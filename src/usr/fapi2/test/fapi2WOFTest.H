@@ -48,7 +48,7 @@ namespace fapi2
 namespace platAttrSvc
 {
     // Function definition being brought in to be tested
-    errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData);
+    errlHndl_t getSeepromWofTable(TARGETING::Target* i_target, uint8_t* o_wofData);
 }
 }
 
@@ -108,7 +108,7 @@ public:
         for (const auto & l_proc : l_procsList)
         {
             // Get WOF data from SEEPROM
-            l_errl = fapi2::platAttrSvc::getDefaultWofTable(l_proc, *l_wofTableData);
+            l_errl = fapi2::platAttrSvc::getSeepromWofTable(l_proc, *l_wofTableData);
 
             if (l_errl)
             {
@@ -151,7 +151,7 @@ public:
       * Test runs for SEEPROM of primary proc only.
       *
       * Bad path will be faked by putting an incorrect magic value in the header of the WOF image.
-      * In getDefaultWofTable(...), the magic value is used to verify the image. Having an incorrect
+      * In getSeepromWofTable(...), the magic value is used to verify the image. Having an incorrect
       * value is like not having a WOF image at all.
       * The magic value is the first 4 bytes of the WOF image. Because the image has an ECC byte
       * following every 8-byte, we're going to be replacing the first 8-bytes of the image (which
@@ -213,20 +213,20 @@ public:
             }
 
             // Get WOF data from SEEPROM, error is expected
-            l_errl = fapi2::platAttrSvc::getDefaultWofTable(l_proc, *l_wofTableData);
+            l_errl = fapi2::platAttrSvc::getSeepromWofTable(l_proc, *l_wofTableData);
 
             if ( l_errl &&
                 (l_errl->reasonCode() == fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH) &&
                 (l_errl->moduleId() == fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES) )
             {
-                FAPI_INF("testNoWofInSeeprom: getDefaultWofTable(...) no WOF img failure path "
+                FAPI_INF("testNoWofInSeeprom: getSeepromWofTable(...) no WOF img failure path "
                          "failed as expected");
                 delete l_errl;
                 l_errl = nullptr;
             }
             else
             {
-                TS_FAIL("testNoWofInSeeprom: getDefaultWofTable(...) no WOF img failure path did "
+                TS_FAIL("testNoWofInSeeprom: getSeepromWofTable(...) no WOF img failure path did "
                         "not fail as expected. Expected RC: 0x%x ModId: 0x%x. Actual RC: 0x%x "
                         "ModId: 0x%x.",
                         fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH, fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
@@ -339,20 +339,20 @@ public:
             }
 
             // Get WOF data from SEEPROM, error is expected
-            l_errl = fapi2::platAttrSvc::getDefaultWofTable(l_proc, *l_wofTableData);
+            l_errl = fapi2::platAttrSvc::getSeepromWofTable(l_proc, *l_wofTableData);
 
             if ( l_errl &&
                 (l_errl->reasonCode() == fapi2::RC_WOF_READ_UNCORRECTABLE_ECC) &&
-                (l_errl->moduleId() == fapi2::MOD_GET_SEEPROM_ECC_LESS_WOF_DATA) )
+                (l_errl->moduleId() == fapi2::MOD_FAPI2_GET_SEEPROM_ECC_LESS_WOF_DATA) )
             {
-                FAPI_INF("testBadEccInWofFromSeeprom: getDefaultWofTable(...) bad ECC byte "
+                FAPI_INF("testBadEccInWofFromSeeprom: getSeepromWofTable(...) bad ECC byte "
                          "failure path hit as expected");
                 delete l_errl;
                 l_errl = nullptr;
             }
             else
             {
-                TS_FAIL("testBadEccInWofFromSeeprom: getDefaultWofTable(...) bad ECC byte failure "
+                TS_FAIL("testBadEccInWofFromSeeprom: getSeepromWofTable(...) bad ECC byte failure "
                         "path did not fail as expected. Expected RC: 0x%x ModId: 0x%x. Actual RC: "
                         "0x%x ModId: 0x%x.",
                         fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH, fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,

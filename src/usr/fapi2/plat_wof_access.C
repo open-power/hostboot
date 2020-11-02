@@ -45,6 +45,35 @@
 #include <eeprom/eeprom_const.H>
 #include <targeting/targplatutil.H>
 #include <pnor/ecc.H> // Remove ECC
+#include <p10_wof_override_structure.H>
+#include <p10_wof_table_set_structure.H>
+
+/*
+Defining images containing WOF Tables that this file deals with:
+
+- WOF Table: WOF information made up of a header (WofTablesHeader_t) and WOF data.
+- WOF Image: An image made up of three WOF Tables.
+  Its structure is made up of a header (wofImageHeader_t), a TOC section containing entries
+  that point to the three WOF Tables (wofSectionTableEntry_t), and the three WOF Tables.
+- WOF Override Image: An image made up of multiple WOF Images.
+  Its structure is made up of a header (wofContainerHeader_t), a TOC section containing entries
+  that point to the multiple WOF Images (wofOverrideTableEntry_t), and the multiple WOF Images.
+
+Where these images come from:
+
+- WOF in SEEPROM (or EECACHE if cached):
+  The SEEPROM only contains a single WOF Image to be used if no override image can be used.
+- WOF in a LID container (i.e. WOFDATA LID):
+  This contains a single WOF Override Image. If the current system meets one of the criteria set by
+  one of the many WOF Images here, then that WOF Image is used instead of the one in the SEEPROM.
+
+The entry point to code in this file is through platParseWOFTables(...), but only by doing the
+following call:
+
+    fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data =
+        (fapi2::ATTR_WOF_TABLE_DATA_Type*)new fapi2::ATTR_WOF_TABLE_DATA_Type;
+    l_rc = FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA, procTarg, (*l_wof_table_data));
+*/
 
 using namespace TARGETING;
 
@@ -54,67 +83,17 @@ namespace fapi2
 namespace platAttrSvc
 {
 
-const uint32_t WOF_IMAGE_MAGIC_VALUE = 0x57544948;  // WTIH
-const uint32_t WOF_TABLES_MAGIC_VALUE = 0x57465448; // WFTH
-const uint32_t RES_VERSION_MASK = 0xFF;
-const uint32_t WOF_IMAGE_VERSION = 1;
-const uint32_t WOF_TABLE_VERSION = 1;
+const uint32_t WOF_IMAGE_MAGIC_VALUE    = 0x57544948; // "WTIH": WOF Tables Image Header
+const uint32_t WOF_TABLES_MAGIC_VALUE   = 0x57465448; // "WFTH": WOF Tables Header
+const uint32_t WOF_OVERRIDE_MAGIC_VALUE = 0x5754534f; // "WTSO": WOF Table Set Override
+const uint32_t WOF_IMAGE_VERSION    = 1;
+const uint32_t WOF_TABLE_VERSION    = 1;
+const uint32_t WOF_OVERRIDE_VERSION = 1;
 
 #ifndef __HOSTBOOT_RUNTIME
-// Remember that we have already allocated the VMM space for
-//  the WOFDATA lid
-/* TODO 250903: WOF Selection Algorithm for P10
+// File global pointer to WOFDATA lid in VM (VMM_VADDR_WOFDATA_LID)
 static void* g_wofdataVMM = nullptr;
-*/
 #endif
-
-
-// TODO 250903: WOF Selection Algorithm for P10
-// WOF Table layout changes to triplets, as seen in WOF data from SEEPROM
-/*
-        WOF Tables In PNOR
-    ---------------------------
-    |      Image Header       |  Points to Section Table
-    |-------------------------|
-    |  Section Table Entry 1  |  Section Table
-    |  Section Table Entry 2  |    Each entry points to
-    |  ...                    |    a WOF Table
-    |-------------------------|
-    |   WOF Tables Header 1   |  WOF Table
-    |        VRFT 1           |    Returned if match
-    |        VRFT 2           |
-    |        ...              |
-    |-------------------------|
-    |   WOF Tables Header 2   |  WOF Table
-    |        VRFT 1           |    Returned if match
-    |        VRFT 2           |
-    |        ...              |
-    |-------------------------|
-    |   ...                   |
-    ---------------------------
-
-    The structs for the Image Header and
-    Section Table Entry are defined below.
-    The struct for the WOF Tables Header
-    is defined in pstates_common.H.
-*/
-
-
-typedef struct __attribute__((__packed__))  wofImageHeader
-{
-    uint32_t magicNumber;
-    uint8_t  version;
-    uint8_t  entryCount;
-    uint32_t offset;
-} wofImageHeader_t;
-
-
-typedef struct __attribute__((__packed__))  wofSectionTableEntry
-{
-    uint32_t offset;
-    uint32_t size;
-} wofSectionTableEntry_t;
-
 
 // Compared fields in each WOF table header entry
 // NOTE: struct must match errl/plugins/errludwofdata.H
@@ -127,24 +106,26 @@ typedef struct __attribute__((__packed__)) wofTableCompareData
 } wofTableCompareData_t;
 
 
+/*
+The main function of this file is platParseWOFTables(...), which is ultimately used when getting
+ATTR_WOF_TABLE_DATA using the FAPI_ATTR_GET macro.
 
-/* Declaration of helper methods for platParseWOFTables(...) */
+The following are the helper functions used inside of platParseWOFTables(...)
+*/
 
 /**
  *  @brief Get WOF Table from SEEPROM (or EECACHE if cached).
  *  The table selected is based on the value of ATTR_WOF_INDEX_SELECT.
  *
- *  @param[in] i_target         Master proc chip target handle pointer
+ *  @param[in] i_procTarg       Proc chip target handle pointer
  *  @param[out] o_wofData       Pointer to memory allocated in the heap for
  *                              large WOF Table data, which includes
  *                              corresponding WOF Table Header and VRT data.
  *
- *  @warning Asserts if o_wofData is nullptr
- *
  *  @return errlHndl_t    - nullptr if no errors encountered
  *                        - else error handler will contain error info
  */
-errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData);
+errlHndl_t getSeepromWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData);
 
 /**
  *  @brief Get blocks of data from WOF data in the Backup SEEPROM.
@@ -153,7 +134,7 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData);
  *  The data offset and size arguments should not take into account ECC, this function will
  *  translate those values to valid ECC-aligned offset and size.
  *
- *  @param[in] i_procTarg       Master proc chip target handle pointer
+ *  @param[in] i_procTarg       Proc chip target handle pointer
  *  @param[in] i_buflen         ECC-less length of data output (in bytes) in WOF image
  *  @param[in] i_offset         ECC-less absolute offset in WOF image (in bytes)
  *  @param[out] o_buffer        Buffer to put result ECC-less data into
@@ -167,14 +148,29 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg,
                                     void* o_buffer);
 
 /**
+ *  @brief Get override WOF Table from PNOR. The table selected is based on system config criteria
+ *  and the value of ATTR_WOF_INDEX_SELECT.
+ *
+ *  @param[in] i_procTarg       Proc chip target handle pointer
+ *  @param[out] o_wofData       Pointer to memory allocated in the heap for
+ *                              large WOF Table data, which includes
+ *                              corresponding WOF Table Header and VRT data.
+ *  @param[out] o_didFindTable  Bool stating if a WOF Table was found or not
+ *
+ *  @return errlHndl_t    - nullptr if no errors encountered
+ *                        - else error handler will contain error info
+ */
+errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData, bool& o_didFindTable);
+
+/**
  *  @brief Checks that in the WOF image header, the magic number equals
  *  WOF_IMAGE_MAGIC_VALUE and that version number is a supported level.
  *
- *  @param[in] i_procTarg            Master proc chip target handle pointer
+ *  @param[in] i_procTarg            Proc chip target handle pointer
  *  @param[in] i_magicNum            Magic number in WOF image header
  *  @param[in] i_version             Version number in WOF image header
- *  @param[in] i_lidNum = nullptr    Optional argument to be used when the WOF
- *                                   image header was retrieved using UtilLidMgr.
+ *  @param[in] i_entryIndex=nullptr  Optional argument to be used when an override
+ *                                   WOF table is being fetched.
  *                                   Value is only used in the UD section of the
  *                                   error log when an error is found.
  *
@@ -184,21 +180,17 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg,
 errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
                                            const uint32_t i_magicNum,
                                            const uint8_t i_version,
-                                           const uint32_t* i_lidNum = nullptr);
+                                           const uint8_t* i_entryIndex = nullptr);
 
 /**
  *  @brief Checks that for a certain WOF table header entry the magic number
  *  equals WOF_TABLES_MAGIC_VALUE and that version number is a supported level.
  *
- *  @param[in] i_procTarg           Master proc chip target handle pointer
+ *  @param[in] i_procTarg           Proc chip target handle pointer
  *  @param[in] i_magicVal           Magic value of the WOF table header
  *  @param[in] i_version            Version number of the WOF table header
- *  @param[in] i_entry = nullptr    Optional argument to be used when the WOF
- *                                  table header entry comes from looping
- *                                  through the WOF image retrieved using
- *                                  UtilLidMgr.
- *                                  Value is only used in the UD section of the
- *                                  error log when an error is found.
+ *  @param[in] i_isOverride=false   Optional argument, default to false, to be used
+ *                                  when an override WOF table is being fetched.
  *
  *  @return errlHndl_t    - nullptr if no errors encountered
  *                        - else error handler will contain error info
@@ -206,7 +198,24 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
 errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
                                              const uint32_t i_magicVal,
                                              const uint8_t i_version,
-                                             const uint32_t* i_entry = nullptr);
+                                             const bool i_isOverride = false);
+
+/**
+ *  @brief Checks that for a certain WOF Override image, the magic number
+ *  equals WOF_OVERRIDE_MAGIC_VALUE and that version number is a supported level.
+ *
+ *  @param[in] i_procTarg           Proc target whose WOF data is being overridden
+ *  @param[in] i_magicVal           Magic value of the WOF Override image
+ *  @param[in] i_version            Version number of the WOF Override image
+ *  @param[in] i_lidNumber          Lid number of WOFDATA (i.e. where the Override image comes from)
+ *
+ *  @return errlHndl_t    - nullptr if no errors encountered
+ *                        - else error handler will contain error info
+ */
+errlHndl_t checkWofOverrideImgForCorrectness(TARGETING::Target* i_procTarg,
+                                             const uint32_t i_magicVal,
+                                             const uint8_t i_version,
+                                             const uint32_t i_lidNumber);
 
 /* End of declaration of helper methods for platParseWOFTables(...) */
 
@@ -219,7 +228,7 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
  *  This table is first searched in the WOF image retrieved using UtilLidMgr
  *  (the search criteria comes from the system's settings). If it's not found
  *  there, then the table data is picked up directly from the Backup EEPROM
- *  using the getDefaultWofTable(...) function.
+ *  using the getSeepromWofTable(...) function.
  *
  *  @param[in]  i_procTarget    Get WOF data hanging off of this processor
  *
@@ -233,454 +242,63 @@ fapi2::ReturnCode platParseWOFTables(TARGETING::Target* i_procTarg, uint8_t* o_w
 {
     FAPI_DBG("Entering platParseWOFTables ....");
 
+    FAPI_INF("platParseWOFTables: Get WOF table for proc: 0x%.8X", get_huid(i_procTarg));
+
+    // Assert if o_wofData is nullptr
+    assert(o_wofData != nullptr, "Error! In plat_wof_access.C platParseWOFTables(), function "
+        "argument o_wofData cannot be nullptr.");
+
     errlHndl_t l_errl = nullptr;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-    uint8_t* l_simMatch = nullptr;
-    /* TODO 250903: WOF Selection Algorithm for P10
-    size_t l_simMatchSize = 0;
-    */
 
-    TARGETING::Target * l_sys = UTIL::assertGetToplevelTarget();
-    TARGETING::targetService().getTopLevelTarget(l_sys);
-
-    // Get the number of present cores
-    TARGETING::TargetHandleList l_coreTargetList;
-    TARGETING::getChildAffinityTargetsByState( l_coreTargetList,
-                                               i_procTarg,
-                                               TARGETING::CLASS_UNIT,
-                                               TARGETING::TYPE_CORE,
-                                               TARGETING::UTIL_FILTER_PRESENT);
-
-/* TODO 250903: WOF Selection Algorithm for P10
-    uint32_t l_numCores = l_coreTargetList.size();
-
-    // Get the socket power, mode, and choose sort frequency
-    uint32_t l_socketPower = 0;
-    uint32_t l_sortFreq = 0;
-    WOF_MODE l_mode = WOF_MODE_UNKNOWN;
-
-// Based on EKB, figure out what WOF modes to assign to l_mode.
-// Hitting assert trying to get target
-// Figure out what to do with these attributes
-    uint8_t l_wofPowerLimit = l_sys->getAttr<TARGETING::ATTR_WOF_POWER_LIMIT>();
-    if(l_wofPowerLimit == TARGETING::WOF_POWER_LIMIT_TURBO)
+    // Check if an override WOF Table was loaded in firmware image.
+    // If not, get WOF Table from SEEPROM
+    do
     {
-        l_socketPower = l_sys->getAttr<TARGETING::ATTR_SOCKET_POWER_TURBO>();
-        l_sortFreq = l_sys->getAttr<TARGETING::ATTR_FREQ_CORE_MAX>();
-        l_mode = WOF_MODE_NORMAL;
-    }
-    else
-    {
-        l_socketPower = l_sys->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
-        l_sortFreq = l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
-        l_mode = WOF_MODE_NORMAL;
-    }
+        // Check override image
 
-// May need to remove ATTR_FREQ_PB_MHZ from HB. Previously may have been used for WOF table search
-// criteria.
+        bool l_didFindOverride = false;
+        l_errl = getOverrideWofTable(i_procTarg, o_wofData, l_didFindOverride);
 
-    FAPI_INF("First checking all WOF table entries from WOF image retrieved using UtilLidMgr");
+        if (l_didFindOverride && l_errl == nullptr)
+        {
+            // WOF table override found
+            FAPI_INF("platParseWOFTables: Override WOF table was found and retrieved from LID");
+            break;
+        }
 
-    // Trace the input params
-    FAPI_INF("WOF table search criteria: Cores %d SocketPower 0x%X SortFreq 0x%X Mode 0x%X",
-             l_numCores, l_socketPower, l_sortFreq, l_mode);
-*/
-    void* l_pWofImage = nullptr;
+        // Get WOF override image errors are not passed back to caller as caller will get WOF table
+        // from SEEPROM if not found in override
+        if (l_errl)
+        {
+            l_errl->collectTrace(FAPI_TRACE_NAME, 256);
+            errlCommit(l_errl, FAPI2_COMP_ID);
+        }
 
-    /* TODO 250903: WOF Selection Algorithm for P10
-    size_t l_lidImageSize = 0;
-    */
+        // Get from SEEPROM
 
-    // Track if WOF Table Header is found using UtilLidMgr
-    bool l_didFindWTH = false;
+        FAPI_INF("platParseWOFTables: No override WOF table found in PNOR");
+        FAPI_INF("platParseWOFTables: Get WOF table from Backup SEEPROM");
 
-//// FIXME: 250903 WOF Selection Algorithm for P10
-//     // Try to find WOF table using UtilLidMgr
-//     do {
-//         // @todo RTC 172776 Make WOF table parser PNOR accesses more efficient
-//         uint32_t l_lidNumber = Util::WOF_LIDID;
-//         if( INITSERVICE::spBaseServicesEnabled() )
-//         {
-//             // Lid number is system dependent on FSP systems
-//             l_lidNumber =
-//               l_sys->getAttr<TARGETING::ATTR_WOF_TABLE_LID_NUMBER>();
-//         }
-//         UtilLidMgr l_wofLidMgr(l_lidNumber);
-
-//         // Get the size of the full wof tables image
-//         l_errl = l_wofLidMgr.getLidSize(l_lidImageSize);
-//         if(l_errl)
-//         {
-//             FAPI_ERR("platParseWOFTables getLidSize failed");
-//             // Add the error log pointer as data to the ReturnCode
-//             addErrlPtrToReturnCode(l_rc, l_errl);
-//             break;
-//         }
-
-//         FAPI_INF("WOFDATA lid is %d bytes", l_lidImageSize);
-
-// #ifdef __HOSTBOOT_RUNTIME
-//         // In HBRT case, phyp will call malloc and return
-//         // the lid pointer to us. We do not need to malloc
-//         // the space ourselves. In fact, two mallocs
-//         // on the WOF partition were leading to heap overflows.
-//         l_pWofImage = nullptr;
-
-//         // Using getStoredLidImage because we want to use the cached copies
-//         // if they exist.
-//         l_errl = l_wofLidMgr.getStoredLidImage(l_pWofImage, l_lidImageSize);
-// #else
-//         // Use a special VMM block to avoid the requirement for
-//         //  contiguous memory
-//         int l_mm_rc = 0;
-//         if( !g_wofdataVMM )
-//         {
-//             l_mm_rc = mm_alloc_block( nullptr,
-//                           reinterpret_cast<void*>(VMM_VADDR_WOFDATA_LID),
-//                           VMM_SIZE_WOFDATA_LID );
-//             if(l_mm_rc != 0)
-//             {
-//                 FAPI_INF("Fail from mm_alloc_block for WOFDATA, rc=%d", l_mm_rc);
-
-//                 /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
-//                 /*@
-//                  * @errortype
-//                  * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
-//                  * @reasoncode        fapi2::RC_MM_ALLOC_BLOCK_FAILED
-//                  * @userdata1         Address being allocated
-//                  * @userdata2[00:31]  Size of block allocation
-//                  * @userdata2[32:63]  rc from mm_alloc_block
-//                  * @devdesc           Error calling mm_alloc_block for WOFDATA
-//                  * @custdesc          Firmware Error
-//                  */
-//                 l_errl = new ERRORLOG::ErrlEntry(
-//                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-//                                fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
-//                                fapi2::RC_MM_ALLOC_BLOCK_FAILED,
-//                                VMM_VADDR_WOFDATA_LID,
-//                                TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
-//                                                     l_mm_rc),
-//                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-//                 // Add the error log pointer as data to the ReturnCode
-//                 addErrlPtrToReturnCode(l_rc, l_errl);
-//                 break;
-//             }
-
-//             g_wofdataVMM = reinterpret_cast<void*>(VMM_VADDR_WOFDATA_LID);
-//         }
-
-//         l_mm_rc = mm_set_permission(
-//                          reinterpret_cast<void*>(VMM_VADDR_WOFDATA_LID),
-//                          l_lidImageSize,
-//                          WRITABLE | ALLOCATE_FROM_ZERO );
-//         if(l_mm_rc != 0)
-//         {
-//             FAPI_INF("Fail from mm_set_permission for WOFDATA, rc=%d", l_mm_rc);
-
-//             /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
-//             /*@
-//              * @errortype
-//              * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
-//              * @reasoncode        fapi2::RC_MM_SET_PERMISSION_FAILED
-//              * @userdata1         Address being changed
-//              * @userdata2[00:31]  Size of change
-//              * @userdata2[32:63]  rc from mm_set_permission
-//              * @devdesc           Error calling mm_set_permission for WOFDATA
-//              * @custdesc          Firmware Error
-//              */
-//             l_errl = new ERRORLOG::ErrlEntry(
-//                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-//                                fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
-//                                fapi2::RC_MM_SET_PERMISSION_FAILED,
-//                                VMM_VADDR_WOFDATA_LID,
-//                                TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
-//                                                     l_mm_rc),
-//                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-//             // Add the error log pointer as data to the ReturnCode
-//             addErrlPtrToReturnCode(l_rc, l_errl);
-//             break;
-//         }
-
-//         // Point my local pointer at the VMM space we allocated
-//         l_pWofImage = g_wofdataVMM;
-
-//         // Get the tables from PNOR or lid
-//         l_errl = l_wofLidMgr.getLid(l_pWofImage, l_lidImageSize);
-// #endif
-
-//         if(l_errl)
-//         {
-//             FAPI_ERR("platParseWOFTables getLid failed "
-//                      "pLidImage %p imageSize %d",
-//                      l_pWofImage, l_lidImageSize);
-//             // Add the error log pointer as data to the ReturnCode
-//             addErrlPtrToReturnCode(l_rc, l_errl);
-//             break;
-//         }
-
-//         // Get the Image Header
-//         wofImageHeader_t* l_img =
-//                 reinterpret_cast<wofImageHeader_t*>(l_pWofImage);
-
-//         // Check header's version and magic number values
-//         l_errl = checkWofImgHeaderForCorrectness(l_img->magicNumber,
-//                     l_img->version, &l_lidNumber);
-
-//         if (l_errl)
-//         {
-//             // Add the error log pointer as data to the ReturnCode
-//             addErrlPtrToReturnCode(l_rc, l_errl);
-//             break;
-//         }
-
-//         // Image info
-//         FAPI_INF("(Retrieved using UtilLidMgr) WOF Image: Magic 0x%X "
-//                  "Version %d Entries %d Offset %p",
-//                  l_img->magicNumber, l_img->version,
-//                  l_img->entryCount, l_img->offset);
-
-//         // Get a pointer to the first section table entry
-//         wofSectionTableEntry_t* l_ste =
-//             reinterpret_cast<wofSectionTableEntry_t*>
-//                 (reinterpret_cast<uint8_t*>(l_pWofImage) + l_img->offset);
-
-//         WofTablesHeader_t* l_wth = nullptr;
-//         uint32_t l_ent = 0; // entry index
-//         uint32_t l_ver = 0; // WOF table header version
-
-//         // Using WOF image retrieved using UtilLidMgr, loop through all section
-//         // table entries until a WOF table header is found that matches the
-//         // criteria set above.
-//         // When running on Simics it is possible that the number of cores found
-//         // on the master proc are less than expected, in which case we match
-//         // with a WOF table by ignoring this value.
-//         // If no matching WOF header is found, then entry will be fetched from
-//         // SEEPROM.
-//         for( l_ent = 0; l_ent < l_img->entryCount; l_ent++ )
-//         {
-//             // Get a pointer to the WOF table
-//             l_wth = reinterpret_cast<WofTablesHeader_t*>
-//                         (reinterpret_cast<uint8_t*>(l_pWofImage)
-//                             + l_ste[l_ent].offset);
-//             l_ver = l_wth->header_version;
-
-//             // Check WOF table header entry version number and magic value
-//             l_errl = checkWofTableHeaderForCorrectness(l_wth->magic_number.value, l_ver, &l_ent);
-
-//             if (l_errl)
-//             {
-//                 // Add the error log pointer as data to the ReturnCode
-//                 addErrlPtrToReturnCode(l_rc, l_errl);
-//                 break;
-//             }
-
-//             // Trace the WOF table fields
-//             FAPI_INF("(Retrieved using UtilLidMgr) WOF table fields "
-//                      "SectionTableEntry %d "
-//                      "SectionTableOffset 0x%X "
-//                      "SectionTableSize %d "
-//                      "Version %d Mode %d Cores %d SocketPower 0x%X "
-//                      "NomFreq 0x%X",
-//                      l_ent, l_ste[l_ent].offset, l_ste[l_ent].size,
-//                      l_ver, l_wth->ocs_mode, l_wth->core_count,
-//                      l_wth->socket_power_w,
-//                      l_wth->sort_power_freq_mhz);
-
-//             // Checking if header was was found using WOF data section from PNOR
-//             // by comparing criteria fields.
-//             if( (l_wth->core_count == l_numCores) &&
-//                 (l_wth->socket_power_w == l_socketPower) &&
-//                 (l_wth->sort_power_freq_mhz == l_sortFreq) &&
-//                 ((l_ver < WOF_TABLE_VERSION_POWERMODE) ||  // mode is ignored
-//                  ((l_ver >= WOF_TABLE_VERSION_POWERMODE) &&
-//                   ((l_wth->ocs_mode == l_mode) ||  // match specific mode
-//                    (l_wth->ocs_mode == WOF_MODE_UNKNOWN)))) // or wild-card
-//               )
-//             {
-//                 FAPI_INF("(Retrieved using UtilLidMgr) Found a WOF table match");
-//                 FAPI_INF("core_count: %d, socket power w: %d, sort power freq MHz: %d, ver: %d, mode: %d",
-//                     l_numCores, l_socketPower, l_sortFreq, l_ver, l_mode);
-
-//                 l_didFindWTH = true;
-
-//                 // Copy the WOF table retrieved using UtilLidMgr to the output pointer
-//                 memcpy(o_wofData,
-//                        reinterpret_cast<uint8_t*>(l_wth),
-//                        l_ste[l_ent].size);
-//                 break;
-//             }
-//             else
-//             {
-//                 // We run with fewer cores in Simics, ignore the core field
-//                 // if we don't find a complete match
-//                 if( Util::isSimicsRunning() && l_simMatch == nullptr )
-//                 {
-//                     if( (l_wth->socket_power_w == l_socketPower) &&
-//                         (l_wth->sort_power_freq_mhz == l_sortFreq) &&
-//                         ((l_ver < WOF_TABLE_VERSION_POWERMODE) || //mode ignored
-//                          ((l_ver >= WOF_TABLE_VERSION_POWERMODE) &&
-//                           ((l_wth->ocs_mode == l_mode) ||  // match specific mode
-//                           (l_wth->ocs_mode == WOF_MODE_UNKNOWN)))) // or wild-card
-//                       )
-//                     {
-//                         FAPI_INF("(Retrieved using UtilLidMgr) Found a "
-//                                     "potential WOF table match for Simics");
-//                         // Copy the WOF table to a local var temporarily
-//                         l_simMatchSize = l_ste[l_ent].size;
-//                         l_simMatch = new uint8_t[l_simMatchSize];
-//                         memcpy(l_simMatch,
-//                                reinterpret_cast<uint8_t*>(l_wth),
-//                                l_simMatchSize);
-//                     }
-//                 }
-//             }
-//         }
-
-//         if(l_errl)
-//         {
-//             break;
-//         }
-
-//         if( Util::isSimicsRunning()
-//             && (l_ent == l_img->entryCount)
-//             && (l_simMatch != nullptr) )
-//         {
-//             WofTablesHeader_t* l_tableHeader =
-//                 reinterpret_cast<WofTablesHeader_t*>(l_simMatch);
-//             FAPI_INF("(Retrieved using UtilLidMgr) Found a WOF table match "
-//                 "using fuzzy match for Simics");
-//             FAPI_INF("core_count: %d, socket power w: %d, sort power freq MHz: %d, ver: %d, mode: %d",
-//                 l_tableHeader->core_count, l_tableHeader->socket_power_w, l_wth->sort_power_freq_mhz, l_tableHeader->header_version, l_tableHeader->ocs_mode);
-
-//             l_didFindWTH = true;
-
-//             // Copy the WOF table to the ouput pointer
-//             memcpy(o_wofData,
-//                    l_simMatch,
-//                    l_simMatchSize);
-//         }
-
-//     } while(0);
-
-    if (!l_didFindWTH)
-    {
-        // Did not find WOF table header using UtilLidMgr, get data from SEEPROM
-
-/* TODO 250903: WOF Selection Algorithm for P10
-        FAPI_INF("No WOF table match found using UtilLidMgr");
-*/
-        FAPI_INF("Get WOF table from Backup SEEPROM");
-
-        l_errl = getDefaultWofTable(i_procTarg, o_wofData);
+        l_errl = getSeepromWofTable(i_procTarg, o_wofData);
 
         if (l_errl)
         {
-            FAPI_ERR("Failed to get WOF table header entry from Backup "
-                "SEEPROM");
-
-            // If the default WOF data was not fetched due to some error, then the code path
-            // ends up here.
-            // If any error was encountered in the do-while loop above, then l_rc will have
-            // pointers to those error logs.
-            // In any case, for any error encountered while fetching WOF, the code path ends up
-            // here, therefore we just need to collectTace here.
+            FAPI_ERR("platParseWOFTables: Failed to get WOF table from Backup SEEPROM");
+            // Collect trace and add the error log pointer as data to the ReturnCode
             l_errl->collectTrace(FAPI_TRACE_NAME, 256);
-
-            // Add the error log pointer as data to the ReturnCode
             addErrlPtrToReturnCode(l_rc, l_errl);
         }
         else
         {
-            // WOF table header successfully retrieved from SEEPROM
-            FAPI_INF("WOF table header entry successfully retrieved from Backup SEEPROM");
-
-            // If Wof has been fetched from SEEPROM (using getDefaultWofTable) without any errors,
-            // then the fapi2 return code needs to show success.
-            // There's a possibility that while trying to find a WOF table header match using
-            // UtilLidMgr, an error may have been encountered. However, since WOF was successfully
-            // retrieved from SEEPROM we can disregard those errors,
-            l_rc = fapi2::FAPI2_RC_SUCCESS;
+            // WOF table successfully retrieved from SEEPROM
+            FAPI_INF("platParseWOFTables: WOF table successfully retrieved from Backup SEEPROM");
         }
-    }
 
-    // Free the wof tables memory
-    if(l_pWofImage != nullptr)
-    {
-#ifndef __HOSTBOOT_RUNTIME
-        errlHndl_t l_tmpErr = nullptr;
-        // Release the memory we may still have allocated and set the
-        //  permissions to prevent further access to it
-        int l_mm_rc = mm_remove_pages(RELEASE,
-                                      l_pWofImage,
-                                      VMM_SIZE_WOFDATA_LID);
-        if( l_mm_rc )
-        {
-            FAPI_INF("Fail from mm_remove_pages for WOFDATA, rc=%d", l_mm_rc);
-
-            /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
-            /*@
-             * @errortype
-             * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
-             * @reasoncode        fapi2::RC_MM_REMOVE_PAGES_FAILED
-             * @userdata1         Address being removed
-             * @userdata2[00:31]  Size of removal
-             * @userdata2[32:63]  rc from mm_remove_pages
-             * @devdesc           Error calling mm_remove_pages for WOFDATA
-             * @custdesc          Firmware Error
-             */
-            l_tmpErr = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                   fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
-                                   fapi2::RC_MM_REMOVE_PAGES_FAILED,
-                                   reinterpret_cast<uint64_t>(l_pWofImage),
-                                   TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
-                                                        l_mm_rc),
-                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_tmpErr->collectTrace(FAPI_TRACE_NAME, 256);
-            errlCommit(l_tmpErr, FAPI2_COMP_ID);
-        }
-        l_mm_rc = mm_set_permission(l_pWofImage,
-                                    VMM_SIZE_WOFDATA_LID,
-                                    NO_ACCESS | ALLOCATE_FROM_ZERO );
-        if( l_mm_rc )
-        {
-            FAPI_INF("Fail from mm_set_permission reset for WOFDATA, rc=%d", l_mm_rc);
-
-            /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
-            /*@
-             * @errortype
-             * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
-             * @reasoncode        fapi2::RC_MM_SET_PERMISSION2_FAILED
-             * @userdata1         Address being changed
-             * @userdata2[00:31]  Size of change
-             * @userdata2[32:63]  rc from mm_set_permission
-             * @devdesc           Error calling mm_set_permission for WOFDATA
-             * @custdesc          Firmware Error
-             */
-            l_tmpErr = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                   fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
-                                   fapi2::RC_MM_SET_PERMISSION2_FAILED,
-                                   reinterpret_cast<uint64_t>(l_pWofImage),
-                                   TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
-                                                        l_mm_rc),
-                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_tmpErr->collectTrace(FAPI_TRACE_NAME, 256);
-            errlCommit(l_tmpErr, FAPI2_COMP_ID);
-        }
-#endif
-
-    }
-
-    if( l_simMatch )
-    {
-        delete[] l_simMatch;
-    }
-
-    FAPI_DBG("Exiting platParseWOFTables ....");
+    } while (0);
 
     return l_rc;
-
+    FAPI_DBG("Exiting platParseWOFTables ....");
 }
 
 /* End of platParseWOFTables(...) */
@@ -690,13 +308,9 @@ fapi2::ReturnCode platParseWOFTables(TARGETING::Target* i_procTarg, uint8_t* o_w
 /* Helper methods for platParseWOFTables(...) */
 
 
-errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
+errlHndl_t getSeepromWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData)
 {
-    FAPI_DBG("Entering getDefaultWofTable ....");
-
-    // Assert if o_wofData is nullptr
-    assert(o_wofData != nullptr, "Error! In plat_wof_access.C getDefaultWofTable(), function "
-        "argument o_wofData cannot be nullptr.");
+    FAPI_DBG("Entering getSeepromWofTable ....");
 
     errlHndl_t l_errl = nullptr;
 
@@ -713,14 +327,14 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
 
         // Get WOF image header
         wofImageHeader_t l_imgHeader;
-        l_errl = getSeepromEccLessWofData(i_target, sizeof(l_imgHeader), 0, &l_imgHeader);
+        l_errl = getSeepromEccLessWofData(i_procTarg, sizeof(l_imgHeader), 0, &l_imgHeader);
         if (l_errl)
         {
             break;
         }
 
         // Check header's version and magic number values
-        l_errl = checkWofImgHeaderForCorrectness(i_target, l_imgHeader.magicNumber, l_imgHeader.version);
+        l_errl = checkWofImgHeaderForCorrectness(i_procTarg, l_imgHeader.magicNumber, l_imgHeader.version);
         if (l_errl)
         {
             break;
@@ -754,14 +368,14 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
                             fapi2::RC_WOF_MRW_IDX_NOT_INCLUDED,
                             l_idxSelect,
                             l_imgHeader.entryCount);
-            l_errl->addHwCallout(i_target, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
             break;
         }
 
         // Get Section Table Entry based on MRW selection index
         wofSectionTableEntry_t l_tableEntry;
         size_t l_entryOffset = l_imgHeader.offset + (l_idxSelect * sizeof(l_tableEntry));
-        l_errl = getSeepromEccLessWofData(i_target, sizeof(l_tableEntry), l_entryOffset, &l_tableEntry);
+        l_errl = getSeepromEccLessWofData(i_procTarg, sizeof(l_tableEntry), l_entryOffset, &l_tableEntry);
 
         if (l_errl)
         {
@@ -772,7 +386,7 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
         // not go beyond the bounds of the WOF image
 
         // Get WOF DATA info
-        TARGETING::SpiWofDataInfo spiWOFDataInfo = i_target->getAttr<TARGETING::ATTR_SPI_WOF_DATA_INFO>();
+        TARGETING::SpiWofDataInfo spiWOFDataInfo = i_procTarg->getAttr<TARGETING::ATTR_SPI_WOF_DATA_INFO>();
 
         // Get data size of WOF image
         const size_t l_wofImgSize = spiWOFDataInfo.dataSizeKB * CONVERSIONS::BYTES_PER_KB;
@@ -804,12 +418,12 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
                             fapi2::RC_WOF_HEADER_ENTRY_BEYOND_IMG,
                             TWO_UINT32_TO_UINT64(l_tableEntry.offset, l_tableEntry.size),
                             TWO_UINT32_TO_UINT64(l_idxSelect, l_wofImgSize));
-            l_errl->addHwCallout(i_target, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
             break;
         }
 
         // Get WOF Table Header and put it in allocated memory from o_wofData
-        l_errl = getSeepromEccLessWofData(i_target, l_tableEntry.size, l_tableEntry.offset, o_wofData);
+        l_errl = getSeepromEccLessWofData(i_procTarg, l_tableEntry.size, l_tableEntry.offset, o_wofData);
         if (l_errl)
         {
             break;
@@ -818,7 +432,7 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
         // Check WOF table header entry version number and magic value
         WofTablesHeader_t* l_tableHeader = reinterpret_cast<WofTablesHeader_t*>(o_wofData);
 
-        l_errl = checkWofTableHeaderForCorrectness(i_target, l_tableHeader->magic_number.value,
+        l_errl = checkWofTableHeaderForCorrectness(i_procTarg, l_tableHeader->magic_number.value,
             l_tableHeader->header_version);
 
         if (l_errl)
@@ -836,6 +450,8 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
             l_tableHeader->sort_power_freq_mhz);
 
     } while(0);
+
+    FAPI_DBG("Exiting getSeepromWofTable ....");
 
     return l_errl;
 
@@ -957,7 +573,7 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
             /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
             /*@
             * @errortype
-            * @moduleid          fapi2::MOD_GET_SEEPROM_ECC_LESS_WOF_DATA
+            * @moduleid          fapi2::MOD_FAPI2_GET_SEEPROM_ECC_LESS_WOF_DATA
             * @reasoncode        fapi2::RC_WOF_READ_UNCORRECTABLE_ECC
             * @userdata1         Offset used to read WOF+ECC data from SEEPROM
             * @userdata2         Buffer length used to read WOF+ECC data from SEEPROM
@@ -966,7 +582,7 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
             */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            fapi2::MOD_GET_SEEPROM_ECC_LESS_WOF_DATA,
+                            fapi2::MOD_FAPI2_GET_SEEPROM_ECC_LESS_WOF_DATA,
                             fapi2::RC_WOF_READ_UNCORRECTABLE_ECC,
                             l_eccOffset,
                             l_eccBuflen);
@@ -1005,7 +621,396 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
     delete[] l_eccDataBuf;
     delete[] l_eccLessDataBuf;
 
+    FAPI_DBG("Exiting getSeepromEccLessWofData ....");
+
     return l_errl;
+}
+
+
+
+errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData, bool& o_didFindTable)
+{
+    /*
+    Summary of getOverrideWofTable
+    - Set search criteria
+    - Set a pointer to WOFDATA LID, i.e. the WOF Override image
+    - Search all Override-set entries
+        - Loop through all Override-set entries (wofOverrideTableEntry_t) in the Override image and
+          search for entry matching search criteria
+    - Go to WOF image header
+        - I.e. wofImageHeader_t pointed to by matching Override-set entry
+    - Get MRW selected WOF table
+        - Using MRW's ATTR_WOF_INDEX_SELECT, set (o_wofData) override table (type WofTablesHeader_t)
+    - Clear out any memory allocated for WOFDATA LID pointer
+    */
+
+    FAPI_DBG("Entering getOverrideWofTable ....");
+
+    TARGETING::Target * l_sys = UTIL::assertGetToplevelTarget();
+    errlHndl_t l_errl = nullptr;
+    o_didFindTable = false; // flag if did find WOF override table
+
+    /* Set Search Criteria: l_coreCount, l_nominalPowerWatts and l_nominalFreqMhz */
+
+    // Core count
+    TARGETING::TargetHandleList l_coreTargetList;
+    TARGETING::getChildAffinityTargetsByState( l_coreTargetList,
+                                               i_procTarg,
+                                               TARGETING::CLASS_UNIT,
+                                               TARGETING::TYPE_CORE,
+                                               TARGETING::UTIL_FILTER_PRESENT);
+    uint8_t l_coreCount = l_coreTargetList.size();
+
+    // Nominal power in Watts for Proc and Nominal Freq in Mhz for System
+    uint16_t l_nominalPowerWatts = i_procTarg->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
+    uint16_t l_nominalFreqMhz = l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
+
+    FAPI_INF("getOverrideWofTable: Override WOF table search criteria: core count %d nominal "
+             "power 0x%X nominal freq 0x%X", l_coreCount, l_nominalPowerWatts, l_nominalFreqMhz);
+
+    /* Set a pointer (l_pWofImage) to WOFDATA LID */
+
+    void* l_pWofImage = nullptr;
+    size_t l_lidImageSize = 0;
+
+    do {
+        // @todo RTC 172776 Make WOF table parser PNOR accesses more efficient
+        uint32_t l_lidNumber = Util::WOF_LIDID;
+
+        if( INITSERVICE::spBaseServicesEnabled() )
+        {
+            // Lid number is system dependent on FSP systems
+            l_lidNumber = l_sys->getAttr<TARGETING::ATTR_WOF_TABLE_LID_NUMBER>();
+        }
+
+        UtilLidMgr l_wofLidMgr(l_lidNumber);
+
+        // Get the size of the full WOF Override image
+        l_errl = l_wofLidMgr.getLidSize(l_lidImageSize);
+
+        if(l_errl)
+        {
+            FAPI_ERR("getOverrideWofTable: UtilLidMgr's getLidSize failed");
+            break;
+        }
+
+        FAPI_INF("WOFDATA lid is: %d bytes", l_lidImageSize);
+
+#ifdef __HOSTBOOT_RUNTIME
+        // In HBRT case, phyp will call malloc and return the lid pointer to us. We do not need to
+        // malloc the space ourselves. In fact, two mallocs on the WOF partition were leading to
+        // heap overflows.
+        l_pWofImage = nullptr;
+
+        // Using getStoredLidImage because we want to use the cached copies if they exist.
+        l_errl = l_wofLidMgr.getStoredLidImage(l_pWofImage, l_lidImageSize);
+#else
+        // Use a special VMM block to avoid the requirement for contiguous memory
+        int l_mm_rc = 0;
+        if (!g_wofdataVMM)
+        {
+            l_mm_rc = mm_alloc_block(nullptr, reinterpret_cast<void*>(VMM_VADDR_WOFDATA_LID),
+                                     VMM_SIZE_WOFDATA_LID);
+            if(l_mm_rc != 0)
+            {
+                FAPI_ERR("getOverrideWofTable: Fail from mm_alloc_block for WOFDATA, rc: %d", l_mm_rc);
+
+                /*@
+                 * @errortype
+                 * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+                 * @reasoncode        fapi2::RC_MM_ALLOC_BLOCK_FAILED
+                 * @userdata1         Address being allocated
+                 * @userdata2[00:31]  Size of block allocation
+                 * @userdata2[32:63]  rc from mm_alloc_block
+                 * @devdesc           Error calling mm_alloc_block for WOFDATA
+                 * @custdesc          Firmware Error
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                               ERRORLOG::ERRL_SEV_PREDICTIVE,
+                               fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                               fapi2::RC_MM_ALLOC_BLOCK_FAILED,
+                               VMM_VADDR_WOFDATA_LID,
+                               TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID, l_mm_rc),
+                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
+
+            g_wofdataVMM = reinterpret_cast<void*>(VMM_VADDR_WOFDATA_LID);
+        }
+
+        l_mm_rc = mm_set_permission(reinterpret_cast<void*>(VMM_VADDR_WOFDATA_LID), l_lidImageSize,
+                                    WRITABLE | ALLOCATE_FROM_ZERO );
+        if (l_mm_rc != 0)
+        {
+            FAPI_ERR("getOverrideWofTable: Fail from mm_set_permission for WOFDATA, rc=%d", l_mm_rc);
+
+            /*@
+             * @errortype
+             * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+             * @reasoncode        fapi2::RC_MM_SET_PERMISSION_FAILED
+             * @userdata1         Address being changed
+             * @userdata2[00:31]  Size of change
+             * @userdata2[32:63]  rc from mm_set_permission
+             * @devdesc           Error calling mm_set_permission for WOFDATA
+             * @custdesc          Firmware Error
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                               ERRORLOG::ERRL_SEV_PREDICTIVE,
+                               fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                               fapi2::RC_MM_SET_PERMISSION_FAILED,
+                               VMM_VADDR_WOFDATA_LID,
+                               TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID, l_mm_rc),
+                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        // Point my local pointer at the VMM space we allocated
+        l_pWofImage = g_wofdataVMM;
+
+        // Get the tables from PNOR or lid
+        l_errl = l_wofLidMgr.getLid(l_pWofImage, l_lidImageSize);
+#endif
+
+        if(l_errl)
+        {
+            FAPI_ERR("getOverrideWofTable: getLid failed pLidImage %p imageSize %d", l_pWofImage,
+                     l_lidImageSize);
+            break;
+        }
+
+        /* Search all Override-set entries */
+
+        // Cast out WOF Override image header into Container struct
+        wofContainerHeader_t* l_containerHeader = reinterpret_cast<wofContainerHeader_t*>(l_pWofImage);
+        const uint8_t l_entryCount = l_containerHeader->entryCount;
+
+        FAPI_INF("getOverrideWofTable: WOF Override Image header info: Magic 0x%X Version %d Entry "
+                 "Count %d Offset %p", l_containerHeader->magicNumber, l_containerHeader->version,
+                 l_containerHeader->entryCount, l_containerHeader->offset);
+
+        l_errl = checkWofOverrideImgForCorrectness(i_procTarg, l_containerHeader->magicNumber,
+                                                   l_containerHeader->version, l_lidNumber);
+        if (l_errl) { break; }
+
+        // Get a pointer to the first override-set table entry
+        wofOverrideTableEntry_t* l_overrideEntry = reinterpret_cast<wofOverrideTableEntry_t*>
+            (reinterpret_cast<uint8_t*>(l_pWofImage) + l_containerHeader->offset);
+
+        // Keep track of table entry that matched search criteria
+        uint8_t l_entryIdx = 0;
+
+        // When running in Simics, record any entry that matches search criteria, ignoring core count
+        struct SimicsEntry
+        {
+            bool didFind = false;
+            uint8_t entryIndex = 0;
+        } l_simicsEntry;
+
+        // Search through all the override-set entries. If an entry matching the search criteria is
+        // found (core count, power, and frequency), for-loop will exit.
+        // In the case we're running in Simics, l_simicsEntry will be filled out if
+        // a match is found, ignoring core count for it.
+        for (l_entryIdx = 0; l_entryIdx < l_entryCount; l_entryIdx++)
+        {
+            FAPI_DBG("getOverrideWofTable: Possible WOF Override-set core_count: %d socket_power_w: 0x%X "
+                "sort_power_freq_mhz: 0x%X ", l_overrideEntry[l_entryIdx].core_count,
+                l_overrideEntry[l_entryIdx].socket_power_w, l_overrideEntry[l_entryIdx].sort_power_freq_mhz);
+
+            // Checking against search criteria
+            if ( (l_overrideEntry[l_entryIdx].core_count          == l_coreCount        ) &&
+                 (l_overrideEntry[l_entryIdx].socket_power_w      == l_nominalPowerWatts) &&
+                 (l_overrideEntry[l_entryIdx].sort_power_freq_mhz == l_nominalFreqMhz   ) )
+            {
+                FAPI_INF("getOverrideWofTable: WOF Override-set matching search criteria found "
+                    "core_count: %d socket_power_w: 0x%X sort_power_freq_mhz: 0x%X ",
+                    l_overrideEntry[l_entryIdx].core_count, l_overrideEntry[l_entryIdx].socket_power_w,
+                    l_overrideEntry[l_entryIdx].sort_power_freq_mhz);
+                break;
+            }
+            // Simics runs with fewer cores, ignore the core_count if we don't find a complete match
+            else if ( (Util::isSimicsRunning() && l_simicsEntry.didFind == false) &&
+                      (l_overrideEntry[l_entryIdx].socket_power_w      == l_nominalPowerWatts) &&
+                      (l_overrideEntry[l_entryIdx].sort_power_freq_mhz == l_nominalFreqMhz   ) )
+            {
+                FAPI_INF("getOverrideWofTable: WOF Override-set matching search criteria found for "
+                    "Simics run socket_power_w: 0x%X sort_power_freq_mhz: 0x%X ",
+                    l_overrideEntry[l_entryIdx].socket_power_w, l_overrideEntry[l_entryIdx].sort_power_freq_mhz);
+                l_simicsEntry.didFind = true;
+                l_simicsEntry.entryIndex = l_entryIdx;
+                // Do not break, we may still find an override table matching all criteria
+            }
+
+        }
+
+        // Check if a WOF override-set match was found
+
+        uint8_t l_entryValue = 0;  // ultimate index to select override-set
+        bool l_didFindEntry = false;
+
+        if (l_entryIdx < l_entryCount)
+        {
+            l_entryValue = l_entryIdx;
+            l_didFindEntry = true;
+        }
+        else if (Util::isSimicsRunning() && (l_didFindEntry == false) && (l_simicsEntry.didFind == true))
+        {
+            l_entryValue = l_simicsEntry.entryIndex;
+            l_didFindEntry = true;
+        }
+
+        if (l_didFindEntry == false)
+        {
+            FAPI_ERR("getOverrideWofTable: Did not find Override-set in Override WOF image");
+            /*@
+            * @errortype
+            * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+            * @reasoncode        fapi2::RC_WOF_OVERRIDE_TABLE_NOT_FOUND
+            * @userdata1[00:31]  Number of WOF override sets checked
+            * @userdata1[32:63]  Core count
+            * @userdata2[00:31]  Nominal power in watts
+            * @userdata2[32:63]  Nominal frequency in Mhz
+            * @devdesc           No override WOF table found
+            * @custdesc          Firmware Error or unsupported part
+            */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                            fapi2::RC_WOF_OVERRIDE_TABLE_NOT_FOUND,
+                            TWO_UINT32_TO_UINT64(TO_UINT32(l_entryCount),
+                                                 TO_UINT32(l_coreCount)),
+                            TWO_UINT32_TO_UINT64(TO_UINT32(l_nominalPowerWatts),
+                                                 TO_UINT32(l_nominalFreqMhz)),
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            // TODO RTC: 250903
+            // Add UD on override entries that were looked at
+
+            break;
+        }
+
+        /* Go to WOF image header */
+
+        // search-selected override-set absolute offset within Override Image
+        const uint32_t l_overrideSetAbsOffset = l_overrideEntry[l_entryValue].offset;
+
+        wofImageHeader_t* l_imgHeader = reinterpret_cast<wofImageHeader_t*>
+            (reinterpret_cast<uint8_t*>(l_pWofImage) + l_overrideSetAbsOffset);
+
+        FAPI_INF("getOverrideWofTable: WOF Image Header Values: l_imgHeader: Magic 0x%X "
+        "Version %d Entries %d Offset %p", l_imgHeader->magicNumber,
+        l_imgHeader->version, l_imgHeader->entryCount, l_imgHeader->offset);
+
+        // Check header's version and magic number values
+        l_errl = checkWofImgHeaderForCorrectness(i_procTarg, l_imgHeader->magicNumber,
+                                                 l_imgHeader->version, &l_entryValue);
+        if (l_errl) { break; }
+
+        // Set absolute offset to the table of content of the WOF image we've chosen
+        const uint32_t l_tocAbsOffset = l_overrideSetAbsOffset + l_imgHeader->offset;
+
+        /* Get MRW selected WOF table */
+
+        fapi2::ATTR_WOF_INDEX_SELECT_Type l_idxSelect = l_sys->getAttr<TARGETING::ATTR_WOF_INDEX_SELECT>();
+        FAPI_INF("getOverrideWofTable: MRW selection index ATTR_WOF_INDEX_SELECT: %u", l_idxSelect);
+
+        // Get header entry for MRW selected WOF table
+        const uint32_t l_tableEntryAbsOffset = l_tocAbsOffset + (l_idxSelect * sizeof(wofSectionTableEntry_t));
+        wofSectionTableEntry_t* l_tableEntry = reinterpret_cast<wofSectionTableEntry_t*>
+            (reinterpret_cast<uint8_t*>(l_pWofImage) + l_tableEntryAbsOffset);
+        FAPI_INF("getOverrideWofTable l_tableEntry size: %lu, offset: %u", l_tableEntry->size, l_tableEntry->offset);
+
+        // Get and copy out WOF override table
+        const uint32_t l_tableHeaderAbsOffset = l_overrideSetAbsOffset + l_tableEntry->offset;
+        WofTablesHeader_t* l_tableHeader = reinterpret_cast<WofTablesHeader_t*>
+            (reinterpret_cast<uint8_t*>(l_pWofImage) + l_tableHeaderAbsOffset);
+
+        l_errl = checkWofTableHeaderForCorrectness(i_procTarg, l_tableHeader->magic_number.value,
+            l_tableHeader->header_version, true);
+        if (l_errl) { break; }
+
+        // Set data to output arguments:
+        // If we get to this point, that means that we've successfully found an override WOF table
+        memcpy(o_wofData, reinterpret_cast<uint8_t*>(l_tableHeader), l_tableEntry->size);
+        o_didFindTable = true;
+
+        // WOF table header fields
+        FAPI_INF("getOverrideWofTable WOF Header Table Fields: magic: 0x%X "
+            "Version %d Mode %d Cores %d SocketPower 0x%X NomFreq 0x%X",
+            l_tableHeader->magic_number,
+            l_tableHeader->header_version, l_tableHeader->ocs_mode,
+            l_tableHeader->core_count, l_tableHeader->socket_power_w,
+            l_tableHeader->sort_power_freq_mhz);
+
+    } while(0);
+
+    /* Clear out any memory allocated for WOFDATA LID pointer */
+
+    if(l_pWofImage != nullptr)
+    {
+#ifndef __HOSTBOOT_RUNTIME
+        errlHndl_t l_tmpErr = nullptr;
+        // Release the memory we may still have allocated and set the
+        //  permissions to prevent further access to it
+        int l_mm_rc = mm_remove_pages(RELEASE, l_pWofImage, VMM_SIZE_WOFDATA_LID);
+        if( l_mm_rc )
+        {
+            FAPI_INF("Fail from mm_remove_pages for WOFDATA, rc=%d", l_mm_rc);
+
+            /*@
+             * @errortype
+             * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+             * @reasoncode        fapi2::RC_MM_REMOVE_PAGES_FAILED
+             * @userdata1         Address being removed
+             * @userdata2[00:31]  Size of removal
+             * @userdata2[32:63]  rc from mm_remove_pages
+             * @devdesc           Error calling mm_remove_pages for WOFDATA
+             * @custdesc          Firmware Error
+             */
+            l_tmpErr = new ERRORLOG::ErrlEntry(
+                                   ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                   fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                                   fapi2::RC_MM_REMOVE_PAGES_FAILED,
+                                   reinterpret_cast<uint64_t>(l_pWofImage),
+                                   TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
+                                                        l_mm_rc),
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_tmpErr->collectTrace(FAPI_TRACE_NAME, 256);
+            errlCommit(l_tmpErr, FAPI2_COMP_ID);
+        }
+        l_mm_rc = mm_set_permission(l_pWofImage,
+                                    VMM_SIZE_WOFDATA_LID,
+                                    NO_ACCESS | ALLOCATE_FROM_ZERO );
+        if( l_mm_rc )
+        {
+            FAPI_INF("Fail from mm_set_permission reset for WOFDATA, rc=%d", l_mm_rc);
+
+            /*@
+             * @errortype
+             * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+             * @reasoncode        fapi2::RC_MM_SET_PERMISSION2_FAILED
+             * @userdata1         Address being changed
+             * @userdata2[00:31]  Size of change
+             * @userdata2[32:63]  rc from mm_set_permission
+             * @devdesc           Error calling mm_set_permission for WOFDATA
+             * @custdesc          Firmware Error
+             */
+            l_tmpErr = new ERRORLOG::ErrlEntry(
+                                   ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                   fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                                   fapi2::RC_MM_SET_PERMISSION2_FAILED,
+                                   reinterpret_cast<uint64_t>(l_pWofImage),
+                                   TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
+                                                        l_mm_rc),
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_tmpErr->collectTrace(FAPI_TRACE_NAME, 256);
+            errlCommit(l_tmpErr, FAPI2_COMP_ID);
+        }
+#endif
+
+    }
+
+    FAPI_DBG("Exiting getOverrideWofTable ....");
+    return l_errl; // error from main do-while loop
 }
 
 
@@ -1013,7 +1018,7 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
 errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
                                            const uint32_t i_magicNum,
                                            const uint8_t i_version,
-                                           const uint32_t* i_lidNum)
+                                           const uint8_t* i_entryIndex)
 {
 
     errlHndl_t l_errl = nullptr;
@@ -1021,90 +1026,121 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
 
     do
     {
-        // Check for the eyecatcher (magic number)
+        // Check for valid magic number
         if(i_magicNum != WOF_IMAGE_MAGIC_VALUE)
         {
             l_userData1 = TWO_UINT32_TO_UINT64(i_magicNum, WOF_IMAGE_MAGIC_VALUE);
-            if (i_lidNum)
+            if (i_entryIndex)
             {
-                // UtilLidMgr was used to get WOF img
-                FAPI_ERR("(Retrieved using UtilLidMgr) WOF Image Header Magic Value"
-                " Mismatch 0x%X != WTIH(0x%X)", i_magicNum, WOF_IMAGE_MAGIC_VALUE);
-
-                l_userData2 = TWO_UINT32_TO_UINT64(i_version, *i_lidNum);
+                // Error from Override WOF image in WOFDATA LID
+                FAPI_ERR("WOF Image from WOF Override Image has Header Magic Value"
+                    " Mismatch 0x%X != WTIH(0x%X)", i_magicNum, WOF_IMAGE_MAGIC_VALUE);
+                l_userData2 = TWO_UINT32_TO_UINT64(get_huid(i_procTarg), *i_entryIndex);
+                /*@
+                * @errortype
+                * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+                * @reasoncode        fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH
+                * @userdata1[00:31]  Image header magic value
+                * @userdata1[32:63]  Expected magic value
+                * @userdata2[00:31]  Proc whose WOF data is being overridden
+                * @userdata2[32:63]  0-based index of Override WOF Image that match override search criteria
+                * @devdesc           WOF image header magic value mismatch
+                * @custdesc          Unsupported WOFDATA in current firmware image
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                                fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH,
+                                l_userData1,
+                                l_userData2,
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
             }
             else
             {
+                // Error from WOF img in SEEPROM
                 FAPI_ERR("(Retrieved from SEEPROM) WOF Image Header Magic Value "
-                "Mismatch 0x%X != WTIH(0x%X)", i_magicNum, WOF_IMAGE_MAGIC_VALUE);
+                    "Mismatch 0x%X != WTIH(0x%X)", i_magicNum, WOF_IMAGE_MAGIC_VALUE);
                 l_userData2 = TO_UINT64(i_version);
+                /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
+                /*@
+                * @errortype
+                * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
+                * @reasoncode        fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH
+                * @userdata1[00:31]  Image header magic value
+                * @userdata1[32:63]  Expected magic value
+                * @userdata2[00:63]  Image header version
+                * @devdesc           WOF image header magic value mismatch
+                * @custdesc          Unsupported processor module
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
+                                fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH,
+                                l_userData1,
+                                l_userData2);
+                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                break;
             }
-
-            /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
-            /*@
-            * @errortype
-            * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
-            * @reasoncode        fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH
-            * @userdata1[00:31]  Image header magic value
-            * @userdata1[32:63]  Expected magic value
-            * @userdata2[00:31]  Image header version
-            * @userdata2[32:63]  The LID ID if WOF img was retrieved from PNOR.
-            *                    0 if WOF img was retrieved from EEPROM.
-            * @devdesc           WOF image header magic value mismatch
-            * @custdesc          Unsupported processor module
-            */
-            l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
-                            fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH,
-                            l_userData1,
-                            l_userData2);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
-            break;
         }
 
         // Check for a valid image header version
         if(i_version != WOF_IMAGE_VERSION)
         {
             l_userData1 = TWO_UINT32_TO_UINT64(i_version, WOF_IMAGE_VERSION);
-            if (i_lidNum)
+            if (i_entryIndex)
             {
-                // UtilLidMgr was used to get WOF img
-                FAPI_ERR("(Retrieved using UtilLidMgr) WOF Image header version "
+                // Error from Override WOF image in WOFDATA LID
+                FAPI_ERR("WOF Image from WOF Override Image has header version that is "
                     "not supported: Header Version %d, Supported Version is "
                     "%d", i_version, WOF_IMAGE_VERSION);
-                l_userData2 = TO_UINT64(*i_lidNum);
+                l_userData2 = TWO_UINT32_TO_UINT64(get_huid(i_procTarg), *i_entryIndex);
+                /*@
+                * @errortype
+                * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+                * @reasoncode        fapi2::RC_WOF_IMAGE_VERSION_MISMATCH
+                * @userdata1[00:31]  Image header version
+                * @userdata1[32:63]  Supported header version
+                * @userdata2[00:31]  Proc whose WOF data is being overridden
+                * @userdata2[32:63]  0-based index of Override WOF Image that match override search criteria
+                * @devdesc           Image header version not supported
+                * @custdesc          Unsupported WOFDATA in current firmware version
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                 ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                 fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                                 fapi2::RC_WOF_IMAGE_VERSION_MISMATCH,
+                                 l_userData1,
+                                 l_userData2,
+                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
             }
             else
             {
+                // Error from WOF img in SEEPROM
                 FAPI_ERR("(Retrieved from SEEPROM) WOF Image header version not "
                     "supported: Header Version %d, Supported Version is "
                     "%d", i_version, WOF_IMAGE_VERSION);
-                l_userData2 = 0;
+                /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
+                /*@
+                * @errortype
+                * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
+                * @reasoncode        fapi2::RC_WOF_IMAGE_VERSION_MISMATCH
+                * @userdata1[00:31]  Image header version
+                * @userdata1[32:63]  Supported header version
+                * @devdesc           Image header version not supported
+                * @custdesc          Unsupported processor module for current firmware version
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                 fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
+                                 fapi2::RC_WOF_IMAGE_VERSION_MISMATCH,
+                                 l_userData1,
+                                 0,
+                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                break;
             }
-
-            /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
-            /*@
-            * @errortype
-            * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
-            * @reasoncode        fapi2::RC_WOF_IMAGE_VERSION_MISMATCH
-            * @userdata1[00:31]  Image header version
-            * @userdata1[32:63]  Supported header version
-            * @userdata2         The LID ID if WOF img was retrieved from PNOR.
-            *                    0 if WOF img was retrieved from EEPROM.
-            * @devdesc           Image header version not supported
-            * @custdesc          Unsupported processor module for current firmware version
-            */
-            l_errl = new ERRORLOG::ErrlEntry(
-                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                             fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
-                             fapi2::RC_WOF_IMAGE_VERSION_MISMATCH,
-                             l_userData1,
-                             l_userData2,
-                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
-
-            break;
         }
     } while (0);
 
@@ -1117,7 +1153,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
 errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
                                              const uint32_t i_magicVal,
                                              const uint8_t i_version,
-                                             const uint32_t* i_entry)
+                                             const bool i_isOverride)
 {
 
     errlHndl_t l_errl = nullptr;
@@ -1125,93 +1161,120 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
 
     do
     {
-        // Check for the eyecatcher (magic num)
+        // Check for magic value mismatch
         if(i_magicVal != WOF_TABLES_MAGIC_VALUE)
         {
             l_userData1 = TWO_UINT32_TO_UINT64(i_magicVal, WOF_TABLES_MAGIC_VALUE);
-            if (i_entry)
+            if (i_isOverride)
             {
-                // UtilLidMgr was used to get WOF img
-                FAPI_ERR("(Retrieved using UtilLidMgr) WOF Table Header Magic "
-                    "Value Mismatch 0x%X != WFTH(0x%X)", i_magicVal,
-                    WOF_TABLES_MAGIC_VALUE);
-                l_userData2 = TWO_UINT32_TO_UINT64(i_version, *i_entry);
+                // Error from Override WOF image in WOFDATA LID
+                FAPI_ERR("checkWofTableHeaderForCorrectness: WOF Table Header Magic "
+                    "Value Mismatch 0x%X != WFTH(0x%X)", i_magicVal, WOF_TABLES_MAGIC_VALUE);
+                /*@
+                * @errortype
+                * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+                * @reasoncode        fapi2::RC_WOF_TABLES_MAGIC_MISMATCH
+                * @userdata1[00:31]  Override WOF table header magic value
+                * @userdata1[32:63]  Expected magic value
+                * @devdesc           WOF tables header magic value mismatch
+                * @custdesc          Unsupported WOFDATA in current firmware image
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                                fapi2::RC_WOF_TABLES_MAGIC_MISMATCH,
+                                l_userData1,
+                                0,
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
             }
             else
             {
+                // Error from WOF img in SEEPROM
                 FAPI_ERR("(Retrieved from SEEPROM) WOF Table Header Magic Value "
                     "Mismatch 0x%X != WFTH(0x%X)", i_magicVal,
                     WOF_TABLES_MAGIC_VALUE);
                 l_userData2 = TO_UINT64(i_version);
+                /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
+                /*@
+                * @errortype
+                * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
+                * @reasoncode        fapi2::RC_WOF_TABLES_MAGIC_MISMATCH
+                * @userdata1[00:31]  WOF tables header magic value
+                * @userdata1[32:63]  Expected magic value
+                * @userdata2[00:63]  WOF tables header version
+                * @devdesc           WOF tables header magic value mismatch
+                * @custdesc          Unsupported processor module
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
+                                fapi2::RC_WOF_TABLES_MAGIC_MISMATCH,
+                                l_userData1,
+                                l_userData2);
+                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+                break;
             }
-
-            /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
-            /*@
-            * @errortype
-            * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
-            * @reasoncode        fapi2::RC_WOF_TABLES_MAGIC_MISMATCH
-            * @userdata1[00:31]  WOF tables header magic value
-            * @userdata1[32:63]  Expected magic value
-            * @userdata2[00:31]  WOF tables header version
-            * @userdata2[32:63]  WOF tables entry number if WOF img was retrieved
-            *                    from PNOR.
-            *                    0 if WOF img was retrieved from EEPROM.
-            * @devdesc           WOF tables header magic value mismatch
-            * @custdesc          Unsupported processor module
-            */
-            l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
-                            fapi2::RC_WOF_TABLES_MAGIC_MISMATCH,
-                            l_userData1,
-                            l_userData2);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
-            break;
         }
 
         // Check for a valid tables header version
         if(i_version != WOF_TABLE_VERSION)
         {
             l_userData1 = TWO_UINT32_TO_UINT64(i_version, WOF_TABLE_VERSION);
-            if (i_entry)
+            if (i_isOverride)
             {
-                // UtilLidMgr was used to get WOF img
-                FAPI_ERR("(Retrieved using UtilLidMgr) WOF table header version "
-                    "not supported: Header Version %d, Supported Version is "
-                    "%d", i_version, WOF_TABLE_VERSION);
-                l_userData2 = TO_UINT64(*i_entry);
+                // Error from Override WOF image in WOFDATA LID
+                FAPI_ERR("checkWofTableHeaderForCorrectness: WOF table header version not supported: "
+                    "Header Version %d, Supported Version is %d", i_version, WOF_TABLE_VERSION);
+                /*@
+                * @errortype
+                * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+                * @reasoncode        fapi2::RC_WOF_TABLES_VERSION_MISMATCH
+                * @userdata1[00:31]  Override WOF tables header version
+                * @userdata1[32:63]  Supported header version
+                * @devdesc           WOF tables header version not supported
+                * @custdesc          Unsupported WOFDATA in current firmware version
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                                fapi2::RC_WOF_TABLES_VERSION_MISMATCH,
+                                l_userData1,
+                                0,
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
             }
             else
             {
+                // Error from WOF img in SEEPROM
                 FAPI_ERR("(Retrieved from SEEPROM) WOF table header version not "
                     "supported: Header Version %d, Supported Version is "
                     "%d", i_version, WOF_TABLE_VERSION);
                 l_userData2 = 0;
+                /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
+                /*@
+                * @errortype
+                * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
+                * @reasoncode        fapi2::RC_WOF_TABLES_VERSION_MISMATCH
+                * @userdata1[00:31]  WOF tables header version
+                * @userdata1[32:63]  Max supported header version
+                * @userdata2         WOF tables entry number if WOF img was retrieved
+                *                    from PNOR.
+                *                    0 if WOF img was retrieved from EEPROM.
+                * @devdesc           WOF tables header version not supported
+                * @custdesc          Unsupported processor module for current firmware level
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
+                                fapi2::RC_WOF_TABLES_VERSION_MISMATCH,
+                                l_userData1,
+                                l_userData2,
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
+
+                break;
             }
-
-            /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
-            /*@
-            * @errortype
-            * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
-            * @reasoncode        fapi2::RC_WOF_TABLES_VERSION_MISMATCH
-            * @userdata1[00:31]  WOF tables header version
-            * @userdata1[32:63]  Max supported header version
-            * @userdata2         WOF tables entry number if WOF img was retrieved
-            *                    from PNOR.
-            *                    0 if WOF img was retrieved from EEPROM.
-            * @devdesc           WOF tables header version not supported
-            * @custdesc          Unsupported processor module for current firmware level
-            */
-            l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
-                            fapi2::RC_WOF_TABLES_VERSION_MISMATCH,
-                            l_userData1,
-                            l_userData2,
-                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
-
-            break;
         }
 
     } while (0);
@@ -1219,6 +1282,80 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
     return l_errl;
 
 }
+
+
+
+errlHndl_t checkWofOverrideImgForCorrectness(TARGETING::Target* i_procTarg,
+                                             const uint32_t i_magicVal,
+                                             const uint8_t i_version,
+                                             const uint32_t i_lidNumber)
+{
+    errlHndl_t l_errl = nullptr;
+    uint64_t l_userData1(0), l_userData2(0);
+    do
+    {
+        // Compare against expected magic number
+        if (i_magicVal != WOF_OVERRIDE_MAGIC_VALUE)
+        {
+            FAPI_ERR("checkWofOverrideImgForCorrectness: WOF Override image Magic Value mismatch "
+                "0x%X != expected WFTH(0x%X)", i_magicVal, WOF_OVERRIDE_MAGIC_VALUE);
+            l_userData1 = TWO_UINT32_TO_UINT64(i_magicVal, WOF_OVERRIDE_MAGIC_VALUE);
+            l_userData2 = TWO_UINT32_TO_UINT64(get_huid(i_procTarg), i_lidNumber);
+            // TODO RTC: 250659 WOF - Support Override of WOF from FSP; set ERRL_SEV_INFORMATIONAL to ERRL_SEV_PREDICTIVE
+            /*@
+            * @errortype
+            * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+            * @reasoncode        fapi2::RC_WOF_OVERRIDE_MAGIC_MISMATCH
+            * @userdata1[00:31]  WOF Override image magic value
+            * @userdata1[32:63]  Expected magic value
+            * @userdata2[00:31]  Proc whose WOF data is being overridden
+            * @userdata2[32:63]  WOFDATA LID number that was used
+            * @devdesc           WOF Override image magic value mismatch
+            * @custdesc          Unsupported WOFDATA in current firmware version
+            */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                            fapi2::RC_WOF_OVERRIDE_MAGIC_MISMATCH,
+                            l_userData1,
+                            l_userData2,
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+        // Check for a valid tables header version
+        if (i_version != WOF_OVERRIDE_VERSION)
+        {
+            FAPI_ERR("checkWofOverrideImgForCorrectness: WOF Override image Version not supported "
+                "Img Version: %d, Supported Version: %d", i_version, WOF_OVERRIDE_VERSION);
+            l_userData1 = TWO_UINT32_TO_UINT64(i_version, WOF_OVERRIDE_VERSION);
+            l_userData2 = TWO_UINT32_TO_UINT64(get_huid(i_procTarg), i_lidNumber);
+            // TODO RTC: 250659 WOF - Support Override of WOF from FSP; set ERRL_SEV_INFORMATIONAL to ERRL_SEV_PREDICTIVE
+            /*@
+            * @errortype
+            * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
+            * @reasoncode        fapi2::RC_WOF_OVERRIDE_VERSION_MISMATCH
+            * @userdata1[00:31]  WOF Override image header version
+            * @userdata1[32:63]  Supported version number
+            * @userdata2[00:31]  Proc whose WOF data is being overridden
+            * @userdata2[32:63]  WOFDATA LID number that was used
+            * @devdesc           WOF Override image version not supported
+            * @custdesc          Unsupported WOFDATA in current firmware version
+            */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE,
+                            fapi2::RC_WOF_OVERRIDE_VERSION_MISMATCH,
+                            l_userData1,
+                            l_userData2,
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            break;
+        }
+    } while (0);
+    return l_errl;
+}
+
+
 
 /* End of helper methods for platParseWOFTables(...) */
 

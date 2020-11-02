@@ -59,6 +59,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/eeprom/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
+EXTRAINCDIR += ${ROOTPATH}/src/import/tools/wof/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
