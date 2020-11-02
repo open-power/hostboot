@@ -5480,7 +5480,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     // Check the validity of some PoundW fields
-    FAPI_INF("Checking validity of #W.  DCC = 0x%016X", revle64(iv_poundW_data.other.droop_count_control));
+    FAPI_INF("Checking validity of #W.  DCC = 0x%016llX", revle64(iv_poundW_data.other.droop_count_control));
     if (iv_poundW_data.other.droop_count_control == 0)
     {
 
@@ -5515,6 +5515,22 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
                     .set_CHIP_TARGET(iv_procChip),
                     "Pstate Parameter Block: #W DCCR has value of 0");
         }
+    }
+
+    // FLMR
+    if (iv_poundW_data.other.ftc_large_droop_mode_reg_setting == 0 || iv_poundW_data.other.dds_calibration_version == 0)
+    {
+        iv_poundW_data.other.ftc_large_droop_mode_reg_setting = revle64(0x23E0404000000000ull);
+        FAPI_INF("Setting FLMR to internal default as #W value is 0.  FLMR = 0x%016llX",
+                revle64(iv_poundW_data.other.ftc_large_droop_mode_reg_setting));
+    }
+
+    // FMMR
+    if (iv_poundW_data.other.ftc_misc_droop_mode_reg_setting == 0 || iv_poundW_data.other.dds_calibration_version == 0)
+    {
+        iv_poundW_data.other.ftc_misc_droop_mode_reg_setting = revle64(0x000002D400000010ull);
+        FAPI_INF("Setting FMMR to internal default as #W value is 0.  FMMR = 0x%016llX",
+                revle64(iv_poundW_data.other.ftc_misc_droop_mode_reg_setting));
     }
 
 fapi_try_exit:
