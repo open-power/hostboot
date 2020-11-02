@@ -435,10 +435,12 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
     // Note if we disabled the centaur i2c sensor cache
     bool l_i2cDisabled = false;
+    TARGETING::Target* l_membuf = nullptr;
 
     TRACFCOMP( g_trac_vpd, INFO_MRK
-               "sendMboxWriteMsg: Send msg to FSP to write VPD type %.8X, "
+               "sendMboxWriteMsg: Send msg to FSP to write VPD for target %.8X type %.8X, "
                "record %d, offset 0x%X",
+               TARGETING::get_huid(i_target),
                i_type,
                i_record.rec_num,
                i_record.offset );
@@ -480,12 +482,12 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         // Note - There is a potential collision on the I2C bus with
         //  the OCC code.  On FSP systems this is handled by the HWSV
         //  code.  On OP systems this is handled by OPAL.
+        auto l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
         TARGETING::Target* pNode = nullptr;
         if(i_target != nullptr)
         {
-            if(   i_target->getAttr<TARGETING::ATTR_TYPE>()
-               == TARGETING::TYPE_NODE)
+            if( l_type == TARGETING::TYPE_NODE )
             {
                 pNode = i_target;
             }
@@ -589,25 +591,58 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
         // We need to temporarily disable the Centaur i2c sensor cache
         //  function to avoid some potential collisions while the SPD
-        //  is getting written.        
-        if( i_target->getAttr<TARGETING::ATTR_TYPE>() ==
-            TARGETING::TYPE_MEMBUF )
+        //  is getting written.
+        if( (l_type == TARGETING::TYPE_MEMBUF)
+            || (l_type == TARGETING::TYPE_DIMM) )
         {
-            l_err = I2C::i2cDisableSensorCache(i_target,l_i2cDisabled);
-            if ( l_err )
+            if( l_type == TARGETING::TYPE_MEMBUF )
+            {
+                l_membuf = i_target;
+            }
+            else if( l_type == TARGETING::TYPE_DIMM )
+            {
+                l_membuf = nullptr;
+                TARGETING::EepromVpdPrimaryInfo eepromData;
+                if( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>(eepromData) )
+                {
+                    TARGETING::TargetService& tS = TARGETING::targetService();
+                    bool exists = false;
+                    tS.exists( eepromData.i2cMasterPath, exists );
+                    if( exists )
+                    {
+                        // Since it exists, convert to a target
+                        l_membuf = tS.toTarget( eepromData.i2cMasterPath );
+                    }
+                }
+            }
+
+            if( l_membuf == nullptr )
             {
                 TRACFCOMP(g_trac_vpd,
-                          ERR_MRK" Disable Sensor Cache failed for HUID=0x%.8X",
+                          ERR_MRK" Could not find membuf for %.8X",
                           TARGETING::get_huid(i_target));
-                // commit this log and keep going, we still want to attempt the
-                //  vpd write since this is only protecting against a window
-                //  condition
-                errlCommit( l_err, VPD_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP(g_trac_vpd,
+                          INFO_MRK" Disabling Sensor Cache for HUID=0x%.8X",
+                          TARGETING::get_huid(l_membuf));
+                l_err = I2C::i2cDisableSensorCache(l_membuf,l_i2cDisabled);
+                if ( l_err )
+                {
+                    TRACFCOMP(g_trac_vpd,
+                              ERR_MRK" Disable Sensor Cache failed for HUID=0x%.8X",
+                              TARGETING::get_huid(i_target));
+                    // commit this log and keep going, we still want to attempt the
+                    //  vpd write since this is only protecting against a window
+                    //  condition
+                    errlCommit( l_err, VPD_COMP_ID );
+                }
             }
         }
 
         // Trace out the request structure
-        TRACFBIN( g_trac_vpd, INFO_MRK"Sending firmware_request",
+        TRACFBIN( g_trac_vpd, INFO_MRK"Sending firmware_request to write VPD",
                   l_req_fw_msg,
                   l_req_fw_msg_size);
 
@@ -626,16 +661,20 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
     // Re-enable the Centaur sensor cache even if we hit another error
     if( l_i2cDisabled )
     {
+        TRACFCOMP(g_trac_vpd,
+                  INFO_MRK" Enabling Sensor Cache for HUID=0x%.8X",
+                  TARGETING::get_huid(l_membuf));
+
         errlHndl_t tmp_err = nullptr;
 
-        tmp_err = I2C::i2cEnableSensorCache(i_target);
+        tmp_err = I2C::i2cEnableSensorCache(l_membuf);
 
         if( l_err && tmp_err)
         {
             delete tmp_err;
             TRACFCOMP(g_trac_vpd,
                       ERR_MRK" Enable Sensor Cache failed for HUID=0x%.8X",
-                      TARGETING::get_huid(i_target));
+                      TARGETING::get_huid(l_membuf));
         }
         else if(tmp_err)
         {
