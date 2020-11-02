@@ -1320,7 +1320,8 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
                 l_power_limit = (i_throttle_type == throttle_type::POWER) ?
                                 l_dummy.iv_port_power_limit : (l_dummy.iv_dimm_thermal_limit[0] + l_dummy.iv_dimm_thermal_limit[1]);
 
-                FAPI_INF("%s Calculated power is %d, limit is %ld", mss::c_str(l_port), l_fin_power, l_power_limit);
+                FAPI_INF("%s Calculated power is %d, limit is %d", mss::c_str(l_port), l_fin_power,
+                         static_cast<uint32_t>(l_power_limit));
 
                 //If there's an error with calculating port power, the wrong watt target was passed in
                 //Returns an error but doesn't deconfigure anything. Calling function can log if it wants to
@@ -1344,7 +1345,7 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
                                         "Error calculating the final port power value for target %s, calculated power is %d, max value can be %d",
                                         mss::c_str(l_port),
                                         l_fin_power,
-                                        l_power_limit);
+                                        static_cast<uint32_t>(l_power_limit));
 
                     o_exceeded_power.push_back(l_port);
                 }
