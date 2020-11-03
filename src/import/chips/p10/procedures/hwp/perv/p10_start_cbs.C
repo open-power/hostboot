@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,8 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
 
     FAPI_ASSERT(l_read_vdn_pgood_status,
                 fapi2::VDN_PGOOD_NOT_SET()
-                .set_CBS_ENVSTAT_READ(l_data32),
+                .set_CBS_ENVSTAT_READ(l_data32)
+                .set_MASTER_CHIP(i_target_chip),
                 "ERROR:VDN_PGOOD OFF, CBS_ENVSTAT BIT 2 NOT SET");
 
     FAPI_DBG("Reset SBE FIFO");
@@ -127,7 +128,8 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
                 .set_CBS_CS_READ(l_data32_cbs_cs)
                 .set_CBS_CS_IDLE_VALUE(CBS_IDLE_VALUE)
                 .set_LOOP_COUNT(P10_CFAM_CBS_POLL_COUNT)
-                .set_HW_DELAY(P10_CBS_IDLE_HW_NS_DELAY),
+                .set_HW_DELAY(P10_CBS_IDLE_HW_NS_DELAY)
+                .set_MASTER_CHIP(i_target_chip),
                 "ERROR: CBS HAS NOT REACHED IDLE STATE VALUE 0x002 ");
 
     FAPI_INF("p10_start_cbs: Exiting ...");
