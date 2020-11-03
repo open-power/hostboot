@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -62,6 +62,9 @@ enum vpdModuleId
     VPD_IPVPD_WRITE_KEYWORD                 = 0x32,
     VPD_IPVPD_LOAD_PNOR                     = 0x33,
     VPD_IPVPD_GET_RECORD_LIST_SEEPROM       = 0x34,
+    VPD_IPVPD_ECC_DATA_UPDATE               = 0x35,
+    VPD_IPVPD_ECC_DATA_CHECK                = 0x36,
+
 
     // PVPD
     VPD_PVPD_PRESENCEDETECT                 = 0x50,
@@ -160,6 +163,10 @@ enum vpdReasonCode
     VPD_INVALID_MASTER_I2C_PATH         = VPD_COMP_ID | 0x3f,
     VPD_NULL_I2C_MASTER                 = VPD_COMP_ID | 0x40,
     VPD_INVALID_EEPROM_CONTENT_TYPE     = VPD_COMP_ID | 0x41,
+    VPD_ECC_DATA_UNKNOWN_FAILURE        = VPD_COMP_ID | 0x42,
+    VPD_ECC_DATA_ECC_SIZE_ISSUE         = VPD_COMP_ID | 0x43,
+    VPD_ECC_DATA_UNCORRECTABLE_DATA     = VPD_COMP_ID | 0x44,
+    VPD_ECC_DATA_CORRECTABLE_DATA       = VPD_COMP_ID | 0x45,
 };
 
 

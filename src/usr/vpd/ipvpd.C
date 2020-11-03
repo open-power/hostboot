@@ -307,6 +307,9 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
             {
                 break;
             }
+
+            //@TODO-RTC:250100-Enable Enterprise VPD ECC
+            // Need add the VPD ECC update code here
         }
     } while( 0 );
 

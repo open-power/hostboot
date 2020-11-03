@@ -30,6 +30,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import
 # common objects with runtime
 OBJS += vpd_common.o
 OBJS += ipvpd.o
+OBJS += vpd_ecc_api.o
 OBJS += mvpd.o
 OBJS += pvpd.o
 OBJS += spd.o

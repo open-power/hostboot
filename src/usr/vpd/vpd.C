@@ -1204,4 +1204,48 @@ void getListOfOverrideSections( OverrideRsvMemMap_t& o_overrides )
 
 }
 
+// ------------------------------------------------------------------
+// updateRecordEccData
+// ------------------------------------------------------------------
+errlHndl_t updateRecordEccData (
+               const TARGETING::TargetHandle_t  i_target,
+               const uint32_t i_record,   const uint32_t i_keyword,
+               const uint32_t i_location, const uint32_t i_eepromSource )
+{
+    IpVpdFacade::input_args_t l_args;
+    l_args.record = static_cast<VPD::vpdRecord>(i_record);
+    l_args.keyword = static_cast<VPD::vpdKeyword>(i_keyword);
+    l_args.location = static_cast<VPD::vpdCmdTarget>(i_location);
+    l_args.eepromSource = static_cast<EEPROM::EEPROM_SOURCE>(i_eepromSource);
+
+    return Singleton<MvpdFacade>::instance().updateRecordEccData( i_target, l_args );
+}
+
+// ------------------------------------------------------------------
+// validateRecordEccData
+// ------------------------------------------------------------------
+errlHndl_t validateRecordEccData (
+               const TARGETING::TargetHandle_t  i_target,
+               const uint32_t i_record,   const uint32_t i_keyword,
+               const uint32_t i_location, const uint32_t i_eepromSource )
+{
+    IpVpdFacade::input_args_t l_args;
+    l_args.record = static_cast<VPD::vpdRecord>(i_record);
+    l_args.keyword = static_cast<VPD::vpdKeyword>(i_keyword);
+    l_args.location = static_cast<VPD::vpdCmdTarget>(i_location);
+    l_args.eepromSource = static_cast<EEPROM::EEPROM_SOURCE>(i_eepromSource);
+
+    return Singleton<MvpdFacade>::instance().validateRecordEccData( i_target, l_args );
+}
+
+// ------------------------------------------------------------------
+// validateAllRecordEccData
+// ------------------------------------------------------------------
+errlHndl_t validateAllRecordEccData (
+               const TARGETING::TargetHandle_t  i_target )
+{
+    return Singleton<MvpdFacade>::instance().validateAllRecordEccData( i_target );
+}
+
+
 }; //end VPD namespace

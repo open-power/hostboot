@@ -30,6 +30,8 @@ MODULE = vpd_rt
 
 # include common objects between hostboot and runtime hostboot
 include ../vpd.mk
+# include the VPD ECC update/validate APIs for HB and runtime
+include ../vpd_ecc_api.mk
 
 # add unique object modules
 OBJS += rt_vpd.o

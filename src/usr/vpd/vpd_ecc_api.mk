@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/vpd/makefile $
+# $Source: src/usr/vpd/vpd_ecc_api.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,20 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = vpd
 
-#include common objects between hb and runtime
-include vpd.mk
-#include the VPD ECC update/validate APIs for HB and runtime
-include vpd_ecc_api.mk
+# Currently a no-op, but do not delete file.
 
-#include unique objects
-OBJS += vpd.o
-OBJS += dimmPres.o
-OBJS += rtvpd_load.o
-
-SUBDIRS += test.d
-SUBDIRS += runtime.d
-
-include ${ROOTPATH}/config.mk
