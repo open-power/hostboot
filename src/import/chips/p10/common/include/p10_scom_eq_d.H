@@ -50,6 +50,15 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 //<< [CTRL_ATOMIC_LOCK_REG]
 // eq/reg00013.H
 
+//>> [EPS_DBG_DEBUG_TRACE_CONTROL]
+static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x200183f0ull;
+
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
+//<< [EPS_DBG_DEBUG_TRACE_CONTROL]
+// eq/reg00013.H
+
 //>> [OPCG_CAPT1]
 static const uint64_t OPCG_CAPT1 = 0x20030010ull;
 
@@ -82,24 +91,105 @@ static const uint32_t OPCG_CAPT1_SEQ_12_LEN = 5;
 //<< [OPCG_CAPT1]
 // eq/reg00013.H
 
+//>> [QME_EIMR]
+static const uint64_t QME_EIMR_RW = 0x200e0264ull;
+static const uint64_t QME_EIMR_WO_CLEAR = 0x200e0267ull;
+static const uint64_t QME_EIMR_WO_OR = 0x200e0266ull;
+
+static const uint32_t QME_EIMR_INTERRUPT_MASK = 0;
+static const uint32_t QME_EIMR_INTERRUPT_MASK_LEN = 64;
+//<< [QME_EIMR]
+// eq/reg00013.H
+
+//>> [QME_PIG]
+static const uint64_t QME_PIG = 0x200e0030ull;
+
+static const uint32_t QME_PIG_REQ_INTR_TYPE = 1;
+static const uint32_t QME_PIG_REQ_INTR_TYPE_LEN = 4;
+static const uint32_t QME_PIG_REQ_INTR_PAYLOAD = 5;
+static const uint32_t QME_PIG_REQ_INTR_PAYLOAD_LEN = 19;
+static const uint32_t QME_PIG_PENDING_SOURCE = 24;
+static const uint32_t QME_PIG_PENDING_SOURCE_LEN = 6;
+static const uint32_t QME_PIG_INTR_GRANTED = 32;
+static const uint32_t QME_PIG_GRANTED_SOURCE = 33;
+static const uint32_t QME_PIG_GRANTED_SOURCE_LEN = 3;
+static const uint32_t QME_PIG_QUAD_ID = 37;
+static const uint32_t QME_PIG_QUAD_ID_LEN = 3;
+static const uint32_t QME_PIG_GRANTED_PACKET = 40;
+static const uint32_t QME_PIG_GRANTED_PACKET_LEN = 24;
+//<< [QME_PIG]
+// eq/reg00013.H
+
 //>> [QME_QSCR]
 static const uint64_t QME_QSCR_RW = 0x200e0070ull;
 static const uint64_t QME_QSCR_WO_CLEAR = 0x200e0073ull;
 static const uint64_t QME_QSCR_WO_OR = 0x200e0072ull;
 
 static const uint32_t QME_QSCR_SRAM_ACCESS_MODE = 0;
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SRAM_ACCESS_MODE = 0; // p10:20,
 static const uint32_t QME_QSCR_SRAM_SCRUB_ENABLE = 1;
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SRAM_SCRUB_ENABLE = 1; // p10:20,
 static const uint32_t QME_QSCR_ECC_CORRECT_DIS = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_ECC_CORRECT_DIS = 2; // p10:20,
 static const uint32_t QME_QSCR_ECC_DETECT_DIS = 3;
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_ECC_DETECT_DIS = 3; // p10:20,
 static const uint32_t QME_QSCR_ECC_INJECT_TYPE = 4;
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_ECC_INJECT_TYPE = 4; // p10:20,
 static const uint32_t QME_QSCR_ECC_INJECT_ERR = 5;
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_ECC_INJECT_ERR = 5; // p10:20,
 static const uint32_t QME_QSCR_SPARE_6_7 = 6;
 static const uint32_t QME_QSCR_SPARE_6_7_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SPARE_6_7 = 6; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SPARE_6_7_LEN = 2;
 static const uint32_t QME_QSCR_DTCBASE = 32;
 static const uint32_t QME_QSCR_DTCBASE_LEN = 8;
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_DTCBASE = 32; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_DTCBASE_LEN = 8;
 static const uint32_t QME_QSCR_SRAM_SCRUB_INDEX = 47;
 static const uint32_t QME_QSCR_SRAM_SCRUB_INDEX_LEN = 13;
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SRAM_SCRUB_INDEX = 47; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SRAM_SCRUB_INDEX_LEN = 13;
 //<< [QME_QSCR]
+// eq/reg00013.H
+
+//>> [QME_RCMR]
+static const uint64_t QME_RCMR = 0x200e0180ull;
+static const uint64_t QME_RCMR_WO_CLEAR = 0x200e0183ull;
+static const uint64_t QME_RCMR_WO_OR = 0x200e0182ull;
+
+static const uint32_t QME_RCMR_STEP_ENABLE = 0;
+static const uint32_t QME_RCMR_AUTO_ACK_ENABLE = 1;
+static const uint32_t QME_RCMR_AUTO_TARGET_DISABLE = 2;
+static const uint32_t QME_RCMR_AUTO_DONE_DISABLE = 3;
+static const uint32_t QME_RCMR_STEP_DELAY = 4;
+static const uint32_t QME_RCMR_STEP_DELAY_LEN = 4;
+static const uint32_t QME_RCMR_CORE0_CONTROL_INDEX = 35;
+static const uint32_t QME_RCMR_CORE0_CONTROL_INDEX_LEN = 5;
+static const uint32_t QME_RCMR_CORE1_CONTROL_INDEX = 43;
+static const uint32_t QME_RCMR_CORE1_CONTROL_INDEX_LEN = 5;
+static const uint32_t QME_RCMR_CORE2_CONTROL_INDEX = 51;
+static const uint32_t QME_RCMR_CORE2_CONTROL_INDEX_LEN = 5;
+static const uint32_t QME_RCMR_CORE3_CONTROL_INDEX = 59;
+static const uint32_t QME_RCMR_CORE3_CONTROL_INDEX_LEN = 5;
+//<< [QME_RCMR]
+// eq/reg00013.H
+
+//>> [QME_WCOR]
+static const uint64_t QME_WCOR = 0x200e0174ull;
+
+static const uint32_t QME_WCOR_0_OVER_THROTTLED = 1;
+static const uint32_t QME_WCOR_0_THROTTLE_INDEX = 2;
+static const uint32_t QME_WCOR_0_THROTTLE_INDEX_LEN = 6;
+static const uint32_t QME_WCOR_1_OVER_THROTTLED = 9;
+static const uint32_t QME_WCOR_1_THROTTLE_INDEX = 10;
+static const uint32_t QME_WCOR_1_THROTTLE_INDEX_LEN = 6;
+static const uint32_t QME_WCOR_2_OVER_THROTTLED = 17;
+static const uint32_t QME_WCOR_2_THROTTLE_INDEX = 18;
+static const uint32_t QME_WCOR_2_THROTTLE_INDEX_LEN = 6;
+static const uint32_t QME_WCOR_3_OVER_THROTTLED = 25;
+static const uint32_t QME_WCOR_3_THROTTLE_INDEX = 26;
+static const uint32_t QME_WCOR_3_THROTTLE_INDEX_LEN = 6;
+//<< [QME_WCOR]
 // eq/reg00013.H
 
 //>> [RECOV_MASK]
@@ -161,84 +251,6 @@ static const uint32_t RECOV_MASK_51 = 51;
 static const uint32_t RECOV_MASK_52 = 52;
 static const uint32_t RECOV_MASK_53 = 53;
 //<< [RECOV_MASK]
-// eq/reg00013.H
-
-//>> [QME_EIMR]
-static const uint64_t QME_EIMR_RW = 0x200e0264ull;
-static const uint64_t QME_EIMR_WO_CLEAR = 0x200e0267ull;
-static const uint64_t QME_EIMR_WO_OR = 0x200e0266ull;
-
-static const uint32_t QME_EIMR_INTERRUPT_MASK = 0;
-static const uint32_t QME_EIMR_INTERRUPT_MASK_LEN = 64;
-//<< [QME_EIMR]
-// eq/reg00013.H
-
-//>> [EPS_DBG_DEBUG_TRACE_CONTROL]
-static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x200183f0ull;
-
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
-//<< [EPS_DBG_DEBUG_TRACE_CONTROL]
-// eq/reg00013.H
-
-//>> [QME_RCMR]
-static const uint64_t QME_RCMR = 0x200e0180ull;
-static const uint64_t QME_RCMR_WO_CLEAR = 0x200e0183ull;
-static const uint64_t QME_RCMR_WO_OR = 0x200e0182ull;
-
-static const uint32_t QME_RCMR_STEP_ENABLE = 0;
-static const uint32_t QME_RCMR_AUTO_ACK_ENABLE = 1;
-static const uint32_t QME_RCMR_AUTO_TARGET_DISABLE = 2;
-static const uint32_t QME_RCMR_AUTO_DONE_DISABLE = 3;
-static const uint32_t QME_RCMR_STEP_DELAY = 4;
-static const uint32_t QME_RCMR_STEP_DELAY_LEN = 4;
-static const uint32_t QME_RCMR_CORE0_CONTROL_INDEX = 35;
-static const uint32_t QME_RCMR_CORE0_CONTROL_INDEX_LEN = 5;
-static const uint32_t QME_RCMR_CORE1_CONTROL_INDEX = 43;
-static const uint32_t QME_RCMR_CORE1_CONTROL_INDEX_LEN = 5;
-static const uint32_t QME_RCMR_CORE2_CONTROL_INDEX = 51;
-static const uint32_t QME_RCMR_CORE2_CONTROL_INDEX_LEN = 5;
-static const uint32_t QME_RCMR_CORE3_CONTROL_INDEX = 59;
-static const uint32_t QME_RCMR_CORE3_CONTROL_INDEX_LEN = 5;
-//<< [QME_RCMR]
-// eq/reg00013.H
-
-//>> [QME_WCOR]
-static const uint64_t QME_WCOR = 0x200e0174ull;
-
-static const uint32_t QME_WCOR_0_OVER_THROTTLED = 1;
-static const uint32_t QME_WCOR_0_THROTTLE_INDEX = 2;
-static const uint32_t QME_WCOR_0_THROTTLE_INDEX_LEN = 6;
-static const uint32_t QME_WCOR_1_OVER_THROTTLED = 9;
-static const uint32_t QME_WCOR_1_THROTTLE_INDEX = 10;
-static const uint32_t QME_WCOR_1_THROTTLE_INDEX_LEN = 6;
-static const uint32_t QME_WCOR_2_OVER_THROTTLED = 17;
-static const uint32_t QME_WCOR_2_THROTTLE_INDEX = 18;
-static const uint32_t QME_WCOR_2_THROTTLE_INDEX_LEN = 6;
-static const uint32_t QME_WCOR_3_OVER_THROTTLED = 25;
-static const uint32_t QME_WCOR_3_THROTTLE_INDEX = 26;
-static const uint32_t QME_WCOR_3_THROTTLE_INDEX_LEN = 6;
-//<< [QME_WCOR]
-// eq/reg00013.H
-
-//>> [QME_PIG]
-static const uint64_t QME_PIG = 0x200e0030ull;
-
-static const uint32_t QME_PIG_REQ_INTR_TYPE = 1;
-static const uint32_t QME_PIG_REQ_INTR_TYPE_LEN = 4;
-static const uint32_t QME_PIG_REQ_INTR_PAYLOAD = 5;
-static const uint32_t QME_PIG_REQ_INTR_PAYLOAD_LEN = 19;
-static const uint32_t QME_PIG_PENDING_SOURCE = 24;
-static const uint32_t QME_PIG_PENDING_SOURCE_LEN = 6;
-static const uint32_t QME_PIG_INTR_GRANTED = 32;
-static const uint32_t QME_PIG_GRANTED_SOURCE = 33;
-static const uint32_t QME_PIG_GRANTED_SOURCE_LEN = 3;
-static const uint32_t QME_PIG_QUAD_ID = 37;
-static const uint32_t QME_PIG_QUAD_ID_LEN = 3;
-static const uint32_t QME_PIG_GRANTED_PACKET = 40;
-static const uint32_t QME_PIG_GRANTED_PACKET_LEN = 24;
-//<< [QME_PIG]
 // eq/reg00013.H
 
 //>> [XSTOP5]

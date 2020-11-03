@@ -159,6 +159,18 @@ static const uint32_t SCOMFIR_MCFGP0A_SMF_UPPER_ADDRESS_LEN = 19;
 //<< [SCOMFIR_MCFGP0A]
 // mc/reg00007.H
 
+//>> [SCOMFIR_MCFGPM1E]
+static const uint64_t SCOMFIR_MCFGPM1E = 0x0c010c1dull;
+
+static const uint32_t SCOMFIR_MCFGPM1E_VALID = 0;
+static const uint32_t SCOMFIR_MCFGPM1E_EXTEND_TO_END_OF_RANGE = 1;
+static const uint32_t SCOMFIR_MCFGPM1E_LOWER_ADDRESS = 2;
+static const uint32_t SCOMFIR_MCFGPM1E_LOWER_ADDRESS_LEN = 19;
+static const uint32_t SCOMFIR_MCFGPM1E_UPPER_ADDRESS = 21;
+static const uint32_t SCOMFIR_MCFGPM1E_UPPER_ADDRESS_LEN = 19;
+//<< [SCOMFIR_MCFGPM1E]
+// mc/reg00007.H
+
 //>> [SYNC_CONFIG]
 static const uint64_t SYNC_CONFIG = 0x0c030000ull;
 
@@ -174,22 +186,11 @@ static const uint32_t SYNC_CONFIG_CONT_SCAN_DISABLE = 10;
 static const uint32_t SYNC_CONFIG_SYNC_PULSE_OUT_DIS = 11;
 static const uint32_t SYNC_CONFIG_REGION_PGOOD_OVERRIDE = 12;
 static const uint32_t SYNC_CONFIG_CONT_SCAN_SHORT_WAIT = 13;
+static const uint32_t SYNC_CONFIG_PCIE32_MODE = 14; // p10:20,
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN = 15;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
 //<< [SYNC_CONFIG]
-// mc/reg00007.H
-
-//>> [SCOMFIR_MCFGPM1E]
-static const uint64_t SCOMFIR_MCFGPM1E = 0x0c010c1dull;
-
-static const uint32_t SCOMFIR_MCFGPM1E_VALID = 0;
-static const uint32_t SCOMFIR_MCFGPM1E_EXTEND_TO_END_OF_RANGE = 1;
-static const uint32_t SCOMFIR_MCFGPM1E_LOWER_ADDRESS = 2;
-static const uint32_t SCOMFIR_MCFGPM1E_LOWER_ADDRESS_LEN = 19;
-static const uint32_t SCOMFIR_MCFGPM1E_UPPER_ADDRESS = 21;
-static const uint32_t SCOMFIR_MCFGPM1E_UPPER_ADDRESS_LEN = 19;
-//<< [SCOMFIR_MCFGPM1E]
 // mc/reg00007.H
 
 //>>THE END<<

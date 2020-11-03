@@ -39,6 +39,75 @@ namespace c
 #endif
 
 
+//>> [CPMS_DTIR]
+static const uint64_t CPMS_DTIR = 0x200e0e80ull;
+
+static const uint32_t CPMS_DTIR_VALID = 0;
+static const uint32_t CPMS_DTIR_THREAD_SEL = 1;
+static const uint32_t CPMS_DTIR_THREAD_SEL_LEN = 3;
+static const uint32_t CPMS_DTIR_MODE_SEL = 6;
+static const uint32_t CPMS_DTIR_MODE_SEL_LEN = 2;
+static const uint32_t CPMS_DTIR_VALUE = 8;
+static const uint32_t CPMS_DTIR_VALUE_LEN = 8;
+static const uint32_t CPMS_DTIR_WINDOW_SEL = 17;
+static const uint32_t CPMS_DTIR_WINDOW_SEL_LEN = 3;
+//<< [CPMS_DTIR]
+// c/reg00002.H
+
+//>> [CPMS_FMMR]
+static const uint64_t CPMS_FMMR_RW = 0x200e0e4cull;
+static const uint64_t CPMS_FMMR_WO_CLEAR = 0x200e0e4full;
+static const uint64_t CPMS_FMMR_WO_OR = 0x200e0e4eull;
+
+static const uint32_t CPMS_FMMR_SMALL_STAGGER_ENABLE = 0;
+static const uint32_t CPMS_FMMR_SMALL_STAGGER_SELECT = 1;
+static const uint32_t CPMS_FMMR_SMALL_STAGGER_CYCLES = 2;
+static const uint32_t CPMS_FMMR_SMALL_STAGGER_CYCLES_LEN = 2;
+static const uint32_t CPMS_FMMR_ADJ_WARN_WEIGHT = 4;
+static const uint32_t CPMS_FMMR_ADJ_WARN_RESPONSE = 5;
+static const uint32_t CPMS_FMMR_ADJ_WARN_OUTPUT_SELECT = 6;
+static const uint32_t CPMS_FMMR_ADJ_WARN_OUTPUT_SELECT_LEN = 3;
+static const uint32_t CPMS_FMMR_DDP_TRIP_SELECT = 9;
+static const uint32_t CPMS_FMMR_DDP_TRIP_SELECT_LEN = 3;
+static const uint32_t CPMS_FMMR_SLOPEA_TYPE_SELECT = 12;
+static const uint32_t CPMS_FMMR_SLOPEA_TYPE_SELECT_LEN = 2;
+static const uint32_t CPMS_FMMR_SLOPEB_TYPE_SELECT = 14;
+static const uint32_t CPMS_FMMR_SLOPEB_TYPE_SELECT_LEN = 2;
+static const uint32_t CPMS_FMMR_SMALL_ASSERT_STABILITY = 16;
+static const uint32_t CPMS_FMMR_SMALL_ASSERT_STABILITY_LEN = 2;
+static const uint32_t CPMS_FMMR_SMALL_DEASSERT_STABILITY = 18;
+static const uint32_t CPMS_FMMR_SMALL_DEASSERT_STABILITY_LEN = 2;
+static const uint32_t CPMS_FMMR_SMALL_INITIAL_CYCLES = 20;
+static const uint32_t CPMS_FMMR_SMALL_INITIAL_CYCLES_LEN = 4;
+static const uint32_t CPMS_FMMR_SMALL_INITIAL_ACTION = 24;
+static const uint32_t CPMS_FMMR_SMALL_INITIAL_ACTION_LEN = 6;
+static const uint32_t CPMS_FMMR_SMALL_PREFETCH_ACTION = 30;
+static const uint32_t CPMS_FMMR_SMALL_PREFETCH_ACTION_LEN = 2;
+static const uint32_t CPMS_FMMR_SMALL_DITHER_WINDOW_SEL = 32;
+static const uint32_t CPMS_FMMR_SMALL_VECTOR_ACTION = 33;
+static const uint32_t CPMS_FMMR_SMALL_VECTOR_ACTION_LEN = 3;
+static const uint32_t CPMS_FMMR_SLOPE_TIMEOUT_SELECT = 36;
+static const uint32_t CPMS_FMMR_SMALL_THROTTLE_ACTION = 37;
+static const uint32_t CPMS_FMMR_SMALL_THROTTLE_ACTION_LEN = 3;
+static const uint32_t CPMS_FMMR_SMALL_DITHER_REPEAT = 40;
+static const uint32_t CPMS_FMMR_SMALL_DITHER_REPEAT_LEN = 4;
+static const uint32_t CPMS_FMMR_SMALL_DITHER_INCREASE = 44;
+static const uint32_t CPMS_FMMR_SMALL_DITHER_INCREASE_LEN = 4;
+static const uint32_t CPMS_FMMR_SMALL_DITHER_INITIAL = 48;
+static const uint32_t CPMS_FMMR_SMALL_DITHER_INITIAL_LEN = 5;
+static const uint32_t CPMS_FMMR_DPLL_DATA2_SEL = 53;
+static const uint32_t CPMS_FMMR_DPLL_DATA1_SEL = 54;
+static const uint32_t CPMS_FMMR_DPLL_DATA1_SEL_LEN = 2;
+static const uint32_t CPMS_FMMR_DPLL_DATA0_SEL = 56;
+static const uint32_t CPMS_FMMR_DPLL_DATA0_SEL_LEN = 2;
+static const uint32_t CPMS_FMMR_DDS_ERROR_ENCODE_DISABLE = 58;
+static const uint32_t CPMS_FMMR_SMALL_RESPONSE_DISABLE = 59;
+static const uint32_t CPMS_FMMR_SLOPE_REPORT_SEL = 60;
+static const uint32_t CPMS_FMMR_OVERRIDE_VECTOR_LIMIT = 61;
+static const uint32_t CPMS_FMMR_OVERRIDE_VECTOR_LIMIT_LEN = 3;
+//<< [CPMS_FMMR]
+// c/reg00002.H
+
 //>> [EC_PC_THRCTL_TCTLCOM_HOLD_OUT]
 static const uint64_t EC_PC_THRCTL_TCTLCOM_HOLD_OUT = 0x20020455ull;
 
@@ -151,10 +220,20 @@ static const uint64_t NC_NCCHTM_NCCHTSC_HTM_MODE = 0x20010680ull;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_HTM_ENABLE = 0;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_CONTENT_SEL = 1;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_CONTENT_SEL_LEN = 2;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE = 1; // p10:20,
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE = 2; // p10:20,
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_SPARE0 = 3;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE = 3; // p10:20,
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_CAPTURE = 4;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_CAPTURE_LEN = 6;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS = 4; // p10:20,
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS = 5; // p10:20,
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS = 6; // p10:20,
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS = 7; // p10:20,
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR = 8; // p10:20,
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE = 9; // p10:20,
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_DD1EQUIV = 10;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE = 10; // p10:20,
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_SPARE_1TO2 = 11;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_SPARE_1TO2_LEN = 2;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_WRAP = 13;
@@ -168,75 +247,6 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_SPARES_LEN = 5;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_VGTARGET = 24;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MODE_VGTARGET_LEN = 8;
 //<< [NC_NCCHTM_NCCHTSC_HTM_MODE]
-// c/reg00002.H
-
-//>> [CPMS_DTIR]
-static const uint64_t CPMS_DTIR = 0x200e0e80ull;
-
-static const uint32_t CPMS_DTIR_VALID = 0;
-static const uint32_t CPMS_DTIR_THREAD_SEL = 1;
-static const uint32_t CPMS_DTIR_THREAD_SEL_LEN = 3;
-static const uint32_t CPMS_DTIR_MODE_SEL = 6;
-static const uint32_t CPMS_DTIR_MODE_SEL_LEN = 2;
-static const uint32_t CPMS_DTIR_VALUE = 8;
-static const uint32_t CPMS_DTIR_VALUE_LEN = 8;
-static const uint32_t CPMS_DTIR_WINDOW_SEL = 17;
-static const uint32_t CPMS_DTIR_WINDOW_SEL_LEN = 3;
-//<< [CPMS_DTIR]
-// c/reg00002.H
-
-//>> [CPMS_FMMR]
-static const uint64_t CPMS_FMMR_RW = 0x200e0e4cull;
-static const uint64_t CPMS_FMMR_WO_CLEAR = 0x200e0e4full;
-static const uint64_t CPMS_FMMR_WO_OR = 0x200e0e4eull;
-
-static const uint32_t CPMS_FMMR_SMALL_STAGGER_ENABLE = 0;
-static const uint32_t CPMS_FMMR_SMALL_STAGGER_SELECT = 1;
-static const uint32_t CPMS_FMMR_SMALL_STAGGER_CYCLES = 2;
-static const uint32_t CPMS_FMMR_SMALL_STAGGER_CYCLES_LEN = 2;
-static const uint32_t CPMS_FMMR_ADJ_WARN_WEIGHT = 4;
-static const uint32_t CPMS_FMMR_ADJ_WARN_RESPONSE = 5;
-static const uint32_t CPMS_FMMR_ADJ_WARN_OUTPUT_SELECT = 6;
-static const uint32_t CPMS_FMMR_ADJ_WARN_OUTPUT_SELECT_LEN = 3;
-static const uint32_t CPMS_FMMR_DDP_TRIP_SELECT = 9;
-static const uint32_t CPMS_FMMR_DDP_TRIP_SELECT_LEN = 3;
-static const uint32_t CPMS_FMMR_SLOPEA_TYPE_SELECT = 12;
-static const uint32_t CPMS_FMMR_SLOPEA_TYPE_SELECT_LEN = 2;
-static const uint32_t CPMS_FMMR_SLOPEB_TYPE_SELECT = 14;
-static const uint32_t CPMS_FMMR_SLOPEB_TYPE_SELECT_LEN = 2;
-static const uint32_t CPMS_FMMR_SMALL_ASSERT_STABILITY = 16;
-static const uint32_t CPMS_FMMR_SMALL_ASSERT_STABILITY_LEN = 2;
-static const uint32_t CPMS_FMMR_SMALL_DEASSERT_STABILITY = 18;
-static const uint32_t CPMS_FMMR_SMALL_DEASSERT_STABILITY_LEN = 2;
-static const uint32_t CPMS_FMMR_SMALL_INITIAL_CYCLES = 20;
-static const uint32_t CPMS_FMMR_SMALL_INITIAL_CYCLES_LEN = 4;
-static const uint32_t CPMS_FMMR_SMALL_INITIAL_ACTION = 24;
-static const uint32_t CPMS_FMMR_SMALL_INITIAL_ACTION_LEN = 6;
-static const uint32_t CPMS_FMMR_SMALL_PREFETCH_ACTION = 30;
-static const uint32_t CPMS_FMMR_SMALL_PREFETCH_ACTION_LEN = 2;
-static const uint32_t CPMS_FMMR_SMALL_DITHER_WINDOW_SEL = 32;
-static const uint32_t CPMS_FMMR_SMALL_VECTOR_ACTION = 33;
-static const uint32_t CPMS_FMMR_SMALL_VECTOR_ACTION_LEN = 3;
-static const uint32_t CPMS_FMMR_SLOPE_TIMEOUT_SELECT = 36;
-static const uint32_t CPMS_FMMR_SMALL_THROTTLE_ACTION = 37;
-static const uint32_t CPMS_FMMR_SMALL_THROTTLE_ACTION_LEN = 3;
-static const uint32_t CPMS_FMMR_SMALL_DITHER_REPEAT = 40;
-static const uint32_t CPMS_FMMR_SMALL_DITHER_REPEAT_LEN = 4;
-static const uint32_t CPMS_FMMR_SMALL_DITHER_INCREASE = 44;
-static const uint32_t CPMS_FMMR_SMALL_DITHER_INCREASE_LEN = 4;
-static const uint32_t CPMS_FMMR_SMALL_DITHER_INITIAL = 48;
-static const uint32_t CPMS_FMMR_SMALL_DITHER_INITIAL_LEN = 5;
-static const uint32_t CPMS_FMMR_DPLL_DATA2_SEL = 53;
-static const uint32_t CPMS_FMMR_DPLL_DATA1_SEL = 54;
-static const uint32_t CPMS_FMMR_DPLL_DATA1_SEL_LEN = 2;
-static const uint32_t CPMS_FMMR_DPLL_DATA0_SEL = 56;
-static const uint32_t CPMS_FMMR_DPLL_DATA0_SEL_LEN = 2;
-static const uint32_t CPMS_FMMR_DDS_ERROR_ENCODE_DISABLE = 58;
-static const uint32_t CPMS_FMMR_SMALL_RESPONSE_DISABLE = 59;
-static const uint32_t CPMS_FMMR_SLOPE_REPORT_SEL = 60;
-static const uint32_t CPMS_FMMR_OVERRIDE_VECTOR_LIMIT = 61;
-static const uint32_t CPMS_FMMR_OVERRIDE_VECTOR_LIMIT_LEN = 3;
-//<< [CPMS_FMMR]
 // c/reg00002.H
 
 //>>THE END<<

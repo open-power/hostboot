@@ -99,8 +99,10 @@ static const uint32_t PHY_PPE_WRAP_ARB_CSCR_ECC_INJECT_TYPE = 4;
 static const uint32_t PHY_PPE_WRAP_ARB_CSCR_ECC_INJECT_ERR = 5;
 static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SPARE_6_7 = 6;
 static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SPARE_6_7_LEN = 2;
-static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX = 47;
-static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX_LEN = 13;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX = 46;
+static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX_LEN = 14;
+// ERROR Duplicate Dial         static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX = 47; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_INDEX_LEN = 13;
 //<< [PHY_PPE_WRAP_ARB_CSCR]
 // pauc/reg00004.H
 

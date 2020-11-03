@@ -50,6 +50,15 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 //<< [CTRL_ATOMIC_LOCK_REG]
 // pec/reg00013.H
 
+//>> [EPS_DBG_DEBUG_TRACE_CONTROL]
+static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x080107d0ull;
+
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
+//<< [EPS_DBG_DEBUG_TRACE_CONTROL]
+// pec/reg00013.H
+
 //>> [OPCG_CAPT1]
 static const uint64_t OPCG_CAPT1 = 0x08030010ull;
 
@@ -141,15 +150,6 @@ static const uint32_t RECOV_MASK_51 = 51;
 static const uint32_t RECOV_MASK_52 = 52;
 static const uint32_t RECOV_MASK_53 = 53;
 //<< [RECOV_MASK]
-// pec/reg00013.H
-
-//>> [EPS_DBG_DEBUG_TRACE_CONTROL]
-static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x080107d0ull;
-
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
-//<< [EPS_DBG_DEBUG_TRACE_CONTROL]
 // pec/reg00013.H
 
 //>> [XSTOP5]

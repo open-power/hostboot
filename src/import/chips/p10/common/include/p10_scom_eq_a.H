@@ -101,6 +101,14 @@ static const uint32_t QME_QSDR_SRAM_DATA_LEN = 64;
 //<< [QME_QSDR]
 // eq/reg00010.H
 
+//>> [QME_RCTAR0]
+static const uint64_t QME_RCTAR0 = 0x200e0190ull;
+
+static const uint32_t QME_RCTAR0_DATA = 0;
+static const uint32_t QME_RCTAR0_DATA_LEN = 64;
+//<< [QME_RCTAR0]
+// eq/reg00010.H
+
 //>> [QME_SCOM_PBTXTR1]
 static const uint64_t QME_SCOM_PBTXTR1 = 0x200e0041ull;
 
@@ -133,14 +141,6 @@ static const uint32_t QME_SCOM_XIVDR0_0_LEN = 32;
 static const uint32_t QME_SCOM_XIVDR0_1 = 32;
 static const uint32_t QME_SCOM_XIVDR0_1_LEN = 32;
 //<< [QME_SCOM_XIVDR0]
-// eq/reg00010.H
-
-//>> [QME_RCTAR0]
-static const uint64_t QME_RCTAR0 = 0x200e0190ull;
-
-static const uint32_t QME_RCTAR0_DATA = 0;
-static const uint32_t QME_RCTAR0_DATA_LEN = 64;
-//<< [QME_RCTAR0]
 // eq/reg00010.H
 
 //>> [QME_TSEL]

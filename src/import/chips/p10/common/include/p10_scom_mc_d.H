@@ -50,6 +50,25 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 //<< [CTRL_ATOMIC_LOCK_REG]
 // mc/reg00013.H
 
+//>> [EPS_DBG_DEBUG_TRACE_CONTROL]
+static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x0c0107d0ull;
+
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
+static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
+//<< [EPS_DBG_DEBUG_TRACE_CONTROL]
+// mc/reg00013.H
+
+//>> [MBA_SCOMFIR_MISCFIRMASK]
+static const uint64_t MBA_SCOMFIR_MISCFIRMASK_RW = 0x0c010f03ull;
+static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_AND = 0x0c010f04ull;
+static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_OR = 0x0c010f05ull;
+
+static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK = 0;
+static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK_LEN = 12;
+//<< [MBA_SCOMFIR_MISCFIRMASK]
+// mc/reg00013.H
+
 //>> [OPCG_CAPT1]
 static const uint64_t OPCG_CAPT1 = 0x0c030010ull;
 
@@ -162,15 +181,6 @@ static const uint32_t SCOMFIR_MCFGP1_R1_MMIO_GROUP_SIZE_LEN = 8;
 //<< [SCOMFIR_MCFGP1]
 // mc/reg00013.H
 
-//>> [EPS_DBG_DEBUG_TRACE_CONTROL]
-static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x0c0107d0ull;
-
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
-//<< [EPS_DBG_DEBUG_TRACE_CONTROL]
-// mc/reg00013.H
-
 //>> [XSTOP5]
 static const uint64_t XSTOP5 = 0x0c030015ull;
 
@@ -196,16 +206,6 @@ static const uint32_t XSTOP5_REGION_UNIT14 = 18;
 static const uint32_t XSTOP5_WAIT_CYCLES = 48;
 static const uint32_t XSTOP5_WAIT_CYCLES_LEN = 12;
 //<< [XSTOP5]
-// mc/reg00013.H
-
-//>> [MBA_SCOMFIR_MISCFIRMASK]
-static const uint64_t MBA_SCOMFIR_MISCFIRMASK_RW = 0x0c010f03ull;
-static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_AND = 0x0c010f04ull;
-static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_OR = 0x0c010f05ull;
-
-static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK = 0;
-static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK_LEN = 12;
-//<< [MBA_SCOMFIR_MISCFIRMASK]
 // mc/reg00013.H
 
 //>>THE END<<

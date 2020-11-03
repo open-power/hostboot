@@ -39,6 +39,17 @@ namespace mc
 #endif
 
 
+//>> [ATOMIC_LOCK_REG]
+static const uint64_t ATOMIC_LOCK_REG = 0x0c0f03ffull;
+
+static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
+static const uint32_t ATOMIC_LOCK_REG_ID = 1;
+static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
+// mc/reg00011.H
+
 //>> [ATTN_INTERRUPT_REG]
 static const uint64_t ATTN_INTERRUPT_REG = 0x0c0f001aull;
 
@@ -190,36 +201,6 @@ static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
 //<< [LOCAL_FIR]
 // mc/reg00011.H
 
-//>> [SCOMFIR_MCFGP0]
-static const uint64_t SCOMFIR_MCFGP0 = 0x0c010c0aull;
-
-static const uint32_t SCOMFIR_MCFGP0_0_VALID = 0;
-static const uint32_t SCOMFIR_MCFGP0_0_GROUP_BASE_ADDRESS = 1;
-static const uint32_t SCOMFIR_MCFGP0_0_GROUP_BASE_ADDRESS_LEN = 24;
-static const uint32_t SCOMFIR_MCFGP0_0_GROUP_SIZE = 25;
-static const uint32_t SCOMFIR_MCFGP0_0_GROUP_SIZE_LEN = 15;
-static const uint32_t SCOMFIR_MCFGP0_0_MC_CHANNELS_PER_GROUP = 40;
-static const uint32_t SCOMFIR_MCFGP0_0_MC_CHANNELS_PER_GROUP_LEN = 3;
-static const uint32_t SCOMFIR_MCFGP0_0_GROUP_MEMBER_IDENTIFICATION = 43;
-static const uint32_t SCOMFIR_MCFGP0_0_GROUP_MEMBER_IDENTIFICATION_LEN = 3;
-static const uint32_t SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE = 46;
-static const uint32_t SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE_LEN = 8;
-static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE = 54;
-static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE_LEN = 8;
-//<< [SCOMFIR_MCFGP0]
-// mc/reg00011.H
-
-//>> [ATOMIC_LOCK_REG]
-static const uint64_t ATOMIC_LOCK_REG = 0x0c0f03ffull;
-
-static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
-static const uint32_t ATOMIC_LOCK_REG_ID = 1;
-static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-//<< [ATOMIC_LOCK_REG]
-// mc/reg00011.H
-
 //>> [RECOV]
 static const uint64_t RECOV = 0x0c040001ull;
 
@@ -278,6 +259,25 @@ static const uint32_t RECOV_IN51 = 51;
 static const uint32_t RECOV_IN52 = 52;
 static const uint32_t RECOV_IN53 = 53;
 //<< [RECOV]
+// mc/reg00011.H
+
+//>> [SCOMFIR_MCFGP0]
+static const uint64_t SCOMFIR_MCFGP0 = 0x0c010c0aull;
+
+static const uint32_t SCOMFIR_MCFGP0_0_VALID = 0;
+static const uint32_t SCOMFIR_MCFGP0_0_GROUP_BASE_ADDRESS = 1;
+static const uint32_t SCOMFIR_MCFGP0_0_GROUP_BASE_ADDRESS_LEN = 24;
+static const uint32_t SCOMFIR_MCFGP0_0_GROUP_SIZE = 25;
+static const uint32_t SCOMFIR_MCFGP0_0_GROUP_SIZE_LEN = 15;
+static const uint32_t SCOMFIR_MCFGP0_0_MC_CHANNELS_PER_GROUP = 40;
+static const uint32_t SCOMFIR_MCFGP0_0_MC_CHANNELS_PER_GROUP_LEN = 3;
+static const uint32_t SCOMFIR_MCFGP0_0_GROUP_MEMBER_IDENTIFICATION = 43;
+static const uint32_t SCOMFIR_MCFGP0_0_GROUP_MEMBER_IDENTIFICATION_LEN = 3;
+static const uint32_t SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE = 46;
+static const uint32_t SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE_LEN = 8;
+static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE = 54;
+static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE_LEN = 8;
+//<< [SCOMFIR_MCFGP0]
 // mc/reg00011.H
 
 //>> [XSTOP4]

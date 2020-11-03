@@ -39,6 +39,24 @@ namespace c
 #endif
 
 
+//>> [CPMS_CERRMSK]
+static const uint64_t CPMS_CERRMSK = 0x200e0e14ull;
+
+static const uint32_t CPMS_CERRMSK_PFET_SEQ_ERR_MASK = 0;
+static const uint32_t CPMS_CERRMSK_DDS_ERR_MASK = 1;
+static const uint32_t CPMS_CERRMSK_CLK_SYNC_ERR_MASK = 2;
+static const uint32_t CPMS_CERRMSK_DPT_ACCESS_MASK = 3;
+static const uint32_t CPMS_CERRMSK_PROXY_MASK = 4;
+static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK = 5;
+static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK_LEN = 3;
+static const uint32_t CPMS_CERRMSK_PITCH_MASK = 8;
+static const uint32_t CPMS_CERRMSK_CCFG_PARITY_MASK = 9; // p10:20,
+static const uint32_t CPMS_CERRMSK_RVRM_DROPOUT_MASK = 10; // p10:20,
+static const uint32_t CPMS_CERRMSK_PITCH_UPDATE_MASK = 11; // p10:20,
+static const uint32_t CPMS_CERRMSK_SPARE_MASK = 12; // p10:20,
+//<< [CPMS_CERRMSK]
+// c/reg00007.H
+
 //>> [EC_PC_FIR_HOLD_OUT]
 static const uint64_t EC_PC_FIR_HOLD_OUT = 0x20020451ull;
 
@@ -65,6 +83,9 @@ static const uint32_t EC_PC_FIR_HOLD_OUT_SD_LOG_XSTOP_HOLD_OUT = 19;
 static const uint32_t EC_PC_FIR_HOLD_OUT_XSTOP_ON_DBG_TRIGGER_HOLD_OUT = 20;
 static const uint32_t EC_PC_FIR_HOLD_OUT_RECONFIG_ERR_DURING_RAM_MODE_HOLD_OUT = 21;
 static const uint32_t EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT = 22;
+static const uint32_t EC_PC_FIR_HOLD_OUT_SPR_SCOM_HOLD_OUT = 23; // p10:20,
+static const uint32_t EC_PC_FIR_HOLD_OUT_TRACE1_SCOM_HOLD_OUT = 24; // p10:20,
+static const uint32_t EC_PC_FIR_HOLD_OUT_TRACE2_SCOM_HOLD_OUT = 25; // p10:20,
 //<< [EC_PC_FIR_HOLD_OUT]
 // c/reg00007.H
 
@@ -165,6 +186,32 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3_31_LEN = 4;
 //<< [NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3]
 // c/reg00007.H
 
+//>> [QME_PSCRS3]
+static const uint64_t QME_PSCRS3 = 0x200e085cull;
+
+static const uint32_t QME_PSCRS3_DPDES_EXIT_ENABLE = 0;
+static const uint32_t QME_PSCRS3_SD = 1;
+static const uint32_t QME_PSCRS3_ESL = 2;
+static const uint32_t QME_PSCRS3_EC = 3;
+static const uint32_t QME_PSCRS3_PSLL = 4;
+static const uint32_t QME_PSCRS3_PSLL_LEN = 4;
+static const uint32_t QME_PSCRS3_HYP_VIRT_EXIT_ENABLE = 8;
+static const uint32_t QME_PSCRS3_UV_DB_EXIT_ENABLE = 9;
+static const uint32_t QME_PSCRS3_HYP_DB_EXIT_ENABLE = 10;
+static const uint32_t QME_PSCRS3_EXT_EXIT_ENABLE = 11;
+static const uint32_t QME_PSCRS3_DEC_EXIT_ENABLE = 12;
+static const uint32_t QME_PSCRS3_HMI_EXIT_ENABLE = 13;
+static const uint32_t QME_PSCRS3_TR = 14;
+static const uint32_t QME_PSCRS3_TR_LEN = 2;
+static const uint32_t QME_PSCRS3_MTL = 16;
+static const uint32_t QME_PSCRS3_MTL_LEN = 4;
+static const uint32_t QME_PSCRS3_RL = 20;
+static const uint32_t QME_PSCRS3_RL_LEN = 4;
+static const uint32_t QME_PSCRS3_PLS = 24;
+static const uint32_t QME_PSCRS3_PLS_LEN = 4;
+//<< [QME_PSCRS3]
+// c/reg00007.H
+
 //>> [QME_SCSR]
 static const uint64_t QME_SCSR = 0x200e0840ull;
 static const uint64_t QME_SCSR_SCOM2 = 0x200e0842ull;
@@ -185,6 +232,7 @@ static const uint32_t QME_SCSR_CHTM_PURGE_REQ = 11;
 static const uint32_t QME_SCSR_PB_PURGE_REQ = 12;
 static const uint32_t QME_SCSR_CORE_QUIESCE = 13;
 static const uint32_t QME_SCSR_SPARE_MODE = 14;
+static const uint32_t QME_SCSR_REG_WKUP_FILTER_DIS = 14; // p10:20,
 static const uint32_t QME_SCSR_SRESET_REQ = 15;
 static const uint32_t QME_SCSR_ASSERT_SPECIAL_WKUP_DONE = 16;
 static const uint32_t QME_SCSR_SPARE_OUT = 17;
@@ -198,6 +246,8 @@ static const uint32_t QME_SCSR_BLOCK_INTR_OUTPUTS = 24;
 static const uint32_t QME_SCSR_BLOCK_INTR_INPUTS = 25;
 static const uint32_t QME_SCSR_ENABLE_PECE = 26;
 static const uint32_t QME_SCSR_CTFS_WKUP_ENABLE = 27;
+static const uint32_t QME_SCSR_PC_COPY_FUSED_SPRS = 28; // p10:20,
+static const uint32_t QME_SCSR_SINGLE_LPAR_MODE = 31; // p10:20,
 static const uint32_t QME_SCSR_PM_BLOCK_INTR = 32;
 static const uint32_t QME_SCSR_PM_EXIT = 33;
 static const uint32_t QME_SCSR_PM_ENTRY_LIMIT = 34;
@@ -205,6 +255,7 @@ static const uint32_t QME_SCSR_PC_SPARE_IN = 35;
 static const uint32_t QME_SCSR_HBUS_INACTIVE = 36;
 static const uint32_t QME_SCSR_L2_PURGE_DONE = 37;
 static const uint32_t QME_SCSR_NCU_PURGE_DONE = 41;
+static const uint32_t QME_SCSR_PC_FUSED_COPY_DONE = 42; // p10:20,
 static const uint32_t QME_SCSR_CHTM_PURGE_DONE = 43;
 static const uint32_t QME_SCSR_PB_PURGE_DONE = 44;
 static const uint32_t QME_SCSR_CORE_QUIESCED = 45;
@@ -243,46 +294,6 @@ static const uint32_t QME_TFCSR_HDEC_MSB = 59;
 static const uint32_t QME_TFCSR_DEC_MSB = 60;
 static const uint32_t QME_TFCSR_DEC_MSB_LEN = 4;
 //<< [QME_TFCSR]
-// c/reg00007.H
-
-//>> [QME_PSCRS3]
-static const uint64_t QME_PSCRS3 = 0x200e085cull;
-
-static const uint32_t QME_PSCRS3_DPDES_EXIT_ENABLE = 0;
-static const uint32_t QME_PSCRS3_SD = 1;
-static const uint32_t QME_PSCRS3_ESL = 2;
-static const uint32_t QME_PSCRS3_EC = 3;
-static const uint32_t QME_PSCRS3_PSLL = 4;
-static const uint32_t QME_PSCRS3_PSLL_LEN = 4;
-static const uint32_t QME_PSCRS3_HYP_VIRT_EXIT_ENABLE = 8;
-static const uint32_t QME_PSCRS3_UV_DB_EXIT_ENABLE = 9;
-static const uint32_t QME_PSCRS3_HYP_DB_EXIT_ENABLE = 10;
-static const uint32_t QME_PSCRS3_EXT_EXIT_ENABLE = 11;
-static const uint32_t QME_PSCRS3_DEC_EXIT_ENABLE = 12;
-static const uint32_t QME_PSCRS3_HMI_EXIT_ENABLE = 13;
-static const uint32_t QME_PSCRS3_TR = 14;
-static const uint32_t QME_PSCRS3_TR_LEN = 2;
-static const uint32_t QME_PSCRS3_MTL = 16;
-static const uint32_t QME_PSCRS3_MTL_LEN = 4;
-static const uint32_t QME_PSCRS3_RL = 20;
-static const uint32_t QME_PSCRS3_RL_LEN = 4;
-static const uint32_t QME_PSCRS3_PLS = 24;
-static const uint32_t QME_PSCRS3_PLS_LEN = 4;
-//<< [QME_PSCRS3]
-// c/reg00007.H
-
-//>> [CPMS_CERRMSK]
-static const uint64_t CPMS_CERRMSK = 0x200e0e14ull;
-
-static const uint32_t CPMS_CERRMSK_PFET_SEQ_ERR_MASK = 0;
-static const uint32_t CPMS_CERRMSK_DDS_ERR_MASK = 1;
-static const uint32_t CPMS_CERRMSK_CLK_SYNC_ERR_MASK = 2;
-static const uint32_t CPMS_CERRMSK_DPT_ACCESS_MASK = 3;
-static const uint32_t CPMS_CERRMSK_PROXY_MASK = 4;
-static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK = 5;
-static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK_LEN = 3;
-static const uint32_t CPMS_CERRMSK_PITCH_MASK = 8;
-//<< [CPMS_CERRMSK]
 // c/reg00007.H
 
 //>>THE END<<

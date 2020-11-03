@@ -39,6 +39,14 @@ namespace mcc
 #endif
 
 
+//>> [CRYPTO_DECRYPT_CRYPTOKEY1B]
+static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY1B = 0x0c010f5bull;
+
+static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B = 0;
+static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B_LEN = 64;
+//<< [CRYPTO_DECRYPT_CRYPTOKEY1B]
+// mcc/reg00011.H
+
 //>> [DSTL_DSTLFIR]
 static const uint64_t DSTL_DSTLFIR_RW = 0x0c010d00ull;
 static const uint64_t DSTL_DSTLFIR_WO_AND = 0x0c010d01ull;
@@ -78,15 +86,9 @@ static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR = 35;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR = 36;
 static const uint32_t DSTL_DSTLFIR_SPARE37 = 37;
 static const uint32_t DSTL_DSTLFIR_SPARE38 = 38;
+static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_A_PERFORMANCE_ATTENTION = 39; // p10:20,
+static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_PERFORMANCE_ATTENTION = 40; // p10:20,
 //<< [DSTL_DSTLFIR]
-// mcc/reg00011.H
-
-//>> [CRYPTO_DECRYPT_CRYPTOKEY1B]
-static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY1B = 0x0c010f5bull;
-
-static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B = 0;
-static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B_LEN = 64;
-//<< [CRYPTO_DECRYPT_CRYPTOKEY1B]
 // mcc/reg00011.H
 
 //>>THE END<<

@@ -90,6 +90,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRACT1));
 #endif
     return o_data.insertFromRight<DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1,
@@ -108,6 +109,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRACT1));
 #endif
     return o_data.insertFromRight<DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1,
@@ -126,6 +128,7 @@ static inline fapi2::buffer<uint64_t>& GET_DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRACT1));
 #endif
     return i_data.extractToRight<DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1,

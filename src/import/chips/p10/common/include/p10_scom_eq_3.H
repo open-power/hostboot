@@ -60,6 +60,18 @@ static const uint32_t CLOCK_STAT_NSL_UNIT14_NSL = 18;
 //<< [CLOCK_STAT_NSL]
 // eq/reg00003.H
 
+//>> [EPS_THERM_WSUB2_DTS_RESULT0]
+static const uint64_t EPS_THERM_WSUB2_DTS_RESULT0 = 0x20050020ull;
+
+static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_0_RESULT = 0;
+static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_0_RESULT_LEN = 16;
+static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_1_RESULT = 16;
+static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_1_RESULT_LEN = 16;
+static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_2_RESULT = 32;
+static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_2_RESULT_LEN = 16;
+//<< [EPS_THERM_WSUB2_DTS_RESULT0]
+// eq/reg00003.H
+
 //>> [EPS_THERM_WSUB_DTS_RESULT2]
 static const uint64_t EPS_THERM_WSUB_DTS_RESULT2 = 0x20050002ull;
 
@@ -93,16 +105,34 @@ static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L3 = 28;
 //<< [EPS_THERM_WSUB_MODE_REG]
 // eq/reg00003.H
 
-//>> [EPS_THERM_WSUB2_DTS_RESULT0]
-static const uint64_t EPS_THERM_WSUB2_DTS_RESULT0 = 0x20050020ull;
+//>> [LOCAL_XSTOP]
+static const uint64_t LOCAL_XSTOP = 0x20040003ull;
 
-static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_0_RESULT = 0;
-static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_0_RESULT_LEN = 16;
-static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_1_RESULT = 16;
-static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_1_RESULT_LEN = 16;
-static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_2_RESULT = 32;
-static const uint32_t EPS_THERM_WSUB2_DTS_RESULT0_2_RESULT_LEN = 16;
-//<< [EPS_THERM_WSUB2_DTS_RESULT0]
+static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
+static const uint32_t LOCAL_XSTOP_RESERVED1L = 1;
+static const uint32_t LOCAL_XSTOP_RESERVED2L = 2;
+static const uint32_t LOCAL_XSTOP_RESERVED3L = 3;
+static const uint32_t LOCAL_XSTOP_PERV = 4;
+static const uint32_t LOCAL_XSTOP_IN05 = 5;
+static const uint32_t LOCAL_XSTOP_IN06 = 6;
+static const uint32_t LOCAL_XSTOP_IN07 = 7;
+static const uint32_t LOCAL_XSTOP_IN08 = 8;
+static const uint32_t LOCAL_XSTOP_IN09 = 9;
+static const uint32_t LOCAL_XSTOP_IN10 = 10;
+static const uint32_t LOCAL_XSTOP_IN11 = 11;
+static const uint32_t LOCAL_XSTOP_IN12 = 12;
+static const uint32_t LOCAL_XSTOP_IN13 = 13;
+static const uint32_t LOCAL_XSTOP_IN14 = 14;
+static const uint32_t LOCAL_XSTOP_IN15 = 15;
+//<< [LOCAL_XSTOP]
+// eq/reg00003.H
+
+//>> [MULTICAST_GROUP_1]
+static const uint64_t MULTICAST_GROUP_1 = 0x200f0001ull;
+
+static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
+static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
+//<< [MULTICAST_GROUP_1]
 // eq/reg00003.H
 
 //>> [NET_CTRL0]
@@ -141,6 +171,7 @@ static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
 // ERROR Duplicate Dial         static const uint32_t NET_CTRL0_PM_ACCESS = 30;
+static const uint32_t NET_CTRL0_OOB_PROTECTION = 30; // p10:20,
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
 //<< [NET_CTRL0]
 // eq/reg00003.H
@@ -151,6 +182,33 @@ static const uint64_t PLL_LOCK_REG = 0x200f0019ull;
 static const uint32_t PLL_LOCK_REG_LOCK = 0;
 static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
 //<< [PLL_LOCK_REG]
+// eq/reg00003.H
+
+//>> [QME_DB1]
+static const uint64_t QME_DB1 = 0x200e0104ull;
+
+static const uint32_t QME_DB1_NUMBER = 0;
+static const uint32_t QME_DB1_NUMBER_LEN = 8;
+static const uint32_t QME_DB1_DATA = 8;
+static const uint32_t QME_DB1_DATA_LEN = 56;
+//<< [QME_DB1]
+// eq/reg00003.H
+
+//>> [QME_PCBSID]
+static const uint64_t QME_PCBSID = 0x200e0034ull;
+
+static const uint32_t QME_PCBSID_EQ_VLD = 0;
+static const uint32_t QME_PCBSID_EQ_MERGING_SCHEME = 2;
+static const uint32_t QME_PCBSID_EQ_MERGING_SCHEME_LEN = 3;
+static const uint32_t QME_PCBSID_SP_ACK = 7;
+static const uint32_t QME_PCBSID_EQ_RD_NOT_WR = 8;
+static const uint32_t QME_PCBSID_EQ_P = 9;
+static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_P = 10;
+static const uint32_t QME_PCBSID_EQ_PORT = 12;
+static const uint32_t QME_PCBSID_EQ_PORT_LEN = 4;
+static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR = 16;
+static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_LEN = 16;
+//<< [QME_PCBSID]
 // eq/reg00003.H
 
 //>> [QME_SCOM_XIVDR4]
@@ -171,24 +229,6 @@ static const uint32_t QME_SCOM_XIXCR_XCR_LEN = 3;
 static const uint32_t QME_SCOM_XIXCR_CTR = 32;
 static const uint32_t QME_SCOM_XIXCR_CTR_LEN = 32;
 //<< [QME_SCOM_XIXCR]
-// eq/reg00003.H
-
-//>> [MULTICAST_GROUP_1]
-static const uint64_t MULTICAST_GROUP_1 = 0x200f0001ull;
-
-static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
-static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
-//<< [MULTICAST_GROUP_1]
-// eq/reg00003.H
-
-//>> [QME_DB1]
-static const uint64_t QME_DB1 = 0x200e0104ull;
-
-static const uint32_t QME_DB1_NUMBER = 0;
-static const uint32_t QME_DB1_NUMBER_LEN = 8;
-static const uint32_t QME_DB1_DATA = 8;
-static const uint32_t QME_DB1_DATA_LEN = 56;
-//<< [QME_DB1]
 // eq/reg00003.H
 
 //>> [SPATTN_MASK]
@@ -232,45 +272,6 @@ static const uint32_t SPATTN_MASK_33 = 33;
 static const uint32_t SPATTN_MASK_34 = 34;
 static const uint32_t SPATTN_MASK_35 = 35;
 //<< [SPATTN_MASK]
-// eq/reg00003.H
-
-//>> [QME_PCBSID]
-static const uint64_t QME_PCBSID = 0x200e0034ull;
-
-static const uint32_t QME_PCBSID_EQ_VLD = 0;
-static const uint32_t QME_PCBSID_EQ_MERGING_SCHEME = 2;
-static const uint32_t QME_PCBSID_EQ_MERGING_SCHEME_LEN = 3;
-static const uint32_t QME_PCBSID_SP_ACK = 7;
-static const uint32_t QME_PCBSID_EQ_RD_NOT_WR = 8;
-static const uint32_t QME_PCBSID_EQ_P = 9;
-static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_P = 10;
-static const uint32_t QME_PCBSID_EQ_PORT = 12;
-static const uint32_t QME_PCBSID_EQ_PORT_LEN = 4;
-static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR = 16;
-static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_LEN = 16;
-//<< [QME_PCBSID]
-// eq/reg00003.H
-
-//>> [LOCAL_XSTOP]
-static const uint64_t LOCAL_XSTOP = 0x20040003ull;
-
-static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
-static const uint32_t LOCAL_XSTOP_RESERVED1L = 1;
-static const uint32_t LOCAL_XSTOP_RESERVED2L = 2;
-static const uint32_t LOCAL_XSTOP_RESERVED3L = 3;
-static const uint32_t LOCAL_XSTOP_PERV = 4;
-static const uint32_t LOCAL_XSTOP_IN05 = 5;
-static const uint32_t LOCAL_XSTOP_IN06 = 6;
-static const uint32_t LOCAL_XSTOP_IN07 = 7;
-static const uint32_t LOCAL_XSTOP_IN08 = 8;
-static const uint32_t LOCAL_XSTOP_IN09 = 9;
-static const uint32_t LOCAL_XSTOP_IN10 = 10;
-static const uint32_t LOCAL_XSTOP_IN11 = 11;
-static const uint32_t LOCAL_XSTOP_IN12 = 12;
-static const uint32_t LOCAL_XSTOP_IN13 = 13;
-static const uint32_t LOCAL_XSTOP_IN14 = 14;
-static const uint32_t LOCAL_XSTOP_IN15 = 15;
-//<< [LOCAL_XSTOP]
 // eq/reg00003.H
 
 //>>THE END<<

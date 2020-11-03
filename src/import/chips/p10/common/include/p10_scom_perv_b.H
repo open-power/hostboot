@@ -39,6 +39,17 @@ namespace perv
 #endif
 
 
+//>> [ATOMIC_LOCK_REG]
+static const uint64_t ATOMIC_LOCK_REG = 0x000f03ffull;
+
+static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
+static const uint32_t ATOMIC_LOCK_REG_ID = 1;
+static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
+// perv/reg00022.H
+
 //>> [ATTN_INTERRUPT_REG]
 static const uint64_t ATTN_INTERRUPT_REG = 0x000f001aull;
 
@@ -263,54 +274,6 @@ static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
 //<< [LOCAL_FIR]
 // perv/reg00022.H
 
-//>> [REC_ACK_REG]
-static const uint64_t REC_ACK_REG = 0x000f0010ull;
-
-static const uint32_t REC_ACK_REG_RECEIVE_ACKNOWLEDGE_REGISTER = 0;
-static const uint32_t REC_ACK_REG_RECEIVE_ACKNOWLEDGE_REGISTER_LEN = 64;
-//<< [REC_ACK_REG]
-// perv/reg00022.H
-
-//>> [SINGLE_OTP_ROM_OTPROM_REG2]
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG2 = 0x00018002ull;
-
-static const uint32_t SINGLE_OTP_ROM_OTPROM_REG2_REGISTER2 = 0;
-static const uint32_t SINGLE_OTP_ROM_OTPROM_REG2_REGISTER2_LEN = 64;
-//<< [SINGLE_OTP_ROM_OTPROM_REG2]
-// perv/reg00022.H
-
-//>> [TOD_TX_TTYPE_2_REG]
-static const uint64_t TOD_TX_TTYPE_2_REG = 0x00040013ull;
-
-static const uint32_t TOD_TX_TTYPE_2_REG_TX_TTYPE_2_TRIGGER = 0;
-//<< [TOD_TX_TTYPE_2_REG]
-// perv/reg00023.H
-
-//>> [TOD_TX_TTYPE_4_REG]
-static const uint64_t TOD_TX_TTYPE_4_REG = 0x00040015ull;
-
-static const uint32_t TOD_TX_TTYPE_4_REG_TX_TTYPE_4_TRIGGER = 0;
-//<< [TOD_TX_TTYPE_4_REG]
-// perv/reg00023.H
-
-//>> [TOD_TX_TTYPE_5_REG]
-static const uint64_t TOD_TX_TTYPE_5_REG = 0x00040016ull;
-
-static const uint32_t TOD_TX_TTYPE_5_REG_TX_TTYPE_5_TRIGGER = 0;
-//<< [TOD_TX_TTYPE_5_REG]
-// perv/reg00023.H
-
-//>> [ATOMIC_LOCK_REG]
-static const uint64_t ATOMIC_LOCK_REG = 0x000f03ffull;
-
-static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
-static const uint32_t ATOMIC_LOCK_REG_ID = 1;
-static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-//<< [ATOMIC_LOCK_REG]
-// perv/reg00022.H
-
 //>> [RECOV]
 static const uint64_t RECOV = 0x00040001ull;
 
@@ -370,6 +333,43 @@ static const uint32_t RECOV_IN52 = 52;
 static const uint32_t RECOV_IN53 = 53;
 //<< [RECOV]
 // perv/reg00022.H
+
+//>> [REC_ACK_REG]
+static const uint64_t REC_ACK_REG = 0x000f0010ull;
+
+static const uint32_t REC_ACK_REG_RECEIVE_ACKNOWLEDGE_REGISTER = 0;
+static const uint32_t REC_ACK_REG_RECEIVE_ACKNOWLEDGE_REGISTER_LEN = 64;
+//<< [REC_ACK_REG]
+// perv/reg00022.H
+
+//>> [SINGLE_OTP_ROM_OTPROM_REG2]
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG2 = 0x00018002ull;
+
+static const uint32_t SINGLE_OTP_ROM_OTPROM_REG2_REGISTER2 = 0;
+static const uint32_t SINGLE_OTP_ROM_OTPROM_REG2_REGISTER2_LEN = 64;
+//<< [SINGLE_OTP_ROM_OTPROM_REG2]
+// perv/reg00022.H
+
+//>> [TOD_TX_TTYPE_2_REG]
+static const uint64_t TOD_TX_TTYPE_2_REG = 0x00040013ull;
+
+static const uint32_t TOD_TX_TTYPE_2_REG_TX_TTYPE_2_TRIGGER = 0;
+//<< [TOD_TX_TTYPE_2_REG]
+// perv/reg00023.H
+
+//>> [TOD_TX_TTYPE_4_REG]
+static const uint64_t TOD_TX_TTYPE_4_REG = 0x00040015ull;
+
+static const uint32_t TOD_TX_TTYPE_4_REG_TX_TTYPE_4_TRIGGER = 0;
+//<< [TOD_TX_TTYPE_4_REG]
+// perv/reg00023.H
+
+//>> [TOD_TX_TTYPE_5_REG]
+static const uint64_t TOD_TX_TTYPE_5_REG = 0x00040016ull;
+
+static const uint32_t TOD_TX_TTYPE_5_REG_TX_TTYPE_5_TRIGGER = 0;
+//<< [TOD_TX_TTYPE_5_REG]
+// perv/reg00023.H
 
 //>> [XSTOP4]
 static const uint64_t XSTOP4 = 0x00030014ull;

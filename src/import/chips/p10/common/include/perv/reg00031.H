@@ -41,6 +41,7 @@ static inline fapi2::ReturnCode PREP_TIMEOUT_REG(const fapi2::Target<K, M, V>& i
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
     scomt::last_scom = TIMEOUT_REG;
 #endif
     return fapi2::current_err;
@@ -57,6 +58,7 @@ static inline fapi2::ReturnCode GET_TIMEOUT_REG(const fapi2::Target<K, M, V>& i_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
     scomt::last_scom = TIMEOUT_REG;
 #endif
     return fapi2::getScom(i_target, TIMEOUT_REG, o_data);
@@ -73,6 +75,7 @@ static inline fapi2::ReturnCode PUT_TIMEOUT_REG(const fapi2::Target<K, M, V>& i_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TIMEOUT_REG));
 #endif
     return fapi2::putScom(i_target, TIMEOUT_REG, i_data);
@@ -84,56 +87,59 @@ fapi_try_exit:
 //<< PUT_[TIMEOUT_REG]
 
 
-//>> SET_[TIMEOUT_REG_INT_TIMEOUT]
-static inline fapi2::buffer<uint64_t>& SET_TIMEOUT_REG_INT_TIMEOUT(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_TIMEOUT_REG_INT_TIMEOUT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TIMEOUT_REG_INT_TIMEOUT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TIMEOUT_REG));
 #endif
-    return o_data.insertFromRight<TIMEOUT_REG_INT_TIMEOUT,
-           TIMEOUT_REG_INT_TIMEOUT_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_TIMEOUT_REG_INT_TIMEOUT,
+           P10_20_TIMEOUT_REG_INT_TIMEOUT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_perv Invalid dial access TIMEOUT_REG_INT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_TIMEOUT_REG_INT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TIMEOUT_REG_INT_TIMEOUT]
+//<< SET_[P10_20_TIMEOUT_REG_INT_TIMEOUT]
 
-//>> SET_[TIMEOUT_REG_INT_TIMEOUT]
-static inline fapi2::buffer<uint64_t>& SET_TIMEOUT_REG_INT_TIMEOUT(const uint64_t i_data,
+//>> SET_[P10_20_TIMEOUT_REG_INT_TIMEOUT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TIMEOUT_REG_INT_TIMEOUT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TIMEOUT_REG));
 #endif
-    return o_data.insertFromRight<TIMEOUT_REG_INT_TIMEOUT,
-           TIMEOUT_REG_INT_TIMEOUT_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_TIMEOUT_REG_INT_TIMEOUT,
+           P10_20_TIMEOUT_REG_INT_TIMEOUT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_perv Invalid dial access TIMEOUT_REG_INT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_TIMEOUT_REG_INT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TIMEOUT_REG_INT_TIMEOUT]
+//<< SET_[P10_20_TIMEOUT_REG_INT_TIMEOUT]
 
-//>> GET_[TIMEOUT_REG_INT_TIMEOUT]
-static inline fapi2::buffer<uint64_t>& GET_TIMEOUT_REG_INT_TIMEOUT(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_TIMEOUT_REG_INT_TIMEOUT]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_TIMEOUT_REG_INT_TIMEOUT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TIMEOUT_REG));
 #endif
-    return i_data.extractToRight<TIMEOUT_REG_INT_TIMEOUT,
-           TIMEOUT_REG_INT_TIMEOUT_LEN>(o_data);
+    return i_data.extractToRight<P10_20_TIMEOUT_REG_INT_TIMEOUT,
+           P10_20_TIMEOUT_REG_INT_TIMEOUT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_perv Invalid dial access TIMEOUT_REG_INT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_TIMEOUT_REG_INT_TIMEOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[TIMEOUT_REG_INT_TIMEOUT]
+//<< GET_[P10_20_TIMEOUT_REG_INT_TIMEOUT]
 
 //>>THE END<<
 

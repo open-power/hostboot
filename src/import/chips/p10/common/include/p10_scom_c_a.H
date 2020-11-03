@@ -39,16 +39,6 @@ namespace c
 #endif
 
 
-//>> [EC_PC_FIR_RAM_STATUS]
-static const uint64_t EC_PC_FIR_RAM_STATUS = 0x20020450ull;
-
-static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_CONTROL_ACCESS_DURING_RECOV = 0;
-static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_COMPLETION = 1;
-static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_EXCEPTION = 2;
-static const uint32_t EC_PC_FIR_RAM_STATUS_LSU_EMPTY = 3;
-//<< [EC_PC_FIR_RAM_STATUS]
-// c/reg00010.H
-
 //>> [CPMS_DPMR]
 static const uint64_t CPMS_DPMR = 0x200e0ea0ull;
 
@@ -80,6 +70,7 @@ static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_10 = 10;
 static const uint32_t EC_PC_FIR_CORE_WOF_SD_LOG_REC_ERROR = 11;
 static const uint32_t EC_PC_FIR_CORE_WOF_SD_LOG_XSTOP_ERROR = 12;
 static const uint32_t EC_PC_FIR_CORE_WOF_SD_NOT_MT_CI_REC_ERROR = 13;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_13 = 13; // p10:20,
 static const uint32_t EC_PC_FIR_CORE_WOF_SD_MCHK_AND_ME_EQ_0_ERROR = 14;
 static const uint32_t EC_PC_FIR_CORE_WOF_SD_L2_UE_ERROR = 15;
 static const uint32_t EC_PC_FIR_CORE_WOF_SD_L2_UE_OVER_THRES_ERROR = 16;
@@ -133,11 +124,22 @@ static const uint32_t EC_PC_FIR_CORE_WOF_PC_PHYP_XSTOP_ERROR = 63;
 //<< [EC_PC_FIR_CORE_WOF]
 // c/reg00010.H
 
+//>> [EC_PC_FIR_RAM_STATUS]
+static const uint64_t EC_PC_FIR_RAM_STATUS = 0x20020450ull;
+
+static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_CONTROL_ACCESS_DURING_RECOV = 0;
+static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_COMPLETION = 1;
+static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_EXCEPTION = 2;
+static const uint32_t EC_PC_FIR_RAM_STATUS_LSU_EMPTY = 3;
+//<< [EC_PC_FIR_RAM_STATUS]
+// c/reg00010.H
+
 //>> [EC_PC_PMC_UPDATE]
 static const uint64_t EC_PC_PMC_UPDATE = 0x20020414ull;
 
 static const uint32_t EC_PC_PMC_UPDATE_PMC_REG_MSR_S_ON_SRESET = 0;
 static const uint32_t EC_PC_PMC_UPDATE_PMC_REG_DIS_XFER_TFAC = 1;
+static const uint32_t EC_PC_PMC_UPDATE_PMC_REG_BLOCK_SMT_DOWN = 2; // p10:20,
 static const uint32_t EC_PC_PMC_UPDATE_PMC_REG_XFER_TFAC = 31;
 static const uint32_t EC_PC_PMC_UPDATE_WRITE_VT0_PM_STATE = 32;
 static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT0_PLS = 33;

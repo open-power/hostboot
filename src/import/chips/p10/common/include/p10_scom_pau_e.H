@@ -39,30 +39,6 @@ namespace pau
 #endif
 
 
-//>> [MISC_REGS_INT_REQ]
-static const uint64_t MISC_REGS_INT_REQ = 0x10010b47ull;
-
-static const uint32_t MISC_REGS_INT_REQ_00 = 0;
-static const uint32_t MISC_REGS_INT_REQ_01 = 1;
-static const uint32_t MISC_REGS_INT_REQ_02 = 2;
-static const uint32_t MISC_REGS_INT_REQ_03 = 3;
-static const uint32_t MISC_REGS_INT_REQ_12 = 12;
-static const uint32_t MISC_REGS_INT_REQ_13 = 13;
-static const uint32_t MISC_REGS_INT_REQ_18 = 18;
-static const uint32_t MISC_REGS_INT_REQ_19 = 19;
-static const uint32_t MISC_REGS_INT_REQ_20 = 20;
-static const uint32_t MISC_REGS_INT_REQ_21 = 21;
-static const uint32_t MISC_REGS_INT_REQ_23 = 23;
-static const uint32_t MISC_REGS_INT_REQ_24 = 24;
-static const uint32_t MISC_REGS_INT_REQ_35 = 35;
-static const uint32_t MISC_REGS_INT_REQ_36 = 36;
-static const uint32_t MISC_REGS_INT_REQ_37 = 37;
-static const uint32_t MISC_REGS_INT_REQ_38 = 38;
-static const uint32_t MISC_REGS_INT_REQ_39 = 39;
-static const uint32_t MISC_REGS_INT_REQ_40 = 40;
-//<< [MISC_REGS_INT_REQ]
-// pau/reg00017.H
-
 //>> [CS_SM0_SNP_MISC_GENID_BAR]
 static const uint64_t CS_SM0_SNP_MISC_GENID_BAR = 0x1001083dull;
 
@@ -121,6 +97,30 @@ static const uint32_t CS_SM2_SNP_MISC_GPU1_BAR_CHIP_EQ_GROUP = 49;
 static const uint32_t CS_SM2_SNP_MISC_GPU1_BAR_EXTENDED_MODE = 50;
 static const uint32_t CS_SM2_SNP_MISC_GPU1_BAR_RESERVED = 51;
 //<< [CS_SM2_SNP_MISC_GPU1_BAR]
+// pau/reg00017.H
+
+//>> [MISC_REGS_INT_REQ]
+static const uint64_t MISC_REGS_INT_REQ = 0x10010b47ull;
+
+static const uint32_t MISC_REGS_INT_REQ_00 = 0;
+static const uint32_t MISC_REGS_INT_REQ_01 = 1;
+static const uint32_t MISC_REGS_INT_REQ_02 = 2;
+static const uint32_t MISC_REGS_INT_REQ_03 = 3;
+static const uint32_t MISC_REGS_INT_REQ_12 = 12;
+static const uint32_t MISC_REGS_INT_REQ_13 = 13;
+static const uint32_t MISC_REGS_INT_REQ_18 = 18;
+static const uint32_t MISC_REGS_INT_REQ_19 = 19;
+static const uint32_t MISC_REGS_INT_REQ_20 = 20;
+static const uint32_t MISC_REGS_INT_REQ_21 = 21;
+static const uint32_t MISC_REGS_INT_REQ_23 = 23;
+static const uint32_t MISC_REGS_INT_REQ_24 = 24;
+static const uint32_t MISC_REGS_INT_REQ_35 = 35;
+static const uint32_t MISC_REGS_INT_REQ_36 = 36;
+static const uint32_t MISC_REGS_INT_REQ_37 = 37;
+static const uint32_t MISC_REGS_INT_REQ_38 = 38;
+static const uint32_t MISC_REGS_INT_REQ_39 = 39;
+static const uint32_t MISC_REGS_INT_REQ_40 = 40;
+//<< [MISC_REGS_INT_REQ]
 // pau/reg00017.H
 
 //>>THE END<<

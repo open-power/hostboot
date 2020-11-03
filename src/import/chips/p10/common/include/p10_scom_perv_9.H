@@ -97,6 +97,18 @@ static const uint32_t FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_MINOR_EC_LEN = 4;
 //<< [FSXCOMP_FSXLOG_CBS_ENVSTAT]
 // perv/reg00018.H
 
+//>> [FSXCOMP_FSXLOG_PERV_CTRL1_COPY]
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_FSI = 0x0000291bull;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_FSI_BYTE = 0x00002c6cull;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_RW = 0x0005011bull;
+
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_PERV_CTRL1_COPY_REG = 0;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_PERV_CTRL1_COPY_REG_LEN = 32;
+//<< [FSXCOMP_FSXLOG_PERV_CTRL1_COPY]
+// perv/reg00018.H
+
 //>> [FSXCOMP_FSXLOG_ROOT_CTRL7_CLEAR]
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -157,7 +169,7 @@ static const uint64_t TOD_TRACE_DATA_1_REG = 0x0004001dull;
 static const uint32_t TOD_TRACE_DATA_1_REG_TRACE_DATA_SET_1 = 0;
 static const uint32_t TOD_TRACE_DATA_1_REG_TRACE_DATA_SET_1_LEN = 64;
 //<< [TOD_TRACE_DATA_1_REG]
-// perv/reg00018.H
+// perv/reg00019.H
 
 //>> [TOD_TRACE_DATA_2_REG]
 static const uint64_t TOD_TRACE_DATA_2_REG = 0x0004001eull;
@@ -234,18 +246,6 @@ static const uint32_t XSTOP_IN52 = 52;
 static const uint32_t XSTOP_IN53 = 53;
 //<< [XSTOP]
 // perv/reg00019.H
-
-//>> [FSXCOMP_FSXLOG_PERV_CTRL1_COPY]
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_FSI = 0x0000291bull;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_FSI_BYTE = 0x00002c6cull;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_RW = 0x0005011bull;
-
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_PERV_CTRL1_COPY_REG = 0;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_COPY_PERV_CTRL1_COPY_REG_LEN = 32;
-//<< [FSXCOMP_FSXLOG_PERV_CTRL1_COPY]
-// perv/reg00018.H
 
 //>>THE END<<
 

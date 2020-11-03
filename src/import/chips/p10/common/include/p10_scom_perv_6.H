@@ -151,6 +151,95 @@ static const uint32_t CPLT_CTRL1_TC_STG_ACT_EN_DC = 22;
 //<< [CPLT_CTRL1]
 // perv/reg00012.H
 
+//>> [FSXCOMP_FSXLOG_ROOT_CTRL2_COPY]
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI = 0x00002912ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI_BYTE = 0x00002c48ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_RW = 0x00050112ull;
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_ROOT_CTRL2_COPY_REG = 0;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_ROOT_CTRL2_COPY_REG_LEN = 32;
+//<< [FSXCOMP_FSXLOG_ROOT_CTRL2_COPY]
+// perv/reg00012.H
+
+//>> [LOCAL_XSTOP_MASK]
+static const uint64_t LOCAL_XSTOP_MASK_RW = 0x00040043ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x00040063ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x00040053ull;
+
+static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
+static const uint32_t LOCAL_XSTOP_MASK_02 = 2;
+static const uint32_t LOCAL_XSTOP_MASK_03 = 3;
+static const uint32_t LOCAL_XSTOP_MASK_04 = 4;
+static const uint32_t LOCAL_XSTOP_MASK_05 = 5;
+static const uint32_t LOCAL_XSTOP_MASK_06 = 6;
+static const uint32_t LOCAL_XSTOP_MASK_07 = 7;
+static const uint32_t LOCAL_XSTOP_MASK_08 = 8;
+static const uint32_t LOCAL_XSTOP_MASK_09 = 9;
+static const uint32_t LOCAL_XSTOP_MASK_10 = 10;
+static const uint32_t LOCAL_XSTOP_MASK_11 = 11;
+static const uint32_t LOCAL_XSTOP_MASK_12 = 12;
+static const uint32_t LOCAL_XSTOP_MASK_13 = 13;
+static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
+static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
+//<< [LOCAL_XSTOP_MASK]
+// perv/reg00013.H
+
+//>> [REC_ERR_MST14_REG2]
+static const uint64_t REC_ERR_MST14_REG2 = 0x000f007aull;
+
+static const uint32_t REC_ERR_MST14_REG2_32_MST14_RESPONSE_BIT = 0;
+static const uint32_t REC_ERR_MST14_REG2_32_MST14_ERROR_CODE = 1;
+static const uint32_t REC_ERR_MST14_REG2_32_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_33_MST14_RESPONSE_BIT = 4;
+static const uint32_t REC_ERR_MST14_REG2_33_MST14_ERROR_CODE = 5;
+static const uint32_t REC_ERR_MST14_REG2_33_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_34_MST14_RESPONSE_BIT = 8;
+static const uint32_t REC_ERR_MST14_REG2_34_MST14_ERROR_CODE = 9;
+static const uint32_t REC_ERR_MST14_REG2_34_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_35_MST14_RESPONSE_BIT = 12;
+static const uint32_t REC_ERR_MST14_REG2_35_MST14_ERROR_CODE = 13;
+static const uint32_t REC_ERR_MST14_REG2_35_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_36_MST14_RESPONSE_BIT = 16;
+static const uint32_t REC_ERR_MST14_REG2_36_MST14_ERROR_CODE = 17;
+static const uint32_t REC_ERR_MST14_REG2_36_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_37_MST14_RESPONSE_BIT = 20;
+static const uint32_t REC_ERR_MST14_REG2_37_MST14_ERROR_CODE = 21;
+static const uint32_t REC_ERR_MST14_REG2_37_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_38_MST14_RESPONSE_BIT = 24;
+static const uint32_t REC_ERR_MST14_REG2_38_MST14_ERROR_CODE = 25;
+static const uint32_t REC_ERR_MST14_REG2_38_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_39_MST14_RESPONSE_BIT = 28;
+static const uint32_t REC_ERR_MST14_REG2_39_MST14_ERROR_CODE = 29;
+static const uint32_t REC_ERR_MST14_REG2_39_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_40_MST14_RESPONSE_BIT = 32;
+static const uint32_t REC_ERR_MST14_REG2_40_MST14_ERROR_CODE = 33;
+static const uint32_t REC_ERR_MST14_REG2_40_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_41_MST14_RESPONSE_BIT = 36;
+static const uint32_t REC_ERR_MST14_REG2_41_MST14_ERROR_CODE = 37;
+static const uint32_t REC_ERR_MST14_REG2_41_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_42_MST14_RESPONSE_BIT = 40;
+static const uint32_t REC_ERR_MST14_REG2_42_MST14_ERROR_CODE = 41;
+static const uint32_t REC_ERR_MST14_REG2_42_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_43_MST14_RESPONSE_BIT = 44;
+static const uint32_t REC_ERR_MST14_REG2_43_MST14_ERROR_CODE = 45;
+static const uint32_t REC_ERR_MST14_REG2_43_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_44_MST14_RESPONSE_BIT = 48;
+static const uint32_t REC_ERR_MST14_REG2_44_MST14_ERROR_CODE = 49;
+static const uint32_t REC_ERR_MST14_REG2_44_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_45_MST14_RESPONSE_BIT = 52;
+static const uint32_t REC_ERR_MST14_REG2_45_MST14_ERROR_CODE = 53;
+static const uint32_t REC_ERR_MST14_REG2_45_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_46_MST14_RESPONSE_BIT = 56;
+static const uint32_t REC_ERR_MST14_REG2_46_MST14_ERROR_CODE = 57;
+static const uint32_t REC_ERR_MST14_REG2_46_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG2_47_MST14_RESPONSE_BIT = 60;
+static const uint32_t REC_ERR_MST14_REG2_47_MST14_ERROR_CODE = 61;
+static const uint32_t REC_ERR_MST14_REG2_47_MST14_ERROR_CODE_LEN = 3;
+//<< [REC_ERR_MST14_REG2]
+// perv/reg00013.H
+
 //>> [TOD_M_PATH_0_STEP_STEER_REG]
 static const uint64_t TOD_M_PATH_0_STEP_STEER_REG = 0x0004000eull;
 
@@ -214,95 +303,6 @@ static const uint32_t TOD_RX_TTYPE_CTRL_REG_RX_TTYPE_DATA = 0;
 static const uint32_t TOD_RX_TTYPE_CTRL_REG_RX_TTYPE_DATA_LEN = 64;
 //<< [TOD_RX_TTYPE_CTRL_REG]
 // perv/reg00013.H
-
-//>> [FSXCOMP_FSXLOG_ROOT_CTRL2_COPY]
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI = 0x00002912ull;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI_BYTE = 0x00002c48ull;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_RW = 0x00050112ull;
-
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_ROOT_CTRL2_COPY_REG = 0;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_ROOT_CTRL2_COPY_REG_LEN = 32;
-//<< [FSXCOMP_FSXLOG_ROOT_CTRL2_COPY]
-// perv/reg00012.H
-
-//>> [REC_ERR_MST14_REG2]
-static const uint64_t REC_ERR_MST14_REG2 = 0x000f007aull;
-
-static const uint32_t REC_ERR_MST14_REG2_32_MST14_RESPONSE_BIT = 0;
-static const uint32_t REC_ERR_MST14_REG2_32_MST14_ERROR_CODE = 1;
-static const uint32_t REC_ERR_MST14_REG2_32_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_33_MST14_RESPONSE_BIT = 4;
-static const uint32_t REC_ERR_MST14_REG2_33_MST14_ERROR_CODE = 5;
-static const uint32_t REC_ERR_MST14_REG2_33_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_34_MST14_RESPONSE_BIT = 8;
-static const uint32_t REC_ERR_MST14_REG2_34_MST14_ERROR_CODE = 9;
-static const uint32_t REC_ERR_MST14_REG2_34_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_35_MST14_RESPONSE_BIT = 12;
-static const uint32_t REC_ERR_MST14_REG2_35_MST14_ERROR_CODE = 13;
-static const uint32_t REC_ERR_MST14_REG2_35_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_36_MST14_RESPONSE_BIT = 16;
-static const uint32_t REC_ERR_MST14_REG2_36_MST14_ERROR_CODE = 17;
-static const uint32_t REC_ERR_MST14_REG2_36_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_37_MST14_RESPONSE_BIT = 20;
-static const uint32_t REC_ERR_MST14_REG2_37_MST14_ERROR_CODE = 21;
-static const uint32_t REC_ERR_MST14_REG2_37_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_38_MST14_RESPONSE_BIT = 24;
-static const uint32_t REC_ERR_MST14_REG2_38_MST14_ERROR_CODE = 25;
-static const uint32_t REC_ERR_MST14_REG2_38_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_39_MST14_RESPONSE_BIT = 28;
-static const uint32_t REC_ERR_MST14_REG2_39_MST14_ERROR_CODE = 29;
-static const uint32_t REC_ERR_MST14_REG2_39_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_40_MST14_RESPONSE_BIT = 32;
-static const uint32_t REC_ERR_MST14_REG2_40_MST14_ERROR_CODE = 33;
-static const uint32_t REC_ERR_MST14_REG2_40_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_41_MST14_RESPONSE_BIT = 36;
-static const uint32_t REC_ERR_MST14_REG2_41_MST14_ERROR_CODE = 37;
-static const uint32_t REC_ERR_MST14_REG2_41_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_42_MST14_RESPONSE_BIT = 40;
-static const uint32_t REC_ERR_MST14_REG2_42_MST14_ERROR_CODE = 41;
-static const uint32_t REC_ERR_MST14_REG2_42_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_43_MST14_RESPONSE_BIT = 44;
-static const uint32_t REC_ERR_MST14_REG2_43_MST14_ERROR_CODE = 45;
-static const uint32_t REC_ERR_MST14_REG2_43_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_44_MST14_RESPONSE_BIT = 48;
-static const uint32_t REC_ERR_MST14_REG2_44_MST14_ERROR_CODE = 49;
-static const uint32_t REC_ERR_MST14_REG2_44_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_45_MST14_RESPONSE_BIT = 52;
-static const uint32_t REC_ERR_MST14_REG2_45_MST14_ERROR_CODE = 53;
-static const uint32_t REC_ERR_MST14_REG2_45_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_46_MST14_RESPONSE_BIT = 56;
-static const uint32_t REC_ERR_MST14_REG2_46_MST14_ERROR_CODE = 57;
-static const uint32_t REC_ERR_MST14_REG2_46_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG2_47_MST14_RESPONSE_BIT = 60;
-static const uint32_t REC_ERR_MST14_REG2_47_MST14_ERROR_CODE = 61;
-static const uint32_t REC_ERR_MST14_REG2_47_MST14_ERROR_CODE_LEN = 3;
-//<< [REC_ERR_MST14_REG2]
-// perv/reg00012.H
-
-//>> [LOCAL_XSTOP_MASK]
-static const uint64_t LOCAL_XSTOP_MASK_RW = 0x00040043ull;
-static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x00040063ull;
-static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x00040053ull;
-
-static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
-static const uint32_t LOCAL_XSTOP_MASK_02 = 2;
-static const uint32_t LOCAL_XSTOP_MASK_03 = 3;
-static const uint32_t LOCAL_XSTOP_MASK_04 = 4;
-static const uint32_t LOCAL_XSTOP_MASK_05 = 5;
-static const uint32_t LOCAL_XSTOP_MASK_06 = 6;
-static const uint32_t LOCAL_XSTOP_MASK_07 = 7;
-static const uint32_t LOCAL_XSTOP_MASK_08 = 8;
-static const uint32_t LOCAL_XSTOP_MASK_09 = 9;
-static const uint32_t LOCAL_XSTOP_MASK_10 = 10;
-static const uint32_t LOCAL_XSTOP_MASK_11 = 11;
-static const uint32_t LOCAL_XSTOP_MASK_12 = 12;
-static const uint32_t LOCAL_XSTOP_MASK_13 = 13;
-static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
-static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
-//<< [LOCAL_XSTOP_MASK]
-// perv/reg00012.H
 
 //>>THE END<<
 

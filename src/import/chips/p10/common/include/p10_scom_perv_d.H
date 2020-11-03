@@ -50,6 +50,15 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 //<< [CTRL_ATOMIC_LOCK_REG]
 // perv/reg00026.H
 
+//>> [P10_20_EPS_DBG_DEBUG_TRACE_CONTROL]
+static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x000107d0ull; // p10:20,
+
+static const uint32_t P10_20_EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
+static const uint32_t P10_20_EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
+static const uint32_t P10_20_EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
+//<< [P10_20_EPS_DBG_DEBUG_TRACE_CONTROL]
+// perv/reg00026.H
+
 //>> [FSXCOMP_FSXLOG_ROOT_CTRL0_COPY]
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -279,15 +288,6 @@ static const uint32_t TOD_S_PATH_STATUS_REG_S_PATH_1_REMOTE_SYNC_LATE_COUNT = 40
 static const uint32_t TOD_S_PATH_STATUS_REG_S_PATH_1_REMOTE_SYNC_LATE_COUNT_LEN = 8;
 //<< [TOD_S_PATH_STATUS_REG]
 // perv/reg00027.H
-
-//>> [EPS_DBG_DEBUG_TRACE_CONTROL]
-static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x000107d0ull;
-
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
-static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
-//<< [EPS_DBG_DEBUG_TRACE_CONTROL]
-// perv/reg00026.H
 
 //>> [XSTOP5]
 static const uint64_t XSTOP5 = 0x00030015ull;

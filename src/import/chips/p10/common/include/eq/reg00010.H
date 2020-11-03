@@ -3364,6 +3364,106 @@ fapi_try_exit:
 }
 //<< GET_[QME_QSDR_SRAM_DATA]
 
+//>> PREP_[QME_RCTAR0]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_QME_RCTAR0(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = QME_RCTAR0;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[QME_RCTAR0]
+
+//>> GET_[QME_RCTAR0]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_QME_RCTAR0(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = QME_RCTAR0;
+#endif
+    return fapi2::getScom(i_target, QME_RCTAR0, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[QME_RCTAR0]
+
+//>> PUT_[QME_RCTAR0]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_QME_RCTAR0(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(QME_RCTAR0));
+#endif
+    return fapi2::putScom(i_target, QME_RCTAR0, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[QME_RCTAR0]
+
+
+//>> SET_[QME_RCTAR0_DATA]
+static inline fapi2::buffer<uint64_t>& SET_QME_RCTAR0_DATA(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(QME_RCTAR0));
+#endif
+    return o_data.insertFromRight<QME_RCTAR0_DATA,
+           QME_RCTAR0_DATA_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_eq Invalid dial access QME_RCTAR0_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[QME_RCTAR0_DATA]
+
+//>> SET_[QME_RCTAR0_DATA]
+static inline fapi2::buffer<uint64_t>& SET_QME_RCTAR0_DATA(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(QME_RCTAR0));
+#endif
+    return o_data.insertFromRight<QME_RCTAR0_DATA,
+           QME_RCTAR0_DATA_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_eq Invalid dial access QME_RCTAR0_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[QME_RCTAR0_DATA]
+
+//>> GET_[QME_RCTAR0_DATA]
+static inline fapi2::buffer<uint64_t>& GET_QME_RCTAR0_DATA(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(QME_RCTAR0));
+#endif
+    return i_data.extractToRight<QME_RCTAR0_DATA,
+           QME_RCTAR0_DATA_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_eq Invalid dial access QME_RCTAR0_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[QME_RCTAR0_DATA]
+
 //>> PREP_[QME_SCOM_PBTXTR1]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_QME_SCOM_PBTXTR1(const fapi2::Target<K, M, V>& i_target)
@@ -4024,106 +4124,6 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[QME_SCOM_XIVDR0_1]
-
-//>> PREP_[QME_RCTAR0]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_QME_RCTAR0(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_RCTAR0;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[QME_RCTAR0]
-
-//>> GET_[QME_RCTAR0]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_QME_RCTAR0(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = QME_RCTAR0;
-#endif
-    return fapi2::getScom(i_target, QME_RCTAR0, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[QME_RCTAR0]
-
-//>> PUT_[QME_RCTAR0]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_QME_RCTAR0(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(QME_RCTAR0));
-#endif
-    return fapi2::putScom(i_target, QME_RCTAR0, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[QME_RCTAR0]
-
-
-//>> SET_[QME_RCTAR0_DATA]
-static inline fapi2::buffer<uint64_t>& SET_QME_RCTAR0_DATA(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_RCTAR0));
-#endif
-    return o_data.insertFromRight<QME_RCTAR0_DATA,
-           QME_RCTAR0_DATA_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_eq Invalid dial access QME_RCTAR0_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[QME_RCTAR0_DATA]
-
-//>> SET_[QME_RCTAR0_DATA]
-static inline fapi2::buffer<uint64_t>& SET_QME_RCTAR0_DATA(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_RCTAR0));
-#endif
-    return o_data.insertFromRight<QME_RCTAR0_DATA,
-           QME_RCTAR0_DATA_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_eq Invalid dial access QME_RCTAR0_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[QME_RCTAR0_DATA]
-
-//>> GET_[QME_RCTAR0_DATA]
-static inline fapi2::buffer<uint64_t>& GET_QME_RCTAR0_DATA(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(QME_RCTAR0));
-#endif
-    return i_data.extractToRight<QME_RCTAR0_DATA,
-           QME_RCTAR0_DATA_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_eq Invalid dial access QME_RCTAR0_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[QME_RCTAR0_DATA]
 
 //>> PREP_[QME_TSEL]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

@@ -69,6 +69,14 @@ static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
 //<< [OPCG_CAPT3]
 // pec/reg00001.H
 
+//>> [SCAN32]
+static const uint64_t SCAN32 = 0x08038000ull;
+
+static const uint32_t SCAN32_SCAN32_REG = 0;
+static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
+//<< [SCAN32]
+// pec/reg00001.H
+
 //>> [SCAN64]
 static const uint64_t SCAN64 = 0x0803e000ull;
 
@@ -83,14 +91,6 @@ static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x08010400ull;
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 //<< [TRA0_TR0_TRACE_HI_DATA_REG]
-// pec/reg00001.H
-
-//>> [SCAN32]
-static const uint64_t SCAN32 = 0x08038000ull;
-
-static const uint32_t SCAN32_SCAN32_REG = 0;
-static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
-//<< [SCAN32]
 // pec/reg00001.H
 
 //>>THE END<<

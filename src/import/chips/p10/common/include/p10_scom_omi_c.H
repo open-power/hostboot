@@ -39,6 +39,16 @@ namespace omi
 #endif
 
 
+//>> [DLX_INFO]
+static const uint64_t DLX_INFO = 0x0c011419ull;
+
+static const uint32_t DLX_INFO_DL0_STS_DLX_INFO = 0;
+static const uint32_t DLX_INFO_DL0_STS_DLX_INFO_LEN = 64;
+static const uint32_t DLX_INFO_DL1_STS_DLX_INFO = 0;
+static const uint32_t DLX_INFO_DL1_STS_DLX_INFO_LEN = 64;
+//<< [DLX_INFO]
+// omi/reg00024.H
+
 //>> [TRAINING_STATUS]
 static const uint64_t TRAINING_STATUS = 0x0c011417ull;
 
@@ -60,16 +70,6 @@ static const uint32_t TRAINING_STATUS_RX_TS3 = 56;
 static const uint32_t TRAINING_STATUS_RX_TS3_LEN = 8;
 //<< [TRAINING_STATUS]
 // omi/reg00025.H
-
-//>> [DLX_INFO]
-static const uint64_t DLX_INFO = 0x0c011419ull;
-
-static const uint32_t DLX_INFO_DL0_STS_DLX_INFO = 0;
-static const uint32_t DLX_INFO_DL0_STS_DLX_INFO_LEN = 64;
-static const uint32_t DLX_INFO_DL1_STS_DLX_INFO = 0;
-static const uint32_t DLX_INFO_DL1_STS_DLX_INFO_LEN = 64;
-//<< [DLX_INFO]
-// omi/reg00024.H
 
 //>>THE END<<
 

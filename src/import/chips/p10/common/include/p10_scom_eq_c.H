@@ -62,86 +62,12 @@ static const uint32_t CPLT_CTRL2_14_PGOOD = 18;
 //<< [CPLT_CTRL2]
 // eq/reg00012.H
 
-//>> [PCB_OPCG_STOP]
-static const uint64_t PCB_OPCG_STOP = 0x20030030ull;
+//>> [CPLT_MASK0]
+static const uint64_t CPLT_MASK0 = 0x20000101ull;
 
-static const uint32_t PCB_OPCG_STOP_PCB_OPCGSTOP = 0;
-//<< [PCB_OPCG_STOP]
-// eq/reg00012.H
-
-//>> [QME_BCEBAR1]
-static const uint64_t QME_BCEBAR1 = 0x200e0064ull;
-
-static const uint32_t QME_BCEBAR1_BASE = 8;
-static const uint32_t QME_BCEBAR1_BASE_LEN = 36;
-static const uint32_t QME_BCEBAR1_SIZE = 61;
-static const uint32_t QME_BCEBAR1_SIZE_LEN = 3;
-//<< [QME_BCEBAR1]
-// eq/reg00012.H
-
-//>> [QME_FLAGS]
-static const uint64_t QME_FLAGS_RW = 0x200e0120ull;
-static const uint64_t QME_FLAGS_WO_CLEAR = 0x200e0123ull;
-static const uint64_t QME_FLAGS_WO_OR = 0x200e0122ull;
-
-static const uint32_t QME_FLAGS_DATA = 0;
-static const uint32_t QME_FLAGS_DATA_LEN = 64;
-//<< [QME_FLAGS]
-// eq/reg00012.H
-
-//>> [QME_SCOM_PBTXTR0]
-static const uint64_t QME_SCOM_PBTXTR0 = 0x200e0040ull;
-
-static const uint32_t QME_SCOM_PBTXTR0_VALID = 0;
-static const uint32_t QME_SCOM_PBTXTR0_VALID_LEN = 8;
-static const uint32_t QME_SCOM_PBTXTR0_0 = 8;
-static const uint32_t QME_SCOM_PBTXTR0_0_LEN = 4;
-static const uint32_t QME_SCOM_PBTXTR0_1 = 12;
-static const uint32_t QME_SCOM_PBTXTR0_1_LEN = 4;
-static const uint32_t QME_SCOM_PBTXTR0_2 = 16;
-static const uint32_t QME_SCOM_PBTXTR0_2_LEN = 4;
-static const uint32_t QME_SCOM_PBTXTR0_3 = 20;
-static const uint32_t QME_SCOM_PBTXTR0_3_LEN = 4;
-static const uint32_t QME_SCOM_PBTXTR0_4 = 24;
-static const uint32_t QME_SCOM_PBTXTR0_4_LEN = 4;
-static const uint32_t QME_SCOM_PBTXTR0_5 = 28;
-static const uint32_t QME_SCOM_PBTXTR0_5_LEN = 4;
-static const uint32_t QME_SCOM_PBTXTR0_6 = 32;
-static const uint32_t QME_SCOM_PBTXTR0_6_LEN = 4;
-static const uint32_t QME_SCOM_PBTXTR0_7 = 36;
-static const uint32_t QME_SCOM_PBTXTR0_7_LEN = 4;
-//<< [QME_SCOM_PBTXTR0]
-// eq/reg00012.H
-
-//>> [QME_SCOM_XIRAMDBG]
-static const uint64_t QME_SCOM_XIRAMDBG = 0x200e020cull;
-
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_HS = 0;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_HC = 1;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_HC_LEN = 3;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_HCP = 4;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_RIP = 5;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_SIP = 6;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_TRAP = 7;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_IAC = 8;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_SIB = 9;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_SIB_LEN = 3;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_RDAC = 12;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_WDAC = 13;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_WS = 14;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_TRH = 15;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_SMS = 16;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_SMS_LEN = 4;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_LP = 20;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_EP = 21;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_PTR = 24;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_ST = 25;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_MFE = 28;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_MCS = 29;
-static const uint32_t QME_SCOM_XIRAMDBG_XSR_MCS_LEN = 3;
-static const uint32_t QME_SCOM_XIRAMDBG_SPRG0 = 32;
-static const uint32_t QME_SCOM_XIRAMDBG_SPRG0_LEN = 32;
-//<< [QME_SCOM_XIRAMDBG]
+static const uint32_t CPLT_MASK0_ITR_MASK = 0;
+static const uint32_t CPLT_MASK0_ITR_MASK_LEN = 32;
+//<< [CPLT_MASK0]
 // eq/reg00012.H
 
 //>> [EPS_DBG_MODE_REG]
@@ -172,34 +98,31 @@ static const uint32_t EPS_DBG_MODE_REG_UNUSED_LEN = 6;
 //<< [EPS_DBG_MODE_REG]
 // eq/reg00012.H
 
-//>> [SCAN64CONTSCAN]
-static const uint64_t SCAN64CONTSCAN = 0x2003f000ull;
+//>> [PCB_OPCG_STOP]
+static const uint64_t PCB_OPCG_STOP = 0x20030030ull;
 
-static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
-static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
-//<< [SCAN64CONTSCAN]
+static const uint32_t PCB_OPCG_STOP_PCB_OPCGSTOP = 0;
+//<< [PCB_OPCG_STOP]
 // eq/reg00012.H
 
-//>> [QME_RCIMR]
-static const uint64_t QME_RCIMR = 0x200e018cull;
+//>> [QME_BCEBAR1]
+static const uint64_t QME_BCEBAR1 = 0x200e0064ull;
 
-static const uint32_t QME_RCIMR_P0 = 0;
-static const uint32_t QME_RCIMR_P0_LEN = 8;
-static const uint32_t QME_RCIMR_X0 = 11;
-static const uint32_t QME_RCIMR_X0_LEN = 5;
-static const uint32_t QME_RCIMR_P1 = 16;
-static const uint32_t QME_RCIMR_P1_LEN = 8;
-static const uint32_t QME_RCIMR_X1 = 27;
-static const uint32_t QME_RCIMR_X1_LEN = 5;
-static const uint32_t QME_RCIMR_P2 = 32;
-static const uint32_t QME_RCIMR_P2_LEN = 8;
-static const uint32_t QME_RCIMR_X2 = 43;
-static const uint32_t QME_RCIMR_X2_LEN = 5;
-static const uint32_t QME_RCIMR_P3 = 48;
-static const uint32_t QME_RCIMR_P3_LEN = 8;
-static const uint32_t QME_RCIMR_X3 = 59;
-static const uint32_t QME_RCIMR_X3_LEN = 5;
-//<< [QME_RCIMR]
+static const uint32_t QME_BCEBAR1_BASE = 8;
+static const uint32_t QME_BCEBAR1_BASE_LEN = 36;
+static const uint32_t QME_BCEBAR1_SIZE = 61;
+static const uint32_t QME_BCEBAR1_SIZE_LEN = 3;
+//<< [QME_BCEBAR1]
+// eq/reg00012.H
+
+//>> [QME_FLAGS]
+static const uint64_t QME_FLAGS_RW = 0x200e0120ull;
+static const uint64_t QME_FLAGS_WO_CLEAR = 0x200e0123ull;
+static const uint64_t QME_FLAGS_WO_OR = 0x200e0122ull;
+
+static const uint32_t QME_FLAGS_DATA = 0;
+static const uint32_t QME_FLAGS_DATA_LEN = 64;
+//<< [QME_FLAGS]
 // eq/reg00012.H
 
 //>> [QME_PPEDBG]
@@ -258,12 +181,89 @@ static const uint32_t QME_PTSR_7_DATA_LEN = 8;
 //<< [QME_PTSR]
 // eq/reg00012.H
 
+//>> [QME_RCIMR]
+static const uint64_t QME_RCIMR = 0x200e018cull;
+
+static const uint32_t QME_RCIMR_P0 = 0;
+static const uint32_t QME_RCIMR_P0_LEN = 8;
+static const uint32_t QME_RCIMR_X0 = 11;
+static const uint32_t QME_RCIMR_X0_LEN = 5;
+static const uint32_t QME_RCIMR_P1 = 16;
+static const uint32_t QME_RCIMR_P1_LEN = 8;
+static const uint32_t QME_RCIMR_X1 = 27;
+static const uint32_t QME_RCIMR_X1_LEN = 5;
+static const uint32_t QME_RCIMR_P2 = 32;
+static const uint32_t QME_RCIMR_P2_LEN = 8;
+static const uint32_t QME_RCIMR_X2 = 43;
+static const uint32_t QME_RCIMR_X2_LEN = 5;
+static const uint32_t QME_RCIMR_P3 = 48;
+static const uint32_t QME_RCIMR_P3_LEN = 8;
+static const uint32_t QME_RCIMR_X3 = 59;
+static const uint32_t QME_RCIMR_X3_LEN = 5;
+//<< [QME_RCIMR]
+// eq/reg00012.H
+
 //>> [QME_RCTAR1]
 static const uint64_t QME_RCTAR1 = 0x200e0194ull;
 
 static const uint32_t QME_RCTAR1_DATA = 0;
 static const uint32_t QME_RCTAR1_DATA_LEN = 64;
 //<< [QME_RCTAR1]
+// eq/reg00012.H
+
+//>> [QME_SCOM_PBTXTR0]
+static const uint64_t QME_SCOM_PBTXTR0 = 0x200e0040ull;
+
+static const uint32_t QME_SCOM_PBTXTR0_VALID = 0;
+static const uint32_t QME_SCOM_PBTXTR0_VALID_LEN = 8;
+static const uint32_t QME_SCOM_PBTXTR0_0 = 8;
+static const uint32_t QME_SCOM_PBTXTR0_0_LEN = 4;
+static const uint32_t QME_SCOM_PBTXTR0_1 = 12;
+static const uint32_t QME_SCOM_PBTXTR0_1_LEN = 4;
+static const uint32_t QME_SCOM_PBTXTR0_2 = 16;
+static const uint32_t QME_SCOM_PBTXTR0_2_LEN = 4;
+static const uint32_t QME_SCOM_PBTXTR0_3 = 20;
+static const uint32_t QME_SCOM_PBTXTR0_3_LEN = 4;
+static const uint32_t QME_SCOM_PBTXTR0_4 = 24;
+static const uint32_t QME_SCOM_PBTXTR0_4_LEN = 4;
+static const uint32_t QME_SCOM_PBTXTR0_5 = 28;
+static const uint32_t QME_SCOM_PBTXTR0_5_LEN = 4;
+static const uint32_t QME_SCOM_PBTXTR0_6 = 32;
+static const uint32_t QME_SCOM_PBTXTR0_6_LEN = 4;
+static const uint32_t QME_SCOM_PBTXTR0_7 = 36;
+static const uint32_t QME_SCOM_PBTXTR0_7_LEN = 4;
+//<< [QME_SCOM_PBTXTR0]
+// eq/reg00012.H
+
+//>> [QME_SCOM_XIRAMDBG]
+static const uint64_t QME_SCOM_XIRAMDBG = 0x200e020cull;
+
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_HS = 0;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_HC = 1;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_HC_LEN = 3;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_HCP = 4;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_RIP = 5;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SIP = 6;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_TRAP = 7;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_IAC = 8;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SIB = 9;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SIB_LEN = 3;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_RDAC = 12;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_WDAC = 13;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_WS = 14;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_TRH = 15;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SMS = 16;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_SMS_LEN = 4;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_LP = 20;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_EP = 21;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_PTR = 24;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_ST = 25;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_MFE = 28;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_MCS = 29;
+static const uint32_t QME_SCOM_XIRAMDBG_XSR_MCS_LEN = 3;
+static const uint32_t QME_SCOM_XIRAMDBG_SPRG0 = 32;
+static const uint32_t QME_SCOM_XIRAMDBG_SPRG0_LEN = 32;
+//<< [QME_SCOM_XIRAMDBG]
 // eq/reg00012.H
 
 //>> [QME_SCOM_XIRAMGA]
@@ -292,12 +292,12 @@ static const uint32_t QME_SCOM_XISIB_DATAOP_PENDING = 63;
 //<< [QME_SCOM_XISIB]
 // eq/reg00012.H
 
-//>> [CPLT_MASK0]
-static const uint64_t CPLT_MASK0 = 0x20000101ull;
+//>> [SCAN64CONTSCAN]
+static const uint64_t SCAN64CONTSCAN = 0x2003f000ull;
 
-static const uint32_t CPLT_MASK0_ITR_MASK = 0;
-static const uint32_t CPLT_MASK0_ITR_MASK_LEN = 32;
-//<< [CPLT_MASK0]
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
+//<< [SCAN64CONTSCAN]
 // eq/reg00012.H
 
 //>>THE END<<

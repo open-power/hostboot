@@ -74,6 +74,37 @@ static const uint32_t EPS_THERM_WSUB_DTS_RESULT1_6_RESULT_LEN = 16;
 //<< [EPS_THERM_WSUB_DTS_RESULT1]
 // eq/reg00009.H
 
+//>> [QME_DB2]
+static const uint64_t QME_DB2 = 0x200e0108ull;
+
+static const uint32_t QME_DB2_MESSAGE_NUMBER = 0;
+static const uint32_t QME_DB2_MESSAGE_NUMBER_LEN = 8;
+//<< [QME_DB2]
+// eq/reg00009.H
+
+//>> [QME_PSSUM]
+static const uint64_t QME_PSSUM = 0x200e0134ull;
+
+static const uint32_t QME_PSSUM_PSTATE_REQ_C0 = 0;
+static const uint32_t QME_PSSUM_PSTATE_REQ_C0_LEN = 8;
+static const uint32_t QME_PSSUM_PSTATE_REQ_C1 = 8;
+static const uint32_t QME_PSSUM_PSTATE_REQ_C1_LEN = 8;
+static const uint32_t QME_PSSUM_PSTATE_REQ_C2 = 16;
+static const uint32_t QME_PSSUM_PSTATE_REQ_C2_LEN = 8;
+static const uint32_t QME_PSSUM_PSTATE_REQ_C3 = 24;
+static const uint32_t QME_PSSUM_PSTATE_REQ_C3_LEN = 8;
+static const uint32_t QME_PSSUM_PSTATE_REQ_QUAD = 32;
+static const uint32_t QME_PSSUM_PSTATE_REQ_QUAD_LEN = 8;
+static const uint32_t QME_PSSUM_RECENT_CORE_NUM = 42;
+static const uint32_t QME_PSSUM_RECENT_CORE_NUM_LEN = 2;
+static const uint32_t QME_PSSUM_QME_QMCR_CORE_PARTIAL_GOOD = 48;
+static const uint32_t QME_PSSUM_QME_QMCR_CORE_PARTIAL_GOOD_LEN = 4;
+static const uint32_t QME_PSSUM_QME_QMCR_AUTO_PMCR_UPDATE = 52;
+static const uint32_t QME_PSSUM_QME_QMCR_PMCR_RECENT_MODE = 53;
+static const uint32_t QME_PSSUM_PMCR_PIG_PENDING = 55;
+//<< [QME_PSSUM]
+// eq/reg00009.H
+
 //>> [XSTOP]
 static const uint64_t XSTOP = 0x20040000ull;
 
@@ -132,37 +163,6 @@ static const uint32_t XSTOP_IN51 = 51;
 static const uint32_t XSTOP_IN52 = 52;
 static const uint32_t XSTOP_IN53 = 53;
 //<< [XSTOP]
-// eq/reg00009.H
-
-//>> [QME_DB2]
-static const uint64_t QME_DB2 = 0x200e0108ull;
-
-static const uint32_t QME_DB2_MESSAGE_NUMBER = 0;
-static const uint32_t QME_DB2_MESSAGE_NUMBER_LEN = 8;
-//<< [QME_DB2]
-// eq/reg00009.H
-
-//>> [QME_PSSUM]
-static const uint64_t QME_PSSUM = 0x200e0134ull;
-
-static const uint32_t QME_PSSUM_PSTATE_REQ_C0 = 0;
-static const uint32_t QME_PSSUM_PSTATE_REQ_C0_LEN = 8;
-static const uint32_t QME_PSSUM_PSTATE_REQ_C1 = 8;
-static const uint32_t QME_PSSUM_PSTATE_REQ_C1_LEN = 8;
-static const uint32_t QME_PSSUM_PSTATE_REQ_C2 = 16;
-static const uint32_t QME_PSSUM_PSTATE_REQ_C2_LEN = 8;
-static const uint32_t QME_PSSUM_PSTATE_REQ_C3 = 24;
-static const uint32_t QME_PSSUM_PSTATE_REQ_C3_LEN = 8;
-static const uint32_t QME_PSSUM_PSTATE_REQ_QUAD = 32;
-static const uint32_t QME_PSSUM_PSTATE_REQ_QUAD_LEN = 8;
-static const uint32_t QME_PSSUM_RECENT_CORE_NUM = 42;
-static const uint32_t QME_PSSUM_RECENT_CORE_NUM_LEN = 2;
-static const uint32_t QME_PSSUM_QME_QMCR_CORE_PARTIAL_GOOD = 48;
-static const uint32_t QME_PSSUM_QME_QMCR_CORE_PARTIAL_GOOD_LEN = 4;
-static const uint32_t QME_PSSUM_QME_QMCR_AUTO_PMCR_UPDATE = 52;
-static const uint32_t QME_PSSUM_QME_QMCR_PMCR_RECENT_MODE = 53;
-static const uint32_t QME_PSSUM_PMCR_PIG_PENDING = 55;
-//<< [QME_PSSUM]
 // eq/reg00009.H
 
 //>>THE END<<

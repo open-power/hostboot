@@ -190,6 +190,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
 #endif
     return o_data.insertFromRight<DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK,
@@ -208,6 +209,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
 #endif
     return o_data.insertFromRight<DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK,
@@ -226,6 +228,7 @@ static inline fapi2::buffer<uint64_t>& GET_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
 #endif
     return i_data.extractToRight<DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK,

@@ -53,16 +53,16 @@ static const uint32_t DLP_LINK1_QUALITY_LINK_CAP_SLECC_SYN3_LEN = 8;
 static const uint32_t DLP_LINK1_QUALITY_SPARE_COUNTER_2 = 57;
 static const uint32_t DLP_LINK1_QUALITY_SPARE_COUNTER_2_LEN = 7;
 //<< [DLP_LINK1_QUALITY]
-// iohs/reg00056.H
+// iohs/reg00058.H
 
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
 }
 }
-#include "iohs/reg00056.H"
-#include "iohs/reg00057.H"
 #include "iohs/reg00058.H"
 #include "iohs/reg00059.H"
+#include "iohs/reg00060.H"
+#include "iohs/reg00061.H"
 #endif
 #endif

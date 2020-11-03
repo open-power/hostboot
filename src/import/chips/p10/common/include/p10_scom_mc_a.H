@@ -83,6 +83,41 @@ static const uint32_t CPLT_CTRL3_14_PSCOM_EN = 18;
 //<< [CPLT_CTRL3]
 // mc/reg00010.H
 
+//>> [SCOMFIR_MCFIR]
+static const uint64_t SCOMFIR_MCFIR_RW = 0x0c010c00ull;
+static const uint64_t SCOMFIR_MCFIR_WO_AND = 0x0c010c01ull;
+static const uint64_t SCOMFIR_MCFIR_WO_OR = 0x0c010c02ull;
+
+static const uint32_t SCOMFIR_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR = 0;
+static const uint32_t SCOMFIR_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR = 1;
+static const uint32_t SCOMFIR_MCFIR_POWERBUS_PROTOCOL_ERROR = 2;
+static const uint32_t SCOMFIR_MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE = 3;
+static const uint32_t SCOMFIR_MCFIR_MULTIPLE_BAR_HIT = 4;
+static const uint32_t SCOMFIR_MCFIR_PB_WRITE_ECC_SYNDROME_NE0 = 5;
+static const uint32_t SCOMFIR_MCFIR_COMMAND_LIST_EARLY_HANG = 5; // p10:20,
+static const uint32_t SCOMFIR_MCFIR_RESERVED_6 = 6;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_7 = 7;
+static const uint32_t SCOMFIR_MCFIR_COMMAND_LIST_TIMEOUT = 8;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_9 = 9;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_10 = 10;
+static const uint32_t SCOMFIR_MCFIR_MCS_WAT0 = 11;
+static const uint32_t SCOMFIR_MCFIR_MCS_WAT1 = 12;
+static const uint32_t SCOMFIR_MCFIR_MCS_WAT2 = 13;
+static const uint32_t SCOMFIR_MCFIR_MCS_WAT3 = 14;
+static const uint32_t SCOMFIR_MCFIR_POP_RCMD_NOHIT = 15;
+static const uint32_t SCOMFIR_MCFIR_POP_RCMD_BADHIT = 16;
+static const uint32_t SCOMFIR_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR = 17;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_18 = 18;
+static const uint32_t SCOMFIR_MCFIR_READ0_OVERCOMMIT = 18; // p10:20,
+static const uint32_t SCOMFIR_MCFIR_RESERVED_19 = 19;
+static const uint32_t SCOMFIR_MCFIR_READ1_OVERCOMMIT = 19; // p10:20,
+static const uint32_t SCOMFIR_MCFIR_MULTIPLE_TID_ERROR = 20;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_21 = 21;
+static const uint32_t SCOMFIR_MCFIR_INVALID_SMF_ACCESS = 22;
+static const uint32_t SCOMFIR_MCFIR_SYNC_ERROR = 23;
+//<< [SCOMFIR_MCFIR]
+// mc/reg00010.H
+
 //>> [SCOMFIR_MCFIRACT1]
 static const uint64_t SCOMFIR_MCFIRACT1 = 0x0c010c07ull;
 
@@ -112,6 +147,8 @@ static const uint32_t SCOMFIR_MCMODE1_DISABLE_SPEC_OP = 33;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_SPEC_OP_LEN = 19;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_CI = 52;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_CI_LEN = 2;
+static const uint32_t SCOMFIR_MCMODE1_RESERVED_52_53 = 52; // p10:20,
+static const uint32_t SCOMFIR_MCMODE1_RESERVED_52_53_LEN = 2;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_COMMAND_BYPASS = 54;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_COMMAND_BYPASS_LEN = 6;
 static const uint32_t SCOMFIR_MCMODE1_RESERVED_60 = 60;
@@ -119,38 +156,6 @@ static const uint32_t SCOMFIR_MCMODE1_DISABLE_FP_COMMAND_BYPASS = 61;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_BYPASS_IN_READ_DATAFLOW = 62;
 static const uint32_t SCOMFIR_MCMODE1_RESERVED_63 = 63;
 //<< [SCOMFIR_MCMODE1]
-// mc/reg00010.H
-
-//>> [SCOMFIR_MCFIR]
-static const uint64_t SCOMFIR_MCFIR_RW = 0x0c010c00ull;
-static const uint64_t SCOMFIR_MCFIR_WO_AND = 0x0c010c01ull;
-static const uint64_t SCOMFIR_MCFIR_WO_OR = 0x0c010c02ull;
-
-static const uint32_t SCOMFIR_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR = 0;
-static const uint32_t SCOMFIR_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR = 1;
-static const uint32_t SCOMFIR_MCFIR_POWERBUS_PROTOCOL_ERROR = 2;
-static const uint32_t SCOMFIR_MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE = 3;
-static const uint32_t SCOMFIR_MCFIR_MULTIPLE_BAR_HIT = 4;
-static const uint32_t SCOMFIR_MCFIR_PB_WRITE_ECC_SYNDROME_NE0 = 5;
-static const uint32_t SCOMFIR_MCFIR_RESERVED_6 = 6;
-static const uint32_t SCOMFIR_MCFIR_RESERVED_7 = 7;
-static const uint32_t SCOMFIR_MCFIR_COMMAND_LIST_TIMEOUT = 8;
-static const uint32_t SCOMFIR_MCFIR_RESERVED_9 = 9;
-static const uint32_t SCOMFIR_MCFIR_RESERVED_10 = 10;
-static const uint32_t SCOMFIR_MCFIR_MCS_WAT0 = 11;
-static const uint32_t SCOMFIR_MCFIR_MCS_WAT1 = 12;
-static const uint32_t SCOMFIR_MCFIR_MCS_WAT2 = 13;
-static const uint32_t SCOMFIR_MCFIR_MCS_WAT3 = 14;
-static const uint32_t SCOMFIR_MCFIR_POP_RCMD_NOHIT = 15;
-static const uint32_t SCOMFIR_MCFIR_POP_RCMD_BADHIT = 16;
-static const uint32_t SCOMFIR_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR = 17;
-static const uint32_t SCOMFIR_MCFIR_RESERVED_18 = 18;
-static const uint32_t SCOMFIR_MCFIR_RESERVED_19 = 19;
-static const uint32_t SCOMFIR_MCFIR_MULTIPLE_TID_ERROR = 20;
-static const uint32_t SCOMFIR_MCFIR_RESERVED_21 = 21;
-static const uint32_t SCOMFIR_MCFIR_INVALID_SMF_ACCESS = 22;
-static const uint32_t SCOMFIR_MCFIR_SYNC_ERROR = 23;
-//<< [SCOMFIR_MCFIR]
 // mc/reg00010.H
 
 //>>THE END<<

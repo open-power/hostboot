@@ -6673,6 +6673,107 @@ fapi_try_exit:
 }
 //<< PUT_[RSB_REGS_MASK_REG_RW]
 
+//>> PREP_[RSB_REGS_MASK_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_RSB_REGS_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = RSB_REGS_MASK_REG_WO_AND;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[RSB_REGS_MASK_REG_WO_AND]
+
+//>> GET_[RSB_REGS_MASK_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_RSB_REGS_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = RSB_REGS_MASK_REG_WO_AND;
+#endif
+    return fapi2::getScom(i_target, RSB_REGS_MASK_REG_WO_AND, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[RSB_REGS_MASK_REG_WO_AND]
+
+//>> PUT_[RSB_REGS_MASK_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_RSB_REGS_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(RSB_REGS_MASK_REG_RW, RSB_REGS_MASK_REG_WO_AND, RSB_REGS_MASK_REG_WO_OR));
+#endif
+    return fapi2::putScom(i_target, RSB_REGS_MASK_REG_WO_AND, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[RSB_REGS_MASK_REG_WO_AND]
+
+//>> PREP_[RSB_REGS_MASK_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_RSB_REGS_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = RSB_REGS_MASK_REG_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[RSB_REGS_MASK_REG_WO_OR]
+
+//>> GET_[RSB_REGS_MASK_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_RSB_REGS_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = RSB_REGS_MASK_REG_WO_OR;
+#endif
+    return fapi2::getScom(i_target, RSB_REGS_MASK_REG_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[RSB_REGS_MASK_REG_WO_OR]
+
+//>> PUT_[RSB_REGS_MASK_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_RSB_REGS_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(RSB_REGS_MASK_REG_RW, RSB_REGS_MASK_REG_WO_AND, RSB_REGS_MASK_REG_WO_OR));
+#endif
+    return fapi2::putScom(i_target, RSB_REGS_MASK_REG_WO_OR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[RSB_REGS_MASK_REG_WO_OR]
+
+
 //>> SET_[RSB_REGS_MASK_REG_AIB_COMMAND_INVALID]
 static inline fapi2::buffer<uint64_t>& SET_RSB_REGS_MASK_REG_AIB_COMMAND_INVALID(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
@@ -13211,107 +13312,6 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[RSB_REGS_MASK_REG_LEM_FIR_INTERNAL_PARITY_ERROR]
-
-
-//>> PREP_[RSB_REGS_MASK_REG_WO_AND]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_RSB_REGS_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = RSB_REGS_MASK_REG_WO_AND;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[RSB_REGS_MASK_REG_WO_AND]
-
-//>> GET_[RSB_REGS_MASK_REG_WO_AND]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_RSB_REGS_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = RSB_REGS_MASK_REG_WO_AND;
-#endif
-    return fapi2::getScom(i_target, RSB_REGS_MASK_REG_WO_AND, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[RSB_REGS_MASK_REG_WO_AND]
-
-//>> PUT_[RSB_REGS_MASK_REG_WO_AND]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_RSB_REGS_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(RSB_REGS_MASK_REG_RW, RSB_REGS_MASK_REG_WO_AND, RSB_REGS_MASK_REG_WO_OR));
-#endif
-    return fapi2::putScom(i_target, RSB_REGS_MASK_REG_WO_AND, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[RSB_REGS_MASK_REG_WO_AND]
-
-//>> PREP_[RSB_REGS_MASK_REG_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_RSB_REGS_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = RSB_REGS_MASK_REG_WO_OR;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[RSB_REGS_MASK_REG_WO_OR]
-
-//>> GET_[RSB_REGS_MASK_REG_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_RSB_REGS_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = RSB_REGS_MASK_REG_WO_OR;
-#endif
-    return fapi2::getScom(i_target, RSB_REGS_MASK_REG_WO_OR, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[RSB_REGS_MASK_REG_WO_OR]
-
-//>> PUT_[RSB_REGS_MASK_REG_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_RSB_REGS_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(RSB_REGS_MASK_REG_RW, RSB_REGS_MASK_REG_WO_AND, RSB_REGS_MASK_REG_WO_OR));
-#endif
-    return fapi2::putScom(i_target, RSB_REGS_MASK_REG_WO_OR, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[RSB_REGS_MASK_REG_WO_OR]
 
 
 //>>THE END<<

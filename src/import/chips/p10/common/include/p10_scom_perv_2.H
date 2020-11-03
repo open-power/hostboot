@@ -251,51 +251,6 @@ static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_TPFSI_RCS_SENSE_DC_0_31 = 31;
 //<< [FSXCOMP_FSXLOG_SNS1LTH]
 // perv/reg00004.H
 
-//>> [TOD_LOAD_REG]
-static const uint64_t TOD_LOAD_REG = 0x00040021ull;
-
-static const uint32_t TOD_LOAD_REG_LOAD_TOD_VALUE = 0;
-static const uint32_t TOD_LOAD_REG_LOAD_TOD_VALUE_LEN = 60;
-static const uint32_t TOD_LOAD_REG_WOF = 60;
-static const uint32_t TOD_LOAD_REG_WOF_LEN = 4;
-//<< [TOD_LOAD_REG]
-// perv/reg00004.H
-
-//>> [TOD_PRI_PORT_1_CTRL_REG]
-static const uint64_t TOD_PRI_PORT_1_CTRL_REG = 0x00040002ull;
-
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_PORT_1_RX_SELECT = 0;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_PORT_1_RX_SELECT_LEN = 3;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_REG_0X02_SPARE_03 = 3;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X0_PORT_1_TX_SELECT = 4;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X0_PORT_1_TX_SELECT_LEN = 2;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X1_PORT_1_TX_SELECT = 6;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X1_PORT_1_TX_SELECT_LEN = 2;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X2_PORT_1_TX_SELECT = 8;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X2_PORT_1_TX_SELECT_LEN = 2;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X3_PORT_1_TX_SELECT = 10;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X3_PORT_1_TX_SELECT_LEN = 2;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X4_PORT_1_TX_SELECT = 12;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X4_PORT_1_TX_SELECT_LEN = 2;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X5_PORT_1_TX_SELECT = 14;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X5_PORT_1_TX_SELECT_LEN = 2;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X6_PORT_1_TX_SELECT = 16;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X6_PORT_1_TX_SELECT_LEN = 2;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X7_PORT_1_TX_SELECT = 18;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X7_PORT_1_TX_SELECT_LEN = 2;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X0_PORT_1_TX_ENABLE = 20;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X1_PORT_1_TX_ENABLE = 21;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X2_PORT_1_TX_ENABLE = 22;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X3_PORT_1_TX_ENABLE = 23;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X4_PORT_1_TX_ENABLE = 24;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X5_PORT_1_TX_ENABLE = 25;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X6_PORT_1_TX_ENABLE = 26;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X7_PORT_1_TX_ENABLE = 27;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_REG_0X02_SPARE_28_31 = 28;
-static const uint32_t TOD_PRI_PORT_1_CTRL_REG_REG_0X02_SPARE_28_31_LEN = 4;
-//<< [TOD_PRI_PORT_1_CTRL_REG]
-// perv/reg00004.H
-
 //>> [REC_ERR_REG3]
 static const uint64_t REC_ERR_REG3 = 0x000f0014ull;
 
@@ -390,6 +345,51 @@ static const uint32_t SPATTN_IN33 = 33;
 static const uint32_t SPATTN_IN34 = 34;
 static const uint32_t SPATTN_IN35 = 35;
 //<< [SPATTN]
+// perv/reg00004.H
+
+//>> [TOD_LOAD_REG]
+static const uint64_t TOD_LOAD_REG = 0x00040021ull;
+
+static const uint32_t TOD_LOAD_REG_LOAD_TOD_VALUE = 0;
+static const uint32_t TOD_LOAD_REG_LOAD_TOD_VALUE_LEN = 60;
+static const uint32_t TOD_LOAD_REG_WOF = 60;
+static const uint32_t TOD_LOAD_REG_WOF_LEN = 4;
+//<< [TOD_LOAD_REG]
+// perv/reg00004.H
+
+//>> [TOD_PRI_PORT_1_CTRL_REG]
+static const uint64_t TOD_PRI_PORT_1_CTRL_REG = 0x00040002ull;
+
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_PORT_1_RX_SELECT = 0;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_PORT_1_RX_SELECT_LEN = 3;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_REG_0X02_SPARE_03 = 3;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X0_PORT_1_TX_SELECT = 4;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X0_PORT_1_TX_SELECT_LEN = 2;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X1_PORT_1_TX_SELECT = 6;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X1_PORT_1_TX_SELECT_LEN = 2;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X2_PORT_1_TX_SELECT = 8;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X2_PORT_1_TX_SELECT_LEN = 2;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X3_PORT_1_TX_SELECT = 10;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X3_PORT_1_TX_SELECT_LEN = 2;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X4_PORT_1_TX_SELECT = 12;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X4_PORT_1_TX_SELECT_LEN = 2;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X5_PORT_1_TX_SELECT = 14;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X5_PORT_1_TX_SELECT_LEN = 2;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X6_PORT_1_TX_SELECT = 16;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X6_PORT_1_TX_SELECT_LEN = 2;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X7_PORT_1_TX_SELECT = 18;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X7_PORT_1_TX_SELECT_LEN = 2;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X0_PORT_1_TX_ENABLE = 20;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X1_PORT_1_TX_ENABLE = 21;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X2_PORT_1_TX_ENABLE = 22;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X3_PORT_1_TX_ENABLE = 23;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X4_PORT_1_TX_ENABLE = 24;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X5_PORT_1_TX_ENABLE = 25;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X6_PORT_1_TX_ENABLE = 26;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_PRI_X7_PORT_1_TX_ENABLE = 27;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_REG_0X02_SPARE_28_31 = 28;
+static const uint32_t TOD_PRI_PORT_1_CTRL_REG_REG_0X02_SPARE_28_31_LEN = 4;
+//<< [TOD_PRI_PORT_1_CTRL_REG]
 // perv/reg00004.H
 
 //>>THE END<<

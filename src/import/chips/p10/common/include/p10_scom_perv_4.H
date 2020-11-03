@@ -79,6 +79,44 @@ static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL1_PERV_CTRL1_20_31_RESERVED_LEN = 
 //<< [FSXCOMP_FSXLOG_PERV_CTRL1]
 // perv/reg00008.H
 
+//>> [FSXCOMP_FSXLOG_ROOT_CTRL1]
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_FSI = 0x00002811ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_FSI_BYTE = 0x00002844ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_RW = 0x00050011ull;
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE0_SEL_DC = 0;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE0_SEL_DC_LEN = 4;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE1_SEL_DC = 4;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE1_SEL_DC_LEN = 4;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE_MESH_SEL_DC = 8;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE_DRV_EN_DC = 9;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_10_SPARE = 10;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_FSI_PROBE_SEL_DC = 11;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_FSI_PROBE_SEL_DC_LEN = 2;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_AN_PROBE_DRVR_MCPRECOMP0_DC = 13;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_AN_PROBE_DRVR_MCPRECOMP1_DC = 14;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_AN_PROBE_DRVR_MCPRECOMP2_DC = 15;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_IDDQ_DC = 16;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SPARE_RI_CONTROL = 17;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SPARE_DI_CONTROL = 18;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_RI_DC_B = 19;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI1_DC_B = 20;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI2_DC_B = 21;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_TPM_DI1_DC_B = 22;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_23_SPARE_TEST = 23;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_TEST_BURNIN_MODE_DC = 24;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TPFSI_ARRAY_SET_VBL_TO_VDD_DC = 25;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TPFSI_TP_GLB_PERST_OVR_DC = 26;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_27_SPARE = 27;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_28_SPARE_TEST_CONTROL = 28;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_29_SPARE_TEST_CONTROL = 29;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_30_SPARE_TEST_CONTROL = 30;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_31_SPARE_TEST_CONTROL = 31;
+//<< [FSXCOMP_FSXLOG_ROOT_CTRL1]
+// perv/reg00008.H
+
 //>> [FSXCOMP_FSXLOG_ROOT_CTRL4_CLEAR]
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -133,6 +171,14 @@ static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_SR_SCRATCH_REGISTER_5_LE
 //<< [FSXCOMP_FSXLOG_SCRATCH_REGISTER_5]
 // perv/reg00008.H
 
+//>> [MCAST_GRP_0_SLAVES_REG]
+static const uint64_t MCAST_GRP_0_SLAVES_REG = 0x000f0000ull;
+
+static const uint32_t MCAST_GRP_0_SLAVES_REG_SLAVES_MCAST_GROUP_0 = 0;
+static const uint32_t MCAST_GRP_0_SLAVES_REG_SLAVES_MCAST_GROUP_0_LEN = 6;
+//<< [MCAST_GRP_0_SLAVES_REG]
+// perv/reg00008.H
+
 //>> [OPCG_REG2]
 static const uint64_t OPCG_REG2 = 0x00030004ull;
 
@@ -157,6 +203,60 @@ static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_VALUE = 59;
 static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT = 60;
 static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT_LEN = 4;
 //<< [OPCG_REG2]
+// perv/reg00008.H
+
+//>> [REC_ERR_REG2]
+static const uint64_t REC_ERR_REG2 = 0x000f0013ull;
+
+static const uint32_t REC_ERR_REG2_32_RESPONSE_BIT = 0;
+static const uint32_t REC_ERR_REG2_32_ERROR_CODE = 1;
+static const uint32_t REC_ERR_REG2_32_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_33_RESPONSE_BIT = 4;
+static const uint32_t REC_ERR_REG2_33_ERROR_CODE = 5;
+static const uint32_t REC_ERR_REG2_33_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_34_RESPONSE_BIT = 8;
+static const uint32_t REC_ERR_REG2_34_ERROR_CODE = 9;
+static const uint32_t REC_ERR_REG2_34_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_35_RESPONSE_BIT = 12;
+static const uint32_t REC_ERR_REG2_35_ERROR_CODE = 13;
+static const uint32_t REC_ERR_REG2_35_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_36_RESPONSE_BIT = 16;
+static const uint32_t REC_ERR_REG2_36_ERROR_CODE = 17;
+static const uint32_t REC_ERR_REG2_36_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_37_RESPONSE_BIT = 20;
+static const uint32_t REC_ERR_REG2_37_ERROR_CODE = 21;
+static const uint32_t REC_ERR_REG2_37_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_38_RESPONSE_BIT = 24;
+static const uint32_t REC_ERR_REG2_38_ERROR_CODE = 25;
+static const uint32_t REC_ERR_REG2_38_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_39_RESPONSE_BIT = 28;
+static const uint32_t REC_ERR_REG2_39_ERROR_CODE = 29;
+static const uint32_t REC_ERR_REG2_39_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_40_RESPONSE_BIT = 32;
+static const uint32_t REC_ERR_REG2_40_ERROR_CODE = 33;
+static const uint32_t REC_ERR_REG2_40_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_41_RESPONSE_BIT = 36;
+static const uint32_t REC_ERR_REG2_41_ERROR_CODE = 37;
+static const uint32_t REC_ERR_REG2_41_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_42_RESPONSE_BIT = 40;
+static const uint32_t REC_ERR_REG2_42_ERROR_CODE = 41;
+static const uint32_t REC_ERR_REG2_42_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_43_RESPONSE_BIT = 44;
+static const uint32_t REC_ERR_REG2_43_ERROR_CODE = 45;
+static const uint32_t REC_ERR_REG2_43_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_44_RESPONSE_BIT = 48;
+static const uint32_t REC_ERR_REG2_44_ERROR_CODE = 49;
+static const uint32_t REC_ERR_REG2_44_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_45_RESPONSE_BIT = 52;
+static const uint32_t REC_ERR_REG2_45_ERROR_CODE = 53;
+static const uint32_t REC_ERR_REG2_45_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_46_RESPONSE_BIT = 56;
+static const uint32_t REC_ERR_REG2_46_ERROR_CODE = 57;
+static const uint32_t REC_ERR_REG2_46_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG2_47_RESPONSE_BIT = 60;
+static const uint32_t REC_ERR_REG2_47_ERROR_CODE = 61;
+static const uint32_t REC_ERR_REG2_47_ERROR_CODE_LEN = 3;
+//<< [REC_ERR_REG2]
 // perv/reg00008.H
 
 //>> [TOD_LOAD_MOD_REG]
@@ -226,106 +326,6 @@ static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 //<< [TRA0_TR0_TRACE_LO_DATA_REG]
 // perv/reg00009.H
-
-//>> [MCAST_GRP_0_SLAVES_REG]
-static const uint64_t MCAST_GRP_0_SLAVES_REG = 0x000f0000ull;
-
-static const uint32_t MCAST_GRP_0_SLAVES_REG_SLAVES_MCAST_GROUP_0 = 0;
-static const uint32_t MCAST_GRP_0_SLAVES_REG_SLAVES_MCAST_GROUP_0_LEN = 6;
-//<< [MCAST_GRP_0_SLAVES_REG]
-// perv/reg00008.H
-
-//>> [FSXCOMP_FSXLOG_ROOT_CTRL1]
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_FSI = 0x00002811ull;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_FSI_BYTE = 0x00002844ull;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_RW = 0x00050011ull;
-
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE0_SEL_DC = 0;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE0_SEL_DC_LEN = 4;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE1_SEL_DC = 4;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE1_SEL_DC_LEN = 4;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE_MESH_SEL_DC = 8;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_PROBE_DRV_EN_DC = 9;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_10_SPARE = 10;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_FSI_PROBE_SEL_DC = 11;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_FSI_PROBE_SEL_DC_LEN = 2;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_AN_PROBE_DRVR_MCPRECOMP0_DC = 13;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_AN_PROBE_DRVR_MCPRECOMP1_DC = 14;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_AN_PROBE_DRVR_MCPRECOMP2_DC = 15;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_IDDQ_DC = 16;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SPARE_RI_CONTROL = 17;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SPARE_DI_CONTROL = 18;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_RI_DC_B = 19;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI1_DC_B = 20;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI2_DC_B = 21;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_TPM_DI1_DC_B = 22;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_23_SPARE_TEST = 23;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_TEST_BURNIN_MODE_DC = 24;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TPFSI_ARRAY_SET_VBL_TO_VDD_DC = 25;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TPFSI_TP_GLB_PERST_OVR_DC = 26;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_27_SPARE = 27;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_28_SPARE_TEST_CONTROL = 28;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_29_SPARE_TEST_CONTROL = 29;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_30_SPARE_TEST_CONTROL = 30;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_31_SPARE_TEST_CONTROL = 31;
-//<< [FSXCOMP_FSXLOG_ROOT_CTRL1]
-// perv/reg00008.H
-
-//>> [REC_ERR_REG2]
-static const uint64_t REC_ERR_REG2 = 0x000f0013ull;
-
-static const uint32_t REC_ERR_REG2_32_RESPONSE_BIT = 0;
-static const uint32_t REC_ERR_REG2_32_ERROR_CODE = 1;
-static const uint32_t REC_ERR_REG2_32_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_33_RESPONSE_BIT = 4;
-static const uint32_t REC_ERR_REG2_33_ERROR_CODE = 5;
-static const uint32_t REC_ERR_REG2_33_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_34_RESPONSE_BIT = 8;
-static const uint32_t REC_ERR_REG2_34_ERROR_CODE = 9;
-static const uint32_t REC_ERR_REG2_34_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_35_RESPONSE_BIT = 12;
-static const uint32_t REC_ERR_REG2_35_ERROR_CODE = 13;
-static const uint32_t REC_ERR_REG2_35_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_36_RESPONSE_BIT = 16;
-static const uint32_t REC_ERR_REG2_36_ERROR_CODE = 17;
-static const uint32_t REC_ERR_REG2_36_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_37_RESPONSE_BIT = 20;
-static const uint32_t REC_ERR_REG2_37_ERROR_CODE = 21;
-static const uint32_t REC_ERR_REG2_37_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_38_RESPONSE_BIT = 24;
-static const uint32_t REC_ERR_REG2_38_ERROR_CODE = 25;
-static const uint32_t REC_ERR_REG2_38_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_39_RESPONSE_BIT = 28;
-static const uint32_t REC_ERR_REG2_39_ERROR_CODE = 29;
-static const uint32_t REC_ERR_REG2_39_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_40_RESPONSE_BIT = 32;
-static const uint32_t REC_ERR_REG2_40_ERROR_CODE = 33;
-static const uint32_t REC_ERR_REG2_40_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_41_RESPONSE_BIT = 36;
-static const uint32_t REC_ERR_REG2_41_ERROR_CODE = 37;
-static const uint32_t REC_ERR_REG2_41_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_42_RESPONSE_BIT = 40;
-static const uint32_t REC_ERR_REG2_42_ERROR_CODE = 41;
-static const uint32_t REC_ERR_REG2_42_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_43_RESPONSE_BIT = 44;
-static const uint32_t REC_ERR_REG2_43_ERROR_CODE = 45;
-static const uint32_t REC_ERR_REG2_43_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_44_RESPONSE_BIT = 48;
-static const uint32_t REC_ERR_REG2_44_ERROR_CODE = 49;
-static const uint32_t REC_ERR_REG2_44_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_45_RESPONSE_BIT = 52;
-static const uint32_t REC_ERR_REG2_45_ERROR_CODE = 53;
-static const uint32_t REC_ERR_REG2_45_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_46_RESPONSE_BIT = 56;
-static const uint32_t REC_ERR_REG2_46_ERROR_CODE = 57;
-static const uint32_t REC_ERR_REG2_46_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_REG2_47_RESPONSE_BIT = 60;
-static const uint32_t REC_ERR_REG2_47_ERROR_CODE = 61;
-static const uint32_t REC_ERR_REG2_47_ERROR_CODE_LEN = 3;
-//<< [REC_ERR_REG2]
-// perv/reg00008.H
 
 //>> [XSTOP1]
 static const uint64_t XSTOP1 = 0x0003000cull;

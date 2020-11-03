@@ -39,6 +39,17 @@ namespace pauc
 #endif
 
 
+//>> [ATOMIC_LOCK_REG]
+static const uint64_t ATOMIC_LOCK_REG = 0x100f03ffull;
+
+static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
+static const uint32_t ATOMIC_LOCK_REG_ID = 1;
+static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
+// pauc/reg00011.H
+
 //>> [ATTN_INTERRUPT_REG]
 static const uint64_t ATTN_INTERRUPT_REG = 0x100f001aull;
 
@@ -188,17 +199,6 @@ static const uint32_t LOCAL_FIR_IN61 = 61;
 static const uint32_t LOCAL_FIR_IN62 = 62;
 static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
 //<< [LOCAL_FIR]
-// pauc/reg00011.H
-
-//>> [ATOMIC_LOCK_REG]
-static const uint64_t ATOMIC_LOCK_REG = 0x100f03ffull;
-
-static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
-static const uint32_t ATOMIC_LOCK_REG_ID = 1;
-static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-//<< [ATOMIC_LOCK_REG]
 // pauc/reg00011.H
 
 //>> [RECOV]

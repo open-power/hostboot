@@ -214,139 +214,6 @@ static const uint32_t EPS_THERM_WSUB_ERR_STATUS_REG_UNUSED = 59;
 //<< [EPS_THERM_WSUB_ERR_STATUS_REG]
 // pauc/reg00000.H
 
-//>> [OPCG_ALIGN]
-static const uint64_t OPCG_ALIGN = 0x10030001ull;
-
-static const uint32_t OPCG_ALIGN_INOP_ALIGN = 0;
-static const uint32_t OPCG_ALIGN_INOP_ALIGN_LEN = 4;
-static const uint32_t OPCG_ALIGN_SNOP_ALIGN = 4;
-static const uint32_t OPCG_ALIGN_SNOP_ALIGN_LEN = 4;
-static const uint32_t OPCG_ALIGN_ENOP_ALIGN = 8;
-static const uint32_t OPCG_ALIGN_ENOP_ALIGN_LEN = 4;
-static const uint32_t OPCG_ALIGN_INOP_WAIT = 12;
-static const uint32_t OPCG_ALIGN_INOP_WAIT_LEN = 8;
-static const uint32_t OPCG_ALIGN_SNOP_WAIT = 20;
-static const uint32_t OPCG_ALIGN_SNOP_WAIT_LEN = 12;
-static const uint32_t OPCG_ALIGN_ENOP_WAIT = 32;
-static const uint32_t OPCG_ALIGN_ENOP_WAIT_LEN = 8;
-static const uint32_t OPCG_ALIGN_INOP_FORCE_SG = 40;
-static const uint32_t OPCG_ALIGN_SNOP_FORCE_SG = 41;
-static const uint32_t OPCG_ALIGN_ENOP_FORCE_SG = 42;
-static const uint32_t OPCG_ALIGN_NO_WAIT_ON_CLK_CMD = 43;
-static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT = 44;
-static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT_LEN = 2;
-static const uint32_t OPCG_ALIGN_SCAN_RATIO = 47;
-static const uint32_t OPCG_ALIGN_SCAN_RATIO_LEN = 5;
-static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
-static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
-//<< [OPCG_ALIGN]
-// pauc/reg00000.H
-
-//>> [PHY_PPE_WRAP_XIXCR]
-static const uint64_t PHY_PPE_WRAP_XIXCR = 0x10012c10ull;
-
-static const uint32_t PHY_PPE_WRAP_XIXCR_PPE_XIXCR_XCR = 1;
-static const uint32_t PHY_PPE_WRAP_XIXCR_PPE_XIXCR_XCR_LEN = 3;
-static const uint32_t PHY_PPE_WRAP_XIXCR_NULL_CTR = 32;
-static const uint32_t PHY_PPE_WRAP_XIXCR_NULL_CTR_LEN = 32;
-//<< [PHY_PPE_WRAP_XIXCR]
-// pauc/reg00000.H
-
-//>> [XSTOP_MASK]
-static const uint64_t XSTOP_MASK_RW = 0x10040040ull;
-static const uint64_t XSTOP_MASK_WO_CLEAR = 0x10040060ull;
-static const uint64_t XSTOP_MASK_WO_OR = 0x10040050ull;
-
-static const uint32_t XSTOP_MASK_01 = 1;
-static const uint32_t XSTOP_MASK_02 = 2;
-static const uint32_t XSTOP_MASK_03 = 3;
-static const uint32_t XSTOP_MASK_04 = 4;
-static const uint32_t XSTOP_MASK_05 = 5;
-static const uint32_t XSTOP_MASK_06 = 6;
-static const uint32_t XSTOP_MASK_07 = 7;
-static const uint32_t XSTOP_MASK_08 = 8;
-static const uint32_t XSTOP_MASK_09 = 9;
-static const uint32_t XSTOP_MASK_10 = 10;
-static const uint32_t XSTOP_MASK_11 = 11;
-static const uint32_t XSTOP_MASK_12 = 12;
-static const uint32_t XSTOP_MASK_13 = 13;
-static const uint32_t XSTOP_MASK_14 = 14;
-static const uint32_t XSTOP_MASK_15 = 15;
-static const uint32_t XSTOP_MASK_16 = 16;
-static const uint32_t XSTOP_MASK_17 = 17;
-static const uint32_t XSTOP_MASK_18 = 18;
-static const uint32_t XSTOP_MASK_19 = 19;
-static const uint32_t XSTOP_MASK_20 = 20;
-static const uint32_t XSTOP_MASK_21 = 21;
-static const uint32_t XSTOP_MASK_22 = 22;
-static const uint32_t XSTOP_MASK_23 = 23;
-static const uint32_t XSTOP_MASK_24 = 24;
-static const uint32_t XSTOP_MASK_25 = 25;
-static const uint32_t XSTOP_MASK_26 = 26;
-static const uint32_t XSTOP_MASK_27 = 27;
-static const uint32_t XSTOP_MASK_28 = 28;
-static const uint32_t XSTOP_MASK_29 = 29;
-static const uint32_t XSTOP_MASK_30 = 30;
-static const uint32_t XSTOP_MASK_31 = 31;
-static const uint32_t XSTOP_MASK_32 = 32;
-static const uint32_t XSTOP_MASK_33 = 33;
-static const uint32_t XSTOP_MASK_34 = 34;
-static const uint32_t XSTOP_MASK_35 = 35;
-static const uint32_t XSTOP_MASK_36 = 36;
-static const uint32_t XSTOP_MASK_37 = 37;
-static const uint32_t XSTOP_MASK_38 = 38;
-static const uint32_t XSTOP_MASK_39 = 39;
-static const uint32_t XSTOP_MASK_40 = 40;
-static const uint32_t XSTOP_MASK_41 = 41;
-static const uint32_t XSTOP_MASK_42 = 42;
-static const uint32_t XSTOP_MASK_43 = 43;
-static const uint32_t XSTOP_MASK_44 = 44;
-static const uint32_t XSTOP_MASK_45 = 45;
-static const uint32_t XSTOP_MASK_46 = 46;
-static const uint32_t XSTOP_MASK_47 = 47;
-static const uint32_t XSTOP_MASK_48 = 48;
-static const uint32_t XSTOP_MASK_49 = 49;
-static const uint32_t XSTOP_MASK_50 = 50;
-static const uint32_t XSTOP_MASK_51 = 51;
-static const uint32_t XSTOP_MASK_52 = 52;
-static const uint32_t XSTOP_MASK_53 = 53;
-//<< [XSTOP_MASK]
-// pauc/reg00000.H
-
-//>> [PHY_SCOM_MAC_FIR_MASK_REG]
-static const uint64_t PHY_SCOM_MAC_FIR_MASK_REG_RW = 0x10012c03ull;
-static const uint64_t PHY_SCOM_MAC_FIR_MASK_REG_WO_AND = 0x10012c04ull;
-static const uint64_t PHY_SCOM_MAC_FIR_MASK_REG_WO_OR = 0x10012c05ull;
-
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 0;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 1;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 2;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 3;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 4;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 5;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 6;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 7;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK = 8;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_INT_HWERROR_MASK = 9;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_EXT_HWERROR_MASK = 10;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK = 11;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_HALT_DEBUG_MASK = 12;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_HALTED_MASK = 13;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK = 14;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK = 15;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK = 16;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK = 17;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK = 18;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK = 19;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_WARNING_MASK = 20;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK = 21;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK = 22;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK = 23;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_6_MASK = 24;
-static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_7_MASK = 25;
-//<< [PHY_SCOM_MAC_FIR_MASK_REG]
-// pauc/reg00000.H
-
 //>> [HOSTATTN]
 static const uint64_t HOSTATTN = 0x10040004ull;
 
@@ -466,6 +333,140 @@ static const uint32_t HOSTATTN_MASK_51 = 51;
 static const uint32_t HOSTATTN_MASK_52 = 52;
 static const uint32_t HOSTATTN_MASK_53 = 53;
 //<< [HOSTATTN_MASK]
+// pauc/reg00000.H
+
+//>> [OPCG_ALIGN]
+static const uint64_t OPCG_ALIGN = 0x10030001ull;
+
+static const uint32_t OPCG_ALIGN_INOP_ALIGN = 0;
+static const uint32_t OPCG_ALIGN_INOP_ALIGN_LEN = 4;
+static const uint32_t OPCG_ALIGN_SNOP_ALIGN = 4;
+static const uint32_t OPCG_ALIGN_SNOP_ALIGN_LEN = 4;
+static const uint32_t OPCG_ALIGN_ENOP_ALIGN = 8;
+static const uint32_t OPCG_ALIGN_ENOP_ALIGN_LEN = 4;
+static const uint32_t OPCG_ALIGN_INOP_WAIT = 12;
+static const uint32_t OPCG_ALIGN_INOP_WAIT_LEN = 8;
+static const uint32_t OPCG_ALIGN_SNOP_WAIT = 20;
+static const uint32_t OPCG_ALIGN_SNOP_WAIT_LEN = 12;
+static const uint32_t OPCG_ALIGN_ENOP_WAIT = 32;
+static const uint32_t OPCG_ALIGN_ENOP_WAIT_LEN = 8;
+static const uint32_t OPCG_ALIGN_INOP_FORCE_SG = 40;
+static const uint32_t OPCG_ALIGN_SNOP_FORCE_SG = 41;
+static const uint32_t OPCG_ALIGN_ENOP_FORCE_SG = 42;
+static const uint32_t OPCG_ALIGN_NO_WAIT_ON_CLK_CMD = 43;
+static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT = 44;
+static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT_LEN = 2;
+static const uint32_t OPCG_ALIGN_SCAN_RATIO = 47;
+static const uint32_t OPCG_ALIGN_SCAN_RATIO_LEN = 5;
+static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
+static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
+//<< [OPCG_ALIGN]
+// pauc/reg00000.H
+
+//>> [PHY_PPE_WRAP_XIXCR]
+static const uint64_t PHY_PPE_WRAP_XIXCR = 0x10012c10ull;
+
+static const uint32_t PHY_PPE_WRAP_XIXCR_PPE_XIXCR_XCR = 1;
+static const uint32_t PHY_PPE_WRAP_XIXCR_PPE_XIXCR_XCR_LEN = 3;
+static const uint32_t PHY_PPE_WRAP_XIXCR_NULL_CTR = 32;
+static const uint32_t PHY_PPE_WRAP_XIXCR_NULL_CTR_LEN = 32;
+//<< [PHY_PPE_WRAP_XIXCR]
+// pauc/reg00000.H
+
+//>> [PHY_SCOM_MAC_FIR_MASK_REG]
+static const uint64_t PHY_SCOM_MAC_FIR_MASK_REG_RW = 0x10012c03ull;
+static const uint64_t PHY_SCOM_MAC_FIR_MASK_REG_WO_AND = 0x10012c04ull;
+static const uint64_t PHY_SCOM_MAC_FIR_MASK_REG_WO_OR = 0x10012c05ull;
+
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 0;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 1;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_OMI0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 2;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_OMI1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 3;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_IOO0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 4;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_IOO1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 5;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_OMI0_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 6;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_OMI1_TX_INVALID_STATE_OR_PARITY_ERROR_MASK = 7;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_ZCAL_INVALID_STATE_OR_PARITY_ERROR_MASK = 8;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_INT_HWERROR_MASK = 9;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_EXT_HWERROR_MASK = 10;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_HALT_WATCHDOG_OR_INTERRUPT_MASK = 11;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_HALT_DEBUG_MASK = 12;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_HALTED_MASK = 13;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_WATCHDOG_TIMEOUT_MASK = 14;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_ARB_MISSED_SCRUB_TICK_MASK = 15;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_ARB_ARRAY_UNCORRECTABLE_ERROR_MASK = 16;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_ARB_ARRAY_CORRECTABLE_ERROR_MASK = 17;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_RECAL_ABORT_MASK = 18;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_FATAL_ERROR_MASK = 19;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_WARNING_MASK = 20;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_DFT_ERROR_MASK = 21;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK = 22;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK = 23;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_6_MASK = 24;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_7_MASK = 25;
+static const uint32_t PHY_SCOM_MAC_FIR_MASK_REG_SCOMFIR_PARITY_ERROR_MASK = 26; // p10:20,
+//<< [PHY_SCOM_MAC_FIR_MASK_REG]
+// pauc/reg00000.H
+
+//>> [XSTOP_MASK]
+static const uint64_t XSTOP_MASK_RW = 0x10040040ull;
+static const uint64_t XSTOP_MASK_WO_CLEAR = 0x10040060ull;
+static const uint64_t XSTOP_MASK_WO_OR = 0x10040050ull;
+
+static const uint32_t XSTOP_MASK_01 = 1;
+static const uint32_t XSTOP_MASK_02 = 2;
+static const uint32_t XSTOP_MASK_03 = 3;
+static const uint32_t XSTOP_MASK_04 = 4;
+static const uint32_t XSTOP_MASK_05 = 5;
+static const uint32_t XSTOP_MASK_06 = 6;
+static const uint32_t XSTOP_MASK_07 = 7;
+static const uint32_t XSTOP_MASK_08 = 8;
+static const uint32_t XSTOP_MASK_09 = 9;
+static const uint32_t XSTOP_MASK_10 = 10;
+static const uint32_t XSTOP_MASK_11 = 11;
+static const uint32_t XSTOP_MASK_12 = 12;
+static const uint32_t XSTOP_MASK_13 = 13;
+static const uint32_t XSTOP_MASK_14 = 14;
+static const uint32_t XSTOP_MASK_15 = 15;
+static const uint32_t XSTOP_MASK_16 = 16;
+static const uint32_t XSTOP_MASK_17 = 17;
+static const uint32_t XSTOP_MASK_18 = 18;
+static const uint32_t XSTOP_MASK_19 = 19;
+static const uint32_t XSTOP_MASK_20 = 20;
+static const uint32_t XSTOP_MASK_21 = 21;
+static const uint32_t XSTOP_MASK_22 = 22;
+static const uint32_t XSTOP_MASK_23 = 23;
+static const uint32_t XSTOP_MASK_24 = 24;
+static const uint32_t XSTOP_MASK_25 = 25;
+static const uint32_t XSTOP_MASK_26 = 26;
+static const uint32_t XSTOP_MASK_27 = 27;
+static const uint32_t XSTOP_MASK_28 = 28;
+static const uint32_t XSTOP_MASK_29 = 29;
+static const uint32_t XSTOP_MASK_30 = 30;
+static const uint32_t XSTOP_MASK_31 = 31;
+static const uint32_t XSTOP_MASK_32 = 32;
+static const uint32_t XSTOP_MASK_33 = 33;
+static const uint32_t XSTOP_MASK_34 = 34;
+static const uint32_t XSTOP_MASK_35 = 35;
+static const uint32_t XSTOP_MASK_36 = 36;
+static const uint32_t XSTOP_MASK_37 = 37;
+static const uint32_t XSTOP_MASK_38 = 38;
+static const uint32_t XSTOP_MASK_39 = 39;
+static const uint32_t XSTOP_MASK_40 = 40;
+static const uint32_t XSTOP_MASK_41 = 41;
+static const uint32_t XSTOP_MASK_42 = 42;
+static const uint32_t XSTOP_MASK_43 = 43;
+static const uint32_t XSTOP_MASK_44 = 44;
+static const uint32_t XSTOP_MASK_45 = 45;
+static const uint32_t XSTOP_MASK_46 = 46;
+static const uint32_t XSTOP_MASK_47 = 47;
+static const uint32_t XSTOP_MASK_48 = 48;
+static const uint32_t XSTOP_MASK_49 = 49;
+static const uint32_t XSTOP_MASK_50 = 50;
+static const uint32_t XSTOP_MASK_51 = 51;
+static const uint32_t XSTOP_MASK_52 = 52;
+static const uint32_t XSTOP_MASK_53 = 53;
+//<< [XSTOP_MASK]
 // pauc/reg00000.H
 
 //>>THE END<<

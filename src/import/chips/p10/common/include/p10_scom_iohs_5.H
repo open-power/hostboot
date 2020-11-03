@@ -39,40 +39,6 @@ namespace iohs
 #endif
 
 
-//>> [NET_CTRL1]
-static const uint64_t NET_CTRL1_RW = 0x180f0044ull;
-static const uint64_t NET_CTRL1_RW_WAND = 0x180f0045ull;
-static const uint64_t NET_CTRL1_RW_WOR = 0x180f0046ull;
-
-static const uint32_t NET_CTRL1_CACHE0_CLK_DCC_BYPASS = 0;
-static const uint32_t NET_CTRL1_CACHE1_CLK_DCC_BYPASS = 1;
-static const uint32_t NET_CTRL1_CACHE2_CLK_DCC_BYPASS = 2;
-static const uint32_t NET_CTRL1_CACHE3_CLK_DCC_BYPASS = 3;
-static const uint32_t NET_CTRL1_CORE0_CLK_DCC_BYPASS = 4;
-static const uint32_t NET_CTRL1_CORE1_CLK_DCC_BYPASS = 5;
-static const uint32_t NET_CTRL1_CORE2_CLK_DCC_BYPASS = 6;
-static const uint32_t NET_CTRL1_CORE3_CLK_DCC_BYPASS = 7;
-static const uint32_t NET_CTRL1_CACHE0_CLK_PDLY_BYPASS = 8;
-static const uint32_t NET_CTRL1_CACHE1_CLK_PDLY_BYPASS = 9;
-static const uint32_t NET_CTRL1_CACHE2_CLK_PDLY_BYPASS = 10;
-static const uint32_t NET_CTRL1_CACHE3_CLK_PDLY_BYPASS = 11;
-static const uint32_t NET_CTRL1_CORE0_CLK_PDLY_BYPASS = 12;
-static const uint32_t NET_CTRL1_CORE1_CLK_PDLY_BYPASS = 13;
-static const uint32_t NET_CTRL1_CORE2_CLK_PDLY_BYPASS = 14;
-static const uint32_t NET_CTRL1_CORE3_CLK_PDLY_BYPASS = 15;
-static const uint32_t NET_CTRL1_CACHE0_CLK_SKEWADJUST_RESET_DC = 16;
-static const uint32_t NET_CTRL1_CACHE1_CLK_SKEWADJUST_RESET_DC = 17;
-static const uint32_t NET_CTRL1_CACHE2_CLK_SKEWADJUST_RESET_DC = 18;
-static const uint32_t NET_CTRL1_CACHE3_CLK_SKEWADJUST_RESET_DC = 19;
-static const uint32_t NET_CTRL1_CORE0_CLK_DCADJUST_RESET_DC = 20;
-static const uint32_t NET_CTRL1_CORE1_CLK_DCADJUST_RESET_DC = 21;
-static const uint32_t NET_CTRL1_CORE2_CLK_DCADJUST_RESET_DC = 22;
-static const uint32_t NET_CTRL1_CORE3_CLK_DCADJUST_RESET_DC = 23;
-static const uint32_t NET_CTRL1_PCB_ACCESS = 24;
-static const uint32_t NET_CTRL1_PCB_ACCESS_LEN = 8;
-//<< [NET_CTRL1]
-// iohs/reg00023.H
-
 //>> [DLP_LINK0_INFO]
 static const uint64_t DLP_LINK0_INFO = 0x18011014ull;
 
@@ -114,6 +80,40 @@ static const uint32_t DLP_LINK1_SYN_CAPTURE_VALID = 63;
 //<< [DLP_LINK1_SYN_CAPTURE]
 // iohs/reg00020.H
 
+//>> [NET_CTRL1]
+static const uint64_t NET_CTRL1_RW = 0x180f0044ull;
+static const uint64_t NET_CTRL1_RW_WAND = 0x180f0045ull;
+static const uint64_t NET_CTRL1_RW_WOR = 0x180f0046ull;
+
+static const uint32_t NET_CTRL1_CACHE0_CLK_DCC_BYPASS = 0;
+static const uint32_t NET_CTRL1_CACHE1_CLK_DCC_BYPASS = 1;
+static const uint32_t NET_CTRL1_CACHE2_CLK_DCC_BYPASS = 2;
+static const uint32_t NET_CTRL1_CACHE3_CLK_DCC_BYPASS = 3;
+static const uint32_t NET_CTRL1_CORE0_CLK_DCC_BYPASS = 4;
+static const uint32_t NET_CTRL1_CORE1_CLK_DCC_BYPASS = 5;
+static const uint32_t NET_CTRL1_CORE2_CLK_DCC_BYPASS = 6;
+static const uint32_t NET_CTRL1_CORE3_CLK_DCC_BYPASS = 7;
+static const uint32_t NET_CTRL1_CACHE0_CLK_PDLY_BYPASS = 8;
+static const uint32_t NET_CTRL1_CACHE1_CLK_PDLY_BYPASS = 9;
+static const uint32_t NET_CTRL1_CACHE2_CLK_PDLY_BYPASS = 10;
+static const uint32_t NET_CTRL1_CACHE3_CLK_PDLY_BYPASS = 11;
+static const uint32_t NET_CTRL1_CORE0_CLK_PDLY_BYPASS = 12;
+static const uint32_t NET_CTRL1_CORE1_CLK_PDLY_BYPASS = 13;
+static const uint32_t NET_CTRL1_CORE2_CLK_PDLY_BYPASS = 14;
+static const uint32_t NET_CTRL1_CORE3_CLK_PDLY_BYPASS = 15;
+static const uint32_t NET_CTRL1_CACHE0_CLK_SKEWADJUST_RESET_DC = 16;
+static const uint32_t NET_CTRL1_CACHE1_CLK_SKEWADJUST_RESET_DC = 17;
+static const uint32_t NET_CTRL1_CACHE2_CLK_SKEWADJUST_RESET_DC = 18;
+static const uint32_t NET_CTRL1_CACHE3_CLK_SKEWADJUST_RESET_DC = 19;
+static const uint32_t NET_CTRL1_CORE0_CLK_DCADJUST_RESET_DC = 20;
+static const uint32_t NET_CTRL1_CORE1_CLK_DCADJUST_RESET_DC = 21;
+static const uint32_t NET_CTRL1_CORE2_CLK_DCADJUST_RESET_DC = 22;
+static const uint32_t NET_CTRL1_CORE3_CLK_DCADJUST_RESET_DC = 23;
+static const uint32_t NET_CTRL1_PCB_ACCESS = 24;
+static const uint32_t NET_CTRL1_PCB_ACCESS_LEN = 8;
+//<< [NET_CTRL1]
+// iohs/reg00024.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
@@ -123,5 +123,6 @@ static const uint32_t DLP_LINK1_SYN_CAPTURE_VALID = 63;
 #include "iohs/reg00021.H"
 #include "iohs/reg00022.H"
 #include "iohs/reg00023.H"
+#include "iohs/reg00024.H"
 #endif
 #endif

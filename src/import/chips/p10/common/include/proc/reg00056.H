@@ -3240,6 +3240,107 @@ fapi_try_exit:
 }
 //<< PUT_[PB_PTLSCOM10_PTL_FIR_REG_RW]
 
+//>> PREP_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PB_PTLSCOM10_PTL_FIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_PTLSCOM10_PTL_FIR_REG_WO_AND;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
+
+//>> GET_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PB_PTLSCOM10_PTL_FIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_PTLSCOM10_PTL_FIR_REG_WO_AND;
+#endif
+    return fapi2::getScom(i_target, PB_PTLSCOM10_PTL_FIR_REG_WO_AND, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
+
+//>> PUT_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PB_PTLSCOM10_PTL_FIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PB_PTLSCOM10_PTL_FIR_REG_RW, PB_PTLSCOM10_PTL_FIR_REG_WO_AND, PB_PTLSCOM10_PTL_FIR_REG_WO_OR));
+#endif
+    return fapi2::putScom(i_target, PB_PTLSCOM10_PTL_FIR_REG_WO_AND, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
+
+//>> PREP_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PB_PTLSCOM10_PTL_FIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_PTLSCOM10_PTL_FIR_REG_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
+
+//>> GET_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PB_PTLSCOM10_PTL_FIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_PTLSCOM10_PTL_FIR_REG_WO_OR;
+#endif
+    return fapi2::getScom(i_target, PB_PTLSCOM10_PTL_FIR_REG_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
+
+//>> PUT_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PB_PTLSCOM10_PTL_FIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PB_PTLSCOM10_PTL_FIR_REG_RW, PB_PTLSCOM10_PTL_FIR_REG_WO_AND, PB_PTLSCOM10_PTL_FIR_REG_WO_OR));
+#endif
+    return fapi2::putScom(i_target, PB_PTLSCOM10_PTL_FIR_REG_WO_OR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
+
+
 //>> SET_[PB_PTLSCOM10_PTL_FIR_REG_FMR00_TRAINED]
 static inline fapi2::buffer<uint64_t>& SET_PB_PTLSCOM10_PTL_FIR_REG_FMR00_TRAINED(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
@@ -7260,6 +7361,369 @@ fapi_try_exit:
 }
 //<< GET_[PB_PTLSCOM10_PTL_FIR_REG_PTL3_SPARE]
 
+//>> PREP_[PSI_MAC_SCOM_REGS_RX_MODE]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PSI_MAC_SCOM_REGS_RX_MODE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PSI_MAC_SCOM_REGS_RX_MODE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PSI_MAC_SCOM_REGS_RX_MODE]
+
+//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PSI_MAC_SCOM_REGS_RX_MODE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PSI_MAC_SCOM_REGS_RX_MODE;
+#endif
+    return fapi2::getScom(i_target, PSI_MAC_SCOM_REGS_RX_MODE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE]
+
+//>> PUT_[PSI_MAC_SCOM_REGS_RX_MODE]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PSI_MAC_SCOM_REGS_RX_MODE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return fapi2::putScom(i_target, PSI_MAC_SCOM_REGS_RX_MODE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PSI_MAC_SCOM_REGS_RX_MODE]
+
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_VREF(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_VREF,
+           PSI_MAC_SCOM_REGS_RX_MODE_VREF_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_VREF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_VREF(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_VREF,
+           PSI_MAC_SCOM_REGS_RX_MODE_VREF_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_VREF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
+
+//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
+static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_VREF(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_VREF,
+           PSI_MAC_SCOM_REGS_RX_MODE_VREF_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_VREF chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.setBit<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+
+//>> CLEAR_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+static inline fapi2::buffer<uint64_t>& CLEAR_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.clearBit<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+
+//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+
+//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+static inline bool GET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return i_data.getBit<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC,
+           PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC,
+           PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
+
+//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
+static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC,
+           PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_PEAK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_PEAK,
+           PSI_MAC_SCOM_REGS_RX_MODE_PEAK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_PEAK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_PEAK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_PEAK,
+           PSI_MAC_SCOM_REGS_RX_MODE_PEAK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_PEAK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
+
+//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
+static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_PEAK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_PEAK,
+           PSI_MAC_SCOM_REGS_RX_MODE_PEAK_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_PEAK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE,
+           PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
+
+//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
+static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE,
+           PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
+
+//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
+static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
+#endif
+    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE,
+           PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
+
 //>> PREP_[TP_TPBR_AD_ALTD_ADDR_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPBR_AD_ALTD_ADDR_REG(const fapi2::Target<K, M, V>& i_target)
@@ -7818,470 +8282,6 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[TP_TPBR_AD_XSCOM_BASE_REG_DISABLE_LOCAL_SHORTCUT]
-
-//>> PREP_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PB_PTLSCOM10_PTL_FIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTLSCOM10_PTL_FIR_REG_WO_AND;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
-
-//>> GET_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PB_PTLSCOM10_PTL_FIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTLSCOM10_PTL_FIR_REG_WO_AND;
-#endif
-    return fapi2::getScom(i_target, PB_PTLSCOM10_PTL_FIR_REG_WO_AND, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
-
-//>> PUT_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PB_PTLSCOM10_PTL_FIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PB_PTLSCOM10_PTL_FIR_REG_RW, PB_PTLSCOM10_PTL_FIR_REG_WO_AND, PB_PTLSCOM10_PTL_FIR_REG_WO_OR));
-#endif
-    return fapi2::putScom(i_target, PB_PTLSCOM10_PTL_FIR_REG_WO_AND, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[PB_PTLSCOM10_PTL_FIR_REG_WO_AND]
-
-//>> PREP_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PB_PTLSCOM10_PTL_FIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTLSCOM10_PTL_FIR_REG_WO_OR;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
-
-//>> GET_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PB_PTLSCOM10_PTL_FIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_PTLSCOM10_PTL_FIR_REG_WO_OR;
-#endif
-    return fapi2::getScom(i_target, PB_PTLSCOM10_PTL_FIR_REG_WO_OR, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
-
-//>> PUT_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PB_PTLSCOM10_PTL_FIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PB_PTLSCOM10_PTL_FIR_REG_RW, PB_PTLSCOM10_PTL_FIR_REG_WO_AND, PB_PTLSCOM10_PTL_FIR_REG_WO_OR));
-#endif
-    return fapi2::putScom(i_target, PB_PTLSCOM10_PTL_FIR_REG_WO_OR, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[PB_PTLSCOM10_PTL_FIR_REG_WO_OR]
-
-
-//>> PREP_[PSI_MAC_SCOM_REGS_RX_MODE]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PSI_MAC_SCOM_REGS_RX_MODE(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PSI_MAC_SCOM_REGS_RX_MODE;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[PSI_MAC_SCOM_REGS_RX_MODE]
-
-//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PSI_MAC_SCOM_REGS_RX_MODE(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PSI_MAC_SCOM_REGS_RX_MODE;
-#endif
-    return fapi2::getScom(i_target, PSI_MAC_SCOM_REGS_RX_MODE, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE]
-
-//>> PUT_[PSI_MAC_SCOM_REGS_RX_MODE]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PSI_MAC_SCOM_REGS_RX_MODE(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return fapi2::putScom(i_target, PSI_MAC_SCOM_REGS_RX_MODE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[PSI_MAC_SCOM_REGS_RX_MODE]
-
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_VREF(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_VREF,
-           PSI_MAC_SCOM_REGS_RX_MODE_VREF_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_VREF chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_VREF(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_VREF,
-           PSI_MAC_SCOM_REGS_RX_MODE_VREF_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_VREF chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
-
-//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
-static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_VREF(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_VREF,
-           PSI_MAC_SCOM_REGS_RX_MODE_VREF_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_VREF chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_VREF]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.setBit<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-
-//>> CLEAR_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-static inline fapi2::buffer<uint64_t>& CLEAR_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.clearBit<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-
-//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-
-//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-static inline bool GET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return i_data.getBit<PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_TEST_MODE]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC,
-           PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC,
-           PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
-
-//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
-static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC,
-           PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_TERM_MODE_ENC]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_PEAK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_PEAK,
-           PSI_MAC_SCOM_REGS_RX_MODE_PEAK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_PEAK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_PEAK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_PEAK,
-           PSI_MAC_SCOM_REGS_RX_MODE_PEAK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_PEAK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
-
-//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
-static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_PEAK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_PEAK,
-           PSI_MAC_SCOM_REGS_RX_MODE_PEAK_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_PEAK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_PEAK]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE,
-           PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
-
-//>> SET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
-static inline fapi2::buffer<uint64_t>& SET_PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return o_data.insertFromRight<PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE,
-           PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
-
-//>> GET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
-static inline fapi2::buffer<uint64_t>& GET_PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PSI_MAC_SCOM_REGS_RX_MODE));
-#endif
-    return i_data.extractToRight<PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE,
-           PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE]
 
 //>>THE END<<
 

@@ -47,7 +47,7 @@ static const uint64_t AXON_CPLT_CONF1_WO_OR = 0x18000019ull;
 static const uint32_t AXON_CPLT_CONF1_OD_IOVALID_DC = 0;
 static const uint32_t AXON_CPLT_CONF1_EV_IOVALID_DC = 1;
 //<< [AXON_CPLT_CONF1]
-// iohs/reg00034.H
+// iohs/reg00035.H
 
 //>> [DLP_LINK0_RX_LANE_CONTROL]
 static const uint64_t DLP_LINK0_RX_LANE_CONTROL = 0x18011012ull;
@@ -62,8 +62,10 @@ static const uint32_t DLP_LINK0_RX_LANE_CONTROL_LOCKED = 36;
 static const uint32_t DLP_LINK0_RX_LANE_CONTROL_LOCKED_LEN = 9;
 static const uint32_t DLP_LINK0_RX_LANE_CONTROL_FAILED = 48;
 static const uint32_t DLP_LINK0_RX_LANE_CONTROL_FAILED_LEN = 9;
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_ERROR_STATUS = 62; // p10:20,
+static const uint32_t DLP_LINK0_RX_LANE_CONTROL_ERROR_STATUS_LEN = 2;
 //<< [DLP_LINK0_RX_LANE_CONTROL]
-// iohs/reg00034.H
+// iohs/reg00035.H
 
 //>> [DLP_OPTICAL_CONFIG]
 static const uint64_t DLP_OPTICAL_CONFIG = 0x1801100full;
@@ -98,7 +100,7 @@ static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS = 59;
 static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT = 60;
 static const uint32_t DLP_OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT_LEN = 4;
 //<< [DLP_OPTICAL_CONFIG]
-// iohs/reg00034.H
+// iohs/reg00035.H
 
 //>> [ERROR_REG]
 static const uint64_t ERROR_REG = 0x180f001full;
@@ -132,17 +134,19 @@ static const uint32_t ERROR_REG_QME_INTERFACE_PARITY_ERROR = 32;
 static const uint32_t ERROR_REG_QME_DATA_PARITY_ERROR = 33;
 static const uint32_t ERROR_REG_QME_ADDR_PARITY_ERROR = 34;
 static const uint32_t ERROR_REG_QME_FSM_ERROR = 35;
+static const uint32_t ERROR_REG_QME_RISING_EDGE_DETECTED_ON_QUIESCE = 36; // p10:20,
+static const uint32_t ERROR_REG_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE = 37; // p10:20,
 //<< [ERROR_REG]
-// iohs/reg00034.H
+// iohs/reg00035.H
 
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
 }
 }
-#include "iohs/reg00034.H"
 #include "iohs/reg00035.H"
 #include "iohs/reg00036.H"
 #include "iohs/reg00037.H"
+#include "iohs/reg00038.H"
 #endif
 #endif

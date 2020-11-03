@@ -62,11 +62,55 @@ static const uint32_t CPLT_CTRL2_14_PGOOD = 18;
 //<< [CPLT_CTRL2]
 // mc/reg00012.H
 
+//>> [CPLT_MASK0]
+static const uint64_t CPLT_MASK0 = 0x0c000101ull;
+
+static const uint32_t CPLT_MASK0_ITR_MASK = 0;
+static const uint32_t CPLT_MASK0_ITR_MASK_LEN = 32;
+//<< [CPLT_MASK0]
+// mc/reg00012.H
+
+//>> [EPS_DBG_MODE_REG]
+static const uint64_t EPS_DBG_MODE_REG = 0x0c0107c0ull;
+
+static const uint32_t EPS_DBG_MODE_REG_GLB_BRCST_MODE = 0;
+static const uint32_t EPS_DBG_MODE_REG_GLB_BRCST_MODE_LEN = 3;
+static const uint32_t EPS_DBG_MODE_REG_TRACE_SEL_MODE = 3;
+static const uint32_t EPS_DBG_MODE_REG_TRACE_SEL_MODE_LEN = 3;
+static const uint32_t EPS_DBG_MODE_REG_TRIG_SEL_MODE = 6;
+static const uint32_t EPS_DBG_MODE_REG_TRIG_SEL_MODE_LEN = 2;
+static const uint32_t EPS_DBG_MODE_REG_STOP_ON_XSTOP_SELECTION = 8;
+static const uint32_t EPS_DBG_MODE_REG_STOP_ON_RECOV_ERR_SELECTION = 9;
+static const uint32_t EPS_DBG_MODE_REG_STOP_ON_SPATTN_SELECTION = 10;
+static const uint32_t EPS_DBG_MODE_REG_STOP_ON_HOSTATTN_SELECTION = 11;
+static const uint32_t EPS_DBG_MODE_REG_FREEZE_SEL_MODE = 12;
+static const uint32_t EPS_DBG_MODE_REG_MASTER_CLOCK_ENABLE = 13;
+static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_ON = 16;
+static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS = 17;
+static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS_LEN = 2;
+static const uint32_t EPS_DBG_MODE_REG_IS_FROZEN_STATUS = 19;
+static const uint32_t EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS = 20;
+static const uint32_t EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS_LEN = 3;
+static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS = 23;
+static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS_LEN = 3;
+static const uint32_t EPS_DBG_MODE_REG_UNUSED = 26;
+static const uint32_t EPS_DBG_MODE_REG_UNUSED_LEN = 6;
+//<< [EPS_DBG_MODE_REG]
+// mc/reg00012.H
+
 //>> [PCB_OPCG_STOP]
 static const uint64_t PCB_OPCG_STOP = 0x0c030030ull;
 
 static const uint32_t PCB_OPCG_STOP_PCB_OPCGSTOP = 0;
 //<< [PCB_OPCG_STOP]
+// mc/reg00012.H
+
+//>> [SCAN64CONTSCAN]
+static const uint64_t SCAN64CONTSCAN = 0x0c03f000ull;
+
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
+static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
+//<< [SCAN64CONTSCAN]
 // mc/reg00012.H
 
 //>> [SCOMFIR_MCFIRACT0]
@@ -85,6 +129,7 @@ static const uint32_t SCOMFIR_MCMODE0_SCOM_PERFMON_STOP_COMMAND = 1;
 static const uint32_t SCOMFIR_MCMODE0_ENABLE_CENTAUR_PERFMON_COMMAND = 2;
 static const uint32_t SCOMFIR_MCMODE0_DISABLE_PERFMON_RESET_ON_START = 3;
 static const uint32_t SCOMFIR_MCMODE0_RESERVED_4 = 4;
+static const uint32_t SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR = 4; // p10:20,
 static const uint32_t SCOMFIR_MCMODE0_FORCE_COMMANDLIST_VALID = 5;
 static const uint32_t SCOMFIR_MCMODE0_FORCE_ANY_BAR_ACTIVE = 6;
 static const uint32_t SCOMFIR_MCMODE0_RESERVED_7 = 7;
@@ -92,6 +137,7 @@ static const uint32_t SCOMFIR_MCMODE0_ENABLE_EMERGENCY_THROTTLE = 8;
 static const uint32_t SCOMFIR_MCMODE0_ENABLE_CENTAUR_CHECKSTOP_COMMAND = 9;
 static const uint32_t SCOMFIR_MCMODE0_ENABLE_CENTAUR_TRACESTOP_COMMAND = 10;
 static const uint32_t SCOMFIR_MCMODE0_RESERVED_11 = 11;
+static const uint32_t SCOMFIR_MCMODE0_HWFM_PERMANENT = 11; // p10:20,
 static const uint32_t SCOMFIR_MCMODE0_DISABLE_MC_SYNC = 12;
 static const uint32_t SCOMFIR_MCMODE0_RESERVED_13 = 13;
 static const uint32_t SCOMFIR_MCMODE0_64B_WR_IS_PWRT = 14;
@@ -144,50 +190,6 @@ static const uint32_t SCOMFIR_MCPERF1_EN_VG_SPECDIS = 46;
 static const uint32_t SCOMFIR_MCPERF1_RESERVED_47_63 = 47;
 static const uint32_t SCOMFIR_MCPERF1_RESERVED_47_63_LEN = 17;
 //<< [SCOMFIR_MCPERF1]
-// mc/reg00012.H
-
-//>> [EPS_DBG_MODE_REG]
-static const uint64_t EPS_DBG_MODE_REG = 0x0c0107c0ull;
-
-static const uint32_t EPS_DBG_MODE_REG_GLB_BRCST_MODE = 0;
-static const uint32_t EPS_DBG_MODE_REG_GLB_BRCST_MODE_LEN = 3;
-static const uint32_t EPS_DBG_MODE_REG_TRACE_SEL_MODE = 3;
-static const uint32_t EPS_DBG_MODE_REG_TRACE_SEL_MODE_LEN = 3;
-static const uint32_t EPS_DBG_MODE_REG_TRIG_SEL_MODE = 6;
-static const uint32_t EPS_DBG_MODE_REG_TRIG_SEL_MODE_LEN = 2;
-static const uint32_t EPS_DBG_MODE_REG_STOP_ON_XSTOP_SELECTION = 8;
-static const uint32_t EPS_DBG_MODE_REG_STOP_ON_RECOV_ERR_SELECTION = 9;
-static const uint32_t EPS_DBG_MODE_REG_STOP_ON_SPATTN_SELECTION = 10;
-static const uint32_t EPS_DBG_MODE_REG_STOP_ON_HOSTATTN_SELECTION = 11;
-static const uint32_t EPS_DBG_MODE_REG_FREEZE_SEL_MODE = 12;
-static const uint32_t EPS_DBG_MODE_REG_MASTER_CLOCK_ENABLE = 13;
-static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_ON = 16;
-static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS = 17;
-static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS_LEN = 2;
-static const uint32_t EPS_DBG_MODE_REG_IS_FROZEN_STATUS = 19;
-static const uint32_t EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS = 20;
-static const uint32_t EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS_LEN = 3;
-static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS = 23;
-static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS_LEN = 3;
-static const uint32_t EPS_DBG_MODE_REG_UNUSED = 26;
-static const uint32_t EPS_DBG_MODE_REG_UNUSED_LEN = 6;
-//<< [EPS_DBG_MODE_REG]
-// mc/reg00012.H
-
-//>> [SCAN64CONTSCAN]
-static const uint64_t SCAN64CONTSCAN = 0x0c03f000ull;
-
-static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
-static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
-//<< [SCAN64CONTSCAN]
-// mc/reg00012.H
-
-//>> [CPLT_MASK0]
-static const uint64_t CPLT_MASK0 = 0x0c000101ull;
-
-static const uint32_t CPLT_MASK0_ITR_MASK = 0;
-static const uint32_t CPLT_MASK0_ITR_MASK_LEN = 32;
-//<< [CPLT_MASK0]
 // mc/reg00012.H
 
 //>>THE END<<

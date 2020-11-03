@@ -39,6 +39,38 @@ namespace iohs
 #endif
 
 
+//>> [DLP_MISC_ERROR_STATUS]
+static const uint64_t DLP_MISC_ERROR_STATUS = 0x18011029ull;
+
+static const uint32_t DLP_MISC_ERROR_STATUS_MISC_RESET_KEEPER = 0;
+static const uint32_t DLP_MISC_ERROR_STATUS_MISC_INT_ERROR_STATUS = 1;
+static const uint32_t DLP_MISC_ERROR_STATUS_MISC_INT_ERROR_STATUS_LEN = 7;
+static const uint32_t DLP_MISC_ERROR_STATUS_RECEIVE_CONTROL_ERROR = 1; // p10:20,
+static const uint32_t DLP_MISC_ERROR_STATUS_LINK0_INTERNAL_ACK_ERROR = 2; // p10:20,
+static const uint32_t DLP_MISC_ERROR_STATUS_LINK0_T9_CONTROL_ERROR = 3; // p10:20,
+static const uint32_t DLP_MISC_ERROR_STATUS_LINK0_NUM_SAVE_ERROR = 4; // p10:20,
+static const uint32_t DLP_MISC_ERROR_STATUS_LINK1_INTERNAL_ACK_ERROR = 5; // p10:20,
+static const uint32_t DLP_MISC_ERROR_STATUS_LINK1_T9_CONTROL_ERROR = 6; // p10:20,
+static const uint32_t DLP_MISC_ERROR_STATUS_LINK1_NUM_SAVE_ERROR = 7; // p10:20,
+static const uint32_t DLP_MISC_ERROR_STATUS_DLX0_ERROR_STATUS = 8;
+static const uint32_t DLP_MISC_ERROR_STATUS_DLX0_ERROR_STATUS_LEN = 8;
+static const uint32_t DLP_MISC_ERROR_STATUS_DLX1_ERROR_STATUS = 16;
+static const uint32_t DLP_MISC_ERROR_STATUS_DLX1_ERROR_STATUS_LEN = 8;
+static const uint32_t DLP_MISC_ERROR_STATUS_OLL_ERROR_STATUS = 24;
+static const uint32_t DLP_MISC_ERROR_STATUS_OLL_ERROR_STATUS_LEN = 18;
+static const uint32_t DLP_MISC_ERROR_STATUS_ODL_ERROR_STATUS = 44;
+static const uint32_t DLP_MISC_ERROR_STATUS_ODL_ERROR_STATUS_LEN = 18;
+//<< [DLP_MISC_ERROR_STATUS]
+// iohs/reg00012.H
+
+//>> [MULTICAST_GROUP_1]
+static const uint64_t MULTICAST_GROUP_1 = 0x180f0001ull;
+
+static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
+static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
+//<< [MULTICAST_GROUP_1]
+// iohs/reg00015.H
+
 //>> [NET_CTRL0]
 static const uint64_t NET_CTRL0_RW = 0x180f0040ull;
 static const uint64_t NET_CTRL0_RW_WAND = 0x180f0041ull;
@@ -75,6 +107,7 @@ static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
 // ERROR Duplicate Dial         static const uint32_t NET_CTRL0_PM_ACCESS = 30;
+static const uint32_t NET_CTRL0_OOB_PROTECTION = 30; // p10:20,
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
 //<< [NET_CTRL0]
 // iohs/reg00015.H
@@ -86,31 +119,6 @@ static const uint32_t PLL_LOCK_REG_LOCK = 0;
 static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
 //<< [PLL_LOCK_REG]
 // iohs/reg00015.H
-
-//>> [MULTICAST_GROUP_1]
-static const uint64_t MULTICAST_GROUP_1 = 0x180f0001ull;
-
-static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
-static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
-//<< [MULTICAST_GROUP_1]
-// iohs/reg00015.H
-
-//>> [DLP_MISC_ERROR_STATUS]
-static const uint64_t DLP_MISC_ERROR_STATUS = 0x18011029ull;
-
-static const uint32_t DLP_MISC_ERROR_STATUS_MISC_RESET_KEEPER = 0;
-static const uint32_t DLP_MISC_ERROR_STATUS_MISC_INT_ERROR_STATUS = 1;
-static const uint32_t DLP_MISC_ERROR_STATUS_MISC_INT_ERROR_STATUS_LEN = 7;
-static const uint32_t DLP_MISC_ERROR_STATUS_DLX0_ERROR_STATUS = 8;
-static const uint32_t DLP_MISC_ERROR_STATUS_DLX0_ERROR_STATUS_LEN = 8;
-static const uint32_t DLP_MISC_ERROR_STATUS_DLX1_ERROR_STATUS = 16;
-static const uint32_t DLP_MISC_ERROR_STATUS_DLX1_ERROR_STATUS_LEN = 8;
-static const uint32_t DLP_MISC_ERROR_STATUS_OLL_ERROR_STATUS = 24;
-static const uint32_t DLP_MISC_ERROR_STATUS_OLL_ERROR_STATUS_LEN = 18;
-static const uint32_t DLP_MISC_ERROR_STATUS_ODL_ERROR_STATUS = 44;
-static const uint32_t DLP_MISC_ERROR_STATUS_ODL_ERROR_STATUS_LEN = 18;
-//<< [DLP_MISC_ERROR_STATUS]
-// iohs/reg00012.H
 
 //>>THE END<<
 

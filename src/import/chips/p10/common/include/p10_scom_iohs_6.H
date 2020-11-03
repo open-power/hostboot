@@ -107,17 +107,17 @@ static const uint32_t DLP_FIR_REG_1_UNRECOVERABLE_ERROR = 59;
 static const uint32_t DLP_FIR_REG_0_INTERNAL_ERROR = 60;
 static const uint32_t DLP_FIR_REG_1_INTERNAL_ERROR = 61;
 //<< [DLP_FIR_REG]
-// iohs/reg00024.H
+// iohs/reg00025.H
 
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
 }
 }
-#include "iohs/reg00024.H"
 #include "iohs/reg00025.H"
 #include "iohs/reg00026.H"
 #include "iohs/reg00027.H"
 #include "iohs/reg00028.H"
+#include "iohs/reg00029.H"
 #endif
 #endif

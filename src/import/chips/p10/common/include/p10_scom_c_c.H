@@ -48,6 +48,8 @@ static const uint32_t CPMS_CGCSR_L3_CLK_SYNC_ENABLE = 0;
 static const uint32_t CPMS_CGCSR_CL2_CLK_SYNC_ENABLE = 1;
 static const uint32_t CPMS_CGCSR_RESERVED_2_3 = 2;
 static const uint32_t CPMS_CGCSR_RESERVED_2_3_LEN = 2;
+static const uint32_t CPMS_CGCSR_ANALOG_SENSOR_INPUT_GATE = 2; // p10:20,
+static const uint32_t CPMS_CGCSR_PFET_SENSE_INPUT_GATE = 3; // p10:20,
 static const uint32_t CPMS_CGCSR_L3_CLKGLM_ASYNC_RESET = 4;
 static const uint32_t CPMS_CGCSR_L3_CLKGLM_SEL = 7;
 static const uint32_t CPMS_CGCSR_CL2_CLKGLM_ASYNC_RESET = 8;
@@ -57,6 +59,21 @@ static const uint32_t CPMS_CGCSR_L3_CACHE_SB_CTRL_LEN = 4;
 static const uint32_t CPMS_CGCSR_L3_CLK_SYNC_DONE = 32;
 static const uint32_t CPMS_CGCSR_CL2_CLK_SYNC_DONE = 33;
 //<< [CPMS_CGCSR]
+// c/reg00012.H
+
+//>> [CPMS_DHCR]
+static const uint64_t CPMS_DHCR = 0x200e0e54ull;
+
+static const uint32_t CPMS_DHCR_FREEZE_HISTORY_ON_LARGE = 0;
+static const uint32_t CPMS_DHCR_RESET_DHDR_ON_FDIR_WRITE = 1;
+static const uint32_t CPMS_DHCR_ADJACENT_WARN_RECORD_MODE = 2;
+static const uint32_t CPMS_DHCR_SPARE = 3;
+static const uint32_t CPMS_DHCR_SPARE_LEN = 2;
+static const uint32_t CPMS_DHCR_EVENT_HISTORY_SELECT = 5;
+static const uint32_t CPMS_DHCR_EVENT_HISTORY_SELECT_LEN = 3;
+static const uint32_t CPMS_DHCR_EVENT_COUNT = 8;
+static const uint32_t CPMS_DHCR_EVENT_COUNT_LEN = 8;
+//<< [CPMS_DHCR]
 // c/reg00012.H
 
 //>> [EC_PC_COMMON_SPR_SCOMC]
@@ -114,21 +131,6 @@ static const uint32_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG_CGC_LEN = 9;
 static const uint32_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG_BANK = 28;
 static const uint32_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG_ERR = 29;
 //<< [L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG]
-// c/reg00012.H
-
-//>> [CPMS_DHCR]
-static const uint64_t CPMS_DHCR = 0x200e0e54ull;
-
-static const uint32_t CPMS_DHCR_FREEZE_HISTORY_ON_LARGE = 0;
-static const uint32_t CPMS_DHCR_RESET_DHDR_ON_FDIR_WRITE = 1;
-static const uint32_t CPMS_DHCR_ADJACENT_WARN_RECORD_MODE = 2;
-static const uint32_t CPMS_DHCR_SPARE = 3;
-static const uint32_t CPMS_DHCR_SPARE_LEN = 2;
-static const uint32_t CPMS_DHCR_EVENT_HISTORY_SELECT = 5;
-static const uint32_t CPMS_DHCR_EVENT_HISTORY_SELECT_LEN = 3;
-static const uint32_t CPMS_DHCR_EVENT_COUNT = 8;
-static const uint32_t CPMS_DHCR_EVENT_COUNT_LEN = 8;
-//<< [CPMS_DHCR]
 // c/reg00012.H
 
 //>> [NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG]

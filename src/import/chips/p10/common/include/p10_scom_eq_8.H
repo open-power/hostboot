@@ -141,6 +141,8 @@ static const uint32_t ERROR_REG_QME_INTERFACE_PARITY_ERROR = 32;
 static const uint32_t ERROR_REG_QME_DATA_PARITY_ERROR = 33;
 static const uint32_t ERROR_REG_QME_ADDR_PARITY_ERROR = 34;
 static const uint32_t ERROR_REG_QME_FSM_ERROR = 35;
+static const uint32_t ERROR_REG_QME_RISING_EDGE_DETECTED_ON_QUIESCE = 36; // p10:20,
+static const uint32_t ERROR_REG_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE = 37; // p10:20,
 //<< [ERROR_REG]
 // eq/reg00008.H
 
@@ -182,6 +184,16 @@ static const uint64_t QME_RVCR = 0x200e0084ull;
 static const uint32_t QME_RVCR_RVID_VALUE = 1;
 static const uint32_t QME_RVCR_RVID_VALUE_LEN = 7;
 //<< [QME_RVCR]
+// eq/reg00008.H
+
+//>> [QME_SCOM_XIRAMRA]
+static const uint64_t QME_SCOM_XIRAMRA = 0x200e0204ull;
+
+static const uint32_t QME_SCOM_XIRAMRA_QME_SCOM_XIXCR_XCR = 1;
+static const uint32_t QME_SCOM_XIRAMRA_QME_SCOM_XIXCR_XCR_LEN = 3;
+static const uint32_t QME_SCOM_XIRAMRA_SPRG0 = 32;
+static const uint32_t QME_SCOM_XIRAMRA_SPRG0_LEN = 32;
+//<< [QME_SCOM_XIRAMRA]
 // eq/reg00008.H
 
 //>> [QME_SCOM_XIVDR28]
@@ -249,16 +261,6 @@ static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_FARR = 57;
 static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_CMSK = 58;
 static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_INEX = 59;
 //<< [SCAN_REGION_TYPE]
-// eq/reg00008.H
-
-//>> [QME_SCOM_XIRAMRA]
-static const uint64_t QME_SCOM_XIRAMRA = 0x200e0204ull;
-
-static const uint32_t QME_SCOM_XIRAMRA_QME_SCOM_XIXCR_XCR = 1;
-static const uint32_t QME_SCOM_XIRAMRA_QME_SCOM_XIXCR_XCR_LEN = 3;
-static const uint32_t QME_SCOM_XIRAMRA_SPRG0 = 32;
-static const uint32_t QME_SCOM_XIRAMRA_SPRG0_LEN = 32;
-//<< [QME_SCOM_XIRAMRA]
 // eq/reg00008.H
 
 //>> [WOF]

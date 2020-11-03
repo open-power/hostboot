@@ -1543,6 +1543,7 @@ static inline fapi2::buffer<uint64_t>& SET_TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPAR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(TOD_PRI_PORT_0_CTRL_REG));
 #endif
     return o_data.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_31,
@@ -1561,6 +1562,7 @@ static inline fapi2::buffer<uint64_t>& SET_TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPAR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(TOD_PRI_PORT_0_CTRL_REG));
 #endif
     return o_data.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_31,
@@ -1579,6 +1581,7 @@ static inline fapi2::buffer<uint64_t>& GET_TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPAR
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(TOD_PRI_PORT_0_CTRL_REG));
 #endif
     return i_data.extractToRight<TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_31,
@@ -1592,12 +1595,70 @@ fapi_try_exit:
 }
 //<< GET_[TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_31]
 
+//>> SET_[TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29]
+static inline fapi2::buffer<uint64_t>& SET_TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TOD_PRI_PORT_0_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29,
+           TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29]
+
+//>> SET_[TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29]
+static inline fapi2::buffer<uint64_t>& SET_TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TOD_PRI_PORT_0_CTRL_REG));
+#endif
+    return o_data.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29,
+           TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29]
+
+//>> GET_[TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29]
+static inline fapi2::buffer<uint64_t>& GET_TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TOD_PRI_PORT_0_CTRL_REG));
+#endif
+    return i_data.extractToRight<TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29,
+           TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[TOD_PRI_PORT_0_CTRL_REG_REG_0X01_SPARE_28_29]
+
 //>> SET_[TOD_PRI_PORT_0_CTRL_REG_PRI_I_PATH_DELAY_VALUE]
 static inline fapi2::buffer<uint64_t>& SET_TOD_PRI_PORT_0_CTRL_REG_PRI_I_PATH_DELAY_VALUE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TOD_PRI_PORT_0_CTRL_REG));
 #endif
     return o_data.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_PRI_I_PATH_DELAY_VALUE,
@@ -1616,6 +1677,7 @@ static inline fapi2::buffer<uint64_t>& SET_TOD_PRI_PORT_0_CTRL_REG_PRI_I_PATH_DE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TOD_PRI_PORT_0_CTRL_REG));
 #endif
     return o_data.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_PRI_I_PATH_DELAY_VALUE,
@@ -1635,6 +1697,7 @@ static inline fapi2::buffer<uint64_t>& GET_TOD_PRI_PORT_0_CTRL_REG_PRI_I_PATH_DE
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TOD_PRI_PORT_0_CTRL_REG));
 #endif
     return i_data.extractToRight<TOD_PRI_PORT_0_CTRL_REG_PRI_I_PATH_DELAY_VALUE,

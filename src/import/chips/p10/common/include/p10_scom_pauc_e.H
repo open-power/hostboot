@@ -182,33 +182,13 @@ static const uint32_t PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK = 39;
 //<< [PB_PTL_FIR_MASK_REG]
 // pauc/reg00014.H
 
-//>> [SLAVE_CONFIG_REG]
-static const uint64_t SLAVE_CONFIG_REG = 0x100f001eull;
-
-static const uint32_t SLAVE_CONFIG_REG_DISABLE_PERV_THOLD_CHECK = 0;
-static const uint32_t SLAVE_CONFIG_REG_DISABLE_MALF_PULSE_GEN = 1;
-static const uint32_t SLAVE_CONFIG_REG_STOP_HANG_CNT_SYS_XSTP = 2;
-static const uint32_t SLAVE_CONFIG_REG_DISABLE_CL_ATOMIC_LOCK = 3;
-static const uint32_t SLAVE_CONFIG_REG_DISABLE_HEARTBEAT = 4;
-static const uint32_t SLAVE_CONFIG_REG_DISABLE_FORCE_TO_ZERO = 5;
-static const uint32_t SLAVE_CONFIG_REG_PM_DISABLE = 6;
-static const uint32_t SLAVE_CONFIG_REG_PM_MUX_DISABLE = 7;
-static const uint32_t SLAVE_CONFIG_REG_MASK_REG_PARITY_ERRS = 8;
-static const uint32_t SLAVE_CONFIG_REG_MASK_PCB_IF_ERRS = 9;
-static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
-static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
-static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
-static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
-static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
-static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
-//<< [SLAVE_CONFIG_REG]
-// pauc/reg00014.H
-
 //>> [PHY_SCOM_MAC_FIR_ACTION0_REG]
 static const uint64_t PHY_SCOM_MAC_FIR_ACTION0_REG = 0x10012c06ull;
 
 static const uint32_t PHY_SCOM_MAC_FIR_ACTION0_REG_FIR_ACTION0 = 0;
 static const uint32_t PHY_SCOM_MAC_FIR_ACTION0_REG_FIR_ACTION0_LEN = 26;
+// ERROR Duplicate Dial         static const uint32_t PHY_SCOM_MAC_FIR_ACTION0_REG_FIR_ACTION0 = 0; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t PHY_SCOM_MAC_FIR_ACTION0_REG_FIR_ACTION0_LEN = 27;
 //<< [PHY_SCOM_MAC_FIR_ACTION0_REG]
 // pauc/reg00014.H
 
@@ -217,7 +197,49 @@ static const uint64_t PHY_SCOM_MAC_FIR_ACTION1_REG = 0x10012c07ull;
 
 static const uint32_t PHY_SCOM_MAC_FIR_ACTION1_REG_FIR_ACTION1 = 0;
 static const uint32_t PHY_SCOM_MAC_FIR_ACTION1_REG_FIR_ACTION1_LEN = 26;
+// ERROR Duplicate Dial         static const uint32_t PHY_SCOM_MAC_FIR_ACTION1_REG_FIR_ACTION1 = 0; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t PHY_SCOM_MAC_FIR_ACTION1_REG_FIR_ACTION1_LEN = 27;
 //<< [PHY_SCOM_MAC_FIR_ACTION1_REG]
+// pauc/reg00014.H
+
+//>> [SLAVE_CONFIG_REG]
+static const uint64_t SLAVE_CONFIG_REG = 0x100f001eull;
+
+static const uint32_t SLAVE_CONFIG_REG_DISABLE_PERV_THOLD_CHECK = 0;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK = 0; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_DISABLE_MALF_PULSE_GEN = 1;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN = 1; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_STOP_HANG_CNT_SYS_XSTP = 2;
+static const uint32_t SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP = 2; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_DISABLE_CL_ATOMIC_LOCK = 3;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK = 3; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_DISABLE_HEARTBEAT = 4;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT = 4; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_DISABLE_FORCE_TO_ZERO = 5;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO = 5; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_PM_DISABLE = 6;
+static const uint32_t SLAVE_CONFIG_REG_CFG_PM_DISABLE = 6; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_PM_MUX_DISABLE = 7;
+static const uint32_t SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE = 7; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_MASK_REG_PARITY_ERRS = 8;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS = 8; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_MASK_PCB_IF_ERRS = 9;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS = 9; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS = 10; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS = 11; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
+static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS = 12; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN = 8;
+static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
+static const uint32_t SLAVE_CONFIG_REG_CFG_QME_PAR_DIS = 20; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
+static const uint32_t SLAVE_CONFIG_REG_CFG_FORCE_0_QME = 21; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE = 22; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE = 23; // p10:20,
+//<< [SLAVE_CONFIG_REG]
 // pauc/reg00014.H
 
 //>> [XSTOP2]

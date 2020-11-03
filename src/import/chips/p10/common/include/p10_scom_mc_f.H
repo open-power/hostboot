@@ -104,6 +104,18 @@ static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_2_RESULT_LEN = 16;
 //<< [EPS_THERM_WSUB_DTS_RESULT0]
 // mc/reg00015.H
 
+//>> [SCOMFIR_MCFGP1E]
+static const uint64_t SCOMFIR_MCFGP1E = 0x0c010c17ull;
+
+static const uint32_t SCOMFIR_MCFGP1E_VALID = 0;
+static const uint32_t SCOMFIR_MCFGP1E_EXTEND_TO_END_OF_RANGE = 1;
+static const uint32_t SCOMFIR_MCFGP1E_LOWER_ADDRESS = 2;
+static const uint32_t SCOMFIR_MCFGP1E_LOWER_ADDRESS_LEN = 19;
+static const uint32_t SCOMFIR_MCFGP1E_UPPER_ADDRESS = 21;
+static const uint32_t SCOMFIR_MCFGP1E_UPPER_ADDRESS_LEN = 19;
+//<< [SCOMFIR_MCFGP1E]
+// mc/reg00015.H
+
 //>> [SCOMFIR_MCFGPM0A]
 static const uint64_t SCOMFIR_MCFGPM0A = 0x0c010c21ull;
 
@@ -127,18 +139,6 @@ static const uint64_t TIMEOUT_REG = 0x0c0f0010ull;
 static const uint32_t TIMEOUT_REG_INT_TIMEOUT = 0;
 static const uint32_t TIMEOUT_REG_INT_TIMEOUT_LEN = 2;
 //<< [TIMEOUT_REG]
-// mc/reg00015.H
-
-//>> [SCOMFIR_MCFGP1E]
-static const uint64_t SCOMFIR_MCFGP1E = 0x0c010c17ull;
-
-static const uint32_t SCOMFIR_MCFGP1E_VALID = 0;
-static const uint32_t SCOMFIR_MCFGP1E_EXTEND_TO_END_OF_RANGE = 1;
-static const uint32_t SCOMFIR_MCFGP1E_LOWER_ADDRESS = 2;
-static const uint32_t SCOMFIR_MCFGP1E_LOWER_ADDRESS_LEN = 19;
-static const uint32_t SCOMFIR_MCFGP1E_UPPER_ADDRESS = 21;
-static const uint32_t SCOMFIR_MCFGP1E_UPPER_ADDRESS_LEN = 19;
-//<< [SCOMFIR_MCFGP1E]
 // mc/reg00015.H
 
 //>>THE END<<

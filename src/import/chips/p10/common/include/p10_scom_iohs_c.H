@@ -71,17 +71,17 @@ static const uint32_t DLP_CONTROL_1_ERR_INJ_COMMAND_LANES_LEN = 9;
 static const uint32_t DLP_CONTROL_1_COMMAND = 60;
 static const uint32_t DLP_CONTROL_1_COMMAND_LEN = 4;
 //<< [DLP_CONTROL]
-// iohs/reg00051.H
+// iohs/reg00053.H
 
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
 }
 }
-#include "iohs/reg00051.H"
-#include "iohs/reg00052.H"
 #include "iohs/reg00053.H"
 #include "iohs/reg00054.H"
 #include "iohs/reg00055.H"
+#include "iohs/reg00056.H"
+#include "iohs/reg00057.H"
 #endif
 #endif

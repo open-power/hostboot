@@ -589,6 +589,113 @@ fapi_try_exit:
 }
 //<< GET_[NX_DMA_SU_CRB_KILL_REQ_SWC_VALUE]
 
+//>> PREP_[PB_BRIDGE_NHTM_SC_HTM0_LAST]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PB_BRIDGE_NHTM_SC_HTM0_LAST(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_BRIDGE_NHTM_SC_HTM0_LAST;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PB_BRIDGE_NHTM_SC_HTM0_LAST]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM0_LAST]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PB_BRIDGE_NHTM_SC_HTM0_LAST(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_BRIDGE_NHTM_SC_HTM0_LAST;
+#endif
+    return fapi2::getScom(i_target, PB_BRIDGE_NHTM_SC_HTM0_LAST, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM0_LAST]
+
+//>> PUT_[PB_BRIDGE_NHTM_SC_HTM0_LAST]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PB_BRIDGE_NHTM_SC_HTM0_LAST(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM0_LAST));
+#endif
+    return fapi2::putScom(i_target, PB_BRIDGE_NHTM_SC_HTM0_LAST, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PB_BRIDGE_NHTM_SC_HTM0_LAST]
+
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM0_LAST));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS,
+           PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM0_LAST));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS,
+           PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS]
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM0_LAST));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS,
+           PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM0_LAST_HTM0_LAST_ADDRESS]
+
 //>> PREP_[PB_COM_SCOM_EQ0_STATION_HP_MODE3_CURR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_PB_COM_SCOM_EQ0_STATION_HP_MODE3_CURR(const fapi2::Target<K, M, V>& i_target)

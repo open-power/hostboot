@@ -69,7 +69,7 @@ static const uint32_t DLP_CONFIG_TIMEOUT_LEN = 4;
 static const uint32_t DLP_CONFIG_TIMER_1US = 52;
 static const uint32_t DLP_CONFIG_TIMER_1US_LEN = 12;
 //<< [DLP_CONFIG]
-// iohs/reg00060.H
+// iohs/reg00062.H
 
 //>> [DLP_LAT_MEASURE]
 static const uint64_t DLP_LAT_MEASURE = 0x1801100eull;
@@ -93,7 +93,23 @@ static const uint32_t DLP_LAT_MEASURE_LINK0_TOD_LATENCY_LEN = 7;
 static const uint32_t DLP_LAT_MEASURE_LINK1_TOD_LATENCY = 57;
 static const uint32_t DLP_LAT_MEASURE_LINK1_TOD_LATENCY_LEN = 7;
 //<< [DLP_LAT_MEASURE]
-// iohs/reg00060.H
+// iohs/reg00062.H
+
+//>> [DLP_LINK0_QUALITY]
+static const uint64_t DLP_LINK0_QUALITY = 0x18011026ull;
+
+static const uint32_t DLP_LINK0_QUALITY_TX_BW = 1;
+static const uint32_t DLP_LINK0_QUALITY_TX_BW_LEN = 11;
+static const uint32_t DLP_LINK0_QUALITY_RX_BW = 13;
+static const uint32_t DLP_LINK0_QUALITY_RX_BW_LEN = 11;
+static const uint32_t DLP_LINK0_QUALITY_ERROR_RATE = 25;
+static const uint32_t DLP_LINK0_QUALITY_ERROR_RATE_LEN = 23;
+static const uint32_t DLP_LINK0_QUALITY_LINK_CAP_SLECC_SYN3 = 48;
+static const uint32_t DLP_LINK0_QUALITY_LINK_CAP_SLECC_SYN3_LEN = 8;
+static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_2 = 57;
+static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_2_LEN = 7;
+//<< [DLP_LINK0_QUALITY]
+// iohs/reg00062.H
 
 //>> [DLP_PHY_CONFIG]
 static const uint64_t DLP_PHY_CONFIG = 0x1801100cull;
@@ -121,55 +137,57 @@ static const uint32_t DLP_PHY_CONFIG_50G_MODE = 61;
 static const uint32_t DLP_PHY_CONFIG_DL_SELECT = 62;
 static const uint32_t DLP_PHY_CONFIG_DL_SELECT_LEN = 2;
 //<< [DLP_PHY_CONFIG]
-// iohs/reg00060.H
+// iohs/reg00062.H
 
 //>> [SLAVE_CONFIG_REG]
 static const uint64_t SLAVE_CONFIG_REG = 0x180f001eull;
 
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_PERV_THOLD_CHECK = 0;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK = 0; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_MALF_PULSE_GEN = 1;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN = 1; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_STOP_HANG_CNT_SYS_XSTP = 2;
+static const uint32_t SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP = 2; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_CL_ATOMIC_LOCK = 3;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK = 3; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_HEARTBEAT = 4;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT = 4; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_FORCE_TO_ZERO = 5;
+static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO = 5; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_PM_DISABLE = 6;
+static const uint32_t SLAVE_CONFIG_REG_CFG_PM_DISABLE = 6; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_PM_MUX_DISABLE = 7;
+static const uint32_t SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE = 7; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_REG_PARITY_ERRS = 8;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS = 8; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCB_IF_ERRS = 9;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS = 9; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS = 10; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS = 11; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS = 12; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN = 8;
 static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
+static const uint32_t SLAVE_CONFIG_REG_CFG_QME_PAR_DIS = 20; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
+static const uint32_t SLAVE_CONFIG_REG_CFG_FORCE_0_QME = 21; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE = 22; // p10:20,
+static const uint32_t SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE = 23; // p10:20,
 //<< [SLAVE_CONFIG_REG]
-// iohs/reg00064.H
-
-//>> [DLP_LINK0_QUALITY]
-static const uint64_t DLP_LINK0_QUALITY = 0x18011026ull;
-
-static const uint32_t DLP_LINK0_QUALITY_TX_BW = 1;
-static const uint32_t DLP_LINK0_QUALITY_TX_BW_LEN = 11;
-static const uint32_t DLP_LINK0_QUALITY_RX_BW = 13;
-static const uint32_t DLP_LINK0_QUALITY_RX_BW_LEN = 11;
-static const uint32_t DLP_LINK0_QUALITY_ERROR_RATE = 25;
-static const uint32_t DLP_LINK0_QUALITY_ERROR_RATE_LEN = 23;
-static const uint32_t DLP_LINK0_QUALITY_LINK_CAP_SLECC_SYN3 = 48;
-static const uint32_t DLP_LINK0_QUALITY_LINK_CAP_SLECC_SYN3_LEN = 8;
-static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_2 = 57;
-static const uint32_t DLP_LINK0_QUALITY_SPARE_COUNTER_2_LEN = 7;
-//<< [DLP_LINK0_QUALITY]
-// iohs/reg00060.H
+// iohs/reg00066.H
 
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
 }
 }
-#include "iohs/reg00060.H"
-#include "iohs/reg00061.H"
 #include "iohs/reg00062.H"
 #include "iohs/reg00063.H"
 #include "iohs/reg00064.H"
+#include "iohs/reg00065.H"
+#include "iohs/reg00066.H"
 #endif
 #endif

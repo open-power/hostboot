@@ -39,6 +39,23 @@ namespace iohs
 #endif
 
 
+//>> [DLP_LINK0_SYN_CAPTURE]
+static const uint64_t DLP_LINK0_SYN_CAPTURE = 0x18011022ull;
+
+static const uint32_t DLP_LINK0_SYN_CAPTURE_CRC_SYN = 0;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_CRC_SYN_LEN = 36;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN0 = 36;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN0_LEN = 8;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN1 = 44;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN1_LEN = 8;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN2 = 52;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN2_LEN = 8;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_RESERVED = 60;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_RESERVED_LEN = 3;
+static const uint32_t DLP_LINK0_SYN_CAPTURE_VALID = 63;
+//<< [DLP_LINK0_SYN_CAPTURE]
+// iohs/reg00000.H
+
 //>> [DLP_LINK1_INFO]
 static const uint64_t DLP_LINK1_INFO = 0x18011015ull;
 
@@ -61,23 +78,6 @@ static const uint32_t DLP_LINK1_INFO_ACK_FIFO_CAP_VALID = 52;
 static const uint32_t DLP_LINK1_INFO_ACK_FIFO_CAP_ADDR = 55;
 static const uint32_t DLP_LINK1_INFO_ACK_FIFO_CAP_ADDR_LEN = 9;
 //<< [DLP_LINK1_INFO]
-// iohs/reg00000.H
-
-//>> [DLP_LINK0_SYN_CAPTURE]
-static const uint64_t DLP_LINK0_SYN_CAPTURE = 0x18011022ull;
-
-static const uint32_t DLP_LINK0_SYN_CAPTURE_CRC_SYN = 0;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_CRC_SYN_LEN = 36;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN0 = 36;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN0_LEN = 8;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN1 = 44;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN1_LEN = 8;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN2 = 52;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_SLECC_SYN2_LEN = 8;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_RESERVED = 60;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_RESERVED_LEN = 3;
-static const uint32_t DLP_LINK0_SYN_CAPTURE_VALID = 63;
-//<< [DLP_LINK0_SYN_CAPTURE]
 // iohs/reg00000.H
 
 //>>THE END<<

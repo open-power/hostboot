@@ -76,14 +76,6 @@ static const uint32_t CPLT_CTRL1_STG_ACT_EN_DC = 22;
 //<< [CPLT_CTRL1]
 // pauc/reg00006.H
 
-//>> [PHY_PPE_WRAP_ARB_CSAR]
-static const uint64_t PHY_PPE_WRAP_ARB_CSAR = 0x10012c0dull;
-
-static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 16;
-static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 13;
-//<< [PHY_PPE_WRAP_ARB_CSAR]
-// pauc/reg00006.H
-
 //>> [LOCAL_XSTOP_MASK]
 static const uint64_t LOCAL_XSTOP_MASK_RW = 0x10040043ull;
 static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x10040063ull;
@@ -105,6 +97,16 @@ static const uint32_t LOCAL_XSTOP_MASK_13 = 13;
 static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
 static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
 //<< [LOCAL_XSTOP_MASK]
+// pauc/reg00006.H
+
+//>> [PHY_PPE_WRAP_ARB_CSAR]
+static const uint64_t PHY_PPE_WRAP_ARB_CSAR = 0x10012c0dull;
+
+static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 15;
+static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 14;
+// ERROR Duplicate Dial         static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 16; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 13;
+//<< [PHY_PPE_WRAP_ARB_CSAR]
 // pauc/reg00006.H
 
 //>>THE END<<

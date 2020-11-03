@@ -39,6 +39,82 @@ namespace c
 #endif
 
 
+//>> [CPMS_FLMR]
+static const uint64_t CPMS_FLMR_RW = 0x200e0e48ull;
+static const uint64_t CPMS_FLMR_WO_CLEAR = 0x200e0e4bull;
+static const uint64_t CPMS_FLMR_WO_OR = 0x200e0e4aull;
+
+static const uint32_t CPMS_FLMR_LARGE_INITIAL_CYCLES = 0;
+static const uint32_t CPMS_FLMR_LARGE_INITIAL_CYCLES_LEN = 6;
+static const uint32_t CPMS_FLMR_LARGE_INITIAL_ACTION = 6;
+static const uint32_t CPMS_FLMR_LARGE_INITIAL_ACTION_LEN = 5;
+static const uint32_t CPMS_FLMR_LARGE_PREFETCH_ACTION = 11;
+static const uint32_t CPMS_FLMR_LARGE_PREFETCH_ACTION_LEN = 2;
+static const uint32_t CPMS_FLMR_LARGE_RESPONSE_DISABLE = 13;
+static const uint32_t CPMS_FLMR_LARGE_FLUSH_TYPE = 14;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_WINDOW_SEL = 15;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_INITIAL = 16;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_INITIAL_LEN = 4;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_REPEAT = 20;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_REPEAT_LEN = 4;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_INCREASE = 24;
+static const uint32_t CPMS_FLMR_LARGE_DITHER_INCREASE_LEN = 4;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_ACTION = 28;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_ACTION_LEN = 3;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_PREFETCH = 31;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_PREFETCH_LEN = 2;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_VECTOR = 33;
+static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_VECTOR_LEN = 3;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_ACTION = 36;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_ACTION_LEN = 3;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_PREFETCH = 39;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_PREFETCH_LEN = 2;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_VECTOR = 41;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_VECTOR_LEN = 3;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_CYCLES = 44;
+static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_CYCLES_LEN = 8;
+static const uint32_t CPMS_FLMR_MMA_DROOP_PROTECT_ENABLE = 52;
+static const uint32_t CPMS_FLMR_MMA_DROOP_PREDICT_SELECT = 53;
+static const uint32_t CPMS_FLMR_MMA_DROOP_PREDICT_SELECT_LEN = 3;
+static const uint32_t CPMS_FLMR_CORE_UCODE_IDLE_DISABLE = 56;
+static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_SUPPRESS = 57;
+static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_SUPPRESS_LEN = 2;
+static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_INJECT = 59;
+static const uint32_t CPMS_FLMR_FTC_RESET = 60;
+static const uint32_t CPMS_FLMR_IGNORE_IFU_THROTTLE_ACTIVE = 61;
+static const uint32_t CPMS_FLMR_PHASE1_DITHER_NTC = 62;
+static const uint32_t CPMS_FLMR_CORE_UCODE_EXIT_DISABLE = 63;
+//<< [CPMS_FLMR]
+// c/reg00005.H
+
+//>> [CPMS_WPCR]
+static const uint64_t CPMS_WPCR = 0x200e0e94ull;
+
+static const uint32_t CPMS_WPCR_SPARE = 0;
+static const uint32_t CPMS_WPCR_SPARE_LEN = 2;
+static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX = 2;
+static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX_LEN = 6;
+static const uint32_t CPMS_WPCR_SPARE2 = 8; // p10:20,
+static const uint32_t CPMS_WPCR_SPARE2_LEN = 4;
+static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET = 12;
+static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET_LEN = 20;
+static const uint32_t CPMS_WPCR_WOF_INTERVAL_TARGET = 12; // p10:20,
+static const uint32_t CPMS_WPCR_WOF_INTERVAL_TARGET_LEN = 20;
+// ERROR Duplicate Dial         static const uint32_t CPMS_WPCR_SPARE2 = 32;
+static const uint32_t CPMS_WPCR_SPARE3 = 32; // p10:20,
+static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT = 33;
+static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT_LEN = 3;
+static const uint32_t CPMS_WPCR_PROXY_CARRYOUT_SEL = 36;
+static const uint32_t CPMS_WPCR_PROXY_CARRYOUT_SEL_LEN = 4;
+static const uint32_t CPMS_WPCR_PITCH_FTX_SAT_MAX = 58;
+static const uint32_t CPMS_WPCR_PITCH_FTX_SAT_MIN = 59;
+static const uint32_t CPMS_WPCR_PITCH_ACCERR_SAT_MAX = 60;
+static const uint32_t CPMS_WPCR_PITCH_ACCERR_SAT_MIN = 61;
+static const uint32_t CPMS_WPCR_PITCH_APP_SATURATED = 62;
+static const uint32_t CPMS_WPCR_STOP_STATE_OCCURRED = 63;
+//<< [CPMS_WPCR]
+// c/reg00005.H
+
 //>> [L3_MISC_L3CERRS_MODE_REG0]
 static const uint64_t L3_MISC_L3CERRS_MODE_REG0 = 0x2001062bull;
 
@@ -105,77 +181,6 @@ static const uint32_t QME_RMOR_URMOR_SELECT = 63;
 //<< [QME_RMOR]
 // c/reg00005.H
 
-//>> [CPMS_FLMR]
-static const uint64_t CPMS_FLMR_RW = 0x200e0e48ull;
-static const uint64_t CPMS_FLMR_WO_CLEAR = 0x200e0e4bull;
-static const uint64_t CPMS_FLMR_WO_OR = 0x200e0e4aull;
-
-static const uint32_t CPMS_FLMR_LARGE_INITIAL_CYCLES = 0;
-static const uint32_t CPMS_FLMR_LARGE_INITIAL_CYCLES_LEN = 6;
-static const uint32_t CPMS_FLMR_LARGE_INITIAL_ACTION = 6;
-static const uint32_t CPMS_FLMR_LARGE_INITIAL_ACTION_LEN = 5;
-static const uint32_t CPMS_FLMR_LARGE_PREFETCH_ACTION = 11;
-static const uint32_t CPMS_FLMR_LARGE_PREFETCH_ACTION_LEN = 2;
-static const uint32_t CPMS_FLMR_LARGE_RESPONSE_DISABLE = 13;
-static const uint32_t CPMS_FLMR_LARGE_FLUSH_TYPE = 14;
-static const uint32_t CPMS_FLMR_LARGE_DITHER_WINDOW_SEL = 15;
-static const uint32_t CPMS_FLMR_LARGE_DITHER_INITIAL = 16;
-static const uint32_t CPMS_FLMR_LARGE_DITHER_INITIAL_LEN = 4;
-static const uint32_t CPMS_FLMR_LARGE_DITHER_REPEAT = 20;
-static const uint32_t CPMS_FLMR_LARGE_DITHER_REPEAT_LEN = 4;
-static const uint32_t CPMS_FLMR_LARGE_DITHER_INCREASE = 24;
-static const uint32_t CPMS_FLMR_LARGE_DITHER_INCREASE_LEN = 4;
-static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_ACTION = 28;
-static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_ACTION_LEN = 3;
-static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_PREFETCH = 31;
-static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_PREFETCH_LEN = 2;
-static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_VECTOR = 33;
-static const uint32_t CPMS_FLMR_PHASE1_RECOVERY_VECTOR_LEN = 3;
-static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_ACTION = 36;
-static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_ACTION_LEN = 3;
-static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_PREFETCH = 39;
-static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_PREFETCH_LEN = 2;
-static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_VECTOR = 41;
-static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_VECTOR_LEN = 3;
-static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_CYCLES = 44;
-static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_CYCLES_LEN = 8;
-static const uint32_t CPMS_FLMR_MMA_DROOP_PROTECT_ENABLE = 52;
-static const uint32_t CPMS_FLMR_MMA_DROOP_PREDICT_SELECT = 53;
-static const uint32_t CPMS_FLMR_MMA_DROOP_PREDICT_SELECT_LEN = 3;
-static const uint32_t CPMS_FLMR_CORE_UCODE_IDLE_DISABLE = 56;
-static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_SUPPRESS = 57;
-static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_SUPPRESS_LEN = 2;
-static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_INJECT = 59;
-static const uint32_t CPMS_FLMR_FTC_RESET = 60;
-static const uint32_t CPMS_FLMR_IGNORE_IFU_THROTTLE_ACTIVE = 61;
-static const uint32_t CPMS_FLMR_PHASE1_DITHER_NTC = 62;
-static const uint32_t CPMS_FLMR_CORE_UCODE_EXIT_DISABLE = 63;
-//<< [CPMS_FLMR]
-// c/reg00005.H
-
-//>> [CPMS_WPCR]
-static const uint64_t CPMS_WPCR = 0x200e0e94ull;
-
-static const uint32_t CPMS_WPCR_SPARE = 0;
-static const uint32_t CPMS_WPCR_SPARE_LEN = 2;
-static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX = 2;
-static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX_LEN = 6;
-static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET = 12;
-static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET_LEN = 20;
-static const uint32_t CPMS_WPCR_SPARE2 = 32;
-static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT = 33;
-static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT_LEN = 3;
-static const uint32_t CPMS_WPCR_PROXY_CARRYOUT_SEL = 36;
-static const uint32_t CPMS_WPCR_PROXY_CARRYOUT_SEL_LEN = 4;
-static const uint32_t CPMS_WPCR_PITCH_FTX_SAT_MAX = 58;
-static const uint32_t CPMS_WPCR_PITCH_FTX_SAT_MIN = 59;
-static const uint32_t CPMS_WPCR_PITCH_ACCERR_SAT_MAX = 60;
-static const uint32_t CPMS_WPCR_PITCH_ACCERR_SAT_MIN = 61;
-static const uint32_t CPMS_WPCR_PITCH_APP_SATURATED = 62;
-static const uint32_t CPMS_WPCR_STOP_STATE_OCCURRED = 63;
-//<< [CPMS_WPCR]
-// c/reg00005.H
-
 //>> [QME_SCR]
 static const uint64_t QME_SCR_RW = 0x200e080cull;
 static const uint64_t QME_SCR_WO_CLEAR = 0x200e080full;
@@ -183,6 +188,8 @@ static const uint64_t QME_SCR_WO_OR = 0x200e080eull;
 
 static const uint32_t QME_SCR_DATA = 0;
 static const uint32_t QME_SCR_DATA_LEN = 64;
+// ERROR Duplicate Dial         static const uint32_t QME_SCR_DATA = 0; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t QME_SCR_DATA_LEN = 16;
 //<< [QME_SCR]
 // c/reg00005.H
 

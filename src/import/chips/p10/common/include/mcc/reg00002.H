@@ -35,6 +35,108 @@ namespace mcc
 #endif
 
 
+//>> PREP_[CRYPTO_DECRYPT_CRYPTOKEY2A]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CRYPTO_DECRYPT_CRYPTOKEY2A(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CRYPTO_DECRYPT_CRYPTOKEY2A;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[CRYPTO_DECRYPT_CRYPTOKEY2A]
+
+//>> GET_[CRYPTO_DECRYPT_CRYPTOKEY2A]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CRYPTO_DECRYPT_CRYPTOKEY2A(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CRYPTO_DECRYPT_CRYPTOKEY2A;
+#endif
+    return fapi2::getScom(i_target, CRYPTO_DECRYPT_CRYPTOKEY2A, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[CRYPTO_DECRYPT_CRYPTOKEY2A]
+
+//>> PUT_[CRYPTO_DECRYPT_CRYPTOKEY2A]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CRYPTO_DECRYPT_CRYPTOKEY2A(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2A));
+#endif
+    return fapi2::putScom(i_target, CRYPTO_DECRYPT_CRYPTOKEY2A, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[CRYPTO_DECRYPT_CRYPTOKEY2A]
+
+
+//>> SET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
+static inline fapi2::buffer<uint64_t>& SET_CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2A));
+#endif
+    return o_data.insertFromRight<CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A,
+           CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
+
+//>> SET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
+static inline fapi2::buffer<uint64_t>& SET_CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2A));
+#endif
+    return o_data.insertFromRight<CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A,
+           CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
+
+//>> GET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
+static inline fapi2::buffer<uint64_t>& GET_CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2A));
+#endif
+    return i_data.extractToRight<CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A,
+           CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
+
 //>> PREP_[USTL_USTLFIR_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_USTL_USTLFIR_RW(const fapi2::Target<K, M, V>& i_target)
@@ -6240,6 +6342,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_SPARE_61(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_SPARE_61,
@@ -6257,6 +6360,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_SPARE_61(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_SPARE_61,
@@ -6273,6 +6377,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_SPARE_61(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_SPARE_61>();
@@ -6288,6 +6393,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_SPARE_61(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_SPARE_61>();
@@ -6304,6 +6410,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_SPARE_61(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_SPARE_61,
@@ -6320,6 +6427,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_SPARE_61(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_SPARE_61>();
@@ -6331,107 +6439,117 @@ fapi_try_exit:
 }
 //<< GET_[USTL_USTLFIR_SPARE_61]
 
-//>> PREP_[CRYPTO_DECRYPT_CRYPTOKEY2A]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CRYPTO_DECRYPT_CRYPTOKEY2A(const fapi2::Target<K, M, V>& i_target)
+//>> SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CRYPTO_DECRYPT_CRYPTOKEY2A;
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return fapi2::current_err;
+    return o_data.insertFromRight<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[CRYPTO_DECRYPT_CRYPTOKEY2A]
-
-//>> GET_[CRYPTO_DECRYPT_CRYPTOKEY2A]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CRYPTO_DECRYPT_CRYPTOKEY2A(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CRYPTO_DECRYPT_CRYPTOKEY2A;
-#endif
-    return fapi2::getScom(i_target, CRYPTO_DECRYPT_CRYPTOKEY2A, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[CRYPTO_DECRYPT_CRYPTOKEY2A]
-
-//>> PUT_[CRYPTO_DECRYPT_CRYPTOKEY2A]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CRYPTO_DECRYPT_CRYPTOKEY2A(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2A));
-#endif
-    return fapi2::putScom(i_target, CRYPTO_DECRYPT_CRYPTOKEY2A, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[CRYPTO_DECRYPT_CRYPTOKEY2A]
-
-
-//>> SET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
-static inline fapi2::buffer<uint64_t>& SET_CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2A));
-#endif
-    return o_data.insertFromRight<CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A,
-           CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
+//<< SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
 
-//>> SET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
-static inline fapi2::buffer<uint64_t>& SET_CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A(const uint64_t i_data,
+//>> SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2A));
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.insertFromRight<CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A,
-           CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN>(i_data);
+    return o_data.insertFromRight<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
+//<< SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
 
-//>> GET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
-static inline fapi2::buffer<uint64_t>& GET_CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+//>> SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2A));
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return i_data.extractToRight<CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A,
-           CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN>(o_data);
+    return o_data.setBit<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+
+//>> CLEAR_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
+#endif
+    return o_data.clearBit<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+
+//>> GET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
+#endif
+    return i_data.extractToRight<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A]
+//<< GET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+
+//>> GET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline bool GET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
+#endif
+    return i_data.getBit<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
 
 //>>THE END<<
 

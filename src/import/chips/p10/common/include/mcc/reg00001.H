@@ -514,6 +514,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED19_23(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED19_23,
@@ -532,6 +533,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED19_23(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED19_23,
@@ -550,6 +552,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_RESERVED19_23(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED19_23,
@@ -562,6 +565,172 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[ATCL_CL_CLSCOM_MCPERF2_RESERVED19_23]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.setBit<ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+
+//>> CLEAR_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.clearBit<ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+
+//>> GET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+
+//>> GET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+static inline bool GET_ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.getBit<ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCPERF2_HTM_ARMW_ADD_RSVD_P10D20]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE20_23]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_SPARE20_23(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_SPARE20_23,
+           ATCL_CL_CLSCOM_MCPERF2_SPARE20_23_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE20_23 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE20_23]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE20_23]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_SPARE20_23(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_SPARE20_23,
+           ATCL_CL_CLSCOM_MCPERF2_SPARE20_23_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE20_23 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE20_23]
+
+//>> GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE20_23]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_SPARE20_23(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_SPARE20_23,
+           ATCL_CL_CLSCOM_MCPERF2_SPARE20_23_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE20_23 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE20_23]
 
 //>> SET_[ATCL_CL_CLSCOM_MCPERF2_NSQ_LFSR_CNTL]
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_NSQ_LFSR_CNTL(fapi2::buffer<uint64_t>& i_data,
@@ -1082,6 +1251,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED36(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED36,
@@ -1099,6 +1269,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED36(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED36,
@@ -1115,6 +1286,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED36(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCPERF2_RESERVED36>();
@@ -1130,6 +1302,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCPERF2_RESERVED36(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCPERF2_RESERVED36>();
@@ -1146,6 +1319,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_RESERVED36(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED36,
@@ -1162,6 +1336,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCPERF2_RESERVED36(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCPERF2_RESERVED36>();
@@ -1172,6 +1347,108 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[ATCL_CL_CLSCOM_MCPERF2_RESERVED36]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_SPARE36(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_SPARE36,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_SPARE36(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_SPARE36,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_SPARE36(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.setBit<ATCL_CL_CLSCOM_MCPERF2_SPARE36>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+
+//>> CLEAR_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCPERF2_SPARE36(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.clearBit<ATCL_CL_CLSCOM_MCPERF2_SPARE36>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+
+//>> GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_SPARE36(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_SPARE36,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+
+//>> GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
+static inline bool GET_ATCL_CL_CLSCOM_MCPERF2_SPARE36(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.getBit<ATCL_CL_CLSCOM_MCPERF2_SPARE36>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE36 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE36]
 
 //>> SET_[ATCL_CL_CLSCOM_MCPERF2_RCTRL_CONFIG]
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RCTRL_CONFIG(fapi2::buffer<uint64_t>& i_data,
@@ -1388,6 +1665,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_49(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED_49,
@@ -1405,6 +1683,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_49(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED_49,
@@ -1421,6 +1700,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_49(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCPERF2_RESERVED_49>();
@@ -1436,6 +1716,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCPERF2_RESERVED_49(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCPERF2_RESERVED_49>();
@@ -1452,6 +1733,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_49(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED_49,
@@ -1468,6 +1750,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_49(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCPERF2_RESERVED_49>();
@@ -1478,6 +1761,108 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[ATCL_CL_CLSCOM_MCPERF2_RESERVED_49]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_SPARE_49(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_SPARE_49,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_SPARE_49(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_SPARE_49,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_SPARE_49(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.setBit<ATCL_CL_CLSCOM_MCPERF2_SPARE_49>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+
+//>> CLEAR_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCPERF2_SPARE_49(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.clearBit<ATCL_CL_CLSCOM_MCPERF2_SPARE_49>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+
+//>> GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_SPARE_49(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_SPARE_49,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+
+//>> GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
+static inline bool GET_ATCL_CL_CLSCOM_MCPERF2_SPARE_49(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.getBit<ATCL_CL_CLSCOM_MCPERF2_SPARE_49>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_SPARE_49 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCPERF2_SPARE_49]
 
 //>> SET_[ATCL_CL_CLSCOM_MCPERF2_NUM_RMW_BUF]
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_NUM_RMW_BUF(fapi2::buffer<uint64_t>& i_data,
@@ -1745,6 +2130,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_62(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED_62,
@@ -1762,6 +2148,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_62(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED_62,
@@ -1778,6 +2165,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_62(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCPERF2_RESERVED_62>();
@@ -1793,6 +2181,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCPERF2_RESERVED_62(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCPERF2_RESERVED_62>();
@@ -1809,6 +2198,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_62(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_RESERVED_62,
@@ -1825,6 +2215,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCPERF2_RESERVED_62(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCPERF2_RESERVED_62>();
@@ -1835,6 +2226,114 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[ATCL_CL_CLSCOM_MCPERF2_RESERVED_62]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+
+//>> SET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.setBit<ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+
+//>> CLEAR_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.clearBit<ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+
+//>> GET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+
+//>> GET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
+static inline bool GET_ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.getBit<ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCPERF2_EN_DYN_RSVD_P10D20]
 
 //>> SET_[ATCL_CL_CLSCOM_MCPERF2_LOAD_RSVD_VALUES]
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_LOAD_RSVD_VALUES(fapi2::buffer<uint64_t>& i_data,

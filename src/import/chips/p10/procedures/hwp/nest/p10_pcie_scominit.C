@@ -158,8 +158,8 @@ p10_pcie_scominit(
 
             FAPI_TRY(fapi2::getScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL2_OFFSET, l_data), "Error from getScom 0x%.16llX",
                      l_xramBaseReg + PIPEDOUTCTL2_OFFSET);
-            l_data.setBit<PIPEDOUTCTL2_RATIO_ALIGN_POLARITY>();
-            l_data.clearBit<PIPEDOUTCTL2_RATIO_ALIGN_DISABLE>();
+            l_data.setBit<TOP0_PIPEDOUTCTL2_RATIO_ALIGN_POLARITY>();
+            l_data.clearBit<TOP0_PIPEDOUTCTL2_RATIO_ALIGN_DISABLE>();
             FAPI_TRY(fapi2::putScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL2_OFFSET, l_data), "Error from putScom 0x%.16llX",
                      l_xramBaseReg + PIPEDOUTCTL2_OFFSET);
 

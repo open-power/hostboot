@@ -90,6 +90,7 @@ static inline fapi2::buffer<uint64_t>& SET_ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ERROR_CAPTURE));
 #endif
     return o_data.insertFromRight<ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO,
@@ -108,6 +109,7 @@ static inline fapi2::buffer<uint64_t>& SET_ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ERROR_CAPTURE));
 #endif
     return o_data.insertFromRight<ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO,
@@ -126,6 +128,7 @@ static inline fapi2::buffer<uint64_t>& GET_ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ERROR_CAPTURE));
 #endif
     return i_data.extractToRight<ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO,
@@ -144,6 +147,7 @@ static inline fapi2::buffer<uint64_t>& SET_ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ERROR_CAPTURE));
 #endif
     return o_data.insertFromRight<ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO,
@@ -162,6 +166,7 @@ static inline fapi2::buffer<uint64_t>& SET_ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ERROR_CAPTURE));
 #endif
     return o_data.insertFromRight<ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO,
@@ -180,6 +185,7 @@ static inline fapi2::buffer<uint64_t>& GET_ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(ERROR_CAPTURE));
 #endif
     return i_data.extractToRight<ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO,

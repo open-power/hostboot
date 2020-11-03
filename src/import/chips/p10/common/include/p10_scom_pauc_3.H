@@ -93,6 +93,36 @@ static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L3 = 28;
 //<< [EPS_THERM_WSUB_MODE_REG]
 // pauc/reg00003.H
 
+//>> [LOCAL_XSTOP]
+static const uint64_t LOCAL_XSTOP = 0x10040003ull;
+
+static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
+static const uint32_t LOCAL_XSTOP_RESERVED1L = 1;
+static const uint32_t LOCAL_XSTOP_RESERVED2L = 2;
+static const uint32_t LOCAL_XSTOP_RESERVED3L = 3;
+static const uint32_t LOCAL_XSTOP_PERV = 4;
+static const uint32_t LOCAL_XSTOP_IN05 = 5;
+static const uint32_t LOCAL_XSTOP_IN06 = 6;
+static const uint32_t LOCAL_XSTOP_IN07 = 7;
+static const uint32_t LOCAL_XSTOP_IN08 = 8;
+static const uint32_t LOCAL_XSTOP_IN09 = 9;
+static const uint32_t LOCAL_XSTOP_IN10 = 10;
+static const uint32_t LOCAL_XSTOP_IN11 = 11;
+static const uint32_t LOCAL_XSTOP_IN12 = 12;
+static const uint32_t LOCAL_XSTOP_IN13 = 13;
+static const uint32_t LOCAL_XSTOP_IN14 = 14;
+static const uint32_t LOCAL_XSTOP_IN15 = 15;
+//<< [LOCAL_XSTOP]
+// pauc/reg00003.H
+
+//>> [MULTICAST_GROUP_1]
+static const uint64_t MULTICAST_GROUP_1 = 0x100f0001ull;
+
+static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
+static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
+//<< [MULTICAST_GROUP_1]
+// pauc/reg00003.H
+
 //>> [NET_CTRL0]
 static const uint64_t NET_CTRL0_RW = 0x100f0040ull;
 static const uint64_t NET_CTRL0_RW_WAND = 0x100f0041ull;
@@ -129,97 +159,9 @@ static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
 // ERROR Duplicate Dial         static const uint32_t NET_CTRL0_PM_ACCESS = 30;
+static const uint32_t NET_CTRL0_OOB_PROTECTION = 30; // p10:20,
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
 //<< [NET_CTRL0]
-// pauc/reg00003.H
-
-//>> [PHY_PPE_WRAP_ARB_CSDR]
-static const uint64_t PHY_PPE_WRAP_ARB_CSDR = 0x10012c0eull;
-
-static const uint32_t PHY_PPE_WRAP_ARB_CSDR_CSDR_SRAM_DATA = 0;
-static const uint32_t PHY_PPE_WRAP_ARB_CSDR_CSDR_SRAM_DATA_LEN = 64;
-//<< [PHY_PPE_WRAP_ARB_CSDR]
-// pauc/reg00003.H
-
-//>> [PLL_LOCK_REG]
-static const uint64_t PLL_LOCK_REG = 0x100f0019ull;
-
-static const uint32_t PLL_LOCK_REG_LOCK = 0;
-static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
-//<< [PLL_LOCK_REG]
-// pauc/reg00003.H
-
-//>> [MULTICAST_GROUP_1]
-static const uint64_t MULTICAST_GROUP_1 = 0x100f0001ull;
-
-static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
-static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
-//<< [MULTICAST_GROUP_1]
-// pauc/reg00003.H
-
-//>> [SPATTN_MASK]
-static const uint64_t SPATTN_MASK_RW = 0x10040042ull;
-static const uint64_t SPATTN_MASK_WO_CLEAR = 0x10040062ull;
-static const uint64_t SPATTN_MASK_WO_OR = 0x10040052ull;
-
-static const uint32_t SPATTN_MASK_01 = 1;
-static const uint32_t SPATTN_MASK_02 = 2;
-static const uint32_t SPATTN_MASK_03 = 3;
-static const uint32_t SPATTN_MASK_04 = 4;
-static const uint32_t SPATTN_MASK_05 = 5;
-static const uint32_t SPATTN_MASK_06 = 6;
-static const uint32_t SPATTN_MASK_07 = 7;
-static const uint32_t SPATTN_MASK_08 = 8;
-static const uint32_t SPATTN_MASK_09 = 9;
-static const uint32_t SPATTN_MASK_10 = 10;
-static const uint32_t SPATTN_MASK_11 = 11;
-static const uint32_t SPATTN_MASK_12 = 12;
-static const uint32_t SPATTN_MASK_13 = 13;
-static const uint32_t SPATTN_MASK_14 = 14;
-static const uint32_t SPATTN_MASK_15 = 15;
-static const uint32_t SPATTN_MASK_16 = 16;
-static const uint32_t SPATTN_MASK_17 = 17;
-static const uint32_t SPATTN_MASK_18 = 18;
-static const uint32_t SPATTN_MASK_19 = 19;
-static const uint32_t SPATTN_MASK_20 = 20;
-static const uint32_t SPATTN_MASK_21 = 21;
-static const uint32_t SPATTN_MASK_22 = 22;
-static const uint32_t SPATTN_MASK_23 = 23;
-static const uint32_t SPATTN_MASK_24 = 24;
-static const uint32_t SPATTN_MASK_25 = 25;
-static const uint32_t SPATTN_MASK_26 = 26;
-static const uint32_t SPATTN_MASK_27 = 27;
-static const uint32_t SPATTN_MASK_28 = 28;
-static const uint32_t SPATTN_MASK_29 = 29;
-static const uint32_t SPATTN_MASK_30 = 30;
-static const uint32_t SPATTN_MASK_31 = 31;
-static const uint32_t SPATTN_MASK_32 = 32;
-static const uint32_t SPATTN_MASK_33 = 33;
-static const uint32_t SPATTN_MASK_34 = 34;
-static const uint32_t SPATTN_MASK_35 = 35;
-//<< [SPATTN_MASK]
-// pauc/reg00003.H
-
-//>> [LOCAL_XSTOP]
-static const uint64_t LOCAL_XSTOP = 0x10040003ull;
-
-static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
-static const uint32_t LOCAL_XSTOP_RESERVED1L = 1;
-static const uint32_t LOCAL_XSTOP_RESERVED2L = 2;
-static const uint32_t LOCAL_XSTOP_RESERVED3L = 3;
-static const uint32_t LOCAL_XSTOP_PERV = 4;
-static const uint32_t LOCAL_XSTOP_IN05 = 5;
-static const uint32_t LOCAL_XSTOP_IN06 = 6;
-static const uint32_t LOCAL_XSTOP_IN07 = 7;
-static const uint32_t LOCAL_XSTOP_IN08 = 8;
-static const uint32_t LOCAL_XSTOP_IN09 = 9;
-static const uint32_t LOCAL_XSTOP_IN10 = 10;
-static const uint32_t LOCAL_XSTOP_IN11 = 11;
-static const uint32_t LOCAL_XSTOP_IN12 = 12;
-static const uint32_t LOCAL_XSTOP_IN13 = 13;
-static const uint32_t LOCAL_XSTOP_IN14 = 14;
-static const uint32_t LOCAL_XSTOP_IN15 = 15;
-//<< [LOCAL_XSTOP]
 // pauc/reg00003.H
 
 //>> [PB_FM0123_ERR]
@@ -290,6 +232,65 @@ static const uint32_t PB_FM0123_ERR_3_VC1_CREDITERR = 61;
 static const uint32_t PB_FM0123_ERR_3_RTAG_PTYERR = 62;
 static const uint32_t PB_FM0123_ERR_3_RTAG_MISC_PTY = 63;
 //<< [PB_FM0123_ERR]
+// pauc/reg00003.H
+
+//>> [PHY_PPE_WRAP_ARB_CSDR]
+static const uint64_t PHY_PPE_WRAP_ARB_CSDR = 0x10012c0eull;
+
+static const uint32_t PHY_PPE_WRAP_ARB_CSDR_CSDR_SRAM_DATA = 0;
+static const uint32_t PHY_PPE_WRAP_ARB_CSDR_CSDR_SRAM_DATA_LEN = 64;
+//<< [PHY_PPE_WRAP_ARB_CSDR]
+// pauc/reg00003.H
+
+//>> [PLL_LOCK_REG]
+static const uint64_t PLL_LOCK_REG = 0x100f0019ull;
+
+static const uint32_t PLL_LOCK_REG_LOCK = 0;
+static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
+//<< [PLL_LOCK_REG]
+// pauc/reg00003.H
+
+//>> [SPATTN_MASK]
+static const uint64_t SPATTN_MASK_RW = 0x10040042ull;
+static const uint64_t SPATTN_MASK_WO_CLEAR = 0x10040062ull;
+static const uint64_t SPATTN_MASK_WO_OR = 0x10040052ull;
+
+static const uint32_t SPATTN_MASK_01 = 1;
+static const uint32_t SPATTN_MASK_02 = 2;
+static const uint32_t SPATTN_MASK_03 = 3;
+static const uint32_t SPATTN_MASK_04 = 4;
+static const uint32_t SPATTN_MASK_05 = 5;
+static const uint32_t SPATTN_MASK_06 = 6;
+static const uint32_t SPATTN_MASK_07 = 7;
+static const uint32_t SPATTN_MASK_08 = 8;
+static const uint32_t SPATTN_MASK_09 = 9;
+static const uint32_t SPATTN_MASK_10 = 10;
+static const uint32_t SPATTN_MASK_11 = 11;
+static const uint32_t SPATTN_MASK_12 = 12;
+static const uint32_t SPATTN_MASK_13 = 13;
+static const uint32_t SPATTN_MASK_14 = 14;
+static const uint32_t SPATTN_MASK_15 = 15;
+static const uint32_t SPATTN_MASK_16 = 16;
+static const uint32_t SPATTN_MASK_17 = 17;
+static const uint32_t SPATTN_MASK_18 = 18;
+static const uint32_t SPATTN_MASK_19 = 19;
+static const uint32_t SPATTN_MASK_20 = 20;
+static const uint32_t SPATTN_MASK_21 = 21;
+static const uint32_t SPATTN_MASK_22 = 22;
+static const uint32_t SPATTN_MASK_23 = 23;
+static const uint32_t SPATTN_MASK_24 = 24;
+static const uint32_t SPATTN_MASK_25 = 25;
+static const uint32_t SPATTN_MASK_26 = 26;
+static const uint32_t SPATTN_MASK_27 = 27;
+static const uint32_t SPATTN_MASK_28 = 28;
+static const uint32_t SPATTN_MASK_29 = 29;
+static const uint32_t SPATTN_MASK_30 = 30;
+static const uint32_t SPATTN_MASK_31 = 31;
+static const uint32_t SPATTN_MASK_32 = 32;
+static const uint32_t SPATTN_MASK_33 = 33;
+static const uint32_t SPATTN_MASK_34 = 34;
+static const uint32_t SPATTN_MASK_35 = 35;
+//<< [SPATTN_MASK]
 // pauc/reg00003.H
 
 //>>THE END<<

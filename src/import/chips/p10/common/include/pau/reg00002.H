@@ -35,6 +35,165 @@ namespace pau
 #endif
 
 
+//>> PREP_[CS_CTL_MISC_FENCE_CONTROL0]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CS_CTL_MISC_FENCE_CONTROL0(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CS_CTL_MISC_FENCE_CONTROL0;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[CS_CTL_MISC_FENCE_CONTROL0]
+
+//>> GET_[CS_CTL_MISC_FENCE_CONTROL0]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CS_CTL_MISC_FENCE_CONTROL0(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CS_CTL_MISC_FENCE_CONTROL0;
+#endif
+    return fapi2::getScom(i_target, CS_CTL_MISC_FENCE_CONTROL0, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[CS_CTL_MISC_FENCE_CONTROL0]
+
+//>> PUT_[CS_CTL_MISC_FENCE_CONTROL0]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CS_CTL_MISC_FENCE_CONTROL0(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
+#endif
+    return fapi2::putScom(i_target, CS_CTL_MISC_FENCE_CONTROL0, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[CS_CTL_MISC_FENCE_CONTROL0]
+
+
+//>> SET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE,
+           CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
+
+//>> SET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE,
+           CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
+
+//>> GET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
+static inline fapi2::buffer<uint64_t>& GET_CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
+#endif
+    return i_data.extractToRight<CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE,
+           CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
+
+//>> SET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED,
+           CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
+
+//>> SET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
+static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
+#endif
+    return o_data.insertFromRight<CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED,
+           CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
+
+//>> GET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
+static inline fapi2::buffer<uint64_t>& GET_CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
+#endif
+    return i_data.extractToRight<CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED,
+           CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
+
 //>> PREP_[CS_SM0_SNP_MISC_TOPOLOGY_TABLE0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_CS_SM0_SNP_MISC_TOPOLOGY_TABLE0(const fapi2::Target<K, M, V>& i_target)
@@ -571,165 +730,6 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[CS_SM0_SNP_MISC_TOPOLOGY_TABLE0_TRY7]
-
-//>> PREP_[CS_CTL_MISC_FENCE_CONTROL0]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CS_CTL_MISC_FENCE_CONTROL0(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CS_CTL_MISC_FENCE_CONTROL0;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[CS_CTL_MISC_FENCE_CONTROL0]
-
-//>> GET_[CS_CTL_MISC_FENCE_CONTROL0]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CS_CTL_MISC_FENCE_CONTROL0(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CS_CTL_MISC_FENCE_CONTROL0;
-#endif
-    return fapi2::getScom(i_target, CS_CTL_MISC_FENCE_CONTROL0, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[CS_CTL_MISC_FENCE_CONTROL0]
-
-//>> PUT_[CS_CTL_MISC_FENCE_CONTROL0]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CS_CTL_MISC_FENCE_CONTROL0(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
-#endif
-    return fapi2::putScom(i_target, CS_CTL_MISC_FENCE_CONTROL0, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[CS_CTL_MISC_FENCE_CONTROL0]
-
-
-//>> SET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
-static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
-#endif
-    return o_data.insertFromRight<CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE,
-           CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
-
-//>> SET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
-static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
-#endif
-    return o_data.insertFromRight<CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE,
-           CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
-
-//>> GET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
-static inline fapi2::buffer<uint64_t>& GET_CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
-#endif
-    return i_data.extractToRight<CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE,
-           CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[CS_CTL_MISC_FENCE_CONTROL0_0_REQUEST_FENCE]
-
-//>> SET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
-static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
-#endif
-    return o_data.insertFromRight<CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED,
-           CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
-
-//>> SET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
-static inline fapi2::buffer<uint64_t>& SET_CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
-#endif
-    return o_data.insertFromRight<CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED,
-           CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
-
-//>> GET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
-static inline fapi2::buffer<uint64_t>& GET_CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CS_CTL_MISC_FENCE_CONTROL0));
-#endif
-    return i_data.extractToRight<CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED,
-           CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_pau Invalid dial access CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[CS_CTL_MISC_FENCE_CONTROL0_CONTROL0_RESERVED]
 
 //>> PREP_[CS_SM2_SNP_MISC_GENID_BAR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

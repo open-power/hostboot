@@ -86,6 +86,109 @@ fapi_try_exit:
 }
 //<< PUT_[TP_TPBR_PBA_PBAF_PBAFIRMASK_RW]
 
+//>> PREP_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
+
+//>> GET_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND;
+#endif
+    return fapi2::getScom(i_target, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
+
+//>> PUT_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAF_PBAFIRMASK_RW, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND,
+                           TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR));
+#endif
+    return fapi2::putScom(i_target, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
+
+//>> PREP_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
+
+//>> GET_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR;
+#endif
+    return fapi2::getScom(i_target, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
+
+//>> PUT_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAF_PBAFIRMASK_RW, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND,
+                           TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR));
+#endif
+    return fapi2::putScom(i_target, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
+
+
 //>> SET_[TP_TPBR_PBA_PBAF_PBAFIRMASK_PB_RDADRERR_FW_MASK]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAF_PBAFIRMASK_PB_RDADRERR_FW_MASK(
     fapi2::buffer<uint64_t>& i_data,
@@ -5389,6 +5492,114 @@ fapi_try_exit:
 }
 //<< GET_[TP_TPBR_PBA_PBAO_PBASLVRST_SCOPE_ATTN_BAR]
 
+//>> PREP_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
+
+//>> GET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1;
+#endif
+    return fapi2::getScom(i_target, TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
+
+//>> PUT_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1));
+#endif
+    return fapi2::putScom(i_target, TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
+
+
+//>> SET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP,
+           TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
+
+//>> SET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1));
+#endif
+    return o_data.insertFromRight<TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP,
+           TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
+
+//>> GET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
+static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1));
+#endif
+    return i_data.extractToRight<TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP,
+           TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
+
 //>> PREP_[TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMEDR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMEDR(const fapi2::Target<K, M, V>& i_target)
@@ -5977,646 +6188,6 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXISGBU_SGB_INFO_UPPER]
-
-//>> PREP_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER]
-
-//>> GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER;
-#endif
-    return fapi2::getScom(i_target, PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER]
-
-//>> PUT_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return fapi2::putScom(i_target, PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER]
-
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT]
-
-//>> GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT]
-static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK]
-
-//>> GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK]
-static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT]
-
-//>> GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT]
-static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK]
-
-//>> GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK]
-static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT]
-
-//>> GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT]
-static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK]
-
-//>> GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK]
-static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES]
-
-//>> SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES]
-static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES]
-
-//>> GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES]
-static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER));
-#endif
-    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES,
-           PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES]
-
-//>> PREP_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
-
-//>> GET_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND;
-#endif
-    return fapi2::getScom(i_target, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
-
-//>> PUT_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAF_PBAFIRMASK_RW, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND,
-                           TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR));
-#endif
-    return fapi2::putScom(i_target, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND]
-
-//>> PREP_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
-
-//>> GET_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR;
-#endif
-    return fapi2::getScom(i_target, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
-
-//>> PUT_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAF_PBAFIRMASK_RW, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND,
-                           TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR));
-#endif
-    return fapi2::putScom(i_target, TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR]
-
-
-//>> PREP_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
-
-//>> GET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1;
-#endif
-    return fapi2::getScom(i_target, TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
-
-//>> PUT_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1));
-#endif
-    return fapi2::putScom(i_target, TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1]
-
-
-//>> SET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP,
-           TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
-
-//>> SET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1));
-#endif
-    return o_data.insertFromRight<TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP,
-           TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
-
-//>> GET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
-static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1));
-#endif
-    return i_data.extractToRight<TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP,
-           TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[TP_TPCHIP_NET_PCBSLN0_MULTICAST_GROUP_1_MULTICAST1_GROUP]
 
 //>>THE END<<
 

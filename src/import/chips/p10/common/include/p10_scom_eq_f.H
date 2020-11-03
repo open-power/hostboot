@@ -100,25 +100,6 @@ static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_2_RESULT_LEN = 16;
 //<< [EPS_THERM_WSUB_DTS_RESULT0]
 // eq/reg00015.H
 
-//>> [QME_QSAR]
-static const uint64_t QME_QSAR = 0x200e0074ull;
-
-static const uint32_t QME_QSAR_SRAM_ADDRESS = 16;
-static const uint32_t QME_QSAR_SRAM_ADDRESS_LEN = 13;
-static const uint32_t QME_QSAR_AUTO_INCR_MODE = 63;
-//<< [QME_QSAR]
-// eq/reg00015.H
-
-//>> [QME_SCOM_XIVDR6]
-static const uint64_t QME_SCOM_XIVDR6 = 0x200e028cull;
-
-static const uint32_t QME_SCOM_XIVDR6_6 = 0;
-static const uint32_t QME_SCOM_XIVDR6_6_LEN = 32;
-static const uint32_t QME_SCOM_XIVDR6_7 = 32;
-static const uint32_t QME_SCOM_XIVDR6_7_LEN = 32;
-//<< [QME_SCOM_XIVDR6]
-// eq/reg00015.H
-
 //>> [QME_PBCR]
 static const uint64_t QME_PBCR = 0x200e0044ull;
 static const uint64_t QME_PBCR_SCOM2 = 0x200e0046ull;
@@ -146,6 +127,25 @@ static const uint32_t QME_PBCR_HANG_DATA_MAX_CNT_LEN = 4;
 static const uint32_t QME_PBCR_DISABLE_PB_CACHE = 24;
 static const uint32_t QME_PBCR_INVALIDATE_PB_CACHE = 25;
 //<< [QME_PBCR]
+// eq/reg00015.H
+
+//>> [QME_QSAR]
+static const uint64_t QME_QSAR = 0x200e0074ull;
+
+static const uint32_t QME_QSAR_SRAM_ADDRESS = 16;
+static const uint32_t QME_QSAR_SRAM_ADDRESS_LEN = 13;
+static const uint32_t QME_QSAR_AUTO_INCR_MODE = 63;
+//<< [QME_QSAR]
+// eq/reg00015.H
+
+//>> [QME_SCOM_XIVDR6]
+static const uint64_t QME_SCOM_XIVDR6 = 0x200e028cull;
+
+static const uint32_t QME_SCOM_XIVDR6_6 = 0;
+static const uint32_t QME_SCOM_XIVDR6_6_LEN = 32;
+static const uint32_t QME_SCOM_XIVDR6_7 = 32;
+static const uint32_t QME_SCOM_XIVDR6_7_LEN = 32;
+//<< [QME_SCOM_XIVDR6]
 // eq/reg00015.H
 
 //>> [TIMEOUT_REG]

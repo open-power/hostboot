@@ -39,17 +39,6 @@ namespace pau
 #endif
 
 
-//>> [MISC_FENCE_STATE]
-static const uint64_t MISC_FENCE_STATE = 0x10010b46ull;
-
-static const uint32_t MISC_FENCE_STATE_0 = 0;
-static const uint32_t MISC_FENCE_STATE_1 = 1;
-static const uint32_t MISC_FENCE_STATE_2 = 2;
-static const uint32_t MISC_FENCE_STATE_3 = 3;
-static const uint32_t MISC_FENCE_STATE_4 = 4;
-//<< [MISC_FENCE_STATE]
-// pau/reg00009.H
-
 //>> [CS_SM1_SNP_MISC_GENID_BAR]
 static const uint64_t CS_SM1_SNP_MISC_GENID_BAR = 0x1001089dull;
 
@@ -62,6 +51,17 @@ static const uint32_t CS_SM1_SNP_MISC_GENID_BAR_GENID_RESERVED2 = 33;
 static const uint32_t CS_SM1_SNP_MISC_GENID_BAR_GENID_RESERVED2_LEN = 2;
 static const uint32_t CS_SM1_SNP_MISC_GENID_BAR_CONFIG_GENID_BAR_POISON = 35;
 //<< [CS_SM1_SNP_MISC_GENID_BAR]
+// pau/reg00009.H
+
+//>> [MISC_FENCE_STATE]
+static const uint64_t MISC_FENCE_STATE = 0x10010b46ull;
+
+static const uint32_t MISC_FENCE_STATE_0 = 0;
+static const uint32_t MISC_FENCE_STATE_1 = 1;
+static const uint32_t MISC_FENCE_STATE_2 = 2;
+static const uint32_t MISC_FENCE_STATE_3 = 3;
+static const uint32_t MISC_FENCE_STATE_4 = 4;
+//<< [MISC_FENCE_STATE]
 // pau/reg00009.H
 
 //>>THE END<<

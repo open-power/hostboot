@@ -39,6 +39,28 @@ namespace c
 #endif
 
 
+//>> [CPMS_CCDR]
+static const uint64_t CPMS_CCDR = 0x200e0e74ull;
+
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_SCALE = 0;
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_SCALE_LEN = 4;
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_VALUE = 4;
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_VALUE_LEN = 16;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_SCALE = 20;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_SCALE_LEN = 4;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_VALUE = 24;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_VALUE_LEN = 16;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_SCALE = 40;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_SCALE_LEN = 4;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_VALUE = 44;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_VALUE_LEN = 16;
+static const uint32_t CPMS_CCDR_CHAR_COUNTA_MOD = 60;
+static const uint32_t CPMS_CCDR_CHAR_COUNTB_MOD = 61;
+static const uint32_t CPMS_CCDR_CHAR_COUNTC_MOD = 62;
+static const uint32_t CPMS_CCDR_SAMPLE_DISABLE_INDICATOR = 63;
+//<< [CPMS_CCDR]
+// c/reg00003.H
+
 //>> [CPMS_CL2_PFETCNTL]
 static const uint64_t CPMS_CL2_PFETCNTL = 0x200e0e28ull;
 static const uint64_t CPMS_CL2_PFETCNTL_WO_CLEAR = 0x200e0e2bull;
@@ -119,6 +141,14 @@ static const uint32_t CPMS_FDCR_SLOPEB_CYCLES_LEN = 4;
 //<< [CPMS_FDCR]
 // c/reg00003.H
 
+//>> [CPMS_PRSR]
+static const uint64_t CPMS_PRSR = 0x200e0eacull;
+
+static const uint32_t CPMS_PRSR_CPMS_PPSR_PERIOD_PROXY_REMAIN = 0;
+static const uint32_t CPMS_PRSR_CPMS_PPSR_PERIOD_PROXY_REMAIN_LEN = 20;
+//<< [CPMS_PRSR]
+// c/reg00003.H
+
 //>> [EC_PC_FIR_RAM_CTRL]
 static const uint64_t EC_PC_FIR_RAM_CTRL = 0x2002044full;
 
@@ -131,6 +161,38 @@ static const uint32_t EC_PC_FIR_RAM_CTRL_SPARE_LEN = 2;
 static const uint32_t EC_PC_FIR_RAM_CTRL_PPC_INSTR = 8;
 static const uint32_t EC_PC_FIR_RAM_CTRL_PPC_INSTR_LEN = 32;
 //<< [EC_PC_FIR_RAM_CTRL]
+// c/reg00003.H
+
+//>> [EC_PC_FIR_RECOV_FWD_PROG_CTRL]
+static const uint64_t EC_PC_FIR_RECOV_FWD_PROG_CTRL = 0x2002044bull;
+
+static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_RESET_FWD_PROG = 0;
+static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD = 1;
+static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD_LEN = 3;
+//<< [EC_PC_FIR_RECOV_FWD_PROG_CTRL]
+// c/reg00003.H
+
+//>> [EC_PC_PMU_SPRCOR_HID]
+static const uint64_t EC_PC_PMU_SPRCOR_HID = 0x20020415ull;
+
+static const uint32_t EC_PC_PMU_SPRCOR_HID_ONE_PPC = 0;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_EN_INSTRUC_TRACE = 1;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_FLUSH_IC = 2;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_EN_ATTN = 3;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HILE = 4;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_DIS_RECOVERY = 5;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_MEGAMOUTH = 6;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_PREFETCH_RESET = 7;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_RADIX_MODE = 8;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_DCACHE_PARTITIONED = 9;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_ICACHE_PARTITIONED = 10;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_11 = 11;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_12 = 12;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_13 = 13;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_14 = 14;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_P10_64K_OPT = 15; // p10:20,
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID = 16; // p10:20,
+//<< [EC_PC_PMU_SPRCOR_HID]
 // c/reg00003.H
 
 //>> [L2_L2MISC_L2CERRS_PRD_PURGE_CMD_REG]
@@ -163,36 +225,6 @@ static const uint32_t L3_MISC_L3CERRS_MODE_REG1_CINJ_LCO_DIS_CFG = 38;
 //<< [L3_MISC_L3CERRS_MODE_REG1]
 // c/reg00003.H
 
-//>> [CPMS_CCDR]
-static const uint64_t CPMS_CCDR = 0x200e0e74ull;
-
-static const uint32_t CPMS_CCDR_CHAR_COUNTA_SCALE = 0;
-static const uint32_t CPMS_CCDR_CHAR_COUNTA_SCALE_LEN = 4;
-static const uint32_t CPMS_CCDR_CHAR_COUNTA_VALUE = 4;
-static const uint32_t CPMS_CCDR_CHAR_COUNTA_VALUE_LEN = 16;
-static const uint32_t CPMS_CCDR_CHAR_COUNTB_SCALE = 20;
-static const uint32_t CPMS_CCDR_CHAR_COUNTB_SCALE_LEN = 4;
-static const uint32_t CPMS_CCDR_CHAR_COUNTB_VALUE = 24;
-static const uint32_t CPMS_CCDR_CHAR_COUNTB_VALUE_LEN = 16;
-static const uint32_t CPMS_CCDR_CHAR_COUNTC_SCALE = 40;
-static const uint32_t CPMS_CCDR_CHAR_COUNTC_SCALE_LEN = 4;
-static const uint32_t CPMS_CCDR_CHAR_COUNTC_VALUE = 44;
-static const uint32_t CPMS_CCDR_CHAR_COUNTC_VALUE_LEN = 16;
-static const uint32_t CPMS_CCDR_CHAR_COUNTA_MOD = 60;
-static const uint32_t CPMS_CCDR_CHAR_COUNTB_MOD = 61;
-static const uint32_t CPMS_CCDR_CHAR_COUNTC_MOD = 62;
-static const uint32_t CPMS_CCDR_SAMPLE_DISABLE_INDICATOR = 63;
-//<< [CPMS_CCDR]
-// c/reg00003.H
-
-//>> [CPMS_PRSR]
-static const uint64_t CPMS_PRSR = 0x200e0eacull;
-
-static const uint32_t CPMS_PRSR_CPMS_PPSR_PERIOD_PROXY_REMAIN = 0;
-static const uint32_t CPMS_PRSR_CPMS_PPSR_PERIOD_PROXY_REMAIN_LEN = 20;
-//<< [CPMS_PRSR]
-// c/reg00003.H
-
 //>> [QME_CDBA]
 static const uint64_t QME_CDBA = 0x200e0800ull;
 
@@ -207,36 +239,6 @@ static const uint64_t QME_CSIR = 0x200e087cull;
 static const uint32_t QME_CSIR_PMSR_INSTR_DATA = 36;
 static const uint32_t QME_CSIR_PMSR_INSTR_DATA_LEN = 22;
 //<< [QME_CSIR]
-// c/reg00003.H
-
-//>> [EC_PC_PMU_SPRCOR_HID]
-static const uint64_t EC_PC_PMU_SPRCOR_HID = 0x20020415ull;
-
-static const uint32_t EC_PC_PMU_SPRCOR_HID_ONE_PPC = 0;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_EN_INSTRUC_TRACE = 1;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_FLUSH_IC = 2;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_EN_ATTN = 3;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_HILE = 4;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_DIS_RECOVERY = 5;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_MEGAMOUTH = 6;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_PREFETCH_RESET = 7;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_RADIX_MODE = 8;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_DCACHE_PARTITIONED = 9;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_ICACHE_PARTITIONED = 10;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_11 = 11;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_12 = 12;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_13 = 13;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_14 = 14;
-//<< [EC_PC_PMU_SPRCOR_HID]
-// c/reg00003.H
-
-//>> [EC_PC_FIR_RECOV_FWD_PROG_CTRL]
-static const uint64_t EC_PC_FIR_RECOV_FWD_PROG_CTRL = 0x2002044bull;
-
-static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_RESET_FWD_PROG = 0;
-static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD = 1;
-static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD_LEN = 3;
-//<< [EC_PC_FIR_RECOV_FWD_PROG_CTRL]
 // c/reg00003.H
 
 //>>THE END<<

@@ -39,20 +39,20 @@ namespace mcc
 #endif
 
 
-//>> [USTL_USTLFIRACT1]
-static const uint64_t USTL_USTLFIRACT1 = 0x0c010e07ull;
-
-static const uint32_t USTL_USTLFIRACT1_USTLFIRACT1_ACTION_1 = 0;
-static const uint32_t USTL_USTLFIRACT1_USTLFIRACT1_ACTION_1_LEN = 62;
-//<< [USTL_USTLFIRACT1]
-// mcc/reg00014.H
-
 //>> [CRYPTO_ENCRYPT_CRYPTOKEY2B]
 static const uint64_t CRYPTO_ENCRYPT_CRYPTOKEY2B = 0x0c010f55ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2B_KEY2B = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2B_KEY2B_LEN = 64;
 //<< [CRYPTO_ENCRYPT_CRYPTOKEY2B]
+// mcc/reg00014.H
+
+//>> [USTL_USTLFIRACT1]
+static const uint64_t USTL_USTLFIRACT1 = 0x0c010e07ull;
+
+static const uint32_t USTL_USTLFIRACT1_USTLFIRACT1_ACTION_1 = 0;
+static const uint32_t USTL_USTLFIRACT1_USTLFIRACT1_ACTION_1_LEN = 62;
+//<< [USTL_USTLFIRACT1]
 // mcc/reg00014.H
 
 //>>THE END<<

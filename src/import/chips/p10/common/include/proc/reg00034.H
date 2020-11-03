@@ -464,6 +464,56 @@ fapi_try_exit:
 }
 //<< GET_[TP_TPCHIP_OCC_OCI_OCB_P2S_CR0_IN_COUNT2]
 
+//>> PREP_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPCHIP_TPC_CPLT_CTRL0_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL0_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
+
+//>> GET_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPCHIP_TPC_CPLT_CTRL0_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL0_RW;
+#endif
+    return fapi2::getScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL0_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
+
+//>> PUT_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPCHIP_TPC_CPLT_CTRL0_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL0_RW, TP_TPCHIP_TPC_CPLT_CTRL0_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR));
+#endif
+    return fapi2::putScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL0_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
+
 //>> PREP_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_CLEAR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPCHIP_TPC_CPLT_CTRL0_WO_CLEAR(const fapi2::Target<K, M, V>& i_target)
@@ -513,6 +563,57 @@ fapi_try_exit:
 #endif
 }
 //<< PUT_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_CLEAR]
+
+//>> PREP_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
+
+//>> GET_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR;
+#endif
+    return fapi2::getScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
+
+//>> PUT_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL0_RW, TP_TPCHIP_TPC_CPLT_CTRL0_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR));
+#endif
+    return fapi2::putScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
+
 
 //>> SET_[TP_TPCHIP_TPC_CPLT_CTRL0_CTRL_CC_ABSTCLK_MUXSEL_DC]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_TPC_CPLT_CTRL0_CTRL_CC_ABSTCLK_MUXSEL_DC(
@@ -5688,107 +5789,6 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[TP_TPCHIP_TPC_OPCG_ALIGN_OPCG_WAIT_CYCLES]
-
-//>> PREP_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TP_TPCHIP_TPC_CPLT_CTRL0_RW(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL0_RW;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
-
-//>> GET_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TP_TPCHIP_TPC_CPLT_CTRL0_RW(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL0_RW;
-#endif
-    return fapi2::getScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL0_RW, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
-
-//>> PUT_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TP_TPCHIP_TPC_CPLT_CTRL0_RW(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL0_RW, TP_TPCHIP_TPC_CPLT_CTRL0_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR));
-#endif
-    return fapi2::putScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL0_RW, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[TP_TPCHIP_TPC_CPLT_CTRL0_RW]
-
-//>> PREP_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
-
-//>> GET_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR;
-#endif
-    return fapi2::getScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
-
-//>> PUT_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(TP_TPCHIP_TPC_CPLT_CTRL0_RW, TP_TPCHIP_TPC_CPLT_CTRL0_WO_CLEAR, TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR));
-#endif
-    return fapi2::putScom(i_target, TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[TP_TPCHIP_TPC_CPLT_CTRL0_WO_OR]
-
 
 //>> PREP_[TP_TPVSB_FSI_W_FSI2PIB_DATA_REGISTER_0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

@@ -142,6 +142,52 @@ static const uint32_t OPCG_CAPT2_24_06ODD_LEN = 5;
 //<< [OPCG_CAPT2]
 // eq/reg00007.H
 
+//>> [QME_ERR]
+static const uint64_t QME_ERR = 0x200e0010ull;
+
+static const uint32_t QME_ERR_PPE_INTERNAL_ERROR = 0;
+static const uint32_t QME_ERR_PPE_EXTERNAL_ERROR = 1;
+static const uint32_t QME_ERR_PPE_PROGRESS_ERROR = 2;
+static const uint32_t QME_ERR_PPE_BREAKPOINT_ERROR = 3;
+static const uint32_t QME_ERR_RESCLK_FREEZE = 4;
+static const uint32_t QME_ERR_RESCLK_FREEZE_LEN = 4;
+static const uint32_t QME_ERR_SPECIAL_WKUP_PROTOCOL_ERR = 8;
+static const uint32_t QME_ERR_SPECIAL_WKUP_PROTOCOL_ERR_LEN = 4;
+static const uint32_t QME_ERR_SPECIAL_WKUP_DONE_WINDOW = 12;
+static const uint32_t QME_ERR_SPECIAL_WKUP_DONE_WINDOW_LEN = 4;
+static const uint32_t QME_ERR_DISABLED_INTR = 16;
+static const uint32_t QME_ERR_DISABLED_INTR_LEN = 4;
+static const uint32_t QME_ERR_DECONFIGURED_INTR = 20;
+static const uint32_t QME_ERR_DECONFIGURED_INTR_LEN = 4;
+static const uint32_t QME_ERR_CTFS_ERR = 24;
+static const uint32_t QME_ERR_CTFS_ERR_LEN = 4;
+static const uint32_t QME_ERR_CPMS_ERR = 28;
+static const uint32_t QME_ERR_CPMS_ERR_LEN = 4;
+static const uint32_t QME_ERR_PCB_ENDPOINT_RESET = 32;
+static const uint32_t QME_ERR_PCB_NETWORK_RESET = 33;
+static const uint32_t QME_ERR_PIG_PENDING_SOURCE_LOST = 34;
+static const uint32_t QME_ERR_PIG_PENDING_SOURCE_LOST_LEN = 6;
+static const uint32_t QME_ERR_SPARE = 40;
+static const uint32_t QME_ERR_SPARE_LEN = 4;
+static const uint32_t QME_ERR_PCB_NETWORK_RESET_REQ = 40; // p10:20,
+static const uint32_t QME_ERR_PCB_NETWORK_RESET_PIG_REQ = 41; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t QME_ERR_SPARE = 42; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t QME_ERR_SPARE_LEN = 2;
+static const uint32_t QME_ERR_LOCAL_ACCESS_PROTECT_ERR = 44;
+static const uint32_t QME_ERR_LOCAL_ACCESS_REGION_ERR = 45;
+static const uint32_t QME_ERR_LOCAL_ACCESS_PARTIAL_ERR = 46;
+//<< [QME_ERR]
+// eq/reg00007.H
+
+//>> [QME_QHTTRIG]
+static const uint64_t QME_QHTTRIG = 0x200e01b0ull;
+
+static const uint32_t QME_QHTTRIG_START = 0;
+static const uint32_t QME_QHTTRIG_STOP = 1;
+static const uint32_t QME_QHTTRIG_PAUSE = 2;
+//<< [QME_QHTTRIG]
+// eq/reg00007.H
+
 //>> [QME_QMCR]
 static const uint64_t QME_QMCR = 0x200e0088ull;
 static const uint64_t QME_QMCR_SCOM2 = 0x200e008aull;
@@ -181,7 +227,18 @@ static const uint32_t QME_QMCR_QOS_AUTO_SEQ_ENABLE = 34;
 static const uint32_t QME_QMCR_QOSR_SPR_UPDATE_ENABLE = 35;
 static const uint32_t QME_QMCR_SPARE2 = 36;
 static const uint32_t QME_QMCR_SPARE2_LEN = 4;
+static const uint32_t QME_QMCR_MIXED_LPAR_MODE_DISABLE = 36; // p10:20,
+static const uint32_t QME_QMCR_RESET_QME_PCB_INTERRUPT_INTERFACE = 37; // p10:20,
+static const uint32_t QME_QMCR_PCB_RESET_ALL_REQ = 38; // p10:20,
+static const uint32_t QME_QMCR_CR_STEP_SYNC_TOGGLE_DISABLE = 39; // p10:20,
+static const uint32_t QME_QMCR_CR_SYNC_PULSE_DIS = 40; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t QME_QMCR_SPARE2 = 41; // p10:20,
+// ERROR Duplicate Dial         static const uint32_t QME_QMCR_SPARE2_LEN = 6;
 static const uint32_t QME_QMCR_FUSED_CORE_MODE = 47;
+static const uint32_t QME_QMCR_TOD_STEP_MS = 48; // p10:20,
+static const uint32_t QME_QMCR_TOD_SYNC_MS = 49; // p10:20,
+static const uint32_t QME_QMCR_TOD_STEP_ACTUAL = 50; // p10:20,
+static const uint32_t QME_QMCR_TOD_SYNC_ACTUAL = 51; // p10:20,
 static const uint32_t QME_QMCR_CORE_PARTIAL_GOOD = 60;
 static const uint32_t QME_QMCR_CORE_PARTIAL_GOOD_LEN = 4;
 //<< [QME_QMCR]
@@ -195,6 +252,16 @@ static const uint32_t QME_SCOM_XIDBGINF_SRR0_TOP_LEN = 30;
 static const uint32_t QME_SCOM_XIDBGINF_LR = 32;
 static const uint32_t QME_SCOM_XIDBGINF_LR_LEN = 32;
 //<< [QME_SCOM_XIDBGINF]
+// eq/reg00007.H
+
+//>> [QME_SWPR1]
+static const uint64_t QME_SWPR1 = 0x200e0094ull;
+
+static const uint32_t QME_SWPR1_BAR = 0;
+static const uint32_t QME_SWPR1_BAR_LEN = 27;
+static const uint32_t QME_SWPR1_SIZE = 44;
+static const uint32_t QME_SWPR1_SIZE_LEN = 15;
+//<< [QME_SWPR1]
 // eq/reg00007.H
 
 //>> [SYNC_CONFIG]
@@ -212,62 +279,11 @@ static const uint32_t SYNC_CONFIG_CONT_SCAN_DISABLE = 10;
 static const uint32_t SYNC_CONFIG_SYNC_PULSE_OUT_DIS = 11;
 static const uint32_t SYNC_CONFIG_REGION_PGOOD_OVERRIDE = 12;
 static const uint32_t SYNC_CONFIG_CONT_SCAN_SHORT_WAIT = 13;
+static const uint32_t SYNC_CONFIG_PCIE32_MODE = 14; // p10:20,
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN = 15;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
 //<< [SYNC_CONFIG]
-// eq/reg00007.H
-
-//>> [QME_ERR]
-static const uint64_t QME_ERR = 0x200e0010ull;
-
-static const uint32_t QME_ERR_PPE_INTERNAL_ERROR = 0;
-static const uint32_t QME_ERR_PPE_EXTERNAL_ERROR = 1;
-static const uint32_t QME_ERR_PPE_PROGRESS_ERROR = 2;
-static const uint32_t QME_ERR_PPE_BREAKPOINT_ERROR = 3;
-static const uint32_t QME_ERR_RESCLK_FREEZE = 4;
-static const uint32_t QME_ERR_RESCLK_FREEZE_LEN = 4;
-static const uint32_t QME_ERR_SPECIAL_WKUP_PROTOCOL_ERR = 8;
-static const uint32_t QME_ERR_SPECIAL_WKUP_PROTOCOL_ERR_LEN = 4;
-static const uint32_t QME_ERR_SPECIAL_WKUP_DONE_WINDOW = 12;
-static const uint32_t QME_ERR_SPECIAL_WKUP_DONE_WINDOW_LEN = 4;
-static const uint32_t QME_ERR_DISABLED_INTR = 16;
-static const uint32_t QME_ERR_DISABLED_INTR_LEN = 4;
-static const uint32_t QME_ERR_DECONFIGURED_INTR = 20;
-static const uint32_t QME_ERR_DECONFIGURED_INTR_LEN = 4;
-static const uint32_t QME_ERR_CTFS_ERR = 24;
-static const uint32_t QME_ERR_CTFS_ERR_LEN = 4;
-static const uint32_t QME_ERR_CPMS_ERR = 28;
-static const uint32_t QME_ERR_CPMS_ERR_LEN = 4;
-static const uint32_t QME_ERR_PCB_ENDPOINT_RESET = 32;
-static const uint32_t QME_ERR_PCB_NETWORK_RESET = 33;
-static const uint32_t QME_ERR_PIG_PENDING_SOURCE_LOST = 34;
-static const uint32_t QME_ERR_PIG_PENDING_SOURCE_LOST_LEN = 6;
-static const uint32_t QME_ERR_SPARE = 40;
-static const uint32_t QME_ERR_SPARE_LEN = 4;
-static const uint32_t QME_ERR_LOCAL_ACCESS_PROTECT_ERR = 44;
-static const uint32_t QME_ERR_LOCAL_ACCESS_REGION_ERR = 45;
-static const uint32_t QME_ERR_LOCAL_ACCESS_PARTIAL_ERR = 46;
-//<< [QME_ERR]
-// eq/reg00007.H
-
-//>> [QME_QHTTRIG]
-static const uint64_t QME_QHTTRIG = 0x200e01b0ull;
-
-static const uint32_t QME_QHTTRIG_START = 0;
-static const uint32_t QME_QHTTRIG_STOP = 1;
-static const uint32_t QME_QHTTRIG_PAUSE = 2;
-//<< [QME_QHTTRIG]
-// eq/reg00007.H
-
-//>> [QME_SWPR1]
-static const uint64_t QME_SWPR1 = 0x200e0094ull;
-
-static const uint32_t QME_SWPR1_BAR = 0;
-static const uint32_t QME_SWPR1_BAR_LEN = 27;
-static const uint32_t QME_SWPR1_SIZE = 44;
-static const uint32_t QME_SWPR1_SIZE_LEN = 15;
-//<< [QME_SWPR1]
 // eq/reg00007.H
 
 //>>THE END<<

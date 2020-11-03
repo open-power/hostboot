@@ -322,241 +322,6 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_ROOT_CTRL8_24_31_LEN = 8;
 //<< [FSXCOMP_FSXLOG_ROOT_CTRL8]
 // perv/reg00000.H
 
-//>> [FSXCOMP_FSXLOG_ROOT_CTRL8_COPY]
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
-
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_FSI = 0x00002918ull;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_FSI_BYTE = 0x00002c60ull;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_RW = 0x00050118ull;
-
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_ROOT_CTRL8_COPY_REG = 0;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_ROOT_CTRL8_COPY_REG_LEN = 32;
-//<< [FSXCOMP_FSXLOG_ROOT_CTRL8_COPY]
-// perv/reg00000.H
-
-//>> [OPCG_ALIGN]
-static const uint64_t OPCG_ALIGN = 0x00030001ull;
-
-static const uint32_t OPCG_ALIGN_INOP_ALIGN = 0;
-static const uint32_t OPCG_ALIGN_INOP_ALIGN_LEN = 4;
-static const uint32_t OPCG_ALIGN_SNOP_ALIGN = 4;
-static const uint32_t OPCG_ALIGN_SNOP_ALIGN_LEN = 4;
-static const uint32_t OPCG_ALIGN_ENOP_ALIGN = 8;
-static const uint32_t OPCG_ALIGN_ENOP_ALIGN_LEN = 4;
-static const uint32_t OPCG_ALIGN_INOP_WAIT = 12;
-static const uint32_t OPCG_ALIGN_INOP_WAIT_LEN = 8;
-static const uint32_t OPCG_ALIGN_SNOP_WAIT = 20;
-static const uint32_t OPCG_ALIGN_SNOP_WAIT_LEN = 12;
-static const uint32_t OPCG_ALIGN_ENOP_WAIT = 32;
-static const uint32_t OPCG_ALIGN_ENOP_WAIT_LEN = 8;
-static const uint32_t OPCG_ALIGN_INOP_FORCE_SG = 40;
-static const uint32_t OPCG_ALIGN_SNOP_FORCE_SG = 41;
-static const uint32_t OPCG_ALIGN_ENOP_FORCE_SG = 42;
-static const uint32_t OPCG_ALIGN_NO_WAIT_ON_CLK_CMD = 43;
-static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT = 44;
-static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT_LEN = 2;
-static const uint32_t OPCG_ALIGN_SCAN_RATIO = 47;
-static const uint32_t OPCG_ALIGN_SCAN_RATIO_LEN = 5;
-static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
-static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
-//<< [OPCG_ALIGN]
-// perv/reg00000.H
-
-//>> [TOD_MISC_RESET_REG]
-static const uint64_t TOD_MISC_RESET_REG = 0x0004000bull;
-
-static const uint32_t TOD_MISC_RESET_REG_M_PATH_0_STEP_CREATE_THRESHOLD_RESET_ENABLE = 0;
-static const uint32_t TOD_MISC_RESET_REG_M_PATH_0_STEP_ALIGN_THRESHOLD_RESET_ENABLE = 1;
-static const uint32_t TOD_MISC_RESET_REG_M_PATH_1_STEP_CREATE_THRESHOLD_RESET_ENABLE = 2;
-static const uint32_t TOD_MISC_RESET_REG_M_PATH_1_STEP_ALIGN_THRESHOLD_RESET_ENABLE = 3;
-static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_04_05 = 4;
-static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_04_05_LEN = 2;
-static const uint32_t TOD_MISC_RESET_REG_DISTR_STEP_SYNC_TX_RESET_DISABLE = 6;
-static const uint32_t TOD_MISC_RESET_REG_CORE_STEP_SYNC_TX_RESET_DISABLE = 7;
-static const uint32_t TOD_MISC_RESET_REG_PROBE_0_TOGGLE_ENABLE = 8;
-static const uint32_t TOD_MISC_RESET_REG_PROBE_1_TOGGLE_ENABLE = 9;
-static const uint32_t TOD_MISC_RESET_REG_PROBE_2_TOGGLE_ENABLE = 10;
-static const uint32_t TOD_MISC_RESET_REG_PROBE_3_TOGGLE_ENABLE = 11;
-// ERROR Duplicate Dial         static const uint32_t TOD_MISC_RESET_REG_DISTR_STEP_SYNC_TX_RESET_DISABLE = 12;
-static const uint32_t TOD_MISC_RESET_REG_DISTR_STEP_SYNC_TX_RESET_TRIGGER = 13;
-static const uint32_t TOD_MISC_RESET_REG_CORE_STEP_SYNC_TX_RESET_ENABLE = 14;
-static const uint32_t TOD_MISC_RESET_REG_CORE_STEP_SYNC_TX_RESET_TRIGGER = 15;
-static const uint32_t TOD_MISC_RESET_REG_TRACE_ENABLE = 16;
-static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_17 = 17;
-static const uint32_t TOD_MISC_RESET_REG_TRACE_DATA_SELECT = 18;
-static const uint32_t TOD_MISC_RESET_REG_TRACE_DATA_SELECT_LEN = 2;
-static const uint32_t TOD_MISC_RESET_REG_M_PATH_0_SYNC_CREATE_COUNTER_RESET_ENABLE = 20;
-static const uint32_t TOD_MISC_RESET_REG_M_PATH_1_SYNC_CREATE_COUNTER_RESET_ENABLE = 21;
-static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_TWOS_COMPL_LOAD = 22;
-static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_ADJUST_RESET = 23;
-static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_TWOS_COMPL_LOAD_VALUE = 24;
-static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_TWOS_COMPL_LOAD_VALUE_LEN = 9;
-static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_33_39 = 33;
-static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_33_39_LEN = 7;
-//<< [TOD_MISC_RESET_REG]
-// perv/reg00001.H
-
-//>> [TOD_SEC_PORT_0_CTRL_REG]
-static const uint64_t TOD_SEC_PORT_0_CTRL_REG = 0x00040003ull;
-
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_PORT_0_RX_SELECT = 0;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_PORT_0_RX_SELECT_LEN = 3;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_03 = 3;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X0_PORT_0_TX_SELECT = 4;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X0_PORT_0_TX_SELECT_LEN = 2;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X1_PORT_0_TX_SELECT = 6;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X1_PORT_0_TX_SELECT_LEN = 2;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X2_PORT_0_TX_SELECT = 8;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X2_PORT_0_TX_SELECT_LEN = 2;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X3_PORT_0_TX_SELECT = 10;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X3_PORT_0_TX_SELECT_LEN = 2;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X4_PORT_0_TX_SELECT = 12;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X4_PORT_0_TX_SELECT_LEN = 2;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X5_PORT_0_TX_SELECT = 14;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X5_PORT_0_TX_SELECT_LEN = 2;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X6_PORT_0_TX_SELECT = 16;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X6_PORT_0_TX_SELECT_LEN = 2;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X7_PORT_0_TX_SELECT = 18;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X7_PORT_0_TX_SELECT_LEN = 2;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X0_PORT_0_TX_ENABLE = 20;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X1_PORT_0_TX_ENABLE = 21;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X2_PORT_0_TX_ENABLE = 22;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X3_PORT_0_TX_ENABLE = 23;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X4_PORT_0_TX_ENABLE = 24;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X5_PORT_0_TX_ENABLE = 25;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X6_PORT_0_TX_ENABLE = 26;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X7_PORT_0_TX_ENABLE = 27;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_31 = 28;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_31_LEN = 4;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE = 32;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN = 8;
-//<< [TOD_SEC_PORT_0_CTRL_REG]
-// perv/reg00001.H
-
-//>> [XSTOP_MASK]
-static const uint64_t XSTOP_MASK_RW = 0x00040040ull;
-static const uint64_t XSTOP_MASK_WO_CLEAR = 0x00040060ull;
-static const uint64_t XSTOP_MASK_WO_OR = 0x00040050ull;
-
-static const uint32_t XSTOP_MASK_01 = 1;
-static const uint32_t XSTOP_MASK_02 = 2;
-static const uint32_t XSTOP_MASK_03 = 3;
-static const uint32_t XSTOP_MASK_04 = 4;
-static const uint32_t XSTOP_MASK_05 = 5;
-static const uint32_t XSTOP_MASK_06 = 6;
-static const uint32_t XSTOP_MASK_07 = 7;
-static const uint32_t XSTOP_MASK_08 = 8;
-static const uint32_t XSTOP_MASK_09 = 9;
-static const uint32_t XSTOP_MASK_10 = 10;
-static const uint32_t XSTOP_MASK_11 = 11;
-static const uint32_t XSTOP_MASK_12 = 12;
-static const uint32_t XSTOP_MASK_13 = 13;
-static const uint32_t XSTOP_MASK_14 = 14;
-static const uint32_t XSTOP_MASK_15 = 15;
-static const uint32_t XSTOP_MASK_16 = 16;
-static const uint32_t XSTOP_MASK_17 = 17;
-static const uint32_t XSTOP_MASK_18 = 18;
-static const uint32_t XSTOP_MASK_19 = 19;
-static const uint32_t XSTOP_MASK_20 = 20;
-static const uint32_t XSTOP_MASK_21 = 21;
-static const uint32_t XSTOP_MASK_22 = 22;
-static const uint32_t XSTOP_MASK_23 = 23;
-static const uint32_t XSTOP_MASK_24 = 24;
-static const uint32_t XSTOP_MASK_25 = 25;
-static const uint32_t XSTOP_MASK_26 = 26;
-static const uint32_t XSTOP_MASK_27 = 27;
-static const uint32_t XSTOP_MASK_28 = 28;
-static const uint32_t XSTOP_MASK_29 = 29;
-static const uint32_t XSTOP_MASK_30 = 30;
-static const uint32_t XSTOP_MASK_31 = 31;
-static const uint32_t XSTOP_MASK_32 = 32;
-static const uint32_t XSTOP_MASK_33 = 33;
-static const uint32_t XSTOP_MASK_34 = 34;
-static const uint32_t XSTOP_MASK_35 = 35;
-static const uint32_t XSTOP_MASK_36 = 36;
-static const uint32_t XSTOP_MASK_37 = 37;
-static const uint32_t XSTOP_MASK_38 = 38;
-static const uint32_t XSTOP_MASK_39 = 39;
-static const uint32_t XSTOP_MASK_40 = 40;
-static const uint32_t XSTOP_MASK_41 = 41;
-static const uint32_t XSTOP_MASK_42 = 42;
-static const uint32_t XSTOP_MASK_43 = 43;
-static const uint32_t XSTOP_MASK_44 = 44;
-static const uint32_t XSTOP_MASK_45 = 45;
-static const uint32_t XSTOP_MASK_46 = 46;
-static const uint32_t XSTOP_MASK_47 = 47;
-static const uint32_t XSTOP_MASK_48 = 48;
-static const uint32_t XSTOP_MASK_49 = 49;
-static const uint32_t XSTOP_MASK_50 = 50;
-static const uint32_t XSTOP_MASK_51 = 51;
-static const uint32_t XSTOP_MASK_52 = 52;
-static const uint32_t XSTOP_MASK_53 = 53;
-//<< [XSTOP_MASK]
-// perv/reg00001.H
-
-//>> [REC_ERR_MST14_REG3]
-static const uint64_t REC_ERR_MST14_REG3 = 0x000f007bull;
-
-static const uint32_t REC_ERR_MST14_REG3_48_MST14_RESPONSE_BIT = 0;
-static const uint32_t REC_ERR_MST14_REG3_48_MST14_ERROR_CODE = 1;
-static const uint32_t REC_ERR_MST14_REG3_48_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_49_MST14_RESPONSE_BIT = 4;
-static const uint32_t REC_ERR_MST14_REG3_49_MST14_ERROR_CODE = 5;
-static const uint32_t REC_ERR_MST14_REG3_49_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_50_MST14_RESPONSE_BIT = 8;
-static const uint32_t REC_ERR_MST14_REG3_50_MST14_ERROR_CODE = 9;
-static const uint32_t REC_ERR_MST14_REG3_50_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_51_MST14_RESPONSE_BIT = 12;
-static const uint32_t REC_ERR_MST14_REG3_51_MST14_ERROR_CODE = 13;
-static const uint32_t REC_ERR_MST14_REG3_51_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_52_MST14_RESPONSE_BIT = 16;
-static const uint32_t REC_ERR_MST14_REG3_52_MST14_ERROR_CODE = 17;
-static const uint32_t REC_ERR_MST14_REG3_52_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_53_MST14_RESPONSE_BIT = 20;
-static const uint32_t REC_ERR_MST14_REG3_53_MST14_ERROR_CODE = 21;
-static const uint32_t REC_ERR_MST14_REG3_53_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_54_MST14_RESPONSE_BIT = 24;
-static const uint32_t REC_ERR_MST14_REG3_54_MST14_ERROR_CODE = 25;
-static const uint32_t REC_ERR_MST14_REG3_54_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_55_MST14_RESPONSE_BIT = 28;
-static const uint32_t REC_ERR_MST14_REG3_55_MST14_ERROR_CODE = 29;
-static const uint32_t REC_ERR_MST14_REG3_55_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_56_MST14_RESPONSE_BIT = 32;
-static const uint32_t REC_ERR_MST14_REG3_56_MST14_ERROR_CODE = 33;
-static const uint32_t REC_ERR_MST14_REG3_56_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_57_MST14_RESPONSE_BIT = 36;
-static const uint32_t REC_ERR_MST14_REG3_57_MST14_ERROR_CODE = 37;
-static const uint32_t REC_ERR_MST14_REG3_57_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_58_MST14_RESPONSE_BIT = 40;
-static const uint32_t REC_ERR_MST14_REG3_58_MST14_ERROR_CODE = 41;
-static const uint32_t REC_ERR_MST14_REG3_58_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_59_MST14_RESPONSE_BIT = 44;
-static const uint32_t REC_ERR_MST14_REG3_59_MST14_ERROR_CODE = 45;
-static const uint32_t REC_ERR_MST14_REG3_59_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_60_MST14_RESPONSE_BIT = 48;
-static const uint32_t REC_ERR_MST14_REG3_60_MST14_ERROR_CODE = 49;
-static const uint32_t REC_ERR_MST14_REG3_60_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_61_MST14_RESPONSE_BIT = 52;
-static const uint32_t REC_ERR_MST14_REG3_61_MST14_ERROR_CODE = 53;
-static const uint32_t REC_ERR_MST14_REG3_61_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_62_MST14_RESPONSE_BIT = 56;
-static const uint32_t REC_ERR_MST14_REG3_62_MST14_ERROR_CODE = 57;
-static const uint32_t REC_ERR_MST14_REG3_62_MST14_ERROR_CODE_LEN = 3;
-static const uint32_t REC_ERR_MST14_REG3_63_MST14_RESPONSE_BIT = 60;
-static const uint32_t REC_ERR_MST14_REG3_63_MST14_ERROR_CODE = 61;
-static const uint32_t REC_ERR_MST14_REG3_63_MST14_ERROR_CODE_LEN = 3;
-//<< [REC_ERR_MST14_REG3]
-// perv/reg00000.H
-
-//>> [RESET_REG]
-static const uint64_t RESET_REG = 0x000f001dull;
-
-static const uint32_t RESET_REG_RESET_PCB = 0;
-static const uint32_t RESET_REG_RESET_ENDPOINTS = 1;
-static const uint32_t RESET_REG_TIMEOUT_RESET_EN = 2;
-//<< [RESET_REG]
-// perv/reg00001.H
-
 //>> [FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR]
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
@@ -581,6 +346,18 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_TCFSI_FSIA_FENCE_DC = 23;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_ROOT_CTRL8_24_31 = 24;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_ROOT_CTRL8_24_31_LEN = 8;
 //<< [FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR]
+// perv/reg00000.H
+
+//>> [FSXCOMP_FSXLOG_ROOT_CTRL8_COPY]
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_FSI = 0x00002918ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_FSI_BYTE = 0x00002c60ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_RW = 0x00050118ull;
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_ROOT_CTRL8_COPY_REG = 0;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_ROOT_CTRL8_COPY_REG_LEN = 32;
+//<< [FSXCOMP_FSXLOG_ROOT_CTRL8_COPY]
 // perv/reg00000.H
 
 //>> [HOSTATTN]
@@ -703,6 +480,234 @@ static const uint32_t HOSTATTN_MASK_52 = 52;
 static const uint32_t HOSTATTN_MASK_53 = 53;
 //<< [HOSTATTN_MASK]
 // perv/reg00000.H
+
+//>> [OPCG_ALIGN]
+static const uint64_t OPCG_ALIGN = 0x00030001ull;
+
+static const uint32_t OPCG_ALIGN_INOP_ALIGN = 0;
+static const uint32_t OPCG_ALIGN_INOP_ALIGN_LEN = 4;
+static const uint32_t OPCG_ALIGN_SNOP_ALIGN = 4;
+static const uint32_t OPCG_ALIGN_SNOP_ALIGN_LEN = 4;
+static const uint32_t OPCG_ALIGN_ENOP_ALIGN = 8;
+static const uint32_t OPCG_ALIGN_ENOP_ALIGN_LEN = 4;
+static const uint32_t OPCG_ALIGN_INOP_WAIT = 12;
+static const uint32_t OPCG_ALIGN_INOP_WAIT_LEN = 8;
+static const uint32_t OPCG_ALIGN_SNOP_WAIT = 20;
+static const uint32_t OPCG_ALIGN_SNOP_WAIT_LEN = 12;
+static const uint32_t OPCG_ALIGN_ENOP_WAIT = 32;
+static const uint32_t OPCG_ALIGN_ENOP_WAIT_LEN = 8;
+static const uint32_t OPCG_ALIGN_INOP_FORCE_SG = 40;
+static const uint32_t OPCG_ALIGN_SNOP_FORCE_SG = 41;
+static const uint32_t OPCG_ALIGN_ENOP_FORCE_SG = 42;
+static const uint32_t OPCG_ALIGN_NO_WAIT_ON_CLK_CMD = 43;
+static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT = 44;
+static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT_LEN = 2;
+static const uint32_t OPCG_ALIGN_SCAN_RATIO = 47;
+static const uint32_t OPCG_ALIGN_SCAN_RATIO_LEN = 5;
+static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
+static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
+//<< [OPCG_ALIGN]
+// perv/reg00000.H
+
+//>> [REC_ERR_MST14_REG3]
+static const uint64_t REC_ERR_MST14_REG3 = 0x000f007bull;
+
+static const uint32_t REC_ERR_MST14_REG3_48_MST14_RESPONSE_BIT = 0;
+static const uint32_t REC_ERR_MST14_REG3_48_MST14_ERROR_CODE = 1;
+static const uint32_t REC_ERR_MST14_REG3_48_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_49_MST14_RESPONSE_BIT = 4;
+static const uint32_t REC_ERR_MST14_REG3_49_MST14_ERROR_CODE = 5;
+static const uint32_t REC_ERR_MST14_REG3_49_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_50_MST14_RESPONSE_BIT = 8;
+static const uint32_t REC_ERR_MST14_REG3_50_MST14_ERROR_CODE = 9;
+static const uint32_t REC_ERR_MST14_REG3_50_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_51_MST14_RESPONSE_BIT = 12;
+static const uint32_t REC_ERR_MST14_REG3_51_MST14_ERROR_CODE = 13;
+static const uint32_t REC_ERR_MST14_REG3_51_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_52_MST14_RESPONSE_BIT = 16;
+static const uint32_t REC_ERR_MST14_REG3_52_MST14_ERROR_CODE = 17;
+static const uint32_t REC_ERR_MST14_REG3_52_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_53_MST14_RESPONSE_BIT = 20;
+static const uint32_t REC_ERR_MST14_REG3_53_MST14_ERROR_CODE = 21;
+static const uint32_t REC_ERR_MST14_REG3_53_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_54_MST14_RESPONSE_BIT = 24;
+static const uint32_t REC_ERR_MST14_REG3_54_MST14_ERROR_CODE = 25;
+static const uint32_t REC_ERR_MST14_REG3_54_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_55_MST14_RESPONSE_BIT = 28;
+static const uint32_t REC_ERR_MST14_REG3_55_MST14_ERROR_CODE = 29;
+static const uint32_t REC_ERR_MST14_REG3_55_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_56_MST14_RESPONSE_BIT = 32;
+static const uint32_t REC_ERR_MST14_REG3_56_MST14_ERROR_CODE = 33;
+static const uint32_t REC_ERR_MST14_REG3_56_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_57_MST14_RESPONSE_BIT = 36;
+static const uint32_t REC_ERR_MST14_REG3_57_MST14_ERROR_CODE = 37;
+static const uint32_t REC_ERR_MST14_REG3_57_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_58_MST14_RESPONSE_BIT = 40;
+static const uint32_t REC_ERR_MST14_REG3_58_MST14_ERROR_CODE = 41;
+static const uint32_t REC_ERR_MST14_REG3_58_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_59_MST14_RESPONSE_BIT = 44;
+static const uint32_t REC_ERR_MST14_REG3_59_MST14_ERROR_CODE = 45;
+static const uint32_t REC_ERR_MST14_REG3_59_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_60_MST14_RESPONSE_BIT = 48;
+static const uint32_t REC_ERR_MST14_REG3_60_MST14_ERROR_CODE = 49;
+static const uint32_t REC_ERR_MST14_REG3_60_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_61_MST14_RESPONSE_BIT = 52;
+static const uint32_t REC_ERR_MST14_REG3_61_MST14_ERROR_CODE = 53;
+static const uint32_t REC_ERR_MST14_REG3_61_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_62_MST14_RESPONSE_BIT = 56;
+static const uint32_t REC_ERR_MST14_REG3_62_MST14_ERROR_CODE = 57;
+static const uint32_t REC_ERR_MST14_REG3_62_MST14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_MST14_REG3_63_MST14_RESPONSE_BIT = 60;
+static const uint32_t REC_ERR_MST14_REG3_63_MST14_ERROR_CODE = 61;
+static const uint32_t REC_ERR_MST14_REG3_63_MST14_ERROR_CODE_LEN = 3;
+//<< [REC_ERR_MST14_REG3]
+// perv/reg00000.H
+
+//>> [RESET_REG]
+static const uint64_t RESET_REG = 0x000f001dull;
+
+static const uint32_t RESET_REG_RESET_PCB = 0;
+static const uint32_t RESET_REG_RESET_ENDPOINTS = 1;
+static const uint32_t RESET_REG_TIMEOUT_RESET_EN = 2;
+static const uint32_t RESET_REG_QUIESCE_PCB = 3; // p10:20,
+//<< [RESET_REG]
+// perv/reg00001.H
+
+//>> [TOD_MISC_RESET_REG]
+static const uint64_t TOD_MISC_RESET_REG = 0x0004000bull;
+
+static const uint32_t TOD_MISC_RESET_REG_M_PATH_0_STEP_CREATE_THRESHOLD_RESET_ENABLE = 0;
+static const uint32_t TOD_MISC_RESET_REG_M_PATH_0_STEP_ALIGN_THRESHOLD_RESET_ENABLE = 1;
+static const uint32_t TOD_MISC_RESET_REG_M_PATH_1_STEP_CREATE_THRESHOLD_RESET_ENABLE = 2;
+static const uint32_t TOD_MISC_RESET_REG_M_PATH_1_STEP_ALIGN_THRESHOLD_RESET_ENABLE = 3;
+static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_04_05 = 4;
+static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_04_05_LEN = 2;
+static const uint32_t TOD_MISC_RESET_REG_DISTR_STEP_SYNC_TX_RESET_DISABLE = 6;
+static const uint32_t TOD_MISC_RESET_REG_CORE_STEP_SYNC_TX_RESET_DISABLE = 7;
+static const uint32_t TOD_MISC_RESET_REG_PROBE_0_TOGGLE_ENABLE = 8;
+static const uint32_t TOD_MISC_RESET_REG_PROBE_1_TOGGLE_ENABLE = 9;
+static const uint32_t TOD_MISC_RESET_REG_PROBE_2_TOGGLE_ENABLE = 10;
+static const uint32_t TOD_MISC_RESET_REG_PROBE_3_TOGGLE_ENABLE = 11;
+// ERROR Duplicate Dial         static const uint32_t TOD_MISC_RESET_REG_DISTR_STEP_SYNC_TX_RESET_DISABLE = 12;
+static const uint32_t TOD_MISC_RESET_REG_DISTR_STEP_SYNC_TX_RESET_TRIGGER = 13;
+static const uint32_t TOD_MISC_RESET_REG_CORE_STEP_SYNC_TX_RESET_ENABLE = 14;
+static const uint32_t TOD_MISC_RESET_REG_CORE_STEP_SYNC_TX_RESET_TRIGGER = 15;
+static const uint32_t TOD_MISC_RESET_REG_TRACE_ENABLE = 16;
+static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_17 = 17;
+static const uint32_t TOD_MISC_RESET_REG_TRACE_DATA_SELECT = 18;
+static const uint32_t TOD_MISC_RESET_REG_TRACE_DATA_SELECT_LEN = 2;
+static const uint32_t TOD_MISC_RESET_REG_M_PATH_0_SYNC_CREATE_COUNTER_RESET_ENABLE = 20;
+static const uint32_t TOD_MISC_RESET_REG_M_PATH_1_SYNC_CREATE_COUNTER_RESET_ENABLE = 21;
+static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_TWOS_COMPL_LOAD = 22;
+static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_ADJUST_RESET = 23;
+static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_TWOS_COMPL_LOAD_VALUE = 24;
+static const uint32_t TOD_MISC_RESET_REG_I_PATH_DELAY_TWOS_COMPL_LOAD_VALUE_LEN = 9;
+static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_33_39 = 33;
+static const uint32_t TOD_MISC_RESET_REG_REG_0X0B_SPARE_33_39_LEN = 7;
+//<< [TOD_MISC_RESET_REG]
+// perv/reg00001.H
+
+//>> [TOD_SEC_PORT_0_CTRL_REG]
+static const uint64_t TOD_SEC_PORT_0_CTRL_REG = 0x00040003ull;
+
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_PORT_0_RX_SELECT = 0;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_PORT_0_RX_SELECT_LEN = 3;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_03 = 3;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X0_PORT_0_TX_SELECT = 4;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X0_PORT_0_TX_SELECT_LEN = 2;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X1_PORT_0_TX_SELECT = 6;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X1_PORT_0_TX_SELECT_LEN = 2;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X2_PORT_0_TX_SELECT = 8;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X2_PORT_0_TX_SELECT_LEN = 2;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X3_PORT_0_TX_SELECT = 10;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X3_PORT_0_TX_SELECT_LEN = 2;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X4_PORT_0_TX_SELECT = 12;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X4_PORT_0_TX_SELECT_LEN = 2;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X5_PORT_0_TX_SELECT = 14;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X5_PORT_0_TX_SELECT_LEN = 2;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X6_PORT_0_TX_SELECT = 16;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X6_PORT_0_TX_SELECT_LEN = 2;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X7_PORT_0_TX_SELECT = 18;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X7_PORT_0_TX_SELECT_LEN = 2;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X0_PORT_0_TX_ENABLE = 20;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X1_PORT_0_TX_ENABLE = 21;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X2_PORT_0_TX_ENABLE = 22;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X3_PORT_0_TX_ENABLE = 23;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X4_PORT_0_TX_ENABLE = 24;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X5_PORT_0_TX_ENABLE = 25;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X6_PORT_0_TX_ENABLE = 26;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X7_PORT_0_TX_ENABLE = 27;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_31 = 28;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_31_LEN = 4;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29 = 28; // p10:20,
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29_LEN = 2;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE = 30; // p10:20,
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN = 10;
+// ERROR Duplicate Dial         static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE = 32;
+// ERROR Duplicate Dial         static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN = 8;
+//<< [TOD_SEC_PORT_0_CTRL_REG]
+// perv/reg00001.H
+
+//>> [XSTOP_MASK]
+static const uint64_t XSTOP_MASK_RW = 0x00040040ull;
+static const uint64_t XSTOP_MASK_WO_CLEAR = 0x00040060ull;
+static const uint64_t XSTOP_MASK_WO_OR = 0x00040050ull;
+
+static const uint32_t XSTOP_MASK_01 = 1;
+static const uint32_t XSTOP_MASK_02 = 2;
+static const uint32_t XSTOP_MASK_03 = 3;
+static const uint32_t XSTOP_MASK_04 = 4;
+static const uint32_t XSTOP_MASK_05 = 5;
+static const uint32_t XSTOP_MASK_06 = 6;
+static const uint32_t XSTOP_MASK_07 = 7;
+static const uint32_t XSTOP_MASK_08 = 8;
+static const uint32_t XSTOP_MASK_09 = 9;
+static const uint32_t XSTOP_MASK_10 = 10;
+static const uint32_t XSTOP_MASK_11 = 11;
+static const uint32_t XSTOP_MASK_12 = 12;
+static const uint32_t XSTOP_MASK_13 = 13;
+static const uint32_t XSTOP_MASK_14 = 14;
+static const uint32_t XSTOP_MASK_15 = 15;
+static const uint32_t XSTOP_MASK_16 = 16;
+static const uint32_t XSTOP_MASK_17 = 17;
+static const uint32_t XSTOP_MASK_18 = 18;
+static const uint32_t XSTOP_MASK_19 = 19;
+static const uint32_t XSTOP_MASK_20 = 20;
+static const uint32_t XSTOP_MASK_21 = 21;
+static const uint32_t XSTOP_MASK_22 = 22;
+static const uint32_t XSTOP_MASK_23 = 23;
+static const uint32_t XSTOP_MASK_24 = 24;
+static const uint32_t XSTOP_MASK_25 = 25;
+static const uint32_t XSTOP_MASK_26 = 26;
+static const uint32_t XSTOP_MASK_27 = 27;
+static const uint32_t XSTOP_MASK_28 = 28;
+static const uint32_t XSTOP_MASK_29 = 29;
+static const uint32_t XSTOP_MASK_30 = 30;
+static const uint32_t XSTOP_MASK_31 = 31;
+static const uint32_t XSTOP_MASK_32 = 32;
+static const uint32_t XSTOP_MASK_33 = 33;
+static const uint32_t XSTOP_MASK_34 = 34;
+static const uint32_t XSTOP_MASK_35 = 35;
+static const uint32_t XSTOP_MASK_36 = 36;
+static const uint32_t XSTOP_MASK_37 = 37;
+static const uint32_t XSTOP_MASK_38 = 38;
+static const uint32_t XSTOP_MASK_39 = 39;
+static const uint32_t XSTOP_MASK_40 = 40;
+static const uint32_t XSTOP_MASK_41 = 41;
+static const uint32_t XSTOP_MASK_42 = 42;
+static const uint32_t XSTOP_MASK_43 = 43;
+static const uint32_t XSTOP_MASK_44 = 44;
+static const uint32_t XSTOP_MASK_45 = 45;
+static const uint32_t XSTOP_MASK_46 = 46;
+static const uint32_t XSTOP_MASK_47 = 47;
+static const uint32_t XSTOP_MASK_48 = 48;
+static const uint32_t XSTOP_MASK_49 = 49;
+static const uint32_t XSTOP_MASK_50 = 50;
+static const uint32_t XSTOP_MASK_51 = 51;
+static const uint32_t XSTOP_MASK_52 = 52;
+static const uint32_t XSTOP_MASK_53 = 53;
+//<< [XSTOP_MASK]
+// perv/reg00001.H
 
 //>>THE END<<
 

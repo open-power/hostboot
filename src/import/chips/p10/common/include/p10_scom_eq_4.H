@@ -86,30 +86,12 @@ static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT_LEN = 4;
 //<< [OPCG_REG2]
 // eq/reg00004.H
 
-//>> [QME_QHB]
-static const uint64_t QME_QHB = 0x200e0080ull;
-
-static const uint32_t QME_QHB_HEARTBEAT_COUNT = 0;
-static const uint32_t QME_QHB_HEARTBEAT_COUNT_LEN = 16;
-static const uint32_t QME_QHB_HEARTBEAT_ENABLE = 16;
-static const uint32_t QME_QHB_SPARE = 17;
-//<< [QME_QHB]
-// eq/reg00004.H
-
 //>> [QME_EISTR]
 static const uint64_t QME_EISTR = 0x200e0270ull;
 
 static const uint32_t QME_EISTR_INTERRUPT_STATUS = 0;
 static const uint32_t QME_EISTR_INTERRUPT_STATUS_LEN = 64;
 //<< [QME_EISTR]
-// eq/reg00004.H
-
-//>> [QME_LFIRACT0]
-static const uint64_t QME_LFIRACT0 = 0x200e0008ull;
-
-static const uint32_t QME_LFIRACT0_FIR_ACTION0 = 0;
-static const uint32_t QME_LFIRACT0_FIR_ACTION0_LEN = 36;
-//<< [QME_LFIRACT0]
 // eq/reg00004.H
 
 //>> [QME_FTXR]
@@ -128,6 +110,14 @@ static const uint32_t QME_FTXR_FTX_UPDATE_PENDING_LEN = 4;
 static const uint32_t QME_FTXR_QOS_UPDATE_PENDING = 36;
 static const uint32_t QME_FTXR_QOS_UPDATE_PENDING_LEN = 4;
 //<< [QME_FTXR]
+// eq/reg00004.H
+
+//>> [QME_LFIRACT0]
+static const uint64_t QME_LFIRACT0 = 0x200e0008ull;
+
+static const uint32_t QME_LFIRACT0_FIR_ACTION0 = 0;
+static const uint32_t QME_LFIRACT0_FIR_ACTION0_LEN = 36;
+//<< [QME_LFIRACT0]
 // eq/reg00004.H
 
 //>> [QME_PLSR]
@@ -166,6 +156,16 @@ static const uint32_t QME_PLSR_3_T2_LEN = 4;
 static const uint32_t QME_PLSR_3_T3 = 60;
 static const uint32_t QME_PLSR_3_T3_LEN = 4;
 //<< [QME_PLSR]
+// eq/reg00004.H
+
+//>> [QME_QHB]
+static const uint64_t QME_QHB = 0x200e0080ull;
+
+static const uint32_t QME_QHB_HEARTBEAT_COUNT = 0;
+static const uint32_t QME_QHB_HEARTBEAT_COUNT_LEN = 16;
+static const uint32_t QME_QHB_HEARTBEAT_ENABLE = 16;
+static const uint32_t QME_QHB_SPARE = 17;
+//<< [QME_QHB]
 // eq/reg00004.H
 
 //>> [QME_RCSCR]

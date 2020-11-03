@@ -215,95 +215,6 @@ static const uint32_t EPS_THERM_WSUB_ERR_STATUS_REG_UNUSED = 59;
 //<< [EPS_THERM_WSUB_ERR_STATUS_REG]
 // pec/reg00000.H
 
-//>> [OPCG_ALIGN]
-static const uint64_t OPCG_ALIGN = 0x08030001ull;
-
-static const uint32_t OPCG_ALIGN_INOP_ALIGN = 0;
-static const uint32_t OPCG_ALIGN_INOP_ALIGN_LEN = 4;
-static const uint32_t OPCG_ALIGN_SNOP_ALIGN = 4;
-static const uint32_t OPCG_ALIGN_SNOP_ALIGN_LEN = 4;
-static const uint32_t OPCG_ALIGN_ENOP_ALIGN = 8;
-static const uint32_t OPCG_ALIGN_ENOP_ALIGN_LEN = 4;
-static const uint32_t OPCG_ALIGN_INOP_WAIT = 12;
-static const uint32_t OPCG_ALIGN_INOP_WAIT_LEN = 8;
-static const uint32_t OPCG_ALIGN_SNOP_WAIT = 20;
-static const uint32_t OPCG_ALIGN_SNOP_WAIT_LEN = 12;
-static const uint32_t OPCG_ALIGN_ENOP_WAIT = 32;
-static const uint32_t OPCG_ALIGN_ENOP_WAIT_LEN = 8;
-static const uint32_t OPCG_ALIGN_INOP_FORCE_SG = 40;
-static const uint32_t OPCG_ALIGN_SNOP_FORCE_SG = 41;
-static const uint32_t OPCG_ALIGN_ENOP_FORCE_SG = 42;
-static const uint32_t OPCG_ALIGN_NO_WAIT_ON_CLK_CMD = 43;
-static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT = 44;
-static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT_LEN = 2;
-static const uint32_t OPCG_ALIGN_SCAN_RATIO = 47;
-static const uint32_t OPCG_ALIGN_SCAN_RATIO_LEN = 5;
-static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
-static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
-//<< [OPCG_ALIGN]
-// pec/reg00000.H
-
-//>> [XSTOP_MASK]
-static const uint64_t XSTOP_MASK_RW = 0x08040040ull;
-static const uint64_t XSTOP_MASK_WO_CLEAR = 0x08040060ull;
-static const uint64_t XSTOP_MASK_WO_OR = 0x08040050ull;
-
-static const uint32_t XSTOP_MASK_01 = 1;
-static const uint32_t XSTOP_MASK_02 = 2;
-static const uint32_t XSTOP_MASK_03 = 3;
-static const uint32_t XSTOP_MASK_04 = 4;
-static const uint32_t XSTOP_MASK_05 = 5;
-static const uint32_t XSTOP_MASK_06 = 6;
-static const uint32_t XSTOP_MASK_07 = 7;
-static const uint32_t XSTOP_MASK_08 = 8;
-static const uint32_t XSTOP_MASK_09 = 9;
-static const uint32_t XSTOP_MASK_10 = 10;
-static const uint32_t XSTOP_MASK_11 = 11;
-static const uint32_t XSTOP_MASK_12 = 12;
-static const uint32_t XSTOP_MASK_13 = 13;
-static const uint32_t XSTOP_MASK_14 = 14;
-static const uint32_t XSTOP_MASK_15 = 15;
-static const uint32_t XSTOP_MASK_16 = 16;
-static const uint32_t XSTOP_MASK_17 = 17;
-static const uint32_t XSTOP_MASK_18 = 18;
-static const uint32_t XSTOP_MASK_19 = 19;
-static const uint32_t XSTOP_MASK_20 = 20;
-static const uint32_t XSTOP_MASK_21 = 21;
-static const uint32_t XSTOP_MASK_22 = 22;
-static const uint32_t XSTOP_MASK_23 = 23;
-static const uint32_t XSTOP_MASK_24 = 24;
-static const uint32_t XSTOP_MASK_25 = 25;
-static const uint32_t XSTOP_MASK_26 = 26;
-static const uint32_t XSTOP_MASK_27 = 27;
-static const uint32_t XSTOP_MASK_28 = 28;
-static const uint32_t XSTOP_MASK_29 = 29;
-static const uint32_t XSTOP_MASK_30 = 30;
-static const uint32_t XSTOP_MASK_31 = 31;
-static const uint32_t XSTOP_MASK_32 = 32;
-static const uint32_t XSTOP_MASK_33 = 33;
-static const uint32_t XSTOP_MASK_34 = 34;
-static const uint32_t XSTOP_MASK_35 = 35;
-static const uint32_t XSTOP_MASK_36 = 36;
-static const uint32_t XSTOP_MASK_37 = 37;
-static const uint32_t XSTOP_MASK_38 = 38;
-static const uint32_t XSTOP_MASK_39 = 39;
-static const uint32_t XSTOP_MASK_40 = 40;
-static const uint32_t XSTOP_MASK_41 = 41;
-static const uint32_t XSTOP_MASK_42 = 42;
-static const uint32_t XSTOP_MASK_43 = 43;
-static const uint32_t XSTOP_MASK_44 = 44;
-static const uint32_t XSTOP_MASK_45 = 45;
-static const uint32_t XSTOP_MASK_46 = 46;
-static const uint32_t XSTOP_MASK_47 = 47;
-static const uint32_t XSTOP_MASK_48 = 48;
-static const uint32_t XSTOP_MASK_49 = 49;
-static const uint32_t XSTOP_MASK_50 = 50;
-static const uint32_t XSTOP_MASK_51 = 51;
-static const uint32_t XSTOP_MASK_52 = 52;
-static const uint32_t XSTOP_MASK_53 = 53;
-//<< [XSTOP_MASK]
-// pec/reg00000.H
-
 //>> [HOSTATTN]
 static const uint64_t HOSTATTN = 0x08040004ull;
 
@@ -423,6 +334,115 @@ static const uint32_t HOSTATTN_MASK_51 = 51;
 static const uint32_t HOSTATTN_MASK_52 = 52;
 static const uint32_t HOSTATTN_MASK_53 = 53;
 //<< [HOSTATTN_MASK]
+// pec/reg00000.H
+
+//>> [OPCG_ALIGN]
+static const uint64_t OPCG_ALIGN = 0x08030001ull;
+
+static const uint32_t OPCG_ALIGN_INOP_ALIGN = 0;
+static const uint32_t OPCG_ALIGN_INOP_ALIGN_LEN = 4;
+static const uint32_t OPCG_ALIGN_SNOP_ALIGN = 4;
+static const uint32_t OPCG_ALIGN_SNOP_ALIGN_LEN = 4;
+static const uint32_t OPCG_ALIGN_ENOP_ALIGN = 8;
+static const uint32_t OPCG_ALIGN_ENOP_ALIGN_LEN = 4;
+static const uint32_t OPCG_ALIGN_INOP_WAIT = 12;
+static const uint32_t OPCG_ALIGN_INOP_WAIT_LEN = 8;
+static const uint32_t OPCG_ALIGN_SNOP_WAIT = 20;
+static const uint32_t OPCG_ALIGN_SNOP_WAIT_LEN = 12;
+static const uint32_t OPCG_ALIGN_ENOP_WAIT = 32;
+static const uint32_t OPCG_ALIGN_ENOP_WAIT_LEN = 8;
+static const uint32_t OPCG_ALIGN_INOP_FORCE_SG = 40;
+static const uint32_t OPCG_ALIGN_SNOP_FORCE_SG = 41;
+static const uint32_t OPCG_ALIGN_ENOP_FORCE_SG = 42;
+static const uint32_t OPCG_ALIGN_NO_WAIT_ON_CLK_CMD = 43;
+static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT = 44;
+static const uint32_t OPCG_ALIGN_ALIGN_SOURCE_SELECT_LEN = 2;
+static const uint32_t OPCG_ALIGN_SCAN_RATIO = 47;
+static const uint32_t OPCG_ALIGN_SCAN_RATIO_LEN = 5;
+static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
+static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
+//<< [OPCG_ALIGN]
+// pec/reg00000.H
+
+//>> [TOP0_PIPEDOUTCTL2]
+static const uint64_t TOP0_PIPEDOUTCTL2 = 0x08011116ull;
+
+static const uint32_t TOP0_PIPEDOUTCTL2_RESERVED_63_59 = 0;
+static const uint32_t TOP0_PIPEDOUTCTL2_RESERVED_63_59_LEN = 5;
+static const uint32_t TOP0_PIPEDOUTCTL2_RATIO_ALIGN_POLARITY = 5;
+static const uint32_t TOP0_PIPEDOUTCTL2_RATIO_ALIGN_DISABLE = 6;
+static const uint32_t TOP0_PIPEDOUTCTL2_PIPE_RX4_SRIS_MODE_EN = 7;
+static const uint32_t TOP0_PIPEDOUTCTL2_PIPE_RX0_SRIS_MODE_EN = 8;
+static const uint32_t TOP0_PIPEDOUTCTL2_PIPE_RX4_ES_CMN_REFCLK_MODE = 9;
+static const uint32_t TOP0_PIPEDOUTCTL2_PIPE_RX0_ES_CMN_REFCLK_MODE = 10;
+static const uint32_t TOP0_PIPEDOUTCTL2_PIPE_LANE4_CMN_REFCLK_MODE = 11;
+static const uint32_t TOP0_PIPEDOUTCTL2_PIPE_LANE0_CMN_REFCLK_MODE = 12;
+static const uint32_t TOP0_PIPEDOUTCTL2_UPCS_PIPE_CONFIG = 13;
+static const uint32_t TOP0_PIPEDOUTCTL2_UPCS_PIPE_CONFIG_LEN = 5;
+static const uint32_t TOP0_PIPEDOUTCTL2_RESERVED_45_0 = 18;
+static const uint32_t TOP0_PIPEDOUTCTL2_RESERVED_45_0_LEN = 46;
+//<< [TOP0_PIPEDOUTCTL2]
+// pec/reg00000.H
+
+//>> [XSTOP_MASK]
+static const uint64_t XSTOP_MASK_RW = 0x08040040ull;
+static const uint64_t XSTOP_MASK_WO_CLEAR = 0x08040060ull;
+static const uint64_t XSTOP_MASK_WO_OR = 0x08040050ull;
+
+static const uint32_t XSTOP_MASK_01 = 1;
+static const uint32_t XSTOP_MASK_02 = 2;
+static const uint32_t XSTOP_MASK_03 = 3;
+static const uint32_t XSTOP_MASK_04 = 4;
+static const uint32_t XSTOP_MASK_05 = 5;
+static const uint32_t XSTOP_MASK_06 = 6;
+static const uint32_t XSTOP_MASK_07 = 7;
+static const uint32_t XSTOP_MASK_08 = 8;
+static const uint32_t XSTOP_MASK_09 = 9;
+static const uint32_t XSTOP_MASK_10 = 10;
+static const uint32_t XSTOP_MASK_11 = 11;
+static const uint32_t XSTOP_MASK_12 = 12;
+static const uint32_t XSTOP_MASK_13 = 13;
+static const uint32_t XSTOP_MASK_14 = 14;
+static const uint32_t XSTOP_MASK_15 = 15;
+static const uint32_t XSTOP_MASK_16 = 16;
+static const uint32_t XSTOP_MASK_17 = 17;
+static const uint32_t XSTOP_MASK_18 = 18;
+static const uint32_t XSTOP_MASK_19 = 19;
+static const uint32_t XSTOP_MASK_20 = 20;
+static const uint32_t XSTOP_MASK_21 = 21;
+static const uint32_t XSTOP_MASK_22 = 22;
+static const uint32_t XSTOP_MASK_23 = 23;
+static const uint32_t XSTOP_MASK_24 = 24;
+static const uint32_t XSTOP_MASK_25 = 25;
+static const uint32_t XSTOP_MASK_26 = 26;
+static const uint32_t XSTOP_MASK_27 = 27;
+static const uint32_t XSTOP_MASK_28 = 28;
+static const uint32_t XSTOP_MASK_29 = 29;
+static const uint32_t XSTOP_MASK_30 = 30;
+static const uint32_t XSTOP_MASK_31 = 31;
+static const uint32_t XSTOP_MASK_32 = 32;
+static const uint32_t XSTOP_MASK_33 = 33;
+static const uint32_t XSTOP_MASK_34 = 34;
+static const uint32_t XSTOP_MASK_35 = 35;
+static const uint32_t XSTOP_MASK_36 = 36;
+static const uint32_t XSTOP_MASK_37 = 37;
+static const uint32_t XSTOP_MASK_38 = 38;
+static const uint32_t XSTOP_MASK_39 = 39;
+static const uint32_t XSTOP_MASK_40 = 40;
+static const uint32_t XSTOP_MASK_41 = 41;
+static const uint32_t XSTOP_MASK_42 = 42;
+static const uint32_t XSTOP_MASK_43 = 43;
+static const uint32_t XSTOP_MASK_44 = 44;
+static const uint32_t XSTOP_MASK_45 = 45;
+static const uint32_t XSTOP_MASK_46 = 46;
+static const uint32_t XSTOP_MASK_47 = 47;
+static const uint32_t XSTOP_MASK_48 = 48;
+static const uint32_t XSTOP_MASK_49 = 49;
+static const uint32_t XSTOP_MASK_50 = 50;
+static const uint32_t XSTOP_MASK_51 = 51;
+static const uint32_t XSTOP_MASK_52 = 52;
+static const uint32_t XSTOP_MASK_53 = 53;
+//<< [XSTOP_MASK]
 // pec/reg00000.H
 
 //>>THE END<<

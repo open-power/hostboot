@@ -39,6 +39,27 @@ namespace c
 #endif
 
 
+//>> [CPMS_CERR]
+static const uint64_t CPMS_CERR = 0x200e0e10ull;
+
+static const uint32_t CPMS_CERR_L3_PFET_SEQ_ERR = 0;
+static const uint32_t CPMS_CERR_CL2_PFET_SEQ_ERR = 1;
+static const uint32_t CPMS_CERR_MMA_PFET_SEQ_ERR = 2;
+static const uint32_t CPMS_CERR_DDS_ERR = 3;
+static const uint32_t CPMS_CERR_L3_CLOCK_SYNC_ERR = 4;
+static const uint32_t CPMS_CERR_CL2_CLOCK_SYNC_ERR = 5;
+static const uint32_t CPMS_CERR_DPT_ACCESS_ERROR = 6;
+static const uint32_t CPMS_CERR_PROXY_UNDERFLOW = 7;
+static const uint32_t CPMS_CERR_PITCH_SATURATED = 8;
+static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT = 9;
+static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT_LEN = 3;
+static const uint32_t CPMS_CERR_CCFG_PARITY_ERR = 12; // p10:20,
+static const uint32_t CPMS_CERR_RVRM_DROPOUT = 13; // p10:20,
+static const uint32_t CPMS_CERR_PITCH_UPDATE_ERR = 14; // p10:20,
+static const uint32_t CPMS_CERR_SPARE_ERR = 15; // p10:20,
+//<< [CPMS_CERR]
+// c/reg00006.H
+
 //>> [CPMS_CUCR]
 static const uint64_t CPMS_CUCR = 0x200e0e3cull;
 static const uint64_t CPMS_CUCR_SCOM2 = 0x200e0e3eull;
@@ -86,6 +107,50 @@ static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING = 61;
 static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING = 62;
 static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING = 63;
 //<< [CPMS_CUCR]
+// c/reg00006.H
+
+//>> [CPMS_DMSR]
+static const uint64_t CPMS_DMSR = 0x200e0e64ull;
+
+static const uint32_t CPMS_DMSR_0_COUNT = 0;
+static const uint32_t CPMS_DMSR_0_COUNT_LEN = 24;
+static const uint32_t CPMS_DMSR_1_COUNT = 32;
+static const uint32_t CPMS_DMSR_1_COUNT_LEN = 24;
+//<< [CPMS_DMSR]
+// c/reg00006.H
+
+//>> [CPMS_DPPR]
+static const uint64_t CPMS_DPPR = 0x200e0ea8ull;
+static const uint64_t CPMS_DPPR_WO_CLEAR = 0x200e0eabull;
+static const uint64_t CPMS_DPPR_WO_OR = 0x200e0eaaull;
+
+static const uint32_t CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE = 0;
+static const uint32_t CPMS_DPPR_PTSR_EVENT_SELECT = 1;
+static const uint32_t CPMS_DPPR_ENERGY_PROXY_RESET_MODE = 2;
+static const uint32_t CPMS_DPPR_PIL_THROTTLE_ENABLE = 3;
+static const uint32_t CPMS_DPPR_OCP_THROTTLE_ENABLE = 4;
+static const uint32_t CPMS_DPPR_OCP_INTERRUPT_ENABLE = 5;
+static const uint32_t CPMS_DPPR_OCP_ENABLE = 6;
+static const uint32_t CPMS_DPPR_SPARE = 7;
+static const uint32_t CPMS_DPPR_SPARE_LEN = 5;
+static const uint32_t CPMS_DPPR_PP0_THRESH_SCALE = 16;
+static const uint32_t CPMS_DPPR_PP0_THRESH_SCALE_LEN = 4;
+static const uint32_t CPMS_DPPR_PP0_THRESH_VALUE = 20;
+static const uint32_t CPMS_DPPR_PP0_THRESH_VALUE_LEN = 4;
+static const uint32_t CPMS_DPPR_PP1_THRESH_SCALE = 24;
+static const uint32_t CPMS_DPPR_PP1_THRESH_SCALE_LEN = 4;
+static const uint32_t CPMS_DPPR_PP1_THRESH_VALUE = 28;
+static const uint32_t CPMS_DPPR_PP1_THRESH_VALUE_LEN = 4;
+static const uint32_t CPMS_DPPR_OCP_WAIT_FOR_GRANT = 32;
+static const uint32_t CPMS_DPPR_OCP_LOCAL_MSB_MAX = 33;
+static const uint32_t CPMS_DPPR_OCP_LOCAL_MSB_MAX_LEN = 2;
+static const uint32_t CPMS_DPPR_OCP_LOCAL_OVERAGE = 35;
+static const uint32_t CPMS_DPPR_OCP_LOCAL_OVERAGE_LEN = 5;
+static const uint32_t CPMS_DPPR_OCP_LOCAL_TANK_VALUE = 40;
+static const uint32_t CPMS_DPPR_OCP_LOCAL_TANK_VALUE_LEN = 10;
+static const uint32_t CPMS_DPPR_OCP_PITCH_OVERRIDE = 50;
+static const uint32_t CPMS_DPPR_OCP_OVERRIDE_HISTORY = 51;
+//<< [CPMS_DPPR]
 // c/reg00006.H
 
 //>> [CPMS_MMA_PFETCNTL]
@@ -261,67 +326,6 @@ static const uint64_t L2_L2MISC_L2CERRS_FIR_MASK_REG_WO_OR = 0x20020005ull;
 static const uint32_t L2_L2MISC_L2CERRS_FIR_MASK_REG_L2_FIR_MASK = 0;
 static const uint32_t L2_L2MISC_L2CERRS_FIR_MASK_REG_L2_FIR_MASK_LEN = 40;
 //<< [L2_L2MISC_L2CERRS_FIR_MASK_REG]
-// c/reg00006.H
-
-//>> [CPMS_CERR]
-static const uint64_t CPMS_CERR = 0x200e0e10ull;
-
-static const uint32_t CPMS_CERR_L3_PFET_SEQ_ERR = 0;
-static const uint32_t CPMS_CERR_CL2_PFET_SEQ_ERR = 1;
-static const uint32_t CPMS_CERR_MMA_PFET_SEQ_ERR = 2;
-static const uint32_t CPMS_CERR_DDS_ERR = 3;
-static const uint32_t CPMS_CERR_L3_CLOCK_SYNC_ERR = 4;
-static const uint32_t CPMS_CERR_CL2_CLOCK_SYNC_ERR = 5;
-static const uint32_t CPMS_CERR_DPT_ACCESS_ERROR = 6;
-static const uint32_t CPMS_CERR_PROXY_UNDERFLOW = 7;
-static const uint32_t CPMS_CERR_PITCH_SATURATED = 8;
-static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT = 9;
-static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT_LEN = 3;
-//<< [CPMS_CERR]
-// c/reg00006.H
-
-//>> [CPMS_DMSR]
-static const uint64_t CPMS_DMSR = 0x200e0e64ull;
-
-static const uint32_t CPMS_DMSR_0_COUNT = 0;
-static const uint32_t CPMS_DMSR_0_COUNT_LEN = 24;
-static const uint32_t CPMS_DMSR_1_COUNT = 32;
-static const uint32_t CPMS_DMSR_1_COUNT_LEN = 24;
-//<< [CPMS_DMSR]
-// c/reg00006.H
-
-//>> [CPMS_DPPR]
-static const uint64_t CPMS_DPPR = 0x200e0ea8ull;
-static const uint64_t CPMS_DPPR_WO_CLEAR = 0x200e0eabull;
-static const uint64_t CPMS_DPPR_WO_OR = 0x200e0eaaull;
-
-static const uint32_t CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE = 0;
-static const uint32_t CPMS_DPPR_PTSR_EVENT_SELECT = 1;
-static const uint32_t CPMS_DPPR_ENERGY_PROXY_RESET_MODE = 2;
-static const uint32_t CPMS_DPPR_PIL_THROTTLE_ENABLE = 3;
-static const uint32_t CPMS_DPPR_OCP_THROTTLE_ENABLE = 4;
-static const uint32_t CPMS_DPPR_OCP_INTERRUPT_ENABLE = 5;
-static const uint32_t CPMS_DPPR_OCP_ENABLE = 6;
-static const uint32_t CPMS_DPPR_SPARE = 7;
-static const uint32_t CPMS_DPPR_SPARE_LEN = 5;
-static const uint32_t CPMS_DPPR_PP0_THRESH_SCALE = 16;
-static const uint32_t CPMS_DPPR_PP0_THRESH_SCALE_LEN = 4;
-static const uint32_t CPMS_DPPR_PP0_THRESH_VALUE = 20;
-static const uint32_t CPMS_DPPR_PP0_THRESH_VALUE_LEN = 4;
-static const uint32_t CPMS_DPPR_PP1_THRESH_SCALE = 24;
-static const uint32_t CPMS_DPPR_PP1_THRESH_SCALE_LEN = 4;
-static const uint32_t CPMS_DPPR_PP1_THRESH_VALUE = 28;
-static const uint32_t CPMS_DPPR_PP1_THRESH_VALUE_LEN = 4;
-static const uint32_t CPMS_DPPR_OCP_WAIT_FOR_GRANT = 32;
-static const uint32_t CPMS_DPPR_OCP_LOCAL_MSB_MAX = 33;
-static const uint32_t CPMS_DPPR_OCP_LOCAL_MSB_MAX_LEN = 2;
-static const uint32_t CPMS_DPPR_OCP_LOCAL_OVERAGE = 35;
-static const uint32_t CPMS_DPPR_OCP_LOCAL_OVERAGE_LEN = 5;
-static const uint32_t CPMS_DPPR_OCP_LOCAL_TANK_VALUE = 40;
-static const uint32_t CPMS_DPPR_OCP_LOCAL_TANK_VALUE_LEN = 10;
-static const uint32_t CPMS_DPPR_OCP_PITCH_OVERRIDE = 50;
-static const uint32_t CPMS_DPPR_OCP_OVERRIDE_HISTORY = 51;
-//<< [CPMS_DPPR]
 // c/reg00006.H
 
 //>>THE END<<

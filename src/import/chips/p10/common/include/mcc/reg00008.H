@@ -35,110 +35,6 @@ namespace mcc
 #endif
 
 
-//>> PREP_[USTL_USTLFIRACT0]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_USTL_USTLFIRACT0(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = USTL_USTLFIRACT0;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[USTL_USTLFIRACT0]
-
-//>> GET_[USTL_USTLFIRACT0]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_USTL_USTLFIRACT0(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = USTL_USTLFIRACT0;
-#endif
-    return fapi2::getScom(i_target, USTL_USTLFIRACT0, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[USTL_USTLFIRACT0]
-
-//>> PUT_[USTL_USTLFIRACT0]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_USTL_USTLFIRACT0(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIRACT0));
-#endif
-    return fapi2::putScom(i_target, USTL_USTLFIRACT0, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[USTL_USTLFIRACT0]
-
-
-//>> SET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIRACT0));
-#endif
-    return o_data.insertFromRight<USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0,
-           USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_mcc Invalid dial access USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
-
-//>> SET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIRACT0));
-#endif
-    return o_data.insertFromRight<USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0,
-           USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_mcc Invalid dial access USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
-
-//>> GET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIRACT0));
-#endif
-    return i_data.extractToRight<USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0,
-           USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_mcc Invalid dial access USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
-
 //>> PREP_[ATCL_CL_CLSCOM_MCEPSQ]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_ATCL_CL_CLSCOM_MCEPSQ(const fapi2::Target<K, M, V>& i_target)
@@ -560,6 +456,108 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON]
+
+//>> PREP_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CRYPTO_DECRYPT_CRYPTOKEY2B(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CRYPTO_DECRYPT_CRYPTOKEY2B;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+
+//>> GET_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CRYPTO_DECRYPT_CRYPTOKEY2B(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CRYPTO_DECRYPT_CRYPTOKEY2B;
+#endif
+    return fapi2::getScom(i_target, CRYPTO_DECRYPT_CRYPTOKEY2B, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+
+//>> PUT_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CRYPTO_DECRYPT_CRYPTOKEY2B(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2B));
+#endif
+    return fapi2::putScom(i_target, CRYPTO_DECRYPT_CRYPTOKEY2B, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+
+
+//>> SET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
+static inline fapi2::buffer<uint64_t>& SET_CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2B));
+#endif
+    return o_data.insertFromRight<CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B,
+           CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
+
+//>> SET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
+static inline fapi2::buffer<uint64_t>& SET_CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2B));
+#endif
+    return o_data.insertFromRight<CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B,
+           CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
+
+//>> GET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
+static inline fapi2::buffer<uint64_t>& GET_CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2B));
+#endif
+    return i_data.extractToRight<CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B,
+           CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
 
 //>> PREP_[CRYPTO_ENCRYPT_CRYPTOCFG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
@@ -2065,13 +2063,13 @@ fapi_try_exit:
 }
 //<< GET_[CRYPTO_ENCRYPT_CRYPTOCFG_CRYPTOCFG_26_31_SPARE]
 
-//>> PREP_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+//>> PREP_[USTL_USTLFIRACT0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CRYPTO_DECRYPT_CRYPTOKEY2B(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_USTL_USTLFIRACT0(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CRYPTO_DECRYPT_CRYPTOKEY2B;
+    scomt::last_scom = USTL_USTLFIRACT0;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2079,93 +2077,95 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
-//<< PREP_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+//<< PREP_[USTL_USTLFIRACT0]
 
-//>> GET_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+//>> GET_[USTL_USTLFIRACT0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CRYPTO_DECRYPT_CRYPTOKEY2B(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_USTL_USTLFIRACT0(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CRYPTO_DECRYPT_CRYPTOKEY2B;
+    scomt::last_scom = USTL_USTLFIRACT0;
 #endif
-    return fapi2::getScom(i_target, CRYPTO_DECRYPT_CRYPTOKEY2B, o_data);
+    return fapi2::getScom(i_target, USTL_USTLFIRACT0, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
-//<< GET_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+//<< GET_[USTL_USTLFIRACT0]
 
-//>> PUT_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+//>> PUT_[USTL_USTLFIRACT0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CRYPTO_DECRYPT_CRYPTOKEY2B(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_USTL_USTLFIRACT0(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2B));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIRACT0));
 #endif
-    return fapi2::putScom(i_target, CRYPTO_DECRYPT_CRYPTOKEY2B, i_data);
+    return fapi2::putScom(i_target, USTL_USTLFIRACT0, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
-//<< PUT_[CRYPTO_DECRYPT_CRYPTOKEY2B]
+//<< PUT_[USTL_USTLFIRACT0]
 
 
-//>> SET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
-static inline fapi2::buffer<uint64_t>& SET_CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2B));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIRACT0));
 #endif
-    return o_data.insertFromRight<CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B,
-           CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B_LEN>(i_data);
+    return o_data.insertFromRight<USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0,
+           USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mcc Invalid dial access USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
+//<< SET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
 
-//>> SET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
-static inline fapi2::buffer<uint64_t>& SET_CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B(const uint64_t i_data,
+//>> SET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2B));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIRACT0));
 #endif
-    return o_data.insertFromRight<CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B,
-           CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B_LEN>(i_data);
+    return o_data.insertFromRight<USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0,
+           USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mcc Invalid dial access USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
+//<< SET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
 
-//>> GET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
-static inline fapi2::buffer<uint64_t>& GET_CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CRYPTO_DECRYPT_CRYPTOKEY2B));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIRACT0));
 #endif
-    return i_data.extractToRight<CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B,
-           CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B_LEN>(o_data);
+    return i_data.extractToRight<USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0,
+           USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mcc Invalid dial access CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mcc Invalid dial access USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B]
+//<< GET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
 
 //>>THE END<<
 

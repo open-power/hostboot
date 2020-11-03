@@ -106,6 +106,26 @@ static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
 //<< [OPCG_CAPT3]
 // eq/reg00001.H
 
+//>> [QME_EIPR]
+static const uint64_t QME_EIPR_RW = 0x200e0268ull;
+static const uint64_t QME_EIPR_WO_CLEAR = 0x200e026bull;
+static const uint64_t QME_EIPR_WO_OR = 0x200e026aull;
+
+static const uint32_t QME_EIPR_INTERRUPT_POLARITY = 0;
+static const uint32_t QME_EIPR_INTERRUPT_POLARITY_LEN = 64;
+//<< [QME_EIPR]
+// eq/reg00001.H
+
+//>> [QME_LFIRMASK]
+static const uint64_t QME_LFIRMASK_RW = 0x200e0004ull;
+static const uint64_t QME_LFIRMASK_WO_AND = 0x200e0005ull;
+static const uint64_t QME_LFIRMASK_WO_OR = 0x200e0006ull;
+
+static const uint32_t QME_LFIRMASK_FIR_MASK = 0;
+static const uint32_t QME_LFIRMASK_FIR_MASK_LEN = 36;
+//<< [QME_LFIRMASK]
+// eq/reg00001.H
+
 //>> [QME_SCDR]
 static const uint64_t QME_SCDR = 0x200e0144ull;
 
@@ -179,44 +199,6 @@ static const uint32_t QME_SCOM_XIDBGPRO_IAR_LEN = 30;
 //<< [QME_SCOM_XIDBGPRO]
 // eq/reg00001.H
 
-//>> [QME_TBR]
-static const uint64_t QME_TBR = 0x200e0248ull;
-
-static const uint32_t QME_TBR_TIMEBASE = 0;
-static const uint32_t QME_TBR_TIMEBASE_LEN = 32;
-static const uint32_t QME_TBR_CYCLES = 32;
-static const uint32_t QME_TBR_CYCLES_LEN = 32;
-//<< [QME_TBR]
-// eq/reg00001.H
-
-//>> [SCAN64]
-static const uint64_t SCAN64 = 0x2003e000ull;
-
-static const uint32_t SCAN64_SCAN64_REG = 0;
-static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
-//<< [SCAN64]
-// eq/reg00001.H
-
-//>> [QME_EIPR]
-static const uint64_t QME_EIPR_RW = 0x200e0268ull;
-static const uint64_t QME_EIPR_WO_CLEAR = 0x200e026bull;
-static const uint64_t QME_EIPR_WO_OR = 0x200e026aull;
-
-static const uint32_t QME_EIPR_INTERRUPT_POLARITY = 0;
-static const uint32_t QME_EIPR_INTERRUPT_POLARITY_LEN = 64;
-//<< [QME_EIPR]
-// eq/reg00001.H
-
-//>> [QME_LFIRMASK]
-static const uint64_t QME_LFIRMASK_RW = 0x200e0004ull;
-static const uint64_t QME_LFIRMASK_WO_AND = 0x200e0005ull;
-static const uint64_t QME_LFIRMASK_WO_OR = 0x200e0006ull;
-
-static const uint32_t QME_LFIRMASK_FIR_MASK = 0;
-static const uint32_t QME_LFIRMASK_FIR_MASK_LEN = 36;
-//<< [QME_LFIRMASK]
-// eq/reg00001.H
-
 //>> [QME_SSDR]
 static const uint64_t QME_SSDR = 0x200e0140ull;
 
@@ -261,14 +243,6 @@ static const uint32_t QME_SSDR_QME_SSH_SRC_SAMPLED_STOP_STATE_LEN = 4;
 // ERROR Duplicate Dial         static const uint32_t QME_SSDR_QME_SSH_SRC_SAMPLED_STOP_STATE = 60;
 // ERROR Duplicate Dial         static const uint32_t QME_SSDR_QME_SSH_SRC_SAMPLED_STOP_STATE_LEN = 4;
 //<< [QME_SSDR]
-// eq/reg00001.H
-
-//>> [SCAN32]
-static const uint64_t SCAN32 = 0x20038000ull;
-
-static const uint32_t SCAN32_SCAN32_REG = 0;
-static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
-//<< [SCAN32]
 // eq/reg00001.H
 
 //>> [QME_SWHR]
@@ -341,6 +315,32 @@ static const uint32_t QME_SWPR0_BAR_LEN = 27;
 static const uint32_t QME_SWPR0_SIZE = 44;
 static const uint32_t QME_SWPR0_SIZE_LEN = 15;
 //<< [QME_SWPR0]
+// eq/reg00001.H
+
+//>> [QME_TBR]
+static const uint64_t QME_TBR = 0x200e0248ull;
+
+static const uint32_t QME_TBR_TIMEBASE = 0;
+static const uint32_t QME_TBR_TIMEBASE_LEN = 32;
+static const uint32_t QME_TBR_CYCLES = 32;
+static const uint32_t QME_TBR_CYCLES_LEN = 32;
+//<< [QME_TBR]
+// eq/reg00001.H
+
+//>> [SCAN32]
+static const uint64_t SCAN32 = 0x20038000ull;
+
+static const uint32_t SCAN32_SCAN32_REG = 0;
+static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
+//<< [SCAN32]
+// eq/reg00001.H
+
+//>> [SCAN64]
+static const uint64_t SCAN64 = 0x2003e000ull;
+
+static const uint32_t SCAN64_SCAN64_REG = 0;
+static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
+//<< [SCAN64]
 // eq/reg00001.H
 
 //>>THE END<<

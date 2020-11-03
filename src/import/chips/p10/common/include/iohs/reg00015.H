@@ -35,6 +35,107 @@ namespace iohs
 #endif
 
 
+//>> PREP_[MULTICAST_GROUP_1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = MULTICAST_GROUP_1;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[MULTICAST_GROUP_1]
+
+//>> GET_[MULTICAST_GROUP_1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = MULTICAST_GROUP_1;
+#endif
+    return fapi2::getScom(i_target, MULTICAST_GROUP_1, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[MULTICAST_GROUP_1]
+
+//>> PUT_[MULTICAST_GROUP_1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(MULTICAST_GROUP_1));
+#endif
+    return fapi2::putScom(i_target, MULTICAST_GROUP_1, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[MULTICAST_GROUP_1]
+
+
+//>> SET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
+static inline fapi2::buffer<uint64_t>& SET_MULTICAST_GROUP_1_MULTICAST1_GROUP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MULTICAST_GROUP_1));
+#endif
+    return o_data.insertFromRight<MULTICAST_GROUP_1_MULTICAST1_GROUP,
+           MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
+
+//>> SET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
+static inline fapi2::buffer<uint64_t>& SET_MULTICAST_GROUP_1_MULTICAST1_GROUP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MULTICAST_GROUP_1));
+#endif
+    return o_data.insertFromRight<MULTICAST_GROUP_1_MULTICAST1_GROUP,
+           MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
+
+//>> GET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
+static inline fapi2::buffer<uint64_t>& GET_MULTICAST_GROUP_1_MULTICAST1_GROUP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MULTICAST_GROUP_1));
+#endif
+    return i_data.extractToRight<MULTICAST_GROUP_1_MULTICAST1_GROUP,
+           MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
+
 //>> PREP_[NET_CTRL0_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_NET_CTRL0_RW(const fapi2::Target<K, M, V>& i_target)
@@ -3063,6 +3164,108 @@ fapi_try_exit:
 }
 //<< GET_[NET_CTRL0_HTB_EXTEST]
 
+//>> SET_[NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<NET_CTRL0_OOB_PROTECTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NET_CTRL0_OOB_PROTECTION]
+
+//>> SET_[NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_OOB_PROTECTION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<NET_CTRL0_OOB_PROTECTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NET_CTRL0_OOB_PROTECTION]
+
+//>> SET_[NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.setBit<NET_CTRL0_OOB_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NET_CTRL0_OOB_PROTECTION]
+
+//>> CLEAR_[NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.clearBit<NET_CTRL0_OOB_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NET_CTRL0_OOB_PROTECTION]
+
+//>> GET_[NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return i_data.extractToRight<NET_CTRL0_OOB_PROTECTION,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NET_CTRL0_OOB_PROTECTION]
+
+//>> GET_[NET_CTRL0_OOB_PROTECTION]
+static inline bool GET_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return i_data.getBit<NET_CTRL0_OOB_PROTECTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NET_CTRL0_OOB_PROTECTION]
+
 //>> SET_[NET_CTRL0_PLLFORCE_OUT_EN]
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLLFORCE_OUT_EN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
@@ -3259,107 +3462,6 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[PLL_LOCK_REG_LOCK]
-
-//>> PREP_[MULTICAST_GROUP_1]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MULTICAST_GROUP_1;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[MULTICAST_GROUP_1]
-
-//>> GET_[MULTICAST_GROUP_1]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = MULTICAST_GROUP_1;
-#endif
-    return fapi2::getScom(i_target, MULTICAST_GROUP_1, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[MULTICAST_GROUP_1]
-
-//>> PUT_[MULTICAST_GROUP_1]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_MULTICAST_GROUP_1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(MULTICAST_GROUP_1));
-#endif
-    return fapi2::putScom(i_target, MULTICAST_GROUP_1, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[MULTICAST_GROUP_1]
-
-
-//>> SET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
-static inline fapi2::buffer<uint64_t>& SET_MULTICAST_GROUP_1_MULTICAST1_GROUP(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MULTICAST_GROUP_1));
-#endif
-    return o_data.insertFromRight<MULTICAST_GROUP_1_MULTICAST1_GROUP,
-           MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
-
-//>> SET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
-static inline fapi2::buffer<uint64_t>& SET_MULTICAST_GROUP_1_MULTICAST1_GROUP(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MULTICAST_GROUP_1));
-#endif
-    return o_data.insertFromRight<MULTICAST_GROUP_1_MULTICAST1_GROUP,
-           MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
-
-//>> GET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
-static inline fapi2::buffer<uint64_t>& GET_MULTICAST_GROUP_1_MULTICAST1_GROUP(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(MULTICAST_GROUP_1));
-#endif
-    return i_data.extractToRight<MULTICAST_GROUP_1_MULTICAST1_GROUP,
-           MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access MULTICAST_GROUP_1_MULTICAST1_GROUP chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[MULTICAST_GROUP_1_MULTICAST1_GROUP]
 
 //>>THE END<<
 

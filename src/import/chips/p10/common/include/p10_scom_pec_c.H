@@ -62,11 +62,12 @@ static const uint32_t CPLT_CTRL2_14_PGOOD = 18;
 //<< [CPLT_CTRL2]
 // pec/reg00012.H
 
-//>> [PCB_OPCG_STOP]
-static const uint64_t PCB_OPCG_STOP = 0x08030030ull;
+//>> [CPLT_MASK0]
+static const uint64_t CPLT_MASK0 = 0x08000101ull;
 
-static const uint32_t PCB_OPCG_STOP_PCB_OPCGSTOP = 0;
-//<< [PCB_OPCG_STOP]
+static const uint32_t CPLT_MASK0_ITR_MASK = 0;
+static const uint32_t CPLT_MASK0_ITR_MASK_LEN = 32;
+//<< [CPLT_MASK0]
 // pec/reg00012.H
 
 //>> [EPS_DBG_MODE_REG]
@@ -97,20 +98,19 @@ static const uint32_t EPS_DBG_MODE_REG_UNUSED_LEN = 6;
 //<< [EPS_DBG_MODE_REG]
 // pec/reg00012.H
 
+//>> [PCB_OPCG_STOP]
+static const uint64_t PCB_OPCG_STOP = 0x08030030ull;
+
+static const uint32_t PCB_OPCG_STOP_PCB_OPCGSTOP = 0;
+//<< [PCB_OPCG_STOP]
+// pec/reg00012.H
+
 //>> [SCAN64CONTSCAN]
 static const uint64_t SCAN64CONTSCAN = 0x0803f000ull;
 
 static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
 static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
 //<< [SCAN64CONTSCAN]
-// pec/reg00012.H
-
-//>> [CPLT_MASK0]
-static const uint64_t CPLT_MASK0 = 0x08000101ull;
-
-static const uint32_t CPLT_MASK0_ITR_MASK = 0;
-static const uint32_t CPLT_MASK0_ITR_MASK_LEN = 32;
-//<< [CPLT_MASK0]
 // pec/reg00012.H
 
 //>>THE END<<

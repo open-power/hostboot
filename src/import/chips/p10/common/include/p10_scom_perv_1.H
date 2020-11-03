@@ -76,70 +76,16 @@ static const uint32_t EPS_THERM_WSUB2_ERR_STATUS_REG_UNUSED = 59;
 //<< [EPS_THERM_WSUB2_ERR_STATUS_REG]
 // perv/reg00002.H
 
-//>> [FSXCOMP_FSXLOG_SCRATCH_REGISTER_3]
+//>> [FSXCOMP_FSXLOG_M1A_DATA_AREA_15]
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI = 0x0000283aull;
-static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE = 0x000028e8ull;
-static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW = 0x0005003aull;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI = 0x0000284full;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE = 0x0000293cull;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW = 0x0005004full;
 
-static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3 = 0;
-static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3_LEN = 32;
-//<< [FSXCOMP_FSXLOG_SCRATCH_REGISTER_3]
-// perv/reg00002.H
-
-//>> [OPCG_CAPT3]
-static const uint64_t OPCG_CAPT3 = 0x00030012ull;
-
-static const uint32_t OPCG_CAPT3_07EVEN = 4;
-static const uint32_t OPCG_CAPT3_07EVEN_LEN = 5;
-static const uint32_t OPCG_CAPT3_07ODD = 9;
-static const uint32_t OPCG_CAPT3_07ODD_LEN = 5;
-static const uint32_t OPCG_CAPT3_08EVEN = 14;
-static const uint32_t OPCG_CAPT3_08EVEN_LEN = 5;
-static const uint32_t OPCG_CAPT3_08ODD = 19;
-static const uint32_t OPCG_CAPT3_08ODD_LEN = 5;
-static const uint32_t OPCG_CAPT3_09EVEN = 24;
-static const uint32_t OPCG_CAPT3_09EVEN_LEN = 5;
-static const uint32_t OPCG_CAPT3_09ODD = 29;
-static const uint32_t OPCG_CAPT3_09ODD_LEN = 5;
-static const uint32_t OPCG_CAPT3_10EVEN = 34;
-static const uint32_t OPCG_CAPT3_10EVEN_LEN = 5;
-static const uint32_t OPCG_CAPT3_10ODD = 39;
-static const uint32_t OPCG_CAPT3_10ODD_LEN = 5;
-static const uint32_t OPCG_CAPT3_11EVEN = 44;
-static const uint32_t OPCG_CAPT3_11EVEN_LEN = 5;
-static const uint32_t OPCG_CAPT3_11ODD = 49;
-static const uint32_t OPCG_CAPT3_11ODD_LEN = 5;
-static const uint32_t OPCG_CAPT3_12EVEN = 54;
-static const uint32_t OPCG_CAPT3_12EVEN_LEN = 5;
-static const uint32_t OPCG_CAPT3_12ODD = 59;
-static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
-//<< [OPCG_CAPT3]
-// perv/reg00002.H
-
-//>> [SCAN64]
-static const uint64_t SCAN64 = 0x0003e000ull;
-
-static const uint32_t SCAN64_SCAN64_REG = 0;
-static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
-//<< [SCAN64]
-// perv/reg00002.H
-
-//>> [SINGLE_OTP_ROM_OTPROM_REG1]
-static const uint64_t SINGLE_OTP_ROM_OTPROM_REG1 = 0x00018001ull;
-
-static const uint32_t SINGLE_OTP_ROM_OTPROM_REG1_REGISTER1 = 0;
-static const uint32_t SINGLE_OTP_ROM_OTPROM_REG1_REGISTER1_LEN = 64;
-//<< [SINGLE_OTP_ROM_OTPROM_REG1]
-// perv/reg00002.H
-
-//>> [TRA0_TR0_TRACE_HI_DATA_REG]
-static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x00010400ull;
-
-static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
-static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-//<< [TRA0_TR0_TRACE_HI_DATA_REG]
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_MDA_M1A_DATA_AREA_15 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_MDA_M1A_DATA_AREA_15_LEN = 32;
+//<< [FSXCOMP_FSXLOG_M1A_DATA_AREA_15]
 // perv/reg00002.H
 
 //>> [FSXCOMP_FSXLOG_ROOT_CTRL7]
@@ -184,6 +130,48 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_31_SPARE_RESONANT_CLO
 //<< [FSXCOMP_FSXLOG_ROOT_CTRL7]
 // perv/reg00002.H
 
+//>> [FSXCOMP_FSXLOG_SCRATCH_REGISTER_3]
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI = 0x0000283aull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE = 0x000028e8ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW = 0x0005003aull;
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3 = 0;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3_LEN = 32;
+//<< [FSXCOMP_FSXLOG_SCRATCH_REGISTER_3]
+// perv/reg00002.H
+
+//>> [OPCG_CAPT3]
+static const uint64_t OPCG_CAPT3 = 0x00030012ull;
+
+static const uint32_t OPCG_CAPT3_07EVEN = 4;
+static const uint32_t OPCG_CAPT3_07EVEN_LEN = 5;
+static const uint32_t OPCG_CAPT3_07ODD = 9;
+static const uint32_t OPCG_CAPT3_07ODD_LEN = 5;
+static const uint32_t OPCG_CAPT3_08EVEN = 14;
+static const uint32_t OPCG_CAPT3_08EVEN_LEN = 5;
+static const uint32_t OPCG_CAPT3_08ODD = 19;
+static const uint32_t OPCG_CAPT3_08ODD_LEN = 5;
+static const uint32_t OPCG_CAPT3_09EVEN = 24;
+static const uint32_t OPCG_CAPT3_09EVEN_LEN = 5;
+static const uint32_t OPCG_CAPT3_09ODD = 29;
+static const uint32_t OPCG_CAPT3_09ODD_LEN = 5;
+static const uint32_t OPCG_CAPT3_10EVEN = 34;
+static const uint32_t OPCG_CAPT3_10EVEN_LEN = 5;
+static const uint32_t OPCG_CAPT3_10ODD = 39;
+static const uint32_t OPCG_CAPT3_10ODD_LEN = 5;
+static const uint32_t OPCG_CAPT3_11EVEN = 44;
+static const uint32_t OPCG_CAPT3_11EVEN_LEN = 5;
+static const uint32_t OPCG_CAPT3_11ODD = 49;
+static const uint32_t OPCG_CAPT3_11ODD_LEN = 5;
+static const uint32_t OPCG_CAPT3_12EVEN = 54;
+static const uint32_t OPCG_CAPT3_12EVEN_LEN = 5;
+static const uint32_t OPCG_CAPT3_12ODD = 59;
+static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
+//<< [OPCG_CAPT3]
+// perv/reg00002.H
+
 //>> [SCAN32]
 static const uint64_t SCAN32 = 0x00038000ull;
 
@@ -192,16 +180,28 @@ static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 //<< [SCAN32]
 // perv/reg00002.H
 
-//>> [FSXCOMP_FSXLOG_M1A_DATA_AREA_15]
-//ERRCODE: // The addresses of this register do not all translate to the same targets.
+//>> [SCAN64]
+static const uint64_t SCAN64 = 0x0003e000ull;
 
-static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI = 0x0000284full;
-static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE = 0x0000293cull;
-static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW = 0x0005004full;
+static const uint32_t SCAN64_SCAN64_REG = 0;
+static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
+//<< [SCAN64]
+// perv/reg00002.H
 
-static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_MDA_M1A_DATA_AREA_15 = 0;
-static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_MDA_M1A_DATA_AREA_15_LEN = 32;
-//<< [FSXCOMP_FSXLOG_M1A_DATA_AREA_15]
+//>> [SINGLE_OTP_ROM_OTPROM_REG1]
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG1 = 0x00018001ull;
+
+static const uint32_t SINGLE_OTP_ROM_OTPROM_REG1_REGISTER1 = 0;
+static const uint32_t SINGLE_OTP_ROM_OTPROM_REG1_REGISTER1_LEN = 64;
+//<< [SINGLE_OTP_ROM_OTPROM_REG1]
+// perv/reg00002.H
+
+//>> [TRA0_TR0_TRACE_HI_DATA_REG]
+static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x00010400ull;
+
+static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
+static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
+//<< [TRA0_TR0_TRACE_HI_DATA_REG]
 // perv/reg00002.H
 
 //>>THE END<<

@@ -39,6 +39,17 @@ namespace eq
 #endif
 
 
+//>> [ATOMIC_LOCK_REG]
+static const uint64_t ATOMIC_LOCK_REG = 0x200f03ffull;
+
+static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
+static const uint32_t ATOMIC_LOCK_REG_ID = 1;
+static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
+// eq/reg00011.H
+
 //>> [ATTN_INTERRUPT_REG]
 static const uint64_t ATTN_INTERRUPT_REG = 0x200f001aull;
 
@@ -209,14 +220,27 @@ static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
 //<< [LOCAL_FIR]
 // eq/reg00011.H
 
-//>> [QME_SCOM_XIVDR30]
-static const uint64_t QME_SCOM_XIVDR30 = 0x200e029cull;
+//>> [QME_PCBQBI]
+static const uint64_t QME_PCBQBI = 0x200e003cull;
 
-static const uint32_t QME_SCOM_XIVDR30_0 = 0;
-static const uint32_t QME_SCOM_XIVDR30_0_LEN = 32;
-static const uint32_t QME_SCOM_XIVDR30_1 = 32;
-static const uint32_t QME_SCOM_XIVDR30_1_LEN = 32;
-//<< [QME_SCOM_XIVDR30]
+static const uint32_t QME_PCBQBI_ENTRY_VALID = 0;
+static const uint32_t QME_PCBQBI_MERGING_SCHEME = 2;
+static const uint32_t QME_PCBQBI_MERGING_SCHEME_LEN = 3;
+static const uint32_t QME_PCBQBI_R_NW = 8;
+static const uint32_t QME_PCBQBI_PORT = 12;
+static const uint32_t QME_PCBQBI_PORT_LEN = 4;
+static const uint32_t QME_PCBQBI_ADDR = 16;
+static const uint32_t QME_PCBQBI_ADDR_LEN = 16;
+//<< [QME_PCBQBI]
+// eq/reg00011.H
+
+//>> [QME_QHTLAST]
+static const uint64_t QME_QHTLAST = 0x200e01acull;
+
+static const uint32_t QME_QHTLAST_HTM_BUFFER_OVERFLOW = 0; // p10:20,
+static const uint32_t QME_QHTLAST_LAST_ADDRESS = 8;
+static const uint32_t QME_QHTLAST_LAST_ADDRESS_LEN = 49;
+//<< [QME_QHTLAST]
 // eq/reg00011.H
 
 //>> [QME_RCPTR]
@@ -228,6 +252,34 @@ static const uint32_t QME_RCPTR_PSTATE_CHANGE_PENDING = 8;
 static const uint32_t QME_RCPTR_TARGET_INDEX = 59;
 static const uint32_t QME_RCPTR_TARGET_INDEX_LEN = 5;
 //<< [QME_RCPTR]
+// eq/reg00011.H
+
+//>> [QME_SCOM_XIMEM]
+static const uint64_t QME_SCOM_XIMEM = 0x200e021cull;
+
+static const uint32_t QME_SCOM_XIMEM_ADDR = 0;
+static const uint32_t QME_SCOM_XIMEM_ADDR_LEN = 32;
+static const uint32_t QME_SCOM_XIMEM_R_NW = 32;
+static const uint32_t QME_SCOM_XIMEM_BUSY = 33;
+static const uint32_t QME_SCOM_XIMEM_IMPRECISE_ERROR_PENDING = 34;
+static const uint32_t QME_SCOM_XIMEM_BYTE_ENABLE = 35;
+static const uint32_t QME_SCOM_XIMEM_BYTE_ENABLE_LEN = 8;
+static const uint32_t QME_SCOM_XIMEM_LINE_MODE = 43;
+static const uint32_t QME_SCOM_XIMEM_ERROR = 49;
+static const uint32_t QME_SCOM_XIMEM_ERROR_LEN = 3;
+static const uint32_t QME_SCOM_XIMEM_IFETCH_PENDING = 62;
+static const uint32_t QME_SCOM_XIMEM_DATAOP_PENDING = 63;
+//<< [QME_SCOM_XIMEM]
+// eq/reg00011.H
+
+//>> [QME_SCOM_XIVDR30]
+static const uint64_t QME_SCOM_XIVDR30 = 0x200e029cull;
+
+static const uint32_t QME_SCOM_XIVDR30_0 = 0;
+static const uint32_t QME_SCOM_XIVDR30_0_LEN = 32;
+static const uint32_t QME_SCOM_XIVDR30_1 = 32;
+static const uint32_t QME_SCOM_XIVDR30_1_LEN = 32;
+//<< [QME_SCOM_XIVDR30]
 // eq/reg00011.H
 
 //>> [QME_TTSR]
@@ -250,57 +302,6 @@ static const uint32_t QME_TTSR_6_DATA_LEN = 8;
 static const uint32_t QME_TTSR_7_DATA = 56;
 static const uint32_t QME_TTSR_7_DATA_LEN = 8;
 //<< [QME_TTSR]
-// eq/reg00011.H
-
-//>> [QME_PCBQBI]
-static const uint64_t QME_PCBQBI = 0x200e003cull;
-
-static const uint32_t QME_PCBQBI_ENTRY_VALID = 0;
-static const uint32_t QME_PCBQBI_MERGING_SCHEME = 2;
-static const uint32_t QME_PCBQBI_MERGING_SCHEME_LEN = 3;
-static const uint32_t QME_PCBQBI_R_NW = 8;
-static const uint32_t QME_PCBQBI_PORT = 12;
-static const uint32_t QME_PCBQBI_PORT_LEN = 4;
-static const uint32_t QME_PCBQBI_ADDR = 16;
-static const uint32_t QME_PCBQBI_ADDR_LEN = 16;
-//<< [QME_PCBQBI]
-// eq/reg00011.H
-
-//>> [QME_QHTLAST]
-static const uint64_t QME_QHTLAST = 0x200e01acull;
-
-static const uint32_t QME_QHTLAST_LAST_ADDRESS = 8;
-static const uint32_t QME_QHTLAST_LAST_ADDRESS_LEN = 49;
-//<< [QME_QHTLAST]
-// eq/reg00011.H
-
-//>> [QME_SCOM_XIMEM]
-static const uint64_t QME_SCOM_XIMEM = 0x200e021cull;
-
-static const uint32_t QME_SCOM_XIMEM_ADDR = 0;
-static const uint32_t QME_SCOM_XIMEM_ADDR_LEN = 32;
-static const uint32_t QME_SCOM_XIMEM_R_NW = 32;
-static const uint32_t QME_SCOM_XIMEM_BUSY = 33;
-static const uint32_t QME_SCOM_XIMEM_IMPRECISE_ERROR_PENDING = 34;
-static const uint32_t QME_SCOM_XIMEM_BYTE_ENABLE = 35;
-static const uint32_t QME_SCOM_XIMEM_BYTE_ENABLE_LEN = 8;
-static const uint32_t QME_SCOM_XIMEM_LINE_MODE = 43;
-static const uint32_t QME_SCOM_XIMEM_ERROR = 49;
-static const uint32_t QME_SCOM_XIMEM_ERROR_LEN = 3;
-static const uint32_t QME_SCOM_XIMEM_IFETCH_PENDING = 62;
-static const uint32_t QME_SCOM_XIMEM_DATAOP_PENDING = 63;
-//<< [QME_SCOM_XIMEM]
-// eq/reg00011.H
-
-//>> [ATOMIC_LOCK_REG]
-static const uint64_t ATOMIC_LOCK_REG = 0x200f03ffull;
-
-static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
-static const uint32_t ATOMIC_LOCK_REG_ID = 1;
-static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-//<< [ATOMIC_LOCK_REG]
 // eq/reg00011.H
 
 //>> [RECOV]

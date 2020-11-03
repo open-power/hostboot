@@ -39,12 +39,23 @@ namespace iohs
 #endif
 
 
+//>> [ATOMIC_LOCK_REG]
+static const uint64_t ATOMIC_LOCK_REG = 0x180f03ffull;
+
+static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
+static const uint32_t ATOMIC_LOCK_REG_ID = 1;
+static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
+// iohs/reg00048.H
+
 //>> [ATTN_INTERRUPT_REG]
 static const uint64_t ATTN_INTERRUPT_REG = 0x180f001aull;
 
 static const uint32_t ATTN_INTERRUPT_REG_ATTN = 0;
 //<< [ATTN_INTERRUPT_REG]
-// iohs/reg00046.H
+// iohs/reg00048.H
 
 //>> [DLP_LINK1_RX_LANE_CONTROL]
 static const uint64_t DLP_LINK1_RX_LANE_CONTROL = 0x18011013ull;
@@ -59,37 +70,28 @@ static const uint32_t DLP_LINK1_RX_LANE_CONTROL_LOCKED = 36;
 static const uint32_t DLP_LINK1_RX_LANE_CONTROL_LOCKED_LEN = 9;
 static const uint32_t DLP_LINK1_RX_LANE_CONTROL_FAILED = 48;
 static const uint32_t DLP_LINK1_RX_LANE_CONTROL_FAILED_LEN = 9;
+static const uint32_t DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS = 62; // p10:20,
+static const uint32_t DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS_LEN = 2;
 //<< [DLP_LINK1_RX_LANE_CONTROL]
-// iohs/reg00046.H
+// iohs/reg00048.H
 
-//>> [ATOMIC_LOCK_REG]
-static const uint64_t ATOMIC_LOCK_REG = 0x180f03ffull;
+//>> [P10_20_DLX_CONFIG]
+static const uint64_t DLX_CONFIG = 0x18011031ull; // p10:20,
 
-static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
-static const uint32_t ATOMIC_LOCK_REG_ID = 1;
-static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-//<< [ATOMIC_LOCK_REG]
-// iohs/reg00046.H
-
-//>> [DLX_CONFIG]
-static const uint64_t DLX_CONFIG = 0x18011031ull;
-
-static const uint32_t DLX_CONFIG_CFG_DLX1 = 0;
-static const uint32_t DLX_CONFIG_CFG_DLX1_LEN = 32;
-//<< [DLX_CONFIG]
-// iohs/reg00046.H
+static const uint32_t P10_20_DLX_CONFIG_CFG_DLX1 = 0;
+static const uint32_t P10_20_DLX_CONFIG_CFG_DLX1_LEN = 32;
+//<< [P10_20_DLX_CONFIG]
+// iohs/reg00048.H
 
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
 }
 }
-#include "iohs/reg00046.H"
-#include "iohs/reg00047.H"
 #include "iohs/reg00048.H"
 #include "iohs/reg00049.H"
 #include "iohs/reg00050.H"
+#include "iohs/reg00051.H"
+#include "iohs/reg00052.H"
 #endif
 #endif

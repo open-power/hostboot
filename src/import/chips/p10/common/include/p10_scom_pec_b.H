@@ -39,6 +39,17 @@ namespace pec
 #endif
 
 
+//>> [ATOMIC_LOCK_REG]
+static const uint64_t ATOMIC_LOCK_REG = 0x080f03ffull;
+
+static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
+static const uint32_t ATOMIC_LOCK_REG_ID = 1;
+static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
+// pec/reg00011.H
+
 //>> [ATTN_INTERRUPT_REG]
 static const uint64_t ATTN_INTERRUPT_REG = 0x080f001aull;
 
@@ -190,17 +201,6 @@ static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
 //<< [LOCAL_FIR]
 // pec/reg00011.H
 
-//>> [ATOMIC_LOCK_REG]
-static const uint64_t ATOMIC_LOCK_REG = 0x080f03ffull;
-
-static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
-static const uint32_t ATOMIC_LOCK_REG_ID = 1;
-static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-//<< [ATOMIC_LOCK_REG]
-// pec/reg00011.H
-
 //>> [RECOV]
 static const uint64_t RECOV = 0x08040001ull;
 
@@ -286,27 +286,6 @@ static const uint32_t XSTOP4_REGION_UNIT14 = 18;
 static const uint32_t XSTOP4_WAIT_CYCLES = 48;
 static const uint32_t XSTOP4_WAIT_CYCLES_LEN = 12;
 //<< [XSTOP4]
-// pec/reg00011.H
-
-//>> [PIPEDOUTCTL0]
-static const uint64_t PIPEDOUTCTL0 = 0x08011514ull;
-
-static const uint32_t PIPEDOUTCTL0_RESERVED_63_59 = 0;
-static const uint32_t PIPEDOUTCTL0_RESERVED_63_59_LEN = 5;
-static const uint32_t PIPEDOUTCTL0_PHY1_REFB_LANE_CLK_EN = 5;
-static const uint32_t PIPEDOUTCTL0_PHY1_REFB_CLKDET_EN = 6;
-static const uint32_t PIPEDOUTCTL0_PHY1_REFA_LANE_CLK_EN = 7;
-static const uint32_t PIPEDOUTCTL0_PHY1_REFA_CLKDET_EN = 8;
-static const uint32_t PIPEDOUTCTL0_PHY0_REFB_LANE_CLK_EN = 9;
-static const uint32_t PIPEDOUTCTL0_PHY0_REFB_CLKDET_EN = 10;
-static const uint32_t PIPEDOUTCTL0_PHY0_REFA_LANE_CLK_EN = 11;
-static const uint32_t PIPEDOUTCTL0_PHY0_REFA_CLKDET_EN = 12;
-static const uint32_t PIPEDOUTCTL0_RESERVED_50_42 = 13;
-static const uint32_t PIPEDOUTCTL0_RESERVED_50_42_LEN = 9;
-static const uint32_t PIPEDOUTCTL0_PHY_RTUNE_REQ = 22;
-static const uint32_t PIPEDOUTCTL0_RESERVED_40_0 = 23;
-static const uint32_t PIPEDOUTCTL0_RESERVED_40_0_LEN = 41;
-//<< [PIPEDOUTCTL0]
 // pec/reg00011.H
 
 //>>THE END<<
