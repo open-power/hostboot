@@ -36,8 +36,6 @@
 #include "p10_core_checkstop_handler.H"
 #include "p10_scom_c_b.H"
 #include "p10_scom_c_d.H"
-#include "p10_scom_c_d_unused.H"
-#include "p10_scom_c_b_unused.H"
 
 using namespace scomt;
 using namespace scomt::c;
