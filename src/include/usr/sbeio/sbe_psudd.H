@@ -83,6 +83,7 @@ class SbePsu
             SBE_PSU_CLASS_UNKNOWN           = 0,
             SBE_PSU_CLASS_CORE_STATE        = 0xD1,
             SBE_PSU_PUT_RING_FROM_IMAGE_CMD = 0xD3,
+            SBE_PSU_CLASS_REGISTER_ACCESS   = 0xD5,
             SBE_PSU_CLASS_SECURITY_CONTROL  = 0xD6,
             SBE_PSU_GENERIC_MESSAGE         = 0xD7,
         };
@@ -96,6 +97,16 @@ class SbePsu
         {
             SBE_CMD_CONTROL_DEADMAN_LOOP   = 0x01,
             SBE_CMD_EXIT_CACHE_CONTAINED   = 0x02,
+        };
+
+        /**
+         * @brief enums for SBE core state control commands
+         */
+
+        // BYTE 7 options
+        enum psuRegisterAccessCommands
+        {
+            SBE_CMD_GET_HW_REG      = 0x03,
         };
 
         /**
@@ -177,7 +188,7 @@ class SbePsu
          * not reserved. Reserved registers do not need to be written
          * or read.
          *
-         * This is a 4 bit field:
+         * This is a 4 bit field, each bit indicates as follows:
          * 0x1 - Reg 0 is non-reserved (read or write this reg)
          * 0x2 - Reg 1 is non-reserved (read or write this reg)
          * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -198,7 +209,7 @@ class SbePsu
          * not reserved. Reserved registers do not need to be written
          * or read.
          *
-         * This is a 4 bit field:
+         * This is a 4 bit field, each bit indicates as follows:
          * 0x1 - Reg 0 is non-reserved (read or write this reg)
          * 0x2 - Reg 1 is non-reserved (read or write this reg)
          * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -219,7 +230,7 @@ class SbePsu
         * not reserved. Reserved registers do not need to be written
         * or read.
         *
-        * This is a 4 bit field:
+        * This is a 4 bit field, each bit indicates as follows:
         * 0x1 - Reg 0 is non-reserved (read or write this reg)
         * 0x2 - Reg 1 is non-reserved (read or write this reg)
         * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -238,7 +249,7 @@ class SbePsu
         * not reserved. Reserved registers do not need to be written
         * or read.
         *
-        * This is a 4 bit field:
+        * This is a 4 bit field, each bit indicates as follows:
         * 0x1 - Reg 0 is non-reserved (read or write this reg)
         * 0x2 - Reg 1 is non-reserved (read or write this reg)
         * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -257,7 +268,7 @@ class SbePsu
         * not reserved. Reserved registers do not need to be written
         * or read.
         *
-        * This is a 4 bit field:
+        * This is a 4 bit field, each bit indicates as follows:
         * 0x1 - Reg 0 is non-reserved (read or write this reg)
         * 0x2 - Reg 1 is non-reserved (read or write this reg)
         * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -277,7 +288,7 @@ class SbePsu
         * registers are excluded and therefore do not need to be written to
         * or read from.
         *
-        * This is a 4 bit field:
+        * This is a 4 bit field, each bit indicates as follows:
         * 0x1 - MBOX Reg 0 is non-reserved (read or write this reg)
         * 0x2 - MBOX Reg 1 is non-reserved (read or write this reg)
         * 0x4 - MBOX Reg 2 is non-reserved (read or write this reg)
@@ -303,7 +314,7 @@ class SbePsu
         * not reserved. Reserved registers do not need to be written
         * or read.
         *
-        * This is a 4 bit field:
+        * This is a 4 bit field, each bit indicates as follows:
         * 0x1 - Reg 0 is non-reserved (read or write this reg)
         * 0x2 - Reg 1 is non-reserved (read or write this reg)
         * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -322,7 +333,7 @@ class SbePsu
         * not reserved. Reserved registers do not need to be written
         * or read.
         *
-        * This is a 4 bit field:
+        * This is a 4 bit field, each bit indicates as follows:
         * 0x1 - Reg 0 is non-reserved (read or write this reg)
         * 0x2 - Reg 1 is non-reserved (read or write this reg)
         * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -334,6 +345,24 @@ class SbePsu
             SBE_STASH_KEY_ADDR_RSP_USED_REGS     = 0x01,
         };
 
+        /**
+        * @brief non reserved word enums
+        *
+        * Shows which of the request and response msg registers are
+        * not reserved. Reserved registers do not need to be written
+        * or read.
+        *
+        * This is a 4 bit field, each bit indicates as follows:
+        * 0x1 - Reg 0 is non-reserved (read or write this reg)
+        * 0x2 - Reg 1 is non-reserved (read or write this reg)
+        * 0x4 - Reg 2 is non-reserved (read or write this reg)
+        * 0x8 - Reg 3 is non-reserved (read or write this reg)
+        */
+        enum psuGetHwRegNonReservedMsgs
+        {
+            SBE_GET_HW_REG_REQ_USED_REGS     = 0x07,
+            SBE_GET_HW_REG_RSP_USED_REGS     = 0x03,
+        };
 
         /**
         * @brief non reserved word enums
@@ -342,7 +371,7 @@ class SbePsu
         * not reserved. Reserved registers do not need to be written
         * or read.
         *
-        * This is a 4 bit field:
+        * This is a 4 bit field, each bit indicates as follows:
         * 0x1 - Reg 0 is non-reserved (read or write this reg)
         * 0x2 - Reg 1 is non-reserved (read or write this reg)
         * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -361,7 +390,7 @@ class SbePsu
         * not reserved. Reserved registers do not need to be written
         * or read.
         *
-        * This is a 4 bit field:
+        * This is a 4 bit field, each bit indicates as follows:
         * 0x1 - Reg 0 is non-reserved (read or write this reg)
         * 0x2 - Reg 1 is non-reserved (read or write this reg)
         * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -380,7 +409,7 @@ class SbePsu
         * not reserved. Reserved registers do not need to be written
         * or read.
         *
-        * This is a 4 bit field:
+        * This is a 4 bit field, each bit indicates as follows:
         * 0x1 - Reg 0 is non-reserved (read or write this reg)
         * 0x2 - Reg 1 is non-reserved (read or write this reg)
         * 0x4 - Reg 2 is non-reserved (read or write this reg)
@@ -532,6 +561,22 @@ class SbePsu
                 uint8_t  cd7_stashKeyAddr_Key;              //Mbx Reg 1
                 uint64_t cd7_stashKeyAddr_Value;            //Mbx Reg 2
                 uint64_t cd7_stashKeyAddr_MbxReg3Reserved;  //Mbx Reg 3
+            } PACKED;
+
+            struct // sbeGetHwReg
+            {
+                uint16_t cd5_getHwReg_MbxReg0Reserved;  //Mbx Reg 0
+                uint16_t cd5_getHwReg_ControlFlags;     //Mbx Reg 0
+                uint16_t cd5_getHwReg_SeqID;            //Mbx Reg 0
+                uint8_t  cd5_getHwReg_CommandClass;     //Mbx Reg 0
+                uint8_t  cd5_getHwReg_Command;          //Mbx Reg 0
+                uint16_t cd5_getHwReg_TargetType;       //Mbx Reg 1
+                uint8_t  cd5_getHwReg_MbxReg1ReservedA; //Mbx Reg 1
+                uint8_t  cd5_getHwReg_TargetInstance;   //Mbx Reg 1
+                uint32_t cd5_getHwReg_AddressHi;        //Mbx Reg 1
+                uint32_t cd5_getHwReg_AddressLow;       //Mbx Reg 2
+                uint32_t cd5_getHwReg_MbxReg2Reserved;  //Mbx Reg 2
+                uint64_t cd5_getHwReg_MbxReg3Reserved;  //Mbx Reg 3
             } PACKED;
 
             // Complies with document Host_SBE_Interface_Specification_v0.9e.pdf
@@ -728,6 +773,22 @@ class SbePsu
                 uint32_t sbe_commit_id;
                 // mbxReg 7
                 uint64_t sbe_reserved2;
+            } PACKED;
+
+            struct // fields for the SBE get hw register response
+            {
+                // mbxReg 4
+                uint16_t getHwReg_primaryStatus;
+                uint16_t getHwReg_secondaryStatus;
+                uint16_t getHwReg_seqID;
+                uint8_t  getHwReg_commandClass;
+                uint8_t  getHwReg_command;
+                // mbxReg 5
+                uint64_t getHwReg_value;
+                // mbxReg 6
+                uint64_t getHwReg_mbx6_reserved;
+                // mbxReg 7
+                uint64_t getHwReg_mbx7_reserved;
             } PACKED;
 
             psuResponse() :

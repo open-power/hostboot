@@ -443,6 +443,22 @@ namespace SBEIO
     errlHndl_t sendPsuSecurityListBinDumpRequest(const uint64_t i_addr,
                                          TARGETING::Target *i_procChip);
 
+    /**
+    * @brief Sends a PSU chipOp to to have SBE perform a HW register read for
+    *        Hostboot. Note that this works for scom addresses.
+    *
+    * @param[in]   i_target       Target which has the HW register we want to read.
+    *                             Assert if i_target == nullptr
+    * @param[in]   i_addr         HW Register Address (scom address works)
+    * @param[out]  o_value        Value read from the HW register by the SBE
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendPsuGetHwRegRequest(TARGETING::Target * i_target,
+                                     const uint64_t i_addr,
+                                     uint64_t & o_value);
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,10 +62,11 @@ namespace SBEIO
 
 
     enum SBE_TARGET_TYPES {
-        SBE_TARGET_TYPE_PROC     = 0x00,
-        SBE_TARGET_TYPE_EX       = 0x01,
-        SBE_TARGET_TYPE_PERV     = 0x02,
-        SBE_TARGET_TYPE_MCS      = 0x03,
+        SBE_TARGET_TYPE_PROC_CHIP    = 0x0000,
+        SBE_TARGET_TYPE_PERV         = 0x0001,
+        SBE_TARGET_TYPE_EQ           = 0x0002,
+        SBE_TARGET_TYPE_CORE         = 0x0003,
+        SBE_TARGET_TYPE_OCMB_CHIP    = 0x0004,
         SBE_TARGET_TYPE_TOTAL          ,
         SBE_TARGET_TYPE_UNKNOWN  = 0xFF
     };
@@ -79,6 +80,20 @@ namespace SBEIO
     /// @param[in] i_hbTarget includes the HB target type
     /// @return: ChipletID for i_hbTarget target
     uint8_t getChipletIDForSBE(TARGETING::Target * i_hbTarget);
+
+    /**
+     * @brief Some SBE chip ops will perform actions on a target. In this
+     *        case we need to find the processor associated with that
+     *        target so we know what SBE to send our chip op to.
+     *        This function will lookup the correct processor to use
+     *        to perform such a chip op.
+     *
+     * @param[in] i_target  Target which we want to the processor accociated with
+     *
+     * @return Target ptr pointing to the processor associated with i_target,
+     *         if no associated processor is found this will be nullptr
+     */
+    TARGETING::Target* getChipForPsuOp(TARGETING::Target *i_target);
 }
 
 #endif  // __SBE_UTILS_H

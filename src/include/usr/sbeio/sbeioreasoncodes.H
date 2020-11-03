@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@ enum sbeioModuleId
     SBEIO_HANDLE_VITAL_ATTN             = 0x0E,
     SBEIO_SEND_PSU_QUIESCE_SBE          = 0x0F,
     SBEIO_DEAD_MAN_TIMER                = 0x10,
+    SBEIO_PSU_GET_HW_REG                = 0x11,
 };
 
 /**
@@ -138,6 +139,8 @@ enum sbeioReasonCode
     SBEIO_RC_KERNEL_REG_FAILED         = SBEIO_COMP_ID | 0x61,
     SBEIO_SEEPROM_VERSION_MISMATCH     = SBEIO_COMP_ID | 0x62,
     SBEIO_START_DMT_CALLED_TWICE       = SBEIO_COMP_ID | 0x63,
+
+    SBEIO_NO_PARENT_PROC               = SBEIO_COMP_ID | 0x64,
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
     SBEIO_HWSV_COLLECT_SBE_RC          = SBEIO_COMP_ID | 0xFF,

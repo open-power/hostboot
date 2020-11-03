@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,12 +28,57 @@
 */
 
 #include <sbeio/sbe_utils.H>
+#include <targeting/common/utilFilter.H>
 extern trace_desc_t* g_trac_sbeio;
 
 #define VIRTUAL_CHIPLET_ID_BASE_MCS_TARGET_TYPE (0x80)
 
+using namespace TARGETING;
+
 namespace SBEIO
 {
+    Target* getChipForPsuOp(Target *i_target)
+    {
+        Target* chip_for_psu_op = nullptr;
+        switch(i_target->getAttr<ATTR_TYPE>())
+        {
+            case(TYPE_PROC):
+            {
+                chip_for_psu_op = i_target;
+                break;
+            }
+            case(TYPE_OCMB_CHIP):
+            {
+                auto i2c_info = i_target->getAttr<ATTR_FAPI_I2C_CONTROL_INFO>();
+                chip_for_psu_op = targetService().toTarget(i2c_info.i2cMasterPath);
+                break;
+            }
+            default:
+            {
+                // try looking up the parent chip as a final effort
+                chip_for_psu_op = const_cast<Target*>(getParentChip(i_target));
+
+                if(chip_for_psu_op != nullptr)
+                {
+                    auto parent_chip_type = chip_for_psu_op->getAttr<ATTR_TYPE>();
+                    if(parent_chip_type == TYPE_OCMB_CHIP)
+                    {
+                        // If we find TYPE_OCMB_CHIP as type of the parent chip
+                        // recursively call this function again to find the parent processor
+                        chip_for_psu_op = getChipForPsuOp(chip_for_psu_op);
+                    }
+                    else if(parent_chip_type != TYPE_PROC)
+                    {
+                        // If the parent chip is not an ocmb or a processor we don't
+                        // know how to find the processor so return nullptr
+                        chip_for_psu_op = nullptr;
+                    }
+              }
+          }
+        }
+        return chip_for_psu_op;
+    }
+
     /// @brief translates HB target types to SBE target type groups
     /// @param[in] i_hbTarget includes the HB target type
     /// @return SBE_TARGET_TYPES returns SBE_TARGET_TYPE_UNKNOWN in error
@@ -48,30 +93,27 @@ namespace SBEIO
         {
             case(TARGETING::TYPE_PROC):
             {
-                sbeType = SBE_TARGET_TYPE_PROC;
+                sbeType = SBE_TARGET_TYPE_PROC_CHIP;
                 break;
             }
-            case(TARGETING::TYPE_EX):
+            case(TARGETING::TYPE_EQ):
             {
-                sbeType = SBE_TARGET_TYPE_EX;
+                sbeType = SBE_TARGET_TYPE_EQ;
+                break;
+            }
+            case(TARGETING::TYPE_CORE):
+            {
+                sbeType = SBE_TARGET_TYPE_CORE;
+                break;
+            }
+            case(TARGETING::TYPE_OCMB_CHIP):
+            {
+                sbeType = SBE_TARGET_TYPE_OCMB_CHIP;
                 break;
             }
             case(TARGETING::TYPE_PERV):
-            case(TARGETING::TYPE_XBUS):
-            case(TARGETING::TYPE_MCBIST):
-            case(TARGETING::TYPE_OBUS):
-            case(TARGETING::TYPE_PCI):
-            case(TARGETING::TYPE_L2):
-            case(TARGETING::TYPE_L3):
-            case(TARGETING::TYPE_L4):
-            case(TARGETING::TYPE_CORE):
             {
                 sbeType = SBE_TARGET_TYPE_PERV;
-                break;
-            }
-            case(TARGETING::TYPE_MCS):
-            {
-                sbeType = SBE_TARGET_TYPE_MCS;
                 break;
             }
             default:
