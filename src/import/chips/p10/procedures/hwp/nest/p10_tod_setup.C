@@ -54,20 +54,6 @@ using namespace scomt::iohs;
 // Implement workaround for P10 defect HW480746.  P9 version of the defect is HW480181.
 // FIXME @RTC 213485 update setting if/when hardware fix is available.
 const bool IMPLEMENT_HW480746_WORKAROUND = true;
-// FIXME @RTC 213485 eventually remove this setting.
-// Implement workaround for P10 defect HW499260
-//    Set to false for Drop V and later (no workaround needed).
-//    Set to true otherwise
-const bool IMPLEMENT_HW499260_WORKAROUND = false;
-// FIXME @RTC 213485 -- Temporary workaround for EKB enum issue in
-//    chips/p10/procedures/xml/attribute_info/p10_clock_attributes.xml
-//    These enum values are currently :  PLLTODFLT = 0, LPC_REFCLOCK = 1
-//                          Should be :  PLLTODFLT = 1, LPC_REFCLOCK = 0
-//    The latter is consistent with the Global Clock spec.
-// Always set the attribute consistent with the Global Clock spec. (e.g. LPC = 0) and the HWP
-//   will correctly interpret the attribute.
-// Set to true if PLLTODFLT = 0 appears in EKB p10_clock_attributes.xml , set to false otherwise.
-const bool IMPLEMENT_EKB_PLL_MUX_TOD_WORKAROUND = true;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -1057,9 +1043,6 @@ fapi2::ReturnCode configure_m_path_ctrl_reg_mdmt(
         // OSC0 step alignment enabled
         CLEAR_TOD_M_PATH_CTRL_REG_0_STEP_ALIGN_DISABLE(io_m_path_ctrl_reg);
 
-        // Set 512 steps per sync for path 0
-        SET_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT(TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512, io_m_path_ctrl_reg);
-
         // Set step check CPS deviation to 50%
         SET_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION(STEP_CHECK_CPS_DEVIATION_50_00_PCENT, io_m_path_ctrl_reg);
 
@@ -1087,9 +1070,6 @@ fapi2::ReturnCode configure_m_path_ctrl_reg_mdmt(
         // OSC1 step alignment enabled
         CLEAR_TOD_M_PATH_CTRL_REG_1_STEP_ALIGN_DISABLE(io_m_path_ctrl_reg);
 
-        // Set 512 steps per sync for path 1
-        SET_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT(TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512, io_m_path_ctrl_reg);
-
         // Set step check CPS deviation to 50%
         SET_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION(STEP_CHECK_CPS_DEVIATION_50_00_PCENT, io_m_path_ctrl_reg);
 
@@ -1111,7 +1091,6 @@ fapi2::ReturnCode configure_m_path_ctrl_reg_mdmt(
     return fapi2::current_err;
 }
 
-
 /// @brief Configures the M_PATH_CTRL_REG register for all nodes.  The DUAL_EDGE_DISABLE
 ///    bit needs to be configured for all nodes (master and slave); all other fields are
 ///    configured only for the MDMT node.
@@ -1123,58 +1102,14 @@ fapi2::ReturnCode configure_m_path_ctrl_reg_mdmt(
 fapi2::ReturnCode configure_m_path_ctrl_reg(
     const tod_topology_node* i_tod_node,
     const p10_tod_setup_osc_sel i_osc_sel,
-    const bool i_mdmt)
+    const bool i_mdmt,
+    const bool i_dual_edge_disable)
 {
     fapi2::buffer<uint64_t> l_m_path_ctrl_reg = 0;
     fapi2::buffer<uint64_t> l_reset_reg = 0;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
-    fapi2::ATTR_CLOCK_PLL_MUX_TOD_Type l_attr_clock_pll_mux_tod;
-    fapi2::buffer<uint64_t> l_perv_ctrl4 = 0;
 
     FAPI_DBG("Start");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_PLL_MUX_TOD, l_target, l_attr_clock_pll_mux_tod),
-             "Error from FAPI_ATTR_GET (ATTR_CLOCK_PLL_MUX_TOD)");
-
-    // FIXME @RTC 213485 -- eventually remove when p10_clock_attributes.xml is updated.
-    // Workaround for EKB bug in chips/p10/procedures/xml/attribute_info/p10_clock_attributes.xml
-    //    These enum values are incorrect :  PLLTODFLT = 0, LPC_REFCLOCK = 1
-    //                          Should be :  PLLTODFLT = 1, LPC_REFCLOCK = 0
-    //    The latter is consistent with the Global Clock spec.
-    // Always set the attribute consistent with the Global Clock spec. (LPC = 0) and the HWP
-    //   will correctly interpret the attribute.
-    if (IMPLEMENT_EKB_PLL_MUX_TOD_WORKAROUND && fapi2::ENUM_ATTR_CLOCK_PLL_MUX_TOD_PLLTODFLT == 0)
-    {
-        // enum definition is incorrect ; flip sense of attribute
-        l_attr_clock_pll_mux_tod = (l_attr_clock_pll_mux_tod == fapi2::ENUM_ATTR_CLOCK_PLL_MUX_TOD_PLLTODFLT) ?
-                                   fapi2::ENUM_ATTR_CLOCK_PLL_MUX_TOD_LPC_REFCLOCK :
-                                   fapi2::ENUM_ATTR_CLOCK_PLL_MUX_TOD_PLLTODFLT ;
-        FAPI_INF("Implementing workaround for EKB defect l_attr_clock_pll_mux_tod = %u",
-                 l_attr_clock_pll_mux_tod);
-    }
-
-    if (IMPLEMENT_HW499260_WORKAROUND)
-    {
-        // Workaround: invert sense of mux select bit for origin of TOD clock
-        //
-        // Note: Drop V uses lpc_mux_sel_dc in bit 17 of the register.  All previous releases
-        //   use bit 16.   Luckily, Drop V also has the fix for HW499260, so this workaround
-        //   is not needed there.
-        FAPI_INF("Implementing workaround for defect HW499260, l_attr_clock_pll_mux_tod = %u",
-                 l_attr_clock_pll_mux_tod);
-        GET_FSXCOMP_FSXLOG_ROOT_CTRL4_RW(l_target, l_perv_ctrl4);
-
-        if (l_attr_clock_pll_mux_tod == fapi2::ENUM_ATTR_CLOCK_PLL_MUX_TOD_PLLTODFLT)   // l_attr_clock_pll_mux_tod = 1
-        {
-            CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_TOD_LPC_MUX_SEL_DC(l_perv_ctrl4);
-        }
-        else // l_attr_clock_pll_mux_tod = 0
-        {
-            SET_FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_TOD_LPC_MUX_SEL_DC(l_perv_ctrl4);
-        }
-
-        PUT_FSXCOMP_FSXLOG_ROOT_CTRL4_RW(l_target, l_perv_ctrl4);
-    }
 
     // Configure Master Path Control Register
     FAPI_DBG("Configuring TOD_M_PATH_CTRL_REG");
@@ -1184,15 +1119,22 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
              "Error from GET_TOD_M_PATH_CTRL_REG");
 
     // Disable clock doubling when running off LPC clock, otherwise enable it.
-    if (l_attr_clock_pll_mux_tod == fapi2::ENUM_ATTR_CLOCK_PLL_MUX_TOD_LPC_REFCLOCK)
+    if (i_dual_edge_disable)
     {
         // ON: sample only the rising edge of the oscillator
         SET_TOD_M_PATH_CTRL_REG_STEP_CREATE_DUAL_EDGE_DISABLE(l_m_path_ctrl_reg);
+
+        // In single-edge mode the TOD expects a 16 MHz oscillator, and since all SPS values are specified in
+        // terms of us instead of steps, the HW actually changes how it interprets the SPS values: Every setting
+        // suddenly means half as many STEPs as before. Since we're staying at 32 MHz and want the same STEPs
+        // per SYNC we have to adapt our SPS values to the next higher power of two.
+        SET_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT(TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_1024, l_m_path_ctrl_reg);
     }
     else
     {
         // OFF: sample both edges of the oscillator
         CLEAR_TOD_M_PATH_CTRL_REG_STEP_CREATE_DUAL_EDGE_DISABLE(l_m_path_ctrl_reg);
+        SET_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT(TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512, l_m_path_ctrl_reg);
     }
 
     if (i_mdmt)
@@ -1307,19 +1249,28 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if the INIT_CHIP_CTRL_REG is successfully configured
 ///         else error
 fapi2::ReturnCode init_chip_ctrl_reg(
-    const tod_topology_node* i_tod_node)
+    const tod_topology_node* i_tod_node,
+    const bool i_dual_edge_disable)
 {
     fapi2::buffer<uint64_t> l_chip_ctrl_reg = 0;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
 
     FAPI_DBG("Start");
 
+    // In single-edge mode the TOD expects a 16 MHz oscillator, and since all SPS values are specified in
+    // terms of us instead of steps, the HW actually changes how it interprets the SPS values: Every setting
+    // suddenly means half as many STEPs as before. Since we're staying at 32 MHz and want the same STEPs
+    // per SYNC we have to adapt our SPS values to the next higher power of two.
+    const uint32_t l_sps_value = i_dual_edge_disable ?
+                                 TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SEL_32 :
+                                 TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SEL_16;
+
     // Read TOD_CHIP_CTRL_REG in order to preserve prior configuration
     FAPI_TRY(GET_TOD_CHIP_CTRL_REG(l_target, l_chip_ctrl_reg),
              "Error from GET_TOD_CHIP_CTRL_REG");
 
     // Default core sync period is 16us
-    SET_TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SELECT(TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SEL_16, l_chip_ctrl_reg);
+    SET_TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SELECT(l_sps_value, l_chip_ctrl_reg);
 
     // Enable internal path sync check
     CLEAR_TOD_CHIP_CTRL_REG_I_PATH_SYNC_CHECK_DISABLE(l_chip_ctrl_reg);
@@ -1363,13 +1314,20 @@ fapi2::ReturnCode configure_tod_node(
 {
     char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
+    fapi2::ATTR_CLOCK_PLL_MUX_TOD_Type l_attr_clock_pll_mux_tod;
     fapi2::toString(l_target,
                     l_targetStr,
                     fapi2::MAX_ECMD_STRING_LEN);
     FAPI_DBG("Start: Configuring %s", l_targetStr);
 
+    bool dual_edge_disable = false;
     const bool is_mdmt = (i_tod_node->i_tod_master &&
                           i_tod_node->i_drawer_master);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_PLL_MUX_TOD, l_target, l_attr_clock_pll_mux_tod),
+             "Error from FAPI_ATTR_GET (ATTR_CLOCK_PLL_MUX_TOD)");
+    dual_edge_disable =
+        l_attr_clock_pll_mux_tod == fapi2::ENUM_ATTR_CLOCK_PLL_MUX_TOD_LPC_REFCLOCK;
 
     FAPI_TRY(configure_fbc_tod_regs(i_tod_node),
              "Error from configure_fbc_tod_regs!");
@@ -1393,14 +1351,16 @@ fapi2::ReturnCode configure_tod_node(
 
     FAPI_TRY(configure_m_path_ctrl_reg(i_tod_node,
                                        i_osc_sel,
-                                       is_mdmt),
+                                       is_mdmt,
+                                       dual_edge_disable),
              "Error from configure_m_path_ctrl_reg!");
 
     FAPI_TRY(configure_i_path_ctrl_reg(i_tod_node,
                                        i_tod_sel),
              "Error from configure_i_path_ctrl_reg!");
 
-    FAPI_TRY(init_chip_ctrl_reg(i_tod_node),
+    FAPI_TRY(init_chip_ctrl_reg(i_tod_node,
+                                dual_edge_disable),
              "Error from init_chip_ctrl_reg!");
 
     // TOD is configured for this node; if it has children, start their
