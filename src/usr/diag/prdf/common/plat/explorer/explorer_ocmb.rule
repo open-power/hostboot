@@ -1483,8 +1483,7 @@ group gOMIDLFIR
     /** OMIDLFIR[5]
      *  OMI-DL0 running in degraded mode
      */
-    (rOMIDLFIR, bit(5)) ? temporaryBringUpHammer;
-#    (rOMIDLFIR, bit(5)) ? omi_bus_th_1;
+    (rOMIDLFIR, bit(5)) ? omi_bus_th_1;
 
     /** OMIDLFIR[6]
      *  OMI-DL0 parity error detection on a lane
