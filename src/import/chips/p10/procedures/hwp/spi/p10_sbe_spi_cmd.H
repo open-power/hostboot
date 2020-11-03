@@ -51,9 +51,10 @@
 //by the h/w on the sideband path
 #define SPI_DEFAULT_SEQ 0x1134491000000000ULL
 
-//The counter reg is 8 bits and with each seq with 8byte transfer,
-//we can transfer a max of 8*256 = 2048 bytes.
-#define MAX_LENGTH_TRNS 2048
+//The counter reg is 8 bits and with each seq with 8byte transfer.
+//For the purposes of security, we're using 8-byte transfers, since
+//8-byte transfers don't use the restricted 0xEX op code.
+#define MAX_LENGTH_TRNS 8
 
 //Secure reads via TPM require not using 0xEX command
 #define TPM_SECURE_READ_TRNS 8
