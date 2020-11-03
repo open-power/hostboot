@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,10 @@ import json
 from udparsers.helpers.errludP_Helpers import hexConcat, intConcat
 
 class errludP_hwpistep:
+    #Generated Parser Functions
+    from udparsers.b0900.hbfwPlatHwpErrParser import hbfwErrLookupHwpRc
+    from udparsers.b0900.hbfwPlatHwpErrParserFFDC import hbfwParseHwpFfdc
+
     def HwpUserDetailsParserIstep(ver, data):
         d = dict()
         i = 0
@@ -38,7 +42,9 @@ class errludP_hwpistep:
 
 #Dictionary with parser functions for each subtype
 #Values are from hwpfUserDetailDataSubSection enum in src/include/usr/isteps/hwpf_reasoncodes.H
-hwpfUserDetailDataSubSection = { 3: "HwpUserDetailsParserIstep"}
+hwpfUserDetailDataSubSection = { 1: "hbfwErrLookupHwpRc", #Generated
+                                 2: "hbfwParseHwpFfdc",  #Generated
+                                 3: "HwpUserDetailsParserIstep" }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data)
