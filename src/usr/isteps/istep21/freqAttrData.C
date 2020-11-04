@@ -188,7 +188,7 @@ errlHndl_t sendFreqAttrData()
         freq_data_obj.ultraTurboFreq = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
         freq_data_obj.turboFreq = sys->getAttr<ATTR_FREQ_CORE_MAX>();
         freq_data_obj.nestFreq = sys->getAttr<ATTR_FREQ_PB_MHZ>();
-        freq_data_obj.powerModeNom = 0x0; // sys->getAttr<ATTR_SOCKET_POWER_NOMINAL>(); transitioning attribute out of HB to EKB repo TODO RTC: 250903
+        freq_data_obj.powerModeNom = mproc->getAttr<ATTR_SOCKET_POWER_NOMINAL>();
         freq_data_obj.powerModeTurbo = sys->getAttr<ATTR_SOCKET_POWER_TURBO>();
 
         // loop thru rest all nodes -- sending msg to each
@@ -414,11 +414,13 @@ errlHndl_t callCheckFreqAttrData(uint64_t freqData1, uint64_t freqData2)
                "callCheckFreqAttrData - Mater Freq Data: 0x%016lx 0x%016lx",
                freqData1, freqData2);
 
-
+    // Figure out which node we are running on
+    TARGETING::Target* mproc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(mproc);
 
     // Get the frequency attributes
     freq_data_obj.nominalFreq = sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
-    freq_data_obj.powerModeNom = 0x0; // sys->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>(); transitioning attribute out of HB to EKB repo TODO RTC: 250903
+    freq_data_obj.powerModeNom = mproc->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
     freq_data_obj.powerModeTurbo = sys->getAttr<TARGETING::ATTR_SOCKET_POWER_TURBO>();
 
     freq_data_obj.floorFreq = sys->getAttr<TARGETING::ATTR_MIN_FREQ_MHZ>();
