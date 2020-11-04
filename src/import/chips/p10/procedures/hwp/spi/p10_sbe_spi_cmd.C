@@ -214,7 +214,7 @@ spi_wait_for_tdr_empty(SpiControlHandle& i_handle)
 
     uint64_t timeout = SPI_TIMEOUT_MAX_WAIT_COUNT;
 
-    while(timeout--)
+    while(timeout)
     {
         FAPI_TRY(getScom( i_handle.target_chip,
                           i_handle.base_addr + SPIM_STATUSREG, data64));
@@ -237,6 +237,7 @@ spi_wait_for_tdr_empty(SpiControlHandle& i_handle)
         }
 
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
+        --timeout;
     }
 
     FAPI_ASSERT( timeout != 0,
@@ -263,7 +264,7 @@ spi_wait_for_rdr_full(SpiControlHandle& i_handle)
 
     uint64_t timeout = SPI_TIMEOUT_MAX_WAIT_COUNT;
 
-    while(timeout--)
+    while(timeout)
     {
         FAPI_TRY(getScom( i_handle.target_chip,
                           i_handle.base_addr + SPIM_STATUSREG, status_reg));
@@ -286,6 +287,7 @@ spi_wait_for_rdr_full(SpiControlHandle& i_handle)
         }
 
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
+        --timeout;
     }
 
     FAPI_ASSERT( timeout != 0,
@@ -312,7 +314,7 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
 
     uint64_t timeout = SPI_TIMEOUT_MAX_WAIT_COUNT;
 
-    while(timeout--)
+    while(timeout)
     {
         FAPI_TRY(getScom( i_handle.target_chip,
                           i_handle.base_addr + SPIM_STATUSREG, data64));
@@ -335,6 +337,7 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
         }
 
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
+        --timeout;
     }
 
     FAPI_ASSERT( timeout != 0,
@@ -869,7 +872,18 @@ fapi2::ReturnCode spi_tpm_read_internal_with_wait( SpiControlHandle& i_handle,
         // The value read from this RDR register is right-aligned.
         // Only copy the requested bytes of data
         temp = temp << ((8 - i_length) * 8);
+#ifndef __PPE__
         memcpy(o_buffer, &temp, i_length);
+#else
+        uint8_t* tempPtr = (uint8_t*)&temp;
+
+        for(uint32_t i = 0; i < i_length; i++)
+        {
+            *(o_buffer + i) = *(tempPtr + i);
+            FAPI_DBG("Output buffer is 0x%02X", *(o_buffer + i));
+        }
+
+#endif
     }
     else
     {
@@ -913,7 +927,18 @@ fapi2::ReturnCode spi_tpm_read_internal_with_wait( SpiControlHandle& i_handle,
             temp = temp << ((8 - (i_length % 8)) * 8);
             FAPI_DBG("Copy %d bytes of right-aligned shifted RDR: 0x%016X",
                      i_length % 8, temp);
+#ifndef __PPE__
             memcpy(&o_buffer[i_length - (i_length % 8)], &temp, i_length % 8);
+#else
+            uint8_t* tempPtr = (uint8_t*)&temp;
+
+            for(uint32_t i = 0; i < (i_length % 8); i++)
+            {
+                *(o_buffer + i_length - (i_length % 8) + i) = *(tempPtr + i);
+                FAPI_DBG("Output buffer is 0x%02X", *(o_buffer + i));
+            }
+
+#endif
         }
     }
 
