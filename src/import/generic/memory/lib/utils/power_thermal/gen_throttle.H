@@ -299,6 +299,7 @@ class throttle
             o_rc = fapi2::FAPI2_RC_SUCCESS;
             FAPI_ASSERT( (i_pos < TT::DIMMS_PER_PORT),
                          fapi2::MSS_POWER_THERMAL_DIMM_INDEX_OUT_OF_BOUND()
+                         .set_PORT_TARGET(iv_target)
                          .set_INPUT_SIZE(i_pos)
                          .set_MAX_SIZE(TT::DIMMS_PER_PORT),
                          "The dimm is index is out of bound for the port index: %d, max: %d for port %s",
@@ -539,6 +540,7 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
 
     FAPI_ASSERT( (iv_databus_port_max != 0),
                  fapi2::MSS_NO_DATABUS_UTILIZATION()
+                 .set_PORT_TARGET(iv_target)
                  .set_PORT_DATABUS_UTIL(iv_databus_port_max)
                  .set_DIMM_COUNT(mss::count_dimm(iv_target)),
                  "Failed to get max databus utilization for target %s",
@@ -546,6 +548,7 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
 
     FAPI_ASSERT( (iv_port_power_limit != 0),
                  fapi2::MSS_NO_PORT_POWER_LIMIT()
+                 .set_PORT_TARGET(iv_target)
                  .set_COUNT_DIMMS( mss::count_dimm(iv_target))
                  .set_PORT_POWER_LIMIT( iv_port_power_limit),
                  "Error calculating port_power_limit on target %s with %d DIMMs installed",
@@ -557,12 +560,14 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
     {
         const auto l_pos = mss::index(l_dimm);
         FAPI_ASSERT( (iv_pwr_int[l_pos] != 0),
-                     fapi2::MSS_POWER_INTERCEPT_NOT_SET(),
+                     fapi2::MSS_POWER_INTERCEPT_NOT_SET()
+                     .set_PORT_TARGET(iv_target),
                      "The attribute ATTR_MSS_TOTAL_PWR_INTERCEPT equals 0 for %s",
                      mss::c_str(l_dimm));
 
         FAPI_ASSERT( (iv_pwr_slope[l_pos] != 0),
-                     fapi2::MSS_POWER_SLOPE_NOT_SET(),
+                     fapi2::MSS_POWER_SLOPE_NOT_SET()
+                     .set_PORT_TARGET(iv_target),
                      "The attribute ATTR_MSS_TOTAL_PWR_SLOPE equals 0 for %s",
                      mss::c_str(l_dimm));
     }
@@ -793,6 +798,7 @@ fapi2::ReturnCode throttle<MC, TT>::calc_port_power(const double i_idle_util [TT
 
     FAPI_ASSERT( (o_port_power_max > 0),
                  fapi2::MSS_NO_PORT_POWER()
+                 .set_PORT_TARGET(iv_target)
                  .set_COUNT_DIMMS(mss::count_dimm(iv_target))
                  .set_MAX_UTILIZATION_DIMM_0(i_max_util[0])
                  .set_MAX_UTILIZATION_DIMM_1(i_max_util[1]),
@@ -871,6 +877,7 @@ fapi2::ReturnCode throttle<MC, TT>::calc_power_curve(const double i_power_idle,
     const double l_divisor = ((static_cast<double>(iv_databus_port_max) / UTIL_CONVERSION) - TT::IDLE_UTIL);
     FAPI_ASSERT ((l_divisor > 0),
                  fapi2::MSS_CALC_POWER_CURVE_DIVIDE_BY_ZERO()
+                 .set_PORT_TARGET(iv_target)
                  .set_PORT_DATABUS_UTIL(iv_databus_port_max)
                  .set_UTIL_CONVERSION(UTIL_CONVERSION)
                  .set_IDLE_UTIL(l_min_util)
@@ -1029,6 +1036,7 @@ fapi2::ReturnCode throttle<MC, TT>::calc_databus (const double i_databus_port_ma
     //Make sure both are not 0
     FAPI_ASSERT ( (o_databus_dimm_max[0] != 0) || (o_databus_dimm_max[1] != 0),
                   fapi2::MSS_NO_DATABUS_UTILIZATION()
+                  .set_PORT_TARGET(iv_target)
                   .set_PORT_DATABUS_UTIL(i_databus_port_max)
                   .set_DIMM_COUNT(l_count_dimms),
                   "Failed to calculated databus utilization for target %s",
@@ -1060,6 +1068,7 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
     //The total utilization to be used is limited by either what the port can allow or what the dimms can use
     FAPI_ASSERT( (i_util_slot <= i_util_port),
                  fapi2::MSS_SLOT_UTIL_EXCEEDS_PORT()
+                 .set_PORT_TARGET(iv_target)
                  .set_SLOT_UTIL(i_util_slot)
                  .set_PORT_UTIL(i_util_port),
                  "The slot utilization (%lu) exceeds the port's utilization (%lu) for %s",
@@ -1120,6 +1129,7 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
     //make sure both are not 0
     FAPI_ASSERT ( (o_util_dimm_max[0] != 0) || (o_util_dimm_max[1] != 0),
                   fapi2::MSS_NO_DATABUS_UTILIZATION()
+                  .set_PORT_TARGET(iv_target)
                   .set_PORT_DATABUS_UTIL(i_util_port)
                   .set_DIMM_COUNT(mss::count_dimm(iv_target)),
                   "Failed to calculated util utilization for target %s",
@@ -1420,6 +1430,7 @@ fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<T>& i_target)
         default:
             FAPI_ASSERT( false,
                          fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
+                         .set_PORT_TARGET(i_target)
                          .set_VALUE(l_pwr_cntrl),
                          "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: %lu",
                          mss::c_str(i_target),
@@ -1478,6 +1489,7 @@ fapi2::ReturnCode set_str_reg(const fapi2::Target<T>& i_target)
         default:
             FAPI_ASSERT( false,
                          fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
+                         .set_PORT_TARGET(i_target)
                          .set_VALUE(l_str_enable),
                          "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: %lu",
                          mss::c_str(i_target),

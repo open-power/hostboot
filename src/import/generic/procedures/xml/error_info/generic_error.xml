@@ -908,6 +908,7 @@
     <description>
       The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -919,6 +920,7 @@
     <description>
       The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -930,6 +932,7 @@
     <description>
       There are 2 DIMMS on the port but both have 0 databus utilization
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>PORT_DATABUS_UTIL</ffdc>
     <ffdc>DIMM_COUNT</ffdc>
     <callout>
@@ -943,6 +946,7 @@
     <description>
       Denominator equals 0
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>PORT_DATABUS_UTIL</ffdc>
     <ffdc>UTIL_CONVERSION</ffdc>
     <ffdc>IDLE_UTIL</ffdc>
@@ -974,6 +978,7 @@
         Got 0 when calculating port power limit.
         Either no dimms or attribute MEM_WATT_TARGET wasn't set
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>COUNT_DIMMS</ffdc>
     <ffdc>PORT_POWER_LIMIT</ffdc>
     <callout>
@@ -987,6 +992,7 @@
     <description>
         Got 0 when calculating port power limits using the DIMMs databus utilization
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>COUNT_DIMMS</ffdc>
     <ffdc>MAX_UTILIZATION_DIMM_0</ffdc>
     <ffdc>MAX_UTILIZATION_DIMM_1</ffdc>
@@ -1114,6 +1120,7 @@
     <description>
       The memory throttle per slot (DIMM) exceeds the allowed throttle for the port
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>SLOT_UTIL</ffdc>
     <ffdc>PORT_UTIL</ffdc>
     <callout>
@@ -1214,6 +1221,7 @@
     <description>
       The dimm index is out of bound for the port
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>INPUT_SIZE</ffdc>
     <ffdc>MAX_SIZE</ffdc>
     <callout>
@@ -1227,6 +1235,7 @@
     <description>
       The value of ATTR_MSS_MRW_POWER_CONTROL_REQUESTED is unsupported
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>VALUE</ffdc>
     <callout>
       <procedure>CODE</procedure>
