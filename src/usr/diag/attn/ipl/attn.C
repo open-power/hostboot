@@ -177,7 +177,7 @@ void  setTrueMask_otherProcs( const TARGETING::TargetHandleList &i_allProcs )
     uint32_t        l_huid = 0;
     errlHndl_t      l_err = NULL;
     const uint16_t  ATTN_TRUEMASK_REG = 0x100D;   // cfam address
-    uint32_t        l_truemaskData = 0x60000002;  // Chkstop/Special/SBE Vital
+    uint32_t        l_truemaskData = 0x60000000;  // Chkstop and SpecialAttn
     size_t          l_size = sizeof(l_truemaskData);
     uint16_t        l_fsiAddr = (ATTN_TRUEMASK_REG & 0xfe00) |
                                 ((ATTN_TRUEMASK_REG & 0x01ff) * 4);
