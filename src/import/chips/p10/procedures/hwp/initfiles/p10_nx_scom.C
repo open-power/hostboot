@@ -96,16 +96,16 @@ fapi2::ReturnCode p10_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x201105cull, l_scom_buffer ));
 
-            constexpr auto l_NX_DMA_CH0_WATCHDOG_REF_DIV_DIVIDE_BY_8 = 0x3;
-            l_scom_buffer.insert<1, 4, 60, uint64_t>(l_NX_DMA_CH0_WATCHDOG_REF_DIV_DIVIDE_BY_8 );
-            constexpr auto l_NX_DMA_CH1_WATCHDOG_REF_DIV_DIVIDE_BY_8 = 0x3;
-            l_scom_buffer.insert<6, 4, 60, uint64_t>(l_NX_DMA_CH1_WATCHDOG_REF_DIV_DIVIDE_BY_8 );
-            constexpr auto l_NX_DMA_CH2_WATCHDOG_REF_DIV_DIVIDE_BY_8 = 0x3;
-            l_scom_buffer.insert<11, 4, 60, uint64_t>(l_NX_DMA_CH2_WATCHDOG_REF_DIV_DIVIDE_BY_8 );
-            constexpr auto l_NX_DMA_CH3_WATCHDOG_REF_DIV_DIVIDE_BY_8 = 0x3;
-            l_scom_buffer.insert<16, 4, 60, uint64_t>(l_NX_DMA_CH3_WATCHDOG_REF_DIV_DIVIDE_BY_8 );
-            constexpr auto l_NX_DMA_CH4_WATCHDOG_REF_DIV_DIVIDE_BY_8 = 0x3;
-            l_scom_buffer.insert<21, 4, 60, uint64_t>(l_NX_DMA_CH4_WATCHDOG_REF_DIV_DIVIDE_BY_8 );
+            constexpr auto l_NX_DMA_CH0_WATCHDOG_REF_DIV_DIVIDE_BY_128 = 0x7;
+            l_scom_buffer.insert<1, 4, 60, uint64_t>(l_NX_DMA_CH0_WATCHDOG_REF_DIV_DIVIDE_BY_128 );
+            constexpr auto l_NX_DMA_CH1_WATCHDOG_REF_DIV_DIVIDE_BY_128 = 0x7;
+            l_scom_buffer.insert<6, 4, 60, uint64_t>(l_NX_DMA_CH1_WATCHDOG_REF_DIV_DIVIDE_BY_128 );
+            constexpr auto l_NX_DMA_CH2_WATCHDOG_REF_DIV_DIVIDE_BY_128 = 0x7;
+            l_scom_buffer.insert<11, 4, 60, uint64_t>(l_NX_DMA_CH2_WATCHDOG_REF_DIV_DIVIDE_BY_128 );
+            constexpr auto l_NX_DMA_CH3_WATCHDOG_REF_DIV_DIVIDE_BY_128 = 0x7;
+            l_scom_buffer.insert<16, 4, 60, uint64_t>(l_NX_DMA_CH3_WATCHDOG_REF_DIV_DIVIDE_BY_128 );
+            constexpr auto l_NX_DMA_CH4_WATCHDOG_REF_DIV_DIVIDE_BY_128 = 0x7;
+            l_scom_buffer.insert<21, 4, 60, uint64_t>(l_NX_DMA_CH4_WATCHDOG_REF_DIV_DIVIDE_BY_128 );
             constexpr auto l_NX_DMA_CH0_WATCHDOG_TIMER_ENBL_ON = 0x1;
             l_scom_buffer.insert<0, 1, 63, uint64_t>(l_NX_DMA_CH0_WATCHDOG_TIMER_ENBL_ON );
             constexpr auto l_NX_DMA_CH1_WATCHDOG_TIMER_ENBL_ON = 0x1;
@@ -118,8 +118,8 @@ fapi2::ReturnCode p10_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             l_scom_buffer.insert<20, 1, 63, uint64_t>(l_NX_DMA_CH4_WATCHDOG_TIMER_ENBL_ON );
             constexpr auto l_NX_DMA_DMA_HANG_TIMER_ENBL_ON = 0x1;
             l_scom_buffer.insert<25, 1, 63, uint64_t>(l_NX_DMA_DMA_HANG_TIMER_ENBL_ON );
-            constexpr auto l_NX_DMA_DMA_HANG_TIMER_REF_DIV_DIVIDE_BY_8 = 0x1;
-            l_scom_buffer.insert<26, 4, 60, uint64_t>(l_NX_DMA_DMA_HANG_TIMER_REF_DIV_DIVIDE_BY_8 );
+            constexpr auto l_NX_DMA_DMA_HANG_TIMER_REF_DIV_DIVIDE_BY_256 = 0x6;
+            l_scom_buffer.insert<26, 4, 60, uint64_t>(l_NX_DMA_DMA_HANG_TIMER_REF_DIV_DIVIDE_BY_256 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x201105cull, l_scom_buffer));
         }
         {
