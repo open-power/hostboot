@@ -44,8 +44,9 @@ namespace fapi2
 {
 namespace platAttrSvc
 {
-    // Function definition being brought in to be tested
+    // Functionality entry points being brought in to be tested
     errlHndl_t getSeepromWofTable(TARGETING::Target* i_target, uint8_t* o_wofData);
+    errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData, bool& o_didFindTable);
 }
 }
 
@@ -53,31 +54,6 @@ class WOFTest: public CxxTest::TestSuite
 {
 
 public:
-
-    /**
-      * @brief Test WOF table access attribute
-      *
-      */
-    void testWOFTableAccess (void)
-    {
-        //fapi2::ReturnCode l_rc;
-        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sysParent;
-
-        FAPI_INF("testWOFTableAccess: ENTER");
-
-        // TODO RTC 172778 Enable WOF test and check for correct table data
-        /*
-        //Set up a char array to hold the data from an attr read
-        fapi2::ATTR_WOF_TABLE_DATA_Type l_wofAttrData;
-
-        //Perform an ATTR_GET on sys target
-        FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
-                      l_sysParent,
-                      l_wofAttrData);
-        */
-        FAPI_INF("testWOFTableAccess: EXIT");
-    } // testWOFTableAccess
-
 
     /**
       * @brief Test coverage of getting WOF table from SEEPROM of every functional processor
@@ -92,7 +68,7 @@ public:
         // Allocating large chunk of memory in the heap
         // typedef uint8_t ATTR_WOF_TABLE_DATA_Type[40064];
         fapi2::ATTR_WOF_TABLE_DATA_Type* l_wofTableData =
-            reinterpret_cast<fapi2::ATTR_WOF_TABLE_DATA_Type*>(new fapi2::ATTR_WOF_TABLE_DATA_Type);
+            reinterpret_cast<fapi2::ATTR_WOF_TABLE_DATA_Type*>(new fapi2::ATTR_WOF_TABLE_DATA_Type());
 
         TargetHandleList l_procsList;
         getAllChips(l_procsList, TYPE_PROC, true);
@@ -111,7 +87,7 @@ public:
             {
                 TS_FAIL("testGetWofFromSeepromCoverage: Failed to get WOF table from SEEPROM for "
                         "proc: 0x%08x", get_huid(l_proc));
-                break;
+                continue; // continue trying to test all functional procs
             }
             else
             {
@@ -134,7 +110,7 @@ public:
             errlCommit(l_errl, CXXTEST_COMP_ID);
         }
 
-        FAPI_INF("testGetWofFromSeepromCoverage: Finished testing %d out of %d procs",
+        FAPI_INF("testGetWofFromSeepromCoverage: Successfully tested %d out of %d procs",
                  l_countProcsTested, l_procsList.size());
 
         FAPI_INF("testGetWofFromSeepromCoverage: EXIT");
@@ -165,9 +141,9 @@ public:
         // Allocating large chunk of memory in the heap for WOF table
         // typedef uint8_t ATTR_WOF_TABLE_DATA_Type[40064];
         fapi2::ATTR_WOF_TABLE_DATA_Type* l_wofTableData =
-            reinterpret_cast<fapi2::ATTR_WOF_TABLE_DATA_Type*>(new fapi2::ATTR_WOF_TABLE_DATA_Type);
+            reinterpret_cast<fapi2::ATTR_WOF_TABLE_DATA_Type*>(new fapi2::ATTR_WOF_TABLE_DATA_Type());
 
-        // Will be use to store 8-bytes of data and its corresponding ECC
+        // Will be used to store 8-bytes of data and its corresponding ECC
         size_t l_eccBlockSize = 9;
         // Will store the original
         uint8_t l_origBlock[l_eccBlockSize] = {};
@@ -284,7 +260,7 @@ public:
         // Allocating large chunk of memory in the heap for WOF table
         // typedef uint8_t ATTR_WOF_TABLE_DATA_Type[40064];
         fapi2::ATTR_WOF_TABLE_DATA_Type* l_wofTableData =
-            reinterpret_cast<fapi2::ATTR_WOF_TABLE_DATA_Type*>(new fapi2::ATTR_WOF_TABLE_DATA_Type);
+            reinterpret_cast<fapi2::ATTR_WOF_TABLE_DATA_Type*>(new fapi2::ATTR_WOF_TABLE_DATA_Type());
 
         uint8_t l_badEccByte = 0;
 
@@ -387,6 +363,126 @@ public:
         FAPI_INF("testBadEccInWofFromSeeprom: EXIT");
 
     } // testBadEccInWofFromSeeprom
+
+
+    /**
+      * @brief Test coverage of getting WOF table from override image in WOFDATA LID
+      * - First, test code path of not finding an override-set entry match
+      * - Second, test success path of finding an override WOF Table
+      */
+    void testGetOverrideWofCoverage()
+    {
+        /*
+        For both test we'll be doing a similar setup
+        - Set selection criteria
+        - Run getOverrideWofTable(...)
+        At the end, we'll write back original selection criteria attrs and delete l_wofTableData
+        */
+
+        FAPI_INF("testGetOverrideWofCoverage: ENTER");
+
+        errlHndl_t l_errl = nullptr;
+        TARGETING::Target * l_sys = UTIL::assertGetToplevelTarget();
+        TARGETING::Target * l_masterProc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+
+        FAPI_INF("testGetOverrideWofCoverage: Testing for master proc HUID 0x%08x",
+            get_huid(l_masterProc));
+
+        // Large chunk of memory in the heap for WOF Table
+        // typedef uint8_t ATTR_WOF_TABLE_DATA_Type[40064];
+        fapi2::ATTR_WOF_TABLE_DATA_Type* l_wofTableData =
+            reinterpret_cast<fapi2::ATTR_WOF_TABLE_DATA_Type*>(new fapi2::ATTR_WOF_TABLE_DATA_Type());
+        bool l_didFindTable = false;
+
+        // Hard coded values of a WOF Image entry in WOFDATA known to exist
+        const uint32_t l_testNominalPowerWatts = 0x190;
+        const uint32_t l_testNominalFreqMhz = 0x960;
+
+        // Store original values
+        const uint32_t l_origNominalPowerWatts = l_masterProc->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
+        const uint32_t l_origNominalFreqMhz = l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
+
+        do
+        {
+            /* Test code path of not finding an override-set entry match */
+
+            // Set selection criteria to values that are purposefully incorrect
+            l_masterProc->setAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>(0xFFFF); // uint_16
+            l_sys->setAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>(0xFFFFFFFF); // uint_16
+            FAPI_INF("testGetOverrideWofCoverage: Testing code path of not finding an override match.")
+            FAPI_INF("testGetOverrideWofCoverage: Set test values ATTR_SOCKET_POWER_NOMINAL = %d, "
+                "ATTR_NOMINAL_FREQ_MHZ = %d", 0xFFFF, 0xFFFFFFFF);
+
+            l_didFindTable = true; // this is expected to be set to false in function call below:
+            l_errl = fapi2::platAttrSvc::getOverrideWofTable(l_masterProc, *l_wofTableData, l_didFindTable);
+
+            if ( l_errl &&
+                (l_didFindTable == false) &&
+                (l_errl->reasonCode() == fapi2::RC_WOF_OVERRIDE_TABLE_NOT_FOUND) &&
+                (l_errl->moduleId() == fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE) )
+            {
+                FAPI_INF("testGetOverrideWofCoverage: Tested code path of not finding an override "
+                    "match tested successfully.");
+                delete l_errl;
+                l_errl = nullptr;
+            }
+            else
+            {
+                TS_FAIL("testGetOverrideWofCoverage: Failed testing code path of not finding an "
+                    "override match. Expected RC: 0x%x ModId: 0x%x. Actual RC: 0x%x ModId: 0x%x. "
+                    "l_didFindTable: %s.", fapi2::RC_WOF_OVERRIDE_TABLE_NOT_FOUND,
+                    fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE, l_errl->reasonCode(),
+                    l_errl->moduleId(), l_didFindTable ? "true" : "false");
+                break;
+            }
+
+            /* Test success path of finding an override WOF Table */
+
+            // Set selection criteria to values known to be in the WOFDATA Override image
+            l_masterProc->setAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>(l_testNominalPowerWatts);
+            l_sys->setAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>(l_testNominalFreqMhz);
+            FAPI_INF("testGetOverrideWofCoverage: Testing success path of finding an override WOF Table.")
+            FAPI_INF("testGetOverrideWofCoverage: Set test values ATTR_SOCKET_POWER_NOMINAL = %d, "
+                "ATTR_NOMINAL_FREQ_MHZ = %d", l_testNominalPowerWatts, l_testNominalFreqMhz);
+
+            // Try to get override WOF table
+            l_didFindTable = false; // this is expected to be set to true in function call below:
+            l_errl = fapi2::platAttrSvc::getOverrideWofTable(l_masterProc, *l_wofTableData, l_didFindTable);
+
+            if (l_errl || (l_didFindTable == false))
+            {
+                TS_FAIL("testGetOverrideWofCoverage: Failed to get Override WOF table. "
+                    "l_didFindTable: %s.", l_didFindTable ? "true" : "false");
+                break;
+            }
+            else
+            {
+                FAPI_INF("testGetOverrideWofCoverage: Override WOF table successfully retrieved.");
+            }
+
+        } while (0);
+
+        // Place back original values
+        l_masterProc->setAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>(l_origNominalPowerWatts);
+        l_sys->setAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>(l_origNominalFreqMhz);
+
+        // Clean up
+        if (l_wofTableData)
+        {
+            delete[] l_wofTableData;
+            l_wofTableData = nullptr;
+        }
+
+        // Commit error if any
+        if (l_errl)
+        {
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+
+        FAPI_INF("testGetOverrideWofCoverage: EXIT");
+
+    } // testGetOverrideWofCoverage
 
 };
 

@@ -1,2 +1,2 @@
-# WOF artifact ID used to assemble PNOR image
-export WOF_ARTIFACT_ID=c8be187ab85968a33ed30fdf69fd42adcf2fe8dc
+# WOF artifact ID used to assemble PNOR image for Standalone Simics
+export WOF_ARTIFACT_ID=10_29_2020_WOF_Override_Image
