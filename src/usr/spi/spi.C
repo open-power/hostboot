@@ -262,19 +262,19 @@ spiEepromPartition collectSpiSlavePartitionInfo(const ATTRIBUTE_ID i_sourceAttri
 
         switch (partInfo.partitionPurpose)
         {
-        case partitionPurpose_t::KEYSTORE_OPAL_VAR_BANK_0:
+        case partitionPurpose_t::KEYSTORE_PHYP:
             keystore_lock_number = 0;
             break;
-        case partitionPurpose_t::KEYSTORE_OPAL_VAR_BANK_1:
+        case partitionPurpose_t::KEYSTORE_HB:
             keystore_lock_number = 1;
             break;
-        case partitionPurpose_t::KEYSTORE_OPAL_QUEUE:
+        case partitionPurpose_t::KEYSTORE_OPAL_VAR_BANK_0:
             keystore_lock_number = 2;
             break;
-        case partitionPurpose_t::KEYSTORE_PHYP:
+        case partitionPurpose_t::KEYSTORE_OPAL_VAR_BANK_1:
             keystore_lock_number = 3;
             break;
-        case partitionPurpose_t::KEYSTORE_HB:
+        case partitionPurpose_t::KEYSTORE_OPAL_QUEUE:
             keystore_lock_number = 4;
             break;
         default:

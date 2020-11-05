@@ -1065,7 +1065,7 @@
       <default>
         <field>
           <id>dataOffsetKB</id>
-          <value>480</value>
+          <value>288</value>
         </field>
         <field>
           <id>dataSizeKB</id>
@@ -1091,7 +1091,7 @@
       <default>
         <field>
           <id>dataOffsetKB</id>
-          <value>256</value>
+          <value>320</value>
         </field>
         <field>
           <id>dataSizeKB</id>
@@ -1117,7 +1117,7 @@
       <default>
         <field>
           <id>dataOffsetKB</id>
-          <value>320</value>
+          <value>384</value>
         </field>
         <field>
           <id>dataSizeKB</id>
@@ -1143,7 +1143,7 @@
       <default>
         <field>
           <id>dataOffsetKB</id>
-          <value>384</value>
+          <value>448</value>
         </field>
         <field>
           <id>dataSizeKB</id>
@@ -1169,7 +1169,7 @@
       <default>
         <field>
           <id>dataOffsetKB</id>
-          <value>448</value>
+          <value>256</value>
         </field>
         <field>
           <id>dataSizeKB</id>
