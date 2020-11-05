@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -438,57 +438,63 @@ class errludP_errl:
         return jsonStr
 
     def ErrlUserDetailsParserWofData(ver, data):
-        # Format of WofData error buffer:
-        # uint16_t - # of table entries (including search for table)
-        # wofTableCompareData_t - Searched for this table
-        # wofTableCompareData_t - last table rejected for possible match
-        # ...
-        # wofTableCompareData_t - 1st table rejected for possible match
-        # NOTE: format must match
-        #       addWofCompareDataToErrl() in plat_wof_access.C
+        '''
+        Format of WofData error buffer:
+            uint16_t - Number of entries: i.e. entry with search info + all entries searched
+            wofOverrideCompareData_t - Info used to perform search
+            wofOverrideCompareData_t - last entry rejected for possible match
+            ...
+            wofOverrideCompareData_t - 1st entry rejected for possible match
+        NOTE: format must match addWofOverrideSearchEntriesToErrl() in plat_wof_access.C and
+              ErrlUserDetailsParserWofData in errludwofdata.H
+        '''
+
+        # Value must match in plat_wof_access.C and errludwofdata.H
+        __WOF_OVERRIDE_ERROR_UD_VERSION = 1
+
         d = dict()
-        i = 0
 
-        sizeofTableEntries = 2
-        sizeofwofTableCompareData = 6
+        sizeofTableEntries = 2 # 2-byte variable holding count
+        sizeofwofOverrideCompareData = 5 # 5-byte wofOverrideCompareData_t
 
-        # From "src/import/chips/p10/procedures/hwp/lib/pstates_common.H"
-        WOF_MODE = { 0: "Any", #WOF_MODE_UNKNOWN
-                     1: "Normal" } #WOF_MODE_NOMINAL
-
-        tableEntries = 0
-        if len(data) >= 2:
-            tableEntries, i=intConcat(data, i, i+2)
-        actualTableCount = (len(data) - sizeofTableEntries) / sizeofwofTableCompareData
-
-        if tableEntries != actualTableCount:
-            d['Total Entries Calculated']=actualTableCount
-            d['Total Entries Expected']=tableEntries
-            #don't go over buffer length
-            tableEntries = actualTableCount
-
-        # Verify the buffer contains at least the specified number of entries
-        if (len(data) - sizeofTableEntries - tableEntries * sizeofwofTableCompareData) >= 0:
-            d['Total WOF Tables Compared']=tableEntries-1
-            for x in range(tableEntries):
-                if x == 0:
-                    d['Searched for This Table']='Tried to Match This:'
-                else:
-                    d['Wof Table']='#' + str(x)
-                d['Core Count']=data[i]
-                i += 1
-                d['Mode']=WOF_MODE.get(data[i], unknownStr(data, i, i+1))
-                i += 1
-                d['Socket Power (Watts)'], i=intConcat(data, i, i+2)
-                d['Sort Power Freq (MHz)'], i=intConcat(data, i, i+2)
+        if ver != __WOF_OVERRIDE_ERROR_UD_VERSION:
+            udErrDict = dict()
+            udErrDict["Version found"] = ver
+            udErrDict["Version supported"] = __WOF_OVERRIDE_ERROR_UD_VERSION
+            udErrDict["Hex Dump"] = hexDump(data, 0, len(data))
+            d["Unsupported UD version found"] = udErrDict
         else:
-            subd = dict()
-            subd['WOF Buffer Length']=hex(len(data))
-            subd['Total Entry Count']=tableEntries
-            subd['Expected Buffer Format']='uint16_t count, match this entry, unmatched entries'
-            subd['Each Entry Size']=sizeofwofTableCompareData
-            subd['Hex Dump']=hexDump(data, 0, len(data))
-            d['Unable to parse too small buffer']=subd
+            i = 0
+            tableEntries = 0
+            if len(data) >= 2:
+                tableEntries, i=intConcat(data, i, i+2)
+            actualTableCount = (len(data) - sizeofTableEntries) / sizeofwofOverrideCompareData
+
+            if tableEntries != actualTableCount:
+                d['Total Entries Calculated']=actualTableCount
+                d['Total Entries Expected']=tableEntries
+                #don't go over buffer length
+                tableEntries = actualTableCount
+
+            # Verify the buffer contains at least the specified number of entries
+            if (len(data) - sizeofTableEntries - (tableEntries * sizeofwofOverrideCompareData)) >= 0:
+                d['Total WOF override set entries compared']=tableEntries-1
+                for x in range(tableEntries):
+                    if x == 0:
+                        d['Searched for This Entry']='Tried to Match This:'
+                    else:
+                        d['Wof Table']='#' + str(x)
+                    d['Core Count'], i=intConcat(data, i, i+1)
+                    d['Socket Power (Watts)'], i=intConcat(data, i, i+2)
+                    d['Sort Power Freq (MHz)'], i=intConcat(data, i, i+2)
+            else:
+                subd = dict()
+                subd['WOF Buffer Length']=hex(len(data))
+                subd['Total Entry Count']=tableEntries
+                subd['Expected Buffer Format']='uint16_t count, match this entry, unmatched entries'
+                subd['Each Entry Size']=sizeofwofOverrideCompareData
+                subd['Hex Dump']=hexDump(data, 0, len(data))
+                d['Unable to parse too small buffer']=subd
 
         jsonStr = json.dumps(d)
         return jsonStr

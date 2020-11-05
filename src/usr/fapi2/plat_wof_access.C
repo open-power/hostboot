@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,16 +95,19 @@ const uint32_t WOF_OVERRIDE_VERSION = 1;
 static void* g_wofdataVMM = nullptr;
 #endif
 
-// Compared fields in each WOF table header entry
-// NOTE: struct must match errl/plugins/errludwofdata.H
-typedef struct __attribute__((__packed__)) wofTableCompareData
+/*
+NOTE: uint and struct must match in errl/plugins/errludwofdata.H and ErrlUserDetailsParserWofData in
+src/usr/errl/plugins/ebmc/b0100.py
+*/
+const uint8_t WOF_OVERRIDE_ERROR_UD_VERSION = 1;
+typedef struct __attribute__((__packed__)) wofOverrideCompareData
 {
-  uint8_t  core_count;
-  uint8_t  mode;
-  uint16_t socket_power_w;
-  uint16_t sort_power_freq_mhz;
-} wofTableCompareData_t;
-
+    // Data pulled from the TOC section of the WOF Override Image. I.e. data from
+    // wofOverrideTableEntry_t used to search for an override set.
+    uint8_t  core_count;
+    uint16_t socket_power_w;
+    uint16_t sort_power_freq_mhz;
+} wofOverrideCompareData_t;
 
 /*
 The main function of this file is platParseWOFTables(...), which is ultimately used when getting
@@ -216,6 +219,27 @@ errlHndl_t checkWofOverrideImgForCorrectness(TARGETING::Target* i_procTarg,
                                              const uint32_t i_magicVal,
                                              const uint8_t i_version,
                                              const uint32_t i_lidNumber);
+
+/**
+ *  @brief Add detail of the WOF override set entries searched to an error log
+ *
+ *     Format of WofData error buffer:
+ *         uint16_t - Number of entries: i.e. entry with search info + all entries searched
+ *         wofOverrideCompareData_t - Info used to perform search
+ *         wofOverrideCompareData_t - last entry rejected for possible match
+ *         ...
+ *         wofOverrideCompareData_t - 1st entry rejected for possible match
+ *         NOTE: format must match errl plugin parser (errludwofdata.H)
+ *
+ *  @param  io_err        Error log to add data into
+ *  @param  i_searchInfo  Entry containing info that was searched for
+ *  @param  i_searchedEntries     Entries that were searched and did not match info in i_searchInfo
+ *
+ *  @warning i_searchedEntries is totally consumed and will end up empty after function ends
+ */
+void addWofOverrideSearchEntriesToErrl(errlHndl_t &io_err,
+                                       wofOverrideCompareData_t* i_searchInfo,
+                                       std::vector<wofOverrideTableEntry_t*> i_searchedEntries);
 
 /* End of declaration of helper methods for platParseWOFTables(...) */
 
@@ -842,6 +866,10 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
             uint8_t entryIndex = 0;
         } l_simicsEntry;
 
+        // Store pointers to searched override entries
+        std::vector<wofOverrideTableEntry_t*> l_searchedEntries;
+        l_searchedEntries.clear();
+
         // Search through all the override-set entries. If an entry matching the search criteria is
         // found (core count, power, and frequency), for-loop will exit.
         // In the case we're running in Simics, l_simicsEntry will be filled out if
@@ -863,17 +891,23 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
                     l_overrideEntry[l_entryIdx].sort_power_freq_mhz);
                 break;
             }
-            // Simics runs with fewer cores, ignore the core_count if we don't find a complete match
-            else if ( (Util::isSimicsRunning() && l_simicsEntry.didFind == false) &&
-                      (l_overrideEntry[l_entryIdx].socket_power_w      == l_nominalPowerWatts) &&
-                      (l_overrideEntry[l_entryIdx].sort_power_freq_mhz == l_nominalFreqMhz   ) )
+            else
             {
-                FAPI_INF("getOverrideWofTable: WOF Override-set matching search criteria found for "
-                    "Simics run socket_power_w: 0x%X sort_power_freq_mhz: 0x%X ",
-                    l_overrideEntry[l_entryIdx].socket_power_w, l_overrideEntry[l_entryIdx].sort_power_freq_mhz);
-                l_simicsEntry.didFind = true;
-                l_simicsEntry.entryIndex = l_entryIdx;
-                // Do not break, we may still find an override table matching all criteria
+                // Save entry info to be used by error log later if needed
+                l_searchedEntries.push_back(&l_overrideEntry[l_entryIdx]);
+
+                // Simics runs with fewer cores, ignore the core_count if we don't find a complete match
+                if ( (Util::isSimicsRunning() && l_simicsEntry.didFind == false) &&
+                          (l_overrideEntry[l_entryIdx].socket_power_w      == l_nominalPowerWatts) &&
+                          (l_overrideEntry[l_entryIdx].sort_power_freq_mhz == l_nominalFreqMhz   ) )
+                {
+                    FAPI_INF("getOverrideWofTable: WOF Override-set matching search criteria found for "
+                        "Simics run socket_power_w: 0x%X sort_power_freq_mhz: 0x%X ",
+                        l_overrideEntry[l_entryIdx].socket_power_w, l_overrideEntry[l_entryIdx].sort_power_freq_mhz);
+                    l_simicsEntry.didFind = true;
+                    l_simicsEntry.entryIndex = l_entryIdx;
+                    // Do not break, we may still find an override table matching all criteria
+                }
             }
 
         }
@@ -918,8 +952,12 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
                                                  TO_UINT32(l_nominalFreqMhz)),
                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-            // TODO RTC: 250903
-            // Add UD on override entries that were looked at
+            // Append info on entries that were searched:
+            wofOverrideCompareData_t l_searchInfo;
+            l_searchInfo.core_count = l_coreCount;
+            l_searchInfo.socket_power_w = l_nominalPowerWatts;
+            l_searchInfo.sort_power_freq_mhz = l_nominalFreqMhz;
+            addWofOverrideSearchEntriesToErrl(l_errl, &l_searchInfo, l_searchedEntries);
 
             break;
         }
@@ -1393,8 +1431,50 @@ errlHndl_t checkWofOverrideImgForCorrectness(TARGETING::Target* i_procTarg,
 
 
 
-/* End of helper methods for platParseWOFTables(...) */
+void addWofOverrideSearchEntriesToErrl(errlHndl_t &io_err,
+                                       wofOverrideCompareData_t* i_searchInfo,
+                                       std::vector<wofOverrideTableEntry_t*> i_searchedEntries)
+{
+    uint16_t l_wofEntryCount = i_searchedEntries.size() + 1; // +1: include entry with search info as well
 
+    // Allocate WofData error buffer
+    uint32_t l_dataLen = sizeof(l_wofEntryCount) + l_wofEntryCount * sizeof(wofOverrideCompareData_t);
+    uint8_t* l_data = new uint8_t[l_dataLen];
+
+    // # of table entries in data
+    memcpy(l_data, &l_wofEntryCount, sizeof(l_wofEntryCount));
+
+    wofOverrideCompareData_t* l_entryPtr =
+        reinterpret_cast<wofOverrideCompareData_t*>(l_data + sizeof(l_wofEntryCount));
+
+    // first entry contains info that was used to perform search
+    l_entryPtr[0] = *i_searchInfo;
+    l_entryPtr++;
+
+    // add info on all the non-matched WOF override entries
+    while(i_searchedEntries.size())
+    {
+        wofOverrideTableEntry_t* l_tmpHeader = i_searchedEntries.back();
+        l_entryPtr->core_count = l_tmpHeader->core_count;
+        l_entryPtr->socket_power_w = l_tmpHeader->socket_power_w;
+        l_entryPtr->sort_power_freq_mhz = l_tmpHeader->sort_power_freq_mhz;
+        l_entryPtr++;
+        i_searchedEntries.pop_back();
+    }
+
+    io_err->addFFDC(
+            ERRL_COMP_ID,
+            l_data,
+            l_dataLen,
+            WOF_OVERRIDE_ERROR_UD_VERSION, // FFDC version
+            ERRORLOG::ERRL_UDT_WOFDATA,    // WOF DATA parser
+            false );                       // merge
+
+    delete [] l_data;
+}
+
+
+/* End of helper methods for platParseWOFTables(...) */
 
 
 } // End platAttrSvc namespace

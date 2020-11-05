@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] YADRO                                                              */
 /*                                                                        */
@@ -44,7 +44,7 @@ namespace ERRORLOG
  *
  * Parses WOF data user detail in an error log
  */
-class ErrlUserDetailsParserWofData :public ErrlUserDetailsParser
+class ErrlUserDetailsParserWofData : public ErrlUserDetailsParser
 {
 public:
     /**
@@ -70,129 +70,97 @@ public:
                        void * i_pBuffer,
                        const uint32_t i_buflen) const
     {
-        // From src/usr/fapi2/plat_wof_access.C
-        typedef struct
+
+        if (i_version != WOF_OVERRIDE_ERROR_UD_VERSION)
         {
-          uint8_t  core_count;
-          uint8_t  mode;
-          uint16_t socket_power_w;
-          uint16_t sort_power_freq_mhz;
-        } wofTableCompareData_t;
-
-        // From src/import/chips/p9/procedures/hwp/lib/p9_pstates_common.h
-        typedef enum
-        {
-            WOF_MODE_UNKNOWN = 0,
-            WOF_MODE_NOMINAL = 1,
-            WOF_MODE_TURBO   = 2
-        } WOF_MODE;
-
-        uint16_t tableEntries = 0;
-
-        // Format of WofData error buffer:
-        // uint16_t - # of table entries (including search for table)
-        // wofTableCompareData_t - Searched for this table
-        // wofTableCompareData_t - last table rejected for possible match
-        // ...
-        // wofTableCompareData_t - 1st table rejected for possible match
-        // NOTE: format must match
-        //       addWofCompareDataToErrl() in plat_wof_access.C
-        if ((NULL != i_pBuffer) && (i_buflen >= sizeof(tableEntries)))
-        {
-          tableEntries = ntohs(UINT16_FROM_PTR(i_pBuffer));
-        }
-
-        // How many entries are really present in this buffer?
-        uint16_t actualTableCount = (i_buflen - sizeof(tableEntries)) /
-                                     sizeof(wofTableCompareData_t);
-
-        // sanity check to verify we are getting all the table data
-        if (tableEntries != actualTableCount)
-        {
-          i_parser.PrintString("**************************************","");
-          i_parser.PrintNumber("Total entries calculated", "%d",
-                               actualTableCount);
-          i_parser.PrintNumber("Total entries expected", "%d",
-                               tableEntries);
-          i_parser.PrintString("**************************************","");
-
-          tableEntries = actualTableCount;  // don't go over buffer length
-        }
-
-        // Verify the buffer contains at least the specified number of entries
-        if ( (i_buflen - sizeof(tableEntries) -
-              tableEntries * sizeof(wofTableCompareData_t)) >= 0 )
-        {
-            i_parser.PrintString("---------------------------------------",
-                                 "---------------------------------------");
-            i_parser.PrintNumber("Total WOF Tables compared", "%d",
-                                 tableEntries-1);
-
-            // point to start of table compare data
-            void * i_pTableData = (uint8_t*)i_pBuffer + sizeof(tableEntries);
-            wofTableCompareData_t* outputDataPtr =
-                              static_cast<wofTableCompareData_t*>(i_pTableData);
-            for ( uint32_t tableEntry = 0; tableEntry < tableEntries;
-                  ++tableEntry )
-            {
-              if (tableEntry == 0)
-              {
-                i_parser.PrintString("---------------------------------------",
-                                     "---------------------------------------");
-                i_parser.PrintString("Searched for this table",
-                                     "Tried to match this:");
-              }
-              else
-              {
-                i_parser.PrintString("---------------------------------------",
-                                     "---------------------------");
-                i_parser.PrintNumber("WOF Table", "#%d", tableEntry);
-              }
-
-              i_parser.PrintNumber( "Core Count", "%d",
-                                    outputDataPtr->core_count );
-
-              switch(outputDataPtr->mode)
-              {
-                  case WOF_MODE_UNKNOWN:
-                  {
-                      i_parser.PrintString( "Mode", "Any" );
-                      break;
-                  }
-                  case WOF_MODE_NOMINAL:
-                  {
-                      i_parser.PrintString( "Mode", "Nominal" );
-                      break;
-                  }
-                  case WOF_MODE_TURBO:
-                  {
-                      i_parser.PrintString( "Mode", "Turbo" );
-                      break;
-                  }
-                  default:
-                  {
-                      i_parser.PrintNumber( "Mode", "UNKNOWN: 0x%X",
-                                            outputDataPtr->mode );
-                      break;
-                  }
-              }
-              i_parser.PrintNumber("Socket Power (Watts)", "%d",
-                                    ntohs(outputDataPtr->socket_power_w));
-              i_parser.PrintNumber("Sort Power Freq (MHz)", "%d",
-                                    ntohs(outputDataPtr->sort_power_freq_mhz));
-              outputDataPtr++; // go to next table entry
-            }
+            i_parser.PrintHeading("Unsupported UD version found - hexdump:");
+            i_parser.PrintNumber("Version found", "0x%X", i_version);
+            i_parser.PrintNumber("Version supported", "0x%X", WOF_OVERRIDE_ERROR_UD_VERSION);
+            i_parser.PrintHexDump(i_pBuffer, i_buflen);
         }
         else
         {
-            i_parser.PrintString("Unable to parse too small buffer","");
-            i_parser.PrintNumber("WOF Buffer length", "0x%X", i_buflen);
-            i_parser.PrintNumber("Total entry count", "0x%X", tableEntries);
-            i_parser.PrintString("Expected buffer format:",
-                        "uint16_t count, match this entry, unmatched entries");
-            i_parser.PrintNumber("Each entry size", "%d",
-                                sizeof(wofTableCompareData_t));
-            i_parser.PrintHexDump(i_pBuffer, i_buflen);
+            uint16_t tableEntries = 0;
+
+            // Format of WofData error buffer:
+            //     uint16_t - Number of entries: i.e. entry with search info + all entries searched
+            //     wofOverrideCompareData_t - Info used to perform search
+            //     wofOverrideCompareData_t - last entry rejected for possible match
+            //     ...
+            //     wofOverrideCompareData_t - 1st entry rejected for possible match
+            // NOTE: format must match addWofOverrideSearchEntriesToErrl() in plat_wof_access.C
+            if ((NULL != i_pBuffer) && (i_buflen >= sizeof(tableEntries)))
+            {
+              tableEntries = ntohs(UINT16_FROM_PTR(i_pBuffer));
+            }
+
+            // How many entries are really present in this buffer?
+            uint16_t actualTableCount = (i_buflen - sizeof(tableEntries)) /
+                                         sizeof(wofOverrideCompareData_t);
+
+            // sanity check to verify we are getting all the table data
+            if (tableEntries != actualTableCount)
+            {
+              i_parser.PrintString("**************************************","");
+              i_parser.PrintNumber("Total entries calculated", "%d",
+                                   actualTableCount);
+              i_parser.PrintNumber("Total entries expected", "%d",
+                                   tableEntries);
+              i_parser.PrintString("**************************************","");
+
+              tableEntries = actualTableCount;  // don't go over buffer length
+            }
+
+            // Verify the buffer contains at least the specified number of entries
+            if ( (i_buflen - sizeof(tableEntries) -
+                  tableEntries * sizeof(wofOverrideCompareData_t)) >= 0 )
+            {
+                i_parser.PrintString("---------------------------------------",
+                                     "---------------------------------------");
+                i_parser.PrintNumber("Total WOF override set entries compared", "%d",
+                                     tableEntries-1);
+
+                // point to start of searched override entries
+                void * i_pTableData = (uint8_t*)i_pBuffer + sizeof(tableEntries);
+                wofOverrideCompareData_t* outputDataPtr =
+                                  static_cast<wofOverrideCompareData_t*>(i_pTableData);
+                for ( uint32_t tableEntry = 0; tableEntry < tableEntries;
+                      ++tableEntry )
+                {
+                  if (tableEntry == 0)
+                  {
+                    i_parser.PrintString("---------------------------------------",
+                                         "---------------------------------------");
+                    i_parser.PrintString("Searched for this entry",
+                                         "Tried to match this:");
+                  }
+                  else
+                  {
+                    i_parser.PrintString("---------------------------------------",
+                                         "---------------------------");
+                    i_parser.PrintNumber("WOF Override Table", "#%d", tableEntry);
+                  }
+
+                  i_parser.PrintNumber( "Core Count", "%d",
+                                        outputDataPtr->core_count );
+                  i_parser.PrintNumber("Socket Power (Watts)", "%d",
+                                        ntohs(outputDataPtr->socket_power_w));
+                  i_parser.PrintNumber("Sort Power Freq (MHz)", "%d",
+                                        ntohs(outputDataPtr->sort_power_freq_mhz));
+                  outputDataPtr++; // go to next table entry
+                }
+            }
+            else
+            {
+                i_parser.PrintString("Unable to parse too small buffer","");
+                i_parser.PrintNumber("WOF Buffer length", "0x%X", i_buflen);
+                i_parser.PrintNumber("Total entry count", "0x%X", tableEntries);
+                i_parser.PrintString("Expected buffer format:",
+                            "uint16_t count, match this entry, unmatched entries");
+                i_parser.PrintNumber("Each entry size", "%d",
+                                    sizeof(wofOverrideCompareData_t));
+                i_parser.PrintHexDump(i_pBuffer, i_buflen);
+            }
         }
     }
 
@@ -201,6 +169,15 @@ private:
     ErrlUserDetailsParserWofData(const ErrlUserDetailsParserWofData &);
     ErrlUserDetailsParserWofData & operator=(
         const ErrlUserDetailsParserWofData &);
+
+    // uint and struct from src/usr/fapi2/plat_wof_access.C and also used in src/usr/errl/plugins/ebmc/b0100.py
+    const uint8_t WOF_OVERRIDE_ERROR_UD_VERSION = 1;
+    typedef struct __attribute__((__packed__)) wofOverrideCompareData
+    {
+        uint8_t  core_count;
+        uint16_t socket_power_w;
+        uint16_t sort_power_freq_mhz;
+    } wofOverrideCompareData_t;
 };
 
 }
