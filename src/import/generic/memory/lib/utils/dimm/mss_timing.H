@@ -610,6 +610,16 @@ constexpr uint64_t trrd_dlr()
 }
 
 ///
+/// @brief Buffer command word to BCW or DRAM cmd delay
+/// @return constexpr value of 16 clocks
+///
+constexpr uint64_t tmrc()
+{
+    // DDR4DB01 Spec Rev 1.0 - input timing requirements
+    return 16;
+}
+
+///
 /// @brief Helper function to find tRRD_L based speed (MT/s) for 1KB page
 /// @tparam T the fapi2::TargetType of a type from which we can get MT/s
 /// @param[in] i_target the fapi2 target

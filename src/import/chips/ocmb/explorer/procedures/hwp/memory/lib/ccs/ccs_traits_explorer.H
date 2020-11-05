@@ -68,6 +68,7 @@ class ccsTraits<mss::mc_type::EXPLORER>
         static constexpr uint64_t NTTM_READ_DELAY = 0x40;
         static constexpr uint64_t NTTM_MODE_FORCE_READ = 33;
 
+        static constexpr uint64_t DDR_ADDRESS_12 = 12;
 
         // Command Pass Disable Delay Time for Explorer - really a JEDEC timing
         static constexpr uint64_t TIMING_TCPDED = 4;

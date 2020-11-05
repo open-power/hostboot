@@ -308,6 +308,10 @@ enum generic_ffdc_codes
     POLL_FOR_PBULK_GOOD = 0x10A4,
 
     EFD_FACTORY = 0x10A5,
+
+    // CW engine information
+    CW_DATA_ENGINE = 0x10A6,
+    CW_INFO_ENGINE = 0x10A7,
 };
 
 ///

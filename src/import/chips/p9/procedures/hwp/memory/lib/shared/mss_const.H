@@ -154,10 +154,6 @@ enum ffdc_function_codes
     RAW_CARD_FACTORY = 115,
     PRIMARY_STACK_TYPE = 116,
 
-    // CW engine information
-    CW_DATA_ENGINE = 117,
-    CW_INFO_ENGINE = 118,
-
     // LR helper functions
     FINE_RECORDER_ADD_RESULTS = 119,
     FINE_RECORDER_FIND_EYE = 120,

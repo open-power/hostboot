@@ -73,6 +73,121 @@ enum control_word
 template< mss::control_word T >
 class cwTraits;
 
+
+///
+/// @class cwTraits
+/// @brief a collection of traits associated with the 8-bit buffer control words
+///
+template< >
+class cwTraits< mss::BCW_8BIT >
+{
+    public:
+        // From DDR4 DBO2 spec
+        // Section 4.1 BCW Decoding
+        // Table 25 - 8-bit BCW Decoding
+
+        // Address bits denoted by A
+
+        // Data settings are set by A[7:0]
+        static constexpr uint64_t DATA_LEN = mss::CW8_DATA_LEN;
+
+        // Control words are set by A[11:4]
+        static constexpr uint64_t WORD_LEN = 4;
+
+        // Magic swizzle start bit to make data left aligned for CCS inst.
+        static constexpr uint64_t SWIZZLE_START = 7;
+
+        // Address bit 12 must be 1 for accesses to Data Buffer (DB) Control Words.
+        static constexpr uint64_t CW_ACCESS = 1;
+};
+
+///
+/// @class cwTraits
+/// @brief a collection of traits associated with the 4-bit buffer control words
+///
+template< >
+class cwTraits< mss::BCW_4BIT >
+{
+    public:
+        // From DDR4 DBO2 spec
+        // Section 4.1 BCW Decoding
+        // Table 24 - 4-bit BCW Decoding
+
+        // Address bits denoted by A
+
+        // Data settings are set by A[3:0]
+        static constexpr uint64_t DATA_LEN = mss::CW4_DATA_LEN;
+
+        // Control words are set by A[11:4]
+        // Word length is technically 8
+        // But we only need 4 to decode word.
+        static constexpr uint64_t WORD_LEN = 4;
+
+        // Magic swizzle start bit to make data left aligned for CCS inst.
+        static constexpr uint64_t SWIZZLE_START = 7;
+
+        // Address bit 12 must be 1 for accesses to Data Buffer (DB) Control Words.
+        static constexpr uint64_t CW_ACCESS = 1;
+};
+
+///
+/// @class cwTraits
+/// @brief a collection of traits associated with the 8-bit register control words
+///
+template< >
+class cwTraits< mss::RCW_8BIT >
+{
+    public:
+        // From DDR4 RCDO2 spec:
+        // Section 2.23.2 Control Word Decoding table
+        // Table 27 -  Function Space 0 Control Word Decoding
+
+        // Address bits denoted by A
+
+        // Data settings are set by A[7:0]
+        static constexpr uint64_t DATA_LEN = mss::CW8_DATA_LEN;
+
+        // Control words are set by A[12:8]
+        // Word length is technically 5
+        // But we only need 4 to decode word.
+        static constexpr uint64_t WORD_LEN = 4;
+
+        // Magic swizzle start bit to make data left aligned for CCS inst.
+        static constexpr uint64_t SWIZZLE_START = 7;
+
+        // Address bit 12 must be 0 for accesses to Register Control Words.
+        static constexpr uint64_t CW_ACCESS = 0;
+};
+
+///
+/// @class cwTraits
+/// @brief a collection of traits associated with the 4-bit register control words
+///
+template< >
+class cwTraits< mss::RCW_4BIT >
+{
+    public:
+        // From DDR4 RCDO2 spec:
+        // Section 2.23.2 Control Word Decoding table
+        // Table 27 -  Function Space 0 Control Word Decoding
+
+        // Address bits denoted by A
+
+        // Data settings are set by A[3:0]
+        static constexpr uint64_t DATA_LEN = mss::CW4_DATA_LEN;
+
+        // Control words are set by A[12:4]
+        // Word length is technically 9
+        // But we only need 4 to decode word.
+        static constexpr uint64_t WORD_LEN = 4;
+
+        // Magic swizzle start bit to make data left aligned for CCS inst.
+        static constexpr uint64_t SWIZZLE_START = 7;
+
+        // Address bit 12 must be 0 for accesses to Register Control Words.
+        static constexpr uint64_t CW_ACCESS = 0;
+};
+
 namespace mss
 {
 

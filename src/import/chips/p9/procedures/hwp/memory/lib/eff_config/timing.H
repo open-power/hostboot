@@ -229,16 +229,6 @@ constexpr uint64_t twlmrd()
 }
 
 ///
-/// @brief Buffer command word to BCW or DRAM cmd delay
-/// @return constexpr value of 16 clocks
-///
-constexpr uint64_t tmrc()
-{
-    // DDR4DB01 Spec Rev 1.0 - input timing requirements
-    return 16;
-}
-
-///
 /// @brief Mode Register Set command update delay
 /// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
 /// @param[in] i_target the target used to get clocks
