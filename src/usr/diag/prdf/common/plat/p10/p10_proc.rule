@@ -2887,7 +2887,7 @@ group gOCC_FIR
     /** OCC_FIR[3]
      *  STOP_RECOVERY_NOTIFY_PRD
      */
-    (rOCC_FIR, bit(3)) ? TBDDefaultCallout;
+    (rOCC_FIR, bit(3)) ? pmRecovery;
 
     /** OCC_FIR[4]
      *  OCC Heartbeat Error

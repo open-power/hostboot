@@ -227,8 +227,8 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 #prd_obj_no_sim += p9_l3err_linedelete.o
 #prd_obj_no_sim += p9_l3err_extract.o
 #prd_obj_no_sim += p9_l2_flush.o
-#prd_obj_no_sim += p10_pm_callout.o
-#
+prd_obj_no_sim += p10_pm_callout.o
+
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/

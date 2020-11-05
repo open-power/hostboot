@@ -29,8 +29,8 @@
 /* TODO RTC 256733
 #include <p9_l3err_extract.H>
 #include <p9_l2err_extract.H>
-#include <p9_pm_callout.H>
 */
+#include <p10_pm_callout.H>
 #include <prdfMemAddress.H>
 
 namespace PRDF
@@ -160,12 +160,10 @@ int32_t l2LineDelete(TARGETING::TargetHandle_t i_exTgt,
  * @param o_ffdcList points to a list of STOP FFDC summary sub-sections
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
-/* TODO RTC 256733
 int32_t pmCallout( TARGETING::TargetHandle_t i_tgt,
                    RasAction& o_ra,
                    uint32_t &o_deadCores,
                    std::vector < StopErrLogSectn >& o_ffdcList );
-*/
 
 
 /**

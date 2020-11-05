@@ -92,6 +92,12 @@ actionclass hang_recovery_gte_13 {capture(PbStationMode13); hang_recovery_gte;};
 actionclass hang_recovery_gte_14 {capture(PbStationMode14); hang_recovery_gte;};
 actionclass hang_recovery_gte_15 {capture(PbStationMode15); hang_recovery_gte;};
 
+actionclass pmRecovery
+{
+    funccall("PmRecovery");
+    threshold1;
+};
+
 ###############################################################################
 # Analyze connected
 ###############################################################################

@@ -48,9 +48,10 @@
 #include <p9_l3err_linedelete.H>
 #include <p9_l2err_linedelete.H>
 #include <p9_proc_gettracearray.H>
-#include <pm_common_ext.H>
-#include <p9_stop_api.H>
 */
+#include <pm_common_ext.H>
+//#include <p9_stop_api.H>
+
 #include <rt_todintf.H>
 
 #include <exp_defaults.H>
@@ -413,7 +414,6 @@ int32_t l2LineDelete(TargetHandle_t i_exTgt,
 }
 */
 
-/* TODO RTC 256733
 int32_t pmCallout( TargetHandle_t i_tgt,
                    RasAction& o_ra,
                    uint32_t &o_deadCores,
@@ -430,7 +430,7 @@ int32_t pmCallout( TargetHandle_t i_tgt,
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapiTrgt (i_tgt);
 
     FAPI_INVOKE_HWP( err,
-                     p9_pm_callout,
+                     p10_pm_callout,
                      l_homerVAddr,
                      fapiTrgt,
                      deadCores,
@@ -448,7 +448,6 @@ int32_t pmCallout( TargetHandle_t i_tgt,
     o_deadCores = (uint32_t) deadCores;
     return SUCCESS;
 }
-*/
 
 void requestNewTODTopology( uint32_t i_oscPos,
                             const TargetHandle_t& i_procOscTgt,

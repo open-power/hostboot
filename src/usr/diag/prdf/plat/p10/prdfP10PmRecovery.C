@@ -28,10 +28,8 @@
 #include <prdfP10PmRecovery.H>
 #include <prdfErrlUtil.H>
 
-/* TODO RTC 256733
 #include <hwas/common/hwas.H>
 #include <hwas/common/deconfigGard.H>
-*/
 
 using namespace TARGETING;
 
@@ -44,10 +42,9 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[pmRecovery] "
     int32_t o_rc = SUCCESS;
-    /* TODO RTC 256733
     TargetHandle_t  target = i_chip->getTrgt();
 
-    // p9_pm_callout HWP parameters
+    // p10_pm_callout HWP parameters
     RasAction ra = PROC_CHIP_CALLOUT;
     uint32_t deadCores = 0;
     std::vector < StopErrLogSectn > ffdcList;
@@ -101,7 +98,7 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         }
     }
 
-    // Make callout indicated by p9_pm_callout
+    // Make callout indicated by p10_pm_callout
     switch (ra) {
         case PROC_CHIP_CALLOUT:
             PRDF_TRAC(PRDF_FUNC "HUID 0x%08x PROC_CHIP_CALLOUT",
@@ -115,7 +112,6 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             io_sc.service_data->SetCallout(target);
             break;
     }
-    */
     // Create errorlog to contain HWP FFDC
     /*@
      * @errortype
@@ -126,7 +122,6 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
      * @userdata2  deadCores bit vector
      * @devdesc    An errorlog containing extra FFDC collected by the HWP
      */
-    /* TODO RTC 256733
     errlHndl_t ffdcErrl = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                         PRDF_PM_RECOVERY_FFDC,
@@ -147,7 +142,7 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     ERRORLOG::errlCommit(ffdcErrl, PRDF_COMP_ID);
 
     } while (0);
-    */
+
     return o_rc;
 
     #undef PRDF_FUNC
