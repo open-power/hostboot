@@ -188,8 +188,6 @@ fapi2::ReturnCode initiateSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
 
     auto l_eq_mc_and =
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
-    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > core_mc_target =
-        i_target.getMulticast< fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
 
     // First check if QME_ACTIVE is set before assert spwu
     FAPI_TRY( getScom( l_eq_mc_and, QME_FLAGS_RW, l_qme_flag ) );
@@ -199,14 +197,7 @@ fapi2::ReturnCode initiateSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
         !(l_xsr.getBit<0>()))
     {
         FAPI_DBG("Enable special wakeup for all functional  Core targets");
-        FAPI_EXEC_HWP(l_rc,
-                      p10_core_special_wakeup,
-                      core_mc_target,
-                      p10specialWakeup::SPCWKUP_ENABLE,
-                      p10specialWakeup::HYP
-                     );
-        FAPI_TRY(l_rc, "ERROR: Failed to enable special wakeup.");
-
+        fapi2::specialWakeup (i_target, p10specialWakeup::SPCWKUP_ENABLE);
     }
 
 fapi_try_exit:

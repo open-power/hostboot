@@ -76,8 +76,6 @@ fapi2::ReturnCode p10_pm_start(
 
     fapi2::ReturnCode l_rc;
 
-    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > core_mc_target =
-        i_target.getMulticast< fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
     //  ************************************************************************
     //  Issue init to OCB
     //  ************************************************************************
@@ -150,14 +148,7 @@ fapi2::ReturnCode p10_pm_start(
     //  p10_pm_qme_init(halt) procedure."
     //  ************************************************************************
     FAPI_DBG("Disable special wakeup for all functional  core targets");
-    FAPI_EXEC_HWP(l_rc,
-                  p10_core_special_wakeup,
-                  core_mc_target,
-                  p10specialWakeup::SPCWKUP_DISABLE,
-                  p10specialWakeup::HYP
-                 );
-    FAPI_TRY(l_rc, "ERROR: Failed to disable special wakeup.");
-
+    fapi2::specialWakeup (i_target, p10specialWakeup::SPCWKUP_DISABLE);
 
     //  Initialize the XGPE Engine
     //  ************************************************************************
