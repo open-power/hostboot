@@ -244,4 +244,15 @@ static const uint8_t P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_55      = 55
 static const uint8_t P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_56      = 56;
 static const uint8_t P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_57      = 57;
 
+static const uint8_t P9A_MCC_USTLCFG_OPENCAPI_ERROR_LOG_ENABLE              = 24;
+static const uint8_t P9A_MCC_USTLCFG_OPENCAPI_ERROR_LOG_ENABLE_LEN          = 7;
+static const uint8_t P9A_MCC_USTLCFG_LOL_CAPTURE_CONFIG                     = 54;
+static const uint8_t P9A_MCC_USTLCFG_LOL_CAPTURE_CONFIG_LEN                 = 2;
+static const uint8_t P9A_MCC_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT_ENABLE = 32;
+static const uint8_t P9A_MCC_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT        = 33;
+static const uint8_t P9A_MCC_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT_LEN    = 3;
+
+static const uint8_t P9A_MCC_USTLLOLMASK_RECOVER_ENABLE_MASK                = 0;
+static const uint8_t P9A_MCC_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN            = 16;
+
 #endif

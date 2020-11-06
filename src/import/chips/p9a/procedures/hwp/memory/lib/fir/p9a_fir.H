@@ -217,6 +217,29 @@ inline fapi2::ReturnCode after_p9a_omi_init_ustlfir_helper(const fapi2::Target<f
 
     FAPI_TRY(fapi2::putScom(i_target, MCCT::USTL_FAILMASK, l_reg_data));
 
+    // Configures the USTLCNFG register
+    // NOTE: These are outside of standard FIR procedure and are being configured due to HW bugs
+    FAPI_TRY(fapi2::getScom(i_target, P9A_MCC_USTLCFG, l_reg_data));
+
+    l_reg_data.setBit<P9A_MCC_USTLCFG_DATE_ERROR_RETRY_ENABLE>()
+    .insertFromRight<P9A_MCC_USTLCFG_OPENCAPI_ERROR_LOG_ENABLE, P9A_MCC_USTLCFG_OPENCAPI_ERROR_LOG_ENABLE_LEN>(0x7f)
+    .insertFromRight<P9A_MCC_USTLCFG_LOL_CAPTURE_CONFIG, P9A_MCC_USTLCFG_LOL_CAPTURE_CONFIG_LEN>(0b11)
+    .setBit<P9A_MCC_USTLCFG_RETRY_LOL_HOLDOFF_ENABLE>()
+    .setBit<P9A_MCC_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT_ENABLE>()
+    .insertFromRight<P9A_MCC_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT, P9A_MCC_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT_LEN>
+    (0b111);
+
+    FAPI_TRY(fapi2::putScom(i_target, P9A_MCC_USTLCFG, l_reg_data));
+
+    // Configures the USTLLOLMASK register
+    // NOTE: These are outside of standard FIR procedure and are being configured due to HW bugs
+    FAPI_TRY(fapi2::getScom(i_target, P9A_MCC_USTLLOLMASK, l_reg_data));
+
+    l_reg_data.insertFromRight<P9A_MCC_USTLLOLMASK_RECOVER_ENABLE_MASK, P9A_MCC_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN>
+    (0x8B61);
+
+    FAPI_TRY(fapi2::putScom(i_target, P9A_MCC_USTLLOLMASK, l_reg_data));
+
 fapi_try_exit:
 
     return fapi2::current_err;
