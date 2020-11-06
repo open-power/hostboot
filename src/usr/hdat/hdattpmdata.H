@@ -25,7 +25,6 @@
 #ifndef HDATTPMDATA_H
 #define HDATTPMDATA_H
 
-// FIXME: RTC: 212110 Secureboot: P10 - HDAT SPI rework
 /**
  * @file hdattpmdata.H
  *
@@ -56,13 +55,13 @@ namespace HDAT
  */
 enum {
     TpmDataInstance = 0,
-    TpmDataVersion = 0x11,
+    TpmDataVersion = 0x30, // 0x30 is first version for P10
     TpmDataHdrSize = 0x20,
     TpmDataPtrOffset = 0x20,
     TpmDataPtrCnt = 3,
     TpmDataChildStrCnt = 0,
     TpmDataChildStrOffset = 0,
-    TpmDataMinRqrdPcrdVersion = 0x1
+    TpmDataMinRqrdPcrdVersion = 0x25 // First version to include SPI Dev Info
 };
 
 /**
@@ -102,7 +101,7 @@ struct hdatTpmConfigFlags_t
  */
 struct hdatSbTpmInstInfo_t
 {
-    uint32_t hdatChipId;
+    uint32_t hdatSpiDeviceId;
     // Reserved space was previously used for "Drawer/Book/Octant/Blade"-id and TPM locality values
     // which are no longer needed. Empty space kept to comform with specs.
     uint32_t reserved_0x0004;
@@ -119,6 +118,15 @@ struct hdatSbTpmInstInfo_t
     uint32_t hdatTpmDrtmEventLogEntrySize;
 } __attribute__ ((packed));
 
+
+// Type used to specify SPI Device IDs
+typedef uint32_t spiDeviceId_t;
+
+// Special spiDeviceId_t values
+enum SPI_DEVICE_ID : spiDeviceId_t
+{
+    INVALID_SPI_DEVICE_ID = 0xFFFFFFFF,
+};
 
 /**
  *  @brief Type used to specify I2C link IDs

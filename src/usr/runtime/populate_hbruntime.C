@@ -1921,7 +1921,6 @@ errlHndl_t populate_hbSecurebootData ( void )
     return (l_elog);
 } // end populate_hbRuntime
 
-// FIXME: RTC: 212110 Secureboot: P10 - HDAT SPI rework
 errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 {
     errlHndl_t l_elog = nullptr;
@@ -2127,12 +2126,24 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
     // Section Secure Boot and TPM Instance Info
     ////////////////////////////////////////////////////////////////////////////
 
-    // save of a list of TPM / Instance Info pairs to fix up in a second pass
+    // save off a list of TPM / Instance Info pairs to fix up in a second pass
     std::vector<std::pair<TARGETING::Target*,
                           HDAT::hdatSbTpmInstInfo_t*> > fixList;
 
     // Calculate the SRTM log offset
     auto l_srtmLogOffset = 0;
+
+    // Number of PCRD instances to be used later
+    uint64_t l_numInstances = 0;
+    l_elog = RUNTIME::get_instance_count(RUNTIME::PCRD, l_numInstances);
+    if (l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: get_instance_count() failed for PCRD HDAT section");
+        break;
+    }
+
+    // A collection of PCRD Instance Headers to be populated and used later
+    std::vector<HDAT::hdatSpPcrd_t const *> l_pcrdInstances;
 
     // fill in the values for each Secure Boot TPM Instance Info in the array
     for (auto pTpm : tpmList)
@@ -2186,10 +2197,10 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                                       hasSameSpiController(l_tpmInfo.spiMasterPath);
 
         auto itr = std::find_if(l_procList.begin(),l_procList.end(),
-        [&hasSameSpiController](const TARGETING::TargetHandle_t & t)
-        {
-            return hasSameSpiController(t);
-        });
+                                [&hasSameSpiController](const TARGETING::TargetHandle_t & t)
+                                {
+                                    return hasSameSpiController(t);
+                                });
 
         if(itr == l_procList.end())
         {
@@ -2216,9 +2227,394 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
             break;
         }
 
-        auto l_proc = *itr;
+        // Start with an empty list of spi device ids from PCRD
+        std::vector<HDAT::spiDeviceId_t> l_PcrdSpiDeviceIds;
 
-        l_tpmInstInfo->hdatChipId = l_proc->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+        // Gather a list of SPI devices for this chip.
+        std::vector<SPI::spiSlaveDevice> l_spiDevices;
+        SPI::getSpiDeviceInfo(l_spiDevices,
+                              pTpm);
+
+        uint64_t l_pcrdAddr = 0;
+        uint64_t l_pcrdSizeMax = 0;
+
+        // Start with an invalid SPI Device Id for this TPM
+        l_tpmInstInfo->hdatSpiDeviceId = HDAT::SPI_DEVICE_ID::INVALID_SPI_DEVICE_ID;
+
+        for (uint64_t l_pcrdInstance = 0;
+                l_pcrdInstance < l_numInstances;
+                ++l_pcrdInstance)
+        {
+            // a pointer to the PCRD header
+            HDAT::hdatSpPcrd_t const * l_pcrd = nullptr;
+
+            // Populate the list of PCRD instances for use in below section "User physical interaction mechanism
+            // information"
+            // Avoid over populating this list after the first TPM
+            if (l_pcrdInstances.size() < l_numInstances)
+            {
+
+                l_elog = RUNTIME::get_host_data_section(RUNTIME::PCRD,
+                        l_pcrdInstance,
+                        l_pcrdAddr,
+                        l_pcrdSizeMax);
+                if(l_elog)
+                {
+                    TRACFCOMP(g_trac_runtime, ERR_MRK"populate_TpmInfoByNode:"
+                              " get_host_data_section() failed for PCRD HDAT section, instance %d",
+                              l_pcrdInstance);
+                    break;
+                }
+
+                // Get a pointer to the PCRD header
+                l_pcrd = reinterpret_cast<const HDAT::hdatSpPcrd_t*>(l_pcrdAddr);
+
+                l_pcrdInstances.push_back(l_pcrd);
+
+                // Check the version of the PCRD section header
+                if(l_pcrd->hdatHdr.hdatVersion < HDAT::TpmDataMinRqrdPcrdVersion)
+                {
+                    TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+                              "Bad PCRD section version 0x%X - must be 0x%X or greater",
+                              l_pcrd->hdatHdr.hdatVersion,
+                              HDAT::TpmDataMinRqrdPcrdVersion);
+
+                    /*@
+                     * @errortype
+                     * @severity      ERRL_SEV_UNRECOVERABLE
+                     * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                     * @reasoncode    RUNTIME::RC_TPM_HDAT_BAD_VERSION
+                     * @userdata1     hdat version
+                     * @userdata2     Expected support version
+                     * @devdesc       Bad PCRD section version
+                     * @custdesc      Platform security problem detected
+                     */
+                    l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                     RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                     RUNTIME::RC_TPM_HDAT_BAD_VERSION,
+                                                     l_pcrd->hdatHdr.hdatVersion,
+                                                     HDAT::TpmDataMinRqrdPcrdVersion,
+                                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_elog->collectTrace(RUNTIME_COMP_NAME);
+                    break;
+                }
+            }
+            else
+            {
+                l_pcrd = l_pcrdInstances[l_pcrdInstance];
+            }
+
+            assert(l_pcrd != nullptr, "l_pcrd was nullptr and that shouldn't happen!");
+
+            // Get offset for the SPI array header
+            auto spiArrayOffset = l_pcrd->hdatPcrdIntData[HDAT::HDAT_PCRD_DA_HOST_SPI].hdatOffset;
+
+            // If pointer pair's offset value is 0, advance to next PCRD instance
+            // as this one has no SPI Devices
+            if(!spiArrayOffset)
+            {
+                continue;
+            }
+
+            // Convert SPI array header offset to a pointer to the SPI array header
+            const auto l_pHostSpiPcrdHeader =
+                reinterpret_cast<HDAT::hdatHDIFDataArray_t*>(reinterpret_cast<uint64_t>(l_pcrd) + spiArrayOffset);
+
+            // make sure the array count is within reasonable limits
+            if(l_pHostSpiPcrdHeader->hdatArrayCnt > HDAT_PCRD_MAX_SPI_DEV)
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+                          "HDAT PCRD reported more than the max number of SPI devices! Count:%d",
+                          l_pHostSpiPcrdHeader->hdatArrayCnt);
+
+                /*@
+                 * @errortype
+                 * @severity      ERRL_SEV_UNRECOVERABLE
+                 * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                 * @reasoncode    RUNTIME::RC_TPM_HDAT_BAD_NUM_SPI
+                 * @userdata1     hdat array count
+                 * @userdata2     max number of SPI devices
+                 * @devdesc       HDAT PCRD reported more than the max number of SPI devices
+                 * @custdesc      Platform security problem detected
+                 */
+                l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                 RUNTIME::RC_TPM_HDAT_BAD_NUM_SPI,
+                                                 l_pHostSpiPcrdHeader->hdatArrayCnt,
+                                                 HDAT_PCRD_MAX_SPI_DEV,
+                                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_elog->collectTrace(RUNTIME_COMP_NAME);
+                break;
+            }
+
+            // Get the pointer to the first element in the SPI array
+            // This is the address of the header plus the offset given in the header
+            auto l_spiDevStart = reinterpret_cast<const uint8_t*>(l_pHostSpiPcrdHeader)
+                               + l_pHostSpiPcrdHeader->hdatOffset;
+
+            // Calculate the stop pointer
+            auto l_spiDevStop = l_spiDevStart + (l_pHostSpiPcrdHeader->hdatArrayCnt
+                              * l_pHostSpiPcrdHeader->hdatAllocSize);
+
+            // for each SPI Device in the PCRD
+            for (auto l_cur = l_spiDevStart;
+                    l_cur != l_spiDevStop;
+                    l_cur += l_pHostSpiPcrdHeader->hdatAllocSize )
+            {
+                // reinterpret the byte pointer as a struct pointer
+                auto l_pcrdSpiDevice = reinterpret_cast<const HDAT::hdatSpiDevData_t*>(l_cur);
+
+                // if we've seen it already
+                auto it = std::find(l_PcrdSpiDeviceIds.begin(),
+                                    l_PcrdSpiDeviceIds.end(),
+                                    l_pcrdSpiDevice->hdatSpiDevId);
+                if (it != l_PcrdSpiDeviceIds.end())
+                {
+                    const auto l_spiDeviceId = *it;
+                    TRACFCOMP(g_trac_runtime,
+                            "populate_TpmInfoByNode: A duplicate SPI Device Id was found in HDAT PCRD Section: %d",
+                            l_spiDeviceId);
+
+                    // terminate the boot due to an integrity violation
+                    /*@
+                     * @errortype
+                     * @reasoncode    RUNTIME::RC_DUPLICATE_SPI_DEV_IDS
+                     * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                     * @severity      ERRL_SEV_UNRECOVERABLE
+                     * @userdata1     SPI Device ID
+                     * @devdesc       Found duplicate SPI Device IDs in PCRD section
+                     *                of HDAT. System security cannot be guaranteed.
+                     * @custdesc      Platform security problem detected
+                     */
+                    ERRORLOG::ErrlEntry* err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                                      RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                                      RUNTIME::RC_DUPLICATE_SPI_DEV_IDS,
+                                                                      l_spiDeviceId,
+                                                                      0,
+                                                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    err->collectTrace(RUNTIME_COMP_NAME);
+                    SECUREBOOT::handleSecurebootFailure(err);
+
+                    assert(false,"handleSecurebootFailure shouldn't return and it did!");
+                }
+                else
+                {
+                    // add it to a known list to make sure we don't see it again
+                    l_PcrdSpiDeviceIds.push_back(l_pcrdSpiDevice->hdatSpiDevId);
+                }
+
+                if (l_pcrdSpiDevice->hdatSpiDevPurp != static_cast<uint8_t>(spiSlaveDevice::slaveDevicePurpose_t::TPM))
+                {
+                    // Only searching for TPM SPI Devices at this point.
+                    continue;
+                }
+
+                // now make sure we have a match in the mrw
+                auto itr = std::find_if(l_spiDevices.begin(),
+                                        l_spiDevices.end(),
+                                        [&l_pcrdSpiDevice](const SPI::spiSlaveDevice & i_spiDevMrw)
+                                        {
+                                            // Shift off "unique id" portion of SPI Device Id as it is not guaranteed to
+                                            // match between PCRD and MRW
+                                            uint32_t shift_amt = 16;
+                                            return ((l_pcrdSpiDevice->hdatSpiDevId >> shift_amt)
+                                                        == (i_spiDevMrw.deviceId.word >> shift_amt)) &&
+                                                   (l_pcrdSpiDevice->hdatSpiMasterEngine == i_spiDevMrw.masterEngine) &&
+                                                   (l_pcrdSpiDevice->hdatSpiMasterPort == i_spiDevMrw.masterPort) &&
+                                                   (l_pcrdSpiDevice->hdatSpiSlaveDevType
+                                                        == static_cast<uint8_t>(i_spiDevMrw.deviceType)) &&
+                                                   (l_pcrdSpiDevice->hdatSpiDevPurp
+                                                        == static_cast<uint8_t>(i_spiDevMrw.devicePurpose));
+                                        });
+
+                if (itr == l_spiDevices.end())
+                {
+                    // Couldn't find a match
+                    TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
+                              "SPI Device in the PCRD with Spi Device ID %d does not have a match in the MRW",
+                              l_pcrdSpiDevice->hdatSpiDevId);
+                    /*@
+                     * @errortype
+                     * @reasoncode   RUNTIME::RC_SPI_DEVICE_NOT_IN_MRW
+                     * @moduleid     RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                     * @severity     ERRL_SEV_UNRECOVERABLE
+                     * @userdata1    [0:7] SPI Controller Engine
+                     * @userdata1    [8:15] SPI Controller Port
+                     * @userdata1    [16:23] SPI Receiver Device Type
+                     * @userdata1    [24:31] SPI Receiver Device Purpose
+                     * @userdata1    [32:63] SPI Device Id
+                     * @devdesc      A SPI device in the PCRD does not have a match
+                     *               in the MRW.
+                     * @custdesc     Platform security problem detected
+                     */
+                    l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                     RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                     RUNTIME::RC_SPI_DEVICE_NOT_IN_MRW,
+                                                     TWO_UINT32_TO_UINT64(
+                                                         FOUR_UINT8_TO_UINT32(
+                                                             l_pcrdSpiDevice->hdatSpiMasterEngine,
+                                                             l_pcrdSpiDevice->hdatSpiMasterPort,
+                                                             l_pcrdSpiDevice->hdatSpiSlaveDevType,
+                                                             l_pcrdSpiDevice->hdatSpiDevPurp),
+                                                         l_pcrdSpiDevice->hdatSpiDevId),
+                                                     0,
+                                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_elog->collectTrace(RUNTIME_COMP_NAME);
+                    break;
+                }
+                else
+                {
+                    if (l_tpmInstInfo->hdatSpiDeviceId != HDAT::SPI_DEVICE_ID::INVALID_SPI_DEVICE_ID)
+                    {
+                        // Found a duplicate SPI Device ID match indicating that there was an error in the model
+                        TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
+                                  "SPI device in the PCRD with Spi Device ID %d has a duplicate match in the MRW",
+                                  l_pcrdSpiDevice->hdatSpiDevId);
+                        /*@
+                         * @errortype
+                         * @reasoncode   RUNTIME::RC_SPI_DEVICE_DUPLICATE_IN_MRW
+                         * @moduleid     RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                         * @severity     ERRL_SEV_UNRECOVERABLE
+                         * @userdata1    [0:7] SPI Controller Engine
+                         * @userdata1    [8:15] SPI Controller Port
+                         * @userdata1    [16:23] SPI Receiver Device Type
+                         * @userdata1    [24:31] SPI Receiver Device Purpose
+                         * @userdata1    [32:63] SPI Device Id
+                         * @devdesc      An SPI device in the PCRD has a duplicate
+                         *               match in the MRW.
+                         * @custdesc     Platform security problem detected
+                         */
+                        l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                         RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                         RUNTIME::RC_SPI_DEVICE_DUPLICATE_IN_MRW,
+                                                         TWO_UINT32_TO_UINT64(
+                                                             FOUR_UINT8_TO_UINT32(
+                                                                 l_pcrdSpiDevice->hdatSpiMasterEngine,
+                                                                 l_pcrdSpiDevice->hdatSpiMasterPort,
+                                                                 l_pcrdSpiDevice->hdatSpiSlaveDevType,
+                                                                 l_pcrdSpiDevice->hdatSpiDevPurp),
+                                                             l_pcrdSpiDevice->hdatSpiDevId),
+                                                         0,
+                                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                        l_elog->collectTrace(RUNTIME_COMP_NAME);
+                        break;
+                    }
+                    else // found a match
+                    {
+                        // Double check the engine and port are correct.
+                        const uint8_t SPI_ENGINE_TPM = 4;
+                        const uint8_t SPI_CONTROLLER_SELECT = 0;
+                        if ((l_pcrdSpiDevice->hdatSpiMasterEngine == SPI_ENGINE_TPM) &&
+                            (l_pcrdSpiDevice->hdatSpiMasterPort == SPI_CONTROLLER_SELECT))
+                        {
+                            l_tpmInstInfo->hdatSpiDeviceId = l_pcrdSpiDevice->hdatSpiDevId;
+                            l_spiDevices.erase(itr);
+                        }
+                        else
+                        {
+                            TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
+                                      "SPI device in the PCRD with Spi Device ID %d has a "
+                                      "bad engine 0x%X and/or port 0x%X",
+                                      l_pcrdSpiDevice->hdatSpiDevId,
+                                      l_pcrdSpiDevice->hdatSpiMasterEngine,
+                                      l_pcrdSpiDevice->hdatSpiMasterPort);
+                            /*@
+                             * @errortype
+                             * @reasoncode   RUNTIME::RC_INVALID_SPI_DEVICE
+                             * @moduleid     RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                             * @severity     ERRL_SEV_UNRECOVERABLE
+                             * @userdata1    [0:7] SPI Controller Engine
+                             * @userdata1    [8:15] SPI Controller Port
+                             * @userdata1    [16:23] SPI Receiver Device Type
+                             * @userdata1    [24:31] SPI Receiver Device Purpose
+                             * @userdata1    [32:63] SPI Device Id
+                             * @devdesc      An SPI device in the PCRD has an invalid engine and/or port.
+                             * @custdesc     Platform security problem detected
+                             */
+                            l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                             RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                             RUNTIME::RC_INVALID_SPI_DEVICE,
+                                                             TWO_UINT32_TO_UINT64(
+                                                                 FOUR_UINT8_TO_UINT32(
+                                                                     l_pcrdSpiDevice->hdatSpiMasterEngine,
+                                                                     l_pcrdSpiDevice->hdatSpiMasterPort,
+                                                                     l_pcrdSpiDevice->hdatSpiSlaveDevType,
+                                                                     l_pcrdSpiDevice->hdatSpiDevPurp),
+                                                                 l_pcrdSpiDevice->hdatSpiDevId),
+                                                             0,
+                                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                            l_elog->collectTrace(RUNTIME_COMP_NAME);
+                            break;
+                        }
+                    }
+                }
+            } // for each spi device in the current PCRD instance
+            if (l_elog)
+            {
+                break;
+            }
+        } // for each PCRD instance
+        if (l_elog)
+        {
+            break;
+        }
+
+        if (!l_spiDevices.empty())
+        {
+            size_t i = 0;
+            for (const auto& spiDev : l_spiDevices)
+            {
+                TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
+                          "SPI device in the MRW was not found in the PCRD having SPI Device ID: 0x%X; engine: 0x%X; masterport: 0x%X; "
+                          "devicetype: 0x%X; devicepurpose: 0x%X; ",
+                        spiDev.deviceId.word,
+                        spiDev.masterEngine,
+                        spiDev.masterPort,
+                        spiDev.deviceType,
+                        spiDev.devicePurpose);
+                /*@
+                 * @errortype
+                 * @reasoncode   RUNTIME::RC_EXTRA_SPI_DEVICE_IN_MRW
+                 * @moduleid     RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                 * @severity     ERRL_SEV_UNRECOVERABLE
+                 * @userdata1    [0:7] SPI Controller Engine
+                 * @userdata1    [8:15] SPI Controller Port
+                 * @userdata1    [16:23] SPI Receiver Device Type
+                 * @userdata1    [24:31] SPI Receiver Device Purpose
+                 * @userdata1    [32:63] SPI Device Id
+                 * @devdesc      An SPI device in the MRW has no match
+                 *               in the PCRD.
+                 * @custdesc     Platform security problem detected
+                 */
+                l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                 RUNTIME::RC_EXTRA_SPI_DEVICE_IN_MRW,
+                                                 TWO_UINT32_TO_UINT64(
+                                                     FOUR_UINT8_TO_UINT32(spiDev.masterEngine,
+                                                         spiDev.masterPort,
+                                                         spiDev.deviceType,
+                                                         spiDev.devicePurpose),
+                                                     spiDev.deviceId.word),
+                                                 0,
+                                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_elog->collectTrace(RUNTIME_COMP_NAME);
+                if (++i >= l_spiDevices.size())
+                {
+                    // This error will be returned
+                    break;
+                }
+                else
+                {
+                    // Commit this error and create another
+                    errlCommit(l_elog, RUNTIME_COMP_ID);
+                    // l_elog is now nullptr
+                }
+            }
+        }
+        if (l_elog)
+        {
+            break;
+        }
 
         // Reserved space was previously used for "Drawer/Book/Octant/Blade"-id
         // and TPM locality values
@@ -2468,67 +2864,12 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         }
     }
 
-    uint64_t l_numInstances = 0;
-
-    l_elog = RUNTIME::get_instance_count(RUNTIME::PCRD, l_numInstances);
-    if (l_elog)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: get_instance_count() failed for PCRD HDAT section");
-        break;
-    }
-
-    uint64_t l_pcrdAddr = 0;
-    uint64_t l_pcrdSizeMax = 0;
-
     // Initialize i2cLinkIds to NA before attempting populate
     l_physInter->i2cLinkIdPhysicalPresence = HDAT::I2C_LINK_ID::NOT_APPLICABLE;
     l_physInter->i2cLinkIdWindowOpen = HDAT::I2C_LINK_ID::NOT_APPLICABLE;
 
-    for (uint64_t l_pcrdInstance = 0;
-         l_pcrdInstance < l_numInstances;
-         ++l_pcrdInstance)
+    for (const auto& l_pcrd : l_pcrdInstances)
     {
-
-        l_elog = RUNTIME::get_host_data_section(RUNTIME::PCRD,
-                                                l_pcrdInstance,
-                                                l_pcrdAddr,
-                                                l_pcrdSizeMax);
-        if(l_elog)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: get_host_data_section() failed for PCRD HDAT section, instance %d", l_pcrdInstance);
-            break;
-        }
-
-        // Get a pointer to the PCRD header
-        auto l_pcrd = reinterpret_cast<const HDAT::hdatSpPcrd_t*>(l_pcrdAddr);
-
-        // Check the version of the PCRD section header
-        if(l_pcrd->hdatHdr.hdatVersion < HDAT::TpmDataMinRqrdPcrdVersion)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: Bad PCRD section version 0x%X - must be 0x%X or greater",
-                      l_pcrd->hdatHdr.hdatVersion,
-                       HDAT::TpmDataMinRqrdPcrdVersion);
-
-            /*@
-             * @errortype
-             * @severity      ERRL_SEV_UNRECOVERABLE
-             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
-             * @reasoncode    RUNTIME::RC_TPM_HDAT_BAD_VERSION
-             * @userdata1     hdat version
-             * @userdata2     Expected support version
-             * @devdesc       Bad PCRD section version
-             * @custdesc      Platform security problem detected
-             */
-            l_elog = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
-                RUNTIME::RC_TPM_HDAT_BAD_VERSION,
-                l_pcrd->hdatHdr.hdatVersion,
-                HDAT::TpmDataMinRqrdPcrdVersion,
-                true);
-            l_elog->collectTrace(RUNTIME_COMP_NAME);
-            break;
-        }
 
         // Get offset for the i2c array header
         auto i2cAryOff =
@@ -2543,7 +2884,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
         // Convert i2c array header offset to a pointer to the i2c array header
         const auto l_hostI2cPcrdHdrPtr =
-           reinterpret_cast<HDAT::hdatHDIFDataArray_t*>(l_pcrdAddr + i2cAryOff);
+           reinterpret_cast<HDAT::hdatHDIFDataArray_t*>(reinterpret_cast<uint64_t>(l_pcrd) + i2cAryOff);
 
         // make sure the array count is within reasonable limits
         if(l_hostI2cPcrdHdrPtr->hdatArrayCnt > HDAT_PCRD_MAX_I2C_DEV)
