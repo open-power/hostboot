@@ -58,7 +58,9 @@
      <attribute>
           <id>ATTR_PROC_MEMORY_ENCRYPTION_ENABLED</id>
           <!-- Value of "CTR" taken from p10_nest_attributes.xml -->
-          <default>2</default>
+          <!-- @TODO RTC 208820: Re-enable this once we move
+               p10_init_mem_encryption earlier in the IPL -->
+          <default>0</default>
           <no_export/>
      </attribute>
 
