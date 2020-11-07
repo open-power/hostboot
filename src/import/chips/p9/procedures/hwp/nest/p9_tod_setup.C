@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -776,21 +776,12 @@ fapi_try_exit:
 fapi2::ReturnCode configure_m_path_ctrl_reg(
     tod_topology_node* i_tod_node,
     const p9_tod_setup_tod_sel i_tod_sel,
-    const p9_tod_setup_osc_sel i_osc_sel)
+    const p9_tod_setup_osc_sel i_osc_sel,
+    const bool i_dual_edge_disable)
 {
     fapi2::buffer<uint64_t> l_m_path_ctrl_reg = 0;
-    fapi2::buffer<uint64_t> l_root_ctrl8_reg = 0;
-    bool l_tod_on_lpc_clock = false;
 
     const bool is_mdmt = (i_tod_node->i_tod_master && i_tod_node->i_drawer_master);
-
-    // Read ROOT_CTRL8 to determine TOD input clock selection
-    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
-                            PERV_ROOT_CTRL8_SCOM,
-                            l_root_ctrl8_reg),
-             "Error from getScom (PERV_ROOT_CTRL8_SCOM)!");
-
-    l_tod_on_lpc_clock = l_root_ctrl8_reg.getBit<P9A_PERV_ROOT_CTRL8_TP_PLL_CLKIN_SEL9_DC>();
 
     // Read PERV_TOD_M_PATH_CTRL_REG to preserve any prior configuration
     FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
@@ -799,7 +790,26 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
              "Error from getScom (PERV_TOD_M_PATH_CTRL_REG)!");
 
     // Configure single or dual edge detect based on tod clock select
-    l_m_path_ctrl_reg.writeBit<PERV_TOD_M_PATH_CTRL_REG_STEP_CREATE_DUAL_EDGE_DISABLE>(l_tod_on_lpc_clock);
+    if (i_dual_edge_disable)
+    {
+        // ON: sample only the rising edge of the oscillator
+        l_m_path_ctrl_reg.setBit<PERV_TOD_M_PATH_CTRL_REG_STEP_CREATE_DUAL_EDGE_DISABLE>();
+
+        // In single-edge mode the TOD expects a 16 MHz oscillator, and since all SPS values are specified in
+        // terms of us instead of steps, the HW actually changes how it interprets the SPS values: Every setting
+        // suddenly means half as many STEPs as before. Since we're staying at 32 MHz and want the same STEPs
+        // per SYNC we have to adapt our SPS values to the next higher power of two.
+        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
+                                          PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_1024);
+    }
+    else
+    {
+        // OFF: sample both edges of the oscillator
+        l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_STEP_CREATE_DUAL_EDGE_DISABLE>();
+
+        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
+                                          PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
+    }
 
     if (is_mdmt)
     {
@@ -818,11 +828,6 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
 
             // OSC0 step alignment enabled
             l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_0_STEP_ALIGN_DISABLE>();
-
-            // Set 512 steps per sync for path 0
-            l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
-                                              PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(
-                                                  TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
 
             // Set step check CPS deviation to 50%
             l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION,
@@ -854,11 +859,6 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
 
             // OSC1 step alignment enabled
             l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_1_STEP_ALIGN_DISABLE>();
-
-            // Set 512 steps per sync for path 1
-            l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
-                                              PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(
-                                                  TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
 
             // Set step check CPS deviation to 50%
             l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION,
@@ -988,9 +988,18 @@ fapi_try_exit:
 fapi2::ReturnCode init_chip_ctrl_reg(
     tod_topology_node* i_tod_node,
     const p9_tod_setup_tod_sel i_tod_sel,
-    const p9_tod_setup_osc_sel i_osc_sel)
+    const p9_tod_setup_osc_sel i_osc_sel,
+    const bool i_dual_edge_disable)
 {
     fapi2::buffer<uint64_t> l_chip_ctrl_reg = 0;
+
+    // In single-edge mode the TOD expects a 16 MHz oscillator, and since all SPS values are specified in
+    // terms of us instead of steps, the HW actually changes how it interprets the SPS values: Every setting
+    // suddenly means half as many STEPs as before. Since we're staying at 32 MHz and want the same STEPs
+    // per SYNC we have to adapt our SPS values to the next higher power of two.
+    const uint32_t l_sps_value = i_dual_edge_disable ?
+                                 TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SEL_16 :
+                                 TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SEL_8;
 
     FAPI_DBG("Start");
     FAPI_DBG("Set low order step value to 3F in PERV_TOD_CHIP_CTRL_REG");
@@ -1003,8 +1012,7 @@ fapi2::ReturnCode init_chip_ctrl_reg(
 
     // Default core sync period is 8us
     l_chip_ctrl_reg.insertFromRight<PERV_TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SELECT,
-                                    PERV_TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SELECT_LEN>(
-                                        TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SEL_8);
+                                    PERV_TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SELECT_LEN>(l_sps_value);
 
     // Enable internal path sync check
     l_chip_ctrl_reg.clearBit<PERV_TOD_CHIP_CTRL_REG_I_PATH_SYNC_CHECK_DISABLE>();
@@ -1050,6 +1058,9 @@ fapi2::ReturnCode configure_tod_node(
     const p9_tod_setup_tod_sel i_tod_sel,
     const p9_tod_setup_osc_sel i_osc_sel)
 {
+    bool l_dual_edge_disable = false;
+    fapi2::buffer<uint64_t> l_root_ctrl8_reg = 0;
+
     char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString(*(i_tod_node->i_target),
                     l_targetStr,
@@ -1058,6 +1069,14 @@ fapi2::ReturnCode configure_tod_node(
 
     const bool is_mdmt = (i_tod_node->i_tod_master &&
                           i_tod_node->i_drawer_master);
+
+    // Read ROOT_CTRL8 to determine TOD input clock selection
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_ROOT_CTRL8_SCOM,
+                            l_root_ctrl8_reg),
+             "Error from getScom (PERV_ROOT_CTRL8_SCOM)!");
+
+    l_dual_edge_disable = l_root_ctrl8_reg.getBit<P9A_PERV_ROOT_CTRL8_TP_PLL_CLKIN_SEL9_DC>();
 
     FAPI_TRY(configure_pss_mss_ctrl_reg(i_tod_node,
                                         i_tod_sel,
@@ -1079,7 +1098,8 @@ fapi2::ReturnCode configure_tod_node(
 
     FAPI_TRY(configure_m_path_ctrl_reg(i_tod_node,
                                        i_tod_sel,
-                                       i_osc_sel),
+                                       i_osc_sel,
+                                       l_dual_edge_disable),
              "Error from configure_m_path_ctrl_reg!");
 
     FAPI_TRY(configure_i_path_ctrl_reg(i_tod_node,
@@ -1089,7 +1109,8 @@ fapi2::ReturnCode configure_tod_node(
 
     FAPI_TRY(init_chip_ctrl_reg(i_tod_node,
                                 i_tod_sel,
-                                i_osc_sel),
+                                i_osc_sel,
+                                l_dual_edge_disable),
              "Error from init_chip_ctrl_reg!");
 
     // TOD is configured for this node; if it has children, start their
