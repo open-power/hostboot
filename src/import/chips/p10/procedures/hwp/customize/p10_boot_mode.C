@@ -661,6 +661,7 @@ add_plat_features_rt(
     fapi2::ATTR_SYSTEM_MMA_POWERON_DISABLE_Type l_attr_system_mma_poweron_disable;
     fapi2::ATTR_MRW_L2_INCREASE_JITTER_Type l_attr_mrw_l2_increase_jitter;
     fapi2::ATTR_MRW_CONVERT_DCBZ_TO_RWITM_Type l_attr_mrw_convert_dcbz_to_rwitm;
+    fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG,
                            i_target_sys,
@@ -678,6 +679,9 @@ add_plat_features_rt(
                            i_target_sys,
                            l_attr_mrw_convert_dcbz_to_rwitm));
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
+                           i_target_sys,
+                           l_attr_contained_ipl_type));
 
     if (l_attr_smf_config == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED)
     {
@@ -689,14 +693,18 @@ add_plat_features_rt(
         FAPI_TRY(set_bit(i_bvec, MMA_STATIC_POWEROFF, "MMA_STATIC_POWEROFF"));
     }
 
-    if (l_attr_mrw_l2_increase_jitter == fapi2::ENUM_ATTR_MRW_L2_INCREASE_JITTER_TRUE)
+    // apply only outside of contained modes
+    if (l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_NONE)
     {
-        FAPI_TRY(set_bit(i_bvec, L2RC_HIGH_JITTER, "L2RC_HIGH_JITTER"));
-    }
+        if (l_attr_mrw_l2_increase_jitter == fapi2::ENUM_ATTR_MRW_L2_INCREASE_JITTER_TRUE)
+        {
+            FAPI_TRY(set_bit(i_bvec, L2RC_HIGH_JITTER, "L2RC_HIGH_JITTER"));
+        }
 
-    if (l_attr_mrw_convert_dcbz_to_rwitm == fapi2::ENUM_ATTR_MRW_CONVERT_DCBZ_TO_RWITM_TRUE)
-    {
-        FAPI_TRY(set_bit(i_bvec, CONVERT_DCBZ_TO_RWITM, "CONVERT_DCBZ_TO_RWITM"));
+        if (l_attr_mrw_convert_dcbz_to_rwitm == fapi2::ENUM_ATTR_MRW_CONVERT_DCBZ_TO_RWITM_TRUE)
+        {
+            FAPI_TRY(set_bit(i_bvec, CONVERT_DCBZ_TO_RWITM, "CONVERT_DCBZ_TO_RWITM"));
+        }
     }
 
     // ensure unwanted features are cleared (necessary based on
