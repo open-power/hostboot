@@ -167,6 +167,20 @@ errlHndl_t PNOR::fixECC(PNOR::SectionId i_section)
     return Singleton<PnorRP>::instance().fixECC(i_section);
 }
 
+/**
+ * @brief  Trace out which pages we loaded more than i_threshold times,
+ *         then optionally clear the list.
+ */
+void PNOR::readAndClearCounter( uint32_t i_threshold,
+                                bool i_clear )
+{
+    Singleton<PnorRP>::instance().readAndClearCounter(i_threshold,
+                                                      i_clear);
+}
+
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+
 
 /**
  * STATIC
@@ -1228,6 +1242,7 @@ void PnorRP::waitForMessage()
                         {
                             status_rc = -EIO; /* I/O error */
                         }
+                        iv_pageCounter[dev_offset]++;
                         break;
 
                     case( MSG_MM_RP_WRITE ):
@@ -1782,6 +1797,23 @@ uint64_t PnorRP::getTocOffset(TOCS i_toc) const
     // Can use a ternary operator because there are only 2 TOCs per side
     return (i_toc == TOC_0) ? iv_TocOffset[WORKING].first :
                               iv_TocOffset[WORKING].second;
+}
+
+void PnorRP::readAndClearCounter( uint32_t i_threshold,
+                                  bool i_clear ) 
+{
+    TRACFCOMP(g_trac_pnor,"PnorRP::readAndClearCounter>  (Flash offset)=(Number of reads)");
+    for( auto const& page : iv_pageCounter )
+    {
+        if( page.second > i_threshold )
+        {
+            TRACFCOMP(g_trac_pnor,"%.8X=%d", page.first, page.second);
+        }
+    }
+    if( i_clear )
+    {
+        iv_pageCounter.clear();
+    }
 }
 
 errlHndl_t PnorRP::setVirtAddrs(void)

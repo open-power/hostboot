@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -126,6 +126,16 @@ class PnorRP
      */
     uint64_t getTocOffset(PNOR::TOCS i_toc) const;
 
+    /**
+     * @brief  Trace out which pages we loaded more than i_threshold times,
+     *         then optionally clear the list.
+     *
+     * @param[in] i_threshold  Threshold to trace results
+     * @param[in] i_clear  Set true to clear the list [default=true]
+     */
+    void readAndClearCounter( uint32_t i_threshold,
+                              bool i_clear = true );
+
   protected:
     /**
      * @brief  Constructor, default TOC offsets to side A
@@ -205,6 +215,11 @@ class PnorRP
      *  constantly allocating new pages every time.  This is always 2 pages.
      */
     uint8_t iv_ecc_buffer[PNOR::PAGESIZE_PLUS_ECC];
+
+    /**
+     * Keep track of all page requests
+     */
+    std::map<uint64_t,uint32_t> iv_pageCounter;
 
     /**
      * @brief Initialize the daemon, called by constructor
