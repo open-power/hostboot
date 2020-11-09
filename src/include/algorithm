@@ -1050,6 +1050,28 @@ namespace std
         return max_length;
     }
 
+
+    /** Given a start and end iterator, accumulate return type T
+     *  starting with type T init value performing the BinaryFunction
+     *  func.
+     *
+     *  @param[in] first - The beginning of the range.
+     *  @param[in] last - The end of the range.
+     *  @param[in] init - Initial value for accumulation
+     *  @param[in] func - BinaryFunction to perform
+     *  @return - result of accumulating init with the
+     *            elements between first and last.
+     */
+    template<class InputIterator, class T, class BinaryFunction>
+    constexpr
+    T accumulate(InputIterator first, InputIterator last,
+                 T init, BinaryFunction func)
+    {
+        for (; first != last; ++first) {
+            init = func(move(init), *first);
+        }
+        return init;
+    }
 };
 #endif
 
