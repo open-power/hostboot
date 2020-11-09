@@ -149,48 +149,39 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                 #ifdef __HOSTBOOT_RUNTIME
                 using namespace stopImageSection;
 
-                // Update CORE/EQ Fir masks in HCODE image
-                TARGETING::TYPE type = PlatServices::getTargetType(i_target);
-                if( TYPE_EQ == type || TYPE_CORE == type )
+                static const std::vector<std::pair<uint32_t,uint32_t>> masks =
                 {
-                    uint32_t l_MaskReg[7] = {
-                                        0x20018605,   // EQ_L3_FIR_MASK_OR
-                                        0x20018645,   // EQ_NCU_FIR_MASK_OR
-                                        0x20028005,   // EQ_L2_FIR_MASK_OR
-                                        0x20028445,   // EQ_CORE_FIR_MASK_OR
-                                        0x20040105,   // EQ_LOCAL_FIR_MASK_OR
-                                        0x200E0006 }; // EQ_QME_FIR_MASK_OR
+                    {0x20018605, PROC_STOP_SECTION_CACHE},//EQ_L3_FIR_MASK_OR
+                    {0x20018645, PROC_STOP_SECTION_CACHE},//EQ_NCU_FIR_MASK_OR
+                    {0x20028005, PROC_STOP_SECTION_CACHE},//EQ_L2_FIR_MASK_OR
+                    {0x20028445, PROC_STOP_SECTION_CORE },//EQ_CORE_FIR_MASK_OR
+                    {0x20040105, PROC_STOP_SECTION_CACHE},//EQ_LOCAL_FIR_MASK_OR
+                    {0x200E0006, PROC_STOP_SECTION_CACHE},//EQ_QME_FIR_MASK_OR
+                };
 
-                    for(uint32_t l_count = 0; l_count < 7; l_count++)
+                // If this register updated the mask on a cache or core FIR,
+                // then update the value in the HCODE image.
+                for (const auto& mask : masks)
+                {
+                    if (registerId != mask.first) continue; // skip this reg
+
+                    uint64_t scomVal =
+                        (((uint64_t)bs.getFieldJustify(0, 32)) << 32) |
+                         ((uint64_t)bs.getFieldJustify(32, 32));
+
+                    errlHndl_t errl = RTPM::hcode_update(mask.second,
+                                                PROC_STOP_SCOM_OR_APPEND,
+                                                i_target, registerId, scomVal);
+                    if (nullptr != errl)
                     {
-                        if( l_MaskReg[l_count]  == registerId )
-                        {
-
-                            errlHndl_t err = nullptr;
-                            uint32_t sec = (TYPE_CORE == type) ?
-                                PROC_STOP_SECTION_CORE :
-                                PROC_STOP_SECTION_CACHE;
-
-                            uint64_t scomVal =
-                                (((uint64_t)bs.getFieldJustify(0, 32)) << 32) |
-                                 ((uint64_t)bs.getFieldJustify(32, 32));
-
-                            err = RTPM::hcode_update(sec,
-                                                     PROC_STOP_SCOM_OR_APPEND,
-                                                     i_target,
-                                                     registerId,
-                                                     scomVal);
-                            if( nullptr != err)
-                            {
-                                PRDF_ERR("[ScomAccessor::Access()] Error in"
-                                         " hcode_update");
-                                PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-                            }
-                            break;
-                        }
+                        PRDF_ERR("[ScomAccessor::Access()] hcode_update error");
+                        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
                     }
+
+                    break; // done searching
                 }
                 #endif
+
                 break;
             }
 
