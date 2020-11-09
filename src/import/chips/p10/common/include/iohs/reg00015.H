@@ -3164,107 +3164,107 @@ fapi_try_exit:
 }
 //<< GET_[NET_CTRL0_HTB_EXTEST]
 
-//>> SET_[NET_CTRL0_OOB_PROTECTION]
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.insertFromRight<NET_CTRL0_OOB_PROTECTION,
+    return o_data.insertFromRight<P10_20_NET_CTRL0_OOB_PROTECTION,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NET_CTRL0_OOB_PROTECTION]
+//<< SET_[P10_20_NET_CTRL0_OOB_PROTECTION]
 
-//>> SET_[NET_CTRL0_OOB_PROTECTION]
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_OOB_PROTECTION(const uint64_t i_data,
+//>> SET_[P10_20_NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NET_CTRL0_OOB_PROTECTION(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.insertFromRight<NET_CTRL0_OOB_PROTECTION,
+    return o_data.insertFromRight<P10_20_NET_CTRL0_OOB_PROTECTION,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NET_CTRL0_OOB_PROTECTION]
+//<< SET_[P10_20_NET_CTRL0_OOB_PROTECTION]
 
-//>> SET_[NET_CTRL0_OOB_PROTECTION]
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.setBit<NET_CTRL0_OOB_PROTECTION>();
+    return o_data.setBit<P10_20_NET_CTRL0_OOB_PROTECTION>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NET_CTRL0_OOB_PROTECTION]
+//<< SET_[P10_20_NET_CTRL0_OOB_PROTECTION]
 
-//>> CLEAR_[NET_CTRL0_OOB_PROTECTION]
-static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.clearBit<NET_CTRL0_OOB_PROTECTION>();
+    return o_data.clearBit<P10_20_NET_CTRL0_OOB_PROTECTION>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[NET_CTRL0_OOB_PROTECTION]
+//<< CLEAR_[P10_20_NET_CTRL0_OOB_PROTECTION]
 
-//>> GET_[NET_CTRL0_OOB_PROTECTION]
-static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_NET_CTRL0_OOB_PROTECTION]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return i_data.extractToRight<NET_CTRL0_OOB_PROTECTION,
+    return i_data.extractToRight<P10_20_NET_CTRL0_OOB_PROTECTION,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NET_CTRL0_OOB_PROTECTION]
+//<< GET_[P10_20_NET_CTRL0_OOB_PROTECTION]
 
-//>> GET_[NET_CTRL0_OOB_PROTECTION]
-static inline bool GET_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_NET_CTRL0_OOB_PROTECTION]
+static inline bool GET_P10_20_NET_CTRL0_OOB_PROTECTION(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return i_data.getBit<NET_CTRL0_OOB_PROTECTION>();
+    return i_data.getBit<P10_20_NET_CTRL0_OOB_PROTECTION>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_NET_CTRL0_OOB_PROTECTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NET_CTRL0_OOB_PROTECTION]
+//<< GET_[P10_20_NET_CTRL0_OOB_PROTECTION]
 
 //>> SET_[NET_CTRL0_PLLFORCE_OUT_EN]
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLLFORCE_OUT_EN(fapi2::buffer<uint64_t>& i_data,

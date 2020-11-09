@@ -190,8 +190,8 @@ static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_11 = 11;
 static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_12 = 12;
 static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_13 = 13;
 static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_14 = 14;
-static const uint32_t EC_PC_PMU_SPRCOR_HID_P10_64K_OPT = 15; // p10:20,
-static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID = 16; // p10:20,
+static const uint32_t P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT = 15; // p10:20,
+static const uint32_t P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID = 16; // p10:20,
 //<< [EC_PC_PMU_SPRCOR_HID]
 // c/reg00003.H
 

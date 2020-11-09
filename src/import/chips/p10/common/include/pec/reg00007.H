@@ -4373,107 +4373,107 @@ fapi_try_exit:
 }
 //<< GET_[SYNC_CONFIG_CONT_SCAN_SHORT_WAIT]
 
-//>> SET_[SYNC_CONFIG_PCIE32_MODE]
-static inline fapi2::buffer<uint64_t>& SET_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SYNC_CONFIG));
 #endif
-    return o_data.insertFromRight<SYNC_CONFIG_PCIE32_MODE,
+    return o_data.insertFromRight<P10_20_SYNC_CONFIG_PCIE32_MODE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_pec Invalid dial access SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_pec Invalid dial access P10_20_SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SYNC_CONFIG_PCIE32_MODE]
+//<< SET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
 
-//>> SET_[SYNC_CONFIG_PCIE32_MODE]
-static inline fapi2::buffer<uint64_t>& SET_SYNC_CONFIG_PCIE32_MODE(const uint64_t i_data,
+//>> SET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SYNC_CONFIG_PCIE32_MODE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SYNC_CONFIG));
 #endif
-    return o_data.insertFromRight<SYNC_CONFIG_PCIE32_MODE,
+    return o_data.insertFromRight<P10_20_SYNC_CONFIG_PCIE32_MODE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_pec Invalid dial access SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_pec Invalid dial access P10_20_SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SYNC_CONFIG_PCIE32_MODE]
+//<< SET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
 
-//>> SET_[SYNC_CONFIG_PCIE32_MODE]
-static inline fapi2::buffer<uint64_t>& SET_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SYNC_CONFIG));
 #endif
-    return o_data.setBit<SYNC_CONFIG_PCIE32_MODE>();
+    return o_data.setBit<P10_20_SYNC_CONFIG_PCIE32_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_pec Invalid dial access SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_pec Invalid dial access P10_20_SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SYNC_CONFIG_PCIE32_MODE]
+//<< SET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
 
-//>> CLEAR_[SYNC_CONFIG_PCIE32_MODE]
-static inline fapi2::buffer<uint64_t>& CLEAR_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SYNC_CONFIG_PCIE32_MODE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SYNC_CONFIG));
 #endif
-    return o_data.clearBit<SYNC_CONFIG_PCIE32_MODE>();
+    return o_data.clearBit<P10_20_SYNC_CONFIG_PCIE32_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_pec Invalid dial access SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_pec Invalid dial access P10_20_SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SYNC_CONFIG_PCIE32_MODE]
+//<< CLEAR_[P10_20_SYNC_CONFIG_PCIE32_MODE]
 
-//>> GET_[SYNC_CONFIG_PCIE32_MODE]
-static inline fapi2::buffer<uint64_t>& GET_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SYNC_CONFIG));
 #endif
-    return i_data.extractToRight<SYNC_CONFIG_PCIE32_MODE,
+    return i_data.extractToRight<P10_20_SYNC_CONFIG_PCIE32_MODE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_pec Invalid dial access SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_pec Invalid dial access P10_20_SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SYNC_CONFIG_PCIE32_MODE]
+//<< GET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
 
-//>> GET_[SYNC_CONFIG_PCIE32_MODE]
-static inline bool GET_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
+static inline bool GET_P10_20_SYNC_CONFIG_PCIE32_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SYNC_CONFIG));
 #endif
-    return i_data.getBit<SYNC_CONFIG_PCIE32_MODE>();
+    return i_data.getBit<P10_20_SYNC_CONFIG_PCIE32_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_pec Invalid dial access SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_pec Invalid dial access P10_20_SYNC_CONFIG_PCIE32_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SYNC_CONFIG_PCIE32_MODE]
+//<< GET_[P10_20_SYNC_CONFIG_PCIE32_MODE]
 
 //>> SET_[SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN]
 static inline fapi2::buffer<uint64_t>& SET_SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN(fapi2::buffer<uint64_t>& i_data,

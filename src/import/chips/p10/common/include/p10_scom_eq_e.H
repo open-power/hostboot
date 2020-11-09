@@ -139,10 +139,10 @@ static const uint64_t QME_CRCR = 0x200e0300ull;
 
 static const uint32_t QME_CRCR_COMPARE_VALUE = 0;
 static const uint32_t QME_CRCR_COMPARE_VALUE_LEN = 8;
-static const uint32_t QME_CRCR_OMPARE_VALUE = 0; // p10:20,
-static const uint32_t QME_CRCR_OMPARE_VALUE_LEN = 8;
-static const uint32_t QME_CRCR_R_TOGGLE_STEP = 8; // p10:20,
-static const uint32_t QME_CRCR_R_TOGGLE_SYNC = 9; // p10:20,
+static const uint32_t P10_20_QME_CRCR_OMPARE_VALUE = 0; // p10:20,
+static const uint32_t P10_20_QME_CRCR_OMPARE_VALUE_LEN = 8;
+static const uint32_t P10_20_QME_CRCR_R_TOGGLE_STEP = 8; // p10:20,
+static const uint32_t P10_20_QME_CRCR_R_TOGGLE_SYNC = 9; // p10:20,
 //<< [QME_CRCR]
 // eq/reg00014.H
 
@@ -191,7 +191,7 @@ static const uint32_t QME_LFIR_SPECIAL_WKUP_DONE_WINDOW = 18;
 static const uint32_t QME_LFIR_DISABLED_INTR = 19;
 static const uint32_t QME_LFIR_DECONFIGURED_INTR = 20;
 static const uint32_t QME_LFIR_RS4_TIMEOUT = 21;
-static const uint32_t QME_LFIR_MIXED_LPAR_ERROR = 21; // p10:20,
+static const uint32_t P10_20_QME_LFIR_MIXED_LPAR_ERROR = 21; // p10:20,
 static const uint32_t QME_LFIR_PB_DATA_HANG = 22;
 static const uint32_t QME_LFIR_WRITE_PROTECT_FAIL = 23;
 static const uint32_t QME_LFIR_DTC_ERROR = 24;
@@ -206,8 +206,8 @@ static const uint32_t QME_LFIR_PB_SSA_CE = 32;
 static const uint32_t QME_LFIR_PB_SSA_UE = 33;
 static const uint32_t QME_LFIR_SPARE1 = 34;
 static const uint32_t QME_LFIR_SPARE1_LEN = 2;
-static const uint32_t QME_LFIR_RESCLK_CCFG_PAR_ERR = 34; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t QME_LFIR_SPARE1 = 35; // p10:20,
+static const uint32_t P10_20_QME_LFIR_RESCLK_CCFG_PAR_ERR = 34; // p10:20,
+static const uint32_t P10_20_QME_LFIR_SPARE1 = 35; // p10:20,
 //<< [QME_LFIR]
 // eq/reg00014.H
 
@@ -228,39 +228,39 @@ static const uint32_t QME_PCBSII_QUAD_ID_LEN = 3;
 static const uint64_t SLAVE_CONFIG_REG = 0x200f001eull;
 
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_PERV_THOLD_CHECK = 0;
-static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK = 0; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK = 0; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_MALF_PULSE_GEN = 1;
-static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN = 1; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN = 1; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_STOP_HANG_CNT_SYS_XSTP = 2;
-static const uint32_t SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP = 2; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP = 2; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_CL_ATOMIC_LOCK = 3;
-static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK = 3; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK = 3; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_HEARTBEAT = 4;
-static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT = 4; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT = 4; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_FORCE_TO_ZERO = 5;
-static const uint32_t SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO = 5; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO = 5; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_PM_DISABLE = 6;
-static const uint32_t SLAVE_CONFIG_REG_CFG_PM_DISABLE = 6; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE = 6; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_PM_MUX_DISABLE = 7;
-static const uint32_t SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE = 7; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE = 7; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_REG_PARITY_ERRS = 8;
-static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS = 8; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS = 8; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCB_IF_ERRS = 9;
-static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS = 9; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS = 9; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
-static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS = 10; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS = 10; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
-static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS = 11; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS = 11; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
-static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS = 12; // p10:20,
-static const uint32_t SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN = 8;
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS = 12; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN = 8;
 static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
-static const uint32_t SLAVE_CONFIG_REG_CFG_QME_PAR_DIS = 20; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS = 20; // p10:20,
 static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
-static const uint32_t SLAVE_CONFIG_REG_CFG_FORCE_0_QME = 21; // p10:20,
-static const uint32_t SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE = 22; // p10:20,
-static const uint32_t SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE = 23; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME = 21; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE = 22; // p10:20,
+static const uint32_t P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE = 23; // p10:20,
 //<< [SLAVE_CONFIG_REG]
 // eq/reg00014.H
 

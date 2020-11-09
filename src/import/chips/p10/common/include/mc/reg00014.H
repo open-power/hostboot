@@ -8778,8 +8778,8 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_DISABLE_PERV_THOLD_CHECK]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -8787,74 +8787,74 @@ static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THO
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(const uint64_t i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK>();
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -8862,33 +8862,33 @@ static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THO
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK]
 
 //>> SET_[SLAVE_CONFIG_REG_DISABLE_MALF_PULSE_GEN]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_DISABLE_MALF_PULSE_GEN(fapi2::buffer<uint64_t>& i_data,
@@ -8998,114 +8998,117 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_DISABLE_MALF_PULSE_GEN]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
-
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
-
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
-
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN>();
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_MALF_PULSE_GEN]
 
 //>> SET_[SLAVE_CONFIG_REG_STOP_HANG_CNT_SYS_XSTP]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_STOP_HANG_CNT_SYS_XSTP(fapi2::buffer<uint64_t>& i_data,
@@ -9215,114 +9218,117 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_STOP_HANG_CNT_SYS_XSTP]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
-
-//>> SET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
-
-//>> SET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
-
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP>();
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_STOP_HANG_CNT_SYS_XSTP]
 
 //>> SET_[SLAVE_CONFIG_REG_DISABLE_CL_ATOMIC_LOCK]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_DISABLE_CL_ATOMIC_LOCK(fapi2::buffer<uint64_t>& i_data,
@@ -9432,114 +9438,117 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_DISABLE_CL_ATOMIC_LOCK]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
-
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
-
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
-
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK>();
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_CL_ATOMIC_LOCK]
 
 //>> SET_[SLAVE_CONFIG_REG_DISABLE_HEARTBEAT]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_DISABLE_HEARTBEAT(fapi2::buffer<uint64_t>& i_data,
@@ -9643,113 +9652,117 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_DISABLE_HEARTBEAT]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT,
-           1>(i_data);
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
-
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_HEARTBEAT]
 
 //>> SET_[SLAVE_CONFIG_REG_DISABLE_FORCE_TO_ZERO]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_DISABLE_FORCE_TO_ZERO(fapi2::buffer<uint64_t>& i_data,
@@ -9859,113 +9872,117 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_DISABLE_FORCE_TO_ZERO]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO,
-           1>(i_data);
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
-
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_DISABLE_FORCE_TO_ZERO]
 
 //>> SET_[SLAVE_CONFIG_REG_PM_DISABLE]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_PM_DISABLE(fapi2::buffer<uint64_t>& i_data,
@@ -10069,107 +10086,113 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_PM_DISABLE]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_PM_DISABLE,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_PM_DISABLE(const uint64_t i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_PM_DISABLE,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_PM_DISABLE>();
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_PM_DISABLE>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_PM_DISABLE,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_PM_DISABLE>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_PM_DISABLE]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_DISABLE]
 
 //>> SET_[SLAVE_CONFIG_REG_PM_MUX_DISABLE]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& i_data,
@@ -10273,107 +10296,113 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_PM_MUX_DISABLE]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(const uint64_t i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE>();
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE]
 
 //>> SET_[SLAVE_CONFIG_REG_MASK_REG_PARITY_ERRS]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_REG_PARITY_ERRS(fapi2::buffer<uint64_t>& i_data,
@@ -10483,113 +10512,117 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_MASK_REG_PARITY_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS,
-           1>(i_data);
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
-
-//>> GET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_REG_PARITY_ERRS]
 
 //>> SET_[SLAVE_CONFIG_REG_MASK_PCB_IF_ERRS]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& i_data,
@@ -10693,113 +10726,114 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_MASK_PCB_IF_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(const uint64_t i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS>();
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCB_IF_ERRS]
 
 //>> SET_[SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS(fapi2::buffer<uint64_t>& i_data,
@@ -10903,113 +10937,117 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
+#endif
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS,
-           1>(i_data);
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
-
-//>> GET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
-#endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_HEARTBEAT_ERRS]
 
 //>> SET_[SLAVE_CONFIG_REG_MASK_PCBSL_ERRS]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& i_data,
@@ -11113,107 +11151,114 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_MASK_PCBSL_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(const uint64_t i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS>();
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PCBSL_ERRS]
 
 //>> SET_[SLAVE_CONFIG_REG_MASK_PLL_ERRS]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_PLL_ERRS(fapi2::buffer<uint64_t>& i_data,
@@ -11269,59 +11314,62 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_MASK_PLL_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
-           SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
+           P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS(const uint64_t i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
-           SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
+           P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
-           SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN>(o_data);
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
+           P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS]
 
 //>> SET_[SLAVE_CONFIG_REG_QME_PAR_DIS]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data,
@@ -11425,107 +11473,113 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_QME_PAR_DIS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_QME_PAR_DIS,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(const uint64_t i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_QME_PAR_DIS,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_QME_PAR_DIS>();
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_QME_PAR_DIS>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_QME_PAR_DIS,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_QME_PAR_DIS>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_QME_PAR_DIS]
 
 //>> SET_[SLAVE_CONFIG_REG_FORCE_0_QME]
 static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data,
@@ -11629,110 +11683,116 @@ fapi_try_exit:
 }
 //<< GET_[SLAVE_CONFIG_REG_FORCE_0_QME]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_FORCE_0_QME,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(const uint64_t i_data,
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_CFG_FORCE_0_QME,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
 
-//>> SET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_CFG_FORCE_0_QME>();
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_CFG_FORCE_0_QME>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_CFG_FORCE_0_QME,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
 
-//>> GET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
-static inline bool GET_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_CFG_FORCE_0_QME>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_CFG_FORCE_0_QME]
 
-//>> SET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11740,19 +11800,19 @@ static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> SET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11760,55 +11820,55 @@ static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> SET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE>();
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> GET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> GET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -11816,36 +11876,36 @@ static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> GET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline bool GET_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> SET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11853,19 +11913,19 @@ static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> SET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11873,55 +11933,55 @@ static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.insertFromRight<SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE,
+    return o_data.insertFromRight<P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> SET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& SET_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.setBit<SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE>();
+    return o_data.setBit<P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< SET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> CLEAR_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& CLEAR_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> CLEAR_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return o_data.clearBit<SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE>();
+    return o_data.clearBit<P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< CLEAR_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> GET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
+//>> GET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -11929,33 +11989,34 @@ static inline fapi2::buffer<uint64_t>& GET_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.extractToRight<SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE,
+    return i_data.extractToRight<P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
 
-//>> GET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
-static inline bool GET_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+static inline bool GET_P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE(
+    fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SLAVE_CONFIG_REG));
 #endif
-    return i_data.getBit<SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE>();
+    return i_data.getBit<P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
+//<< GET_[P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE]
 
 //>> PREP_[XSTOP2]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

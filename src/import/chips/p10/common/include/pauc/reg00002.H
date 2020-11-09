@@ -7954,113 +7954,117 @@ fapi_try_exit:
 }
 //<< GET_[PHY_SCOM_MAC_FIR_REG_PPE_CODE_7]
 
-//>> SET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PHY_SCOM_MAC_FIR_REG_RW, PHY_SCOM_MAC_FIR_REG_WO_AND, PHY_SCOM_MAC_FIR_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_pauc Invalid dial access P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+
+//>> SET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(PHY_SCOM_MAC_FIR_REG_RW, PHY_SCOM_MAC_FIR_REG_WO_AND, PHY_SCOM_MAC_FIR_REG_WO_OR));
 #endif
-    return o_data.insertFromRight<PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR,
+    return o_data.insertFromRight<P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_pauc Invalid dial access PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_pauc Invalid dial access P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+//<< SET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
 
-//>> SET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(PHY_SCOM_MAC_FIR_REG_RW, PHY_SCOM_MAC_FIR_REG_WO_AND, PHY_SCOM_MAC_FIR_REG_WO_OR));
 #endif
-    return o_data.insertFromRight<PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR,
-           1>(i_data);
+    return o_data.setBit<P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_pauc Invalid dial access PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_pauc Invalid dial access P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+//<< SET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
 
-//>> SET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(PHY_SCOM_MAC_FIR_REG_RW, PHY_SCOM_MAC_FIR_REG_WO_AND, PHY_SCOM_MAC_FIR_REG_WO_OR));
 #endif
-    return o_data.setBit<PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR>();
+    return o_data.clearBit<P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_pauc Invalid dial access PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_pauc Invalid dial access P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+//<< CLEAR_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
 
-//>> CLEAR_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(PHY_SCOM_MAC_FIR_REG_RW, PHY_SCOM_MAC_FIR_REG_WO_AND, PHY_SCOM_MAC_FIR_REG_WO_OR));
 #endif
-    return o_data.clearBit<PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_pauc Invalid dial access PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
-
-//>> GET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(PHY_SCOM_MAC_FIR_REG_RW, PHY_SCOM_MAC_FIR_REG_WO_AND, PHY_SCOM_MAC_FIR_REG_WO_OR));
-#endif
-    return i_data.extractToRight<PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR,
+    return i_data.extractToRight<P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_pauc Invalid dial access PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_pauc Invalid dial access P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+//<< GET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
 
-//>> GET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
-static inline bool GET_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+static inline bool GET_P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(PHY_SCOM_MAC_FIR_REG_RW, PHY_SCOM_MAC_FIR_REG_WO_AND, PHY_SCOM_MAC_FIR_REG_WO_OR));
 #endif
-    return i_data.getBit<PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR>();
+    return i_data.getBit<P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_pauc Invalid dial access PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_pauc Invalid dial access P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
+//<< GET_[P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR]
 
 //>> PREP_[SPATTN]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

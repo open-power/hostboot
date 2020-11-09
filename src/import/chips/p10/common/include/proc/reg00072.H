@@ -3849,8 +3849,8 @@ fapi_try_exit:
 }
 //<< GET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK]
 
-//>> SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(
+//>> SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3859,19 +3859,19 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERF
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return o_data.insertFromRight<TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK,
+    return o_data.insertFromRight<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+//<< SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
 
-//>> SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(const uint64_t i_data,
+//>> SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -3879,19 +3879,19 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERF
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return o_data.insertFromRight<TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK,
+    return o_data.insertFromRight<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+//<< SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
 
-//>> SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(
+//>> SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -3899,18 +3899,18 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERF
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return o_data.setBit<TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK>();
+    return o_data.setBit<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+//<< SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
 
-//>> CLEAR_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
-static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(
+//>> CLEAR_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -3918,18 +3918,18 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVE
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return o_data.clearBit<TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK>();
+    return o_data.clearBit<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+//<< CLEAR_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
 
-//>> GET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
-static inline fapi2::buffer<uint64_t>& GET_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(
+//>> GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -3938,37 +3938,37 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERF
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return i_data.extractToRight<TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK,
+    return i_data.extractToRight<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+//<< GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
 
-//>> GET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
-static inline bool GET_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+static inline bool GET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return i_data.getBit<TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK>();
+    return i_data.getBit<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
+//<< GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_HTM_OVERFLOW_MASK]
 
-//>> SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(
+//>> SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3977,39 +3977,20 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_T
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return o_data.insertFromRight<TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK,
+    return o_data.insertFromRight<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+//<< SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
 
-//>> SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
-                           TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
-#endif
-    return o_data.insertFromRight<TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
-
-//>> SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(
+//>> SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -4017,18 +3998,19 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_T
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return o_data.setBit<TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK>();
+    return o_data.insertFromRight<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+//<< SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
 
-//>> CLEAR_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
-static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(
+//>> SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -4036,18 +4018,37 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return o_data.clearBit<TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK>();
+    return o_data.setBit<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+//<< SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
 
-//>> GET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
-static inline fapi2::buffer<uint64_t>& GET_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(
+//>> CLEAR_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
+                           TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
+#endif
+    return o_data.clearBit<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+
+//>> GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -4056,34 +4057,96 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_T
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return i_data.extractToRight<TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK,
+    return i_data.extractToRight<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+//<< GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
 
-//>> GET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
-static inline bool GET_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+static inline bool GET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
                            TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
 #endif
-    return i_data.getBit<TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK>();
+    return i_data.getBit<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_proc Invalid dial access TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+//<< GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_INVALID_TOPOLOGY_ID_MASK]
+
+//>> SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
+                           TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
+#endif
+    return o_data.insertFromRight<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK,
+           P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK]
+
+//>> SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
+                           TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
+#endif
+    return o_data.insertFromRight<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK,
+           P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK]
+
+//>> GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PBA_PBAO_PBAFIRMASK_RW, TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_AND,
+                           TP_TPBR_PBA_PBAO_PBAFIRMASK_WO_OR));
+#endif
+    return i_data.extractToRight<P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK,
+           P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_TP_TPBR_PBA_PBAO_PBAFIRMASK_RESERVED_MASK]
 
 //>> PREP_[TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISGBL]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

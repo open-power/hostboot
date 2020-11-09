@@ -156,7 +156,7 @@ static const uint32_t PHY_SCOM_MAC_FIR_REG_PPE_CODE_RECAL_NOT_RUN = 22;
 static const uint32_t PHY_SCOM_MAC_FIR_REG_PPE_CODE_THREAD_LOCKED = 23;
 static const uint32_t PHY_SCOM_MAC_FIR_REG_PPE_CODE_6 = 24;
 static const uint32_t PHY_SCOM_MAC_FIR_REG_PPE_CODE_7 = 25;
-static const uint32_t PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR = 26; // p10:20,
+static const uint32_t P10_20_PHY_SCOM_MAC_FIR_REG_SCOMFIR_PARITY_ERROR = 26; // p10:20,
 //<< [PHY_SCOM_MAC_FIR_REG]
 // pauc/reg00002.H
 

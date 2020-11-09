@@ -4050,6 +4050,65 @@ fapi_try_exit:
 }
 //<< GET_[PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS]
 
+//>> SET_[P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_ARB_CSAR));
+#endif
+    return o_data.insertFromRight<P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS,
+           P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_pauc Invalid dial access P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS]
+
+//>> SET_[P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_ARB_CSAR));
+#endif
+    return o_data.insertFromRight<P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS,
+           P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_pauc Invalid dial access P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS]
+
+//>> GET_[P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_ARB_CSAR));
+#endif
+    return i_data.extractToRight<P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS,
+           P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_pauc Invalid dial access P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

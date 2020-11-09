@@ -372,107 +372,107 @@ fapi_try_exit:
 }
 //<< GET_[RESET_REG_TIMEOUT_RESET_EN]
 
-//>> SET_[RESET_REG_QUIESCE_PCB]
-static inline fapi2::buffer<uint64_t>& SET_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_RESET_REG_QUIESCE_PCB]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(RESET_REG));
 #endif
-    return o_data.insertFromRight<RESET_REG_QUIESCE_PCB,
+    return o_data.insertFromRight<P10_20_RESET_REG_QUIESCE_PCB,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_perv Invalid dial access RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[RESET_REG_QUIESCE_PCB]
+//<< SET_[P10_20_RESET_REG_QUIESCE_PCB]
 
-//>> SET_[RESET_REG_QUIESCE_PCB]
-static inline fapi2::buffer<uint64_t>& SET_RESET_REG_QUIESCE_PCB(const uint64_t i_data,
+//>> SET_[P10_20_RESET_REG_QUIESCE_PCB]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_RESET_REG_QUIESCE_PCB(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(RESET_REG));
 #endif
-    return o_data.insertFromRight<RESET_REG_QUIESCE_PCB,
+    return o_data.insertFromRight<P10_20_RESET_REG_QUIESCE_PCB,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_perv Invalid dial access RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[RESET_REG_QUIESCE_PCB]
+//<< SET_[P10_20_RESET_REG_QUIESCE_PCB]
 
-//>> SET_[RESET_REG_QUIESCE_PCB]
-static inline fapi2::buffer<uint64_t>& SET_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_RESET_REG_QUIESCE_PCB]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(RESET_REG));
 #endif
-    return o_data.setBit<RESET_REG_QUIESCE_PCB>();
+    return o_data.setBit<P10_20_RESET_REG_QUIESCE_PCB>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_perv Invalid dial access RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_perv Invalid dial access P10_20_RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[RESET_REG_QUIESCE_PCB]
+//<< SET_[P10_20_RESET_REG_QUIESCE_PCB]
 
-//>> CLEAR_[RESET_REG_QUIESCE_PCB]
-static inline fapi2::buffer<uint64_t>& CLEAR_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_RESET_REG_QUIESCE_PCB]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(RESET_REG));
 #endif
-    return o_data.clearBit<RESET_REG_QUIESCE_PCB>();
+    return o_data.clearBit<P10_20_RESET_REG_QUIESCE_PCB>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_perv Invalid dial access RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_perv Invalid dial access P10_20_RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[RESET_REG_QUIESCE_PCB]
+//<< CLEAR_[P10_20_RESET_REG_QUIESCE_PCB]
 
-//>> GET_[RESET_REG_QUIESCE_PCB]
-static inline fapi2::buffer<uint64_t>& GET_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_RESET_REG_QUIESCE_PCB]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(RESET_REG));
 #endif
-    return i_data.extractToRight<RESET_REG_QUIESCE_PCB,
+    return i_data.extractToRight<P10_20_RESET_REG_QUIESCE_PCB,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_perv Invalid dial access RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[RESET_REG_QUIESCE_PCB]
+//<< GET_[P10_20_RESET_REG_QUIESCE_PCB]
 
-//>> GET_[RESET_REG_QUIESCE_PCB]
-static inline bool GET_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_RESET_REG_QUIESCE_PCB]
+static inline bool GET_P10_20_RESET_REG_QUIESCE_PCB(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(RESET_REG));
 #endif
-    return i_data.getBit<RESET_REG_QUIESCE_PCB>();
+    return i_data.getBit<P10_20_RESET_REG_QUIESCE_PCB>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_perv Invalid dial access RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_perv Invalid dial access P10_20_RESET_REG_QUIESCE_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[RESET_REG_QUIESCE_PCB]
+//<< GET_[P10_20_RESET_REG_QUIESCE_PCB]
 
 //>> PREP_[TOD_MISC_RESET_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
@@ -4289,62 +4289,123 @@ fapi_try_exit:
 }
 //<< GET_[TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_31]
 
-//>> SET_[TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
-static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
+#endif
+    return o_data.insertFromRight<P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29,
+           P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
+
+//>> SET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
 #endif
-    return o_data.insertFromRight<TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29,
-           TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29,
+           P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_perv Invalid dial access TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
+//<< SET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
 
-//>> SET_[TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
-static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
 #endif
-    return o_data.insertFromRight<TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29,
-           TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29_LEN>(i_data);
+    return i_data.extractToRight<P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29,
+           P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_perv Invalid dial access TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
-
-//>> GET_[TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
-static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
-#endif
-    return i_data.extractToRight<TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29,
-           TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_perv Invalid dial access TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
+//<< GET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29]
+
+//>> SET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
+#endif
+    return o_data.insertFromRight<P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE,
+           P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE]
+
+//>> SET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
+#endif
+    return o_data.insertFromRight<P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE,
+           P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE]
+
+//>> GET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
+#endif
+    return i_data.extractToRight<P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE,
+           P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE]
 
 //>> SET_[TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE]
 static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE(
@@ -4352,7 +4413,7 @@ static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
 #endif
     return o_data.insertFromRight<TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE,
@@ -4371,7 +4432,7 @@ static inline fapi2::buffer<uint64_t>& SET_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
 #endif
     return o_data.insertFromRight<TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE,
@@ -4391,7 +4452,7 @@ static inline fapi2::buffer<uint64_t>& GET_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DE
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(TOD_SEC_PORT_0_CTRL_REG));
 #endif
     return i_data.extractToRight<TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE,

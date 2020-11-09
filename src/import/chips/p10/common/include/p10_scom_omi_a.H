@@ -46,10 +46,10 @@ static const uint32_t ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO = 1;
 static const uint32_t ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO_LEN = 63;
 static const uint32_t ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO = 1;
 static const uint32_t ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO_LEN = 63;
-// ERROR Duplicate Dial         static const uint32_t ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO = 1; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO_LEN = 7;
-// ERROR Duplicate Dial         static const uint32_t ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO = 1; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO_LEN = 7;
+static const uint32_t P10_20_ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO = 1; // p10:20,
+static const uint32_t P10_20_ERROR_CAPTURE_DL0_ERROR_CAPTURE_INFO_LEN = 7;
+static const uint32_t P10_20_ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO = 1; // p10:20,
+static const uint32_t P10_20_ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO_LEN = 7;
 //<< [ERROR_CAPTURE]
 // omi/reg00020.H
 

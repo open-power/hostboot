@@ -50,10 +50,10 @@ static const uint32_t CPMS_CERRMSK_PROXY_MASK = 4;
 static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK = 5;
 static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK_LEN = 3;
 static const uint32_t CPMS_CERRMSK_PITCH_MASK = 8;
-static const uint32_t CPMS_CERRMSK_CCFG_PARITY_MASK = 9; // p10:20,
-static const uint32_t CPMS_CERRMSK_RVRM_DROPOUT_MASK = 10; // p10:20,
-static const uint32_t CPMS_CERRMSK_PITCH_UPDATE_MASK = 11; // p10:20,
-static const uint32_t CPMS_CERRMSK_SPARE_MASK = 12; // p10:20,
+static const uint32_t P10_20_CPMS_CERRMSK_CCFG_PARITY_MASK = 9; // p10:20,
+static const uint32_t P10_20_CPMS_CERRMSK_RVRM_DROPOUT_MASK = 10; // p10:20,
+static const uint32_t P10_20_CPMS_CERRMSK_PITCH_UPDATE_MASK = 11; // p10:20,
+static const uint32_t P10_20_CPMS_CERRMSK_SPARE_MASK = 12; // p10:20,
 //<< [CPMS_CERRMSK]
 // c/reg00007.H
 
@@ -83,9 +83,9 @@ static const uint32_t EC_PC_FIR_HOLD_OUT_SD_LOG_XSTOP_HOLD_OUT = 19;
 static const uint32_t EC_PC_FIR_HOLD_OUT_XSTOP_ON_DBG_TRIGGER_HOLD_OUT = 20;
 static const uint32_t EC_PC_FIR_HOLD_OUT_RECONFIG_ERR_DURING_RAM_MODE_HOLD_OUT = 21;
 static const uint32_t EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT = 22;
-static const uint32_t EC_PC_FIR_HOLD_OUT_SPR_SCOM_HOLD_OUT = 23; // p10:20,
-static const uint32_t EC_PC_FIR_HOLD_OUT_TRACE1_SCOM_HOLD_OUT = 24; // p10:20,
-static const uint32_t EC_PC_FIR_HOLD_OUT_TRACE2_SCOM_HOLD_OUT = 25; // p10:20,
+static const uint32_t P10_20_EC_PC_FIR_HOLD_OUT_SPR_SCOM_HOLD_OUT = 23; // p10:20,
+static const uint32_t P10_20_EC_PC_FIR_HOLD_OUT_TRACE1_SCOM_HOLD_OUT = 24; // p10:20,
+static const uint32_t P10_20_EC_PC_FIR_HOLD_OUT_TRACE2_SCOM_HOLD_OUT = 25; // p10:20,
 //<< [EC_PC_FIR_HOLD_OUT]
 // c/reg00007.H
 
@@ -232,7 +232,7 @@ static const uint32_t QME_SCSR_CHTM_PURGE_REQ = 11;
 static const uint32_t QME_SCSR_PB_PURGE_REQ = 12;
 static const uint32_t QME_SCSR_CORE_QUIESCE = 13;
 static const uint32_t QME_SCSR_SPARE_MODE = 14;
-static const uint32_t QME_SCSR_REG_WKUP_FILTER_DIS = 14; // p10:20,
+static const uint32_t P10_20_QME_SCSR_REG_WKUP_FILTER_DIS = 14; // p10:20,
 static const uint32_t QME_SCSR_SRESET_REQ = 15;
 static const uint32_t QME_SCSR_ASSERT_SPECIAL_WKUP_DONE = 16;
 static const uint32_t QME_SCSR_SPARE_OUT = 17;
@@ -246,8 +246,8 @@ static const uint32_t QME_SCSR_BLOCK_INTR_OUTPUTS = 24;
 static const uint32_t QME_SCSR_BLOCK_INTR_INPUTS = 25;
 static const uint32_t QME_SCSR_ENABLE_PECE = 26;
 static const uint32_t QME_SCSR_CTFS_WKUP_ENABLE = 27;
-static const uint32_t QME_SCSR_PC_COPY_FUSED_SPRS = 28; // p10:20,
-static const uint32_t QME_SCSR_SINGLE_LPAR_MODE = 31; // p10:20,
+static const uint32_t P10_20_QME_SCSR_PC_COPY_FUSED_SPRS = 28; // p10:20,
+static const uint32_t P10_20_QME_SCSR_SINGLE_LPAR_MODE = 31; // p10:20,
 static const uint32_t QME_SCSR_PM_BLOCK_INTR = 32;
 static const uint32_t QME_SCSR_PM_EXIT = 33;
 static const uint32_t QME_SCSR_PM_ENTRY_LIMIT = 34;
@@ -255,7 +255,7 @@ static const uint32_t QME_SCSR_PC_SPARE_IN = 35;
 static const uint32_t QME_SCSR_HBUS_INACTIVE = 36;
 static const uint32_t QME_SCSR_L2_PURGE_DONE = 37;
 static const uint32_t QME_SCSR_NCU_PURGE_DONE = 41;
-static const uint32_t QME_SCSR_PC_FUSED_COPY_DONE = 42; // p10:20,
+static const uint32_t P10_20_QME_SCSR_PC_FUSED_COPY_DONE = 42; // p10:20,
 static const uint32_t QME_SCSR_CHTM_PURGE_DONE = 43;
 static const uint32_t QME_SCSR_PB_PURGE_DONE = 44;
 static const uint32_t QME_SCSR_CORE_QUIESCED = 45;

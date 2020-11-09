@@ -104,8 +104,8 @@ static const uint64_t PHY_PPE_WRAP_ARB_CSAR = 0x10012c0dull;
 
 static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 15;
 static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 14;
-// ERROR Duplicate Dial         static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 16; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 13;
+static const uint32_t P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 16; // p10:20,
+static const uint32_t P10_20_PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 13;
 //<< [PHY_PPE_WRAP_ARB_CSAR]
 // pauc/reg00006.H
 

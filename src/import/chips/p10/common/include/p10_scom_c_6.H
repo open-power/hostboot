@@ -53,10 +53,10 @@ static const uint32_t CPMS_CERR_PROXY_UNDERFLOW = 7;
 static const uint32_t CPMS_CERR_PITCH_SATURATED = 8;
 static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT = 9;
 static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT_LEN = 3;
-static const uint32_t CPMS_CERR_CCFG_PARITY_ERR = 12; // p10:20,
-static const uint32_t CPMS_CERR_RVRM_DROPOUT = 13; // p10:20,
-static const uint32_t CPMS_CERR_PITCH_UPDATE_ERR = 14; // p10:20,
-static const uint32_t CPMS_CERR_SPARE_ERR = 15; // p10:20,
+static const uint32_t P10_20_CPMS_CERR_CCFG_PARITY_ERR = 12; // p10:20,
+static const uint32_t P10_20_CPMS_CERR_RVRM_DROPOUT = 13; // p10:20,
+static const uint32_t P10_20_CPMS_CERR_PITCH_UPDATE_ERR = 14; // p10:20,
+static const uint32_t P10_20_CPMS_CERR_SPARE_ERR = 15; // p10:20,
 //<< [CPMS_CERR]
 // c/reg00006.H
 

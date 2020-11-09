@@ -159,7 +159,7 @@ static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
 // ERROR Duplicate Dial         static const uint32_t NET_CTRL0_PM_ACCESS = 30;
-static const uint32_t NET_CTRL0_OOB_PROTECTION = 30; // p10:20,
+static const uint32_t P10_20_NET_CTRL0_OOB_PROTECTION = 30; // p10:20,
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
 //<< [NET_CTRL0]
 // pauc/reg00003.H

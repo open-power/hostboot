@@ -3850,107 +3850,113 @@ fapi_try_exit:
 }
 //<< GET_[SCOMFIR_MCMODE0_RESERVED_4]
 
-//>> SET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR,
+    return o_data.insertFromRight<P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+//<< SET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
 
-//>> SET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(const uint64_t i_data,
+//>> SET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR,
+    return o_data.insertFromRight<P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+//<< SET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
 
-//>> SET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return o_data.setBit<SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR>();
+    return o_data.setBit<P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+//<< SET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
 
-//>> CLEAR_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
-static inline fapi2::buffer<uint64_t>& CLEAR_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return o_data.clearBit<SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR>();
+    return o_data.clearBit<P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+//<< CLEAR_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
 
-//>> GET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
-static inline fapi2::buffer<uint64_t>& GET_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return i_data.extractToRight<SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR,
+    return i_data.extractToRight<P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+//<< GET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
 
-//>> GET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
-static inline bool GET_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+static inline bool GET_P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return i_data.getBit<SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR>();
+    return i_data.getBit<P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
+//<< GET_[P10_20_SCOMFIR_MCMODE0_USE_BIT14_AS_DSADDR]
 
 //>> SET_[SCOMFIR_MCMODE0_FORCE_COMMANDLIST_VALID]
 static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE0_FORCE_COMMANDLIST_VALID(fapi2::buffer<uint64_t>& i_data,
@@ -4662,107 +4668,113 @@ fapi_try_exit:
 }
 //<< GET_[SCOMFIR_MCMODE0_RESERVED_11]
 
-//>> SET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCMODE0_HWFM_PERMANENT,
+    return o_data.insertFromRight<P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
+//<< SET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
 
-//>> SET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE0_HWFM_PERMANENT(const uint64_t i_data,
+//>> SET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCMODE0_HWFM_PERMANENT,
+    return o_data.insertFromRight<P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
+//<< SET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
 
-//>> SET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return o_data.setBit<SCOMFIR_MCMODE0_HWFM_PERMANENT>();
+    return o_data.setBit<P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mc Invalid dial access SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
+//<< SET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
 
-//>> CLEAR_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
-static inline fapi2::buffer<uint64_t>& CLEAR_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return o_data.clearBit<SCOMFIR_MCMODE0_HWFM_PERMANENT>();
+    return o_data.clearBit<P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mc Invalid dial access SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
+//<< CLEAR_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
 
-//>> GET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
-static inline fapi2::buffer<uint64_t>& GET_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return i_data.extractToRight<SCOMFIR_MCMODE0_HWFM_PERMANENT,
+    return i_data.extractToRight<P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
+//<< GET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
 
-//>> GET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
-static inline bool GET_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
+static inline bool GET_P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE0));
 #endif
-    return i_data.getBit<SCOMFIR_MCMODE0_HWFM_PERMANENT>();
+    return i_data.getBit<P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mc Invalid dial access SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SCOMFIR_MCMODE0_HWFM_PERMANENT]
+//<< GET_[P10_20_SCOMFIR_MCMODE0_HWFM_PERMANENT]
 
 //>> SET_[SCOMFIR_MCMODE0_DISABLE_MC_SYNC]
 static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE0_DISABLE_MC_SYNC(fapi2::buffer<uint64_t>& i_data,

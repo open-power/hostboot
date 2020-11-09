@@ -6439,8 +6439,8 @@ fapi_try_exit:
 }
 //<< GET_[USTL_USTLFIR_SPARE_61]
 
-//>> SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+//>> SET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6448,74 +6448,75 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.insertFromRight<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR,
+    return o_data.insertFromRight<P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("0:scom_mcc Invalid dial access P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+//<< SET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
 
-//>> SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
-#endif
-    return o_data.insertFromRight<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
-
-//>> SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+//>> SET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.setBit<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR>();
+    return o_data.insertFromRight<P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("1:scom_mcc Invalid dial access P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+//<< SET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
 
-//>> CLEAR_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+//>> SET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.clearBit<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR>();
+    return o_data.setBit<P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("2:scom_mcc Invalid dial access P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+//<< SET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
 
-//>> GET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+//>> CLEAR_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
+#endif
+    return o_data.clearBit<P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_mcc Invalid dial access P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+
+//>> GET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -6523,33 +6524,33 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return i_data.extractToRight<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR,
+    return i_data.extractToRight<P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("4:scom_mcc Invalid dial access P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+//<< GET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
 
-//>> GET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
-static inline bool GET_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+static inline bool GET_P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return i_data.getBit<USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR>();
+    return i_data.getBit<P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mcc Invalid dial access USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("5:scom_mcc Invalid dial access P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
+//<< GET_[P10_20_USTL_USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR]
 
 //>>THE END<<
 

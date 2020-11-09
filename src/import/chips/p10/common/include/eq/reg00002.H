@@ -5639,263 +5639,263 @@ fapi_try_exit:
 }
 //<< GET_[QME_EISR_DOORBELL_A]
 
-//>> SET_[QME_EISR_DOORBELL_3]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_QME_EISR_DOORBELL_3]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.insertFromRight<QME_EISR_DOORBELL_3,
+    return o_data.insertFromRight<P10_20_QME_EISR_DOORBELL_3,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_eq Invalid dial access QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_DOORBELL_3]
+//<< SET_[P10_20_QME_EISR_DOORBELL_3]
 
-//>> SET_[QME_EISR_DOORBELL_3]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_DOORBELL_3(const uint64_t i_data,
+//>> SET_[P10_20_QME_EISR_DOORBELL_3]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_DOORBELL_3(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.insertFromRight<QME_EISR_DOORBELL_3,
+    return o_data.insertFromRight<P10_20_QME_EISR_DOORBELL_3,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_eq Invalid dial access QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_DOORBELL_3]
+//<< SET_[P10_20_QME_EISR_DOORBELL_3]
 
-//>> SET_[QME_EISR_DOORBELL_3]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_QME_EISR_DOORBELL_3]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.setBit<QME_EISR_DOORBELL_3>();
+    return o_data.setBit<P10_20_QME_EISR_DOORBELL_3>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_eq Invalid dial access QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_DOORBELL_3]
+//<< SET_[P10_20_QME_EISR_DOORBELL_3]
 
-//>> CLEAR_[QME_EISR_DOORBELL_3]
-static inline fapi2::buffer<uint64_t>& CLEAR_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_QME_EISR_DOORBELL_3]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.clearBit<QME_EISR_DOORBELL_3>();
+    return o_data.clearBit<P10_20_QME_EISR_DOORBELL_3>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_eq Invalid dial access QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[QME_EISR_DOORBELL_3]
+//<< CLEAR_[P10_20_QME_EISR_DOORBELL_3]
 
-//>> GET_[QME_EISR_DOORBELL_3]
-static inline fapi2::buffer<uint64_t>& GET_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_QME_EISR_DOORBELL_3]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return i_data.extractToRight<QME_EISR_DOORBELL_3,
+    return i_data.extractToRight<P10_20_QME_EISR_DOORBELL_3,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_eq Invalid dial access QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[QME_EISR_DOORBELL_3]
+//<< GET_[P10_20_QME_EISR_DOORBELL_3]
 
-//>> GET_[QME_EISR_DOORBELL_3]
-static inline bool GET_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_QME_EISR_DOORBELL_3]
+static inline bool GET_P10_20_QME_EISR_DOORBELL_3(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return i_data.getBit<QME_EISR_DOORBELL_3>();
+    return i_data.getBit<P10_20_QME_EISR_DOORBELL_3>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_eq Invalid dial access QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[QME_EISR_DOORBELL_3]
+//<< GET_[P10_20_QME_EISR_DOORBELL_3]
 
-//>> SET_[QME_EISR_DOORBELL_4]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_QME_EISR_DOORBELL_4]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.insertFromRight<QME_EISR_DOORBELL_4,
+    return o_data.insertFromRight<P10_20_QME_EISR_DOORBELL_4,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_eq Invalid dial access QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_DOORBELL_4]
+//<< SET_[P10_20_QME_EISR_DOORBELL_4]
 
-//>> SET_[QME_EISR_DOORBELL_4]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_DOORBELL_4(const uint64_t i_data,
+//>> SET_[P10_20_QME_EISR_DOORBELL_4]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_DOORBELL_4(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.insertFromRight<QME_EISR_DOORBELL_4,
+    return o_data.insertFromRight<P10_20_QME_EISR_DOORBELL_4,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_eq Invalid dial access QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_DOORBELL_4]
+//<< SET_[P10_20_QME_EISR_DOORBELL_4]
 
-//>> SET_[QME_EISR_DOORBELL_4]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_QME_EISR_DOORBELL_4]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.setBit<QME_EISR_DOORBELL_4>();
+    return o_data.setBit<P10_20_QME_EISR_DOORBELL_4>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_eq Invalid dial access QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_DOORBELL_4]
+//<< SET_[P10_20_QME_EISR_DOORBELL_4]
 
-//>> CLEAR_[QME_EISR_DOORBELL_4]
-static inline fapi2::buffer<uint64_t>& CLEAR_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_QME_EISR_DOORBELL_4]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.clearBit<QME_EISR_DOORBELL_4>();
+    return o_data.clearBit<P10_20_QME_EISR_DOORBELL_4>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_eq Invalid dial access QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[QME_EISR_DOORBELL_4]
+//<< CLEAR_[P10_20_QME_EISR_DOORBELL_4]
 
-//>> GET_[QME_EISR_DOORBELL_4]
-static inline fapi2::buffer<uint64_t>& GET_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_QME_EISR_DOORBELL_4]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return i_data.extractToRight<QME_EISR_DOORBELL_4,
+    return i_data.extractToRight<P10_20_QME_EISR_DOORBELL_4,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_eq Invalid dial access QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[QME_EISR_DOORBELL_4]
+//<< GET_[P10_20_QME_EISR_DOORBELL_4]
 
-//>> GET_[QME_EISR_DOORBELL_4]
-static inline bool GET_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_QME_EISR_DOORBELL_4]
+static inline bool GET_P10_20_QME_EISR_DOORBELL_4(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return i_data.getBit<QME_EISR_DOORBELL_4>();
+    return i_data.getBit<P10_20_QME_EISR_DOORBELL_4>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_eq Invalid dial access QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_eq Invalid dial access P10_20_QME_EISR_DOORBELL_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[QME_EISR_DOORBELL_4]
+//<< GET_[P10_20_QME_EISR_DOORBELL_4]
 
-//>> SET_[QME_EISR_SPAREA]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_SPAREA(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_QME_EISR_SPAREA]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_SPAREA(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.insertFromRight<QME_EISR_SPAREA,
-           QME_EISR_SPAREA_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_QME_EISR_SPAREA,
+           P10_20_QME_EISR_SPAREA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_eq Invalid dial access QME_EISR_SPAREA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_eq Invalid dial access P10_20_QME_EISR_SPAREA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_SPAREA]
+//<< SET_[P10_20_QME_EISR_SPAREA]
 
-//>> SET_[QME_EISR_SPAREA]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_SPAREA(const uint64_t i_data,
+//>> SET_[P10_20_QME_EISR_SPAREA]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_SPAREA(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.insertFromRight<QME_EISR_SPAREA,
-           QME_EISR_SPAREA_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_QME_EISR_SPAREA,
+           P10_20_QME_EISR_SPAREA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_eq Invalid dial access QME_EISR_SPAREA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_eq Invalid dial access P10_20_QME_EISR_SPAREA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_SPAREA]
+//<< SET_[P10_20_QME_EISR_SPAREA]
 
-//>> GET_[QME_EISR_SPAREA]
-static inline fapi2::buffer<uint64_t>& GET_QME_EISR_SPAREA(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_QME_EISR_SPAREA]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_QME_EISR_SPAREA(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return i_data.extractToRight<QME_EISR_SPAREA,
-           QME_EISR_SPAREA_LEN>(o_data);
+    return i_data.extractToRight<P10_20_QME_EISR_SPAREA,
+           P10_20_QME_EISR_SPAREA_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_eq Invalid dial access QME_EISR_SPAREA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_eq Invalid dial access P10_20_QME_EISR_SPAREA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[QME_EISR_SPAREA]
+//<< GET_[P10_20_QME_EISR_SPAREA]
 
 //>> SET_[QME_EISR_DOORBELL_B]
 static inline fapi2::buffer<uint64_t>& SET_QME_EISR_DOORBELL_B(fapi2::buffer<uint64_t>& i_data,
@@ -5951,59 +5951,59 @@ fapi_try_exit:
 }
 //<< GET_[QME_EISR_DOORBELL_B]
 
-//>> SET_[QME_EISR_SPAREB]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_SPAREB(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_QME_EISR_SPAREB]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_SPAREB(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.insertFromRight<QME_EISR_SPAREB,
-           QME_EISR_SPAREB_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_QME_EISR_SPAREB,
+           P10_20_QME_EISR_SPAREB_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_eq Invalid dial access QME_EISR_SPAREB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_eq Invalid dial access P10_20_QME_EISR_SPAREB chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_SPAREB]
+//<< SET_[P10_20_QME_EISR_SPAREB]
 
-//>> SET_[QME_EISR_SPAREB]
-static inline fapi2::buffer<uint64_t>& SET_QME_EISR_SPAREB(const uint64_t i_data,
+//>> SET_[P10_20_QME_EISR_SPAREB]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_QME_EISR_SPAREB(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return o_data.insertFromRight<QME_EISR_SPAREB,
-           QME_EISR_SPAREB_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_QME_EISR_SPAREB,
+           P10_20_QME_EISR_SPAREB_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_eq Invalid dial access QME_EISR_SPAREB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_eq Invalid dial access P10_20_QME_EISR_SPAREB chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[QME_EISR_SPAREB]
+//<< SET_[P10_20_QME_EISR_SPAREB]
 
-//>> GET_[QME_EISR_SPAREB]
-static inline fapi2::buffer<uint64_t>& GET_QME_EISR_SPAREB(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_QME_EISR_SPAREB]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_QME_EISR_SPAREB(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(QME_EISR_RW, QME_EISR_WO_CLEAR, QME_EISR_WO_OR));
 #endif
-    return i_data.extractToRight<QME_EISR_SPAREB,
-           QME_EISR_SPAREB_LEN>(o_data);
+    return i_data.extractToRight<P10_20_QME_EISR_SPAREB,
+           P10_20_QME_EISR_SPAREB_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_eq Invalid dial access QME_EISR_SPAREB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_eq Invalid dial access P10_20_QME_EISR_SPAREB chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[QME_EISR_SPAREB]
+//<< GET_[P10_20_QME_EISR_SPAREB]
 
 //>> SET_[QME_EISR_MMA_ACTIVE]
 static inline fapi2::buffer<uint64_t>& SET_QME_EISR_MMA_ACTIVE(fapi2::buffer<uint64_t>& i_data,

@@ -126,29 +126,29 @@ static const uint64_t QME_QSCR_WO_CLEAR = 0x200e0073ull;
 static const uint64_t QME_QSCR_WO_OR = 0x200e0072ull;
 
 static const uint32_t QME_QSCR_SRAM_ACCESS_MODE = 0;
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SRAM_ACCESS_MODE = 0; // p10:20,
+static const uint32_t P10_20_QME_QSCR_SRAM_ACCESS_MODE = 0; // p10:20,
 static const uint32_t QME_QSCR_SRAM_SCRUB_ENABLE = 1;
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SRAM_SCRUB_ENABLE = 1; // p10:20,
+static const uint32_t P10_20_QME_QSCR_SRAM_SCRUB_ENABLE = 1; // p10:20,
 static const uint32_t QME_QSCR_ECC_CORRECT_DIS = 2;
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_ECC_CORRECT_DIS = 2; // p10:20,
+static const uint32_t P10_20_QME_QSCR_ECC_CORRECT_DIS = 2; // p10:20,
 static const uint32_t QME_QSCR_ECC_DETECT_DIS = 3;
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_ECC_DETECT_DIS = 3; // p10:20,
+static const uint32_t P10_20_QME_QSCR_ECC_DETECT_DIS = 3; // p10:20,
 static const uint32_t QME_QSCR_ECC_INJECT_TYPE = 4;
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_ECC_INJECT_TYPE = 4; // p10:20,
+static const uint32_t P10_20_QME_QSCR_ECC_INJECT_TYPE = 4; // p10:20,
 static const uint32_t QME_QSCR_ECC_INJECT_ERR = 5;
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_ECC_INJECT_ERR = 5; // p10:20,
+static const uint32_t P10_20_QME_QSCR_ECC_INJECT_ERR = 5; // p10:20,
 static const uint32_t QME_QSCR_SPARE_6_7 = 6;
 static const uint32_t QME_QSCR_SPARE_6_7_LEN = 2;
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SPARE_6_7 = 6; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SPARE_6_7_LEN = 2;
+static const uint32_t P10_20_QME_QSCR_SPARE_6_7 = 6; // p10:20,
+static const uint32_t P10_20_QME_QSCR_SPARE_6_7_LEN = 2;
 static const uint32_t QME_QSCR_DTCBASE = 32;
 static const uint32_t QME_QSCR_DTCBASE_LEN = 8;
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_DTCBASE = 32; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_DTCBASE_LEN = 8;
+static const uint32_t P10_20_QME_QSCR_DTCBASE = 32; // p10:20,
+static const uint32_t P10_20_QME_QSCR_DTCBASE_LEN = 8;
 static const uint32_t QME_QSCR_SRAM_SCRUB_INDEX = 47;
 static const uint32_t QME_QSCR_SRAM_SCRUB_INDEX_LEN = 13;
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SRAM_SCRUB_INDEX = 47; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t QME_QSCR_SRAM_SCRUB_INDEX_LEN = 13;
+static const uint32_t P10_20_QME_QSCR_SRAM_SCRUB_INDEX = 47; // p10:20,
+static const uint32_t P10_20_QME_QSCR_SRAM_SCRUB_INDEX_LEN = 13;
 //<< [QME_QSCR]
 // eq/reg00013.H
 

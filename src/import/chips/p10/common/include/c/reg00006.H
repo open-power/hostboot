@@ -999,413 +999,413 @@ fapi_try_exit:
 }
 //<< GET_[CPMS_CERR_FTC_DEBUG_EVENT]
 
-//>> SET_[CPMS_CERR_CCFG_PARITY_ERR]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_CCFG_PARITY_ERR,
+    return o_data.insertFromRight<P10_20_CPMS_CERR_CCFG_PARITY_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_CCFG_PARITY_ERR]
+//<< SET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
 
-//>> SET_[CPMS_CERR_CCFG_PARITY_ERR]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_CCFG_PARITY_ERR(const uint64_t i_data,
+//>> SET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_CCFG_PARITY_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_CCFG_PARITY_ERR,
+    return o_data.insertFromRight<P10_20_CPMS_CERR_CCFG_PARITY_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_CCFG_PARITY_ERR]
+//<< SET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
 
-//>> SET_[CPMS_CERR_CCFG_PARITY_ERR]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.setBit<CPMS_CERR_CCFG_PARITY_ERR>();
+    return o_data.setBit<P10_20_CPMS_CERR_CCFG_PARITY_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_CCFG_PARITY_ERR]
+//<< SET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
 
-//>> CLEAR_[CPMS_CERR_CCFG_PARITY_ERR]
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.clearBit<CPMS_CERR_CCFG_PARITY_ERR>();
+    return o_data.clearBit<P10_20_CPMS_CERR_CCFG_PARITY_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[CPMS_CERR_CCFG_PARITY_ERR]
+//<< CLEAR_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
 
-//>> GET_[CPMS_CERR_CCFG_PARITY_ERR]
-static inline fapi2::buffer<uint64_t>& GET_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.extractToRight<CPMS_CERR_CCFG_PARITY_ERR,
+    return i_data.extractToRight<P10_20_CPMS_CERR_CCFG_PARITY_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CERR_CCFG_PARITY_ERR]
+//<< GET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
 
-//>> GET_[CPMS_CERR_CCFG_PARITY_ERR]
-static inline bool GET_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
+static inline bool GET_P10_20_CPMS_CERR_CCFG_PARITY_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.getBit<CPMS_CERR_CCFG_PARITY_ERR>();
+    return i_data.getBit<P10_20_CPMS_CERR_CCFG_PARITY_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_CPMS_CERR_CCFG_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CERR_CCFG_PARITY_ERR]
+//<< GET_[P10_20_CPMS_CERR_CCFG_PARITY_ERR]
 
-//>> SET_[CPMS_CERR_RVRM_DROPOUT]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_RVRM_DROPOUT,
+    return o_data.insertFromRight<P10_20_CPMS_CERR_RVRM_DROPOUT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_RVRM_DROPOUT]
+//<< SET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
 
-//>> SET_[CPMS_CERR_RVRM_DROPOUT]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_RVRM_DROPOUT(const uint64_t i_data,
+//>> SET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_RVRM_DROPOUT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_RVRM_DROPOUT,
+    return o_data.insertFromRight<P10_20_CPMS_CERR_RVRM_DROPOUT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_RVRM_DROPOUT]
+//<< SET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
 
-//>> SET_[CPMS_CERR_RVRM_DROPOUT]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.setBit<CPMS_CERR_RVRM_DROPOUT>();
+    return o_data.setBit<P10_20_CPMS_CERR_RVRM_DROPOUT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_RVRM_DROPOUT]
+//<< SET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
 
-//>> CLEAR_[CPMS_CERR_RVRM_DROPOUT]
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_CPMS_CERR_RVRM_DROPOUT]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.clearBit<CPMS_CERR_RVRM_DROPOUT>();
+    return o_data.clearBit<P10_20_CPMS_CERR_RVRM_DROPOUT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[CPMS_CERR_RVRM_DROPOUT]
+//<< CLEAR_[P10_20_CPMS_CERR_RVRM_DROPOUT]
 
-//>> GET_[CPMS_CERR_RVRM_DROPOUT]
-static inline fapi2::buffer<uint64_t>& GET_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.extractToRight<CPMS_CERR_RVRM_DROPOUT,
+    return i_data.extractToRight<P10_20_CPMS_CERR_RVRM_DROPOUT,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CERR_RVRM_DROPOUT]
+//<< GET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
 
-//>> GET_[CPMS_CERR_RVRM_DROPOUT]
-static inline bool GET_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
+static inline bool GET_P10_20_CPMS_CERR_RVRM_DROPOUT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.getBit<CPMS_CERR_RVRM_DROPOUT>();
+    return i_data.getBit<P10_20_CPMS_CERR_RVRM_DROPOUT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_CPMS_CERR_RVRM_DROPOUT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CERR_RVRM_DROPOUT]
+//<< GET_[P10_20_CPMS_CERR_RVRM_DROPOUT]
 
-//>> SET_[CPMS_CERR_PITCH_UPDATE_ERR]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_PITCH_UPDATE_ERR,
+    return o_data.insertFromRight<P10_20_CPMS_CERR_PITCH_UPDATE_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_PITCH_UPDATE_ERR]
+//<< SET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
 
-//>> SET_[CPMS_CERR_PITCH_UPDATE_ERR]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_PITCH_UPDATE_ERR(const uint64_t i_data,
+//>> SET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_PITCH_UPDATE_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_PITCH_UPDATE_ERR,
+    return o_data.insertFromRight<P10_20_CPMS_CERR_PITCH_UPDATE_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_PITCH_UPDATE_ERR]
+//<< SET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
 
-//>> SET_[CPMS_CERR_PITCH_UPDATE_ERR]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.setBit<CPMS_CERR_PITCH_UPDATE_ERR>();
+    return o_data.setBit<P10_20_CPMS_CERR_PITCH_UPDATE_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_PITCH_UPDATE_ERR]
+//<< SET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
 
-//>> CLEAR_[CPMS_CERR_PITCH_UPDATE_ERR]
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.clearBit<CPMS_CERR_PITCH_UPDATE_ERR>();
+    return o_data.clearBit<P10_20_CPMS_CERR_PITCH_UPDATE_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[CPMS_CERR_PITCH_UPDATE_ERR]
+//<< CLEAR_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
 
-//>> GET_[CPMS_CERR_PITCH_UPDATE_ERR]
-static inline fapi2::buffer<uint64_t>& GET_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.extractToRight<CPMS_CERR_PITCH_UPDATE_ERR,
+    return i_data.extractToRight<P10_20_CPMS_CERR_PITCH_UPDATE_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CERR_PITCH_UPDATE_ERR]
+//<< GET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
 
-//>> GET_[CPMS_CERR_PITCH_UPDATE_ERR]
-static inline bool GET_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
+static inline bool GET_P10_20_CPMS_CERR_PITCH_UPDATE_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.getBit<CPMS_CERR_PITCH_UPDATE_ERR>();
+    return i_data.getBit<P10_20_CPMS_CERR_PITCH_UPDATE_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_CPMS_CERR_PITCH_UPDATE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CERR_PITCH_UPDATE_ERR]
+//<< GET_[P10_20_CPMS_CERR_PITCH_UPDATE_ERR]
 
-//>> SET_[CPMS_CERR_SPARE_ERR]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_CPMS_CERR_SPARE_ERR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_SPARE_ERR,
+    return o_data.insertFromRight<P10_20_CPMS_CERR_SPARE_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_SPARE_ERR]
+//<< SET_[P10_20_CPMS_CERR_SPARE_ERR]
 
-//>> SET_[CPMS_CERR_SPARE_ERR]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_SPARE_ERR(const uint64_t i_data,
+//>> SET_[P10_20_CPMS_CERR_SPARE_ERR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_SPARE_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_SPARE_ERR,
+    return o_data.insertFromRight<P10_20_CPMS_CERR_SPARE_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_SPARE_ERR]
+//<< SET_[P10_20_CPMS_CERR_SPARE_ERR]
 
-//>> SET_[CPMS_CERR_SPARE_ERR]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_CPMS_CERR_SPARE_ERR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.setBit<CPMS_CERR_SPARE_ERR>();
+    return o_data.setBit<P10_20_CPMS_CERR_SPARE_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CERR_SPARE_ERR]
+//<< SET_[P10_20_CPMS_CERR_SPARE_ERR]
 
-//>> CLEAR_[CPMS_CERR_SPARE_ERR]
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_CPMS_CERR_SPARE_ERR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.clearBit<CPMS_CERR_SPARE_ERR>();
+    return o_data.clearBit<P10_20_CPMS_CERR_SPARE_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[CPMS_CERR_SPARE_ERR]
+//<< CLEAR_[P10_20_CPMS_CERR_SPARE_ERR]
 
-//>> GET_[CPMS_CERR_SPARE_ERR]
-static inline fapi2::buffer<uint64_t>& GET_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_CPMS_CERR_SPARE_ERR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.extractToRight<CPMS_CERR_SPARE_ERR,
+    return i_data.extractToRight<P10_20_CPMS_CERR_SPARE_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CERR_SPARE_ERR]
+//<< GET_[P10_20_CPMS_CERR_SPARE_ERR]
 
-//>> GET_[CPMS_CERR_SPARE_ERR]
-static inline bool GET_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_CPMS_CERR_SPARE_ERR]
+static inline bool GET_P10_20_CPMS_CERR_SPARE_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.getBit<CPMS_CERR_SPARE_ERR>();
+    return i_data.getBit<P10_20_CPMS_CERR_SPARE_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_CPMS_CERR_SPARE_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CERR_SPARE_ERR]
+//<< GET_[P10_20_CPMS_CERR_SPARE_ERR]
 
 //>> PREP_[CPMS_CUCR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

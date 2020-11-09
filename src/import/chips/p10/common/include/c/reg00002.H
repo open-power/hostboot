@@ -9515,223 +9515,229 @@ fapi_try_exit:
 }
 //<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CONTENT_SEL]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE>();
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE,
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
-
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE>();
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE,
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE>();
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE]
 
 //>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_SPARE0]
 static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_SPARE0(fapi2::buffer<uint64_t>& i_data,
@@ -9835,114 +9841,117 @@ fapi_try_exit:
 }
 //<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_SPARE0]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
-
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE>();
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE,
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE>();
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_IMA_TRACE_ENABLE]
 
 //>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CAPTURE]
 static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CAPTURE(fapi2::buffer<uint64_t>& i_data,
@@ -9998,8 +10007,8 @@ fapi_try_exit:
 }
 //<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CAPTURE]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10007,464 +10016,19 @@ static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTU
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS,
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10472,55 +10036,55 @@ static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTU
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR,
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR>();
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
 
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR>();
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -10528,36 +10092,36 @@ static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTU
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR,
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR>();
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10565,74 +10129,300 @@ static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE,
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(const uint64_t i_data,
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE,
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE>();
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
 
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE>();
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -10640,33 +10430,260 @@ static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE,
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE>();
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE]
 
 //>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_DD1EQUIV]
 static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_DD1EQUIV(fapi2::buffer<uint64_t>& i_data,
@@ -10770,8 +10787,8 @@ fapi_try_exit:
 }
 //<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_DD1EQUIV]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10779,74 +10796,75 @@ static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTU
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE,
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
 
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE>();
+    return o_data.insertFromRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
 
-//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
-static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(
+//>> SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE>();
+    return o_data.setBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+//<< SET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(
+//>> CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
+#endif
+    return o_data.clearBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -10854,33 +10872,33 @@ static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTU
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE,
+    return i_data.extractToRight<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
 
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
-static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+static inline bool GET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_MODE));
 #endif
-    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE>();
+    return i_data.getBit<P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
+//<< GET_[P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_HOLD_ACTIVE]
 
 //>> SET_[NC_NCCHTM_NCCHTSC_HTM_MODE_SPARE_1TO2]
 static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_MODE_SPARE_1TO2(fapi2::buffer<uint64_t>& i_data,

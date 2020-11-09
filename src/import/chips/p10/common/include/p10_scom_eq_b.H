@@ -237,7 +237,7 @@ static const uint32_t QME_PCBQBI_ADDR_LEN = 16;
 //>> [QME_QHTLAST]
 static const uint64_t QME_QHTLAST = 0x200e01acull;
 
-static const uint32_t QME_QHTLAST_HTM_BUFFER_OVERFLOW = 0; // p10:20,
+static const uint32_t P10_20_QME_QHTLAST_HTM_BUFFER_OVERFLOW = 0; // p10:20,
 static const uint32_t QME_QHTLAST_LAST_ADDRESS = 8;
 static const uint32_t QME_QHTLAST_LAST_ADDRESS_LEN = 49;
 //<< [QME_QHTLAST]

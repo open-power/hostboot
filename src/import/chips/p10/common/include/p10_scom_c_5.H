@@ -94,14 +94,14 @@ static const uint32_t CPMS_WPCR_SPARE = 0;
 static const uint32_t CPMS_WPCR_SPARE_LEN = 2;
 static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX = 2;
 static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX_LEN = 6;
-static const uint32_t CPMS_WPCR_SPARE2 = 8; // p10:20,
-static const uint32_t CPMS_WPCR_SPARE2_LEN = 4;
+static const uint32_t P10_20_CPMS_WPCR_SPARE2 = 8; // p10:20,
+static const uint32_t P10_20_CPMS_WPCR_SPARE2_LEN = 4;
 static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET = 12;
 static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET_LEN = 20;
-static const uint32_t CPMS_WPCR_WOF_INTERVAL_TARGET = 12; // p10:20,
-static const uint32_t CPMS_WPCR_WOF_INTERVAL_TARGET_LEN = 20;
-// ERROR Duplicate Dial         static const uint32_t CPMS_WPCR_SPARE2 = 32;
-static const uint32_t CPMS_WPCR_SPARE3 = 32; // p10:20,
+static const uint32_t P10_20_CPMS_WPCR_WOF_INTERVAL_TARGET = 12; // p10:20,
+static const uint32_t P10_20_CPMS_WPCR_WOF_INTERVAL_TARGET_LEN = 20;
+static const uint32_t CPMS_WPCR_SPARE2 = 32;
+static const uint32_t P10_20_CPMS_WPCR_SPARE3 = 32; // p10:20,
 static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT = 33;
 static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT_LEN = 3;
 static const uint32_t CPMS_WPCR_PROXY_CARRYOUT_SEL = 36;
@@ -188,8 +188,8 @@ static const uint64_t QME_SCR_WO_OR = 0x200e080eull;
 
 static const uint32_t QME_SCR_DATA = 0;
 static const uint32_t QME_SCR_DATA_LEN = 64;
-// ERROR Duplicate Dial         static const uint32_t QME_SCR_DATA = 0; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t QME_SCR_DATA_LEN = 16;
+static const uint32_t P10_20_QME_SCR_DATA = 0; // p10:20,
+static const uint32_t P10_20_QME_SCR_DATA_LEN = 16;
 //<< [QME_SCR]
 // c/reg00005.H
 

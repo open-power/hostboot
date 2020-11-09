@@ -105,7 +105,7 @@ static const uint32_t CPMS_RVCSR_RVRM_TUNE_LEN = 6;
 static const uint32_t CPMS_RVCSR_RVID_ACTIVE = 32;
 static const uint32_t CPMS_RVCSR_BYPASS_ACTIVE = 33;
 static const uint32_t CPMS_RVCSR_RVID_ENABLED = 34;
-static const uint32_t CPMS_RVCSR_BYPASS_RAW = 35; // p10:20,
+static const uint32_t P10_20_CPMS_RVCSR_BYPASS_RAW = 35; // p10:20,
 //<< [CPMS_RVCSR]
 // c/reg00004.H
 

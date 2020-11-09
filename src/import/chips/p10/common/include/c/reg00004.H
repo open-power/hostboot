@@ -2060,107 +2060,107 @@ fapi_try_exit:
 }
 //<< GET_[CPMS_RVCSR_RVID_ENABLED]
 
-//>> SET_[CPMS_RVCSR_BYPASS_RAW]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_RVCSR, CPMS_RVCSR_WO_CLEAR, CPMS_RVCSR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_RVCSR_BYPASS_RAW,
+    return o_data.insertFromRight<P10_20_CPMS_RVCSR_BYPASS_RAW,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_RVCSR_BYPASS_RAW]
+//<< SET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
 
-//>> SET_[CPMS_RVCSR_BYPASS_RAW]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_RVCSR_BYPASS_RAW(const uint64_t i_data,
+//>> SET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_RVCSR_BYPASS_RAW(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_RVCSR, CPMS_RVCSR_WO_CLEAR, CPMS_RVCSR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_RVCSR_BYPASS_RAW,
+    return o_data.insertFromRight<P10_20_CPMS_RVCSR_BYPASS_RAW,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_RVCSR_BYPASS_RAW]
+//<< SET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
 
-//>> SET_[CPMS_RVCSR_BYPASS_RAW]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_RVCSR, CPMS_RVCSR_WO_CLEAR, CPMS_RVCSR_WO_OR));
 #endif
-    return o_data.setBit<CPMS_RVCSR_BYPASS_RAW>();
+    return o_data.setBit<P10_20_CPMS_RVCSR_BYPASS_RAW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_RVCSR_BYPASS_RAW]
+//<< SET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
 
-//>> CLEAR_[CPMS_RVCSR_BYPASS_RAW]
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_CPMS_RVCSR_BYPASS_RAW]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_RVCSR, CPMS_RVCSR_WO_CLEAR, CPMS_RVCSR_WO_OR));
 #endif
-    return o_data.clearBit<CPMS_RVCSR_BYPASS_RAW>();
+    return o_data.clearBit<P10_20_CPMS_RVCSR_BYPASS_RAW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[CPMS_RVCSR_BYPASS_RAW]
+//<< CLEAR_[P10_20_CPMS_RVCSR_BYPASS_RAW]
 
-//>> GET_[CPMS_RVCSR_BYPASS_RAW]
-static inline fapi2::buffer<uint64_t>& GET_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_RVCSR, CPMS_RVCSR_WO_CLEAR, CPMS_RVCSR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_RVCSR_BYPASS_RAW,
+    return i_data.extractToRight<P10_20_CPMS_RVCSR_BYPASS_RAW,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_RVCSR_BYPASS_RAW]
+//<< GET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
 
-//>> GET_[CPMS_RVCSR_BYPASS_RAW]
-static inline bool GET_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
+static inline bool GET_P10_20_CPMS_RVCSR_BYPASS_RAW(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_RVCSR, CPMS_RVCSR_WO_CLEAR, CPMS_RVCSR_WO_OR));
 #endif
-    return i_data.getBit<CPMS_RVCSR_BYPASS_RAW>();
+    return i_data.getBit<P10_20_CPMS_RVCSR_BYPASS_RAW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_CPMS_RVCSR_BYPASS_RAW chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_RVCSR_BYPASS_RAW]
+//<< GET_[P10_20_CPMS_RVCSR_BYPASS_RAW]
 
 //>> PREP_[EC_PC_IMA_EVENT_MASK]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

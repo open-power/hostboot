@@ -44,8 +44,8 @@ static const uint64_t DSTL_DSTLFIRACT2 = 0x0c010d09ull;
 
 static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2 = 0;
 static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2_LEN = 39;
-// ERROR Duplicate Dial         static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2 = 0; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2_LEN = 41;
+static const uint32_t P10_20_DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2 = 0; // p10:20,
+static const uint32_t P10_20_DSTL_DSTLFIRACT2_DSTLFIRACT2_ACTION_2_LEN = 41;
 //<< [DSTL_DSTLFIRACT2]
 // mcc/reg00000.H
 

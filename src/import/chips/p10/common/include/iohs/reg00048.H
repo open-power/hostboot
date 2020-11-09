@@ -735,62 +735,64 @@ fapi_try_exit:
 }
 //<< GET_[DLP_LINK1_RX_LANE_CONTROL_FAILED]
 
-//>> SET_[DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK1_RX_LANE_CONTROL));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS,
+           P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
+
+//>> SET_[P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK1_RX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS,
-           DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS,
+           P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
+//<< SET_[P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
 
-//>> SET_[DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK1_RX_LANE_CONTROL));
 #endif
-    return o_data.insertFromRight<DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS,
-           DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS_LEN>(i_data);
+    return i_data.extractToRight<P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS,
+           P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
-
-//>> GET_[DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK1_RX_LANE_CONTROL));
-#endif
-    return i_data.extractToRight<DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS,
-           DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
+//<< GET_[P10_20_DLP_LINK1_RX_LANE_CONTROL_ERROR_STATUS]
 
 //>> PREP_[DLX_CONFIG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

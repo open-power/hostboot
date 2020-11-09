@@ -27289,59 +27289,62 @@ fapi_try_exit:
 }
 //<< GET_[SCOMFIR_MCMODE2_ENABLE_FIR_SPEC_ATTN]
 
-//>> SET_[SCOMFIR_MCMODE2_RESERVED_44_52]
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE2_RESERVED_44_52(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_SCOMFIR_MCMODE2_RESERVED_44_52]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SCOMFIR_MCMODE2_RESERVED_44_52(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE2));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCMODE2_RESERVED_44_52,
-           SCOMFIR_MCMODE2_RESERVED_44_52_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_SCOMFIR_MCMODE2_RESERVED_44_52,
+           P10_20_SCOMFIR_MCMODE2_RESERVED_44_52_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mc Invalid dial access SCOMFIR_MCMODE2_RESERVED_44_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE2_RESERVED_44_52 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SCOMFIR_MCMODE2_RESERVED_44_52]
+//<< SET_[P10_20_SCOMFIR_MCMODE2_RESERVED_44_52]
 
-//>> SET_[SCOMFIR_MCMODE2_RESERVED_44_52]
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE2_RESERVED_44_52(const uint64_t i_data,
+//>> SET_[P10_20_SCOMFIR_MCMODE2_RESERVED_44_52]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_SCOMFIR_MCMODE2_RESERVED_44_52(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE2));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCMODE2_RESERVED_44_52,
-           SCOMFIR_MCMODE2_RESERVED_44_52_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_SCOMFIR_MCMODE2_RESERVED_44_52,
+           P10_20_SCOMFIR_MCMODE2_RESERVED_44_52_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mc Invalid dial access SCOMFIR_MCMODE2_RESERVED_44_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE2_RESERVED_44_52 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[SCOMFIR_MCMODE2_RESERVED_44_52]
+//<< SET_[P10_20_SCOMFIR_MCMODE2_RESERVED_44_52]
 
-//>> GET_[SCOMFIR_MCMODE2_RESERVED_44_52]
-static inline fapi2::buffer<uint64_t>& GET_SCOMFIR_MCMODE2_RESERVED_44_52(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_SCOMFIR_MCMODE2_RESERVED_44_52]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_SCOMFIR_MCMODE2_RESERVED_44_52(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCMODE2));
 #endif
-    return i_data.extractToRight<SCOMFIR_MCMODE2_RESERVED_44_52,
-           SCOMFIR_MCMODE2_RESERVED_44_52_LEN>(o_data);
+    return i_data.extractToRight<P10_20_SCOMFIR_MCMODE2_RESERVED_44_52,
+           P10_20_SCOMFIR_MCMODE2_RESERVED_44_52_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mc Invalid dial access SCOMFIR_MCMODE2_RESERVED_44_52 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_mc Invalid dial access P10_20_SCOMFIR_MCMODE2_RESERVED_44_52 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[SCOMFIR_MCMODE2_RESERVED_44_52]
+//<< GET_[P10_20_SCOMFIR_MCMODE2_RESERVED_44_52]
 
 //>> SET_[SCOMFIR_MCMODE2_ENABLE_FIR_HOST_ATTN]
 static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCMODE2_ENABLE_FIR_HOST_ATTN(fapi2::buffer<uint64_t>& i_data,

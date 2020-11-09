@@ -46,8 +46,8 @@ static const uint64_t DSTL_DSTLFIRMASK_WO_OR = 0x0c010d05ull;
 
 static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK = 0;
 static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 39;
-// ERROR Duplicate Dial         static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK = 0; // p10:20,
-// ERROR Duplicate Dial         static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 41;
+static const uint32_t P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK = 0; // p10:20,
+static const uint32_t P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 41;
 //<< [DSTL_DSTLFIRMASK]
 // mcc/reg00009.H
 

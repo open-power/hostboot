@@ -1924,113 +1924,113 @@ fapi_try_exit:
 }
 //<< GET_[DLP_LINK0_ERROR_STATUS_LINK0_RESET_KEEPER]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RESET_KEEPER,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RESET_KEEPER,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RESET_KEEPER>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RESET_KEEPER>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RESET_KEEPER,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RESET_KEEPER>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RESET_KEEPER]
 
 //>> SET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_CE]
 static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_CE(fapi2::buffer<uint64_t>& i_data,
@@ -2089,762 +2089,782 @@ fapi_try_exit:
 }
 //<< GET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_CE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR>();
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_CE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE,
-           1>(i_data);
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_CE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE,
-           1>(i_data);
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_CE]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_CE]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_DATA]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_DATA]
 
 //>> SET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_UE]
 static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_UE(fapi2::buffer<uint64_t>& i_data,
@@ -2903,437 +2923,453 @@ fapi_try_exit:
 }
 //<< GET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_UE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE,
-           1>(i_data);
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_UE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE,
-           1>(i_data);
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_UE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL,
-           1>(i_data);
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_FRAME_UE_CTL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL,
-           1>(i_data);
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_UE_CTL]
 
 //>> SET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_OSC]
 static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_OSC(
@@ -3394,221 +3430,226 @@ fapi_try_exit:
 }
 //<< GET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_OSC]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_OPT_OSC_SWITCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH,
-           1>(i_data);
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_OPT_OSC_SWITCH]
 
 //>> SET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_TRAIN]
 static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_TRAIN(
@@ -3669,539 +3710,549 @@ fapi_try_exit:
 }
 //<< GET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_TRAIN]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_INIT_SEQ_DOWN]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_TSTART_GIVEUP]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_LANE_MISMATCH,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_LANE_MISMATCH,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_LANE_MISMATCH>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_LANE_MISMATCH>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_LANE_MISMATCH,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_LANE_MISMATCH>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_LANE_MISMATCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_LINK_MISMATCH,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_LINK_MISMATCH,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_LINK_MISMATCH>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_LINK_MISMATCH>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_LINK_MISMATCH,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_LINK_MISMATCH>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_MISMATCH]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RX_SLOWER,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_SLOWER(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RX_SLOWER,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RX_SLOWER>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RX_SLOWER>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RX_SLOWER,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RX_SLOWER>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RX_SLOWER]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_SLOWER]
 
 //>> SET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_UNRECOV]
 static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_UNRECOV(
@@ -4262,116 +4313,8 @@ fapi_try_exit:
 }
 //<< GET_[DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_UNRECOV]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4379,74 +4322,74 @@ static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -4454,1326 +4397,1472 @@ static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_OVERFLOW]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW>();
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REPLAY_BUFFER_OVERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_OVERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_SEQ_LINK_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_UE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_UE(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_UE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_REMOTE_UE>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_REMOTE_UE>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_REMOTE_UE,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_REMOTE_UE>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_CRC_COUNT_FAIL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_LINK_PAIR_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_CRC_COUNT_FAIL]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UNRECOV]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_INTERNAL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW>();
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(fapi2::buffer<uint64_t>& i_data,
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_UE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_REMOTE_SW_DISABLE]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_REPLAY_OVERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_TL_RL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_DLX_RL_ERROR]
 
 //>> SET_[DLP_LINK0_ERROR_STATUS_INTERNAL]
 static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_INTERNAL(fapi2::buffer<uint64_t>& i_data,
@@ -5829,226 +5918,8 @@ fapi_try_exit:
 }
 //<< GET_[DLP_LINK0_ERROR_STATUS_INTERNAL]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6056,74 +5927,74 @@ static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_T
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -6131,36 +6002,36 @@ static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_T
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_DATA_PARITY_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6168,402 +6039,74 @@ static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_B
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -6571,36 +6114,36 @@ static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_P
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ODL_CTL_PARTIY_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6608,186 +6151,75 @@ static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_T
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -6795,36 +6227,36 @@ static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_T
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_TOGGLE_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6832,295 +6264,75 @@ static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& i_data,
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR,
-           1>(i_data);
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -7128,795 +6340,36 @@ static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_LANE_BUFFER_OVERFLOW]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7924,74 +6377,74 @@ static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -7999,252 +6452,36 @@ static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_PACKET_STATE_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-
-//>> GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -8252,74 +6489,74 @@ static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(const uint64_t i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW>();
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -8327,36 +6564,36 @@ static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_T1_TRANSMIT_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -8364,74 +6601,75 @@ static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARI
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR>();
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -8439,36 +6677,36 @@ static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARI
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_BYTES_OUTPUT_PARITY_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -8476,74 +6714,75 @@ static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR,
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(
+    const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR>();
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
 
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR>();
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -8551,142 +6790,2051 @@ static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_IN_ERROR]
 
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.insertFromRight<DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
-
-//>> SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
-static inline fapi2::buffer<uint64_t>& SET_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
-#endif
-    return o_data.setBit<DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
-
-//>> CLEAR_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
-static inline fapi2::buffer<uint64_t>& CLEAR_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return o_data.clearBit<DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR>();
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_BUFFER_TOGGLE_OUT_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_OUTPUT_REPLAY_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_OVERFLOW_BYTES_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_INVALID_STATE_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_DATA_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
-static inline fapi2::buffer<uint64_t>& GET_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RX_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_TX_DATA_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_SHIFT_AMOUNT_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_LINK_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_EARLY_OV_BYTES_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.extractToRight<DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR,
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
 
-//>> GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
-static inline bool GET_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
 #endif
-    return i_data.getBit<DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR>();
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_iohs Invalid dial access DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_PROTOCOL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_ACK_FIFO_UNDERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_BUFFER_OVERFLOW]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_FRAME_CTL_PARITY_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECAL_INVALID_STATE_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.insertFromRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+
+//>> SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.setBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+
+//>> CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return o_data.clearBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.extractToRight<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+
+//>> GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
+static inline bool GET_P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DLP_LINK0_ERROR_STATUS));
+#endif
+    return i_data.getBit<P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_iohs Invalid dial access P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DLP_LINK0_ERROR_STATUS_RECEIVE_CONTROL_ERROR]
 
 //>>THE END<<
 

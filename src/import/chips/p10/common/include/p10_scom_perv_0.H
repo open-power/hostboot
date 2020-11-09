@@ -569,7 +569,7 @@ static const uint64_t RESET_REG = 0x000f001dull;
 static const uint32_t RESET_REG_RESET_PCB = 0;
 static const uint32_t RESET_REG_RESET_ENDPOINTS = 1;
 static const uint32_t RESET_REG_TIMEOUT_RESET_EN = 2;
-static const uint32_t RESET_REG_QUIESCE_PCB = 3; // p10:20,
+static const uint32_t P10_20_RESET_REG_QUIESCE_PCB = 3; // p10:20,
 //<< [RESET_REG]
 // perv/reg00001.H
 
@@ -639,12 +639,12 @@ static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X6_PORT_0_TX_ENABLE = 26;
 static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_X7_PORT_0_TX_ENABLE = 27;
 static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_31 = 28;
 static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_31_LEN = 4;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29 = 28; // p10:20,
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29_LEN = 2;
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE = 30; // p10:20,
-static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN = 10;
-// ERROR Duplicate Dial         static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE = 32;
-// ERROR Duplicate Dial         static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN = 8;
+static const uint32_t P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29 = 28; // p10:20,
+static const uint32_t P10_20_TOD_SEC_PORT_0_CTRL_REG_REG_0X03_SPARE_28_29_LEN = 2;
+static const uint32_t P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE = 30; // p10:20,
+static const uint32_t P10_20_TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN = 10;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE = 32;
+static const uint32_t TOD_SEC_PORT_0_CTRL_REG_SEC_I_PATH_DELAY_VALUE_LEN = 8;
 //<< [TOD_SEC_PORT_0_CTRL_REG]
 // perv/reg00001.H
 

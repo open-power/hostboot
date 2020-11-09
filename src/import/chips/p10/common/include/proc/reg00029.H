@@ -2240,8 +2240,8 @@ fapi_try_exit:
 }
 //<< GET_[TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_GA_IR]
 
-//>> SET_[TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR(
+//>> SET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2249,38 +2249,38 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XI
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR));
 #endif
-    return o_data.insertFromRight<TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR,
-           TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR,
+           P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_proc Invalid dial access TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
+//<< SET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
 
-//>> SET_[TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
-static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR(const uint64_t i_data,
+//>> SET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR));
 #endif
-    return o_data.insertFromRight<TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR,
-           TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR_LEN>(i_data);
+    return o_data.insertFromRight<P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR,
+           P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_proc Invalid dial access TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
+//<< SET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
 
-//>> GET_[TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
-static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR(
+//>> GET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
@@ -2288,16 +2288,16 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XI
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR));
 #endif
-    return i_data.extractToRight<TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR,
-           TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR_LEN>(o_data);
+    return i_data.extractToRight<P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR,
+           P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_proc Invalid dial access TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
+//<< GET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_IR]
 
 //>> SET_[TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR(
@@ -2357,6 +2357,65 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR]
+
+//>> SET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR));
+#endif
+    return o_data.insertFromRight<P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR,
+           P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR]
+
+//>> SET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR));
+#endif
+    return o_data.insertFromRight<P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR,
+           P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR]
+
+//>> GET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR));
+#endif
+    return i_data.extractToRight<P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR,
+           P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_EDR]
 
 //>> PREP_[TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_HIST]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >

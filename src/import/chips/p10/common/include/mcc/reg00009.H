@@ -242,6 +242,63 @@ fapi_try_exit:
 }
 //<< GET_[DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK]
 
+//>> SET_[P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
+#endif
+    return o_data.insertFromRight<P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK,
+           P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK]
+
+//>> SET_[P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
+#endif
+    return o_data.insertFromRight<P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK,
+           P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK]
+
+//>> GET_[P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
+#endif
+    return i_data.extractToRight<P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK,
+           P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK]
+
 //>> PREP_[WRITE_WRTCFG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_WRITE_WRTCFG(const fapi2::Target<K, M, V>& i_target)

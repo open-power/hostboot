@@ -1277,223 +1277,229 @@ fapi_try_exit:
 }
 //<< GET_[CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE]
 
-//>> SET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
-#endif
-    return o_data.insertFromRight<CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-
-//>> SET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
-#endif
-    return o_data.insertFromRight<CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-
-//>> SET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
-#endif
-    return o_data.setBit<CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-
-//>> CLEAR_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(
+//>> SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
-    return o_data.clearBit<CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE>();
+    return o_data.insertFromRight<P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
+//<< SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
 
-//>> GET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& GET_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
-#endif
-    return i_data.extractToRight<CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-
-//>> GET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-static inline bool GET_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
-#endif
-    return i_data.getBit<CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
-
-//>> SET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
-    return o_data.insertFromRight<CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE,
+    return o_data.insertFromRight<P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+//<< SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
 
-//>> SET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
-#endif
-    return o_data.insertFromRight<CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
-
-//>> SET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
-#endif
-    return o_data.setBit<CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
-
-//>> CLEAR_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(
+//>> SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
-    return o_data.clearBit<CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE>();
+    return o_data.setBit<P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+//<< SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
 
-//>> GET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
-static inline fapi2::buffer<uint64_t>& GET_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+//>> CLEAR_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
-    return i_data.extractToRight<CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE,
+    return o_data.clearBit<P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
+
+//>> GET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
+#endif
+    return i_data.extractToRight<P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+//<< GET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
 
-//>> GET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
-static inline bool GET_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
+static inline bool GET_P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
 #endif
-    return i_data.getBit<CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE>();
+    return i_data.getBit<P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+//<< GET_[P10_20_CPMS_CL2_PFETSTAT_L2_VDD_PFETS_FINGER0_SENSE]
+
+//>> SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
+#endif
+    return o_data.insertFromRight<P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+
+//>> SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
+#endif
+    return o_data.insertFromRight<P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+
+//>> SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
+#endif
+    return o_data.setBit<P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+
+//>> CLEAR_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
+#endif
+    return o_data.clearBit<P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+
+//>> GET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
+#endif
+    return i_data.extractToRight<P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+
+//>> GET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
+static inline bool GET_P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(CPMS_CL2_PFETSTAT));
+#endif
+    return i_data.getBit<P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_CPMS_CL2_PFETSTAT_L2_VCS_PFETS_FINGER0_SENSE]
 
 //>> SET_[CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACTUAL]
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACTUAL(fapi2::buffer<uint64_t>& i_data,

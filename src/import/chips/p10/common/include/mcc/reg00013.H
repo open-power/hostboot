@@ -5590,113 +5590,117 @@ fapi_try_exit:
 }
 //<< GET_[USTL_USTLCFG_RESERVED_19]
 
-//>> SET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
+#endif
+    return o_data.insertFromRight<P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+
+//>> SET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
 #endif
-    return o_data.insertFromRight<USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20,
+    return o_data.insertFromRight<P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_mcc Invalid dial access USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_mcc Invalid dial access P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+//<< SET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
 
-//>> SET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
 #endif
-    return o_data.insertFromRight<USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20,
-           1>(i_data);
+    return o_data.setBit<P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_mcc Invalid dial access USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_mcc Invalid dial access P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+//<< SET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
 
-//>> SET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
 #endif
-    return o_data.setBit<USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20>();
+    return o_data.clearBit<P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_mcc Invalid dial access USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_mcc Invalid dial access P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+//<< CLEAR_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
 
-//>> CLEAR_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
 #endif
-    return o_data.clearBit<USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_mcc Invalid dial access USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
-
-//>> GET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
-#endif
-    return i_data.extractToRight<USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20,
+    return i_data.extractToRight<P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_mcc Invalid dial access USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_mcc Invalid dial access P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+//<< GET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
 
-//>> GET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
-static inline bool GET_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+static inline bool GET_P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(USTL_USTLCFG));
 #endif
-    return i_data.getBit<USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20>();
+    return i_data.getBit<P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_mcc Invalid dial access USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_mcc Invalid dial access P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
+//<< GET_[P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20]
 
 //>> SET_[USTL_USTLCFG_SELF_DETECT_DEAD_CYCLE_EN]
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLCFG_SELF_DETECT_DEAD_CYCLE_EN(fapi2::buffer<uint64_t>& i_data,

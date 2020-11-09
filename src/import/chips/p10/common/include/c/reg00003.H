@@ -5656,215 +5656,225 @@ fapi_try_exit:
 }
 //<< GET_[EC_PC_PMU_SPRCOR_HID_HID_SPARE_14]
 
-//>> SET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return o_data.insertFromRight<EC_PC_PMU_SPRCOR_HID_P10_64K_OPT,
+    return o_data.insertFromRight<P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+//<< SET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
 
-//>> SET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(const uint64_t i_data,
+//>> SET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return o_data.insertFromRight<EC_PC_PMU_SPRCOR_HID_P10_64K_OPT,
+    return o_data.insertFromRight<P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+//<< SET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
 
-//>> SET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return o_data.setBit<EC_PC_PMU_SPRCOR_HID_P10_64K_OPT>();
+    return o_data.setBit<P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+//<< SET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
 
-//>> CLEAR_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return o_data.clearBit<EC_PC_PMU_SPRCOR_HID_P10_64K_OPT>();
+    return o_data.clearBit<P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
-//<< CLEAR_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+//<< CLEAR_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
 
-//>> GET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& i_data,
+//>> GET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return i_data.extractToRight<EC_PC_PMU_SPRCOR_HID_P10_64K_OPT,
+    return i_data.extractToRight<P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+//<< GET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
 
-//>> GET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
-static inline bool GET_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+static inline bool GET_P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return i_data.getBit<EC_PC_PMU_SPRCOR_HID_P10_64K_OPT>();
+    return i_data.getBit<P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
+//<< GET_[P10_20_EC_PC_PMU_SPRCOR_HID_P10_64K_OPT]
 
-//>> SET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(fapi2::buffer<uint64_t>& i_data,
+//>> SET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
+#endif
+    return o_data.insertFromRight<P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+
+//>> SET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return o_data.insertFromRight<EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID,
+    return o_data.insertFromRight<P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("1:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+//<< SET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
 
-//>> SET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+//>> SET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return o_data.insertFromRight<EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID,
-           1>(i_data);
+    return o_data.setBit<P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("2:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+//<< SET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
 
-//>> SET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(fapi2::buffer<uint64_t>& o_data)
+//>> CLEAR_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return o_data.setBit<EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID>();
+    return o_data.clearBit<P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("2:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("3:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
-//<< SET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+//<< CLEAR_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
 
-//>> CLEAR_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(fapi2::buffer<uint64_t>& o_data)
+//>> GET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return o_data.clearBit<EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("3:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< CLEAR_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
-
-//>> GET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::failOn(0xa, 0x10));
-    FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
-#endif
-    return i_data.extractToRight<EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID,
+    return i_data.extractToRight<P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("4:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+//<< GET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
 
-//>> GET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
-static inline bool GET_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(fapi2::buffer<uint64_t>& i_data)
+//>> GET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+static inline bool GET_P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::failOn(0xa, 0x10));
     FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_HID));
 #endif
-    return i_data.getBit<EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID>();
+    return i_data.getBit<P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("5:scom_c Invalid dial access EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("5:scom_c Invalid dial access P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
-//<< GET_[EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
+//<< GET_[P10_20_EC_PC_PMU_SPRCOR_HID_HID_MU_CTXTTAG_EQ_TID]
 
 //>> PREP_[L2_L2MISC_L2CERRS_PRD_PURGE_CMD_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
