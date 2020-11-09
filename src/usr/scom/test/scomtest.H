@@ -954,7 +954,7 @@ public:
                                test_data[x].target,
                                &(read_data[x]),
                                op_size,
-                               DEVICE_SBEFIFOSCOM_ADDRESS(test_data[x].addr) );
+                               DEVICE_SBESCOM_ADDRESS(test_data[x].addr) );
 
 
           if( l_err )

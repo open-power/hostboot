@@ -219,7 +219,7 @@ namespace DeviceFW
                 || (i_accessType == DeviceFW::XSCOM)
                 || (i_accessType == DeviceFW::FSISCOM)
                 || (i_accessType == DeviceFW::IBSCOM)
-                || (i_accessType == DeviceFW::SBEFIFOSCOM)
+                || (i_accessType == DeviceFW::SBESCOM)
                 || (i_accessType == DeviceFW::I2CSCOM) )
             {
                 ATTR_SCOM_SWITCHES_type l_switches;

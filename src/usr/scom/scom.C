@@ -1005,7 +1005,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
                                  i_target,
                                  io_buffer,
                                  io_buflen,
-                                 DEVICE_SBEFIFOSCOM_ADDRESS(i_addr));
+                                 DEVICE_SBESCOM_ADDRESS(i_addr));
                 if( l_err ) { break; }
             }
             else if(scomSetting.useInbandScom)

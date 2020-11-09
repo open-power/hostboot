@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,7 +137,7 @@ errlHndl_t ddFifoScomChipOp(DeviceFW::OperationType i_opType,
              * @reasoncode   SBEIO_FIFO_INVALID_OPERATION
              * @userdata1    Request Address
              * @userdata2    Request operation
-             * @devdesc      Invalide operation. Read and Write supported.
+             * @devdesc      Invalid operation. Read and Write supported.
              * @custdesc     Firmware error communicating with boot device
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -161,17 +161,88 @@ errlHndl_t ddFifoScomChipOp(DeviceFW::OperationType i_opType,
     return l_err;
 };
 
+/**
+* @brief Performs a SBE PSU device driver get scom operation
+*
+*        Provides device driver interface to scom operations to be
+*        used, for example, the scom device driver. This is a wrapper
+*        to the psu scom client interfaces.
+*
+* @param[in]     i_opType      Operation type, see DeviceFW::OperationType
+* @param[in]     i_target      Target
+* @param[in/out] io_pBuffer    Read: Pointer to output data storage
+* @param[in/out] io_buflen     Input: size must be 8 bytes
+*                              Output: Success = input value, Failure = 0
+* @param[in]     i_accessType  DeviceFW::AccessType enum
+* @param[in]     i_args        This is an argument list for DD framework.
+*                              In this function, there's only one argument,
+*                              containing the address
+* @return  errlHndl_t
+*/
+errlHndl_t ddPsuScomChipOp(DeviceFW::OperationType i_opType,
+                            TARGETING::Target* i_target,
+                            void   * io_pBuffer,
+                            size_t & io_buflen,
+                            int64_t  i_accessType,
+                            va_list  i_args)
+{
+    errlHndl_t errl = nullptr;
+    uint64_t address = va_arg(i_args,uint64_t);
+
+    SBE_TRACD(ENTER_MRK "ddPsuScomChipOp: i_addr=%llX, target=%.8X",
+                        address, TARGETING::get_huid(i_target) );
+    do{
+        if(i_opType != DeviceFW::READ)
+        {
+            SBE_TRACF(ERR_MRK "Currently psu scom writes are not supported");
+            /*@
+             * @errortype
+             * @moduleid     SBEIO_PSU
+             * @reasoncode   SBEIO_PSU_INVALID_OPERATION
+             * @userdata1    Request Address
+             * @userdata2    Request operation
+             * @devdesc      Invalid operation. Only PSU Scom Reads are supported
+             * @custdesc     Firmware error communicating with boot device
+             */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            SBEIO_FIFO,
+                                            SBEIO_PSU_INVALID_OPERATION,
+                                            address,
+                                            TO_UINT64(i_opType),
+                                            true /*SW error*/);
+            errl->collectTrace(SBEIO_COMP_NAME);
+            break;
+        }
+        assert(io_buflen == sizeof(uint64_t) ,
+               "We only support read lengths of 8 bytes for PSU scom ops");
+        errl = sendPsuGetHwRegRequest(i_target,
+                                      address,
+                                      *static_cast<uint64_t *>(io_pBuffer));
+    }while(0);
+
+    SBE_TRACF(ENTER_MRK "ddPsuScomChipOp: value=%llX",
+                    *static_cast<uint64_t *>(io_pBuffer) );
+
+    return errl;
+}
+
 // Register fsidd access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
-                      DeviceFW::SBEFIFOSCOM,
+                      DeviceFW::SBESCOM,
                       TARGETING::TYPE_PROC,
                       ddFifoScomChipOp);
 
 // Register fsidd access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
-                      DeviceFW::SBEFIFOSCOM,
+                      DeviceFW::SBESCOM,
                       TARGETING::TYPE_PROC,
                       ddFifoScomChipOp);
+
+// Register psu get hw register operation to DD framework
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SBESCOM,
+                      TARGETING::TYPE_OCMB_CHIP,
+                      ddPsuScomChipOp);
 
 } //end namespace SBEIO
 

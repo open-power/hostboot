@@ -79,6 +79,7 @@ enum sbeioReasonCode
     SBEIO_PSU_FFDC_MISSING             = SBEIO_COMP_ID | 0x04,
     SBEIO_PSU_SEND                     = SBEIO_COMP_ID | 0x05,
     SBEIO_PSU_INVALID_TARGET           = SBEIO_COMP_ID | 0x06,
+    SBEIO_PSU_INVALID_OPERATION        = SBEIO_COMP_ID | 0x07,
 
     // SBE FIFO error codes
     SBEIO_FIFO_UPSTREAM_TIMEOUT        = SBEIO_COMP_ID | 0x10,

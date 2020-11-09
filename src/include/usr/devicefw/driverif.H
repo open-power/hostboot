@@ -63,7 +63,7 @@ namespace DeviceFW
         IBSCOM,
         HOSTI2C,
         FSI_I2C,
-        SBEFIFOSCOM,
+        SBESCOM,
         I2CSCOM,
         I2C_MUX,
         SPI_EEPROM,
@@ -334,12 +334,12 @@ namespace DeviceFW
         DeviceFW::FSI_I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr,\
                                             i_offset_len, i_offset)
 
-    /** Construct the device addressing parameters for the SBE FIFO Scom
+    /** Construct the device addressing parameters for the SBE Scom
      *  device ops.
      *  @param[in] i_address - scom address to operate on.
      */
-    #define DEVICE_SBEFIFOSCOM_ADDRESS(i_address) \
-        DeviceFW::SBEFIFOSCOM, static_cast<uint64_t>((i_address))
+    #define DEVICE_SBESCOM_ADDRESS(i_address) \
+        DeviceFW::SBESCOM, static_cast<uint64_t>((i_address))
 
     /**
      * Construct the device addressing parameters for the SPI device ops
