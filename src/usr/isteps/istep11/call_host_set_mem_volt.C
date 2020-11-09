@@ -124,8 +124,9 @@ void* call_host_set_mem_volt (void *io_pArgs)
     // Create a vector of Target pointers
     TargetHandleList l_ocmbTargetList;
 
-    // Get a list of all of the functioning ocmb chips
-    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP, true);
+    // Get a list of all present OCMB chips. host_set_mem_volt will attempt to disable
+    // PMICs on non-functional/deconfigured OCMBs prior to enabling PMICs on functional OCMBs
+    getClassResources(l_ocmbTargetList, CLASS_CHIP, TYPE_OCMB_CHIP, UTIL_FILTER_PRESENT);
 
     for (const auto & l_ocmb_target: l_ocmbTargetList)
     {
