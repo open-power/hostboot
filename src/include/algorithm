@@ -1016,41 +1016,6 @@ namespace std
         return (first1 == last1) && (first2 != last2);
     }
 
-    /** Compile-time strlen implementation.
-     *
-     *  @param s - A const char ptr pointing to a null-terminated string
-     *  @return size_t containing the length of string not including null terminator
-     */
-    constexpr inline size_t comptime_strlen(const char* s)
-    {
-        size_t length = 0;
-        while (*s)
-        {
-            ++length;
-            ++s;
-        }
-        return length;
-    }
-
-    /**  Compile-time function find the longest string, given an array
-     *   of strings.
-     *
-     *  @param string_array - An array of strings
-     *  @return size_t containing the longest strlen for the given array of strings
-     */
-    template<size_t N>
-    constexpr size_t longest_string(const char* const(&string_array)[N])
-    {
-        size_t max_length = 0;
-        for (const char* str : string_array)
-        {
-            size_t tmp_size = comptime_strlen(str);
-            max_length = max(tmp_size, max_length);
-        }
-        return max_length;
-    }
-
-
     /** Given a start and end iterator, accumulate return type T
      *  starting with type T init value performing the BinaryFunction
      *  func.

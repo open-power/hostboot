@@ -28,8 +28,8 @@
  *         the BMC.
  */
 
+#include <util/comptime_util.H>
 #include <algorithm>
-#include <iterator>
 
 // pldm /include/ headers
 #include <pldm/requests/pldm_bios_attr_requests.H>
@@ -52,6 +52,43 @@ constexpr char PLDM_BIOS_HB_POWERVM_STRING[] = "PowerVM";
 constexpr const char* POSSIBLE_HYP_VALUE_STRINGS[] = {PLDM_BIOS_HB_OPAL_STRING,
                                                       PLDM_BIOS_HB_POWERVM_STRING};
 
+/** @brief Given a size_t s, and a string ptr c,
+*          determine if the strlen of the string pointed
+*          to by c is > s. If it is, return strlen of c,
+*          else return s.
+*
+* @param[in] s
+*          A length to compare against.
+* @param[in] c
+*          Char ptrs which points to a string that we will
+*          take the length of and compare against s
+*
+* @return the max of strlen(c) and s
+*/
+constexpr size_t find_maxstrlen(size_t s, const char* c)
+                    {return std::max(s, Util::comptime_strlen(c));};
+
+/** @brief Given two vectors, one representing PLDM Bios Table
+*          String Table, and one representing PLDM Bios Attribute
+*          Table, ensure that the tables have content, if they do
+*          not, perform the neccesary PLDM requests to the BMC to
+*          populate the tables.
+*
+* @param[in,out] io_string_table
+*          A byte vector that if empty will be filled
+*          with the string table via a PLDM Bios Table
+*          request to the BMC. If it already has contents
+*          no request will be made and vector will not
+*          be modified.
+* @param[in,out] io_attr_table
+*          A byte vector that if empty will be filled
+*          with the attribute table via a PLDM Bios Table
+*          request to the BMC. If it already has contents
+*          no request will be made and vector will not
+*          be modified.
+*
+* @return Error if any, otherwise nullptr.
+*/
 errlHndl_t ensureTablesAreSet(std::vector<uint8_t>& io_string_table,
                               std::vector<uint8_t>& io_attr_table)
 {
@@ -88,6 +125,35 @@ errlHndl_t ensureTablesAreSet(std::vector<uint8_t>& io_string_table,
   return errl;
 }
 
+
+/** @brief Given a string describing the name of a PLDM bios attribute
+*          Hostboot wants to read from the BMC, retrieve the value
+*          and value type of that attribute
+*
+* @param[in] i_attr_string
+*          String representing PLDM Bios attribute we want
+*          the value of.
+* @param[in,out] io_string_table
+*          A byte vector that if empty will be filled
+*          with the string table via a PLDM Bios Table
+*          request to the BMC. If it already has contents
+*          no request will be made and vector will not
+*          be modified.
+* @param[in,out] io_attr_table
+*          A byte vector that if empty will be filled
+*          with the attribute table via a PLDM Bios Table
+*          request to the BMC. If it already has contents
+*          no request will be made and vector will not
+*          be modified.
+* @param[out] o_attr_type
+*          Type of PLDM attribute, See bios.h.
+* @param[out] o_attr_val
+*          Expected to be empty on input, will be cleared
+*          during the function. If no error then will
+*          contain bios attribute value when
+*          function completes.
+* @return Error if any, otherwise nullptr.
+*/
 errlHndl_t getCurrentAttrValue(const char *i_attr_string,
                                std::vector<uint8_t>& io_string_table,
                                std::vector<uint8_t>& io_attr_table,
@@ -221,7 +287,7 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
                     value_entry->value,
                     value_entry->value + value_size);
 
-  PLDM_INF_BIN("Value found was ", o_attr_val.data(), o_attr_val.size());
+  PLDM_DBG_BIN("Value found was ", o_attr_val.data(), o_attr_val.size());
   PLDM_EXIT("getCurrentAttrValue Found type 0x%x for attribute %s", o_attr_type, i_attr_string);
 
   }while(0);
@@ -320,9 +386,21 @@ errlHndl_t getHypervisorMode(std::vector<uint8_t>& io_string_table,
                                                                     io_string_table.size(),
                                                                     possible_values[hyp_attr_value[1]]);
 
+    // Find the longest string that we will accept as a
+    // possible value for the "hb-hyp-switch" PLDM BIOS attribute
+    // so we can allocate a sufficiently sized buffer.
     // Add 1 byte to buffer to account for null terminator
-    constexpr size_t max_possible_value_length = std::longest_string(POSSIBLE_HYP_VALUE_STRINGS) + 1;
-    static_assert(max_possible_value_length != 1);
+    constexpr size_t max_possible_value_length =
+        std::accumulate(std::begin(POSSIBLE_HYP_VALUE_STRINGS),
+                        std::end(POSSIBLE_HYP_VALUE_STRINGS),
+                        0ul,
+                        find_maxstrlen) + 1;
+
+    // Ensure max_possible_value_length is larger than the extra
+    // extra byte we added to account for the null terminator.
+    // This assert forces the constexpr to be evaluated at
+    // compile-time
+    static_assert(max_possible_value_length > 1);
     char translated_string[max_possible_value_length] = {0};
 
     pldm_bios_table_string_entry_decode_string(string_table_entry,

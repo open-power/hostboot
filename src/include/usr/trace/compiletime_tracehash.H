@@ -31,7 +31,7 @@
 #ifndef COMPILETIME_TRACEHASH_H
 #define COMPILETIME_TRACEHASH_H
 
-#include <algorithm>
+#include <util/comptime_util.H>
 
 namespace trace_impl
 {
@@ -109,7 +109,7 @@ constexpr inline void copy_format_spec(const char* string, compiletime_string& r
  */
 constexpr inline compiletime_string reduce_format_string(const char* string)
 {
-    size_t length = std::comptime_strlen(string) + 1;
+    size_t length = Util::comptime_strlen(string) + 1;
 
     compiletime_string result { };
 
@@ -198,7 +198,7 @@ constexpr string_container<N> initialize_string(const char* c)
  */
 constexpr inline compiletime_string compiletime_basename(const char* c)
 {
-    const char* slash = c + std::comptime_strlen(c);
+    const char* slash = c + Util::comptime_strlen(c);
 
     while (slash != c)
     {

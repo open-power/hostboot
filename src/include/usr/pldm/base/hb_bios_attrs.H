@@ -43,13 +43,13 @@ namespace PLDM
     *
     * @param[in,out] io_string_table  A byte vector that if empty will be filled
     *                                 with the string table via a PLDM Bios Table
-    *                                 request to the BMC. If already has contents
+    *                                 request to the BMC. If it already has contents
     *                                 no request will be made and vector will not
     *                                 be modified.
     *
     * @param[in,out] io_attr_table    A byte vector that if empty will be filled
     *                                 with the attribute table via a PLDM Bios Table
-    *                                 request to the BMC. If already has contents
+    *                                 request to the BMC. If it already has contents
     *                                 no request will be made and vector will not
     *                                 be modified.
     *
@@ -60,8 +60,8 @@ namespace PLDM
     * @return Error if any, otherwise nullptr.
     */
     errlHndl_t getHypervisorMode(std::vector<uint8_t>& io_string_table,
-                                std::vector<uint8_t>& io_attr_table,
-                                TARGETING::ATTR_PAYLOAD_KIND_type &o_payloadType);
+                                 std::vector<uint8_t>& io_attr_table,
+                                 TARGETING::ATTR_PAYLOAD_KIND_type &o_payloadType);
 }
 
 #endif
