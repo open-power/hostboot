@@ -438,6 +438,7 @@ static errlHndl_t finish_pdr_exchange()
 void crosscheck_sp_presence( ISTEP_ERROR::IStepError& i_istepErr )
 {
     errlHndl_t l_errhdl = nullptr;
+    errlHndl_t firstErr = nullptr;
 
     // Loop through every target to check any with the attribute
     for( TARGETING::TargetIterator target = TARGETING::targetService().begin();
@@ -497,8 +498,6 @@ void crosscheck_sp_presence( ISTEP_ERROR::IStepError& i_istepErr )
             l_errhdl->collectTrace(ISTEP_COMP_NAME,256);
             l_errhdl->collectTrace(HWAS_COMP_NAME,256);
 
-            // Create IStep error log and cross ref error that occurred
-            captureError(l_errhdl, i_istepErr, ISTEP_COMP_ID);
         }
         // The SP sees it but HB didn't
         else if( !hb_presence &&
@@ -538,11 +537,29 @@ void crosscheck_sp_presence( ISTEP_ERROR::IStepError& i_istepErr )
             l_errhdl->collectTrace(I2C_COMP_NAME,256);
             l_errhdl->collectTrace(SPI_COMP_NAME,256);
             l_errhdl->collectTrace(EEPROM_COMP_NAME,256);
-
-            // Create IStep error log and cross ref error that occurred
-            captureError(l_errhdl, i_istepErr, ISTEP_COMP_ID);
         }
         // otherwise we match so we're fine
+
+        if(l_errhdl)
+        {
+            // Store the first error in order to link any later related errors
+            // to it
+            if(!firstErr)
+            {
+                firstErr = l_errhdl;
+                l_errhdl = nullptr;
+            }
+            else
+            {
+                l_errhdl->plid(firstErr->plid());
+                errlCommit (l_errhdl, ISTEP_COMP_ID);
+            }
+        }
+    }
+
+    if(firstErr)
+    {
+        errlCommit (firstErr, ISTEP_COMP_ID);
     }
 }
 
