@@ -43,6 +43,7 @@
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/shared/exp_consts.H>
 
 namespace mss
 {

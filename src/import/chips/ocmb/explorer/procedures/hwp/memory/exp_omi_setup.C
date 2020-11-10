@@ -47,6 +47,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
+#include <p9a_io_omi_prbs.H>
 
 extern "C"
 {
@@ -60,15 +61,23 @@ extern "C"
     {
         mss::display_git_commit_info("exp_omi_setup");
         fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+        uint8_t l_is_apollo = 0;
         uint8_t l_gem_menterp_workaround = 0;
         uint8_t l_enable_ffe_settings = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
         std::vector<uint8_t> l_ffe_setup_data;
+        std::vector<uint8_t> l_fw_status_data;
 
-        // BOOT CONFIG 0
-        uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
+        FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+
+        // Send downstream PRBS pattern from host
+        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+        {
+            FAPI_TRY(p9a_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMIC>(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target)),
+                                     true));
+        }
 
         // FFE Setup
         FAPI_TRY(mss::attr::get_omi_ffe_settings_command(i_target, l_enable_ffe_settings));
@@ -83,17 +92,18 @@ extern "C"
         // Gets the data setup
         FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
 
-        // Sanity check: set dl_layer_boot_mode to NON DL TRAINING (0b00 == default)
-        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_boot_config_data, l_dl_layer_boot_mode ));
+        // Set up dl_layer_boot_mode according to FW and HW support
+        // Need to run original sequence (0b00) on Apollo and on legacy FW
+        FAPI_TRY(mss::exp::i2c::get_fw_status(i_target, l_fw_status_data));
+        FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_fw_status_data,
+                 l_boot_config_data));
 
         // Issues the command and checks for completion
         // Note: This does not kick off OMI training
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
         // Check FW status for success
-        // Note: Extended polling count from 100 to 1000 to account for longer Boot_config_0 sequence
-        // in Explorer FW CL-384401.
-        l_rc = mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 1000);
+        l_rc = mss::exp::i2c::fw_status(i_target, 2 * mss::DELAY_1MS, 5000);
 
         // Note: It's still under discussion whether FIRs will be lit if BOOT_CONFIG_0 fails, and if
         // the registers will be clocked so we can read them. Disabling FIR checking until this
@@ -151,6 +161,13 @@ extern "C"
             mss::exp::omi::set_edpl_enable_bit(l_dlx_config1_data, !l_edpl_disable);
             FAPI_TRY(mss::exp::omi::write_dlx_config1(i_target, l_dlx_config1_data));
             FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
+        }
+
+        // Terminate downstream PRBS pattern
+        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+        {
+            FAPI_TRY(p9a_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMIC>(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target)),
+                                     false));
         }
 
         // Perform p9a workaround

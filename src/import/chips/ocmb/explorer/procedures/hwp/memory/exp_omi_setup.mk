@@ -28,4 +28,7 @@
 
 PROCEDURE=exp_omi_setup
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_EXP_INCLUDES))
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/io)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/io)
+lib$(PROCEDURE)_DEPLIBS += p9a_io_omi_prbs
 $(call BUILD_PROCEDURE)

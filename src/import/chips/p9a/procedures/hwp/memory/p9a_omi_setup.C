@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <lib/mc/omi.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/workarounds/p9a_omi_workarounds.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 ///
 /// @brief Setup OMI for axone
@@ -66,6 +67,9 @@ fapi2::ReturnCode p9a_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_
         // Ensuring we don't try to access an empty vector
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    // Add 120ms delay before PRBS
+    FAPI_TRY( fapi2::delay( 120 * mss::DELAY_1MS, 200) );
 
     {
         // Only one OCMB per OMI for axone

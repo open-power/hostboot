@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,6 +97,21 @@ fapi2::ReturnCode training_prbs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 fapi2::ReturnCode pre_training_prbs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Select and set dl_layer_boot_mode for BOOT_CONFIG0
+///
+/// @param[in] i_target OCMB_CHIP target
+/// @param[in] i_is_apollo value of ATTR_IS_APOLLO
+/// @param[in] i_fw_status_data value from FW_STATUS command
+/// @param[in,out] io_boot_config_data BOOT_CONFIG0 data
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode select_dl_layer_boot_mode(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_is_apollo,
+    const std::vector<uint8_t>& i_fw_status_data,
+    std::vector<uint8_t>& io_boot_config_data);
 
 } // omi
 } // workarounds
