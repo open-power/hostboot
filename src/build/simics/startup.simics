@@ -44,13 +44,14 @@ echo "Defaulting to CPU "+$hb_cpu+" for Hostboot tools"
 # Prevent SBE Updates from happening on an IPL
 echo "Altering SBE SEEPROM Versions to disable Update in IPL"
 
-# Max sockets we'll see in P10 is 8
+# Max sockets we'll see in P10 is 8, but $num_sockets is set in the simics config
 $maxSockets=8
+echo "Using num_sockets of "+$num_sockets+" out of max of "+$maxSockets
 # At most two chips to a DCM (only 1 for SCM)
 $maxChipsPerSocket=2
 # SPI engines 0 and 1 are the SBE SEEPROMs
 $spiEngines = [0,1]
-foreach $socket in (range 0 $maxSockets) {
+foreach $socket in (range 0 $num_sockets) {
     foreach $chip in (range 0 $maxChipsPerSocket) {
         foreach $spiEngine in $spiEngines {
             $sbeSeeprom = (get-seeprom $socket $chip $spiEngine)
