@@ -254,11 +254,12 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TYPE_OCMB_CHIP,
                       ocmbMmioPerformOp);
 
-/*******************************************************************************
+/**
  *
- * @brief Switch to using I2C instead of MMIO SCOMs for an OCMB
+ * @brief Switch to using asking the SBE to perform the SCOM over I2C
+ *        instead of MMIO SCOMs for an OCMB
  *
- * @param[in] i_ocmbTarget Which OCMB to switch to using I2C
+ * @param[in] i_ocmbTarget Which OCMB to switch to using SBE SCOM requests
  *
  */
 void disableInbandScomsOcmb(const TargetHandle_t i_ocmbTarget)
@@ -266,7 +267,7 @@ void disableInbandScomsOcmb(const TargetHandle_t i_ocmbTarget)
     mutex_t* l_mutex = nullptr;
 
     TRACFCOMP(g_trac_mmio,
-              "disableInbandScomsOcmb: switching to use I2C on OCMB 0x%08x",
+              "disableInbandScomsOcmb: switching to use SBESCOM on OCMB 0x%08x",
                get_huid(i_ocmbTarget));
 
     //don't mess with attributes without the mutex (just to be safe)
@@ -275,7 +276,7 @@ void disableInbandScomsOcmb(const TargetHandle_t i_ocmbTarget)
 
     ScomSwitches l_switches = i_ocmbTarget->getAttr<ATTR_SCOM_SWITCHES>();
     l_switches.useInbandScom = 0;
-    l_switches.useI2cScom = 1;
+    l_switches.useSbeScom = 1;
 
     // Modify attribute
     i_ocmbTarget->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
@@ -1003,8 +1004,8 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
 
                     addDefaultCallouts(l_err, i_ocmbTarget);
 
-                    // Switch to I2C to allow collection of registers on
-                    // OCMB.
+                    // Switch over to requesting the SBE to perform i2c scoms to prevent
+                    // further MMIO access to this OCMB
                     disableInbandScomsOcmb(i_ocmbTarget);
 
                     // Dump some debug registers to the error log
@@ -1250,8 +1251,9 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
         // Only disable if HW error, not for user parameter failures
         if (!invalidParmError)
         {
-            // Switch over to using I2C to prevent further MMIO access
-            // to this OCMB (error regs cannot be cleared on Explorer).
+            // Switch over to requesting the SBE to perform i2c scoms to prevent
+            // further MMIO access to this OCMB (error regs cannot be cleared
+            // on Explorer).
             disableInbandScomsOcmb(i_ocmbTarget);
         }
 
