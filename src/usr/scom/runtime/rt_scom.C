@@ -172,7 +172,7 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
         // Convert target to something Sapphire understands
         TARGETING::rtChipId_t target_id = 0;
         l_err = TARGETING::getRtTarget(i_target,
-                                    target_id);
+                                       target_id);
         if(l_err)
         {
             break;
@@ -223,7 +223,7 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                 * @moduleid     SCOM_RT_SEND_SCOM_TO_HYP
                 * @reasoncode   SCOM_RUNTIME_HYP_ERR
                 * @userdata1[0:31]   Hypervisor return code
-                * @userdata2[32:63]  Chipid sent to Hyp
+                * @userdata1[32:63]  Chipid sent to Hyp
                 * @userdata2[0:63]   SCOM address
                 * @userdata2[1]      SCOM Op Type: 0=read, 1=write
                 * @devdesc      Error from Hypervisor attempting SCOM
@@ -234,14 +234,17 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                                     SCOM_RUNTIME_HYP_ERR,
                                     TWO_UINT32_TO_UINT64(
                                                     l_hostRC,
-                                                    i_opType),
+                                                    target_id),
                                     l_userdata2);
 
                 if (l_hostRC == HBRT_RC_CHANNEL_FAILURE)
                 {
-                    // Channel is dead so switch to using the FSP for
-                    //  access
-                    FSISCOM::switchToFspScomAccess(i_target);
+                    if (i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
+                    {
+                        // Channel is dead so switch to using the SBE for
+                        //  access
+                        SBESCOM::switchToSbeScomAccess(i_target);
+                    }
 
                     // Callout the failing buffer chip
                     l_err->addHwCallout(i_target,

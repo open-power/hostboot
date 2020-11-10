@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,16 +46,21 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
 
 };  // end namespace SCOM
 
-namespace FSISCOM
+namespace SBESCOM
 {
 
 /**
- * @brief DMI channel has checkstopped.  Mark it bad and switch to FSP access.
+ * @brief OMI channel has checkstopped.  Mark it bad and switch to FSP->SBE access.
  *
- * @param[in]     i_target    SCOM target
+ * @param[in]     i_ocmb    OCMB SCOM target
  * @return  None
  */
-void switchToFspScomAccess(TARGETING::TargetHandle_t i_target);
+void switchToSbeScomAccess(TARGETING::TargetHandle_t i_ocmb);
+
+};  // end namespace SBESCOM
+
+namespace FSISCOM
+{
 
 /**
  * @brief This function sends the scom op to the FSP

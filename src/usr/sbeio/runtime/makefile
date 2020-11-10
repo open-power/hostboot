@@ -35,11 +35,15 @@ include ../common/common.mk
 
 ## Objects unique to HBRT
 OBJS += rt_sbeio.o
+OBJS += rt_sbescom.o
 OBJS += sbeio_attr_override.o
 OBJS += sbeio_vital_attn.o
 OBJS += p10_extract_sbe_rc.o
 OBJS += p10_ppe_utils.o
 OBJS += p10_ppe_common.o
+
+# for PRDF channel failure cache registers
+EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf
 
 ## sbeio_rt's sub directories
 SUBDIRS += test.d

@@ -42,7 +42,7 @@
 #include <isteps/pm/pm_common_ext.H>
 #include <scom/runtime/rt_scomif.H> // sendScomOpToFsp,
                                     // sendMultiScomReadToFsp,
-                                    // switchToFspScomAccess
+                                    // switchToSbeScomAccess
 #ifdef CONFIG_NVDIMM
 #include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
 #endif
@@ -964,13 +964,13 @@ void cmd_hbrt_update(char*& o_output)
 
 
 /**
- * @brief Mark a target as requiring access to its SCOMs through the FSP
+ * @brief Mark a target as requiring access to its SCOMs through the FSP->SBE
  * @param[out] o_output     Output display buffer, memory allocated here
  * @param[in]  i_huid       HUID associated with Target to switch access on
  */
-void cmd_switchToFspScomAccess( char*& o_output, uint32_t i_huid)
+void cmd_switchToSbeScomAccess( char*& o_output, uint32_t i_huid)
 {
-    UTIL_FT( "cmd_switchToFspScomAccess> huid=%.8X", i_huid );
+    UTIL_FT( "switchToSbeScomAccess> huid=%.8X", i_huid );
 
     TARGETING::Target* l_targ{};
 
@@ -990,9 +990,9 @@ void cmd_switchToFspScomAccess( char*& o_output, uint32_t i_huid)
         return;
     }
 
-    FSISCOM::switchToFspScomAccess(l_targ);
+    SBESCOM::switchToSbeScomAccess(l_targ);
 
-    sprintf( o_output, "switchToFspScomAccess executed");
+    sprintf( o_output, "switchToSbeScomAccess executed");
 }
 
 
@@ -1403,18 +1403,18 @@ int hbrtCommand( int argc,
                      "ERROR: hbrt_update\n" );
         }
     }
-    else if( !strcmp( argv[0], "switchToFspScomAccess" ) )
+    else if( !strcmp( argv[0], "switchToSbeScomAccess" ) )
     {
         if (argc == 2)
         {
-            cmd_switchToFspScomAccess( *l_output,
+            cmd_switchToSbeScomAccess( *l_output,
                                        strtou64(argv[1], NULL, 16)); // huid
         }
         else
         {
             *l_output = new char[100];
             sprintf(*l_output,
-                    "ERROR: switchToFspScomAccess <huid>");
+                    "ERROR: switchToSbeScomAccess <ocmb huid>");
         }
     }
     else if( !strcmp( argv[0], "scomOpToFsp" ) )
@@ -1567,7 +1567,7 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "hbrt_update\n");
         strcat( *l_output, l_tmpstr );
-        sprintf( l_tmpstr, "switchToFspScomAccess <huid>\n");
+        sprintf( l_tmpstr, "switchToSbeScomAccess <ocmb huid>\n");
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "scomOpToFsp <op> <huid> <scomAddr> [<scomValue>]\n"
                            "            <op> == r|w\n");
