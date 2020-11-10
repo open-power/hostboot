@@ -751,6 +751,11 @@ ispy MB_SIM.SRQ.MBA_RRQ0Q_CFG_DISABLE_FAST_ACT [when=S] {
   def_disable_fast_act;
 }
 
+ispy MB_SIM.SRQ.MBA_RRQ0Q_CFG_CRIT_OW_FIRST_EN [when=S] {
+  spyv;
+  0b1;
+}
+
 ispy MB_SIM.SRQ.MBA_FARB0Q_CFG_2N_ADDR [when=S] {
   spyv, expr;
   0b1,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x02); # force 2n

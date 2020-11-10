@@ -162,6 +162,14 @@ static const uint32_t P10_20_WRITE_READCFG_CFG_DD2_OVERCOMMIT_CREDITS_LEN = 2;
 //<< [WRITE_READCFG]
 // mcc/reg00007.H
 
+//>> [USTL_USTLCFG2]
+static const uint64_t USTL_USTLCFG2 = 0x0c010e17ull;
+
+static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH = 0;
+static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH_LEN = 6;
+//<< [USTL_USTLCFG2]
+// mcc/reg00007.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

@@ -757,29 +757,50 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     //data
     if (l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941)
     {
-        l_scom_data |= (uint64_t)  0x1 << (64 - (7 + 1)); //ATTR_CHIP_EC_FEATURE_HW548941
+        l_scom_data |= (uint64_t)  0x1 << (64 - (7 + 1)); //DSTLCFG_SET_MDI_ON_2ND_DIS=ON
     }
 
-    l_scom_data |= (uint64_t)  0x1 << (64 - (16 + 4));
-    l_scom_data |= (uint64_t)  0x2 << (64 - (24 + 4));
-    l_scom_data |= (uint64_t)  0x8 << (64 - (45 + 4));
+    l_scom_data |= (uint64_t)  0x1 << (64 - (16 + 4)); //DSTLCFG_WR_TMP4_THRESHOLD=0b0001
+    l_scom_data |= (uint64_t)  0x2 << (64 - (24 + 4)); //DSTLCFG_WR_DBL_THRESHOLD=0b0010
+    l_scom_data |= (uint64_t)  0x0 << (64 - (28 + 1)); //DSTLCFG_CRITICAL_OW_DIS=OFF
+    l_scom_data |= (uint64_t)  0x8 << (64 - (45 + 4)); //DSTLCFG_CREDIT_RETURN_DELAY_THRESH=0b1000
 
     if (!l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS)
     {
-        l_scom_data |= (uint64_t) 0x7 << (64 - (49 + 3));
+        l_scom_data |= (uint64_t) 0x7 << (64 - (49 + 3)); //DSTLCFG_TIMEOUT_MODE=1M cycles
     }
 
     //mask
-    l_scom_mask |= (uint64_t)  0x1 << (64 - ( 7 + 1));
-    l_scom_mask |= (uint64_t)  0xF << (64 - (16 + 4));
-    l_scom_mask |= (uint64_t)  0xF << (64 - (24 + 4));
-    l_scom_mask |= (uint64_t)  0xF << (64 - (45 + 4));
-    l_scom_mask |= (uint64_t)  0x7 << (64 - (49 + 3));
+    l_scom_mask |= (uint64_t)  0x1 << (64 - ( 7 + 1)); //DSTLCFG_SET_MDI_ON_2ND_DIS=ON
+    l_scom_mask |= (uint64_t)  0xF << (64 - (16 + 4)); //DSTLCFG_WR_TMP4_THRESHOLD=0b0001
+    l_scom_mask |= (uint64_t)  0xF << (64 - (24 + 4)); //DSTLCFG_WR_DBL_THRESHOLD=0b0010
+    l_scom_mask |= (uint64_t)  0x1 << (64 - (28 + 1)); //DSTLCFG_CRITICAL_OW_DIS=OFF
+    l_scom_mask |= (uint64_t)  0xF << (64 - (45 + 4)); //DSTLCFG_CREDIT_RETURN_DELAY_THRESH=0b1000
+    l_scom_mask |= (uint64_t)  0x7 << (64 - (49 + 3)); //DSTLCFG_TIMEOUT_MODE=1M cycles
 
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,
                  p10_chipUnitPairing_t(PU_MCC_CHIPUNIT, l_unit_num),
                  scomt::mcc::DSTL_DSTLCFG,
+                 l_scom_data,
+                 l_scom_mask,
+                 o_xscom_inits),
+             "Error from p10_gen_xscom_init");
+
+    //DSTL_DSTLCFG2
+    l_scom_data = 0;
+    l_scom_mask = 0;
+
+    //data
+    l_scom_data |= (uint64_t)  0x0 << (64 - ( 0 + 4)); //DSTLCFG2_TEMPLATE0_RATE_PACING=0x0
+
+    //mask
+    l_scom_mask |= (uint64_t)  0xF << (64 - ( 0 + 4)); //DSTLCFG2_TEMPLATE0_RATE_PACING=0x0
+
+    FAPI_TRY(p10_gen_xscom_init(
+                 i_target,
+                 p10_chipUnitPairing_t(PU_MCC_CHIPUNIT, l_unit_num),
+                 scomt::mcc::DSTL_DSTLCFG2,
                  l_scom_data,
                  l_scom_mask,
                  o_xscom_inits),
@@ -799,6 +820,24 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
                  i_target,
                  p10_chipUnitPairing_t(PU_MCC_CHIPUNIT, l_unit_num),
                  scomt::mcc::USTL_USTLCFG,
+                 l_scom_data,
+                 l_scom_mask,
+                 o_xscom_inits),
+             "Error from p10_gen_xscom_init");
+
+    //USTL_USTLCFG2
+    l_scom_data = 0;
+    l_scom_mask = 0;
+
+    //data
+    l_scom_data |= (uint64_t)  0x3F << (64 - (0 + 6));
+    //mask
+    l_scom_mask |= (uint64_t)  0x3F << (64 - (0 + 6));
+
+    FAPI_TRY(p10_gen_xscom_init(
+                 i_target,
+                 p10_chipUnitPairing_t(PU_MCC_CHIPUNIT, l_unit_num),
+                 scomt::mcc::USTL_USTLCFG2,
                  l_scom_data,
                  l_scom_mask,
                  o_xscom_inits),
@@ -907,15 +946,17 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_data = 0;
     l_scom_mask = 0;
     //data
-    l_scom_data |= (uint64_t)  0x0 << (64 - ( 0 + 1));
-    l_scom_data |= (uint64_t)  0x1 << (64 - (22 + 1));
-    l_scom_data |= (uint64_t) 0x0F << (64 - (38 + 5));
-    l_scom_data |= (uint64_t)  0x1 << (64 - (44 + 1));
+    l_scom_data |= (uint64_t)  0x0 << (64 - ( 0 + 1)); //MCPERF1_DISABLE_FASTPATH=OFF
+    l_scom_data |= (uint64_t)  0x1 << (64 - (22 + 1)); //MCPERF1_ENABLE_PREFETCH_PROMOTE=ON
+    l_scom_data |= (uint64_t) 0x0F << (64 - (38 + 5)); //MCPERF1_WBIT_SCOPE_ENABLE=0b01111
+    l_scom_data |= (uint64_t)  0x0 << (64 - (43 + 1)); //MCPERF1_EN_SPEC_EDATA=OFF
+    l_scom_data |= (uint64_t)  0x1 << (64 - (44 + 1)); //MCPERF1_EN_SPEC_EDATA=ON
     //mask
-    l_scom_mask |= (uint64_t)  0x1 << (64 - ( 0 + 1));
-    l_scom_mask |= (uint64_t)  0x1 << (64 - (22 + 1));
-    l_scom_mask |= (uint64_t) 0x1F << (64 - (38 + 5));
-    l_scom_mask |= (uint64_t)  0x1 << (64 - (44 + 1));
+    l_scom_mask |= (uint64_t)  0x1 << (64 - ( 0 + 1)); //MCPERF1_DISABLE_FASTPATH=OFF
+    l_scom_mask |= (uint64_t)  0x1 << (64 - (22 + 1)); //MCPERF1_ENABLE_PREFETCH_PROMOTE=ON
+    l_scom_mask |= (uint64_t) 0x1F << (64 - (38 + 5)); //MCPERF1_WBIT_SCOPE_ENABLE=0b01111
+    l_scom_mask |= (uint64_t)  0x1 << (64 - (43 + 1)); //MCPERF1_EN_SPEC_EDATA=OFF
+    l_scom_mask |= (uint64_t)  0x1 << (64 - (44 + 1)); //MCPERF1_EN_SPEC_EDATA=ON
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,
                  p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
@@ -954,13 +995,15 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_data = 0;
     l_scom_mask = 0;
     //data
-    l_scom_data |= (uint64_t) 0x1 << (64 - ( 9 + 1));
-    l_scom_data |= (uint64_t) 0x0 << (64 - (32 + 1));
-    l_scom_data |= (uint64_t) 0x0 << (64 - (61 + 1));
+    l_scom_data |= (uint64_t) 0x1     << (64 - ( 9 +  1)); //MCMODE1_EN_EPF_CL_LIMIT=ON
+    l_scom_data |= (uint64_t) 0x0     << (64 - (32 +  1)); //MCMODE1_DISABLE_ALL_SPEC_OPS=OFF
+    l_scom_data |= (uint64_t) 0x00040 << (64 - (33 + 19)); //MCMODE1_DISABLE_SPEC_OP=0x00040
+    l_scom_data |= (uint64_t) 0x0     << (64 - (61 +  1)); //MCMODE1_DISABLE_FP_COMMAND_BYPASS=OFF
     //mask
-    l_scom_mask |= (uint64_t) 0x1 << (64 - ( 9 + 1));
-    l_scom_mask |= (uint64_t) 0x1 << (64 - (32 + 1));
-    l_scom_mask |= (uint64_t) 0x1 << (64 - (61 + 1));
+    l_scom_mask |= (uint64_t) 0x1     << (64 - ( 9 +  1)); //MCMODE1_EN_EPF_CL_LIMIT=ON
+    l_scom_mask |= (uint64_t) 0x1     << (64 - (32 +  1)); //MCMODE1_DISABLE_ALL_SPEC_OPS=OFF
+    l_scom_mask |= (uint64_t) 0x7FFFF << (64 - (33 + 19)); //MCMODE1_DISABLE_SPEC_OP=0x00040
+    l_scom_mask |= (uint64_t) 0x1     << (64 - (61 +  1)); //MCMODE1_DISABLE_FP_COMMAND_BYPASS=OFF
 
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,
