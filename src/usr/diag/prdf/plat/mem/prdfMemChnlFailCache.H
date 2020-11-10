@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,106 +36,89 @@ typedef std::map<TARGETING::TYPE, std::vector<uint64_t>> TargetScoms_t;
 TargetScoms_t chnlFailScomList =
 {
     {
-        TARGETING::TYPE_MEMBUF,
+        TARGETING::TYPE_OCMB_CHIP,
         { // SCOMs
-            0x500F001C, // GLOBAL_CS_FIR
-            0x500F001B, // GLOBAL_RE_FIR
-            0x500F001A, // GLOBAL_SPA_FIR
-            0x01040000, // TP_CHIPLET_CS_FIR
-            0x01040001, // TP_CHIPLET_RE_FIR
-            0x01040002, // TP_CHIPLET_FIR_MASK
-            0x0104000A, // TP_LFIR
-            0x0104000D, // TP_LFIR_MASK
-            0x01040010, // TP_LFIR_ACT0
-            0x01040011, // TP_LFIR_ACT1
-            0x02040000, // NEST_CHIPLET_CS_FIR
-            0x02040001, // NEST_CHIPLET_RE_FIR
-            0x02040002, // NEST_CHIPLET_FIR_MASK
-            0x0204000A, // NEST_LFIR
-            0x0204000D, // NEST_LFIR_MASK
-            0x02040010, // NEST_LFIR_ACT0
-            0x02040011, // NEST_LFIR_ACT1
-            0x02010400, // DMIFIR
-            0x02010403, // DMIFIR_MASK
-            0x02010406, // DMIFIR_ACT0
-            0x02010407, // DMIFIR_ACT1
-            0x02010800, // MBIFIR
-            0x02010803, // MBIFIR_MASK
-            0x02010806, // MBIFIR_ACT0
-            0x02010807, // MBIFIR_ACT1
-            0x02011400, // MBSFIR
-            0x02011403, // MBSFIR_MASK
-            0x02011406, // MBSFIR_ACT0
-            0x02011407, // MBSFIR_ACT1
-            0x0201141e, // MBSSECUREFIR
-            0x02011440, // MBSECCFIR_0
-            0x02011443, // MBSECCFIR_0_MASK
-            0x02011446, // MBSECCFIR_0_ACT0
-            0x02011447, // MBSECCFIR_0_ACT1
-            0x02011480, // MBSECCFIR_1
-            0x02011483, // MBSECCFIR_1_MASK
-            0x02011486, // MBSECCFIR_1_ACT0
-            0x02011487, // MBSECCFIR_1_ACT1
-            0x020115c0, // SCACFIR
-            0x020115c3, // SCACFIR_MASK
-            0x020115c6, // SCACFIR_ACT0
-            0x020115c7, // SCACFIR_ACT1
-            0x02011600, // MCBISTFIR_0
-            0x02011603, // MCBISTFIR_0_MASK
-            0x02011606, // MCBISTFIR_0_ACT0
-            0x02011607, // MCBISTFIR_0_ACT1
-            0x02011700, // MCBISTFIR_1
-            0x02011703, // MCBISTFIR_1_MASK
-            0x02011706, // MCBISTFIR_1_ACT0
-            0x02011707, // MCBISTFIR_1_ACT1
-            0x03040000, // MEM_CHIPLET_CS_FIR
-            0x03040001, // MEM_CHIPLET_RE_FIR
-            0x03040002, // MEM_CHIPLET_FIR_MASK
-            0x03040004, // MEM_CHIPLET_SPA_FIR
-            0x03040007, // MEM_CHIPLET_SPA_FIR_MASK
-            0x0304000A, // MEM_LFIR
-            0x0304000D, // MEM_LFIR_MASK
-            0x03040010, // MEM_LFIR_ACT0
-            0x03040011, // MEM_LFIR_ACT1
-            0x01030009, // TP_ERROR_STATUS
-            0x02030009, // NEST_ERROR_STATUS
-            0x0201080F, // MBIERPT
-            0x02011413, // MBSCERR1
-            0x0201142C, // MBSCERR2
-            0x02011466, // MBA0_MBSECCERRPT_0
-            0x02011467, // MBA0_MBSECCERRPT_1
-            0x020114A6, // MBA1_MBSECCERRPT_0
-            0x020114A7, // MBA1_MBSECCERRPT_1
-            0x0201168f, // MBA0_MBXERRSTAT
-            0x0201178f, // MBA1_MBXERRSTAT
-            0x020115D4, // SENSORCACHEERRPT
-            0x03030009, // MEM_ERROR_STATUS
-        }
-    },
-    {
-        TARGETING::TYPE_MBA,
-        {
-            0x03010400, // MBACALFIR
-            0x03010403, // MBACALFIR_MASK
-            0x03010406, // MBACALFIR_ACT0
-            0x03010407, // MBACALFIR_ACT1
-            0x0301041b, // MBASECUREFIR
-            0x03010600, // MBAFIR
-            0x03010603, // MBAFIR_MASK
-            0x03010606, // MBAFIR_ACT0
-            0x03010607, // MBAFIR_ACT1
-            0x03010611, // MBASPA
-            0x03010614, // MBASPA_MASK
-            0x0301041A, // MBA_ERR_REPORT
-            0x030106E7, // MBA_MCBERRPTQ
-            0x800200900301143F, // MBADDRPHYFIR
-            0x800200930301143F, // MBADDRPHYFIR_MASK
-            0x800200960301143F, // MBADDRPHYFIR_ACT0
-            0x800200970301143F, // MBADDRPHYFIR_ACT1
-            0x8000D0060301143F, // DDRPHY_APB_FIR_ERR0_P0
-            0x8000D0070301143F, // DDRPHY_APB_FIR_ERR1_P0
-            0x8001D0060301143F, // DDRPHY_APB_FIR_ERR0_P1
-            0x8001D0070301143F, // DDRPHY_APB_FIR_ERR1_P1
+            0x08040000, // OCMB_CHIPLET_CS_FIR
+            0x08040001, // OCMB_CHIPLET_RE_FIR
+            0x08040002, // OCMB_CHIPLET_FIR_MASK
+            0x08040004, // OCMB_CHIPLET_SPA_FIR
+            0x08040007, // OCMB_CHIPLET_SPA_FIR_MASK
+            0x0804000a, // OCMB_LFIR
+            0x0804000d, // OCMB_LFIR_MASK
+            0x08040010, // OCMB_LFIR_ACT0
+            0x08040011, // OCMB_LFIR_ACT1
+            0x08010870, // MMIOFIR
+            0x08010873, // MMIOFIR_MASK
+            0x08010876, // MMIOFIR_ACT0
+            0x08010877, // MMIOFIR_ACT1
+            0x08011400, // SRQFIR
+            0x08011403, // SRQFIR_MASK
+            0x08011406, // SRQFIR_ACT0
+            0x08011407, // SRQFIR_ACT1
+            0x08011800, // MCBISTFIR
+            0x08011803, // MCBISTFIR_MASK
+            0x08011806, // MCBISTFIR_ACT0
+            0x08011807, // MCBISTFIR_ACT1
+            0x08011c00, // RDFFIR
+            0x08011c03, // RDFFIR_MASK
+            0x08011c06, // RDFFIR_ACT0
+            0x08011c07, // RDFFIR_ACT1
+            0x08012400, // TLXFIR
+            0x08012403, // TLXFIR_MASK
+            0x08012406, // TLXFIR_ACT0
+            0x08012407, // TLXFIR_ACT1
+            0x08012800, // OMIDLFIR
+            0x08012803, // OMIDLFIR_MASK
+            0x08012806, // OMIDLFIR_ACT0
+            0x08012807, // OMIDLFIR_ACT1
+            0x08011858, // OCMB_MBSSYMEC0
+            0x08011859, // OCMB_MBSSYMEC1
+            0x0801185A, // OCMB_MBSSYMEC2
+            0x0801185B, // OCMB_MBSSYMEC3
+            0x0801185C, // OCMB_MBSSYMEC4
+            0x0801185D, // OCMB_MBSSYMEC5
+            0x0801185E, // OCMB_MBSSYMEC6
+            0x0801185F, // OCMB_MBSSYMEC7
+            0x08011860, // OCMB_MBSSYMEC8
+            0x0801187E, // MBSEVR0
+            0x08011855, // MBSEC0
+            0x08011856, // MBSEC1
+            0x08011869, // MBSMSEC
+            0x08011857, // MBSTR
+            0x080118D6, // MCBAGRA
+            0x080118D7, // MCBMCAT
+            0x080118DB, // MCB_CNTL
+            0x080118DC, // MCB_CNTLSTAT
+            0x08011C10, // HW_MS0
+            0x08011C11, // HW_MS1
+            0x08011C12, // HW_MS2
+            0x08011C13, // HW_MS3
+            0x08011C14, // HW_MS4
+            0x08011C15, // HW_MS5
+            0x08011C16, // HW_MS6
+            0x08011C17, // HW_MS7
+            0x08011C18, // FW_MS0
+            0x08011C19, // FW_MS1
+            0x08011C1A, // FW_MS2
+            0x08011C1B, // FW_MS3
+            0x08011C1C, // FW_MS4
+            0x08011C1D, // FW_MS5
+            0x08011C1E, // FW_MS6
+            0x08011C1F, // FW_MS7
+            0x0801241C, // TLX_ERR0_REPORT
+            0x0801241D, // TLX_ERR1_REPORT
+            0x08012414, // TLX_ERR0_REPORT_MASK
+            0x08012415, // TLX_ERR1_REPORT_MASK
+            0x0801186A, // MBNCER
+            0x0801186B, // MBRCER
+            0x0801186C, // MBMPER
+            0x0801186D, // MBUER
+            0x0801186E, // MBAUER
+            0x08011415, // FARB0
+            0x08011C0C, // EXP_MSR
+            0x0801186F, // MC_ADDR_TRANS
+            0x08011870, // MC_ADDR_TRANS1
+            0x08011871, // MC_ADDR_TRANS2
         }
     }
 };
