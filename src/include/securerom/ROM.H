@@ -123,7 +123,7 @@ typedef struct
   uint64_t        code_start_offset;
   char            component_id[SW_HDR_COMP_ID_SIZE_BYTES];
   uint32_t        flags;
-  uint8_t         fw_secure_version;
+  uint8_t         reserved_0;
   uint64_t        payload_size;
   SHA512_t        payload_hash;
   uint8_t         ecid_count;
@@ -236,10 +236,7 @@ extern "C"
  * @param[in] void*              Address of function offset into Secure ROM
  * @param[in] ROM_container_raw* Pointer to effective address of container
  * @param[in/out] ROM_hw_params* HW params to pass in (including HW keys' hash)
- *                               Additionally, the secure version used to check
- *                               against the container's fw secure version is
- *                               passed in via the HW params log; and then the
- *                               error information is written to
+ *                               Additionally, error information is written to
  *                               the HW params log.
  *
  * @return ROM_response ROM_DONE on sucess ROM_FAILURE otherwise

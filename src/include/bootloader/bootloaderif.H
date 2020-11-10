@@ -37,14 +37,6 @@ namespace Bootloader{
 // Location of the HW Key Hash located at the end of the HBBL without ECC
 #define HBBL_HW_KEY_HASH_LOCATION  (MAX_HBBL_SIZE - sizeof(SHA512_t))
 
-// Location of Secure Version is the byte preceding HBBL_HW_KEY_HASH_LOCATION
-#define HBBL_SECURE_VERSION_LOCATION  (HBBL_HW_KEY_HASH_LOCATION - 1)
-
-// Location of Secure Version aligned down to the nearest uint64_t/8-byte
-// boundary for use in getting this information from locations that might already
-// have ECC applied
-#define HBBL_SECURE_VERSION_LOCATION_ALIGNED ALIGN_DOWN_8(HBBL_SECURE_VERSION_LOCATION)
-
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
 
@@ -83,7 +75,6 @@ enum BlToHbDataVersion
     BLTOHB_SIZE             = 0x0000000900000005,
     BLTOHB_KEYADDR          = 0x0000000900000006,
     BLTOHB_BACKDOOR         = 0x0000000900000007,
-    BLTOHB_SECURE_VERSION   = 0x0000000900000008,
 };
 
 enum
@@ -134,7 +125,7 @@ struct BlToHbData
                    lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), keyAddrStashData(0),
-                   secBackdoorBit(0), min_secure_version(0) {}
+                   secBackdoorBit(0) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -170,8 +161,6 @@ struct BlToHbData
     keyAddrPair_t  keyAddrStashData;
     // Secure Setting - SBE Security Backdoor
     bool secBackdoorBit;
-    // Minimum FW Secure Version
-    uint8_t min_secure_version;
 } __attribute__((packed));
 
 /**

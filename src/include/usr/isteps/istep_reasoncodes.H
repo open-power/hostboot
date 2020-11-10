@@ -61,7 +61,6 @@ namespace ISTEP
         MOD_OCC_XSTOP_HANDLER                             = 0x1E,
         MOD_VERIFY_AND_MOVE_PAYLOAD                       = 0x1F,
         MOD_REDISCOVER_I2C_TARGETS                        = 0x20,
-        MOD_VALIDATE_SECURITY_SETTINGS                    = 0x21,
     };
 
     /**
@@ -134,7 +133,6 @@ namespace ISTEP
         RC_INVALID_HX_KEYWORD_DATA               = ISTEP_COMP_ID | 0x4C,
         RC_PNOR_IPMI_NOT_ENABLED                 = ISTEP_COMP_ID | 0x4D,
         RC_SLAVE_CORE_WAKEUP_ERROR               = ISTEP_COMP_ID | 0x4E,
-        RC_MASTER_PROC_SECURE_VERSION_MISMATCH   = ISTEP_COMP_ID | 0x4F,
     };
 
 };

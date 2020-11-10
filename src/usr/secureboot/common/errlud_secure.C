@@ -45,7 +45,7 @@ enum {
     PARSER_SIZEOF_SHA512_t           = 64,
     PARSER_SIZEOF_UINT32_t           =  4,
     PARSER_SIZEOF_UINT8_t            =  1,
-    PARSER_SIZEOF_TARGET_HKH_SECTION = 70,
+    PARSER_SIZEOF_TARGET_HKH_SECTION = 69,
 };
 
 //------------------------------------------------------------------------------
@@ -81,34 +81,28 @@ UdSystemHwKeyHash::~UdSystemHwKeyHash()
 //------------------------------------------------------------------------------
 UdTargetHwKeyHash::UdTargetHwKeyHash(const TARGETING::Target * i_target,
                                      const uint8_t i_side,
-                                     const SHA512_t i_hash,
-                                     const uint8_t i_secure_version)
+                                     const SHA512_t i_hash)
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_2;
+    iv_Version = SECURE_UDT_VERSION_1;
     iv_SubSection = SECURE_UDT_TARGET_HW_KEY_HASH;
 
-    //***** Version SECURE_UDT_VERSION_1 Memory Layout *****
+    //***** Memory Layout *****
     // 4 bytes  : Target HUID
     // 1 byte   : SBE EEPROM (Primary or Backup)
     // 64 bytes : SHA512_t of Target HW Key Hash
 
-    //***** Version SECURE_UDT_VERSION_2 Memory Layout *****
-    // The following is appended onto VERSION_1 for VERSION_2:
-    // 1 byte   : Minimum Secure Version
-
     static_assert(sizeof(uint32_t)==PARSER_SIZEOF_UINT32_t, "Expected sizeof(uint32_t) is 4");
     static_assert(sizeof(uint8_t)==PARSER_SIZEOF_UINT8_t, "Expected sizeof(uint8_t) is 1");
     static_assert(sizeof(SHA512_t) == PARSER_SIZEOF_SHA512_t, "Expected SHA512_t size is 64 bytes");
-    static_assert((sizeof(uint32_t) + sizeof(uint8_t) + sizeof(SHA512_t)+sizeof(uint8_t))
-                  == PARSER_SIZEOF_TARGET_HKH_SECTION, "Expected Buffer length is 70 bytes");
+    static_assert((sizeof(uint32_t) + sizeof(uint8_t) + sizeof(SHA512_t)) == PARSER_SIZEOF_TARGET_HKH_SECTION,
+                  "Expected Buffer length is 69 bytes");
 
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint32_t)
                                         +sizeof(uint8_t)
-                                        +sizeof(SHA512_t)
-                                        +sizeof(uint8_t)));
+                                        +sizeof(SHA512_t)));
 
     uint32_t tmp32 = 0;
     uint8_t tmp8 = 0;
@@ -123,10 +117,6 @@ UdTargetHwKeyHash::UdTargetHwKeyHash(const TARGETING::Target * i_target,
 
     memcpy(l_pBuf, i_hash, sizeof(SHA512_t));
     l_pBuf += sizeof(SHA512_t);
-
-    tmp8 = static_cast<uint8_t>(i_secure_version);
-    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
-    l_pBuf += sizeof(tmp8);
 }
 
 //------------------------------------------------------------------------------
@@ -142,7 +132,7 @@ UdSecuritySettings::UdSecuritySettings()
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_2;
+    iv_Version = SECURE_UDT_VERSION_1;
     iv_SubSection = SECURE_UDT_SECURITY_SETTINGS;
 
     char * l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(
@@ -155,14 +145,9 @@ UdSecuritySettings::UdSecuritySettings()
     // 1 byte   : Security Override
     // 1 byte   : Allow Attribute Overrides
 
-    //***** Version SECURE_UDT_VERSION_2 Memory Layout *****
-    // The following is appended onto VERSION_1 for VERSION_2:
-    // 1 byte   : Minimum Secure Version
-
     l_pDetailsLayout->secAccessBit = 0xFF;
     l_pDetailsLayout->secOverride = 0xFF;
     l_pDetailsLayout->allowAttrOverride = 0xFF;
-    l_pDetailsLayout->minSecureVersion = 0xFF;
 
 #ifndef __HOSTBOOT_RUNTIME
     // Only check BlToHbData if it is valid, otherwise fields defaulted to 0xFF
@@ -171,7 +156,6 @@ UdSecuritySettings::UdSecuritySettings()
         l_pDetailsLayout->secAccessBit = g_BlToHbDataManager.getSecureAccessBit();
         l_pDetailsLayout->secOverride = g_BlToHbDataManager.getSecurityOverride();
         l_pDetailsLayout->allowAttrOverride = g_BlToHbDataManager.getAllowAttrOverrides();
-        l_pDetailsLayout->minSecureVersion = g_BlToHbDataManager.getMinimumSecureVersion();
     }
 #endif
 
@@ -190,14 +174,11 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
                            const uint64_t i_protectedSize,
                            const RomVerifyIds& i_ids,
                            const SHA512_t& i_measuredHash,
-                           const SHA512_t& i_expectedHash,
-                           const uint8_t i_min_secure_version,
-                           const uint8_t i_input_secure_version,
-                           const uint8_t i_container_secure_version)
+                           const SHA512_t& i_expectedHash)
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_2;
+    iv_Version = SECURE_UDT_VERSION_1;
     iv_SubSection = SECURE_UDT_VERIFY_INFO;
 
     //***** Version SECURE_UDT_VERSION_1 Memory Layout *****
@@ -207,12 +188,6 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
     // 4*N bytes : IDs (PNOR id or LidID) multiplied by number of ids
     // 64 bytes  : Measured Hash
     // 64 bytes  : Expected Hash
-
-    //***** Version SECURE_UDT_VERSION_2 Memory Layout *****
-    // VERSION_2 appends the following:
-    // 1 byte    : Minimum FW Secure Version
-    // 1 byte    : Input Secure Version
-    // 1 byte    : Container Secure Version
 
     const size_t compSize=strlen(i_compId)+1;
     uint64_t protectedSize=i_protectedSize;
@@ -224,8 +199,7 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
         + sizeof(ids)
         + sizeof(idType)*ids
         + PARSER_SIZEOF_SHA512_t
-        + PARSER_SIZEOF_SHA512_t
-        + 3 * sizeof(uint8_t); // For 3 Secure Versions
+        + PARSER_SIZEOF_SHA512_t;
 
     auto l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(totalSize));
     memcpy(l_pBuf,i_compId,compSize);
@@ -243,18 +217,6 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
     l_pBuf+=PARSER_SIZEOF_SHA512_t;
     memcpy(l_pBuf,i_expectedHash, PARSER_SIZEOF_SHA512_t);
     l_pBuf+=PARSER_SIZEOF_SHA512_t;
-
-    uint8_t tmp8 = static_cast<uint8_t>(i_min_secure_version);
-    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
-    l_pBuf += sizeof(tmp8);
-
-    tmp8 = static_cast<uint8_t>(i_input_secure_version);
-    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
-    l_pBuf += sizeof(tmp8);
-
-    tmp8 = static_cast<uint8_t>(i_container_secure_version);
-    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
-    l_pBuf += sizeof(tmp8);
 }
 
 } // end SECUREBOOT namespace

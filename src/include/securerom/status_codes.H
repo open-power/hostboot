@@ -91,8 +91,6 @@
 
 #define ENTRY_VALID_TEST       0x0080
 
-#define SECURE_VERSION_TEST    0x0090
-
 #define PARTIAL                0x0002
 #define COMPLETED              0x0003
 

@@ -1979,7 +1979,6 @@ namespace SBE
 
         errlHndl_t err = nullptr;
         void *sbeHbblImgPtr = nullptr;
-        uint8_t hbbl_secure_version = 0;
 
         // Clear build information
         io_sbeState.new_imageBuild.buildDate = 0;
@@ -2132,143 +2131,6 @@ namespace SBE
             TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
                        "hbblPnorPtr=%p, hbblMaxSize=0x%08X (%d)",
                        hbblPnorPtr, MAX_HBBL_SIZE, MAX_HBBL_SIZE);
-
-            TRACDBIN(g_trac_sbe,
-                     "getSbeInfoState: end of HBBL - SV and HKH",
-                     reinterpret_cast<uint8_t*>(
-                                       reinterpret_cast<uint64_t>(hbblPnorPtr) +
-                                       HBBL_SECURE_VERSION_LOCATION),
-                     sizeof(SHA512_t)+sizeof(hbbl_secure_version));
-
-
-            /*******************************************/
-            /*  Update the Secure Version in the HBBL  */
-            /*******************************************/
-            // Get Secure Version value from HBBL in Pnor
-            memcpy(&hbbl_secure_version,
-                   reinterpret_cast<uint8_t*>(
-                               reinterpret_cast<uint64_t>(hbblPnorPtr) +
-                               HBBL_SECURE_VERSION_LOCATION),
-                   sizeof(hbbl_secure_version));
-
-            // Get system values to see if we need to update hbbl_secure_version
-            uint8_t min_secure_version = SECUREBOOT::getMinimumSecureVersion();
-            bool isSecurityEnabled = SECUREBOOT::enabled();
-
-            // Get Target Service, and the system target to get LOCKIN Policy
-            TargetService& tS = targetService();
-            TARGETING::Target* sys = NULL;
-            (void) tS.getTopLevelTarget( sys );
-            assert(sys, "getSbeInfoState() system target is NULL");
-            uint8_t lockin_policy = sys->getAttr<ATTR_SECURE_VERSION_LOCKIN_POLICY>();
-
-#ifndef CONFIG_FSP_BUILD
-            lockin_policy = 1;
-            TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
-                      "Defaulting LOCKIN_POLICY to %d for all OpenPower Systems",
-                      lockin_policy);
-#endif
-            bool update_hbbl_secure_version = false;
-
-            if (hbbl_secure_version == min_secure_version)
-            {
-                TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
-                          "HBBL from pnor has secure version=0x%.2X, which is equal to "
-                          "min_secure_version=0x%.2X. No changes. Ignoring "
-                          "LOCKIN_POLICY=%d",
-                          hbbl_secure_version, min_secure_version, lockin_policy);
-            }
-            else if (hbbl_secure_version > min_secure_version)
-            {
-                if (lockin_policy == true)
-                {
-                    TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
-                              "HBBL from pnor has secure version=0x%.2X, which is greater than "
-                              "min_secure_version=0x%.2X. LOCKIN_POLICY=%d "
-                              "so will use new secure version value of 0x%.2X",
-                              hbbl_secure_version, min_secure_version,
-                              lockin_policy, hbbl_secure_version);
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
-                              "HBBL from pnor has secure version=0x%.2X, which is greater than "
-                              "min_secure_version=0x%.2X. But LOCKIN_POLICY=%d "
-                              "so will keep current min secure version value of 0x%.2X",
-                              hbbl_secure_version, min_secure_version,
-                              lockin_policy, min_secure_version);
-                     hbbl_secure_version = min_secure_version;
-                     update_hbbl_secure_version = true;
-                }
-            }
-            else // hbbl_secure_version < min_secure_version
-            {
-                if (isSecurityEnabled == false)
-                {
-                    TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
-                              "HBBL from pnor has secure version=0x%.2X, which is less than "
-                              "min_secure_version=0x%.2X. Since isSecurityEnabled=%d will "
-                              "ROLLBACK secure version to 0x%.2X. Ignoring "
-                              "LOCKIN_POLICY=%d",
-                              hbbl_secure_version, min_secure_version,
-                              isSecurityEnabled, hbbl_secure_version, lockin_policy);
-                }
-                else // isSecurityEnabled == true.  should NEVER get here
-                {
-                    TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
-                              "HBBL from pnor has secure version=0x%.2X, which is less than "
-                              "min_secure_version=0x%.2X.  With isSecurityEnabled=%d we should "
-                              "have NEVER gotten here  Shutting down. Ignoring "
-                              "LOCKIN_POLICY=%d",
-                              hbbl_secure_version, min_secure_version,
-                              isSecurityEnabled, lockin_policy);
-
-                     /*@
-                      * @errortype
-                      * @moduleid         SBE_GET_TARGET_INFO_STATE
-                      * @reasoncode       SBE_SECUREBOOT_ESCAPE
-                      * @userdata1[0:31]  Security Setting (isSecurityEnabled)
-                      * @userdata1[32:63] Secure Version Lock-in Policy
-                      * @userdata2[0:31]  Minimum Secure Version
-                      * @userdata2[32:63] Incoming Secure Version from PNOR
-                      * @devdesc          Invalid Security Setting where lesser Secure Version
-                      *                   found from securely loaded PNOR partitions
-                      * @custdesc         A problem occurred while updating processor
-                      *                   boot code.
-                      */
-                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                        SBE_GET_TARGET_INFO_STATE,
-                                        SBE_SECUREBOOT_ESCAPE,
-                                        TWO_UINT32_TO_UINT64(
-                                          isSecurityEnabled,
-                                          lockin_policy),
-                                        TWO_UINT32_TO_UINT64(
-                                          min_secure_version,
-                                          hbbl_secure_version));
-
-                    ErrlUserDetailsTarget(io_sbeState.target).addToLog(err);
-
-                    err->collectTrace(SBE_COMP_NAME);
-                    err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                              HWAS::SRCI_PRIORITY_HIGH );
-
-
-                    SECUREBOOT::handleSecurebootFailure(err);
-                    assert(false,"Bug! getSbeInfoState() - handleSecurebootFailure shouldn't return!");
-
-
-                }
-            }
-
-            // If necessary, update hbbl_secure_version
-            if (update_hbbl_secure_version == true)
-            {
-                memcpy(reinterpret_cast<uint8_t*>(
-                               reinterpret_cast<uint64_t>(hbblPnorPtr) +
-                               HBBL_SECURE_VERSION_LOCATION),
-                       &hbbl_secure_version,
-                       sizeof(hbbl_secure_version));
-            }
 
             /*******************************************/
             /*  Update the HW Key Hash in the HBBL     */
@@ -2443,66 +2305,22 @@ namespace SBE
                 break;
             }
 
-            // Retrieve the Secure Version and HW Key Hash included in customized image
+            // Verify that HW Key Hash is included in customized image
             SHA512_t hash = {0};
-            uint8_t sbe_secure_version = 0;
-            err = getSecuritySettingsFromSbeImage(
-                                         io_sbeState.target,  // ignored
-                                         EEPROM::SBE_PRIMARY, // ignored
-                                         hash,
-                                         sbe_secure_version,
-                                         pCustomizedBfr);
+            err = getHwKeyHashFromSbeImage(io_sbeState.target,  // ignored
+                                           EEPROM::SBE_PRIMARY, // ignored
+                                           hash,
+                                           pCustomizedBfr);
 
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error from getSecuritySettingsFromSbeImage(), "
+                           "Error from getHwKeyHashFromSbeImage(), "
                            "RC=0x%X, PLID=0x%lX",
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETPLID_SAFE(err));
                 break;
             }
-
-            // Verify that the correct Secure Version is included in customized image
-            if ( hbbl_secure_version != sbe_secure_version )
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error: "
-                           "Secure Version in customized image 0x%.2X doesn't "
-                           "match expected value of 0x%.2X for proc=0x%X",
-                           sbe_secure_version,
-                           hbbl_secure_version,
-                           TARGETING::get_huid(io_sbeState.target));
-
-                /*@
-                 * @errortype
-                 * @moduleid         SBE_GET_TARGET_INFO_STATE
-                 * @reasoncode       SBE_MISMATCHED_SECURE_VERSION
-                 * @userdata1        Target HUID
-                 * @userdata2[0:15]  Secure Version found in Customized SBE Image
-                 * @userdata2[16:31] Expected Secure Version
-                 * @userdata2[32:47] Minimum Secure Version
-                 * @userdata2[48:63] LOCKIN_POLICY
-                 * @devdesc          Unexpected Secure Version found in SBE Image
-                 * @custdesc         A problem occurred while updating processor
-                 *                   boot code.
-                 */
-                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_GET_TARGET_INFO_STATE,
-                                    SBE_MISMATCHED_SECURE_VERSION,
-                                    TARGETING::get_huid(io_sbeState.target),
-                                    FOUR_UINT16_TO_UINT64(
-                                      sbe_secure_version,
-                                      hbbl_secure_version,
-                                      min_secure_version,
-                                      lockin_policy));
-
-
-                err->collectTrace(SBE_COMP_NAME);
-                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH );
-                break;
-            }
-
 
             // Verify that the HW Key Hash is the same hash used earlier
             if ( memcmp(hash, tmp_hash, sizeof(SHA512_t)) != 0 )
@@ -2578,10 +2396,9 @@ namespace SBE
                                              sbeImgSize) ;
 
             TRACFCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): "
-                       "maxSize=0x%X, actSize=0x%X, crc=0x%X (SV=0x%.2X, Hash=0x%.8X)",
+                       "maxSize=0x%X, actSize=0x%X, crc=0x%X",
                        MAX_SEEPROM_IMAGE_SIZE, sbeImgSize,
-                       io_sbeState.customizedImage_crc,
-                       sbe_secure_version, sha512_to_u32(hash));
+                       io_sbeState.customizedImage_crc);
 
             // restore the hbbl ID string
             memcpy( pHbblIdStringBfr,
@@ -5722,19 +5539,17 @@ errlHndl_t sbeDoReboot( void )
 }
 
 /////////////////////////////////////////////////////////////////////
-errlHndl_t getSecuritySettingsFromSbeImage(
+errlHndl_t getHwKeyHashFromSbeImage(
                            TARGETING::Target* const i_target,
                            const EEPROM::eeprom_chip_types_t i_seeprom,
                            SHA512_t o_hash,
-                           uint8_t & o_secure_version,
                            const void * i_image_ptr) // defaults to nullptr
 {
     errlHndl_t err = nullptr;
 
     // if i_image_ptr == nullptr, then read from SBE Seeprom;
     // if i_image_ptr != nullptr, then read from memory at i_image_ptr
-
-    TRACFCOMP( g_trac_sbe, ENTER_MRK"getSecuritySettingsFromSbeImage: "
+    TRACFCOMP( g_trac_sbe, ENTER_MRK"getHwKeyHashFromSbeImage: "
                "i_target=0x%X, i_seeprom=%d, i_image_ptr=%p: "
                "reading from %s",
                get_huid(i_target), i_seeprom, i_image_ptr,
@@ -5745,24 +5560,23 @@ errlHndl_t getSecuritySettingsFromSbeImage(
     {
         // Only check i_target and i_seeprom if i_image_ptr == nullptr;
         // otherwise they're ignored as i_image_ptr is used
-        assert(i_target != nullptr,"getSecuritySettingsFromSbeImage i_target can't be NULL");
-        assert(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC, "getSecuritySettingsFromSbeImage i_target must be TYPE_PROC");
-        assert(((i_seeprom == EEPROM::SBE_PRIMARY) || (i_seeprom == EEPROM::SBE_BACKUP)), "getSecuritySettingsFromSbeImage i_seeprom=%d is invalid", i_seeprom);
+        assert(i_target != nullptr,"getHwKeyHashFromSbeImage i_target can't be NULL");
+        assert(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC, "getHwKeyHashFromSbeImage i_target must be TYPE_PROC");
+        assert(((i_seeprom == EEPROM::SBE_PRIMARY) || (i_seeprom == EEPROM::SBE_BACKUP)), "getHwKeyHashFromSbeImage i_seeprom=%d is invalid", i_seeprom);
     }
 
 
     // Code Assumptions
-    static_assert((sizeof(P9XipHeader) % 8) == 0, "getSecuritySettingsFromSbeImage(): sizeof(P9XipHeader) is not 8-byte-aligned");
-    static_assert((sizeof(P9XipHeader().iv_magic) % 8) == 0, "getSecuritySettingsFromSbeImage(): sizeof(P9XipHeader().iv_magic) is not 8-byte-aligned");
-    static_assert((sizeof(SHA512_t) % 8) == 0, "getSecuritySettingsFromSbeImage(): sizeof(SHA512_t) is not 8-byte-aligned");
+    static_assert((sizeof(P9XipHeader) % 8) == 0, "getHwKeyHashFromSbeImage(): sizeof(P9XipHeader) is not 8-byte-aligned");
+    static_assert((sizeof(P9XipHeader().iv_magic) % 8) == 0, "getHwKeyHashFromSbeImage(): sizeof(P9XipHeader().iv_magic) is not 8-byte-aligned");
+    static_assert((sizeof(SHA512_t) % 8) == 0, "getHwKeyHashFromSbeImage(): sizeof(SHA512_t) is not 8-byte-aligned");
 
     // Local variables used to capture ECC FFDC
     PNOR::ECC::eccStatus eccStatus = PNOR::ECC::CLEAN;
     size_t seeprom_offset = 0;
-    size_t data_size = 0;
     size_t remove_ECC_size = 0;
-    size_t op_size = 0;
-    size_t expected_op_size = 0;
+    size_t size = 0;
+    size_t expected_size = 0;
 
     // Create buffers for read operations and removing ECC
     const size_t max_buffer_size = PNOR::ECC::sizeWithEcc(
@@ -5779,18 +5593,18 @@ errlHndl_t getSecuritySettingsFromSbeImage(
         if ( i_image_ptr == nullptr )
         {
             // Calculate amount of data to read from SEEPROM
-            op_size = PNOR::ECC::sizeWithEcc(sizeof(P9XipHeader));
-            expected_op_size = op_size;
+            size = PNOR::ECC::sizeWithEcc(sizeof(P9XipHeader));
+            expected_size = size;
 
             //Read SBE Versions
             err = deviceRead( i_target,
                               tmp_data_ECC,
-                              op_size,
+                              size,
                               DEVICE_EEPROM_ADDRESS(i_seeprom,
                                                     seeprom_offset));
             if(err)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSecuritySettingsFromSbeImage() "
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getHwKeyHashFromSbeImage() "
                            "Error getting SBE Data from Tgt=0x%X SEEPROM "
                            "(0x%X), RC=0x%X, PLID=0x%X",
                            get_huid(i_target),
@@ -5802,7 +5616,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
 
                 break;
             }
-            assert(op_size==expected_op_size, "getSecuritySettingsFromSbeImage: size 0x%X returned form reading P9XipHeader does not equal expected_size=0x%X", op_size, expected_op_size);
+            assert(size==expected_size, "getHwKeyHashFromSbeImage: size 0x%X returned form reading P9XipHeader does not equal expected_size=0x%X", size, expected_size);
 
             remove_ECC_size = sizeof(P9XipHeader);
             eccStatus = removeECC( tmp_data_ECC,
@@ -5813,7 +5627,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
 
             if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
             {
-                TRACFCOMP( g_trac_sbe, "getSecuritySettingsFromSbeImage(): "
+                TRACFCOMP( g_trac_sbe, "getHwKeyHashFromSbeImage(): "
                            "Uncorrectable eccStatus from reading P9XipHeader: "
                            "%d",
                            eccStatus);
@@ -5823,7 +5637,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
             }
 
             TRACDBIN( g_trac_sbe,
-                      "getSecuritySettingsFromSbeImage: P9XipHeader with ECC",
+                      "getHwKeyHashFromSbeImage: P9XipHeader with ECC",
                       tmp_data_ECC,
                       PNOR::ECC::sizeWithEcc(sizeof(P9XipHeader().iv_magic) ) );
 
@@ -5835,7 +5649,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
         }
 
         TRACDBIN( g_trac_sbe,
-                  "getSecuritySettingsFromSbeImage: P9XipHeader no ECC",
+                  "getHwKeyHashFromSbeImage: P9XipHeader no ECC",
                   tmp_data,
                   sizeof(P9XipHeader().iv_magic) ) ;
 
@@ -5849,7 +5663,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
 
         int xip_rc = p9_xip_get_section( tmp_data, l_sectionId, &l_xipSection );
 
-        TRACUCOMP( g_trac_sbe, "getSecuritySettingsFromSbeImage: xip_rc=%d: "
+        TRACUCOMP( g_trac_sbe, "getHwKeyHashFromSbeImage: xip_rc=%d: "
                    "Section iv_offset=0x%X, iv_size=0x%X, iv_alignment=0x%X",
                    xip_rc, l_xipSection.iv_offset, l_xipSection.iv_size,
                    l_xipSection.iv_alignment);
@@ -5859,7 +5673,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
             ( l_xipSection.iv_offset == 0 ) ||
             ( l_xipSection.iv_size == 0 ) )
         {
-            TRACFCOMP( g_trac_sbe, "getSecuritySettingsFromSbeImage: Error from "
+            TRACFCOMP( g_trac_sbe, "getHwKeyHashFromSbeImage: Error from "
                        "p9_xip_get_section: xip_rc=%d: Section iv_offset=0x%X, "
                        "iv_size=0x%X, iv_alignment=0x%X",
                        xip_rc, l_xipSection.iv_offset, l_xipSection.iv_size,
@@ -5903,46 +5717,37 @@ errlHndl_t getSecuritySettingsFromSbeImage(
 
 
         // Calculate Seeprom offset
-        // -- Raw Image Offset -- Secure Version and HW Key Hash are at end of HBBL section
-        // -- Need to use 8-byte aligned  value to account for ECC boundaries
-        // -- Therefore, using size of uint64_t to align down for Secure Version instead of
-        //    its actual size of uint8_t.  HW Key Hash is already 8-byte aligned
-        seeprom_offset = l_xipSection.iv_offset + HBBL_SECURE_VERSION_LOCATION_ALIGNED;
-        data_size = sizeof(SHA512_t) + sizeof(uint64_t);
-
-        TRACDCOMP( g_trac_sbe, "getSecuritySettingsFromSbeImage: seeprom_offset "
-                   "= 0x%X, data_size = 0x%X (l_xipSection.iv_size=0x%X, iv.offset=0x%X)",
-                   seeprom_offset, data_size, l_xipSection.iv_size, l_xipSection.iv_offset);
-
-        /************************************************************************/
-        /* Option 1: Read HW Key Hash and Secure Version from SBE Image via I2C */
-        /************************************************************************/
+        // -- Raw Image Offset -- HW Key Hash is at end of HBBL section
+        seeprom_offset = l_xipSection.iv_offset + HBBL_HW_KEY_HASH_LOCATION;
         if ( i_image_ptr == nullptr )
         {
             // Math to convert Image offset to Seeprom(with ECC) Offset
-            // when reading Seeprom via I2C
-            op_size = setECCSize(data_size, seeprom_offset);
             seeprom_offset = setECCSize(seeprom_offset);
-            TRACFCOMP( g_trac_sbe, "getSecuritySettingsFromSbeImage: I2C op needs ECC: "
-                       "updated op_size=0x%X, seeprom_offset=0x%X",
-                       op_size, seeprom_offset);
+        }
 
-            // Clear buffers and set size to uint64_t + SHA512_t+ECC
-            // (uint64_t is for aligning down from uint8_t secure version)
+        TRACUCOMP( g_trac_sbe, "getHwKeyHashFromSbeImage: seeprom_offset "
+                   "= 0x%X, size = 0x%X",
+                   seeprom_offset, size);
+
+        // Read HW Key Hash from SBE Image
+        if ( i_image_ptr == nullptr)
+        {
+            // Clear buffers and set size to SHA512_t+ECC
             memset( tmp_data_ECC, 0, max_buffer_size );
             memset( tmp_data, 0, max_buffer_size );
-            expected_op_size = op_size;
+            size = PNOR::ECC::sizeWithEcc(sizeof(SHA512_t));
+            expected_size = size;
 
             //Read SBE Seeprom
             err = deviceRead( i_target,
                               tmp_data_ECC,
-                              op_size,
+                              size,
                               DEVICE_EEPROM_ADDRESS(
                                                 i_seeprom,
                                                 seeprom_offset));
             if(err)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSecuritySettingsFromSbeImage() "
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getHwKeyHashFromSbeImage() "
                            "Error getting HKH from SEEPROM (0x%X), "
                            "RC=0x%X, PLID=0x%X",
                            EEPROM::SBE_BACKUP,
@@ -5953,9 +5758,9 @@ errlHndl_t getSecuritySettingsFromSbeImage(
 
                 break;
             }
-            assert(op_size==expected_op_size, "getSecuritySettingsFromSbeImage: size 0x%X returned form reading HW Key Hash does not equal expected_size=0x%X", op_size, expected_op_size);
+            assert(size==expected_size, "getHwKeyHashFromSbeImage: size 0x%X returned form reading HW Key Hash does not equal expected_size=0x%X", size, expected_size);
 
-            remove_ECC_size = data_size;
+            remove_ECC_size = sizeof(SHA512_t);
             eccStatus = removeECC( tmp_data_ECC,
                                    tmp_data,
                                    remove_ECC_size,
@@ -5964,7 +5769,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
 
             if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
             {
-                TRACFCOMP( g_trac_sbe, "getSecuritySettingsFromSbeImage(): "
+                TRACFCOMP( g_trac_sbe, "getHwKeyHashFromSbeImage(): "
                            "Uncorrectable eccStatus from reading HW Key Hash: %d",
                            eccStatus);
 
@@ -5973,44 +5778,26 @@ errlHndl_t getSecuritySettingsFromSbeImage(
             }
 
             TRACDBIN( g_trac_sbe,
-                      "getSecuritySettingsFromSbeImage: ECC",
+                      "getHwKeyHashFromSbeImage: ECC",
                       tmp_data_ECC,
-                      expected_op_size ) ;
+                      expected_size ) ;
 
             TRACDBIN( g_trac_sbe,
-                      "getSecuritySettingsFromSbeImage: no ECC",
+                      "getHwKeyHashFromSbeImage: no ECC",
                       tmp_data,
-                      data_size ) ;
+                      sizeof(SHA512_t) ) ;
 
             // If we made it here, HW Key Hash was found successfully
-            // -- seeprom_offset is based on aligning down from the 1 byte of the
-            //    Secure Version (ie HBBL_SECURE_VERSION_LOCATION_ALIGNED).
-            //    Need to account for this when copying over the values
-
-            TRACUCOMP( g_trac_sbe, INFO_MRK"getSecuritySettingsFromSbeImage(): secure version and hash "
+            TRACUCOMP( g_trac_sbe, INFO_MRK"getHwKeyHashFromSbeImage(): hash "
                        "found successfully from SBE Seeprom- setting o_hash");
-
-            memcpy(&o_secure_version,
-                   &tmp_data[HBBL_SECURE_VERSION_LOCATION - HBBL_SECURE_VERSION_LOCATION_ALIGNED],
-                   sizeof(o_secure_version));
-            memcpy(o_hash,
-                   &tmp_data[HBBL_HW_KEY_HASH_LOCATION - HBBL_SECURE_VERSION_LOCATION_ALIGNED],
-                   sizeof(SHA512_t));
+            memcpy(o_hash, tmp_data, sizeof(SHA512_t));
         }
-
         else
         {
-            // Copy Secure Version and HW Key Hash from system memory
-            // -- seeprom_offset is based on aligning down from the 1 byte of the
-            //    Secure Version (ie HBBL_SECURE_VERSION_LOCATION_ALIGNED).
-            //    Need to account for this when copying over the values
-            memcpy(&o_secure_version,
-                   reinterpret_cast<uint8_t*>(const_cast<void*>(i_image_ptr))
-                     + seeprom_offset + (HBBL_SECURE_VERSION_LOCATION - HBBL_SECURE_VERSION_LOCATION_ALIGNED),
-                   sizeof(o_secure_version));
+            // Copy HW Key Hash from system memory
             memcpy(o_hash,
                    reinterpret_cast<uint8_t*>(const_cast<void*>(i_image_ptr))
-                     + seeprom_offset + (HBBL_HW_KEY_HASH_LOCATION - HBBL_SECURE_VERSION_LOCATION_ALIGNED),
+                     + seeprom_offset,
                    sizeof(SHA512_t));
         }
 
@@ -6057,13 +5844,10 @@ errlHndl_t getSecuritySettingsFromSbeImage(
     }
 
 
-    TRACDBIN(g_trac_sbe,"getSecuritySettingsFromSbeImage - Hash:", o_hash, sizeof(SHA512_t));
-
-    TRACFCOMP( g_trac_sbe, EXIT_MRK"getSecuritySettingsFromSbeImage: "
-               "err rc=0x%X, plid=0x%X, o_hash=0x%.8X, "
-               "o_secure_version=0x%.2X",
+    TRACFCOMP( g_trac_sbe, EXIT_MRK"getHwKeyHashFromSbeImage: "
+               "err rc=0x%X, plid=0x%X, o_hash=0x%.8X",
                ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err),
-               sha512_to_u32(o_hash), o_secure_version);
+               sha512_to_u32(o_hash));
 
     return err;
 }

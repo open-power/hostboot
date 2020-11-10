@@ -135,45 +135,32 @@ public:
         char* l_databuf = static_cast<char*>(i_pBuffer);
         i_parser.PrintHeading("Target HW Key Hash");
 
-        //***** Version 1 Memory Layout *****
+        //***** Memory Layout *****
         // 4 bytes  : Target HUID
         // 1 byte   : SBE SEEPROM (Primary or Backup)
         // 64 bytes : SHA512_t of Target HW Key Hash
 
-        // **** Version 2 Memory Layout ****
-        // Append this to the end of Version 1:
-        // 1 byte   : Minimum FW Secure Version
+        i_parser.PrintNumber("Target HUID","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
 
-        if (i_version >= 1)
+        uint8_t side = TO_UINT8(l_databuf);
+        l_databuf += sizeof(uint8_t);
+
+        if( side == 0 )
         {
-            i_parser.PrintNumber("Target HUID","%.8lX",TO_UINT32(l_databuf));
-            l_databuf += sizeof(uint32_t);
-
-            uint8_t side = TO_UINT8(l_databuf);
-            l_databuf += sizeof(uint8_t);
-
-            if( side == 0 )
-            {
-                i_parser.PrintNumber("SBE_PRIMARY","%.2X",side);
-            }
-            else if( side == 1 )
-            {
-                i_parser.PrintNumber("SBE_BACKUP","%.2X",side);
-            }
-            else
-            {
-                i_parser.PrintNumber("Unknown SBE","%.2X",side);
-            }
-
-            i_parser.PrintHexDump(l_databuf, UDPARSER_SIZEOF_SHA512_t);
-            l_databuf += UDPARSER_SIZEOF_SHA512_t;
+            i_parser.PrintNumber("SBE_PRIMARY","%.2X",side);
         }
-        if (i_version >= 2)
+        else if( side == 1 )
         {
-            i_parser.PrintNumber("SBE FW Secure Version 0x","%.2lX",TO_UINT8(l_databuf));
-            l_databuf += sizeof(uint8_t);
+            i_parser.PrintNumber("SBE_BACKUP","%.2X",side);
+        }
+        else
+        {
+            i_parser.PrintNumber("Unknown SBE","%.2X",side);
         }
 
+        i_parser.PrintHexDump(l_databuf, UDPARSER_SIZEOF_SHA512_t);
+        l_databuf += UDPARSER_SIZEOF_SHA512_t;
     }
 
 private:
@@ -218,10 +205,6 @@ class UdParserSecuritySettings : public ERRORLOG::ErrlUserDetailsParser
         // 1 byte   : Security Override
         // 1 byte   : Allow Attribute Overrides
 
-        // **** Version 2 Memory Layout ****
-        // Append this to the end of Version 1:
-        // 1 byte   : Minimum FW Secure Version
-
         detailsLayout* l_databuf = static_cast<detailsLayout*>(i_pBuffer);
 
         i_parser.PrintHeading("Security Settings");
@@ -233,11 +216,6 @@ class UdParserSecuritySettings : public ERRORLOG::ErrlUserDetailsParser
                                  l_databuf->secOverride);
             i_parser.PrintNumber("Allow Attribute Overrides","0x%.2X",
                                  l_databuf->allowAttrOverride);
-        }
-        if (i_version >= 2)
-        {
-            i_parser.PrintNumber("Minimum FW Secure Version","0x%.2X",
-                                 l_databuf->minSecureVersion);
         }
     }
 
@@ -252,7 +230,6 @@ class UdParserSecuritySettings : public ERRORLOG::ErrlUserDetailsParser
         uint8_t secAccessBit;
         uint8_t secOverride;
         uint8_t allowAttrOverride;
-        uint8_t minSecureVersion;
     };
 };
 
@@ -294,12 +271,6 @@ class UdParserVerifyInfo : public ERRORLOG::ErrlUserDetailsParser
         // 4*N bytes   : IDs (PNOR id or LidID) multiplied by number of ids
         // 64 bytes    : Measured Hash
         // 64 bytes    : Expected Hash
-
-        // **** Version 2 Memory Layout ****
-        // Append this to the end of Version 1:
-        // 1 byte      : Minimum FW Secure Version
-        // 1 byte      : Input Secure Version
-        // 1 byte      : Container Secure Version
 
         char* l_databuf = static_cast<char*>(i_pBuffer);
         bool l_parseError = false;
@@ -352,20 +323,7 @@ class UdParserVerifyInfo : public ERRORLOG::ErrlUserDetailsParser
             i_parser.PrintHeading("Expected Hash");
             i_parser.PrintHexDump(l_databuf, UDPARSER_SIZEOF_SHA512_t);
             l_databuf += UDPARSER_SIZEOF_SHA512_t;
-
         }
-        if (i_version >= 2)
-        {
-            i_parser.PrintNumber("Minimum FW Secure Version 0x","%.2lX",TO_UINT8(l_databuf));
-            l_databuf += sizeof(uint8_t);
-
-            i_parser.PrintNumber("Input Secure Version 0x","%.2lX",TO_UINT8(l_databuf));
-            l_databuf += sizeof(uint8_t);
-
-            i_parser.PrintNumber("Container Secure Version 0x","%.2lX",TO_UINT8(l_databuf));
-            l_databuf += sizeof(uint8_t);
-        }
-
         } while(0);
 
     }

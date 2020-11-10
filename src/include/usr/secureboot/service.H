@@ -55,7 +55,6 @@ typedef std::vector< std::pair<void*,size_t> > blobPair_t;
 const size_t HASH_PAGE_TABLE_ENTRY_SIZE = 32;
 typedef uint8_t PAGE_TABLE_ENTRY_t[HASH_PAGE_TABLE_ENTRY_SIZE];
 
-const uint8_t INVALID_SECURE_VERSION = 0xFF;
 
 namespace SECUREBOOT
 {
@@ -223,16 +222,11 @@ namespace SECUREBOOT
      * @param[in] i_hwKeyHash  Custom hw keys' hash to test against
      *                         [default = nullptr, use current hw hash key]
      *
-     * @param[in] i_secureVersion  Custom FW Secure Version to test against
-     *                         [default = INVALID_SECURE_VERSION, use internal Secure Version;
-     *                          otherwise, use i_secureVersion]
-     *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t verifyContainer(void * i_container,
                                const RomVerifyIds& i_ids = RomVerifyIds(),
-                               const SHA512_t* i_hwKeyHash = nullptr,
-                               const uint8_t i_secureVersion = INVALID_SECURE_VERSION);
+                               const SHA512_t* i_hwKeyHash = nullptr);
 
     /**
      * @brief Verify component ID in a container header against a reference
@@ -270,14 +264,6 @@ namespace SECUREBOOT
      *                     hash to.
      */
      void getHwKeyHash(SHA512_t o_hash);
-
-    /**
-     * @brief Retrieve the internal Minimum FW Secure Version used to validate
-     *     containers
-     *
-     * @return uint8_t    secure_version
-     */
-     uint8_t getMinimumSecureVersion(void);
 
      /*
       * @brief Hash the concatenation of N Blobs

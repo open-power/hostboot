@@ -197,13 +197,6 @@ class ContainerHeader
          */
         const uint8_t* fakeHeader() const;
 
-        /**
-         *  @brief Returns the container's secure version
-         *
-         *  @return const uint8_t secure version
-         */
-        const uint8_t secureVersion() const;
-
     private:
 
         /**

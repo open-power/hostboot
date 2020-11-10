@@ -71,16 +71,14 @@ errlHndl_t initializeSecureRomManager(void)
  * @brief Verify Signed Container
  */
 errlHndl_t verifyContainer(void * i_container,  const RomVerifyIds& i_ids,
-                           const SHA512_t* i_hwKeyHash,
-                           const uint8_t i_secureVersion)
+                           const SHA512_t* i_hwKeyHash)
 {
     errlHndl_t l_errl = nullptr;
 
     l_errl = Singleton<SecureRomManager>::instance().
                                        verifyContainer(i_container,
                                                        i_ids,
-                                                       i_hwKeyHash,
-                                                       i_secureVersion);
+                                                       i_hwKeyHash);
 
     return l_errl;
 }
@@ -167,15 +165,6 @@ void getHwKeyHash(SHA512_t o_hash)
 {
     return Singleton<SecureRomManager>::instance().getHwKeyHash(o_hash);
 }
-
-/*
- * @brief  Externally available Minimum FW Secure Version retrieval function
- */
-uint8_t getMinimumSecureVersion(void)
-{
-    return Singleton<SecureRomManager>::instance().getMinimumSecureVersion();
-}
-
 
 sbFuncVer_t getSecRomFuncVersion(const sbFuncType_t i_funcType)
 {
@@ -333,8 +322,7 @@ errlHndl_t SecureRomManager::initialize()
  */
 errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                                              const RomVerifyIds& i_ids,
-                                             const SHA512_t* i_hwKeyHash,
-                                             const uint8_t i_secureVersion)
+                                             const SHA512_t* i_hwKeyHash)
 {
     TRACDCOMP(g_trac_secure,ENTER_MRK"SecureRomManager::verifyContainer(): "
               "i_container=%p", i_container);
@@ -366,20 +354,8 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
         }
         else
         {
-            // Use custom hw hash key passed in by the caller
+            // Use custom hw hash key
             memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(SHA512_t));
-        }
-
-        // Set FW Secure Version
-        if (i_secureVersion == INVALID_SECURE_VERSION)
-        {
-            // Use internal system Minimum Secure Version
-            l_hw_parms.log = getMinimumSecureVersion();
-        }
-        else
-        {
-            // Use custom Secure Version passed in by the caller
-            l_hw_parms.log = i_secureVersion;
         }
 
         /*******************************************************************/
@@ -403,6 +379,7 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                                (l_rom_verify_startAddr),
                                l_container,
                                &l_hw_parms);
+
 
         TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
                   "Back from ROM_verify() via call_rom_verify: l_rc=0x%x, "
@@ -450,7 +427,7 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                 ERRORLOG::errlCommit(l_hdrParseErr, RUNTIME_COMP_ID);
 
                 // Add UD data without data needed from Container Header
-                UdVerifyInfo("UNKNOWN", 0, i_ids, {}, {}, 0, 0, 0).addToLog(l_errl);
+                UdVerifyInfo("UNKNOWN", 0, i_ids, {}, {}).addToLog(l_errl);
             }
             else
             {
@@ -467,12 +444,8 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                              l_conHdr.payloadTextSize(),
                              i_ids,
                              l_measuredHash,
-                             *l_conHdr.payloadTextHash(),
-                             getMinimumSecureVersion(),
-                             i_secureVersion,
-                             l_conHdr.secureVersion()
-                             ).addToLog(l_errl);
-
+                             *l_conHdr.payloadTextHash()
+                            ).addToLog(l_errl);
             }
 
             break;
@@ -552,15 +525,6 @@ void SecureRomManager::getHwKeyHash()
     iv_key_hash  = reinterpret_cast<const SHA512_t*>(
                                            g_BlToHbDataManager.getHwKeysHash());
 }
-
-/**
- * @brief Retrieves Minimum FW Secure Version
- */
-uint8_t SecureRomManager::getMinimumSecureVersion()
-{
-    return g_BlToHbDataManager.getMinimumSecureVersion();
-}
-
 
 /**
  * @brief  Retrieve the internal hardware keys' hash from secure ROM object.

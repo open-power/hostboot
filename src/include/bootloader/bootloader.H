@@ -210,10 +210,6 @@ namespace Bootloader{
     /** HW Keys hash is placed in the last 64 bytes of the HBBL */
 #define HW_KEYS_HASH_ADDR (getHRMOR() + HBBL_EXCEPTION_VECTOR_SIZE \
                            + MAX_HBBL_SIZE - 64)
-
-    /** FW Secure Version is placed in byte before HW_KEYS_HASH_ADDR */
-#define SECURE_VERSION_ADDR (HW_KEYS_HASH_ADDR-1)
-
     /** Location of working copy of HBB with ECC */
 #define HBB_ECC_WORKING_ADDR    (getHRMOR() - ( 1*MEGABYTE))
 

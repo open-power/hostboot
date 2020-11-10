@@ -128,10 +128,6 @@ ROM_response ROM_verify( ROM_container_raw* container,
     ROM_sw_sig_raw* sw_sig;
     uint64_t size;
 
-    // params-> log is used to pass in a FW Secure Version to
-    // compare against the container's sw header's fw_secure_version field
-    uint8_t i_fw_secure_version = static_cast<uint8_t>(params->log);
-
     params->log=CONTEXT|BEGIN;
 
     // test for valid container magic number, version, hash & signature
@@ -193,14 +189,6 @@ ROM_response ROM_verify( ROM_container_raw* container,
     // start processing sw header
     header = (ROM_sw_header_raw*) (hw_data->sw_pkey_p
                                    + prefix->sw_key_count*sizeof(ecc_key_t));
-
-    // test for fw secure version - compare what was passed in via
-    // params->log to what the container's sw header has
-    if( header->fw_secure_version < i_fw_secure_version)
-    {
-        FAILED(SECURE_VERSION_TEST,"bad container fw secure version");
-    }
-
     // test for valid header version, hash & signature algorithms (sanity check)
     if(!valid_ver_alg(&header->ver_alg, 0))
     {

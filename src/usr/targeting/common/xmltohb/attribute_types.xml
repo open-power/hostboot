@@ -5893,48 +5893,6 @@
 </attribute>
 
 <attribute>
-  <id>SECURE_VERSION_LOCKIN_POLICY</id>
-  <description>
-      This policy determines if a new FW Secure Version will be locked into
-      the SBE Seeproms during the SBE Update process such that previous
-      versions will no longer be supported.
-      - 0b0 - (Default) Policy Disabled - Do NOT Lock In Secure Version
-      - 0b1 - Policy Enabled - Do Lock In Secure Version
-  </description>
-  <simpleType>
-    <uint8_t>
-      <default>0</default>
-    </uint8_t>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <range>
-    <min>0</min>
-    <max>1</max>
-  </range>
-  <readable/>
-  <writeable/>
-  <no_export/>
-</attribute>
-
-<attribute>
-  <id>SECURE_VERSION_SEEPROM</id>
-  <description>
-      The value of the FW Secure Version found in the SBE Seeprom
-      of the master processor used to boot this node. It will get
-      updated, if necessary, by Hostboot on each IPL.
-  </description>
-  <simpleType>
-    <uint8_t>
-      <default>0</default>
-    </uint8_t>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-  <writeable/>
-  <no_export/>
-</attribute>
-
-<attribute>
     <id>MBA_PORT</id>
     <description>MBA port this DIMM is connected to</description>
     <simpleType>

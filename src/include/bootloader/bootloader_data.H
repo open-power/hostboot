@@ -91,7 +91,7 @@ namespace Bootloader{
         // Object that will be stored where the SBE HB structure indicates
         BlToHbData blToHbData;
         uint8_t bl_reserved5[(512 - sizeof(BlToHbData)) % 16];
-        static_assert( sizeof(BlToHbData) == 173, "BlToHbData "
+        static_assert( sizeof(BlToHbData) == 172, "BlToHbData "
                        "size changed.  Check bootloader_data.H alignment.  "
                        "Fix BlData.pm processing.");
     } blData_t;

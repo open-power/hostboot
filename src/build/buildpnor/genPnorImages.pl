@@ -80,9 +80,8 @@ use constant FIPS_BUILD_FLAG => 0x40000000;
 # Applies to SBE image only
 use constant LAB_SECURITY_OVERRIDE_FLAG => 0x00080000;
 use constant KEY_TRANSITION_FLAG => 0x00000001;
-# Size of HW keys' Hash and Secure Version
+# Size of HW keys' Hash
 use constant HW_KEYS_HASH_SIZE => 64;
-use constant SECURE_VERSION_SIZE => 1;
 
 # Dynamic support for choosing FSP or op-build flag type.
 # Default to OP build
@@ -120,8 +119,6 @@ my $sign_mode = $DEVELOPMENT;
 my $hwKeyHashFile = "";
 my $hb_standalone="";
 my $buildType="";
-my $secureVersionStr="";
-my $secureVersionHbbl = 0xFF; # default - invalid value
 
 # @TODO RTC 170650: Set default to 0 after all environments provide external
 # control over this policy, plus remove '!' from 'lab-security-override'
@@ -144,7 +141,6 @@ GetOptions("binDir:s" => \$bin_dir,
            "lab-security-override!" => \$labSecurityOverride,
            "emit-eccless" => \$emitEccless,
            "build-type:s" => \$buildType,
-           "secure-version:s" => \$secureVersionStr,
            "help" => \$help);
 
 if ($help)
@@ -361,28 +357,11 @@ $SETTINGS .= $testRun ? "Test Mode = Yes\n" : "Test Mode = No\n";
 $SETTINGS .= $secureboot ? "Secureboot = Enabled\n" : "Secureboot = Disabled\n";
 $SETTINGS .= %partitionsToCorrupt && $secureboot ? "Corrupt Partitions: ".Dumper \%partitionsToCorrupt : "";
 $SETTINGS .= $secureboot ? "Sign Mode = $sign_mode\n" : "Sign Mode = NA\n";
-$SETTINGS .= $secureVersionStr ? "Secure Version = $secureVersionStr\n" : "Secure Version was NA, so will use 0\n";
 $SETTINGS .= $key_transition && $secureboot ? "Key Transition Mode = $key_transition\n" : "Key Transition Mode = NA\n";
 $SETTINGS .= "Lab security override (valid for SBE partition only) = ";
 $SETTINGS .= $labSecurityOverride ? "Yes\n" : "No\n";
 $SETTINGS .= "//======================================================//\n\n";
 print $SETTINGS;
-
-# Check if secure version parameter was passed in and add it to the signing command, if necessary
-if ($secureVersionStr eq "")
-{
-    # Without input still write Secure Version 0 to HBBL,
-    # but dont pass in "--security version" to signing tool
-    $secureVersionStr = "0";
-    $secureVersionHbbl = sprintf("%02X",$secureVersionStr);
-}
-else
-{
-    $secureVersionHbbl = sprintf("%02X",$secureVersionStr);
-
-    # Pass this parameter to the signing tool
-    $OPEN_SIGN_REQUEST .= " --security-version $secureVersionStr ";
-}
 
 if ($build_all && $secureboot)
 {
@@ -601,25 +580,23 @@ sub manipulateImages
                     # Ensure there is enough room at the end of the HBBL partition
                     # to store the HW keys' hash.
                     my $hbblRawSize = (-s $bin_file or die "Cannot get size of file $bin_file");
-                    print "HBBL raw size ($bin_file) (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
-                    if ($hbblRawSize > $MAX_HBBL_SIZE - HW_KEYS_HASH_SIZE - SECURE_VERSION_SIZE)
+                    print "HBBL raw size (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
+                    if ($hbblRawSize > $MAX_HBBL_SIZE - HW_KEYS_HASH_SIZE)
                     {
-                        die "HBBL cannot fit Secure Version then HW Keys' Hash (65 bytes) at the end without overwriting real data";
+                        die "HBBL cannot fit HW Keys' Hash (64 bytes) at the end without overwriting real data";
                     }
 
                     # Pad HBBL to max size
                     run_command("cp $bin_file $tempImages{TEMP_BIN}");
                     run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
 
-                    # Add Secure Version then HW key hash to end of HBBL - 65 Bytes
-                    my $insertPtr = (-s $bin_file or die "Cannot get size of file $bin_file")
-                                          - HW_KEYS_HASH_SIZE - SECURE_VERSION_SIZE;
+                    # Add HW key hash to end of HBBL - 64 Bytes
+                    my $hwKeyHashStart = (-s $bin_file or die "Cannot get size of file $bin_file")
+                                          - HW_KEYS_HASH_SIZE;
 
-                    # dd used with seek to add the secure version right before hw keys' hash
-                    # at the end of the hbbl padded bin file
-                    run_command("echo -n -e '\\x$secureVersionHbbl' | dd conv=notrunc of=$bin_file bs=1 seek=\$(($insertPtr))");
-                    $insertPtr += 1; # move it past Secure Version byte
-                    run_command("dd if=$hwKeyHashFile conv=notrunc of=$bin_file bs=1 seek=\$(($insertPtr))");
+                    # dd used with seek to add the hw keys' hash at the end of the hbbl
+                    # padded bin file
+                    run_command("dd if=$hwKeyHashFile conv=notrunc of=$bin_file bs=1 seek=\$(($hwKeyHashStart))");
                 }
 
                 # Header Phase

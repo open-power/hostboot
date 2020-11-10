@@ -120,12 +120,7 @@ namespace Bootloader{
                 g_blData->blToHbData.version = BLTOHB_KEYADDR;
                 break;
             case SBE_BACKDOOR_BIT_ADDED:
-                // This case was setting version to BLTOHB_BACKDOOR,
-                // as that is the lastest SBE-specific case.
-                // However, HB needs to use an even later version,
-                // that is SBE-independent, so setting to BLTOHB_SECURE_VERSION
-                g_blData->blToHbData.version = BLTOHB_SECURE_VERSION;
-
+                g_blData->blToHbData.version = BLTOHB_BACKDOOR;
                 break;
             default:
                 g_blData->blToHbData.version = BLTOHB_SIZE;
@@ -156,11 +151,6 @@ namespace Bootloader{
             g_blData->blToHbData.hwKeysHash = reinterpret_cast<const void *>
                                                             (HW_KEYS_HASH_ADDR);
             g_blData->blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;
-
-            // Set Minimum Secure Version from the 1 byte before HW key hash pointer
-            memcpy(&g_blData->blToHbData.min_secure_version,
-                   reinterpret_cast<const void *>(SECURE_VERSION_ADDR),
-                   sizeof(g_blData->blToHbData.min_secure_version));
 
             // Set HBB header and size
             g_blData->blToHbData.hbbHeader = i_pHbbSrc;
@@ -337,9 +327,6 @@ namespace Bootloader{
             // Use current hw hash key
             memcpy (&l_hw_parms.hw_key_hash, g_blData->blToHbData.hwKeysHash,
                     sizeof(SHA512_t));
-
-            // Use current minimum secure version from the system
-            l_hw_parms.log = g_blData->blToHbData.min_secure_version;
 
             const auto l_container = reinterpret_cast<const ROM_container_raw*>
                                                                  (i_pContainer);

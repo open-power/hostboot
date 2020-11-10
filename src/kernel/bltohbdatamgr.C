@@ -65,11 +65,6 @@ void BlToHbDataManager::print() const
         printkd("-- HW keys' Hash Addr = 0x%lX Size = 0x%lX\n",
                 getHwKeysHashAddr(),
                 iv_data.hwKeysHashSize);
-        if(iv_data.version >= Bootloader::BLTOHB_SECURE_VERSION)
-        {
-            printkd("-- Minimum FW Secure Version  = 0x%02X\n",
-                    iv_data.min_secure_version);
-        }
         printkd("-- HBB header Addr = 0x%lX Size = 0x%lX\n", getHbbHeaderAddr(),
                iv_data.hbbHeaderSize);
         printkd("-- Reserved Size = 0x%lX\n", iv_preservedSize);
@@ -188,16 +183,6 @@ printk("Version=%lX\n",i_data.version);
     if(iv_data.version >= Bootloader::BLTOHB_BACKDOOR)
     {
         iv_data.secBackdoorBit = i_data.secBackdoorBit;
-    }
-
-    if(iv_data.version >= Bootloader::BLTOHB_SECURE_VERSION)
-    {
-        iv_data.min_secure_version = i_data.min_secure_version;
-    }
-    else
-    {
-        // Set to zero as default for older BLTOHB versions
-        iv_data.min_secure_version = 0;
     }
 
     // Size of data that needs to be preserved and pinned.
@@ -327,17 +312,6 @@ const size_t BlToHbDataManager::getHwKeysHashSize() const
 {
     return iv_data.hwKeysHashSize;
 }
-
-const uint8_t BlToHbDataManager::getMinimumSecureVersion() const
-{
-    if(!iv_dataValid)
-    {
-        printk("E> BlToHbDataManager is invalid, cannot access Minimum Secure Version\n");
-        crit_assert(iv_dataValid);
-    }
-    return iv_data.min_secure_version;
-}
-
 
 const void* BlToHbDataManager::getHbbHeader() const
 {

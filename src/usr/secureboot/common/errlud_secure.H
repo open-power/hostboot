@@ -90,16 +90,14 @@ class UdTargetHwKeyHash : public ERRORLOG::ErrlUserDetails
     /**
      *  @brief Constructor
      *
-     *  @param i_target         Processor Target containing HW Keys Hash
-     *  @param i_side           SEEPROM side used on the target:
-     *                          0=SBE_PRIMARY, 1=SBE_BACKUP
-     *  @param i_hash           Target HW Keys Hash represented by SHA512
-     *  @param i_secure_version Target Secure Version
+     *  @param i_target       Processor Target containing HW Keys Hash
+     *  @param i_side         SEEPROM side used on the target:
+     *                        0=SBE_PRIMARY, 1=SBE_BACKUP
+     *  @param i_hash         Target HW Keys Hash represented by SHA512
      */
     UdTargetHwKeyHash(const TARGETING::Target * i_target,
                       const uint8_t i_side,
-                      const SHA512_t i_hash,
-                      const uint8_t i_secure_version);
+                      const SHA512_t i_hash);
 
     /**
      *  @brief Destructor
@@ -172,7 +170,6 @@ class UdSecuritySettings : public ERRORLOG::ErrlUserDetails
             uint8_t secAccessBit;
             uint8_t secOverride;
             uint8_t allowAttrOverride;
-            uint8_t minSecureVersion;
         };
 
 };
@@ -193,18 +190,12 @@ class UdVerifyInfo : public ERRORLOG::ErrlUserDetails
      *                    the blob that is being verified.
      *  @param[in] i_measuredHash  Measured SHA512 Hash
      *  @param[in] i_expectedHash  Expected SHA512 Hash
-     *  @param[in] i_min_secure_version  System Minimum FW Secure Version
-     *  @param[in] i_input_secure_version  Secure Version input to verify function
-     *  @param[in] i_container_secure_version  Secure Version from container header
      */
     UdVerifyInfo(const char* i_compId,
                  const uint64_t i_protectedSize,
                  const RomVerifyIds& i_ids,
                  const SHA512_t& i_measuredHash,
-                 const SHA512_t& i_expectedHash,
-                 const uint8_t i_min_secure_version,
-                 const uint8_t i_input_secure_version,
-                 const uint8_t i_container_secure_version);
+                 const SHA512_t& i_expectedHash);
 
     /**
      *  @brief Destructor

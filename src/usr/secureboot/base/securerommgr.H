@@ -28,7 +28,6 @@
 
 #include <errl/errlentry.H>
 #include <securerom/ROM.H>
-#include <secureboot/service.H>
 #include <utility>
 #include <map>
 
@@ -60,16 +59,11 @@ class SecureRomManager
          * @param[in] i_hwKeyHash  Custom hw keys' hash to test against
          *                         [default = nullptr, use current hw hash key
          *
-         * @param[in] i_secureVersion  Custom FW Secure Version to test against
-         *                             [default = INVALID_SECURE_VERSION, use internal
-         *                             Minimum Secure Version; otherwise, use i_secureVersion]
-         *
          * @return errlHndl_t NULL on success
          */
         errlHndl_t verifyContainer(void * i_container,
                                    const RomVerifyIds& i_ids = RomVerifyIds(),
-                                   const SHA512_t* i_hwKeyHash = nullptr,
-                                   const uint8_t i_secureVersion = INVALID_SECURE_VERSION);
+                                   const SHA512_t* i_hwKeyHash = nullptr);
 
         /**
          * @brief Hash Blob
@@ -91,14 +85,6 @@ class SecureRomManager
          *                     hash to.
          */
         void getHwKeyHash(SHA512_t o_hash);
-
-        /**
-         * @brief Retrieve the internal Minimum FW Secure Version used to validate
-         *     containers
-         *
-         * @return uint8_t    min_secure_version
-         */
-         uint8_t getMinimumSecureVersion(void);
 
         /*
          * @brief Hash the concatenation of N Blobs
