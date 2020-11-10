@@ -336,6 +336,7 @@ typedef struct __attribute__((__packed__))
     PoundWEntry_t           entry[MAXIMUM_CORES];
     PoundWEntry_TgtActBin_t entry_tgt_act_bin[MAXIMUM_CORES];
     PoundWEntry_AltCal_t    entry_alt_cal[MAXIMUM_CORES];
+    vdd_calibration         vdd_cal;
 }
 PoundW_curfits;
 
@@ -350,9 +351,25 @@ typedef struct __attribute__((__packed__))
     uint64_t             ftc_large_droop_mode_reg_setting; //FLMR
     uint64_t             ftc_misc_droop_mode_reg_setting; //FMMR
     uint8_t              calibration_bin;
-    uint8_t              spare[10];
+    uint8_t              mode_setting;
+    uint8_t              spare[9];
 }
 PoundWOther_t;
+
+typedef struct __attribute__((__packed__))
+{
+    uint8_t              dds_calibration_version;
+    uint8_t              padding[3];
+    PoundWDpllSettings_t dpll_settings;
+    uint16_t             droop_freq_resp_reference_mhz;
+    uint64_t             droop_count_control; //DCCR
+    uint64_t             ftc_large_droop_mode_reg_setting; //FLMR
+    uint64_t             ftc_misc_droop_mode_reg_setting; //FMMR
+    uint8_t              calibration_bin;
+    uint8_t              mode_setting;
+    uint8_t              spare[9];
+}
+PoundWOtherPadded_t;
 
 /// #W VPD Structure
 ///
@@ -360,7 +377,6 @@ PoundWOther_t;
 typedef struct __attribute__((__packed__))
 {
     PoundW_curfits          entry[NUM_PV_POINTS];
-    vdd_calibration         vdd_cal[NUM_PV_POINTS];
     PoundWOther_t           other;
 }
 PoundW_t;
@@ -432,7 +448,7 @@ typedef struct
     uint32_t            safe_throttle_idx;
 
     /// #W Entry(DDS)
-    PoundWEntry_t       dds[MAXIMUM_CORES][NUM_PV_POINTS];
+    PoundWEntry_t       dds[NUM_PV_POINTS][MAXIMUM_CORES];
 
     /// The following are needed to generated the Pstate Table to HOMER.
     ResClkSetup_t       resclk;
@@ -526,13 +542,13 @@ typedef struct
     uint32_t frequency_ceiling_khz;
 
     /// #W Alternate Calibration Data
-    PoundWEntry_AltCal_t    dds_alt_cal[MAXIMUM_CORES][NUM_PV_POINTS];
+    PoundWEntry_AltCal_t    dds_alt_cal[NUM_PV_POINTS][MAXIMUM_CORES];
 
     /// #W Target Active Bin Data
-    PoundWEntry_TgtActBin_t dds_tgt_act_bin[MAXIMUM_CORES][NUM_PV_POINTS];
+    PoundWEntry_TgtActBin_t dds_tgt_act_bin[NUM_PV_POINTS][MAXIMUM_CORES];
 
     /// #W Other (DDS Data)
-    PoundWOther_t           dds_other;
+    PoundWOtherPadded_t dds_other;
 
     /// #W VDD Calibration(DDS Data)
     vdd_calibration         vdd_cal[NUM_PV_POINTS];
@@ -730,13 +746,13 @@ typedef struct
 
     //DDS
     /// #W Entry(DDS)
-    PoundWEntry_t       dds[MAXIMUM_CORES][NUM_PV_POINTS];
+    PoundWEntry_t       dds[NUM_PV_POINTS][MAXIMUM_CORES];
 
     /// #W Alternate Calibration Data
-    PoundWEntry_AltCal_t    dds_alt_cal[MAXIMUM_CORES][NUM_PV_POINTS];
+    PoundWEntry_AltCal_t    dds_alt_cal[NUM_PV_POINTS][MAXIMUM_CORES];
 
     /// #W Target Active Bin Data
-    PoundWEntry_TgtActBin_t dds_tgt_act_bin[MAXIMUM_CORES][NUM_PV_POINTS];
+    PoundWEntry_TgtActBin_t dds_tgt_act_bin[NUM_PV_POINTS][MAXIMUM_CORES];
 
     /// #W Other (DDS Data)
     PoundWOther_t   dds_other;

@@ -978,20 +978,56 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         compute_PStateV_I_slope(io_globalppb);
 
         //Copy over the DDS data
-        memcpy(&io_globalppb->dds, &iv_poundW_data.entry, sizeof(PoundWEntry_t)* MAXIMUM_CORES* NUM_PV_POINTS);
-        memcpy(&io_globalppb->dds_alt_cal, &iv_poundW_data.entry[0].entry_alt_cal, sizeof(PoundWEntry_AltCal_t) * MAXIMUM_CORES * NUM_PV_POINTS);
-        memcpy(&io_globalppb->dds_tgt_act_bin, &iv_poundW_data.entry[0].entry_tgt_act_bin, (sizeof(PoundWEntry_TgtActBin_t)* MAXIMUM_CORES * NUM_PV_POINTS));
-        memcpy(&io_globalppb->vdd_cal,  &iv_poundW_data.vdd_cal, (sizeof(((PoundW_t*)0)->vdd_cal)));
-        memcpy(&io_globalppb->vdd_cal,  &iv_poundW_data.vdd_cal, (sizeof(((PoundW_t*)0)->vdd_cal)));
-        memcpy(&io_globalppb->dds_other, &iv_poundW_data.other, (sizeof(((PoundW_t*)0)->other)));
+        for (uint8_t i = 0; i < NUM_OP_POINTS; i++)
+        {
+            for (auto c = 0; c < MAXIMUM_CORES; c++) {
+                io_globalppb->dds[i][c].ddsc.value =  revle64(iv_poundW_data.entry[i].entry[c].ddsc.value);
+                io_globalppb->dds_tgt_act_bin[i][c].target_act_bin.value =  iv_poundW_data.entry[i].entry_tgt_act_bin[c].target_act_bin.value;
+                io_globalppb->dds_alt_cal[i][c].alt_cal.value  =  revle16(iv_poundW_data.entry[i].entry_alt_cal[c].alt_cal.value);
+            }
+            io_globalppb->vdd_cal[i].cal_vdd  =  revle16(iv_poundW_data.entry[i].vdd_cal.cal_vdd); 
+            io_globalppb->vdd_cal[i].alt_cal_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.alt_cal_vdd); 
+            io_globalppb->vdd_cal[i].large_droop_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.large_droop_vdd); 
+            io_globalppb->vdd_cal[i].worst_droop_min_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.worst_droop_min_vdd); 
+            io_globalppb->vdd_cal[i].non_perf_loss_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.non_perf_loss_vdd); 
+        }
+        io_globalppb->dds_other.dds_calibration_version = iv_poundW_data.other.dds_calibration_version;
+        io_globalppb->dds_other.droop_freq_resp_reference_mhz = revle16(iv_poundW_data.other.dds_calibration_version);
+        io_globalppb->dds_other.droop_count_control = revle64(iv_poundW_data.other.droop_count_control);
+        io_globalppb->dds_other.ftc_large_droop_mode_reg_setting = revle64(iv_poundW_data.other.ftc_large_droop_mode_reg_setting);
+        io_globalppb->dds_other.ftc_misc_droop_mode_reg_setting = revle64(iv_poundW_data.other.ftc_misc_droop_mode_reg_setting);
+        io_globalppb->dds_other.calibration_bin = iv_poundW_data.other.calibration_bin;
+        io_globalppb->dds_other.mode_setting = iv_poundW_data.other.mode_setting;
+
+
+#ifndef __HOSTBOOT_MODULE
+        for(auto region(REGION_CF0_CF1); region <= REGION_CF6_CF7; ++region)
+        {
+                for (auto cores = 0; cores < MAXIMUM_CORES; cores++)
+                {
+                    PoundWEntry_t pwe;
+                    pwe.ddsc.value = revle64(io_globalppb->dds[region][cores].ddsc.value);
+                    FAPI_DBG("global_ppb[%s][%u]: 0x%016llx  delay: 0x%04x, %d" 
+                            , region_names[region],cores,
+                            pwe.ddsc.value,
+                            pwe.ddsc.fields.insrtn_dely,
+                            pwe.ddsc.fields.insrtn_dely
+                            );
+                }
+        }
+#endif
+
+        FAPI_INF("DCCR=0x%016lx",iv_poundW_data.other.droop_count_control);
+        FAPI_INF("FLMR=0x%016lx",iv_poundW_data.other.ftc_large_droop_mode_reg_setting);
+        FAPI_INF("FMMR=0x%016lx",iv_poundW_data.other.ftc_misc_droop_mode_reg_setting);
 
         //If ATTR_DDS_BIAS_ENABLE = ON, use the ALT_TRIP_OFFSET, ALT_CAL_ADJ,
         //ALT_DELAY values for each core instead of TRIP_OFFSET, CAL_ADJ, DELAY.
         if (iv_attrs.attr_dds_bias_enable)
         {
-            for (uint8_t i = 0; i < MAXIMUM_CORES; i++)
+            for (uint8_t i = 0; i < NUM_OP_POINTS; i++)
             {
-                for (uint8_t j = 0; j < NUM_OP_POINTS; j++)
+                for (uint8_t j = 0; j < MAXIMUM_CORES; j++)
                 {
                     io_globalppb->dds[i][j].ddsc.fields.trip_offset = io_globalppb->dds_alt_cal[i][j].alt_cal.fields.alt_trip_offset;
                     io_globalppb->dds[i][j].ddsc.fields.insrtn_dely = io_globalppb->dds_alt_cal[i][j].alt_cal.fields.alt_delay;
@@ -1018,15 +1054,12 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = !is_ocs_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_ENABLE] = iv_wof_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_UNDERVOLT_ENABLE] = iv_wov_underv_enabled;
-
-
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE] = iv_wov_overv_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_DDS_COARSE_THROTTLE_ENABLE] = iv_attrs.attr_dds_coarse_thr_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_PMCR_MOST_RECENT_ENABLE] = iv_attrs.attr_pmcr_most_recent_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_DDS_ENABLE] = is_dds_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_TRIP_MODE] = iv_attrs.attr_dds_trip_mode;
         io_globalppb->pgpe_flags[PGPE_FLAG_TRIP_INTERPOLATION_CONTROL] = iv_attrs.attr_dds_trip_interpolation_control;
-
         // turn off voltage movement when the WAR MODE defect exists.
         io_globalppb->pgpe_flags[PGPE_FLAG_STATIC_VOLTAGE_ENABLE] =
                             iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU ? 1 : 0;
@@ -3365,10 +3398,10 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
         FAPI_DBG("get_mvpd_poundW: VDM enable = %d, WOF enable %d",
                 is_dds_enabled(), is_wof_enabled());
 
-        // Exit if both VDM and WOF is disabled
+        // Exit if both DDS and WOF is disabled
         if ((!is_dds_enabled() && !is_wof_enabled()))
         {
-            FAPI_INF("   get_mvpd_poundW: BOTH VDM and WOF are disabled.  Skipping remaining checks");
+            FAPI_INF("   get_mvpd_poundW: BOTH DDS and WOF are disabled.  Skipping remaining checks");
             iv_dds_enabled = false;
             iv_wof_enabled = false;
             iv_wov_underv_enabled = false;
@@ -3405,18 +3438,54 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
             FAPI_INF("attribute ATTR_POUND_W_STATIC_DATA_ENABLE is NOT set");
             // copy the data to the pound w structure from the actual VPD image
             memcpy (&iv_poundW_data, l_ddscBuf->ddscData, sizeof (l_ddscBuf->ddscData));
+#ifndef __HOSTBOOT_MODULE
+            for (uint8_t i = 0; i < NUM_OP_POINTS; i++)
+            {
+                for (uint8_t j = 0; j < 32; j++)
+                {
+                    iv_poundW_data.entry[i].entry[j].ddsc.value = 
+                        revle64(iv_poundW_data.entry[i].entry[j].ddsc.value);
+
+                    iv_poundW_data.entry[i].entry_alt_cal[j].alt_cal.value = 
+                        revle16(iv_poundW_data.entry[i].entry_alt_cal[j].alt_cal.value);
+
+                }
+
+                iv_poundW_data.entry[i].vdd_cal.cal_vdd = 
+                    revle16(iv_poundW_data.entry[i].vdd_cal.cal_vdd);
+                iv_poundW_data.entry[i].vdd_cal.alt_cal_vdd = 
+                    revle16(iv_poundW_data.entry[i].vdd_cal.alt_cal_vdd);
+                iv_poundW_data.entry[i].vdd_cal.large_droop_vdd = 
+                    revle16(iv_poundW_data.entry[i].vdd_cal.large_droop_vdd);
+                iv_poundW_data.entry[i].vdd_cal.worst_droop_min_vdd = 
+                    revle16(iv_poundW_data.entry[i].vdd_cal.worst_droop_min_vdd);
+                iv_poundW_data.entry[i].vdd_cal.worst_droop_max_vdd = 
+                    revle16(iv_poundW_data.entry[i].vdd_cal.worst_droop_max_vdd);
+                iv_poundW_data.entry[i].vdd_cal.non_perf_loss_vdd = 
+                    revle16(iv_poundW_data.entry[i].vdd_cal.non_perf_loss_vdd);
+            }
+
+            iv_poundW_data.other.dpll_settings.value = revle16(iv_poundW_data.other.dpll_settings.value);
+            iv_poundW_data.other.droop_freq_resp_reference_mhz = 
+                revle16(iv_poundW_data.other.droop_freq_resp_reference_mhz);
+            iv_poundW_data.other.droop_count_control = 
+                revle64(iv_poundW_data.other.droop_count_control);
+            iv_poundW_data.other.ftc_large_droop_mode_reg_setting = 
+                revle64(iv_poundW_data.other.ftc_large_droop_mode_reg_setting);
+            iv_poundW_data.other.ftc_misc_droop_mode_reg_setting = 
+                revle64(iv_poundW_data.other.ftc_misc_droop_mode_reg_setting);
+#endif
+
         }
 
         // validate vid values
         bool l_frequency_value_state = 1;
-        iv_poundW_data.other.dpll_settings.value = revle16(iv_poundW_data.other.dpll_settings.value);
         FAPI_INF("iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct);
         FAPI_INF("iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct);
         FAPI_INF(" iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct);
         FAPI_INF("iv_poundW_data.other.dpll_settings.fields.S_N_return_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.S_N_return_3p125pct);
         if ( iv_poundW_data.other.dds_calibration_version)
         {
-            iv_poundW_data.other.dpll_settings.value = revle16(iv_poundW_data.other.dpll_settings.value);
             VALIDATE_FREQUENCY_DROP_VALUES(iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct,
                     iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct,
                     iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct,
@@ -3425,11 +3494,10 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
         }
 
 
-
         if (!l_frequency_value_state)
         {
-            iv_dds_enabled = false;
-            break;
+            FAPI_INF("l_frequency_value_state=0");
+            //iv_dds_enabled = false; // \\todo determine if this check should disable/enable dds
         }
 
         //If we have reached this point, that means DDS is ok to be enabled. Only then we try to
@@ -4073,7 +4141,9 @@ void PlatPmPPB::compute_vpd_pts()
             iv_attr_mvpd_poundV_biased[p].pstate;
     }
 
+    // As this is memory to memory, Endianess correction is not necessary.
     iv_reference_frequency_khz = iv_attrs.attr_pstate0_freq_mhz * 1000;
+//        (iv_operating_points[VPD_PT_SET_BIASED][VPD_PV_CF6].frequency_mhz) * 1000;
 
     FAPI_DBG("Reference into GPPB: LE local Freq=%X (%d);  Freq=%X (%d)",
                 iv_reference_frequency_khz,
@@ -4085,7 +4155,7 @@ void PlatPmPPB::compute_vpd_pts()
     for (auto p = 0; p < NUM_PV_POINTS; p++)
     {
         iv_operating_points[VPD_PT_SET_BIASED][p].pstate =
-            ((((iv_attrs.attr_pstate0_freq_mhz) -
+            ((((iv_attrs.attr_pstate0_freq_mhz)  -
                (iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz)) * 1000) /
              (iv_frequency_step_khz));
 
@@ -4901,6 +4971,46 @@ void PlatPmPPB::compute_dds_slopes(
 {
     uint32_t l_max = 0;
     uint32_t l_min = 0;
+
+
+#ifndef __HOSTBOOT_MODULE
+    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET; ++pt_set)
+    {
+        for(auto region(REGION_CF0_CF1); region <= REGION_CF6_CF7; ++region)
+        {
+            for (auto cores = 0; cores < MAXIMUM_CORES; cores++)
+            {
+                PoundWEntry_t pwe;
+                pwe.ddsc.value = iv_poundW_data.entry[region].entry[cores].ddsc.value;
+                FAPI_DBG("ps_dds_ddsc[%s][%s][%u]: 0x%016llx  delay: 0x%04x, %d", 
+                        vpdSetStr[pt_set], region_names[region],cores,
+                        pwe.ddsc.value,
+                        pwe.ddsc.fields.insrtn_dely,
+                        pwe.ddsc.fields.insrtn_dely
+                        );
+            }
+        }
+    }
+
+    for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET; ++pt_set)
+    {
+        for(auto region(REGION_CF0_CF1); region <= REGION_CF6_CF7; ++region)
+        {
+            for (auto cores = 0; cores < MAXIMUM_CORES; cores++)
+            {
+                PoundWEntry_t pwe;
+                pwe.ddsc.value = revle64(iv_poundW_data.entry[region].entry[cores].ddsc.value);
+                FAPI_DBG("ps_dds_ddsc[%s][%s][%u]: 0x%016llx  delay: 0x%04x, %d", 
+                        vpdSetStr[pt_set], region_names[region],cores,
+                        pwe.ddsc.value,
+                        pwe.ddsc.fields.insrtn_dely,
+                        pwe.ddsc.fields.insrtn_dely
+                        );
+            }
+        }
+    }
+#endif
+
     for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET; ++pt_set)
     {
         for(auto region(REGION_CF0_CF1); region <= REGION_CF6_CF7; ++region)
@@ -4916,10 +5026,11 @@ void PlatPmPPB::compute_dds_slopes(
                                 iv_operating_points[pt_set][region + 1].pstate)
                            );
 
-                FAPI_DBG("ps_dds_delay_slopes [%s][%s] 0x%04x %d",
-                        vpdSetStr[pt_set], region_names[region],
+                FAPI_DBG("ps_dds_delay_slopes: [%s][%s][%u] 0x%04x %d",
+                        vpdSetStr[pt_set], region_names[region],cores,
                         revle16(o_gppb->ps_dds_delay_slopes[pt_set][cores][region]),
-                        revle16(o_gppb->ps_dds_delay_slopes[pt_set][cores][region]));
+                        revle16(o_gppb->ps_dds_delay_slopes[pt_set][cores][region])
+                        );
             }
 
             for (uint8_t dds_cnt = TRIP_OFFSET; dds_cnt < NUM_POUNDW_DDS_FIELDS; ++dds_cnt)
