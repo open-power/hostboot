@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -50,6 +50,7 @@ my $g_TOCEyeCatch = "part";
 my $testRun = 0;
 my $g_fpartCmd = "";
 my $g_fcpCmd = "";
+my $g_jailCmd ="";
 my %sidelessSecFilled = ();
 my %SideOptions = (
         A => "A",
@@ -100,11 +101,21 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
         $editedLayoutLocation = $ARGV[++$i];
         trace(2, "Location where the edited layout file will be placed: $editedLayoutLocation");
     }
+    elsif($ARGV[$i] =~ /--jailCmd/) {
+        $g_jailCmd = $ARGV[++$i];
+    }
     else {
         traceErr("Unrecognized Input: $ARGV[$i]");
         exit 1;
 	#Error!!
     }
+}
+
+# Prepend the jail command to the fpart and fcp commands
+if($g_jailCmd ne "")
+{
+    $g_fpartCmd = "$g_jailCmd $g_fpartCmd";
+    $g_fcpCmd = "$g_jailCmd $g_fcpCmd";
 }
 
 ############################## Begin Actions ##################################

@@ -135,6 +135,7 @@ my $hb_standalone="";
 my $buildType="";
 my $editedLayoutLocation="";
 my $secureVersionStr="";
+my $jailCmd="";
 my $secureVersionHbbl = 0xFF; # default - invalid value
 
 # @TODO RTC 170650: Set default to 0 after all environments provide external
@@ -160,6 +161,7 @@ GetOptions("binDir:s" => \$bin_dir,
            "build-type:s" => \$buildType,
            "editedLayoutLocation:s" => \$editedLayoutLocation,
            "secure-version:s" => \$secureVersionStr,
+           "jail-cmd:s" => \$jailCmd,
            "help" => \$help);
 
 if ($help)
@@ -952,7 +954,14 @@ sub manipulateImages
             # ECC Phase
             if( ($sectionHash{$layoutKey}{ecc} eq "yes") )
             {
-                run_command("ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
+                if($jailCmd eq "")
+                {
+                    run_command("ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
+                }
+                else
+                {
+                    run_command("$jailCmd ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
+                }
             }
             else
             {
