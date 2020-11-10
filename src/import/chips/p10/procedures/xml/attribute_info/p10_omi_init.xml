@@ -230,8 +230,7 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
       Selects the settings for DSTLFIR and USTLFIR channel fail FIRs
-      Default: LOCAL_XSTOP (channel based FIRs will cause unit checkstop)
-      Lab/Cronus users may want XSTOP to help debug channel fails
+      Default: XSTOP (channel based FIRs will cause checkstop)
   </description>
   <valueType>uint8</valueType>
   <enum>
@@ -240,7 +239,7 @@
     LOCAL_XSTOP = 0x02,
     RECOVERABLE = 0x03
   </enum>
-  <default>0x02</default>
+  <default>XSTOP</default>
   <platInit/>
   <writeable/>
   <mssAccessorName>omi_channel_fail_action</mssAccessorName>
