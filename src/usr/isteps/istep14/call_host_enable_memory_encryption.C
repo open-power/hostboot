@@ -51,17 +51,16 @@
 #include <secureboot/service.H>
 #include <arch/ppc.H>
 #include <memory>
+#include <algorithm>
 #include <scom/scomif.H>
 
 // HWP
 #include <p10_ncu_enable_darn.H>
-#include <p10_init_mem_encryption.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <isteps/hwpisteperror.H>
 
 // SCOM definitions
 #include <p10_scom_mcc.H>
-#include <p10_scom_proc.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -120,7 +119,6 @@ static void addRngFFDC(const errlHndl_t i_errlog,
     ErrlUserDetailsString(msg).addToLog(i_errlog);
 }
 
-using namespace scomt::proc;
 using namespace scomt::mcc;
 
 /** @brief Generate a 64-bit random number with the DARN instruction.
@@ -184,68 +182,6 @@ static errlHndl_t hardware_random64(const Target* const i_core,
         errl->addHwCallout(i_core, SRCI_PRIORITY_MED, NO_DECONFIG, GARD_NULL);
         errl->addProcedureCallout(EPUB_PRC_HB_CODE, SRCI_PRIORITY_LOW);
         addRngFFDC(errl, i_core, i_nx);
-    }
-
-    return errl;
-}
-
-/* @brief Determine whether memory encryption should be enabled.
- *
- * @param[in] i_procs    Processor targets to consider
- * @param[out] o_enable  True if memory encryption should be enabled on
- *                       all given processors, false otherwise.
- * @return errlHndl_t    Error if any, otherwise nullptr.
- */
-static errlHndl_t should_enable_memory_encryption(TargetHandleList const i_procs,
-                                                  bool& o_enable)
-{
-    errlHndl_t errl = nullptr;
-
-    o_enable = true;
-
-    // If any processor disables encryption, then we won't enable it on any
-    // processor.
-    for (const auto proc : i_procs)
-    {
-        bool encryption_export_controlled = false;
-
-        // Check for export controls on memory encryption
-        {
-            // Read the Export Control Status register to check whether we're
-            // allowed to use cryptography.
-            uint64_t export_ctl = 0;
-            size_t export_ctl_size = sizeof(export_ctl);
-            errl = deviceRead(proc,
-                              &export_ctl,
-                              export_ctl_size,
-                              DEVICE_SCOM_ADDRESS(TP_TPCHIP_PIB_OTP_OTPC_M_EXPORT_REGL_STATUS));
-
-            if (errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"Memory encryption: Failed to read export status SCOM register");
-                break;
-            }
-
-            const uint64_t EXPORT_STATUS_TP_MC_ALLOW_CRYPTO_DC_MASK
-                = 1ull << (63 - TP_TPCHIP_PIB_OTP_OTPC_M_EXPORT_REGL_STATUS_TP_MC_ALLOW_CRYPTO_DC);
-
-            encryption_export_controlled = (export_ctl & EXPORT_STATUS_TP_MC_ALLOW_CRYPTO_DC_MASK) == 0;
-        }
-
-        if (encryption_export_controlled)
-        {
-            // Do not enable encryption if export controls are in place on any
-            // processor.
-            o_enable = false;
-        }
-        else
-        {
-            // If no export controls are in place, then check whether this
-            // processor's attribute disables encryption.
-            o_enable = o_enable && (proc->getAttr<ATTR_PROC_MEMORY_ENCRYPTION_ENABLED>()
-                                    != PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED);
-        }
     }
 
     return errl;
@@ -374,65 +310,48 @@ static errlHndl_t enable_memory_encryption()
     /// eligible MCC target.
 
     TargetHandleList encrypt_mccs;
-    bool enable_encryption { };
+
+    Target* const node = UTIL::getCurrentNodeTarget();
+
+    TargetHandleList procs;
+    getChildAffinityTargetsByState(procs,
+                                   node,
+                                   CLASS_NA,
+                                   TYPE_PROC,
+                                   UTIL_FILTER_FUNCTIONAL);
+
+    // Check the MEMORY_ENCRYPTION_ENABLED attribute on all function procs
+    const bool enable_encryption
+        = std::accumulate(begin(procs), end(procs), true,
+                          [](const bool enable, const Target* const t)
+                          {
+                              return enable && t->getAttr<ATTR_PROC_MEMORY_ENCRYPTION_ENABLED>();
+                          });
 
     do
     {
 
-    Target* const node = UTIL::getCurrentNodeTarget();
-
-    {
-        TargetHandleList procs;
-        getChildAffinityTargetsByState(procs,
-                                       node,
-                                       CLASS_NA,
-                                       TYPE_PROC,
-                                       UTIL_FILTER_FUNCTIONAL);
-
-        errl = should_enable_memory_encryption(procs, enable_encryption);
-
-        if (errl)
-        {
-            break;
-        }
-
-        if (enable_encryption)
-        {
-            // Set up the encryption SCOMs
-            Target* failproc = nullptr;
-            errl = hwp_for_each(p10_init_mem_encryption, procs, &failproc);
-
-            if (errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "Memory encryption: p10_init_mem_encryption failed on processor 0x%08x",
-                          get_huid(failproc));
-                break;
-            }
-
-            // Collect a list of MCCs from each PROC on this node if encryption
-            // is enabled.
-            getChildAffinityTargetsByState(encrypt_mccs,
-                                           node,
-                                           CLASS_NA,
-                                           TYPE_MCC,
-                                           UTIL_FILTER_FUNCTIONAL);
-        }
-    }
-
-    if (!enable_encryption)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Memory encryption: Encryption disabled on node 0x%08x, not initializing keys",
-                  get_huid(node));
-        break;
-    }
-    else
+    if (enable_encryption)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Memory encryption: Initializing keys for a total of %lu MCCs on node 0x%08x",
                   encrypt_mccs.size(),
                   get_huid(node));
+
+        // Collect a list of MCCs from each PROC on this node if encryption
+        // is enabled.
+        getChildAffinityTargetsByState(encrypt_mccs,
+                                       node,
+                                       CLASS_NA,
+                                       TYPE_MCC,
+                                       UTIL_FILTER_FUNCTIONAL);
+    }
+    else
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Memory encryption: Encryption disabled on node 0x%08x, not initializing keys",
+                  get_huid(node));
+        break;
     }
 
     // Set up the master core for DARN and migrate this task there so that the
