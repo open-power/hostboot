@@ -75,6 +75,10 @@ const ScomSwitches forceMMIOScom = {.useFsiScom = 0, .useXscom = 0,
                                    .useInbandScom = 1, .useSbeScom = 0,
                                    .useI2cScom = 0};
 
+const ScomSwitches forceSBEScom = {.useFsiScom = 0, .useXscom = 0,
+                                   .useInbandScom = 0, .useSbeScom = 1,
+                                   .useI2cScom = 0};
+
 #define FAIL_TEST_RC(TARGET, STRING) \
 l_fails++; \
 TS_FAIL(STRING , \
@@ -230,7 +234,7 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_firstExpChip,
-                                "testExpscomI2c>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                                "testExpscomI2c>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x");
 
                 }
 
@@ -243,7 +247,7 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_lastExpChip,
-                              "testExpscomI2c>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                              "testExpscomI2c>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x");
                 }
 
 
@@ -259,14 +263,14 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_firstExpChip,
-                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                                "testExpscomI2c>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x");
                 }
 
                 l_tests++;
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomI2c>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             get_huid(l_firstExpChip));
@@ -284,14 +288,14 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_lastExpChip,
-                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                                "testExpscomI2c>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x");
                 }
 
                 l_tests++;
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomI2c>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             get_huid(l_lastExpChip));
@@ -321,7 +325,7 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_firstMemPort,
-                                "testExpscomI2c>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                                "testExpscomI2c>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x");
 
                 }
 
@@ -334,7 +338,7 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_lastMemPort,
-                              "testExpscomI2c>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                              "testExpscomI2c>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x");
                 }
 
 
@@ -350,14 +354,14 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_firstMemPort,
-                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                                "testExpscomI2c>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x");
                 }
 
                 l_tests++;
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomI2c>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             get_huid(l_firstMemPort));
@@ -375,14 +379,14 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_lastMemPort,
-                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                                "testExpscomI2c>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x");
                 }
 
                 l_tests++;
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomI2c>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             get_huid(l_lastMemPort));
@@ -483,7 +487,7 @@ public:
                 if(l_err)
                 {
                   FAIL_TEST_ERRL(l_firstExpChip,
-                            "testExpscomI2cPlatform>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                            "testExpscomI2cPlatform>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x");
 
                 }
 
@@ -495,7 +499,7 @@ public:
                 if(l_err)
                 {
                   FAIL_TEST_ERRL(l_firstExpChip,
-                                "testExpscomI2cPlatform>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                                "testExpscomI2cPlatform>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x");
 
                 }
                 // Flush scom buffers so it doesnt mess up next test
@@ -510,14 +514,14 @@ public:
                 if(l_err)
                 {
                   FAIL_TEST_ERRL(l_firstExpChip,
-                            "testExpscomI2cPlatform>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X")
+                            "testExpscomI2cPlatform>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x")
                 }
 
                 l_tests++;
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                   l_fails++;
-                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                         l_testEntry.data,
                         l_scom_buffer(),
                         get_huid(l_firstExpChip));
@@ -536,14 +540,14 @@ public:
                 if(l_err)
                 {
                   FAIL_TEST_ERRL(l_firstExpChip,
-                                 "testExpscomI2cPlatform>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X")
+                                 "testExpscomI2cPlatform>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x")
                 }
 
                 l_tests++;
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                   l_fails++;
-                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                           l_testEntry.data,
                           l_scom_buffer(),
                           get_huid(l_firstExpChip));
@@ -641,7 +645,7 @@ public:
                 if(l_rc)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomMmio>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomMmio>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_firstExpChip));
@@ -657,7 +661,7 @@ public:
                 if(l_rc)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomMmio>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomMmio>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_lastExpChip));
@@ -676,7 +680,7 @@ public:
                 if(l_rc)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomMmio>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomMmio>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_firstExpChip));
@@ -688,7 +692,7 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                    l_fails++;
-                    TS_FAIL("testExpscomMmio>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             get_huid(l_firstExpChip));
@@ -707,7 +711,7 @@ public:
                 if(l_rc)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomMmio>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomMmio>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_lastExpChip));
@@ -719,7 +723,7 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomMmio>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             get_huid(l_lastExpChip));
@@ -828,7 +832,7 @@ public:
                 if(l_rc)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomCombined>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_firstExpChip));
@@ -842,7 +846,7 @@ public:
                 if(l_rc)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomCombined>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_lastExpChip));
@@ -859,7 +863,7 @@ public:
                 if(l_rc)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomCombined>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_firstExpChip));
@@ -869,7 +873,7 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             get_huid(l_firstExpChip));
@@ -899,7 +903,7 @@ public:
                 if(l_rc)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomCombined>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_lastExpChip));
@@ -909,7 +913,189 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                            l_testEntry.data,
+                            l_scom_buffer(),
+                            get_huid(l_lastExpChip));
+                }
+            }
+
+            // Set ATTR_SCOM_SWITCHES back to their original values
+            l_firstExpChip->setAttr<ATTR_SCOM_SWITCHES>(first_ocmb_info);
+            l_lastExpChip->setAttr<ATTR_SCOM_SWITCHES>(last_ocmb_info);
+
+            // << atomic section
+            mutex_unlock(iv_serializeTestMutex);
+        }while(0);
+
+        TRACFCOMP(g_trac_expscom, "<< Exit  testExpscomCombined");
+#endif
+        return;
+    }
+
+    /**
+     * @brief EXPSCOM test SBE
+     *        Combine I2C and MMIO writes to verify that we get consistent
+     *        results using SBE get scom to the OCMBs
+     */
+    void testExpscomSbe(void)
+    {
+// Only MMIO scoms supported at runtime, i2c not supported
+#ifndef __HOSTBOOT_RUNTIME
+        TargetHandleList l_explorerList;
+        uint32_t l_tests = 0;
+        uint32_t l_fails = 0;
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+        fapi2::buffer<uint64_t> l_scom_buffer;
+
+        TRACFCOMP(g_trac_expscom, ">> Enter  testExpscomSbe");
+
+        do{
+            if (!iv_serializeTestMutex)
+            {
+                TS_FAIL("iv_serializedTestMutex is not setup");
+                break;
+            }
+
+            // Get the system's procs
+            getAllChips( l_explorerList,
+                         TYPE_OCMB_CHIP,
+                         true ); // true: return functional OCMBs
+
+            if(l_explorerList.size() == 0 )
+            {
+                TS_FAIL("No OCMB targets found, skipping testExpscomSbe");
+                break;
+            }
+
+            auto l_firstExpChip = l_explorerList.front();
+            auto l_lastExpChip  = l_explorerList.back();
+
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
+                                l_firstExpChip_fapi(l_firstExpChip);
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
+                                l_lastExpChip_fapi(l_lastExpChip);
+
+            auto first_ocmb_info =
+                    l_firstExpChip->getAttr<ATTR_SCOM_SWITCHES>();
+            auto last_ocmb_info  =
+                    l_lastExpChip->getAttr<ATTR_SCOM_SWITCHES>();
+
+            // Inband operations can't be run at the same time
+            // atomic section >>
+            mutex_lock(iv_serializeTestMutex);
+
+            // Loop through table for first and last OCMB, test writing
+            // scoms with mmio and i2c and reading the value back with
+            // sbe scoms
+            for( uint32_t l_num=0; l_num < g_expscomAddrTableSz; l_num++)
+            {
+                testExpscomAddrData l_testEntry = g_expscomAddrTable[l_num];
+
+                if(l_testEntry.addr & mss::exp::i2c::IBM_SCOM_INDICATOR)
+                {
+                    l_scom_buffer.insert<0,64,0,uint64_t>(l_testEntry.data);
+                }
+                else
+                {
+                    l_scom_buffer.insert<32,32,0,uint32_t>(l_testEntry.data);
+                }
+
+                // ODD tests  : first target writes MMIO, last target writes I2C
+                // EVEN tests : first target writes I2C, last target writes MMIO
+                if(l_num % 2)
+                {
+                    l_firstExpChip->setAttr<ATTR_SCOM_SWITCHES>(forceMMIOScom);
+                    l_lastExpChip->setAttr<ATTR_SCOM_SWITCHES>(forceI2CScom);
+                }
+                else
+                {
+                    l_firstExpChip->setAttr<ATTR_SCOM_SWITCHES>(forceI2CScom);
+                    l_lastExpChip->setAttr<ATTR_SCOM_SWITCHES>(forceMMIOScom);
+                }
+
+                // putScom to first OCMB
+                l_rc = put_scom(l_firstExpChip_fapi,
+                                l_testEntry.addr,
+                                l_scom_buffer);
+                l_tests++;
+                if(l_rc)
+                {
+                    l_fails++;
+                    TS_FAIL("testExpscomSbe>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x",
+                            l_testEntry.data,
+                            l_testEntry.addr,
+                            get_huid(l_firstExpChip));
+                }
+
+                // putScom to last OCMB
+                l_rc = put_scom(l_lastExpChip_fapi,
+                                l_testEntry.addr,
+                                l_scom_buffer);
+                l_tests++;
+                if(l_rc)
+                {
+                    l_fails++;
+                    TS_FAIL("testExpscomSbe>> Failed putScom writing 0x%016lx to 0x%08x on target w/ huid 0x%08x",
+                            l_testEntry.data,
+                            l_testEntry.addr,
+                            get_huid(l_lastExpChip));
+                }
+
+                // Always read the results back with SBE scoms
+                l_firstExpChip->setAttr<ATTR_SCOM_SWITCHES>(forceSBEScom);
+                l_lastExpChip->setAttr<ATTR_SCOM_SWITCHES>(forceSBEScom);
+
+
+                // Flush scom buffer so it doesnt mess up next test
+                l_scom_buffer.flush<0>();
+
+                // getScom to first OCMB
+                l_rc = get_scom(l_firstExpChip_fapi,
+                                l_testEntry.addr,
+                                l_scom_buffer);
+                l_tests++;
+                if(l_rc)
+                {
+                    l_fails++;
+                    TS_FAIL("testExpscomSbe>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x",
+                            l_testEntry.data,
+                            l_testEntry.addr,
+                            get_huid(l_firstExpChip));
+                }
+
+                l_tests++;
+                if(l_scom_buffer() != l_testEntry.data)
+                {
+                    l_fails++;
+                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                            l_testEntry.data,
+                            l_scom_buffer(),
+                            get_huid(l_firstExpChip));
+                }
+
+                // Flush scom buffer so it doesnt mess up next test
+                l_scom_buffer.flush<0>();
+
+                // getScom to last OCMB
+                l_rc = get_scom(l_lastExpChip_fapi,
+                                l_testEntry.addr,
+                                l_scom_buffer);
+                l_tests++;
+                if(l_rc)
+                {
+                    l_fails++;
+                    TS_FAIL("testExpscomSbe>> Failed getScom reading 0x%016lx to 0x%08x on target w/ huid 0x%08x",
+                            l_testEntry.data,
+                            l_testEntry.addr,
+                            get_huid(l_lastExpChip));
+                }
+
+                l_tests++;
+                if(l_scom_buffer() != l_testEntry.data)
+                {
+                    l_fails++;
+                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             get_huid(l_lastExpChip));
