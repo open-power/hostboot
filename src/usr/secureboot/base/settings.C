@@ -235,6 +235,11 @@ namespace SECUREBOOT
                 ERRL_GETPLID_SAFE(pError),
                 ERRL_GETEID_SAFE(pError),
                 ERRL_GETRC_SAFE(pError));
+
+            pError->addHwCallout(i_pTarget,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 HWAS::DELAYED_DECONFIG,
+                                 HWAS::GARD_NULL);
         }
 
         return pError;
