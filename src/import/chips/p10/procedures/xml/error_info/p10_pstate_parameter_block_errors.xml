@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -672,4 +672,14 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_MULTINODE_PSTATE0_MISMATCH</rc>
+    <description> THere is a mismatch in pstate0 value when we 
+    compared with different node pstate0 values
+    </description>
+    <ffdc>LOCAL_PSTATE0_FREQ</ffdc>
+    <ffdc>SYSTEM_PSTATE0_FREQ</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+
 </hwpErrors>
