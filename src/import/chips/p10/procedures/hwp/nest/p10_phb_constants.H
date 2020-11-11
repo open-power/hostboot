@@ -32,6 +32,8 @@
 // *HWP Level: 3
 // *HWP Consumed by: Cronus/Lab
 
+// EKB-Mirror-To: hostboot
+
 #ifndef _P10_PHB_CONSTANTS_H_
 #define _P10_PHB_CONSTANTS_H_
 
@@ -176,7 +178,11 @@ extern "C"
 //PHB HV Register field/bit definitions
     const uint32_t PHB_HV_1A00_PHYSICAL_LINK_WIDTH_START_BIT   = 40;
     const uint32_t PHB_HV_1A00_PHYSICAL_LINK_WIDTH_NUM_OF_BITS = 6;
-    const uint32_t PHB_HV_1A10_HP_PERST_BIT            = 3;
+    const uint32_t PHB_HV_1A10_CFG_CORE_RESET_BIT       = 0;
+    const uint32_t PHB_HV_1A10_PDL_PTL_RESET_BIT        = 1;
+    const uint32_t PHB_HV_1A10_PBL_RESET_BIT            = 2;
+    const uint32_t PHB_HV_1A10_HP_PERST_BIT             = 3;
+    const uint32_t PHB_HV_1A10_PIPE_RESETN_BIT          = 4;
     const uint32_t PHB_HV_1A30_TL_EC10_LINKACTIVE_BIT      = 8;
     const uint32_t PHB_HV_1A40_TL_EC10_LINKACTIVE_BIT      = 23;
     const uint32_t PHB_HV_1A20_HP_PRESENCE_BIT         = 10;

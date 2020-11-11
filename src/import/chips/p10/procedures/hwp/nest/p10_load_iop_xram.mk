@@ -25,6 +25,9 @@
 PROCEDURE=p10_load_iop_xram
 OBJS+=p10_iop_xram_utils.o
 OBJS+=p10_pcie_scominit.o
+OBJS+=p10_phb_hv_access.o
+OBJS+=p10_phb_hv_utils.o
+OBJS+=p10_pcie_utils.o
 lib$(PROCEDURE)_DEPLIBS+=p10_ipl_image
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/utils/imageProcs)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/common/utils/imageProcs)

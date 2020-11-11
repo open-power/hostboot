@@ -33,6 +33,9 @@
 /// *HWP Level:
 /// *HWP Consumed by: FSP
 /// ---------------------------------------------------------------------------
+
+// EKB-Mirror-To: hostboot
+
 #ifndef _P10_PHB_HV_UTILS_H_
 #define _P10_PHB_HV_UTILS_H_
 

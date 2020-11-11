@@ -75,13 +75,42 @@ extern "C"
 /// @brief p10_load_iop_override procedure
 ///
 /// Initializes CReg Overrides through the CR Parallel Interface
-/// Fucntion needs to be called when phy is out of reset in proc_load_iop_xram
+/// Function needs to be called when phy is out of reset in proc_load_iop_xram
 ///
 /// @param[in] i_target Reference to processor chip target
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 
     fapi2::ReturnCode p10_load_iop_override(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+
+///
+/// @brief p10_load_rtrim_override procedure
+///
+/// Initializes CReg Overrides through the CR Parallel Interface
+/// Function needs to be called when phy is out of reset in proc_load_iop_xram
+///
+/// @param[in] i_target Reference to processor chip target
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+
+    fapi2::ReturnCode p10_load_rtrim_override(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+
+///
+/// @brief p10_verify_iop_fw procedure
+///
+/// Reads FW version via CR Parallel Interface and compares with HW image
+/// version information
+/// Function needs to be called when phy is out of reset in proc_load_iop_xram
+///
+/// @param[in] i_target Reference to processor chip target
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+
+    fapi2::ReturnCode p10_verify_iop_fw(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 

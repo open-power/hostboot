@@ -44,6 +44,7 @@
 
 //@TODO: RTC 214852 - Use SCOM accessors, remove workaround code
 
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -60,6 +61,7 @@ fapi2::ReturnCode p10_load_iop_xram(
     uint8_t* l_xramImgPtr = NULL;
     uint8_t* l_xramFwDataPtr = NULL;
     uint32_t l_xramFwSize = 0;
+
 
     // Get PEC multicast target
     auto l_target_mcast = i_target.getMulticast<fapi2::TARGET_TYPE_PEC>(fapi2::MCGROUP_GOOD_PCI);
@@ -117,6 +119,11 @@ fapi2::ReturnCode p10_load_iop_xram(
     FAPI_TRY(doPhyReset(l_target_mcast),
              "p10_load_iop_xram: doPhyReset returns an error.");
 
+    // Write CReg overrides through the CR Parallel Interface
+    // This is called here because phy reset has to be deasserted for CReg access
+    // Do this after PHY Reset and preferablly before ext_ld_done.
+    FAPI_TRY(p10_load_iop_override(i_target));
+
     // Use multicast PEC target to load PCIE FW to all PECs
     // Loop to load to all IOP XRAM (iop_top0/1, phy0/1)
     for (uint8_t l_top = 0; l_top < NUM_OF_IO_TOPS; l_top++)
@@ -164,9 +171,9 @@ fapi2::ReturnCode p10_load_iop_xram(
                  "p10_load_iop_xram: enableXramScrubber returns an error.");
     }
 
-    // Write CReg overrides through the CR Parallel Interface
-    // This is called here because phy reset has to be deasserted for CReg access
-    FAPI_TRY(p10_load_iop_override(i_target));
+    FAPI_TRY(p10_load_rtrim_override(i_target));
+
+    FAPI_TRY(p10_verify_iop_fw(i_target));
 
 fapi_try_exit:
     FAPI_DBG("End");

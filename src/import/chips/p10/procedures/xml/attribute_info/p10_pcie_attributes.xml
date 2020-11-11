@@ -266,4 +266,35 @@
       0xFFFFFFC000000000
     </default>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_FW_VERSION_0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Synopsis IOP FW Version Register 0 value
+      creator: p10_io_load_ppe
+      consumer: p10_pcie_config, p10_pcie_scominit, p10_load_iop_xram
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <default>
+      0x1100
+    </default>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_FW_VERSION_1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Synopsis IOP FW Version Register 1 value
+      creator: p10_io_load_ppe
+      consumer: p10_pcie_config, p10_pcie_scominit, p10_load_iop_xram
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <default>
+      0x033A
+    </default>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

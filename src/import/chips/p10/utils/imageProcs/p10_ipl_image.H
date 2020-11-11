@@ -2064,12 +2064,14 @@ typedef enum
 typedef enum
 {
     P9_XIP_SECTION_IOPXRAM_IOP_FW  = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTIONS_IOPXRAM        = P9_XIP_SECTIONS_PLUS(1) // # sections
+    P9_XIP_SECTION_IOPXRAM_VER     = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTIONS_IOPXRAM        = P9_XIP_SECTIONS_PLUS(2) // # sections
 } p9_xip_section_iopxram_t;
 
 #define P9_XIP_SECTION_NAMES_IOPXRAM(var)        \
-    P9_XIP_SECTION_NAMES(var,                  \
-                         ".iop_fw")
+    P9_XIP_SECTION_NAMES(var,                    \
+                         ".iop_fw",              \
+                         ".iop_fw_ver")
 
 #endif  // ifndef __ASSEMBLER__
 

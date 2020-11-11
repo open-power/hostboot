@@ -44,6 +44,8 @@
 #include <p10_scom_phb.H>
 #include <p10_fbc_utils.H>
 #include <p10_iop_xram_utils.H>
+#include <p10_phb_hv_access.H>
+#include <p10_phb_hv_utils.H>
 // Cronus only
 #if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
     #include <p10_pcie_utils.H>
@@ -61,6 +63,10 @@ const uint64_t PIPEDOUTCTL0_OFFSET = 20;
 const uint64_t NANO_SEC_DELAY = 20000;
 const uint64_t SIM_CYC_DELAY = 512;
 
+// July 2020 FW overrides
+const uint16_t FW_VER_0_JUL_2020 = 0x1100;
+const uint16_t FW_VER_1_JUL_2020 = 0x033A;
+
 const uint8_t FAST_RX_CONT_CAL_ADAPT_BIT = 60;
 const uint64_t  RAWLANEAONN_DIG_FAST_FLAGS_REG[NUM_OF_INSTANCES] =
 {
@@ -68,6 +74,47 @@ const uint64_t  RAWLANEAONN_DIG_FAST_FLAGS_REG[NUM_OF_INSTANCES] =
     0x8001702B0801113F,
     0x8000702B0801153F,
     0x8001702B0801153F,
+};
+
+// October 2020 FW overrides
+const uint16_t FW_VER_0_OCT_2020 = 0x2002;
+const uint16_t FW_VER_1_OCT_2020 = 0x00D2;
+
+const uint8_t AFE_RTRIM_VAL = 0;
+const uint8_t AFE_RTRIM_START = 62;
+const uint8_t AFE_RTRIM_LEN = 2;
+const uint8_t SCRATCH_15_START = 48;
+const uint8_t SCRATCH_15_LEN = 16;
+const uint64_t  RAWLANEN_DIG_FSM_FW_SCRATCH_15[NUM_OF_INSTANCES] =
+{
+    0x800060A30801113F,
+    0x800160A30801113F,
+    0x800060A30801153F,
+    0x800160A30801153F,
+};
+const uint64_t  RAWLANEAONN_DIG_AFE_RTRIM[NUM_OF_INSTANCES] =
+{
+    0x8000712A0801113F,
+    0x8001712A0801113F,
+    0x8000712A0801153F,
+    0x8001712A0801153F,
+};
+
+// FW version registers
+const uint64_t  RAWCMN_DIG_AON_FW_VERSION_0[NUM_OF_INSTANCES] =
+{
+    0x800001780801113F,
+    0x800101780801113F,
+    0x800001780801153F,
+    0x800101780801153F,
+};
+
+const uint64_t  RAWCMN_DIG_AON_FW_VERSION_1[NUM_OF_INSTANCES] =
+{
+    0x800001790801113F,
+    0x800101790801113F,
+    0x800001790801153F,
+    0x800101790801153F,
 };
 
 
@@ -222,24 +269,232 @@ fapi2::ReturnCode p10_load_iop_override(
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_data;
 
+    fapi2::ATTR_PROC_PCIE_FW_VERSION_0_Type l_fw_ver_0 = 0;
+    fapi2::ATTR_PROC_PCIE_FW_VERSION_1_Type l_fw_ver_1 = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_FW_VERSION_0, i_target, l_fw_ver_0));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_FW_VERSION_1, i_target, l_fw_ver_1));
+
+    FAPI_DBG("FW VERSION 0: %04X", l_fw_ver_0);
+    FAPI_DBG("FW VERSION 1: %04X", l_fw_ver_1);
+
     // Loop through all configured PECs
     for (auto l_pec_target : i_target.getChildren<fapi2::TARGET_TYPE_PEC>())
     {
-        //Disable FAST_RX_CONT_CAL_ADAPT per request from Synopsis
-        //PleaseI disable CCA (continuous calibration and adaptation algorithm for slow VT drift) by:
         for (uint8_t i = 0; i < NUM_OF_INSTANCES ; i++)
         {
-            l_data = 0;
-            FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
-                     "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
-            l_data.setBit<FAST_RX_CONT_CAL_ADAPT_BIT>();
-            FAPI_DBG("RAWLANEAONN_DIG_FAST_FLAGS_REG 0x%.0x", l_data);
-            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
-                     "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
+            if ((l_fw_ver_0 == FW_VER_0_JUL_2020) && (l_fw_ver_1 == FW_VER_1_JUL_2020))
+            {
+                l_data = 0;
+                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
+                         "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
+                l_data.setBit<FAST_RX_CONT_CAL_ADAPT_BIT>();
+                FAPI_DBG("RAWLANEAONN_DIG_FAST_FLAGS_REG 0x%.0x", l_data);
+                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
+                         "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
+            }
+            else if ((l_fw_ver_0 == FW_VER_0_OCT_2020) && (l_fw_ver_1 == FW_VER_1_OCT_2020))
+            {
+                //Disable scratch_15 algo
+                l_data = 0;
+                l_data.setBit(SCRATCH_15_START, SCRATCH_15_LEN);
+                FAPI_DBG("RAWLANEN_DIG_FSM_FW_SCRATCH_15 0x%.0x", l_data);
+                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEN_DIG_FSM_FW_SCRATCH_15[i] , l_data),
+                         "Error from putScom 0x%.16llX", RAWLANEN_DIG_FSM_FW_SCRATCH_15[i]);
+            }
         }
     }
 
 fapi_try_exit:
     FAPI_DBG("End CReg Overrides");
+    return fapi2::current_err;
+}
+
+/// ############################################################
+/// See doxygen in header file
+fapi2::ReturnCode p10_load_rtrim_override(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Start RTRIM Override");
+    using namespace scomt;
+    using namespace scomt::pec;
+    using namespace scomt::phb;
+
+    fapi2::buffer<uint64_t> l_data;
+
+    fapi2::ATTR_PROC_PCIE_FW_VERSION_0_Type l_fw_ver_0 = 0;
+    fapi2::ATTR_PROC_PCIE_FW_VERSION_1_Type l_fw_ver_1 = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_FW_VERSION_0, i_target, l_fw_ver_0));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_FW_VERSION_1, i_target, l_fw_ver_1));
+
+    FAPI_DBG("FW VERSION 0: %04X", l_fw_ver_0);
+    FAPI_DBG("FW VERSION 1: %04X", l_fw_ver_1);
+
+    if ((l_fw_ver_0 == FW_VER_0_OCT_2020) && (l_fw_ver_1 == FW_VER_1_OCT_2020))
+    {
+        for (auto l_phb_target : i_target.getChildren<fapi2::TARGET_TYPE_PHB>())
+        {
+
+            // Cronus only
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
+            // Skip if PHB target is not enabled
+            bool l_phbEnabled = false;
+            FAPI_TRY(isPHBEnabled(l_phb_target, l_phbEnabled),
+                     "Error returned from isPHBEnabled()");
+
+            if (!l_phbEnabled)
+            {
+                FAPI_DBG("PHB is disabled, skip Reset.");
+                continue;
+            }
+
+#endif
+            l_data = 0;
+            //Take ETU out of reset to acess PHB PCI - Core Reset Register
+            FAPI_DBG("  ETU is in reset. Taking it out of reset");
+            FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target),
+                     "Error from PREP_REGS_PHBRESET_REG");
+            CLEAR_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);
+            FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data),
+                     "Error from PUT_REGS_PHBRESET_REG");
+
+            FAPI_TRY(fapi2::delay(NANO_SEC_DELAY, SIM_CYC_DELAY),
+                     "fapiDelay error.");
+
+            l_data = 0;
+            //This will deassert reset for the PCI CFG core only.
+            FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, true, false, l_data),
+                     "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Read)");
+            l_data.clearBit<PHB_HV_1A10_CFG_CORE_RESET_BIT>();
+            FAPI_DBG("  Value to be written to %016lX -  %016lX", PHB_CORE_RESET_REGISTER, l_data());
+            FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, false, false, l_data),
+                     "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Write)");
+
+            FAPI_TRY(fapi2::delay(NANO_SEC_DELAY, SIM_CYC_DELAY),
+                     "fapiDelay error.");
+
+            l_data = 0;
+            //This will deassert reset for the PDL + PTL + PBL + PIPE_RESET.
+            FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, true, false, l_data),
+                     "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Read)");
+            l_data.clearBit<PHB_HV_1A10_PDL_PTL_RESET_BIT>();
+            l_data.clearBit<PHB_HV_1A10_PBL_RESET_BIT>();
+            l_data.setBit<PHB_HV_1A10_PIPE_RESETN_BIT>();
+            FAPI_DBG("  Value to be written to %016lX -  %016lX", PHB_CORE_RESET_REGISTER, l_data());
+            FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, false, false, l_data),
+                     "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Write)");
+        }
+
+        // Write CReg overrides through the CR Parallel Interface.
+        // Note: This overrides is required to be done after ext_ld_done and lane_reset is de-asserted.
+        // Loop through all configured PECs
+        for (auto l_pec_target : i_target.getChildren<fapi2::TARGET_TYPE_PEC>())
+        {
+            for (uint8_t i = 0; i < NUM_OF_INSTANCES ; i++)
+            {
+                //Only to be applied with firmware version
+                //  0x0178, 0x2002
+                //  0x0179, 0x00D2
+                //Change RTRIM setting to reflect short channels for better AFE performance.
+                //Needs to be set after a toggle of lane_reset.
+                l_data = 0;
+                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i] , l_data),
+                         "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_AFE_RTRIM[i]);
+                l_data.insertFromRight(AFE_RTRIM_VAL, AFE_RTRIM_START, AFE_RTRIM_LEN);
+                FAPI_DBG("RAWLANEAONN_DIG_AFE_RTRIM 0x%.0x", l_data);
+                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i] , l_data),
+                         "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_AFE_RTRIM[i]);
+            }
+        }
+
+
+        for (auto l_phb_target : i_target.getChildren<fapi2::TARGET_TYPE_PHB>())
+        {
+            // Cronus only
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
+            // Skip if PHB target is not enabled
+            bool l_phbEnabled = false;
+            FAPI_TRY(isPHBEnabled(l_phb_target, l_phbEnabled),
+                     "Error returned from isPHBEnabled()");
+
+            if (!l_phbEnabled)
+            {
+                FAPI_DBG("PHB is disabled, skip Reset.");
+                continue;
+            }
+
+#endif
+
+            l_data = 0;
+            //Put ETU into reset
+            FAPI_DBG("  Put ETU back into reset.");
+            FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target),
+                     "Error from PREP_REGS_PHBRESET_REG");
+            SET_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);
+            FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data),
+                     "Error from PUT_REGS_PHBRESET_REG");
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End RTRIM Override");
+    return fapi2::current_err;
+}
+
+
+/// ############################################################
+/// See doxygen in header file
+fapi2::ReturnCode p10_verify_iop_fw(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Start Verify IOP FW");
+    using namespace scomt;
+    using namespace scomt::pec;
+
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_data;
+
+    fapi2::ATTR_PROC_PCIE_FW_VERSION_0_Type l_fw_ver_0_attr = 0;
+    fapi2::ATTR_PROC_PCIE_FW_VERSION_1_Type l_fw_ver_1_attr = 0;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_IS_SIMICS_Type l_attr_is_simics;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_FW_VERSION_0, i_target, l_fw_ver_0_attr));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_FW_VERSION_1, i_target, l_fw_ver_1_attr));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, FAPI_SYSTEM, l_attr_is_simics));
+
+    FAPI_DBG("FW VERSION 0: %04X", l_fw_ver_0_attr);
+    FAPI_DBG("FW VERSION 1: %04X", l_fw_ver_1_attr);
+
+    for (auto l_pec_target : i_target.getChildren<fapi2::TARGET_TYPE_PEC>())
+    {
+        for (uint8_t i = 0; i < NUM_OF_INSTANCES ; i++)
+        {
+            fapi2::buffer<uint64_t> l_fw_ver_0_hw = 0;
+            fapi2::buffer<uint64_t> l_fw_ver_1_hw = 0;
+
+            FAPI_TRY(fapi2::getScom(l_pec_target, RAWCMN_DIG_AON_FW_VERSION_0[i] , l_fw_ver_0_hw),
+                     "Error from getScom 0x%.16llX", RAWCMN_DIG_AON_FW_VERSION_0[i]);
+            FAPI_TRY(fapi2::getScom(l_pec_target, RAWCMN_DIG_AON_FW_VERSION_1[i] , l_fw_ver_1_hw),
+                     "Error from getScom 0x%.16llX", RAWCMN_DIG_AON_FW_VERSION_1[i]);
+
+            FAPI_ASSERT(l_attr_is_simics ||
+                        ((l_fw_ver_0_attr == (l_fw_ver_0_hw() & 0xFFFF)) &&
+                         (l_fw_ver_1_attr == (l_fw_ver_1_hw() & 0xFFFF))),
+                        fapi2::P10_IOP_XRAM_FW_VER_ERROR()
+                        .set_TARGET(l_pec_target)
+                        .set_INST(i)
+                        .set_FW_VER_0_ATTR(l_fw_ver_0_attr)
+                        .set_FW_VER_0_HW(l_fw_ver_0_hw)
+                        .set_FW_VER_1_ATTR(l_fw_ver_1_attr)
+                        .set_FW_VER_1_HW(l_fw_ver_1_hw),
+                        "p10_verify_iop_fw: Attribute and HW version values mismatch!");
+        }
+    }
+
+
+fapi_try_exit:
+    FAPI_DBG("End Verify IOP FW");
     return fapi2::current_err;
 }

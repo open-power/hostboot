@@ -37,6 +37,8 @@
 // *HWP Level:
 // *HWP Consumed by: HB
 
+// EKB-Mirror-To: hostboot
+
 #ifndef _P10_PHB_HV_ACCESS_H_
 #define _P10_PHB_HV_ACCESS_H_
 

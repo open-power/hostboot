@@ -22,7 +22,8 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Error definitions for p10_phb_hv_utils procedure -->
+<!-- Error definitions for p10_phb_hv_utils procedure                       -->
+<!-- EKB-Mirror-To: hostboot                                                -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>

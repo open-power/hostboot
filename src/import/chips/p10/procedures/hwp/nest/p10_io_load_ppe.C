@@ -80,6 +80,62 @@ fapi2::ReturnCode p10_io_load_ppe(
     uint8_t* l_memRegsImgDataPtr = NULL;
     uint32_t l_memRegsImgSize = 0;
 
+    FAPI_ASSERT(i_hw_image != NULL ,
+                fapi2::P10_IO_LOAD_PPE_HW_IMG_ERROR()
+                .set_TARGET(i_target)
+                .set_HW_IMAGE(i_hw_image),
+                "p10_io_load_ppe: Invalid HW XIP image");
+
+    // extract IOP XRAM FW version information, set attributes for this chip
+    // this is performed here to allow all downstream HWPs which might set
+    // dependent inits for PCIE to have an accurate view of the IOP FW to be
+    // loaded later in the IPL
+    {
+        uint8_t* l_iopxramImgPtr = NULL;
+        fapi2::ATTR_PROC_PCIE_FW_VERSION_0_Type l_fw_ver_0 = 0;
+        fapi2::ATTR_PROC_PCIE_FW_VERSION_1_Type l_fw_ver_1 = 0;
+        uint8_t* l_iopverImgDataPtr = NULL;
+        uint32_t l_iopverImgSize = 0;
+
+        FAPI_DBG("p10_io_load_ppe: Calling p9_xip_get_section (HW image, IOPXRAM)");
+        FAPI_TRY(p9_xip_get_section(i_hw_image, P9_XIP_SECTION_HW_IOPXRAM, &l_section),
+                 "p10_io_load_ppe: Error from p9_xip_get_section (HW image, IOPXRAM)");
+        l_iopxramImgPtr = l_section.iv_offset + (uint8_t*)(i_hw_image);
+
+        // from the IOPXRAM image, obtain pointer to iop_fw_ver section to read
+        // older HW images may not contain this section -- don't error in this
+        // case but simply maintain default value of FAPI FW version attributes
+        // which match the prior FW actually present in the HW image
+        FAPI_DBG("p10_io_load_ppe: Calling p9_xip_get_section (IOPXRAM image, IOP_FW_VER section)");
+        FAPI_TRY(p9_xip_get_section(l_iopxramImgPtr, P9_XIP_SECTION_IOPXRAM_VER, &l_section));
+
+        l_iopverImgDataPtr = l_section.iv_offset + (uint8_t*)(l_iopxramImgPtr);
+        l_iopverImgSize = l_section.iv_size;
+
+        FAPI_DBG("  ptr: %p, size: %d", l_iopverImgDataPtr, l_iopverImgSize);
+
+        if ((l_iopverImgDataPtr != NULL) &&
+            (l_iopverImgSize != 0))
+        {
+            FAPI_ASSERT((l_iopverImgDataPtr != NULL) &&
+                        (l_iopverImgSize >= 4),
+                        fapi2::P10_IO_LOAD_PPE_IOPXRAM_IMG_ERROR()
+                        .set_TARGET(i_target)
+                        .set_IOPXRAM_VER_IMAGE(l_iopverImgDataPtr)
+                        .set_IOPXRAM_VER_SIZE(l_iopverImgSize)
+                        .set_HW_IMAGE(i_hw_image),
+                        "p10_io_load_ppe: Invalid IOPXRAM XIP image");
+
+            l_fw_ver_0 = ((*(l_iopverImgDataPtr + 0)) << 8) |
+                         (*(l_iopverImgDataPtr + 1));
+
+            l_fw_ver_1 = ((*(l_iopverImgDataPtr + 2)) << 8) |
+                         (*(l_iopverImgDataPtr + 3));
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_PCIE_FW_VERSION_0, i_target, l_fw_ver_0));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_PCIE_FW_VERSION_1, i_target, l_fw_ver_1));
+        }
+    }
 
     // skip load if there are no functional PAUC targets on this chip
     if (i_target.getMulticast<fapi2::TARGET_TYPE_PAUC>(fapi2::MCGROUP_GOOD_PAU)
@@ -89,17 +145,11 @@ fapi2::ReturnCode p10_io_load_ppe(
         goto fapi_try_exit;
     }
 
-    FAPI_ASSERT(i_hw_image != NULL ,
-                fapi2::P10_IO_LOAD_PPE_HW_IMG_ERROR()
-                .set_TARGET(i_target)
-                .set_HW_IMAGE(i_hw_image),
-                "p10_io_load_ppe: Invalid HW XIP image");
-
     // reference the IOPPE (.ioppe) section in the HW image
     // this is an XIP image nested in the HW image itself
-    FAPI_DBG("p10_io_load_ppe: Calling p9_xip_get_section (HW image)");
+    FAPI_DBG("p10_io_load_ppe: Calling p9_xip_get_section (HW image, IOPPE)");
     FAPI_TRY(p9_xip_get_section(i_hw_image, P9_XIP_SECTION_HW_IOPPE, &l_section),
-             "p10_io_load_ppe: Error from p9_xip_get_section (HW image)");
+             "p10_io_load_ppe: Error from p9_xip_get_section (HW image, IOPPE)");
     l_ioppeImgPtr = l_section.iv_offset + (uint8_t*)(i_hw_image);
 
     // from the IOPPE image, obtain pointers to ioo and memregs sections to load

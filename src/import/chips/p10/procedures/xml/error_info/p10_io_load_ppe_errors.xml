@@ -57,4 +57,21 @@
   </callout>
 </hwpError>
 <!-- ******************************************************************** -->
+<hwpError>
+  <sbeError/>
+  <rc>RC_P10_IO_LOAD_PPE_IOPXRAM_IMG_ERROR</rc>
+  <description>
+    Null pointer or zero size section encountered when searching
+    nested IOPXRAM XIP image extracted from HW reference image pointer
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>IOPXRAM_VER_IMAGE</ffdc>
+  <ffdc>IOPXRAM_VER_SIZE</ffdc>
+  <ffdc>HW_IMAGE</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
 </hwpErrors>
