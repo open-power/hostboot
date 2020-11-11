@@ -57,6 +57,18 @@ typedef fapi2::ReturnCode (*exp_clear_active_log_FP_t)(
 typedef fapi2::ReturnCode (*exp_clear_saved_log_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& );
 
+// These are the starting addresses of the circular buffer where the active logs
+// are kept in Explorer RAM, for each known FW version
+constexpr uint32_t CL397559_BUFFER_START = 0x0101C520;
+constexpr uint32_t CL407134_BUFFER_START = 0x0101CDE0;
+
+// This is the size of the circular buffer in Explorer RAM
+constexpr uint32_t BUFFER_SIZE = 0x4C00;
+
+// These are the start and end addresses of Explorer's RAM space
+constexpr uint32_t EXP_RAM_START = 0x01000000;
+constexpr uint32_t EXP_RAM_END   = 0x010FFFFF;
+
 extern "C"
 {
 
@@ -87,6 +99,24 @@ extern "C"
         const uint32_t i_offset,
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
         std::vector<uint8_t>& io_data );
+
+    ///
+    /// @brief Grab active log entries from Explorer RAM via MMIO
+    /// @param[in] i_target the controller
+    /// @param[in] i_start_addr - starting MMIO address to start grabbing data
+    /// @param[out] o_data -
+    ///               [in] size = amount of log data to gather (0-0x10000)
+    ///               [out]where to put error log data
+    ///
+    /// @note This function allows us to read the FW logs from an Explorer with
+    ///       a hung MIPS processor, since we can still access RAM directly.
+    /// @note o_data will be resized/padded to a multiple of 8 bytes
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_active_log_from_ram(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
+        const uint32_t i_start_addr,
+        std::vector<uint8_t>& o_data);
 
     ///
     /// @brief Clear active log entries from Explorer RAM

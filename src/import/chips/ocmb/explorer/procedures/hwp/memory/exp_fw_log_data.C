@@ -131,6 +131,37 @@ extern "C"
     }
 
     /// See header
+    fapi2::ReturnCode exp_active_log_from_ram(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
+        const uint32_t i_start_addr,
+        std::vector<uint8_t>& o_data)
+    {
+        const auto l_len = static_cast<uint32_t>(o_data.size());
+        uint64_t l_mmio_start_addr = mss::exp::ib::EXPLR_IB_MMIO_OFFSET | i_start_addr;
+
+        // make sure expected size is a multiple of 8
+        const uint32_t l_padding = ((l_len % 8) > 0) ? (8 - (l_len % 8)) : 0;
+        o_data.resize(l_len + l_padding);
+
+        // check bounds of address and length
+        if ((i_start_addr < EXP_RAM_START) ||
+            (i_start_addr > EXP_RAM_END - l_len))
+        {
+            FAPI_ERR("start address and length must be in RAM range 0x%.8X to 0x%.8X\n",
+                     EXP_RAM_START, EXP_RAM_END);
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+        }
+
+        FAPI_DBG("Reading log data from Explorer RAM...");
+        FAPI_TRY(fapi2::getMMIO(i_ocmbTarget, l_mmio_start_addr, mss::exp::ib::BUFFER_TRANSACTION_SIZE, o_data));
+        FAPI_TRY(mss::exp::ib::correctMMIOEndianForStruct(o_data));
+        FAPI_TRY(mss::exp::ib::correctMMIOword_order(o_data));
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    /// See header
     fapi2::ReturnCode exp_clear_active_log(
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget)
     {
