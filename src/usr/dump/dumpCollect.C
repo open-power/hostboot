@@ -47,6 +47,7 @@
 #include <sys/msg.h>                     //  message Q's
 #include <mbox/mbox_queues.H>            //
 #include <kernel/vmmmgr.H>
+#include <targeting/targplatutil.H>
 
 // Trace definition
 trace_desc_t* g_trac_dump = NULL;
@@ -345,7 +346,6 @@ void* getPhysAddr( uint64_t i_phypAddr )
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t copyArchitectedRegs(void)
 {
-    TRACFCOMP(g_trac_dump, "copyArchitectedRegs - start ");
     errlHndl_t l_err = nullptr;
     int rc;
     // Processor dump area address and size from HDAT
@@ -365,6 +365,8 @@ errlHndl_t copyArchitectedRegs(void)
 
     do
     {
+        uint8_t nodeId =  TARGETING::UTIL::getCurrentNodePhysId();
+        TRACFCOMP(g_trac_dump, "copyArchitectedRegs - start, NodeId=0x%x ",nodeId);
         // Get the PROC_DUMP_AREA_TBL address from SPIRAH
         l_err = RUNTIME::get_host_data_section(RUNTIME::PROC_DUMP_AREA_TBL,
                                                0,
@@ -377,7 +379,6 @@ errlHndl_t copyArchitectedRegs(void)
                                    "for PDAT failed");
             break;
         }
-
         // If the address or size is zero - error out
         if ((procTableAddr == 0) || (procTableSize == 0))
         {
@@ -404,16 +405,44 @@ errlHndl_t copyArchitectedRegs(void)
 
         // Map processor dump area destination address to VA addresses
         procTableEntry = reinterpret_cast<procDumpAreaEntry *>(procTableAddr);
-        pDstAddrBase = getPhysAddr(procTableEntry->dstArrayAddr);
+
+        //In case of HYP Pre-Init failure case , HYP does not allocate minimum memory on all nodes so node specific 
+        //allocated size will be zero.In that case skip copying of data to HDAT and return to the caller.
+        if( !procTableEntry->HypInitSuccess && (procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataSize == 0) )
+        {
+            TRACFCOMP(g_trac_dump, "Hypervisor Pre-Init failure scenario!! No memory "
+                      "allocated for dump collection for Node:%d",nodeId);
+            /*@
+             * @errortype
+             * @moduleid         DUMP::DUMP_ARCH_REGS
+             * @reasoncode       DUMP::DUMP_PDAT_INSUF_SPACE_FOR_NODE
+             * @userdata1        NODE ORDINAL ID
+             * @devdesc          HYP Pre-Init scenario. No memory allocated for theode
+             * @custdesc         Failure to collect some error data
+             *                   following system error
+             *
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    DUMP_ARCH_REGS,
+                    DUMP_PDAT_INSUF_SPACE_FOR_NODE,
+                    nodeId);
+            errlCommit(l_err, DUMP_COMP_ID);
+            break;
+        }
+        pDstAddrBase = getPhysAddr(procTableEntry->iv_nodeSrcArcRegDataTOC
+                       [nodeId].dataOffset);
         vMapDstAddrBase = mm_block_map(pDstAddrBase,
-                       (ALIGN_PAGE(procTableEntry->dstArraySize) + PAGESIZE));
+                          (ALIGN_PAGE(procTableEntry->iv_nodeSrcArcRegDataTOC
+                          [nodeId].dataSize) + PAGESIZE));
 
         //Need to adjust actual virtual address due to mm_block_map only
         //mapping on page boundary to account for non page aligned addresses
         //from PHYP/OPAL
         uint64_t tmpAddr = reinterpret_cast<uint64_t>(vMapDstAddrBase);
         vMapDstAddrBase = reinterpret_cast<void*>(tmpAddr +
-                               (procTableEntry->dstArrayAddr & (PAGESIZE-1)));
+                          (procTableEntry->iv_nodeSrcArcRegDataTOC
+                          [nodeId].dataOffset & (PAGESIZE-1)));
 
         // Map architected register reserved memory to VA addresses
         TARGETING::Target * l_sys = NULL;
@@ -426,9 +455,13 @@ errlHndl_t copyArchitectedRegs(void)
         vMapSrcAddrBase = mm_block_map(pSrcAddrBase,
                                        VMM_ARCH_REG_DATA_SIZE_ALL_PROC);
 
-        TRACFCOMP(g_trac_dump, "Node level Source address(same as ATTR_SBE_ARCH_DUMP_ADDR) [0x%16llx] [%p], destArrayaddr"
-                 " [0x%.16llx] Destination address [%p] [%p]", srcAddr, vMapSrcAddrBase,
-                  procTableEntry->dstArrayAddr, pDstAddrBase, vMapDstAddrBase);
+        TRACFCOMP(g_trac_dump, "Node level Source address (ATTR_SBE_ARCH_DUMP_ADDR)=[0x%16llx] "
+                 "vMapSrcAddrBase=[%p], HYP assigned dest addr [0x%.16llx] pDstAddrBase=[%p] "
+                 "vMapDstAddrBase=[%p]", srcAddr, vMapSrcAddrBase,procTableEntry->iv_nodeSrcArcRegDataTOC
+                 [nodeId].dataOffset, pDstAddrBase, vMapDstAddrBase);
+
+
+
 
         // Get list of functional processor chips, in MPIPL path we
         // don't expect any deconfiguration
@@ -437,7 +470,7 @@ errlHndl_t copyArchitectedRegs(void)
 
 
         uint64_t dstTempAddr = reinterpret_cast<uint64_t>(vMapDstAddrBase);
-        procTableEntry->capArraySize = 0;
+        procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize = 0;
         for (uint32_t procNum = 0; procNum < procChips.size(); procNum++)
         {
             // Base addresses w.r.t PROC positions. This is static here
@@ -495,9 +528,9 @@ errlHndl_t copyArchitectedRegs(void)
 
             procTableEntry->threadRegSize = sizeof(hostArchRegDataHdr)+
                                       (regCount * sizeof(hostArchRegDataEntry));
-            procTableEntry->capArraySize = procTableEntry->capArraySize +
-                                          (procTableEntry->threadRegSize
-                                           * threadCount);
+            procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize =
+                      procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize +
+                      (procTableEntry->threadRegSize * threadCount);
 
 
             bool collectMinimumDataMode = false;
@@ -511,13 +544,17 @@ errlHndl_t copyArchitectedRegs(void)
                 //Data will be collected only for Master fused core of master proc
                 //Update the procDumpAreaEntry entries accordingly
                 threadCount = 8;//Fused core.
-                procTableEntry->capArraySize =  (procTableEntry->threadRegSize * threadCount);
+                procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize =
+                                                  (procTableEntry->threadRegSize * threadCount);
             }
-            else if(procTableEntry->dstArraySize < procTableEntry->capArraySize)
+
+            if(procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataSize <
+                                  procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize)
             {
-                TRACFCOMP(g_trac_dump, "Insufficient space detected, HYP Reserved Size=0x%.8x, actual "
-                " size=0x%.8x and Hypervisor Pre-Init failure(%d)", procTableEntry->dstArraySize,
-                procTableEntry->capArraySize,collectMinimumDataMode); 
+                TRACFCOMP(g_trac_dump, "Insufficient space detected, HYP Reserved Size=0x%.8x, "
+                "actual  size=0x%.8x and Hypervisor Pre-Init failure(%d)",
+                procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataSize,
+                procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize,collectMinimumDataMode);
                 /*@
                  * @errortype
                  * @moduleid         DUMP::DUMP_ARCH_REGS
@@ -537,7 +574,8 @@ errlHndl_t copyArchitectedRegs(void)
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                         DUMP_ARCH_REGS,
                         DUMP_PDAT_INSUFFICIENT_SPACE,
-                        TWO_UINT32_TO_UINT64(procTableEntry->dstArraySize,procTableEntry->capArraySize),
+                        TWO_UINT32_TO_UINT64(procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataSize,
+                                       procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize),
                         HYP_REQUIRED_MIN_REG_SIZE,
                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 errlCommit(l_err, DUMP_COMP_ID);
@@ -545,12 +583,11 @@ errlHndl_t copyArchitectedRegs(void)
             }
 
             TRACFCOMP(g_trac_dump, "HYP Reserved Size=0x%.8x, actual size=0x%.8x and "
-            "Hypervisor Pre-Init failure(%d)", procTableEntry->dstArraySize,
-            procTableEntry->capArraySize,collectMinimumDataMode); 
+            "Hypervisor Pre-Init failure(%d)", procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataSize,
+            procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize,collectMinimumDataMode);
             // Total Number of Threads possible in one Proc
             for(uint32_t idx = 0; idx < threadCount; idx++)
             {
- 
                 sbeArchRegDumpThreadHdr_t *sbeTdHdr =
                      reinterpret_cast<sbeArchRegDumpThreadHdr_t *>(procSrcAddr);
 
@@ -640,7 +677,7 @@ errlHndl_t copyArchitectedRegs(void)
 
                         //If Reg Type is TIMA and Last register is not set,
                         //then there is valid data after TIMA failure FFDC.
-                        //Adjust the destination address accordingly to copy 
+                        //Adjust the destination address accordingly to copy
                         //the SPR data.
                         if ( (sbeRegData->regType == DUMP_ARCH_REG_TYPE_TIMA)
                                 && (!sbeRegData->isLastReg) )
@@ -661,7 +698,7 @@ errlHndl_t copyArchitectedRegs(void)
                         if(remaingRegCount)
                         {
                             dstTempAddr = reinterpret_cast<uint64_t>(
-                                     dstTempAddr + (remaingRegCount * 
+                                     dstTempAddr + (remaingRegCount *
                                           sizeof(hostArchRegDataEntry)));
                         }
                         break;
@@ -669,18 +706,25 @@ errlHndl_t copyArchitectedRegs(void)
 
                 } //End of Register Loop
             }//Thread Loop
-
-            //Update Processor Specific data TOC contents. 
-            procTableEntry->iv_procArcRegDataToc[procNum].dataSize = (procTableEntry->threadRegSize * threadCount);
+            uint32_t procId = procChips[procNum]->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+            //Update Processor Specific data TOC contents.
+            procTableEntry->iv_procArcRegDataToc[procId].dataSize =
+                                            (procTableEntry->threadRegSize * threadCount);
             if(procNum == 0)
             {
-                procTableEntry->iv_procArcRegDataToc[procNum].dataOffset = (uint64_t)pDstAddrBase;
+                procTableEntry->iv_procArcRegDataToc[procId].dataOffset =
+                                 (uint64_t)procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataOffset;
             }
             else
             {
-                procTableEntry->iv_procArcRegDataToc[procNum].dataOffset = procTableEntry->iv_procArcRegDataToc[procNum-1].dataOffset + 
-                                                                           procTableEntry->iv_procArcRegDataToc[procNum-1].dataSize;
+                procTableEntry->iv_procArcRegDataToc[procId].dataOffset = procTableEntry->iv_procArcRegDataToc[procId-1].dataOffset +
+                                                                           procTableEntry->iv_procArcRegDataToc[procId-1].dataSize;
             }
+
+            TRACDCOMP(g_trac_dump,"procTableEntry->iv_procArcRegDataToc[%d].dataOffset=0x%.8x",
+                                   procId,procTableEntry->iv_procArcRegDataToc[procId].dataOffset);
+            TRACDCOMP(g_trac_dump,"procTableEntry->iv_procArcRegDataToc[%d].dataSize=0x%.8x",
+                                   procId,procTableEntry->iv_procArcRegDataToc[procId].dataSize);
 
             if(collectMinimumDataMode)
             {
@@ -691,18 +735,14 @@ errlHndl_t copyArchitectedRegs(void)
         }
         // Update Process Dump Area tuple
         procTableEntry->threadRegVersion = REG_DUMP_HDAT_STRUCT_VER;
-        procTableEntry->capArrayAddr = procTableEntry->dstArrayAddr;
+        procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataOffset =
+                                  procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataOffset;
 
         // Update the PDA Table Entries to Attribute to be fetched in istep 21
         l_sys->setAttr<TARGETING::ATTR_PDA_THREAD_REG_STATE_ENTRY_FORMAT>(
                                               procTableEntry->threadRegVersion);
         l_sys->setAttr<TARGETING::ATTR_PDA_THREAD_REG_ENTRY_SIZE>(
                                                  procTableEntry->threadRegSize);
-        l_sys->setAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_ADDR>(
-                                                  procTableEntry->capArrayAddr);
-        l_sys->setAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_SIZE>(
-                                                  procTableEntry->capArraySize);
-
     } while (0);
 
     // Unmap destination memory

@@ -422,6 +422,8 @@ void* call_host_runtime_setup (void *io_pArgs)
 #endif
 
         // Update the MDRT Count and PDA Table Entries from Attribute
+        // Captured Address offset and size will be updated during the data 
+        // collection.
         TargetService& l_targetService = targetService();
         Target* l_sys = nullptr;
         l_targetService.getTopLevelTarget(l_sys);
@@ -432,8 +434,6 @@ void* call_host_runtime_setup (void *io_pArgs)
                                 (DEF_ARCH_REG_COUNT_PER_THREAD *
                                  sizeof(DUMP::hostArchRegDataEntry));
         uint8_t threadRegFormat = REG_DUMP_SBE_HB_STRUCT_VER;
-        uint64_t capThreadArrayAddr = 0;
-        uint64_t capThreadArraySize = 0;
 
         if(l_sys->getAttr<ATTR_IS_MPIPL_HB>())
         {
@@ -445,23 +445,15 @@ void* call_host_runtime_setup (void *io_pArgs)
                 RUNTIME::saveActualCount( RUNTIME::MS_DUMP_RESULTS_TBL,
                                           l_mdrtCount);
             }
-
-
             threadRegSize =
               l_sys->getAttr<TARGETING::ATTR_PDA_THREAD_REG_ENTRY_SIZE>();
             threadRegFormat =
               l_sys->getAttr<TARGETING::ATTR_PDA_THREAD_REG_STATE_ENTRY_FORMAT>();
-            capThreadArrayAddr =
-              l_sys->getAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_ADDR>();
-            capThreadArraySize =
-              l_sys->getAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_SIZE>();
         }
 
         // Ignore return value
         RUNTIME::updateHostProcDumpActual( RUNTIME::PROC_DUMP_AREA_TBL,
-                                           threadRegSize, threadRegFormat,
-                                           capThreadArrayAddr, capThreadArraySize);
-
+                                           threadRegSize, threadRegFormat);
 
         //Update the MDRT value (for MS Dump)
         l_err = RUNTIME::writeActualCount(RUNTIME::MS_DUMP_RESULTS_TBL);

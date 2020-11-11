@@ -311,16 +311,12 @@ errlHndl_t writeActualCount( SectionId i_id );
  * @param[in] i_section        Chunk of data to update
  * @param[in] threadRegSize    Architected reg data size per thread
  * @param[in] threadRegVersion Data format version
- * @param[in] capArrayAddr     Actual destination address
- * @param[in] capArraySize     Actual destiantion size
  *
  * @return errlHndl_t  NULL on success
  */
 errlHndl_t updateHostProcDumpActual( SectionId i_section,
                                      uint32_t threadRegSize,
-                                     uint8_t threadRegVersion,
-                                     uint64_t capArrayAddr,
-                                     uint32_t capArraySize);
+                                     uint8_t threadRegVersion);
 
 /**
  * @brief  Use relocated payload base address

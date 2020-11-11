@@ -1255,9 +1255,7 @@ errlHndl_t hdatService::findSpira( void )
 
 errlHndl_t hdatService::updateHostProcDumpActual( SectionId i_section,
                                                   uint32_t threadRegSize,
-                                                  uint8_t threadRegVersion,
-                                                  uint64_t capArrayAddr,
-                                                  uint32_t capArraySize)
+                                                  uint8_t threadRegVersion)
 {
     errlHndl_t errhdl = nullptr;
     TRACFCOMP( g_trac_runtime,
@@ -1282,8 +1280,6 @@ errlHndl_t hdatService::updateHostProcDumpActual( SectionId i_section,
         procDumpTable = reinterpret_cast<DUMP::procDumpAreaEntry *>(l_hostDataAddr);
         procDumpTable->threadRegSize    = threadRegSize;
         procDumpTable->threadRegVersion = threadRegVersion;
-        procDumpTable->capArrayAddr     = capArrayAddr;
-        procDumpTable->capArraySize     = capArraySize;
     } while(0);
 
     return errhdl;
@@ -1832,13 +1828,10 @@ errlHndl_t writeActualCount( SectionId i_id )
 
 errlHndl_t updateHostProcDumpActual( SectionId i_section,
                                      uint32_t threadRegSize,
-                                     uint8_t threadRegVersion,
-                                     uint64_t capArrayAddr,
-                                     uint32_t capArraySize)
+                                     uint8_t threadRegVersion)
 {
     return Singleton<hdatService>::instance().updateHostProcDumpActual(i_section,
-                                                   threadRegSize, threadRegVersion,
-                                                   capArrayAddr, capArraySize);
+                                                   threadRegSize, threadRegVersion);
 }
 
 void useRelocatedPayloadAddr(bool val)

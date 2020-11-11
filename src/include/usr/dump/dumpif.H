@@ -119,15 +119,15 @@ namespace DUMP
     } PACKED;
 
 
-    //Processor Specific Architected Register Data TOC
-    //structure
-    struct procArcRegDataToc_t
+    //Architected Register Data TOC.
+    //Same structure will be used for storing the node and processor
+    //specific details into the HDAT
+    struct ArchRegDataToc_t
     {
-        uint64_t dataOffset; //Processor specific architected data start offset
-        uint32_t dataSize;  //Total data size for particular processor data
+        uint64_t dataOffset; //Architected data start offset
+        uint32_t dataSize;  //Total data size for node/processor specific data
         uint32_t reserved;  //Future use reserve
     } PACKED;
-
 
     // Processor Dump Area table format
     struct procDumpAreaEntry
@@ -137,13 +137,15 @@ namespace DUMP
         uint8_t  reserved1[9];         // Reserved
         uint8_t  HypInitSuccess;       // Hypervisor Initialization Successful indicator
         uint8_t  sprIdType;            // Hypervisor passed (SPR Name/SPR Number) indentification type
-        uint64_t dstArrayAddr;         // Hypervisor passed destination addresss
-        uint8_t  reserved2[4];         // Reserved
-        uint32_t dstArraySize;         // Hypervisor passed destination size
-        uint64_t capArrayAddr;         // Actual destination address (filled by HB)
-        uint8_t  reserved3[4];         // Reserved
-        uint32_t capArraySize;         // Actual destination size (filled by HB)
-        procArcRegDataToc_t iv_procArcRegDataToc[16];//processor Specific Architected Register Data TOC
+        //Node specific Architected Register Data TOC, which will be filled in by Hypervisor. It indicates
+        //Hypervisor allocated node specific address offsets and total memory allocated per node .
+        ArchRegDataToc_t iv_nodeSrcArcRegDataTOC[4];
+        //Node specific Architected Register Data TOC, which will be filled in by Hostboot. It indicates the
+        //actual node specific address offsets and total memory used to store data per node.
+        ArchRegDataToc_t iv_nodeCapturedArcRegDataTOC[4];
+        //processor Specific Architected Register Data TOC, which will be filled by Hostboot. It indicates the
+        //processor specific data start offset and total size of the processor specific data.
+        ArchRegDataToc_t iv_procArcRegDataToc[16];
     } PACKED;
 
     // Host formatted architected register data content (as per HDAT spec)
