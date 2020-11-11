@@ -194,7 +194,28 @@
       Polling for ram done reached threshold
     </description>
     <ffdc>CORE_TARGET</ffdc>
-    <ffdc>C_RAM_STATUS_REG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RAM_CORE_REGISTERS</id>
+      <targetType>TARGET_TYPE_CORE</targetType>
+      <target>CORE_TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_RAM_THREAD_ACTION_POLL_THRESHOLD_ERR</rc>
+    <description>
+      Polling for ram thread action reached threshold
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_RAM_CORE_REGISTERS</id>
       <targetType>TARGET_TYPE_CORE</targetType>
