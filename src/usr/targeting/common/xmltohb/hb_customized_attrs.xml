@@ -549,7 +549,12 @@
     <attribute>
           <id>ATTR_SBE_SYS_CONFIG</id>
           <default>0x0</default>
-     </attribute>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_SBE_SELECT_EX_POLICY</id>
+          <default>HB_MAX_FOOTPRINT</default>
+    </attribute>
 
     <attribute>
           <id>ATTR_MSS_MRW_PWR_INTERCEPT</id>
@@ -927,7 +932,7 @@
     <attribute>
         <id>ATTR_CORE_LPAR_MODE_POLICY</id>
         <no_export/>
-    </attribute>
+    </attribute> 
 
     <!-- =====================================================================
      End of customizations definitions
