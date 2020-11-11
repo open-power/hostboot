@@ -82,6 +82,24 @@ template
 MemAddr MemAddr::fromMaintAddr<TYPE_OCMB_CHIP>( uint64_t i_addr );
 
 
+template<TARGETING::TYPE T>
+uint64_t MemAddr::toMaintAddr() const
+{
+    return
+    (
+        ((uint64_t)(iv_rnk.getRankSlct() & 0x3    ) << 59) | // 3:4
+        ((uint64_t)(iv_rnk.getSlave()    & 0x7    ) << 56) | // 5:7
+        ((uint64_t)(iv_row               & 0x3ffff) << 38) | // 8:25
+        ((uint64_t)(iv_col               & 0x7f   ) << 31) | // 26:32
+        ((uint64_t)(iv_bnk               & 0x1f   ) << 26) | // 33:37
+        ((uint64_t)(iv_rnk.getDimmSlct() & 0x1    ) << 23)   // 40
+    );
+}
+
+template
+uint64_t MemAddr::toMaintAddr<TYPE_OCMB_CHIP>() const;
+
+
 //------------------------------------------------------------------------------
 //                       Address Accessor Functions
 //------------------------------------------------------------------------------

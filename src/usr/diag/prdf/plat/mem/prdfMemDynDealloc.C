@@ -955,6 +955,7 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr )
     do
     {
         if ( !isEnabled() ) break; // nothing to do
+        PRDF_TRAC( PRDF_FUNC "i_addr=0x%016llx", i_addr.toMaintAddr<T>() );
 
         o_rc = getSystemAddr<T>( i_chip, i_addr, sysAddr);
         if( SUCCESS != o_rc )
@@ -997,6 +998,9 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
                       i_chip->getHuid(), i_rank.getKey() );
             break;
         }
+        PRDF_TRAC( PRDF_FUNC "getMemAddrRange: startAddr=0x%016llx, endAddr="
+                   "0x%016llx", startAddr.toMaintAddr<T>(),
+                   endAddr.toMaintAddr<T>() );
 
         // Get the system addresses.
         uint64_t ssAddr = 0;
@@ -1011,11 +1015,8 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
         }
         if ( T == TYPE_OCMB_CHIP )
         {
-            PRDF_TRAC(PRDF_FUNC "NOTE: Dynamic mem dealloc currently disabled");
-            /* TODO RTC 258446
             // Send the address range to the hypervisor.
             sendDynMemDeallocRequest( ssAddr, seAddr );
-            */
         }
         else
         {
@@ -1056,6 +1057,9 @@ int32_t port( ExtensibleChip * i_chip )
                       i_chip->getHuid() );
             break;
         }
+        PRDF_TRAC( PRDF_FUNC "getMemAddrRange: startAddr=0x%016llx, endAddr="
+                   "0x%016llx", startAddr.toMaintAddr<T>(),
+                   endAddr.toMaintAddr<T>() );
 
         // Get the system addresses.
         uint64_t ssAddr = 0;
@@ -1071,11 +1075,8 @@ int32_t port( ExtensibleChip * i_chip )
 
         if ( T == TYPE_OCMB_CHIP )
         {
-            PRDF_TRAC(PRDF_FUNC "NOTE: Dynamic mem dealloc currently disabled");
-            /* TODO RTC 258446
             // Send the address range to the hypervisor.
             sendDynMemDeallocRequest( ssAddr, seAddr );
-            */
         }
         else
         {
@@ -1172,11 +1173,8 @@ int32_t dimmSlct( TargetHandle_t i_dimm )
 
         if ( T == TYPE_OCMB_CHIP )
         {
-            PRDF_TRAC(PRDF_FUNC "NOTE: Dynamic mem dealloc currently disabled");
-            /* TODO RTC 258446
             // Send the address range to the hypervisor.
             sendDynMemDeallocRequest( ssAddr, seAddr );
-            */
         }
         else
         {
