@@ -404,11 +404,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         }
 
         // ----------------
-        // Compute Fmax and update pstate0
-        // ----------------
-//        l_pmPPB->pm_set_frequency();
-
-        // ----------------
         // get VPD data (#V,#W,IQ)
         // ----------------
         FAPI_TRY(l_pmPPB->vpd_init(),"vpd_init function failed");
@@ -1896,10 +1891,6 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                 !iv_attrs.attr_boot_voltage_mv[VCS] ||
                 !iv_attrs.attr_boot_voltage_mv[VDN])
             {
-                // ----------------
-                // Compute Fmax and update pstate0
-                // ----------------
-//                l_pmPPB->pm_set_frequency();
 
                 // ----------------
                 // get VPD data (#V,#W)
@@ -4082,9 +4073,7 @@ void PlatPmPPB::compute_vpd_pts()
             iv_attr_mvpd_poundV_biased[p].pstate;
     }
 
-    // As this is memory to memory, Endianess correction is not necessary.
-    iv_reference_frequency_khz =
-        (iv_operating_points[VPD_PT_SET_BIASED][VPD_PV_CF6].frequency_mhz) * 1000;
+    iv_reference_frequency_khz = iv_attrs.attr_pstate0_freq_mhz * 1000;
 
     FAPI_DBG("Reference into GPPB: LE local Freq=%X (%d);  Freq=%X (%d)",
                 iv_reference_frequency_khz,
@@ -4092,11 +4081,11 @@ void PlatPmPPB::compute_vpd_pts()
                 (iv_reference_frequency_khz),
                 (iv_reference_frequency_khz));
 
-    // Now that the VPD_PV_CF6 frequency is known, Pstates can be calculated
+    // Now that the Pstate 0 frequency is known, Pstates can be calculated
     for (auto p = 0; p < NUM_PV_POINTS; p++)
     {
         iv_operating_points[VPD_PT_SET_BIASED][p].pstate =
-            ((((iv_operating_points[VPD_PT_SET_BIASED][VPD_PV_CF6].frequency_mhz) -
+            ((((iv_attrs.attr_pstate0_freq_mhz) -
                (iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz)) * 1000) /
              (iv_frequency_step_khz));
 
