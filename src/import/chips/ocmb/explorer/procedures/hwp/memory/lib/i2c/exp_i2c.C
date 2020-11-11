@@ -414,8 +414,33 @@ fapi2::ReturnCode fw_bypass_download_window(const fapi2::Target<fapi2::TARGET_TY
     std::vector<uint8_t> l_cmd_id;
     fw_bypass_download_window_setup(l_cmd_id);
 
-    // We'll see FAPI2_RC_SUCCESS if the I2C returns an ACK.
-    return fapi2::putI2c(i_target, l_cmd_id);
+    constexpr uint64_t MAX_LOOPS = 3;
+
+    // WORKAROUND: Loop a few times on this because sometimes Explorer doesn't ACK
+    for (uint64_t l_loop = 0; l_loop < MAX_LOOPS; ++l_loop)
+    {
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+        // We'll see FAPI2_RC_SUCCESS if the I2C returns an ACK.
+        l_rc = fapi2::putI2c(i_target, l_cmd_id);
+
+        if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+        {
+            return l_rc;
+        }
+
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        FAPI_TRY( fapi2::delay( mss::DELAY_1MS, 200) );
+    }
+
+    // Hide the bad RC if this completely fails, and we'll wait through the remainder of the window.
+    FAPI_ERR(TARGTIDFORMAT " Failed to send EXP_FW_BYPASS_4SEC_TIMEOUT command."
+             "This may cause FW_STATUS loop to timeout later",
+             MSSTARGID);
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
