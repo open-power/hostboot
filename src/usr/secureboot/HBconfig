@@ -11,7 +11,7 @@ config TPM_NVIDX_VALIDATE
         Validate TPM MFG NV Index Provisioning during IPL
 
 config PHYS_PRES_PWR_BUTTON
-    default n
+    default y
     depends on (!PHYS_PRES_JUMPER && SECUREBOOT)
     help
         Support asserting Physical Presence via pushing the Power Button
@@ -25,7 +25,7 @@ config PHYS_PRES_JUMPER
         Currently not supported.
 
 config KEY_CLEAR
-    default n
+    default y
     depends on PHYS_PRES_PWR_BUTTON
     help
         Support various 'key clear requests' to remove specific security

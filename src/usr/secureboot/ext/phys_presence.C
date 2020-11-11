@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,6 +155,7 @@ errlHndl_t detectPhysPresence(void)
 
     // Get "window open" and "physical presence asserted" LEDs/Pins
     led_window_open = PCA9551_LED0 << gpioInfo.windowOpenPin;
+
     led_phys_pres_asserted = PCA9551_LED0 << gpioInfo.physicalPresencePin;
 
     // Read PCA9551 INPUT Register to get LED Values
@@ -427,6 +428,22 @@ errlHndl_t handlePhysPresenceWindow(void)
                attr_phys_pres_asserted, attr_open_window,
                doesKeyClearRequestPhysPres);
 
+
+        if (attr_phys_pres_reipl != 0)
+        {
+            // if this was currenlty a re-ipl for physical presence
+            // detection set ATTR_PHYS_PRES_REIPL to 0x00 so future
+            // ipls can assert physcal presence detection
+            SB_INF("handlePhysPresenceWindow: Since attr_phys_pres_reipl=0x%.2X, "
+                   "but Physical Presence is already asserted, "
+                   "clearing attr_phys_pres_reipl, since future ipls are not "
+                   "phys pres reipls",
+                   attr_phys_pres_reipl);
+
+            attr_phys_pres_reipl = 0x00;
+            sys->setAttr<ATTR_PHYS_PRES_REIPL>(attr_phys_pres_reipl);
+        }
+
         if (attr_open_window != 0)
         {
             // Close request to open the window
@@ -641,7 +658,7 @@ errlHndl_t handlePhysPresenceWindow(void)
     sys->setAttr<ATTR_PHYS_PRES_REIPL>(0x01);
     attr_phys_pres_reipl = sys->getAttr<ATTR_PHYS_PRES_REIPL>();
 
-    SB_INF("handlePhysPresenceWindow: Closing attr_open_window=0x0 (0x%.2X), "
+    SB_INF("handlePhysPresenceWindow: Closing request attr_open_window=0x0 (0x%.2X), "
            "and setting ATTR_PHYS_PRES_REIPL to 0x01 (0x%.2X)",
            attr_open_window, attr_phys_pres_reipl);
 
