@@ -422,6 +422,13 @@ ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_QUAD_RANK_ENC_4DATA_CSN_ENABLE [when=S] {
   1, (def_NUM_MRANKS_0 == 4 || def_NUM_MRANKS_1 == 4 );
 }
 
+#  FARB4 SCOM REGISTER   #
+
+ispy  MB_SIM.SRQ.MBA_FARB4Q_CFG_NOISE_WAIT_TIME [when=S] {
+  spyv;
+  0x0100;
+}
+
 #  REF0 SCOM REGISTER    #
 
 #gdial std_size 4gbx4 (8GB rank)
