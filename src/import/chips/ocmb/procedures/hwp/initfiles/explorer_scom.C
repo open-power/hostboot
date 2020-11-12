@@ -69,6 +69,7 @@ constexpr uint64_t literal_0b011 = 0b011;
 constexpr uint64_t literal_0b101 = 0b101;
 constexpr uint64_t literal_0b111 = 0b111;
 constexpr uint64_t literal_6 = 6;
+constexpr uint64_t literal_0x0100 = 0x0100;
 constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_1024 = 1024;
@@ -702,6 +703,12 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             l_scom_buffer.insert<62, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_3] >> literal_3) );
             l_scom_buffer.insert<63, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_3] >> literal_2) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011417ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8011419ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 16, 48, uint64_t>(literal_0x0100 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8011419ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x801141aull, l_scom_buffer ));
