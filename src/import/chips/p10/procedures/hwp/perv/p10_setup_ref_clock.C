@@ -42,6 +42,7 @@
 #include "p10_scom_perv_d.H"
 #include "p10_scom_perv_e.H"
 #include "p10_scom_perv_f.H"
+#include "p10_scom_proc_d.H"
 
 enum P10_SETUP_REF_CLOCK_Private_Constants
 {
@@ -53,6 +54,7 @@ fapi2::ReturnCode p10_setup_ref_clock(const
                                       fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     using namespace scomt;
+    using namespace scomt::proc;
     using namespace scomt::perv;
 
     fapi2::buffer<uint32_t> l_read_reg;
@@ -65,6 +67,17 @@ fapi2::ReturnCode p10_setup_ref_clock(const
     fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
 
     FAPI_INF("p10_setup_ref_clock: Entering ...");
+
+    // HW549287 -- ensure FSI device driver cleanup path is invoked by making
+    // two CFAM touches with first return code ignored
+    fapi2::buffer<uint32_t> l_fsi2pib_status;
+    fapi2::ReturnCode l_rc;
+    (void) fapi2::getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_FSI2PIB_STATUS_FSI, l_fsi2pib_status);
+    l_rc = fapi2::getCfamRegister(i_target_chip, TP_TPVSB_FSI_W_FSI2PIB_STATUS_FSI, l_fsi2pib_status);
+    FAPI_ASSERT(l_rc == fapi2::FAPI2_RC_SUCCESS,
+                fapi2::P10_HW549287_WAR_ERR()
+                .set_TARGET_CHIP(i_target_chip),
+                "Error in HW549287 workaround");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS0_REFCLOCK_RCVR_TERM, FAPI_SYSTEM, l_sys0_term),
              "Error from FAPI_ATTR_GET (ATTR_SYS0_REFCLOCK_RCVR_TERM)");
