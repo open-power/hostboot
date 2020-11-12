@@ -2695,10 +2695,12 @@ fapi_try_exit:
 ///  - iv_numGroups
 ///
 ///  @param[in]  i_memInfo        Reference to EffGroupingMemInfo structure
+///  @param[in]  i_mirrorRequired Mirroring required
 ///  @param[in/out] io_groupData  Reference to in/out data
 ///  @param[in/out] io_numMCCsRemained Number of ungrouped MCCs remained
 ///
 void grouping_group1MCCPerGroup(const EffGroupingMemInfo& i_memInfo,
+                                const bool i_mirrorRequired,
                                 EffGroupingData& io_groupData,
                                 uint8_t& io_MCCsRemained)
 {
@@ -2710,6 +2712,16 @@ void grouping_group1MCCPerGroup(const EffGroupingMemInfo& i_memInfo,
 
     for (uint8_t pos = 0; pos < NUM_MCC_PER_PROC; pos++)
     {
+        // If Mirror policy is 'REQUIRED', both ports must have both sub-channels enabled.
+        if ( (i_mirrorRequired) &&
+             (i_memInfo.iv_SubChannelsEnabled[pos] != OMISubChannelConfig::BOTH) )
+        {
+            FAPI_DBG("MCC %d, Sub-channel %d", pos, i_memInfo.iv_SubChannelsEnabled[pos])
+            FAPI_DBG("Unable to group 1 MCC: sub-channels are not both enabled "
+                     "for REQUIRED mirroring");
+            continue;
+        }
+
         if ( (!io_groupData.iv_mccGrouped[pos]) &&
              (i_memInfo.iv_mccSize[pos] != 0) &&
              (i_memInfo.iv_mccSize[pos] <= i_memInfo.iv_maxGroupMemSize) )
@@ -3119,7 +3131,7 @@ fapi2::ReturnCode groupMCC(
 
     if ( (i_sysAttrs.iv_groupsAllowed & GROUP_1)  && (l_MCCsRemained >= 1) )
     {
-        grouping_group1MCCPerGroup(i_memInfo, o_groupData, l_MCCsRemained);
+        grouping_group1MCCPerGroup(i_memInfo, l_mirrorRequired, o_groupData, l_MCCsRemained);
     }
 
     // Verify all MCCs are grouped, or error out
