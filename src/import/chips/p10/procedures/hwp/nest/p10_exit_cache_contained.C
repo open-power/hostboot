@@ -1038,27 +1038,29 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     //data
     if (!l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS)
     {
-        l_scom_data |= (uint64_t)    0x0 << (64 - ( 0 +  1));
-        l_scom_data |= (uint64_t)    0x1 << (64 - ( 1 +  1));
-        l_scom_data |= (uint64_t)    0x7 << (64 - ( 5 +  3));
-        l_scom_data |= (uint64_t) 0xFFFF << (64 - ( 8 + 16));
-        l_scom_data |= (uint64_t)   0x70 << (64 - (24 +  8));
-        l_scom_data |= (uint64_t)    0x1 << (64 - (33 +  1));
-        l_scom_data |= (uint64_t)    0x1 << (64 - (34 +  1));
-        l_scom_data |= (uint64_t)    0x1 << (64 - (36 +  1));
-        l_scom_data |= (uint64_t)    0x2 << (64 - (37 +  3));
+        l_scom_data |= (uint64_t)    0x0 << (64 - ( 0 +  1)); //MCTO_SELECT_PB_HANG_PULSE=OFF
+        l_scom_data |= (uint64_t)    0x1 << (64 - ( 1 +  1)); //MCTO_SELECT_LOCAL_HANG_PULSE=ON
+        l_scom_data |= (uint64_t)    0x7 << (64 - ( 5 +  3)); //MCTO_CL_TIMEOUT_VALUE=0x7
+        l_scom_data |= (uint64_t) 0xFFFF << (64 - ( 8 + 16)); //MCTO_LOCAL_HANG_COMP=0xFFFF
+        l_scom_data |= (uint64_t)   0x70 << (64 - (24 +  8)); //MCTO_HANG_COMP=0x70
+        l_scom_data |= (uint64_t)    0x1 << (64 - (32 +  1)); //MCTO_ENABLE_NONMIRROR_HANG=ON
+        l_scom_data |= (uint64_t)    0x1 << (64 - (33 +  1)); //MCTO_ENABLE_CHANNEL_HANG=ON
+        l_scom_data |= (uint64_t)    0x1 << (64 - (34 +  1)); //MCTO_ENABLE_APO_HANG=ON
+        l_scom_data |= (uint64_t)    0x1 << (64 - (36 +  1)); //MCTO_DISABLE_HARDWARE_TRACE_MANAGER_HANG=ON
+        l_scom_data |= (uint64_t)    0x2 << (64 - (37 +  3)); //MCTO_CHANNEL_TIMEOUT_VALUE=0x2
     }
 
     //mask
-    l_scom_mask |= (uint64_t)    0x1 << (64 - ( 0 +  1));
-    l_scom_mask |= (uint64_t)    0x1 << (64 - ( 1 +  1));
-    l_scom_mask |= (uint64_t)    0x7 << (64 - ( 5 +  3));
-    l_scom_mask |= (uint64_t) 0xFFFF << (64 - ( 8 + 16));
-    l_scom_mask |= (uint64_t)   0xFF << (64 - (24 +  8));
-    l_scom_mask |= (uint64_t)    0x1 << (64 - (33 +  1));
-    l_scom_mask |= (uint64_t)    0x1 << (64 - (34 +  1));
-    l_scom_mask |= (uint64_t)    0x1 << (64 - (36 +  1));
-    l_scom_mask |= (uint64_t)    0x7 << (64 - (37 +  3));
+    l_scom_mask |= (uint64_t)    0x1 << (64 - ( 0 +  1)); //MCTO_SELECT_PB_HANG_PULSE=OFF
+    l_scom_mask |= (uint64_t)    0x1 << (64 - ( 1 +  1)); //MCTO_SELECT_LOCAL_HANG_PULSE=ON
+    l_scom_mask |= (uint64_t)    0x7 << (64 - ( 5 +  3)); //MCTO_CL_TIMEOUT_VALUE=0x7
+    l_scom_mask |= (uint64_t) 0xFFFF << (64 - ( 8 + 16)); //MCTO_LOCAL_HANG_COMP=0xFFFF
+    l_scom_mask |= (uint64_t)   0xFF << (64 - (24 +  8)); //MCTO_HANG_COMP=0x70
+    l_scom_mask |= (uint64_t)    0x1 << (64 - (32 +  1)); //MCTO_ENABLE_NONMIRROR_HANG=ON
+    l_scom_mask |= (uint64_t)    0x1 << (64 - (33 +  1)); //MCTO_ENABLE_CHANNEL_HANG=ON
+    l_scom_mask |= (uint64_t)    0x1 << (64 - (34 +  1)); //MCTO_ENABLE_APO_HANG=ON
+    l_scom_mask |= (uint64_t)    0x1 << (64 - (36 +  1)); //MCTO_DISABLE_HARDWARE_TRACE_MANAGER_HANG=ON
+    l_scom_mask |= (uint64_t)    0x7 << (64 - (37 +  3)); //MCTO_CHANNEL_TIMEOUT_VALUE=0x2
 
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,
