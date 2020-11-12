@@ -47,6 +47,8 @@ struct wrap_mode_def
 {
     fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG_Type num_links[NUM_PROCS];
     fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type link_en[NUM_PROCS];
+    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID_Type rem_link_id[NUM_PROCS];
+    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID_Type rem_chip_id[NUM_PROCS];
 };
 
 struct wrap_mode_def MODEA_DEF =
@@ -58,6 +60,20 @@ struct wrap_mode_def MODEA_DEF =
         { 0, 1, 0, 0, 1, 0, 1, 0 }, // p1
         { 0, 1, 0, 0, 1, 0, 1, 0 }, // p2
         { 0, 1, 0, 0, 1, 0, 1, 0 }, // p3
+    },
+    .rem_link_id =
+    {
+        { 0, 1, 0, 0, 6, 0, 6, 0 }, // p0
+        { 0, 1, 0, 0, 4, 0, 4, 0 }, // p1
+        { 0, 1, 0, 0, 4, 0, 4, 0 }, // p2
+        { 0, 1, 0, 0, 6, 0, 6, 0 }, // p3
+    },
+    .rem_chip_id =
+    {
+        { 0, 1, 0, 0, 2, 0, 3, 0 }, // p0
+        { 0, 0, 0, 0, 2, 0, 3, 0 }, // p1
+        { 0, 3, 0, 0, 1, 0, 0, 0 }, // p2
+        { 0, 2, 0, 0, 1, 0, 0, 0 }, // p3
     },
 };
 
@@ -71,6 +87,20 @@ struct wrap_mode_def MODEB_DEF =
         { 0, 0, 1, 0, 0, 1, 0, 1 }, // p2
         { 0, 0, 1, 0, 0, 1, 0, 1 }, // p3
     },
+    .rem_link_id =
+    {
+        { 0, 0, 2, 0, 0, 7, 0, 7 }, // p0
+        { 0, 0, 2, 0, 0, 5, 0, 5 }, // p1
+        { 0, 0, 2, 0, 0, 5, 0, 5 }, // p2
+        { 0, 0, 2, 0, 0, 7, 0, 7 }, // p3
+    },
+    .rem_chip_id =
+    {
+        { 0, 0, 1, 0, 0, 2, 0, 3 }, // p0
+        { 0, 0, 0, 0, 0, 2, 0, 3 }, // p1
+        { 0, 0, 3, 0, 0, 1, 0, 0 }, // p2
+        { 0, 0, 2, 0, 0, 1, 0, 0 }, // p3
+    },
 };
 
 struct wrap_mode_def MODEC_DEF =
@@ -83,6 +113,20 @@ struct wrap_mode_def MODEC_DEF =
         { 1, 0, 0, 0, 0, 1, 0, 1 }, // p2
         { 0, 0, 0, 1, 0, 1, 0, 1 }, // p3
     },
+    .rem_link_id =
+    {
+        { 3, 0, 0, 0, 0, 7, 0, 7 }, // p0
+        { 0, 0, 0, 0, 0, 5, 0, 5 }, // p1
+        { 3, 0, 0, 0, 0, 5, 0, 5 }, // p2
+        { 0, 0, 0, 0, 0, 7, 0, 7 }, // p3
+    },
+    .rem_chip_id =
+    {
+        { 1, 0, 0, 0, 0, 2, 0, 3 }, // p0
+        { 0, 0, 0, 0, 0, 2, 0, 3 }, // p1
+        { 3, 0, 0, 0, 0, 1, 0, 0 }, // p2
+        { 0, 0, 0, 2, 0, 1, 0, 0 }, // p3
+    },
 };
 
 struct wrap_mode_def MODEV_DEF =
@@ -92,6 +136,20 @@ struct wrap_mode_def MODEV_DEF =
     {
         { 1, 0, 0, 0, 0, 0, 0, 0 }, // p0
         { 0, 0, 0, 1, 0, 0, 0, 0 }, // p1
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p2
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p3
+    },
+    .rem_link_id =
+    {
+        { 3, 2, 1, 0, 7, 6, 6, 4 }, // p0
+        { 3, 2, 1, 0, 7, 6, 5, 4 }, // p1
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p2
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p3
+    },
+    .rem_chip_id =
+    {
+        { 1, 1, 1, 1, 1, 1, 1, 1 }, // p0
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p1
         { 0, 0, 0, 0, 0, 0, 0, 0 }, // p2
         { 0, 0, 0, 0, 0, 0, 0, 0 }, // p3
     },
@@ -107,6 +165,20 @@ struct wrap_mode_def MODEW_DEF =
         { 0, 0, 0, 0, 0, 0, 0, 0 }, // p2
         { 0, 0, 0, 0, 0, 0, 0, 0 }, // p3
     },
+    .rem_link_id =
+    {
+        { 3, 2, 1, 0, 7, 6, 6, 4 }, // p0
+        { 3, 2, 1, 0, 7, 6, 5, 4 }, // p1
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p2
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p3
+    },
+    .rem_chip_id =
+    {
+        { 1, 1, 1, 1, 1, 1, 1, 1 }, // p0
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p1
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p2
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p3
+    },
 };
 
 struct wrap_mode_def MODEX_DEF =
@@ -116,6 +188,20 @@ struct wrap_mode_def MODEX_DEF =
     {
         { 0, 0, 1, 0, 0, 0, 0, 0 }, // p0
         { 0, 1, 0, 0, 0, 0, 0, 0 }, // p1
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p2
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p3
+    },
+    .rem_link_id =
+    {
+        { 3, 2, 1, 0, 7, 6, 6, 4 }, // p0
+        { 3, 2, 1, 0, 7, 6, 5, 4 }, // p1
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p2
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p3
+    },
+    .rem_chip_id =
+    {
+        { 1, 1, 1, 1, 1, 1, 1, 1 }, // p0
+        { 0, 0, 0, 0, 0, 0, 0, 0 }, // p1
         { 0, 0, 0, 0, 0, 0, 0, 0 }, // p2
         { 0, 0, 0, 0, 0, 0, 0, 0 }, // p3
     },
@@ -236,6 +322,10 @@ fapi2::ReturnCode p10_smp_wrap(
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_LINKS_CNFG)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, i_target, l_def.link_en[l_proc_id]),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID, i_target, l_def.rem_link_id[l_proc_id]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, i_target, l_def.rem_chip_id[l_proc_id]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
 
 fapi_try_exit:
     FAPI_DBG("End");
