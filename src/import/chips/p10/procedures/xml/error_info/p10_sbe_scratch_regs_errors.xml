@@ -102,6 +102,22 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <rc>RC_P10_HW549287_WAR_ERR</rc>
+  <description>
+    Workaround for HW549287 failed
+  </description>
+  <ffdc>TARGET_CHIP</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <target>TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
   <rc>RC_P10_SBE_SCRATCH_REGS_INVALID_ACCESS_ERR</rc>
   <description>
     Requested hardware access method is not supported by platform
