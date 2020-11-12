@@ -537,9 +537,27 @@ inline std::vector<Target<K_CHILD, M, V> >
     }
     else
     {
-        TARGETING::ResourceState l_state = l_functional ? TARGETING::UTIL_FILTER_FUNCTIONAL : TARGETING::UTIL_FILTER_ALL;
+        // There is translation required to go from the binary functional
+        //  representation of fapi2::TargetState to the trinary state that
+        //  we have inside of Hostboot.  For chiplet/subunits, the ekb
+        //  code expects TARGET_STATE_PRESENT to represent the architectural
+        //  limits of the chip, meaning that we need to include parts marked
+        //  as bad in PG.  Since those are marked non-present in TARGETING
+        //  we will use the ALL (aka. blueprint) value.  However, for top-level
+        //  targets (chips, dimms), PRESENT should represent what is physically
+        //  installed.
 
-        if (K_CHILD == fapi2::TARGET_TYPE_DIMM && !l_functional)
+        TARGETING::ResourceState l_state = l_functional
+          ? TARGETING::UTIL_FILTER_FUNCTIONAL
+          : TARGETING::UTIL_FILTER_ALL;
+
+        // For any top-level target, we will use PRESENT for !functional
+        if( !l_functional &&
+            ( (K_CHILD == fapi2::TARGET_TYPE_DIMM)
+              || (K_CHILD == fapi2::TARGET_TYPE_PROC_CHIP)
+              || (K_CHILD == fapi2::TARGET_TYPE_PMIC)
+              || (K_CHILD == fapi2::TARGET_TYPE_GENERICI2CSLAVE)
+              || (K_CHILD == fapi2::TARGET_TYPE_OCMB_CHIP) ) )
         {
             l_state = TARGETING::UTIL_FILTER_PRESENT;
         }
