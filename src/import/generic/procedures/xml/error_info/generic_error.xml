@@ -241,6 +241,20 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_INVALID_CW_ENCODING</rc>
+    <description>
+      Set if a controlword is invalid
+    </description>
+    <ffdc>CW_DATA_LEN</ffdc>
+    <ffdc>BCW</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
    <hwpError>
     <rc>RC_MSS_INVALID_RTT_WR_ENCODING</rc>
     <description>
