@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,8 +68,15 @@ void addFruCallouts(TARGETING::Target* i_target,
        break;
 
      case  PIB::PIB_PARTIAL_GOOD: //b011
-       io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                    HWAS::SRCI_PRIORITY_HIGH);
+        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+        // Add a low priority callout w/ delayed deconfig
+        // to ensure the part gets deconfigured so the next
+        // ipl has a better change of booting.
+        io_errl->addHwCallout(i_target,
+                              HWAS::SRCI_PRIORITY_LOW,
+                              HWAS::DELAYED_DECONFIG,
+                              HWAS::GARD_NULL );
        break;
 
      case  PIB::PIB_INVALID_ADDRESS: //b100
@@ -89,7 +96,7 @@ void addFruCallouts(TARGETING::Target* i_target,
      case PIB::PIB_TIMEOUT: //b111
        io_errl->addHwCallout( i_target,
                               HWAS::SRCI_PRIORITY_LOW,
-                              HWAS::NO_DECONFIG,
+                              HWAS::DELAYED_DECONFIG,
                               HWAS::GARD_NULL );
        break;
 
@@ -99,7 +106,7 @@ void addFruCallouts(TARGETING::Target* i_target,
             // SENTINEL is a proc so use the OSC path
             io_errl->addClockCallout(i_target,
                                 HWAS::OSCREFCLK_TYPE,
-                                HWAS::SRCI_PRIORITY_LOW);
+                                HWAS::SRCI_PRIORITY_MED);
         }
         else if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
                     TARGETING::TYPE_PROC)
@@ -114,14 +121,14 @@ void addFruCallouts(TARGETING::Target* i_target,
             {
                 io_errl->addClockCallout(i_target,
                                          HWAS::OSCPCICLK_TYPE,
-                                         HWAS::SRCI_PRIORITY_LOW);
+                                         HWAS::SRCI_PRIORITY_MED);
             }
             //for everything else blame the ref clock
             else
             {
                 io_errl->addClockCallout(i_target,
                                          HWAS::OSCREFCLK_TYPE,
-                                         HWAS::SRCI_PRIORITY_LOW);
+                                         HWAS::SRCI_PRIORITY_MED);
             }
         }
         else if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
@@ -129,23 +136,43 @@ void addFruCallouts(TARGETING::Target* i_target,
         {
             io_errl->addClockCallout(i_target,
                                      HWAS::MEMCLK_TYPE,
-                                     HWAS::SRCI_PRIORITY_LOW);
+                                     HWAS::SRCI_PRIORITY_MED);
         }
         else // for anything else, just blame the refclock
         {
             io_errl->addClockCallout(i_target,
                                 HWAS::OSCREFCLK_TYPE,
-                                HWAS::SRCI_PRIORITY_LOW);
+                                HWAS::SRCI_PRIORITY_MED);
         }
+        // Add a low priority callout w/ delayed deconfig
+        // to ensure the part gets deconfigured so the next
+        // ipl has a better change of booting.
+        io_errl->addHwCallout(i_target,
+                              HWAS::SRCI_PRIORITY_LOW,
+                              HWAS::DELAYED_DECONFIG,
+                              HWAS::GARD_NULL );
        break;
 
      default:
        // Anything else would most likely be a code bug
        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_HIGH);
+        // Make sure we aren't calling the part out if there wasn't actually
+        // a PIB error and this function was mistakenly called
+        if(i_pibErrStatus != PIB_NO_ERROR)
+        {
+            // Add a low priority callout w/ delayed deconfig
+            // to ensure the part gets deconfigured so the next
+            // ipl has a better change of booting.
+            io_errl->addHwCallout(i_target,
+                                  HWAS::SRCI_PRIORITY_LOW,
+                                  HWAS::DELAYED_DECONFIG,
+                                  HWAS::GARD_NULL );
+        }
        break;
-
    }
+
+
 }
 
 } // end of namespace
