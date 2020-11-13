@@ -540,6 +540,11 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
             F1RC1X_START = 0,
             F1RC1X_LEN = 8,
 
+            // Byte 105:  F1RC2X - QxCN Output Delay Control Word
+            F1RC2X_BYTE = 105,
+            F1RC2X_START = 0,
+            F1RC2X_LEN = 8,
+
             // Byte 106:  F1RC3X - QxCKEn Output Delay Control Word
             F1RC3X_BYTE = 106,
             F1RC3X_START = 0,
@@ -845,6 +850,9 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
 
         // Byte 104:  F1RC1X - QxCSn_n Output Delay Control Word
         static constexpr field_t F1RC1X{F1RC1X_BYTE, F1RC1X_START, F1RC1X_LEN};
+
+        // Byte 105:  F1RC2X - QxCN Output Delay Control Word
+        static constexpr field_t F1RC2X{F1RC2X_BYTE, F1RC2X_START, F1RC2X_LEN};
 
         // Byte 106:  F1RC3X - QxCKEn Output Delay Control Word
         static constexpr field_t F1RC3X{F1RC3X_BYTE, F1RC3X_START, F1RC3X_LEN};

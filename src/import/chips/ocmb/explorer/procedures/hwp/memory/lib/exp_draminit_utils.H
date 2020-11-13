@@ -671,6 +671,7 @@ class phy_params
             FAPI_TRY(mss::attr::get_exp_atxdly_a(i_target, iv_attrs_params.iv_atxdly_a));
             FAPI_TRY(mss::attr::get_exp_atxdly_b(i_target, iv_attrs_params.iv_atxdly_b));
             FAPI_TRY(mss::attr::get_ddr4_f1rc1x(i_target, iv_attrs_params.iv_f1rc1x));
+            FAPI_TRY(mss::attr::get_ddr4_f1rc2x(i_target, iv_attrs_params.iv_f1rc2x));
             FAPI_TRY(mss::attr::get_ddr4_f1rc3x(i_target, iv_attrs_params.iv_f1rc3x));
             FAPI_TRY(mss::attr::get_ddr4_f1rc4x(i_target, iv_attrs_params.iv_f1rc4x));
             FAPI_TRY(mss::attr::get_ddr4_f1rc5x(i_target, iv_attrs_params.iv_f1rc5x));

@@ -1068,6 +1068,16 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         }
 
         ///
+        /// @brief F1RC2X - QxCSN Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc2x(uint8_t& o_output) const override
+        {
+            return reader<fields_t::F1RC2X, R>(iv_target, iv_data, o_output);
+        }
+
+        ///
         /// @brief F1RC3X - QxCKEn Output Delay Control Word
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay

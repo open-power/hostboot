@@ -568,7 +568,6 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
             if(is_new_fw_msdg_supported(l_fw_version))
             {
                 FAPI_TRY(l_set_phy_params.set_F1RC1x(o_phy_params));
-                FAPI_TRY(l_set_phy_params.set_F1RC1x(o_phy_params));
                 FAPI_TRY(l_set_phy_params.set_F1RC2x(o_phy_params));
                 FAPI_TRY(l_set_phy_params.set_F1RC3x(o_phy_params));
                 FAPI_TRY(l_set_phy_params.set_F1RC4x(o_phy_params));
