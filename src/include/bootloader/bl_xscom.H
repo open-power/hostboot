@@ -36,6 +36,7 @@
 
 namespace XSCOM
 {
+
 /**
  * @brief Performs an XSCOM operation
  *

@@ -87,7 +87,9 @@ namespace Bootloader
         RC_LPC_ERR                 = HBBL_COMP_ID | 0x10, /**< LPC Error */
         //termination_rc
         RC_TOC_NOT_FOUND_ERR       = HBBL_COMP_ID | 0x11, /**< TOC Not Found Error */
-        RC_XSCOM_BAD_PARAM         = HBBL_COMP_ID | 0x12  /**< Bad params passed to XSCOM op */
+        RC_XSCOM_BAD_PARAM         = HBBL_COMP_ID | 0x12,  /**< Bad params passed to XSCOM op */
+        RC_XSCOM_OP_FAILED         = HBBL_COMP_ID | 0x13,  /**< XSCOM operation failed */
+        RC_XSCOM_OP_TIMEOUT        = HBBL_COMP_ID | 0x14,  /**< XSCOM operation timeout */
 
     };
 

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/xscom/piberror.H $                            */
+/* $Source: src/include/usr/xscom/piberror_common.H $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,36 +22,30 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __PIBERROR_COMMON_H
+#define __PIBERROR_COMMON_H
 
-#ifndef __PIB_ERROR_H
-#define __PIB_ERROR_H
-
-#include <errl/errlentry.H>
-#include <targeting/common/target.H>
-#include <xscom/piberror_common.H>
-#include <stdint.h>
+/** @file piberror_common.H
+  * @brief Provides PIB data structures and interfaces common between HBBL and HB
+  */
 
 namespace PIB
 {
 
-/**
- * @brief Add callouts to an errorlog based on the type of PIB error passed in
- *        could be a hardware or procedure callout
- *
- * @param[in]  i_target        Operation target
- * @param[in]  i_pibErrStatus  Error Status bits retrieved
- * @param[in]  i_scomAddr      Address of SCOM operation that led to the fail,
- *    if operation was not a scom, set to UINT64_MAX
- * @param[in/out] io_errl      Originating errorlog that we will add Fru
- *                             Callouts to.
- * @return none
- */
-void addFruCallouts(TARGETING::Target* i_target,
-                    uint32_t i_pibErrStatus,
-                    uint64_t i_scomAddr,
-                    errlHndl_t& io_errl);
-
-
-}
+    /**
+     * @brief Enumerations for the each PIB error possbility
+     */
+    enum PibError
+    {
+        PIB_NO_ERROR          = 0,//0b000,
+        PIB_RESOURCE_OCCUPIED = 1,//0b001,
+        PIB_CHIPLET_OFFLINE   = 2,//0b010,
+        PIB_PARTIAL_GOOD      = 3,//0b011,
+        PIB_INVALID_ADDRESS   = 4,//0b100,
+        PIB_CLOCK_ERROR       = 5,//0b101,
+        PIB_PARITY_ERROR      = 6,//0b110,
+        PIB_TIMEOUT           = 7,//0b111,
+    };
+} // namespace PIB
 
 #endif

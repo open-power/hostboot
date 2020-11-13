@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,7 +178,7 @@ extern uint64_t GET64 (uint64_t data);
 
 #define HRMOR			313
 
-#define HMER			336
+#define HMER_REG        336
 #define HMER_XSCOM_FAIL	0x0080000000000000  //Bit 8
 #define HMER_XSCOM_DONE 0x0040000000000000  //Bit 9
 #define HMER_XSCOM_RSLT	0x0000070000000000  //Bit 21-23
@@ -307,13 +307,13 @@ static inline void ci_write(const uint64_t reg, uint64_t val)
 #define getscom(a, b) _getscom((a)+PCB2PBUS(b))
 static inline uint64_t _getscom(uint64_t addr)
 {
-    mtspr(HMER,0);
+    mtspr(HMER_REG,0);
     uint64_t value;
     uint64_t rslt;
     do {
         value = ci_read(addr);
         do {
-            rslt = mfspr(HMER)&(HMER_XSCOM_RSLT|HMER_XSCOM_DONE|HMER_XSCOM_FAIL);
+            rslt = mfspr(HMER_REG)&(HMER_XSCOM_RSLT|HMER_XSCOM_DONE|HMER_XSCOM_FAIL);
         } while( (rslt & HMER_XSCOM_DONE)==0 );
     } while(rslt == (HMER_XSCOM_RTRY|HMER_XSCOM_DONE|HMER_XSCOM_FAIL) ); // 001 retry
     if(rslt != HMER_XSCOM_DONE)
@@ -327,12 +327,12 @@ static inline uint64_t _getscom(uint64_t addr)
         + PCB2PBUS(scom_addr),value)
 static inline void _putscom(uint64_t addr, uint64_t value)
 {
-    mtspr(HMER,0);
+    mtspr(HMER_REG,0);
     uint64_t rslt = -1;
     do {
         ci_write(addr,value);
         do {
-            rslt = mfspr(HMER)&(HMER_XSCOM_RSLT|HMER_XSCOM_DONE|HMER_XSCOM_FAIL);
+            rslt = mfspr(HMER_REG)&(HMER_XSCOM_RSLT|HMER_XSCOM_DONE|HMER_XSCOM_FAIL);
         } while( (rslt & HMER_XSCOM_DONE)==0 );
     } while(rslt == (HMER_XSCOM_RTRY|HMER_XSCOM_DONE|HMER_XSCOM_FAIL) ); // 001 retry
     if(rslt != HMER_XSCOM_DONE)
