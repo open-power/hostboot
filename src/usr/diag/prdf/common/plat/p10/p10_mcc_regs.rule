@@ -100,3 +100,17 @@
         capture     group mc_ustl_fir_ffdc;
     };
 
+    register MC_USTL_LOL_DROP
+    {
+        name        "MC USTL LOL DROP Register";
+        scomaddr    0x0C010E11;
+        capture     group mc_ustl_fir_ffdc;
+    };
+
+    register MC_USTL_LOL_MASK
+    {
+        name        "MC USTL LOL Mask Register";
+        scomaddr    0x0C010E12;
+        capture     group mc_ustl_fir_ffdc;
+    };
+
