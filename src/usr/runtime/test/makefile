@@ -24,7 +24,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = testruntime
-TESTS += $(if $(or $(CONFIG_EARLY_TESTCASES),${CONFIG_AXONE_BRING_UP}) ,,testpreverifiedlidmgr.H)
+TESTS += testpreverifiedlidmgr.H
 TESTS += test_checkHbResMemLimit.H
 #@TODO RTC 132750
 #TESTS += hdatservicetest.H
