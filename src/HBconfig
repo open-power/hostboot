@@ -60,16 +60,6 @@ config FSP_BUILD
     help
         Indicates that this is an FSP build
 
-config AXONE
-    default n
-    help
-        Only enabled for Axone
-
-config AXONE_BRING_UP
-    default n
-    help
-        Only enable for Axone bringup, will be removed eventually
-
 config P10_BRING_UP
     default n
     help
