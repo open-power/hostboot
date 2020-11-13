@@ -595,7 +595,7 @@
         OFF = 0x00,
         ON = 0x01
     </enum>
-    <default>OFF</default>
+    <default>ON</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -786,7 +786,7 @@
         ON=1,
         OFF_SKIP_DD=2
     </enum>
-    <default>OFF</default>
+    <default>ON</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
