@@ -538,6 +538,20 @@
     <mssAccessorName>ddr4_f1rc1x</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_DIMM_DDR4_F1RC2X</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Array[DIMM].
+      F1RC2X - QxCn Output Delay Control Word from the DDR4 RCD Spec.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>ddr4_f1rc2x</mssAccessorName>
+  </attribute>
+
     <attribute>
     <id>ATTR_MEM_DIMM_DDR4_F1RC3X</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>

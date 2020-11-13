@@ -2333,6 +2333,43 @@ class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUST
 ///
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
+/// @note F1RC2X field specialization
+/// @note valid for rev = 0.3
+///
+template< >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC2X, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "QxCn Output Delay Control Word (F1RC2X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note F1RC2X field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC2X, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x9F;
+        static constexpr const char* FIELD_STR = "QxCSn_n Output Delay Control Word (F1RC2X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
 /// @note F1RC3X field specialization
 /// @note valid for rev = 0.3
 ///
