@@ -22,10 +22,11 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-
-# Include the macros and things for MSS EXP procedures
 -include 00exp_common.mk
 
 PROCEDURE=exp_omi_setup
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_EXP_INCLUDES))
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/io)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/io)
+lib$(PROCEDURE)_DEPLIBS += p10_io_omi_prbs
 $(call BUILD_PROCEDURE)

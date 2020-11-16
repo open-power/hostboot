@@ -38,6 +38,7 @@
 #include <lib/omi/p10_omi_utils.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 ///
 /// @brief Setup OMI for P10
@@ -61,6 +62,9 @@ fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i
     }
 
     FAPI_TRY(mss::omi::setup_mc_cmn_config(i_target));
+
+    // Add 120ms delay before PRBS
+    FAPI_TRY( fapi2::delay( 120 * mss::DELAY_1MS, 200) );
 
     // Two OMI per OMIC
     for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))

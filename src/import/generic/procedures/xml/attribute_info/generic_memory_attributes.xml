@@ -501,6 +501,7 @@
       Will be set automatically in Cronus based on SYSTEM_TYPE
     </description>
     <valueType>uint8</valueType>
+    <enum> FALSE = 0, TRUE = 1 </enum>
     <initToZero></initToZero>
     <platInit/>
     <mrwHide/>

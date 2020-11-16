@@ -38,6 +38,7 @@
 #include <lib/workarounds/exp_omi_workarounds.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/omi/exp_omi_utils.H>
+#include <lib/i2c/exp_i2c_fields.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <lib/inband/exp_inband.H>
@@ -271,6 +272,25 @@ fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
             lane++;
         }
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Disable Explorer PHY optimization step in BOOT_CONFIG0
+///
+/// @param[in] i_target OCMB_CHIP target
+/// @param[in,out] io_boot_config_data BOOT_CONFIG0 data
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode disable_phy_opt(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    std::vector<uint8_t>& io_boot_config_data)
+{
+    FAPI_DBG("Disabling OMI PHY optimization on %s", mss::c_str(i_target));
+
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_phy_opt_disable(i_target, io_boot_config_data, 1));
 
 fapi_try_exit:
     return fapi2::current_err;

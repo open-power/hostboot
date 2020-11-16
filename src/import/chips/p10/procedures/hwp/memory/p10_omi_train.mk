@@ -28,7 +28,4 @@
 
 PROCEDURE=p10_omi_train
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_P10_INCLUDES))
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/io/)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/io/)
-OBJS+=p10_io_lib.o
 $(call BUILD_PROCEDURE)

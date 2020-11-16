@@ -49,6 +49,7 @@
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <lib/i2c/exp_i2c_fields.H>
+#include <p10_io_omi_prbs.H>
 
 extern "C"
 {
@@ -62,6 +63,7 @@ extern "C"
     {
         mss::display_git_commit_info("exp_omi_setup");
         fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+        uint8_t l_is_apollo = 0;
         uint8_t l_gem_menterp_workaround = 0;
         uint8_t l_enable_ffe_settings = 0;
         uint32_t l_omi_freq = 0;
@@ -85,6 +87,14 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
+        FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+
+        // Send downstream PRBS pattern from host
+        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+        {
+            FAPI_TRY(p10_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target), true));
+        }
+
         // FFE Setup
         FAPI_TRY(mss::attr::get_omi_ffe_settings_command(i_target, l_enable_ffe_settings));
 
@@ -101,14 +111,20 @@ extern "C"
         // Sanity check: set dl_layer_boot_mode to NON DL TRAINING (0b00 == default)
         FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_boot_config_data, l_dl_layer_boot_mode ));
 
+        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_TRUE)
+        {
+            // Apollo cannot send the PRBS23 pattern, so need to disable PHY optimization
+            FAPI_TRY(mss::exp::workarounds::omi::disable_phy_opt(i_target, l_boot_config_data));
+        }
+
         // Issues the command and checks for completion
         // Note: This does not kick off OMI training
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
         // Check FW status for success
-        // Note: Extended polling count from 100 to 1000 to account for longer Boot_config_0 sequence
-        // in Explorer FW CL-384401.
-        l_rc = mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 1000);
+        // Note: Extended polling count to 200000ms to account for PHY training during Boot_config_0 sequence
+        // TK this will need to be shortened to work in firmware
+        l_rc = mss::exp::i2c::fw_status(i_target, 2 * mss::DELAY_1MS, 100000);
 
         // Note: It's still under discussion whether FIRs will be lit if BOOT_CONFIG_0 fails, and if
         // the registers will be clocked so we can read them. Disabling FIR checking until this
@@ -119,6 +135,12 @@ extern "C"
 #else
         FAPI_TRY(l_rc, "%s BOOT_CONFIG_0 either failed or timed out", mss::c_str(i_target));
 #endif
+
+        // Terminate downstream PRBS23 pattern
+        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+        {
+            FAPI_TRY(p10_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target), false));
+        }
 
         FAPI_TRY(mss::exp::workarounds::omi::gem_menterp(i_target, l_gem_menterp_workaround));
 
@@ -172,7 +194,7 @@ extern "C"
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
         FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target, l_omi_freq));
 
-        // Perform p10 workaround
+        // Start P10 PHY training by sending upstream PRBS pattern
         // Train mode 6 (state 3)
         FAPI_TRY(mss::exp::workarounds::omi::pre_training_prbs(i_target));
 

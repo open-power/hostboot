@@ -108,6 +108,17 @@ fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
                                   uint32_t i_omi_freq);
 
 
+///
+/// @brief Disable Explorer PHY optimization step in BOOT_CONFIG0
+///
+/// @param[in] i_target OCMB_CHIP target
+/// @param[in,out] io_boot_config_data BOOT_CONFIG0 data
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode disable_phy_opt(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    std::vector<uint8_t>& io_boot_config_data);
+
 } // omi
 } // workarounds
 } // exp
