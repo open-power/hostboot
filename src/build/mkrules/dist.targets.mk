@@ -43,6 +43,9 @@ ROOTPATH = ../../..
 VALID_TARGETS = fsp tools openpower vpo errltool openpower-sim
 RELEASE_TARGETS = fsp tools errltool
 
+# TODO RTC: 250794PM: Enable WOFDATA generation for op-build
+# Remove wof-tables-img file from being delivered to FSP or OP tars.
+
 #
 # Files which are to be directly copied into content targets.
 #
@@ -92,6 +95,7 @@ COPY_FILES = \
     src/build/buildpnor/PnorUtils.pm:openpower,openpower-sim \
     src/build/buildpnor/imprintHwKeyHash:openpower,openpower-sim \
     src/build/buildpnor/wof-tables-img:openpower,openpower-sim \
+    src/import/tools/wof/wof_data_xlator.pl:openpower,openpower-sim \
     src/build/buildpnor/memd_creation.pl:openpower,openpower-sim \
     src/build/buildpnor/pkgOcmbFw.pl:openpower,openpower-sim \
     src/usr/targeting/common/processMrw.pl:openpower,openpower-sim \
@@ -295,6 +299,7 @@ fsp.tar_CONTENTS = \
     src/build/mkrules/hbfw/fsp/makefile \
     src/build/tools/eecache_editor.pl \
     src/build/buildpnor/wof-tables-img \
+    src/import/tools/wof/wof_data_xlator.pl \
     src/build/buildpnor/memd_creation.pl \
     src/build/buildpnor/buildSbePart.pl \
     src/build/buildpnor/buildpnor.pl \
