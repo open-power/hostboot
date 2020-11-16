@@ -23,11 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file pre_data_init.H
-/// @brief Class to set preliminary eff_config attributes
+/// @file data_engine.H
+/// @brief Classes for the eff_config engine
 ///
-// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:CI
@@ -133,6 +133,7 @@ struct attr_engine< P, ET, F, TT, true >
 };
 
 }// gen
+
 }// mss
 
 #endif

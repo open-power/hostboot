@@ -113,6 +113,7 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
             iv_data = i_spd_data;
         }
 
+#if 0
         ///
         /// @brief Decodes SPD Revision for bytes 192->447 -> SPD_REV_DDIMM_MODULE
         /// @param[out] o_output encoding from SPD
@@ -1763,7 +1764,7 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         fapi_try_exit:
             return fapi2::current_err;
         }
-
+#endif
 };// decoder
 
 }// spd

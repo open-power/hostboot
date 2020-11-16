@@ -27,6 +27,7 @@ ROOTPATH = ../../../..
 IMPORT_PATH              = ${ROOTPATH}/src/import
 PROCEDURES_PATH          = ${IMPORT_PATH}/chips/p10/procedures
 EXPLORER_PROCEDURES_PATH = ${IMPORT_PATH}/chips/ocmb/explorer/procedures
+PMIC_PROCEDURES_PATH     = ${IMPORT_PATH}/chips/ocmb/common/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
@@ -42,6 +43,8 @@ EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memor
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${PMIC_PROCEDURES_PATH}/hwp/pmic/
+EXTRAINCDIR += ${PMIC_PROCEDURES_PATH}/hwp/pmic/lib/
 
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib
@@ -67,8 +70,10 @@ MSS_LIB += ${ROOTPATH}/src/import/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/common/ddr4/
+MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/ddimm/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/ccs/
+MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/data_engine/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/ecc/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/shared/

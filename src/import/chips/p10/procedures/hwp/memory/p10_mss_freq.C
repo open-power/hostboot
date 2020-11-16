@@ -40,11 +40,8 @@
 #include <p10_mss_freq.H>
 
 #include <lib/freq/p10_freq_traits.H>
-#include <lib/eff_config/p10_data_init_traits.H>
-#include <lib/eff_config/explorer_attr_engine_traits.H>
-#include <generic/memory/lib/data_engine/data_engine.H>
+#include <lib/eff_config/p10_base_engine.H>
 #include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
 #include <generic/memory/mss_git_data_helper.H>
@@ -76,20 +73,8 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
             std::vector<uint8_t> l_raw_spd;
             FAPI_TRY(mss::spd::get_raw_data(d, l_raw_spd));
             {
-                // Gets the SPD facade
-                fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-                mss::spd::facade l_spd_decoder(d, l_raw_spd, l_rc);
-
-                // Checks that the facade was setup correctly
-                FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d) );
-
-                // Set pre-eff_config SPD driven attributes
-                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::pre_data_init_fields>::set(l_spd_decoder)),
-                          "Failed gen::attr_engine<mss::proc_type::PROC_P10, mss::pre_data_init_fields>::set on %s", mss::spd::c_str(d) );
-
-                // Set pre_eff_config attributes derived from other attributes
-                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::generic_metadata_fields>::set(d)),
-                          "Failed gen::attr_engine<mss::proc_type::PROC_P10, mss::generic_metadata_fields>::set on %s", mss::spd::c_str(d) );
+                std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg = std::make_shared<mss::spd::base_0_4>(d);
+                FAPI_TRY(l_base_cfg->process_data_init_fields(l_raw_spd));
             }
         }
 

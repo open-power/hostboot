@@ -42,7 +42,6 @@ OBJS += call_mss_freq.o
 OBJS += call_mss_eff_config.o
 OBJS += call_mss_attr_update.o
 OBJS += host_mss_attr_cleanup.o
-OBJS += pmic_efd_processing.o
 OBJS += p10_fbc_utils.o
 #mss_eff_config - Need in istep07 to group memory
 OBJS += p10_mss_eff_grouping.o

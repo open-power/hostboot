@@ -1191,6 +1191,12 @@ class fields<DDR4, DDIMM_MODULE>
             MODULE_RCD_START = 6,
             MODULE_RCD_LEN = 2,
 
+            // Byte 265-266: RCD MFG ID Code
+            RCD_MFG_ID_LSB_BYTE = 265,
+            RCD_MFG_ID_MSB_BYTE = 266,
+            RCD_MFG_ID_START = 0,
+            RCD_MFG_ID_LEN = 8,
+
             // Byte 268: Thermal Sensor 0 Profile
             THERM_SENSOR_0_PROFILE_BYTE = 268,
             THERM_SENSOR_0_AVAIL_START = 0,
@@ -1508,6 +1514,10 @@ class fields<DDR4, DDIMM_MODULE>
 
         // Byte 264: Registered Clock Drivers (RCD)
         static constexpr field_t MODULE_RCD{MODULE_RCD_BYTE, MODULE_RCD_START, MODULE_RCD_LEN};
+
+        // Byte 265 and 266: RCD MFG ID
+        static constexpr field_t RCD_MFG_ID_LSB{RCD_MFG_ID_LSB_BYTE, RCD_MFG_ID_START, RCD_MFG_ID_LEN};
+        static constexpr field_t RCD_MFG_ID_MSB{RCD_MFG_ID_MSB_BYTE, RCD_MFG_ID_START, RCD_MFG_ID_LEN};
 
         // Byte 268: Thermal Sensor 0 Profile
         static constexpr field_t THERM_SENSOR_0_AVAIL{THERM_SENSOR_0_PROFILE_BYTE, THERM_SENSOR_0_AVAIL_START, THERM_SENSOR_0_AVAIL_LEN};

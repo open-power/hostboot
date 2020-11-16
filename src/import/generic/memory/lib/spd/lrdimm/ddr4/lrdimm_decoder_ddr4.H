@@ -142,6 +142,7 @@ class decoder<DDR4, LRDIMM_MODULE, R > : public dimm_module_decoder
             iv_data = i_spd_data;
         }
 
+#if 0
         ///
         /// @brief Decodes module nominal height max
         /// @param[out] o_output height range encoding from SPD
@@ -1036,7 +1037,7 @@ class decoder<DDR4, LRDIMM_MODULE, R > : public dimm_module_decoder
         fapi_try_exit:
             return fapi2::current_err;
         }
-
+#endif
 };//decoder
 
 }// spd

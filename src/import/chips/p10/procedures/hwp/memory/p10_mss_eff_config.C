@@ -40,20 +40,20 @@
 #include <generic/memory/lib/utils/mss_rank.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/spd/ddimm/efd_factory.H>
 #include <vpd_access.H>
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/data_engine/attr_engine_traits.H>
-#include <lib/eff_config/explorer_attr_engine_traits.H>
-#include <lib/eff_config/pmic_attr_engine_traits.H>
-#include <lib/eff_config/explorer_efd_processing.H>
-#include <lib/eff_config/pmic_efd_processing.H>
+
 #include <lib/freq/p10_freq_traits.H>
 #include <lib/freq/p10_sync.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/workarounds/exp_ccs_2666_write_workarounds.H>
 #include <lib/plug_rules/p10_plug_rules.H>
 
+#include <lib/eff_config/p10_factory.H>
+#include <lib/eff_config/p10_base_engine.H>
+#include <lib/eff_config/p10_ddimm_engine.H>
+#include <lib/eff_config/p10_ddimm_efd_engine.H>
 ///
 /// @brief Configure the attributes for each controller
 /// @param[in] i_target port target
@@ -64,6 +64,9 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
     using mss::DEFAULT_MC_TYPE;
 
     mss::display_git_commit_info("p10_mss_eff_config");
+
+    uint8_t l_spd_rev = 0;
+    FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
 
     for(const auto& dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
@@ -78,8 +81,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
         for (const auto& l_rank : l_ranks)
         {
-            uint8_t l_spd_rev = 0;
-            std::shared_ptr<mss::efd::base_decoder> l_efd_data;
+            std::shared_ptr<mss::efd::ddimm_efd_base> l_ddimm_efd;
 
             // Get EFD size
             const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
@@ -93,22 +95,10 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             std::vector<uint8_t> l_vpd_raw (l_vpd_info.iv_size, 0);
             FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, l_vpd_raw.data()) );
 
-            // Instantiate EFD decoder
-            FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
-            FAPI_TRY( mss::efd::factory(l_ocmb, l_spd_rev, l_vpd_raw, l_vpd_info.iv_rank, l_efd_data) );
-
-            // Set up SI ATTRS
-            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::attr_si_engine_fields>::set(l_efd_data)) );
-
-            // Explorer EFD
-            FAPI_TRY( mss::exp::efd::process(dimm, l_efd_data));
-
-            // PMIC EFD fields do not change per dimm. These attributes and processes will ocurr at the OCMB level,
-            // and we will just choose the fields from DIMM 0 to use as the efd_data
-            if (l_rank.get_dimm_rank() == 0)
+            // Instantiate EFD engine
             {
-                // PMIC EFD
-                FAPI_TRY(mss::pmic::efd::process(l_ocmb, l_efd_data));
+                FAPI_TRY(mss::efd::factory(dimm, l_spd_rev, l_rank.get_dimm_rank(), l_ddimm_efd));
+                FAPI_TRY(l_ddimm_efd->process(l_vpd_raw));
             }
         }
 
@@ -118,25 +108,20 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             {
                 // Gets the SPD facade
                 fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-                mss::spd::facade l_spd_decoder(dimm, l_raw_spd, l_rc);
+
+                std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg;
+                std::shared_ptr<mss::spd::ddimm_base> l_ddimm_module;
+
+                FAPI_TRY(mss::spd::factory(dimm, l_spd_rev, l_base_cfg, l_ddimm_module));
 
                 // Checks that the facade was setup correctly
                 FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(dimm) );
 
-                // Set up generic SPD ATTRS
-                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::attr_eff_engine_fields>::set(l_spd_decoder)) );
-
-                // Set up explorer SPD ATTRS
-                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::exp::attr_eff_engine_fields>::set(l_spd_decoder)) );
-
-                // Set up pmic SPD ATTRS
-                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::pmic::attr_eff_engine_fields>::set(l_spd_decoder)) );
+                FAPI_TRY(l_base_cfg->process(l_raw_spd));
+                FAPI_TRY(l_ddimm_module->process(l_raw_spd));
+                FAPI_TRY(l_base_cfg->process_derived(l_raw_spd));
             }
         }
-
-        // Set up derived ATTRS
-        FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::attr_engine_derived_fields>::set(dimm)) );
-
     }// dimm
 
     // Enforces plug rules

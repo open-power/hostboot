@@ -674,6 +674,7 @@
       ARRAY[DIMM]
       Register Manufacturer ID Code
       Decodes SPD Byte 133 and 134
+      DDIMM Module Bytes 265 and 266
     </description>
     <enum>INPHI = 0xB304, MONTAGE = 0x3286, IDT = 0xB380 </enum>
     <initToZero></initToZero>

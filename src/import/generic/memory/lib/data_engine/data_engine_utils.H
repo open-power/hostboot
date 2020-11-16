@@ -41,7 +41,6 @@
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <generic/memory/lib/spd/ddimm/efd_decoder.H>
 #include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
@@ -197,63 +196,6 @@ struct get<fapi2::TARGET_TYPE_MEM_PORT, spd::facade>
         return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.get_target());
     }
 };
-
-///
-/// @class Get get<T, std::shared_ptr<efd::base_decoder>>
-/// @brief get struct for efd::base_decoder specialization with default target type
-/// @tparam T TargetType with which to use
-///
-template <>
-struct get<fapi2::TARGET_TYPE_MEM_PORT, std::shared_ptr<efd::base_decoder>>
-{
-    ///
-    /// @brief Get target for std::shared_ptr<efd::base_decoder> and default target type for EFD attrs (MEM_PORT)
-    ///
-    /// @param[in] i_data std::shared_ptr<efd::base_decoder> data
-    /// @return fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> Attribute target type
-    ///
-    static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> target(const std::shared_ptr<efd::base_decoder>& i_data)
-    {
-        return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_data->get_target())[0];
-    }
-};
-
-///
-/// @brief Helper function to update the structure that holds attr data
-/// @tparam X size of 1st array index
-/// @tparam Y size of 2nd array index
-/// @tparam T Input/output data type
-/// @tparam FFDC the FFDC type
-/// @param[in] i_efd_data the EFD data
-/// @param[in] i_setting array to set
-/// @param[in] i_ffdc_code FFDC function code
-/// @param[out] o_data attribute data structure to set
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-template < size_t X,
-           size_t Y,
-           typename T,
-           typename FFDC >
-fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i_efd_data,
-                              const T i_setting,
-                              const FFDC i_ffdc_code,
-                              T (&o_data)[X][Y])
-{
-    const auto l_ocmb = i_efd_data->get_target();
-
-    // mss::index of rank number will % 4 (RANKS_PER_DIMM) to get us the corresponding dimm
-    const auto l_dimm_index = i_efd_data->get_rank() / mss::MAX_RANK_PER_DIMM;
-    const auto l_dimm_rank = i_efd_data->get_rank() % mss::MAX_RANK_PER_DIMM;
-
-    FAPI_TRY( check::index_within_bounds(l_ocmb, l_dimm_index, X, i_ffdc_code) );
-    FAPI_TRY( check::index_within_bounds(l_ocmb, l_dimm_rank, Y, i_ffdc_code) );
-
-    FAPI_DBG("Updating data[%d][%d] with %d for %s", l_dimm_index, l_dimm_rank, i_setting, spd::c_str(l_ocmb));
-    o_data[l_dimm_index][l_dimm_rank] = i_setting;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Helper function to update the structure that holds attr data
@@ -465,6 +407,19 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Get the max valid cas latency
+///
+/// @param[in] i_rev SPD revision
+/// @param[in] i_dimm_type DIMM type
+/// @return uint32_t max valid CL val
+///
+static inline uint32_t get_max_valid_cl_val(const uint8_t i_rev, const uint8_t i_dimm_type)
+{
+    return (i_rev == mss::spd::rev::V1_0 && (i_dimm_type != fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM))
+           ? 0x0003FFFF : 0xBFFFFFFF;
+}
+
+///
 /// @brief Align the READ_PREAMBLE and WRITE_PREAMBLE to the si attribute bitmap
 ///
 /// @param[in] i_read_pramble read preamble value
@@ -601,6 +556,21 @@ fapi_try_exit:
 }
 
 } // namespace gen
+
+namespace pmic
+{
+
+///
+/// @brief Convert PMIC rail voltage offset from SPD to signed offset for attributes
+///
+/// @param[in] i_offset - unsigned offset value
+/// @param[in] i_direction - direction (0 = positive, 1 = negative)
+/// @return int8_t signed equivalent
+/// @note Should be used with SPD data where the offset is 7 bits such that overflow could not be possible
+///
+int8_t convert_to_signed_offset(const uint8_t i_offset, const uint8_t i_direction);
+
+}
 } // namespace mss
 
 #endif

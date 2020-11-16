@@ -195,7 +195,7 @@ enum sizes
 ///
 /// @brief explorer ffdc codes
 ///
-enum ffdc_codes
+enum ffdc_codes : uint16_t
 {
     EXP_I2C_GET_FIELD = 0x0000,
     EXP_I2C_SET_FIELD = 0x0001,

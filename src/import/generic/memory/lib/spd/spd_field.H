@@ -101,6 +101,38 @@ class init_fields
 template <device_type D, module_params S>
 class fields;
 
+///
+/// @brief Determine if the provided index is within the SPD bounds
+///
+/// @param[in] i_target OCMB target for traces
+/// @param[in] i_index index
+/// @param[in] i_size size of binary
+/// @param[in] i_ffdc_codes FFDC code
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode index_within_bounds_spd(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const size_t i_index,
+    const size_t i_size,
+    const uint16_t i_ffdc_codes);
+
+///
+/// @brief Get the provided field from the passed in binary
+///
+/// @param[in] i_target Target for error traces
+/// @param[in] i_field field parameter including byte, start, len
+/// @param[in] i_binary binary (SPD/EFD)
+/// @param[in] i_ffdc_code FFDC code for error traces
+/// @param[out] o_field resulting field
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode get_field_spd(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const mss::field_t<mss::endian::LITTLE>& i_field,
+    const std::vector<uint8_t>& i_binary,
+    const uint16_t i_ffdc_code,
+    uint8_t& o_field);
+
 }// spd
 }// mss
 
