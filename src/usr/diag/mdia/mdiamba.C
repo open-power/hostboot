@@ -32,6 +32,7 @@
 #include "mdiasm.H"
 #include "mdiatrace.H"
 #include "targeting/common/utilFilter.H"
+#include <util/misc.H> // Util::isSimicsRunning
 
 using namespace TARGETING;
 
@@ -45,7 +46,8 @@ errlHndl_t getDiagnosticMode( const Globals & i_globals, TargetHandle_t i_trgt,
 
     // Check the HW changed state of this target to determine if more testing
     // is required.
-    if ( (ONE_PATTERN == o_mode) && isHWStateChanged(i_trgt) )
+    if ( (ONE_PATTERN == o_mode) && isHWStateChanged(i_trgt) &&
+         !Util::isSimicsRunning() )
     {
         // Run standard pattern testing.
         o_mode = FOUR_PATTERNS;
@@ -137,9 +139,21 @@ TargetHandleList getMemTargetsForQueryOrClear(TargetHandle_t i_trgt)
                                 CLASS_NA,
                                 TYPE_DIMM);
 
-        if( ! dimmList.empty() )
+        if( !dimmList.empty() )
         {
             o_list.insert(o_list.begin(), dimmList.begin(), dimmList.end());
+        }
+
+        // add associated MEM_PORTs
+        TargetHandleList portList;
+        getChildAffinityTargets(portList,
+                                i_trgt,
+                                CLASS_NA,
+                                TYPE_MEM_PORT);
+
+        if( !portList.empty() )
+        {
+            o_list.insert(o_list.begin(), portList.begin(), portList.end());
         }
 
         // add associated OCMB
