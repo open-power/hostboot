@@ -2527,9 +2527,6 @@
       <id>CLEAR_DIMM_SPD_ENABLE</id>
     </attribute>
     <attribute>
-      <id>DO_ABUS_DECONFIG</id>
-    </attribute>
-    <attribute>
       <id>DPO_MIN_FREQ_PERCENT</id>
     </attribute>
     <attribute>

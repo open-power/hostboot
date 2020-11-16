@@ -671,11 +671,12 @@ private:
     DeconfigGard & operator=(const DeconfigGard & i_right);
 
     /**
-     * @brief Maximum number of A/X bus endpoints. Used to initialize
-     *        ProcInfo structs.
+     * @brief Maximum number of endpoints. Used to initialize ProcInfo structs.
      */
-    static const uint8_t NUM_A_BUSES = 3; // Max number of ABus links
-    static const uint8_t NUM_X_BUSES = 4; // Max number of XBus links
+    // Max number of IOHS links that connect procs outside a particular fabric group
+    static const uint8_t NUM_OUT_GROUP_BUSES = 3;
+    // Max number of IOHS links that connect procs within the same fabric group
+    static const uint8_t NUM_IN_GROUP_BUSES = 4;
 
     /**
      * @brief  Struct representing a particular processor.  Used by
@@ -694,12 +695,12 @@ private:
         bool iv_deconfigured;
 
         // targets defining A link connected chips
-        ProcInfo * iv_pAProcs[NUM_A_BUSES];
-        bool iv_ADeconfigured[NUM_A_BUSES];
+        ProcInfo * iv_pOutGroupProcInfos[NUM_OUT_GROUP_BUSES];
+        bool iv_OutGroupLinkDeconfigured[NUM_OUT_GROUP_BUSES];
 
         // targets defining X link connected chips
-        ProcInfo * iv_pXProcs[NUM_X_BUSES];
-        bool iv_XDeconfigured[NUM_X_BUSES];
+        ProcInfo * iv_pInGroupProcInfos[NUM_IN_GROUP_BUSES];
+        bool iv_InGroupLinkDeconfigured[NUM_IN_GROUP_BUSES];
     };
 
     // Structure populated in _invokeDeconfigureAssocProc() for use in
@@ -798,14 +799,11 @@ private:
      *
      *  @param[in] i_node           restrict processing - only apply algorithm
      *                              to targets that match the predicate
-     *  @param[in] i_doAbusDeconfig indicates if abus logic should be considered
      *
      *  @return errlHndl_t. Error log handle.
      *
      */
-    errlHndl_t _invokeDeconfigureAssocProc(
-                TARGETING::ConstTargetHandle_t i_node = NULL,
-                bool i_doAbusDeconfig = true);
+    errlHndl_t _invokeDeconfigureAssocProc(TARGETING::ConstTargetHandle_t i_node = NULL);
 
     /**
      *  @brief _deconfigureAssocProc deconfigures procs based on
