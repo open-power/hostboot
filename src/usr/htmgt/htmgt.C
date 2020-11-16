@@ -911,6 +911,61 @@ namespace HTMGT
                         break;
 
 
+                    case PASSTHRU_SET_MODE:
+                        if ((i_cmdLength == 2) || (i_cmdLength == 4))
+                        {
+                            const uint8_t mode = i_cmdData[1];
+                            uint16_t freq = 0;
+                            if (IS_VALID_MODE(mode))
+                            {
+                                if ((mode == POWERMODE_SFP) ||
+                                    (mode == POWERMODE_FFO))
+                                {
+                                    if (i_cmdLength == 4)
+                                    {
+                                        freq = UINT16_GET(&i_cmdData[2]);
+                                        TMGT_INF("passThruCommand: Set mode %d "
+                                                 "(0x%04X / %d)",
+                                                 mode, freq, freq);
+                                        err = OccManager::setMode(mode, freq);
+                                    }
+                                    else
+                                    {
+                                        TMGT_ERR("passThruCommand: Set mode %d "
+                                                 "requires 4 bytes (not %d)",
+                                                 mode, i_cmdLength);
+                                        failingSrc = HTMGT_RC_INVALID_LENGTH;
+                                    }
+                                }
+                                else
+                                {
+                                    TMGT_INF("passThruCommand: Set mode %d",
+                                             mode);
+                                    err = OccManager::setMode(mode);
+                                }
+                            }
+                            else
+                            {
+                                TMGT_ERR("passThruCommand: Invalid mode %d",
+                                         mode);
+                                failingSrc = HTMGT_RC_INVALID_DATA;
+                            }
+                        }
+                        else
+                        {
+                            TMGT_ERR("passThruCommand: Set mode %d "
+                                     "requires 2 bytes (not %d)", i_cmdLength);
+                            failingSrc = HTMGT_RC_INVALID_LENGTH;
+                        }
+                        break;
+
+
+                    case PASSTHRU_QUERY_MODE_FUNCTION:
+                        TMGT_INF("passThruCommand: Query Mode and Function");
+                        OccManager::queryModeAndFunction(o_rspLength, o_rspData);
+                        break;
+
+
                     default:
                         TMGT_ERR("passThruCommand: Invalid command 0x%08X "
                               "(%d bytes)", UINT32_GET(i_cmdData), i_cmdLength);

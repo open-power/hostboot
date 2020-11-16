@@ -47,7 +47,7 @@ namespace HTMGT
 {
 
     bool G_wofSupported = true;
-    uint8_t G_system_type = OCC_CFGDATA_OPENPOWER_OPALVM;
+    uint8_t G_system_type = 0;
 
     // Send config format data to all OCCs
     errlHndl_t sendOccConfigData(const occCfgDataFormat i_requestedFormat)

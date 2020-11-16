@@ -270,6 +270,30 @@ namespace HTMGT
                                                const uint8_t i_instance);
 
 
+            /**
+             * @brief Set the system power mode.  Command will
+             *        go to the master OCC.
+             *
+             * @param[in]  i_mode   Desired Power Mode
+             * @param[in]  i_freq   Desired frequency for FFO or SFP mode
+             *
+             * @return NULL on success, or error handle on failure
+             */
+            static errlHndl_t setMode(const uint8_t  i_mode,
+                                      const uint16_t i_freq = 0);
+
+            /**
+             * @brief Query the Mode and functions of the system
+             *
+             * @param[out] o_length Length of data returned in o_data
+             * @param[out] o_data   Buffer containing query structure
+             *
+             * @return NULL on success, or error handle on failure
+             */
+            static errlHndl_t queryModeAndFunction(uint16_t & o_length,
+                                                   uint8_t *o_data);
+
+
         private:
 
             typedef std::vector<Occ*> occList_t;
@@ -279,6 +303,8 @@ namespace HTMGT
             occStateId              iv_state;
             occStateId              iv_targetState;
             uint8_t                 iv_sysResetCount;
+            powerMode               iv_mode;
+            uint16_t                iv_freqPoint; // for FFO/SFP
 
 
             /**
@@ -387,6 +413,13 @@ namespace HTMGT
             /** See validateOccsPresent() above */
             uint8_t _validateOccsPresent(const uint8_t i_present,
                                          const uint8_t i_instance);
+
+            /** See setMode() above */
+            errlHndl_t _setMode(const uint8_t  i_mode,
+                                const uint16_t i_freq = 0);
+
+            /** See queryModeAndFunction() above */
+            errlHndl_t _queryModeAndFunction(uint16_t & o_length, uint8_t *o_data);
     };
 
     typedef Singleton<OccManager> occMgr;

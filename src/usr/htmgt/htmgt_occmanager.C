@@ -28,6 +28,7 @@
 #include "htmgt_utility.H"
 #include "htmgt_occ.H"
 #include "htmgt_occmanager.H"
+#include "htmgt_cfgdata.H"
 
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
@@ -36,9 +37,9 @@
 #include <console/consoleif.H>
 #include <sys/time.h>
 #include <isteps/pm/occAccess.H>
-
 #include <isteps/pm/pm_common_ext.H>
 #include <isteps/pm/scopedHomerMapper.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 namespace HTMGT
 {
@@ -97,6 +98,17 @@ namespace HTMGT
 
         // Remove existing OCC objects
         _removeAllOccs();
+
+        if (TARGETING::is_phyp_load())
+        {
+            TMGT_INF("_buildOccs: PHYP/PowerVM system");
+            G_system_type = OCC_CFGDATA_OPENPOWER_POWERVM;
+        }
+        else
+        {
+            TMGT_INF("_buildOccs: OPAL system");
+            G_system_type = OCC_CFGDATA_OPENPOWER_OPALVM;
+        }
 
         // Get all functional processors
         TARGETING::TargetHandleList pProcs;
@@ -503,6 +515,15 @@ namespace HTMGT
                         {
                             TMGT_CONSOLE("OCCs are now running in "
                                          "CHARACTERIZATION state");
+                        }
+
+                        // TODO - Remove default in RTC 209567
+                        if (iv_occMaster->getMode() == POWERMODE_UNKNOWN)
+                        {
+                            // Set default mode
+                            TMGT_INF("_setOccState: Setting power mode to "
+                                     "Maximum Performance (default)");
+                            l_err = _setMode(POWERMODE_MAX_PERF, 0);
                         }
                     }
                 }
@@ -1048,7 +1069,7 @@ namespace HTMGT
         o_data[index++] = iv_targetState;
         o_data[index++] = iv_sysResetCount;
         o_data[index++] = resets_since_boot;
-        o_data[index++] = 0x00; // STATUS VERSION (for future expansion)
+        o_data[index++] = iv_mode;
         o_data[index++] = safeMode;
         UINT32_PUT(&o_data[index], cv_safeReturnCode);
         index += 4;
@@ -1063,7 +1084,7 @@ namespace HTMGT
             o_data[index++] = occ->getRole();
             o_data[index++] = occ->iv_masterCapable;
             o_data[index++] = occ->iv_commEstablished;
-            o_data[index++] = 0; // reserved for expansion
+            o_data[index++] = occ->iv_mode;
             o_data[index++] = 0; // reserved for expansion
             o_data[index++] = 0; // reserved for expansion
             o_data[index++] = occ->iv_failed;
@@ -1201,6 +1222,160 @@ namespace HTMGT
     }
 
 
+    errlHndl_t OccManager::_setMode(const uint8_t  i_mode,
+                                    const uint16_t i_freq)
+    {
+        errlHndl_t l_err = nullptr;
+
+        if (nullptr != iv_occMaster)
+        {
+            // map HOMER for this OCC
+            TARGETING::Target* procTarget = nullptr;
+            procTarget = TARGETING::
+                getImmediateParentByAffinity(iv_occMaster->getTarget());
+            HBPM::ScopedHomerMapper l_mapper(procTarget);
+            l_err = l_mapper.map();
+            if (nullptr == l_err)
+            {
+                iv_occMaster->setHomerAddr(l_mapper.getHomerVirtAddr());
+                l_err = iv_occMaster->setMode(i_mode, i_freq);
+                if (nullptr == l_err)
+                {
+                    // Send poll to query state/mode of all OCCs
+                    // and flush any errors reported by the OCCs
+                    l_err = sendOccPoll(true);
+                    if (l_err)
+                    {
+                        TMGT_ERR("_setMode: Poll all OCCs failed");
+                        ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                    }
+
+                    // Make sure all OCCs went to requested mode
+                    for( const auto & occ : iv_occArray )
+                    {
+                        if (occ->getMode() != i_mode)
+                        {
+                            TMGT_ERR("_setMode: OCC%d is not in mode "
+                                     "0x%02X", occ->getInstance(), i_mode);
+                            iv_mode = POWERMODE_UNKNOWN;
+                            /*@
+                             * @errortype
+                             * @moduleid HTMGT_MOD_OCCMGR_SET_MODE
+                             * @reasoncode HTMGT_RC_OCC_UNEXPECTED_MODE
+                             * @userdata1[0-31]  OCC mode
+                             * @userdata1[32-47] requested mode
+                             * @userdata1[48-63] SFP/FFO freq point
+                             * @userdata2[0-31]  OCC state
+                             * @userdata2[32-63] OCC instance
+                             * @devdesc Mismatched OCC mode
+                             */
+                            bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_MODE,
+                                      HTMGT_RC_OCC_UNEXPECTED_MODE,
+                                      occ->getMode(),
+                                      (i_mode << 16) | (i_freq),
+                                      occ->getState(),
+                                      occ->getInstance(),
+                                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                            break;
+                        }
+                    }
+
+                    TMGT_INF("_setMode: All OCCs are in mode 0x%02X", i_mode);
+                    iv_mode = (powerMode)i_mode;
+                    iv_freqPoint = i_freq;
+                }
+                iv_occMaster->invalidateHomer();
+            }
+            else
+            {
+                // Unable to send resetPrep command to this OCC,
+                // just commit and proceed with reset
+                TMGT_ERR("_setMode: Unable to get HOMER virtual"
+                         " address for OCC%d (rc=0x%04X)",
+                         iv_occMaster->getInstance(), l_err->reasonCode());
+                l_err->collectTrace(HTMGT_COMP_NAME);
+            }
+        }
+        else
+        {
+            /*@
+             * @errortype
+             * @moduleid HTMGT_MOD_OCCMGR_SET_MODE
+             * @reasoncode HTMGT_RC_INTERNAL_ERROR
+             * @devdesc Master OCC is not defined
+             * @userdata1  requested power mode
+             * @userdata2  requested frequency for SPF or FFO
+             */
+            bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_MODE,
+                      HTMGT_RC_INTERNAL_ERROR,
+                      i_mode, i_freq, 0, 0,
+                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        }
+
+        return l_err;
+    }
+
+
+    // Collect Mode and Function Capabilities
+    // NOTE: o_data is pointer to OCC_MAX_DATA_LENGTH byte buffer
+    errlHndl_t OccManager::_queryModeAndFunction(uint16_t & o_length,
+                                                 uint8_t *o_data)
+    {
+        errlHndl_t l_err = nullptr;
+        uint16_t index = 0;
+
+        TARGETING::Target* sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        uint8_t safeMode = 0;
+        uint8_t resets_since_boot = 0;
+        if (sys)
+        {
+            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
+            sys->tryGetAttr<TARGETING::ATTR_CUMULATIVE_PMCOMPLEX_RESET_COUNT>
+                (resets_since_boot);
+        }
+        // First add HTMGT specific data
+        if (safeMode)
+            o_data[index++] = POWERMODE_SAFE; // currentPwrMode
+        else
+            o_data[index++] = 1; // currentPwrMode = NORMAL
+        o_data[index++] = iv_mode;  // custRequestedMode
+        o_data[index++] = iv_mode;  // currentVoltSetting
+        o_data[index++] = iv_state;
+        o_data[index++] = 0; // EnableHFTrading
+        uint16_t l_freq = 0;
+        if ((iv_mode == POWERMODE_SFP) || (iv_mode == POWERMODE_FFO))
+            l_freq = iv_freqPoint;
+        o_data[index++] = (l_freq >> 8); // DesiredFrequency (FFO/SFP)
+        o_data[index++] = (l_freq & 0xFF);
+        // currEmpathFunct
+        if (safeMode)
+            o_data[index++] = 0; // .occStatus = DISABLED
+        else
+            o_data[index++] = 1; // .occStatus = ACTIVE
+        o_data[index++] = 1; // .powerSave
+        o_data[index++] = 1; // .powerCap
+        o_data[index++] = 0; // .reserved
+        o_data[index++] = 1; // .dynamicPerformance
+        o_data[index++] = 1; // .FFO
+        o_data[index++] = 0; // reserved (IPS)
+        o_data[index++] = 1; // .maxPerformance
+        o_data[index++] = 0; // reserved
+        o_data[index++] = 0; // reserved
+        o_data[index++] = 0; // reserved
+        o_data[index++] = 0; // reserved
+        o_data[index++] = 0; // reserved
+
+        UINT32_PUT(&o_data[index], cv_safeReturnCode);
+        index += 4;
+        UINT32_PUT(&o_data[index], cv_safeOccInstance);
+        index += 4;
+
+        o_length = index;
+
+        return l_err;
+    }
+
     // ---------- public interfaces ---------- //
 
 
@@ -1315,5 +1490,17 @@ namespace HTMGT
         return Singleton<OccManager>::instance()._validateOccsPresent(i_present,
                                                                     i_instance);
     }
+
+    errlHndl_t OccManager::setMode(const uint8_t  i_mode,
+                                   const uint16_t i_freq)
+    {
+        return Singleton<OccManager>::instance()._setMode(i_mode, i_freq);
+    }
+
+    errlHndl_t OccManager::queryModeAndFunction(uint16_t & o_length, uint8_t *o_data)
+    {
+        return Singleton<OccManager>::instance()._queryModeAndFunction(o_length, o_data);
+    }
+
 
 } // end namespace

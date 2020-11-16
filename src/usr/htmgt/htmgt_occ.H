@@ -91,6 +91,28 @@ namespace HTMGT
         OCC_RESET_REASON_POWER_OFF         = 0xFF,
     };
 
+    enum powerMode
+    {
+        POWERMODE_UNKNOWN           = 0x00, // Not set yet
+        POWERMODE_DISABLE           = 0x01, // Disabled Mode
+        POWERMODE_SFP               = 0x03, // Static Frequency Point
+        POWERMODE_SAFE              = 0x04, // -- not settable mode --
+        POWERMODE_POWER_SAVE        = 0x05, // Static Power Save
+        POWERMODE_FMAX              = 0x09, // Maximum Frequency
+        POWERMODE_DYNAMIC_PERF      = 0x0A, // Dynamic Performace
+        POWERMODE_FFO               = 0x0B, // Fixed Frequency Override
+        POWERMODE_MAX_PERF          = 0x0C, // Maximum Performance
+        POWERMODE_INVALID           = 0xFF  // NOT A VALID MODE
+    };
+
+#define IS_VALID_MODE(mode) ((mode == POWERMODE_DISABLE) || \
+                             (mode == POWERMODE_SFP) || \
+                             (mode == POWERMODE_POWER_SAVE) || \
+                             (mode == POWERMODE_FMAX) || \
+                             (mode == POWERMODE_DYNAMIC_PERF) || \
+                             (mode == POWERMODE_FFO) || \
+                             (mode == POWERMODE_MAX_PERF))
+
     // OCC Callout Structure
     struct occErrlCallout
     {
@@ -223,6 +245,14 @@ namespace HTMGT
 
 
             /**
+             * @brief Return power mode
+             *
+             * @return power mode of this OCC
+             */
+            powerMode getMode() { return iv_mode; };
+
+
+            /**
              * @brief Prepare this OCC for reset
              * @return return true if at threshold otherwise false
              */
@@ -327,6 +357,20 @@ namespace HTMGT
              */
             void invalidateHomer();
 
+
+            /**
+             * @brief Set the mode of the OCC.
+             *        This is only allowed on the master OCC
+             *
+             * @param[in]  i_mode   Desired power mode
+             * @param[in]  i_freq   Frequency for FFO or SFP modes
+             *
+             * @return NULL on success, or error handle on failure
+             */
+            errlHndl_t setMode(const uint8_t i_mode,
+                               const uint16_t i_freq = 0);
+
+
         private:   // functions
 
             /**
@@ -402,6 +446,8 @@ namespace HTMGT
             occRole         iv_role;
             // State of this OCC
             occStateId      iv_state;
+            // Power mode of this OCC
+            powerMode       iv_mode;
             // true if communication to this OCC has been established
             bool            iv_commEstablished;
             // true if OCC needs to be reset

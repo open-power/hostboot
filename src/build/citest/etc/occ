@@ -1,2 +1,6 @@
 # OCC artifact ID used to assemble PNOR image
-export OCC_ARTIFACT_ID=41d1f8bff0251eea3f69253c37198ff88a2d547a
+# OCC is not automatically pulled in from github for standalone model.
+# Need to create artifact directory (use commit number) in:
+#     /gsa/ausgsa/projects/h/hostboot/simbuild/dependencies/occ/
+# and then build 81e00430.lid and copy to that new directory
+export OCC_ARTIFACT_ID=fcf9f011cc8de7605d276a6a20af6f8c09ad1a2a

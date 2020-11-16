@@ -407,6 +407,14 @@ namespace HTMGT
                          iv_instance, state_string(iv_state));
             }
 
+            // Check for mode change
+            if (iv_mode != pollRsp->mode)
+            {
+                iv_mode = (powerMode)pollRsp->mode;
+                TMGT_INF("pollRspHandler: updating OCC%d mode to %d",
+                         iv_instance, iv_mode);
+            }
+
             // Check GPU config
             if (iv_gpuCfg != pollRsp->gpuCfg)
             {
