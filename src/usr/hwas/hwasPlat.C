@@ -1419,7 +1419,7 @@ errlHndl_t HWASPlatVerification::verificationMatchHandler(Target * i_target,
     }
     else
     {
-        HWAS_INF("verifyDeconfiguration: ATTR_PG matches mbox "
+        HWAS_DBG("verifyDeconfiguration: ATTR_PG matches mbox "
             "scratch registers for chip unit type %s with HUID %.8X "
             "(SBE marked functional: %s  HB marked functional: %s)",
             i_target->getAttrAsString<ATTR_TYPE>(),

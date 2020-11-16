@@ -78,6 +78,7 @@
 #include <isteps/mem_utils.H>
 #include <arch/memorymap.H>
 #include <util/misc.H> // Util::isSimicsRunning
+#include <pldm/requests/pldm_pdr_requests.H>
 
 //#define TRACUCOMP(args...) TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -604,16 +605,40 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
         }
     }
 
+    // TODO RTC:259097 remove simics check
+    if (l_reconfigLoop && Util::isSimicsRunning())
+    {
+        TRACFCOMP(g_trac_isteps_trace,"Skipping scratch reg mismatch reboot in Simics");
+        l_reconfigLoop = false;
+    }
+
     // If we had a scratch/attribute mismatch do reconfig loop
     // which will also sync attributes to the SP
-    // TODO RTC:259097 remove simics check
-    if (l_reconfigLoop && !(Util::isSimicsRunning()))
+    if (l_reconfigLoop)
     {
         TRACFCOMP(g_trac_isteps_trace,
                   "check_scratch_regs_vs_attrs scratch/attribute mismatch, "
                   "bitwise failing scratch reg: 0x%.8X "
                   "triggering reconfig loop", l_reconfigReg);
 
+#ifdef CONFIG_PLDM
+        TRACFCOMP(g_trac_isteps_trace, "check_scratch_regs_vs_attrs: requesting PLDM reboot");
+        INITSERVICE::stopIpl();
+        l_err = PLDM::sendGracefulRebootRequest();
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_isteps_trace, "check_scratch_regs_vs_attrs(): could not request PLDM reboot");
+            errlCommit(l_err, ISTEP_COMP_ID);
+            break;
+        }
+
+#elif defined (CONFIG_BMC_IPMI)
+        // Initiate a graceful power cycle
+        TRACFCOMP( g_trac_isteps_trace,"check_scratch_regs_vs_attrs(): requesting power cycle");
+        INITSERVICE::requestReboot();
+
+
+#else // FSP Systems
         /*@
          * @errortype
          * @moduleid          MOD_CALL_MSS_ATTR_UPDATE
@@ -630,9 +655,12 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
                                0,
                                ErrlEntry::ADD_SW_CALLOUT);
         l_err->collectTrace("ISTEPS_TRACE");
-        errlCommit(l_err, HWPF_COMP_ID);
+        errlCommit(l_err, ISTEP_COMP_ID);
 
         INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
+
+#endif
+
     }
 
     } while(0);
