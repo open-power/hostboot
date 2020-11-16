@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,6 @@ fapi2::ReturnCode eff_memory_size<mss::mc_type::EXPLORER>(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     uint64_t& o_size )
 {
-#ifdef ACCESSORS_FIXED
     uint32_t l_size = 0;
     o_size = 0;
     FAPI_TRY( mss::attr::get_dimm_size(i_target, l_size) );
@@ -62,20 +61,6 @@ fapi2::ReturnCode eff_memory_size<mss::mc_type::EXPLORER>(
 
 fapi_try_exit:
     return fapi2::current_err;
-#endif
-
-    // Temporarily unrolling attribute accessor here until mss library is fixed
-    uint32_t l_value[2] = {};
-    const auto l_port = i_target.getParent<fapi2::TARGET_TYPE_MEM_PORT>();
-    uint8_t l_pos;
-
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_target, l_pos) );
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SIZE, l_port, l_value) );
-    o_size = l_value[l_pos];
-
-fapi_try_exit:
-    return fapi2::current_err;
-
 }
 
 } // ns mss
