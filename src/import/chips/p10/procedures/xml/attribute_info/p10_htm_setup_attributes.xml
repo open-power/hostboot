@@ -49,7 +49,7 @@
   </description>
   <valueType>uint8</valueType>
   <array>32</array>
-  <enum> DISABLE = 0x0, CORE = 0x1, LLAT = 0x2, DMW = 0x3, CORE_AND_IMA = 0x4 </enum>
+  <enum> DISABLE = 0x0, CORE = 0x1, LLAT = 0x2, DMW = 0x4 </enum>
   <initToZero/>
   <writeable/>
   <persistRuntime/>

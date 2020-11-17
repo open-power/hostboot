@@ -1128,10 +1128,10 @@
    </description>
    <chipEcFeature>
      <chip>
-       <name>ATTR_EC</name>
+       <name>ENUM_ATTR_NAME_P10</name>
        <ec>
-         <value>0x10</value>
-         <test>GREATER_THAN</test>
+         <value>0x20</value>
+         <test>GREATER_THAN_OR_EQUAL</test>
        </ec>
      </chip>
    </chipEcFeature>

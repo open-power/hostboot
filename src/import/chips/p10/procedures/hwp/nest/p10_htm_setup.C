@@ -278,7 +278,7 @@ fapi2::ReturnCode setup_NHTM_FILT(
             SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SOURCE_MASK(~l_HTM_FILT.iv_filtSourceMask, l_nHTM_filt_data);
             SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_MASK(~l_HTM_FILT.iv_filtCrespMask, l_nHTM_filt_data);
 
-            if (l_dd2)
+            if (!l_dd2)
             {
                 FAPI_DBG("Program FILT for DD1");
                 SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_PAT(l_HTM_FILT.iv_filtPortPat, l_nHTM_filt_data);
