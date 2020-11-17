@@ -196,12 +196,12 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(09,06,"proc_fabric_iovalid"),
                 ISTEP_09::call_proc_fabric_iovalid,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false } //TODO RTC:260484 set back to true
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(09,07,"proc_fbc_eff_config_aggregate"),
                 ISTEP_09::call_proc_fbc_eff_config_aggregate,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false } //TODO RTC:260484 set back to true
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
     };
 
