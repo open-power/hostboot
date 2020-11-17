@@ -45,6 +45,17 @@
    <!-- ******************************************************************** -->
    <hwpError>
       <sbeError/>
+      <rc>RC_P10_HW540133_SB_WA_ERR</rc>
+      <description>
+        Error applying static bandsel workaround -- bad return code in
+        scan/scom sequence application or failure to observe subseqent PLL lock
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>LOCK_ERR</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
       <rc>RC_P10_HW540133_CBM1_WA_ERR</rc>
       <description>
         Error applying calibrated_bandsel_m1 workaround -- bad return code in
