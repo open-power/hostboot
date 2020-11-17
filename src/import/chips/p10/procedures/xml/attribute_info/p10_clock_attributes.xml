@@ -302,4 +302,39 @@
   <overrideOnly/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FORCE_MC_PLL_BANDSEL</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Set to TRUE to install ATTR_PROC_MC_PLL_BANDSEL_OVERRIDE values into MC PLLs
+    directly, skipping HWP controlled sequence to resolve PLL
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0, TRUE = 0x1</enum>
+  <initToZero/>
+  <overrideOnly/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_MC_PLL_BANDSEL_OVERRIDE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Bits 4:7: CCALBANDSEL override value
+    Array indices:
+      Index 0: MC0 odd
+      Index 1: MC0 even
+      Index 2: MC1 odd
+      Index 3: MC1 even
+      Index 4: MC2 odd
+      Index 5: MC2 even
+      Index 6: MC3 odd
+      Index 7: MC3 even
+  </description>
+  <valueType>uint8</valueType>
+  <array>8</array>
+  <writeable/>
+  <initToZero/>
+  <overrideOnly/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
