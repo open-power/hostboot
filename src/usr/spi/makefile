@@ -35,6 +35,7 @@ EXTRAINCDIR += ${HWP_PATH}/hwp/ffdc
 EXTRAINCDIR += ${HWP_PATH}/../common/include/
 EXTRAINCDIR += ${HWP_PATH}/hwp/spi/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${ROOTPATH}/src/inlcude/usr/
 
 VPATH += ${HWP_PATH}/hwp/spi/
 

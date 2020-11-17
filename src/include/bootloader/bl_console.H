@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,15 @@ static void putChar(const char i_c);
   * @param[in] i_s      string to display to console
   */
 static void putString(const char* i_s);
+
 };
+
+/**
+ * @brief The HBBL's version of sleep/wait/delay
+ *
+ * @param[in] i_sec the number of seconds to wait
+ * @param[in] i_nsec the number of nanoseconds to wait
+ */
+void bl_nanosleep(uint64_t i_sec, uint64_t i_nsec);
 
 #endif

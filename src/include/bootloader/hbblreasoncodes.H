@@ -90,6 +90,10 @@ namespace Bootloader
         RC_XSCOM_BAD_PARAM         = HBBL_COMP_ID | 0x12,  /**< Bad params passed to XSCOM op */
         RC_XSCOM_OP_FAILED         = HBBL_COMP_ID | 0x13,  /**< XSCOM operation failed */
         RC_XSCOM_OP_TIMEOUT        = HBBL_COMP_ID | 0x14,  /**< XSCOM operation timeout */
+        RC_SPI_TPM_READ_FAIL       = HBBL_COMP_ID | 0x15,  /**< A SPI read from TPM failed */
+        RC_SPI_TPM_WRITE_FAIL      = HBBL_COMP_ID | 0x16,  /**< A SPI write to TPM failed */
+        RC_TPM_INVALID_READ_SIZE   = HBBL_COMP_ID | 0x17,  /**< We read out more or less data than we wanted */
+        RC_TPM_INVALID_WRITE_SIZE  = HBBL_COMP_ID | 0x25,  /**< We wrote less or more data than we wanted */
 
     };
 

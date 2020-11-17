@@ -182,7 +182,7 @@ static void simpleDelay(const uint64_t i_sec, const uint64_t i_nsec)
     asm volatile("or 2,2,2");
 }
 
-void nanosleep(const uint64_t i_sec, const uint64_t i_nsec)
+void bl_nanosleep(const uint64_t i_sec, const uint64_t i_nsec)
 {
     uint64_t l_sec = i_sec + i_nsec / NS_PER_SEC;
     uint64_t l_nsec = i_nsec % NS_PER_SEC;
@@ -324,7 +324,7 @@ void bl_console::putChar(const char i_c)
                 {
                     break;
                 }
-                nanosleep(0, CONSOLE::DELAY_NS);
+                bl_nanosleep(0, CONSOLE::DELAY_NS);
 
                 loops++;
             } while (loops < CONSOLE::DELAY_LOOPS);

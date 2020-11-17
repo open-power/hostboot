@@ -37,8 +37,10 @@ COMMONFLAGS += -DPIB_ERROR_MASK_NOT_SUPPORTED
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/bootloader/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
 EXTRAINCDIR += ${ROOTPATH}/src/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
 
 OBJS += plat_hw_access.o
 OBJS += plat_utils.o

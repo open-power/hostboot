@@ -40,14 +40,13 @@ COMMONFLAGS += -DFAPI2_NO_FFDC
 COMMONFLAGS += -DFAPI_VARIABLE_BUFFER_NOT_SUPPORTED
 COMMONFLAGS += -DFAPI_PLAT_MULTICAST_NOT_SUPPORTED
 COMMONFLAGS += -DPLAT_EC_FEATURE_NOT_SUPPORTED
+COMMONFLAGS += -DPLAT_NO_THREAD_LOCAL_STORAGE
 
 EXTRAINCDIR += ${HWP_PATH}/hwp/nest/
 EXTRAINCDIR += ${HWP_PATH}/hwp/spi/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/bootloader/
-# @TODO RTC 216130 Investigate removal of imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 
 SUBDIRS += fapi2.d
 
@@ -61,13 +60,13 @@ OBJS += bl_terminate.o
 OBJS += bl_string_utils.o
 OBJS += bl_console.o
 OBJS += bl_xscom.o
+OBJS += bl_tpm_spidd.o
 OBJS += p10_sbe_spi_cmd.o
 
 OPT_LEVEL = -Os
 
 VPATH += ${HWP_PATH}/hwp/spi
 
-include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
 
 vpath ${ROOTPATH}/src/usr/console/uart.H  ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.H
