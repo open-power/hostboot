@@ -664,7 +664,7 @@ fapi2::ReturnCode p10_io_init::ext_req_all(const fapi2::Target<fapi2::TARGET_TYP
             FAPI_TRY(p10_io_ppe_ext_cmd_req_dccal_pl[l_thread].putData(l_pauc_target, 1));
             FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_zcal_pl[l_thread].putData(l_pauc_target, 1));
             FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_ffe_pl[l_thread].putData(l_pauc_target, 1));
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_power_off_pl[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_power_on_pl[l_thread].putData(l_pauc_target, 1));
 
         }
 

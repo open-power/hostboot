@@ -111,8 +111,6 @@ fapi2::ReturnCode p10_io_get_iohs_lanes(
     int l_end_bit = 0;
 
     fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
-
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_iohs_target, l_link_train),
              "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
 
@@ -151,14 +149,19 @@ fapi2::ReturnCode p10_io_get_omic_lanes(
 
     for (auto l_omi_target : l_omi_targets)
     {
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_omi_num;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_omi_target, l_omi_num),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-        l_omi_num = l_omi_num % 2;
+        auto l_ocmbs = l_omi_target.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>();
 
-        for (int l_lane = l_omi_num * 8; l_lane < (l_omi_num + 1) * 8; l_lane++)
+        if (l_ocmbs.size() > 0)
         {
-            o_lanes.push_back(l_lane);
+            fapi2::ATTR_CHIP_UNIT_POS_Type l_omi_num;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_omi_target, l_omi_num),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+            l_omi_num = l_omi_num % 2;
+
+            for (int l_lane = l_omi_num * 8; l_lane < (l_omi_num + 1) * 8; l_lane++)
+            {
+                o_lanes.push_back(l_lane);
+            }
         }
     }
 

@@ -230,7 +230,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
                 FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
 
-                FAPI_TRY(l_proc.p10_io_init_done_poff_check_thread_done(l_pauc_target, l_thread, l_done ));
+                FAPI_TRY(l_proc.p10_io_init_done_pon_check_thread_done(l_pauc_target, l_thread, l_done));
 
             }
 

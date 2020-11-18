@@ -36,7 +36,6 @@
 //------------------------------------------------------------------------------
 #include <p10_fabric_link_layer.H>
 #include <p10_scom_iohs_c.H>
-#include <p10_io_power.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -120,9 +119,6 @@ fapi2::ReturnCode p10_fabric_link_layer(
             || (l_a_en[l_link] && i_train_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
         {
             FAPI_DBG("Training link %d (%s)", l_link, l_x_en[l_link] ? ("SMPX") : ("SMPA"));
-
-            // Power on the phy for the link to be trained
-            p10_io_iohs_power(l_iohs, true);
 
             FAPI_TRY(p10_fabric_link_layer_train_link(
                          l_iohs,
