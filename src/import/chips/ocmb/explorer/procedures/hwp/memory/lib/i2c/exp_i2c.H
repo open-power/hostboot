@@ -27,7 +27,7 @@
 /// @file exp_i2c.H
 /// @brief explorer I2C utility function declarations
 ///
-// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2

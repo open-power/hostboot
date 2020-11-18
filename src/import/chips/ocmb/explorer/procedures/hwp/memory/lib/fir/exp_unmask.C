@@ -27,7 +27,7 @@
 /// @brief Subroutines for unmasking and setting up MSS FIR
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB

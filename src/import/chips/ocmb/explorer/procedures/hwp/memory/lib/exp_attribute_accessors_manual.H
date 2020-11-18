@@ -30,7 +30,7 @@
 /// accessor generator. EC workarounds is one example - everytime someone creates
 /// a work-around they'd be burdened with updating this file.
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3

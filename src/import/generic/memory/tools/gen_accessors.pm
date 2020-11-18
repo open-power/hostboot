@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,7 +28,8 @@
 # @brief Contains subroutines for generating attribute accessors from XML
 #
 # *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-# *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+# *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+
 # *HWP Team: Memory
 # *HWP Level: 2
 # *HWP Consumed by: Memory

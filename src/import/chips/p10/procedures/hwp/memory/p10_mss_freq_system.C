@@ -27,8 +27,8 @@
 /// @file p10_mss_freq_system.C
 /// @brief Matches OMI freq with DDR freq
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB

@@ -27,7 +27,7 @@
 /// @file p10_mss_eff_config.C
 /// @brief Command and Control for the memory subsystem - populate attributes
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1

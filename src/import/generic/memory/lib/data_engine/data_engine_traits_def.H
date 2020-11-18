@@ -27,8 +27,8 @@
 /// @file data_engine_traits_def.H
 /// @brief Class to set preliminary eff_config attributes
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: CI

@@ -28,7 +28,7 @@
 /// @brief Utils to set ECID attributes according to FUSE registers
 ///
 // *HWP HWP Owner: Mark Pizzutillo <aamarin@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB

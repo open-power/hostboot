@@ -28,7 +28,7 @@
 /// @brief Contains the mc specific traits and settings for the mrs engine
 ///
 // *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP

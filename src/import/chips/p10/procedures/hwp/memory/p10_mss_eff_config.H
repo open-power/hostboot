@@ -28,7 +28,7 @@
 /// @brief Command and Control for the memory subsystem - populate attributes
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Mark Pizzutillo <mark.pizzutillo@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB

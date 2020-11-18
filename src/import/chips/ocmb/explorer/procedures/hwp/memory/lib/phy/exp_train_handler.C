@@ -28,7 +28,7 @@
 /// @brief Procedure handle any training fails from the explorer
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB

@@ -27,7 +27,7 @@
 /// @file explorer_pos.C
 /// @brief Tools to return target's position from a fapi2 target
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3

@@ -27,8 +27,8 @@
 /// @file attr_engine_traits.H
 /// @brief Trait class definitions for generic attrs
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:CI

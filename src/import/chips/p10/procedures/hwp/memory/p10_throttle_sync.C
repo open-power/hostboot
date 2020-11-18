@@ -29,7 +29,7 @@
 /// @note The purpose of this procedure is to triggers sync command from a 'master'
 /// MC to other MCs that have attached memory in a processor.
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2

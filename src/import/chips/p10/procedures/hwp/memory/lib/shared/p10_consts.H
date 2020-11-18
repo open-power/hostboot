@@ -28,7 +28,7 @@
 /// @file p10_consts.H
 /// @brief Constants for p10
 ///
-// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2

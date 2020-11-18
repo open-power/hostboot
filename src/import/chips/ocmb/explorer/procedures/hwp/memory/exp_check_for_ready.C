@@ -27,7 +27,7 @@
 /// @file exp_check_for_ready.C
 /// @brief FW polls I2C slave interface to determine when it is ready
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2

@@ -27,8 +27,8 @@
 /// @file p10_mss_freq.C
 /// @brief Calculate and save off DIMM frequencies
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB

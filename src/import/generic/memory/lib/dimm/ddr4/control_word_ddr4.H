@@ -27,7 +27,7 @@
 /// @file control_word_ddr4.H
 /// @brief Run and manage the DDR4 control words for the RCD and data buffers
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3

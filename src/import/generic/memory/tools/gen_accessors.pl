@@ -28,7 +28,8 @@
 # @brief Calls the 2D plotting information
 #
 # *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-# *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+# *HWP HWP Backup : Stephen Glancy <sglancy@us.ibm.com>
+
 # *HWP Team: Memory
 # *HWP Level: 2
 # *HWP Consumed by: Memory

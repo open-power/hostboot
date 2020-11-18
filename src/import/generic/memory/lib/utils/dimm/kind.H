@@ -27,8 +27,8 @@
 /// @file kind.H
 /// @brief Encapsulation for dimms of all types
 ///
-// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
