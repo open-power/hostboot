@@ -624,7 +624,7 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 #ifdef CONFIG_PLDM
         TRACFCOMP(g_trac_isteps_trace, "check_scratch_regs_vs_attrs: requesting PLDM reboot");
         INITSERVICE::stopIpl();
-        l_err = PLDM::sendGracefulRebootRequest();
+        l_err = PLDM::sendGracefulRebootRequest("boot parm adjustment");
         if(l_err)
         {
             TRACFCOMP(g_trac_isteps_trace, "check_scratch_regs_vs_attrs(): could not request PLDM reboot");

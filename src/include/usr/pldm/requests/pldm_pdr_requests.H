@@ -103,9 +103,10 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* i_proc_target,
 
 /* @brief Send a PLDM command notifying the BMC that Hostboot wants to be rebooted
  *
+ * @param[in] i_reason         Reason for reboot to display on the console
  * @return errlHndl_t          Error if any, otherwise nullptr.
  */
-errlHndl_t sendGracefulRebootRequest();
+errlHndl_t sendGracefulRebootRequest( const char* i_reason );
 }
 
 #endif

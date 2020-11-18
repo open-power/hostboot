@@ -731,7 +731,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             #ifdef CONFIG_PLDM
                             TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending PLDM reboot request");
                             INITSERVICE::stopIpl();
-                            err = PLDM::sendGracefulRebootRequest();
+                            err = PLDM::sendGracefulRebootRequest("reconfig loop");
                             if(err)
                             {
                                 TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: could not send PLDM reboot request");

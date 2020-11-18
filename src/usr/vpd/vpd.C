@@ -505,7 +505,7 @@ errlHndl_t updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
                     CONSOLE::flush();
 #ifdef CONFIG_PLDM
                     INITSERVICE::stopIpl();
-                    l_errl = PLDM::sendGracefulRebootRequest();
+                    l_errl = PLDM::sendGracefulRebootRequest("serial number update");
                     if(l_errl)
                     {
                         TRACFCOMP(g_trac_vpd, "updateSerialNumberFromBMC: Could not send reboot PLDM request");

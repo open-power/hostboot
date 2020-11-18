@@ -36,6 +36,9 @@
 // Error logs
 #include <errl/errlentry.H>
 
+// Console display
+#include <console/consoleif.H>
+
 // IPC
 #include <sys/msg.h>
 
@@ -712,7 +715,7 @@ errlHndl_t sendSetStateEffecterStatesRequest(
     return errl;
 }
 
-errlHndl_t sendGracefulRebootRequest()
+errlHndl_t sendGracefulRebootRequest( const char* i_reason )
 {
     // TODO RTC: 259581 Dynamically fetch this effecter from BMC instead of
     // assuming its value.
@@ -721,6 +724,8 @@ errlHndl_t sendGracefulRebootRequest()
     constexpr uint8_t graceful_reboot =
             pldm_effecter_state_fields::PLDM_GRACEFUL_REBOOT;
     fields_to_set.push_back({set_request::PLDM_REQUEST_SET, graceful_reboot});
+
+    CONSOLE::displayf(nullptr,"Triggering graceful reboot for %s", i_reason);
 
     return sendSetStateEffecterStatesRequest(SOFTWARE_TERMINATION_STATUS_EFFECTER_ID,
                                              fields_to_set);
