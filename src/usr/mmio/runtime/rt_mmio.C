@@ -80,9 +80,62 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
         // Set the ignore HRMOR bit so that PHYP gets the right address
         l_fullAddr |= IGNORE_HRMOR;
 
-        // send message to hypervisor level to do the mmio operation
-        l_err = SCOM::sendScomToHyp(i_opType, i_ocmbTarget,
-                                    l_fullAddr, io_buffer);
+        // verify buffer length is supported
+        if ((io_buflen != 4) && (io_buflen != 8))
+        {
+            // Only 4 and 8 byte scom sizes supported
+            /*@
+             * @errortype
+             * @moduleid         MMIO::RT_OCMB_MMIO_PERFORM_OP
+             * @reasoncode       MMIO::RC_INCORRECT_BUFFER_LENGTH
+             * @userdata1[0:31]  Target huid
+             * @userdata1[32:63] Data Offset
+             * @userdata2[0:31]  Operation Type
+             * @userdata2[32:63] Buffer Length
+             * @devdesc          Unsupported buffer length for SCOM offset.
+             *                   Only lengths 4 and 8 supported.
+             * @custdesc         Unexpected memory subsystem firmware error.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    MMIO::RT_OCMB_MMIO_PERFORM_OP,
+                                    MMIO::RC_INCORRECT_BUFFER_LENGTH,
+                                    TWO_UINT32_TO_UINT64(
+                                      TARGETING::get_huid(i_ocmbTarget),
+                                      l_offset),
+                                    TWO_UINT32_TO_UINT64(i_opType, io_buflen),
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        }
+        else
+        {
+            // hypervisor expects an 8-byte buffer
+            uint8_t l_scombuf[8] = {0};
+            if (i_opType == DeviceFW::WRITE)
+            {
+                if (io_buflen == 4)
+                {
+                    // data is right-justified
+                    memcpy(l_scombuf+4, io_buffer, 4);
+                }
+                else // io_buflen == 8
+                {
+                    memcpy(l_scombuf, io_buffer, 8);
+                }
+            }
+
+            // send message to hypervisor level to do the mmio operation
+            l_err = SCOM::sendScomToHyp(i_opType, i_ocmbTarget,
+                                        l_fullAddr, l_scombuf );
+            if( io_buflen == 4 )
+            {
+                 // data is right-justified
+                 memcpy( io_buffer, l_scombuf+4, 4 );
+            }
+            else // io_buflen == 8
+            {
+                 memcpy( io_buffer, l_scombuf, 8 );
+            }
+        }
     }
     else
     {
