@@ -421,13 +421,13 @@ void __getGrpPrms<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t & o_portPos,
 {
     // Get the connected parent MI;
     ExtensibleChip * mcc = getConnectedParent( i_chip, TYPE_MCC );
-    ExtensibleChip * mi  = getConnectedParent( mcc, TYPE_MI );
+    ExtensibleChip * mc  = getConnectedParent( mcc, TYPE_MC );
 
     // TODO RTC 210072 - support for multiple ports
     o_portPos = 0;
 
-    // Get the position of the MCC relative to the MI (0:1)
-    uint8_t chnlPos = mcc->getPos() % MAX_MCC_PER_MI;
+    // Get the position of the MCC relative to the MC (0:1)
+    uint8_t chnlPos = mcc->getPos() % MAX_MCC_PER_MC;
 
     char mcfgpName[64];
     sprintf( mcfgpName, "MCFGP%d", chnlPos );
@@ -435,8 +435,8 @@ void __getGrpPrms<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t & o_portPos,
     char mcfgpmName[64];
     sprintf( mcfgpmName, "MCFGPM%d", chnlPos );
 
-    o_mcfgp  = mi->getRegister( mcfgpName );
-    o_mcfgpm = mi->getRegister( mcfgpmName );
+    o_mcfgp  = mc->getRegister( mcfgpName );
+    o_mcfgpm = mc->getRegister( mcfgpmName );
 
 }
 

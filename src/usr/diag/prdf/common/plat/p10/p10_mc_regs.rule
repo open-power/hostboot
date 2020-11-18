@@ -70,3 +70,36 @@
         capture     group pll_ffdc;
     };
 
+
+    ############################################################################
+    # Memory Configuration Registers
+    ############################################################################
+
+    register MCFGP0
+    {
+        name        "Memory Configuration Register Channel 0";
+        scomaddr    0x0C010C0A;
+        capture     group default;
+    };
+
+    register MCFGP1
+    {
+        name        "Memory Configuration Register Channel 1";
+        scomaddr    0x0C010C0B;
+        capture     group default;
+    };
+
+
+    register MCFGPM0
+    {
+        name        "MC Mirrored Memory Configuration Register Channel 0";
+        scomaddr    0x0C010C20;
+        capture     group default;
+    };
+
+    register MCFGPM1
+    {
+        name        "MC Mirrored Memory Configuration Register Channel 1";
+        scomaddr    0x0C010C30;
+        capture     group default;
+    };
