@@ -27,7 +27,7 @@
 /// @file spd_utls.H
 /// @brief SPD utility functions definitions
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
