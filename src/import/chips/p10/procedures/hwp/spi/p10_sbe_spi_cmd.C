@@ -236,7 +236,9 @@ spi_wait_for_tdr_empty(SpiControlHandle& i_handle)
             break; //Wait until TX Buffer is empty
         }
 
+#ifndef __PPE__
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
+#endif
         --timeout;
     }
 
@@ -286,7 +288,9 @@ spi_wait_for_rdr_full(SpiControlHandle& i_handle)
             break;
         }
 
+#ifndef __PPE__
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
+#endif
         --timeout;
     }
 
@@ -336,7 +340,9 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
             break;
         }
 
+#ifndef __PPE__
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
+#endif
         --timeout;
     }
 
@@ -590,7 +596,9 @@ spi_wait_for_seq_index_pass(SpiControlHandle& i_handle, const uint32_t i_index)
             break;
         }
 
+#ifndef __PPE__
         fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
+#endif
     }
 
     FAPI_DBG("wait_for_seq_index_pass(%d) timeout %lld msec", i_index, timeout);
