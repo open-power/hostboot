@@ -137,53 +137,6 @@ public:
     }
 
 
-    void testSystemConfigData()
-    {
-        TargetHandleList occs;
-        TargetHandleList::iterator occ;
-        uint8_t data[4*KILOBYTE];
-        uint64_t size = 0;
-
-        TS_TRACE(ENTER_MRK"HTMGT: testSystemConfigData");
-
-        getAllChiplets(occs, TYPE_OCC, true);
-
-        for (occ=occs.begin();occ!=occs.end();++occ)
-        {
-            memset(data, 0, 4*KILOBYTE);
-
-            getSystemConfigMessageData(*occ, data, size);
-
-            if (data[0] != OCC_CFGDATA_SYS_CONFIG)
-            {
-                TS_FAIL("Wrong format 0x%X for system config data command",
-                        data[0]);
-            }
-
-            if (data[1] != 0x30)
-            {
-                TS_FAIL("Wrong version 0x%X for system config data command",
-                        data[1]);
-            }
-
-
-            if (data[2] != OCC_CFGDATA_OPENPOWER_OPALVM)
-            {
-                TS_FAIL("wrong system type 0x%X for system config data command",
-                        data[2]);
-            }
-
-            if (size != 163) // 32 cores
-            {
-                TS_FAIL("wrong size %d for system config data command",
-                        size);
-            }
-        }
-
-        TS_TRACE(EXIT_MRK"HTMGT: testSystemConfigData");
-    }
-
-
     void testThermalControlConfigData()
     {
         uint8_t data[4*KILOBYTE];

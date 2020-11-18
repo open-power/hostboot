@@ -64,13 +64,10 @@ namespace HTMGT
     {
         //KVM or OPAL mode + single node
         OCC_CFGDATA_OPENPOWER_OPALVM  = 0x81,
+        // Max resets due to WOF has been reached
+        OCC_CFGDATA_WOF_RESET_LIMIT   = 0x04,
         //PowerVM mode + single node
-        OCC_CFGDATA_NON_REDUNDANT_PS  = 0x02,
         OCC_CFGDATA_OPENPOWER_POWERVM = 0x01,
-
-        //Mask, report throttling only when max frequency lowered below nominal
-        OCC_REPORT_THROTTLE_BELOW_NOMINAL = 0x08,   //Bit 3
-        //else, OCC report throttling when max frequency lowered below turbo
 
         CFGDATA_CORES = 32,
 
@@ -155,7 +152,7 @@ namespace HTMGT
      * @param[out] o_size - set to the message size
      * @pre o_data is large enough.
      */
-    void getMemConfigMessageData(const TARGETING::TargetHandle_t i_occ,
+    void getMemConfigMessageData(Occ *i_occ,
                                  uint8_t* o_data, uint64_t & o_size);
 
 
@@ -218,7 +215,7 @@ namespace HTMGT
      * @param[out] o_size - set to the message size
      * @pre o_data is large enough.
      */
-    void getSystemConfigMessageData(const TARGETING::TargetHandle_t i_occ,
+    void getSystemConfigMessageData(const Occ &i_occ,
                                     uint8_t* o_data, uint64_t & o_size);
 
 

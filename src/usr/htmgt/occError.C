@@ -36,6 +36,7 @@
 #include <targeting/common/utilFilter.H>
 #include <variable_buffer.H>
 #include "ipmi/ipmisensor.H"
+#include <targeting/common/mfgFlagAccessors.H>
 
 
 namespace HTMGT
@@ -530,7 +531,17 @@ namespace HTMGT
         bool l_occReset = false;
         o_call_home = false;
 
-        if (i_actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED)
+        if (i_actions & TMGT_ERRL_ACTIONS_MANUFACTURING_ERROR)
+        {
+            if (isMfgFlagSet(TARGETING::
+                             MFG_FLAGS_MNFG_ENERGYSCALE_SPECIAL_POLICIES))
+            {
+                TMGT_INF("elog_process_actions: Mfg policy set, forcing "
+                         "severity to Unrecoverable");
+                io_errlSeverity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+            }
+        }
+        else if (i_actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED)
         {
             iv_failed = false;
             iv_resetReason = OCC_RESET_REASON_WOF_RESET;
@@ -551,9 +562,11 @@ namespace HTMGT
 
                 // We compare against one less than the threshold because the
                 // WOF reset count doesn't get incremented until the resetPrep
-                if( iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1) )
+                if ((iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1)) &&
+                    (! isMfgFlagSet(TARGETING::
+                                  MFG_FLAGS_MNFG_ENERGYSCALE_SPECIAL_POLICIES)))
                 {
-                    // Not at WOF reset threshold yet. Set sev to INFO
+                    // Not at WOF reset threshold yet and not MFG, set as INFO
                     io_errlSeverity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
                 }
             }
@@ -587,9 +600,11 @@ namespace HTMGT
                         io_errlSeverity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
                     }
                 }
-                else if (io_errlSeverity != ERRORLOG::ERRL_SEV_INFORMATIONAL)
+                else if ((io_errlSeverity != ERRORLOG::ERRL_SEV_INFORMATIONAL)&&
+                         !isMfgFlagSet(TARGETING::
+                                   MFG_FLAGS_MNFG_ENERGYSCALE_SPECIAL_POLICIES))
                 {
-                    // update severity to INFO
+                    // Not INFO and not MFG, update severity to INFO
                     TMGT_INF("elogProcessActions: changing severity to "
                              "INFORMATIONAL (was sev=0x%02X)",
                              io_errlSeverity);

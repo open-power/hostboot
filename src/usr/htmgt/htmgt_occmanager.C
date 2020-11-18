@@ -41,6 +41,9 @@
 #include <isteps/pm/scopedHomerMapper.H>
 #include <targeting/common/mfgFlagAccessors.H>
 
+#include <targeting/common/mfgFlagAccessors.H>
+#include "htmgt_cfgdata.H"
+
 namespace HTMGT
 {
 
@@ -1355,7 +1358,7 @@ namespace HTMGT
             o_data[index++] = 1; // .occStatus = ACTIVE
         o_data[index++] = 1; // .powerSave
         o_data[index++] = 1; // .powerCap
-        o_data[index++] = 0; // .reserved
+        o_data[index++] = 0; // reserved
         o_data[index++] = 1; // .dynamicPerformance
         o_data[index++] = 1; // .FFO
         o_data[index++] = 0; // reserved (IPS)
@@ -1364,7 +1367,9 @@ namespace HTMGT
         o_data[index++] = 0; // reserved
         o_data[index++] = 0; // reserved
         o_data[index++] = 0; // reserved
-        o_data[index++] = 0; // reserved
+        bool is_mfg = isMfgFlagSet(TARGETING::
+                                   MFG_FLAGS_MNFG_ENERGYSCALE_SPECIAL_POLICIES);
+        o_data[index++] = is_mfg ? 1 : 0; // .mfgMode
 
         UINT32_PUT(&o_data[index], cv_safeReturnCode);
         index += 4;

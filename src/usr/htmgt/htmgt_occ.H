@@ -167,7 +167,7 @@ namespace HTMGT
              *
              * @return instance number for this OCC
              */
-            uint8_t getInstance() { return iv_instance; };
+            uint8_t getInstance() const { return iv_instance; };
 
 
             /**
@@ -189,7 +189,7 @@ namespace HTMGT
              *
              * @return pointer to OCC target (not processor target)
              */
-            TARGETING::TargetHandle_t getTarget() { return iv_target; };
+            TARGETING::TargetHandle_t getTarget() const { return iv_target; };
 
 
             /**
@@ -297,7 +297,7 @@ namespace HTMGT
              *
              * @return Number of WOF resets for this OCC
              */
-            uint8_t wofResetCount() { return iv_wofResetCount; }
+            uint8_t wofResetCount() const { return iv_wofResetCount; }
 
 
             /**

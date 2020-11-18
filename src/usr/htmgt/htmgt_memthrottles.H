@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,14 @@ namespace HTMGT
     const uint8_t TMGT_MAX_DIMM_PER_MCA = 2;
     const uint8_t TMGT_MAX_DIMM_PER_MCS =
         TMGT_MAX_DIMM_PER_MCA * TMGT_MAX_MCA_PER_MCS;
+
+    // Each P10 procesor can have 16 DDIMs (each attached via an OMI channel)
+    // Each DDIMM has 1 EXPLORER OCMB chip
+    // Each EXPLORER OCMB chip has 1 port
+    // Each port has 2 slots for DDR4 DIMMs
+    const uint8_t TMGT_MAX_PORT_PER_OCMB_CHIP = 1;
+    const uint8_t TMGT_MAX_SLOT_PER_OCMB_PORT = 2;
+    const uint8_t TMGT_NUM_DTS_PER_OCMB = 2;
 
     /**
      * Calculates the memory throttling numerator values for the OT,
