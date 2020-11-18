@@ -598,6 +598,8 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
 ExtensibleChipList getConnectedChildren( ExtensibleChip * i_chip,
                                          TYPE i_connType )
 {
+    #define PRDF_FUNC "[PlatServices::getConnectedChildren] "
+
     PRDF_ASSERT( nullptr != i_chip );
 
     ExtensibleChipList o_list; // Default empty list
@@ -608,12 +610,20 @@ ExtensibleChipList getConnectedChildren( ExtensibleChip * i_chip,
         // Check to make sure that if we have a non-null Target, we also
         // get back a non-null ExtensibleChip.
         ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip(trgt);
-        PRDF_ASSERT( nullptr != chip );
+        if ( nullptr == chip )
+        {
+            PRDF_ERR( PRDF_FUNC "Got null ExtensibleChip from target 0x%08x of "
+                      "type 0x%x from parent i_chip 0x%08x", getHuid(trgt),
+                      i_connType, i_chip->getHuid() );
+            PRDF_ASSERT( nullptr != chip );
+        }
 
         o_list.push_back( chip );
     }
 
     return o_list;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -621,6 +631,8 @@ ExtensibleChipList getConnectedChildren( ExtensibleChip * i_chip,
 ExtensibleChip * getConnectedParent( ExtensibleChip * i_child,
                                      TYPE i_parentType )
 {
+    #define PRDF_FUNC "[PlatServices::getConnectedParent] "
+
     PRDF_ASSERT( nullptr != i_child );
 
     TargetHandle_t trgt = getConnectedParent( i_child->getTrgt(),
@@ -629,9 +641,18 @@ ExtensibleChip * getConnectedParent( ExtensibleChip * i_child,
     // Check to make sure that if we have a non-null Target, we also
     // get back a non-null ExtensibleChip.
     ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip( trgt );
-    PRDF_ASSERT( nullptr != chip );
+
+    if ( nullptr == chip )
+    {
+        PRDF_ERR( PRDF_FUNC "Got null ExtensibleChip from non-null "
+                  "target 0x%08x of type 0x%x from child chip 0x%08x",
+                  getHuid(trgt), i_parentType, i_child->getHuid() );
+        PRDF_ASSERT( nullptr != chip );
+    }
 
     return chip;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -640,6 +661,8 @@ ExtensibleChip * getConnectedChild( ExtensibleChip * i_parent,
                                     TARGETING::TYPE i_childType,
                                     uint32_t i_childPos )
 {
+    #define PRDF_FUNC "[PlatServices::getConnectedChild] "
+
     PRDF_ASSERT( nullptr != i_parent );
 
     ExtensibleChip * o_child = nullptr;
@@ -653,10 +676,18 @@ ExtensibleChip * getConnectedChild( ExtensibleChip * i_parent,
 
         // Check to make sure that if we have a non-null Target, we also
         // get back a non-null ExtensibleChip.
-        PRDF_ASSERT( nullptr != o_child );
+        if ( nullptr == o_child )
+        {
+            PRDF_ERR( PRDF_FUNC "Got null ExtensibleChip from non-null "
+                      "target 0x%08x of type 0x%x from parent chip 0x%08x",
+                      getHuid(trgt), i_childType, i_parent->getHuid() );
+            PRDF_ASSERT( nullptr != o_child );
+        }
     }
 
     return o_child;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
