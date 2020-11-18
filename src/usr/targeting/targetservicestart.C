@@ -938,6 +938,9 @@ static void adjustMemoryMap( TargetService& i_targetService )
                         l_swapVictim, l_swapAttrs );
         SWAP_ATTRIBUTE( ATTR_PSI_HB_ESB_ADDR, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_FSP_BASE_ADDR, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+
         // Handle the rest of the BARs...
     }
 
