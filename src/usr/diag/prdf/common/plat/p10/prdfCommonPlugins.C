@@ -33,6 +33,7 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
 #include <prdfPlatServices.H>
+#include <UtilHash.H> // for Util::hashString
 #include <xspprdService.h>
 
 using namespace TARGETING;
@@ -148,6 +149,10 @@ int32_t CrcSideEffect( ExtensibleChip * i_chip,
         // read the PAU_PHY_FIR
         SCAN_COMM_REGISTER_CLASS * pau_phy = pauc->getRegister( "PAU_PHY_FIR" );
         if ( SUCCESS != pau_phy->Read() ) break;
+
+        // Collect the PAU_PHY_FIR for FFDC
+        pauc->CaptureErrorData( io_sc.service_data->GetCaptureData(),
+                                Util::hashString("crcRootCause") );
 
         // Get the OMI, OCMB, and OMIC targets for possible callouts.
         TargetHandle_t omicTrgt = i_chip->getTrgt();

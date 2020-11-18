@@ -134,6 +134,7 @@ chip p10_pauc
         reset       (&, 0x10012c01);
         mask        (|, 0x10012c05);
         capture     group default;
+        capture     group crcRootCause;
     };
 
     register PAU_PHY_FIR_MASK
