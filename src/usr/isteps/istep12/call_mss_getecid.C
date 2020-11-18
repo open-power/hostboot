@@ -78,7 +78,7 @@ namespace ISTEP_12
  *                       all given processors, false otherwise.
  * @return errlHndl_t    Error if any, otherwise nullptr.
  */
-static errlHndl_t should_enable_memory_encryption(TargetHandleList const i_procs,
+static errlHndl_t should_enable_memory_encryption(const TargetHandleList& i_procs,
                                                   bool& o_enable)
 {
     errlHndl_t errl = nullptr;
@@ -120,13 +120,19 @@ static errlHndl_t should_enable_memory_encryption(TargetHandleList const i_procs
             // Do not enable encryption if export controls are in place on any
             // processor.
             o_enable = false;
+            break;
         }
         else
         {
             // If no export controls are in place, then check whether this
             // processor's attribute disables encryption.
-            o_enable = o_enable && (proc->getAttr<ATTR_PROC_MEMORY_ENCRYPTION_ENABLED>()
-                                    != PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED);
+            o_enable = (proc->getAttr<ATTR_PROC_MEMORY_ENCRYPTION_ENABLED>()
+                        != PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED);
+
+            if (!o_enable)
+            {
+                break;
+            }
         }
     }
 

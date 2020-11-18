@@ -320,7 +320,7 @@ static errlHndl_t enable_memory_encryption()
                                    TYPE_PROC,
                                    UTIL_FILTER_FUNCTIONAL);
 
-    // Check the MEMORY_ENCRYPTION_ENABLED attribute on all function procs
+    // Check the MEMORY_ENCRYPTION_ENABLED attribute on all functional procs
     const bool enable_encryption
         = std::accumulate(begin(procs), end(procs), true,
                           [](const bool enable, const Target* const t)
