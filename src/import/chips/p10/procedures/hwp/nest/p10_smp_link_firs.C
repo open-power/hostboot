@@ -113,14 +113,15 @@ const struct fir_registers_btm firs_btm =
     },
     .PHY_FIR =
     {
-        0x88FBFDC000000000, // iohs0
-        0x44FBFDC000000000, // iohs1
-        0x88FBFDC000000000, // iohs2
-        0x44FBFDC000000000, // iohs3
-        0x88FBFDC000000000, // iohs4
-        0x44FBFDC000000000, // iohs5
-        0x88FBFDC000000000, // iohs6
-        0x44FBFDC000000000, // iohs7
+        0x88FFFFC000000000, // iohs0
+        0x44FFFFC000000000, // iohs1
+        0x88FFFFC000000000, // iohs2
+        0x44FFFFC000000000, // iohs3
+        0x88FFFFC000000000, // iohs4
+        0x44FFFFC000000000, // iohs5
+        0x88FFFFC000000000, // iohs6
+        0x44FFFFC000000000, // iohs7
+
     },
 };
 
@@ -169,8 +170,8 @@ const struct fir_registers firs_inactive =
     .DLP_FIR_ACTION1 = 0xFFFFFFFFFFFFFFFF,
     .DLP_FIR_MASK    = 0xFFFFFFFFFFFFFFFF,
 
-    .PHY_FIR_ACTION0 = 0x8000000000000000,
-    .PHY_FIR_ACTION1 = 0xF47FDB0000000000,
+    .PHY_FIR_ACTION0 = 0x0000000000000000,
+    .PHY_FIR_ACTION1 = 0xFFFFDB0000000000,
     .PHY_FIR_MASK    = 0xFFFFFFFFFFFFFFFF,
 };
 
@@ -188,10 +189,9 @@ const struct fir_registers firs_runtime =
     .DLP_FIR_ACTION1 = 0xFFFFFFFFFFFFFFFF,
     .DLP_FIR_MASK    = 0xFCFC3FFFFCC00003,
 
-    .PHY_FIR_ACTION0 = 0x8000000000000000,
-    .PHY_FIR_ACTION1 = 0xF47FDB0000000000,
-    //.PHY_FIR_MASK    = 0x0B8024C000000000,
-    .PHY_FIR_MASK    = 0x0B843FC000000000,
+    .PHY_FIR_ACTION0 = 0x0000000000000000,
+    .PHY_FIR_ACTION1 = 0xFFFFDB0000000000,
+    .PHY_FIR_MASK    = 0x000424C000000000,
 };
 
 // DL Config Register Enums
