@@ -2628,6 +2628,9 @@ fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncMode
             l_tempSize = htobe32( pImgHdr->g_qme_L3ScomLength );
         }
 
+        FAPI_DBG( "QME Hcode Size 0x%08x, QME SRAM Buffer Size 0x%08x Max of Rings and Scom Restore 0x%08x ",
+                    htobe32( pCpmrHdr->iv_qmeImgLength ), l_bceBufSize, l_tempSize );
+
         FAPI_ASSERT( ( l_bceBufSize >= l_tempSize ),
                      fapi2::BCE_BUF_SMALLER_FOR_NON_HCODE_SECTION()
                      .set_BCE_BUF_SIZE( l_bceBufSize )
