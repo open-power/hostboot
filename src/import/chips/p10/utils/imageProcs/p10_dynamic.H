@@ -33,7 +33,7 @@
 static const uint64_t DYN_MAGIC_FEATURE = 0x44594e4645415453; //'DYNFEATS'
 static const uint64_t DYN_MAGIC_SERVICE = 0x44594e5345525653; //'DYNSERVS'
 
-#define MAX_DYN_FEATURES   34
+#define MAX_DYN_FEATURES   37
 #define NUM_OF_64_BITS_SET 1
 
 typedef struct
@@ -138,46 +138,49 @@ void dynamic_get_record_perValue( void*     i_dynSection,
 
 enum DYN_FEATURES
 {
-    CACHE_CONTAINED               = 0,
-    CHIP_CONTAINED                = 1,
-    COMMON_CONTAINED              = 2,
-    HOSTBOOT                      = 3,
-    HV_INITS                      = 4,
-    L2RC_HIGH_JITTER              = 5,
-    MC2RT_NOMINAL                 = 6,
-    MC2RT_SAFE                    = 7,
-    MC2RT_TURBO                   = 8,
-    MC2RT_ULTRATURBO              = 9,
-    MC_FAST                       = 10,
-    MMA_STATIC_POWEROFF           = 11,
-    PA2RT_NOMINAL                 = 12,
-    PA2RT_SAFE                    = 13,
-    PA2RT_TURBO                   = 14,
-    RT2MC_NOMINAL                 = 15,
-    RT2MC_SAFE                    = 16,
-    RT2MC_TURBO                   = 17,
-    RT2MC_ULTRATURBO              = 18,
-    RT2PA_NOMINAL                 = 19,
-    RT2PA_SAFE                    = 20,
-    RUNN_SRESET_THREAD0           = 21,
-    RUNN_SRESET_THREAD1           = 22,
-    RUNN_SRESET_THREAD2           = 23,
-    RUNN_SRESET_THREAD3           = 24,
-    RUNN_USE_QME_TB_SRC           = 25,
-    RUNN_CONTAINED_DUMP           = 26,
-    UV_INITS                      = 27,
-    CONTAINED_CLKOFFS             = 28,
-    CORE_RECOVERY                 = 29,
-    REVERT_HW542915               = 30,
-    REVERT_HW541421               = 31,
-    REVERT_TLBIE_UNMARK_FIXES     = 32,
-    CONVERT_DCBZ_TO_RWITM         = 33,
+    CACHE_CONTAINED                                   = 0,
+    CHIP_CONTAINED                                    = 1,
+    COMMON_CONTAINED                                  = 2,
+    HOSTBOOT                                          = 3,
+    HV_INITS                                          = 4,
+    L2RC_HIGH_JITTER                                  = 5,
+    MC2RT_NOMINAL                                     = 6,
+    MC2RT_SAFE                                        = 7,
+    MC2RT_TURBO                                       = 8,
+    MC2RT_ULTRATURBO                                  = 9,
+    MC_FAST                                           = 10,
+    MMA_STATIC_POWEROFF                               = 11,
+    PA2RT_NOMINAL                                     = 12,
+    PA2RT_SAFE                                        = 13,
+    PA2RT_TURBO                                       = 14,
+    RT2MC_NOMINAL                                     = 15,
+    RT2MC_SAFE                                        = 16,
+    RT2MC_TURBO                                       = 17,
+    RT2MC_ULTRATURBO                                  = 18,
+    RT2PA_NOMINAL                                     = 19,
+    RT2PA_SAFE                                        = 20,
+    RUNN_SRESET_THREAD0                               = 21,
+    RUNN_SRESET_THREAD1                               = 22,
+    RUNN_SRESET_THREAD2                               = 23,
+    RUNN_SRESET_THREAD3                               = 24,
+    RUNN_USE_QME_TB_SRC                               = 25,
+    RUNN_CONTAINED_DUMP                               = 26,
+    UV_INITS                                          = 27,
+    CONTAINED_CLKOFFS                                 = 28,
+    CORE_RECOVERY                                     = 29,
+    REVERT_HW542915                                   = 30,
+    REVERT_HW541421                                   = 31,
+    REVERT_TLBIE_UNMARK_FIXES                         = 32,
+    CONVERT_DCBZ_TO_RWITM                             = 33,
+    REVERT_HW549081_WIGGLY_AUTOPSY                    = 34,
+    REVERT_HW549142_FRESH_TRAINS                      = 35,
+    REVERT_HW549976_CRABBY_SMILE                      = 36,
 };
 
 enum DYN_SERVICES
 {
-    RAS_MPV            = 0,
-    PERF_DD10          = 1,
+    RAS_MPV                                          = 0,
+    PERF_DD10                                        = 1,
 };
 
 #endif
