@@ -95,6 +95,11 @@ union tpm_sts_reg_t
         uint8_t responseRetry  : 1; // 06 // WO
         uint8_t rsvd2          : 1; // 07 // RO
     };
+
+    tpm_sts_reg_t()
+    {
+        value = 0;
+    }
 };
 
 } // namespace TPMDD

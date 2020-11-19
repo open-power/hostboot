@@ -93,7 +93,8 @@ namespace Bootloader
         RC_SPI_TPM_READ_FAIL       = HBBL_COMP_ID | 0x15,  /**< A SPI read from TPM failed */
         RC_SPI_TPM_WRITE_FAIL      = HBBL_COMP_ID | 0x16,  /**< A SPI write to TPM failed */
         RC_TPM_INVALID_READ_SIZE   = HBBL_COMP_ID | 0x17,  /**< We read out more or less data than we wanted */
-        RC_TPM_INVALID_WRITE_SIZE  = HBBL_COMP_ID | 0x25,  /**< We wrote less or more data than we wanted */
+        RC_TPM_INVALID_WRITE_SIZE  = HBBL_COMP_ID | 0x18,  /**< We wrote less or more data than we wanted */
+        RC_TPM_COMMAND_NOT_READY   = HBBL_COMP_ID | 0x19,  /**< TPM is not ready for a command */
 
     };
 
