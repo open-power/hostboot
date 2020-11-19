@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,18 @@ static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO = 51;
 static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO_LEN = 3;
 //<< [IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL]
 // iohs/reg00044.H
+
+//>> [IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_STAT1_PL]
+static const uint64_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_STAT1_PL = 0x8003e00010012c3full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_STAT1_PL_DL_PHY_RUN_LANE_RO_SIGNAL = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_STAT1_PL_DL_PHY_RECAL_REQ_RO_SIGNAL = 49;
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_STAT1_PL_DL_PHY_RECAL_ABORT_RO_SIGNAL = 50;
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_STAT1_PL_DL_PHY_RECAL_ABORT_STICKY_RO_SIGNAL = 51;
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_STAT1_PL_PSAVE_REQ_DL_RO_SIGNAL = 52;
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_STAT1_PL_PSAVE_STS_PHY_RO_SIGNAL = 53;
+//<< [IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_STAT1_PL]
+// iohs/reg00046.H
 
 //>>THE END<<
 
