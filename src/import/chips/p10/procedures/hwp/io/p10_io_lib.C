@@ -37,7 +37,6 @@
 #include <utils.H>
 #include <p10_scom_omi.H>
 #include <p10_scom_omic.H>
-//#include <omic/reg00030.H>
 
 //------------------------------------------------------------------------------
 // Consts
@@ -276,7 +275,7 @@ fapi2::ReturnCode p10_io_omi_poll_init_done(const fapi2::Target<fapi2::TARGET_TY
     fapi2::toString(i_omi_target, l_tgt_str, sizeof(l_tgt_str));
 
     //Poll for done
-    const int POLLING_LOOPS = 800;
+    const int POLLING_LOOPS = 10000;
 
     for (int l_try = 0; l_try < POLLING_LOOPS && !l_done; l_try++)
     {
@@ -315,6 +314,8 @@ fapi2::ReturnCode p10_io_omi_poll_init_done(const fapi2::Target<fapi2::TARGET_TY
     // Avoid failing in Simics until the models get updated
     if( !l_done )
     {
+        FAPI_ERR("OMI PHY Init Done Timeout on %s", l_tgt_str);
+
         fapi2::ATTR_IS_SIMICS_Type l_simics;
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, FAPI_SYSTEM, l_simics),
@@ -335,57 +336,3 @@ fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }
-
-///// @brief Drive PRBS from PHY
-///// @param[in] i_iohs_target   OMI target to get thread id for
-///// @param[in] i_on            Enable/Disable PRBS
-///// @return FAPI_RC_SUCCESS if arguments are valid
-//fapi2::ReturnCode p10_io_omi_drive_prbs(
-//    const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi_target,
-//    const bool& i_on)
-//{
-//    FAPI_DBG("Begin");
-//    using namespace scomt::omi;
-//    using namespace scomt::omic;
-//    int l_num_lanes = P10_IO_LIB_NUMBER_OF_OMI_LANES;
-//    fapi2::buffer<uint64_t> l_data = 0;
-//
-//    char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
-//    fapi2::toString(i_omi_target, l_tgt_str, sizeof(l_tgt_str));
-//
-//
-//    uint32_t l_pattern_sel = 0;
-//    uint32_t l_pattern_enable = 0;
-//    if (i_on)
-//    {
-//        l_pattern_sel = 6; // PRBS23
-//        l_pattern_enable = 1;
-//    }
-//
-//
-//    // tx_pattern_sel = 6 (PRBS23), tx_ctl_cntl1_pg
-//    auto l_omic_target = i_omi_target.getParent<fapi2::TARGET_TYPE_OMIC>();
-//    FAPI_TRY(GET_TX0_TXCTL_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
-//    SET_TX0_TXCTL_CTL_REGS_TX_CNTL1_PG_TX_PATTERN_SEL(l_pattern_sel, l_data);
-//    FAPI_TRY(PUT_TX0_TXCTL_CTL_REGS_TX_CNTL1_PG(l_omic_target, l_data));
-//
-//
-//    // tx_pattern_enable = 1, pl, tx_cntl3_pl
-//    FAPI_TRY(p10_io_omi_put_pl_regs(i_omi_target,
-//        CTL_REGS_TX_CNTL1_PG,
-//        CTL_REGS_TX_CNTL1_PG_TX_PATTERN_SEL,
-//        CTL_REGS_TX_CNTL1_PG_TX_PATTERN_SEL_LEN,
-//        l_num_lanes,
-//        l_pattern_enable));
-//
-//
-//
-//fapi_try_exit:
-//    FAPI_DBG("End");
-//    return fapi2::current_err;
-//
-//
-//
-//
-//
-//}

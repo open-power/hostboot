@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/common/include/p10_scom_omic_4.H $       */
+/* $Source: src/import/chips/p10/procedures/hwp/io/p10_io_omi_prbs.H $    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,36 +22,43 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
+///
+/// @file p10_io_omi_prbs.H
+/// @brief OMI PRBS Functions
+///-----------------------------------------------------------------------------
+/// *HW HW Maintainer: Chris Steffen <cwsteffen@us.ibm.com>
+/// *HW FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
+/// *HW Consumed by  : HB
+///-----------------------------------------------------------------------------
 
-#ifndef __PPE_HCODE__
-    #include "proc_scomt.H"
-#endif
+#include <fapi2.H>
 
-#ifndef __p10_scom_omic_4_H_
-#define __p10_scom_omic_4_H_
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
 
+/// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_io_omi_prbs_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMI>&,
+    const bool&);
 
-#ifndef __PPE_HCODE__
-namespace scomt
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+
+extern "C"
 {
-namespace omic
-{
-#endif
 
+///
+/// @brief Enable PRBS23
+///
+/// @param[in] i_target OMI target to start
+/// @param[in] i_on     Enable PRBS
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_io_omi_prbs(
+        const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
+        const bool& i_on);
 
-//>> [CTL_REGS_TX_CNTL1_PG]
-static const uint64_t CTL_REGS_TX_CNTL1_PG = 0x800c444010012c3full;
-
-static const uint32_t CTL_REGS_TX_CNTL1_PG_TX_PATTERN_SEL = 48;
-static const uint32_t CTL_REGS_TX_CNTL1_PG_TX_PATTERN_SEL_LEN = 3;
-//<< [CTL_REGS_TX_CNTL1_PG]
-// omic/reg00004.H
-
-//>>THE END<<
-
-#ifndef __PPE_HCODE__
-}
-}
-#include "omic/reg00004.H"
-#endif
-#endif
+} // extern "C"
