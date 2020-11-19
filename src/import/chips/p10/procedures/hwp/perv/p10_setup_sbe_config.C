@@ -130,21 +130,21 @@ fapi2::ReturnCode p10_setup_sbe_config(
                          "Error writing CBS Control/Status register (cfam)");
 
                 FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
-                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW,
+                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI,
                                                 l_read_scratch3_reg),
                          "Error reading Scratch Reg3 register");
                 l_read_scratch3_reg.setBit<6>();
                 FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
-                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW,
+                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI,
                                                 l_read_scratch3_reg),
                          "Error writing Scratch Reg3 register");
                 FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
-                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW,
+                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI,
                                                 l_read_scratch8_reg),
                          "Error reading Scratch Reg8 register");
                 l_read_scratch8_reg.setBit<2>();
                 FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
-                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW,
+                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI,
                                                 l_read_scratch8_reg),
                          "Error writing Scratch Reg8 register");
             }
