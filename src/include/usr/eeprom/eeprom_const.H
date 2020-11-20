@@ -61,6 +61,9 @@ enum EEPROM_ROLE
     WOF_DATA      = 4,  // WOF data from Backup SEEPROM
     LAST_CHIP_TYPE,
 
+    VPD_AUTO      = 6,  // Autoselect primary vs. backup (not a real role, only
+                        // used at the device driver layer)
+
     // Test-only eeprom_role
     // Keep after LAST_CHIP_TYPE so these are not cached/used in production code
     SPARE_TEST    = 10,

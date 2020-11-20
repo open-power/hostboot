@@ -1924,14 +1924,14 @@ errlHndl_t IpVpdFacade::fetchDataFromEeprom(uint64_t i_byteAddr,
     do
     {
         // Need to read directly from target's EEPROM.
-        TRACSSCOMP( g_trac_vpd, "IpVpdFacade::fetchDataFromEeprom -> deviceOp(DEVICE_EEPROM_ADDRESS(VPD_PRIMARY, %d, %d)",
+        TRACSSCOMP( g_trac_vpd, "IpVpdFacade::fetchDataFromEeprom -> deviceOp(DEVICE_EEPROM_ADDRESS(VPD_AUTO, %d, %d)",
           i_byteAddr, i_eepromSource );
         err = DeviceFW::deviceOp( DeviceFW::READ,
                                   i_target,
                                   o_data,
                                   i_numBytes,
                                   DEVICE_EEPROM_ADDRESS(
-                                      EEPROM::VPD_PRIMARY,
+                                      EEPROM::VPD_AUTO,
                                       i_byteAddr,
                                       i_eepromSource ) );
         if( err )
@@ -2397,7 +2397,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                       i_buffer,
                                       keywordSize,
                                       DEVICE_EEPROM_ADDRESS(
-                                          EEPROM::VPD_PRIMARY,
+                                          EEPROM::VPD_AUTO,
                                           i_offset+byteAddr,
                                           EEPROM::AUTOSELECT) );
             if( err )

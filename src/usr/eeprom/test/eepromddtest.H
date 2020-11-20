@@ -47,6 +47,8 @@
 #include <p10_sbe_spi_cmd.H>
 #include <p10_infrastruct_help.H>
 
+#include <memory>
+
 using namespace TARGETING;
 using namespace EEPROM;
 
@@ -57,6 +59,38 @@ extern trace_desc_t* g_trac_eeprom;
 
 class EEPROMTest: public CxxTest::TestSuite
 {
+    /* @brief Restore the EEPROM device driver VPD state attribute(s).
+     */
+    static void restoreMvpdState()
+    {
+        TargetHandleList procs;
+        getAllChips(procs, TYPE_PROC, true);
+
+        for (const auto proc : procs)
+        {
+            const uint8_t state = proc->getAttr<ATTR_SAVED_STATE_UINT8>();
+            proc->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(static_cast<ATTR_EEPROM_VPD_ACCESSIBILITY_type>(state));
+        }
+    }
+
+    /* @brief Preserve the state attribute(s) of the VPDs for the EEPROM device
+     *        driver, and return an object that will restore them when it goes
+     *        out of scope.
+     */
+    static auto saveMvpdState()
+    {
+        TargetHandleList procs;
+        getAllChips(procs, TYPE_PROC, true);
+
+        for (const auto proc : procs)
+        {
+            const uint8_t state = proc->getAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>();
+            proc->setAttr<ATTR_SAVED_STATE_UINT8>(state);
+        }
+
+        return hbstd::scope_exit(restoreMvpdState);
+    }
+
     public:
 
         void testEEPROMBoundaryWrite ( void )
@@ -115,6 +149,10 @@ class EEPROMTest: public CxxTest::TestSuite
             for (uint8_t i = 0; i < 3; ++i)
             {
                 uint64_t storedDataSize = TestDataSize;
+
+                {
+                const auto restore = saveMvpdState();
+
                 num_ops++;
                 // first read the bytes we are overwritting
                 err = deviceOp( DeviceFW::READ,
@@ -146,10 +184,14 @@ class EEPROMTest: public CxxTest::TestSuite
                     TS_FAIL("testEEPROMBoundaryWrite: TEST_ONE_OVER_LAST_PAGE read should fail");
                     fails++;
                 }
+                } // saveMvpdState
 
+                uint64_t testDataSize = TestDataSize;
+
+                {
+                const auto restore = saveMvpdState();
 
                 // overwrite the data
-                uint64_t testDataSize = TestDataSize;
                 num_ops++;
                 err = deviceOp( DeviceFW::WRITE,
                                 testTarget,
@@ -180,6 +222,7 @@ class EEPROMTest: public CxxTest::TestSuite
                     TS_FAIL("testEEPROMBoundaryWrite: TEST_ONE_OVER_LAST_PAGE write should fail");
                     fails++;
                 }
+                } // saveMvpdState
 
                 // read new updated data now
                 uint8_t updatedData[TestDataSize];
@@ -247,6 +290,7 @@ class EEPROMTest: public CxxTest::TestSuite
          */
         void testEEPROMReadWrite ( void )
         {
+            const auto restore = saveMvpdState();
 
             // Skipping EEPROM test altogether in VBU/VPO environment or in
             // Secure mode
@@ -684,6 +728,8 @@ class EEPROMTest: public CxxTest::TestSuite
          */
         void testEEPROMReadWriteLarge ( void )
         {
+            const auto restore = saveMvpdState();
+
             // Skipping EEPROM test altogether in VBU/VPO environment or in
             // Secure mode
             if( TARGETING::is_vpo() || SECUREBOOT::enabled() )
@@ -926,6 +972,8 @@ class EEPROMTest: public CxxTest::TestSuite
          */
         void testEEPROMInvalidOperation ( void )
         {
+            const auto restore = saveMvpdState();
+
             errlHndl_t err = NULL;
             int64_t fails = 0, num_ops = 0;
             uint64_t data = 0x0ull;
@@ -985,6 +1033,8 @@ class EEPROMTest: public CxxTest::TestSuite
          */
         void testEEPROMOverflow ( void )
         {
+            const auto restore = saveMvpdState();
+
             errlHndl_t err = NULL;
             int64_t fails = 0, num_ops = 0;
             uint64_t data = 0x0ull;
@@ -1050,6 +1100,8 @@ class EEPROMTest: public CxxTest::TestSuite
          */
         void testEEPROMInvalidChip ( void )
         {
+            const auto restore = saveMvpdState();
+
             errlHndl_t err = NULL;
             int64_t fails = 0, num_ops = 0;
             uint64_t data = 0x0ull;
@@ -1109,6 +1161,8 @@ class EEPROMTest: public CxxTest::TestSuite
          */
         void test_getEEPROMs( void )
         {
+            const auto restore = saveMvpdState();
+
             TS_INFO( ENTER_MRK"test_getEEPROMs" );
             std::list<EEPROM::EepromInfo_t> info;
             getEEPROMs( info );
@@ -1142,6 +1196,190 @@ class EEPROMTest: public CxxTest::TestSuite
             TS_INFO( EXIT_MRK"test_getEEPROMs" );
         }
 
+    static Target* getProcessorWithTwoGoodVpds()
+    {
+        TargetHandleList procs;
+        getAllChips(procs, TYPE_PROC, true);
+
+        for (const auto proc : procs)
+        {
+            if (proc->getAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>() == EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED)
+            {
+                return proc;
+            }
+        }
+
+        return nullptr;
+    }
+
+    static bool writeToVpd(Target* const i_target,
+                           const EEPROM_ROLE i_role,
+                           uint64_t i_data,
+                           EEPROM_SOURCE i_source = EEPROM::HARDWARE)
+    {
+        uint64_t data_size = sizeof(i_data);
+
+        errlHndl_t errl = deviceOp(DeviceFW::WRITE,
+                                   i_target,
+                                   &i_data,
+                                   data_size,
+                                   DEVICE_EEPROM_ADDRESS(i_role,
+                                                         0,
+                                                         i_source));
+
+        bool success = true;
+        if (errl)
+        {
+            errlCommit(errl, CXXTEST_COMP_ID);
+            success = false;
+        }
+
+        return success;
+    }
+
+    static bool readFromVpdCompare(Target* const i_target,
+                                   const EEPROM_ROLE i_role,
+                                   uint64_t i_data,
+                                   const EEPROM_SOURCE i_source = EEPROM::HARDWARE)
+    {
+        uint64_t data = 0;
+        uint64_t data_size = sizeof(i_data);
+        errlHndl_t errl = deviceOp(DeviceFW::READ,
+                                   i_target,
+                                   &data,
+                                   data_size,
+                                   DEVICE_EEPROM_ADDRESS(i_role,
+                                                         0,
+                                                         i_source));
+
+        bool success = true;
+        if (errl)
+        {
+            errlCommit(errl, CXXTEST_COMP_ID);
+            success = false;
+        }
+        else if (i_data != 0 && data != i_data)
+        {
+            TS_INFO("readFromVpdCompareHw: Read 0x%lx, expected 0x%lx", data, i_data);
+            success = false;
+        }
+
+        return success;
+    }
+
+    void setVpdAccessibility(Target* const i_proc, const uint64_t i_accessibility)
+    {
+        i_proc->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(static_cast<ATTR_EEPROM_VPD_ACCESSIBILITY_type>(i_accessibility));
+    }
+
+    void test_redundantVpdAccess()
+    {
+        TS_INFO( ENTER_MRK"test_redundantVpdAccess" );
+
+        const auto restore = saveMvpdState();
+
+        do
+        {
+
+        Target* const proc = getProcessorWithTwoGoodVpds();
+
+        if (!proc)
+        {
+            TS_FAIL("Can't find a processor with both good VPDs");
+            break;
+        }
+
+        const uint64_t testdata_primary = 0xabcd1234, testdata_backup = 0xffeeffee;
+
+#define VPDASSERT(X) if (!(X)) { TS_FAIL("test_redundantVpdAccess: %s failed, expected success on line %d", #X, __LINE__); }
+#define VPDASSERTFAIL(X) if (X) { TS_FAIL("test_redundantVpdAccess: %s succeeded, expected failure on line %d", #X, __LINE__); }
+
+        // Simple sanity check (for SPI buses etc.)
+        VPDASSERT(writeToVpd(proc, VPD_PRIMARY, testdata_primary, HARDWARE));
+        VPDASSERT(writeToVpd(proc, VPD_BACKUP, testdata_backup, HARDWARE));
+
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata_primary, HARDWARE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, testdata_backup, HARDWARE));
+
+        // The primary VPD is good, so make sure we read from that
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata_primary));
+
+        // Write the test data to cache, make sure it gets written to both
+        // EEPROMs as well
+        VPDASSERT(writeToVpd(proc, VPD_AUTO, testdata_primary, AUTOSELECT));
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata_primary, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata_primary, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, testdata_primary, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata_primary, HARDWARE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata_primary, HARDWARE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, testdata_primary, HARDWARE));
+
+        // Make back and primary inaccessible and make sure we fail on reads
+        // from hardware
+        setVpdAccessibility(proc, (EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED
+                                   | EEPROM_VPD_ACCESSIBILITY_SECONDARY_DISABLED));
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, 0, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, 0, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, 0, CACHE));
+        VPDASSERTFAIL(readFromVpdCompare(proc, VPD_AUTO, 0, HARDWARE));
+        VPDASSERTFAIL(readFromVpdCompare(proc, VPD_PRIMARY, 0, HARDWARE));
+        VPDASSERTFAIL(readFromVpdCompare(proc, VPD_BACKUP, 0, HARDWARE));
+
+        // Make the primary VPD inaccessible and ensure the data only gets
+        // written to the backup one through EECACHE
+        setVpdAccessibility(proc, EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED);
+        VPDASSERT(writeToVpd(proc, VPD_AUTO, testdata_backup, AUTOSELECT));
+        setVpdAccessibility(proc, EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED);
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata_backup, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata_backup, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, testdata_backup, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata_primary, HARDWARE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata_primary, HARDWARE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, testdata_backup, HARDWARE));
+
+        // Make the backup VPD inaccessible and ensure the data only gets
+        // written to the primary one through EECACHE
+        setVpdAccessibility(proc, EEPROM_VPD_ACCESSIBILITY_SECONDARY_DISABLED);
+        VPDASSERT(writeToVpd(proc, VPD_AUTO, testdata_primary, AUTOSELECT));
+        setVpdAccessibility(proc, EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED);
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata_primary, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata_primary, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, testdata_primary, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata_primary, HARDWARE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata_primary, HARDWARE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, testdata_backup, HARDWARE));
+
+        // Make the primary inaccessible and make sure we read from the backup
+        setVpdAccessibility(proc, EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED);
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata_backup));
+
+        // Make the secondary inaccessible and make sure we read from the primary
+        setVpdAccessibility(proc, EEPROM_VPD_ACCESSIBILITY_SECONDARY_DISABLED);
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata_primary));
+
+        // Disable everything and make sure everything fails
+        setVpdAccessibility(proc, (EEPROM_VPD_ACCESSIBILITY_CACHE_DISABLED
+                                   | EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED
+                                   | EEPROM_VPD_ACCESSIBILITY_SECONDARY_DISABLED));
+
+        VPDASSERTFAIL(writeToVpd(proc, VPD_AUTO, testdata_primary, CACHE));
+        VPDASSERTFAIL(writeToVpd(proc, VPD_PRIMARY, testdata_primary, CACHE));
+        VPDASSERTFAIL(writeToVpd(proc, VPD_BACKUP, testdata_primary, CACHE));
+        VPDASSERTFAIL(writeToVpd(proc, VPD_AUTO, testdata_primary, HARDWARE));
+        VPDASSERTFAIL(writeToVpd(proc, VPD_PRIMARY, testdata_primary, HARDWARE));
+        VPDASSERTFAIL(writeToVpd(proc, VPD_BACKUP, testdata_backup, HARDWARE));
+
+        VPDASSERTFAIL(readFromVpdCompare(proc, VPD_AUTO, testdata_primary, CACHE));
+        VPDASSERTFAIL(readFromVpdCompare(proc, VPD_PRIMARY, testdata_primary, CACHE));
+        VPDASSERTFAIL(readFromVpdCompare(proc, VPD_BACKUP, testdata_primary, CACHE));
+        VPDASSERTFAIL(readFromVpdCompare(proc, VPD_AUTO, testdata_primary, HARDWARE));
+        VPDASSERTFAIL(readFromVpdCompare(proc, VPD_PRIMARY, testdata_primary, HARDWARE));
+        VPDASSERTFAIL(readFromVpdCompare(proc, VPD_BACKUP, testdata_backup, HARDWARE));
+
+        } while(false);
+
+        TS_INFO( EXIT_MRK"test_redundantVpdAccess" );
+    }
 };
 
 #endif

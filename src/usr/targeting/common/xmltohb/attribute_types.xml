@@ -1331,6 +1331,50 @@
   </attribute>
 
   <attribute>
+    <id>EEPROM_VPD_ACCESSIBILITY</id>
+    <description>
+      A bitmask value indicating whether an error has previously
+      occurred on an access to the primary or secondary VPDs for this
+      target. Adding this attribute to a target indicates the
+      existence of redundant VPD for this target.
+    </description>
+    <simpleType>
+      <enumeration>
+        <id>EEPROM_VPD_ACCESSIBILITY</id>
+        <default>NONE_DISABLED</default>
+      </enumeration>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <default>NONE_DISABLED</default>
+    <description>
+      Enumeration indicating which VPDs are disabled on a
+      target. These values can be OR-ed together to make a bitmask.
+    </description>
+    <enumerator>
+      <name>NONE_DISABLED</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>CACHE_DISABLED</name>
+      <value>0x01</value>
+    </enumerator>
+    <enumerator>
+      <name>PRIMARY_DISABLED</name>
+      <value>0x02</value>
+    </enumerator>
+    <enumerator>
+      <name>SECONDARY_DISABLED</name>
+      <value>0x04</value>
+    </enumerator>
+    <id>EEPROM_VPD_ACCESSIBILITY</id>
+  </enumerationType>
+
+  <attribute>
     <complexType>
       <description>Structure to define the addressing for an attached I2C
           eeprom device that contains secondary VPD info.

@@ -160,7 +160,8 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
         // eepromRecordHeader is constructed.
 
         if ((io_eepromInfo.eepromRole == VPD_PRIMARY) ||
-            (io_eepromInfo.eepromRole == VPD_BACKUP))
+            (io_eepromInfo.eepromRole == VPD_BACKUP) ||
+            (io_eepromInfo.eepromRole == VPD_AUTO))
         {
             // This record is the master record for this eeprom
             o_eepromRecordHeader.completeRecord.master_eeprom = 1;
@@ -174,7 +175,7 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                                 TARGETING::Target * i_target,
                                 void *  io_buffer,
                                 size_t& io_buflen,
-                                eeprom_addr_t &i_eepromInfo)
+                                eeprom_addr_t i_eepromInfo)
 {
     errlHndl_t l_errl = nullptr;
     eepromRecordHeader l_eepromRecordHeader;
@@ -183,6 +184,12 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
 
         TRACSSCOMP( g_trac_eeprom, ENTER_MRK"eepromPerformOpCache() "
                     "Target HUID 0x%.08X Enter", TARGETING::get_huid(i_target));
+
+        if (i_eepromInfo.eepromRole == VPD_BACKUP)
+        { // Route backup VPD operations to the primary EECACHE entry, because
+          // the primary and backup VPD share the same EECACHE entry.
+            i_eepromInfo.eepromRole = VPD_PRIMARY;
+        }
 
         l_errl = buildEepromRecordHeader(i_target,
                                          i_eepromInfo,

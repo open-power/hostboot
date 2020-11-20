@@ -565,7 +565,7 @@ errlHndl_t spdFetchData ( uint64_t              i_byteAddr,
                                       o_data,
                                       i_numBytes,
                                       DEVICE_EEPROM_ADDRESS(
-                                          EEPROM::VPD_PRIMARY,
+                                          EEPROM::VPD_AUTO,
                                           i_byteAddr,
                                           i_eepromSource));
             if( err )
@@ -650,7 +650,7 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
                                           i_data,
                                           i_numBytes,
                                           DEVICE_EEPROM_ADDRESS(
-                                              EEPROM::VPD_PRIMARY,
+                                              EEPROM::VPD_AUTO,
                                               i_offset,
                                               EEPROM::AUTOSELECT) );
                 if( err )

@@ -675,6 +675,9 @@
       <id>EECACHE_VPD_STATE</id>
     </attribute>
     <attribute>
+      <id>EEPROM_VPD_ACCESSIBILITY</id>
+    </attribute>
+    <attribute>
       <id>FABRIC_CHIP_ID</id>
     </attribute>
     <attribute>

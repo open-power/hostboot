@@ -329,6 +329,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
     {
         switch (io_eepromAddr.eepromRole )
         {
+            case VPD_AUTO:
             case VPD_PRIMARY:
                 if( i_target->
                     tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>
@@ -430,6 +431,11 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                 err->collectTrace( EEPROM_COMP_NAME );
 
                 break;
+        }
+
+        if (err)
+        {
+            break;
         }
 
         // Check if Attribute Data was found
@@ -843,6 +849,9 @@ void add_to_list( std::list<EepromInfo_t>& io_list,
                 }
                 break;
 
+            case VPD_AUTO:
+                assert(false, "add_to_list: Unexpected eep_type VPD_AUTO");
+
             case SBE_PRIMARY:
                 if (
                   i_targ->tryGetAttr<TARGETING::ATTR_SPI_SBE_BOOT_CODE_PRIMARY_INFO>
@@ -1085,15 +1094,16 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
          i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>
           (spiEepromData) )
     {
-        TRACFCOMP(g_trac_eeprom, "Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_PRIMARY, target present = %d , eeprom type = %d",
-                  TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_PRIMARY));
+        TRACFCOMP(g_trac_eeprom, "Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, target present = %d , eeprom type = %d",
+                  TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
+
         void * empty_buffer = nullptr;
         size_t empty_size = 0;
         errl = deviceRead(i_target, empty_buffer, empty_size,
-                        DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_PRIMARY));
+                        DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
         if (errl != nullptr)
         {
-            TRACFCOMP(g_trac_eeprom,"pTarget %.8X - failed reading primary VPD eeprom",
+            TRACFCOMP(g_trac_eeprom,"pTarget %.8X - failed reading VPD eeprom",
                 i_target->getAttr<TARGETING::ATTR_HUID>());
             errlCommit(errl, EEPROM_COMP_ID);
         }
@@ -1112,15 +1122,15 @@ errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
          i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>
           (spiEepromData) )
     {
-        TRACFCOMP(g_trac_eeprom, "Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_PRIMARY, target present = %d , eeprom type = %d",
-                  TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_PRIMARY));
+        TRACFCOMP(g_trac_eeprom, "Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, target present = %d , eeprom type = %d",
+                  TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
 
         size_t eeprom_data_size = i_eeprom_data.size();
         errl = deviceRead(i_target,
                           const_cast<uint8_t *>(i_eeprom_data.data()),
                           eeprom_data_size,
                           DEVICE_CACHE_EEPROM_ADDRESS(i_present,
-                                                      EEPROM::VPD_PRIMARY));
+                                                      EEPROM::VPD_AUTO));
     }
 
     return errl;

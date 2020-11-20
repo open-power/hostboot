@@ -65,7 +65,7 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                                 TARGETING::Target * i_target,
                                 void * io_buffer,
                                 size_t & io_buflen,
-                                eeprom_addr_t &i_eepromInfo);
+                                eeprom_addr_t i_eepromInfo);
 
 /**
 *

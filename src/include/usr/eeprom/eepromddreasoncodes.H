@@ -108,6 +108,8 @@ enum eepromReasonCode
 
     // Error occured while trying to flush the MMIO page out.
     EEPROM_FAILED_TO_FLUSH_PAGE             = EEPROM_COMP_ID | 0x15,
+    EEPROM_NO_FUNCTIONAL_EEPROM             = EEPROM_COMP_ID | 0x16,   // Couldn't find an EEPROM source to operate on.
+    EEPROM_INVALID_OFFSET                   = EEPROM_COMP_ID | 0x17,   // Tried to access an EEPROM beyond the end.
 };
 
 enum UserDetailsTypes

@@ -1,0 +1,91 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/eeprom/README $                                       */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+# EEPROM module
+
+## Redundant Module VPD Support
+
+POWER processors are equipped with several redundant EEPROM sections,
+and in particular, redundant Module VPD sections. For P9 and before,
+accesses to Module VPD EEPROM sections, along with failover to
+redundant parts, were done by the service processor.
+
+For P10, Hostboot is required to perform its own accesses to these
+EEPROM sections, and support redundant hardware. This support is
+currently implemented at the EEPROM Device Driver (DD) level by means
+of a table which specifies how a single "virtual" EEPROM access (read
+or write) should be decomposed into one or more "physical" EEPROM
+accesses.
+
+### Physical and Virtual EEPROM Devices
+
+To perform an EEPROM operation through the Device Driver, the caller
+must specify the EEPROM device they want to access, along with other
+parameters. This EEPROM device is defined by a pair of enumeration
+values: (1) the EEPROM "role" (that is, primary VPD, backup VPD, WOF
+data, etc.), and (2) the EEPROM "source" (EECACHE, hardware).
+
+For the purposes of this document, the Driver supports accesses to
+what can be conceptualized as two kinds of EEPROM devices: "physical"
+and "virtual." Physical data sources exist in memory or on SEEPROM
+hardware as storage of actual data, and are designated by using both a
+physical EEPROM role, like "VPD_PRIMARY" and a physical EEPROM source,
+like "HARDWARE."
+
+Virtual devices refer to one or more physical devices, such that
+accessing a virtual device may access one or more physical devices. A
+virtual device is designated by using either a virtual role or a
+virtual source. The Driver supports one virtual role, which is the
+"auto" VPD role. The Driver supports two virtual sources, which are
+the "cache" and the "autoselect" sources. (The "cache" source is
+unusual in that it meets the definition for a virtual source and also
+a physical source, since e.g. writes to VPD cache will be mapped to
+both to cache and hardware by the translation process).
+
+The Device Driver translates virtual accesses into physical accesses
+using a table of rules, each entry containing a role/source pattern
+and a set of operations. At the beginning of an EEPROM operation, the
+Driver will search the table to check whether a rule in the table
+matches the access being performed. If so, the dispatcher will execute
+the operations specified by the rule. If not, the access is performed
+as-is. Only the first matching rule is executed. The operations
+specified by a rule in the table will also be checked in the table.
+
+### Hardware Failure Tolerance
+
+When performing EEPROM operations, the Device Driver consults an
+attribute called ATTR_EEPROM_VPD_ACCESSIBILITY which may exist on the
+target being accessed. The attribute is a bitmask which specifies
+which EEPROM devices have malfunctioned. If a bit is set in the
+bitmask, the Driver will not attempt to access the corresponding
+device until a re-IPL resets the value of the attribute. When an
+operation fails, the Driver will update the bitmask on the target.
+Note that the device representing the EECACHE entry is treated no
+differently than a SEEPROM.
+
+An EEPROM access fails when none of the attempted accesses to physical
+EEPROM devices succeed. This can happen because one or more accesses
+fail, or because no accesses were attempted (i.e. all devices had
+failed before and were masked in the accessibility attribute).

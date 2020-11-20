@@ -302,8 +302,8 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
     // partition, so we need to read less than the full size of MVPD. We're
     // reading 8 bytes less because SPI reading logic rounds the sizes up to
     // 8 bytes.
-    if(i_eepromType == EEPROM::VPD_PRIMARY &&
-       i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC)
+    if((i_eepromType == EEPROM::VPD_PRIMARY || i_eepromType == EEPROM::VPD_AUTO)
+       && i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC)
     {
         l_eepromLen = l_eepromLen - 8;
     }
@@ -2010,7 +2010,10 @@ errlHndl_t isEepromInSync(TARGETING::Target * i_target,
         // eeprom record. (target must be present to cache)
         T::EEPROM_CONTENT_TYPE l_eepromContentType = T::EEPROM_CONTENT_TYPE_RAW;
 
-        if (i_eepromType == EEPROM::VPD_PRIMARY)
+        // Primary and backup MVPDs share the same EECACHE entry
+        if (i_eepromType == EEPROM::VPD_PRIMARY
+            || i_eepromType == EEPROM::VPD_BACKUP
+            || i_eepromType == EEPROM::VPD_AUTO)
         {
             if (i_eepromRecordHeader.completeRecord.accessType ==
                 EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C )
@@ -2026,28 +2029,6 @@ errlHndl_t isEepromInSync(TARGETING::Target * i_target,
             {
                 auto l_spiEepromVpd =
                     i_target->getAttr<T::ATTR_SPI_MVPD_PRIMARY_INFO>();
-
-                l_eepromContentType =
-                    static_cast<T::EEPROM_CONTENT_TYPE>(
-                            l_spiEepromVpd.eepromContentType);
-            }
-        }
-        else if (i_eepromType == EEPROM::VPD_BACKUP)
-        {
-            if (i_eepromRecordHeader.completeRecord.accessType ==
-                EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C )
-            {
-                auto l_eepromVpd =
-                   i_target->getAttr<T::ATTR_EEPROM_VPD_BACKUP_INFO>();
-
-                l_eepromContentType =
-                   static_cast<T::EEPROM_CONTENT_TYPE>(
-                           l_eepromVpd.eepromContentType);
-            }
-            else
-            {
-                auto l_spiEepromVpd =
-                    i_target->getAttr<T::ATTR_SPI_MVPD_BACKUP_INFO>();
 
                 l_eepromContentType =
                     static_cast<T::EEPROM_CONTENT_TYPE>(

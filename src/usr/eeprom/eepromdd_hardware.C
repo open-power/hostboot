@@ -32,6 +32,7 @@
 #include <eeprom/eepromddreasoncodes.H>
 #include <errl/errludstring.H>
 #include <errl/errludtarget.H>
+#include <util/misc.H>
 
 extern trace_desc_t* g_trac_eeprom;
 
@@ -81,11 +82,41 @@ errlHndl_t eepromPerformSpiOpHW( DeviceFW::OperationType i_opType,
         }
 
         // Verify not operating outside of eeprom role's defined data area
-        assert((io_spiInfo.offset + io_buflen) <= (io_spiInfo.devSize_KB * KILOBYTE),
-            "eepromPerformSpiOpHW(): offset %lld + %lld byte length is outside"
-            " %lld KB max boundary of 0x%08X target with %lld role",
-            io_spiInfo.offset, io_buflen, io_spiInfo.devSize_KB,
-            TARGETING::get_huid(i_target), io_spiInfo.eepromRole);
+        if ((io_spiInfo.offset + io_buflen) > (io_spiInfo.devSize_KB * KILOBYTE))
+        {
+            TRACFCOMP( g_trac_eeprom,
+                       "eepromPerformSpiOpHW(): offset %lld + %lld byte length is outside"
+                       " %lld KB max boundary of 0x%08X target with %lld role",
+                       io_spiInfo.offset, io_buflen, io_spiInfo.devSize_KB,
+                       TARGETING::get_huid(i_target), io_spiInfo.eepromRole);
+
+            /*@
+             * @errortype
+             * @reasoncode       EEPROM_INVALID_OFFSET
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @moduleid         EEPROM_PERFORM_SPI_OP
+             * @userdata1[0:31]  Operation offset
+             * @userdata1[32:47] Operation type (0 = read, 1 = write)
+             * @userdata1[48:63] Operation length in KB (rounded down)
+             * @userdata2[0:15]  Device size in KB
+             * @userdata2[16:31] SPI engine
+             * @userdata2[32:63] Target HUID
+             * @devdesc          Invalid offset in SPI operation
+             * @custdesc         A problem occurred during the IPL of the system.
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          EEPROM_PERFORM_SPI_OP,
+                                          EEPROM_INVALID_OFFSET,
+                                          TWO_UINT32_TO_UINT64(io_spiInfo.offset,
+                                                               TWO_UINT16_TO_UINT32(i_opType,
+                                                                                    io_buflen / KILOBYTE)),
+                                          TWO_UINT32_TO_UINT64(TWO_UINT16_TO_UINT32(io_spiInfo.devSize_KB,
+                                                                                    io_spiInfo.accessAddr.spi_addr.engine),
+                                                               TARGETING::get_huid(i_target)),
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            break;
+        }
 
         if ( i_opType == DeviceFW::READ )
         {
@@ -96,10 +127,9 @@ errlHndl_t eepromPerformSpiOpHW( DeviceFW::OperationType i_opType,
         }
         else if ( i_opType == DeviceFW::WRITE )
         {
-            //@TODO-RTC:250100-Enable Enterprise VPD ECC
-            // Need to skip writes to the actual SEEPROM until we have the
-            //  ECC algorithm in place or we'll corrupt the data
-            if( io_spiInfo.eepromRole == VPD_PRIMARY )
+            if( !Util::isSimicsRunning() &&
+                (io_spiInfo.eepromRole == VPD_PRIMARY
+                 || io_spiInfo.eepromRole == VPD_BACKUP) )
             {
                 TRACFCOMP( g_trac_eeprom,"Skipping EEPROM write for module vpd" );
                 break;
@@ -417,31 +447,32 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
                              TARGETING::Target * i_target,
                              void * io_buffer,
                              size_t & io_buflen,
-                             eeprom_addr_t & io_eepromInfo)
+                             eeprom_addr_t i_eepromInfo)
 {
     errlHndl_t err = nullptr;
+
     do
     {
         // Read Attributes needed to complete the operation
         err = eepromReadAttributes( i_target,
-                                    io_eepromInfo );
+                                    i_eepromInfo );
         if( err )
         {
             TRACFCOMP( g_trac_eeprom,
                 ERR_MRK"eepromPerformOpHW(): Unable to read %d role eeprom "
                 "attributes so cannot do %d operation for target 0x%.8X",
-                io_eepromInfo.eepromRole, i_opType,
+                i_eepromInfo.eepromRole, i_opType,
                 TARGETING::get_huid(i_target) );
             break;
         }
 
-        if (io_eepromInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
+        if (i_eepromInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
         {
-            err = eepromPerformI2cOpHW(i_opType, i_target, io_buffer, io_buflen, io_eepromInfo);
+            err = eepromPerformI2cOpHW(i_opType, i_target, io_buffer, io_buflen, i_eepromInfo);
         }
-        else if (io_eepromInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_SPI)
+        else if (i_eepromInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_SPI)
         {
-            err = eepromPerformSpiOpHW(i_opType, i_target, io_buffer, io_buflen, io_eepromInfo);
+            err = eepromPerformSpiOpHW(i_opType, i_target, io_buffer, io_buflen, i_eepromInfo);
         }
         else
         {
@@ -449,7 +480,7 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
             TRACFCOMP( g_trac_eeprom,
                        ERR_MRK"eepromPerformOpHW(): Unknown accessMethod %d so "
                        "cannot do %d operation for target 0x%.8X",
-                       io_eepromInfo.accessMethod, i_opType,
+                       i_eepromInfo.accessMethod, i_opType,
                        TARGETING::get_huid(i_target) );
             /*@
              * @errortype
@@ -469,7 +500,7 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
                                            EEPROM_INVALID_ACCESS_METHOD,
                                            TWO_UINT32_TO_UINT64(
                                               TARGETING::get_huid(i_target),
-                                              io_eepromInfo.accessMethod ),
+                                              i_eepromInfo.accessMethod ),
                                            i_opType,
                                            true /*Add HB SW Callout*/ );
             err->collectTrace( EEPROM_COMP_NAME );

@@ -711,15 +711,15 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
                            (sizeof(uint16_t)*numRecords) *  //size val of all recs
                            i_num *2 +//total kwd name size
                            i_num * sizeof(uint8_t); //separator between kwds
-        HDAT_DBG("actual totSize=%d",totSize);                   
+        HDAT_DBG("actual totSize=%d",totSize);
         ////////
         size_t remSize = totSize % 4  + 32;
         totSize += remSize; //Phyp needs a stanza of 0s at the end
         HDAT_DBG("after adding an extra stanza totSize=%d",totSize);
-        ////////                   
+        ////////
         o_kwdSize = totSize;
 
-        o_kwd = new char[totSize](); 
+        o_kwd = new char[totSize]();
         HDAT_DBG("vini kwd Size=0x%x, numViniKwds=0x%x",viniSize,numViniKwds);
         uint16_t tmpVINISize = viniSize + numViniKwds * 1 + numViniKwds * 2;
         HDAT_DBG("VINI SIZE=0x%x",tmpVINISize);
@@ -794,13 +794,13 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
                      memcpy(reinterpret_cast<void *>(o_kwd + loc+1),&l_startTag,
                                                             sizeof(l_startTag));
                      HDAT_DBG("lxSize=0x%x, numLXKwds=0x%x",lxSize,numLXKwds);
-                     uint16_t tmpLxSize = lxSize + numLXKwds * 1 + 
+                     uint16_t tmpLxSize = lxSize + numLXKwds * 1 +
                                                                  numLXKwds * 2;
                      HDAT_DBG("LX SIZE=0x%x",tmpLxSize);
                      tmpSize = UINT16_IN_LITTLE_ENDIAN(tmpLxSize);
                      memcpy(reinterpret_cast<void *>(o_kwd + loc+2),
                                                      &tmpSize,sizeof(tmpSize));
-                     loc += sizeof(l_startTag) *2 + sizeof(tmpSize); 
+                     loc += sizeof(l_startTag) *2 + sizeof(tmpSize);
                 }
                 memcpy(reinterpret_cast<void *>(o_kwd + loc),
                                             &i_Keywords[curCmd].keywordName, 2);
@@ -1648,7 +1648,7 @@ errlHndl_t hdatGetFullEepromVpd(TARGETING::Target * i_target,
                         i_target,
                         o_data,
                         io_dataSize,
-                        DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                        DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
                                               0,
                                               EEPROM::AUTOSELECT));
         if(err)

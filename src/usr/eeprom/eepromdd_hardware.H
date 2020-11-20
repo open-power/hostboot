@@ -58,7 +58,7 @@ namespace EEPROM
 *       OUTPUT: Length of buffer that was written, or length of buffer
 *           to be read from target device.
 *
-* @param [in/out] io_eepromInfo struct containing information needed to perform
+* @param [in] i_eepromInfo struct containing information needed to perform
 *        operation on the given eeprom. NOTE It is expected that
 *        eepromRole and offset have been filled out in this struct
 *        prior to passing it into this function
@@ -73,7 +73,7 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
                              TARGETING::Target * i_target,
                              void * io_buffer,
                              size_t & io_buflen,
-                             eeprom_addr_t & io_eepromInfo) ;
+                             eeprom_addr_t i_eepromInfo) ;
 
 /**
  *
