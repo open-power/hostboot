@@ -762,7 +762,7 @@ void* host_discover_targets( void *io_pArgs )
                                                 l_type,
                                                 l_val>>32, l_val&0xFFFFFFFF);
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-        CONSOLE::displayf("HWAS", "PRESENT> %s[%.2X]=%.8X%.8X",
+        CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "PRESENT> %s[%.2X]=%.8X%.8X",
                 l_epath.pathElementTypeAsString(itr->first),
                                                 l_type,
                                                 l_val>>32,

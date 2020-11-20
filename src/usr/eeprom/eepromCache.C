@@ -317,7 +317,7 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
 
     do {
         l_pathstring = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
-        CONSOLE::displayf(NULL,"Detected new part : %.8X (%s)",
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL,"Detected new part : %.8X (%s)",
                           TARGETING::get_huid(i_target),
                           l_pathstring);
 
@@ -750,7 +750,7 @@ errlHndl_t checkForEecacheEntryUpdate(
         else
         {
             char* l_pathstring = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
-            CONSOLE::displayf(NULL,"Detected part removal : %.8X (%s)",
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL,"Detected part removal : %.8X (%s)",
                               TARGETING::get_huid(i_target),
                               l_pathstring);
             free(l_pathstring);
@@ -1090,7 +1090,7 @@ errlHndl_t findEepromHeaderInPnorEecache(
                 errlCommit(l_errl, EEPROM_COMP_ID);
 
 #ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(EEPROM_COMP_NAME,
+                CONSOLE::displayf(CONSOLE::DEFAULT, EEPROM_COMP_NAME,
                         "New EEPROM size detected for an existing part,"
                         "clearing EEPROM cache and performing reconfig loop");
 #endif

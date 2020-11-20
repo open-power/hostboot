@@ -50,7 +50,7 @@ namespace CONSOLE
 {
 // Compile getUartInfo regardless of CONFIG_CONSOLE
 #ifdef CONFIG_CONSOLE
-    void Uart::initialize()
+    void Uart::initialize(const uartId_t i_handle)
     {
         using namespace UARTREGS;
 
@@ -60,6 +60,19 @@ namespace CONSOLE
         {
             // Check for failure from superclass initalize call.
             if (iv_failed) { break; }
+
+            if( i_handle == VUART1)
+            {
+                iv_base = g_vuart1Base;
+                iv_baud = g_vuart1Baud;
+                iv_clock = g_vuart1Clock;
+            }
+            else
+            {
+                iv_base = g_vuart2Base;
+                iv_baud = g_vuart2Baud;
+                iv_clock = g_vuart2Clock;
+            }
 
             // Clear line control reg.
             l_errl = writeReg(LCR, 0x00);
@@ -85,9 +98,8 @@ namespace CONSOLE
             l_errl = writeReg(IER, 0);
             if (l_errl) { break; }
 
-
             // Set baud rate.
-            uint64_t divisor = (g_vuart1Clock / 16) / g_vuart1Baud;
+            uint64_t divisor = (iv_clock / 16) / iv_baud;
             l_errl = writeReg(LCR, LCR_DLAB);
             if (l_errl) { break; }
             l_errl = writeReg(DLL, divisor & 0xff);
@@ -107,17 +119,17 @@ namespace CONSOLE
             l_errl = writeReg(FCR, FCR_ENF | FCR_CLFR | FCR_CLFT);
             if (l_errl) { break; }
 
-            // Found device.
-            printk("UART: Device initialized.\n");
             iv_initialized = true;
-
-        } while(0);
+            // Found device.
+            printk("UART%d: Device initialized.\n", i_handle);
+        }while(0);
 
         if (l_errl)
         {
             iv_failed = true;
             errlCommit(l_errl, CONSOLE_COMP_ID);
         }
+
     }
 
     void Uart::putc(char c)
@@ -226,7 +238,7 @@ namespace CONSOLE
                            &i_byte,
                            len,
                            DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                              i_addr + g_vuart1Base));
+                                              i_addr + iv_base));
     }
 
     errlHndl_t Uart::readReg(uint64_t i_addr, uint8_t& o_byte)
@@ -236,10 +248,9 @@ namespace CONSOLE
                           static_cast<uint8_t*>(&o_byte),
                           len,
                           DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                             i_addr + g_vuart1Base));
+                                             i_addr + iv_base));
     }
 
-    Uart* Uart::g_device = NULL;
 #endif
     /**
      * Retrieve some information about a UART and the connection

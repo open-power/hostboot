@@ -250,7 +250,7 @@ errlHndl_t AST2400BootConfig::readAndProcessBootConfig()
                     " 0x%x!=0x%x", register_data, BOOT_FLAGS_VERSION_1 );
 
 #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(NULL, "Ignoring boot flags, incorrect version 0x%x", register_data);
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Ignoring boot flags, incorrect version 0x%x", register_data);
             CONSOLE::flush();
 #endif
 

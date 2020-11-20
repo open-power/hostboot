@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -36,30 +36,30 @@ namespace CONSOLE
 {
     msg_q_t g_msgq = msg_q_create();
 
-    void display(const char* str)
+    void display(const uartId_t id, const char* str)
     {
         timespec_t time;
         clock_gettime(CLOCK_MONOTONIC, &time);
 
         msg_t* msg = msg_allocate();
-        msg->type = DISPLAY;
+        msg->type = id;
         msg->data[0] = time.tv_sec;
         msg->data[1] = time.tv_nsec;
         msg->extra_data = strdup(str);
         msg_send(g_msgq, msg);
     }
 
-    void displayf(const char* header, const char* format, ...)
+    void displayf(const uartId_t id, const char* header, const char* format, ...)
     {
         va_list args;
         va_start(args, format);
 
-        vdisplayf(header, format, args);
+        vdisplayf(id, header, format, args);
 
         va_end(args);
     }
 
-    void vdisplayf(const char* header, const char* format, va_list args)
+    void vdisplayf(const uartId_t id, const char* header, const char* format, va_list args)
     {
         using Util::vasprintf;
 
@@ -97,7 +97,7 @@ namespace CONSOLE
 
         if (b.str.size())
         {
-            display(&b.str[0]);
+            display(id, &b.str[0]);
         }
     }
 

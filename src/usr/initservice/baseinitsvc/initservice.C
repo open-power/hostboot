@@ -892,7 +892,7 @@ void InitService::_doShutdown(uint64_t i_status,
         (SBE::SBE_UPDATE_REQUEST_REIPL != i_status) &&
         (SHUTDOWN_NOT_RECONFIG_LOOP != i_status))
     {
-        CONSOLE::displayf(NULL, "System shutting down with error status 0x%X",
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "System shutting down with error status 0x%X",
                          i_status);
         if(Util::isConsoleStarted())
         {

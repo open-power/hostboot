@@ -543,7 +543,7 @@ void ErrlManager::errlogMsgHndlr ()
                     iv_isErrlDisplayEnabled = true;
                     if(!iv_errlList.empty())
                     {
-                        CONSOLE::displayf("ERRL",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, "ERRL",
                         "Dumping errors reported prior to registration");
                     }
                     // Display errlogs to errldisplay

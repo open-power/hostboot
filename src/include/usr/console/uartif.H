@@ -34,6 +34,7 @@
 #ifndef __CONSOLE_UARTIF_H
 #define __CONSOLE_UARTIF_H
 
+#include <stdint.h>
 #include <stdarg.h>
 
 namespace CONSOLE
@@ -58,7 +59,10 @@ namespace CONSOLE
 enum uartId_t: uint8_t
 {
     VUART1 = 0,
-    VUART2 = 1
+    VUART2 = 1,
+    NUM_VUARTS,
+    DEFAULT = VUART1,
+    DEBUG = VUART2
 };
 
 /**

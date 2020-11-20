@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -39,8 +39,10 @@ namespace CONSOLE
 {
     extern msg_q_t g_msgq;
 
+    std::array<Uart*, NUM_VUARTS> devices{};
+
     /* Display characters one at a time from string. */
-    void _display(const char* str)
+    void _display(const char* str, const uartId_t id)
     {
 
         while(*str)
@@ -48,10 +50,10 @@ namespace CONSOLE
             // UART uses DOS-style new lines. "\r\n"
             if (*str == '\n')
             {
-                Uart::g_device->putc('\r');
+                devices[id]->putc('\r');
             }
 
-            Uart::g_device->putc(*str);
+            devices[id]->putc(*str);
 
             str++;
         }
@@ -64,13 +66,10 @@ namespace CONSOLE
         INITSERVICE::registerShutdownEvent(CONSOLE_COMP_ID, g_msgq, SYNC,
                                            INITSERVICE::CONSOLE_PRIORITY);
 
-        // Create a default output UART device if there isn't already one.
-        //    - Some devices are registered via the CONSOLE_UART_DEFINE_DEVICE
-        //      macro and therefore don't need this.
-        if (NULL == Uart::g_device)
+        for(uint8_t device_id = VUART1; device_id < NUM_VUARTS; device_id++)
         {
-            Uart::g_device = new Uart();
-            Uart::g_device->initialize();
+            devices[device_id] = new Uart();
+            devices[device_id]->initialize(static_cast<uartId_t>(device_id));
         }
 
         Util::setIsConsoleStarted();
@@ -78,17 +77,23 @@ namespace CONSOLE
         // Display a banner denoting the hostboot version
         char banner[256];
         snprintf(banner, sizeof(banner),
-                 "\n\n--== Welcome to Hostboot %s ==--\n\n",
+                 "\n\n--== Welcome to Hostboot %s Boot Status (VUART1) ==--\n\n",
                  hbi_ImageId);
-        _display(banner);
+        _display(banner, VUART1);
+        snprintf(banner, sizeof(banner),
+                 "\n\n--== Welcome to Hostboot %s Debug Trace (VUART2) ==--\n\n",
+                 hbi_ImageId);
+        _display(banner, VUART2);
 
         while(1)
         {
             msg_t* msg = msg_wait(g_msgq);
-
+            uartId_t id = DEBUG;
             switch (msg->type)
             {
-                case DISPLAY:
+                case DISPLAY_DEFAULT:
+                    id = DEFAULT;
+                case DISPLAY_DEBUG:
                 {
                     if (NULL != msg->extra_data)
                     {
@@ -97,16 +102,17 @@ namespace CONSOLE
                                 msg->data[0],
                                     // 5 Digits worth of ns.
                                 (msg->data[1]*100000)/NS_PER_SEC);
-                        _display(timestamp);
 
-                        _display(
-                            static_cast<const char*>(msg->extra_data));
+                        _display(timestamp,
+                                 id);
+
+                        _display(static_cast<const char*>(msg->extra_data),
+                                 id);
                         free(msg->extra_data);
                     }
                     msg_free(msg);
                     break;
                 }
-
                 case SYNC:
                 {
                     msg_respond(g_msgq, msg);

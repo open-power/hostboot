@@ -35,6 +35,7 @@
 #define __CONSOLE_UART_H
 
 #include <errl/errlentry.H>
+#include <console/uartif.H>
 
 namespace CONSOLE
 {
@@ -144,13 +145,14 @@ namespace CONSOLE
             //virtual void getc(char& c);
 
             /** Perform UART-specific initialization. */
-            virtual void initialize();
+            virtual void initialize(const uartId_t i_handle);
 
-            /** Pointer to console UART singleton.
-             *
-             *  Should be initalized using the CONSOLE_UART_DEFINE_DEVICE macro.
-             */
-            static Uart* g_device;
+            /** Offsets to key registers for the UART device.
+                See uartconfig.C. */
+            uint64_t iv_base;
+            uint64_t iv_baud;
+            uint64_t iv_clock;
+
 
         protected:
 
@@ -170,7 +172,7 @@ namespace CONSOLE
             Uart& operator=(const Uart&);
     };
 
-        // Static configuration constants.  See uartconfig.C.
+    // Static configuration constants.  See uartconfig.C.
     extern const uint64_t g_vuart1Base;
     extern const uint64_t g_vuart1Baud;
     extern const uint64_t g_vuart1Clock;

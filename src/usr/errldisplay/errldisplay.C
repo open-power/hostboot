@@ -196,7 +196,7 @@ void displayCalloutTarget (uint8_t * epRaw, size_t& o_size)
         }
     }
 
-    CONSOLE::displayf(NULL, "  Target                   : %s", ep_str);
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Target                   : %s", ep_str);
     free(tmp_str);
 }
 
@@ -207,7 +207,7 @@ void ErrLogDisplay::displayPrdf (uint64_t i_ud1, uint64_t i_ud2)
     uint32_t l_huid = i_ud1 >> 32;
     uint32_t l_sig = i_ud2 >> 32;
 
-    CONSOLE::displayf(NULL, "  PRD Signature            : 0x%X 0x%X",
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  PRD Signature            : 0x%X 0x%X",
                       l_huid, l_sig);
 
 #ifdef CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY
@@ -231,12 +231,12 @@ void ErrLogDisplay::displayPrdf (uint64_t i_ud1, uint64_t i_ud2)
 
         if(l_nameStr)
         {
-            CONSOLE::displayf(NULL, "  Signature Description    : %s (%s) %s",
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Signature Description    : %s (%s) %s",
                               l_fapiStr, l_nameStr, l_descStr);
         }
         else
         {
-            CONSOLE::displayf(NULL, "  Signature Description    : %s UNKNOWN",
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Signature Description    : %s UNKNOWN",
                               l_fapiStr);
         }
     }
@@ -246,7 +246,7 @@ void ErrLogDisplay::displayPrdf (uint64_t i_ud1, uint64_t i_ud2)
 
 void ErrLogDisplay::displayCallout (void *data, size_t size)
 {
-    CONSOLE::displayf(NULL,
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                       "------------------------------------------------");
 
     // Parse encoded callout data.  See ErrlUserDetailsCallout class in
@@ -268,13 +268,13 @@ void ErrLogDisplay::displayCallout (void *data, size_t size)
                 switch (callout->clockType)
                 {
 #define case_CLOCK_TYPE(_type) \
-case HWAS::_type: CONSOLE::displayf(NULL, "  Clock Type               : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Clock Type               : %s", #_type); break;
                     case_CLOCK_TYPE(TODCLK_TYPE)
                     case_CLOCK_TYPE(MEMCLK_TYPE)
                     case_CLOCK_TYPE(OSCREFCLK_TYPE)
                     case_CLOCK_TYPE(OSCPCICLK_TYPE)
                     default:
-                        CONSOLE::displayf(NULL, "  Clock Type               : UNKNOWN 0x%X",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Clock Type               : UNKNOWN 0x%X",
                                           callout->clockType);
                 } // switch clockType
 #undef case_CLOCK_TYPE
@@ -290,7 +290,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Clock Type               : %s", #_t
                 switch (callout->partType)
                 {
 #define case_PART_TYPE(_type) \
-case HWAS::_type: CONSOLE::displayf(NULL, "  Part Type                : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Part Type                : %s", #_type); break;
                     case_PART_TYPE(FLASH_CONTROLLER_PART_TYPE)
                     case_PART_TYPE(PNOR_PART_TYPE)
                     case_PART_TYPE(SBE_SEEPROM_PART_TYPE)
@@ -302,7 +302,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Part Type                : %s", #_t
                     case_PART_TYPE(NV_CONTROLLER_PART_TYPE)
                     case_PART_TYPE(BPM_PART_TYPE)
                     default:
-                        CONSOLE::displayf(NULL, "  Part Type                : UNKNOWN 0x%X",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Part Type                : UNKNOWN 0x%X",
                                           callout->partType);
                 } // switch partType
 #undef case_PART_TYPE
@@ -318,7 +318,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Part Type                : %s", #_t
                 switch (callout->busType)
                 {
 #define case_BUS_TYPE(_type) \
-case HWAS::_type: CONSOLE::displayf(NULL, "  Bus Type                 : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Bus Type                 : %s", #_type); break;
                     case_BUS_TYPE(FSI_BUS_TYPE)
                     case_BUS_TYPE(A_BUS_TYPE)
                     case_BUS_TYPE(X_BUS_TYPE)
@@ -327,7 +327,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Bus Type                 : %s", #_t
                     case_BUS_TYPE(O_BUS_TYPE)
                     case_BUS_TYPE(OMI_BUS_TYPE)
                     default:
-                        CONSOLE::displayf(NULL, "  Bus Type                 : UNKNOWN 0x%X",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Bus Type                 : UNKNOWN 0x%X",
                                           callout->busType);
                 } // switch partType
 #undef case_BUS_TYPE
@@ -338,7 +338,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Bus Type                 : %s", #_t
                 break;
 
             case HWAS::HW_CALLOUT:
-                CONSOLE::displayf(NULL, "  Callout type             : Hardware Callout");
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type             : Hardware Callout");
 
                 displayGard = true;
                 l_gard = callout->gardErrorType;
@@ -348,11 +348,11 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Bus Type                 : %s", #_t
                 break;
 
             case HWAS::PROCEDURE_CALLOUT:
-                CONSOLE::displayf(NULL, "  Callout type             : Procedure Callout");
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type             : Procedure Callout");
                 switch (callout->procedure)
                 {
 #define case_PROCEDURE(_type) \
-case HWAS::_type: CONSOLE::displayf(NULL, "  Procedure                : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure                : %s", #_type); break;
                     case_PROCEDURE(EPUB_PRC_NONE)
                     case_PROCEDURE(EPUB_PRC_FIND_DECONFIGURED_PART)
                     case_PROCEDURE(EPUB_PRC_SP_CODE)
@@ -378,7 +378,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Procedure                : %s", #_t
                     case_PROCEDURE(EPUB_PRC_FW_VERIFICATION_ERR)
                     case_PROCEDURE(EPUB_PRC_GPU_ISOLATION_PROCEDURE)
                     default:
-                        CONSOLE::displayf(NULL, "  Procedure                : UNKNOWN: 0x%X",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Procedure                : UNKNOWN: 0x%X",
                                           callout->procedure);
                         break;
                 } // switch procedure
@@ -386,30 +386,30 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Procedure                : %s", #_t
                 break;
 
               case HWAS::SENSOR_CALLOUT:
-                CONSOLE::displayf(NULL, "  Sensor ID                   : 0x%x", callout->sensorId);
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor ID                   : 0x%x", callout->sensorId);
 
                 switch (callout->sensorType)
                 {
 #define case_SENSOR_TYPE(_type) \
-case HWAS::_type: CONSOLE::displayf(NULL, "  Sensor Type                : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor Type                : %s", #_type); break;
                     case_SENSOR_TYPE(UNKNOWN_SENSOR)
                     case_SENSOR_TYPE(GPU_FUNC_SENSOR)
                     case_SENSOR_TYPE(GPU_TEMPERATURE_SENSOR)
                     case_SENSOR_TYPE(GPU_MEMORY_TEMP_SENSOR)
                     default:
-                        CONSOLE::displayf(NULL, "  Sensor Type                : UNKNOWN 0x%X",
+                        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Sensor Type                : UNKNOWN 0x%X",
                                           callout->sensorType);
                 } // switch sensorType
 #undef case_SENSOR_TYPE
                 break;
 
               case HWAS::I2C_DEVICE_CALLOUT:
-                CONSOLE::displayf(nullptr, "  Callout type             : I2C Device Callout");
+                CONSOLE::displayf(CONSOLE::DEFAULT, nullptr, "  Callout type             : I2C Device Callout");
 
                 break;
 
             default:
-                CONSOLE::displayf(NULL, "  Callout type             : UNKNOWN: 0x%X",
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Callout type             : UNKNOWN: 0x%X",
                                   callout->type);
                 break;
         }
@@ -435,12 +435,12 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Sensor Type                : %s", #
             switch (l_deconfig)
             {
 #define case_DECONFIG_STATE(_type) \
-case HWAS::_type: CONSOLE::displayf(NULL, "  Deconfig State           : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Deconfig State           : %s", #_type); break;
                 case_DECONFIG_STATE(NO_DECONFIG)
                 case_DECONFIG_STATE(DECONFIG)
                 case_DECONFIG_STATE(DELAYED_DECONFIG)
                 default:
-                    CONSOLE::displayf(NULL, "  Deconfig State           : UNKNOWN: 0x%X",
+                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Deconfig State           : UNKNOWN: 0x%X",
                                       l_deconfig);
                     break;
             } // switch deconfigState
@@ -452,7 +452,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Deconfig State           : %s", #_t
             switch (l_gard)
             {
 #define case_GARD_ERROR_TYPE(_type) \
-case HWAS::_type: CONSOLE::displayf(NULL, "  GARD Error Type          : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type          : %s", #_type); break;
                 case_GARD_ERROR_TYPE(GARD_NULL)
                 case_GARD_ERROR_TYPE(GARD_User_Manual)
                 case_GARD_ERROR_TYPE(GARD_Unrecoverable)
@@ -463,7 +463,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  GARD Error Type          : %s", #_t
                 case_GARD_ERROR_TYPE(GARD_Reconfig)
                 case_GARD_ERROR_TYPE(GARD_Void)
                 default:
-                    CONSOLE::displayf(NULL, "  GARD Error Type          : UNKNOWN: 0x%X",
+                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type          : UNKNOWN: 0x%X",
                                       l_gard);
                     break;
             } // switch gardState
@@ -473,7 +473,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  GARD Error Type          : %s", #_t
         switch (callout->priority)
         {
 #define case_PRIORITY(_type) \
-case HWAS::_type: CONSOLE::displayf(NULL, "  Priority                 : %s", #_type); break;
+case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Priority                 : %s", #_type); break;
             case_PRIORITY(SRCI_PRIORITY_NONE)
             case_PRIORITY(SRCI_PRIORITY_LOW)
             case_PRIORITY(SRCI_PRIORITY_MEDC)
@@ -482,7 +482,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Priority                 : %s", #_t
             case_PRIORITY(SRCI_PRIORITY_MED)
             case_PRIORITY(SRCI_PRIORITY_HIGH)
             default:
-                CONSOLE::displayf(NULL, "  Priority                 : UNKNOWN: 0x%X",
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Priority                 : UNKNOWN: 0x%X",
                                   callout->priority);
                 break;
         } // switch priority
@@ -504,7 +504,7 @@ void ErrLogDisplay::displayTarget(void *data, size_t size)
 
     if( label->tag == 0xffffffff )
     {
-        CONSOLE::displayf(NULL, "  MASTER PROCESSOR SENTINEL" );
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  MASTER PROCESSOR SENTINEL" );
     }
     else
     {
@@ -515,7 +515,7 @@ void ErrLogDisplay::displayTarget(void *data, size_t size)
         TARGETING::AttributeTraits<TARGETING::ATTR_HUID>::Type *huid =
           reinterpret_cast<TARGETING::AttributeTraits<
           TARGETING::ATTR_HUID>::Type*>( char_buf );
-        CONSOLE::displayf(NULL, "  HUID: %08x", *huid );
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  HUID: %08x", *huid );
 
         // Look up the HUID across all targets.
         for ( TARGETING::TargetIterator ti = TARGETING::targetService().begin();
@@ -526,10 +526,10 @@ void ErrLogDisplay::displayTarget(void *data, size_t size)
                 tmp_huid == *huid )
             {
                 TARGETING::Target *target = *ti;
-                CONSOLE::displayf(NULL,
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                   "  Phys path: %s",
                   target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString() );
-                CONSOLE::displayf(NULL,
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                   "  Affinity path: %s",
                   target->getAttr<TARGETING::ATTR_AFFINITY_PATH>().toString());
                 break;
@@ -547,7 +547,7 @@ static void printHex(char *i_buf, const size_t i_size)
     for ( size_t i = 0; i < std::min( i_size, 32ul ); ++i )
         pos += sprintf( byte_str + pos, "%s%02X", (i % 4) == 0 ? " " : "",
                         i_buf[i] );
-    CONSOLE::displayf( NULL, "    %s", byte_str );
+    CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "    %s", byte_str );
 }
 #endif
 
@@ -561,14 +561,14 @@ void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
     {
     case ERRORLOG::ERRL_UDT_STRING:
         //this is error code str -- single word of data is HWPF RC
-        CONSOLE::displayf( NULL,
+        CONSOLE::displayf(CONSOLE::DEFAULT,  NULL,
                            "------------------------------------------------" );
         const char *rc;
         const char *desc;
         fapi2::hbfwErrLookupHwpRc( *word_buf, rc, desc );
-        CONSOLE::displayf( NULL, "  HwpReturnCode              : %s",
+        CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  HwpReturnCode              : %s",
                            rc ? rc : "Unknown" );
-        CONSOLE::displayf( NULL, "  HWP Error description      : %s",
+        CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  HWP Error description      : %s",
                            desc ? desc : "Unknown" );
         break;
 
@@ -576,7 +576,7 @@ void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
         {
         //this is HWPF FFDC.  First word is hash, rest of data is hex
         //reserve space for 16 words of data with spaces between
-        CONSOLE::displayf( NULL,
+        CONSOLE::displayf(CONSOLE::DEFAULT,  NULL,
                            "------------------------------------------------" );
         fapi2::hbfwFfdcType type;
         uint64_t value;
@@ -592,9 +592,9 @@ void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
                 const char *rc;
                 const char *desc;
                 fapi2::hbfwErrLookupHwpRc( value, rc, desc );
-                CONSOLE::displayf( NULL, "  HwpReturnCode              : %s",
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  HwpReturnCode              : %s",
                                    rc ? rc : "Unknown" );
-                CONSOLE::displayf( NULL, "  FFDC                       : %s",
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  FFDC                       : %s",
                                    str ? str : "Unknown" );
                 printHex(buf, size);
                 size = 0;
@@ -602,25 +602,25 @@ void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
             else if( type == fapi2::HBFW_FFDC_TYPE_SCOM_FAIL )
             {
                 uint64_t val64 = be64toh( *reinterpret_cast<uint64_t*>( buf ) );
-                CONSOLE::displayf( NULL, "  Failed SCOM address        : %#016lX",
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  Failed SCOM address        : %#016lX",
                                    val64 );
             }
             else if( type == fapi2::HBFW_FFDC_TYPE_PIB_RC )
             {
                 uint64_t val32 = be64toh( *reinterpret_cast<uint32_t*>( buf ) );
-                CONSOLE::displayf( NULL, "  PIB RC                     : %#08lX",
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  PIB RC                     : %#08lX",
                                    val32 );
             }
             else if( type == fapi2::HBFW_FFDC_TYPE_REGISTER_SET )
             {
-                CONSOLE::displayf( NULL, "  Register FFDC              : %s",
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  Register FFDC              : %s",
                                    str ? str : "Unknown" );
             }
             else if( type == fapi2::HBFW_FFDC_TYPE_CHIP_POSITION
                 && (size >= sizeof(uint32_t)) )
             {
                 uint32_t val32 = be32toh( *reinterpret_cast<uint32_t*>( buf ) );
-                CONSOLE::displayf( NULL, "  Chip Position              : %X",
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  Chip Position              : %X",
                                    val32 );
                 buf += sizeof(uint32_t);
                 size -= sizeof(uint32_t);
@@ -629,9 +629,9 @@ void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
                 && (size >= sizeof(uint32_t)) )
             {
                 uint32_t val32 = be32toh( *reinterpret_cast<uint32_t*>( buf ) );
-                CONSOLE::displayf( NULL, "  CFAM Register              : %s",
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  CFAM Register              : %s",
                                    str ? str : "Unknown" );
-                CONSOLE::displayf( NULL, "    %08X", val32 );
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "    %08X", val32 );
                 buf += sizeof(uint32_t);
                 size -= sizeof(uint32_t);
             }
@@ -639,9 +639,9 @@ void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
                 && (size >= sizeof(uint64_t)) )
             {
                 uint64_t val64 = be64toh( *reinterpret_cast<uint64_t*>( buf ) );
-                CONSOLE::displayf( NULL, "  SCOM Register              : %s",
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "  SCOM Register              : %s",
                                    str ? str : "Unknown" );
-                CONSOLE::displayf( NULL, "    %08llX %08llX",
+                CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "    %08llX %08llX",
                                    (val64 >> 32) & 0xffffffff,
                                    (val64 & 0xffffffff) );
                 buf += sizeof(uint64_t);
@@ -673,9 +673,9 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
         const errLogInfo *info = findErrLogInfo ( i_err->moduleId(),
                                               i_err->reasonCode());
 
-        CONSOLE::displayf(NULL,
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                           "================================================");
-        CONSOLE::displayf(NULL, "Error reported by %s (0x%04X) EID 0x%08X",
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Error reported by %s (0x%04X) EID 0x%08X",
                          findComponentName( i_committerComp ),
                          i_committerComp, i_err->eid() );
 
@@ -687,16 +687,16 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
         }
         else
         {
-            CONSOLE::displayf(NULL, "  %s", info->descriptString);
-            CONSOLE::displayf(NULL, "  ModuleId   0x%02x %s",
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  %s", info->descriptString);
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  ModuleId   0x%02x %s",
                           i_err->moduleId(), info->moduleName);
-            CONSOLE::displayf(NULL, "  ReasonCode 0x%04x %s",
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  ReasonCode 0x%04x %s",
                           i_err->reasonCode(), info->reasonString);
         }
 
-        CONSOLE::displayf(NULL, "  UserData1  %s : 0x%016lx",
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  UserData1  %s : 0x%016lx",
                           info->userData1String, i_err->getUserData1());
-        CONSOLE::displayf(NULL, "  UserData2  %s : 0x%016lx",
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  UserData2  %s : 0x%016lx",
                           info->userData2String, i_err->getUserData2());
 
         // Loop through and print interesting  user data sections.
@@ -718,9 +718,9 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
                     break;
 
                 case ERRORLOG::ERRL_UDT_STRING:
-                    CONSOLE::displayf(NULL,
+                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                        "------------------------------------------------");
-                    CONSOLE::displayf(NULL,
+                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                         "  %s",
                         reinterpret_cast<char*>( user_data->iv_pData ) );
                     break;
@@ -728,7 +728,7 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
             }
         }
 
-        CONSOLE::displayf(NULL,
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                       "================================================" );
         CONSOLE::flush();
     }while( 0 );

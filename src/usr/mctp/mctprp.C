@@ -184,7 +184,7 @@ void MctpRP::poll_kcs_status(void)
                   uint32_t l_fatalEid = l_errl->eid();
                   errlCommit(l_errl, MCTP_COMP_ID);
 #ifdef CONFIG_CONSOLE
-                  CONSOLE::displayf(NULL,
+                  CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                                     "MCTP initialization failed! The commited error log 0x%X will be in hostboot dump but will not make it to BMC",
                                     l_fatalEid);
 #endif

@@ -121,7 +121,8 @@ namespace TRACE
                          CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME) )
             {
             #endif
-                CONSOLE::vdisplayf(i_td->iv_compName, i_fmt, i_args);
+                CONSOLE::vdisplayf(CONSOLE::DEFAULT, i_td->iv_compName,
+                                   i_fmt, i_args);
             #ifdef CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME
             }
             #endif
@@ -341,7 +342,8 @@ namespace TRACE
             {
                 char tmpstr[sizeof(i_td->iv_compName)+sizeof(l_time.tid)+1];
                 sprintf(tmpstr, "%u %s", l_time.tid, i_td->iv_compName );
-                CONSOLE::vdisplayf(tmpstr, *l_cb, l_tl_args);
+                CONSOLE::vdisplayf(CONSOLE::DEFAULT, tmpstr,
+                                   *l_cb, l_tl_args);
             }
 #else
             if (iv_traceLite)
@@ -352,7 +354,8 @@ namespace TRACE
                 {
                     char tmpstr[sizeof(i_td->iv_compName)+sizeof(l_time.tid)+1];
                     sprintf(tmpstr, "%d %s", l_time.tid, i_td->iv_compName );
-                    CONSOLE::vdisplayf(tmpstr, *l_cb, l_tl_args);
+                    CONSOLE::vdisplayf(CONSOLE::DEFAULT, tmpstr,
+                                       *l_cb, l_tl_args);
                 }
             }
 
@@ -469,7 +472,7 @@ namespace TRACE
             if ( !strcmp(i_td->iv_compName,
                          CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME) )
             #endif
-            {CONSOLE::displayf(i_td->iv_compName,"%s",output);}
+            {CONSOLE::displayf(CONSOLE::DEFAULT, i_td->iv_compName,"%s",output);}
 
             free(output);
 

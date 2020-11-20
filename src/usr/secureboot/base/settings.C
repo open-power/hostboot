@@ -79,7 +79,7 @@ namespace SECUREBOOT
         if (!iv_enabled)
         {
             #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SECURE_COMP_NAME, "Booting in non-secure mode (minimum secure version=0x%.02X)",
+            CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "Booting in non-secure mode (minimum secure version=0x%.02X)",
                       l_min_secure_version);
             #endif
 
@@ -108,7 +108,7 @@ namespace SECUREBOOT
         else
         {
             #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SECURE_COMP_NAME, "Booting in secure mode (minimum secure version=0x%.02X)",
+            CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "Booting in secure mode (minimum secure version=0x%.02X)",
                       l_min_secure_version);
             #endif
         }

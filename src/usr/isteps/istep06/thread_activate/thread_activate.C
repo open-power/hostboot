@@ -149,7 +149,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         TRACFCOMP( g_fapiImpTd, "Core Mode = %d, Fuseblow = %d, Option = %d",
                    l_coreMode, l_isFuseBlown, l_option );
-        CONSOLE::displayf( nullptr, "SMT=%d, Fuse=%d\n", l_coreMode, l_isFuseBlown );
+        CONSOLE::displayf(CONSOLE::DEFAULT,  nullptr, "SMT=%d, Fuse=%d\n", l_coreMode, l_isFuseBlown );
 
         // -----------------------------------
         // Activate threads on the master core

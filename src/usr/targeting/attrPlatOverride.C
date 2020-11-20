@@ -308,7 +308,7 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                    ATTR 02395414 = 07
                  */
 
-                CONSOLE::displayf("TARG","**Found %d attribute overrides in Tank %s(%d)",
+                CONSOLE::displayf(CONSOLE::DEFAULT, "TARG","**Found %d attribute overrides in Tank %s(%d)",
                                   l_pOverTanks[i]->size(),
                                   AttributeTank::layerToString(
                                      static_cast<AttributeTank::TankLayer>(i)),
@@ -364,7 +364,7 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                             sprintf( tmpstr, ":c%d", hdr.iv_unitPos );
                             strcat( outstr, tmpstr );
                         }
-                        CONSOLE::displayf("TARG",outstr);
+                        CONSOLE::displayf(CONSOLE::DEFAULT, "TARG",outstr);
                         last_hdr = hdr;
                     }
 
@@ -385,7 +385,7 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                     {
                         strcat( outstr, "..." );
                     }
-                    CONSOLE::displayf("TARG",outstr);
+                    CONSOLE::displayf(CONSOLE::DEFAULT, "TARG",outstr);
                 }
                 CONSOLE::flush();
             }

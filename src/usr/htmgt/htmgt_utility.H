@@ -52,7 +52,7 @@
 
 #if defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME)
 #define TMGT_CONSOLE( _fmt_, _args_...) \
-    CONSOLE::displayf( HTMGT_COMP_NAME, _fmt_, ##_args_ )
+    CONSOLE::displayf(CONSOLE::DEFAULT,  HTMGT_COMP_NAME, _fmt_, ##_args_ )
 #else
 #define TMGT_CONSOLE(_fmt_, _args_...)
 #endif
@@ -63,10 +63,10 @@
 #if defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME)
 #undef TMGT_INF
 #define    TMGT_INF( _fmt_, _args_...) \
-               CONSOLE::displayf( HTMGT_COMP_NAME, _fmt_, ##_args_ )
+               CONSOLE::displayf(CONSOLE::DEFAULT,  HTMGT_COMP_NAME, _fmt_, ##_args_ )
 #undef TMGT_ERR
 #define    TMGT_ERR( _fmt_, _args_...) \
-               CONSOLE::displayf( HTMGT_COMP_NAME, "E>" _fmt_, ##_args_ )
+               CONSOLE::displayf(CONSOLE::DEFAULT,  HTMGT_COMP_NAME, "E>" _fmt_, ##_args_ )
 #endif
 #endif
 

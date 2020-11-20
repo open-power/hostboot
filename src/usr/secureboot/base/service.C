@@ -409,7 +409,7 @@ void handleSecurebootFailure(errlHndl_t &io_err, const bool i_waitForShutdown,
     uint16_t l_rc = io_err->reasonCode();
 
 #ifdef CONFIG_CONSOLE
-    CONSOLE::displayf(SECURE_COMP_NAME, "Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
+    CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
                       io_err->plid(), l_rc);
 #endif
     printk("Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
@@ -519,10 +519,10 @@ errlHndl_t traceSecuritySettings(bool i_doConsoleTrace)
     {
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
         // Using 2 uint32_t's due to CONSOLE BUG displaying uint64_t
-        CONSOLE::displayf("SECURE", "Security Access Bit> 0x%.8X%.8X",
+        CONSOLE::displayf(CONSOLE::DEFAULT, "SECURE", "Security Access Bit> 0x%.8X%.8X",
                           l_SABBits>>32, l_SABBits&0xFFFFFFFF );
 
-        CONSOLE::displayf("SECURE", "Secure Mode Disable (via Jumper)> 0x%.8X%.8X",
+        CONSOLE::displayf(CONSOLE::DEFAULT, "SECURE", "Secure Mode Disable (via Jumper)> 0x%.8X%.8X",
                           l_SMDBits>>32, l_SMDBits&0xFFFFFFFF );
 #endif
         SB_INF("Security Access Bit> 0x%.16llX", l_SABBits);

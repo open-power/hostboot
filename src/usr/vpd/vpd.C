@@ -499,9 +499,9 @@ errlHndl_t updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
                 {
                     l_errl = deviceWrite(i_nodetarget, l_sn_prod, l_vpdSize,
                                 DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
-                    CONSOLE::displayf(nullptr, "updated SN from BMC into PVPD.");
+                    CONSOLE::displayf(CONSOLE::DEFAULT, nullptr, "updated SN from BMC into PVPD.");
                     CONSOLE::flush();
-                    CONSOLE::displayf(nullptr, "Need a reboot.");
+                    CONSOLE::displayf(CONSOLE::DEFAULT, nullptr, "Need a reboot.");
                     CONSOLE::flush();
 #ifdef CONFIG_PLDM
                     INITSERVICE::stopIpl();
@@ -931,7 +931,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
             TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN != SEEPROM_PN/SN, Loading PNOR from SEEPROM for target %.8X",TARGETING::get_huid(i_target));
             const char* l_pathstring =
               i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
-            CONSOLE::displayf(nullptr,"Detected new part : %.8X (%s)",
+            CONSOLE::displayf(CONSOLE::DEFAULT, nullptr,"Detected new part : %.8X (%s)",
                               TARGETING::get_huid(i_target),
                               l_pathstring);
             free((void*)(l_pathstring));

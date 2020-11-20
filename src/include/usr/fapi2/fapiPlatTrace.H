@@ -83,7 +83,7 @@ extern trace_desc_t* g_fapiMfgTd;
     { \
         if(TRACE::isDebugEnabled(g_fapiMfgTd)) \
         { \
-            CONSOLE::displayf(FAPI_MFG_TRACE_NAME,_fmt_, ##_args_); \
+            CONSOLE::displayf(CONSOLE::DEFAULT, FAPI_MFG_TRACE_NAME,_fmt_, ##_args_); \
         } \
     }
 #else

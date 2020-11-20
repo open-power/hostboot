@@ -3223,7 +3223,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                    io_sbeState.seeprom_side_to_update);
 
 #ifdef CONFIG_CONSOLE
-        CONSOLE::displayf(SBE_COMP_NAME,
+        CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME,
                           "System Performing SBE Update for PROC %d, side %d",
                         io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>(),
                         io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1);
@@ -6001,13 +6001,13 @@ errlHndl_t sbeDoReboot( void )
 #ifdef CONFIG_CONSOLE
         if(g_do_hw_keys_hash_transition)
         {
-            CONSOLE::displayf(SBE_COMP_NAME, "Performing Secure Boot key transition\n");
-            CONSOLE::displayf(SBE_COMP_NAME, "System will power off after completion\n");
+            CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME, "Performing Secure Boot key transition\n");
+            CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME, "System will power off after completion\n");
             CONSOLE::flush();
         }
         else
         {
-            CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
+            CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME, "System Rebooting To "
                               "Complete SBE Update Process");
             CONSOLE::flush();
         }

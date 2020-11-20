@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,7 +130,7 @@ void handleControlCmd( SPLessCmd & io_cmd )
 
     default:
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
-    CONSOLE::displayf(NULL, "Unknown control command %02x", io_cmd.substep);
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Unknown control command %02x", io_cmd.substep);
     CONSOLE::flush();
 #endif
     TRACFCOMP( g_trac_initsvc, "splessComm: UNKNOWN control cmd %02x",
@@ -165,7 +165,7 @@ void handleIstep( SPLessCmd & io_cmd, msg_q_t i_sendQ,
     l_pMsg->extra_data  =   NULL;
 
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
-    CONSOLE::displayf(NULL, "ISTEP %2d.%2d", io_cmd.istep, io_cmd.substep);
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "ISTEP %2d.%2d", io_cmd.istep, io_cmd.substep);
     CONSOLE::flush();
 #endif
     TRACFCOMP( g_trac_initsvc,
@@ -253,7 +253,7 @@ void    splessComm( void *  io_msgQ )
 #else
     const char* l_input = "CFAM";
 #endif
-    CONSOLE::displayf(NULL, "ISTEP mode -- awaiting user input from %s", l_input);
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "ISTEP mode -- awaiting user input from %s", l_input);
     CONSOLE::flush();
 #endif
 

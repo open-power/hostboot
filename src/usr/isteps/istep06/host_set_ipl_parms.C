@@ -184,9 +184,9 @@ void* host_set_ipl_parms( void *io_pArgs )
     if( l_pvr.isNimbusDD1() )
     {
 #ifdef CONFIG_CONSOLE
-        CONSOLE::displayf(ISTEP_COMP_NAME,
+        CONSOLE::displayf(CONSOLE::DEFAULT, ISTEP_COMP_NAME,
                           "P9N (Nimbus) DD1.0 is not supported in this driver");
-        CONSOLE::displayf(ISTEP_COMP_NAME,
+        CONSOLE::displayf(CONSOLE::DEFAULT, ISTEP_COMP_NAME,
                           "Please update the system's processor modules");
 #endif
 
@@ -225,7 +225,7 @@ void* host_set_ipl_parms( void *io_pArgs )
     if( l_mode != PNOR::PNOR_IPMI )
     {
 #ifdef CONFIG_CONSOLE
-        CONSOLE::displayf(ISTEP_COMP_NAME,
+        CONSOLE::displayf(CONSOLE::DEFAULT, ISTEP_COMP_NAME,
             "HIOMAP PNOR-IPMI not enabled, BMC firmware needs to be updated.");
 #endif
 

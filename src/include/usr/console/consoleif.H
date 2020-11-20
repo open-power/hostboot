@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -28,6 +28,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <console/uartif.H>
 
 namespace CONSOLE
 {
@@ -37,9 +38,9 @@ namespace CONSOLE
      *  @param[in] - String to display.
      */
 #if (defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME))
-    extern void display(const char*);
+    extern void display(const uartId_t, const char*);
 #else
-    inline void display(const char*) {};
+    inline void display(const uartId_t, const char*) {};
 #endif
 
     /** @brief Display formatted string to the console.
@@ -48,9 +49,9 @@ namespace CONSOLE
      *  @param[in] - Format string.
      */
 #if (defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME))
-    extern void displayf(const char*, const char*, ...);
+    extern void displayf(const uartId_t, const char*, const char*, ...);
 #else
-    inline void displayf(const char*, const char*, ...) {};
+    inline void displayf(const uartId_t, const char*, const char*, ...) {};
 #endif
 
     /** @brief Display formatted string to the console.
@@ -60,9 +61,9 @@ namespace CONSOLE
      *  @param[in] - va_list of arguments.
      */
 #if (defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME))
-    extern void vdisplayf(const char*, const char*, va_list);
+    extern void vdisplayf(const uartId_t, const char*, const char*, va_list);
 #else
-    inline void vdisplayf(const char*, const char*, va_list) {};
+    inline void vdisplayf(const uartId_t, const char*, const char*, va_list) {};
 #endif
 
 

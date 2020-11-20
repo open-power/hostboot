@@ -457,7 +457,7 @@ void IpmiRP::handlePowerMessage( IPMI::oemSEL* i_event )
             IPMI_TRAC("Graceful shutdown request received");
 
 #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(NULL, "IPMI: shutdown requested");
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "IPMI: shutdown requested");
             CONSOLE::flush();
 #endif
 
@@ -704,7 +704,7 @@ void IpmiRP::execute(void)
                 iv_shutdown_msg = msg;   // Reply to this message
 
 #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(NULL, "IPMI: shutdown complete\n");
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "IPMI: shutdown complete\n");
             CONSOLE::flush();
 #endif
 
@@ -720,11 +720,11 @@ void IpmiRP::execute(void)
 #ifdef CONFIG_CONSOLE
                 if (msg_type == IPMI::MSG_STATE_INITIATE_POWER_CYCLE)
                 {
-                    CONSOLE::displayf(NULL, "IPMI: Initiate power cycle");
+                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "IPMI: Initiate power cycle");
                 }
                 else // == IPMI::MSG_STATE_INITIATE_SOFT_POWER_OFF
                 {
-                    CONSOLE::displayf(NULL, "IPMI: Initiate soft power off");
+                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "IPMI: Initiate soft power off");
                 }
                 CONSOLE::flush();
 #endif

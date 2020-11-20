@@ -239,7 +239,7 @@ errlHndl_t detectPhysPresence(void)
         errlCommit( err_info, SECURE_COMP_ID );
 
 #ifdef CONFIG_CONSOLE
-        CONSOLE::displayf(SECURE_COMP_NAME, "Physical Presence Was Asserted In Detection Window\n");
+        CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "Physical Presence Was Asserted In Detection Window\n");
         CONSOLE::flush();
 #endif
     }
@@ -534,7 +534,7 @@ errlHndl_t handlePhysPresenceWindow(void)
 
             // Also display a message to the console
             #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SECURE_COMP_NAME, "Detected KEY_CLEAR_REQUEST_MFG(_ALL); No Physical Presence Detection Necessary\n");
+            CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "Detected KEY_CLEAR_REQUEST_MFG(_ALL); No Physical Presence Detection Necessary\n");
             #endif
         }
 
@@ -680,8 +680,8 @@ errlHndl_t handlePhysPresenceWindow(void)
 
     // Alert the users that the system will power off
 #ifdef CONFIG_CONSOLE
-    CONSOLE::displayf(SECURE_COMP_NAME, "Opened Physical Presence Detection Window\n");
-    CONSOLE::displayf(SECURE_COMP_NAME, "System Will Power Off and Wait For Manual Power On\n");
+    CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "Opened Physical Presence Detection Window\n");
+    CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "System Will Power Off and Wait For Manual Power On\n");
     CONSOLE::flush();
 #endif
 

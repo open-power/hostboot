@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -26,13 +26,16 @@
 #ifndef __CONSOLE_DAEMON_H
 #define __CONSOLE_DAEMON_H
 
+#include <console/uartif.H>
+
 namespace CONSOLE
 {
     /** Enumeration of IPC message types to daemon. */
     enum ConsoleDaemonMessages
     {
-        DISPLAY,  //< Display a string to console.
-        SYNC      //< Synchronization point to ensure console is flushed.
+        DISPLAY_DEFAULT, //< Display a string on DEFAULT console (VUART1)
+        DISPLAY_DEBUG,   //< Display a string on DEBUG console (VUART2)
+        SYNC            //< Synchronization point to ensure console is flushed.
     };
 }
 

@@ -193,7 +193,7 @@ errlHndl_t rediscoverI2CTargets(void)
             errlCommit(err, ISTEP_COMP_ID);
 
 #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(ISTEP_COMP_NAME,"Requesting Reboot after DIMM(s) "
+            CONSOLE::displayf(CONSOLE::DEFAULT, ISTEP_COMP_NAME,"Requesting Reboot after DIMM(s) "
                               "were rediscovered after I2C Reset");
             CONSOLE::flush();
 #endif

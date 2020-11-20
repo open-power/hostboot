@@ -216,7 +216,7 @@ errlHndl_t SecureRomManager::initialize()
         {
             TRACFCOMP(g_trac_secure,ERR_MRK"SecureRomManager::initialize(): SecureROM invalid");
 #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SECURE_COMP_NAME, ERR_MRK"SecureROM invalid");
+            CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, ERR_MRK"SecureROM invalid");
 #endif
             printk("ERR> SecureRomManager SecureROM invalid\n");
             /*@
@@ -236,7 +236,7 @@ errlHndl_t SecureRomManager::initialize()
 
         TRACFCOMP(g_trac_secure,"SecureRomManager::initialize(): SecureROM valid, enabling functionality");
 #ifdef CONFIG_CONSOLE
-        CONSOLE::displayf(SECURE_COMP_NAME, "SecureROM valid - enabling functionality");
+        CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "SecureROM valid - enabling functionality");
 #endif
 
         // Check to see if ROM has already been initialized

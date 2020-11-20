@@ -335,7 +335,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
             printk( "SBE Boot Side = %d\n", l_bootside );
 
             // Sending to console SBE side
-            CONSOLE::displayf( NULL,
+            CONSOLE::displayf(CONSOLE::DEFAULT,  NULL,
                     "Booting from SBE side %d on master proc=%.8X",
                     l_bootside, TARGETING::get_huid(l_masterTarget) );
             CONSOLE::flush();
@@ -688,7 +688,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                 l_deconfig = true;
                             }
 
-                            CONSOLE::displayf(NULL,
+                            CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
                               "System Shutting Down"
                               "To Perform Reconfiguration After %s",
                               l_deconfig ? "Deconfig" : "Recoverable Error" );
@@ -759,7 +759,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     "error log has been committed. Stopping the IPL.");
 
                 #ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(NULL, "Manufacturing Mode is set and an "
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Manufacturing Mode is set and an "
                     "error log has been committed. Stopping the IPL.");
                 CONSOLE::flush();
                 #endif
@@ -800,7 +800,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 if(err_ipmi)
                 {
                     #ifdef CONFIG_CONSOLE
-                    CONSOLE::displayf(NULL, "Failed to disable BMC auto reboots....");
+                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Failed to disable BMC auto reboots....");
                     CONSOLE::flush();
                     #endif
                     TRACFCOMP(g_trac_initsvc,
@@ -856,7 +856,7 @@ void IStepDispatcher::stop()
 {
 
 #ifdef CONFIG_CONSOLE
-    CONSOLE::displayf(NULL,"Stopping istep dispatcher");
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL,"Stopping istep dispatcher");
     CONSOLE::flush();
 #endif
 
@@ -2549,7 +2549,7 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     if ((iv_curIStep != lastIstep) || (iv_curSubStep != lastSubstep))
     {
         const TaskInfo *taskinfo = findTaskInfo(iv_curIStep, iv_curSubStep);
-        CONSOLE::displayf(NULL, "ISTEP %2d.%2d - %s",
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "ISTEP %2d.%2d - %s",
                      iv_curIStep, iv_curSubStep,
                      taskinfo && taskinfo->taskname ? taskinfo->taskname : "");
         CONSOLE::flush();
@@ -3106,7 +3106,7 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
                         );
 
 #ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(NULL, "istepPauseSet: "
+                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "istepPauseSet: "
                         "pauseLen=0x%02X, Permanent pause enabled.",
                         l_p_pauseCfg->pauseLen
                         );

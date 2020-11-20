@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -255,8 +255,8 @@ static PnorIf* probeHiomapTransport(TARGETING::Target* i_target,
         return pnor;
     }
 
-    CONSOLE::displayf(NULL, "Probes for MBOX and IPMI HIOMAP transports failed\n");
-    CONSOLE::displayf(NULL, "Cannot access PNOR!\n");
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Probes for MBOX and IPMI HIOMAP transports failed\n");
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Cannot access PNOR!\n");
     CONSOLE::flush();
     INITSERVICE::doShutdown(PNOR::RC_PNOR_INIT_FAILURE);
 

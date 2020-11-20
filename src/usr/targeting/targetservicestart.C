@@ -154,7 +154,7 @@ static void initTargeting(errlHndl_t& io_pError)
     {
         TARG_INF("We are running MPIPL mode");
         printk( "Boot is MPIPL.\n" );
-        CONSOLE::displayf( NULL,"Boot is MPIPL." );
+        CONSOLE::displayf(CONSOLE::DEFAULT,  NULL,"Boot is MPIPL." );
         CONSOLE::flush();
         l_isMpipl = true;
     }
@@ -888,7 +888,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
         // figure out what fabric id we actually booted with
         uint8_t l_bootIndex = getTopoIndexFromAddr( l_curXscomBAR );
-        CONSOLE::displayf( NULL, "Module swap detected - handling memory remap from %d\n", l_bootIndex );
+        CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "Module swap detected - handling memory remap from %d\n", l_bootIndex );
 
         // now adjust the attributes that our early code is going to consume
         //  to match the fabric id we're currently using
