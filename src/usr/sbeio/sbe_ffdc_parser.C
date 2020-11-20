@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,12 +30,11 @@
 #include <errl/errlmanager.H>
 #include <util/utilbyte.H>
 #include <sbeio/sbe_ffdc_parser.H>
-// FIXME RTC: 254961
-//#include <fapi2.H>
+#include <fapi2.H>
 
 /**
- * @file sbe_ffdc_pader.C
- * @brief SBE FFDC package parder
+ * @file sbe_ffdc_parser.C
+ * @brief SBE FFDC package parser
  */
 
 
@@ -117,11 +116,11 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                   i + iv_headerWordInBytes);
 
             /*
-             * Get the size of the ffdc package = the entire package length
-             * minus the header (2 words), and the rc (1 word)
+             * Get the length in bytes of the FFDC data contained in the FFDC Package
+             * = the entire package length - the header (8 bytes) - the rc (4 bytes)
              */
             uint32_t l_bufLenInBytes = iv_ffdcWordLen * l_packageLengthInWords -
-                 iv_headerWordInBytes;
+                 iv_headerWordInBytes - iv_ffdcWordLen;
 
             // Check to see if what we're copying is beyond the buffer size
             uint32_t l_bufferMarker = i + iv_headerWordInBytes + l_bufLenInBytes;
@@ -158,11 +157,12 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                     break;
                 }
 
-                // Copy data from ffdcPackageBuffer to wordBuffer
-                // starting at 12 byte from current pointer
+                // Copy just the FFDC data from ffdcPackageBuffer to wordBuffer
+                // starting at the offset to the current FFDC package + 12 bytes
+                // to skip the FFDC header (8 bytes) and rc (4 bytes)
                 memcpy(l_wordBuffer,
                        static_cast<char *>(i_ffdcPackageBuffer) +
-                       i + iv_headerWordInBytes,
+                       i + iv_headerWordInBytes + iv_ffdcWordLen,
                        l_bufLenInBytes);
 
                 addFFDCPackage(l_wordBuffer, l_rc, l_bufLenInBytes);
@@ -281,7 +281,7 @@ void SbeFFDCParser::addFFDCPackage(void * i_ffdcPackage,
 PIB::PibError  SbeFFDCParser::getPibRc(uint8_t i_index)
 {
     PIB::PibError l_pibRc   = PIB::PIB_NO_ERROR;
-/* FIXME RTC: 254961
+
     //get the rc for this ffdc package
     auto l_fapiRc           = getPackageRC(i_index);
 
@@ -322,7 +322,7 @@ PIB::PibError  SbeFFDCParser::getPibRc(uint8_t i_index)
             break;
     }
     SBE_TRACF("getPibRc for index=%d, fapiRc=0x%x pibRc:%0x", i_index, l_fapiRc, l_pibRc);
-*/
+
     return l_pibRc;
 }
 }

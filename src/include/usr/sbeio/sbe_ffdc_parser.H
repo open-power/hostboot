@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,8 @@ namespace SBEIO
 
 /*
  * @brief Type to hold the ffdc package
- * This struct also holds the size and the RC
+ * This struct also holds the RC and the
+ * size, in bytes, of the ffdc package
 */
 struct ffdc_package
 {

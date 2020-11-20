@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,8 +170,8 @@ private:
  *
  * The FFDC schema parsed by this class is as follows:
  *
- *        u32          u32           u64         u32          u64
- *     | FapiRC | Scom Addr Size | Scom Addr | PIB RC Size | PIB RC |
+ *            u32           u64         u32          u64
+ *     | Scom Addr Size | Scom Addr | PIB RC Size | PIB RC |
  *
  */
 class FfdcScomPibErrorPackage: public FfdcParsedPackage

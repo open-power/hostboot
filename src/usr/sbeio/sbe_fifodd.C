@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,9 +42,8 @@
 #include <sbeio/sbe_ffdc_package_parser.H>
 #include <sbeio/sbe_ffdc_parser.H>
 #include <kernel/pagemgr.H>
-// FIXME RTC: 254961
-//#include <fapi2.H>
-//#include <set_sbe_error.H>
+#include <fapi2.H>
+#include <set_sbe_error.H>
 #include <sbeio/sbe_sp_intf.H>
 #include <xscom/piberror.H>
 #include <sbeio/sbe_retry_handler.H>
@@ -65,7 +64,6 @@ extern trace_desc_t* g_trac_sbeio;
 #define SBE_TRACU(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"fifodd: " printf_string,##args)
 */
-#define READ_BUFFER_SIZE 2048
 
 #define TOLERATE_BLACKLIST_ERRS 0
 
@@ -188,6 +186,7 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
         uint32_t   l_cnt      = *l_pSent;
         SBE_TRACDBIN("Write Request in SBEIO",i_pFifoRequest,
                      l_cnt*sizeof(*l_pSent));
+
         for (uint32_t i=0;i<l_cnt;i++)
         {
             // Wait for room to write into fifo
@@ -347,8 +346,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                 l_fifoBuffer.append(l_data);
             }
         }
-        if (errl) break;
 
+        if (errl) break;
 
         // EOT is expected before running out of response buffer
         if (!l_EOT)
@@ -433,6 +432,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
 
         // Check status for success.
         const statusHeader * l_pStatusHeader = l_fifoBuffer.getStatusHeader();
+
         if ((FIFO_STATUS_MAGIC != l_pStatusHeader->magic) ||
             (SBE_PRI_OPERATION_SUCCESSFUL != l_pStatusHeader->primaryStatus) ||
             (SBE_SEC_OPERATION_SUCCESSFUL != l_pStatusHeader->secondaryStatus))
@@ -504,6 +504,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
 
             // Go through the buffer, get the RC
             uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+
             for(uint8_t i = 0; i < l_pkgs; i++)
             {
                  ffdc_package l_package = {nullptr, 0, 0};
@@ -512,8 +513,6 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                      continue;
                  }
 
-// FIXME RTC: 254961
-#if 0
                  uint32_t l_rc = l_package.rc;
                  // If fapiRC, add data to errorlog
                  if(l_rc ==  fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
@@ -532,13 +531,10 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                      fapi2::ReturnCode l_fapiRC;
 
                      /*
-                      * Put FFDC into sbeFfdc_t struct and
+                      * Put FFDC data into sbeFfdc_t struct and
                       * call FAPI_SET_SBE_ERROR
                       */
-                     sbeFfdc_t * l_ffdcBuf = new sbeFfdc_t();
-                     l_ffdcBuf->size = l_package.size;
-                     l_ffdcBuf->data = reinterpret_cast<uint64_t>(
-                                                           l_package.ffdcPtr);
+                     sbeFfdc_t * l_ffdcBuf = reinterpret_cast<sbeFfdc_t * >(l_package.ffdcPtr);
 
                      FAPI_SET_SBE_ERROR(l_fapiRC,
                                 l_rc,
@@ -551,7 +547,6 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                          ERRORLOG::errlCommit( sbe_errl, SBEIO_COMP_ID );
                      }
                  }
-#endif
 
                  //If FFDC schema is known and a processing routine
                  //is defined then perform the processing.
@@ -737,7 +732,6 @@ errlHndl_t SbeFifo::readFsi(TARGETING::Target * i_target,
                     o_pData,
                     l_32bitSize,
                     DEVICE_FSI_ADDRESS(i_addr));
-
     SBE_TRACU("  readFsi addr=0x%08lx data=0x%08x",
                          i_addr,*o_pData);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,9 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <sbeio/sbe_ffdc_package_parser.H>
-
-// FIXME RTC: 254961
-//#include <hwp_return_codes.H>
+#include <hwp_return_codes.H>
 #include <trace/interface.H>
 #include <xscom/piberror.H>
 
@@ -43,7 +41,6 @@ FfdcParsedPackage::rcToParsedType(uint32_t fapiRc)
 {
     ParsedType retval{ParsedType::NONE};
 
-/* FIXME RTC: 254961
     switch(fapiRc)
     {
         case fapi2::RC_SBE_SCOM_FAILURE:
@@ -59,7 +56,6 @@ FfdcParsedPackage::rcToParsedType(uint32_t fapiRc)
             break;
         }
     }
-*/
 
     return retval;
 }
@@ -154,8 +150,8 @@ bool FfdcScomPibErrorPackage::validateFFDCPackage(const ffdc_package& i_ffdc,
                                                   bool ignoreRC)
 {
     //Schema
-    //     u32          u32            u64          u32        u64
-    // | FAPI RC | SCOM ADDR SIZE | SCOM ADDR | PIB RC SIZE | PIB RC |
+    //        u32            u64          u32        u64
+    // | SCOM ADDR SIZE | SCOM ADDR | PIB RC SIZE | PIB RC |
 
     bool retval{false};
 
@@ -184,17 +180,15 @@ bool FfdcScomPibErrorPackage::validateFFDCPackage(const ffdc_package& i_ffdc,
             }
         }
 
-        constexpr size_t scomAddressOffset = sizeof(uint32_t) + //FAPI RC
-                                             sizeof(uint32_t);  //size of Scom
-                                                                //Addr
+        constexpr size_t scomAddressOffset = sizeof(uint32_t);  //size of Scom Addr
 
-        constexpr size_t pibRcOffset =  sizeof(uint32_t) + //FAPI RC
-                                        sizeof(uint32_t) + //size of Scom Addr
+        constexpr size_t pibRcOffset =  sizeof(uint32_t) + //size of Scom Addr
                                         sizeof(uint64_t) + //Scom Address
                                         sizeof(uint32_t);  //size of PIB RC
 
         const char* l_buffer = reinterpret_cast<const char*>(i_ffdc.ffdcPtr);
 
+        // the sizes for these casts come from the sizeof sbeFfdc_t.data defined in error_info_def.H
         iv_scomAddress = *(reinterpret_cast<const uint64_t*>
                                                (l_buffer + scomAddressOffset));
 
@@ -215,9 +209,10 @@ bool FfdcScomPibErrorPackage::doesPackageMatchSchema(const ffdc_package&
                                                                        i_ffdc)
 {
     //Schema
-    //      u32         u32           u64          u32         u64
-    // | FAPI RC | SCOM ADDR SIZE | SCOM ADDR | PIB RC SIZE | PIB RC |
+    //        u32           u64          u32         u64
+    // | SCOM ADDR SIZE | SCOM ADDR | PIB RC SIZE | PIB RC |
     bool retval{false};
+    bool isInvalidSize{false};
 
     do
     {
@@ -226,43 +221,51 @@ bool FfdcScomPibErrorPackage::doesPackageMatchSchema(const ffdc_package&
             return retval;
         }
 
-        constexpr uint32_t l_expectedPIBSize = sizeof(uint64_t);
-        constexpr uint32_t l_expectedScomAddrSize{sizeof(uint64_t)};
-        constexpr size_t expectedSize = sizeof(uint32_t) + //FAPI RC
-                                        sizeof(uint32_t) + //size of Scom Addr
+        constexpr uint32_t l_expectedPIBSize = sizeof(uint8_t);
+        constexpr size_t l_expectedSize = sizeof(uint32_t) + //size of Scom Addr
                                         sizeof(uint64_t) + //Scom Address
                                         sizeof(uint32_t) + //size of PIB RC
                                         sizeof(uint64_t);  //PIB RC
 
-        constexpr size_t scomAddrSizeOffset =  sizeof(uint32_t); //FAPI RC
-        constexpr size_t pibSizeOffset = sizeof(uint32_t) + //FAPI RC
-                                         sizeof(uint32_t) + //size of Scom Addr
+        constexpr size_t l_pibSizeOffset = sizeof(uint32_t) + //size of Scom Addr
                                          sizeof(uint64_t);  //Scom Address
 
 
-        if(expectedSize != i_ffdc.size)
+        if(l_expectedSize != i_ffdc.size)
         {
+            SBE_TRACF(ERR_MRK "i_ffdc.size != l_expectedSize. i_ffdc.size = 0x%08X, "
+                      "l_expectedSize = 0x%08X", i_ffdc.size, l_expectedSize);
             break;
         }
 
         const char* l_buffer = reinterpret_cast<const char*>(i_ffdc.ffdcPtr);
+        uint32_t l_scomAddrSize = *(reinterpret_cast<const uint32_t*>(l_buffer));
 
-        if(l_expectedScomAddrSize != *(reinterpret_cast<const uint32_t*>
-                                              (l_buffer + scomAddrSizeOffset)))
+        // the offset of the scom adress size should always be at the beginning of the buffer
+        switch (l_scomAddrSize)
         {
+            case 4:
+            case 8:
+                break;
+            default:
+                // if the size is not either 4 or 8 bytes then the size is invalid
+                isInvalidSize = true;
+        }
+
+        if(isInvalidSize)
+        {
+            SBE_TRACF(ERR_MRK "scomAddrSize is of an unexpected size. scomAddrSize = %d, "
+                      "expected sizes are 4 or 8", l_scomAddrSize);
             break;
         }
 
         uint32_t l_pibSize = *(reinterpret_cast<const uint32_t*>
-                                                   (l_buffer + pibSizeOffset));
+                                                   (l_buffer + l_pibSizeOffset));
         if(l_expectedPIBSize != l_pibSize)
         {
-            //This can be deduced as uint32_t, we'll check uint16_t as well
-            if(not (l_pibSize < l_expectedPIBSize && l_pibSize != 0 &&
-                                            0 == l_pibSize%sizeof(uint16_t)))
-            {
-                break;
-            }
+            SBE_TRACF(ERR_MRK "l_pibSize != l_expectedPIBSize. l_pibSize = %d, "
+                      "l_expectedPIBSize = %d", l_pibSize, l_expectedPIBSize);
+            break;
         }
 
         retval = true;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -267,7 +267,8 @@ public:
     //=========================
     // Class Constants
     //=========================
-    static const size_t MSG_BUFFER_SIZE = 2048;
+
+    static const size_t MSG_BUFFER_SIZE_WORDS = 3072;
     static const size_t INVALID_INDEX = size_t(-1);
 
 protected:
@@ -291,7 +292,7 @@ private:
    // Buffers
    //====================
 
-   uint32_t iv_localMsgBuffer[MSG_BUFFER_SIZE]; /**< local buffer large enough
+   uint32_t iv_localMsgBuffer[MSG_BUFFER_SIZE_WORDS]; /**< local buffer large enough
                                                            to hold FFDC data */
 
    uint32_t * const iv_callerBufferPtr{}; /**< caller supplied buffer should

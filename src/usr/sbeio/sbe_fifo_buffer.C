@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@ constexpr size_t STATUS_WORD_SIZE =
 namespace SBEIO
 {
 
-const size_t SbeFifoRespBuffer::MSG_BUFFER_SIZE;
+const size_t SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS;
 
 //------------------------------------------------------------------------
 const char* SbeFifoRespBuffer::cv_stateStrings[] = {
@@ -58,7 +58,7 @@ SbeFifoRespBuffer::SbeFifoRespBuffer(uint32_t* i_fifoBuffer,
                                             iv_callerBufferPtr(i_fifoBuffer),
                                             iv_callerWordSize(
                                                  std::min(bufferWordSize,
-                                                          MSG_BUFFER_SIZE)
+                                                          MSG_BUFFER_SIZE_WORDS)
                                                              ),
                                             iv_getSbeFfdcFmt(i_getSbeFfdcFmt)
 {
@@ -90,7 +90,7 @@ bool SbeFifoRespBuffer::append(uint32_t i_value)
             iv_callerBufferPtr[iv_index] = i_value;
         }
 
-        if(iv_index < MSG_BUFFER_SIZE)
+        if(iv_index < MSG_BUFFER_SIZE_WORDS)
         {
             iv_localMsgBuffer[iv_index] = i_value;
             ++iv_index;
@@ -139,7 +139,7 @@ void SbeFifoRespBuffer::completeMessage()
             }
 
             // |offset to header| EOT marker | current insert pos | <- iv_index
-            // The offset is how far to move back from from the EOT position to
+            // The 'offset to header' is how many words to move back from the EOT position
             // to get the index of the Status Header.
             iv_offsetIndex = (iv_index - 2);
 

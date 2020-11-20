@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@ extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_FFDC_TRACD(printf_string,args...) \
     TRACDCOMP(g_trac_sbeio,"sbeFFDCParserTest: " printf_string,##args)
-
 using namespace SBEIO;
 
 class FfdcScomPibErrorPackageTestFixure: public SBEIO::FfdcScomPibErrorPackage
@@ -100,7 +99,7 @@ std::vector<uint32_t>  bufferFFDC = {
                                     0x00000008, //FFDC 4 - scom addr size
                                     0x12345678, //FFDC 5 - scom addr msb
                                     0x9ABCDEF0, //FFDC 6 - scom addr lsb
-                                    0x00000008, //FFDC 7 - PIB RC size
+                                    0x00000001, //FFDC 7 - PIB RC size
                                     0x00000000, //FFDC 8 - PIB_PARITY_ERROR msb
                                     0x00000006  //FFDC 9 - PIB_PARITY_ERROR lsb
                                      };
@@ -112,7 +111,7 @@ std::vector<uint32_t>  bufferUnknownRCFFDC = {
                                     0x00000008, //FFDC 4 - scom addr size
                                     0x12345678, //FFDC 5 - scom addr msb
                                     0x9ABCDEF0, //FFDC 6 - scom addr lsb
-                                    0x00000008, //FFDC 7 - PIB RC size
+                                    0x00000001, //FFDC 7 - PIB RC size
                                     0x00000000, //FFDC 8 - PIB_PARITY_ERROR msb
                                     0x00000006  //FFDC 9 - PIB_PARITY_ERROR lsb
                                      };
@@ -124,7 +123,7 @@ std::vector<uint32_t>  bufferBadSchemaFFDC = {
                                     0x00000008, //FFDC 4 - scom addr size
                                     0x12345678, //FFDC 5 - scom addr msb
                                     0x9ABCDEF0, //FFDC 6 - scom addr lsb
-                                    0x00000008, //FFDC 7 - PIB RC size
+                                    0x00000001, //FFDC 7 - PIB RC size
                                     0x00000000, //FFDC 8 - PIB_PARITY_ERROR msb
                                     0x00000006, //FFDC 9 - PIB_PARITY_ERROR lsb
                                     0xFFEEDDCC  //FFDC 10  Extra Garbage Word
@@ -149,10 +148,9 @@ public:
 
         do
         {
-            bufferFFDC[2] = static_cast<uint32_t>(fapi2::RC_SBE_SCOM_FAILURE);
-            g_testPackage.ffdcPtr = &bufferFFDC[2];
-            g_testPackage.size = (bufferFFDC.size() - 2) * sizeof(uint32_t);
-            g_testPackage.rc = fapi2::RC_SBE_SCOM_FAILURE;
+            g_testPackage.ffdcPtr = &bufferFFDC[3];
+            g_testPackage.size = (bufferFFDC.size() - 3) * sizeof(uint32_t);
+            g_testPackage.rc = bufferFFDC[2];
 
             bool matchesSchema =
             FfdcScomPibErrorPackage::doesPackageMatchSchema(g_testPackage);
@@ -163,9 +161,9 @@ public:
                 xxdPrint(g_testPackage.ffdcPtr, g_testPackage.size, strFfdc);
 
                 SBE_FFDC_TRACD("sbeFFDCParserTest testGoodFFDC: "
-                             "doesPackageMatchSchema unexpectedly "
-                             "returned false. Input FFDC:\n%s",
-                             strFfdc
+                               "doesPackageMatchSchema unexpectedly "
+                               "returned false. Input FFDC:%s",
+                                strFfdc
                               );
 
                 TS_FAIL("sbeFFDCParserTest testGoodFFDC: "
@@ -235,8 +233,8 @@ public:
                 TS_FAIL("sbeFFDCParserTest testGoodFFDC: "
                         "Did not receive pib rc 0x%08X as expected. "
                         "pib rc: 0x%08X",
-                        expectedPibRc,
-                        pibRc
+                         expectedPibRc,
+                         pibRc
                        );
 
                 result = false;
@@ -299,10 +297,10 @@ public:
         do
         {
             bufferFFDC[2] = static_cast<uint32_t>(fapi2::RC_SBE_SCOM_FAILURE);
-            bufferFFDC[6] = 4; // test with size of PIB RC = 4
-            g_testPackage.ffdcPtr = &bufferFFDC[2];
-            g_testPackage.size = (bufferFFDC.size() - 2) * sizeof(uint32_t);
-            g_testPackage.rc = fapi2::RC_SBE_SCOM_FAILURE;
+            bufferFFDC[3] = 4; // test with size of scom addr = 4
+            g_testPackage.ffdcPtr = &bufferFFDC[3];
+            g_testPackage.size = (bufferFFDC.size() - 3) * sizeof(uint32_t);
+            g_testPackage.rc = bufferFFDC[2];
 
             if(FfdcParsedPackage::ParsedType::SBE_SCOM_PIB_ERROR !=
               FfdcParsedPackage::rcToParsedType(fapi2::RC_SBE_SCOM_FAILURE))
@@ -545,10 +543,10 @@ public:
         bufferBadSchemaFFDC[2] = static_cast<uint32_t>
                                             (fapi2::RC_SBE_SCOM_FAILURE);
 
-        g_testPackage.ffdcPtr = &bufferBadSchemaFFDC[2];
-        g_testPackage.size = (bufferBadSchemaFFDC.size() - 2) *
+        g_testPackage.ffdcPtr = &bufferBadSchemaFFDC[3];
+        g_testPackage.size = (bufferBadSchemaFFDC.size() - 3) *
                                                             sizeof(uint32_t);
-        g_testPackage.rc = fapi2::RC_SBE_SCOM_FAILURE;
+        g_testPackage.rc = bufferBadSchemaFFDC[2];
 
         FfdcScomPibErrorPackageTestFixure l_ffdcPackage{g_testPackage};
 
@@ -592,6 +590,7 @@ public:
      //---------------------------------------------------------------------
      void testWithFFDCParser()
      {
+         SBE_FFDC_TRACD("ENTER sbeFFDCParserTest testWithFFDCParser");
 
          bool result{true};
 
@@ -633,7 +632,7 @@ public:
                         "Ffdc package was not successfully parsed."
                        );
 
-                result = true;
+                result = false;
                 break;
              }
 
@@ -646,7 +645,7 @@ public:
                         "ffdcParser.getFFDCPackage(0, package2) failed."
                        );
 
-                result = true;
+                result = false;
                 break;
              }
 
@@ -666,7 +665,7 @@ public:
                         "Ffdc package 2 was not successfully parsed."
                        );
 
-                result = true;
+                result = false;
                 break;
              }
          }

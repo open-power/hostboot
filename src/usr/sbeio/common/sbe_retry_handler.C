@@ -67,7 +67,8 @@
 #include <devicefw/driverif.H>
 #include <plat_utils.H>
 
-
+#include <fapi2.H>
+#include <set_sbe_error.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -809,7 +810,7 @@ void SbeRetryHandler::handleFspIplTimeFail(TARGETING::Target * i_target)
 void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
 {
     SBE_TRACF(ENTER_MRK "sbe_get_ffdc_handler()");
-    uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE;
+    uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS;
     uint32_t *l_pFifoResponse =
         reinterpret_cast<uint32_t *>(malloc(l_responseSize));
 
@@ -920,14 +921,12 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
                         continue;
                     }
 
-                    //Put FFDC into sbeFfdc_t struct and
+                    //Put FFDC data into sbeFfdc_t struct and
                     //call FAPI_SET_SBE_ERROR
-                    // @TODO RTC 254961 fapi2::sbeFfdc_t l_sbeFfdc;
-                    //l_sbeFfdc.size = l_package.size;
-                    //l_sbeFfdc.data = reinterpret_cast<uint64_t>(l_package.ffdcPtr);
+                    fapi2::sbeFfdc_t * l_sbeFfdc = reinterpret_cast<sbeFfdc_t * >(l_package.ffdcPtr);
+                    uint32_t l_pos = i_target->getAttr<TARGETING::ATTR_FAPI_POS>();
+                    FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, l_sbeFfdc, l_pos);
 
-                    //uint32_t l_pos = i_target->getAttr<TARGETING::ATTR_FAPI_POS>();
-                    //FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, &l_sbeFfdc, l_pos);
                     errlHndl_t l_sbeHwpfErr = rcToErrl(l_fapiRc);
                     // If we created an error successfully we must now commit it
                     if(l_sbeHwpfErr)

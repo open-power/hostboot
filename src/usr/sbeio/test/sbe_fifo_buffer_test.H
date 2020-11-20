@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@ public:
 std::vector<uint32_t> bufferNoReturnNoFFDC = {
                                     0xC0DEA807, //Status Header 1
                                     0x00000000, //Status Header 2
-                                    0x00000003, //Offset to Status Header
+                                    0x00000003, //word offset from the EOT to Status Header entry
                                     0x00000001  //EOT
                                   };
 
@@ -80,20 +80,23 @@ std::vector<uint32_t>  bufferReturnNoFFDC = {
                                     0x00030004, //Return Data 2
                                     0xC0DEA807, //Status Header 1
                                     0x00000000, //Status Header 2
-                                    0x00000003, //Offset to Status Header
+                                    0x00000003, //word offset from the EOT to Status Header entry
                                     0x00000001  //EOT
                                 };
 
 std::vector<uint32_t>  bufferNoReturnFFDC = {
                                     0xC0DEA807, //Status Header 1
                                     0x00FE0099, //Status Header 2
-                                    0xFFDC0024, //FFDC 1
-                                    0x00983AB6, //FFDC 2 - RC_SBE_SCOM_FAILURE
-                                    0x00000008, //FFDC 3 - scom addr size
-                                    0x12345678, //FFDC 4 - scom addr
-                                    0x00000008, //FFDC 5 - PIB RC size
-                                    0x00000006, //FFDC 6 - PIB_PARITY_ERROR
-                                    0x00000009, //Offset to Status Header
+                                    0xFFDC0009, //FFDC 1 - Magic, Len (in words)
+                                    0x0000A807, //FFDC 2 - Seq, Cmd class, cmd
+                                    0x00983AB6, //FFDC 3 - RC_SBE_SCOM_FAILURE
+                                    0x00000004, //FFDC 4 - scom addr size
+                                    0x00000000, //FFDC 5 - scom addr
+                                    0x12345678, //FFDC 6 - scom addr
+                                    0x00000001, //FFDC 7 - PIB RC size
+                                    0x00000000, //FFDC 8 - PIB_PARITY_ERROR
+                                    0x00000006, //FFDC 9 - PIB_PARITY_ERROR
+                                    0x0000000C, //word offset from the EOT to Status Header entry
                                     0x00000001, //EOT
                                 };
 
@@ -103,50 +106,56 @@ std::vector<uint32_t>  bufferReturnFFDC = {
                                     0x00000003, //Return Data 3
                                     0xC0DEA807, //Status Header 1
                                     0x00FE0099, //Status Header 2
-                                    0xFFDC0024, //FFDC 1
-                                    0x00983AB6, //FFDC 2 - RC_SBE_SCOM_FAILURE
-                                    0x00000008, //FFDC 3 - scom addr size
-                                    0x12345678, //FFDC 4 - scom addr
-                                    0x00000008, //FFDC 5 - PIB RC size
-                                    0x00000006, //FFDC 6 - PIB_PARITY_ERROR
-                                    0x00000009, //Offset to Status Header
+                                    0xFFDC0009, //FFDC 1 - Magic, Len
+                                    0x0000A807, //FFDC 2 - Seq, Cmd class, cmd
+                                    0x00983AB6, //FFDC 3 - RC_SBE_SCOM_FAILURE
+                                    0x00000008, //FFDC 4 - scom addr size
+                                    0x12345678, //FFDC 5 - scom addr msb
+                                    0x9ABCDEF0, //FFDC 6 - scom addr lsb
+                                    0x00000001, //FFDC 7 - PIB RC size
+                                    0x00000000, //FFDC 8 - PIB_PARITY_ERROR msb
+                                    0x00000006, //FFDC 9 - PIB_PARITY_ERROR lsb
+                                    0x0000000C, //word offset from the EOT to Status Header entry
                                     0x00000001, //EOT
                                 };
 
 std::vector<uint32_t> bufferLongOffset = {
-                                        0xC0DEA807, //Status Header 1
-                                        0x00000000, //Status Header 2
-                                        0x00000004, //Offset to Status Header
-                                        0x00000001  //EOT
-                                        };
+                                    0xC0DEA807, //Status Header 1
+                                    0x00000000, //Status Header 2
+                                    0x00000004, //word offset from the EOT to Status Header entry
+                                    0x00000001  //EOT
+                                };
 
 std::vector<uint32_t> bufferShortOffset = {
-                                       0xC0DEA807, //Status Header 1
-                                       0x00000000, //Status Header 2
-                                       0x00000002, //Offset to Status Header
-                                       0x00000001  //EOT
-                                        };
+                                    0xC0DEA807, //Status Header 1
+                                    0x00000000, //Status Header 2
+                                    0x00000002, //word offset from the EOT to Status Header entry
+                                    0x00000001  //EOT
+                                };
 
 std::vector<uint32_t> bufferShortRead = {
-                                            0xC0DEA807, //Status Header 1
-                                            0x00000000, //Status Header 2
-                                            0x00000001  //EOT
-                                        };
+                                    0xC0DEA807, //Status Header 1
+                                    0x00000000, //Status Header 2
+                                    0x00000001  //EOT
+                                };
 
 std::vector<uint32_t>  bufferGetSbeFFDC = {
-                                    0xFFDC0024, //FFDC 1
-                                    0x00983AB6, //FFDC 2 - RC_SBE_SCOM_FAILURE
-                                    0x00000008, //FFDC 3 - scom addr size
-                                    0x12345678, //FFDC 4 - scom addr
-                                    0x00000008, //FFDC 5 - PIB RC size
-                                    0x00000006, //FFDC 6 - PIB_PARITY_ERROR
+                                    0xFFDC0009, //FFDC 1 - Magic, Len
+                                    0x0000A801, //FFDC 2 - Seq, Cmd class, cmd
+                                    0x00000000, //FFDC 3 - return code
+                                    0x00000004, //FFDC 4 - scom addr size
+                                    0x00000000, //FFDC 5 - scom addr msb
+                                    0x12345678, //FFDC 6 - scom addr lsb
+                                    0x00000001, //FFDC 7 - PIB RC size
+                                    0x00000000, //FFDC 8 - PIB_PARITY_ERROR msb
+                                    0x00000006, //FFDC 9 - PIB_PARITY_ERROR lsb
                                     0xC0DEA801, //Status Header 1
                                     0x00000000, //Status Header 2
-                                    0x00000003, //Offset to Status Header
+                                    0x00000003, //word offset from the EOT to Status Header entry
                                     0x00000001, //EOT
                                 };
 
-size_t overrun_element_count{2096};
+size_t overrun_element_count{SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS + 1};
 uint32_t overrun_element_value{34};
 std::vector<uint32_t> bufferOverrun(overrun_element_count,
                                     overrun_element_value);
@@ -181,7 +190,7 @@ public:
     //------------------------------------------------
     void testState()
     {
-        SBE_BUFFER_TRACF("Enter sbeFifoBufferTest testState");
+        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testState");
 
         bool result{true};
 
@@ -819,16 +828,16 @@ public:
             memset(&expData, 0, sizeof(expData));
 
             expData.test_name = "sbeFifoBufferTest testNoReturnFFDC";
-            expData.index = 10;
-            expData.offset_index = 8;
-            expData.offset = 9;
+            expData.index = 13;
+            expData.offset_index = 11;
+            expData.offset = 12;
 
             expData.statusIndex = 0;
             expData.expected_status = &bufferNoReturnFFDC[0];
 
             expData.expectFFDC = true;
             expData.ffdcIndex = 2;
-            expData.ffdcByteSize = sizeof(uint32_t)*6;
+            expData.ffdcByteSize = sizeof(uint32_t)*9;
             expData.expected_ffdc_data = &bufferNoReturnFFDC[2];
 
             expData.expectReturnData = false;
@@ -951,16 +960,16 @@ public:
             memset(&expData, 0, sizeof(expData));
 
             expData.test_name = "ReturnFFDC";
-            expData.index = 13;
-            expData.offset_index = 11;
-            expData.offset = 9;
+            expData.index = 16;
+            expData.offset_index = 14;
+            expData.offset = 12;
 
             expData.statusIndex = 3;
             expData.expected_status = &bufferReturnFFDC[3];
 
             expData.expectFFDC = true;
             expData.ffdcIndex = 5;
-            expData.ffdcByteSize = sizeof(uint32_t)*6;
+            expData.ffdcByteSize = sizeof(uint32_t)*9;
             expData.expected_ffdc_data = &bufferReturnFFDC[5];
 
             expData.expectReturnData = true;
@@ -1280,13 +1289,11 @@ public:
         //overruns the local buffer.
 
         bool result{true};
-
         do
         {
             uint32_t callerBuffer[2] = {0};
             SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
                                        sizeof(callerBuffer)/sizeof(uint32_t));
-
             if(not fifoBuffer)
             {
                 TS_FAIL("sbeFifoBufferTest testOverrun: "
@@ -1462,21 +1469,21 @@ public:
             memset(&expData, 0, sizeof(expData));
 
             expData.test_name = "GetSbeFFDC";
-            expData.index = 10;
-            expData.offset_index = 8;
+            expData.index = 13;
+            expData.offset_index = 11;
             expData.offset = 3;
 
-            expData.statusIndex = 6;
-            expData.expected_status = &bufferGetSbeFFDC[6];
+            expData.statusIndex = 9;
+            expData.expected_status = &bufferGetSbeFFDC[9];
 
             // NOTE: FFDC is in the return data for get SBE FFDC response.
             expData.expectFFDC = true;
             expData.ffdcIndex = 0;
-            expData.ffdcByteSize = sizeof(uint32_t)*6;
+            expData.ffdcByteSize = sizeof(uint32_t)*9;
             expData.expected_ffdc_data = &bufferGetSbeFFDC[0];
 
             expData.expectReturnData = true;
-            expData.dataByteSize = sizeof(uint32_t) * 6;
+            expData.dataByteSize = sizeof(uint32_t) * 9;
             expData.expected_data = &bufferGetSbeFFDC[0];
 
             bool check_result = runChecks(expData, fifoBuffer);
@@ -1552,7 +1559,7 @@ private:
             {
                 snprintf(expData.strMessage,
                          sizeof(expData.strMessage),
-                        "%s index not at %d as expected. Index = %d",
+                        "%s next insertion index not at %d as expected. Index = %d",
                          expData.test_name,
                          expData.index,
                          fifoBuffer.index()
@@ -1577,18 +1584,15 @@ private:
                 break;
             }
 
-            uint32_t offset =
-                        fifoBuffer.localBuffer()[fifoBuffer.offsetIndex()];
-
-            if(expData.offset != offset)
+            if(expData.offset != fifoBuffer.offset())
             {
                 snprintf(expData.strMessage,
                          sizeof(expData.strMessage),
                          "%s: "
-                         "The offset is not %d as expected. Buffer Offset: %d",
+                         "The offset to the status header is not %d as expected. Buffer Offset: %d",
                          expData.test_name,
                          expData.offset,
-                         offset);
+                         fifoBuffer.offset());
 
                 result = false;
                 break;
@@ -1699,7 +1703,7 @@ private:
                     snprintf(expData.strMessage,
                              sizeof(expData.strMessage),
                             "%s: "
-                            "Buffer FFDC size %d not as expected %d",
+                            "Buffer FFDC byte size %d not as expected %d",
                              expData.test_name,
                              fifoBuffer.getFFDCByteSize(),
                              expData.ffdcByteSize

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,11 +63,8 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
     {
         TS_TRACE("getSBEFFDCTest entry");
 
-        //@fixme-RTC:254961-Enable FFDC Test
-        TS_TRACE("Skipping testgetSBEFFDC1 - See RTC:254961");
-#if 0
         errlHndl_t l_errl = nullptr;
-        uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE;
+        uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS * sizeof(uint32_t);
         uint32_t *l_pFifoResponse =
             reinterpret_cast<uint32_t *>(malloc(l_responseSize));
 
@@ -78,7 +75,7 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
         getAllChips(l_cpuTargetList,
                     TARGETING::TYPE_PROC);
 
-        SBEFFDC_TRACF("getSBEFFDCTest: %d proc(s) in the system.",
+        SBEFFDC_TRACF("%d proc(s) in the system.",
                       l_cpuTargetList.size() );
 
         //
@@ -125,7 +122,7 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
                 }
 
                 uint32_t dumpsize = std::min( l_responseSize, (uint32_t)256 );
-                TRACFCOMP(g_trac_sbeio,"response size=%d",l_responseSize);
+                TRACFCOMP(g_trac_sbeio,"response size=%d bytes long",l_responseSize);
                 TRACFBIN(g_trac_sbeio,"response",l_pFifoResponse, dumpsize);
 
                 // Find the status header after the return data, ie, FFDC
@@ -134,12 +131,14 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
                     reinterpret_cast<SbeFifo::ffdcHeader *>(l_pFifoResponse);
                 uint64_t l_firstFfdcHeaderAddr =
                         reinterpret_cast<uint64_t>(l_pFfdcHeader);
+
                 while(l_pFfdcHeader->magic == SbeFifo::FIFO_FFDC_MAGIC)
                 {
-                    l_size += l_pFfdcHeader->lengthWords / sizeof(uint32_t);
+                    l_size += l_pFfdcHeader->lengthWords * sizeof(uint32_t);
                     l_pFfdcHeader = reinterpret_cast<SbeFifo::ffdcHeader *>
                         (l_firstFfdcHeaderAddr + l_size);
                 };
+
                 SbeFifo::statusHeader *l_pStatusHeader = reinterpret_cast<
                     SbeFifo::statusHeader *>(l_firstFfdcHeaderAddr + l_size);
 
@@ -147,7 +146,7 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
                 if(l_pStatusHeader->magic != SbeFifo::FIFO_STATUS_MAGIC)
                 {
                     TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X with status "
-                            "magic 0x%.4x, but expected 0x%.4x",
+                            "magic 0x%.4X, but expected 0x%.4X",
                             TARGETING::get_huid(l_cpu_target),
                             l_pStatusHeader->magic,
                             SbeFifo::FIFO_STATUS_MAGIC);
@@ -207,7 +206,6 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
         free(l_pFifoResponse);
         l_pFifoResponse = nullptr;
 
-#endif
         TS_TRACE("getSBEFFDCTest exit");
     }
 };

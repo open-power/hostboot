@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -369,7 +369,8 @@ inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc, uint8_t i_proc_instance,
                 break;
 
             default:
-                FAPI_ERR("Invalid data size in SBE FFDC buffer");
+                FAPI_ERR("Invalid data size in SBE FFDC buffer, i_sbeFfdc.size = %d",
+                          i_sbeFfdc.size);
                 invalid_data = true;
         }
 
