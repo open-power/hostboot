@@ -416,9 +416,22 @@ class PlatPmPPB
                                  PoundVOpPoint_t* ip);
 
         ///////////////////////////////////////////////////////////
+        ////////   interpolate_pw_point
+        ///////////////////////////////////////////////////////////
+        void interpolate_pw_pt(const uint32_t  freq,
+                               const uint32_t  region,
+                               const uint32_t  d_region,
+                               PoundWEntry_t* ip);
+
+        ///////////////////////////////////////////////////////////
         ////////   create_stretched_points
         ///////////////////////////////////////////////////////////
         fapi2::ReturnCode create_stretched_pts();
+
+        ///////////////////////////////////////////////////////////
+        ////////   create_stretched_points
+        ///////////////////////////////////////////////////////////
+        fapi2::ReturnCode create_stretched_pts_poundW();
 
         /// -----------------------------------------------------------------------
         /// @brief Compute VPD points of different regions

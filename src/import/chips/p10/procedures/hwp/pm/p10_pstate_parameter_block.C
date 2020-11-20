@@ -2111,6 +2111,8 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
 
+        FAPI_TRY(create_stretched_pts_poundW(),
+                "create_stretched_pts_poundW function failed");
         //Read #IQ data
 
         //if wof is disabled.. don't call IQ function
@@ -3879,14 +3881,15 @@ CF0         0   CF0             CF0
 ///////////////////////////////////////////////////////////
 uint32_t PlatPmPPB::find_freq_region(const uint32_t freq_mhz)
 {
-    for (auto r = 0; r < NUM_PV_POINTS; ++r)
+    for (uint8_t r = 0; r < NUM_PV_POINTS; ++r)
     {
-        FAPI_INF("%08X %08X %d",iv_attr_mvpd_poundV_raw[r].frequency_mhz,
-        iv_attr_mvpd_poundV_raw[r+1].frequency_mhz,r);
-        if ((freq_mhz >= iv_attr_mvpd_poundV_raw[r].frequency_mhz &&
-             freq_mhz <  iv_attr_mvpd_poundV_raw[r+1].frequency_mhz  )  ||
-            (freq_mhz >= iv_attr_mvpd_poundV_raw[r].frequency_mhz &&
-             iv_attr_mvpd_poundV_raw[r+1].frequency_mhz) == 0)
+        FAPI_INF("freq_mhz %08x NUM_PV_POINTS %d",freq_mhz,NUM_PV_POINTS);
+        FAPI_INF("%08X %08X %d",iv_attr_mvpd_poundV_raw_orig[r].frequency_mhz,
+        iv_attr_mvpd_poundV_raw_orig[r+1].frequency_mhz,r);
+        if ((freq_mhz >= iv_attr_mvpd_poundV_raw_orig[r].frequency_mhz &&
+             freq_mhz <  iv_attr_mvpd_poundV_raw_orig[r+1].frequency_mhz  )  ||
+            (freq_mhz >= iv_attr_mvpd_poundV_raw_orig[r].frequency_mhz &&
+             iv_attr_mvpd_poundV_raw_orig[r+1].frequency_mhz) == 0)
         {
             return r;
         }
@@ -3900,13 +3903,13 @@ uint32_t PlatPmPPB::find_freq_region(const uint32_t freq_mhz)
 uint32_t PlatPmPPB::region_steps(const uint32_t region)
 {
 
-   if (iv_attr_mvpd_poundV_raw[region+1].frequency_mhz == 0)
+   if (iv_attr_mvpd_poundV_raw_orig[region+1].frequency_mhz == 0)
    {
       return 0;
    }
 
-   return ((iv_attr_mvpd_poundV_raw[region+1].frequency_mhz -
-            iv_attr_mvpd_poundV_raw[region].frequency_mhz  ) * 1000 /
+   return ((iv_attr_mvpd_poundV_raw_orig[region+1].frequency_mhz -
+            iv_attr_mvpd_poundV_raw_orig[region].frequency_mhz  ) * 1000 /
             iv_frequency_step_khz );
 }
 
@@ -3920,23 +3923,25 @@ uint32_t PlatPmPPB::region_steps(const uint32_t region)
 void PlatPmPPB::compute_stretched_freq_pt(const uint32_t region,
                                           uint32_t *o_point_mhz)
 {
-    uint32_t region_start_mhz = iv_attr_mvpd_poundV_raw[region].frequency_mhz;
-    uint32_t region_end_mhz = iv_attr_mvpd_poundV_raw[region+1].frequency_mhz;
+    uint32_t region_start_mhz = iv_attr_mvpd_poundV_raw_orig[region].frequency_mhz;
+    uint32_t region_end_mhz = iv_attr_mvpd_poundV_raw_orig[region+1].frequency_mhz;
 
     uint32_t step_size_mhz =
         (uint32_t) internal_ceil(((float)region_end_mhz - (float)region_start_mhz) / 2);
+
+    step_size_mhz =(((uint16_t) (step_size_mhz * 1000 /16667)) * 16667)/1000;  
 
     *o_point_mhz = region_start_mhz + step_size_mhz;
 }
 
 #define INTERPOLATE_FREQ(m_FREQ, round, m_REGION, m_MEMBER, m_VALUE)  \
     {\
-        uint16_t m = compute_slope_4_12(iv_attr_mvpd_poundV_raw[m_REGION+1].m_MEMBER,         \
-                                        iv_attr_mvpd_poundV_raw[m_REGION].m_MEMBER,           \
-                                        iv_attr_mvpd_poundV_raw[m_REGION+1].frequency_mhz,    \
-                                        iv_attr_mvpd_poundV_raw[m_REGION].frequency_mhz     );\
-        uint32_t x = m_FREQ - iv_attr_mvpd_poundV_raw[m_REGION].frequency_mhz; \
-        uint32_t b = iv_attr_mvpd_poundV_raw[m_REGION].m_MEMBER; \
+        uint16_t m = compute_slope_4_12(iv_attr_mvpd_poundV_raw_orig[m_REGION+1].m_MEMBER,         \
+                                        iv_attr_mvpd_poundV_raw_orig[m_REGION].m_MEMBER,           \
+                                        iv_attr_mvpd_poundV_raw_orig[m_REGION+1].frequency_mhz,    \
+                                        iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz     );\
+        uint32_t x = m_FREQ - iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz; \
+        uint32_t b = iv_attr_mvpd_poundV_raw_orig[m_REGION].m_MEMBER; \
         if (round == ROUND_UP) \
         {\
             m_VALUE = (( m * x ) >> (VID_SLOPE_FP_SHIFT_12 - 1)) + (b << 1) + 1; \
@@ -3948,8 +3953,52 @@ void PlatPmPPB::compute_stretched_freq_pt(const uint32_t region,
         }\
     }
 
+#define INTERPOLATE_PW_PTS(m_FREQ, round, m_REGION, m_MEMBER, m_VALUE, c,dr)  \
+    {\
+       int16_t m;\
+       if(iv_poundW_data.entry[m_REGION+1].entry[c].ddsc.fields.insrtn_dely >=  \
+          iv_poundW_data.entry[m_REGION].entry[c].ddsc.fields.insrtn_dely) { \
+        m = compute_slope_4_12(iv_poundW_data.entry[m_REGION+1].entry[c].ddsc.fields.m_MEMBER,         \
+                                        iv_poundW_data.entry[m_REGION].entry[c].ddsc.fields.m_MEMBER,         \
+                                        iv_attr_mvpd_poundV_raw_orig[m_REGION+1].frequency_mhz,    \
+                                        iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz     );\
+       }\
+       else \
+        {\
+            m = compute_slope_4_12(iv_poundW_data.entry[m_REGION].entry[c].ddsc.fields.m_MEMBER,         \
+                    iv_poundW_data.entry[m_REGION+1].entry[c].ddsc.fields.m_MEMBER,         \
+                    iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz,    \
+                    iv_attr_mvpd_poundV_raw_orig[m_REGION+1].frequency_mhz     );\
+        }\
+         uint32_t x = m_FREQ - iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz; \
+        uint32_t b = iv_poundW_data.entry[m_REGION].entry[c].ddsc.fields.m_MEMBER; \
+        if (round == ROUND_UP) \
+        {\
+            m = (( m * x ) >> (VID_SLOPE_FP_SHIFT_12 - 1)) + (b << 1) + 1; \
+            m_VALUE = m >> 1; \
+        } \
+        else if (round == ROUND_DOWN)\
+        { \
+            m_VALUE = (( m * x ) >> (VID_SLOPE_FP_SHIFT_12)) + b; \
+        }\
+       iv_poundW_data.entry[dr].entry[c].ddsc.fields.m_MEMBER = m_VALUE;\
+    }
+
 ///////////////////////////////////////////////////////////
-////////   interpolate_freq_point
+////////   interpolate_pw_point
+///////////////////////////////////////////////////////////
+void PlatPmPPB::interpolate_pw_pt(const uint32_t freq,
+                                    const uint32_t region,
+                                    const uint32_t d_region,
+                                    PoundWEntry_t *ip)
+{
+    for (auto core = 0; core < MAXIMUM_CORES; core++)
+    {
+        INTERPOLATE_PW_PTS( freq, ROUND_UP,region, insrtn_dely,ip->ddsc.fields.insrtn_dely, core,d_region);
+    }
+}
+///////////////////////////////////////////////////////////
+////////   interpolate_freq_point_poundW
 ///////////////////////////////////////////////////////////
 void PlatPmPPB::interpolate_freq_pt(const uint32_t freq,
                                     const uint32_t region,
@@ -3966,11 +4015,57 @@ void PlatPmPPB::interpolate_freq_pt(const uint32_t freq,
     INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_rdp_ac_10ma,    ip->ics_rdp_ac_10ma);
     INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_rdp_dc_10ma,    ip->ics_rdp_dc_10ma);
 
-    ip->vdd_vmin = iv_attr_mvpd_poundV_raw[region].vdd_vmin;
-    ip->rt_tdp_ac_10ma = iv_attr_mvpd_poundV_raw[region].rt_tdp_ac_10ma;
-    ip->rt_tdp_dc_10ma = iv_attr_mvpd_poundV_raw[region].rt_tdp_dc_10ma;
+    ip->vdd_vmin = iv_attr_mvpd_poundV_raw_orig[region].vdd_vmin;
+    ip->rt_tdp_ac_10ma = iv_attr_mvpd_poundV_raw_orig[region].rt_tdp_ac_10ma;
+    ip->rt_tdp_dc_10ma = iv_attr_mvpd_poundV_raw_orig[region].rt_tdp_dc_10ma;
 }
 
+// point set use.
+//    VPD_PT_SET_RAW - MVPD as is
+//    VPD_PT_SET_STRETCHED - Stretched
+//    VPD_PT_SET_BIASED - Biased and stretched
+fapi2::ReturnCode PlatPmPPB::create_stretched_pts_poundW()
+{
+    FAPI_INF(">>>>>>>>>> create_stretched_points_poundW");
+
+    {
+        uint32_t        ur = find_freq_region(iv_attrs.attr_pstate0_freq_mhz);  // UT region
+        uint32_t        dr = NUM_PV_POINTS-1;                               // Destination point
+        uint32_t        sr = ur;                                            // Source region
+        uint32_t        stretch_freq;
+        PoundWEntry_t ip;
+
+        FAPI_INF("create_stretched_points_poundW ur %d %08x",ur,iv_attrs.attr_pstate0_freq_mhz);
+
+        // 2 cases: (possible with pointers into a common set of curve fit points)
+        // 1. f(UT) > f(CF6)
+        // 2. f(UT) = f(CF6) (eg region 6)
+
+
+        if ( iv_attrs.attr_pstate0_freq_mhz > iv_attr_mvpd_poundV_raw_orig[ur].frequency_mhz)
+        {
+            //UT freq put in gCF7
+            interpolate_pw_pt(iv_attrs.attr_pstate0_freq_mhz, ur, dr,&ip); 
+            --dr;
+        }
+        else // f(UT) = f(CF6) (eg region 6)
+        {
+            for (auto core = 0; core < MAXIMUM_CORES; core++)
+            {
+                iv_poundW_data.entry[dr].entry[core].ddsc.value = 
+                    iv_poundW_data.entry[ur].entry[core].ddsc.value;
+            }
+            --dr; --sr;
+
+            compute_stretched_freq_pt(sr, &stretch_freq);
+
+            interpolate_pw_pt(stretch_freq, sr, dr,&ip);
+        }
+    }
+
+    FAPI_INF("<<<<<<<<<< create_stretched_points_poundW");
+    return fapi2::current_err;
+}
 
 // point set use.
 //    VPD_PT_SET_RAW - MVPD as is
