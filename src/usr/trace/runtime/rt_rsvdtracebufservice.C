@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,7 +115,8 @@ void RsvdTraceBufService::retrieveDataFromLastCrash()
                                      0,0,true);
 
     // Note: Set the iv_rsvdTraceBuffer before calling collectTrace()
-    iv_errl->collectTrace("RSVD_MEM_TRACE",0);
+    // Need to keep trace small enough so it doesn't get dropped from log
+    iv_errl->collectTrace("RSVD_MEM_TRACE", 3*KILOBYTE);
 
     // Can not commit the errl until the ErrlManager gets initialized.
     // Committing will be done in commitRsvdMemTraceErrl() after
