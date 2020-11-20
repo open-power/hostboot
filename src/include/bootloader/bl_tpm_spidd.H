@@ -61,5 +61,5 @@ Bootloader::hbblReasonCode tpm_read(uint32_t i_offset, void* o_buffer, size_t& i
  *
  * @return 0 on success or error code on failure
  */
-Bootloader::hbblReasonCode tpm_write(uint32_t i_offset, void* i_buffer, size_t& io_buflen);
+Bootloader::hbblReasonCode tpm_write(uint32_t i_offset, const void* i_buffer, size_t& io_buflen);
 #endif

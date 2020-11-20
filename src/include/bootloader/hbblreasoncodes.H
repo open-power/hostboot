@@ -95,6 +95,10 @@ namespace Bootloader
         RC_TPM_INVALID_READ_SIZE   = HBBL_COMP_ID | 0x17,  /**< We read out more or less data than we wanted */
         RC_TPM_INVALID_WRITE_SIZE  = HBBL_COMP_ID | 0x18,  /**< We wrote less or more data than we wanted */
         RC_TPM_COMMAND_NOT_READY   = HBBL_COMP_ID | 0x19,  /**< TPM is not ready for a command */
+        RC_TPM_NOT_EXPECTING       = HBBL_COMP_ID | 0x1a,  /**< TPM not expecting more data while it should be */
+        RC_TPM_TIMEOUT_D_1         = HBBL_COMP_ID | 0x1b,  /**< TPM hit the TPM D timeout (1) */
+        RC_TPM_TIMEOUT_D_2         = HBBL_COMP_ID | 0x1c,  /**< TPM hit the TPM D timeout (2) */
+        RC_TPM_IS_EXPECTING        = HBBL_COMP_ID | 0x1d,  /**< TPM expecting more data while it shouldn't be */
 
     };
 
