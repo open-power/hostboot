@@ -471,6 +471,7 @@ errlHndl_t copyArchitectedRegs(void)
 
         uint64_t dstTempAddr = reinterpret_cast<uint64_t>(vMapDstAddrBase);
         procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize = 0;
+        uint64_t allProcDataSize = 0; 
         for (uint32_t procNum = 0; procNum < procChips.size(); procNum++)
         {
             // Base addresses w.r.t PROC positions. This is static here
@@ -706,20 +707,18 @@ errlHndl_t copyArchitectedRegs(void)
 
                 } //End of Register Loop
             }//Thread Loop
+
+            //Populate the processor specific TOC in the HDAT PDA structure.
             uint32_t procId = procChips[procNum]->getAttr<TARGETING::ATTR_ORDINAL_ID>();
-            //Update Processor Specific data TOC contents.
-            procTableEntry->iv_procArcRegDataToc[procId].dataSize =
-                                            (procTableEntry->threadRegSize * threadCount);
-            if(procNum == 0)
-            {
-                procTableEntry->iv_procArcRegDataToc[procId].dataOffset =
-                                 (uint64_t)procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataOffset;
-            }
-            else
-            {
-                procTableEntry->iv_procArcRegDataToc[procId].dataOffset = procTableEntry->iv_procArcRegDataToc[procId-1].dataOffset +
-                                                                           procTableEntry->iv_procArcRegDataToc[procId-1].dataSize;
-            }
+            //Update PROC specific data offset
+            procTableEntry->iv_procArcRegDataToc[procId].dataOffset = 
+               static_cast<uint64_t>(procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataOffset + 
+                                     allProcDataSize);
+            //Update the size information.
+            procTableEntry->iv_procArcRegDataToc[procId].dataSize = (procTableEntry->threadRegSize * threadCount);
+            //Update the allProcDataSize to calculate the next PROC specific data offset.
+            allProcDataSize = allProcDataSize + procTableEntry->iv_procArcRegDataToc[procId].dataSize;
+
 
             TRACDCOMP(g_trac_dump,"procTableEntry->iv_procArcRegDataToc[%d].dataOffset=0x%.8x",
                                    procId,procTableEntry->iv_procArcRegDataToc[procId].dataOffset);
