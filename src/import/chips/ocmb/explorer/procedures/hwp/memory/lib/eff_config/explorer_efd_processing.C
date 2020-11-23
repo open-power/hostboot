@@ -371,6 +371,174 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Processes F1RC1x
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode dimm_ddr4_f1rc1x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint8_t l_f1rc1x = 0;
+
+    FAPI_TRY(mss::attr::get_ddr4_f1rc1x(i_target, l_f1rc1x));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->dimm_ddr4_f1rc1x(l_f1rc1x));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_ddr4_f1rc1x(i_target, l_f1rc1x));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes F1RC2x
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode dimm_ddr4_f1rc2x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint8_t l_f1rc2x = 0;
+
+    FAPI_TRY(mss::attr::get_ddr4_f1rc2x(i_target, l_f1rc2x));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->dimm_ddr4_f1rc2x(l_f1rc2x));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_ddr4_f1rc2x(i_target, l_f1rc2x));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes F1RC3x
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode dimm_ddr4_f1rc3x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint8_t l_f1rc3x = 0;
+
+    FAPI_TRY(mss::attr::get_ddr4_f1rc3x(i_target, l_f1rc3x));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->dimm_ddr4_f1rc3x(l_f1rc3x));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_ddr4_f1rc3x(i_target, l_f1rc3x));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes F1RC4x
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode dimm_ddr4_f1rc4x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint8_t l_f1rc4x = 0;
+
+    FAPI_TRY(mss::attr::get_ddr4_f1rc4x(i_target, l_f1rc4x));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->dimm_ddr4_f1rc4x(l_f1rc4x));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_ddr4_f1rc4x(i_target, l_f1rc4x));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes F1RC5x
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode dimm_ddr4_f1rc5x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint8_t l_f1rc5x = 0;
+
+    FAPI_TRY(mss::attr::get_ddr4_f1rc5x(i_target, l_f1rc5x));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->dimm_ddr4_f1rc5x(l_f1rc5x));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_ddr4_f1rc5x(i_target, l_f1rc5x));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes F1RC6x
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode dimm_ddr4_f1rc6x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint8_t l_f1rc6x = 0;
+
+    FAPI_TRY(mss::attr::get_ddr4_f1rc6x(i_target, l_f1rc6x));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->dimm_ddr4_f1rc6x(l_f1rc6x));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_ddr4_f1rc6x(i_target, l_f1rc6x));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes F1RC7x
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode dimm_ddr4_f1rc7x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint8_t l_f1rc7x = 0;
+
+    FAPI_TRY(mss::attr::get_ddr4_f1rc7x(i_target, l_f1rc7x));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->dimm_ddr4_f1rc7x(l_f1rc7x));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_ddr4_f1rc7x(i_target, l_f1rc7x));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Process the EFD data and set attributes
 /// @param[in] i_target DIMM target on which to operate
 /// @param[in] i_efd_data the EFD data to process
@@ -385,6 +553,13 @@ fapi2::ReturnCode process(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
     FAPI_TRY(rcd_voltage_ctrl(i_target, i_efd_data));
     FAPI_TRY(dimm_ddr4_f0rc7x(i_target, i_efd_data));
     FAPI_TRY(dimm_ddr4_f1rc00(i_target, i_efd_data));
+    FAPI_TRY(dimm_ddr4_f1rc1x(i_target, i_efd_data));
+    FAPI_TRY(dimm_ddr4_f1rc2x(i_target, i_efd_data));
+    FAPI_TRY(dimm_ddr4_f1rc3x(i_target, i_efd_data));
+    FAPI_TRY(dimm_ddr4_f1rc4x(i_target, i_efd_data));
+    FAPI_TRY(dimm_ddr4_f1rc5x(i_target, i_efd_data));
+    FAPI_TRY(dimm_ddr4_f1rc6x(i_target, i_efd_data));
+    FAPI_TRY(dimm_ddr4_f1rc7x(i_target, i_efd_data));
     FAPI_TRY(rcd_slew_rate(i_target, i_efd_data));
     FAPI_TRY(cs_cmd_latency(i_target, i_efd_data));
     FAPI_TRY(ca_parity_latency(i_target, i_efd_data));
