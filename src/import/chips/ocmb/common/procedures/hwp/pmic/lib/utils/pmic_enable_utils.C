@@ -934,7 +934,7 @@ fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC
                    mss::pmic::n_mode::N_MODE);
     }
 
-    FAPI_DBG("R31 VIN_BULK Reading: 0x%02X", l_reg_contents);
+    FAPI_DBG("%s EFUSE OFF VIN_BULK Reading: 0x%02X", mss::c_str(i_pmic_target), l_reg_contents);
 
     // Prior to turning on the efuse via the GPIO expander, we expect to see VIN below the
     // EFUSE_OFF_HIGH threshold, as power will not be applied.
@@ -981,7 +981,7 @@ fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
                    mss::pmic::n_mode::N_MODE);
     }
 
-    FAPI_DBG("R31 VIN_BULK Reading: 0x%02X", l_reg_contents);
+    FAPI_DBG("%s EFUSE ON VIN_BULK Reading: 0x%02X", mss::c_str(i_pmic_target), l_reg_contents);
 
     // After we turn on the efuse via the GPIO expander, power is applied to VIN_BULK,
     // and we should see a valid value within the range of EFUSE_ON_LOW --> HIGH, otherwise,
@@ -1003,14 +1003,22 @@ fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
 ///
 /// @brief Enable EFUSE according to 4U Functional Specification
 ///
+/// @param[in] i_pmic_map PMIC map object
 /// @param[in] i_gpio GPIO target
+/// @param[in] i_pmic_id_0 first PMIC ID (Either 0 or 2)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note Corresponds to steps (6,7,8) & (16,17,18) in 4U DDIMM Functional Spec
 ///
-fapi2::ReturnCode enable_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio)
+fapi2::ReturnCode enable_efuse(
+    const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
+    const uint8_t i_pmic_id_0)
 {
     FAPI_DBG("Enabling EFUSE on %s", mss::c_str(i_gpio));
     fapi2::buffer<uint8_t> l_reg_contents;
+
+    // 2 PMICS in a pair, grab the next PMIC ID (1 or 3)
+    const uint8_t l_pmic_id_1 = i_pmic_id_0 + 1;
 
     // Step 6 / 16
     l_reg_contents = mss::gpio::fields::EFUSE_OUTPUT_SETTING;
@@ -1020,10 +1028,54 @@ fapi2::ReturnCode enable_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2C
     l_reg_contents = mss::gpio::fields::EFUSE_POLARITY_SETTING;
     FAPI_TRY(mss::pmic::i2c::reg_write(i_gpio, mss::gpio::regs::EFUSE_POLARITY, l_reg_contents));
 
-    // Step 8 / 18
-    // Set pin to output type (this will turn on the E-Fuse)
-    l_reg_contents = mss::gpio::fields::CONFIGURATION_IO_MAP;
-    FAPI_TRY(mss::pmic::i2c::reg_write(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+    // Loop through the two pmics
+    for (uint8_t l_pmic_id = i_pmic_id_0; l_pmic_id <= l_pmic_id_1; ++l_pmic_id)
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+        FAPI_TRY_NO_TRACE(run_if_present(i_pmic_map, l_pmic_id, [&i_pmic_map, &i_gpio, &l_reg_contents, l_pmic_id]
+                                         (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+        {
+            const uint8_t PMIC_EFUSE_BIT = l_pmic_id % CONSTS::NUM_PRIMARY_PMICS;
+
+            // PMIC0/2
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read(i_pmic, REGS::R31, l_reg_contents));
+
+            // If the PMIC does not report 12V, then the SR Latch is either stuck, or the efuse is off.
+            // In either case, we will perform the efuse on/off/on toggle to solve both of those problems
+            if (l_reg_contents < CONSTS::R31_VIN_BULK_EFUSE_ON_LOW)
+            {
+                // The efuse enable bits, bit 0 and bit 1 map to PMIC0/2 or PMIC1/3, depending
+                // on the GPIO. We can normalize the pmic id to 0 or 1 to get the relevant bit
+                // for the provided pmic on that GPIO
+
+                FAPI_DBG("Performing GPIO EFUSE Enable for %s", mss::c_str(i_pmic))
+                FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read_reverse_buffer(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+
+                // Conveniently, the bit we need to set is either bit 0 (PMIC0) or 1 (PMIC1), so we can use l_pmic_id here
+                FAPI_TRY_LAMBDA(l_reg_contents.setBit(PMIC_EFUSE_BIT));
+                FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+                FAPI_TRY_LAMBDA(l_reg_contents.clearBit(PMIC_EFUSE_BIT));
+                FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+                FAPI_TRY_LAMBDA(l_reg_contents.setBit(PMIC_EFUSE_BIT));
+                FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+                FAPI_TRY_LAMBDA(l_reg_contents.clearBit(PMIC_EFUSE_BIT));
+                FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+
+            // If we failed one of the register reads/writes, declare N-Mode
+            fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+            return mss::attr::set_n_mode_helper(
+                mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_gpio),
+                l_pmic_id,
+                mss::pmic::n_mode::N_MODE);
+        }));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1045,8 +1097,11 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
     const uint8_t i_pmic_id_1,
     const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio)
 {
+    bool l_already_enabled = false;
     // The sequence below is defined in section 6.1.1 of the
     // Redundant Power on DIMM – Functional Specification document
+    // Check if GPIO is already enabled
+    FAPI_TRY(check::gpio_already_enabled(i_gpio, l_already_enabled));
 
     // First set up the ADCs on the PMICs to measure VIN_BULK
     FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_0, [&i_pmic_map, i_pmic_id_0]
@@ -1066,26 +1121,29 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
     // Delay 25ms
     fapi2::delay(25 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
-    // Now, sampling VIN_BULK, which is protected by a fuse, we check that VIN_BULK does not read
-    // more than 0.28V. If it does, then the fuse must be bad/blown, and we will declare N-mode.
-
-    // Now, validate the EFUSE readings for both PMICs
-    FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_0, [&i_pmic_map, i_pmic_id_0]
-                            (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+    if (!l_already_enabled)
     {
-        // PMIC0/2
-        return mss::pmic::validate_efuse_off(i_pmic);
-    }));
+        // Now, sampling VIN_BULK, which is protected by a fuse, we check that VIN_BULK does not read
+        // more than 0.28V. If it does, then the fuse must be bad/blown, and we will declare N-mode.
 
-    FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_1, [&i_pmic_map, i_pmic_id_1]
-                            (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
-    {
-        // PMIC1/3
-        return mss::pmic::validate_efuse_off(i_pmic);
-    }));
+        // Validate the EFUSE readings for both PMICs
+        FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_0, [&i_pmic_map, i_pmic_id_0]
+                                (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+        {
+            // PMIC0/2
+            return mss::pmic::validate_efuse_off(i_pmic);
+        }));
+
+        FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_1, [&i_pmic_map, i_pmic_id_1]
+                                (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+        {
+            // PMIC1/3
+            return mss::pmic::validate_efuse_off(i_pmic);
+        }));
+    }
 
     // Enable E-Fuse via GPIO
-    FAPI_TRY(enable_efuse(i_gpio));
+    FAPI_TRY(enable_efuse(i_pmic_map, i_gpio, i_pmic_id_0));
 
     // Delay 30ms looked consistantly good in testing
     fapi2::delay(30 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
@@ -1371,22 +1429,18 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Check if the GPIOs are already enabled (efuse is on)
 ///
-/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @param[in] i_gpio GPIO target
 /// @param[out] o_already_enabled true if efuse already on, else false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else
 ///
-fapi2::ReturnCode gpios_already_enabled(const target_info_redundancy& i_target_info, bool& o_already_enabled)
+fapi2::ReturnCode gpio_already_enabled(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
+                                       bool& o_already_enabled)
 {
     fapi2::buffer<uint8_t> l_reg_contents;
 
-    // The procedure enables GPIO1 then GPIO2. If something went wrong enabling GPIO1,
-    // we couldn't proceed at all, so it would've bombed out by that point.
-    // (Ex. a fail on an i2c write or something). So, we check that GPIO2 is enabled to move forward.
-    FAPI_TRY(mss::pmic::i2c::reg_read(i_target_info.iv_gpio2, mss::gpio::regs::CONFIGURATION, l_reg_contents));
-
-    o_already_enabled = gpios_already_enabled_helper(l_reg_contents);
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+    o_already_enabled = gpio_already_enabled_helper(l_reg_contents);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1544,50 +1598,22 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode redundancy_gpio_efuse_setup(const target_info_redundancy& i_target_info)
 {
-    bool l_already_enabled = false;
-
     // Reset N Mode attributes
     FAPI_TRY(check::reset_n_mode_attrs(i_target_info));
 
-    // First set up independent PMIC pairs with their GPIO expander
-    FAPI_TRY(check::gpios_already_enabled(i_target_info, l_already_enabled));
+    // Set up both trios of devices
+    FAPI_TRY(setup_pmic_pair_and_gpio(
+                 i_target_info.iv_pmic_map,
+                 mss::pmic::id::PMIC0,
+                 mss::pmic::id::PMIC1,
+                 i_target_info.iv_gpio1));
 
-    // If we are already enabled (12V on), skip all the GPIO initialization,
-    // 12V being on will cause the efuse N-mode checks to fail, anyway
-    if (!l_already_enabled)
-    {
-        // Set up both trios of devices
-        FAPI_TRY(setup_pmic_pair_and_gpio(
-                     i_target_info.iv_pmic_map,
-                     mss::pmic::id::PMIC0,
-                     mss::pmic::id::PMIC1,
-                     i_target_info.iv_gpio1));
 
-        FAPI_TRY(setup_pmic_pair_and_gpio(
-                     i_target_info.iv_pmic_map,
-                     mss::pmic::id::PMIC2,
-                     mss::pmic::id::PMIC3,
-                     i_target_info.iv_gpio2));
-    }
-    else
-    {
-        // Make sure that we do report 12V on each PMIC, since the GPIOs claim that the
-        // efuses are on. Otherwise, we will declare N-mode
-        for (uint8_t l_pmic_id = mss::pmic::id::PMIC0; l_pmic_id < CONSTS::NUM_PMICS_4U; ++l_pmic_id)
-        {
-            FAPI_TRY(run_if_present(i_target_info.iv_pmic_map, l_pmic_id, [&i_target_info, l_pmic_id]
-                                    (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
-            {
-                FAPI_TRY_LAMBDA(mss::pmic::setup_adc_vin_bulk_read(i_pmic));
-                FAPI_TRY_LAMBDA(mss::pmic::validate_efuse_on(i_pmic));
-
-            fapi_try_exit_lambda:
-                // Both those functions in their fapi_try_exit will set n-mode accordingly,
-                // so we don't have to do anything other than return current_err
-                return fapi2::current_err;
-            }));
-        }
-    }
+    FAPI_TRY(setup_pmic_pair_and_gpio(
+                 i_target_info.iv_pmic_map,
+                 mss::pmic::id::PMIC2,
+                 mss::pmic::id::PMIC3,
+                 i_target_info.iv_gpio2));
 
 fapi_try_exit:
     return fapi2::current_err;

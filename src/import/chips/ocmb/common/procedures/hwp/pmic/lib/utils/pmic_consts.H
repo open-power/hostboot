@@ -419,6 +419,7 @@ enum fields : uint8_t
 
     // 1's are inputs, 0's are outputs
     CONFIGURATION_IO_MAP        = 0xFC,
+    CONFIGURATION_IO_MAP_OFF    = 0xFF,
 };
 
 } // ns gpio

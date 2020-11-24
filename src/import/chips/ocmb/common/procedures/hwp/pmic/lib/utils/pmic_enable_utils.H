@@ -793,11 +793,16 @@ fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
 ///
 /// @brief Enable EFUSE according to 4U Functional Specification
 ///
+/// @param[in] i_pmic_map PMIC map object
 /// @param[in] i_gpio GPIO target
+/// @param[in] i_pmic_id_0 first PMIC ID (Either 0 or 2)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note Corresponds to steps (6,7,8) & (16,17,18) in 4U DDIMM Functional Spec
 ///
-fapi2::ReturnCode enable_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio);
+fapi2::ReturnCode enable_efuse(
+    const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
+    const uint8_t i_pmic_id_0);
 
 ///
 /// @brief Set the up PMIC pair and matching GPIO expander prior to PMIC enable
@@ -925,13 +930,13 @@ bool bad_any(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode
 fapi2::ReturnCode reset_n_mode_attrs(const target_info_redundancy& i_target_info);
 
 ///
-/// @brief Check if the GPIOs are already enabled (efuse is on)
 ///
-/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @param[in] i_gpio GPIO target
 /// @param[out] o_already_enabled true if efuse already on, else false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else
 ///
-fapi2::ReturnCode gpios_already_enabled(const target_info_redundancy& i_target_info, bool& o_already_enabled);
+fapi2::ReturnCode gpio_already_enabled(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
+                                       bool& o_already_enabled);
 
 ///
 /// @brief Helper function to check if GPIO is already enabled given config register contents
@@ -940,7 +945,7 @@ fapi2::ReturnCode gpios_already_enabled(const target_info_redundancy& i_target_i
 /// @return bool enabled true/false
 /// @note unit-testable helper function
 ///
-inline bool gpios_already_enabled_helper(const uint8_t i_config)
+inline bool gpio_already_enabled_helper(const uint8_t i_config)
 {
     return (i_config == mss::gpio::fields::CONFIGURATION_IO_MAP);
 }
