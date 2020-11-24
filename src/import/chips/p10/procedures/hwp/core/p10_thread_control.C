@@ -39,8 +39,8 @@
 //------------------------------------------------------------------------------
 #include <p10_thread_control.H>
 
-static const uint64_t STEP_DELAY_POLLTIME_NS = 100000; //100usec
-static const uint64_t STEP_DELAY_SIM_CYCLES = 150000;
+static const uint64_t DELAY_POLLTIME_NS = 100000; //100usec
+static const uint64_t DELAY_SIM_CYCLES = 150000;
 
 using fapi2::TARGET_TYPE_CORE;
 
@@ -72,7 +72,7 @@ static const uint64_t g_control_reg_map[] =
     0x8080808000000000, // b1111
 };
 
-static const uint8_t PTC_STEP_COMP_POLL_LIMIT = 10;
+static const uint8_t POLL_LIMIT = 20;
 
 //--------------------------------------------------------------------------
 // Function Prototypes
@@ -531,11 +531,13 @@ fapi2::ReturnCode p10_thread_control_stop(
 
     // Post-conditions check
     {
-        int l_trys = 10;
+        int l_trys = POLL_LIMIT;
         bool l_stopped = false;
 
         while (!l_stopped && l_trys > 0)
         {
+            FAPI_DBG("Poll counter: %d", l_trys);
+            FAPI_TRY(fapi2::delay(DELAY_POLLTIME_NS, DELAY_SIM_CYCLES));
             FAPI_TRY(threads_stopped(i_target, i_threads, o_rasStatusReg, l_stopped),
                      "p10_thread_control_stop: unable to determine if threads are "
                      "stopped. threads: 0x%x", i_threads);
@@ -576,7 +578,7 @@ fapi2::ReturnCode p10_thread_control_step(
     const ThreadSpecifier i_threads, const bool i_warncheck,
     fapi2::buffer<uint64_t>& o_rasStatusReg)
 {
-    FAPI_DBG("p10_thread_control_stop : Initiating step command to core PC "
+    FAPI_DBG("p10_thread_control_step : Initiating step command to core PC "
              "logic for threads 0x%x", i_threads);
 
     using namespace scomt;
@@ -615,7 +617,7 @@ fapi2::ReturnCode p10_thread_control_step(
     // Poll for completion.
     {
         bool l_step_done = false;
-        uint8_t l_governor = PTC_STEP_COMP_POLL_LIMIT;
+        uint8_t l_governor = POLL_LIMIT;
 
         do
         {
@@ -630,7 +632,7 @@ fapi2::ReturnCode p10_thread_control_step(
                 // Adding delay b/w polls to achieve 300us delay
                 // sim_cycles = 500 MHz * 300us = 1,50,000
                 // Adding 100us delay per poll which allows STEP to complete in 3 polls
-                fapi2::delay(STEP_DELAY_POLLTIME_NS, STEP_DELAY_SIM_CYCLES);
+                fapi2::delay(DELAY_POLLTIME_NS, DELAY_SIM_CYCLES);
             }
 
 #endif
@@ -650,12 +652,12 @@ fapi2::ReturnCode p10_thread_control_step(
                         .set_CORE_TARGET(i_target)
                         .set_THREAD(i_threads)
                         .set_C_RAS_STATUS_REG(o_rasStatusReg)
-                        .set_PTC_STEP_COMP_POLL_LIMIT(PTC_STEP_COMP_POLL_LIMIT),
-                        "p10_thread_control_stop: ERROR: Thread Step failed."
+                        .set_PTC_STEP_COMP_POLL_LIMIT(POLL_LIMIT),
+                        "p10_thread_control_step: ERROR: Thread Step failed."
                         "Complete bits aren't set after %d poll atempts. "
                         "WARNING: RAS_STATUS bit still in single instruction "
                         "mode. Threads 0x%x, RAS_STATUS reg 0x%.16llX",
-                        PTC_STEP_COMP_POLL_LIMIT, i_threads, o_rasStatusReg);
+                        POLL_LIMIT, i_threads, o_rasStatusReg);
     }
 
 fapi_try_exit:
