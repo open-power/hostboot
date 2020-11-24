@@ -346,6 +346,11 @@ fapi2::ReturnCode qme_init(
     }
 
     {
+
+        //CLear EISR interrupts if they are any, before qme boot
+        FAPI_TRY(fapi2::putScom(l_eq_mc_or, QME_EISR_RW, 0),
+                 "Error during putscom of QME_EISR_RW for shiftable regs access");
+
         fapi2::buffer<uint64_t> l_tod_fsm_reg;
         fapi2::buffer<uint64_t> l_qme_flag_mask;
 
