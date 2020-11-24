@@ -475,10 +475,29 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_EXP_I2C_POLLING_TIMEOUT</rc>
+    <rc>RC_MSS_EXP_I2C_POLLING_TIMEOUT_RESET</rc>
     <description>
-      Polling the explorer I2C slave interface for an ACK
-      timed out.
+      Polling the explorer I2C interface for an ACK
+      timed out when explorer was coming out of reset.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_I2C_POLLING_TIMEOUT_BOOT_ROM</rc>
+    <description>
+      Polling the explorer I2C interface for an ACK
+      timed out during explorer boot ROM to runtime FW transition
     </description>
     <callout>
       <procedure>CODE</procedure>

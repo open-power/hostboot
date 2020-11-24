@@ -216,13 +216,13 @@ bool fw_status_loop_done(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ta
 
     if (i_busy)
     {
-        FAPI_DBG( TARGTIDFORMAT " reutrned FW_BUSY status. Retrying...", MSSTARGID );
+        FAPI_DBG( TARGTIDFORMAT " returned FW_BUSY status. Retrying...", MSSTARGID );
         return false;
     }
 
     if (i_boot_stage != EXPECTED_BOOT_STAGE)
     {
-        FAPI_DBG( TARGTIDFORMAT " reutrned non-RUNTIME boot stage (0x%02x). Retrying...",
+        FAPI_DBG( TARGTIDFORMAT " returned non-RUNTIME boot stage (0x%02x). Retrying...",
                   MSSTARGID, i_boot_stage );
         return false;
     }
@@ -467,13 +467,14 @@ fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_T
     // From MSCC explorer firmware arch spec
     // 4.1.5: After power-up, the Explorer Chip will respond with NACK to all incoming I2C requests
     // from the HOST until the I2C slave interface is ready to receive commands.
+    // Here, we are checking if the Explorer reset ok
     FAPI_ASSERT( mss::poll(i_target, l_poll_params, [i_target]()->bool
     {
         return mss::exp::i2c::is_ready(i_target) == fapi2::FAPI2_RC_SUCCESS;
     }),
-    fapi2::MSS_EXP_I2C_POLLING_TIMEOUT().
+    fapi2::MSS_EXP_I2C_POLLING_TIMEOUT_RESET().
     set_TARGET(i_target),
-    "Failed to see an ACK from I2C -- polling timeout on %s",
+    "Failed to see an ACK from I2C -- polling timeout on reset %s",
     mss::c_str(i_target) );
 
     // If we're already in RUNTIME_FW stage, due to fuse settings or running procedures manually,
@@ -495,13 +496,14 @@ fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_T
     FAPI_TRY(fw_bypass_download_window(i_target));
 
     // Loop again until we get an ACK from i2c
+    // EXP reset OK
     FAPI_ASSERT( mss::poll(i_target, l_poll_params, [i_target]()->bool
     {
         return mss::exp::i2c::is_ready(i_target) == fapi2::FAPI2_RC_SUCCESS;
     }),
-    fapi2::MSS_EXP_I2C_POLLING_TIMEOUT().
+    fapi2::MSS_EXP_I2C_POLLING_TIMEOUT_BOOT_ROM().
     set_TARGET(i_target),
-    "Failed to see an ACK from I2C -- polling timeout on %s",
+    "Failed to see an ACK from I2C -- polling timeout on boot ROM %s",
     mss::c_str(i_target) );
 
     // Now poll the EXP_FW_STATUS command until it returns SUCCESS and RUNTIME_FW
