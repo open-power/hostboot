@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -419,6 +419,7 @@ enum fields : uint8_t
 
     // 1's are inputs, 0's are outputs
     CONFIGURATION_IO_MAP        = 0xFC,
+    CONFIGURATION_IO_MAP_OFF    = 0xFF,
 };
 
 } // ns gpio
