@@ -1122,17 +1122,20 @@ void log_n_modes_as_recoverable_errors(
 {
     for (uint8_t l_idx = PMIC0; l_idx < CONSTS::NUM_PMICS_4U; ++l_idx)
     {
+        // FAPI_ASSERT_NOEXIT's behavior differs from FAPI_ASSERT:
+        // NOEXIT commits the error log as soon as the FFDC execute function is called,
+        // so we do not need to manually log the error, like with FAPI_ASSERT,
+        // so long as we pass in the right severity as an argument
         FAPI_ASSERT_NOEXIT((i_n_mode_pmic[l_idx] == mss::pmic::n_mode::N_PLUS_1_MODE),
-                           fapi2::PMIC_DROPPED_INTO_N_MODE()
+                           fapi2::PMIC_DROPPED_INTO_N_MODE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                            .set_OCMB_TARGET(i_target_info.iv_ocmb)
                            .set_PMIC_ID(l_idx),
                            "%s PMIC%u had errors which caused a drop into N-Mode",
                            mss::c_str(i_target_info.iv_ocmb), l_idx);
 
-        // Log that error, set back to success
+        // Set back to success
         if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
         {
-            fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
     }
