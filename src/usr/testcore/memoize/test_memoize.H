@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,8 +64,7 @@ errlHndl_t _incrementer(int in, int& out)
 
 errlHndl_t incrementer(int in, int& out)
 {
-    return Util::Memoize::memoize(
-        _incrementer,in,out);
+    return Util::Memoize::memoize<errlHndl_t>(_incrementer,in,out);
 }
 
 class MemoizerTest: public CxxTest::TestSuite

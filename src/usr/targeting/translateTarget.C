@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -149,7 +150,7 @@ errlHndl_t getHbTarget(
     const rtChipId_t          i_rtTargetId,
           TARGETING::Target*& o_pTarget)
 {
-      return Util::Memoize::memoize(_getHbTarget,i_rtTargetId,o_pTarget);
+      return Util::Memoize::memoize<errlHndl_t>(_getHbTarget,i_rtTargetId,o_pTarget);
 }
 
 }; // End namespace RT_TARG

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -45,7 +45,8 @@ RUNBVT_SUBDIRS   +=
 INCLUDES = hbdescriptor.H \
            hbterminatetypes.H \
            hbotcompid.H \
-           hbfw_term_rc.H
+           hbfw_term_rc.H \
+           memoize.H
 
 .elseif (${CONTEXT} == "x86.nfp")
 

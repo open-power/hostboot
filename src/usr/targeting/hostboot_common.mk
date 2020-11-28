@@ -37,6 +37,7 @@ VPATH += ${addprefix ${COMMON_TARGETING_REL_PATH}/, ${COMMON_TARGETING_SUBDIRS}}
 # Next includes required for attribute override support
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/include/util/
 
 HOSTBOOT_RT_IPL_COMMON_OBJS += attrPlatOverride.o
 HOSTBOOT_RT_IPL_COMMON_OBJS += translateTarget.o

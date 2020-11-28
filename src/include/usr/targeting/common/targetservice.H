@@ -443,7 +443,17 @@ class TargetService
          *  @param[in] i_entityPath Entity path for which to find the matching
          *      target handle
          *
-         *  @pre N/A
+         *  @note toTarget implements a pre-check for an already
+         *      existing cached result to improve performance.
+         *      The memoize utility will check its cache and if
+         *      a value already exists for the key (in this case
+         *      the EntityPath) memoize will return the already
+         *      looked up target.  If the memoize cache does not
+         *      contain a match, then a subsequent call will be
+         *      made to _memoizeTarget to indirectly call _toTarget
+         *      (indirection needed to map memoize call invocation).
+         *      _toTarget may be an expensive lookup, searching the
+         *      full target model.
          *
          *  @post NULL returned to caller if no match was found or service
          *      not initialized, otherwise a valid handle returned
@@ -1131,6 +1141,56 @@ class TargetService
          *         attribute ATTR_MODEL of the master processor
          */
         void _setProcessorModel(void);
+
+        /**
+         *  @brief Returns a target handle which has an associated entity path
+         *      matching the specified entity path
+         *
+         *  Returns a target handle which has an associated entity path
+         *  matching the specified entity path.  Caller must check the
+         *  returned handle for nullptr.
+         *
+         *  @param[in] i_entityPath Entity path for which to find the matching
+         *      target handle
+         *
+         *  @pre N/A
+         *
+         *  @post nullptr returned to caller if no match was found or service
+         *      not initialized, otherwise a valid handle returned
+         *
+         *  @return Target handle
+         *
+         *  @retval nullptr No target match found
+         *  @retval !nullptr Handle to the corresponding target
+         */
+        Target* _toTarget(
+            const EntityPath& i_entityPath) const;
+
+        /**
+         *  @brief Returns a target handle which has an associated entity path
+         *      matching the specified entity path
+         *
+         *  Returns a target handle which has an associated entity path
+         *  matching the specified entity path.  Caller must check the
+         *  returned handle for nullptr.
+         *
+         *  This internal call is needed to match the semantics of the
+         *  memoize call invocation.
+         *
+         *  @param[in] i_entityPath Entity path for which to find the matching
+         *      target handle
+         *  @param[out] o_target Target handle, nullptr if no match or
+         *      service not initialized, otherwise a valid handle
+         *
+         *  @pre N/A
+         *
+         *  @post o_target nullptr if no match was found or service
+         *      not initialized, otherwise a valid handle returned
+         *
+         *  @return int, indicates success or failure
+         *  @retval zero success, non-zero failure
+         */
+        static int _memoizeTarget(EntityPath, Target*& o_target);
 
         // Instance variables
         bool        iv_initialized; ///< Is service initialized or not

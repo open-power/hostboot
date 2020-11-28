@@ -374,7 +374,8 @@ fsp.tar_CONTENTS = \
     src/include/usr/fapi2/plat_target_filter.H \
     src/usr/targeting/attroverride/attrTextToBinaryBlob.C \
     src/usr/targeting/attroverride/attrTextToBinaryBlob.H \
-    src/include/usr/sbe/sbe_common.H
+    src/include/usr/sbe/sbe_common.H \
+    src/include/util/memoize.H
 
 
 include dist.rules.mk

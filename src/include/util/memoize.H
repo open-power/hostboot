@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,6 @@
 #ifndef __UTIL_MEMOIZE_H
 #define __UTIL_MEMOIZE_H
 
-#include <errl/errlentry.H>
 #include <map>
 
 namespace Util
@@ -37,7 +36,7 @@ namespace Memoize
 
 /**
  *  @brief Wraps a function (which accepts an input/output parameter pair and
- *      returns an error log handle) with a memoizer
+ *      returns a result) with a memoizer
  *
  *  @par Detailed Description:
  *      This template wraps a candidate function with a memoizer, a facility
@@ -58,7 +57,7 @@ namespace Memoize
  *  @param[out] o_out Output of the memoized function.  The memoizer does not
  *      alter the output on failure; Caller should default the value as
  *      appropriate to anticipate that case.
- *  @return Error log indicating success or failure
+ *  @return Value indicating success or failure
  *  @retval NULL Result was already computed for the given input and was
  *      returned in the output parameter -otherwise- real function returned
  *      a value that was cached and returned in the output parameter
@@ -68,13 +67,13 @@ namespace Memoize
  *      std::function in place of function pointers if std::function was
  *      implemented
  */
-template < class InputType , class OutputType >
-errlHndl_t memoize(
-    errlHndl_t (*i_fn)(InputType,OutputType&),
+template < class ReturnType, class InputType , class OutputType >
+auto memoize(
+    ReturnType (*i_fn)(InputType,OutputType&),
     InputType    i_in,
     OutputType&  o_out)
 {
-    errlHndl_t pError = NULL;
+    decltype(i_fn(i_in, o_out)) r_value {};
 
     do {
 
@@ -89,8 +88,8 @@ errlHndl_t memoize(
     // Otherwise call the real function and assuming no error, cache the result
     // and return it
     OutputType out;
-    pError = i_fn(i_in,out);
-    if(!pError)
+    r_value = i_fn(i_in,out);
+    if(!r_value)
     {
         cache[i_in] = out;
         o_out = out;
@@ -98,7 +97,7 @@ errlHndl_t memoize(
 
     } while(0);
 
-    return pError;
+    return r_value;
 }
 
 }; // End namespace Memoize

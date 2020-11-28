@@ -53,6 +53,7 @@
 #include <attributetraits.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
+#include <memoize.H>
 
 #ifdef __HOSTBOOT_MODULE
 // System
@@ -728,7 +729,7 @@ void TargetService::exists(
 // TargetService::toTarget
 //******************************************************************************
 
-Target* TargetService::toTarget(
+Target* TargetService::_toTarget(
     const EntityPath& i_entityPath) const
 {
     #define TARG_FN "toTarget(...)"
@@ -799,6 +800,29 @@ Target* TargetService::toTarget(
     return l_pTarget;
 
     #undef TARG_FN
+}
+
+
+//******************************************************************************
+// TargetService::_memoizeTarget
+//******************************************************************************
+int TargetService::_memoizeTarget(
+          EntityPath i_entityPath,
+          TARGETING::Target*& o_target)
+{
+    o_target = TARGETING::targetService()._toTarget(i_entityPath);
+    return 0;
+}
+
+//******************************************************************************
+// TargetService::toTarget
+//******************************************************************************
+Target* TargetService::toTarget(
+    const EntityPath& i_entityPath) const
+{
+    Target* o_target = nullptr;
+    Util::Memoize::memoize<int>(TargetService::_memoizeTarget, i_entityPath, o_target);
+    return o_target;
 }
 
 //******************************************************************************
