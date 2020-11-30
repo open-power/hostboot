@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -986,11 +986,11 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                 io_globalppb->dds_tgt_act_bin[i][c].target_act_bin.value =  iv_poundW_data.entry[i].entry_tgt_act_bin[c].target_act_bin.value;
                 io_globalppb->dds_alt_cal[i][c].alt_cal.value  =  revle16(iv_poundW_data.entry[i].entry_alt_cal[c].alt_cal.value);
             }
-            io_globalppb->vdd_cal[i].cal_vdd  =  revle16(iv_poundW_data.entry[i].vdd_cal.cal_vdd); 
-            io_globalppb->vdd_cal[i].alt_cal_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.alt_cal_vdd); 
-            io_globalppb->vdd_cal[i].large_droop_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.large_droop_vdd); 
-            io_globalppb->vdd_cal[i].worst_droop_min_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.worst_droop_min_vdd); 
-            io_globalppb->vdd_cal[i].non_perf_loss_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.non_perf_loss_vdd); 
+            io_globalppb->vdd_cal[i].cal_vdd  =  revle16(iv_poundW_data.entry[i].vdd_cal.cal_vdd);
+            io_globalppb->vdd_cal[i].alt_cal_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.alt_cal_vdd);
+            io_globalppb->vdd_cal[i].large_droop_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.large_droop_vdd);
+            io_globalppb->vdd_cal[i].worst_droop_min_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.worst_droop_min_vdd);
+            io_globalppb->vdd_cal[i].non_perf_loss_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.non_perf_loss_vdd);
         }
         io_globalppb->dds_other.dds_calibration_version = iv_poundW_data.other.dds_calibration_version;
         io_globalppb->dds_other.droop_freq_resp_reference_mhz = revle16(iv_poundW_data.other.dds_calibration_version);
@@ -1008,7 +1008,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                 {
                     PoundWEntry_t pwe;
                     pwe.ddsc.value = revle64(io_globalppb->dds[region][cores].ddsc.value);
-                    FAPI_DBG("global_ppb[%s][%u]: 0x%016llx  delay: 0x%04x, %d" 
+                    FAPI_DBG("global_ppb[%s][%u]: 0x%016llx  delay: 0x%04x, %d"
                             , region_names[region],cores,
                             pwe.ddsc.value,
                             pwe.ddsc.fields.insrtn_dely,
@@ -1113,6 +1113,12 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->attr.fields.overv_enabled   = iv_wov_overv_enabled;
         io_globalppb->attr.fields.rvrm_enabled    = iv_rvrm_enabled;
 
+        //Current Scaling Factor - only VDD, VCS and VDN are sent to PGPE
+        for (auto i=0; i < 3; ++i)
+        {
+            io_globalppb->current_scaling_factor[i] = iv_attrs.attr_current_scaling_factor[i];
+            FAPI_INF("Current_scaling_factor[%u]=%u, attr=%u",io_globalppb->current_scaling_factor[i],iv_attrs.attr_current_scaling_factor[i]);
+        }
 
     } while (0);
 
@@ -1616,6 +1622,17 @@ FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.a
 FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
 FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);
 
+#define DATABLOCK_GET_ATTR_8(attr_name, target, attr_assign) \
+FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
+FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
+FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
+FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
+FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);\
+FAPI_INF("%-54s[4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[4], iv_attrs.attr_assign[4]);\
+FAPI_INF("%-54s[5] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[5], iv_attrs.attr_assign[5]);\
+FAPI_INF("%-54s[6] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[6], iv_attrs.attr_assign[6]);\
+FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.attr_assign[7]);
+
     // Frequency attributes
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATE0_FREQ_MHZ, FAPI_SYSTEM, attr_pstate0_freq_mhz);
     DATABLOCK_GET_ATTR(ATTR_NOMINAL_FREQ_MHZ, FAPI_SYSTEM, attr_nominal_freq_mhz);
@@ -1708,6 +1725,8 @@ FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_VCS_FLOOR_MV,                   iv_procChip,attr_vcs_floor_mv);
     DATABLOCK_GET_ATTR(ATTR_VCS_VDD_OFFSET_MV,              iv_procChip,attr_vcs_vdd_offset_mv);
 
+    // Current Scaling Factors
+    DATABLOCK_GET_ATTR_8(ATTR_CURRENT_SCALING_FACTOR,  FAPI_SYSTEM, attr_current_scaling_factor);
 
     // Deal with defaults if attributes are not set
 #define SET_DEFAULT(_attr_name, _attr_default) \
@@ -3243,7 +3262,7 @@ bool PlatPmPPB::is_wof_throttle_enabled()
 
      return
          (!(attr_system_wof_throttle_disable) &&
-          !(attr_system_wof_pitch_enable) && 
+          !(attr_system_wof_pitch_enable) &&
          iv_wof_throttle_enabled)
          ? true : false;
 } //end of is_wof_throttle_enabled
@@ -3446,36 +3465,36 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
             {
                 for (uint8_t j = 0; j < 32; j++)
                 {
-                    iv_poundW_data.entry[i].entry[j].ddsc.value = 
+                    iv_poundW_data.entry[i].entry[j].ddsc.value =
                         revle64(iv_poundW_data.entry[i].entry[j].ddsc.value);
 
-                    iv_poundW_data.entry[i].entry_alt_cal[j].alt_cal.value = 
+                    iv_poundW_data.entry[i].entry_alt_cal[j].alt_cal.value =
                         revle16(iv_poundW_data.entry[i].entry_alt_cal[j].alt_cal.value);
 
                 }
 
-                iv_poundW_data.entry[i].vdd_cal.cal_vdd = 
+                iv_poundW_data.entry[i].vdd_cal.cal_vdd =
                     revle16(iv_poundW_data.entry[i].vdd_cal.cal_vdd);
-                iv_poundW_data.entry[i].vdd_cal.alt_cal_vdd = 
+                iv_poundW_data.entry[i].vdd_cal.alt_cal_vdd =
                     revle16(iv_poundW_data.entry[i].vdd_cal.alt_cal_vdd);
-                iv_poundW_data.entry[i].vdd_cal.large_droop_vdd = 
+                iv_poundW_data.entry[i].vdd_cal.large_droop_vdd =
                     revle16(iv_poundW_data.entry[i].vdd_cal.large_droop_vdd);
-                iv_poundW_data.entry[i].vdd_cal.worst_droop_min_vdd = 
+                iv_poundW_data.entry[i].vdd_cal.worst_droop_min_vdd =
                     revle16(iv_poundW_data.entry[i].vdd_cal.worst_droop_min_vdd);
-                iv_poundW_data.entry[i].vdd_cal.worst_droop_max_vdd = 
+                iv_poundW_data.entry[i].vdd_cal.worst_droop_max_vdd =
                     revle16(iv_poundW_data.entry[i].vdd_cal.worst_droop_max_vdd);
-                iv_poundW_data.entry[i].vdd_cal.non_perf_loss_vdd = 
+                iv_poundW_data.entry[i].vdd_cal.non_perf_loss_vdd =
                     revle16(iv_poundW_data.entry[i].vdd_cal.non_perf_loss_vdd);
             }
 
             iv_poundW_data.other.dpll_settings.value = revle16(iv_poundW_data.other.dpll_settings.value);
-            iv_poundW_data.other.droop_freq_resp_reference_mhz = 
+            iv_poundW_data.other.droop_freq_resp_reference_mhz =
                 revle16(iv_poundW_data.other.droop_freq_resp_reference_mhz);
-            iv_poundW_data.other.droop_count_control = 
+            iv_poundW_data.other.droop_count_control =
                 revle64(iv_poundW_data.other.droop_count_control);
-            iv_poundW_data.other.ftc_large_droop_mode_reg_setting = 
+            iv_poundW_data.other.ftc_large_droop_mode_reg_setting =
                 revle64(iv_poundW_data.other.ftc_large_droop_mode_reg_setting);
-            iv_poundW_data.other.ftc_misc_droop_mode_reg_setting = 
+            iv_poundW_data.other.ftc_misc_droop_mode_reg_setting =
                 revle64(iv_poundW_data.other.ftc_misc_droop_mode_reg_setting);
 #endif
 
@@ -3705,7 +3724,7 @@ void iddq_print(IddqTable_t* i_iddqt)
         strcpy(l_line_str, string); \
         sprintf(l_buffer_str, "%-43s", l_line_str);\
         strcpy(l_line_str, l_buffer_str); \
-        strcpy(l_buffer_str, "");        
+        strcpy(l_buffer_str, "");
 
     // Put out the measurement voltages to the trace.
     IDDQ_TRACE ("  Measurement voltages:");
@@ -5078,7 +5097,7 @@ void PlatPmPPB::compute_dds_slopes(
             {
                 PoundWEntry_t pwe;
                 pwe.ddsc.value = iv_poundW_data.entry[region].entry[cores].ddsc.value;
-                FAPI_DBG("ps_dds_ddsc[%s][%s][%u]: 0x%016llx  delay: 0x%04x, %d", 
+                FAPI_DBG("ps_dds_ddsc[%s][%s][%u]: 0x%016llx  delay: 0x%04x, %d",
                         vpdSetStr[pt_set], region_names[region],cores,
                         pwe.ddsc.value,
                         pwe.ddsc.fields.insrtn_dely,
@@ -5096,7 +5115,7 @@ void PlatPmPPB::compute_dds_slopes(
             {
                 PoundWEntry_t pwe;
                 pwe.ddsc.value = revle64(iv_poundW_data.entry[region].entry[cores].ddsc.value);
-                FAPI_DBG("ps_dds_ddsc[%s][%s][%u]: 0x%016llx  delay: 0x%04x, %d", 
+                FAPI_DBG("ps_dds_ddsc[%s][%s][%u]: 0x%016llx  delay: 0x%04x, %d",
                         vpdSetStr[pt_set], region_names[region],cores,
                         pwe.ddsc.value,
                         pwe.ddsc.fields.insrtn_dely,
@@ -5114,7 +5133,7 @@ void PlatPmPPB::compute_dds_slopes(
             for (auto cores = 0; cores < MAXIMUM_CORES; cores++)
             {
                 //Insertion delay slopes
-                    if(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely >=  
+                    if(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely >=
                         iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely) {
 
                         o_gppb->ps_dds_delay_slopes[pt_set][cores][region] =

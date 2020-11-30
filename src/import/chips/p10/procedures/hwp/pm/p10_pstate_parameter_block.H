@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,6 +200,10 @@ typedef struct
     uint8_t  attr_rvrm_deadzone_mv;
     uint8_t attr_vcs_vdd_offset_mv;
     uint16_t attr_vcs_floor_mv;
+
+    // Only 3 of the 8 are actually consumed
+    uint8_t attr_current_scaling_factor[8];
+
 
 } AttributeList;
 

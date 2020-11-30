@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,6 +117,19 @@ enum DDS_TRIP_INTP_CTRL
 #define RUNTIME_RAIL_ICS    1
 #define RUNTIME_RAIL_STR { "VDD", "VCS"}
 
+
+enum CURRENT_SCALE_IDX
+{
+    CURRENT_SCALE_IDX_VDD    =   0,
+    CURRENT_SCALE_IDX_VCS    =   1,
+    CURRENT_SCALE_IDX_VDN    =   2,
+    CURRENT_SCALE_IDX_VIO    =   3,
+    CURRENT_SCALE_IDX_AVDD   =   4,
+    CURRENT_SCALE_IDX_RSVD0  =   5,
+    CURRENT_SCALE_IDX_RSVD1  =   6,
+    CURRENT_SCALE_IDX_RSVD2  =   7,
+    CURRENT_SCALE_IDX_MAX    =   8
+};
 
 /// These defines resonant clock data structures constants
 #define RESCLK_FREQ_REGIONS 4
@@ -552,6 +565,14 @@ typedef struct
 
     /// #W VDD Calibration(DDS Data)
     vdd_calibration         vdd_cal[NUM_PV_POINTS];
+
+    /// Current Scaling Factor
+    /// Integer scaling needed on current read from VRMs
+    /// Indexes:
+    ///   0: VDD
+    ///   1: VCS
+    ///   2: VDN
+    uint8_t                 current_scaling_factor[3];
 
 // __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_t;
