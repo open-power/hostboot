@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,11 +46,11 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 
-
 // For Secureboot, Trustedboot support
 #include <secureboot/service.H>
 #include <secureboot/phys_presence_if.H>
 #include <secureboot/service_ext.H>
+#include <secureboot/trustedbootif.H>
 
 // Secureboot lockdown HWP
 #include <plat_hwp_invoker.H>
@@ -69,6 +69,10 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     errlHndl_t l_err = nullptr;
 #endif
 
+//    @TODO RTC-264774: Backup TPM init is busted for 1 socket scenario. Despite the Proc parent being not XSCOM-able
+//                      and SPI Controller non-functional, the TPM is marked UNUSABLE. This shouldn't be happening.
+//    TRUSTEDBOOT::initBackupTpm();
+
     do {
 #ifdef CONFIG_SECUREBOOT
 
@@ -76,6 +80,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     {
         TARGETING::TargetHandleList l_procList;
         TARGETING::TargetHandleList l_tpmList;
+
         getAllChips(l_procList,TARGETING::TYPE_PROC);
         getAllChips(l_tpmList,TARGETING::TYPE_TPM,false);
 

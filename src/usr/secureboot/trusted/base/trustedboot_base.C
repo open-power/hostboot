@@ -529,48 +529,53 @@ void initBackupTpm()
 {
 #ifdef CONFIG_TPMDD
     errlHndl_t l_errl = nullptr;
-    Message* l_msg = Message::factory(MSG_TYPE_INIT_BACKUP_TPM,
-                                      0,
-                                      nullptr,
-                                      MSG_MODE_SYNC);
-    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
-    if(l_rc == 0)
-    {
-        l_errl = l_msg->iv_errl;
-        l_msg->iv_errl = nullptr;
-    }
-    else
-    {
-        TRACFCOMP(g_trac_trustedboot, "Error occurred while sending message to"
-                 " the TPM daemon. RC = %d", l_rc);
-        /*@
-         * @errortype      ERRL_SEV_UNRECOVERABLE
-         * @reasoncode     RC_SENDRECV_FAIL
-         * @moduleid       MOD_INIT_BACKUP_TPM
-         * @userdata1      rc from msq_sendrecv()
-         * @devdesc        msg_sendrecv() failed
-         * @custdesc       Trusted Boot failure
-         */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         MOD_INIT_BACKUP_TPM,
-                                         RC_SENDRECV_FAIL,
-                                         l_rc,
-                                         0,
-                                         true);
-        l_errl->collectTrace(SECURE_COMP_NAME);
-        l_errl->collectTrace(TRBOOT_COMP_NAME);
-    }
-    delete l_msg;
-    l_msg = nullptr;
+    TARGETING::Target* l_backupTpm = nullptr;
 
-    if(l_errl)
+    getBackupTpm(l_backupTpm);
+    if(l_backupTpm)
     {
-        TARGETING::Target* l_backupTpm = nullptr;
-        getBackupTpm(l_backupTpm);
-        if(l_backupTpm)
+        Message* l_msg = Message::factory(MSG_TYPE_INIT_BACKUP_TPM,
+                                          0,
+                                          nullptr,
+                                          MSG_MODE_SYNC);
+        int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+        if(l_rc == 0)
+        {
+            l_errl = l_msg->iv_errl;
+            l_msg->iv_errl = nullptr;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK"initBackupTpm(): Error occurred while sending message to"
+                     " the TPM daemon. RC = %d", l_rc);
+            /*@
+             * @errortype      ERRL_SEV_UNRECOVERABLE
+             * @reasoncode     RC_SENDRECV_FAIL
+             * @moduleid       MOD_INIT_BACKUP_TPM
+             * @userdata1      rc from msq_sendrecv()
+             * @devdesc        msg_sendrecv() failed
+             * @custdesc       Trusted Boot failure
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             MOD_INIT_BACKUP_TPM,
+                                             RC_SENDRECV_FAIL,
+                                             l_rc,
+                                             0,
+                                             true);
+            l_errl->collectTrace(SECURE_COMP_NAME);
+            l_errl->collectTrace(TRBOOT_COMP_NAME);
+        }
+        delete l_msg;
+        l_msg = nullptr;
+
+        if(l_errl)
         {
             tpmMarkFailed(l_backupTpm, l_errl);
         }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_trustedboot, INFO_MRK"initBackupTpm(): Backup TPM not found.");
     }
 #endif
 }

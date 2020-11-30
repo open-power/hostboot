@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2083,7 +2083,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                                                     (l_baseAddr + l_currOffset);
 
     TARGETING::TargetHandleList tpmList;
-    TRUSTEDBOOT::getTPMs(tpmList, TRUSTEDBOOT::TPM_FILTER::ALL_IN_BLUEPRINT);
+    TRUSTEDBOOT::getTPMs(tpmList, TRUSTEDBOOT::TPM_FILTER::ALL_FUNCTIONAL);
 
     // Put the primary TPM first in the list of TPMs to simplify alignment of
     // trusted boot enabled bits across the nodes.
@@ -2448,7 +2448,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                      * @errortype
                      * @reasoncode   RUNTIME::RC_SPI_DEVICE_NOT_IN_MRW
                      * @moduleid     RUNTIME::MOD_POPULATE_TPMINFOBYNODE
-                     * @severity     ERRL_SEV_UNRECOVERABLE
+                     * @severity     ERRL_SEV_INFORMATIONAL
                      * @userdata1    [0:7] SPI Controller Engine
                      * @userdata1    [8:15] SPI Controller Port
                      * @userdata1    [16:23] SPI Receiver Device Type
@@ -2461,21 +2461,20 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                      *               in the MRW.
                      * @custdesc     Platform security problem detected
                      */
-                    // @TODO RTC:212110  Re-enable when SW512178 is resolved
-//                    l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-//                                                     RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
-//                                                     RUNTIME::RC_SPI_DEVICE_NOT_IN_MRW,
-//                                                     TWO_UINT32_TO_UINT64(
-//                                                         FOUR_UINT8_TO_UINT32(
-//                                                             l_pcrdSpiDevice->hdatSpiMasterEngine,
-//                                                             l_pcrdSpiDevice->hdatSpiMasterPort,
-//                                                             l_pcrdSpiDevice->hdatSpiSlaveDevType,
-//                                                             l_pcrdSpiDevice->hdatSpiDevPurp),
-//                                                         l_pcrdSpiDevice->hdatSpiDevId),
-//                                                     0,
-//                                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-//                    l_elog->collectTrace(RUNTIME_COMP_NAME);
-                    break;
+                    l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                                     RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                     RUNTIME::RC_SPI_DEVICE_NOT_IN_MRW,
+                                                     TWO_UINT32_TO_UINT64(
+                                                         FOUR_UINT8_TO_UINT32(
+                                                             l_pcrdSpiDevice->hdatSpiMasterEngine,
+                                                             l_pcrdSpiDevice->hdatSpiMasterPort,
+                                                             l_pcrdSpiDevice->hdatSpiSlaveDevType,
+                                                             l_pcrdSpiDevice->hdatSpiDevPurp),
+                                                         l_pcrdSpiDevice->hdatSpiDevId),
+                                                     0,
+                                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_elog->collectTrace(RUNTIME_COMP_NAME);
+                    errlCommit(l_elog, RUNTIME_COMP_ID);
                 }
                 else
                 {
@@ -2502,20 +2501,19 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                          *               match in the MRW.
                          * @custdesc     Platform security problem detected
                          */
-                    // @TODO RTC:212110  Re-enable when SW512178 is resolved
-//                        l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-//                                                         RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
-//                                                         RUNTIME::RC_SPI_DEVICE_DUPLICATE_IN_MRW,
-//                                                         TWO_UINT32_TO_UINT64(
-//                                                             FOUR_UINT8_TO_UINT32(
-//                                                                 l_pcrdSpiDevice->hdatSpiMasterEngine,
-//                                                                 l_pcrdSpiDevice->hdatSpiMasterPort,
-//                                                                 l_pcrdSpiDevice->hdatSpiSlaveDevType,
-//                                                                 l_pcrdSpiDevice->hdatSpiDevPurp),
-//                                                             l_pcrdSpiDevice->hdatSpiDevId),
-//                                                         0,
-//                                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-//                        l_elog->collectTrace(RUNTIME_COMP_NAME);
+                        l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                         RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                         RUNTIME::RC_SPI_DEVICE_DUPLICATE_IN_MRW,
+                                                         TWO_UINT32_TO_UINT64(
+                                                             FOUR_UINT8_TO_UINT32(
+                                                                 l_pcrdSpiDevice->hdatSpiMasterEngine,
+                                                                 l_pcrdSpiDevice->hdatSpiMasterPort,
+                                                                 l_pcrdSpiDevice->hdatSpiSlaveDevType,
+                                                                 l_pcrdSpiDevice->hdatSpiDevPurp),
+                                                             l_pcrdSpiDevice->hdatSpiDevId),
+                                                         0,
+                                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                        l_elog->collectTrace(RUNTIME_COMP_NAME);
                         break;
                     }
                     else // found a match
@@ -2619,19 +2617,18 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                  *               in the PCRD.
                  * @custdesc     Platform security problem detected
                  */
-                // @TODO RTC:212110  Re-enable when SW512178 is resolved
-//                l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-//                                                 RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
-//                                                 RUNTIME::RC_EXTRA_SPI_DEVICE_IN_MRW,
-//                                                 TWO_UINT32_TO_UINT64(
-//                                                     FOUR_UINT8_TO_UINT32(spiDev.masterEngine,
-//                                                         spiDev.masterPort,
-//                                                         spiDev.deviceType,
-//                                                         spiDev.devicePurpose),
-//                                                     spiDev.deviceId.word),
-//                                                 0,
-//                                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-//                l_elog->collectTrace(RUNTIME_COMP_NAME);
+                l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                                                 RUNTIME::RC_EXTRA_SPI_DEVICE_IN_MRW,
+                                                 TWO_UINT32_TO_UINT64(
+                                                     FOUR_UINT8_TO_UINT32(spiDev.masterEngine,
+                                                         spiDev.masterPort,
+                                                         spiDev.deviceType,
+                                                         spiDev.devicePurpose),
+                                                     spiDev.deviceId.word),
+                                                 0,
+                                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_elog->collectTrace(RUNTIME_COMP_NAME);
                 if (++i >= l_spiDevices.size())
                 {
                     // This error will be returned
@@ -2640,8 +2637,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                 else
                 {
                     // Commit this error and create another
-                    // @TODO RTC:212110  Re-enable when SW512178 is resolved
-//                    errlCommit(l_elog, RUNTIME_COMP_ID);
+                    errlCommit(l_elog, RUNTIME_COMP_ID);
                     // l_elog is now nullptr
                 }
             }
