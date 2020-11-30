@@ -148,13 +148,13 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg,
                                     void* o_buffer);
 
 /**
- *  @brief Get override WOF Table from PNOR. The table selected is based on system config criteria
- *  and the value of ATTR_WOF_INDEX_SELECT.
+ *  @brief Get override WOF Table from WOFDATA LID. The table selected is based on system config
+ *  criteria and the value of ATTR_WOF_INDEX_SELECT.
  *
  *  @param[in] i_procTarg       Proc chip target handle pointer
- *  @param[out] o_wofData       Pointer to memory allocated in the heap for
+ *  @param[out] o_wofData       Pointer to memory allocated from the heap for
  *                              large WOF Table data, which includes
- *                              corresponding WOF Table Header and VRT data.
+ *                              corresponding WOF Table Header and VRT (Voltage Ratio Table) data.
  *  @param[out] o_didFindTable  Bool stating if a WOF Table was found or not
  *
  *  @return errlHndl_t    - nullptr if no errors encountered
@@ -659,11 +659,11 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
                                                TARGETING::CLASS_UNIT,
                                                TARGETING::TYPE_CORE,
                                                TARGETING::UTIL_FILTER_PRESENT);
-    uint8_t l_coreCount = l_coreTargetList.size();
+    const uint8_t l_coreCount = l_coreTargetList.size();
 
     // Nominal power in Watts for Proc and Nominal Freq in Mhz for System
-    uint16_t l_nominalPowerWatts = i_procTarg->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
-    uint16_t l_nominalFreqMhz = l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
+    const uint16_t l_nominalPowerWatts = i_procTarg->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
+    const uint16_t l_nominalFreqMhz = l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
 
     FAPI_INF("getOverrideWofTable: Override WOF table search criteria: core count %d nominal "
              "power 0x%X nominal freq 0x%X", l_coreCount, l_nominalPowerWatts, l_nominalFreqMhz);
@@ -780,7 +780,7 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
 
         /* Search all Override-set entries */
 
-        // Cast out WOF Override image header into Container struct
+        // Cast out WOF Override image header into wofContainerHeader_t struct
         wofContainerHeader_t* l_containerHeader = reinterpret_cast<wofContainerHeader_t*>(l_pWofImage);
         const uint8_t l_entryCount = l_containerHeader->entryCount;
 
