@@ -2972,5 +2972,31 @@
     <group>pstate</group>
   </attribute>
 
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CURRENT_SCALING_FACTOR</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The scaling factor to be applied to currents read from the respective VRM
+    before consumption.
+
+     [Index]->8 entries-:
+         0: VDD
+         1: VCS
+         2: VDN
+         3: VIO
+         4: AVDD
+         5: Reserved
+         6: Reserved
+         7: Reserved
+    </description>
+    <valueType>uint8</valueType>
+    <array>8</array>
+    <platInit/>
+    <default>1,1,1,1,1,1,1,1</default>
+    <overrideOnly/>
+    <group>vrm</group>
+  </attribute>
+
   <!-- *********************************************************************-->
 </attributes>
