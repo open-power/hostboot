@@ -44,7 +44,6 @@
 
 #include <fapi2/plat_hwp_invoker.H>
 #include <p10_query_core_stop_state.H>
-#include <p10_core_special_wakeup.H>
 
 #include <scom/scomif.H>
 #include <errl/errludprintk.H>
@@ -99,53 +98,6 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
 
     do
     {
-        //TODO RTC:259370 - Remove this HW workaround later
-        if (sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
-        {
-            //In an MPIPL we need to issue a special wakeup to all functional cores
-            // prior to sending the doorbell messages
-            TargetHandleList l_procTargetList;
-            getAllChips(l_procTargetList, TYPE_PROC);
-
-            for (const auto & l_proc: l_procTargetList)
-            {
-                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
-
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "Calling p10_core_special_wakeup (ENABLE) for all cores on proc: 0x%x",
-                             l_proc->getAttr<TARGETING::ATTR_HUID>());
-
-                fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST >  l_core_mc =
-                             l_fapiProc.getMulticast< fapi2::MULTICAST_OR >
-                                        (fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
-
-                FAPI_INVOKE_HWP(l_errl,
-                                p10_core_special_wakeup,
-                                l_core_mc,
-                                p10specialWakeup::SPCWKUP_ENABLE,
-                                p10specialWakeup::HOST);
-
-                if (l_errl != nullptr)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               ERR_MRK "call_host_activate_secondary_cores> Failed in call to "
-                               "p10_core_special_wakeup (ENABLE) for all cores on proc: 0x%x",
-                               l_proc->getAttr<TARGETING::ATTR_HUID>());
-                    //break out of processor loop
-                    break;
-                }
-            }
-
-            //if there was an error enabling special wakeup, do not continue with
-            // secondary core wakeup
-            if (l_errl != nullptr)
-            {
-                l_stepError.addErrorDetails(l_errl);
-                errlCommit(l_errl, HWPF_COMP_ID);
-                break;
-            }
-        }
-
         // keep track of which cores started
         TargetHandleList l_startedCores;
 
@@ -282,44 +234,6 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
                 errlCommit(l_errl, HWPF_COMP_ID);
 
                 break;
-            }
-        }
-
-        //TODO RTC:259370 - Remove HW workaround later
-        //Disable Special Wakeup in MPIPL (allows stop states to work)
-        if (sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
-        {
-            TargetHandleList l_procTargetList;
-            getAllChips(l_procTargetList, TYPE_PROC);
-
-            for (const auto & l_proc: l_procTargetList)
-            {
-                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
-
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                "Calling p10_core_special_wakeup (DISABLE) for all cores on proc: 0x%x",
-                                 l_proc->getAttr<TARGETING::ATTR_HUID>());
-
-                fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST >  l_core_mc =
-                      l_fapiProc.getMulticast< fapi2::MULTICAST_OR >
-                                      (fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
-
-
-                FAPI_INVOKE_HWP(l_errl,
-                                p10_core_special_wakeup,
-                                l_core_mc,
-                                p10specialWakeup::SPCWKUP_DISABLE,
-                                p10specialWakeup::HOST);
-
-                if (l_errl != nullptr)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               ERR_MRK "call_host_activate_secondary_cores> Failed in call to "
-                               "p10_core_special_wakeup DISABLE for all cores on proc: 0x%x",
-                               l_proc->getAttr<TARGETING::ATTR_HUID>());
-                    l_stepError.addErrorDetails(l_errl);
-                    errlCommit(l_errl, HWPF_COMP_ID);
-                }
             }
         }
     } while (0);
