@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,14 +113,14 @@ const struct fir_registers_btm firs_btm =
     },
     .PHY_FIR =
     {
-        0x88FFFFC000000000, // iohs0
-        0x44FFFFC000000000, // iohs1
-        0x88FFFFC000000000, // iohs2
-        0x44FFFFC000000000, // iohs3
-        0x88FFFFC000000000, // iohs4
-        0x44FFFFC000000000, // iohs5
-        0x88FFFFC000000000, // iohs6
-        0x44FFFFC000000000, // iohs7
+        0x8800000000000000, // iohs0
+        0x4400000000000000, // iohs1
+        0x8800000000000000, // iohs2
+        0x4400000000000000, // iohs3
+        0x8800000000000000, // iohs4
+        0x4400000000000000, // iohs5
+        0x8800000000000000, // iohs6
+        0x4400000000000000, // iohs7
 
     },
 };
@@ -172,7 +172,7 @@ const struct fir_registers firs_inactive =
 
     .PHY_FIR_ACTION0 = 0x0000000000000000,
     .PHY_FIR_ACTION1 = 0xFFFFDB0000000000,
-    .PHY_FIR_MASK    = 0xFFFFFFFFFFFFFFFF,
+    .PHY_FIR_MASK    = 0xFF00000000000000,
 };
 
 const struct fir_registers firs_runtime =
@@ -191,7 +191,7 @@ const struct fir_registers firs_runtime =
 
     .PHY_FIR_ACTION0 = 0x0000000000000000,
     .PHY_FIR_ACTION1 = 0xFFFFDB0000000000,
-    .PHY_FIR_MASK    = 0x000424C000000000,
+    .PHY_FIR_MASK    = 0x0000000000000000,
 };
 
 // DL Config Register Enums
@@ -513,6 +513,7 @@ fapi2::ReturnCode p10_smp_link_firs_phy(
 
     FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_MASK_REG_RW(i_pauc_target, l_mask_value),
              "Error from putScom (PHY_SCOM_MAC_FIR_MASK_REG_RW)");
+
 
 fapi_try_exit:
     return fapi2::current_err;

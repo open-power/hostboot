@@ -148,6 +148,7 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
 
     for (auto l_pauc_target : l_pauc_targets)
     {
+        bool l_enable_fir = false;
         auto l_iohs_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
         auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
 
@@ -172,14 +173,14 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
 
         for (auto l_iohs_target : l_iohs_targets)
         {
-            fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+            fapi2::ATTR_IOHS_CONFIG_MODE_Type l_config_mode;
             int l_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
             int l_thread = 0;
 
             FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
             FAPI_DBG("Setting number of lanes and turning off stop_thread for IOHS thread %d", l_thread);
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, l_iohs_target, l_config_mode),
                      "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
 
             //Enable spread spectrum
@@ -193,6 +194,24 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
 
             //Turn off stop_thread
             FAPI_TRY(p10_io_ppe_fw_stop_thread[l_thread].putData(l_pauc_target, 0));
+
+            //if (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX ||
+            //    l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
+            //{
+            //    FAPI_DBG("Found Xbus IOHS thread %d", l_thread);
+            //    l_enable_fir = true;
+            //}
+            if (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
+            {
+                FAPI_DBG("Found Xbus IOHS thread %d", l_thread);
+                l_enable_fir = true;
+            }
+
+            if (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
+            {
+                FAPI_DBG("Found Abus IOHS thread %d", l_thread);
+                l_enable_fir = true;
+            }
 
         }
 
@@ -216,6 +235,17 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
 
             //Turn off stop_thread
             FAPI_TRY(p10_io_ppe_fw_stop_thread[l_thread].putData(l_pauc_target, 0));
+
+            for (auto l_omi_target : l_omi_targets)
+            {
+                auto l_ocmbs = l_omi_target.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>();
+
+                if (l_ocmbs.size() > 0)
+                {
+                    FAPI_DBG("Found OCMB Child on OMIC thread %d", l_thread);
+                    l_enable_fir = true;
+                }
+            }
         }
 
         // Flush the data to the sram
@@ -240,11 +270,20 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
         SET_PHY_SCOM_MAC_FIR_REG_PPE_HALTED(0, l_data);
         FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_REG_RW(l_pauc_target, l_data));
 
-        // Clear PPE Halted FIR Mask
-        FAPI_TRY(GET_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc_target, l_data));
-        SET_PHY_SCOM_MAC_FIR_MASK_REG_PPE_HALTED_MASK(0, l_data);
-        FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc_target, l_data));
+        if (l_enable_fir)
+        {
+            const uint64_t l_phy_fir_mask_ppe_and = 0xFF00000000000000;
+            const uint64_t l_phy_fir_mask_ppe_or  = 0x000024C000000000;
 
+            FAPI_TRY(GET_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc_target, l_data),
+                     "Error from getScom (PHY_SCOM_MAC_FIR_MASK_REG_RW)");
+
+            l_data &= l_phy_fir_mask_ppe_and;
+            l_data |= l_phy_fir_mask_ppe_or;
+
+            FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc_target, l_data),
+                     "Error from putScom (PHY_SCOM_MAC_FIR_MASK_REG_RW)");
+        }
     }
 
 fapi_try_exit:
