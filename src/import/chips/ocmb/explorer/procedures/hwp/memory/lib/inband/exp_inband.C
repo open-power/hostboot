@@ -417,8 +417,6 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(
                 "%s Failed to convert from data to host_fw_response_struct data size %u expected size %u",
                 mss::c_str(i_target), io_data.size(), sizeof(host_fw_response_struct));
 
-//TODO CQ: SW461052 Correct MMIO CRC responses
-#ifndef __HOSTBOOT_MODULE
     FAPI_ASSERT(l_crc == o_response.response_header_crc,
                 fapi2::EXP_INBAND_RSP_CRC_ERR()
                 .set_COMPUTED(l_crc)
@@ -426,7 +424,6 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(
                 .set_OCMB_TARGET(i_target),
                 "%s Response CRC failed to validate computed: 0x%08x got: 0x%08x",
                 mss::c_str(i_target), l_crc, o_response.response_header_crc);
-#endif
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -499,6 +496,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
 /// @brief Reads a response from the response buffer
 ///
 /// @param[in] i_target     The Explorer chip to read data from
@@ -545,6 +543,28 @@ fapi2::ReturnCode getRSP(
 
 fapi_try_exit:
     FAPI_DBG("%s Exiting with return code : 0x%08X...", mss::c_str(i_target), (uint64_t)fapi2::current_err);
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads a response from the response buffer and checks request_id
+///
+/// @param[in] i_target     The Explorer chip to read data from
+/// @param[in] i_cmd        The original command
+/// @param[out] o_rsp       The response data read from the buffer
+/// @param[out] o_data      Raw (little-endian) response data buffer portion
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode getRSP(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const host_fw_command_struct& i_cmd,
+    host_fw_response_struct& o_rsp,
+    std::vector<uint8_t>& o_data)
+{
+    FAPI_TRY(getRSP(i_target, o_rsp, o_data));
+    FAPI_TRY(check::request_id(i_target, o_rsp, i_cmd));
+
+fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -1014,6 +1034,38 @@ fapi_try_exit:
 
 namespace check
 {
+
+///
+/// @brief Checks explorer request_id in fw_response_struct
+/// @param[in] i_target OCMB target
+/// @param[in] i_rsp response from command
+/// @param[in] i_cmd original command
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode request_id(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                             const host_fw_response_struct& i_rsp,
+                             const host_fw_command_struct& i_cmd)
+{
+    FAPI_ASSERT(i_rsp.request_identifier == i_cmd.request_identifier,
+                fapi2::EXP_RESPONSE_WRONG_REQID().
+                set_TARGET(i_target).
+                set_CMD_ID(i_cmd.cmd_id).
+                set_CMD_REQ_ID(i_cmd.request_identifier).
+                set_RSP_ID(i_rsp.response_id).
+                set_RSP_REQ_ID(i_rsp.request_identifier),
+                "%s Received response with incorrect request id (0x%02x when expecting 0x%02x). "
+                "Command ID was 0x%02x, and Response ID is 0x%02x",
+                mss::c_str(i_target),
+                i_rsp.request_identifier,
+                i_cmd.request_identifier,
+                i_cmd.cmd_id,
+                i_rsp.response_id);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Checks explorer response argument for a successful command

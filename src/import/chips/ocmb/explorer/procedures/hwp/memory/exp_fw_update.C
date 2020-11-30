@@ -57,36 +57,155 @@ namespace bupg
 /// @param[in] i_target OCMB target
 /// @param[in] i_rsp response from command
 /// @param[in] i_cmd original command
+/// @param[in] i_image_sz size of the binary image
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                  const host_fw_response_struct& i_rsp,
-                                 const host_fw_command_struct& i_cmd)
+                                 const host_fw_command_struct& i_cmd,
+                                 const size_t i_image_sz)
 {
-    // The byte indices of i_rsp.response_argument which contain the MCHP
-    // error codes. Useful for debug purposes.
+    static constexpr uint8_t MCHP_STATUS_CODE  = 0;
     static constexpr uint8_t MCHP_ERROR_CODE_1 = 1;
     static constexpr uint8_t MCHP_ERROR_CODE_2 = 2;
     static constexpr uint8_t MCHP_ERROR_CODE_3 = 3;
 
-    // Check if cmd was successful
-    // The CMD_WRITE subcommand provides 3 bytes of MCHP error
-    // information in response_argument[1] to [3]
-    FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::RESPONSE_SUCCESS &&
-                i_rsp.request_identifier == i_cmd.request_identifier,
-                fapi2::EXP_UPDATE_CMD_FAILED().
-                set_TARGET(i_target).
-                set_RSP_ID(i_rsp.response_id).
-                set_REQ_ID(i_rsp.request_identifier).
-                set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
-                set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
-                set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
-                "Recieved failure response for firmware update command on %s . MCHP Error codes: "
-                "response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
-                mss::c_str(i_target),
-                i_rsp.response_argument[MCHP_ERROR_CODE_1],
-                i_rsp.response_argument[MCHP_ERROR_CODE_2],
-                i_rsp.response_argument[MCHP_ERROR_CODE_3]);
+    // Now if we get a bad success_flag, switch on the error code to give
+    // corresponding error log
+    if (i_rsp.response_argument[0] != omi::response_arg::RESPONSE_SUCCESS)
+    {
+        switch(i_rsp.response_argument[MCHP_ERROR_CODE_1])
+        {
+            case bupg::fw_binary_upgrade_rc::DEV_INF_ERR:
+                FAPI_ASSERT(false,
+                            fapi2::EXP_UPDATE_DEV_INF_ERR().
+                            set_TARGET(i_target).
+                            set_RSP_ID(i_rsp.response_id).
+                            set_REQ_ID(i_rsp.request_identifier).
+                            set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
+                            set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
+                            set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            "%s Firmware update command encountered device info retrieve error. "
+                            "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
+                            mss::c_str(i_target),
+                            i_rsp.response_argument[MCHP_ERROR_CODE_1],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_2],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_3]);
+                break;
+
+            case bupg::fw_binary_upgrade_rc::DEV_SECTOR_INF_ERR:
+                FAPI_ASSERT(false,
+                            fapi2::EXP_UPDATE_DEV_SECTOR_INF_ERR().
+                            set_TARGET(i_target).
+                            set_RSP_ID(i_rsp.response_id).
+                            set_REQ_ID(i_rsp.request_identifier).
+                            set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
+                            set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
+                            set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            "%s Firmware update command encountered device sector info retrieve error. "
+                            "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
+                            mss::c_str(i_target),
+                            i_rsp.response_argument[MCHP_ERROR_CODE_1],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_2],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_3]);
+                break;
+
+            case bupg::fw_binary_upgrade_rc::DEV_ERASE_ERR:
+                FAPI_ASSERT(false,
+                            fapi2::EXP_UPDATE_DEV_ERASE_ERR().
+                            set_TARGET(i_target).
+                            set_RSP_ID(i_rsp.response_id).
+                            set_REQ_ID(i_rsp.request_identifier).
+                            set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
+                            set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
+                            set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            "%s Firmware update command encountered device erase error. "
+                            "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
+                            mss::c_str(i_target),
+                            i_rsp.response_argument[MCHP_ERROR_CODE_1],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_2],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_3]);
+                break;
+
+            case bupg::fw_binary_upgrade_rc::WRITE_FAIL:
+                FAPI_ASSERT(false,
+                            fapi2::EXP_UPDATE_WRITE_FAIL().
+                            set_TARGET(i_target).
+                            set_RSP_ID(i_rsp.response_id).
+                            set_REQ_ID(i_rsp.request_identifier).
+                            set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
+                            set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
+                            set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            "%s Firmware update command encountered device write error. "
+                            "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
+                            mss::c_str(i_target),
+                            i_rsp.response_argument[MCHP_ERROR_CODE_1],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_2],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_3]);
+                break;
+
+            case bupg::fw_binary_upgrade_rc::INV_IMAGE_LEN:
+                FAPI_ASSERT(false,
+                            fapi2::EXP_UPDATE_INV_IMAGE_LEN().
+                            set_TARGET(i_target).
+                            set_RSP_ID(i_rsp.response_id).
+                            set_REQ_ID(i_rsp.request_identifier).
+                            set_IMAGE_LEN(i_image_sz).
+                            set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
+                            set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
+                            set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            "%s Firmware update command encountered invalid image length error. "
+                            "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
+                            mss::c_str(i_target),
+                            i_rsp.response_argument[MCHP_ERROR_CODE_1],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_2],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_3]);
+                break;
+
+            case bupg::fw_binary_upgrade_rc::AUTH_FAIL:
+                FAPI_ASSERT(false,
+                            fapi2::EXP_UPDATE_AUTH_FAIL().
+                            set_TARGET(i_target).
+                            set_RSP_ID(i_rsp.response_id).
+                            set_REQ_ID(i_rsp.request_identifier).
+                            set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
+                            set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
+                            set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            "%s Firmware update command reported an authentication failure. "
+                            "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
+                            mss::c_str(i_target),
+                            i_rsp.response_argument[MCHP_ERROR_CODE_1],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_2],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_3]);
+                break;
+
+            default:
+                FAPI_ASSERT(false,
+                            fapi2::EXP_UPDATE_CMD_FAILED().
+                            set_TARGET(i_target).
+                            set_RSP_ID(i_rsp.response_id).
+                            set_REQ_ID(i_rsp.request_identifier).
+                            set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
+                            set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
+                            set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            "%s Recieved unknown failure response for firmware update command. "
+                            "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
+                            mss::c_str(i_target),
+                            i_rsp.response_argument[MCHP_ERROR_CODE_1],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_2],
+                            i_rsp.response_argument[MCHP_ERROR_CODE_3]);
+                break;
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -234,9 +353,10 @@ extern "C"
         //is the actual field size for this value in the packet.
         FAPI_ASSERT(((i_image_sz & 0xff000000) == 0),
                     fapi2::EXP_UPDATE_INVALID_IMAGE_SIZE()
+                    .set_TARGET(i_target)
                     .set_IMAGE_SIZE(i_image_sz),
-                    "exp_fw_update: image size[0x%08x] must be less than 16MB!",
-                    i_image_sz);
+                    "%s exp_fw_update: image size[0x%08x] must be less than 16MB!",
+                    mss::c_str(i_target), i_image_sz);
 
         // Write successive blocks until the entire image is written
         buffer.reserve(mss::exp::FLASH_WRITE_BLOCK_SIZE);
@@ -304,13 +424,13 @@ extern "C"
                 if ((seq_num % 16) == 0)
                 {
                     // Read response from buffer
-                    FAPI_TRY(mss::exp::ib::getRSP(i_target, response, rsp_data),
+                    FAPI_TRY(mss::exp::ib::getRSP(i_target, flash_write_cmd, response, rsp_data),
                              "exp_fw_update: getRSP() failed for flash_write "
                              "on %s! seq_num[%u]",
                              mss::c_str(i_target), seq_num);
 
                     // Check status in response packet
-                    FAPI_TRY(mss::exp::bupg::check_response(i_target, response, flash_write_cmd),
+                    FAPI_TRY(mss::exp::bupg::check_response(i_target, response, flash_write_cmd, i_image_sz),
                              "exp_fw_update: error response for flash_write "
                              "on %s! seq_num[%u]",
                              mss::c_str(i_target), seq_num);
@@ -359,12 +479,12 @@ extern "C"
                 FAPI_TRY(fapi2::delay(mss::DELAY_1S, 200));
             }
 
-            FAPI_TRY(mss::exp::ib::getRSP(i_target, response, rsp_data),
+            FAPI_TRY(mss::exp::ib::getRSP(i_target, flash_commit_cmd, response, rsp_data),
                      "exp_fw_update: getRSP() failed for flash_commit on %s!",
                      mss::c_str(i_target) );
 
             // Check if cmd was successful
-            FAPI_TRY(mss::exp::bupg::check_response(i_target, response, flash_commit_cmd),
+            FAPI_TRY(mss::exp::bupg::check_response(i_target, response, flash_commit_cmd, i_image_sz),
                      "exp_fw_update: error response for flash_commit on %s!",
                      mss::c_str(i_target) );
         }

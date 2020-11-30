@@ -773,6 +773,28 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_EXP_RESPONSE_WRONG_REQID</rc>
+    <description>
+        Request ID in Explorer response was not equal to the ID in the command.
+        Indicates a mismatch between command and response.
+    </description>
+    <ffdc>CMD_ID</ffdc>
+    <ffdc>CMD_REQ_ID</ffdc>
+    <ffdc>RSP_ID</ffdc>
+    <ffdc>RSP_REQ_ID</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_UNKNOWN_PHY_INIT_MODE</rc>
     <description>
       The PHY init mode value was an unknown value.

@@ -82,15 +82,42 @@ typedef enum sub_cmd_id
 } sub_cmd_id_t;
 
 ///
+/// @brief Error codes for EXP_FW_BINARY_UPGRADE command
+/// @note These are described in the MCHP FW doc, chapter 9
+///
+enum fw_binary_upgrade_rc
+{
+    // Device information retrieve error
+    DEV_INF_ERR        = 0x05,
+
+    // Device sector information retrieve error
+    DEV_SECTOR_INF_ERR = 0x06,
+
+    // Device erase error
+    DEV_ERASE_ERR      = 0x07,
+
+    // Write failure
+    WRITE_FAIL         = 0x0C,
+
+    // Invalid image length
+    INV_IMAGE_LEN      = 0x0D,
+
+    // Image authentication failure
+    AUTH_FAIL          = 0x0E,
+};
+
+///
 /// @brief Checks explorer response argument for a successful command
 /// @param[in] i_target OCMB target
-/// @param[in] i_rsp response command
+/// @param[in] i_rsp response from command
 /// @param[in] i_cmd original command
+/// @param[in] i_image_sz size of the binary image
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                  const host_fw_response_struct& i_rsp,
-                                 const host_fw_command_struct& i_cmd);
+                                 const host_fw_command_struct& i_cmd,
+                                 const size_t i_image_sz);
 
 }// ns bupg
 

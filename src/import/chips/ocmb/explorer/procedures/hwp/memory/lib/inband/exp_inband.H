@@ -350,6 +350,7 @@ fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE
 ///
 fapi2::ReturnCode clear_outbound_doorbell(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
+///
 /// @brief Reads a response from the response buffer
 ///
 /// @param[in] i_target     The Explorer chip to read data from
@@ -363,6 +364,22 @@ fapi2::ReturnCode getRSP(
     host_fw_response_struct& o_rsp,
     std::vector<uint8_t>& o_data);
 
+///
+/// @brief Reads a response from the response buffer and checks request_id
+///
+/// @param[in] i_target     The Explorer chip to read data from
+/// @param[in] i_cmd        The original command
+/// @param[out] o_rsp       The response data read from the buffer
+/// @param[out] o_data      Raw (little-endian) response data buffer portion
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode getRSP(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const host_fw_command_struct& i_cmd,
+    host_fw_response_struct& o_rsp,
+    std::vector<uint8_t>& o_data);
+
+///
 /// @brief Reads the complete 64 byte sensor cache on the selected Explorer
 ///
 /// @param[in] i_target     The Explorer chip to read data from
@@ -506,6 +523,17 @@ fapi2::ReturnCode readCrctEndianArray(const std::vector<uint8_t>& i_input, const
 
 namespace check
 {
+
+///
+/// @brief Checks explorer request_id in fw_response_struct
+/// @param[in] i_target OCMB target
+/// @param[in] i_rsp response from command
+/// @param[in] i_cmd original command
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode request_id(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                             const host_fw_response_struct& i_rsp,
+                             const host_fw_command_struct& i_cmd);
 
 ///
 /// @brief Checks explorer response argument for a successful command
