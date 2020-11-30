@@ -635,31 +635,20 @@ errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
 
         auto l_scom_switch = i_spiMasterProc->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
 
-        // Set the contents of root control register 8 which controls
-        // whether we're accessing over PIB or FSI.
+        // Set the SCOM and SPI switches to the desired access mode. This is done ahead of the init
+        // call because the init functions clear the sticky MUX error bit that may not have been reset
+        // properly and that can only occur if the switches are already set.
         if (i_type == PIB_ACCESS)
         {
-            FAPI_INVOKE_HWP(l_err, p10_spi_init_pib, masterProc);
             switches.usePibSPI  = 1;
             switches.useFsiSPI  = 0;
             l_scom_switch.useSpiFsiScom = 0;
         }
         else
         {
-            FAPI_INVOKE_HWP(l_err, p10_spi_init_fsi, masterProc);
             switches.usePibSPI  = 0;
             switches.useFsiSPI  = 1;
             l_scom_switch.useSpiFsiScom = 1;
-        }
-
-        if (l_err != nullptr)
-        {
-            TRACFCOMP(g_trac_spi, ERR_MRK"spiSetAccessMode(): "
-                     "An error occurred from %s HWP call, RC=0x%X",
-                     i_type==PIB_ACCESS?"p10_spi_init_pib":"p10_spi_init_fsi",
-                     ERRL_GETRC_SAFE(l_err));
-            l_err->collectTrace(SPI_COMP_NAME, KILOBYTE);
-            break;
         }
 
         // Update SCOM switch access
@@ -668,6 +657,38 @@ errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
 
         // Update SPI access attribute for master processor
         i_spiMasterProc->setAttr<TARGETING::ATTR_SPI_SWITCHES>(switches);
+
+        // Set the contents of root control register 8 which controls
+        // whether we're accessing over PIB or FSI.
+        if (i_type == PIB_ACCESS)
+        {
+            FAPI_INVOKE_HWP(l_err, p10_spi_init_pib, masterProc);
+        }
+        else
+        {
+            FAPI_INVOKE_HWP(l_err, p10_spi_init_fsi, masterProc);
+        }
+
+        if (l_err != nullptr)
+        {
+            // Flip the switchs back to what they were before the error occurred.
+            switches.usePibSPI  = !switches.usePibSPI;
+            switches.useFsiSPI  = !switches.useFsiSPI;
+            l_scom_switch.useSpiFsiScom = !l_scom_switch.useSpiFsiScom;
+            // Update SCOM switch access
+            i_spiMasterProc->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_scom_switch);
+            // Update SPI access attribute for master processor
+            i_spiMasterProc->setAttr<TARGETING::ATTR_SPI_SWITCHES>(switches);
+
+            TRACFCOMP(g_trac_spi, ERR_MRK"spiSetAccessMode(): "
+                     "An error occurred from %s HWP call, RC=0x%X",
+                     i_type==PIB_ACCESS?"p10_spi_init_pib":"p10_spi_init_fsi",
+                     ERRL_GETRC_SAFE(l_err));
+            l_err->collectTrace(SPI_COMP_NAME, KILOBYTE);
+            break;
+        }
+
+        // Only trace the new access mode if the init functions don't fail.
         TRACFCOMP( g_trac_spi, "spiSetAccessMode: tgt=0x%X SPI_SWITCHES updated: "
                    "pib=%d, fsi=%d",
                    TARGETING::get_huid(i_spiMasterProc),
