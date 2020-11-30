@@ -30,9 +30,3 @@ config KEY_CLEAR
     help
         Support various 'key clear requests' to remove specific security
         keys, certificates, etc on the system
-
-config DISABLE_TPM_IN_HDAT
-    default n
-    help
-        Disable reporting the state of the TPMs in the system to HDAT.
-        Used for bringup purposes
