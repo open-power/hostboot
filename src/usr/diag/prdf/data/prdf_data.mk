@@ -6,6 +6,7 @@
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 
-include $(ROOTPATH)/src/usr/diag/prdf/data/chip_data/prdf_chip_data.mk
-
-prd_data_targets += ${prd_chip_data_targets}
+prd_data_targets +=
 
