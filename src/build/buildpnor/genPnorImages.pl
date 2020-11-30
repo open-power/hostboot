@@ -51,6 +51,14 @@ use constant MAX_COMP_ID_LEN => 8;
 # Max logical HBBL content size is 32K
 my $MAX_HBBL_SIZE = 32768;
 
+# Jail command for yocto froot
+my $jailcmd = "";
+if ($ENV{JAILCMD}) {
+   $jailcmd = $ENV{JAILCMD};
+}
+
+print ("jailcmd = $jailcmd\n");
+
 ################################################################################
 # Be explicit with POSIX
 # Everything is exported by default (with a handful of exceptions). This is an
@@ -135,7 +143,6 @@ my $hb_standalone="";
 my $buildType="";
 my $editedLayoutLocation="";
 my $secureVersionStr="";
-my $jailCmd="";
 my $secureVersionHbbl = 0xFF; # default - invalid value
 
 # @TODO RTC 170650: Set default to 0 after all environments provide external
@@ -161,7 +168,6 @@ GetOptions("binDir:s" => \$bin_dir,
            "build-type:s" => \$buildType,
            "editedLayoutLocation:s" => \$editedLayoutLocation,
            "secure-version:s" => \$secureVersionStr,
-           "jail-cmd:s" => \$jailCmd,
            "help" => \$help);
 
 if ($help)
@@ -954,14 +960,7 @@ sub manipulateImages
             # ECC Phase
             if( ($sectionHash{$layoutKey}{ecc} eq "yes") )
             {
-                if($jailCmd eq "")
-                {
-                    run_command("ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
-                }
-                else
-                {
-                    run_command("$jailCmd ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
-                }
+                run_command("$jailcmd ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
             }
             else
             {

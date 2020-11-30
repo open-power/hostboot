@@ -53,12 +53,6 @@ SRCPATH = ${DEFAULT_PATH:M*src*}
     GEN_DEFAULT_IMAGES_DEPS = cp_hbfiles dump-secureboot-config
 .endif
 
-.if (${MCP_VER:M*yocto*})
-    IMG_JAIL_CMD=x86_64-yocto27-jail
-.else
-    IMG_JAIL_CMD=""
-.endif
-
 OBJECTS=hcode_lid
 # Be sure to first get the hcode_lid copied at appropriate time
 .if (${MAKEFILE_PASS} == "OBJECTS")
@@ -245,13 +239,13 @@ GEN_STANDALONE_BIN_FILES = ${GEN_COMMON_BIN_FILES},TEST=EMPTY,TESTRO=EMPTY,TESTL
                      --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
                      --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
                      --secure-version ${SIGNING_SECURITY_VERSION} \
-                     --editedLayoutLocation ${EDITED_LAYOUT_PATH} --jail-cmd ${IMG_JAIL_CMD}
+                     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .else
     PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_DEFAULT_BIN_FILES = HBI=${HBI_IMG},HBEL=EMPTY,EECACHE=${${EECACHE_FAKE_IMG}:P}
     DEFAULT_PARAMS = --systemBinFiles ${GEN_DEFAULT_BIN_FILES} --pnorLayout ${PNOR_LAYOUT} \
-		     --editedLayoutLocation ${EDITED_LAYOUT_PATH} --jail-cmd ${IMG_JAIL_CMD}
+		     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .endif
 
 # rule to update hostboot image tags for custom CFM image, only enabled
@@ -269,11 +263,7 @@ cp_hbfiles: .SPECTARG
 
 gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
 	currentsb -chain
-	.if (${MCP_VER:M*yocto*})
-	    ${IMG_JAIL_CMD} ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
-	.else
-	    ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
-	.endif
+	${JAILCMD} ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
 
     # Remove offset from start of Bootloader image for HBBL partition
     # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space
@@ -483,7 +473,7 @@ ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
 		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
 			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
 			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp" \
-			--editedLayoutLocation ${EDITED_LAYOUT_PATH} --jailCmd ${IMG_JAIL_CMD}
+			--editedLayoutLocation ${EDITED_LAYOUT_PATH}
 	.endif
 .endif
 

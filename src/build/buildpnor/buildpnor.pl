@@ -38,6 +38,14 @@ use lib dirname abs_path($0);
 use PnorUtils qw(loadPnorLayout getNumber traceErr trace run_command
                  findLayoutKeyByEyeCatch checkSpaceConstraints);
 
+# Jail command for yocto froot
+my $jailcmd = "";
+if ($ENV{JAILCMD}) {
+   $jailcmd = $ENV{JAILCMD};
+}
+
+print ("jailcmd = $jailcmd\n");
+
 my $programName = File::Basename::basename $0;
 my %pnorLayout;
 my %PhysicalOffsets;
@@ -50,7 +58,6 @@ my $g_TOCEyeCatch = "part";
 my $testRun = 0;
 my $g_fpartCmd = "";
 my $g_fcpCmd = "";
-my $g_jailCmd ="";
 my %sidelessSecFilled = ();
 my %SideOptions = (
         A => "A",
@@ -101,9 +108,6 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
         $editedLayoutLocation = $ARGV[++$i];
         trace(2, "Location where the edited layout file will be placed: $editedLayoutLocation");
     }
-    elsif($ARGV[$i] =~ /--jailCmd/) {
-        $g_jailCmd = $ARGV[++$i];
-    }
     else {
         traceErr("Unrecognized Input: $ARGV[$i]");
         exit 1;
@@ -112,11 +116,8 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
 }
 
 # Prepend the jail command to the fpart and fcp commands
-if($g_jailCmd ne "")
-{
-    $g_fpartCmd = "$g_jailCmd $g_fpartCmd";
-    $g_fcpCmd = "$g_jailCmd $g_fcpCmd";
-}
+$g_fpartCmd = "$jailcmd $g_fpartCmd";
+$g_fcpCmd = "$jailcmd $g_fcpCmd";
 
 ############################## Begin Actions ##################################
 
