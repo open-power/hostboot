@@ -39,6 +39,9 @@
 // Max SPI transmit size
 #define TPM_MAX_SPI_TRANSMIT_SIZE 64
 
+// TPM polling timeout in NS
+#define TPM_POLLING_TIMEOUT_NS 10 * NS_PER_MSEC
+
 Bootloader::hbblReasonCode tpm_read(const uint32_t i_offset, void* o_buffer, size_t& io_buflen)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
@@ -115,6 +118,7 @@ Bootloader::hbblReasonCode tpm_write(const uint32_t i_offset, const void* i_buff
 Bootloader::hbblReasonCode tpmReadSTSReg(TPMDD::tpm_sts_reg_t& o_stsReg)
 {
     size_t l_size = sizeof(o_stsReg);
+    o_stsReg = 0;
     return tpm_read(TPMDD::TPM_REG_75x_STS, &o_stsReg, l_size);
 }
 
@@ -269,6 +273,244 @@ Bootloader::hbblReasonCode tpmPollForCommandReady()
 }
 
 /**
+ * @brief Helper function to read the status valid bit from the TPM status reg
+ *
+ * @param[out] o_stsReg the value of the status reg
+ * @return 0 on success or error code on error
+ */
+Bootloader::hbblReasonCode tpmReadSTSRegValid(TPMDD::tpm_sts_reg_t& o_stsReg)
+{
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+    size_t l_polls = 0;
+
+    do
+    {
+        l_rc = tpmReadSTSReg(o_stsReg);
+        if(l_rc)
+        {
+            break;
+        }
+
+        if(l_polls > TPMDD::MAX_STSVALID_POLLS && !(o_stsReg.stsValid))
+        {
+            l_rc = Bootloader::RC_TPM_STS_TIMEOUT;
+            break;
+        }
+        else if(!o_stsReg.stsValid)
+        {
+            bl_nanosleep(0, TPM_POLLING_TIMEOUT_NS); // 10 ms
+            ++l_polls;
+        }
+    }while(!o_stsReg.stsValid);
+
+    return l_rc;
+}
+
+/**
+ * @brief Helper function to check if there is more data available from TPM
+ *
+ * @param[out] o_isDataAvail whether more data is available from TPM
+ * @return 0 on success or error code on error
+ */
+Bootloader::hbblReasonCode tpmIsDataAvail(bool& o_isDataAvail)
+{
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+    TPMDD::tpm_sts_reg_t l_stsReg;
+    l_rc = tpmReadSTSRegValid(l_stsReg);
+    o_isDataAvail = false;
+
+    if(!l_rc && l_stsReg.dataAvail)
+    {
+        o_isDataAvail = true;
+    }
+    return l_rc;
+}
+
+/**
+ * @brief Helper function to poll TPM for data available status
+ *
+ * @return 0 on success or error code on error
+ */
+Bootloader::hbblReasonCode tpmPollForDataAvail()
+{
+    TPMDD::tpm_sts_reg_t l_stsReg;
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+    size_t l_delay_ms = 0;
+
+    // Use the longer timeout B here since some of the TPM commands may take
+    // more than timeout A to complete
+    for (l_delay_ms = 0; l_delay_ms < TPMDD::TPM_TIMEOUT_B; l_delay_ms += 10)
+    {
+        l_rc = tpmReadSTSRegValid(l_stsReg);
+        if (l_rc == Bootloader::RC_TPM_STS_TIMEOUT)
+        {
+            // Polling loop within tpmReadSTSRegValid timed out, delete error and try again.
+            l_rc = Bootloader::RC_NO_ERROR;
+            // Ensure that dataAvail is 0, since we didn't get a good status
+            l_stsReg.dataAvail = 0;
+        }
+
+        if ((!l_rc && l_stsReg.dataAvail) ||
+            (l_rc))
+        {
+            break;
+        }
+        // Sleep 10ms before attempting another read
+        bl_nanosleep(0, TPM_POLLING_TIMEOUT_NS);
+
+    }
+
+    if(l_delay_ms >= TPMDD::TPM_TIMEOUT_B)
+    {
+        l_rc = Bootloader::RC_TPM_TIMEOUT_B;
+    }
+
+    return l_rc;
+}
+
+/**
+ * @brief Helper function to write the tpmGo bit to TPM status reg
+ *
+ * @return 0 on success or error code on error
+ */
+Bootloader::hbblReasonCode tpmWriteTpmGo()
+{
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+    TPMDD::tpm_sts_reg_t l_stsReg;
+    l_stsReg.tpmGo = 1;
+
+    size_t l_size = sizeof(l_stsReg);
+
+    l_rc = tpm_write(TPMDD::TPM_REG_75x_STS, &l_stsReg, l_size);
+    return l_rc;
+}
+
+/**
+ * @brief Helper function to read the TPM FIFO
+ *
+ * @param[out] o_buffer the buffer read from TPM FIFO
+ * @param[in/out] io_buflen the amount of data to read/amount actually read
+ * @return 0 on success or error code on error
+ */
+Bootloader::hbblReasonCode tpmReadFifo(void* o_buffer, size_t& io_buflen)
+{
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+    size_t l_delay_ms = 0;
+    size_t l_curByte = 0;
+    bool l_firstRead = true;
+    uint32_t l_dataLeft = io_buflen;
+
+    // all command responses are at least 10 bytes of data
+    // 2 byte tag + 4 byte response size + 4 byte response code
+    const uint32_t MIN_COMMAND_RESPONSE_SIZE = 10;
+
+    do {
+    // Verify the TPM has data waiting for us
+    l_rc = tpmPollForDataAvail();
+    if(l_rc)
+    {
+        break;
+    }
+
+    do
+    {
+        size_t l_dataLen = 0;
+        bool l_dataAvail = false;
+        uint32_t l_responseSize = 0;
+        uint8_t* l_bytePtr = static_cast<uint8_t*>(o_buffer);
+        uint16_t l_burstCount = 0;
+
+        l_rc = tpmReadBurstCount(l_burstCount);
+        if(l_rc)
+        {
+            break;
+        }
+        else if(0 == l_burstCount)
+        {
+            // Need to delay to allow the TPM time
+            bl_nanosleep(0, TPM_POLLING_TIMEOUT_NS); // 10ms
+            l_delay_ms += 10;
+            continue;
+        }
+
+        // Read some data
+        if (l_firstRead)
+        {
+            l_dataLen = MIN_COMMAND_RESPONSE_SIZE;
+        }
+        else if (l_burstCount < l_dataLeft)
+        {
+            l_dataLen = l_burstCount;
+        }
+        else
+        {
+            l_dataLen = l_dataLeft;
+        }
+
+        if(l_curByte + l_dataLen > io_buflen)
+        {
+            // TPM is expecting more data even though we think we are done
+            l_rc = Bootloader::RC_TPM_OVERFLOW;
+            break;
+        }
+
+        l_delay_ms = 0;
+        uint8_t* l_curBytePtr = &(l_bytePtr[l_curByte]);
+        l_rc = tpm_read(TPMDD::TPM_REG_75x_RD_FIFO, l_curBytePtr, l_dataLen);
+        if(l_rc)
+        {
+            break;
+        }
+
+        if(l_firstRead)
+        {
+            l_responseSize = *(reinterpret_cast<uint32_t*>((l_curBytePtr + 2)));
+            l_dataLeft = l_responseSize;
+            l_firstRead = false;
+        }
+
+        l_curByte += l_dataLen;
+        l_dataLeft -= l_dataLen;
+
+        l_rc = tpmIsDataAvail(l_dataAvail);
+        if(l_rc || !l_dataAvail)
+        {
+            break;
+        }
+        if((l_dataLeft == 0) && l_dataAvail)
+        {
+            // Either the available STS is wrong or
+            // responseSize in firstRead response was wrong
+            l_rc = Bootloader::RC_TPM_EXTRA_DATA_AVAIL;
+            break;
+        }
+
+    // Operation TIMEOUT_D defined by TCG spec for FIFO availability
+    } while(l_delay_ms < TPMDD::TPM_TIMEOUT_D);
+    if(l_rc)
+    {
+        break;
+    }
+    else if(l_delay_ms >= TPMDD::TPM_TIMEOUT_D)
+    {
+        l_rc = Bootloader::RC_TPM_READ_TIMEOUT;
+        break;
+    }
+    else
+    {
+        io_buflen = l_curByte;
+    }
+
+    } while(0);
+
+    if(l_rc)
+    {
+        io_buflen = 0;
+    }
+    return l_rc;
+}
+
+/**
  * @brief Helper function to write to TPM FIFO
  *
  * @param[in] i_buffer the buffer to write to FIFO
@@ -302,7 +544,7 @@ Bootloader::hbblReasonCode tpmWriteFifo(const void* i_buffer, size_t i_buflen)
         else if (0 == l_burstCount)
         {
             // Need to delay to allow the TPM time
-            bl_nanosleep(0, 10 * NS_PER_MSEC); // 10ms
+            bl_nanosleep(0, TPM_POLLING_TIMEOUT_NS); // 10ms
             l_delay_ms += 10;
             continue;
         }
@@ -369,7 +611,7 @@ Bootloader::hbblReasonCode tpmWriteFifo(const void* i_buffer, size_t i_buflen)
         else if(0 == l_burstCount)
         {
             // Need to delay to allow the TPM time
-            bl_nanosleep(0, 10 * NS_PER_MSEC); // 10ms
+            bl_nanosleep(0, TPM_POLLING_TIMEOUT_NS); // 10ms
             l_delay_ms += 10;
             continue;
         }

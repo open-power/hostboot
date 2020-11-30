@@ -99,6 +99,11 @@ namespace Bootloader
         RC_TPM_TIMEOUT_D_1         = HBBL_COMP_ID | 0x1b,  /**< TPM hit the TPM D timeout (1) */
         RC_TPM_TIMEOUT_D_2         = HBBL_COMP_ID | 0x1c,  /**< TPM hit the TPM D timeout (2) */
         RC_TPM_IS_EXPECTING        = HBBL_COMP_ID | 0x1d,  /**< TPM expecting more data while it shouldn't be */
+        RC_TPM_STS_TIMEOUT         = HBBL_COMP_ID | 0x1e,  /**< Timeout out waiting for TPM status */
+        RC_TPM_OVERFLOW            = HBBL_COMP_ID | 0x1f,  /**< TPM expected more data than we thought */
+        RC_TPM_EXTRA_DATA_AVAIL    = HBBL_COMP_ID | 0x20,  /**< Data size mismatch */
+        RC_TPM_READ_TIMEOUT        = HBBL_COMP_ID | 0x21,  /**< TPM read fifo timeout */
+        RC_TPM_TIMEOUT_B           = HBBL_COMP_ID | 0x22,  /**< TPM hit the TPM timeout B */
 
     };
 

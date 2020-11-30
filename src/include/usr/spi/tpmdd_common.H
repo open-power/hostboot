@@ -100,6 +100,12 @@ union tpm_sts_reg_t
     {
         value = 0;
     }
+
+    uint8_t operator=(const uint8_t l_rhs)
+    {
+        value = l_rhs;
+        return value;
+    }
 };
 
 } // namespace TPMDD
