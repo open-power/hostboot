@@ -184,7 +184,10 @@ class instruction_t
 
                 // Assigns the CS based upon which DIMM we're at
                 const uint64_t CS01 = l_is_dimm0 ? TT::CS_N[l_dimm_rank].first : NON_DIMM_CS;
-                const uint64_t CS23 = l_is_dimm0 ? NON_DIMM_CS : TT::CS_N[l_dimm_rank].first;
+                uint64_t CS23 = l_is_dimm0 ? NON_DIMM_CS : TT::CS_N[l_dimm_rank].first;
+
+                // Set CS23 <-- CS01 if CS needs to be tied
+                FAPI_TRY(TT::cs_tied(i_target, CS01, CS23));
 
                 // Setup that rank
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
