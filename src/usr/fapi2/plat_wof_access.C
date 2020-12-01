@@ -352,7 +352,6 @@ errlHndl_t getSeepromWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData)
                 "value %u is out of range, only %d table header entries found",
                 l_idxSelect, l_imgHeader.entryCount);
 
-            /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
             /*@
             * @errortype
             * @moduleid    fapi2::MOD_FAPI2_GET_DEFAULT_WOF_TABLE
@@ -363,7 +362,7 @@ errlHndl_t getSeepromWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData)
             * @custdesc    Unsupported processor module
             */
             l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             fapi2::MOD_FAPI2_GET_DEFAULT_WOF_TABLE,
                             fapi2::RC_WOF_MRW_IDX_NOT_INCLUDED,
                             l_idxSelect,
@@ -400,7 +399,6 @@ errlHndl_t getSeepromWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData)
                 "offset + size = %u + %u = %u", l_wofImgSize, l_tableEntry.offset,
                 l_tableEntry.size, l_endOfHeader);
 
-            /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
             /*@
             * @errortype
             * @moduleid          fapi2::MOD_FAPI2_GET_DEFAULT_WOF_TABLE
@@ -413,7 +411,7 @@ errlHndl_t getSeepromWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData)
             * @custdesc          Unsupported processor module
             */
             l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             fapi2::MOD_FAPI2_GET_DEFAULT_WOF_TABLE,
                             fapi2::RC_WOF_HEADER_ENTRY_BEYOND_IMG,
                             TWO_UINT32_TO_UINT64(l_tableEntry.offset, l_tableEntry.size),
@@ -570,7 +568,7 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
             FAPI_ERR("getSeepromEccLessWofData: ECC removal was uncorrectable when removing ECC "
                      "from WOF when reading: i_buflen: %u i_offset: %u i_procTarg HUID: 0x%.8X",
                      i_buflen,  i_offset, TARGETING::get_huid(i_procTarg));
-            /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
+
             /*@
             * @errortype
             * @moduleid          fapi2::MOD_FAPI2_GET_SEEPROM_ECC_LESS_WOF_DATA
@@ -581,7 +579,7 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
             * @custdesc          Hardware error inside processor module
             */
             l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             fapi2::MOD_FAPI2_GET_SEEPROM_ECC_LESS_WOF_DATA,
                             fapi2::RC_WOF_READ_UNCORRECTABLE_ECC,
                             l_eccOffset,
@@ -1062,7 +1060,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
                 FAPI_ERR("(Retrieved from SEEPROM) WOF Image Header Magic Value "
                     "Mismatch 0x%X != WTIH(0x%X)", i_magicNum, WOF_IMAGE_MAGIC_VALUE);
                 l_userData2 = TO_UINT64(i_version);
-                /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
+
                 /*@
                 * @errortype
                 * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
@@ -1074,7 +1072,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
                 * @custdesc          Unsupported processor module
                 */
                 l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
                                 fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH,
                                 l_userData1,
@@ -1121,7 +1119,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
                 FAPI_ERR("(Retrieved from SEEPROM) WOF Image header version not "
                     "supported: Header Version %d, Supported Version is "
                     "%d", i_version, WOF_IMAGE_VERSION);
-                /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
+
                 /*@
                 * @errortype
                 * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
@@ -1132,7 +1130,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
                 * @custdesc          Unsupported processor module for current firmware version
                 */
                 l_errl = new ERRORLOG::ErrlEntry(
-                                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                  fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
                                  fapi2::RC_WOF_IMAGE_VERSION_MISMATCH,
                                  l_userData1,
@@ -1195,7 +1193,7 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
                     "Mismatch 0x%X != WFTH(0x%X)", i_magicVal,
                     WOF_TABLES_MAGIC_VALUE);
                 l_userData2 = TO_UINT64(i_version);
-                /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
+
                 /*@
                 * @errortype
                 * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
@@ -1207,7 +1205,7 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
                 * @custdesc          Unsupported processor module
                 */
                 l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
                                 fapi2::RC_WOF_TABLES_MAGIC_MISMATCH,
                                 l_userData1,
@@ -1251,7 +1249,7 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
                     "supported: Header Version %d, Supported Version is "
                     "%d", i_version, WOF_TABLE_VERSION);
                 l_userData2 = 0;
-                /* FIXME 255501 Revert back to ERRL_SEV_UNRECOVERABLE*/
+
                 /*@
                 * @errortype
                 * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
@@ -1265,7 +1263,7 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
                 * @custdesc          Unsupported processor module for current firmware level
                 */
                 l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
                                 fapi2::RC_WOF_TABLES_VERSION_MISMATCH,
                                 l_userData1,
