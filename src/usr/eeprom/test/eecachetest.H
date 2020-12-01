@@ -211,7 +211,7 @@ class EECACHETest: public CxxTest::TestSuite
                                 DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY, l_offset, EEPROM::CACHE));
               if (l_errl != nullptr)
               {
-                  TS_FAIL("pTarget %.8X - failed reading backup VPD eeprom", TARGETING::get_huid(testTarget));
+                  TS_FAIL("pTarget %.8X - failed reading primary VPD eeprom", TARGETING::get_huid(testTarget));
                   break;
               }
 
