@@ -66,6 +66,7 @@
 #include <p10_scom_proc_3.H>
 #include <p10_scom_proc_5.H>
 #include <p10_scom_c_7.H>
+#include <p10_scom_c_d.H>
 #include <p10_scom_eq.H>
 #include <p10_scom_c.H>
 #include <p10_scom_perv.H>
@@ -221,6 +222,7 @@ fapi2::ReturnCode qme_init(
     // Function not supported on SBE platform
 #ifndef __PPE__
     using namespace scomt::eq;
+    using namespace scomt::c;
     using namespace scomt::perv;
     using namespace scomt::proc;
 
@@ -243,6 +245,9 @@ fapi2::ReturnCode qme_init(
     auto l_eq_mc_or  = i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
     auto l_eq_mc_and = i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
     auto l_eq_vector = i_target.getChildren<fapi2::TARGET_TYPE_EQ> (fapi2::TARGET_STATE_FUNCTIONAL);
+    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > core_mc_target =
+        i_target.getMulticast<>(fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
+
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_IS_SIMULATION_Type is_sim;
@@ -252,6 +257,15 @@ fapi2::ReturnCode qme_init(
     {
         l_timeout = SIM_TIMEOUT_COUNT;
     }
+
+    //Set the delay values for core chiplets
+    l_data64.flush<0>().insertFromRight<0,  4>(HCD_PFET_DELAY_POWERDOWN).
+    insertFromRight<4,  4>(HCD_PFET_DELAY_POWERUP_L3).
+    insertFromRight<8,  4>(HCD_PFET_DELAY_POWERUP_CL2).
+    insertFromRight<12, 4>(HCD_PFET_DELAY_POWERUP_MMA);
+
+    FAPI_DBG("Setting PFET Delays in all cores via multicast");
+    FAPI_TRY(fapi2::putScom(core_mc_target, CPMS_PFETDLY, l_data64));
 
     // First check if QME_ACTIVE is not set in any OCCFLAG register
     FAPI_TRY( getScom( l_eq_mc_or, QME_FLAGS_RW, l_qme_flag ) );
