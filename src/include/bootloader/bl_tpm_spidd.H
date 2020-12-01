@@ -62,4 +62,12 @@ Bootloader::hbblReasonCode tpm_read(uint32_t i_offset, void* o_buffer, size_t& i
  * @return 0 on success or error code on failure
  */
 Bootloader::hbblReasonCode tpm_write(uint32_t i_offset, const void* i_buffer, size_t& io_buflen);
+
+/**
+ * @brief Sends the TPM Startup command to the TPM.
+ *
+ * @return 0 on success or error code on failure
+ * @note The TPM locality needs to be set prior to calling this function
+ */
+Bootloader::hbblReasonCode tpmCmdStartup();
 #endif

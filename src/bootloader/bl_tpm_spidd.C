@@ -35,9 +35,20 @@
 
 // TPM lives on SPI engine 4
 #define TPM_SPI_ENGINE 4
-
 // Max SPI transmit size
 #define TPM_MAX_SPI_TRANSMIT_SIZE 64
+// The length of the TPM startup command
+#define TPM_STARTUP_CMD_LEN 0xC
+
+/**
+ * @brief Base response from the TPM (used to get the RC)
+ */
+struct TPM_BaseOut
+{
+    uint16_t tag;
+    uint32_t responseSize; ///< Total # out bytes incl paramSize & tag
+    uint32_t responseCode; ///< The return code of the operation
+} PACKED;
 
 // TPM polling timeout in NS
 #define TPM_POLLING_TIMEOUT_NS 10 * NS_PER_MSEC
@@ -562,6 +573,7 @@ Bootloader::hbblReasonCode tpmWriteFifo(const void* i_buffer, size_t i_buflen)
                     (l_length - l_curByte) :
                     l_burstCount);
         l_rc = tpm_write(TPMDD::TPM_REG_75x_WR_FIFO, l_curBytePtr, l_tx_len);
+
         if(l_rc)
         {
             break;
@@ -651,3 +663,108 @@ Bootloader::hbblReasonCode tpmWriteFifo(const void* i_buffer, size_t i_buflen)
     } while (0);
     return l_rc;
 }
+
+/**
+ * @brief Helper function to transmit a command to the TPM
+ *
+ * @param[in/out] io_buffer the buffer containing the TPM command/TPM response
+ * @param[in/out] io_buflen the size of the buffer
+ * @param[in] i_commandlen the length of the TPM command
+ * @return 0 on success or error code on error
+ */
+Bootloader::hbblReasonCode tpmTransmit(void* io_buffer,
+                                              size_t& io_buflen,
+                                              const size_t i_commandlen)
+{
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+    bool l_isReady = false;
+
+    do {
+    // Verify the TPM is ready to receive our command
+    l_rc = tpmIsCommandReady(l_isReady);
+    if(l_rc)
+    {
+        break;
+    }
+
+    if(!l_isReady)
+    {
+        // set TPM into command ready state
+        l_rc = tpmWriteCommandReady();
+        if(l_rc)
+        {
+            break;
+        }
+
+        // Verify the TPM is now ready to receive our command
+        l_rc = tpmPollForCommandReady();
+        if(l_rc)
+        {
+            break;
+        }
+    }
+
+    // Write the command into the TPM FIFO
+    l_rc = tpmWriteFifo(io_buffer, i_commandlen);
+    if(l_rc)
+    {
+        break;
+    }
+
+    l_rc = tpmWriteTpmGo();
+    if(l_rc)
+    {
+        break;
+    }
+
+    // Read the response from the TPM FIFO
+    l_rc = tpmReadFifo(io_buffer, io_buflen);
+    if(l_rc)
+    {
+        break;
+    }
+
+    l_rc = tpmWriteCommandReady();
+    if(l_rc)
+    {
+        break;
+    }
+    } while(0);
+
+    return l_rc;
+}
+
+Bootloader::hbblReasonCode tpmCmdStartup()
+{
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+    uint32_t l_cmdData[] = { 0x80010000, // Header and some TPM-specific params
+                             0x000C0000, // TPM-specific params cont.
+                             0x01440000 }; // 144 is the TPM startup command
+    size_t l_cmdLen = TPM_STARTUP_CMD_LEN;
+
+    // l_cmdData will be reused for the TPM response
+    l_rc = tpmTransmit(l_cmdData,
+                       l_cmdLen,
+                       l_cmdLen);
+    if(!l_rc)
+    {
+        TPM_BaseOut* l_resp = reinterpret_cast<TPM_BaseOut*>(l_cmdData);
+        if(l_resp->responseCode == Bootloader::RC_NO_ERROR)
+        {
+            bl_console::putString("Successfully started TPM (SBE has NOT started the TPM before)\r\n");
+        }
+        else if(l_resp->responseCode == Bootloader::RC_TPM_INITIALIZE)
+        {
+            bl_console::putString("Successfully started TPM (SBE started the TPM)\r\n");
+        }
+        else
+        {
+            bl_console::putString("TPM Init fail! TPM RC: 0x");
+            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_resp->responseCode), sizeof(l_resp->responseCode));
+            bl_console::putString("\r\n");
+            l_rc = Bootloader::RC_TPM_INIT_FAIL;
+        }
+    }
+    return l_rc;
+}
+

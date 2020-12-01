@@ -104,6 +104,9 @@ namespace Bootloader
         RC_TPM_EXTRA_DATA_AVAIL    = HBBL_COMP_ID | 0x20,  /**< Data size mismatch */
         RC_TPM_READ_TIMEOUT        = HBBL_COMP_ID | 0x21,  /**< TPM read fifo timeout */
         RC_TPM_TIMEOUT_B           = HBBL_COMP_ID | 0x22,  /**< TPM hit the TPM timeout B */
+        RC_TPM_INIT_FAIL           = HBBL_COMP_ID | 0x23,  /**< Failed to init the TPM */
+
+        RC_TPM_INITIALIZE          = 0x100, /**< Special TPM RC that signals if TPM's been initialized already */
 
     };
 
