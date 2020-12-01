@@ -94,26 +94,6 @@ void maskIfCoreCs( ExtensibleChip * i_chip )
     }while(0);
 }
 
-void rtDcnfgCore( ExtensibleChip * i_chip )
-{
-    TargetHandle_t coreTgt = i_chip->getTrgt();
-
-    // Get the Global Errorlog
-    errlHndl_t globalErrl =
-        ServiceGeneratorClass::ThisServiceGenerator().getErrl();
-
-    // Call Deconfig
-    errlHndl_t errl = nullptr;
-    errl = HWAS::theDeconfigGard().deconfigureTargetAtRuntime( coreTgt,
-                       HWAS::DeconfigGard::FULLY_AT_RUNTIME, globalErrl );
-
-    if (errl)
-    {
-        PRDF_ERR( "[EC::rtDcnfgCore] Deconfig failed on core %x",
-                  getHuid(coreTgt));
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-    }
-}
 #endif
 
 /**
@@ -133,11 +113,15 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
     {
         ExtensibleChip * n_chip = getNeighborCore(i_chip);
         maskIfCoreCs(i_chip);
-        rtDcnfgCore(i_chip);
         if (n_chip != nullptr)
         {
             maskIfCoreCs(n_chip);
         }
+
+        // NOTE: We no longer need to do a runtime deconfig of the core here as
+        // in P10 there is now support for non-fatal unit checkstops at runtime.
+        // We want to avoid runtime deconfiguring of the core to avoid problems
+        // that it can potentially cause for MPIPL and HWPs.
     }
     else
     {
