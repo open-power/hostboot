@@ -389,11 +389,9 @@ securerom_NO_RELOCATION = 1
 
 # for PRDR_RULE_TABLE_TARGETS
 include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
-include ${ROOTPATH}/src/usr/diag/prdf/data/prdf_data.mk
 
 hbicore_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),pvpd_bp.dat)
 hbicore_DATA_MODULES += ${prd_rule_prf_targets}
-hbicore_DATA_MODULES += ${prd_data_targets}
 
 hbicore_test_OBJECTS += ${hbicore_OBJECTS}
 hbicore_test_MODULES += ${hbicore_MODULES}
@@ -413,7 +411,6 @@ hbirt_OBJECTS += ${BASE_OBJECTS} tlsrt.o
 hbirt_MODULES += ${RUNTIME_MODULES}
 hbirt_DATA_MODULES += ${RUNTIME_DATA_MODULES}
 hbirt_DATA_MODULES += $(if $(CONFIG_HBRT_PRD),$(prd_rule_prf_targets))
-hbirt_DATA_MODULES += $(if $(CONFIG_HBRT_PRD),$(prd_data_targets))
 hbirt_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
 hbirt_LDFILE = kernel.ld
 

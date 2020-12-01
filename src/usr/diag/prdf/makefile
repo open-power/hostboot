@@ -27,7 +27,6 @@ ROOTPATH = ../../../..
 MODULE = prdf
 
 SUBDIRS += rule.d
-SUBDIRS += data.d
 SUBDIRS += runtime.d
 SUBDIRS += test.d
 
