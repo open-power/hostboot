@@ -325,6 +325,7 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     constexpr uint64_t MASK_ALL = ~0ull;
 
     fapi2::ATTR_OMI_X4_DEGRADE_ACTION_Type l_degrade_fail_action = 0;
+    fapi2::ATTR_OMI_CRC_DEBUG_Type l_omi_crc_debug = 0;
     fapi2::buffer<uint64_t> l_dl0_error_mask;
     fapi2::buffer<uint64_t> l_global_fir_mask_reg;
     fapi2::buffer<uint64_t> l_global_spa_attn_reg;
@@ -343,6 +344,7 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     FAPI_TRY(l_rc3, "unable to create fir::reg for EXPLR_DLX_MC_OMI_FIR_REG 0x%08X", EXPLR_DLX_MC_OMI_FIR_REG);
 
     FAPI_TRY(mss::attr::get_omi_x4_degrade_action(l_degrade_fail_action));
+    FAPI_TRY(mss::attr::get_omi_crc_debug(l_omi_crc_debug));
 
     // Write LOCAL_FIR register per Explorer unmask spec
     FAPI_TRY(l_exp_local_fir_reg.recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_106>()
@@ -381,6 +383,9 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_TIMEOUT>()
     .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_ERROR_RETRAIN>()
     .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>();
+
+    // Set up OMI CRC debug mode if requested
+    mss::exp::workarounds::fir::override_omi_crc_firs(i_target, l_omi_crc_debug, l_exp_mc_omi_fir_reg);
 
     // Set up x4 degrade FIR attribute overrides
     mss::exp::workarounds::fir::override_x4_degrade_fir(i_target, l_degrade_fail_action, l_exp_mc_omi_fir_reg);

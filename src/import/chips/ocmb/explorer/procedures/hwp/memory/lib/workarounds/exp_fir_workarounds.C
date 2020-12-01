@@ -83,6 +83,44 @@ void override_x4_degrade_fir( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
     }
 }
 
+///
+/// @brief Function handling the MC_OMI_FIR CRC FIR settings
+/// @param[in] i_target the OCMB_CHIP target of the MC_OMI fir
+/// @param[in] i_omi_crc_debug value from ATTR_OMI_CRC_DEBUG
+/// @param[in,out] io_exp_mc_omi_fir_reg the MC_OMI_FIR register instance
+///
+void override_omi_crc_firs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                            const uint8_t i_omi_crc_debug,
+                            mss::fir::reg<EXPLR_DLX_MC_OMI_FIR_REG>& io_exp_mc_omi_fir_reg )
+{
+    // Write MC_OMI_FIR register per attr setting
+    switch(i_omi_crc_debug)
+    {
+        case fapi2::ENUM_ATTR_OMI_CRC_DEBUG_XSTOP:
+            FAPI_DBG("%s Setting MC_OMI_FIR CRC FIRs to checkstop per attribute setting", mss::c_str(i_target));
+            io_exp_mc_omi_fir_reg.checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>()
+            .checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_NACK>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CRC_DEBUG_RECOVERABLE:
+            FAPI_DBG("%s Setting MC_OMI_FIR CRC FIRs to recoverable per attribute setting", mss::c_str(i_target));
+            io_exp_mc_omi_fir_reg.recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>()
+            .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_NACK>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CRC_DEBUG_LOCAL_XSTOP:
+            FAPI_DBG("%s Setting MC_OMI_FIR CRC FIRs to local_checkstop per attribute setting", mss::c_str(i_target));
+            io_exp_mc_omi_fir_reg.local_checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>()
+            .local_checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_NACK>();
+            break;
+
+        default:
+            // By default just leave it
+            FAPI_DBG("%s Leaving MC_OMI_FIR CRC FIRs as masked per attribute setting", mss::c_str(i_target));
+            break;
+    }
+}
+
 } // fir
 } // workarounds
 } // exp

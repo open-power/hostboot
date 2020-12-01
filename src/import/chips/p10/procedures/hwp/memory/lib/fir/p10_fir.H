@@ -524,6 +524,7 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ATTR_OMI_CHANNEL_FAIL_ACTION_Type l_omi_fail_action = 0;
     fapi2::ATTR_OMI_X4_DEGRADE_ACTION_Type l_degrade_fail_action = 0;
+    fapi2::ATTR_OMI_CRC_DEBUG_Type l_omi_crc_debug = 0;
     bool l_subchannel_a_config = false;
     bool l_subchannel_b_config = false;
 
@@ -533,6 +534,7 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
 
     FAPI_TRY(mss::attr::get_omi_channel_fail_action(l_omi_fail_action));
     FAPI_TRY(mss::attr::get_omi_x4_degrade_action(l_degrade_fail_action));
+    FAPI_TRY(mss::attr::get_omi_crc_debug(l_omi_crc_debug));
 
     // Set up MISCFIRQ
     l_rc = l_mc_miscfir_reg.recoverable_error<scomt::mc::MBA_SCOMFIR_MISCFIRQ_SCOM_RECOVERABLE_REG_PE>()
@@ -560,6 +562,9 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
         .recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL1_TIMEOUT>()
         .recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL1_ERROR_RETRAIN>()
         .recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL1_EDPL_RETRAIN>();
+
+        // Set up OMI CRC debug mode if requested
+        mss::workarounds::fir::override_omi_crc_firs(l_omic, l_omi_crc_debug, l_mc_omi_fir_reg);
 
         // Set up x4 degrade FIR attribute overrides
         mss::workarounds::fir::override_x4_degrade_firs(l_omic, l_degrade_fail_action, l_mc_omi_fir_reg);

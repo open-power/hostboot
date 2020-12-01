@@ -97,6 +97,16 @@ void override_x4_degrade_firs( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_t
                                const uint8_t i_omi_fail_action,
                                mss::fir::reg<scomt::omic::MC_OMI_FIR_REG_RW>& io_mc_omi_fir_reg );
 
+///
+/// @brief Function handling the MC_OMI_FIR CRC FIR settings
+/// @param[in] i_target the OMIC target of the MC_OMI fir
+/// @param[in] i_omi_crc_debug value from ATTR_OMI_CRC_DEBUG
+/// @param[in,out] io_mc_omi_fir_reg the MC_OMI_FIR register instance
+///
+void override_omi_crc_firs( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                            const uint8_t i_omi_crc_debug,
+                            mss::fir::reg<scomt::omic::MC_OMI_FIR_REG_RW>& io_mc_omi_fir_reg );
+
 } // namespace fir
 } // namespace workarounds
 } // namespace mss

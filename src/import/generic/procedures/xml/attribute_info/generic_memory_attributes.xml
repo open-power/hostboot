@@ -460,6 +460,27 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_OMI_CRC_DEBUG</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Selects the settings for Host and Explorer FIRs
+        for CRC and NACK errors.
+        Default: MASKED
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      MASKED = 0x00,
+      XSTOP = 0x01,
+      LOCAL_XSTOP = 0x02,
+      RECOVERABLE = 0x03
+    </enum>
+    <default>0x00</default>
+    <platInit/>
+    <writeable/>
+    <mssAccessorName>omi_crc_debug</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_ENABLE_FIR_UNMASKING</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
