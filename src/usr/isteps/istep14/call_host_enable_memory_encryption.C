@@ -165,7 +165,8 @@ static errlHndl_t hardware_random64(const Target* const i_core,
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   ERR_MRK"hardware_random64: DARN failed too many times");
 
-        /* @errortype
+        /*@
+         * @errortype
          * @severity         ERRL_SEV_UNRECOVERABLE
          * @moduleid         MOD_ENABLE_MEMORY_ENCRYPTION
          * @reasoncode       RC_RNG_FAILED
@@ -422,7 +423,8 @@ static errlHndl_t enable_memory_encryption()
     } while (false);
 
     { // Create an informational error log to report whether we enabled memory encryption
-        /* @errortype
+        /*@
+         * @errortype
          * @severity          ERRL_SEV_INFORMATIONAL
          * @moduleid          MOD_ENABLE_MEMORY_ENCRYPTION
          * @reasoncode        RC_MEMORY_ENCRYPTION_ENABLED
@@ -484,7 +486,8 @@ void* call_host_enable_memory_encryption(void*)
         {
             // These are the errors that the expression below can produce:
 
-            /* @errortype
+            /*@
+             * @errortype
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       MOD_ENABLE_MEMORY_ENCRYPTION
              * @reasoncode     RC_MEMCRYPT_KEY_SETUP_FAILED
@@ -492,7 +495,8 @@ void* call_host_enable_memory_encryption(void*)
              * @custdesc       Platform security problem detected
              */
 
-            /* @errortype
+            /*@
+             * @errortype
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       MOD_ENABLE_MEMORY_ENCRYPTION
              * @reasoncode     RC_MEMCRYPT_LOCK_FAILED
