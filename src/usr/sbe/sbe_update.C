@@ -2038,13 +2038,12 @@ namespace SBE
 
                 if(l_err)
                 {
-                    TRACFCOMP(g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                              "getting SBE Information from SEEPROM 0 (Primary) via ChipOp "
-                              "on tgt=0x%.08X: " TRACE_ERR_FMT " Committing as INFORMATIONAL. "
-                              "Using all-zero for info struct",
-                              get_huid(io_sbeState.target),
-                              TRACE_ERR_ARGS(l_err));
-                    //Commit error as informational
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                            "getting SBE Information from SEEPROM 0 (Primary) via ChipOp "
+                            "RC=0x%X, EID=0x%lX, will attempt SPI read instead",
+                            ERRL_GETRC_SAFE(l_err),
+                            ERRL_GETEID_SAFE(l_err));
+                    //Commit error as informational and attempt reading via SPI
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     l_err->collectTrace(SBE_COMP_NAME, 256);
                     l_err->collectTrace(SBEIO_COMP_NAME, 256);
@@ -2067,17 +2066,12 @@ namespace SBE
 
                 if(l_err)
                 {
-                    TRACFCOMP(g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                              "getting SBE Information from SEEPROM 0 (Primary) via SPI "
-                              "on tgt=0x%.08X: " TRACE_ERR_FMT " Committing as INFORMATIONAL. "
-                              "Using all-zero for info struct",
-                              get_huid(io_sbeState.target),
-                              TRACE_ERR_ARGS(l_err));
-                    //Commit error as informational
-                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    l_err->collectTrace(SBE_COMP_NAME, 256);
-                    l_err->collectTrace(SBEIO_COMP_NAME, 256);
-                    errlCommit( l_err, SBE_COMP_ID );
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                            "getting SBE Information from SEEPROM 0 (Primary) via SPI, "
+                            "RC=0x%X, EID=0x%lX",
+                            ERRL_GETRC_SAFE(l_err),
+                            ERRL_GETEID_SAFE(l_err));
+                    break;
                 }
 
                 TRACDBIN(g_trac_sbe, "getSeepromVersions found via SPI -spA",
@@ -2098,14 +2092,12 @@ namespace SBE
 
                 if(l_err)
                 {
-                    TRACFCOMP(g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                              "getting SBE Information from SEEPROM 1 (Backup) via ChipOp "
-                              "on tgt=0x%.08X: " TRACE_ERR_FMT " Committing as INFORMATIONAL. "
-                              "Using all-zero for info struct",
-                              get_huid(io_sbeState.target),
-                              TRACE_ERR_ARGS(l_err));
-
-                    //Commit error as informational
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                            "getting SBE Information from SEEPROM 1 (Backup) via Chipop, "
+                            "RC=0x%X, EID=0x%lX, will attempt SPI read instead",
+                            ERRL_GETRC_SAFE(l_err),
+                            ERRL_GETEID_SAFE(l_err));
+                    //Commit error as informational and attempt reading via SPI
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     l_err->collectTrace(SBE_COMP_NAME, 256);
                     l_err->collectTrace(SBEIO_COMP_NAME, 256);
@@ -2127,17 +2119,12 @@ namespace SBE
 
                 if(l_err)
                 {
-                    TRACFCOMP(g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                              "getting SBE Information from SEEPROM 1 (Backup) via SPI "
-                              "on tgt=0x%.08X: " TRACE_ERR_FMT " Committing as INFORMATIONAL. "
-                              "Using all-zero for info struct",
-                              get_huid(io_sbeState.target),
-                              TRACE_ERR_ARGS(l_err));
-                    //Commit error as informational
-                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    l_err->collectTrace(SBE_COMP_NAME, 256);
-                    l_err->collectTrace(SBEIO_COMP_NAME, 256);
-                    errlCommit( l_err, SBE_COMP_ID );
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                            "getting SBE Information from SEEPROM 1 (Backup) via SPI, "
+                            "RC=0x%X, EID=0x%lX",
+                            ERRL_GETRC_SAFE(l_err),
+                            ERRL_GETEID_SAFE(l_err));
+                    break;
                 }
 
                 TRACDBIN(g_trac_sbe, "getSeepromVersions-spB found via SPI",
@@ -2180,9 +2167,9 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
                            "Error returned from getSbeBootSeeprom(), "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                 break;
             }
 
@@ -2239,9 +2226,9 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
                 "Error getting SBE Version from SEEPROMs, "
-                "RC=0x%X, PLID=0x%lX",
+                "RC=0x%X, EID=0x%lX",
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                            break;
             }
 
@@ -2261,9 +2248,9 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
                            "Error getting SBE Version from PNOR, "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                 break;
             }
             else
@@ -2628,9 +2615,9 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
                            "Error from appendHbblToSbe(), "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                 break;
             }
 
@@ -2701,9 +2688,9 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"ge() - "
                         "Error from loadPnorSection(HCODE), "
-                        "RC=0x%X, PLID=0x%lX",
+                        "RC=0x%X, EID=0x%lX",
                         ERRL_GETRC_SAFE(err),
-                        ERRL_GETPLID_SAFE(err));
+                        ERRL_GETEID_SAFE(err));
                 break;
             }
             char* l_hCodeAddr = reinterpret_cast<char*>(l_hcodePnorInfo.vaddr);
@@ -2722,9 +2709,9 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
                            "Error from procCustomizeSbeImg(), "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                 break;
             }
 
@@ -2752,9 +2739,9 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
                            "Error from getSecuritySettingsFromSbeImage(), "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                 break;
             }
 
@@ -2850,9 +2837,9 @@ namespace SBE
                 //   to the next proc
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
                            "Error searching for HBBL ID string, "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                 break;
             }
 
@@ -2894,9 +2881,9 @@ namespace SBE
                 //If MVPD is bad, commit the error and move to the next proc
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
                            "Error reading version from MVPD, "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                 break;
             }
 
@@ -3256,11 +3243,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "Writing SBE Version Info: HUID=0x%.8X, side=%d, "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            TARGETING::get_huid(io_sbeState.target),
                            io_sbeState.seeprom_side_to_update,
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                 break;
             }
 
@@ -3283,11 +3270,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                                "Reading Back SBE Version Info: HUID=0x%.8X, "
-                               "side=%d, RC=0x%X, PLID=0x%lX",
+                               "side=%d, RC=0x%X, EID=0x%lX",
                                TARGETING::get_huid(io_sbeState.target),
                                io_sbeState.seeprom_side_to_update,
                                ERRL_GETRC_SAFE(err),
-                               ERRL_GETPLID_SAFE(err));
+                               ERRL_GETEID_SAFE(err));
                     break;
                 }
 
@@ -3469,10 +3456,47 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
                 if(err)
                 {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
-                               "quiescing SBE.  RC=0x%X, PLID=0x%lX",
-                               ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
-                    break;
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error quiescing SBE, going to force a halt and continue.  RC=0x%X, EID=0x%lX",
+                               ERRL_GETRC_SAFE(err), ERRL_GETEID_SAFE(err));
+                    // We have to assume that the SBE is hung and keep going or
+                    //  we won't be able to recover from some error scenarios.
+                    err->collectTrace(SBE_COMP_NAME);
+                    errlCommit( err, SBE_COMP_ID );
+
+                    // To add another layer of safety, we will explicitly halt
+                    //  the SBE using the Secure Debug Bit
+                    uint64_t l_scomreg = 0;
+                    size_t l_regSize = sizeof(l_scomreg);
+                    err = deviceRead(io_sbeState.target,
+                                     reinterpret_cast<void*>(&l_scomreg),
+                                     l_regSize,
+                                     DEVICE_SCOM_ADDRESS(FSXCOMP_FSXLOG_SB_CS));//0x00050008
+                    if( err )
+                    {
+                        TRACFCOMP( g_trac_sbe,
+                                   ERR_MRK"updateSeepromSide() - Error reading SBE control reg on %.8X - ignoring",
+                                   TARGETING::get_huid(io_sbeState.target));
+                        delete err;
+                        err = nullptr;
+                    }
+                    else
+                    {
+                        // force a halt
+                        l_scomreg |= 0x8000000000000000; //bit0 is SDB
+
+                        err = deviceWrite(io_sbeState.target,
+                                          reinterpret_cast<void*>(&l_scomreg),
+                                          l_regSize,
+                                          DEVICE_SCOM_ADDRESS(FSXCOMP_FSXLOG_SB_CS));//0x00050008
+                        if( err )
+                        {
+                            TRACFCOMP( g_trac_sbe,
+                                       ERR_MRK"updateSeepromSide() - Error writing SBE control reg on %.8X - ignoring",
+                                       TARGETING::get_huid(io_sbeState.target));
+                            delete err;
+                            err = nullptr;
+                        }
+                    }
                 }
             }
 
@@ -3497,12 +3521,12 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                            "writing new SBE image to size=%d. HUID=0x%.8X."
                            "SBE_VADDR=0x%.16X, ECC_VADDR=0x%.16X, size=0x%.8X, "
                            "eccSize=0x%.8X, EEPROM offset=0x%X, "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            io_sbeState.seeprom_side_to_update,
                            TARGETING::get_huid(io_sbeState.target),
                            SBE_IMG_VADDR, SBE_ECC_IMG_VADDR, sbeImgSize,
                            sbeEccImgSize, SBE_IMAGE_SEEPROM_ADDRESS,
-                           ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
+                           ERRL_GETRC_SAFE(err), ERRL_GETEID_SAFE(err));
                 break;
             }
 
@@ -3537,11 +3561,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "Writing SBE Version Info: HUID=0x%.8X, side=%d, "
-                           "RC=0x%X, PLID=0x%lX",
+                           "RC=0x%X, EID=0x%lX",
                            TARGETING::get_huid(io_sbeState.target),
                            io_sbeState.seeprom_side_to_update,
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
                 break;
             }
 
@@ -5115,10 +5139,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 TRACFCOMP(g_trac_sbe, ERR_MRK"isIplFromReIplRequest(): "
                           "Error sending MBOX msg. Commit error, and assume "
                           "IPL wasn't requested from us: o_reIplRequest=%d, "
-                          "RC=0x%X, PLID=0x%lX",
+                          "RC=0x%X, EID=0x%lX",
                           o_reIplRequest,
                           ERRL_GETRC_SAFE(err),
-                          ERRL_GETPLID_SAFE(err));
+                          ERRL_GETEID_SAFE(err));
 
                 errlCommit(err, SBE_COMP_ID);
                 break;
@@ -5909,9 +5933,9 @@ errlHndl_t sbeDoReboot( void )
                 // and continue with the Re-IPL Request
                 TRACFCOMP(g_trac_sbe, ERR_MRK
                     "sbeDoReboot: Error syncing attributes to FSP/BMC.  "
-                    "RC=0x%04X, PLID=0x%08X",
+                    "RC=0x%04X, EID=0x%08X",
                     ERRL_GETRC_SAFE(err),
-                    ERRL_GETPLID_SAFE(err));
+                    ERRL_GETEID_SAFE(err));
                 errlCommit( err, SBE_COMP_ID );
             }
             else
@@ -6101,11 +6125,11 @@ errlHndl_t getSecuritySettingsFromSbeImage(
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSecuritySettingsFromSbeImage() "
                            "Error getting SBE Data from Tgt=0x%X SEEPROM "
-                           "(0x%X), RC=0x%X, PLID=0x%X",
+                           "(0x%X), RC=0x%X, EID=0x%X",
                            get_huid(i_target),
                            EEPROM::SBE_BACKUP,
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
 
                 err->collectTrace(SBE_COMP_NAME);
 
@@ -6157,9 +6181,9 @@ errlHndl_t getSecuritySettingsFromSbeImage(
             {
               TRACFCOMP( g_trac_sbe,
                           "getSecuritySettingsFromSbeImage: Error reading P9XipHeader "
-                          "from seeprom via chipOp: "
-                          TRACE_ERR_FMT,
-                          TRACE_ERR_ARGS(err));
+                          "from seeprom via chipOp (err_rc=0x%X, err_eid=0x%X)",
+                          ERRL_GETRC_SAFE(err),
+                          ERRL_GETEID_SAFE(err));
                break;
             }
             // Copy P9XipHeader to local membuf
@@ -6291,10 +6315,10 @@ errlHndl_t getSecuritySettingsFromSbeImage(
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSecuritySettingsFromSbeImage() "
                            "Error getting HKH from SEEPROM (0x%X), "
-                           "RC=0x%X, PLID=0x%X",
+                           "RC=0x%X, EID=0x%X",
                            EEPROM::SBE_BACKUP,
                            ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERRL_GETEID_SAFE(err));
 
                 err->collectTrace(SBE_COMP_NAME);
 
@@ -6364,9 +6388,9 @@ errlHndl_t getSecuritySettingsFromSbeImage(
             {
                TRACFCOMP( g_trac_sbe,
                           "getSecuritySettingsFromSbeImage: Error reading Hash from "
-                          "seeprom via chipOp at offset=0x%X: "
-                          TRACE_ERR_FMT,
-                          seeprom_offset, TRACE_ERR_ARGS(err));
+                          "seeprom via chipOp: (err_rc=0x%X, err_eid=0x%X): offset=0x%X",
+                          ERRL_GETRC_SAFE(err), ERRL_GETEID_SAFE(err),
+                          seeprom_offset);
                break;
             }
             // Copy data to output variables
@@ -6456,9 +6480,9 @@ errlHndl_t getSecuritySettingsFromSbeImage(
     TRACDBIN(g_trac_sbe,"getSecuritySettingsFromSbeImage - Hash:", o_hash, sizeof(SHA512_t));
 
     TRACFCOMP( g_trac_sbe, EXIT_MRK"getSecuritySettingsFromSbeImage: "
-               "err rc=0x%X, plid=0x%X, o_hash=0x%.8X, "
+               "err rc=0x%X, EID=0x%X, o_hash=0x%.8X, "
                "o_secure_version=0x%.2X",
-               ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err),
+               ERRL_GETRC_SAFE(err), ERRL_GETEID_SAFE(err),
                sha512_to_u32(o_hash), o_secure_version);
 
     return err;
