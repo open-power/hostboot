@@ -113,12 +113,29 @@ PRDF_PLUGIN_DEFINE( p10_mcc, ReturnPrdNoClearFirBits );
 int32_t calloutBusInterface_0(ExtensibleChip* i_chip,
                               STEP_CODE_DATA_STRUCT& io_sc)
 {
+    #define PRDF_FUNC "[p10_mcc::calloutBusInterface_0] "
+
     TargetHandle_t rxTrgt = getConnectedChild(i_chip->getTrgt(), TYPE_OMI, 0);
+    if ( nullptr == rxTrgt )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get connected OMI from parent MCC "
+                  "0x%08x", i_chip->getHuid() );
+        return SUCCESS;
+    }
+
     TargetHandle_t txTrgt = getConnectedChild(rxTrgt, TYPE_OCMB_CHIP, 0);
+    if ( nullptr == txTrgt )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get connected OCMB from parent OMI "
+                  "0x%08x", getHuid(rxTrgt) );
+        return SUCCESS;
+    }
 
     calloutBus(io_sc, rxTrgt, txTrgt, HWAS::OMI_BUS_TYPE);
 
     return SUCCESS;
+
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE(p10_mcc, calloutBusInterface_0);
 
@@ -131,12 +148,29 @@ PRDF_PLUGIN_DEFINE(p10_mcc, calloutBusInterface_0);
 int32_t calloutBusInterface_1(ExtensibleChip* i_chip,
                               STEP_CODE_DATA_STRUCT& io_sc)
 {
+    #define PRDF_FUNC "[p10_mcc::calloutBusInterface_1] "
+
     TargetHandle_t rxTrgt = getConnectedChild(i_chip->getTrgt(), TYPE_OMI, 1);
+    if ( nullptr == rxTrgt )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get connected OMI from parent MCC "
+                  "0x%08x", i_chip->getHuid() );
+        return SUCCESS;
+    }
+
     TargetHandle_t txTrgt = getConnectedChild(rxTrgt, TYPE_OCMB_CHIP, 0);
+    if ( nullptr == txTrgt )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get connected OCMB from parent OMI "
+                  "0x%08x", getHuid(rxTrgt) );
+        return SUCCESS;
+    }
 
     calloutBus(io_sc, rxTrgt, txTrgt, HWAS::OMI_BUS_TYPE);
 
     return SUCCESS;
+
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE(p10_mcc, calloutBusInterface_1);
 

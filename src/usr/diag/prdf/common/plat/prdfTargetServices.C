@@ -588,6 +588,13 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
 
     }
 
+    if ( nullptr == o_child )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed to get connected child of type 0x%x at "
+                  "pos %d from target 0x%08x", i_childType, i_childPos,
+                  getHuid(i_parent) );
+    }
+
     return o_child;
 
     #undef PRDF_FUNC

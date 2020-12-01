@@ -135,6 +135,8 @@ int32_t CrcSideEffect( ExtensibleChip * i_chip,
                        STEP_CODE_DATA_STRUCT & io_sc,
                        uint8_t i_omiPos )
 {
+    #define PRDF_FUNC "[CrcSideEffect] "
+
     int32_t o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
 
     do
@@ -157,7 +159,20 @@ int32_t CrcSideEffect( ExtensibleChip * i_chip,
         // Get the OMI, OCMB, and OMIC targets for possible callouts.
         TargetHandle_t omicTrgt = i_chip->getTrgt();
         TargetHandle_t omiTrgt = getConnectedChild(omicTrgt, TYPE_OMI,i_omiPos);
+        if ( nullptr == omiTrgt )
+        {
+            PRDF_ERR(PRDF_FUNC "Unable to get connected child OMI at pos %d "
+                     "from parent target 0x%08x", i_omiPos, getHuid(omicTrgt));
+            break;
+        }
+
         TargetHandle_t ocmbTrgt = getConnectedChild(omiTrgt, TYPE_OCMB_CHIP, 0);
+        if ( nullptr == ocmbTrgt )
+        {
+            PRDF_ERR( PRDF_FUNC "Unable to get connected child OCMB from "
+                      "parent OMI 0x%08x", getHuid(omiTrgt) );
+            break;
+        }
 
         // Read the related possible root causes.
         // NOTE: we want to check to see if these bits are on, even if they
@@ -217,6 +232,8 @@ int32_t CrcSideEffect( ExtensibleChip * i_chip,
     } while(0);
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 #define CRC_SIDE_EFFECT_PLUGIN( POS ) \
