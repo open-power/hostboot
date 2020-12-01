@@ -622,6 +622,11 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
                   "triggering reconfig loop", l_reconfigReg);
 
 #ifdef CONFIG_PLDM
+        // Explicitly for a devtree sync because we don't currently
+        //  go through a shutdown when we send a reboot request
+        // Remove with RTC:259366 ?
+        TARGETING::AttrRP::syncAllAttributesToSP();
+
         TRACFCOMP(g_trac_isteps_trace, "check_scratch_regs_vs_attrs: requesting PLDM reboot");
         INITSERVICE::stopIpl();
         l_err = PLDM::sendGracefulRebootRequest("boot parm adjustment");
