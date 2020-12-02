@@ -558,6 +558,8 @@ namespace SBE
     * @param[in]  io_sbeState Struct holding SBE related information
     * @pre        it is expected that the member 'target' in the
     *             sbeTargetState_t struct is set prior to calling this function
+    * @note       members 'seeprom_0_ver' and 'seeprom_1_ver' in sbeTargetState_t
+    *             are defaulted to all zero at start of the function
     *
     * @return errlHndl_t if error, nullptr if no error
     */

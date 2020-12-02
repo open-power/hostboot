@@ -2000,7 +2000,16 @@ namespace SBE
     errlHndl_t getSeepromVersions(sbeTargetState_t& io_sbeState)
     {
         errlHndl_t l_err = nullptr;
-        bool l_errFoundDuringChipOp = false;
+
+        // Default io_sbeState.seeprom_0_ver and io_sbeState.seeprom_1_ver to
+        // all zeroes before reading from HW
+        memset(&io_sbeState.seeprom_0_ver,
+               0,
+               sizeof(sbeSeepromVersionInfo_t));
+
+        memset(&io_sbeState.seeprom_1_ver,
+               0,
+               sizeof(sbeSeepromVersionInfo_t));
 
         //Make sure that io_sbeState had valid information
         assert(io_sbeState.target != NULL, "target member variable not set on io_sbeState");
@@ -2016,6 +2025,7 @@ namespace SBE
                 break;
             }
             bool l_sideZeroActive = (tmp_cur_side == SBE_SEEPROM0);
+
             /*******************************************/
             /*  Get SEEPROM 0 SBE Version Information  */
             /*******************************************/
@@ -2028,30 +2038,26 @@ namespace SBE
 
                 if(l_err)
                 {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                            "getting SBE Information from SEEPROM 0 (Primary) via ChipOp "
-                            "RC=0x%X, PLID=0x%lX, will attempt SPI read instead",
-                            ERRL_GETRC_SAFE(l_err),
-                            ERRL_GETPLID_SAFE(l_err));
-                    //Commit error as informational and attempt reading via SPI
-                    l_errFoundDuringChipOp = true;
+                    TRACFCOMP(g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                              "getting SBE Information from SEEPROM 0 (Primary) via ChipOp "
+                              "on tgt=0x%.08X: " TRACE_ERR_FMT " Committing as INFORMATIONAL. "
+                              "Using all-zero for info struct",
+                              get_huid(io_sbeState.target),
+                              TRACE_ERR_ARGS(l_err));
+                    //Commit error as informational
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     l_err->collectTrace(SBE_COMP_NAME, 256);
                     l_err->collectTrace(SBEIO_COMP_NAME, 256);
                     errlCommit( l_err, SBE_COMP_ID );
                 }
-                else
-                {
-                    TRACDBIN(g_trac_sbe, "getSeepromVersions found via ChipOp -spA",
-                            &(io_sbeState.seeprom_0_ver),
-                            sizeof(sbeSeepromVersionInfo_t));
-                }
+
+                TRACDBIN(g_trac_sbe, "getSeepromVersions found via ChipOp -spA",
+                         &(io_sbeState.seeprom_0_ver),
+                         sizeof(sbeSeepromVersionInfo_t));
             }
 
-            // If side 0 is not active (boot side is 1) or there was an error trying to read
-            // the primary side 0 via chipOp, try reading side 0 via SPI
-            if(!l_sideZeroActive ||
-                l_errFoundDuringChipOp)
+            // else side 0 is not active (boot side is 1), try reading side 0 via SPI
+            else
             {
 
                 l_err = getSeepromSideVersionViaSPI(io_sbeState.target,
@@ -2061,12 +2067,17 @@ namespace SBE
 
                 if(l_err)
                 {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                            "getting SBE Information from SEEPROM 0 (Primary) via SPI, "
-                            "RC=0x%X, PLID=0x%lX",
-                            ERRL_GETRC_SAFE(l_err),
-                            ERRL_GETPLID_SAFE(l_err));
-                    break;
+                    TRACFCOMP(g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                              "getting SBE Information from SEEPROM 0 (Primary) via SPI "
+                              "on tgt=0x%.08X: " TRACE_ERR_FMT " Committing as INFORMATIONAL. "
+                              "Using all-zero for info struct",
+                              get_huid(io_sbeState.target),
+                              TRACE_ERR_ARGS(l_err));
+                    //Commit error as informational
+                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    l_err->collectTrace(SBE_COMP_NAME, 256);
+                    l_err->collectTrace(SBEIO_COMP_NAME, 256);
+                    errlCommit( l_err, SBE_COMP_ID );
                 }
 
                 TRACDBIN(g_trac_sbe, "getSeepromVersions found via SPI -spA",
@@ -2080,37 +2091,34 @@ namespace SBE
             /*******************************************/
 
             //If side 1 is active boot side, then attempt read via chipOp
-            if (!l_sideZeroActive &&
-                !l_errFoundDuringChipOp)
+            if (!l_sideZeroActive)
             {
                 l_err = getSeepromSideVersionViaChipOp(io_sbeState.target,
                                                        io_sbeState.seeprom_1_ver);
 
                 if(l_err)
                 {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                            "getting SBE Information from SEEPROM 1 (Backup) via Chipop, "
-                            "RC=0x%X, PLID=0x%lX, will attempt SPI read instead",
-                            ERRL_GETRC_SAFE(l_err),
-                            ERRL_GETPLID_SAFE(l_err));
-                    //Commit error as informational and attempt reading via SPI
-                    l_errFoundDuringChipOp = true;
+                    TRACFCOMP(g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                              "getting SBE Information from SEEPROM 1 (Backup) via ChipOp "
+                              "on tgt=0x%.08X: " TRACE_ERR_FMT " Committing as INFORMATIONAL. "
+                              "Using all-zero for info struct",
+                              get_huid(io_sbeState.target),
+                              TRACE_ERR_ARGS(l_err));
+
+                    //Commit error as informational
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     l_err->collectTrace(SBE_COMP_NAME, 256);
                     l_err->collectTrace(SBEIO_COMP_NAME, 256);
                     errlCommit( l_err, SBE_COMP_ID );
                 }
-                else
-                {
-                    TRACDBIN(g_trac_sbe, "getSeepromVersions found via Chipop -spB",
-                            &(io_sbeState.seeprom_1_ver),
-                            sizeof(sbeSeepromVersionInfo_t));
-                }
+
+                TRACDBIN(g_trac_sbe, "getSeepromVersions found via Chipop -spB",
+                         &(io_sbeState.seeprom_1_ver),
+                         sizeof(sbeSeepromVersionInfo_t));
             }
 
-            // If side 1 is not active (boot side 0) or there was an error trying to read
-            // the primary via chipOp, then try reading via SPI
-            if (l_sideZeroActive || l_errFoundDuringChipOp)
+            // else side 1 is not active (boot side 0), then try reading via SPI
+            else
             {
                 l_err = getSeepromSideVersionViaSPI(io_sbeState.target,
                                             EEPROM::SBE_BACKUP,
@@ -2119,12 +2127,17 @@ namespace SBE
 
                 if(l_err)
                 {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                            "getting SBE Information from SEEPROM 1 (Backup) via SPI, "
-                            "RC=0x%X, PLID=0x%lX",
-                            ERRL_GETRC_SAFE(l_err),
-                            ERRL_GETPLID_SAFE(l_err));
-                    break;
+                    TRACFCOMP(g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                              "getting SBE Information from SEEPROM 1 (Backup) via SPI "
+                              "on tgt=0x%.08X: " TRACE_ERR_FMT " Committing as INFORMATIONAL. "
+                              "Using all-zero for info struct",
+                              get_huid(io_sbeState.target),
+                              TRACE_ERR_ARGS(l_err));
+                    //Commit error as informational
+                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    l_err->collectTrace(SBE_COMP_NAME, 256);
+                    l_err->collectTrace(SBEIO_COMP_NAME, 256);
+                    errlCommit( l_err, SBE_COMP_ID );
                 }
 
                 TRACDBIN(g_trac_sbe, "getSeepromVersions-spB found via SPI",
