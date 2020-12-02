@@ -182,6 +182,12 @@ actionclass self_H_th_1
     threshold1;
 };
 
+actionclass self_H_th_32perDay
+{
+    calloutSelfHigh;
+    threshold32pday;
+};
+
 actionclass self_th_5perHour
 {
     calloutSelfMed;

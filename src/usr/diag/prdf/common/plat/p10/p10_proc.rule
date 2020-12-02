@@ -2659,17 +2659,17 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[25]
      *  TOD - any error
      */
-    (rTP_LOCAL_FIR, bit(25)) ? self_th_32perDay;
+    (rTP_LOCAL_FIR, bit(25)) ? analyzeTodBackupTopology;
 
     /** TP_LOCAL_FIR[26]
      *  TOD - access error PIB
      */
-    (rTP_LOCAL_FIR, bit(26)) ? self_th_32perDay;
+    (rTP_LOCAL_FIR, bit(26)) ? analyzePibError;
 
     /** TP_LOCAL_FIR[27]
-     *  TOD - unused tie0
+     *  TOD - Error reported from PHYP
      */
-    (rTP_LOCAL_FIR, bit(27)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(27)) ? analyzePhypTodError;
 
     /** TP_LOCAL_FIR[28]
      *  PCB Slave error

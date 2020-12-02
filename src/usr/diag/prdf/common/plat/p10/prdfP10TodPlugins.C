@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9TodPlugins.C $         */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10TodPlugins.C $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #include <prdfPluginMap.H>
 #include <prdfExtensibleChip.H>
 #include <iipSystem.h>
-#include <prdfP9ProcDomain.H>
+#include <prdfP10ProcDomain.H>
 #include <prdfGlobal_common.H>
 #include <iipServiceDataCollector.h>
 #include <prdfRegisterCache.H>
@@ -183,7 +183,7 @@ int32_t todCleanUpErrors( STEP_CODE_DATA_STRUCT & i_stepcode )
 
         // Clear bits 18 and 20 in TPLFIR
         SCAN_COMM_REGISTER_CLASS * l_andTpFir =
-                        l_procChip->getRegister( "TP_LFIR_AND" );
+                        l_procChip->getRegister( "TP_LOCAL_FIR_AND" );
 
         l_andTpFir->setAllBits();
         l_andTpFir->ClearBit(18);
@@ -192,7 +192,7 @@ int32_t todCleanUpErrors( STEP_CODE_DATA_STRUCT & i_stepcode )
         l_rc = l_andTpFir->Write();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Write() failed on TP_LFIR_AND: "
+            PRDF_ERR( PRDF_FUNC"Write() failed on TP_LOCAL_FIR_AND: "
                       "proc=0x%08x", l_procChip->GetId() );
             o_rc = FAIL;
             continue;
@@ -306,17 +306,18 @@ int32_t todCollectFaultDataChip(  ExtensibleChip * i_chip,
     do
     {
         // Check if PHYP reported TOD error
-        SCAN_COMM_REGISTER_CLASS * l_pTpLFir = i_chip->getRegister( "TP_LFIR" );
+        SCAN_COMM_REGISTER_CLASS * l_pTpLFir =
+            i_chip->getRegister( "TP_LOCAL_FIR" );
 
         l_rc = l_pTpLFir->Read();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on TP_LFIR: i_chip=0x%08x",
+            PRDF_ERR( PRDF_FUNC"Read() failed on TP_LOCAL_FIR: i_chip=0x%08x",
                       i_chip->GetId() );
             break;
         }
 
-        l_faultData.phypDetectedFault = l_pTpLFir->IsBitSet(20);
+        l_faultData.phypDetectedFault = l_pTpLFir->IsBitSet(27);
 
         // Deterimine active topology.
         SCAN_COMM_REGISTER_CLASS * l_todStatus =
@@ -437,21 +438,9 @@ int32_t todCollectFaultDataChip(  ExtensibleChip * i_chip,
 #endif
                     if( SUCCESS != l_ret ) continue;
 
-                    // The connection value is in bits 0:2. The scomdef doesn't
-                    // define this very well:
-                    //    X0_PORT_0=>0b000
-                    //    X1_PORT_0=>0b001
-                    //    X2_PORT_0=>0b010
-                    //    X3_PORT_0=>0b011
-                    //    X4_PORT_0=>0b100
-                    //    X5_PORT_0=>0b101
-                    //    X6_PORT_0=>0b110
-                    //    X7_PORT_0=>0b111
-                    // I've been told the actual definition is 0-2 for XBUS0-2
-                    // 3-6 for OBUS0-3, port 7 unused.
-
+                    // The connection value is in bits 0:2.
                     l_connection >>= 29;
-                    if ( l_connection > 6 )
+                    if ( l_connection > 7 )
                     {
                         PRDF_ERR( PRDF_FUNC"Configuration error for 0x%08x "
                                   "connection 0x%08x", getHuid(l_chipTarget),
@@ -460,12 +449,7 @@ int32_t todCollectFaultDataChip(  ExtensibleChip * i_chip,
                     }
                     else
                     {
-                        TYPE l_busType = TYPE_XBUS;
-                        if ( l_connection > 2 )
-                        {
-                            l_busType = TYPE_OBUS;
-                            l_connection -= 3;
-                        }
+                        TYPE l_busType = TYPE_IOHS;
 
                         l_procClockSrc = getConnectedPeerProc( l_chipTarget,
                                                               l_busType,
@@ -967,7 +951,7 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, todStepCheckFault );
+PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, todStepCheckFault );
 
 /**
  * @brief   Request for creation of a new back up topology.
@@ -1029,7 +1013,7 @@ int32_t todNewTopologyIfBackupMDMT( ExtensibleChip * i_chip,
 #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, todNewTopologyIfBackupMDMT );
+PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, todNewTopologyIfBackupMDMT );
 
 
 /**
@@ -1052,7 +1036,7 @@ int32_t requestTopologySwitch( ExtensibleChip * i_chip,
 #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, requestTopologySwitch );
+PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, requestTopologySwitch );
 
 /**
  * @brief   Checks if TOD error analysis is disabled on platform.
@@ -1080,14 +1064,18 @@ int32_t isTodDisabled( ExtensibleChip * i_chip,
     }
     else
     {
+        #ifdef ESW_SIM_COMPILE
+        o_rc = FAIL; // support TOD fault analysis for the simulator
+        #else
         i_stepcode.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
         i_stepcode.service_data->SetCallout( SP_CODE, MRU_MED, NO_GARD );
         o_rc =  SUCCESS; // TOD fault analysis not supported
+        #endif
     }
 
     return o_rc;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isTodDisabled );
+PRDF_PLUGIN_DEFINE_NS( p10_proc, Proc, isTodDisabled );
 
 } //namespace Proc ends
 

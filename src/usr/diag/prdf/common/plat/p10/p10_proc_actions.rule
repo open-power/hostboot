@@ -99,6 +99,359 @@ actionclass pmRecovery
 };
 
 ###############################################################################
+# TOD actions
+###############################################################################
+
+rule TodErrors
+{
+    TOD_ERRORREGISTER & (~TOD_ERRORMASK) & (~TOD_ERRORACTION);
+};
+
+
+group gTodErrors filter singlebit
+{
+    /** TOD_ERRORREGISTER[0]
+     *  M_PATH_CONTROL_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(0)) ? defaultMaskedError;
+
+    /** TOD_ERRORREGISTER[1]
+     *  M_PATH_0_PARITY_ERROR
+     */
+    (TodErrors,bit(1)) ? self_H_th_32perDay_TopReConfig;
+
+    /** TOD_ERRORREGISTER[2]
+     *  M_PATH_1_PARITY_ERROR
+     */
+    (TodErrors,bit(2)) ? self_H_th_32perDay_TopReConfig;
+
+    /** TOD_ERRORREGISTER[3]
+     *  PCRP0_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(3)) ? defaultMaskedError;
+
+    /** TOD_ERRORREGISTER[4]
+     *  PCRP1_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(4)) ? defaultMaskedError;
+
+    /** TOD_ERRORREGISTER[5]
+     *  SCRP0_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(5)) ? defaultMaskedError;
+
+    /** TOD_ERRORREGISTER[6]
+     *  SCRP1_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(6)) ? defaultMaskedError;
+
+    /** TOD_ERRORREGISTER[7]
+     *  SPCR_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(7)) ? defaultMaskedError;
+
+    /** TOD_ERRORREGISTER[8]
+     *  IPCR_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(8)) ? defaultMaskedError;
+
+    /** TOD_ERRORREGISTER[9]
+     *  PSMSCR_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(9)) ? defaultMaskedError;
+
+    /** TOD_ERRORREGISTER[10]
+     *  S_PATH_0_PARITY_ERROr
+     */
+    (TodErrors,bit(10)) ? self_H_th_32perDay_TopReConfig;
+
+    /** TOD_ERRORREGISTER[11]
+     *  REG_0X08_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(11)) ? self_H_th_32perDay;
+
+
+    /** TOD_ERRORREGISTER[12]
+     *  M_PATH_STATUS_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(12)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[13]
+     *  S_PATH_STATUS_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(13)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[14]
+     *  M_PATH_0_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(14)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[15]
+     *  M_PATH_1_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(15)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[16]
+     *  S_PATH_0_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(16)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[17]
+     *  I_PATH_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(17)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[18]
+     *  PSS HAMMING DISTANCE
+     */
+    (TodErrors,bit(18)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[19]
+     *  MISC_RESET_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(19)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[20]
+     *  S_PATH_0_PARITY_ERROR
+     */
+    (TodErrors,bit(20)) ? self_H_th_32perDay_TopReConfig;
+
+    /** TOD_ERRORREGISTER[21]
+     *  S_PATH_1_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(21)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[22]
+     *  I_PATH_DELAY_STEP_CHECK_PARITY_ERROR
+     */
+    (TodErrors,bit(22)) ? self_H_th_32perDay_TopReConfig;
+
+    /** TOD_ERRORREGISTER[23]
+     *  REG_0X0C DATA_PARITY ERROR
+     */
+    (TodErrors,bit(23)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[24]
+     *  REG_0X11_0X12_0X13_0X14_0X15_0X16_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(24)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[25]
+     * REG_0X17_0X18_0X21_0X22_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(25)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[26]
+     *  REG_0X1D_0X1E_0X1F_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(26)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[27]
+     *  TIMER_VALUE_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(27)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[28]
+     *  LOW_ORDER_STEP_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(28)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[29]
+     *  FSM_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(29)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[30]
+     *  RX_TTYPE_CONTROL_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(30)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[31]
+     *  REG_0X30_0X31_0X32_0X33_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(31)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[32]
+     *  CHIP_CONTROL_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(32)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[33]
+     *  I_PATH_SYNC_CHECK_ERROR
+     */
+    (TodErrors,bit(33)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[34]
+     *  I_PATH_FSM_STATE_PARITY_ERROR
+     */
+    (TodErrors,bit(34)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[35]
+     *  I_PATH_TIME_REG_PARITY_ERROR
+     */
+    (TodErrors,bit(35)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[36]
+     *  I_PATH_TIME_REG_OVERFLOW
+     */
+    (TodErrors,bit(36)) ? maskTodError;
+
+    /** TOD_ERRORREGISTER[37]
+     *  WOF_LOW_ORDER_STEP_COUNTER_PARITY_ERROR
+     */
+    (TodErrors,bit(37)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[38|39|40|41|42|43]
+     *  RX_TTYPE_1
+     */
+    (TodErrors,bit(38|39|40|41|42|43)) ? defaultMaskedError;
+
+    #Note: For firmware all the TOD-PIB errors are informational by nature.So,
+    # not doing any special analysis.
+    /** TOD_ERRORREGISTER[44]
+     *  PIB_SLAVE_ADDR_INVALID_ERROR
+     */
+    (TodErrors,bit(44)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[45]
+     *  PIB_SLAVE_WRITE_INVALID_ERROR
+     */
+    (TodErrors,bit(45)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[46]
+     *  PIB_SLAVE_READ_INVALID_ERROR
+     */
+    (TodErrors,bit(46)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[47]
+     *  PIB_SLAVE_ADDR_PARITY_ERROR
+     */
+    (TodErrors,bit(47)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[48]
+     *  PIB_SLAVE_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(48)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[49]
+     *  TTYPE_CONTROL_REG_DATA_PARITY_ERROR
+     */
+    #Note: Based on discussion with with Hardware Team and PHYP, this error
+    #shall be routed to PHYP instead of FSP
+    (TodErrors,bit(49)) ? defaultMaskedError;
+
+    /** TOD_ERRORREGISTER[50|51|52]
+     *  PIB_MASTER_RSP_INFO_ERROR
+     */
+    #ignoring TOD-PIB errors for any special analysis.Since errors are
+    #informational by nature.
+    (TodErrors,bit( 50|51|52 )) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[53]
+     *  RX_TTYPE_INVALID_ERROR
+     */
+    (TodErrors,bit(53 )) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[54]
+     *  RX_TTYPE_4_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(54)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[55]
+     *  PIB_MASTER_REQUEST_ERROR
+     */
+    (TodErrors,bit(55)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[56]
+     *  PIB_RESET_DURING_PIB_ACCESS_ERROR
+     */
+    (TodErrors,bit(56)) ? self_H_th_32perDay;
+
+    /** TOD_ERRORREGISTER[57]
+     *  EXTERNAL_XSTOP_ERROR
+     */
+    #bit tells us that TOD has received an external check stop
+    #purpose is to merely provide an information. Hence not doing any
+    #analysis.
+    (TodErrors,bit(57)) ? defaultMaskedError;
+
+    #bit[58:63] not implemented
+    /** TOD_ERRORREGISTER[58|59|60|61|62|63]
+     *  SPARE_ERROR
+     */
+    (TodErrors,bit(58|59|60|61|62|63)) ? defaultMaskedError;
+
+};
+
+/**
+ *  Mask indication from PHYP due to all cores evacuated.
+ *    - Mask TOD errors from this chip.
+ *    - Not visible unless xstp.
+ *    - Request new topology if chip is MDMT.
+ */
+actionclass maskTodError
+{
+    self_H_th_1;
+    funccall("ClearServiceCallFlag");
+    funccall("todNewTopologyIfBackupMDMT");
+};
+
+/** callout Proc reporting error. If threshold reaches 32 per day, request
+ *  reconfiguration of topology.
+ */
+actionclass self_H_th_32perDay_TopReConfig
+{
+    self_H_th_32perDay;
+    funccall("requestTopologySwitch");
+};
+
+/**
+ * TOD Step Check Fault - Isolate topology.
+ */
+actionclass analyzeStepCheckErr
+{
+    threshold32pday;
+    funccall("todStepCheckFault");
+};
+
+/**
+ * Analyze TOD Register.
+ */
+actionclass TodReportByRegister
+{
+    capture(TODReg);
+    try( analyze(gTodErrors), self_H_th_1 );
+};
+
+/** analyzes backup topology if TOD error analysis is enabled */
+actionclass analyzeTodBackupTopology
+{
+    try( funccall("isTodDisabled"), TodReportByRegister );
+};
+
+/** callout and gard self if TOD error analysis is enabled */
+actionclass analyzePibError
+{
+    capture(TODReg);
+    try( funccall("isTodDisabled"), self_H_th_1 );
+};
+
+/**
+ * PHYP Network fault.
+ */
+actionclass TodReportByPHYP
+{
+    threshold1;
+    funccall("todStepCheckFault");
+};
+
+/** analyzes active topology if TOD error analysis is enabled */
+actionclass analyzePhypTodError
+{
+    try( funccall("isTodDisabled"), TodReportByPHYP );
+};
+
+###############################################################################
 # Analyze connected
 ###############################################################################
 
