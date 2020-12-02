@@ -105,6 +105,7 @@ namespace Bootloader
         RC_TPM_READ_TIMEOUT        = HBBL_COMP_ID | 0x21,  /**< TPM read fifo timeout */
         RC_TPM_TIMEOUT_B           = HBBL_COMP_ID | 0x22,  /**< TPM hit the TPM timeout B */
         RC_TPM_INIT_FAIL           = HBBL_COMP_ID | 0x23,  /**< Failed to init the TPM */
+        RC_SPI_CLK_INIT_FAIL       = HBBL_COMP_ID | 0x24,  /**< Failed to init SPI clock for TPM engine */
 
         RC_TPM_INITIALIZE          = 0x100, /**< Special TPM RC that signals if TPM's been initialized already */
 

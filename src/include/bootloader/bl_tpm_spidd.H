@@ -70,4 +70,11 @@ Bootloader::hbblReasonCode tpm_write(uint32_t i_offset, const void* i_buffer, si
  * @note The TPM locality needs to be set prior to calling this function
  */
 Bootloader::hbblReasonCode tpmCmdStartup();
+
+/**
+ * @brief Calls the HWP to init SPI engine clock
+ *
+ * @return 0 on success or error code on failure
+ */
+Bootloader::hbblReasonCode tpm_init_spi_engine();
 #endif

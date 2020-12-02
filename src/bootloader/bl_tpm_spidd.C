@@ -53,6 +53,28 @@ struct TPM_BaseOut
 // TPM polling timeout in NS
 #define TPM_POLLING_TIMEOUT_NS 10 * NS_PER_MSEC
 
+Bootloader::hbblReasonCode tpm_init_spi_engine()
+{
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target_chip;
+    SpiControlHandle l_spi_handle(l_target_chip,
+                                  TPM_SPI_ENGINE,
+                                  1, // i_slave
+                                  true); // i_pib_access
+
+    fapi2::ReturnCode l_fapi_rc = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_CALL_HWP(l_fapi_rc,
+                  p10_spi_clock_init,
+                  l_spi_handle);
+    if(l_fapi_rc)
+    {
+        l_rc = Bootloader::RC_SPI_CLK_INIT_FAIL;
+    }
+
+    return l_rc;
+}
+
 Bootloader::hbblReasonCode tpm_read(const uint32_t i_offset, void* o_buffer, size_t& io_buflen)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
