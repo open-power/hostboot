@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -194,12 +194,27 @@ namespace ECC
     }
 #endif
 
+
+#ifndef __HOSTBOOT_MODULE
     eccStatus removeECC(uint8_t* io_src,
-                        uint8_t* o_dst, size_t i_dstSz)
+                        uint8_t* o_dst,
+                        size_t i_dstSz)
     {
+#else
+    eccStatus removeECC(uint8_t* io_src,
+                        uint8_t* o_dst,
+                        size_t i_dstSz,
+                        eccErrors_t* o_accumulatedErrors)
+    {
+        if (o_accumulatedErrors != nullptr)
+        {
+            o_accumulatedErrors->clear();
+        }
+#endif
         assert(0 == (i_dstSz % sizeof(uint64_t)));
 
         eccStatus rc = CLEAN;
+
 
         for(size_t i = 0, o = 0;
             o < i_dstSz;
@@ -230,6 +245,20 @@ namespace ECC
                 *reinterpret_cast<uint64_t*>(&io_src[i]) = data;
                 io_src[i + sizeof(uint64_t)] = ecc;
             }
+
+#ifdef __HOSTBOOT_MODULE
+            // If asked to accumulate ECC errors and one occurred
+            if ((o_accumulatedErrors != nullptr)
+                && (badBit != GD))
+            {
+                eccErrorLocation_t eccError;
+                eccError.offset = i;
+                eccError.status = badBit == UE ? UNCORRECTABLE : CORRECTED;
+
+                // Add the ECC error to the list of errors.
+                o_accumulatedErrors->push_back(eccError);
+            }
+#endif
 
             // Copy fixed data to destination buffer.
             *reinterpret_cast<uint64_t*>(&o_dst[o]) = data;

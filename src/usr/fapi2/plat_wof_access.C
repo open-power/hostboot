@@ -551,18 +551,56 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
         // Aliasing namespace for readability. Done here because PNOR::ECC package is only used here
         namespace PE = PNOR::ECC;
 
-        PE::eccStatus l_eccStat = PE::removeECC(l_eccDataBuf, l_eccLessDataBuf, l_eccLessBuflen);
+        // Accumulate any ECC errors so that if correctable errors occur they can be written back to
+        // Hardware.
+        PE::eccErrors_t accumulatedEccErrors;
+        PE::eccStatus l_eccStat = PE::removeECC(l_eccDataBuf, l_eccLessDataBuf, l_eccLessBuflen, &accumulatedEccErrors);
 
         switch(l_eccStat) {
         case PE::CLEAN:
-            FAPI_INF("getSeepromEccLessWofData: successfully removed ECC from WOF data block when "
+            FAPI_DBG("getSeepromEccLessWofData: successfully removed ECC from WOF data block when "
                      "reading i_buflen: %u, i_offset: %u", i_buflen,  i_offset);
             break;
         case PE::CORRECTED:
-            // TODO RTC: 260978 Write back WOF data to EECACHE if ECC is correctable.
-            FAPI_INF("getSeepromEccLessWofData: ECC correction was needed to successfully remove "
-                     "ECC from WOF data block when reading i_buflen: %u, i_offset: %u",
-                     i_buflen,  i_offset);
+            {
+                FAPI_INF("getSeepromEccLessWofData: ECC correction was needed to successfully remove "
+                         "ECC from WOF data block when reading i_buflen: %u, i_offset: %u. "
+                         "Attempting to write back corrected data with ECC",
+                         i_buflen,  i_offset);
+
+                // Create a new buffer to contain the corrected WOF+ECC data
+                uint8_t* l_correctedEccBlock = new uint8_t[l_eccBlock];
+
+                // By stripping the ECC, the l_eccLessDataBuf already has the corrected data in it. To write back each
+                // block of corrected data plus ECC byte iterate through the accumulated errors, copy the corrected WOF
+                // data to the l_correctedEccBlock, add the ECC back onto the end of the buffer, and write the block.
+                for (const auto& errorLocation : accumulatedEccErrors)
+                {
+                    // Error offset is recorded as the offset into the original ECCed data. Translate to ECCless offset.
+                    size_t l_offset = (errorLocation.offset / l_eccBlock) * l_eccLessBlock;
+
+                    // Copy the corrected ECCless data to the new buffer and inject the ECC
+                    PE::injectECC(&l_eccLessDataBuf[l_offset], l_eccLessBlock, l_correctedEccBlock);
+
+                    //  Write back the corrected data with a corrected ECC to EECACHE/HARDWARE
+                    // A write to EECACHE is automatically a write-through to HARDWARE but use EEPROM::AUTOSELECT
+                    // for safety.
+                    size_t l_writeSize = l_eccBlock;
+                    l_errl = deviceWrite(i_procTarg, l_correctedEccBlock, l_writeSize,
+                             DEVICE_EEPROM_ADDRESS(EEPROM::WOF_DATA, errorLocation.offset, EEPROM::AUTOSELECT));
+
+                    if (l_errl != nullptr)
+                    {
+                        FAPI_ERR("getSeepromEccLessWofData: An error occurred when attempting to write back the "
+                                 "corrected data with ECC of size: %u at offset %u",
+                                 l_eccBlock, errorLocation.offset);
+                        break;
+                    }
+                }
+
+                // Clean up.
+                delete[] l_correctedEccBlock;
+            }
             break;
         case PE::UNCORRECTABLE:
             FAPI_ERR("getSeepromEccLessWofData: ECC removal was uncorrectable when removing ECC "

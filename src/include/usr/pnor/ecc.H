@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #ifdef __HOSTBOOT_MODULE
+#include <vector>
 #include <assert.h>
 #endif
 
@@ -73,16 +74,45 @@ namespace ECC
     void injectECC(const uint8_t* i_src, size_t i_srcSz,
                    uint8_t* o_dst);
 
+
+#ifdef __HOSTBOOT_MODULE
+    /* A structure for holding the offset into a buffer where an ECC error occurred and the error type */
+    typedef struct
+    {
+        size_t offset;
+        eccStatus status;
+    } eccErrorLocation_t;
+
+    typedef std::vector<eccErrorLocation_t> eccErrors_t;
+
     /** Remove ECC from a data stream.
      *
      *  @param[in,out] io_src - Source data+ECC stream.
-     *  @param[out] o_dst - Destination buffer for data only.
-     *  @param[in] i_dstSz - Size in bytes of destination ((srcSz / 9) * 8).
+     *  @param[out]    o_dst - Destination buffer for data only.
+     *  @param[in]     i_dstSz - Size in bytes of destination ((srcSz / 9) * 8).
+     *  @param[out]    o_accumulatedErrors - Optional; A pointer to an eccErrors_t to accumulate
+     *                                       ECC errors as they occur so the caller can handle them.
+     *
+     *  @note i_dstSz must be a multiple of 8 bytes.
+     */
+    eccStatus removeECC(uint8_t* io_src,
+                        uint8_t* o_dst, size_t i_dstSz,
+                        eccErrors_t* o_accumulatedErrors = nullptr);
+#else
+    /** Remove ECC from a data stream.
+     *
+     *  @param[in,out] io_src - Source data+ECC stream.
+     *  @param[out]    o_dst - Destination buffer for data only.
+     *  @param[in]     i_dstSz - Size in bytes of destination ((srcSz / 9) * 8).
      *
      *  @note i_dstSz must be a multiple of 8 bytes.
      */
     eccStatus removeECC(uint8_t* io_src,
                         uint8_t* o_dst, size_t i_dstSz);
+#endif
+
+
+
 
 #ifdef __HOSTBOOT_MODULE
     /** Given the size of Data, return the size of Data+ECC

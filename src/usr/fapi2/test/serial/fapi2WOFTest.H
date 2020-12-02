@@ -47,7 +47,20 @@ namespace platAttrSvc
     // Functionality entry points being brought in to be tested
     errlHndl_t getSeepromWofTable(TARGETING::Target* i_target, uint8_t* o_wofData);
     errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData, bool& o_didFindTable);
+
+    errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg,
+                                        const size_t i_buflen,
+                                        const size_t i_offset,
+                                        void* o_buffer);
 }
+}
+
+namespace PNOR
+{
+    namespace ECC
+    {
+        uint8_t generateECC(uint64_t i_data);
+    }
 }
 
 class WOFTest: public CxxTest::TestSuite
@@ -483,6 +496,220 @@ public:
         FAPI_INF("testGetOverrideWofCoverage: EXIT");
 
     } // testGetOverrideWofCoverage
+
+    void testEccCorrectionForWofData()
+    {
+        // This test will verify that the logic within getDefaultWofTable is able to correct for 1 bit ECC errors.
+        // To do this, we are going to read the first 9 bytes from the start of the WOF header and corrupt it
+        // bit by bit and writing back the corrupted data. After, we call the function that will fetch the WOF table
+        // and it should correct the error and write back the correction.
+
+        FAPI_INF("testEccCorrectionForWofData: ENTER");
+
+        errlHndl_t l_errl = nullptr;
+        TARGETING::Target * l_proc = nullptr;
+
+        const size_t ECC_SIZE = 1;
+        const size_t BLOCK_SIZE = 8;
+        // Will be used to store 8-bytes of data and its corresponding ECC
+        size_t ECC_BLOCK_SIZE = BLOCK_SIZE + ECC_SIZE;
+        // Will store the original read from the SEEPROM. This is used to compare to the corrupted data to
+        // ensure that ECC correction took place.
+        uint8_t l_originalBlock[ECC_BLOCK_SIZE] = {};
+        // Used to corrupt 1 bit at a time to be written back to the EECACHE so that WOF retrieval must correct it.
+        uint8_t l_corruptBlock[ECC_BLOCK_SIZE] = {};
+
+        do
+        {
+            // Get primary proc
+            l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
+            if (l_errl)
+            {
+                TS_FAIL("testEccCorrectionForWofData: Failed to get primary proc "
+                        "when calling queryMasterProcChipTargetHandle");
+                break;
+            }
+
+            FAPI_INF("testEccCorrectionForWofData: testing with SEEPROM of proc: 0x%08x", get_huid(l_proc));
+
+            // Copy original first 8-bytes with ecc (which includes magic value)
+            // The magic value is the first 4-bytes of the image, see:
+            // src/usr/fapi2/plat_wof_access.C line 101
+            l_errl = deviceRead(l_proc, &l_originalBlock, ECC_BLOCK_SIZE,
+                DEVICE_EEPROM_ADDRESS(EEPROM::WOF_DATA, 0, EEPROM::AUTOSELECT));
+
+            if (l_errl)
+            {
+                TS_FAIL("testEccCorrectionForWofData: Failed to get original WOF image data");
+                break;
+            }
+
+            // Copy original data to corrupt data block
+            memcpy(l_corruptBlock, l_originalBlock, ECC_BLOCK_SIZE);
+
+            FAPI_INF("testEccCorrectionForWofData: Testing correction of 1 bit data corruption...");
+            bool l_stopTest = false;
+            // Iterate over the first 8 bytes of data, the non-ECC portion, and verify that the API corrects it when
+            // corrupted.
+            for (int i = 0; i < 64; i++)
+            {
+                // Corrupt a bit by flipping its value
+                uint64_t l_corruptEcclessBlock = *(reinterpret_cast<uint64_t*>(l_corruptBlock)) ^ (1ul << (63 - i));
+                memcpy(l_corruptBlock, &l_corruptEcclessBlock, BLOCK_SIZE);
+
+                // Write corrupted data back to the EECACHE
+                l_errl = deviceWrite(l_proc, &l_corruptBlock, ECC_BLOCK_SIZE,
+                    DEVICE_EEPROM_ADDRESS(EEPROM::WOF_DATA, 0, EEPROM::AUTOSELECT));
+                if (l_errl)
+                {
+                    TS_FAIL("testEccCorrectionForWofData: Failed to write corrupted data to WOF image");
+                    l_stopTest = true;
+                    break;
+                }
+
+                // Read the now corrupted data back and verify it is corrupted
+                {
+                    uint8_t l_verifyBlock[ECC_BLOCK_SIZE] = {};
+                    l_errl = deviceRead(l_proc, &l_verifyBlock, ECC_BLOCK_SIZE,
+                        DEVICE_EEPROM_ADDRESS(EEPROM::WOF_DATA, 0, EEPROM::AUTOSELECT));
+                    if (l_errl)
+                    {
+                        TS_FAIL("testEccCorrectionForWofData: Failed to read back WOF image corrupted data");
+                        l_stopTest = true;
+                        break;
+                    }
+
+                    // Compare the data read back is the same as the corrupted data that was attempted to be written
+                    if (memcmp(l_corruptBlock, l_verifyBlock, ECC_BLOCK_SIZE) != 0)
+                    {
+                        TS_FAIL("testEccCorrectionForWofData: Corrupted data wasn't written correctly.")
+                        TRACFBIN(g_trac_test, "Corrupted (Expected) Data", l_corruptBlock, ECC_BLOCK_SIZE);
+                        TRACFBIN(g_trac_test, "Read back Data", l_verifyBlock, ECC_BLOCK_SIZE);
+                        l_stopTest = true;
+                        break;
+                    }
+
+                } // Done checking corrupt data was successfully written
+
+                // Read WOF table header and check ECC_BLOCK_SIZE.
+                // Fetching the WOF via the API should've corrected the data in the process.
+                l_errl = fapi2::platAttrSvc::getSeepromEccLessWofData(l_proc, BLOCK_SIZE, 0, &l_corruptBlock);
+                if (l_errl)
+                {
+                    TS_FAIL("testEccCorrectionForWofData: getSeepromEccLessWofData(...) Unexpected Error");
+                    l_stopTest = true;
+                    break;
+                }
+
+                // The data returned is ECCless so calculate a new ECC for comparison.
+                l_corruptBlock[BLOCK_SIZE] = PNOR::ECC::generateECC(*reinterpret_cast<uint64_t*>(&l_corruptBlock));
+
+                // Compare the data fetched via the API is the same as the original block
+                if (memcmp(l_corruptBlock, l_originalBlock, ECC_BLOCK_SIZE) != 0)
+                {
+                    TS_FAIL("testEccCorrectionForWofData: Corrupted data was not corrected by WOF API.")
+                    TRACFBIN(g_trac_test, "Original (Expected) Data", l_originalBlock, ECC_BLOCK_SIZE);
+                    TRACFBIN(g_trac_test, "Corrupted Data", l_corruptBlock, ECC_BLOCK_SIZE);
+                    l_stopTest = true;
+                    break;
+                }
+            }
+            if (l_stopTest)
+            {
+                break;
+            }
+
+            FAPI_INF("testEccCorrectionForWofData: Testing correction of 1 bit ECC corruption...");
+            // Iterate over the last byte of data, the ECC byte, and verify that the API corrects it when
+            // corrupted.
+            for (int i = 0; i < 8; i++)
+            {
+                // Corrupt a bit by flipping its value
+                l_corruptBlock[BLOCK_SIZE] = l_corruptBlock[BLOCK_SIZE] ^ (1u <<  i);
+
+                // Write corrupted data back to the EECACHE
+                l_errl = deviceWrite(l_proc, &l_corruptBlock, ECC_BLOCK_SIZE,
+                    DEVICE_EEPROM_ADDRESS(EEPROM::WOF_DATA, 0, EEPROM::AUTOSELECT));
+                if (l_errl)
+                {
+                    TS_FAIL("testEccCorrectionForWofData: Failed to write corrupted ECC data to WOF image");
+                    break;
+                }
+
+                // Read the now corrupted data back and verify it is corrupted
+                {
+                    uint8_t l_verifyBlock[ECC_BLOCK_SIZE] = {};
+                    l_errl = deviceRead(l_proc, &l_verifyBlock, ECC_BLOCK_SIZE,
+                        DEVICE_EEPROM_ADDRESS(EEPROM::WOF_DATA, 0, EEPROM::AUTOSELECT));
+                    if (l_errl)
+                    {
+                        TS_FAIL("testEccCorrectionForWofData: Failed to read back WOF image corrupted data");
+                        break;
+                    }
+
+                    // Compare the data read back is the same as the corrupted data that was attempted to be written
+                    if (memcmp(l_corruptBlock, l_verifyBlock, ECC_BLOCK_SIZE) != 0)
+                    {
+                        TS_FAIL("testEccCorrectionForWofData: Corrupted data wasn't written correctly.")
+                        TRACFBIN(g_trac_test, "Corrupted (Expected) Data", l_corruptBlock, ECC_BLOCK_SIZE);
+                        TRACFBIN(g_trac_test, "Read back Data", l_verifyBlock, ECC_BLOCK_SIZE);
+                        break;
+                    }
+
+                } // Done checking corrupt data was successfully written
+
+                // Read WOF table header and check ECC.
+                // Fetching the WOF via the API should've corrected the data in the process.
+                l_errl = fapi2::platAttrSvc::getSeepromEccLessWofData(l_proc, BLOCK_SIZE, 0, &l_corruptBlock);
+                if (l_errl)
+                {
+                    TS_FAIL("testEccCorrectionForWofData: getSeepromEccLessWofData(...) Unexpected Error");
+                    break;
+                }
+
+                // The data returned is ECCless so read the data directly and include the ECC. It should
+                // be corrected.
+                l_errl = deviceRead(l_proc, &l_corruptBlock, ECC_BLOCK_SIZE,
+                    DEVICE_EEPROM_ADDRESS(EEPROM::WOF_DATA, 0, EEPROM::AUTOSELECT));
+
+                if (l_errl)
+                {
+                    TS_FAIL("testEccCorrectionForWofData: Failed to get WOF image corrected data");
+                    break;
+                }
+
+                // Compare the data fetched via the API is the same as the original block
+                if (memcmp(l_corruptBlock, l_originalBlock, ECC_BLOCK_SIZE) != 0)
+                {
+                    TS_FAIL("testEccCorrectionForWofData: Corrupted Data was not corrected by WOF API.")
+                    TRACFBIN(g_trac_test, "Original (Expected) Data", l_originalBlock, ECC_BLOCK_SIZE);
+                    TRACFBIN(g_trac_test, "Corrupted Data", l_corruptBlock, ECC_BLOCK_SIZE);
+                    break;
+                }
+            }
+
+
+        } while (0);
+
+        // Commit error if any from do-while loop
+        if (l_errl)
+        {
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+
+        // In case WOF image is used again in a test, write back original magic value to header
+        l_errl = deviceWrite(l_proc, &l_originalBlock, ECC_BLOCK_SIZE,
+            DEVICE_EEPROM_ADDRESS(EEPROM::WOF_DATA, 0, EEPROM::AUTOSELECT));
+        if (l_errl)
+        {
+            TS_FAIL("testEccCorrectionForWofData: Failed to write back original magic value in header");
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+
+        FAPI_INF("testEccCorrectionForWofData: EXIT");
+
+
+    }
 
 };
 
