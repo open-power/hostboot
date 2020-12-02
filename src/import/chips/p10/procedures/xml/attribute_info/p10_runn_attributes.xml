@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -162,7 +162,7 @@
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_RUNN_STOP_ON_XSTOP</id>
-  <targetType>TARGET_TYPE_PERV</targetType>
+  <targetType>TARGET_TYPE_EQ</targetType>
   <description>
     Stop OPCG RUNN counter and clocks when a checkstop occurs.
   </description>
@@ -227,6 +227,20 @@
   <valueType>uint64</valueType>
   <array>4</array>
   <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_RUNN_STAGGER_DELAY</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+	It is important to stagger EQ start to prevent massive di/dt voltage
+	droops upon sreset. We add this parametrizable delay to set the time
+	between issuing OPCG go across each EQ. Measured in nanoseconds.
+  </description>
+  <valueType>uint64</valueType>
+  <default>
+    0x0000000004C4B400	  
+  </default>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>
