@@ -678,7 +678,7 @@ class IpVpdFacade
                                  uint16_t i_index,
                                  TARGETING::Target * i_target,
                                  size_t& o_keywordSize,
-                                 uint64_t& o_byteAddr,
+                                 uint16_t& o_byteAddr,
                                  input_args_t i_args );
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
@@ -635,11 +635,11 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
 {
     errlHndl_t err{nullptr};
 
-    TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"spdWriteData()" );
 
     do
     {
+        TRACSSCOMP(g_trac_spd, "spdWriteData() i_location=%d g_spdWriteHW=%d g_spdWritePNOR=%d HUID=0x%X",
+            i_location, g_spdWriteHW, g_spdWritePNOR, get_huid(i_target));
         if( g_spdWriteHW )
         {
             if( i_location != VPD::PNOR )
@@ -688,7 +688,7 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd,
-                EXIT_MRK"spdWriteData(): returning %s errors",
+                EXIT_MRK"spdWriteData() returning %s errors",
                 (err ? "with" : "with no") );
 
     return err;
@@ -855,8 +855,7 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
 {
     errlHndl_t err{nullptr};
 
-    TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"spdWriteValue()" );
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdWriteValue()");
 
     do
     {
@@ -986,6 +985,8 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
             break;
         }
 
+        TRACSSCOMP( g_trac_spd, "spdWriteValue() spdWriteData g_spdWriteHW=0x%X i_keyword=0x%X io_buflen=0x%X HUID=0x%X i_location=0x%X",
+            g_spdWriteHW, i_keyword, io_buflen, get_huid(i_target), i_location);
         // Write value
         err = spdWriteData( entry->offset,
                             io_buflen,
@@ -998,24 +999,18 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
             break;
         }
 
-        // Don't send mbox msg for seeprom
-        if ( i_location == VPD::SEEPROM )
+        if( g_spdWriteHW )
         {
-            break;
-        }
-
-        if( !g_spdWriteHW )
-        {
-            // Send mbox message with new data to Fsp
+            // sendMboxWriteMsg will handle if really to send msg to SP
+            TRACFCOMP(g_trac_spd, "spdWriteValue() sending sendMboxWriteMsg HUID=0x%X io_buflen=0x%X entry->offset=0x%X ",
+                get_huid(i_target), io_buflen, entry->offset);
+            // Send mbox message with new data to FSP
             VPD::VpdWriteMsg_t msgdata;
-            msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-            //XXXX=offset relative to whole section
-            memcpy( msgdata.record, "XXXX", sizeof(msgdata.record) );
             msgdata.offset = entry->offset;
             err = VPD::sendMboxWriteMsg( io_buflen,
                                          io_buffer,
                                          i_target,
-                                         VPD::VPD_WRITE_DIMM,
+                                         VPD::VPD_WRITE_CACHE,
                                          msgdata );
             if( err )
             {

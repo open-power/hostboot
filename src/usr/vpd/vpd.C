@@ -267,7 +267,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                               void * i_data,
                               TARGETING::Target * i_target,
                               VPD_MSG_TYPE i_type,
-                              VpdWriteMsg_t& i_record )
+                              VpdWriteMsg_t& io_record )
 {
     errlHndl_t l_err = nullptr;
     msg_t* msg = nullptr;
@@ -280,23 +280,28 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         //Create a mailbox message to send to FSP
         msg = msg_allocate();
         msg->type = i_type;
-        msg->data[0] = i_record.data0;
-        msg->data[1] = i_numBytes;
+        io_record.targetHUID = get_huid(i_target);    // targetHUID
+        // io_record.targetHUID lives in data[0] so copy HUID to the io_record first
+        // offset from io_record.offset set by caller
+        msg->data[0] = io_record.data[0];             // io_record payload has both targetHUID and offset
+        msg->data[1] = i_numBytes;                    // extra payload size
 
         //Copy the data into the message
         msg->extra_data = malloc( i_numBytes );
         memcpy( msg->extra_data, i_data, i_numBytes );
 
         TRACFCOMP( g_trac_vpd,
-                   INFO_MRK"sendMboxWriteMsg: Send msg to FSP to write VPD type %.8X, record %d, offset 0x%X",
+                   INFO_MRK"sendMboxWriteMsg: VPD_WRITE_* type %.8X, HUID=0x%X i_numBytes=0x%X offset=0x%X",
                    i_type,
-                   i_record.rec_num,
-                   i_record.offset );
+                   get_huid(i_target),
+                   i_numBytes,
+                   io_record.offset );
 
-        //We only send VPD update when we have SP Base Services
+        // We send VPD update message when we have SP Base Services
+        // PLDM messaging (via eeache handling) covers non-SP based services
         if( !INITSERVICE::spBaseServicesEnabled() )
         {
-            TRACFCOMP(g_trac_vpd, INFO_MRK "No SP Base Services, skipping VPD write");
+            TRACFCOMP(g_trac_vpd, INFO_MRK "sendMboxWriteMsg: No SP Base Services skipping send");
             TRACFBIN( g_trac_vpd, "msg=", msg, sizeof(msg_t) );
             TRACFBIN( g_trac_vpd, "extra=", msg->extra_data, i_numBytes );
             free (msg->extra_data);
@@ -313,8 +318,12 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                       TARGETING::get_huid(i_target));
             ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_err);
 
-            l_err->collectTrace("VPD",1024);
-            if( VPD_WRITE_DIMM == i_type )
+            TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+            if ( l_type == TARGETING::TYPE_PROC )
+            {
+                l_err->collectTrace("VPD",1024);
+            }
+            else if( l_type == TARGETING::TYPE_DIMM )
             {
                 l_err->collectTrace("SPD",1024);
             }
@@ -730,19 +739,29 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
 //        }
 
         o_isInSync = (l_matchPN && l_matchSN);
+        TRACFCOMP(g_trac_vpd, "VPD::ensureEepromCacheIsInSync o_isInSync=%d HUID=0x%X l_matchPN=%d l_matchSN=%d",
+            o_isInSync, get_huid(i_target), l_matchPN, l_matchSN);
+
+        if (i_target->getAttr<TARGETING::ATTR_EECACHE_VPD_STATE>() == TARGETING::EECACHE_VPD_STATE_VPD_NEEDS_REFRESH)
+        {
+            o_isInSync = false;
+            TRACFCOMP(g_trac_vpd, "VPD::ensureEepromCacheIsInSync EECACHE_VPD_STATE o_isInSync=%d HUID=0x%X", o_isInSync, get_huid(i_target));
+            // EECACHE_VPD_STATE reset to VPD_GOOD since we flagged for the refresh via o_isInSync
+            i_target->setAttr<TARGETING::ATTR_EECACHE_VPD_STATE>(TARGETING::EECACHE_VPD_STATE_VPD_GOOD);
+        }
 
         // If we did not match, we need to load HARDWARE VPD data into CACHE
         if (o_isInSync)
         {
             TRACFCOMP(g_trac_vpd,
                       "VPD::ensureEepromCacheIsInSync: "
-                      "CACHE_PN/SN == HARDWARE_PN/SN for target %.8X",
+                      "CACHE_PN/SN == HARDWARE_PN/SN and VPD_GOOD for target %.8X",
                       TARGETING::get_huid(i_target));
         }
         else
         {
             TRACFCOMP(g_trac_vpd,
-                      "VPD::ensureEepromCacheIsInSync: CACHE_PN/SN != HARDWARE_PN/SN,CACHE must be loaded from HARDWARE for target %.8X",
+                      "VPD::ensureEepromCacheIsInSync: CACHE_PN/SN != HARDWARE_PN/SN -OR- VPD_NEEDS_REFRESHED, CACHE must be loaded from HARDWARE for target %.8X",
                       TARGETING::get_huid(i_target));
             CONSOLE::flush();
 #ifndef CONFIG_SUPPORT_EEPROM_CACHING

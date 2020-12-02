@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,9 +105,9 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
     TRACFCOMP( g_trac_vpd, INFO_MRK
                "sendMboxWriteMsg: Send msg to FSP to write VPD type %.8X, "
-               "record %d, offset 0x%X",
+               "HUID=0x%X offset=0x%X",
                i_type,
-               i_record.rec_num,
+               get_huid(i_target),
                i_record.offset );
 
     do
@@ -188,16 +188,18 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
             break;
         }
 
-        const uint32_t nodeHuid = pNode->getAttr<TARGETING::ATTR_HUID>();
+        const uint32_t targetHUID = i_target->getAttr<TARGETING::ATTR_HUID>();
+        i_target->setAttr<TARGETING::ATTR_EECACHE_VPD_STATE>(TARGETING::EECACHE_VPD_STATE_VPD_NEEDS_REFRESH);
+        //  FSP will set this for normal reboots, setAttr by HBRT will only survive MPIPL.
+        //  Any modifications to VPD will -NOT- take affect until next IPL
 
         // Get an accurate size of memory needed to transport
         // the data for the firmware_request request struct
         uint32_t l_fsp_req_size = GENERIC_FSP_MBOX_MESSAGE_BASE_SIZE;
-        // add on the 2 header words that are used in the IPL-time
-        //  version of the VPD write message (see vpd.H)
-        l_fsp_req_size +=   sizeof(nodeHuid) + sizeof(VpdWriteMsg_t)
-                          + sizeof(uint64_t);
-        // add on the extra_data portion of the message
+        l_fsp_req_size +=   sizeof(VpdWriteMsg_t);
+
+        // add the i_numBytes (extra_data) to bump up total size of payload
+        // see vpd.H for layout of data payload sections within VpdWriteMsg_t
         l_fsp_req_size += i_numBytes;
 
         // The request data size must be at a minimum the size of the
@@ -227,21 +229,19 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         l_req_fw_msg->generic_msg.msgType = i_type;
         l_req_fw_msg->generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
 
-        // the full message looks like this
+        // the full message looks like this, see msg.h msg_t for layout
         struct VpdWriteMsgHBRT_t
         {
-            uint32_t nodeHuid;
-            VpdWriteMsg_t vpdInfo;
-            uint64_t vpdBytes;
-            uint8_t vpdData; //of vpdBytes size
-
+            VpdWriteMsg_t vpdInfo;  // VpdWriteMsg_t payloads for data[2]
+                                    // from msg.h
+            uint8_t vpdData;        // msg_t start of payload of i_numBytes size
         } PACKED;
 
         VpdWriteMsgHBRT_t* l_msg = reinterpret_cast<VpdWriteMsgHBRT_t*>
           (&(l_req_fw_msg->generic_msg.data));
-        l_msg->nodeHuid = nodeHuid;
-        l_msg->vpdInfo = i_record;
-        l_msg->vpdBytes = i_numBytes;
+        l_msg->vpdInfo.offset = i_record.offset;
+        l_msg->vpdInfo.targetHUID = targetHUID;
+        l_msg->vpdInfo.extra_payload_bytes = i_numBytes;
         memcpy( &(l_msg->vpdData), i_data, i_numBytes );
 
         // Create the firmware_request response struct to receive data

@@ -236,7 +236,7 @@ IpVpdFacade(MVPD::mvpdRecords,
             (sizeof(MVPD::mvpdKeywords)/sizeof(MVPD::mvpdKeywords[0])),
             PNOR::MODULE_VPD,
             MVPD::g_mutex,
-            VPD::VPD_WRITE_PROC)
+            VPD::VPD_WRITE_CACHE)
 {
     TRACUCOMP(g_trac_vpd, "MvpdFacade::MvpdFacade> " );
 

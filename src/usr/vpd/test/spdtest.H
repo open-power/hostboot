@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -289,7 +289,6 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdWriteDQ ( void )
         {
-#ifndef __HOSTBOOT_RUNTIME
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -297,8 +296,7 @@ class SPDTest: public CxxTest::TestSuite
             uint8_t * origData = NULL;
             uint8_t * verifyData = NULL;
 
-            TRACFCOMP( g_trac_spd,
-                       ENTER_MRK"testSpdWriteDQ()" );
+            TS_INFO("testSpdWriteDQ Entry");
 
             do
             {
@@ -308,11 +306,11 @@ class SPDTest: public CxxTest::TestSuite
                 TargetHandleList dimmList;
                 getDIMMTargets( dimmList );
 
+                TS_INFO( "testSpdWriteDQ dimmList.size()=%d", dimmList.size() );
                 if( ( 0 == dimmList.size() ) ||
                     ( NULL == dimmList[0] ) )
                 {
-                    TRACFCOMP( g_trac_spd,
-                               "testSpdWriteDQ - No DIMMs found!" );
+                    TS_FAIL("testSpdWriteDQ - No DIMMs found! Why not?");
                     break;
                 }
 
@@ -353,6 +351,7 @@ class SPDTest: public CxxTest::TestSuite
                 // Get the size
                 if( SPD_DDR3_TYPE == memType )
                 {
+                    TS_INFO("testSpdWriteDQ SPD_DDR3_TYPE");
                     for( uint32_t entry = 0;
                          entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
                          entry++ )
@@ -366,6 +365,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
                 else if( SPD_DDR4_TYPE == memType )
                 {
+                    TS_INFO("testSpdWriteDQ SPD_DDR4_TYPE");
                     size_t dataSize = (modType == DDIMM)
                         ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
                         : (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
@@ -395,19 +395,15 @@ class SPDTest: public CxxTest::TestSuite
                 else
                 {
                     fails++;
-                    TRACFCOMP( g_trac_spd,
-                               "testSpdWriteDQ - memory type: 0x%04x",
-                               memType );
-                    TS_FAIL( "testSpdWriteDQ - Unsupported Memory Type!" );
-                    errlCommit( err,
-                                VPD_COMP_ID );
+                    TS_FAIL( "testSpdWriteDQ - Unsupported memory type: 0x%04x", memType );
+                    errlCommit( err, VPD_COMP_ID);
                     break;
                 }
 
                 if( 0 == theSize )
                 {
-                    // memType not supported or Keyword not supported on
-                    // this memType
+                    // memType or Keyword not supported
+                    TS_INFO("testSpdWriteDQ memType Keyword not supported, but we tried...");
                     cmds++;
                     break;
                 }
@@ -420,11 +416,13 @@ class SPDTest: public CxxTest::TestSuite
                                   origData,
                                   theSize,
                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
+                TS_INFO( "testSpdWriteDQ - ORIGINAL DIMM Bad DQ data" );
+                TRACFBIN( g_trac_spd, "original read=", origData, theSize );
 
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - failed to read DIMM Bad DQ data!" );
+                    TS_FAIL( "testSpdWriteDQ - failed to read ORIGINAL DIMM Bad DQ data!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     break;
@@ -446,8 +444,7 @@ class SPDTest: public CxxTest::TestSuite
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - Error writing data to DIMM Bad DQ "
-                             "data" );
+                    TS_FAIL( "testSpdWriteDQ - Error writing data to DIMM Bad DQ data" );
                     break;
                 }
 
@@ -457,11 +454,13 @@ class SPDTest: public CxxTest::TestSuite
                                   verifyData,
                                   theSize,
                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
+                TS_INFO( "testSpdWriteDQ - DUMMY DIMM Bad DQ data" );
+                TRACFBIN( g_trac_spd, "dummy data read=", verifyData, theSize );
 
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - failed to read DIMM Bad DQ data! [2]" );
+                    TS_FAIL( "testSpdWriteDQ - failed to read DUMMY DIMM Bad DQ data!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     break;
@@ -471,6 +470,12 @@ class SPDTest: public CxxTest::TestSuite
                 {
                     fails++;
                     TS_FAIL( "testSpdWriteDQ - DIMM Bad DQ data does not match what we wrote!" );
+                    TRACFBIN( g_trac_spd, "MISMATCH PROBLEM wrote=", testData, theSize );
+                    TRACFBIN( g_trac_spd, "MISMATCH PROBLEM read=", verifyData, theSize );
+                }
+                else
+                {
+                    TS_INFO( "testSpdWriteDQ - DIMM Bad DQ data written successfully!" );
                     TRACFBIN( g_trac_spd, "wrote=", testData, theSize );
                     TRACFBIN( g_trac_spd, "read=", verifyData, theSize );
                 }
@@ -480,13 +485,17 @@ class SPDTest: public CxxTest::TestSuite
                                    origData,
                                    theSize,
                                    DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
+                TS_INFO( "testSpdWriteDQ - deviceWrite Restoring ORIGINAL DIMM Bad DQ" );
 
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - Error writing original data back to DIMM Bad DQ "
-                             "data" );
+                    TS_FAIL( "testSpdWriteDQ - Error writing original data back to DIMM Bad DQ data, things may be corrupted!");
                     break;
+                }
+                else
+                {
+                    TS_INFO("testSpdWriteDQ - Successfully restored original DIMM Bad DQ theSize=0x%X", theSize);
                 }
 
 
@@ -512,15 +521,10 @@ class SPDTest: public CxxTest::TestSuite
 
             if( cmds == 0 )
             {
-                TRACFCOMP( g_trac_spd,
-                           "testSpdWriteDQ - No tests ran,\
-                           something is wrong..." );
+                TS_FAIL("testSpdWriteDQ - No tests ran, something is wrong...");
             }
 
-            TRACFCOMP( g_trac_spd,
-                       "testSpdWriteDQ - %d/%d fails",
-                       fails, cmds );
-#endif  // #ifndef __HOSTBOOT_RUNTIME
+            TS_INFO("testSpdWriteDQ Exit - %d/%d fails", fails, cmds);
         }
 
         /**

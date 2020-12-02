@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -322,7 +322,7 @@ IpVpdFacade(PVPD::pvpdRecords,
             (sizeof(PVPD::pvpdKeywords)/sizeof(PVPD::pvpdKeywords[0])),
             PNOR::EECACHE,
             PVPD::g_mutex,
-            VPD::VPD_WRITE_NODE)
+            VPD::VPD_WRITE_CACHE)
 {
     TRACUCOMP(g_trac_vpd, "PvpdFacade::PvpdFacade> " );
 

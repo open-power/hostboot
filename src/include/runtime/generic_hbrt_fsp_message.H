@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -256,7 +256,7 @@ struct GenericFspMboxMessage_t
                         // the request came from the FSP, i.e. 0x0000->0x7FFF
                         // are from HBRT, 0x8000->0xFFFF are from HWSV.
     uint32_t msgq;      // Example: MBOX::FSP_VPD_MSGQ
-    uint32_t msgType;   // Example: VPD_MSG_TYPE:VPD_WRITE_PROC
+    uint32_t msgType;   // Example: VPD_MSG_TYPE:VPD_WRITE_CACHE
     struct  // flags
     {
         uint32_t __req:1;    // 1=this is a request, 0=this is a response

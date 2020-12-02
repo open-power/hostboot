@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ struct msg_t
         uint32_t __reserved__pseudosync:1;
         uint32_t __reserved__unused:30;
     };
-    uint64_t data[2];
+    uint64_t data[2];  // data[0] start of variable payload calculations
     void* extra_data;
 };
 

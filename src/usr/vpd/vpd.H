@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,40 +49,53 @@ struct pnorInformation
 enum VPD_MSG_TYPE
 {
     VPD_INVALID       = 0x0000,
-    VPD_WRITE_DIMM    = 0x00C1, //< DIMM SPD
-    VPD_WRITE_PROC    = 0x00C2, //< Processor MVPD
+    // UNUSED message types are OLD and should probably NOT
+    // be recycled since disablement was NOT performed across
+    // the stack (HWSV/HB, etc).
+    //
+    //VPD_WRITE_DIMM    = 0x00C1, // UNUSED < DIMM SPD
+    //VPD_WRITE_PROC    = 0x00C2, // UNUSED < Processor MVPD
     // Hole in mapping
-    VPD_WRITE_NODE    = 0x00C4, //< Planar VPD
-    VPD_WRITE_MCS     = 0x00C5, //< Direct access memory VPD
+    //VPD_WRITE_NODE    = 0x00C4, // UNUSED < Planar VPD
+    //VPD_WRITE_MCS     = 0x00C5, // UNUSED < Direct access memory VPD
+    VPD_WRITE_CACHE   = 0x00C6, //< VPD cache write update
 };
 
 /**
  * @brief Message definition for VPD Write Request
  *
  * - data0 :
- *   - [16] VPD Record Number
- *   - [32] 4-byte ASCII String for record name
- *          'XXXX'=Entire VPD section from PNOR
- *   - [16] 2-byte ASCII String for keyword or offset into SPD
- *          'XX'=Entire VPD record
+ *   - [32] targetHUID
+ *   - [16] offset
+ *   - [16] unused
  * - data1 :
- *   - [64] Size of binary data in bytes
- * - extra data : Binary VPD Data
+ *   - [64] Size of binary extra data in bytes
+ *
+ *   VpdWriteMsg_t total size 2 x uint64_t = 16 bytes
+ *
+ * Reference Only for Extra Data usage
+ *   Extra Data bundled in msg_t and seeded in VpdWriteMsgHBRT_t
+ *   - see vpdData in VpdWriteMsgHBRT_t
+ *   - extra data : Binary VPD Data
+ * See msg.h for msg_t layout
  */
 union VpdWriteMsg_t
 {
-    uint64_t data0;
     struct
     {
-        uint16_t rec_num;     //< VPD_REC_NUM
-        char record[4];       //< ASCII Record Name
-        union
-        {
-            char keyword[2];  //< ASCII Keyword (for IBM VPD)
-            uint16_t offset;  //< Offset into record in bytes (for DIMM SPD)
-        };
+        // data[0]
+        uint32_t targetHUID;
+        uint16_t offset;
+        uint16_t data0_unused;
+        // data[1]
+        uint64_t extra_payload_bytes; // payload size
+          // even though this is a large number, the
+          // various other code that gets this passed
+          // around uses size_t so we keep this
+          // as uint64_t
     } PACKED;
-};
+    uint64_t data[2]; // msg_t overlay
+} PACKED;
 
 /**
  * first = 4-character record name as a 4-byte uint
@@ -231,11 +244,12 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
  *
  * @param[in] i_data - The data buffer that will return the data read.
  *
- * @param[in] i_target - The target to access.
+ * @param[in] i_target - The target to access.  The msg_t payload
+ *     built and sent via MBOX will be populated with this target HUID.
  *
  * @param[in] i_type - The type of VPD being written.
  *
- * @param[in] i_record - The rec_num + record/keyword.
+ * @param[in] io_record - The record/keyword.
  *
  * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
  *      log.
@@ -244,7 +258,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                               void * i_data,
                               TARGETING::Target * i_target,
                               VPD_MSG_TYPE i_type,
-                              VpdWriteMsg_t& i_record );
+                              VpdWriteMsg_t& io_record );
 
 /**
  * @brief This function determines the VPD source (PNOR/SEEPROM)

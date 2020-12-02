@@ -1591,7 +1591,7 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
     {
         // First go find the keyword in memory
         size_t keywordSize = 0x0;
-        uint64_t byteAddr = 0x0;
+        uint16_t byteAddr = 0x0;
         err = findKeywordAddr( i_keywordName,
                                i_recordName,
                                i_offset,
@@ -1969,7 +1969,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                           uint16_t i_index,
                                           TARGETING::Target * i_target,
                                           size_t& o_keywordSize,
-                                          uint64_t& o_byteAddr,
+                                          uint16_t& o_byteAddr,
                                           input_args_t i_args )
 {
     errlHndl_t err = NULL;
@@ -2266,7 +2266,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
 
         // First go find the keyword in memory
         size_t keywordSize = 0x0;
-        uint64_t byteAddr = 0x0;
+        uint16_t byteAddr = 0x0;
         err = findKeywordAddr( i_keywordName,
                                i_recordName,
                                i_offset,
@@ -2375,15 +2375,8 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
 
             VPD::VpdWriteMsg_t msgdata;
 
-            // Quick double-check that our constants agree with the values
-            //  in the VPD message structure
-            assert( sizeof(msgdata.record) == RECORD_BYTE_SIZE );
-            assert( sizeof(msgdata.keyword) == KEYWORD_BYTE_SIZE );
+            msgdata.offset = i_offset+byteAddr;
 
-            // Finally, send it down to the FSP
-            msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-            memcpy( msgdata.record, i_recordName, RECORD_BYTE_SIZE );
-            memcpy( msgdata.keyword, i_keywordName, KEYWORD_BYTE_SIZE );
             err = VPD::sendMboxWriteMsg( keywordSize,
                                          i_buffer,
                                          i_target,
@@ -2408,6 +2401,19 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                           EEPROM::VPD_AUTO,
                                           i_offset+byteAddr,
                                           EEPROM::AUTOSELECT) );
+            if( err )
+            {
+                break;
+            }
+            VPD::VpdWriteMsg_t msgdata;
+
+            msgdata.offset = i_offset+byteAddr;
+
+            err = VPD::sendMboxWriteMsg( keywordSize,
+                                         i_buffer,
+                                         i_target,
+                                         iv_vpdMsgType,
+                                         msgdata );
             if( err )
             {
                 break;

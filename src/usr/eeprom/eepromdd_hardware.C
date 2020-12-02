@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,7 +131,7 @@ errlHndl_t eepromPerformSpiOpHW( DeviceFW::OperationType i_opType,
                 (io_spiInfo.eepromRole == VPD_PRIMARY
                  || io_spiInfo.eepromRole == VPD_BACKUP) )
             {
-                TRACFCOMP( g_trac_eeprom,"Skipping EEPROM write for module vpd" );
+                TRACFCOMP( g_trac_eeprom,"Skipping EEPROM write for module vpd (isSimicsRunning and conditions)" );
                 break;
             }
 
