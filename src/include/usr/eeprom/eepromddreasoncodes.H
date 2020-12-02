@@ -65,6 +65,7 @@ enum eepromModuleId
     EEPROM_GENERIC_CACHE                    = 0x0F,
     EEPROM_FLUSH_TO_PNOR                    = 0x10,
     EEPROM_FIND_EEPROM_HEADER_IN_CACHE      = 0x11,
+    EEPROM_DISABLE_NEXT_MVPD_SOURCE         = 0x12,
 };
 
 /**

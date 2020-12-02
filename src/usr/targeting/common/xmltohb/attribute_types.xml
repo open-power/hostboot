@@ -1355,6 +1355,7 @@
       Enumeration indicating which VPDs are disabled on a
       target. These values can be OR-ed together to make a bitmask.
     </description>
+    <!-- Real values for the attribute -->
     <enumerator>
       <name>NONE_DISABLED</name>
       <value>0</value>
@@ -1370,6 +1371,11 @@
     <enumerator>
       <name>SECONDARY_DISABLED</name>
       <value>0x04</value>
+    </enumerator>
+    <!-- Special values which are combinations of other flags -->
+    <enumerator>
+      <name>LAST_DISABLED</name>
+      <value>0x08</value>
     </enumerator>
     <id>EEPROM_VPD_ACCESSIBILITY</id>
   </enumerationType>

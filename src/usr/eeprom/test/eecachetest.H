@@ -46,12 +46,6 @@ using namespace EEPROM;
 // making the API available through a header file
 namespace EEPROM
 {
-    errlHndl_t updateEecacheContents(TARGETING::Target*            i_target,
-                                       EEPROM::EEPROM_ROLE const   i_eepromType,
-                                       void        const * const   i_eepromBuffer,
-                                       size_t              const   i_eepromBuflen,
-                                       eepromRecordHeader  const & i_recordHeader);
-
     errlHndl_t updateEecacheHeader(eepromRecordHeader   const & i_completeRecordHeader,
                                    eepromRecordHeader * const & io_pnorRecordToUpdate);
 }

@@ -297,6 +297,81 @@ errlHndl_t clearEecache(eecacheSectionHeader * i_eecacheSectionHeaderPtr,
  */
 errlHndl_t getMasterEepromCacheState(TARGETING::Target * i_assocTarg, bool & o_valid,
                                      bool & o_changed);
+
+/*
+ * @brief Searches through the records in PNOR EECACHE to check for the
+ *        existence of the search record in PNOR.
+ *
+ * @param[in]   i_target          The target associated with partial record
+ *                                header.
+ *
+ * @param[in]   i_present         Describes whether or not target is present
+ *
+ * @param[in]   i_eepromType      Describes which EEPROM associated to the
+ *                                target that is being requested to be updated,
+ *                                PRIMARY, BACKUP, etc.
+ *
+ * @param[in]   i_searchRecordHeader  A record that has been constructed by
+ *                                    calling buildEepromRecordHeader().
+ *
+ * @param[out]  o_recordHeaderFromPnor  A pointer that must be nullptr because
+ *                                      it will be reassigned to the record
+ *                                      found or a place for a new record.
+ *
+ *
+ * @return  errlHndl_t
+ */
+errlHndl_t findEepromHeaderInPnorEecache(
+        TARGETING::Target*         i_target,
+        bool const                 i_present,
+        EEPROM::EEPROM_ROLE const  i_eepromType,
+        eepromRecordHeader const & i_searchRecordHeader,
+        eepromRecordHeader      *& o_recordHeaderFromPnor);
+
+// Constants for use in updateEecacheContents' i_newPart parameter
+const bool EECACHE_EXISTING_PART = false;
+const bool EECACHE_NEW_PART = true;
+
+/* @brief     Updates the eeprom cache entry's contents in PNOR. This only
+ *            modifies the data after the header section in the EECACHE
+ *            partition. This function assumes a completed record header has
+ *            been given. That is to say that all fields have been filled in
+ *            since buildEepromRecordHeader() doesn't do that automatically
+ *            because fields like internal_offset and cached_copy_valid are
+ *            determined based on what may or may not already exist in PNOR.
+ *
+ * @param[in]   i_target       Target associated with the eeprom record. Used
+ *                             only for tracing purposes.
+ *
+ * @param[in]   i_eepromType   Describes which EEPROM associated to the target
+ *                             that is being requested to be updated,
+ *                             PRIMARY, BACKUP, etc.
+ *
+ * @param[in]   i_eepromBuffer A buffer containing data to load into EECACHE or
+ *                             nullptr. If nullptr, HW lookup for data will be
+ *                             attempted.
+ *
+ * @param[in]   i_eepromBuflen Length of i_eepromBuffer. If i_eepromBuffer is
+ *                             nullptr then this should be 0.
+ *
+ * @param[in]  i_recordHeader The complete eeprom record header to be used to
+ *                            update the contents in EECACHE.
+ *
+ * @param[in]  i_newPart      Whether the target represents a new part that
+ *                            has been introduced into the system. This will
+ *                            be the case when e.g. we detect a SN/PN mismatch
+ *                            in a processor's MVPD and we need to update
+ *                            the cached copy.
+ *
+ * @return  errlHndl_t
+ */
+errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
+                                 EEPROM::EEPROM_ROLE const   i_eepromType,
+                                 void        const * const   i_eepromBuffer,
+                                 size_t              const   i_eepromBuflen,
+                                 eepromRecordHeader  const & i_recordHeader,
+                                 bool                        i_newPart = EECACHE_NEW_PART);
+
 #else
 /**
 *

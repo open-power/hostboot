@@ -1272,8 +1272,13 @@ class EEPROMTest: public CxxTest::TestSuite
         i_proc->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(static_cast<ATTR_EEPROM_VPD_ACCESSIBILITY_type>(i_accessibility));
     }
 
+#define VPDASSERT(X) if (!(X)) { TS_FAIL(FUNC ": %s failed, expected success on line %d", #X, __LINE__); }
+#define VPDASSERTFAIL(X) if (X) { TS_FAIL(FUNC ": %s succeeded, expected failure on line %d", #X, __LINE__); }
+
     void test_redundantVpdAccess()
     {
+        #define FUNC "test_redundantVpdAccess"
+
         TS_INFO( ENTER_MRK"test_redundantVpdAccess" );
 
         const auto restore = saveMvpdState();
@@ -1290,9 +1295,6 @@ class EEPROMTest: public CxxTest::TestSuite
         }
 
         const uint64_t testdata_primary = 0xabcd1234, testdata_backup = 0xffeeffee;
-
-#define VPDASSERT(X) if (!(X)) { TS_FAIL("test_redundantVpdAccess: %s failed, expected success on line %d", #X, __LINE__); }
-#define VPDASSERTFAIL(X) if (X) { TS_FAIL("test_redundantVpdAccess: %s succeeded, expected failure on line %d", #X, __LINE__); }
 
         // Simple sanity check (for SPI buses etc.)
         VPDASSERT(writeToVpd(proc, VPD_PRIMARY, testdata_primary, HARDWARE));
@@ -1379,6 +1381,79 @@ class EEPROMTest: public CxxTest::TestSuite
         } while(false);
 
         TS_INFO( EXIT_MRK"test_redundantVpdAccess" );
+    }
+
+    /* @brief This test simulates a situation where there is different data in
+     *        the primary and backup MVPD SEEPROMs. We call
+     *        reloadMvpdEecacheFromNextSource to discard the data in the EECACHE
+     *        (which has come from the primary SEEPROM), and then reload it
+     *        (from the secondary SEEPROM).
+     */
+    void test_reloadMvpdEecacheFromNextSource()
+    {
+        #undef FUNC
+        #define FUNC "test_reloadMvpdEecacheFromNextSource"
+
+        TS_INFO(ENTER_MRK"test_reloadMvpdEecacheFromNextSource");
+
+        const auto restore = saveMvpdState();
+
+        do
+        {
+
+        Target* const proc = getProcessorWithTwoGoodVpds();
+
+        if (!proc)
+        {
+            TS_FAIL("test_reloadMvpdEecacheFromNextSource: Can't find a processor with both good VPDs");
+            break;
+        }
+
+        const uint64_t testdata1 = 0x1111111111111111;
+        const uint64_t testdata2 = 0x2222222222222222;
+
+        // Write to the primary cache, then write different data to the backup
+        VPDASSERT(writeToVpd(proc, VPD_PRIMARY, testdata1, CACHE));
+        VPDASSERT(writeToVpd(proc, VPD_BACKUP, testdata2, HARDWARE));
+
+        // Verify that the primary hw + cache have been written
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata1, AUTOSELECT));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata1, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata1, HARDWARE));
+
+        // Verify that the backup data is different
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, testdata2, HARDWARE));
+
+        // Discard what's in cache (i.e. the primary EEPROM's data) and reload
+        // from the next source (i.e. the backup EEPROM). This should succeed.
+        errlHndl_t errl = reloadMvpdEecacheFromNextSource(proc);
+
+        if (errl)
+        {
+            TS_FAIL("test_reloadMvpdEecacheFromNextSource: failed with error %x", errl->plid());
+            errlCommit(errl, CXXTEST_COMP_ID);
+            break;
+        }
+
+        // Now all the reads should give us back what was in the backup SEEPROM
+        VPDASSERT(readFromVpdCompare(proc, VPD_AUTO, testdata2, AUTOSELECT));
+        VPDASSERT(readFromVpdCompare(proc, VPD_PRIMARY, testdata2, CACHE));
+        VPDASSERT(readFromVpdCompare(proc, VPD_BACKUP, testdata2, HARDWARE));
+
+        // This should fail since there are only two hardware MVPD sources
+        errl = reloadMvpdEecacheFromNextSource(proc);
+
+        if (!errl)
+        {
+            TS_FAIL("test_disableNextMpvdSource: expected second disable to fail");
+            break;
+        }
+
+        errlCommit(errl, CXXTEST_COMP_ID);
+
+        } while (0);
+
+        TS_INFO( EXIT_MRK"test_reloadMvpdEecacheFromNextSource" );
     }
 };
 

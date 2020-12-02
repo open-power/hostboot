@@ -682,7 +682,8 @@ errlHndl_t eepromPerformOp(DeviceFW::OperationType i_opType,
     if (attempts == 0)
     { // If we didn't try any operations (because all the sources were
       // disabled), then report an error.
-        /* @errortype
+        /*@
+         * @errortype
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
          * @moduleid         EEPROM_PERFORM_OP
          * @reasoncode       EEPROM_NO_FUNCTIONAL_EEPROM
@@ -726,6 +727,147 @@ errlHndl_t eepromPerformOp(DeviceFW::OperationType i_opType,
 
     return errl;
 }
+
+#ifndef __HOSTBOOT_RUNTIME
+
+errlHndl_t reloadMvpdEecacheFromNextSource(TARGETING::Target* const i_target)
+{
+    using namespace TARGETING;
+    using namespace ERRORLOG;
+
+    TRACFCOMP(g_trac_eeprom,
+              ENTER_MRK"reloadMvpdEecacheFromNextSource: target 0x%08x",
+              get_huid(i_target));
+
+    bool success = false;
+    errlHndl_t errl = nullptr;
+
+    ATTR_EEPROM_VPD_ACCESSIBILITY_type vpd_mask { };
+
+    do
+    {
+
+    /// First check whether the target supports redundant VPD.
+
+    if (!i_target->tryGetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(vpd_mask))
+    {
+        break;
+    }
+
+    /// Find the first VPD source that is active, so we can disable it.
+
+    auto new_bit = EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED;
+
+    for (; new_bit < EEPROM_VPD_ACCESSIBILITY_LAST_DISABLED >> 1;
+         new_bit = static_cast<ATTR_EEPROM_VPD_ACCESSIBILITY_type>(new_bit << 1))
+    {
+        if ((vpd_mask & new_bit) == 0)
+        {
+            break;
+        }
+    }
+
+    /// If there are no redundant VPD sources left, then error.
+
+    if (new_bit == EEPROM_VPD_ACCESSIBILITY_LAST_DISABLED >> 1)
+    {
+        break;
+    }
+
+    /// Update the VPD accessibility mask, so that future accesses won't use the
+    /// bad VPD source again.
+
+    const auto new_mask = static_cast<ATTR_EEPROM_VPD_ACCESSIBILITY_type>(vpd_mask | new_bit);
+
+    i_target->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(new_mask);
+
+    /// Refresh the MVPD EECACHE.
+
+    TRACFCOMP(g_trac_eeprom,
+              INFO_MRK"reloadMvpdEecacheFromNextSource: Reloading VPD_PRIMARY EECACHE entry "
+              "on target 0x%08x with EEPROM_VPD_ACCESSIBILITY mask 0x%x",
+              get_huid(i_target),
+              new_mask);
+
+    eepromRecordHeader searchEepromRecordHeader { };
+    eeprom_addr_t eepromInfo { };
+
+    eepromInfo.eepromRole = VPD_PRIMARY;
+    errl = buildEepromRecordHeader(i_target, eepromInfo, searchEepromRecordHeader);
+
+    if (errl)
+    {
+        TRACFCOMP(g_trac_eeprom, ERR_MRK"reloadMvpdEecacheFromNextSource: buildEepromRecordHeader failed");
+        break;
+    }
+
+    eepromRecordHeader* realEepromRecordHeader = nullptr;
+
+    errl = findEepromHeaderInPnorEecache(i_target,
+                                         true, // target is present
+                                         VPD_PRIMARY,
+                                         searchEepromRecordHeader,
+                                         realEepromRecordHeader);
+
+    if (errl)
+    {
+        TRACFCOMP(g_trac_eeprom, ERR_MRK"reloadMvpdEecacheFromNextSource: findEepromHeaderInPnorEecache failed");
+        break;
+    }
+
+    errl = updateEecacheContents(i_target,
+                                 VPD_AUTO,
+                                 nullptr, // data buffer (using nullptr to auto-allocate)
+                                 0, // data size
+                                 *realEepromRecordHeader,
+                                 EECACHE_EXISTING_PART);
+
+    if (errl)
+    {
+        TRACFCOMP(g_trac_eeprom, ERR_MRK"reloadMvpdEecacheFromNextSource: updateEecacheContents failed");
+        break;
+    }
+
+    success = true;
+
+    } while(false);
+
+    if (!success && !errl)
+    {
+        TRACFCOMP(g_trac_eeprom, ERR_MRK"reloadMvpdEecacheFromNextSource: No functional EEPROMs left "
+                  "on target 0x%08x",
+                  get_huid(i_target));
+
+        /*@
+         * @errortype
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         EEPROM_DISABLE_NEXT_MVPD_SOURCE
+         * @reasoncode       EEPROM_NO_FUNCTIONAL_EEPROM
+         * @userdata1        Mask from ATTR_EEPROM_VPD_ACCESSIBILITY
+         * @userdata2        HUID of target
+         * @devdesc          No functional EEPROM source available
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             EEPROM_DISABLE_NEXT_MVPD_SOURCE,
+                             EEPROM_NO_FUNCTIONAL_EEPROM,
+                             vpd_mask,
+                             get_huid(i_target),
+                             ErrlEntry::NO_SW_CALLOUT);
+
+        errl->addHwCallout(i_target,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DELAYED_DECONFIG,
+                           HWAS::GARD_NULL);
+
+        errl->collectTrace(EEPROM_COMP_NAME);
+    }
+
+    TRACFCOMP(g_trac_eeprom, EXIT_MRK"reloadMvpdEecacheFromNextSource");
+
+    return errl;
+}
+
+#endif
 
 // Register the perform Op with the routing code for Procs.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,

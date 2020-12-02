@@ -259,31 +259,13 @@ errlHndl_t flushToPnor(void * i_vaddr, uint64_t i_size)
  *            since buildEepromRecordHeader() doesn't do that automatically
  *            because fields like internal_offset and cached_copy_valid are
  *            determined based on what may or may not already exist in PNOR.
- *
- * @param[in]   i_target       Target associated with the eeprom record. Used
- *                             only for tracing purposes.
- *
- * @param[in]   i_eepromType   Describes which EEPROM associated to the target
- *                             that is being requested to be updated,
- *                             PRIMARY, BACKUP, etc.
- *
- * @param[in]   i_eepromBuffer A buffer containing data to load into EECACHE or
- *                             nullptr. If nullptr, HW lookup for data will be
- *                             attempted.
- *
- * @param[in]   i_eepromBuflen Length of i_eepromBuffer. If i_eepromBuffer is
- *                             nullptr then this should be 0.
- *
- * @param[in]  i_recordHeader The complete eeprom record header to be used to
- *                            update the contents in EECACHE.
- *
- * @return  errlHndl_t
  */
 errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
                                  EEPROM::EEPROM_ROLE const   i_eepromType,
                                  void        const * const   i_eepromBuffer,
                                  size_t              const   i_eepromBuflen,
-                                 eepromRecordHeader  const & i_recordHeader)
+                                 eepromRecordHeader  const & i_recordHeader,
+                                 const bool                  i_newPart)
 {
     TRACFCOMP(g_trac_eeprom, ENTER_MRK"updateEecacheContents(): "
               "updating cache entry for 0x%.8X target of type %d",
@@ -351,6 +333,7 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
                         get_huid(i_target));
                 break;
             }
+
             // Copy from tmp buffer into vaddr of internal section offset
             memcpy(l_internalSectionAddr, l_tmpBuffer.get(),  l_eepromLen);
         }
@@ -390,13 +373,16 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
         // Since we have copied stuff in the cache is valid, and been updated.
         // Even if this is a replacement ( cached_copy_valid was already 1) we
         // must set mark_target_changed so just always update the header
-        setEepromChanged(i_recordHeader);
-
-        if (i_recordHeader.completeRecord.master_eeprom)
+        if (i_newPart == EECACHE_NEW_PART)
         {
-            // We have updated the cache entry, this indicates we have found a
-            // "new" part. Mark the target as changed in hwas.
-            HWAS::markTargetChanged(i_target);
+            setEepromChanged(i_recordHeader);
+
+            if (i_recordHeader.completeRecord.master_eeprom)
+            {
+                // We have updated the cache entry, this indicates we have found a
+                // "new" part. Mark the target as changed in hwas.
+                HWAS::markTargetChanged(i_target);
+            }
         }
     } while(0);
 
@@ -969,25 +955,6 @@ errlHndl_t updateExistingEecacheEntry(
 /*
  * @brief Searches through the records in PNOR EECACHE to check for the
  *        existence of the search record in PNOR.
- *
- * @param[in]   i_target          The target associated with partial record
- *                                header.
- *
- * @param[in]   i_present         Describes whether or not target is present
- *
- * @param[in]   i_eepromType      Describes which EEPROM associated to the
- *                                target that is being requested to be updated,
- *                                PRIMARY, BACKUP, etc.
- *
- * @param[in]   i_searchRecordHeader  A record that has been constructed by
- *                                    calling buildEepromRecordHeader().
- *
- * @param[out]  o_recordHeaderFromPnor  A pointer that must be nullptr because
- *                                      it will be reassigned to the record
- *                                      found or a place for a new record.
- *
- *
- * @return  errlHndl_t
  */
 errlHndl_t findEepromHeaderInPnorEecache(
         TARGETING::Target*         i_target,

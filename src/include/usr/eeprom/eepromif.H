@@ -166,7 +166,21 @@ void cacheEepromAncillaryRoles();
  */
 uint64_t getEepromHeaderUserData(const eepromRecordHeader& i_eepromRecordHeader);
 
+#ifndef __HOSTBOOT_RUNTIME
+
+/* @brief  Disable the current redundant MVPD source for the given target, and
+ *         reload the VPD EECACHE entry from the next source. If there are no
+ *         more MVPD sources available, then return an error.
+ *
+ * @note The given target must be "present" according to HWAS.
+ *
+ * @param[in] i_target  The target to operate on
+ * @return errlHndl_t   Error if any, otherwise nullptr.
+ */
+errlHndl_t reloadMvpdEecacheFromNextSource(TARGETING::Target* i_target);
+
+#endif
+
 };  // end namespace EEPROM
 
 #endif  // end __EEPROMIF_H
-
