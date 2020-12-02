@@ -440,8 +440,6 @@ errlHndl_t check_proc0_memory_config()
     uint8_t l_proc0 = INVALID_PROC;
     uint8_t l_victim = INVALID_PROC;
 
-    Target* l_sys = UTIL::assertGetToplevelTarget();
-
     for (const auto & l_procChip : l_procsList)
     {
         l_procIds[i].proc = l_procChip;
@@ -567,19 +565,15 @@ errlHndl_t check_proc0_memory_config()
         if(l_procIds[i].topoId != l_procIds[i].topoIdEff)
         {
             // Update attributes
+            TRACFCOMP(g_trac_targeting,
+                "check_proc0_memory_config: updating "
+                "ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID for "
+                "Proc %.8X: topoIdEff = %d --> topoId = %d",
+                get_huid(l_procIds[i].proc),
+                l_procIds[i].topoIdEff,
+                l_procIds[i].topoId);
             (l_procIds[i].proc)->
                 setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(l_procIds[i].topoId);
-            ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
-                l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>();
-            TRACFCOMP(g_trac_targeting,
-                    "updateProcessorSbeSeeproms needed due to "
-                    "topology checks, will set ATTR_FORCE_SBE_UPDATE "
-                    "Proc %.8X: topoIdEff = %d, topoId = %d l_sbe_update=0x%X",
-                    get_huid(l_procIds[i].proc),
-                    l_procIds[i].topoIdEff,
-                    l_procIds[i].topoId, l_sbe_update);
-            l_sys->setAttr<ATTR_FORCE_SBE_UPDATE>
-                (l_sbe_update | SBE_UPDATE_TYPE_TOPOLOGY_CHECKS);
         }
 
         TRACDCOMP(g_trac_targeting,

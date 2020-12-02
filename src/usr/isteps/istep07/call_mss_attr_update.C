@@ -857,7 +857,7 @@ void* call_mss_attr_update( void *io_pArgs )
                                     ERRL_SEV_UNRECOVERABLE,
                                     MOD_CALL_MSS_ATTR_UPDATE,
                                     RC_SBE_UPDATE_UNEXPECTEDLY_FAILED,
-                                    l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>(),
+                                    l_sbe_update,
                                     0);
                     TargetHandle_t l_pMasterProcChip(nullptr);
                     targetService().masterProcChipTargetHandle(l_pMasterProcChip);
