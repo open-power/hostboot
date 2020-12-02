@@ -62,8 +62,8 @@ const uint16_t NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_VAL         = 0x32;
 const uint16_t NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_VAL         = 0x32;
 
 // RNG Self Test Register 1 constants
-// adaptive proportion soft fail threshold (Setting [0:6] to 0x02)
-const uint8_t NX_RNG_ST1_SOFT_FAIL_TH_VAL                       = 0x02;
+// adaptive proportion soft fail threshold (hangpulse ~ 34s; 1 hour / 34s ~ 105 (0x69))
+const uint8_t NX_RNG_ST1_SOFT_FAIL_TH_VAL                       = 0x69;
 // adaptive proportion 1bit match threshold min (100)
 const uint16_t NX_RNG_ST1_1BIT_MATCH_TH_MIN_VAL                 = 0x0064;
 // adaptive proportion 1bit match threshold max (415)
