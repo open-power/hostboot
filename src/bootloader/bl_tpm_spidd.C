@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,8 @@
 #define TPM_MAX_SPI_TRANSMIT_SIZE 64
 // The length of the TPM startup command
 #define TPM_STARTUP_CMD_LEN 0xC
+// The length of the PCR extend TPM command
+#define TPM_PCR_EXTEND_CMD_LEN 0x57
 
 /**
  * @brief Base response from the TPM (used to get the RC)
@@ -148,7 +150,7 @@ Bootloader::hbblReasonCode tpm_write(const uint32_t i_offset, const void* i_buff
  * @param[out] o_stsReg the value of the status register
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmReadSTSReg(TPMDD::tpm_sts_reg_t& o_stsReg)
+static Bootloader::hbblReasonCode tpmReadSTSReg(TPMDD::tpm_sts_reg_t& o_stsReg)
 {
     size_t l_size = sizeof(o_stsReg);
     o_stsReg = 0;
@@ -160,7 +162,7 @@ Bootloader::hbblReasonCode tpmReadSTSReg(TPMDD::tpm_sts_reg_t& o_stsReg)
  *
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmWriteCommandReady()
+static Bootloader::hbblReasonCode tpmWriteCommandReady()
 {
     TPMDD::tpm_sts_reg_t l_stsReg;
     l_stsReg.isCommandReady = 1;
@@ -175,7 +177,7 @@ Bootloader::hbblReasonCode tpmWriteCommandReady()
  * @param[out] o_isExpecting whether TPM is expecting more data
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmIsExpecting(bool& o_isExpecting)
+static Bootloader::hbblReasonCode tpmIsExpecting(bool& o_isExpecting)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     TPMDD::tpm_sts_reg_t l_stsReg;
@@ -193,7 +195,7 @@ Bootloader::hbblReasonCode tpmIsExpecting(bool& o_isExpecting)
  * @param[out] o_isReady whether the command is ready
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmIsCommandReady(bool& o_isReady)
+static Bootloader::hbblReasonCode tpmIsCommandReady(bool& o_isReady)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     TPMDD::tpm_sts_reg_t l_stsReg;
@@ -212,7 +214,7 @@ Bootloader::hbblReasonCode tpmIsCommandReady(bool& o_isReady)
  * @param[out] o_stsReg the value of the TPM status reg
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmCheckCommandReadyStatus(bool& o_commandReady)
+static Bootloader::hbblReasonCode tpmCheckCommandReadyStatus(bool& o_commandReady)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     for(size_t l_delay = 0; l_delay < TPMDD::TPM_TIMEOUT_B; l_delay += 10)
@@ -238,7 +240,7 @@ Bootloader::hbblReasonCode tpmCheckCommandReadyStatus(bool& o_commandReady)
  * @param[out] o_burstCount the burst count as indicated by the TPM reg
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmReadBurstCount(uint16_t& o_burstCount)
+static Bootloader::hbblReasonCode tpmReadBurstCount(uint16_t& o_burstCount)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     o_burstCount = 0;
@@ -260,7 +262,7 @@ Bootloader::hbblReasonCode tpmReadBurstCount(uint16_t& o_burstCount)
  *
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmPollForCommandReady()
+static Bootloader::hbblReasonCode tpmPollForCommandReady()
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     bool l_commandReady = false;
@@ -311,7 +313,7 @@ Bootloader::hbblReasonCode tpmPollForCommandReady()
  * @param[out] o_stsReg the value of the status reg
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmReadSTSRegValid(TPMDD::tpm_sts_reg_t& o_stsReg)
+static Bootloader::hbblReasonCode tpmReadSTSRegValid(TPMDD::tpm_sts_reg_t& o_stsReg)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     size_t l_polls = 0;
@@ -345,7 +347,7 @@ Bootloader::hbblReasonCode tpmReadSTSRegValid(TPMDD::tpm_sts_reg_t& o_stsReg)
  * @param[out] o_isDataAvail whether more data is available from TPM
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmIsDataAvail(bool& o_isDataAvail)
+static Bootloader::hbblReasonCode tpmIsDataAvail(bool& o_isDataAvail)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     TPMDD::tpm_sts_reg_t l_stsReg;
@@ -364,7 +366,7 @@ Bootloader::hbblReasonCode tpmIsDataAvail(bool& o_isDataAvail)
  *
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmPollForDataAvail()
+static Bootloader::hbblReasonCode tpmPollForDataAvail()
 {
     TPMDD::tpm_sts_reg_t l_stsReg;
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
@@ -406,7 +408,7 @@ Bootloader::hbblReasonCode tpmPollForDataAvail()
  *
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmWriteTpmGo()
+static Bootloader::hbblReasonCode tpmWriteTpmGo()
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     TPMDD::tpm_sts_reg_t l_stsReg;
@@ -425,7 +427,7 @@ Bootloader::hbblReasonCode tpmWriteTpmGo()
  * @param[in/out] io_buflen the amount of data to read/amount actually read
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmReadFifo(void* o_buffer, size_t& io_buflen)
+static Bootloader::hbblReasonCode tpmReadFifo(void* o_buffer, size_t& io_buflen)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     size_t l_delay_ms = 0;
@@ -550,7 +552,7 @@ Bootloader::hbblReasonCode tpmReadFifo(void* o_buffer, size_t& io_buflen)
  * @param[in] i_buflen the size of the input buffer
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmWriteFifo(const void* i_buffer, size_t i_buflen)
+static Bootloader::hbblReasonCode tpmWriteFifo(const void* i_buffer, size_t i_buflen)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
     size_t l_delay_ms = 0;
@@ -694,7 +696,7 @@ Bootloader::hbblReasonCode tpmWriteFifo(const void* i_buffer, size_t i_buflen)
  * @param[in] i_commandlen the length of the TPM command
  * @return 0 on success or error code on error
  */
-Bootloader::hbblReasonCode tpmTransmit(void* io_buffer,
+static Bootloader::hbblReasonCode tpmTransmit(void* io_buffer,
                                               size_t& io_buflen,
                                               const size_t i_commandlen)
 {
@@ -790,3 +792,41 @@ Bootloader::hbblReasonCode tpmCmdStartup()
     return l_rc;
 }
 
+Bootloader::hbblReasonCode tpmExtendHash(const uint8_t* const i_hash)
+{
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+    uint32_t l_cmdData[] = { 0x80020000, 0x00570000, 0x01820000, 0x00000000,
+                             0x00094000, 0x00090000, 0x00000000, 0x00000200,
+                             0x0b000000, 0x00000000, 0x00000000, 0x00000000, // 32-byte hash starts right after 0x0b
+                             0x00000000, 0x00000000, 0x00000000, 0x00000000, // 32-byte hash cont.
+                             0x00000400, 0x00000000, 0x00000000, 0x00000000, // 20-byte hash starts right after 0x04
+                             0x00000000, 0x00000000 };
+    const uint8_t HASH_OFFSET = 33; // The offset at which the 32-byte hash starts in the message
+    const uint8_t HASH_20B_OFFSET = 67; // The offset at which 20-byte hast starts
+    const uint8_t TPM_FULL_HASH_SIZE = 32; // Sha256 algorithm's digest size is 32 bytes
+    const uint8_t TPM_SHORT_HASH_SIZE = 20; // Sha1 algorithm's digest is 20 bytes
+    size_t l_cmdLen = TPM_PCR_EXTEND_CMD_LEN;
+
+    // Populate the cmd with the input hash
+    // Fist the 32-byte hash
+    memcpy(reinterpret_cast<uint8_t*>(l_cmdData) + HASH_OFFSET, i_hash, TPM_FULL_HASH_SIZE);
+    // Now the smaller, 20-byte hash
+    memcpy(reinterpret_cast<uint8_t*>(l_cmdData) + HASH_20B_OFFSET, i_hash, TPM_SHORT_HASH_SIZE);
+
+    // l_cmdData will be reused for the TPM response
+    l_rc = tpmTransmit(l_cmdData,
+                       l_cmdLen,
+                       l_cmdLen);
+    if(!l_rc)
+    {
+        TPM_BaseOut* l_resp = reinterpret_cast<TPM_BaseOut*>(l_cmdData);
+        if(l_resp->responseCode != Bootloader::RC_NO_ERROR)
+        {
+            bl_console::putString("Could not extend to TPM PCR0! TPM RC: 0x");
+            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_resp->responseCode), sizeof(l_resp->responseCode));
+            bl_console::putString("\r\n");
+            l_rc = Bootloader::RC_TPM_PCR_EXTEND_FAIL;
+        }
+    }
+    return l_rc;
+}

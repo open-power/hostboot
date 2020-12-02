@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,4 +77,18 @@ Bootloader::hbblReasonCode tpmCmdStartup();
  * @return 0 on success or error code on failure
  */
 Bootloader::hbblReasonCode tpm_init_spi_engine();
+
+/**
+ * @brief Extend (write) the given hash to TPM PCR0
+ *
+ * @param[in] i_hash the hash to be extended (written) into PCR0; must be at least
+ *            32 bytes in length
+ * @return 0 on success or error code on failure
+ * @note Any data beyond the first 32 bytes of the hash is ignored due to TPM
+ *       digest size limitations (TPM digests are 32 bytes). An additional 20 bytes
+ *       of the input hash get extended (written) again into the same PCR under
+ *       different digest.
+ */
+Bootloader::hbblReasonCode tpmExtendHash(const uint8_t* const i_hash);
+
 #endif

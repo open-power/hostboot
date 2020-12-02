@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef BOOTLOADER
 extern "C" void *memset(void *vdest, int ch, size_t len)
 {
     // TODO: align to an 8-byte boundary
@@ -56,7 +55,6 @@ extern "C" void *memset(void *vdest, int ch, size_t len)
 
     return vdest;
 }
-#endif
 
 extern "C" void *memcpy(void *vdest, const void *vsrc, size_t len)
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@
 #include <kernel/memstate.H>
 
 #include <p10_sbe_spi_cmd.H>
+#include <bl_tpm_spidd.H>
 
 using namespace MEMMAP;
 
@@ -68,7 +69,6 @@ extern char bootloader_end_address;
 // XSCOM/LPC BAR constants
 const uint64_t XSCOM_BAR_MASK = 0xFF000003FFFFFFFFULL;
 const uint64_t LPC_BAR_MASK = 0xFF000000FFFFFFFFULL;
-
 
 namespace Bootloader{
     /**
@@ -388,6 +388,64 @@ namespace Bootloader{
         }
     }
 
+#ifndef CONFIG_VPO_COMPILE
+    /**
+     * @brief Initialize the TPM and extend the given hash to TPM PCR0
+     *
+     * @param[in] i_hash the hash to be extended to TPM PCR0. Needs to be at least
+     *            32 bytes long.
+     * @return 0 on success or error code on failure
+     */
+    static Bootloader::hbblReasonCode extendHashToTPM(const uint8_t* const i_hash)
+    {
+        Bootloader::hbblReasonCode l_rc = RC_NO_ERROR;
+        do {
+
+        // First, initialize the TPM SPI engine so we can communicate with TPM
+        l_rc = tpm_init_spi_engine();
+        if(l_rc)
+        {
+            bl_console::putString("Could not init TPM SPI engine clock! RC: ");
+            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+            bl_console::putString("\r\n");
+            break;
+        }
+
+        // Set the TPM locality to 0
+        uint8_t l_locality = TPMDD::TPM_ACCESS_REQUEST_LOCALITY_USE;
+        size_t l_size = sizeof(l_locality);
+        l_rc = tpm_write(TPMDD::TPM_REG_75x_TPM_ACCESS, &l_locality, l_size);
+        if(l_rc)
+        {
+            bl_console::putString("Could not set TPM locality\r\n");
+            break;
+        }
+
+        // Start the TPM
+        l_rc = tpmCmdStartup();
+        if(l_rc)
+        {
+            bl_console::putString("TPM init FAILED; RC: 0x");
+            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+            bl_console::putString("\r\n");
+            break;
+        }
+
+        // Extend the input hash to TPM PCR0
+        l_rc = tpmExtendHash(i_hash);
+        if(l_rc)
+        {
+            bl_console::putString("Could not extend hash! RC: ");
+            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+            bl_console::putString("\r\n");
+            break;
+        }
+
+        } while(0);
+        return l_rc;
+    }
+#endif
+
     /** Bootloader main function to work with and start HBB.
      *
      * @return 0.
@@ -553,13 +611,37 @@ namespace Bootloader{
 #ifndef CONFIG_VPO_COMPILE // No secureboot in VPO - no need to verify
                 // ROM verification of HBB image
                 verifyContainer(l_src_addr);
+
+#ifdef CONFIG_TPMDD
+                // Grab the HBB content signature hash out of the secureboot
+                // header and extended into TPM
+
+                // Current offset of the hash of protected payload into the
+                // secure header
+                const uint16_t CONTENT_HASH_OFFSET = 1085;
+                uint8_t* l_hash = reinterpret_cast<uint8_t*>(l_src_addr) +
+                                  CONTENT_HASH_OFFSET;
+
+                // Extend the obtained hash into TPM
+                Bootloader::hbblReasonCode l_rc = extendHashToTPM(l_hash);
+                if(l_rc)
+                {
+                    bl_console::putString("Could not extend HBB hash to TPM. RC: ");
+                    bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+                    bl_console::putString("\r\n");
+                    bl_console::putString("Continuing the boot.\r\n");
+                    l_rc = Bootloader::RC_NO_ERROR;
+                }
+#endif // CONFIG_TPMDD
+
                 // Increment past secure header
                 if (isEnforcedSecureSection(PNOR::HB_BASE_CODE))
                 {
                     l_src_addr += PAGE_SIZE/sizeof(uint64_t);
                     l_hbbLength -= PAGE_SIZE;
                 }
-#endif
+
+#endif // CONFIG_VPO_COMPILE
 
                 // Copy HBB image into address where it executes
                 for(uint32_t i = 0;

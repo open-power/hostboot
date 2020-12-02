@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,6 +106,7 @@ namespace Bootloader
         RC_TPM_TIMEOUT_B           = HBBL_COMP_ID | 0x22,  /**< TPM hit the TPM timeout B */
         RC_TPM_INIT_FAIL           = HBBL_COMP_ID | 0x23,  /**< Failed to init the TPM */
         RC_SPI_CLK_INIT_FAIL       = HBBL_COMP_ID | 0x24,  /**< Failed to init SPI clock for TPM engine */
+        RC_TPM_PCR_EXTEND_FAIL     = HBBL_COMP_ID | 0x25,  /**< TPM PCR extend failed */
 
         RC_TPM_INITIALIZE          = 0x100, /**< Special TPM RC that signals if TPM's been initialized already */
 

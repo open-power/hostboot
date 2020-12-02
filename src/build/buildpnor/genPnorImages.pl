@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -36,7 +36,7 @@ use Getopt::Long qw(:config pass_through);
 
 # Hostboot base image constants for the hardware header portion of the
 # secureboot header
-use constant BASE_IMAGE_TOTAL_CONTAINER_SIZE => 0x000000000007EF80;
+
 # Note: base_image_target_hrmor is not being filled out because
 # the value is not used. We want the hostboot codebase to be able
 # to dynamically handle being loaded at any HRMOR. We will use a
@@ -779,8 +779,6 @@ sub manipulateImages
                         # header.
                         if($eyeCatch eq "HBB")
                         {
-                            $callerHwHdrFields{totalContainerSize}
-                                = BASE_IMAGE_TOTAL_CONTAINER_SIZE;
                             $callerHwHdrFields{targetHrmor}
                                 = BASE_IMAGE_TARGET_HRMOR;
                             $callerHwHdrFields{instructionStartStackPointer}
