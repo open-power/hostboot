@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,8 +58,7 @@ namespace SBEIO
     errlHndl_t sendPsuReadSeeprom(TARGETING::Target * i_target,
                                   uint32_t i_seepromOffset,
                                   uint32_t i_readSize,
-                                  uint64_t i_destAddr,
-                                  bool   & o_opSupported)
+                                  uint64_t i_destAddr)
     {
         errlHndl_t errl = nullptr;
 
@@ -89,20 +88,6 @@ namespace SBEIO
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                                 SbePsu::SBE_READ_SEEPROM_REQ_USED_REGS,
                                 SbePsu::SBE_READ_SEEPROM_RSP_USED_REGS);
-
-        if(l_psuResponse.primaryStatus == SBE_PRI_INVALID_COMMAND &&
-            l_psuResponse.secondaryStatus == SBE_SEC_COMMAND_NOT_SUPPORTED)
-        {
-            SBE_TRACF(ENTER_MRK "SBE firmware level does not support PSU Seeprom Read Requests");
-            //Make sure we aren't passing out any errors if the command isn't supported
-            delete errl;
-            errl = nullptr;
-            o_opSupported = false;
-        }
-        else
-        {
-            o_opSupported = true;
-        }
 
         SBE_TRACD(EXIT_MRK "sendPsuReadSeeprom");
 

@@ -416,8 +416,6 @@ namespace SBEIO
     * @param[in]  i_destAddr       Address that hostboot has prepared which the
     *                              sbe will write too
     *                              Assert if i_destAddr is not 8-byte aligned
-    * @param[out] o_opSupported    Bool which tells us if the sbe supports the
-    *                              chipOp or not
     *
     * @return errlHndl_t Error log handle on failure.
     *
@@ -425,8 +423,7 @@ namespace SBEIO
     errlHndl_t sendPsuReadSeeprom(TARGETING::Target * i_target,
                                   uint32_t i_seepromOffset,
                                   uint32_t i_readSize,
-                                  uint64_t i_destAddr,
-                                  bool   & o_opSupported);
+                                  uint64_t i_destAddr);
 
     /**
     * @brief Sends a PSU chipOp to fetch security list binary dump in the SBE

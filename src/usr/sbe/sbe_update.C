@@ -2000,7 +2000,6 @@ namespace SBE
     errlHndl_t getSeepromVersions(sbeTargetState_t& io_sbeState)
     {
         errlHndl_t l_err = nullptr;
-        bool l_sbeSupportedSeepromReadOp = true;
         bool l_errFoundDuringChipOp = false;
 
         //Make sure that io_sbeState had valid information
@@ -2025,8 +2024,7 @@ namespace SBE
             if (l_sideZeroActive)
             {
                 l_err = getSeepromSideVersionViaChipOp(io_sbeState.target,
-                                            io_sbeState.seeprom_0_ver,
-                                            l_sbeSupportedSeepromReadOp);
+                                                       io_sbeState.seeprom_0_ver);
 
                 if(l_err)
                 {
@@ -2042,12 +2040,6 @@ namespace SBE
                     l_err->collectTrace(SBEIO_COMP_NAME, 256);
                     errlCommit( l_err, SBE_COMP_ID );
                 }
-                else if(!l_sbeSupportedSeepromReadOp)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                    "getting SBE Information from SEEPROM 0 (Primary) via ChipOp. The "
-                    "SBE firmware level does not support readSeeprom Op, will attempt SPI read instead");
-                }
                 else
                 {
                     TRACDBIN(g_trac_sbe, "getSeepromVersions found via ChipOp -spA",
@@ -2058,7 +2050,7 @@ namespace SBE
 
             // If side 0 is not active (boot side is 1) or there was an error trying to read
             // the primary side 0 via chipOp, try reading side 0 via SPI
-            if(!l_sideZeroActive || !l_sbeSupportedSeepromReadOp ||
+            if(!l_sideZeroActive ||
                 l_errFoundDuringChipOp)
             {
 
@@ -2088,14 +2080,11 @@ namespace SBE
             /*******************************************/
 
             //If side 1 is active boot side, then attempt read via chipOp
-            //Note that there is no reason to attempt chipOp on backup if it failed
-            //on the primary.
-            if (!l_sideZeroActive && l_sbeSupportedSeepromReadOp &&
+            if (!l_sideZeroActive &&
                 !l_errFoundDuringChipOp)
             {
                 l_err = getSeepromSideVersionViaChipOp(io_sbeState.target,
-                                                    io_sbeState.seeprom_1_ver,
-                                                    l_sbeSupportedSeepromReadOp);
+                                                       io_sbeState.seeprom_1_ver);
 
                 if(l_err)
                 {
@@ -2111,12 +2100,6 @@ namespace SBE
                     l_err->collectTrace(SBEIO_COMP_NAME, 256);
                     errlCommit( l_err, SBE_COMP_ID );
                 }
-                else if(!l_sbeSupportedSeepromReadOp)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
-                                "getting SBE Information from SEEPROM 1 (Backup) via ChipOp. The "
-                                "SBE firmware level does not support readSeeprom Op, will attempt SPI read instead");
-                }
                 else
                 {
                     TRACDBIN(g_trac_sbe, "getSeepromVersions found via Chipop -spB",
@@ -2127,7 +2110,7 @@ namespace SBE
 
             // If side 1 is not active (boot side 0) or there was an error trying to read
             // the primary via chipOp, then try reading via SPI
-            if (l_sideZeroActive || !l_sbeSupportedSeepromReadOp || l_errFoundDuringChipOp)
+            if (l_sideZeroActive || l_errFoundDuringChipOp)
             {
                 l_err = getSeepromSideVersionViaSPI(io_sbeState.target,
                                             EEPROM::SBE_BACKUP,
@@ -3083,8 +3066,7 @@ namespace SBE
     }
 
 errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
-                                          sbeSeepromVersionInfo_t& o_info,
-                                          bool& o_opSupported)
+                                          sbeSeepromVersionInfo_t& o_info)
     {
         errlHndl_t l_err = nullptr;
 
@@ -3117,10 +3099,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             l_err = SBEIO::sendPsuReadSeeprom(i_target,
                                END_OF_SEEPROM_MINUS_READ_SIZE,
                                SBE_SEEPROM_VERSION_READ_SIZE,
-                               mm_virt_to_phys(reinterpret_cast<void*>(l_seepromReadBufferAligned)),
-                               o_opSupported);
+                               mm_virt_to_phys(reinterpret_cast<void*>(
+                                  l_seepromReadBufferAligned)));
 
-            if(!l_err && o_opSupported)
+            if(!l_err)
             {
 
                 TRACDBIN(g_trac_sbe,
@@ -3161,9 +3143,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             }
             else
             {
-                TRACFCOMP( g_trac_sbe,
-                        "Error reading seeprom via chipOp, either the Op isnt supported by SBE or"
-                        " something else went wrong, not going to attempt to parse results");
+                TRACFCOMP(g_trac_sbe,
+                          "Error reading seeprom via chipOp on tgt=0x%.08X: "
+                          TRACE_ERR_FMT,
+                          get_huid(i_target),
+                          TRACE_ERR_ARGS(l_err));
             }
 
         }while(0);
@@ -6023,10 +6007,6 @@ errlHndl_t getSecuritySettingsFromSbeImage(
                         ((i_bootSide == SBE_SEEPROM1) &&
                         (i_seeprom == EEPROM::SBE_BACKUP)));
 
-    // reading via ChipOp should be supported, but this parameter is still used
-    // for the call
-    bool l_chipOpSupported = false;
-
     TRACFCOMP( g_trac_sbe, ENTER_MRK"getSecuritySettingsFromSbeImage: "
                "i_target=0x%X, i_seeprom=%d, i_image_ptr=%p: "
                "reading from %s",
@@ -6158,18 +6138,15 @@ errlHndl_t getSecuritySettingsFromSbeImage(
                            ALIGN_X(sizeof(P9XipHeader),
                                    CHIPOP_READ_SEEPROM_SIZE_ALIGNMENT_BYTES),
                            mm_virt_to_phys(reinterpret_cast
-                                           <void*>(l_chipOpBufferAligned)),
-                           l_chipOpSupported);
+                                           <void*>(l_chipOpBufferAligned)));
 
-            if(err || !l_chipOpSupported)
+            if(err)
             {
               TRACFCOMP( g_trac_sbe,
                           "getSecuritySettingsFromSbeImage: Error reading P9XipHeader "
-                          "from seeprom via chipOp: either the Op is not "
-                          "supported by SBE (%d) or something else went wrong "
-                          "(err_rc=0x%X, err_plid=0x%X)",
-                          l_chipOpSupported, ERRL_GETRC_SAFE(err),
-                          ERRL_GETPLID_SAFE(err));
+                          "from seeprom via chipOp: "
+                          TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(err));
                break;
             }
             // Copy P9XipHeader to local membuf
@@ -6368,18 +6345,15 @@ errlHndl_t getSecuritySettingsFromSbeImage(
                            ALIGN_X(data_size,
                                    CHIPOP_READ_SEEPROM_SIZE_ALIGNMENT_BYTES),
                            mm_virt_to_phys(reinterpret_cast
-                                           <void*>(l_chipOpBufferAligned)),
-                           l_chipOpSupported);
+                                           <void*>(l_chipOpBufferAligned)));
 
-            if(err || !l_chipOpSupported)
+            if(err)
             {
                TRACFCOMP( g_trac_sbe,
                           "getSecuritySettingsFromSbeImage: Error reading Hash from "
-                          "seeprom via chipOp: either the Op is not supported "
-                          "by SBE (%d) or something else went wrong: (err_rc="
-                          "0x%X, err_plid=0x%X): offset=0x%X",
-                          l_chipOpSupported, ERRL_GETRC_SAFE(err),
-                          ERRL_GETPLID_SAFE(err), seeprom_offset);
+                          "seeprom via chipOp at offset=0x%X: "
+                          TRACE_ERR_FMT,
+                          seeprom_offset, TRACE_ERR_ARGS(err));
                break;
             }
             // Copy data to output variables

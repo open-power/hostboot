@@ -365,13 +365,10 @@ namespace SBE
      *
      * @param[out] o_info         Struct containing the SBE Version Information
      *
-     * @param[out] o_opSupported  output if sbe supports seeprom read chip op or not
-     *
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
-                                     sbeSeepromVersionInfo_t& o_info,
-                                     bool& o_opSupported);
+                                     sbeSeepromVersionInfo_t& o_info);
 
     /**
      * @brief Updates a specific SEEPROM
