@@ -776,12 +776,9 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                     l_eepromParts.size());
             }
 
-            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_EEPROM_PART].
-                hdatOffset =
-                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_SPI].
-                hdatOffset +
-                sizeof(hdatHDIFVersionedDataArray_t) +
-                (sizeof(hdatSpiDevData_t) * HDAT_PCRD_MAX_SPI_DEV);
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_EEPROM_PART].hdatOffset =
+                  this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_SPI].hdatOffset
+                + this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_SPI].hdatSize;
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_EEPROM_PART].hdatSize=
                 l_pcrdEepromPartTotalSize;
             this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdEepromPartTotalSize;
