@@ -55,8 +55,8 @@ namespace HDAT
 #define HDAT_FULL_MVPD_SIZE 0x10000
 const uint16_t HDAT_PCRD_VERSION    = 0x26;
 const char HDAT_PCRD_STRUCT_NAME[7] = "SPPCRD";
-#define HDAT_SW_CHKSTP_FIR_SCOM         0x05012000
-#define HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS 0x1F  
+#define HDAT_SW_CHKSTP_FIR_SCOM         0x03040100
+#define HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS 0x3C
 
 //Max number of I2c devices for any given proc
 #define HDAT_PCRD_MAX_I2C_DEV  128
