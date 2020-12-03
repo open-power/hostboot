@@ -878,8 +878,7 @@
     </attribute>
     <attribute>
         <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>
-        <persistency>volatile-zeroed</persistency>
-        <default>OFF</default>
+        <persistency>volatile</persistency>
     </attribute>
     <attribute>
         <id>ATTR_FUSED_CORE_MODE</id>
