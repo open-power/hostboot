@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -718,12 +718,23 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(regionData & i_region)
         l_psuCommand.cd6_memRegion_Size = i_region.size;
         l_psuCommand.cd6_memRegion_Start_Addr = i_region.start_addr;
 
+        SbePsu::unsupported_command_error_severity opUnsupportedErrorSev { ERRORLOG::ERRL_SEV_UNRECOVERABLE };
+
+        // If Secureboot is not enabled, make the error from the SBE not
+        // supporting Security Control Messages Control command class (which
+        // includes the Unsecure Memory Region commands) Informational
+        if (!SECUREBOOT::enabled())
+        {
+            opUnsupportedErrorSev = { ERRORLOG::ERRL_SEV_INFORMATIONAL };
+        }
+
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(l_tgt,
                                 &l_psuCommand,
                                 &l_psuResponse,
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                                 SbePsu::SBE_MEM_REGION_REQ_USED_REGS,
-                                SbePsu::SBE_MEM_REGION_RSP_USED_REGS);
+                                SbePsu::SBE_MEM_REGION_RSP_USED_REGS,
+                                opUnsupportedErrorSev);
 
         if (errl)
         {
@@ -731,24 +742,7 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(regionData & i_region)
                       "err rc=0x%.4X plid=0x%.8X (mbxReg0=0x%.16llX)",
                       ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl),
                       l_psuCommand.mbxReg0);
-
-            // If Secureboot is not enabled, make the error from the SBE not
-            // supporting Security Control Messages Control command class (which
-            // includes the Unsecure Memory Region commands) Informational
-            if ((!SECUREBOOT::enabled()) &&
-                (l_psuResponse.primaryStatus ==
-                   SBE_PRI_INVALID_COMMAND) &&
-                (l_psuResponse.secondaryStatus ==
-                   SBE_SEC_COMMAND_CLASS_NOT_SUPPORTED)
-               )
-            {
-                SBE_TRACF(ERR_MRK "doUnsecureMemRegionOp: Secureboot NOT "
-                          "Enabled - Changing 'Command Class Not Supported' "
-                          "Error Log To Informational.");
-                errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                errl->collectTrace(SBEIO_COMP_NAME);
-            }
-
+            errl->collectTrace(SBEIO_COMP_NAME, SBEIO_COMP_ID);
             break;
         }
     }

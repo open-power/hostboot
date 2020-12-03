@@ -85,6 +85,8 @@ errlHndl_t psuSendSbeOcmbConfig(const TargetHandle_t i_pProc)
         // Create a PSU response message
         SbePsu::psuResponse l_psuResponse;
 
+        bool command_unsupported = false;
+
         // Make the call to perform the PSU Chip Operation
         l_err = SbePsu::getTheInstance().performPsuChipOp(
                         i_pProc,
@@ -92,7 +94,9 @@ errlHndl_t psuSendSbeOcmbConfig(const TargetHandle_t i_pProc)
                         &l_psuResponse,
                         SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                         SbePsu::SBE_REQ_SEND_OCMB_CONFIG_REGS,
-                        SbePsu::SBE_RSP_SEND_OCMB_CONFIG_REGS);
+                        SbePsu::SBE_RSP_SEND_OCMB_CONFIG_REGS,
+                        SbePsu::COMMAND_SUPPORT_OPTIONAL, // No error when operation is unsupported
+                        &command_unsupported);
 
         if (l_err)
         {
@@ -101,15 +105,11 @@ errlHndl_t psuSendSbeOcmbConfig(const TargetHandle_t i_pProc)
 
             break;
         }
-        else if ( SBE_PRI_INVALID_COMMAND       == l_psuResponse.primaryStatus   &&
-                  SBE_SEC_COMMAND_NOT_SUPPORTED == l_psuResponse.secondaryStatus )
+        else if ( command_unsupported )
         {
             TRACFCOMP( g_trac_sbeio, ERR_MRK"psuSendSbeOcmbConfig: ERROR: SBE firmware "
                        "does not support PSU sending OCMB configuration information" );
 
-            // Do not pass back any errors
-            delete l_err;
-            l_err = nullptr;
             break;
         }
         else if (SBE_PRI_OPERATION_SUCCESSFUL != l_psuResponse.primaryStatus)

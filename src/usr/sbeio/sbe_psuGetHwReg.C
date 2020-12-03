@@ -146,32 +146,12 @@ namespace SBEIO
                                                          &l_psuResponse,
                                                          SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                                                          SbePsu::SBE_GET_HW_REG_REQ_USED_REGS,
-                                                         SbePsu::SBE_GET_HW_REG_RSP_USED_REGS);
+                                                         SbePsu::SBE_GET_HW_REG_RSP_USED_REGS,
+                                                         SbePsu::unsupported_command_error_severity { ERRL_SEV_PREDICTIVE });
         if(errl)
         {
             // Error log will have already appended SBEIO traces
             SBE_TRACF("An error was returned from the SBE for the previous getHwReg PSU chipop, check error log");
-        }
-
-        if(l_psuResponse.primaryStatus == SBE_PRI_INVALID_COMMAND &&
-           l_psuResponse.secondaryStatus == SBE_SEC_COMMAND_NOT_SUPPORTED)
-        {
-            SBE_TRACF("The version of code running on the SBE does not support getHwReg requests over PSU");
-            /*@
-              * @errortype
-              * @moduleid          SBEIO_PSU_GET_HW_REG
-              * @reasoncode        SBEIO_INCORRECT_FCN_CALL
-              * @userdata1         Chip Target HUID
-              * @userdata2         HwReg Address
-              * @devdesc           SBE code does not support hw register accesss
-              * @custdesc          A firmware error occurred during system boot
-              */
-            errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                                 SBEIO_PSU_GET_HW_REG,
-                                 SBEIO_INCORRECT_FCN_CALL,
-                                 get_huid(proc_chip),
-                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            errl->collectTrace(SBEIO_COMP_NAME);
             break;
         }
 

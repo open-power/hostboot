@@ -251,28 +251,27 @@ void SbePsu::msgHandler()
 
 }
 
-/**
- * @brief perform SBE PSU chip-op
- *
- * @param[in]  i_target       Proc target to use for PSU Request
- * @param[in]  i_pPsuRequest  Pointer to PSU request commands
- * @param[out] o_pPsuResponse Pointer to PSU response
- * @param[in]  i_timeout      Time out for response
- * @param[in]  i_reqMsgs      4 bit mask telling which regs to write
- * @param[in]  i_rspMsgs      4 bit mask telling which regs to read
- */
-errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
-                                    psuCommand     * i_pPsuRequest,
-                                    psuResponse    * o_pPsuResponse,
-                                    const uint64_t   i_timeout,
-                                    uint8_t          i_reqMsgs,
-                                    uint8_t          i_rspMsgs)
+const SbePsu::unsupported_command_error_severity SbePsu::COMMAND_SUPPORT_OPTIONAL { ERRORLOG::ERRL_SEV_UNKNOWN };
+
+errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
+                                    psuCommand     *       i_pPsuRequest,
+                                    psuResponse    *       o_pPsuResponse,
+                                    const uint64_t         i_timeout,
+                                    uint8_t                i_reqMsgs,
+                                    uint8_t                i_rspMsgs,
+                                    const unsupported_command_error_severity i_supportErrSev,
+                                    bool* const            o_unsupportedOp)
 
 {
     errlHndl_t errl = NULL;
     static mutex_t l_psuOpMux = MUTEX_INITIALIZER;
 
     SBE_TRACD(ENTER_MRK "performPsuChipOp");
+
+    if (o_unsupportedOp)
+    {
+        *o_unsupportedOp = false;
+    }
 
     //Only perform new chip-ops if we aren't shutting down
     if (!iv_shutdownInProgress)
@@ -334,6 +333,42 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
                 SBE_TRACF(ERR_MRK"performPsuChipOp::"
                         " checkResponse returned an error");
                 break;  // return with error
+            }
+
+            if (    SBE_PRI_INVALID_COMMAND       == o_pPsuResponse->primaryStatus
+                && (SBE_SEC_COMMAND_NOT_SUPPORTED == o_pPsuResponse->secondaryStatus
+                    || SBE_SEC_COMMAND_CLASS_NOT_SUPPORTED == o_pPsuResponse->secondaryStatus))
+            {
+                if (o_unsupportedOp)
+                {
+                    *o_unsupportedOp = true;
+                }
+
+                if (i_supportErrSev.error_sev != ERRL_SEV_UNKNOWN)
+                {
+                    SBE_TRACF("The SBE does not support command class %d/command %d on target 0x%08x",
+                              i_pPsuRequest->commandClass,
+                              i_pPsuRequest->command,
+                              get_huid(i_target));
+
+                    /*@
+                     * @errortype
+                     * @moduleid        SBEIO_PSU
+                     * @reasoncode      SBEIO_COMMAND_NOT_SUPPORTED
+                     * @userdata1       PSU command class
+                     * @userdata2       PSU command
+                     * @devdesc         Current SBE version does not support the attempted PSU command
+                     * @custdesc        SBE version too old
+                     */
+                    errl = new ErrlEntry(i_supportErrSev.error_sev,
+                                         SBEIO_PSU,
+                                         SBEIO_COMMAND_NOT_SUPPORTED,
+                                         i_pPsuRequest->commandClass,
+                                         i_pPsuRequest->command,
+                                         ErrlEntry::ADD_SW_CALLOUT);
+
+                    errl->collectTrace(SBEIO_COMP_NAME);
+                }
             }
         }
         while (0);
@@ -645,7 +680,8 @@ errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
         //At this point we will have valid data in iv_psuResponse
         //If the command is not supported, then print a statement and break out
         if(o_pPsuResponse->primaryStatus == SBE_PRI_INVALID_COMMAND &&
-           o_pPsuResponse->secondaryStatus == SBE_SEC_COMMAND_NOT_SUPPORTED)
+           (o_pPsuResponse->secondaryStatus == SBE_SEC_COMMAND_NOT_SUPPORTED
+            || o_pPsuResponse->secondaryStatus == SBE_SEC_COMMAND_CLASS_NOT_SUPPORTED))
         {
             SBE_TRACF("sbe_psudd.C :: checkResponse: COMMAND NOT SUPPORTED "
                       " cmd=0x%02x%02x prim=0x%08x secondary=0x%08x"

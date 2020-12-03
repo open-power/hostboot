@@ -825,22 +825,40 @@ class SbePsu
             return (ffdcPackageSize * PAGESIZE);
         }
 
+        // Structure to give to performPsuChipOp to indicate how unsupported
+        // PSU commands should be handled.
+        struct unsupported_command_error_severity
+        {
+            ERRORLOG::errlSeverity_t error_sev = { };
+        };
+
+        // Constant error policy instructing performPsuChipOp to not create an
+        // error when the command is not supported.
+        const static unsupported_command_error_severity COMMAND_SUPPORT_OPTIONAL;
+
         /**
          * @brief perform SBE PSU chip-op
          *
-         * @param[in]  i_target       Proc target to use for PSU Request
-         * @param[in]  i_pPsuRequest  Pointer to PSU request commands
-         * @param[out] o_pPsuResponse Pointer to PSU response
-         * @param[in]  i_timeout      Time out for response
-         * @param[in]  i_reqMsgs      4 bit mask telling which regs to write
-         * @param[in]  i_rspMsgs      4 bit mask telling which regs to read
+         * @param[in]  i_target         Proc target to use for PSU Request
+         * @param[in]  i_pPsuRequest    Pointer to PSU request commands
+         * @param[out] o_pPsuResponse   Pointer to PSU response
+         * @param[in]  i_timeout        Time out for response
+         * @param[in]  i_reqMsgs        4 bit mask telling which regs to write
+         * @param[in]  i_rspMsgs        4 bit mask telling which regs to read
+         * @param[in]  i_supportErrSeverity  "Operation not supported" errors will be created with the
+         *                                   given severity. COMMAND_SUPPORT_OPTIONAL means no error
+         *                                   will be created.
+         * @param[out] o_unsupportedOp  Whether the SBE responded with "unsupported operation"
          */
         errlHndl_t performPsuChipOp(TARGETING::Target * i_target,
                                     psuCommand        * i_pPsuRequest,
                                     psuResponse       * o_pPsuResponse,
                                     const uint64_t      i_timeout,
                                     uint8_t             i_reqMsgs,
-                                    uint8_t             i_rspMsgs);
+                                    uint8_t             i_rspMsgs,
+                                    unsupported_command_error_severity i_supportErrSeverity
+                                        = { ERRORLOG::ERRL_SEV_UNRECOVERABLE },
+                                    bool*               o_unsupportedOp = nullptr);
 
         /**
          * @brief save information from an "early" error

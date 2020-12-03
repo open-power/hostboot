@@ -140,8 +140,8 @@ enum sbeioReasonCode
     SBEIO_RC_KERNEL_REG_FAILED         = SBEIO_COMP_ID | 0x61,
     SBEIO_SEEPROM_VERSION_MISMATCH     = SBEIO_COMP_ID | 0x62,
     SBEIO_START_DMT_CALLED_TWICE       = SBEIO_COMP_ID | 0x63,
-
     SBEIO_NO_PARENT_PROC               = SBEIO_COMP_ID | 0x64,
+    SBEIO_COMMAND_NOT_SUPPORTED        = SBEIO_COMP_ID | 0x65,
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
     SBEIO_HWSV_COLLECT_SBE_RC          = SBEIO_COMP_ID | 0xFF,

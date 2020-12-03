@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,31 +71,27 @@ namespace SBEIO
 
         l_psuCommand.cd7_securityListBinDump_addr = i_addr;
 
-        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(i_procChip,
-                               &l_psuCommand,
-                               &l_psuResponse,
-                               SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
-                               SbePsu::SBE_SECURITY_LIST_BIN_DUMP_REQ_USED_REGS,
-                               SbePsu::SBE_SECURITY_LIST_BIN_DUMP_RSP_USED_REGS);
+        bool unsupported_command = false;
 
-        if (errl)
+        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(
+            i_procChip,
+            &l_psuCommand,
+            &l_psuResponse,
+            SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
+            SbePsu::SBE_SECURITY_LIST_BIN_DUMP_REQ_USED_REGS,
+            SbePsu::SBE_SECURITY_LIST_BIN_DUMP_RSP_USED_REGS,
+            SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_INFORMATIONAL },
+            &unsupported_command);
+
+        if (unsupported_command)
+        { // Traces are already logged
+            errlCommit(errl, SBEIO_COMP_ID);
+        }
+        else
         {
             SBE_TRACF(ERR_MRK "sendPsuSecurityBinDumpRequest: PSU Cmd Failed: "
-            "err rc=0x%.4X plid=0x%.8X",
-            ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
-
-            // If the error states that the command is not supported on SBE then set as informational log
-            if ((l_psuResponse.primaryStatus ==
-                SBE_PRI_INVALID_COMMAND) &&
-                (l_psuResponse.secondaryStatus ==
-                SBE_SEC_COMMAND_NOT_SUPPORTED)
-                )
-            {
-                SBE_TRACF(ERR_MRK "sendPsuSecurityBinDumpRequest: Changing 'Command  Not Supported' Error Log To Informational.");
-                errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                errl->collectTrace(SBEIO_COMP_NAME);
-                ERRORLOG::errlCommit(errl, SBEIO_COMP_ID);
-            }
+                      "err rc=0x%.4X plid=0x%.8X",
+                      ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
         }
 
         SBE_TRACD(EXIT_MRK "sendPsuSecurityListBinDumpRequest");

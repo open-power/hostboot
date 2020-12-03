@@ -77,12 +77,22 @@ namespace SBEIO
         // set up PSU command message
         l_psuCommand.cd7_SetSystemConfig_SystemFabricIdMap = i_systemConfig;
 
-        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(i_procChip,
-                                &l_psuCommand,
-                                &l_psuResponse,
-                                SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
-                                SbePsu::SBE_SYSTEM_CONFIG_REQ_USED_REGS,
-                                SbePsu::SBE_SYSTEM_CONFIG_RSP_USED_REGS);
+        bool command_unsupported = false;
+
+        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(
+            i_procChip,
+            &l_psuCommand,
+            &l_psuResponse,
+            SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
+            SbePsu::SBE_SYSTEM_CONFIG_REQ_USED_REGS,
+            SbePsu::SBE_SYSTEM_CONFIG_RSP_USED_REGS,
+            SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_PREDICTIVE },
+            &command_unsupported);
+
+        if (command_unsupported)
+        { // Traces have already been logged
+            errlCommit(errl, SBEIO_COMP_ID);
+        }
 
         SBE_TRACD(EXIT_MRK "sendSystemConfig");
 
@@ -90,4 +100,3 @@ namespace SBEIO
     };
 
 } //end namespace SBEIO
-

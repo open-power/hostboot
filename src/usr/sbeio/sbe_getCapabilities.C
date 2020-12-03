@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,6 +126,8 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
 
     do
     {
+        bool command_unsupported = false;
+
         // Make the call to perform the PSU Chip Operation
         l_errl = SbePsu::getTheInstance().performPsuChipOp(
                         i_target,
@@ -133,21 +135,17 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
                         &l_psuResponse,
                         SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                         SbePsu::SBE_GET_CAPABILITIES_REQ_USED_REGS,
-                        SbePsu::SBE_GET_CAPABILITIES_RSP_USED_REGS);
+                        SbePsu::SBE_GET_CAPABILITIES_RSP_USED_REGS,
+                        SbePsu::unsupported_command_error_severity { ERRL_SEV_PREDICTIVE },
+                        &command_unsupported);
 
         // Before continuing, make sure this request is honored
-        if (SBE_PRI_INVALID_COMMAND == l_psuResponse.primaryStatus &&
-            SBE_SEC_COMMAND_NOT_SUPPORTED == l_psuResponse.secondaryStatus)
-        {
-            TRACFCOMP(g_trac_sbeio, "getPsuSbeCapabilities: SBE firmware does "
-                                    "not support PSU get capabilities request");
 
-            // Do not pass back any errors
-            delete l_errl;
-            l_errl = nullptr;
+        if (command_unsupported)
+        { // Traces have already been logged
+            errlCommit(l_errl, SBEIO_COMP_ID);
             break;
         }
-
 
         if (l_errl)
         {
