@@ -53,18 +53,11 @@
 //Fapi support
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-/* FIXME RTC:257487
-#include <p9n2_quad_scom_addresses_fld.H>
-#include <p9_quad_scom_addresses.H>
-*/
 #include <ipmi/ipmiwatchdog.H>
 #include <errno.h>
 #include <p10_int_scom.H>
 #include <sbeio/sbeioif.H>
 #include <runtime/runtime.H>
-/* FIXME RTC:257487
-#include <p9_stop_api.H>
-*/
 #include <kernel/memstate.H>
 #include <kernel/misc.H>
 #include "../hdat/hdattpmdata.H"
@@ -748,7 +741,6 @@ errlHndl_t enableCoreCheckstops()
 {
     errlHndl_t l_errl = nullptr;
 
-/* FIXME RTC: 257487
     // If we're running on a PHYP system, we need
     // to switch back to running unit checkstops
     if(! is_sapphire_load() )
@@ -774,7 +766,7 @@ errlHndl_t enableCoreCheckstops()
             }
         }
     }
-*/
+
     return l_errl;
 }
 

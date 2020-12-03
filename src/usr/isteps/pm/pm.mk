@@ -45,6 +45,8 @@ EXTRAINCDIR += ${HWP_STOPUTIL_PATH}
 NEST_UTIL_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 EXTRAINCDIR += ${NEST_UTIL_PATH}
 CUSTOMIZE_HWP_PATH = ${ROOTPATH}/src/import/chips/p10/procedures/hwp/customize
+PERV_HWP_PATH = ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
+EXTRAINCDIR += ${PERV_HWP_PATH}
 
 # for attnsvc in pm_common.C
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/
@@ -98,6 +100,7 @@ OBJS += p10_pm_halt.o
 OBJS += p10_setup_runtime_wakeup_mode.o
 OBJS += p10_qme_customize.o
 OBJS += p10_check_proc_config.o
+OBJS += p10_core_checkstop_handler.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH}
@@ -105,5 +108,6 @@ VPATH += ${HWP_LIB_PATH}
 VPATH += ${HWP_STOPUTIL_PATH}
 VPATH += ${CUSTOMIZE_HWP_PATH}
 VPATH += ${NEST_UTIL_PATH}
+VPATH += ${PERV_HWP_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk

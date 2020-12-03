@@ -82,10 +82,10 @@
 
 #include <isteps/pm/scopedHomerMapper.H>
 
-/* FIXME RTC: 257487
 #include    <p10_core_checkstop_handler.H>
-*/
 #include    <p10_stop_api.H>
+#include    <p10_scom_c_b.H>
+#include    <p10_scom_c_d.H>
 #include    <scom/scomif.H>
 #include <secureboot/smf_utils.H>
 
@@ -1350,7 +1350,6 @@ errlHndl_t core_checkstop_helper_hwp( const TARGETING::Target* i_core_target,
     {
         assert( i_core_target != NULL );
 
-/* FIXME RTC: 257487
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
                 const_cast<TARGETING::Target*> ( i_core_target ));
 
@@ -1368,7 +1367,7 @@ errlHndl_t core_checkstop_helper_hwp( const TARGETING::Target* i_core_target,
                    addToLog( l_errl );
             break;
         }
-*/
+
     }while(0);
 
     if( l_errl )
@@ -1392,27 +1391,23 @@ errlHndl_t core_checkstop_helper_homer()
                "core_checkstop_helper_homer");
 
     errlHndl_t l_errl = NULL;
-/* FIXME RTC: 257487
-    TARGETING::Target* l_sys = NULL;
-    TARGETING::targetService().getTopLevelTarget(l_sys);
-    assert( l_sys != NULL );
 
     do{
-
-        uint64_t l_action0 = l_sys->getAttr<
-                    TARGETING::ATTR_ORIG_FIR_SETTINGS_ACTION0>();
-        uint64_t l_action1 = l_sys->getAttr<
-                    TARGETING::ATTR_ORIG_FIR_SETTINGS_ACTION1>();
-
-        uint64_t l_local_xstop = l_action0 & l_action1;
-        l_action0 &= ~l_local_xstop;
-        l_action1 &= ~l_local_xstop;
 
         TARGETING::TargetHandleList l_coreIds;
         getAllChiplets( l_coreIds, TYPE_CORE, true );
 
         for(TARGETING::Target* l_core : l_coreIds)
         {
+            uint64_t l_action0 = l_core->getAttr<
+                        TARGETING::ATTR_ORIG_FIR_SETTINGS_ACTION0>();
+            uint64_t l_action1 = l_core->getAttr<
+                        TARGETING::ATTR_ORIG_FIR_SETTINGS_ACTION1>();
+
+            uint64_t l_local_xstop = l_action0 & l_action1;
+            l_action0 &= ~l_local_xstop;
+            l_action1 &= ~l_local_xstop;
+
             const TARGETING::Target* l_procChip =
                         TARGETING::getParentChip(l_core);
 
@@ -1424,7 +1419,7 @@ errlHndl_t core_checkstop_helper_homer()
                                 l_homerAddr);
 
             // Translate the scom address
-            uint64_t l_scomAddr = C_CORE_ACTION0;
+            uint64_t l_scomAddr = scomt::c::EC_PC_FIR_CORE_ACTION0;
             bool l_needsWakeup = false; // Ignored - SW already enabled
 
             l_errl = SCOM::scomTranslate( l_core, l_scomAddr,
@@ -1437,10 +1432,10 @@ errlHndl_t core_checkstop_helper_homer()
             }
 
             stopImageSection::StopReturnCode_t l_srErrl =
-                                p10_stop_save_scom( l_homerVAddr,
-                                l_scomAddr, l_action0,
-                                stopImageSection::P10_STOP_SCOM_REPLACE,
-                                stopImageSection::P10_STOP_SECTION_CORE_SCOM );
+                                stopImageSection::proc_stop_save_scom(
+                                l_homerVAddr, l_scomAddr, l_action0,
+                                stopImageSection::PROC_STOP_SCOM_REPLACE,
+                                stopImageSection::PROC_STOP_SECTION_CORE );
 
             if( l_srErrl != stopImageSection::StopReturnCode_t::
                                 STOP_SAVE_SUCCESS )
@@ -1453,7 +1448,7 @@ errlHndl_t core_checkstop_helper_homer()
             }
 
             // Translate the scom address
-            l_scomAddr = C_CORE_ACTION1;
+            l_scomAddr = scomt::c::EC_PC_FIR_CORE_ACTION1;
 
             l_errl = SCOM::scomTranslate(l_core, l_scomAddr,
                                 l_needsWakeup);
@@ -1465,10 +1460,10 @@ errlHndl_t core_checkstop_helper_homer()
                 break;
             }
 
-            l_srErrl = p10_stop_save_scom( l_homerVAddr,
-                                l_scomAddr, l_action1,
-                                stopImageSection::P10_STOP_SCOM_REPLACE,
-                                stopImageSection::P10_STOP_SECTION_CORE_SCOM );
+            l_srErrl = stopImageSection::proc_stop_save_scom(
+                                l_homerVAddr, l_scomAddr, l_action1,
+                                stopImageSection::PROC_STOP_SCOM_REPLACE,
+                                stopImageSection::PROC_STOP_SECTION_CORE );
 
             if( l_srErrl != stopImageSection::StopReturnCode_t::
                                 STOP_SAVE_SUCCESS )
@@ -1488,8 +1483,6 @@ errlHndl_t core_checkstop_helper_homer()
         // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
     }
-
-*/
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,EXIT_MRK
                "core_checkstop_helper_homer");

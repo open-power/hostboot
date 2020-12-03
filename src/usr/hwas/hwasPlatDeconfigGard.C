@@ -57,13 +57,6 @@
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <errl/errludtarget.H>
 
-/* FIXME RTC:257487 the P10 version of this HWP DNE yet
-// includes to support the fapi2 hwp call in
-// platDeconfigureTargetAtRuntime()
-#include <fapi2/target.H>
-#include <p9_update_ec_eq_state.H>
-#include <fapi2/plat_hwp_invoker.H>
-*/
 #endif
 
 #ifdef CONFIG_TPMDD
@@ -1283,30 +1276,6 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
             HWAS_INF("platDeconfigureTargetAtRuntime() - skippign call to resetPMComplex - ATTR_HB_INITIATED_PM_RESET=%d", l_pmResetInProgress );
         }
 
-// FIXME RTC:257487
-#if 0
-        // get the parent proc and call the hwp to alert
-        // pm not to attempt to manage this core anymore
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-            l_proc(l_parent);
-
-        HWAS_INF("platDeconfigureTargetAtRuntime() - "
-                "calling p9_update_ec_eq_state");
-        FAPI_INVOKE_HWP( l_errl,p9_update_ec_eq_state,
-                         l_proc,true/*skip qssr*/);
-
-
-        if(l_errl)
-        {
-            HWAS_ERR("platDeconfigureTargetAtRuntime() - "
-                    "call to p9_update_ec_eq_state() failed on proc "
-                    "with HUID : %d",TARGETING::get_huid(l_proc));
-            ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_errl);
-
-            // If an error then exit while loop
-            break;
-        }
-#endif
     }while(0);
 
     HWAS_INF("<<<platDeconfigureTargetAtRuntime()" );
