@@ -482,6 +482,9 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <id>EECACHE_VPD_STATE</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <value>0xFF</value>
@@ -664,6 +667,9 @@
     </attribute>
     <attribute>
       <id>DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE</id>
+    </attribute>
+    <attribute>
+      <id>EECACHE_VPD_STATE</id>
     </attribute>
     <attribute>
       <id>FABRIC_CHIP_ID</id>
@@ -1655,6 +1661,9 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <id>EECACHE_VPD_STATE</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <value>0xFF</value>
@@ -2130,6 +2139,9 @@
     <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <id>EECACHE_VPD_STATE</id>
     </attribute>
     <attribute>
       <id>EEPROM_NV_INFO</id>

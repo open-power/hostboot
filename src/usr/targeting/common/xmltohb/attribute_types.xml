@@ -842,6 +842,43 @@
   </attribute>
 
   <attribute>
+    <description>State of the VPD synchronization
+    between the in memory eecache, the SEEPROM and
+    the EECACHE partition.  This will be used to
+    track the modification of the VPD information
+    and then used to trigger a refresh of the EECACHE
+    partition during the IPL flow(s).
+    </description>
+    <id>EECACHE_VPD_STATE</id>
+    <simpleType>
+      <enumeration>
+        <id>EECACHE_VPD_STATE</id>
+        <default>VPD_GOOD</default>
+      </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <enumerationType>
+    <default>VPD_GOOD</default>
+    <description>
+        Enumeration specifying status of VPD data
+    </description>
+    <enumerator>
+      <name>VPD_GOOD</name>
+      <value>0x0</value>
+    </enumerator>
+    <enumerator>
+      <name>VPD_NEEDS_REFRESH</name>
+      <value>0x1</value>
+    </enumerator>
+    <id>EECACHE_VPD_STATE</id>
+  </enumerationType>
+
+  <attribute>
     <description>Specifies a target's eeprom content type.</description>
     <hasStringConversion/>
     <id>EEPROM_CONTENT_TYPE</id>
