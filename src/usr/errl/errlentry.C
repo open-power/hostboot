@@ -1413,32 +1413,21 @@ epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_target ) const
     // local variables
     epubSubSystem_t subsystem = EPUB_MISC_UNKNOWN;
 
-    uint32_t TARGET_TO_SUBSYS_TABLE_ENTRIES =
-                    sizeof(TARGET_TO_SUBSYS_TABLE)/
-                    sizeof(TARGET_TO_SUBSYS_TABLE[0]);
-
-    uint32_t low = 0;
-    uint32_t high = TARGET_TO_SUBSYS_TABLE_ENTRIES - 1;
-    uint32_t mid  = 0;
-
-    while( low <= high )
+    // search table for lowest possible match
+    // iterator will either point to the match (if exists) or just past
+    auto it = std::lower_bound(TARGET_TO_SUBSYS_TABLE,
+                  std::end(TARGET_TO_SUBSYS_TABLE),
+                  i_target,
+                  [](const epubTargetTypeToSub_t& lhs, TARGETING::TYPE rhs){return lhs.xType < rhs; });
+    // verify iterator not outside table
+    if (it < std::end(TARGET_TO_SUBSYS_TABLE))
     {
-        mid = low + (( high - low)/2);
-
-        if ( TARGET_TO_SUBSYS_TABLE[mid].xType > i_target )
-        {
-            high = mid -1;
-        }
-        else if ( TARGET_TO_SUBSYS_TABLE[mid].xType < i_target )
-        {
-            low = mid + 1;
-        }
-        else
-        {
-            // found it
-           subsystem = TARGET_TO_SUBSYS_TABLE[mid].xSubSys;
-           break;
-        }
+       // verify iterator is pointing to target entry
+       if (it->xType == i_target)
+       {
+          // found a valid subsystem for target type
+          subsystem = it->xSubSys;
+       }
     }
 
     if( subsystem == EPUB_MISC_UNKNOWN )

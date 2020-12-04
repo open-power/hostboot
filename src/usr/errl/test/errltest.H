@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1209,6 +1209,68 @@ public:
         {
             TS_INFO( "Correct subsystem type returned for TYPE_SMPGROUP!" );
         }
+        // Delete the log
+        delete l_err;
+        l_err = NULL;
+    }
+
+    /**
+     *  @brief Verify subsystem is known for every target type
+     */
+    void testErrl_verifySubsystem_known(void)
+    {
+        std::map<TARGETING::ATTR_TYPE_type, int> mTypesTried;
+        errlHndl_t l_err = nullptr;
+        epubSubSystem_t l_subsys = EPUB_MISC_UNKNOWN;
+        l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                        ERRORLOG::ERRL_TEST_MOD_ID,
+                                        ERRORLOG::ERRL_TEST_REASON_CODE,
+                                        0x494E464F, //INFO
+                                        0);
+
+
+        // cycle through all the targets
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+        for (TARGETING::TargetIterator l_pTarget = l_targetService.begin();
+             l_pTarget != l_targetService.end();
+             ++l_pTarget)
+        {
+            TARGETING::ATTR_TYPE_type type = l_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+            // skip types that have been checked already
+            if (mTypesTried.count(type) == 0)
+            {
+                l_subsys = l_err->getSubSystem(type);
+                if(l_subsys == EPUB_MISC_UNKNOWN)
+                {
+                    TS_FAIL( "testErrl_verifySubsystem_known: "
+                        "Unknown subsystem for type 0x%02X, target huid: 0x%08X",
+                        type, TARGETING::get_huid(*l_pTarget) );
+                }
+                else
+                {
+                    TS_INFO( "testErrl_verifySubsystem_known: "
+                        "Type 0x%02X -> subsystem 0x%02X", type, l_subsys );
+                }
+                mTypesTried[type] = 1;
+            }
+        }
+
+        // out of bounds check (should be unknown)
+        l_subsys = l_err->getSubSystem(TARGETING::TYPE_LAST_IN_RANGE);
+        if (l_subsys != EPUB_MISC_UNKNOWN)
+        {
+            TS_FAIL( "testErrl_verifySubsystem_known: "
+                "TYPE_LAST_IN_RANGE 0x%02X -> subsystem 0x%02X",
+                TARGETING::TYPE_LAST_IN_RANGE, l_subsys );
+        }
+        else
+        {
+            TS_INFO( "testErrl_verifySubsystem_known: "
+                "TYPE_LAST_IN_RANGE 0x%02X -> subsystem EPUB_MISC_UNKNOWN",
+                TARGETING::TYPE_LAST_IN_RANGE );
+        }
+
         // Delete the log
         delete l_err;
         l_err = NULL;
