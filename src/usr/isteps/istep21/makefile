@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,7 @@ MODULE = istep21
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/initfiles/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
@@ -45,8 +46,12 @@ OBJS += call_host_runtime_setup.o
 OBJS += freqAttrData.o
 OBJS += call_host_verify_hdat.o
 OBJS += call_host_start_payload.o
+OBJS += p10_get_freq_compat_settings.o
+OBJS += p10_check_freq_compat.o
 OBJS += $(if $(CONFIG_UCD_FLASH_UPDATES),call_update_ucd_flash.o,)
 
 OBJS += $(if $(CONFIG_NVDIMM),call_nvdimm_update.o,)
+
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 
 include ${ROOTPATH}/config.mk

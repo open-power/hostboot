@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,15 @@
 #include <sys/misc.h>
 #include <kernel/misc.H>
 #include <arch/memorymap.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <errl/errluserdetails.H>
+#include <errl/errludtarget.H>
+#include <initservice/isteps_trace.H>
+#include <isteps/hwpisteperror.H>
+
+#ifndef CONFIG_VPO_COMPILE
+#include <freqAttrData.H>
+#endif
 
 namespace ISTEP_21
 {
@@ -52,8 +61,9 @@ namespace ISTEP_21
                                      bool i_masterInstance,
                                      const uint64_t i_commBase );
     extern errlHndl_t enableCoreCheckstops();
-
-    extern errlHndl_t callCheckFreqAttrData(uint64_t freqData1, uint64_t freqData2);
+#ifndef CONFIG_VPO_COMPILE
+    extern errlHndl_t callCheckFreqAttrData(uint64_t i_pstate0);
+#endif
 };
 
 trace_desc_t* g_trac_ipc = NULL;
@@ -392,17 +402,14 @@ void IpcSp::msgHandler()
 
                 if(!err)
                 {
-/* FIXME RTC: 256840 update multinode frequency checks
-                    uint64_t l_freqData1 =
-                        reinterpret_cast<uint64_t>(msg->data[1]);
-
-                    uint64_t l_freqData2 =
-                        reinterpret_cast<uint64_t>(msg->extra_data);
+#ifndef CONFIG_VPO_COMPILE
+                    uint32_t pstate = msg->data[1];
 
                     //  Function checks frequency attribute data. Returns an error
                     //  if there is a mismatch with that of HB master data
-                    err = ISTEP_21::callCheckFreqAttrData(l_freqData1, l_freqData2);
-*/
+                    // temporary hack to send wrong pstate
+                    err = ISTEP_21::callCheckFreqAttrData(pstate);
+#endif
                 }
 
                 if (err)
@@ -427,7 +434,7 @@ void IpcSp::msgHandler()
 
                 }
 
-                 //Send response back to the master HB to indicate set freq attr successful
+                 //Send response back to the master HB to indicate valid freq attrs
                  err = MBOX::send(MBOX::HB_FREQ_ATTR_DATA_MSGQ, msg, (msg->data[0]& 0xFFFFFFFF) );
 
                  if (err)
@@ -476,7 +483,7 @@ void IpcSp::msgHandler()
 
                 if (err) break;
 
- #ifndef CONFIG_VPO_COMPILE
+#ifndef CONFIG_VPO_COMPILE
                err = ISTEP_21::enableCoreCheckstops();
 
                 if (err)

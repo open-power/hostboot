@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,11 +109,11 @@ namespace ISTEP_21
      * @brief Checks the frequency attributes with that of master HB
      *
      * @description Invoked by IpcSp for the message type IPC_FREQ_ATTR_DATA
-     * @param[in]   uint64_t freqData1, freqData2 frequency attribute data
+     * @param[in]   uint64_t i_pstate0 frequency attribute
      *
      * @return errlHndl_t
      */
-    errlHndl_t callCheckFreqAttrData( uint64_t freqData1, uint64_t freqData2) ;
+    errlHndl_t callCheckFreqAttrData(const uint64_t i_pstate0);
 
 };
 

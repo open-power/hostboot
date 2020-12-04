@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,12 +49,14 @@
 #include <sys/vfs.h>
 #include <arch/ppc.H>
 #include <mbox/ipc_msg_types.H>
-
-/* FIXME RTC: 256840
-#include <fapi2.H>
-#include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-*/
+#ifndef CONFIG_VPO_COMPILE
+#include <p10_check_freq_compat.H>
+#include <p10_get_freq_compat_settings.H>
+#endif
+#include <errl/errluserdetails.H>
+#include <errl/errludtarget.H>
+#include <targeting/targplatutil.H>
 #include <errl/errlreasoncodes.H>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
@@ -177,23 +179,27 @@ errlHndl_t sendFreqAttrData()
         // keep track of the number of messages we send so we
         // know how many responses to expect
         uint64_t msg_count = 0;
-        freq_data freq_data_obj{0};
 
-        // Fill in the frequency attribute data of master node
-        // Copy the master node frequency data into two uint64_t
-        // so that this data will be sent to the slaves using IPC below
-        freq_data_obj.nominalFreq = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
-        freq_data_obj.floorFreq = sys->getAttr<ATTR_MIN_FREQ_MHZ>();
-        freq_data_obj.ceilingFreq = sys->getAttr<ATTR_FREQ_CORE_CEILING_MHZ>();
-        freq_data_obj.ultraTurboFreq = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
-        freq_data_obj.turboFreq = sys->getAttr<ATTR_FREQ_CORE_MAX>();
-        freq_data_obj.nestFreq = sys->getAttr<ATTR_FREQ_PB_MHZ>();
-        freq_data_obj.powerModeNom = mproc->getAttr<ATTR_SOCKET_POWER_NOMINAL>();
-        freq_data_obj.powerModeTurbo = sys->getAttr<ATTR_SOCKET_POWER_TURBO>();
 
+#ifndef CONFIG_VPO_COMPILE
         // loop thru rest all nodes -- sending msg to each
         TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
           ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+        uint32_t pstate = 0;
+
+        // Convert target to fapi2 target
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_fapi_sys_target(sys);
+        FAPI_INVOKE_HWP(l_elog, p10_get_freq_compat_settings, l_fapi_sys_target, &pstate);
+        if (l_elog)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "sendFreqAttrData::p10_get_freq_compat_settings failed on HUID 0x%08x. "
+                    TRACE_ERR_FMT,
+                    get_huid(mproc),
+                    TRACE_ERR_ARGS(l_elog));
+            ErrlUserDetailsTarget(mproc).addToLog(l_elog);
+            break;
+        }
 
         for (uint32_t l_node=0; (l_node < MAX_NODES_PER_SYS ); l_node++ )
         {
@@ -216,17 +222,15 @@ errlHndl_t sendFreqAttrData()
                 // pack destination node and master node in msg->data[0]
                 msg->data[0] = TWO_UINT32_TO_UINT64(l_node, nodeid);
 
-                msg->data[1] = freq_data_obj.freqData1;
+                msg->data[1] = pstate;
 
-                msg->extra_data = reinterpret_cast<uint64_t*>(freq_data_obj.freqData2);
-
-                // send the message to the slave hb instance
                 l_elog = MBOX::send(MBOX::HB_IPC_MSGQ, msg, l_node);
 
-                if( l_elog )
+                if (l_elog)
                 {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "MBOX::send to node %d"
-                               " failed", l_node);
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MBOX::send IPC_FREQ_ATTR_DATA to node %d"
+                              " failed", l_node);
+                    ErrlUserDetailsTarget(mproc).addToLog(l_elog);
                     break;
                 }
 
@@ -235,6 +239,7 @@ errlHndl_t sendFreqAttrData()
             } // end if node to process
         } // end for loop on nodes
 
+#endif
         if(l_elog)
         {
             break;
@@ -395,374 +400,52 @@ errlHndl_t sendFreqAttrData()
     return(l_elog);
 }
 
-errlHndl_t callCheckFreqAttrData(uint64_t freqData1, uint64_t freqData2)
+errlHndl_t callCheckFreqAttrData(uint64_t i_pstate0)
 {
-    TARGETING::Target * sys = nullptr;
-    errlHndl_t  l_elog = nullptr;
-    freq_data freq_data_obj{0};
-    ISTEP_ERROR::IStepError l_stepError;
-    uint16_t errCaseId = 0xFF;
-    freq_data master_freq_data_obj{0};
+    errlHndl_t l_elog = nullptr;
+#ifndef CONFIG_VPO_COMPILE
+    // Get current node
+    TARGETING::Target * l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_fapi_sys_target(l_sys);
 
-    TARGETING::targetService().getTopLevelTarget( sys );
-    assert(sys != nullptr);
+    // Validate pstate and other attributes
+    FAPI_INVOKE_HWP(l_elog, p10_check_freq_compat, l_fapi_sys_target, i_pstate0);
 
-    master_freq_data_obj.freqData1 = freqData1;
-    master_freq_data_obj.freqData2 = freqData2;
+    if (l_elog)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "p10_check_freq_compat failed on HUID 0x%08x with pstate = %d"
+                TRACE_ERR_FMT,
+                get_huid(l_sys),
+                i_pstate0,
+                TRACE_ERR_ARGS(l_elog));
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "callCheckFreqAttrData - Mater Freq Data: 0x%016lx 0x%016lx",
-               freqData1, freqData2);
+        TargetHandleList procList;
 
-    // Figure out which node we are running on
-    TARGETING::Target* mproc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(mproc);
+        // Get the child proc chips
+        getChildAffinityTargets(procList,
+                l_sys,
+                CLASS_CHIP,
+                TYPE_PROC);
 
-    // Get the frequency attributes
-    freq_data_obj.nominalFreq = sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
-    freq_data_obj.powerModeNom = mproc->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
-    freq_data_obj.powerModeTurbo = sys->getAttr<TARGETING::ATTR_SOCKET_POWER_TURBO>();
-
-    freq_data_obj.floorFreq = sys->getAttr<TARGETING::ATTR_MIN_FREQ_MHZ>();
-    freq_data_obj.ceilingFreq = sys->getAttr<TARGETING::ATTR_FREQ_CORE_CEILING_MHZ>();
-    freq_data_obj.ultraTurboFreq = sys->getAttr<TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ>();
-    freq_data_obj.turboFreq = sys->getAttr<TARGETING::ATTR_FREQ_CORE_MAX>();
-    freq_data_obj.nestFreq = sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
-
-
-    do {
-
-        // All of the buckets should report the same Power mode
-        if((freq_data_obj.powerModeNom != master_freq_data_obj.powerModeNom )||
-          (freq_data_obj.powerModeTurbo != master_freq_data_obj.powerModeTurbo ))
+        for (const auto & proc: procList)
         {
-            errCaseId = 0;
-        }
-        else if(freq_data_obj.nominalFreq != master_freq_data_obj.nominalFreq )
-        {
-            errCaseId = 1;
-        }
-        else if(freq_data_obj.floorFreq != master_freq_data_obj.floorFreq )
-        {
-            errCaseId = 2;
-        }
-        else if(freq_data_obj.ceilingFreq != master_freq_data_obj.ceilingFreq )
-        {
-            errCaseId = 3;
-        }
-        else if(freq_data_obj.ultraTurboFreq != master_freq_data_obj.ultraTurboFreq )
-        {
-            errCaseId = 4;
-        }
-        else if(freq_data_obj.turboFreq != master_freq_data_obj.turboFreq )
-        {
-            errCaseId = 5;
-        }
-        else if(freq_data_obj.nestFreq != master_freq_data_obj.nestFreq )
-        {
-            errCaseId = 6;
+            l_elog->addHwCallout(proc,
+                    HWAS::SRCI_PRIORITY_MEDA,
+                    HWAS::NO_DECONFIG,
+                    HWAS::GARD_NULL);
         }
 
-        switch(errCaseId)
-        {
-            case 0:
+        l_elog->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                    HWAS::SRCI_PRIORITY_LOW);
 
-                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "frequency attribute data MISMATCH! "
-                    "expected PowerNom %d actual PowerMom %d "
-                    "expected PowerTurbo %d actual PowerTurbo %d",
-                    master_freq_data_obj.powerModeNom,
-                    freq_data_obj.powerModeNom,
-                    master_freq_data_obj.powerModeTurbo,
-                    freq_data_obj.powerModeTurbo);
+        l_elog->addProcedureCallout(HWAS::EPUB_PRC_INVALID_PART,
+                                    HWAS::SRCI_PRIORITY_HIGH);
 
-
-                //generate an errorlog
-                /*@
-                 * @errortype        ERRL_SEV_CRITICAL_SYS_TERM
-                 * @moduleid         ISTEP::MOD_FREQ_ATTR_DATA,
-                 * @reasoncode       ISTEP::RC_POWER_MODE_MISMATCH,
-                 * @userdata1[00:31]  Master node nominal power mode
-                 * @userdata1[32:63]  Current node nominal power mode
-                 * @userdata2[00:31]  Master node turbo power mode
-                 * @userdata2[32:63]  Current node turbo power mode
-                 * @devdesc           Power Mode mismatch between drawers
-                 * @custdesc          Incompatible processor modules
-                 *                    installed between drawers.
-
-                 */
-                l_elog = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                ISTEP::MOD_FREQ_ATTR_DATA,
-                                ISTEP::RC_POWER_MODE_MISMATCH,
-                                TWO_UINT32_TO_UINT64(
-                                   master_freq_data_obj.powerModeNom,
-                                   freq_data_obj.powerModeNom),
-                                TWO_UINT32_TO_UINT64(
-                                   master_freq_data_obj.powerModeTurbo,
-                                   freq_data_obj.powerModeTurbo), false);
-
-
-
-            break;
-
-
-            case 1:
-
-             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "nominal frequency data MISMATCH! "
-                "expected Nominal %d actual Nominal %d ",
-                master_freq_data_obj.nominalFreq,
-                freq_data_obj.nominalFreq);
-
-
-            //generate an errorlog
-            /*@
-             * @errortype        ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid         ISTEP::MOD_FREQ_ATTR_DATA,
-             * @reasoncode       ISTEP::RC_NOMINAL_FREQ_MISMATCH,
-             * @userdata1        Master node nominal frequency
-             * @userdata2[00:31] Current node nominal frequency
-             * @userdata2[32:63] Error category INVALID_PART
-             * @devdesc          Nominal Mode mismatch between drawers
-             * @custdesc         Incompatible processor modules
-             *                   installed between drawers.
-
-             */
-            l_elog = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                            ISTEP::MOD_FREQ_ATTR_DATA,
-                            ISTEP::RC_NOMINAL_FREQ_MISMATCH,
-                            master_freq_data_obj.nominalFreq,
-                            TWO_UINT32_TO_UINT64 (
-                               freq_data_obj.nominalFreq,
-                               HWAS::ERR_CATEGORY_INVALID_PART ), false);
-
-
-            break;
-
-            case 2:
-
-             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Floor frequency data MISMATCH! "
-                "expected Floor Freq %d actual Floor Freq %d ",
-                master_freq_data_obj.floorFreq,
-                freq_data_obj.floorFreq);
-
-
-            //generate an errorlog
-            /*@
-             * @errortype        ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid         ISTEP::MOD_FREQ_ATTR_DATA,
-             * @reasoncode       ISTEP::RC_FLOOR_FREQ_MISMATCH,
-             * @userdata1        Master node Floor frequency
-             * @userdata2[00:31] Current node floor frequency
-             * @userdata2[32:63] Error category INVALID_PART
-             * @devdesc          Floor Freq mismatch between drawers
-             * @custdesc         Incompatible processor modules
-             *                   installed between drawers.
-
-             */
-            l_elog = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                            ISTEP::MOD_FREQ_ATTR_DATA,
-                            ISTEP::RC_FLOOR_FREQ_MISMATCH,
-                            master_freq_data_obj.floorFreq,
-                            TWO_UINT32_TO_UINT64 (
-                               freq_data_obj.floorFreq,
-                               HWAS::ERR_CATEGORY_INVALID_PART ), false);
-
-
-            break;
-
-            case 3:
-
-             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Ceiling frequency data MISMATCH! "
-                "expected Ceiling Freq %d actual Ceiling Freq %d ",
-                master_freq_data_obj.ceilingFreq,
-                freq_data_obj.ceilingFreq);
-
-
-            //generate an errorlog
-            /*@
-             * @errortype        ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid         ISTEP::MOD_FREQ_ATTR_DATA,
-             * @reasoncode       ISTEP::RC_CEIL_FREQ_MISMATCH,
-             * @userdata1        Master node Ceil frequency
-             * @userdata2[00:31] Current node Ceil frequency
-             * @userdata2[32:63] Error category INVALID_PART
-             * @devdesc          Ceil Freq mismatch between drawers
-             * @custdesc         Incompatible processor modules
-             *                   installed between drawers.
-
-             */
-            l_elog = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                            ISTEP::MOD_FREQ_ATTR_DATA,
-                            ISTEP::RC_CEIL_FREQ_MISMATCH,
-                            master_freq_data_obj.ceilingFreq,
-                            TWO_UINT32_TO_UINT64 (
-                               freq_data_obj.ceilingFreq,
-                               HWAS::ERR_CATEGORY_INVALID_PART ), false);
-
-
-            break;
-
-
-            case 4:
-
-             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "UltraTurbo frequency data MISMATCH! "
-                "expected UltraTurbo Freq %d actual UltraTurbo Freq %d ",
-                master_freq_data_obj.ultraTurboFreq,
-                freq_data_obj.ultraTurboFreq);
-
-
-            //generate an errorlog
-            /*@
-             * @errortype        ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid         ISTEP::MOD_FREQ_ATTR_DATA,
-             * @reasoncode       ISTEP::RC_ULTRA_TURBO_FREQ_MISMATCH,
-             * @userdata1        Master node UltraTurbo frequency
-             * @userdata2[00:31] Current node UltraTurbo frequency
-             * @userdata2[32:63] Error category INVALID_PART
-             * @devdesc          UltraTurbo Freq mismatch between drawers
-             * @custdesc         Incompatible processor modules
-             *                   installed between drawers.
-
-             */
-            l_elog = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                            ISTEP::MOD_FREQ_ATTR_DATA,
-                            ISTEP::RC_ULTRA_TURBO_FREQ_MISMATCH,
-                            master_freq_data_obj.ultraTurboFreq,
-                            TWO_UINT32_TO_UINT64 (
-                               freq_data_obj.ultraTurboFreq,
-                               HWAS::ERR_CATEGORY_INVALID_PART ), false);
-
-
-            break;
-
-            case 5:
-
-             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Turbo frequency data MISMATCH! "
-                "expected Turbo Freq %d actual Turbo Freq %d ",
-                master_freq_data_obj.turboFreq,
-                freq_data_obj.turboFreq);
-
-
-            //generate an errorlog
-            /*@
-             * @errortype        ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid         ISTEP::MOD_FREQ_ATTR_DATA,
-             * @reasoncode       ISTEP::RC_TURBO_FREQ_MISMATCH,
-             * @userdata1        Master node Turbo frequency
-             * @userdata2[00:31] Current node Turbo frequency
-             * @userdata2[32:63] Error category INVALID_PART
-             * @devdesc          Turbo Freq mismatch between drawers
-             * @custdesc         Incompatible processor modules
-             *                   installed between drawers.
-
-             */
-            l_elog = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                            ISTEP::MOD_FREQ_ATTR_DATA,
-                            ISTEP::RC_TURBO_FREQ_MISMATCH,
-                            master_freq_data_obj.turboFreq,
-                            TWO_UINT32_TO_UINT64 (
-                               freq_data_obj.turboFreq,
-                               HWAS::ERR_CATEGORY_INVALID_PART ), false);
-
-
-            break;
-
-            case 6:
-
-             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Nest frequency data MISMATCH! "
-                "expected Nest Freq %d actual Nest Freq %d ",
-                master_freq_data_obj.nestFreq,
-                freq_data_obj.nestFreq);
-
-
-            //generate an errorlog
-            /*@
-             * @errortype        ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid         ISTEP::MOD_FREQ_ATTR_DATA,
-             * @reasoncode       ISTEP::RC_NEST_FREQ_MISMATCH,
-             * @userdata1        Master node Nest frequency
-             * @userdata2[00:31] Current node Nest frequency
-             * @userdata2[32:63] Error category INVALID_PART
-             * @devdesc          Nest Freq mismatch between drawers
-             * @custdesc         Incompatible processor modules
-             *                   installed between drawers.
-
-             */
-            l_elog = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                            ISTEP::MOD_FREQ_ATTR_DATA,
-                            ISTEP::RC_NEST_FREQ_MISMATCH,
-                            master_freq_data_obj.nestFreq,
-                            TWO_UINT32_TO_UINT64 (
-                               freq_data_obj.nestFreq,
-                               HWAS::ERR_CATEGORY_INVALID_PART ), false);
-
-
-            break;
-
-            default: // do nothing
-            break;
-
-        }
-        if(errCaseId != 0xFF)
-        {
-            TargetHandleList procList;
-
-            // Get the child proc chips
-            getChildAffinityTargets(procList,
-                                    sys,
-                                    CLASS_CHIP,
-                                    TYPE_PROC );
-            for( const auto & proc : procList )
-            {
-                l_elog->addHwCallout(proc,
-                                     HWAS::SRCI_PRIORITY_MEDA,
-                                     HWAS::NO_DECONFIG,
-                                     HWAS::GARD_NULL );
-            }
-
-            l_elog->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                        HWAS::SRCI_PRIORITY_LOW);
-
-            l_elog->addProcedureCallout(HWAS::EPUB_PRC_INVALID_PART,
-                                        HWAS::SRCI_PRIORITY_HIGH);
-
-            l_elog->collectTrace("ISTEPS_TRACE");
-
-            l_elog->addFFDC(ISTEP_COMP_ID,
-                            &master_freq_data_obj,
-                            sizeof(freq_data),
-                            0,                   // Version
-                            ERRL_UDT_CALLOUT,
-                            false);
-
-            l_elog->addFFDC(ISTEP_COMP_ID,
-                            &freq_data_obj,
-                            sizeof(freq_data),
-                            0,                   // Version
-                            ERRL_UDT_CALLOUT,
-                            false);
-
-            // Create IStep error log and
-            // cross reference occurred error
-            l_stepError.addErrorDetails( l_elog );
-        }
-    }while(0);
-
+        l_elog->collectTrace("ISTEPS_TRACE");
+    }
+#endif
     return l_elog;
-
 }
 
 }
