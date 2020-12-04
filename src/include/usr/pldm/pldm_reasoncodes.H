@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,6 +83,15 @@ namespace PLDM
 
         // getHypervisorMode
         MOD_GET_HYPERVISOR_MODE = 0x1D,
+
+        // getDebugConsoleEnabled
+        MOD_GET_DEBUG_CONSOLE_ENABLED = 0x1E,
+
+        // lookupEnumAttrValuesInStringTable
+        MOD_LOOKUP_VALUE_IN_STRING_TABLE = 0x1F,
+
+        // systemEnumAttrLookup
+        MOD_SYSTEM_ENUM_ATTR_LOOKUP = 0x20,
     };
 
     enum PLDMReasonCode
@@ -121,6 +130,8 @@ namespace PLDM
         RC_MULTIPLE_AWAIT           = PLDM_COMP_ID | 0x20,
         RC_UNSUPPORTED_ATTRIBUTE    = PLDM_COMP_ID | 0x21,
         RC_NO_ATTRIBUTE_MATCH       = PLDM_COMP_ID | 0x22,
+        RC_OUT_OF_RANGE             = PLDM_COMP_ID | 0x23,
+        RC_NO_MATCH_IN_TABLE        = PLDM_COMP_ID | 0x24,
     };
 }
 #endif

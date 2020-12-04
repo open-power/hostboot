@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,10 +26,24 @@
 #define HB_BIOS_ATTRS_H
 
 /** @file  hb_bios_attrs.H
- *  @brief This file contains the declaration(s) of the function(s) that
+ *  @brief This file contains the declarations of the functions that
  *         are used to get the current value of the PLDM BIOS attributes from
- *         the BMC.
- */
+ *         the BMC. These interfaces should translate the PLDM attribute value
+ *         into a type suitable for hostboot's use as an output parameter.
+ *
+ *  All interfaces should provide the following input/output parameters:
+ *  param[in,out] io_string_table  A byte vector that if empty will be filled
+ *                                 with the string table via a PLDM Bios Table
+ *                                 request to the BMC. If it already has contents
+ *                                 no request will be made and vector will not
+ *                                 be modified.
+ *
+ *  param[in,out] io_attr_table   A byte vector that if empty will be filled
+ *                                with the attribute table via a PLDM Bios Table
+ *                                request to the BMC. If it already has contents
+ *                                no request will be made and vector will not
+ *                                be modified.
+ **/
 
 #include <openbmc/pldm/libpldm/bios_table.h>
 #include <attributetraits.H>
@@ -38,21 +52,11 @@
 namespace PLDM
 {
     /** @brief Retrieve the current value of the hb-hyp-switch
-    *          PLDM bios attribute, convert it to ATTR_PAYLOAD_KIND
-    *          enum, and set ATTR_PAYLOAD_KIND on the system target.
+    *          PLDM bios attribute and return the value converted
+    *          to a ATTR_PAYLOAD_KIND enum.
     *
-    * @param[in,out] io_string_table  A byte vector that if empty will be filled
-    *                                 with the string table via a PLDM Bios Table
-    *                                 request to the BMC. If it already has contents
-    *                                 no request will be made and vector will not
-    *                                 be modified.
-    *
-    * @param[in,out] io_attr_table    A byte vector that if empty will be filled
-    *                                 with the attribute table via a PLDM Bios Table
-    *                                 request to the BMC. If it already has contents
-    *                                 no request will be made and vector will not
-    *                                 be modified.
-    *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
     * @param[out]    o_payloadType    If no error occurs will contain the value
     *                                 we found for hb-hyp-switch translated to
     *                                 terms of ATTR_PAYLOAD_KIND_type.
@@ -62,6 +66,16 @@ namespace PLDM
     errlHndl_t getHypervisorMode(std::vector<uint8_t>& io_string_table,
                                  std::vector<uint8_t>& io_attr_table,
                                  TARGETING::ATTR_PAYLOAD_KIND_type &o_payloadType);
+
+    /** @brief Retrieve the current value of the hb-debug-console
+    *          PLDM bios attribute, convert it to a boolean value.
+    *
+    * @param[out] o_debugConsoleEnabled  Will return true if "Enabled" is
+    *                                    returned as the value for PLDM attr
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getDebugConsoleEnabled(bool &o_debugConsoleEnabled);
 }
 
 #endif
