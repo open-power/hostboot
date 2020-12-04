@@ -22,7 +22,7 @@ config ISTEP_LPC_PORT80_DEBUG
         Writes ISTEP progress to LPC port 80h.
 
 config HANG_ON_MFG_SRC_TERM
-    default y
+    default n
     help
         Controls the behavior when terminating due to a fail when
         manufacturing stop-on-error mode is set.
