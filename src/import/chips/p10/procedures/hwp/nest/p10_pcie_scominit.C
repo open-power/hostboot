@@ -60,8 +60,14 @@ const uint8_t NUM_STACK_CONFIG = 3;
 const uint8_t NUM_OF_INSTANCES = 4;
 const uint64_t PIPEDOUTCTL2_OFFSET = 22;
 const uint64_t PIPEDOUTCTL0_OFFSET = 20;
-const uint64_t NANO_SEC_DELAY = 20000;
+const uint64_t NANO_SEC_DELAY = 1000000;
 const uint64_t SIM_CYC_DELAY = 512;
+
+//Maximum number of iterations (So, 1ms * 100 = 100ms before timeout)
+const uint32_t MAX_NUM_POLLS = 100;
+
+// # of iterations while polling for DL_PGRESET to deassert
+uint32_t l_poll_counter;
 
 // July 2020 FW overrides
 const uint16_t FW_VER_0_JUL_2020 = 0x1100;
@@ -359,9 +365,6 @@ fapi2::ReturnCode p10_load_rtrim_override(
             FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data),
                      "Error from PUT_REGS_PHBRESET_REG");
 
-            FAPI_TRY(fapi2::delay(NANO_SEC_DELAY, SIM_CYC_DELAY),
-                     "fapiDelay error.");
-
             l_data = 0;
             //This will deassert reset for the PCI CFG core only.
             FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, true, false, l_data),
@@ -371,8 +374,6 @@ fapi2::ReturnCode p10_load_rtrim_override(
             FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, false, false, l_data),
                      "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Write)");
 
-            FAPI_TRY(fapi2::delay(NANO_SEC_DELAY, SIM_CYC_DELAY),
-                     "fapiDelay error.");
 
             l_data = 0;
             //This will deassert reset for the PDL + PTL + PBL + PIPE_RESET.
@@ -384,6 +385,40 @@ fapi2::ReturnCode p10_load_rtrim_override(
             FAPI_DBG("  Value to be written to %016lX -  %016lX", PHB_CORE_RESET_REGISTER, l_data());
             FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_CORE_RESET_REGISTER, false, false, l_data),
                      "Error from p10_phb_hv_access: Deactivate PHB_CORE_RESET_REGISTER (Write)");
+
+
+            //Read PCIE - DLP Training Control Register to check for DL_PGRESET to be deasserted
+            l_poll_counter = 0; //Reset poll counter
+
+            while (l_poll_counter < MAX_NUM_POLLS)
+            {
+                l_poll_counter++;
+                FAPI_TRY(fapi2::delay(NANO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+
+                l_data = 0;
+                FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_DLP_TRAINING_CTRL_REGISTER, true, false, l_data),
+                         "Error from p10_phb_hv_access: PHB_DLP_TRAINING_CTRL_REGISTER (Read)");
+
+                FAPI_DBG("PHB%i: PHB_DLP_TRAINING_CTRL_REGISTER %#lx", l_phb_target, l_data());
+
+                //Check DL_PGRESET is deasserted
+                if (!(l_data.getBit(PHB_HV_1A40_TL_EC10_DL_PGRESET)))
+                {
+                    FAPI_DBG("  DL_PGRESET completed reset to complete %016lX -  %016lX", PHB_DLP_TRAINING_CTRL_REGISTER, l_data());
+                    FAPI_DBG("  End polling for DL_PGRESET to become deasserted");
+                    break;
+                }
+            }
+
+            FAPI_DBG("  DL_PGRESET status (poll counter = %d).", l_poll_counter);
+
+            FAPI_ASSERT(l_poll_counter < MAX_NUM_POLLS,
+                        fapi2::P10_DL_PGRESET_STUCK()
+                        .set_TARGET(l_phb_target)
+                        .set_PHB_ADDR(PHB_DLP_TRAINING_CTRL_REGISTER)
+                        .set_PHB_DATA(l_data),
+                        "PHB%i: DL_PGRESET did not clear.", l_phb_target);
+
         }
 
         // Write CReg overrides through the CR Parallel Interface.

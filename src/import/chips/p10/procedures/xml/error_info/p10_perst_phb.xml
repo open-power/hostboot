@@ -23,6 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p10_perst_phb procedure -->
+<!-- EKB-Mirror-To: hostboot                                                -->
 
 <hwpErrors>
   <!-- ********************************************************************* -->
@@ -75,6 +76,26 @@
     <ffdc>PFIR_ADDR</ffdc>
     <ffdc>PFIR_DATA</ffdc>
     <!-- Add hw callout -->
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_DL_PGRESET_STUCK</rc>
+    <description>
+      DL_PGRESET did not complete reset.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PHB_ADDR</ffdc>
+    <ffdc>PHB_DATA</ffdc>
+    <!-- Add procedure callout -->
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>

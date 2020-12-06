@@ -184,6 +184,7 @@ extern "C"
     const uint32_t PHB_HV_1A10_HP_PERST_BIT             = 3;
     const uint32_t PHB_HV_1A10_PIPE_RESETN_BIT          = 4;
     const uint32_t PHB_HV_1A30_TL_EC10_LINKACTIVE_BIT      = 8;
+    const uint32_t PHB_HV_1A40_TL_EC10_DL_PGRESET      = 22;
     const uint32_t PHB_HV_1A40_TL_EC10_LINKACTIVE_BIT      = 23;
     const uint32_t PHB_HV_1A20_HP_PRESENCE_BIT         = 10;
 
