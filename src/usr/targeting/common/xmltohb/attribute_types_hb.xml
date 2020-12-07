@@ -1703,10 +1703,23 @@
         <default>0</default>
       </field>
       <field>
+        <name>vpdCollectedRemotely</name>
+        <description>
+          Describes if the VPD for this target that we wrote to cache
+          was collected by another entity, such as the BMC, and provided
+          to the Host. If set to 1 this will indicate to the code to
+          assume the target is present and to not attempt to read the eeprom
+          like we typically do for presence detection.
+        </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
         <name>reserved</name>
         <description>Reserved for future expansion</description>
         <type>uint8_t</type>
-        <bits>5</bits>
+        <bits>4</bits>
         <default>0</default>
       </field>
     </complexType>

@@ -46,6 +46,34 @@ namespace EEPROM
 {
 
 #ifndef __HOSTBOOT_RUNTIME
+
+/**
+* @brief Check if the target gets its VPD from a remote source
+*        such as the BMC. This function will check the VPD_SWITCHES
+*        attribute to see if vpdCollectedRemotely is set, if set
+*        this indicates a remote source thinks this target is present
+*        and has given us the VPD associated with it.
+*
+* @param[in] i_target Target we want to query for whether it has a remote VPD source or not
+*
+* @return bool True if vpdCollectedRemotely bit on ATTR_VPD_SWITCHES is true
+*
+* @note targets that do not have ATTR_VPD_SWITCHES will always return false
+*
+*/
+bool hasRemoteVpdSource(TARGETING::Target * i_target)
+{
+    bool vpd_source_is_remote = false;
+    TARGETING::ATTR_VPD_SWITCHES_type vpd_switch = {0};
+    // If the target does not have this attribute we can assume
+    // it was not collected remotely
+    if(i_target->tryGetAttr<TARGETING::ATTR_VPD_SWITCHES>(vpd_switch))
+    {
+        vpd_source_is_remote = vpd_switch.vpdCollectedRemotely;
+    }
+    return vpd_source_is_remote;
+}
+
 //-------------------------------------------------------------------
 //eepromPresence
 //-------------------------------------------------------------------
@@ -65,6 +93,14 @@ bool eepromPresence ( TARGETING::Target * i_target )
     eepInfo.offset = 0;
     do
     {
+        if(hasRemoteVpdSource(i_target))
+        {
+            TRACFCOMP(g_trac_eeprom,
+                     "eepromPresence: Found that VPD for 0x%8x was remotely sourced this IPL, assuming present",
+                     TARGETING::get_huid(i_target));
+            l_present = true;
+            break;
+        }
 
         // Read Attributes needed to complete the operation
         err = eepromReadAttributes( i_target, eepInfo );

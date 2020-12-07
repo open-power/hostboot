@@ -1220,6 +1220,11 @@ errlHndl_t cacheRemoteFruVpd()
                     PLDM_ERR("cacheRemoteFruVpd: An error occurred during EEPROM::cacheEepromBuffer");
                     break;
                 }
+
+                // Mark that vpd was collected remotely for this target
+                auto vpd_switch = entity_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
+                vpd_switch.vpdCollectedRemotely = 1;
+                entity_target->setAttr<TARGETING::ATTR_VPD_SWITCHES>(vpd_switch);
             }
 
             /* Read and store firmware version info if necessary */
