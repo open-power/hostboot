@@ -1,0 +1,73 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_fbc_core_topo_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- EKB-Mirror-To: hostboot                                                -->
+<!-- EKB-Mirror-To: hw/ppe                                                  -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_FBC_CORE_TOPO_SIZE_ERROR</rc>
+    <description>The size of the topology vector is not as expected.
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>EXP_VEC_SIZE</ffdc>
+    <ffdc>ACT_VEC_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_FBC_CORE_TOPO_HOMER_TARGET_ERROR</rc>
+    <description>Target type must be CORE for HOMER actions.
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_FBC_CORE_TOPO_HOMER_SCOM_ERROR</rc>
+    <description>Adding topology SCOM to HOMER image failed.
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>DATA</ffdc>
+    <ffdc>OPERATION</ffdc>
+    <ffdc>SECTION</ffdc>
+    <ffdc>API_RC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
