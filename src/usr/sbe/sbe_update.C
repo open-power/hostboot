@@ -36,6 +36,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errludstring.H>
 #include <errl/errlreasoncodes.H>
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
@@ -117,6 +118,9 @@ static bool g_update_both_sides = false;
 // Global Variables HW Keys Hash Transition
 static bool    g_do_hw_keys_hash_transition = false;
 static SHA512_t g_hw_keys_hash_transition_data = {0};
+
+// Define used to generate SBE Section Names for tracing
+P9_XIP_SECTION_NAMES_SBE(g_sectionNamesSbe);
 
 // ----------------------------------------
 // Global Variables for VMM management
@@ -915,109 +919,176 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t appendHbblToSbe(void*     i_section,
-                               uint32_t  i_section_size,
-                               void*     i_image,
-                               uint32_t& io_image_size)
-    {
-        errlHndl_t err = nullptr;
-        P9XipSection l_xipSection = {0};
 
-        TRACFCOMP( g_trac_sbe,
-                   ENTER_MRK"appendHbblToSbe(): i_section=%p, "
-                            "i_section_size=0x%X, i_image=%p, "
-                            "io_image_size=0x%X",
-                            i_section, i_section_size,
-                            i_image, io_image_size);
+errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
+                            const modifyType_t i_modify_type,
+                            void*     i_section_ptr,
+                            const uint32_t  i_section_size,
+                            void*     i_sbe_image,
+                            uint32_t& io_sbe_image_size)
+{
+    errlHndl_t err = nullptr;
 
-        do{
-            // Call p9_xip_get_section to find HBBL section in SBE image
-            // Some xip calls keep same p9 prefix for p10
-            int xip_rc = p9_xip_get_section(i_image, P9_XIP_SECTION_SBE_HBBL, &l_xipSection);
-            TRACFCOMP(g_trac_sbe, "appendHbblToSbe(): p9_xip_get_section .hbbl xip_rc=%d"
-                " iv_offset=0x%X iv_size=0x%X iv_alignment=0x%X",
-                xip_rc, l_xipSection.iv_offset, l_xipSection.iv_size,
-                l_xipSection.iv_alignment);
+    // NOTE: Throughout this function some xip calls have kept the same p9 prefix for p10
+    P9XipSection l_xipSection = {0};
+    int xip_rc = 0;
+    const char* i_section_str = P9_XIP_SECTION_NAME(g_sectionNamesSbe, i_section);
 
-            // Check the return code
-            if ((xip_rc == 0) && (l_xipSection.iv_size != 0))
+    TRACFCOMP(g_trac_sbe, ENTER_MRK"modifySbeSection(): "
+              "i_section= %s (0x%X), i_modify_type=0x%X, i_section_ptr=%p, "
+              "i_section_size=0x%X, i_sbe_image=%p, io_sbe_image_size=0x%X",
+              i_section_str, i_section, i_modify_type, i_section_ptr,
+              i_section_size, i_sbe_image, io_sbe_image_size);
+
+    do{
+        /***************************************************************/
+        /* Find the section in the SBE image                           */
+        /***************************************************************/
+        xip_rc = p9_xip_get_section(i_sbe_image, i_section, &l_xipSection);
+        TRACFCOMP(g_trac_sbe, "modifySbeSection(): p9_xip_get_section %s (0x%X) xip_rc=%d "
+            "iv_offset=0x%X iv_size=0x%X iv_alignment=0x%X",
+            i_section_str,
+            i_section, xip_rc, l_xipSection.iv_offset, l_xipSection.iv_size,
+            l_xipSection.iv_alignment);
+
+        // Check the return code
+        if ((xip_rc == 0) && (l_xipSection.iv_size != 0))
+        {
+            TRACFCOMP(g_trac_sbe, "modifySbeSection(): "
+                      "p9_xip_get_section %s found of size 0x%X (rc=0x%X)",
+                      i_section_str, l_xipSection.iv_size, xip_rc);
+
+        }
+        else if (xip_rc == 0)
+        {
+            TRACFCOMP(g_trac_sbe, "modifySbeSection(): "
+                      "p9_xip_get_section %s FOUND but EMPTY (rc=0x%X). Will continue",
+                      i_section_str, xip_rc);
+        }
+        else if ((xip_rc == P9_XIP_ITEM_NOT_FOUND) || (xip_rc == P9_XIP_DATA_NOT_PRESENT))
+        {
+            TRACFCOMP(g_trac_sbe, "modifySbeSection(): p9_xip_get_section %s returned "
+                      "rc=0x%X, which is either ITEM_NOT_FOUND (0x%X) or "
+                      "DATA_NOT_PRESENT (0x%X). Will Continue",
+                      i_section_str, xip_rc, P9_XIP_ITEM_NOT_FOUND, P9_XIP_DATA_NOT_PRESENT);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_sbe, "modifySbeSection(): p9_xip_get_section %s returned "
+                      "unexpected return code, rc=0x%X",
+                      i_section_str, xip_rc );
+
+            /*@
+             * @errortype
+             * @moduleid     SBE_MODIFY_SBE_SECTION
+             * @reasoncode   ERROR_FROM_XIP_FIND
+             * @userdata1    rc from p9_xip_get_section
+             * @userdata2    SBE Section
+             * @devdesc      Bad RC from p9_xip_get_section
+             * @custdesc     A problem occurred while updating processor
+             *               boot code.
+             */
+            err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                SBE_MODIFY_SBE_SECTION,
+                                ERROR_FROM_XIP_FIND,
+                                xip_rc,
+                                i_section,
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            ErrlUserDetailsString(i_section_str).addToLog(err);
+            err->collectTrace(SBE_COMP_NAME);
+            err->collectTrace(FAPI_IMP_TRACE_NAME,256);
+            err->collectTrace(FAPI_TRACE_NAME,384);
+
+            // exit loop
+            break;
+        }
+
+        /***************************************************************/
+        /* Delete the section in the SBE image, if necessary           */
+        /***************************************************************/
+        if (i_modify_type & DELETE_SECTION)
+        {
+            TRACUCOMP(g_trac_sbe, "modifySbeSection(): Deleting %s section", i_section_str);
+
+            // Call p9_xip_delete_section to clean or delete existing section
+            // from SBE image
+            void *l_imageBuf = malloc(io_sbe_image_size);
+            xip_rc = p9_xip_delete_section(
+                             i_sbe_image,
+                             l_imageBuf,
+                             io_sbe_image_size,
+                             i_section);
+
+            free(l_imageBuf);
+            l_imageBuf = nullptr;
+
+            // Check for error
+            if(xip_rc)
             {
-                TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
-                           "p9_xip_get_section .hbbl NON CONCLUSIVE clean first rc=0x%X", xip_rc);
+                TRACFCOMP(g_trac_sbe, "modifySbeSection(): "
+                          "p9_xip_delete_section %s failed, rc=0x%X",
+                          i_section_str, xip_rc );
 
-                // Call p9_xip_delete_section to clean or delete existing HBBL section
-                // from SBE image
-                // Some xip calls keep same p9 prefix for p10
-                void *l_imageBuf =malloc(io_image_size);
-                xip_rc = p9_xip_delete_section(
-                                 i_image,
-                                 l_imageBuf,
-                                 io_image_size,
-                                 P9_XIP_SECTION_SBE_HBBL );
-                free(l_imageBuf);
-                l_imageBuf = nullptr;
-
-                // Check for error
-                if( xip_rc )
-                {
-                    TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
-                               "p9_xip_delete_section .hbbl failed, rc=0x%X",
-                               xip_rc );
-                    /*@
-                     * @errortype
-                     * @moduleid     SBE_APPEND_HBBL
-                     * @reasoncode   ERROR_FROM_XIP_DELETE
-                     * @userdata1    rc from p9_xip_delete
-                     * @userdata2    <unused>
-                     * @devdesc      Bad RC from p9_xip_delete
-                     * @custdesc     A problem occurred while updating processor
-                     *               boot code.
-                     */
-                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                        SBE_APPEND_HBBL,
-                                        ERROR_FROM_XIP_DELETE,
-                                        xip_rc,
-                                        0,
-                                        true /* SW error */);
-                    err->collectTrace(SBE_COMP_NAME);
-
-                    // exit loop
-                    break;
-                }
-            }
-            else if (xip_rc == 0)
-            {
-                TRACFCOMP(g_trac_sbe, "appendHbblToSbe(): p9_xip_get_section .hbbl FOUND but EMPTY");
-            }
-            else if ((xip_rc == P9_XIP_ITEM_NOT_FOUND) || (xip_rc == P9_XIP_DATA_NOT_PRESENT))
-            {
-                TRACFCOMP(g_trac_sbe, "appendHbblToSbe(): p9_xip_get_section .hbbl ITEM_NOT_FOUND "
-                    "or DATA_NOT_PRESENT");
-            }
-            else
-            {
-                TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): p9_xip_get_section "
-                           ".hbbl received unexpected return code, rc=0x%X",
-                           xip_rc );
                 /*@
                  * @errortype
-                 * @moduleid     SBE_APPEND_HBBL
-                 * @reasoncode   ERROR_FROM_XIP_FIND
-                 * @userdata1    rc from p9_xip_get_section
-                 * @userdata2    <unused>
-                 * @devdesc      Bad RC from p9_xip_get_section
+                 * @moduleid     SBE_MODIFY_SBE_SECTION
+                 * @reasoncode   ERROR_FROM_XIP_DELETE
+                 * @userdata1    rc from p9_xip_delete
+                 * @userdata2    SBE Section
+                 * @devdesc      Bad RC from p9_xip_delete
                  * @custdesc     A problem occurred while updating processor
                  *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_APPEND_HBBL,
-                                    ERROR_FROM_XIP_FIND,
+                                    SBE_MODIFY_SBE_SECTION,
+                                    ERROR_FROM_XIP_DELETE,
                                     xip_rc,
-                                    0,
-                                    true /* SW error */);
+                                    i_section,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
                 err->collectTrace(SBE_COMP_NAME);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-                err->collectTrace(FAPI_TRACE_NAME,384);
+                ErrlUserDetailsString(i_section_str).addToLog(err);
+
+                // exit loop
+                break;
+            }
+        } // end of delete section
+
+
+        /***************************************************************/
+        /* Append the section in the SBE image, if necessary           */
+        /***************************************************************/
+        if (i_modify_type & APPEND_SECTION )
+        {
+            TRACUCOMP(g_trac_sbe, "modifySbeSection(): Appending %s section", i_section_str);
+
+            // Verify caller has valid section ptr before appending
+            if(i_section_ptr == nullptr)
+            {
+                TRACFCOMP(g_trac_sbe, "modifySbeSection(): "
+                          "Trying to append %s section, but i_section_ptr == nullptr",
+                          i_section_str);
+
+                /*@
+                 * @errortype
+                 * @moduleid     SBE_MODIFY_SBE_SECTION
+                 * @reasoncode   SBE_INVALID_INPUT
+                 * @userdata1    SBE Section
+                 * @userdata2    unused
+                 * @devdesc      Caller passed in nullptr for append SBE Section operation
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    SBE_MODIFY_SBE_SECTION,
+                                    SBE_INVALID_INPUT,
+                                    i_section,
+                                    0,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                err->collectTrace(SBE_COMP_NAME);
+                ErrlUserDetailsString(i_section_str).addToLog(err);
 
                 // exit loop
                 break;
@@ -1026,33 +1097,38 @@ namespace SBE
             // Invoke p10_ipl_section_append to append HBBL section to SBE image
             FAPI_INVOKE_HWP( err,
                              p10_ipl_section_append,
-                             i_section,
+                             i_section_ptr,
                              i_section_size,
-                             P9_XIP_SECTION_SBE_HBBL,
-                             i_image,
-                             io_image_size );
+                             i_section,
+                             i_sbe_image,
+                             io_sbe_image_size );
 
             // Check for error
             if(err)
             {
-                TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
-                           "p10_ipl_section_append failed"
+                TRACFCOMP( g_trac_sbe, "modifySbeSection(): "
+                           "p10_ipl_section_append %s failed: "
                            TRACE_ERR_FMT,
+                           i_section_str,
                            TRACE_ERR_ARGS(err));
 
                 // exit loop
                 break;
             }
+        } // end of append section
 
         }while(0);
 
-        TRACFCOMP( g_trac_sbe,
-                   EXIT_MRK"appendHbblToSbe(): i_image=%p, "
-                   "io_image_size=0x%X, RC=0x%X",
-                   i_image, io_image_size, ERRL_GETRC_SAFE(err) );
+        TRACFCOMP(g_trac_sbe,EXIT_MRK"modifySbeSection(): i_sbe_image=%p, "
+                   "io_sbe_image_size=0x%X "
+                   TRACE_ERR_FMT,
+                   i_sbe_image, io_sbe_image_size,
+                   TRACE_ERR_ARGS(err) );
 
         return err;
     }
+
+
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t ringOvd(void *io_imgPtr,
@@ -2502,10 +2578,11 @@ namespace SBE
                         sizeof(SHA512_t));
             }
 
-            /*******************************************/
-            /*  Append HBBL Image from PNOR to SBE     */
-            /*  Image from PNOR                        */
-            /*******************************************/
+            /*************************************************/
+            /*  Append HBBL Image from PNOR to SBE           */
+            /*  Image from PNOR                              */
+            /*  Also delete P9_XIP_SECTION_SBE_RINGS section */
+            /*************************************************/
             uint32_t sbeHbblImgSize =
                 static_cast<uint32_t>(sbePnorImageSize + MAX_HBBL_SIZE);
 
@@ -2515,109 +2592,38 @@ namespace SBE
                      sbePnorPtr,
                      sbePnorImageSize);
 
-            P9XipSection l_xipSection = {0};
-            int xip_rc = p9_xip_get_section(sbeHbblImgPtr, P9_XIP_SECTION_SBE_RINGS, &l_xipSection);
-            TRACFCOMP(g_trac_sbe, "getSbeInfoState(): p9_xip_get_section .rings xip_rc=%d"
-                " iv_offset=0x%X iv_size=0x%X iv_alignment=0x%X",
-                xip_rc, l_xipSection.iv_offset, l_xipSection.iv_size,
-                l_xipSection.iv_alignment);
 
-            // Check the return code
-            if ((xip_rc == 0) && (l_xipSection.iv_size != 0))
-            {
-                TRACFCOMP( g_trac_sbe, "getSbeInfoState(): "
-                           "p9_xip_get_section .rings NON CONCLUSIVE clean first rc=0x%X", xip_rc);
-
-                // Call p9_xip_delete_section to clean or delete existing RINGS section
-                // from SBE image
-                // Some xip calls keep same p9 prefix for p10
-                void *l_imageBuf =malloc(sbePnorImageSize);
-                xip_rc = p9_xip_delete_section(
-                                 sbeHbblImgPtr,
-                                 l_imageBuf,
-                                 sbePnorImageSize,
-                                 P9_XIP_SECTION_SBE_RINGS );
-                free(l_imageBuf);
-                l_imageBuf = nullptr;
-
-                // Check for error
-                if( xip_rc )
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState(): "
-                               "p9_xip_delete_section .rings failed, rc=0x%X",
-                               xip_rc );
-                    /*@
-                     * @errortype
-                     * @moduleid     SBE_APPEND_HBBL
-                     * @reasoncode   ERROR_FROM_XIP_DELETE_RINGS
-                     * @userdata1    rc from p9_xip_delete
-                     * @userdata2    <unused>
-                     * @devdesc      Bad RC from p9_xip_delete
-                     * @custdesc     A problem occurred while updating processor
-                     *               boot code.
-                     */
-                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                        SBE_APPEND_HBBL,
-                                        ERROR_FROM_XIP_DELETE_RINGS,
-                                        xip_rc,
-                                        0,
-                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                    err->collectTrace(SBE_COMP_NAME);
-
-                    // exit loop
-                    break;
-                }
-            }
-            else if (xip_rc == 0)
-            {
-                TRACFCOMP(g_trac_sbe, "getSbeInfoState(): p9_xip_get_section .rings FOUND but EMPTY");
-            }
-            else if ((xip_rc == P9_XIP_ITEM_NOT_FOUND) || (xip_rc == P9_XIP_DATA_NOT_PRESENT))
-            {
-                TRACFCOMP(g_trac_sbe, "getSbeInfoState(): p9_xip_get_section .rings ITEM_NOT_FOUND "
-                    "or DATA_NOT_PRESENT");
-            }
-            else
-            {
-                TRACFCOMP( g_trac_sbe, "getSbeInfoState(): p9_xip_get_section "
-                           ".rings received unexpected return code, rc=0x%X",
-                           xip_rc );
-                /*@
-                 * @errortype
-                 * @moduleid     SBE_APPEND_HBBL
-                 * @reasoncode   ERROR_FROM_XIP_FIND_RINGS
-                 * @userdata1    rc from p9_xip_get_section
-                 * @userdata2    <unused>
-                 * @devdesc      Bad RC from p9_xip_get_section
-                 * @custdesc     A problem occurred while updating processor
-                 *               boot code.
-                 */
-                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_APPEND_HBBL,
-                                    ERROR_FROM_XIP_FIND_RINGS,
-                                    xip_rc,
-                                    0,
-                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                err->collectTrace(SBE_COMP_NAME);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-                err->collectTrace(FAPI_TRACE_NAME,384);
-
-                // exit loop
-                break;
-            }
-
-            err = appendHbblToSbe(const_cast<void*>(hbblPnorPtr), // HBBL Image to append
-                                  MAX_HBBL_SIZE, // Size of HBBL Image
-                                  sbeHbblImgPtr,     // SBE, HBBL Image
-                                  sbeHbblImgSize);   // Available/used
+            // First delete P9_XIP_SECTION_SBE_RINGS to ideally add space
+            err = modifySbeSection(P9_XIP_SECTION_SBE_RINGS,
+                                   DELETE_SECTION,
+                                   nullptr,         // no input section required
+                                   0,               // no size required
+                                   sbeHbblImgPtr,   // SBE, HBBL Image
+                                   sbeHbblImgSize); // Available/used
 
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error from appendHbblToSbe(), "
-                           "RC=0x%X, EID=0x%lX",
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETEID_SAFE(err));
+                           "Error from modifySbeSection() for P9_XIP_SECTION_SBE_RINGS: "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
+                break;
+            }
+
+            // Now append HBBL section to the SBE Image
+            err = modifySbeSection(P9_XIP_SECTION_SBE_HBBL,
+                                   DELETE_AND_APPEND_SECTION,
+                                   const_cast<void*>(hbblPnorPtr), // HBBL Image to append
+                                   MAX_HBBL_SIZE,                  // Size of HBBL Image
+                                   sbeHbblImgPtr,                  // SBE, HBBL Image
+                                   sbeHbblImgSize);                // Available/used
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Error from modifySbeSection() for P9_XIP_SECTION_SBE_HBBL: "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
                 break;
             }
 
@@ -6663,6 +6669,8 @@ errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
     }
     return l_errl;
 }
+
+/////////////////////////////////////////////////////////////////////
 
 errlHndl_t updateKeyTransitionState(
     const TARGETING::KEY_TRANSITION_STATE i_keyTransitionState)

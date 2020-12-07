@@ -43,6 +43,7 @@
 #include <util/utilxipimage.H>        // Util::imageBuild_t
 #include <vector>
 #include <p10_infrastruct_help.H>     // XIPC_RING_BUF{1,2,3}_SIZE
+#include <p10_ipl_image.H>            // p9_xip_section_sbe_t
 
 namespace SBE
 {
@@ -149,13 +150,15 @@ namespace SBE
         UNSUPPORTED_SITUATION  = 0x80000000,
     };
 
-    // Values used to indicate whether an SBE Seeprom image originates from the
-    // golden side SBE Seeprom or not
-    enum sbeOrigin_t
+    // Used for modifySbeSection() function
+    enum modifyType_t : uint8_t
     {
-        WORKING_SIDE = 0,
-        GOLDEN_SIDE = 1,
+        NO_MODIFY                  = 0x00,
+        DELETE_SECTION             = 0x01,
+        APPEND_SECTION             = 0x02,
+        DELETE_AND_APPEND_SECTION  = DELETE_SECTION | APPEND_SECTION,
     };
+
 
     /**
      * @brief Contains the SBE state for a given target
@@ -274,26 +277,31 @@ namespace SBE
     errlHndl_t readPNORVersion(void*& i_pnorImgHdrPtr,
                                sbe_image_version_t& o_version);
 
-
     /**
-     * @brief Append HBBL Immage to SBE Image
+     * @brief Modify (Delete and/or Append) Section of SBE Image
      *
-     * @param[in] i_section          Pointer to HBBL Image to append
+     * @param[ini] i_section             Enum defining which section to modify
      *
-     * @param[in] i_section_size     Cacheline size of HBBL Image
+     * @param[in] i_modify_type          Enum defining the action(s) to take on the section
      *
-     * @param[in] i_image            Pointer to SBE image in memory (non-ecc)
+     * @param[in] i_section_ptr          Pointer to SBE Section to append
+     *                                   Fail if nullptr on append operation
      *
-     * @param[in/out] io_image_size  in: space available for enlarged XIP image
-     *                               out: size of enlarged XIP image
+     * @param[in] i_section_size         Size of SBE Section
+     *
+     * @param[in] i_sbe_image            Pointer to SBE image in memory (non-ecc)
+     *
+     * @param[in/out] io_sbe_image_size  in: space available for enlarged XIP image
+     *                                   out: size of enlarged XIP image
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t appendHbblToSbe(void*     i_section,
-                               uint32_t  i_section_size,
-                               void*     i_image,
-                               uint32_t& io_image_size);
-
+    errlHndl_t modifySbeSection(p9_xip_section_sbe_t i_section,
+                                modifyType_t i_modify_type,
+                                void*     i_section_ptr,
+                                uint32_t  i_section_size,
+                                void*     i_image,
+                                uint32_t& io_image_size);
 
     /**
      * @brief Customize SBE Image for current Processor
