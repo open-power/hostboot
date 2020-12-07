@@ -68,7 +68,7 @@ namespace Memoize
  *      implemented
  */
 template < class ReturnType, class InputType , class OutputType >
-auto memoize(
+ReturnType memoize(
     ReturnType (*i_fn)(InputType,OutputType&),
     InputType    i_in,
     OutputType&  o_out)
