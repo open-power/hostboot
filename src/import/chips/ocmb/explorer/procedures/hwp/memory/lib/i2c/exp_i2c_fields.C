@@ -44,7 +44,7 @@ constexpr mss::field_t<mss::endian::BIG> fields::DL_LAYER_BOOT_MODE;
 constexpr mss::field_t<mss::endian::BIG> fields::CMD_ID;
 constexpr mss::field_t<mss::endian::BIG> fields::STATUS_CODE;
 constexpr mss::field_t<mss::endian::BIG> fields::BOOT_STAGE;
-constexpr mss::field_t<mss::endian::BIG> fields::PHY_OPT_DISABLE;
+constexpr mss::field_t<mss::endian::BIG> fields::DL_LAYER_BOOT_MODE_SUPPORT;
 
 namespace boot_cfg
 {

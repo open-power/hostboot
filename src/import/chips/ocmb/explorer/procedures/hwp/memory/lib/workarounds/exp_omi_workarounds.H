@@ -109,14 +109,18 @@ fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
 
 ///
-/// @brief Disable Explorer PHY optimization step in BOOT_CONFIG0
+/// @brief Select and set dl_layer_boot_mode for BOOT_CONFIG0
 ///
 /// @param[in] i_target OCMB_CHIP target
+/// @param[in] i_is_apollo value of ATTR_IS_APOLLO
+/// @param[in] i_fw_status_data value from FW_STATUS command
 /// @param[in,out] io_boot_config_data BOOT_CONFIG0 data
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode disable_phy_opt(
+fapi2::ReturnCode select_dl_layer_boot_mode(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_is_apollo,
+    const std::vector<uint8_t>& i_fw_status_data,
     std::vector<uint8_t>& io_boot_config_data);
 
 } // omi

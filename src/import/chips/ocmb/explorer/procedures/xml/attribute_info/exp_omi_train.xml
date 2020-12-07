@@ -93,12 +93,15 @@
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
             Indicates whether the OpenCAPI DL boots immediately
-            or waits for host command.
+            or waits for host command. BOOT_CONFIG0 should use either
+            setting '0' (legacy Explorer FW) or '2' (newer Explorer FW).
+            BOOT_CONFIG1 should use setting '1'
         </description>
         <valueType>uint8</valueType>
         <enum>
            NON_DL_TRAINING = 0,
-           ONLY_DL_TRAINING = 1
+           ONLY_DL_TRAINING = 1,
+           NON_DL_TRAINING_VERSION2 = 2
         </enum>
         <platInit/>
         <initToZero/>

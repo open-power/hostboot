@@ -70,12 +70,12 @@ struct fields
     static constexpr mss::field_t<mss::endian::BIG> LOOPBACK_TEST{1, 3, 1};
     static constexpr mss::field_t<mss::endian::BIG> TRANSPORT_LAYER{1, 4, 2};
     static constexpr mss::field_t<mss::endian::BIG> DL_LAYER_BOOT_MODE{1, 6, 2};
-    static constexpr mss::field_t<mss::endian::BIG> PHY_OPT_DISABLE{2, 7, 1};
 
     // Part of EXP_FW_STATUS
     static constexpr mss::field_t<mss::endian::BIG> CMD_ID{0, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> STATUS_CODE{1, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> BOOT_STAGE{2, 6, 2};
+    static constexpr mss::field_t<mss::endian::BIG> DL_LAYER_BOOT_MODE_SUPPORT{2, 5, 1};
 #ifndef __PPE__
     // Part of EXP_FW_TWI_FFE_SETTINGS
     static constexpr mss::field_t<mss::endian::BIG> FFE_POST_CURSOR_BYTE0{0, 0, 8};
@@ -146,22 +146,8 @@ struct fieldTraits<fields::DFE_DISABLE>
 template <>
 struct fieldTraits<fields::DL_LAYER_BOOT_MODE>
 {
-    static constexpr uint8_t COMPARISON_VAL = 0x01;
+    static constexpr uint8_t COMPARISON_VAL = 0x02;
     static constexpr const char* FIELD_STR = "DL Layer Boot mode";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class fieldTraits - PHY_OPT_DISABLE specialization
-/// @brief Traits assoiated with the Explorer I2C commands
-///
-template <>
-struct fieldTraits<fields::PHY_OPT_DISABLE>
-{
-    static constexpr uint8_t COMPARISON_VAL = 0x01;
-    static constexpr const char* FIELD_STR = "PHY optimization disable";
 
     template <typename T>
     using COMPARISON_OP = std::less_equal<T>;
@@ -260,6 +246,20 @@ struct fieldTraits<fields::BOOT_STAGE>
 {
     static constexpr uint8_t COMPARISON_VAL = 0x03;
     static constexpr const char* FIELD_STR = "Boot Stage";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class fieldTraits - DL_LAYER_BOOT_MODE_SUPPORT specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::DL_LAYER_BOOT_MODE_SUPPORT>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x01;
+    static constexpr const char* FIELD_STR = "DL Layer Boot Mode Support";
 
     template <typename T>
     using COMPARISON_OP = std::less_equal<T>;
@@ -535,33 +535,6 @@ inline fapi2::ReturnCode set_dl_layer_boot_mode(const fapi2::Target<fapi2::TARGE
     return set_field<fields::DL_LAYER_BOOT_MODE>(i_target, io_data, i_setting);
 }
 
-/// @brief PHY_OPT_DISABLE getter
-/// @param[in] i_target the OCMB target
-/// @param[in] i_data the buffer as a reference to a vector
-/// @param[out] o_setting
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-inline fapi2::ReturnCode get_phy_opt_disable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const std::vector<uint8_t>& i_data,
-        uint8_t& o_setting)
-{
-    return get_field<fields::PHY_OPT_DISABLE>(i_target, i_data, o_setting);
-}
-
-///
-/// @brief PHY_OPT_DISABLE setter
-/// @param[in] i_target the OCMB target
-/// @param[in,out] io_data the buffer as a reference to a vector
-/// @param[in] i_setting the value to set
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-inline fapi2::ReturnCode set_phy_opt_disable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        std::vector<uint8_t>& io_data,
-        const uint8_t i_setting)
-{
-    return set_field<fields::PHY_OPT_DISABLE>(i_target, io_data, i_setting);
-}
-
 /// @brief ADAPTATION_MODE getter
 /// @param[in] i_target the OCMB target
 /// @param[in] i_data the buffer as a reference to a vector
@@ -820,6 +793,19 @@ inline fapi2::ReturnCode get_boot_stage(const fapi2::Target<fapi2::TARGET_TYPE_O
     return get_field<fields::BOOT_STAGE>(i_target, i_data, o_setting);
 }
 
+///
+/// @brief DL_LAYER_BOOT_MODE_SUPPORT getter
+/// @param[in] i_target the OCMB target
+/// @param[in] i_data the buffer as a reference to a vector
+/// @param[out] o_setting
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode get_dl_layer_boot_mode_support(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        uint8_t& o_setting)
+{
+    return get_field<fields::DL_LAYER_BOOT_MODE_SUPPORT>(i_target, i_data, o_setting);
+}
 
 ///
 /// @brief STATUS_CODE getter

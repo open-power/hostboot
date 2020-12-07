@@ -71,11 +71,9 @@ extern "C"
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
         std::vector<uint8_t> l_ffe_setup_data;
+        std::vector<uint8_t> l_fw_status_data;
 
         const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
-
-        // BOOT CONFIG 0
-        uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
 
         uint8_t l_sim = 0;
         FAPI_TRY(mss::attr::get_is_simulation(l_sim));
@@ -108,14 +106,11 @@ extern "C"
         // Gets the data setup
         FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
 
-        // Sanity check: set dl_layer_boot_mode to NON DL TRAINING (0b00 == default)
-        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_boot_config_data, l_dl_layer_boot_mode ));
-
-        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_TRUE)
-        {
-            // Apollo cannot send the PRBS23 pattern, so need to disable PHY optimization
-            FAPI_TRY(mss::exp::workarounds::omi::disable_phy_opt(i_target, l_boot_config_data));
-        }
+        // Set up dl_layer_boot_mode according to FW and HW support
+        // Need to run original sequence (0b00) on Apollo and on legacy FW
+        FAPI_TRY(mss::exp::i2c::get_fw_status(i_target, l_fw_status_data));
+        FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_fw_status_data,
+                 l_boot_config_data));
 
         // Issues the command and checks for completion
         // Note: This does not kick off OMI training

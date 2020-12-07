@@ -278,20 +278,51 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Disable Explorer PHY optimization step in BOOT_CONFIG0
+/// @brief Select and set dl_layer_boot_mode for BOOT_CONFIG0
 ///
 /// @param[in] i_target OCMB_CHIP target
+/// @param[in] i_is_apollo value of ATTR_IS_APOLLO
+/// @param[in] i_fw_status_data value from FW_STATUS command
 /// @param[in,out] io_boot_config_data BOOT_CONFIG0 data
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode disable_phy_opt(
+fapi2::ReturnCode select_dl_layer_boot_mode(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_is_apollo,
+    const std::vector<uint8_t>& i_fw_status_data,
     std::vector<uint8_t>& io_boot_config_data)
 {
-    FAPI_DBG("Disabling OMI PHY optimization on %s", mss::c_str(i_target));
+    constexpr uint8_t BOOT_MODE_VERSION1 = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
+    constexpr uint8_t BOOT_MODE_VERSION2 =
+        fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING_VERSION2;
+    constexpr uint8_t VERSION2_SUPPORTED = 0x01;
 
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_phy_opt_disable(i_target, io_boot_config_data, 1));
+    uint8_t l_supported = 0;
 
+    if (i_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_TRUE)
+    {
+        FAPI_DBG("%s Selecting dl_layer_boot_mode = 0b00 for Apollo", mss::c_str(i_target));
+        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target,
+                 io_boot_config_data,
+                 BOOT_MODE_VERSION1 ));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY(mss::exp::i2c::status::get_dl_layer_boot_mode_support(i_target, i_fw_status_data, l_supported));
+
+    if (l_supported == VERSION2_SUPPORTED)
+    {
+        FAPI_DBG("%s Selecting dl_layer_boot_mode = 0b01", mss::c_str(i_target));
+        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target,
+                 io_boot_config_data,
+                 BOOT_MODE_VERSION2 ));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_DBG("%s Selecting dl_layer_boot_mode = 0b00 due to legacy FW", mss::c_str(i_target));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target,
+             io_boot_config_data,
+             BOOT_MODE_VERSION1 ));
 fapi_try_exit:
     return fapi2::current_err;
 }
