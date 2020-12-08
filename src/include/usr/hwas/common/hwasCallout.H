@@ -164,6 +164,9 @@ enum epubProcedureID
     ///< The diagnostic function detected a problem with the NVDIMM.
     ///<    Both the NVDIMM and the cable connecting the DIMM to the
     ///<    Backup Power Module should be replaced
+
+    EPUB_PRC_SBE_CODE               = 0x62,
+    ///< Problem is in SBE code, upgrade your firmware
 };
 
 // from srci/fsp/srci.H

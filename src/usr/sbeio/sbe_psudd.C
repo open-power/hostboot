@@ -55,6 +55,8 @@
 #include <errl/errludprintk.H>
 #include <vfs/vfs.H> // module_is_loaded
 #include <util/misc.H>
+#include <sbe/sbeif.H>
+#include <isteps/istep_reasoncodes.H>
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -114,10 +116,10 @@ void * SbePsu::msg_handler(void *unused)
  **/
 SbePsu::SbePsu()
     :
-        iv_earlyErrorOccurred(false),
-        iv_psuResponse(nullptr),
-        iv_responseReady(false),
-        iv_shutdownInProgress(false)
+    iv_earlyErrorOccurred(false),
+    iv_psuResponse(nullptr),
+    iv_responseReady(false),
+    iv_shutdownInProgress(false)
 {
     errlHndl_t l_err = nullptr;
     size_t rc = 0;
@@ -131,7 +133,7 @@ SbePsu::SbePsu()
     if(rc)   // could not register msgQ with kernel
     {
         SBE_TRACF(ERR_MRK "SbePsu() Could not register"
-                   "message queue with kernel");
+                  "message queue with kernel");
 
         /*@ errorlog tag
          * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
@@ -141,14 +143,14 @@ SbePsu::SbePsu()
          * @devdesc         Could not register mailbox message queue
          */
         l_err = new ErrlEntry
-             (
-              ERRL_SEV_CRITICAL_SYS_TERM,
-              SBEIO_PSU,
-              SBEIO_RC_KERNEL_REG_FAILED,    //  reason Code
-              rc,                        // rc from msg_send
-              0,
-              true //Add HB Software Callout
-             );
+            (
+                ERRL_SEV_CRITICAL_SYS_TERM,
+                SBEIO_PSU,
+                SBEIO_RC_KERNEL_REG_FAILED,    //  reason Code
+                rc,                        // rc from msg_send
+                0,
+                true //Add HB Software Callout
+                );
     }
 
     if (!l_err)
@@ -211,42 +213,89 @@ void SbePsu::msgHandler()
 
         switch(msg->type)
         {
-            case MSG_INTR:
+        case MSG_INTR:
+        {
+            if (msg->data[0] == INTR::SHUT_DOWN)
+            {
+                iv_shutdownInProgress = true;
+                SBE_TRACF("SbePsu::msgHandler Handle Shutdown");
+                //respond so INTRP can continue
+                // with shutdown procedure
+                msg_respond(iv_msgQ,msg);
+            }
+            else
+            {
+                //Handle the interrupt message -- pass the PIR of the
+                // proc causing the interrupt
+                SBE_TRACF("SbePsu::msgHandler got MSG_INTR message");
+                l_err = handleInterrupt(msg->data[1]);
+
+                if (l_err)
                 {
-                    if (msg->data[0] == INTR::SHUT_DOWN)
-                    {
-                        iv_shutdownInProgress = true;
-                        SBE_TRACF("SbePsu::msgHandler Handle Shutdown");
-                        //respond so INTRP can continue
-                        // with shutdown procedure
-                        msg_respond(iv_msgQ,msg);
-                    }
-                    else
-                    {
-                        //Handle the interrupt message -- pass the PIR of the
-                        // proc causing the interrupt
-                        SBE_TRACF("SbePsu::msgHandler got MSG_INTR message");
-                        l_err = handleInterrupt(msg->data[1]);
-
-                        if (l_err)
-                        {
-                            SBE_TRACF("SbePsu::msgHandler handleInterrupt returned an error");
-                            l_err->collectTrace(SBEIO_COMP_NAME);
-                            l_err->collectTrace(INTR_COMP_NAME, 256);
-                            errlCommit(l_err, SBEIO_COMP_ID);
-                        }
-
-                        // Respond to the interrupt handler regardless of error
-                        INTR::sendEOI(iv_msgQ,msg);
-                    }
+                    SBE_TRACF("SbePsu::msgHandler handleInterrupt returned an error");
+                    l_err->collectTrace(SBEIO_COMP_NAME);
+                    l_err->collectTrace(INTR_COMP_NAME, 256);
+                    errlCommit(l_err, SBEIO_COMP_ID);
                 }
-                break;
-            default:
-                msg->data[1] = -EINVAL;
-                msg_respond(iv_msgQ, msg);
+
+                // Respond to the interrupt handler regardless of error
+                INTR::sendEOI(iv_msgQ,msg);
+            }
+        }
+        break;
+        default:
+            msg->data[1] = -EINVAL;
+            msg_respond(iv_msgQ, msg);
         }
     }
 
+}
+
+static errlHndl_t forceSbeUpdate(Target* const i_target)
+{
+    errlHndl_t errl = SBE::updateProcessorSbeSeeproms();
+
+    if (errl)
+    {
+        SBE_TRACF(ERR_MRK"forceSbeUpdate: updateProcessorSbeSeeproms returned "
+                  "an error for processor 0x%08x: "
+                  TRACE_ERR_FMT,
+                  get_huid(i_target),
+                  TRACE_ERR_ARGS(errl));
+        errl->collectTrace(SBEIO_COMP_NAME);
+    }
+    else
+    {
+        SBE_TRACF(ERR_MRK"forceSbeUpdate: updateProcessorSbeSeeproms returned "
+                  "without an error on processor 0x%08x",
+                  get_huid(i_target));
+
+        /*@
+         * @errortype
+         * @moduleid     SBEIO_PSU
+         * @reasoncode   ISTEP::RC_SBE_UPDATE_UNEXPECTEDLY_FAILED
+         * @devdesc      Failed to update the SBE after an unsupported PSU operation error
+         * @custdesc     SBE update failed
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             SBEIO_PSU,
+                             ISTEP::RC_SBE_UPDATE_UNEXPECTEDLY_FAILED,
+                             0,
+                             0,
+                             ErrlEntry::ADD_SW_CALLOUT);
+
+        errl->addHwCallout(i_target,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::NO_DECONFIG,
+                           HWAS::GARD_NULL);
+
+        errl->collectTrace(TARG_COMP_NAME);
+        errl->collectTrace(SBE_COMP_NAME);
+        errl->collectTrace(ISTEP_COMP_NAME);
+        errl->collectTrace(SBEIO_COMP_NAME);
+    }
+
+    return errl;
 }
 
 const SbePsu::unsupported_command_error_severity SbePsu::COMMAND_SUPPORT_OPTIONAL { ERRORLOG::ERRL_SEV_UNKNOWN };
@@ -266,10 +315,7 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
 
     SBE_TRACD(ENTER_MRK "performPsuChipOp");
 
-    if (o_unsupportedOp)
-    {
-        *o_unsupportedOp = false;
-    }
+    o_unsupportedOp && (*o_unsupportedOp = false);
 
     //Only perform new chip-ops if we aren't shutting down
     if (!iv_shutdownInProgress)
@@ -327,7 +373,8 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
                                  iv_psuResponse,
                                  i_timeout,
                                  i_rspMsgs);
-            if (errl){
+            if (errl)
+            {
                 SBE_TRACF(ERR_MRK"performPsuChipOp::"
                         " checkResponse returned an error");
                 break;  // return with error
@@ -337,17 +384,43 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
                 && (SBE_SEC_COMMAND_NOT_SUPPORTED == o_pPsuResponse->secondaryStatus
                     || SBE_SEC_COMMAND_CLASS_NOT_SUPPORTED == o_pPsuResponse->secondaryStatus))
             {
-                if (o_unsupportedOp)
-                {
-                    *o_unsupportedOp = true;
-                }
+                o_unsupportedOp && (*o_unsupportedOp = true);
 
+                // If the caller requested that an error be created for
+                // unsupported operations, create the error here.
                 if (i_supportErrSev.error_sev != ERRL_SEV_UNKNOWN)
                 {
                     SBE_TRACF("The SBE does not support command class %d/command %d on target 0x%08x",
                               i_pPsuRequest->commandClass,
                               i_pPsuRequest->command,
                               get_huid(i_target));
+
+                    // If support for an operation on the master processor's SBE
+                    // is not optional, then update the SBE now and reboot.
+                    if (i_supportErrSev.error_sev >= ERRL_SEV_UNRECOVERABLE
+                        && i_target->getAttr<ATTR_PROC_MASTER_TYPE>() == PROC_MASTER_TYPE_ACTING_MASTER)
+                    {
+                        // Some callers may ignore errors if they see that the
+                        // operation was unsupported, but SBE update error are
+                        // not ignorable
+                        o_unsupportedOp && (*o_unsupportedOp = false);
+
+                        if (TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_SBE_UPDATE_DISABLE>())
+                        {
+                            // In this case a fatal/unrecoverable error will be
+                            // created below and halt the IPL.
+                            SBE_TRACF(INFO_MRK"performPsuChipOp: The SBE on the master processor 0x%08x "
+                                      "needs to be updated after an unsupported SBE PSU operation, but "
+                                      "SBE updates have been disabled via ATTR_SBE_UPDATE_DISABLE",
+                                      get_huid(i_target));
+                        }
+                        else
+                        {
+                            // Update the SBE and reboot
+                            errl = forceSbeUpdate(i_target);
+                            break; // the call above should never return
+                        }
+                    }
 
                     /*@
                      * @errortype
@@ -364,6 +437,32 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
                                          i_pPsuRequest->commandClass,
                                          i_pPsuRequest->command,
                                          ErrlEntry::ADD_SW_CALLOUT);
+
+                    // For subsidiary processors, either the error happens
+                    // before the SMP fabric is up, in which case we can't fix
+                    // the problem by updating the SBE (because SBE SEEPROM
+                    // accesses are blocked over FSI for being insecure), or
+                    // else the error happens after the SMP fabric is up, in
+                    // which case we have already updated the SBE (there are no
+                    // isteps between fabric setup and the SBE update istep for
+                    // subsidiary processors) and there's some serious problem
+                    // on the latest version of the SBE that we possess. Either
+                    // way, we have to deconfigure the processor.
+                    if (i_supportErrSev.error_sev >= ERRL_SEV_UNRECOVERABLE
+                        && i_target->getAttr<ATTR_PROC_MASTER_TYPE>() != PROC_MASTER_TYPE_ACTING_MASTER)
+                    {
+                        SBE_TRACF(ERR_MRK"performPsuChipOp: Deconfiguring subsidiary processor 0x%08x "
+                                  " because of an unsupported SBE PSU operation on a subsidiary processor",
+                                  get_huid(i_target));
+
+                        errl->addHwCallout(i_target,
+                                           HWAS::SRCI_PRIORITY_MED,
+                                           HWAS::DELAYED_DECONFIG,
+                                           HWAS::GARD_NULL);
+                    }
+
+                    errl->addProcedureCallout(HWAS::EPUB_PRC_SBE_CODE,
+                                              HWAS::SRCI_PRIORITY_HIGH);
 
                     errl->collectTrace(SBEIO_COMP_NAME);
                 }
