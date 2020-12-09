@@ -71,8 +71,6 @@ namespace SBEIO
             }
         }
 
-// @TODO: RTC 248572: Can't take advantage of SbeRetryHandler because it relies heavily on P9 code
-#if 0
         SbeRetryHandler l_sbeObj = SbeRetryHandler(
                       SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
@@ -144,7 +142,6 @@ namespace SBEIO
                 }
             }
         }
-#endif  // End: Can't take advantage of SbeRetryHandler because it relies heavily on P9 code
 #else
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                             const_cast<TARGETING::Target*> (i_procTarg));

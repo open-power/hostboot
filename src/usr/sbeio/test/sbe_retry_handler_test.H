@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,9 +57,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     void testSBEReturns(void)
     {
-        SBE_TRACF_RHT(ENTER_MRK"testSBEReturns: Calling sbe handler retry, "
-                        "and returning");
-
+        SBE_TRACF_RHT(ENTER_MRK"testSBEReturns: Testing we come back from SbeRetryHandler");
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(
@@ -73,9 +71,11 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
         for( const auto & l_cpu_target: l_cpuTargetList)
         {
 
+            SBE_TRACF_RHT("testSBEReturns PROC HUID=0x%X", get_huid(l_cpu_target));
             if(l_cpu_target == l_pMasterProcTarget)
             {
                 // we are just looking at Slave SBE's
+                SBE_TRACF_RHT("testSBEReturns skipping PRIMARY PROC HUID=0x%X", get_huid(l_cpu_target));
                 continue;
             }
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
@@ -83,21 +83,20 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
             l_SBEobj.main_sbe_handler(l_cpu_target);
 
-            SBE_TRACF_RHT("testSBEReturns: returned from main_sbe_handler "
-                           "SUCCESS");
+            SBE_TRACF_RHT("testSBEReturns: Success, returned from main_sbe_handler HUID=0x%X", get_huid(l_cpu_target));
         }
+        SBE_TRACF_RHT(EXIT_MRK"testSBEReturns: Testing we come back from SbeRetryHandler");
     }
 
     /**
-     * @brief Call into sbe handler retry on the slave SBE, and ensure that
-     *        the sbe started class element matches the target attribute
+     * @brief Call into SbeRetryHandler on the slave SBE, and ensure that
+     *        the sbe started status matches the target attribute
      *
      *        This will not run fully without a slave SBE
      */
     void testSBEStarted(void)
     {
-        SBE_TRACF_RHT(ENTER_MRK"testSBEStarted: The class element that the "
-                  "SBE has started needs to match the SBE started attribute");
+        SBE_TRACF_RHT(ENTER_MRK"testSBEStarted: Match SBE started state with attribute");
 
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = NULL;
@@ -112,9 +111,11 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
         for( const auto & l_cpu_target: l_cpuTargetList)
         {
 
+            SBE_TRACF_RHT("testSBEStarted PROC HUID=0x%X", get_huid(l_cpu_target));
             if(l_cpu_target == l_pMasterProcTarget)
             {
                 // we are just looking at Slave SBE's
+                SBE_TRACF_RHT("testSBEStarted skipping PRIMARY PROC HUID=0x%X", get_huid(l_cpu_target));
                 continue;
             }
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
@@ -127,16 +128,13 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
             if(l_SBEobj.isSbeAtRuntime() && !l_sbeStarted)
             {
-                TS_FAIL("testSBEStarted: If the class element that "
-                       "the SBE started is true, then the SBE attribute also "
-                       "needs to be true");
+                TS_FAIL("testSBEStarted: Mismatch between SBE state says at RUNTIME and attribute says -NOT- started");
             }else if(!(l_SBEobj.isSbeAtRuntime() && l_sbeStarted))
             {
-                TS_FAIL("testSBEStarted: If the class element "
-                       "that the SBE started is false, then the SBE attribute "
-                       "also needs to be false");
+                TS_FAIL("testSBEStarted: Mismatch between SBE state says -NOT- at RUNTIME and attribute says started");
             }
         }
+        SBE_TRACF_RHT(EXIT_MRK"testSBEStarted: Match SBE started state with attribute");
     }
 
 };

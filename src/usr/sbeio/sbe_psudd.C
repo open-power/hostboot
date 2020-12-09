@@ -43,11 +43,9 @@
 #include <arch/magic.H>
 #include <kernel/pagemgr.H>
 #include <sbeio/sbeioif.H>
-/* FIXME RTC: 248572
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-#include <p9_extract_sbe_rc.H>
-*/
+#include <p10_extract_sbe_rc.H>
 #include <errl/errludlogregister.H>
 #include <sbeio/sbe_retry_handler.H>
 #include <initservice/initserviceif.H>
@@ -411,7 +409,6 @@ void SbePsu::saveEarlyError(uint32_t i_plid, TARGETING::TargetHandle_t i_target)
 errlHndl_t SbePsu::processEarlyError()
 {
     errlHndl_t l_err = nullptr;
-/* FIXME RTC: 248572 no SbeRetryHandler yet
     SBE_TRACD(ENTER_MRK "processEarlyError");
 
     if (earlyError())
@@ -430,7 +427,6 @@ errlHndl_t SbePsu::processEarlyError()
     }
 
     SBE_TRACD(EXIT_MRK "processEarlyError");
-*/
     return l_err;
 }
 
@@ -899,7 +895,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
 
                 // Keep a copy of the plid so we can pass it to the retry_handler
                 // so the error logs it creates will be linked
-                //uint32_t l_errPlid = l_errl->plid(); // FIXME RTC: 248572
+                uint32_t l_errPlid = l_errl->plid();
 
                 // Commit error log now if this is a FSP system because
                 // we will not return from retry handler
@@ -920,7 +916,6 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                           HWAS::GARD_NULL );
                 }
 
-/* FIXME RTC: 248572 no SbeRetryHandler yet
                 if (!VFS::module_is_loaded("libfapi2.so"))
                 {
                     // If the fapi library hasn't been loaded, we need to save
@@ -944,7 +939,6 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
 
                     l_SBEobj.main_sbe_handler(i_target);
                 }
-*/
             }
             else
             {

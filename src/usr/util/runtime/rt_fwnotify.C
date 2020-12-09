@@ -103,9 +103,6 @@ uint16_t SeqId_t::getCurrentSeqId()
  **/
 void sbeAttemptRecovery(uint64_t i_data)
 {
-// @TODO: RTC 244854 Re-enable once the SBEIO::SbeRetryHandler is operational
-//  and no longer tied to P9.
-#if 0
 
    // Create a useful struct to get to the data
    // The data is expected to be a HUID (in the first 4 bytes)
@@ -242,7 +239,6 @@ void sbeAttemptRecovery(uint64_t i_data)
     }
 
     TRACFCOMP(g_trac_runtime, EXIT_MRK"sbeAttemptRecovery");
-#endif // #if 0
 }
 
 /**

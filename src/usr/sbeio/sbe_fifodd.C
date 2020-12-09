@@ -661,7 +661,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
 
             // Keep a copy of the plid so we can pass it to the retry_handler
             // so the error logs it creates will be linked
-//            uint32_t l_errPlid = errl->plid();
+            uint32_t l_errPlid = errl->plid();
 
             // Commit error log now if this is a FSP system because
             // we will not return from retry handler
@@ -682,8 +682,6 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
                                      HWAS::GARD_NULL );
             }
 
-// FIXME RTC: 248572 no SbeRetryHandler yet
-#if 0
             // Set the retry handler's mode to be informational, this will run
             // p9_extract_rc then TI the system on fsp-systems.
             // On open power systems if mode is set to informational we will run
@@ -708,7 +706,6 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
             }
 
             l_SBEobj.main_sbe_handler(i_target);
-#endif
 
             //break out of continuous loop ( should only get here on openPower systems)
             break;

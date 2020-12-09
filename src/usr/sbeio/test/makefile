@@ -43,8 +43,7 @@ MODULE = testsbeio
 TESTS  = sbe_ffdctest.H
 TESTS += sbe_getsbeffdctest.H
 TESTS += sbe_fifo_buffer_test.H
-#TODO RTC:248572
-#TESTS += sbe_retry_handler_test.H
+TESTS += sbe_retry_handler_test.H
 TESTS += sbe_memregiontest.H
 TESTS += sbe_psucommandstest.H
 TESTS += sbe_psuSendOcmbConfigTest.H

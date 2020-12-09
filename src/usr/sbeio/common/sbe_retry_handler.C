@@ -66,7 +66,6 @@
 
 #include <devicefw/driverif.H>
 #include <plat_utils.H>
-//TODO: RTC 248572 #include <set_sbe_error.H>
 
 
 
@@ -203,7 +202,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             SBEIO_EXTRACT_RC_HANDLER,
                             SBEIO_SLAVE_FAILED_TO_BOOT,
-                            /* TODO RTC: 248572 this->iv_sbeRegister.asyncFFDC*/ 0,
+                            this->iv_sbeRegister.asyncFFDC,
                             TARGETING::get_huid(i_target));
 
                 l_errl->collectTrace( "ISTEPS_TRACE", 256);
@@ -227,7 +226,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
         // will run extract RC if we know the sbe has at least tried to boot
         if(this->iv_sbeRegister.sbeBooted)
         {
-            SBE_TRACF("main_sbe_handler(): No async ffdc found and sbe says it has been booted, running run p10_sbe_extract_rc.");
+            SBE_TRACF("main_sbe_handler(): No async ffdc found and sbe says it has been booted, running p10_sbe_extract_rc.");
             // Call the function that runs extract_rc, this needs to run to determine
             // what broke and what our retry action should be
             this->sbe_run_extract_rc(i_target);
@@ -283,10 +282,9 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             SBE_TRACF("main_sbe_handler(): iv_sbeRegister.currState: %d , "
                         "iv_currentSideBootAttempts: %d , "
                         "iv_currentAction: %d , ",
-                        /* FIXME RTC: 248572 this->iv_sbeRegister.currState*/ 0,
+                        this->iv_sbeRegister.currState,
                         this->iv_currentSideBootAttempts,
-                        // FIXME RTC: 248572
-                        /*this->iv_currentAction*/ 0);
+                        this->iv_currentAction);
 
             if(this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
             {
@@ -422,7 +420,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target (i_target);
             if(this->iv_currentSideBootAttempts >= MAX_SIDE_BOOT_ATTEMPTS)
             {
-/* TODO RTC 248572
+               /*@
                 * @errortype  ERRL_SEV_PREDICTIVE
                 * @moduleid   SBEIO_EXTRACT_RC_HANDLER
                 * @reasoncode SBEIO_EXCEED_MAX_SIDE_BOOTS
@@ -432,6 +430,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                 *             the current seeprom side. For some reason
                 *             we are attempting to do another boot.
                 * @custdesc   Processor Error
+                */
                 l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_PREDICTIVE,
                             SBEIO_EXTRACT_RC_HANDLER,
@@ -439,7 +438,6 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                             this->iv_currentSideBootAttempts,
                             TARGETING::get_huid(i_target));
 
-*/
                 l_errl->collectTrace( SBEIO_COMP_NAME, 256);
 
                 // Set the PLID of the error log to master PLID
@@ -558,12 +556,12 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             // If the currState of the SBE is not RUNTIME then we will assume
             // our attempt to boot the SBE has failed, so run extract rc again
             // to determine why we have failed
-            if (/* FIXME RTC: 248572 this->iv_sbeRegister.currState != SBE_STATE_RUNTIME*/ 0)
+            if (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME)
             {
                 this->sbe_run_extract_rc(i_target);
             }
 
-        } while(/* FIXME RTC: 248572 (this->iv_sbeRegister).currState != SBE_STATE_RUNTIME*/ 0);
+        } while( (this->iv_sbeRegister).currState != SBE_STATE_RUNTIME );
 
         // If we ended up switching sides we want to mark it down as
         // as informational log
@@ -731,7 +729,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
         {
             SBE_TRACF("SBE 0x%.8X has async FFDC bit set, "
                       "iv_sbeRegister=0x%.8X",TARGETING::get_huid(i_target),
-                      /* FIXME RTC: 248572 (this->iv_sbeRegister).reg*/ 0);
+                      (this->iv_sbeRegister).reg);
             // Async FFDC is indicator that SBE is failing to boot, and if
             // in DUMP state, that SBE is done dumping, so leave loop
             break;
@@ -740,7 +738,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
         {
             if( !(l_loops % 10) )
             {
-                SBE_TRACF("%d> SBE 0x%.8X NOT booted yet, "
+                SBE_TRACF("Loop %d> SBE 0x%.8X NOT booted yet, "
                           "iv_sbeRegister=0x%.8X", l_loops,
                           TARGETING::get_huid(i_target),
                            (this->iv_sbeRegister).reg);
@@ -786,7 +784,7 @@ void SbeRetryHandler::handleFspIplTimeFail(TARGETING::Target * i_target)
     // If we found that there was async FFDC available we need to notify hwsv of this
     // even if we did not find anything useful in the ffdc for us, its possible hwsv
     // will be able to use it.
-    if (/* FIXME RTC: 248572(this->iv_sbeRegister).asyncFFDC*/ 0)
+    if ((this->iv_sbeRegister).asyncFFDC)
     {
         iv_shutdownReturnCode = SBEIO_HWSV_COLLECT_SBE_RC;
     }
@@ -799,7 +797,7 @@ void SbeRetryHandler::handleFspIplTimeFail(TARGETING::Target * i_target)
     }
     SBE_TRACF("handleFspIplTimeFail(): During IPL time on FSP system hostboot will TI so that HWSV can handle the error. "
               "Shutting down w/ the error code %s" ,
-              /* FIXME RTC: 248572 this->iv_sbeRegister.asyncFFDC*/ 0 ? "SBEIO_HWSV_COLLECT_SBE_RC" : "SBEIO_DEAD_SBE"  );
+              this->iv_sbeRegister.asyncFFDC ? "SBEIO_HWSV_COLLECT_SBE_RC" : "SBEIO_DEAD_SBE"  );
 
     // On FSP systems if we failed to recover the SBE then we should shutdown w/ the
     // correct error so that HWSV will know what FFDC to collect
@@ -924,13 +922,12 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
 
                     //Put FFDC into sbeFfdc_t struct and
                     //call FAPI_SET_SBE_ERROR
-                    //FIXME 248572 fapi2::sbeFfdc_t l_sbeFfdc;
+                    // @TODO RTC 254961 fapi2::sbeFfdc_t l_sbeFfdc;
                     //l_sbeFfdc.size = l_package.size;
-                    //l_sbeFfdc.data = reinterpret_cast<uint64_t>(
-                    //                                          l_package.ffdcPtr);
+                    //l_sbeFfdc.data = reinterpret_cast<uint64_t>(l_package.ffdcPtr);
 
-                    //FIXME 248572 uint32_t l_pos = i_target->getAttr<TARGETING::ATTR_FAPI_POS>();
-                    // FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, &l_sbeFfdc, l_pos);
+                    //uint32_t l_pos = i_target->getAttr<TARGETING::ATTR_FAPI_POS>();
+                    //FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, &l_sbeFfdc, l_pos);
                     errlHndl_t l_sbeHwpfErr = rcToErrl(l_fapiRc);
                     // If we created an error successfully we must now commit it
                     if(l_sbeHwpfErr)
@@ -1030,8 +1027,7 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     // Convert the returnCode into an UNRECOVERABLE error log which we will
     // associate w/ the caller's errlog via plid
     l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-    // FIXME RTC: 248572
-    //this->iv_currentAction = l_ret;
+    this->iv_currentAction = l_ret;
 
     // This call will look at what p10_extact_sbe_rc had set the return action to
     // checks on how many times we have attempted to boot this side,
@@ -1068,7 +1064,7 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     }
 
     SBE_TRACF(EXIT_MRK "sbe_run_extract_rc() current action is %llx",
-                        /* FIXME RTC: 248572 this->iv_currentAction*/ 0);
+                        this->iv_currentAction);
 }
 
 void SbeRetryHandler::bestEffortCheck()
