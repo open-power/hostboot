@@ -322,6 +322,8 @@ void nvdimmSendNvStatus();
  *        ENCRYPTION_DISABLED - contents of nvdimm are not encrypted
  *        ERASE_VERIFY_STARTED - set secure_erase_verify_complete to 0
  *        ERASE_VERIFY_COMPLETE = set secure_erase_verify_complete to 1
+ *        SBE_ACTIVE - set active state
+ *        SBE_INACTIVE - set inactive state
  */
 enum nvdimm_protection_t
 {
@@ -337,6 +339,8 @@ enum nvdimm_protection_t
     ERASE_VERIFY_STARTED      = 9,
     ERASE_VERIFY_COMPLETED    = 10,
     SEND_NV_STATUS            = 11,
+    SBE_ACTIVE                = 12,
+    SBE_INACTIVE              = 13,
     /* deprecated, still used by PRD */
     UNPROTECTED_BECAUSE_ERROR = 4,
 };

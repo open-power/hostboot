@@ -94,6 +94,49 @@ uint16_t SeqId_t::getCurrentSeqId()
 }
 
 /**
+ *  @brief Attempt to notify PHYP of SBE active status change
+ *  @param[in] i_data - contains a byte indicating SBE active status
+ *  @param[in] i_target - target we wish to send the notification for
+ *  @platform FSP
+ **/
+void sbeActiveNotification( void * i_data,
+                            const TARGETING::Target *i_target)
+{
+    // data is one byte - 1 = SBE active, 0 = SBE not active
+    uint8_t * l_active = reinterpret_cast<uint8_t*>(i_data);
+    TRACFCOMP(g_trac_runtime, ENTER_MRK"sbeActiveNotification: 0x%02X", *l_active);
+#ifdef CONFIG_NVDIMM
+    // Just a safety check
+    assert(l_active != nullptr, "sbeActiveNotification: invalid NULL data ptr");
+    assert(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC,
+           "sbeActiveNotification passed target that is not TYPE_PROC");
+    errlHndl_t l_err = nullptr;
+
+    if (*l_active)
+    {
+        l_err = NVDIMM::notifyNvdimmProtectionChange(i_target,
+                                                     NVDIMM::SBE_ACTIVE);
+    }
+    else
+    {
+        l_err = NVDIMM::notifyNvdimmProtectionChange(i_target,
+                                                     NVDIMM::SBE_INACTIVE);
+    }
+
+    // commit error if it exists
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_runtime,
+                  ERR_MRK"sbeActiveNotification: 0x%02X - 0x%.8X processor",
+                  *l_active, TARGETING::get_huid(i_target));
+
+        errlCommit(l_err, RUNTIME_COMP_ID);
+        l_err = nullptr;
+    }
+#endif
+}
+
+/**
  *  @brief Attempt an SBE recovery after an SBE error
  *  @param[in] uint64_t i_data Contains a HUID (in the first 4 bytes)
  *                             and a plid (in the last 4 bytes)
@@ -110,6 +153,7 @@ void sbeAttemptRecovery(uint64_t i_data)
              "HUID:0x%X", l_sbeRetryData->plid, l_sbeRetryData->huid);
 
     errlHndl_t l_err = nullptr;
+    uint8_t l_sbe_recovered = 0;
 
     do
     {
@@ -141,6 +185,9 @@ void sbeAttemptRecovery(uint64_t i_data)
                                    true);
             break;
         }
+
+        // Notify PHYP that the SBE is inactive and their NVDIMMs are not protected
+        sbeActiveNotification( &l_sbe_recovered, l_target );
 
         // Get the SBE Retry Handler, propagating the supplied PLID
         SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
@@ -195,6 +242,9 @@ void sbeAttemptRecovery(uint64_t i_data)
             TRACFCOMP(g_trac_runtime, "sbeAttemptRecovery: RECOVERY_SUCCESS");
             l_req_fw_msg.generic_msg.msgType =
                              GenericFspMboxMessage_t::MSG_SBE_RECOVERY_SUCCESS;
+            // Notify PHYP that the SBE is active
+            l_sbe_recovered = 1;
+            sbeActiveNotification( &l_sbe_recovered, l_target);
         }
         else
         {

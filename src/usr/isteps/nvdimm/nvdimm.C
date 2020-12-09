@@ -3736,6 +3736,12 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                 case SEND_NV_STATUS:
                     // no action, just send status
                     break;
+                case SBE_ACTIVE
+                    l_armed_state.sbe_active = 1;
+                    break;
+                case SBE_INACTIVE
+                    l_armed_state.sbe_active = 0;
+                    break;
             }
 
             // Set the attribute and send it to the FSP if needed
@@ -3752,6 +3758,7 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
             // Clear bit 0 if protected nv state
             if (l_armed_state.armed &&
                 l_armed_state.occ_active &&
+                l_armed_state.sbe_active &&
                 !l_armed_state.fatal_error_detected)
             {
                 l_nv_status &= NV_STATUS_UNPROTECTED_CLR;
