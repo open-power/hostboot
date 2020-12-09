@@ -27,6 +27,7 @@
 #define __UTIL_MEMOIZE_H
 
 #include <map>
+#include <targeting/adapters/mutexadapter.H>
 
 namespace Util
 {
@@ -75,6 +76,9 @@ ReturnType memoize(
 {
     decltype(i_fn(i_in, o_out)) r_value {};
 
+    static TARG_MUTEX_TYPE memoize_mutex;
+    TARG_MUTEX_LOCK(memoize_mutex);
+
     do {
 
     // If the result of the input is already cached, return it
@@ -96,6 +100,8 @@ ReturnType memoize(
     }
 
     } while(0);
+
+    TARG_MUTEX_UNLOCK(memoize_mutex);
 
     return r_value;
 }
