@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,11 +162,14 @@ fapi_try_exit:
 /// @tparam T the fapi2::TargetType which hold the FIR bits
 /// @param[in] i_target - the target on which to operate
 /// @param[in,out] io_rc - the return code for the function
+/// @param[in,out] io_fircheck_scom_err - the return code for reading the FIR scoms
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 /// @note This is a helper function to enable unit testing
 ///
 template< mss::mc_type MC, firChecklist F, fapi2::TargetType T >
-fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target, fapi2::ReturnCode& io_rc )
+fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target,
+        fapi2::ReturnCode& io_rc,
+        fapi2::ReturnCode& io_fircheck_scom_err)
 {
     // We didn't have an error, so return success
     if(io_rc == fapi2::FAPI2_RC_SUCCESS)
@@ -175,13 +178,12 @@ fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target, fa
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    fapi2::ReturnCode l_fircheck_scom_err(fapi2::FAPI2_RC_SUCCESS);
     bool l_fir_error = false;
 
     FAPI_ERR("%s has a bad return code, time to check some firs!", mss::c_str(i_target));
 
     // Check the fir bits against the mask and return fir status thru fapi2 RC
-    l_fircheck_scom_err = bad_fir_bits<MC, F>(i_target, io_rc, l_fir_error);
+    io_fircheck_scom_err = bad_fir_bits<MC, F>(i_target, io_rc, l_fir_error);
 
     FAPI_ERR("%s took a fail. FIR was %s", mss::c_str(i_target),
              l_fir_error ? "set - returning FIR RC" : "unset - returning inputted RC");
@@ -218,12 +220,18 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
 #ifdef __HOSTBOOT_MODULE
 
     fapi2::ReturnCode l_rc(io_rc);
+    fapi2::ReturnCode l_fircheck_scom_err(fapi2::FAPI2_RC_SUCCESS);
 
     // If need be, check the FIR below
     if(i_check_fir)
     {
         // Handle any issues according to PRD FIR scheme, as a FIR could have caused this issue
-        l_rc = hostboot_fir_or_pll_fail<MC, F>(i_target, l_rc);
+        l_rc = hostboot_fir_or_pll_fail<MC, F>(i_target, l_rc, l_fircheck_scom_err);
+    }
+
+    if (l_fircheck_scom_err != fapi2::FAPI2_RC_SUCCESS)
+    {
+        return l_fircheck_scom_err;
     }
 
     return l_rc;

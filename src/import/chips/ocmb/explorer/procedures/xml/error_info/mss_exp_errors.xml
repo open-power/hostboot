@@ -433,10 +433,35 @@
     <rc>RC_MSS_EXP_I2C_FW_STATUS_BUSY</rc>
     <description>
       Received FW_BUSY status after polling timeout for
-      command ID EXP_FW_STATUS
+      command ID EXP_FW_STATUS. See CMD_ID for the failing command id.
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>STATUS_CODE</ffdc>
+    <ffdc>CMD_ID</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_I2C_CMD_FAIL</rc>
+    <description>
+      Received non-SUCCESS status for command ID EXP_FW_STATUS.
+      See CMD_ID for the failing command id.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CMD_ID</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>STATUS</ffdc>
     <ffdc>STATUS_DATA</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -590,6 +615,129 @@
     <deconfigure>
       <target>TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_INVALID_CMD</rc>
+    <description>
+      BOOT_CONFIG command was invalid.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_LOOPBACK_FAIL</rc>
+    <description>
+      BOOT_CONFIG command encountered an OMI loopback test failure.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_SERDES_INIT_FAIL</rc>
+    <description>
+      BOOT_CONFIG command encountered an OMI SerDes initialization
+      failure.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_DLX_CONFIG_FAIL</rc>
+    <description>
+      BOOT_CONFIG command encountered an OMI DL config or training
+      failure.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_LANE_INV_FAIL</rc>
+    <description>
+      BOOT_CONFIG command encountered an OMI lane inversion
+      failure.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_PARITY_UECC_ERROR</rc>
+    <description>
+      BOOT_CONFIG command encountered OMI parity or UECC errors.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
   </hwpError>
 
   <registerFfdc>

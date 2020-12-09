@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -377,16 +377,12 @@ enum status_codes
 ///
 enum fw_boot_cfg_status
 {
-    FW_BOOT_CFG_SUCCESS                 = status_codes::I2C_SUCCESS,
-
-    // Loopback fail
-    FW_BOOT_CFG_LB_FAIL                 = 0x01,
-    // Transport layer fail
-    FW_BOOT_CFG_UNSUPPORTED_TL          = 0x02,
-    // DL (data link) layer fail
-    FW_BOOT_CFG_UNSUPPORTED_DL          = 0x03,
-    // SERDES (serializer/deserializer) FREQ fail
-    FW_BOOT_CFG_UNSUPPORTED_SERDES_FREQ = 0x04,
+    INVALID_CMD       = 0x01,
+    LOOPBACK_FAIL     = 0x02,
+    SERDES_INIT_FAIL  = 0x04,
+    DLX_CONFIG_FAIL   = 0x08,
+    LANE_INV_FAIL     = 0x10,
+    PARITY_UECC_ERROR = 0x20,
 };
 
 #endif

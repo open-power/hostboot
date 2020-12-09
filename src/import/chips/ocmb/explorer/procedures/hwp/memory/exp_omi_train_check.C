@@ -39,6 +39,7 @@
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/i2c/exp_i2c.H>
+#include <lib/i2c/exp_i2c_fields.H>
 #include <lib/omi/exp_omi_utils.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <mss_generic_system_attribute_getters.H>
@@ -71,7 +72,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     uint32_t l_omi_freq = 0;
     uint8_t l_lane = 0;
     constexpr uint8_t NUM_LANES = 8;
-    bool l_fw_status_busy = true;
+    std::vector<uint8_t> l_cmd_data;
     std::vector<uint8_t> l_fw_status_data;
 
     uint8_t l_sim = 0;
@@ -89,20 +90,18 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     // Simics does not support fw_status here, will return BUSY as done in exp_omi_setup
     if (l_simics == fapi2::ENUM_ATTR_IS_SIMICS_REALHW)
     {
+        uint8_t l_status_code = ~(0);
         // First poll FW_STATUS to ensure we can do scoms to Explorer
         // There is a window during OMI training where Explorer FW will not respond to anything
         // except FW_STATUS and TWI_POLL_ABORT commands (which precludes i2c scom reads)
         // note the assert param is to suppress assert/callout if polling ends with BUSY state
         // note the polling count was updated from 100 to 10,000 to give time for training to
         // complete. This value may need to be optimized once the training procedure is finalized
-        FAPI_TRY( mss::exp::i2c::fw_status(i_target, mss::common_timings::DELAY_1MS, 10000,
-                                           mss::exp::i2c::NO_ASSERT_IF_BUSY_FW_STATUS) );
-
-        FAPI_TRY( mss::exp::i2c::get_fw_status(i_target, l_fw_status_data) );
-        FAPI_TRY( mss::exp::i2c::check::status_code(i_target, mss::exp::i2c::FW_STATUS, l_fw_status_data, l_fw_status_busy) );
+        FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::common_timings::DELAY_1MS, 10000, l_fw_status_data));
+        FAPI_TRY(mss::exp::i2c::status::get_status_code(i_target, l_fw_status_data, l_status_code) );
 
         // If we're still in the BUSY state, abort Explorer FW polling loop
-        if (l_fw_status_busy)
+        if (l_status_code == mss::exp::i2c::status_codes::FW_BUSY)
         {
             FAPI_TRY( mss::exp::omi::train::poll_abort(i_target) );
         }
@@ -150,8 +149,16 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                 l_dl0_error_hold
                );
 
+    // Rebuild BOOT_CONFIG1 command so we have it for traces and error logs
+    FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_cmd_data));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target,
+             l_cmd_data,
+             fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_ONLY_DL_TRAINING ));
+    mss::exp::i2c::boot_config_setup(l_cmd_data);
+
     // Finally, make sure fw_status is good
-    FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::common_timings::DELAY_1MS, 100));
+    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::common_timings::DELAY_1MS, 100, l_fw_status_data));
+    FAPI_TRY(mss::exp::i2c::check::boot_config(i_target, l_cmd_data, l_fw_status_data));
 
     // Training done bit
     l_expected_dl0_error_hold.setBit<EXPLR_DLX_DL0_ERROR_HOLD_CERR_39>();

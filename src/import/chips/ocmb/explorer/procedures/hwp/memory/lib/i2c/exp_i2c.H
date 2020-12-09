@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,23 +54,13 @@ namespace i2c
 {
 
 ///
-/// @brief Assert/callout settings for when a FW_STATUS response shows a non-SUCCESS status
-/// @note Allows the caller of check::status_code or fw_status to suppress asserts if we expect a command to fail
+/// @brief Poll settings for when a FW_STATUS response shows a non-SUCCESS status
+/// @note Allows the caller of poll_fw_status to continue polling if we expect a command to fail
 ///
-enum assert_if_bad_fw_status
+enum stop_if_bad_fw_status
 {
-    ASSERT_IF_BAD_FW_STATUS,
-    NO_ASSERT_IF_BAD_FW_STATUS,
-};
-
-///
-/// @brief Assert/callout settings for when a FW_STATUS response shows a BUSY status
-/// @note Allows the caller of fw_status to suppress asserts if the polling loop ends with a BUSY state
-///
-enum assert_if_busy_fw_status
-{
-    ASSERT_IF_BUSY_FW_STATUS,
-    NO_ASSERT_IF_BUSY_FW_STATUS,
+    STOP_IF_BAD_FW_STATUS,
+    CONTINUE_IF_BAD_FW_STATUS,
 };
 
 ///
@@ -87,19 +77,28 @@ namespace check
 {
 
 ///
-/// @brief Checks the I2c explorer status codes
+/// @brief Check EXP_FW_STATUS for completion/results of previous command
 /// @param[in] i_target the OCMB target
-/// @param[in] i_cmd_id the command ID
-/// @param[in] i_data data to check from EXP_FW_STATUS
-/// @param[out] o_busy true if explorer returns FW_BUSY status, false otherwise
-/// @param[in] i_assert set to ASSERT if function should assert if FW_STATUS returns a bad status value (default ASSERT)
+/// @param[in] i_cmd_id the command id
+/// @param[in] i_cmd_data the command in byte vector format
+/// @param[in] i_rsp_data data to check from EXP_FW_STATUS
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode status_code( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                               const uint8_t i_cmd_id,
-                               const std::vector<uint8_t>& i_data,
-                               bool& o_busy,
-                               const assert_if_bad_fw_status i_assert = ASSERT_IF_BAD_FW_STATUS );
+fapi2::ReturnCode command_result( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  const uint8_t i_cmd_id,
+                                  const std::vector<uint8_t>& i_cmd_data,
+                                  const std::vector<uint8_t>& i_rsp_data );
+
+///
+/// @brief Check FW_STATUS for completion/results of FW_BOOT_CONFIG
+/// @param[in] i_target the OCMB target
+/// @param[in] i_cmd_data the command
+/// @param[in] i_rsp_data data to check from EXP_FW_STATUS
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                               const std::vector<uint8_t>& i_cmd_data,
+                               const std::vector<uint8_t>& i_rsp_data );
 
 }// check
 
@@ -131,28 +130,30 @@ fapi2::ReturnCode get_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 ///
 /// @brief Helper function to check FW_STATUS loop termination, for unit testing
 /// @param[in] i_target the OCMB target
-/// @param[in] i_busy busy flag from check::status_code
-/// @param[in] i_boot_stage boot_stage output from status::get_boot_stage
-/// @return true if we should break out of the loop, false otherwise
+/// @param[in] i_data response data from FW_STATUS command
+/// @param[in] i_stop_if_bad_status set to STOP if polling should stop if FW_STATUS returns a bad status value (default CONTINUE)
+/// @param[out] o_done true if we should break out of the loop, false otherwise
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-bool fw_status_loop_done(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                         const bool i_busy,
-                         const uint8_t i_boot_stage);
+fapi2::ReturnCode fw_status_loop_done(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      const std::vector<uint8_t>& i_data,
+                                      const stop_if_bad_fw_status i_stop_if_bad_status,
+                                      bool& o_done);
 
 ///
-/// @brief EXP_FW_STATUS
+/// @brief Poll EXP_FW_STATUS command
 /// @param[in] i_target the OCMB target
 /// @param[in] i_delay delay between polls
 /// @param[in] i_loops number of polling loops to perform
-/// @param[in] i_assert_if_busy set to ASSERT if function should assert if polling ends with BUSY state (default ASSERT)
-/// @param[in] i_assert_if_bad_status set to ASSERT if function should assert if FW_STATUS returns a bad status value (default ASSERT)
+/// @param[out] o_data result of final FW_STATUS command sent
+/// @param[in] i_stop_if_bad_status set to CONTINUE if polling should continue if FW_STATUS returns a bad status value (default STOP)
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                            const uint64_t i_delay,
-                            const uint64_t i_loops,
-                            const assert_if_busy_fw_status i_assert_if_busy = ASSERT_IF_BUSY_FW_STATUS,
-                            const assert_if_bad_fw_status i_assert_if_bad_status = ASSERT_IF_BAD_FW_STATUS);
+fapi2::ReturnCode poll_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const uint64_t i_delay,
+                                 const uint64_t i_loops,
+                                 std::vector<uint8_t>& o_data,
+                                 const stop_if_bad_fw_status i_stop_if_bad_status = STOP_IF_BAD_FW_STATUS);
 
 #ifndef __PPE__
 ///
@@ -164,11 +165,11 @@ void boot_config_setup(std::vector<uint8_t>& io_data);
 ///
 /// @brief EXP_FW_BOOT_CONFIG
 /// @param[in] i_target the OCMB target
-/// @param[in] i_data the data to write
+/// @param[in,out] io_data the data to write
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode boot_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                              const std::vector<uint8_t>& i_data);
+                              std::vector<uint8_t>& io_data);
 
 ///
 /// @brief Check that the FW status code returns a busy status (expected for exp_omi_train)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,17 +83,18 @@ extern "C"
         {
             bool l_ocmb_is_explorer = false;
 
-            std::vector<uint8_t> l_data;
+            std::vector<uint8_t> l_cmd_data;
+            std::vector<uint8_t> l_rsp_data;
             uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_ONLY_DL_TRAINING;
 
             // Gets the data setup
-            FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_data));
+            FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_cmd_data));
 
             // Sets DL_TRAIN field
-            FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_data, l_dl_layer_boot_mode ));
+            FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_cmd_data, l_dl_layer_boot_mode ));
 
             // Issues the command and checks for completion
-            FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_data));
+            FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_cmd_data));
 
             // Check for expected busy status (this won't work for gemini)
             if (!l_sim)
@@ -112,7 +113,8 @@ extern "C"
             else
             {
                 // Gemini should return success code
-                FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+                FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_rsp_data));
+                FAPI_TRY(mss::exp::i2c::check::boot_config(i_target, l_cmd_data, l_rsp_data));
             }
 
         }

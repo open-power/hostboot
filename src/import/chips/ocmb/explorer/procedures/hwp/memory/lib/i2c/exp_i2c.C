@@ -62,6 +62,24 @@ namespace i2c
 {
 
 ///
+/// @brief convert data from vector of bytes into single uint64_t variable
+/// @param[in] i_data data in vector of bytes
+/// @return uint64_t variable
+///
+uint64_t convert_to_long(const std::vector<uint8_t>& i_data)
+{
+    uint64_t o_data_var = 0;
+
+    for( const auto l_byte : i_data )
+    {
+        o_data_var <<= BITS_PER_BYTE;
+        o_data_var |= l_byte;
+    }
+
+    return o_data_var;
+}
+
+///
 /// @brief capture EXP_FW_STATUS data from vector into single uint64_t variable
 /// @param[in] i_target the OCMB target
 /// @param[in] i_data data to capture from EXP_FW_STATUS
@@ -85,14 +103,7 @@ fapi2::ReturnCode capture_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                  TARGTIDFORMAT,
                  i_data.size(), FW_STATUS_BYTE_LEN , MSSTARGID);
 #endif
-    o_fw_status_data = 0;
-
-    for( const auto l_byte : i_data )
-    {
-        // appending each byte of vector data into o_fw_status_data
-        o_fw_status_data <<= BITS_PER_BYTE;
-        o_fw_status_data |= l_byte;
-    }
+    o_fw_status_data = convert_to_long(i_data);
 
     return fapi2::FAPI2_RC_SUCCESS;
 #if 0
@@ -100,59 +111,6 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
-
-namespace check
-{
-///
-/// @brief Checks the I2c explorer status codes
-/// @param[in] i_target the OCMB target
-/// @param[in] i_cmd_id the command ID
-/// @param[in] i_data data to check from EXP_FW_STATUS
-/// @param[out] o_busy true if explorer returns FW_BUSY status, false otherwise
-/// @param[in] i_assert set to ASSERT if function should assert if FW_STATUS returns a bad status value (default ASSERT)
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-fapi2::ReturnCode status_code( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                               const uint8_t i_cmd_id,
-                               const std::vector<uint8_t>& i_data,
-                               bool& o_busy,
-                               const assert_if_bad_fw_status i_assert)
-{
-    //create variable to hold EXP_FW_STATUS data
-    uint64_t l_fw_status_data = 0;
-    // Set o_busy to false just in case we don't make it to where we check it
-    o_busy = false;
-
-    // Set to a high number to make sure check for SUCCESS (== 0) isn't a fluke
-    uint8_t l_status = ~(0);
-    FAPI_TRY( status::get_status_code(i_target, i_data, l_status) );
-
-    // We need to try again if we get a FW_BUSY status, so set the flag
-    if (l_status == status_codes::FW_BUSY)
-    {
-        o_busy = true;
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    FAPI_TRY(capture_status(i_target, i_data, l_fw_status_data));
-    // Technically many cmds have their own status code decoding..but SUCCESS is always 0.
-    // If it's anything else we can just look up the status code
-    FAPI_ASSERT( (l_status == status_codes::I2C_SUCCESS) || (i_assert == NO_ASSERT_IF_BAD_FW_STATUS),
-                 fapi2::MSS_EXP_I2C_FW_STATUS_CODE_FAILED().
-                 set_TARGET(i_target).
-                 set_STATUS_CODE(l_status).
-                 set_CMD_ID(i_cmd_id).
-                 set_STATUS_DATA(l_fw_status_data),
-                 "Status code did not return SUCCESS (%d), received (%d) for " TARGTIDFORMAT ,
-                 status_codes::I2C_SUCCESS, l_status, MSSTARGID );
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-}// check
 
 ///
 /// @brief EXP_FW_STATUS setup helper function - useful for testing
@@ -207,59 +165,74 @@ fapi_try_exit:
 ///
 /// @brief Helper function to check FW_STATUS loop termination, for unit testing
 /// @param[in] i_target the OCMB target
-/// @param[in] i_busy busy flag from check::status_code
-/// @param[in] i_boot_stage boot_stage output from status::get_boot_stage
-/// @return true if we should break out of the loop, false otherwise
+/// @param[in] i_data response data from FW_STATUS command
+/// @param[in] i_stop_if_bad_status set to STOP if polling should stop if FW_STATUS returns a bad status value (default CONTINUE)
+/// @param[out] o_done true if we should break out of the loop, false otherwise
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-bool fw_status_loop_done(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                         const bool i_busy,
-                         const uint8_t i_boot_stage)
+fapi2::ReturnCode fw_status_loop_done(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      const std::vector<uint8_t>& i_data,
+                                      const stop_if_bad_fw_status i_stop_if_bad_status,
+                                      bool& o_done)
 {
     constexpr uint8_t EXPECTED_BOOT_STAGE = boot_stages::RUNTIME_FW;
 
-    if (i_busy)
+    uint8_t l_status = 0;
+    uint8_t l_boot_stage = 0;
+
+    FAPI_TRY( status::get_status_code(i_target, i_data, l_status) );
+    FAPI_TRY( status::get_boot_stage(i_target, i_data, l_boot_stage) );
+
+    if (l_status == status_codes::FW_BUSY)
     {
         FAPI_DBG( TARGTIDFORMAT " returned FW_BUSY status. Retrying...", MSSTARGID );
-        return false;
+        o_done = false;
+        return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    if (i_boot_stage != EXPECTED_BOOT_STAGE)
+    if (l_boot_stage != EXPECTED_BOOT_STAGE)
     {
         FAPI_DBG( TARGTIDFORMAT " returned non-RUNTIME boot stage (0x%02x). Retrying...",
-                  MSSTARGID, i_boot_stage );
-        return false;
+                  MSSTARGID, l_boot_stage );
+        o_done = false;
+        return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    return true;
+    if ((l_status != status_codes::I2C_SUCCESS) &&
+        (i_stop_if_bad_status == CONTINUE_IF_BAD_FW_STATUS))
+    {
+        o_done = false;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    o_done = true;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
-/// @brief EXP_FW_STATUS
+/// @brief Poll EXP_FW_STATUS command
 /// @param[in] i_target the OCMB target
 /// @param[in] i_delay delay between polls
 /// @param[in] i_loops number of polling loops to perform
-/// @param[in] i_assert_if_busy set to ASSERT if function should assert if polling ends with BUSY state (default ASSERT)
-/// @param[in] i_assert_if_bad_status set to ASSERT if function should assert if FW_STATUS returns a bad status value (default ASSERT)
+/// @param[out] o_data result of final FW_STATUS command sent
+/// @param[in] i_stop_if_bad_status set to CONTINUE if polling should continue if FW_STATUS returns a bad status value (default STOP)
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                            const uint64_t i_delay,
-                            const uint64_t i_loops,
-                            const assert_if_busy_fw_status i_assert_if_busy,
-                            const assert_if_bad_fw_status i_assert_if_bad_status)
+fapi2::ReturnCode poll_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const uint64_t i_delay,
+                                 const uint64_t i_loops,
+                                 std::vector<uint8_t>& o_data,
+                                 const stop_if_bad_fw_status i_stop_if_bad_status)
 {
-    constexpr uint8_t EXPECTED_BOOT_STAGE = boot_stages::RUNTIME_FW;
-    //create variable to hold EXP_FW_STATUS data
-    uint64_t l_fw_status_data = 0;
+    o_data.clear();
+
     // So, why aren't we using the memory team's polling API?
     // This is a base function that will be utilized by the platform code
     // As such, we don't want to pull in more libraries than we need to: it would cause extra dependencies
     // So, we're decomposing the polling library below
     fapi2::ReturnCode l_fw_status_rc = fapi2::FAPI2_RC_SUCCESS;
-    bool l_busy = true;
-    uint8_t l_boot_stage = 0;
     uint64_t l_loop = 0;
-    std::vector<uint8_t> l_data;
 
     // Loop until we max our our loop count or get a non-busy response
     for(; l_loop < i_loops; ++l_loop)
@@ -267,14 +240,14 @@ fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i
         // Lab debug: We're seeing i2c timeout on some fw_status commands during OMI training
         // so remove FAPI_TRY around get_fw_status to avoid bailing out of polling loop
         // TK #622 : update once EDBC-671 is resolved
-        l_fw_status_rc = get_fw_status(i_target, l_data);
+        l_fw_status_rc = get_fw_status(i_target, o_data);
 
         if (l_fw_status_rc == fapi2::FAPI2_RC_SUCCESS)
         {
-            FAPI_TRY( check::status_code(i_target, FW_STATUS, l_data, l_busy, i_assert_if_bad_status) );
-            FAPI_TRY( status::get_boot_stage(i_target, l_data, l_boot_stage) );
+            bool l_loop_done = false;
+            FAPI_TRY(fw_status_loop_done(i_target, o_data, i_stop_if_bad_status, l_loop_done));
 
-            if (fw_status_loop_done(i_target, l_busy, l_boot_stage))
+            if (l_loop_done)
             {
                 break;
             }
@@ -291,23 +264,6 @@ fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i
     }
 
     FAPI_DBG(TARGTIDFORMAT " stopped on loop %u/%u", MSSTARGID , l_loop, i_loops);
-    FAPI_TRY(capture_status(i_target, l_data, l_fw_status_data));
-    // Check that Explorer is not still in FW_BUSY state
-    FAPI_ASSERT( !(l_busy && (i_assert_if_busy == ASSERT_IF_BUSY_FW_STATUS)),
-                 fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
-                 set_TARGET(i_target).
-                 set_STATUS_DATA(l_fw_status_data),
-                 "Polling timeout on FW_STATUS command (still FW_BUSY) for " TARGTIDFORMAT,
-                 MSSTARGID );
-    // Check that Explorer is in RUNTIME_FW boot stage
-    FAPI_ASSERT( (l_boot_stage == EXPECTED_BOOT_STAGE),
-                 fapi2::MSS_EXP_I2C_WRONG_BOOT_STAGE().
-                 set_TARGET(i_target).
-                 set_BOOT_STAGE(l_boot_stage).
-                 set_EXPECTED_BOOT_STAGE(EXPECTED_BOOT_STAGE).
-                 set_STATUS_DATA(l_fw_status_data),
-                 "Polling timeout on FW_STATUS command (wrong boot stage: 0x%01x, expected 0x%01x) for " TARGTIDFORMAT,
-                 l_boot_stage, EXPECTED_BOOT_STAGE, MSSTARGID );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -330,18 +286,17 @@ void boot_config_setup(std::vector<uint8_t>& io_data)
 ///
 /// @brief EXP_FW_BOOT_CONFIG
 /// @param[in] i_target the OCMB target
-/// @param[in] i_data the data to write
+/// @param[in,out] io_data the data to write
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode boot_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                              const std::vector<uint8_t>& i_data)
+                              std::vector<uint8_t>& io_data)
 {
     // Retrieve setup data
-    std::vector<uint8_t> l_configured_data(i_data);
-    boot_config_setup(l_configured_data);
+    boot_config_setup(io_data);
 
     // Send the command
-    FAPI_TRY(fapi2::putI2c(i_target, l_configured_data));
+    FAPI_TRY(fapi2::putI2c(i_target, io_data));
 
     // Wait a bit for the command (DLL lock and OMI training) to complete
     // Value based on initial Explorer hardware.
@@ -458,7 +413,9 @@ fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_T
         const uint64_t i_delay)
 {
     std::vector<uint8_t> l_data;
+    uint8_t l_status = 0;
     uint8_t l_boot_stage = 0;
+    uint64_t l_fw_status_data = 0;
 
     // Using using default parameters from class, with overrides for delay and poll_count
     mss::poll_parameters l_poll_params(DELAY_10NS,
@@ -510,7 +467,30 @@ fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_T
     mss::c_str(i_target) );
 
     // Now poll the EXP_FW_STATUS command until it returns SUCCESS and RUNTIME_FW
-    FAPI_TRY(fw_status(i_target, i_delay, i_poll_count));
+    FAPI_TRY(poll_fw_status(i_target, i_delay, i_poll_count, l_data));
+
+    FAPI_TRY( status::get_status_code(i_target, l_data, l_status) );
+    FAPI_TRY( status::get_boot_stage(i_target, l_data, l_boot_stage) );
+
+    FAPI_TRY(capture_status(i_target, l_data, l_fw_status_data));
+
+    // Check that Explorer is not still in FW_BUSY state
+    FAPI_ASSERT( (l_status != status_codes::FW_BUSY),
+                 fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
+                 set_TARGET(i_target).
+                 set_CMD_ID(FW_STATUS).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "Polling timeout on FW_STATUS command (still FW_BUSY) for " TARGTIDFORMAT,
+                 MSSTARGID );
+    // Check that Explorer is in RUNTIME_FW boot stage
+    FAPI_ASSERT( (l_boot_stage == boot_stages::RUNTIME_FW),
+                 fapi2::MSS_EXP_I2C_WRONG_BOOT_STAGE().
+                 set_TARGET(i_target).
+                 set_BOOT_STAGE(l_boot_stage).
+                 set_EXPECTED_BOOT_STAGE(boot_stages::RUNTIME_FW).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "Polling timeout on FW_STATUS command (wrong boot stage: 0x%01x, expected 0x%01x) for " TARGTIDFORMAT,
+                 l_boot_stage, boot_stages::RUNTIME_FW, MSSTARGID );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -533,6 +513,7 @@ fapi2::ReturnCode fw_reg_write(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     // create byte vector that will hold command bytes in sequence that will do the scom
     std::vector<uint8_t> l_cmd_vector;
     std::vector<uint8_t> l_byte_vector;
+    std::vector<uint8_t> l_data;
 
     uint32_t l_input_data = static_cast<uint32_t>(i_data_buffer);
 
@@ -566,7 +547,8 @@ fapi2::ReturnCode fw_reg_write(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
              i_addr, mss::fapi_pos(i_target));
 
     // Check status of operation
-    FAPI_TRY(fw_status(i_target, DELAY_1MS, 100),
+    FAPI_TRY(poll_fw_status(i_target, DELAY_1MS, 100, l_data));
+    FAPI_TRY(check::command_result(i_target, FW_REG_WRITE, l_cmd_vector, l_data),
              "Invalid Status after FW_REG_WRITE operation to 0x%.8X on OCMB w/ fapiPos = 0x%.8X",
              i_addr, mss::fapi_pos(i_target));
 
@@ -589,6 +571,7 @@ fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
     // create byte vector that will hold command bytes in sequence that will do the scom
     std::vector<uint8_t> l_cmd_vector;
     std::vector<uint8_t> l_byte_vector;
+    std::vector<uint8_t> l_data;
 
     // Flush o_data_buffer w/ all 0's to avoid stale data
     o_data_buffer.flush<0>();
@@ -616,9 +599,11 @@ fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
              i_addr, mss::fapi_pos(i_target));
 
     // Check i2c status after operation
-    FAPI_TRY(fw_status(i_target, DELAY_1MS, 100),
+    FAPI_TRY(poll_fw_status(i_target, DELAY_1MS, 100, l_data));
+    FAPI_TRY(check::command_result(i_target, FW_REG_ADDR_LATCH, l_cmd_vector, l_data),
              "Invalid Status after FW_REG_ADDR_LATCH operation to 0x%.8X on OCMB w/ fapiPos = 0x%.8X",
              i_addr, mss::fapi_pos(i_target));
+
 
     // Clear out cmd vector as i2c op is complete and we must prepare for next
     l_cmd_vector.clear();
@@ -660,7 +645,8 @@ fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
                   FW_REG_ADDR_LATCH_SIZE, l_byte_vector[0] );
 
     // Check i2c status after operation
-    FAPI_TRY(fw_status(i_target, DELAY_1MS, 100),
+    FAPI_TRY(poll_fw_status(i_target, DELAY_1MS, 100, l_data));
+    FAPI_TRY(check::command_result(i_target, FW_REG_READ, l_cmd_vector, l_data),
              "Invalid Status after FW_REG_READ operation to 0x%.8X on OCMB w/ fapiPos = 0x%.8X",
              i_addr, mss::fapi_pos(i_target));
 
@@ -788,6 +774,151 @@ fapi_try_exit:
 }
 
 #endif
+
+namespace check
+{
+///
+/// @brief Check EXP_FW_STATUS for completion/results of previous command
+/// @param[in] i_target the OCMB target
+/// @param[in] i_cmd_id the command id
+/// @param[in] i_cmd_data the command in byte vector format
+/// @param[in] i_rsp_data data to check from EXP_FW_STATUS
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode command_result( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  const uint8_t i_cmd_id,
+                                  const std::vector<uint8_t>& i_cmd_data,
+                                  const std::vector<uint8_t>& i_rsp_data )
+{
+    uint8_t l_status = 0;
+    uint64_t l_fw_status_data = 0;
+    uint64_t l_cmd_data = convert_to_long(i_cmd_data);
+
+    FAPI_TRY(status::get_status_code(i_target, i_rsp_data, l_status));
+    FAPI_TRY(capture_status(i_target, i_rsp_data, l_fw_status_data));
+
+    // Check that Explorer is not still in FW_BUSY state
+    FAPI_ASSERT( (l_status != status_codes::FW_BUSY),
+                 fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
+                 set_TARGET(i_target).
+                 set_CMD_ID(i_cmd_id).
+                 set_COMMAND(l_cmd_data).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "Polling timeout on command 0x%02X (still FW_BUSY) for " TARGTIDFORMAT,
+                 i_cmd_id, MSSTARGID );
+    // Check that Explorer gave a successful return code
+    FAPI_ASSERT( (l_status == status_codes::I2C_SUCCESS),
+                 fapi2::MSS_EXP_I2C_CMD_FAIL().
+                 set_TARGET(i_target).
+                 set_CMD_ID(i_cmd_id).
+                 set_COMMAND(l_cmd_data).
+                 set_STATUS(l_status).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "Failing RC (0x%016X, RC 0x%02X) from command 0x%02X for " TARGTIDFORMAT,
+                 l_fw_status_data, l_status, i_cmd_id, MSSTARGID );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+#ifndef __PPE__
+
+///
+/// @brief Check FW_STATUS for completion/results of FW_BOOT_CONFIG
+/// @param[in] i_target the OCMB target
+/// @param[in] i_cmd_data the command
+/// @param[in] i_rsp_data data to check from EXP_FW_STATUS
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                               const std::vector<uint8_t>& i_cmd_data,
+                               const std::vector<uint8_t>& i_rsp_data )
+{
+    uint8_t l_boot_mode = 0;
+    uint8_t l_status = 0;
+    uint64_t l_fw_status_data = 0;
+    uint64_t l_cmd_data = convert_to_long(i_cmd_data);
+
+    FAPI_TRY(exp::i2c::boot_cfg::get_dl_layer_boot_mode(i_target, i_cmd_data, l_boot_mode));
+    FAPI_TRY(status::get_status_code(i_target, i_rsp_data, l_status));
+    FAPI_TRY(capture_status(i_target, i_rsp_data, l_fw_status_data));
+
+    // Check that Explorer is not still in FW_BUSY state
+    FAPI_ASSERT( (l_status != status_codes::FW_BUSY),
+                 fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
+                 set_TARGET(i_target).
+                 set_CMD_ID(FW_BOOT_CONFIG).
+                 set_COMMAND(l_cmd_data).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "Polling timeout on FW_BOOT_CONFIG command (still FW_BUSY) for " TARGTIDFORMAT,
+                 MSSTARGID );
+
+    // Check Explorer return code
+    FAPI_ASSERT( (l_status != fw_boot_cfg_status::INVALID_CMD),
+                 fapi2::MSS_EXP_BOOT_CONFIG_INVALID_CMD().
+                 set_TARGET(i_target).
+                 set_COMMAND(l_cmd_data).
+                 set_BOOT_MODE(l_boot_mode).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "BOOT_CONFIG invalid command error (CMD 0x%08X, BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
+                 l_cmd_data, l_boot_mode, l_fw_status_data, MSSTARGID );
+    FAPI_ASSERT( (l_status != fw_boot_cfg_status::LOOPBACK_FAIL),
+                 fapi2::MSS_EXP_BOOT_CONFIG_LOOPBACK_FAIL().
+                 set_TARGET(i_target).
+                 set_COMMAND(l_cmd_data).
+                 set_BOOT_MODE(l_boot_mode).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "BOOT_CONFIG loopback test fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
+                 l_boot_mode, l_fw_status_data, MSSTARGID );
+    FAPI_ASSERT( (l_status != fw_boot_cfg_status::SERDES_INIT_FAIL),
+                 fapi2::MSS_EXP_BOOT_CONFIG_SERDES_INIT_FAIL().
+                 set_TARGET(i_target).
+                 set_COMMAND(l_cmd_data).
+                 set_BOOT_MODE(l_boot_mode).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "BOOT_CONFIG OpenCapi SerDes init fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
+                 l_boot_mode, l_fw_status_data, MSSTARGID );
+    FAPI_ASSERT( (l_status != fw_boot_cfg_status::DLX_CONFIG_FAIL),
+                 fapi2::MSS_EXP_BOOT_CONFIG_DLX_CONFIG_FAIL().
+                 set_TARGET(i_target).
+                 set_COMMAND(l_cmd_data).
+                 set_BOOT_MODE(l_boot_mode).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "BOOT_CONFIG DLx config fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
+                 l_boot_mode, l_fw_status_data, MSSTARGID );
+    FAPI_ASSERT( (l_status != fw_boot_cfg_status::LANE_INV_FAIL),
+                 fapi2::MSS_EXP_BOOT_CONFIG_LANE_INV_FAIL().
+                 set_TARGET(i_target).
+                 set_COMMAND(l_cmd_data).
+                 set_BOOT_MODE(l_boot_mode).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "BOOT_CONFIG Lane Inversion configuration fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
+                 l_boot_mode, l_fw_status_data, MSSTARGID );
+    FAPI_ASSERT( (l_status != fw_boot_cfg_status::PARITY_UECC_ERROR),
+                 fapi2::MSS_EXP_BOOT_CONFIG_PARITY_UECC_ERROR().
+                 set_TARGET(i_target).
+                 set_COMMAND(l_cmd_data).
+                 set_BOOT_MODE(l_boot_mode).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "BOOT_CONFIG reported SerDes parity and/or UECC errors (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
+                 l_boot_mode, l_fw_status_data, MSSTARGID );
+    FAPI_ASSERT( (l_status == status_codes::I2C_SUCCESS),
+                 fapi2::MSS_EXP_I2C_CMD_FAIL().
+                 set_TARGET(i_target).
+                 set_CMD_ID(FW_BOOT_CONFIG).
+                 set_COMMAND(l_cmd_data).
+                 set_STATUS(l_status).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "Failing RC (0x%02X, full status 0x%016X) from BOOT_CONFIG command (BOOT_MODE 0x%02X) for " TARGTIDFORMAT,
+                 l_status, l_fw_status_data, l_boot_mode, MSSTARGID );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+#endif
+
+}// ns check
 
 }// i2c
 }// exp

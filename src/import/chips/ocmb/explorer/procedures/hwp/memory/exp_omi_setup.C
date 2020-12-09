@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,11 +62,15 @@ extern "C"
     fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_omi_setup");
-        fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-        uint8_t l_is_apollo = 0;
+
+        fapi2::ReturnCode l_rc_bootconfig0(fapi2::FAPI2_RC_SUCCESS);
+        fapi2::ReturnCode l_rc_bootconfig0_copy(fapi2::FAPI2_RC_SUCCESS);
+        fapi2::ReturnCode l_rc_unmask(fapi2::FAPI2_RC_SUCCESS);
+        fapi2::ReturnCode l_rc_firchk(fapi2::FAPI2_RC_SUCCESS);
         uint8_t l_gem_menterp_workaround = 0;
         uint8_t l_enable_ffe_settings = 0;
         uint32_t l_omi_freq = 0;
+        uint8_t l_is_apollo = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
@@ -100,7 +104,9 @@ extern "C"
         {
             FAPI_TRY(mss::exp::omi::ffe_setup(i_target, l_ffe_setup_data));
             FAPI_TRY(mss::exp::i2c::send_ffe_settings(i_target, l_ffe_setup_data));
-            FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+            FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_fw_status_data));
+            FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_TWI_FFE_SETTINGS, l_ffe_setup_data,
+                     l_fw_status_data));
         }
 
         // Gets the data setup
@@ -117,19 +123,60 @@ extern "C"
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
         // Check FW status for success
-        // Note: Extended polling count to 200000ms to account for PHY training during Boot_config_0 sequence
-        // TK this will need to be shortened to work in firmware
-        l_rc = mss::exp::i2c::fw_status(i_target, 2 * mss::DELAY_1MS, 100000);
+        FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, 2 * mss::DELAY_1MS, 100000, l_fw_status_data));
+        l_rc_bootconfig0 = mss::exp::i2c::check::boot_config(i_target, l_boot_config_data, l_fw_status_data);
+        l_rc_bootconfig0_copy = l_rc_bootconfig0;
 
-        // Note: It's still under discussion whether FIRs will be lit if BOOT_CONFIG_0 fails, and if
-        // the registers will be clocked so we can read them. Disabling FIR checking until this
-        // gets resolved.
-#ifdef FIRS_AVAIL_AFTER_BOOT_CONFIG_0_FAIL
-        // If BOOT_CONFIG_0 failed or timed out, we need to check some FIRs
-        FAPI_TRY( (mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, l_rc)) );
-#else
-        FAPI_TRY(l_rc, "%s BOOT_CONFIG_0 either failed or timed out", mss::c_str(i_target));
-#endif
+        // Unmask FIRs before checking the BOOT_CONFIG0 RC in case we need to blame FIRs
+        l_rc_unmask = mss::unmask::after_mc_omi_setup<mss::mc_type::EXPLORER>(i_target);
+
+        // The error paths below are complicated due to the fact that certain BOOT_CONFIG0 fails will
+        // cause us not to be able to access FIRs. This is the plan:
+        // 1. Assume we can unmask FIRs, and attempt to do so
+        //    a. if we get a scom fail and BOOT_CONFIG failed, commit the scom fail as recovered and return the BOOT_CONFIG fail
+        //    b. if we get a scom fail and BOOT_CONFIG passed, return the scom fail
+        // 2. If BOOT_CONFIG0 failed, check the FIRs to see if any are unmasked and lit
+        //    a. if we get a scom fail and BOOT_CONFIG failed, commit the scom fail as recovered and return the BOOT_CONFIG fail
+        //    b. if we see FIRs lit, commit the FIR RC (fir_or_pll_fail does this), return the BOOT_CONFIG fail in Cronus, but SUCCESS in hostboot
+        //    c. if we don't see any FIRs lit, return the BOOT_CONFIG fail
+        {
+            // Check for unmask scom fail
+            if(l_rc_unmask != fapi2::FAPI2_RC_SUCCESS)
+            {
+                // 1a: Commit scom and return BOOT_CONFIG fail
+                if(l_rc_bootconfig0 != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    fapi2::log_related_error(i_target, l_rc_unmask, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+                    FAPI_TRY(l_rc_bootconfig0, "%s BOOT_CONFIG_0 either failed or timed out", mss::c_str(i_target));
+                }
+                // 1b: Return the scom fail
+                else
+                {
+                    FAPI_TRY(l_rc_unmask, "%s Unmask after exp_omi_setup failed", mss::c_str(i_target));
+                }
+            }
+
+            // Check FIRs if BOOT_CONFIG_0 failed or timed out
+            // Use a copy of l_rc_bootconfig0 so we don't overwrite it with SUCCESS if we find a FIR lit
+            l_rc_firchk = mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target,
+                          l_rc_bootconfig0_copy);
+
+            // Check for scom fail and return correct log
+            // l_rc_firchk will either be a duplicate of l_rc_bootconfig0_copy or a scom fail RC
+            if(l_rc_firchk != l_rc_bootconfig0_copy)
+            {
+                // 2a: Commit scom fail and return l_rc_bootconfig0_copy
+                fapi2::log_related_error(i_target, l_rc_firchk, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+                return l_rc_bootconfig0_copy;
+            }
+
+            // 2b/c: Finally, return l_rc_firchk (SUCCESS if we found FIRs set, failing RC otherwise) if BOOT_CONFIG0 failed
+            if (l_rc_bootconfig0 != fapi2::FAPI2_RC_SUCCESS)
+            {
+                FAPI_ERR("%s BOOT_CONFIG_0 either failed or timed out", mss::c_str(i_target));
+                return l_rc_firchk;
+            }
+        }
 
         // Terminate downstream PRBS23 pattern
         if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
@@ -192,9 +239,6 @@ extern "C"
         // Start P10 PHY training by sending upstream PRBS pattern
         // Train mode 6 (state 3)
         FAPI_TRY(mss::exp::workarounds::omi::pre_training_prbs(i_target));
-
-        // Unmask FIRs
-        FAPI_TRY(mss::unmask::after_mc_omi_setup<mss::mc_type::EXPLORER>(i_target));
 
     fapi_try_exit:
         return fapi2::current_err;
