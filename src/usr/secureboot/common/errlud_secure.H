@@ -95,6 +95,8 @@ class UdTargetHwKeyHash : public ERRORLOG::ErrlUserDetails
      *  @param i_target         Processor Target containing HW Keys Hash
      *  @param i_side           SEEPROM side used on the target:
      *                          0=SBE_PRIMARY, 1=SBE_BACKUP
+     *                          2=Customized Value (used in sbe_update.C)
+     *                          3=Expected Customized Value (used in sbe_update.C)
      *  @param i_hash           Target HW Keys Hash represented by SHA512
      *  @param i_secure_version Target Secure Version
      */

@@ -37,6 +37,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/customize/
 EXTRAINCDIR += ${ROOTPATH}/src/import/
 
+# to pick up a special secureboot error log user detail section:
+EXTRAINCDIR += ${ROOTPATH}/src/usr/secureboot/common/
+
 OBJS += sbe_update.o
 
 SUBDIRS += test.d

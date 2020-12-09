@@ -67,6 +67,7 @@
 #include <initservice/initsvcreasoncodes.H>
 #include <sys/time.h>
 #include <pldm/requests/pldm_pdr_requests.H>
+#include <errlud_secure.H>
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
@@ -2223,6 +2224,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         errlHndl_t err = nullptr;
         void *sbeHbblImgPtr = nullptr;
         uint8_t hbbl_secure_version = 0;
+        sbeSectionSbSettings_t sb_settings;
 
         // Clear build information
         io_sbeState.new_imageBuild.buildDate = 0;
@@ -2508,12 +2510,15 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                        sizeof(hbbl_secure_version));
             }
 
+            // Save off secure_version used for customization
+            sb_settings.minimum_secure_version = hbbl_secure_version;
+
             /*******************************************/
             /*  Update the HW Key Hash in the HBBL     */
             /*******************************************/
             // Create an 'all-zero' hash for comparison now and then use it
             // to save hash being put into image for comparison later
-            SHA512_t tmp_hash = {0};
+            SHA512_t zero_hash = {0};
 
             if ( !g_do_hw_keys_hash_transition )
             {
@@ -2522,7 +2527,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 SECUREBOOT::getHwKeyHash(sys_hash);
 
                 // Look for 'all-zero' system hash
-                if ( memcmp(sys_hash, tmp_hash, sizeof(SHA512_t)) == 0 )
+                if ( memcmp(sys_hash, zero_hash, sizeof(SHA512_t)) == 0 )
                 {
                     // System hash is all zeros, so use HW Key Hash in HBBL
                     // section from PNOR
@@ -2534,7 +2539,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                        HBBL_HW_KEY_HASH_LOCATION)));
 
                     // Save hash for comparison later
-                    memcpy (tmp_hash,
+                    memcpy (&sb_settings.hw_keys_hash,
                             reinterpret_cast<uint8_t*>(
                                        reinterpret_cast<uint64_t>(hbblPnorPtr) +
                                        HBBL_HW_KEY_HASH_LOCATION),
@@ -2554,7 +2559,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                             sizeof(SHA512_t));
 
                     // Save hash for comparison later
-                    memcpy (tmp_hash,
+                    memcpy (&sb_settings.hw_keys_hash,
                             sys_hash,
                             sizeof(SHA512_t));
                 }
@@ -2573,18 +2578,21 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                         sizeof(SHA512_t));
 
                 // Save hash for comparison later
-                memcpy (tmp_hash,
+                memcpy (&sb_settings.hw_keys_hash,
                         g_hw_keys_hash_transition_data,
                         sizeof(SHA512_t));
             }
 
-            /*************************************************/
-            /*  Append HBBL Image from PNOR to SBE           */
-            /*  Image from PNOR                              */
-            /*  Also delete P9_XIP_SECTION_SBE_RINGS section */
-            /*************************************************/
+
+            /*******************************************************/
+            /*  Append HBBL Image from PNOR to SBE Image from PNOR */
+            /*  Also delete P9_XIP_SECTION_SBE_RINGS section       */
+            /*  Also append P9_XIP_SECTION_SBE_SB_SETTINGS         */
+            /*******************************************************/
             uint32_t sbeHbblImgSize =
                 static_cast<uint32_t>(sbePnorImageSize + MAX_HBBL_SIZE);
+
+            uint32_t sbeSbSettingsImgSize = sbeHbblImgSize + sizeof(sb_settings);
 
             // copy SBE image from PNOR to memory
             sbeHbblImgPtr = (void*)SBE_HBBL_IMG_VADDR;
@@ -2626,6 +2634,24 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            TRACE_ERR_ARGS(err));
                 break;
             }
+
+            // Now append P9_XIP_SECTION_SBE_SB_SETTINGS
+            err = modifySbeSection(P9_XIP_SECTION_SBE_SB_SETTINGS,
+                                   DELETE_AND_APPEND_SECTION,
+                                   reinterpret_cast<void*>(&sb_settings), // sb_settings struct to append
+                                   sizeof(sb_settings), // Size of sb_settings struct
+                                   sbeHbblImgPtr,     // SBE Image (now with HBBL Section)
+                                   sbeSbSettingsImgSize);   // Available/used
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Error from modifySbeSection() for P9_XIP_SECTION_SBE_SB_SETTINGS: "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
+                break;
+            }
+
 
             // We are now done with the SBE and HBBL images in PNOR, unload
             //  them now to save memory for the other images we have to load
@@ -2731,13 +2757,13 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             }
 
             // Retrieve the Secure Version and HW Key Hash included in customized image
-            SHA512_t hash = {0};
+            SHA512_t sbe_hash = {0};
             uint8_t sbe_secure_version = 0;
             err = getSecuritySettingsFromSbeImage(
                                          io_sbeState.target,  // ignored
                                          EEPROM::SBE_PRIMARY, // ignored
                                          SBE_SEEPROM_INVALID, // ignored
-                                         hash,
+                                         sbe_hash,
                                          sbe_secure_version,
                                          pCustomizedBfr);
 
@@ -2752,13 +2778,13 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             }
 
             // Verify that the correct Secure Version is included in customized image
-            if ( hbbl_secure_version != sbe_secure_version )
+            if ( sb_settings.minimum_secure_version != sbe_secure_version )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error: "
                            "Secure Version in customized image 0x%.2X doesn't "
                            "match expected value of 0x%.2X for proc=0x%X",
                            sbe_secure_version,
-                           hbbl_secure_version,
+                           sb_settings.minimum_secure_version,
                            TARGETING::get_huid(io_sbeState.target));
 
                 /*@
@@ -2780,7 +2806,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                     TARGETING::get_huid(io_sbeState.target),
                                     FOUR_UINT16_TO_UINT64(
                                       sbe_secure_version,
-                                      hbbl_secure_version,
+                                      sb_settings.minimum_secure_version,
                                       min_secure_version,
                                       lockin_policy));
 
@@ -2793,13 +2819,13 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
 
             // Verify that the HW Key Hash is the same hash used earlier
-            if ( memcmp(hash, tmp_hash, sizeof(SHA512_t)) != 0 )
+            if ( memcmp(sbe_hash, sb_settings.hw_keys_hash, sizeof(SHA512_t)) != 0 )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error: "
                            "HW Key Hash in customized image 0x%.8X doesn't "
                            "match expected hash 0x%.8X for proc=0x%X",
-                           sha512_to_u32(hash),
-                           sha512_to_u32(tmp_hash),
+                           sha512_to_u32(sbe_hash),
+                           sha512_to_u32(sb_settings.hw_keys_hash),
                            TARGETING::get_huid(io_sbeState.target));
 
                 /*@
@@ -2818,8 +2844,28 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                     SBE_MISMATCHED_HW_KEY_HASH,
                                     TARGETING::get_huid(io_sbeState.target),
                                     TWO_UINT32_TO_UINT64(
-                                      sha512_to_u32(hash),
-                                      sha512_to_u32(tmp_hash)));
+                                      sha512_to_u32(sbe_hash),
+                                      sha512_to_u32(sb_settings.hw_keys_hash)));
+
+                TRACFBIN(g_trac_sbe,
+                         "getSbeInfoState() - sbe_hash",
+                         sbe_hash,
+                         sizeof(SHA512_t));
+                SECUREBOOT::UdTargetHwKeyHash(
+                              io_sbeState.target,
+                              2,
+                              sbe_hash,
+                              sbe_secure_version).addToLog(err);
+
+                TRACFBIN(g_trac_sbe,
+                         "getSbeInfoState() - sb_settings.hw_keys_hash",
+                         sb_settings.hw_keys_hash,
+                         sizeof(SHA512_t));
+                SECUREBOOT::UdTargetHwKeyHash(
+                              io_sbeState.target,
+                              3,
+                              sb_settings.hw_keys_hash,
+                              sb_settings.minimum_secure_version).addToLog(err);
 
                 err->collectTrace(SBE_COMP_NAME);
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
@@ -2869,7 +2915,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                        "maxSize=0x%X, actSize=0x%X, crc=0x%X (SV=0x%.2X, Hash=0x%.8X)",
                        MAX_SEEPROM_IMAGE_SIZE, sbeImgSize,
                        io_sbeState.customizedImage_crc,
-                       sbe_secure_version, sha512_to_u32(hash));
+                       sbe_secure_version, sha512_to_u32(sbe_hash));
 
             // restore the hbbl ID string
             memcpy( pHbblIdStringBfr,

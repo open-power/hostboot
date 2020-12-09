@@ -44,6 +44,7 @@
 #include <vector>
 #include <p10_infrastruct_help.H>     // XIPC_RING_BUF{1,2,3}_SIZE
 #include <p10_ipl_image.H>            // p9_xip_section_sbe_t
+#include <securerom/sha512.H>         // SHA512_t
 
 namespace SBE
 {
@@ -212,6 +213,20 @@ namespace SBE
           err_sev(ERRORLOG::ERRL_SEV_UNKNOWN)
         {};
     };
+
+    /**
+     * @brief Layout of P9_XIP_SECTION_SBE_SB_SETTINGS section in the SBE
+     */
+    struct sbeSectionSbSettings_t
+    {
+        SHA512_t hw_keys_hash = {0};            // 64 bytes
+        uint8_t minimum_secure_version = 0;     // 1 byte
+        uint8_t reserved[7] = {0,0,0,0,0,0,0};  // 7 bytes - used to keep 8-byte alignment
+    } PACKED;
+
+    // Catch if the struct is ever not 8-byte aligned
+    static_assert(0 == (sizeof(sbeSectionSbSettings_t) % 8),
+                  "sbeSectionSbSettings_t is not 8-byte-aligned");
 
     /******************************************/
     /*  Functions -- High Level Functions     */
