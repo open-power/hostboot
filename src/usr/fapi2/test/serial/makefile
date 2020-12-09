@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/fapi2/test/makefile $
+# $Source: src/usr/fapi2/test/serial/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,21 +22,19 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# @file src/usr/fapi2/test/makefile
 #
-# @brief Makefile for fapi2 test case directory
+# @brief Makefile for fapi2 test cases that will run serially
 #
-ROOTPATH = ../../../..
-MODULE = testfapi2
+ROOTPATH = ../../../../..
+MODULE = testfapi2serial
 
-include fapi2Test.mk
+TESTS = fapi2WOFTest.H
 
-ifdef TRACE_MB_VPD_ATTR_UNIT_TEST
-CXXFLAGS+=-DTRACE_MB_VPD_ATTR_UNIT_TEST
-endif
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/eeprom/
 
-SUBDIRS += serial.d
 include ${ROOTPATH}/config.mk
-
-vpath %.C ${GENDIR}
-

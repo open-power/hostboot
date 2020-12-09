@@ -268,6 +268,7 @@ TESTCASE_MODULES += testscom
 #TESTCASE_MODULES += testruntime   @TODO-RTC:257502
 TESTCASE_MODULES += testintr
 TESTCASE_MODULES += testfapi2
+TESTCASE_MODULES += testfapi2serial
 TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
 TESTCASE_MODULES += testsmf
 TESTCASE_MODULES += testexpaccess

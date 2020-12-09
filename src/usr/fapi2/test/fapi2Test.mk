@@ -43,10 +43,8 @@ EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwp/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/attn/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/eeprom/
 
 # TODO RTC: 210905 Uncomment the procedures below
 # Procedures

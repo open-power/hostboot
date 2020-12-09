@@ -50,7 +50,8 @@ namespace CxxTest
 //
 std::vector<const char *> CxxSerialTests{ "libtesthwas.so",
                                           "libtesteeprom.so",
-                                          "libtestspiserial.so" };
+                                          "libtestspiserial.so",
+                                          "libtestfapi2serial.so" };
 
 //
 // TestSuite members

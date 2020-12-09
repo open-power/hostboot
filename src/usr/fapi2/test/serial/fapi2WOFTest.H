@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/fapi2/test/fapi2WOFTest.H $                           */
+/* $Source: src/usr/fapi2/test/serial/fapi2WOFTest.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -36,9 +36,6 @@
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <fapi2.H>
-#include <devicefw/userif.H>
-#include <utilFilter.H>
-#include <pstates_common.H>
 #include <eeprom/eeprom_const.H>
 
 using namespace TARGETING;
