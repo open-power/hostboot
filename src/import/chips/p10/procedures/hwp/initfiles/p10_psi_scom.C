@@ -31,6 +31,7 @@ using namespace fapi2;
 
 constexpr uint64_t literal_0x000 = 0x000;
 constexpr uint64_t literal_0b00000 = 0b00000;
+constexpr uint64_t literal_0xFFFFFFFFFFFC = 0xFFFFFFFFFFFC;
 
 fapi2::ReturnCode p10_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0)
 {
@@ -46,6 +47,13 @@ fapi2::ReturnCode p10_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_scom_buffer.insert<16, 12, 52, uint64_t>(literal_0x000 );
             l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x3011d0full, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x3011d14ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<16, 45, 16, uint64_t>(literal_0xFFFFFFFFFFFC );
+            l_scom_buffer.insert<61, 3, 61, uint64_t>(literal_0xFFFFFFFFFFFC );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x3011d14ull, l_scom_buffer));
         }
 
     };
