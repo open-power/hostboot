@@ -44,6 +44,9 @@
 #include <p10_hcd_common.H>
 #include <p10_scom_proc.H>
 
+#ifdef __HOSTBOOT_MODULE
+    #include <util/misc.H>                   // Util::isSimicsRunning
+#endif
 // ----------------------------------------------------------------------------
 // Constant definitions
 // ----------------------------------------------------------------------------
@@ -261,6 +264,55 @@ fapi_try_exit:
 }
 
 
+static const uint32_t OCC_HB_TIMEOUT_MS       = 2000;
+static const uint32_t OCC_HB_TIMEOUT_MCYCLES  = 100;
+static const uint32_t OCC_HB_POLLTIME_MS      = 20;
+static const uint32_t OCC_HB_POLLTIME_MCYCLES = 20;
+static const uint32_t TIMEOUT_COUNT = OCC_HB_TIMEOUT_MS / OCC_HB_POLLTIME_MS;
+///
+/// @brief Poll for OCC Heartbeat Enablement
+/// @param[in] i_target  Chip target
+///
+/// @return FAPI2_RC_SUCCESS on success, else error
+///
+fapi2::ReturnCode pollOCCHearbeat(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+
+#ifdef __HOSTBOOT_MODULE
+    using namespace scomt;
+    using namespace proc;
+
+    fapi2::buffer<uint64_t>  l_occhbr;
+    uint32_t                 l_timeout_counter = TIMEOUT_COUNT;
+
+    FAPI_DBG("OCC heartbeat polling...");
+
+    do
+    {
+        FAPI_TRY(GET_TP_TPCHIP_OCC_OCI_OCB_OCCHBR(i_target, l_occhbr));
+        FAPI_DBG("OCC Heartbeat Reg: 0x%016lx; Timeout: %d",
+                 l_occhbr, l_timeout_counter);
+        // fapi2::delay takes ns as the arg
+        fapi2::delay(OCC_HB_POLLTIME_MS * 1000 * 1000, OCC_HB_POLLTIME_MCYCLES * 1000 * 1000);
+    }
+    while((l_occhbr.getBit<TP_TPCHIP_OCC_OCI_OCB_OCCHBR_EN>() != 1) &&
+          (--l_timeout_counter != 0));
+
+    FAPI_ASSERT((l_timeout_counter &&
+                 l_occhbr.getBit<TP_TPCHIP_OCC_OCI_OCB_OCCHBR_EN>()),
+                fapi2::OCC_START_TIMEOUT()
+                .set_CHIP(i_target),
+                "OCC Start via Heartbeat enable timeout");
+
+    FAPI_INF("OCC was activated successfully!!!!");
+
+#endif
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
 fapi2::ReturnCode p10_pm_occ_control
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
  const occ_ctrl::PPC_CONTROL i_ppc405_reset_ctrl,
@@ -421,7 +473,11 @@ fapi2::ReturnCode p10_pm_occ_control
         case occ_ctrl::PPC405_START:
 
             FAPI_INF("Starting the PPC405");
-            // Clear the halt bit
+            // Clear the halt bit of both JTAG and OCR
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_CLEAR(i_target);
+            FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_CLEAR(i_target,
+                     BIT64(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
+
             PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target,
                      ~BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
@@ -435,6 +491,20 @@ fapi2::ReturnCode p10_pm_occ_control
             PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_CLEAR(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_CLEAR(i_target,
                      BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_CORE_RESET)));
+
+#ifdef __HOSTBOOT_MODULE
+
+            if (! Util::isSimicsRunning())
+            {
+#endif
+                FAPI_TRY(pollOCCHearbeat(i_target));
+
+#ifdef __HOSTBOOT_MODULE
+            }
+
+#endif
+
+
             break;
 
         default:

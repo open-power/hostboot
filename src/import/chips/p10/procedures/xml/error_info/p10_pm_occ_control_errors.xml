@@ -64,4 +64,17 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+ <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_OCC_START_TIMEOUT</rc>
+    <description>
+    The OCC PPC405 failed to start as determined by the OCC Heartbeat enablement.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+ <!-- ******************************************************************** -->
 </hwpErrors>
