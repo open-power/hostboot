@@ -168,21 +168,10 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 ################################################################################
 # Hardware procedure files needed for both IPL and RT
 ################################################################################
-#TODO RTC 256733
-#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
-#prd_obj_no_sim += p9_io_erepairAccessorHwpFuncs.o
-#prd_obj_no_sim += p9_io_xbus_read_erepair.o
-#prd_obj_no_sim += p9_io_dmi_read_erepair.o
-#prd_obj_no_sim += p9_io_dmi_pdwn_lanes.o
-#prd_obj_no_sim += p9_io_dmi_clear_firs.o
 
-#prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/io/
-#
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 prd_obj_no_sim += p10_proc_gettracearray.o
 prd_obj_no_sim += p10_sbe_tracearray.o
-#prd_obj_no_sim += p9_io_xbus_clear_firs.o
-#prd_obj_no_sim += p9_io_xbus_pdwn_lanes.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mc/

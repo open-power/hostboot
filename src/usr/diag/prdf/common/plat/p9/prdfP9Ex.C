@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,7 +135,6 @@ void addL3LdCrFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
  */
 int32_t L2UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    /* TODO RTC 256733
 #ifdef __HOSTBOOT_RUNTIME
     int32_t l_rc = SUCCESS;
     p9_l2err_extract_err_data errorAddr =
@@ -176,7 +175,6 @@ int32_t L2UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     addL2LdCrFfdc( i_chip, io_sc, ldcrffdc );
 
 #endif
-    */
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L2UE );
@@ -189,7 +187,6 @@ PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L2UE );
  */
 int32_t L3UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    /* TODO RTC 256733
 #ifdef __HOSTBOOT_RUNTIME
     int32_t l_rc = SUCCESS;
     p9_l3err_extract_err_data errorAddr = { L3ERR_CE_UE, 0, 0, 0, 0, 0, 0 };
@@ -225,7 +222,6 @@ int32_t L3UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     addL3LdCrFfdc( i_chip, io_sc, ldcrffdc );
 
 #endif
-    */
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L3UE );
@@ -246,7 +242,6 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         int32_t l_rc = SUCCESS;
 
 #ifdef __HOSTBOOT_RUNTIME
-        /* TODO RTC 256733
         p9_l2err_extract_err_data errorAddr =
             { L2ERR_CE_UE, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -279,7 +274,6 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         ldcrffdc.L2errIsLeftSA  = errorAddr.is_left_sa;
         ldcrffdc.L2errAddress   = errorAddr.address;
         addL2LdCrFfdc( i_chip, io_sc, ldcrffdc );
-        */
 #endif
         if (mfgMode())
             l_maxLineDelAllowed =
@@ -318,9 +312,7 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         PRDF_TRAC( "[L2CE] HUID: 0x%08x apply directed line delete",
                         i_chip->GetId());
 #ifdef __HOSTBOOT_RUNTIME
-        /* TODO RTC 256733
         l_rc = l2LineDelete(i_chip->getTrgt(), errorAddr);
-        */
 #endif
         if (SUCCESS != l_rc)
         {
@@ -367,7 +359,6 @@ int32_t L3CE( ExtensibleChip * i_chip,
         int32_t l_rc = SUCCESS;
 
 #ifdef __HOSTBOOT_RUNTIME
-        /* TODO RTC 256733
         p9_l3err_extract_err_data errorAddr =
             { L3ERR_CE_UE, 0, 0, 0, 0, 0, 0 };
 
@@ -398,7 +389,6 @@ int32_t L3CE( ExtensibleChip * i_chip,
         addL3LdCrFfdc( i_chip, io_sc, ldcrffdc );
 
         curMem = errorAddr.member;
-        */
 #endif
 
         if (mfgMode())
@@ -459,9 +449,7 @@ int32_t L3CE( ExtensibleChip * i_chip,
         PRDF_TRAC( "[L3CE] HUID: 0x%08x apply directed line delete",
                 i_chip->GetId());
         #ifdef __HOSTBOOT_RUNTIME
-        /* TODO RTC 256733
         l_rc = l3LineDelete(i_chip->getTrgt(), errorAddr);
-        */
         #endif
 
 

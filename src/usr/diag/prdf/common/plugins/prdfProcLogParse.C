@@ -35,11 +35,6 @@
 #include <prdfParserEnums.H>
 #include <netinet/in.h>
 #include <prdfPlatProcConst.H>
-/* TODO RTC 256733
-#include <p9n2_misc_scom_addresses.H>
-#include <p9_quad_scom_addresses.H>
-#include <p9_ppe_defs.H>
-*/
 #include <map>
 #include <vector>
 #include <string>
@@ -317,6 +312,45 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
 }
 
 //------------------------------------------------------------------------------------------------
+
+// TODO RTC 267015 - investigate PM recovery parsing further
+
+// Constants previously defined in p9_pm_recovery_ffdc_defines.H and elsewhere
+struct __attribute__((packed)) FfdcSummSubSectHdr
+{
+    uint8_t  iv_subSectnId;
+    uint8_t  iv_majorNum;
+    uint8_t  iv_minorNum;
+    uint8_t  iv_secValid;
+};
+constexpr uint8_t MAX_CMES_PER_CHIP = 12;
+constexpr uint8_t FFDC_SUMMARY_SIZE_CME = 28;
+constexpr uint8_t CME_MAJ_NUM = 1;
+constexpr uint8_t CME_MIN_NUM = 0;
+constexpr uint8_t SGPE_MAJ_NUM = 1;
+constexpr uint8_t SGPE_MIN_NUM = 0;
+constexpr uint8_t PGPE_MAJ_NUM = 1;
+constexpr uint8_t PGPE_MIN_NUM = 0;
+constexpr uint8_t SYS_CONFIG_MAJ_NUM = 1;
+constexpr uint8_t SYS_CONFIG_MIN_NUM = 0;
+constexpr uint8_t FFDC_SUMMARY_SIZE_CPPM_REG = 28;
+constexpr uint8_t FFDC_SUMMARY_SIZE_QPPM_REG = 36;
+constexpr uint8_t CPPM_MAJ_NUM = 1;
+constexpr uint8_t CPPM_MIN_NUM = 0;
+enum  VerList_t
+{
+    STATE_CONFIG_SECTN         =   0x00,
+    SGPE_SECTN                 =   0x01,
+    PGPE_SECTN                 =   0x02,
+    CME_SECTN                  =   0x03,
+    QPPM_SECTN                 =   0x04,
+    CPPM_SECTN                 =   0x05,
+    SGPE_GLOBAL_VAR_SECTN      =   0x06,
+    PGPE_GLOBAL_VAR_SECTN      =   0x07,
+    CME_GLOBAL_VAR_SECTN       =   0x08,
+    MAX_FFDC_SUMMARY_SECTN_CNT =   0x09,
+};
+
 /**
  * @brief parser a user data section consisting of SCOM register values.
  * @param[in] i_parser  error log parser
@@ -327,13 +361,11 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
  * @param[in] i_minNum  minor number
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 256733
 uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length,
                        std::vector < std::string >& i_regList,
                        uint32_t i_majNum, uint32_t i_minNum )
 
 {
-    using namespace p9_stop_recov_ffdc;
     char l_lineStr[BUF_LENGTH];
     char l_hdrStr[BUF_LENGTH];
     uint32_t l_rc            =  PARSE_SUCCESS;
@@ -428,7 +460,6 @@ uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
 
     return l_rc;
 }
-*/
 
 //------------------------------------------------------------------------------------------------
 
@@ -442,11 +473,9 @@ uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  * @note      assumes just PPE XIRs
  */
-/* TODO RTC 256733
 uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length,
                        uint32_t i_majNum, uint32_t i_minNum )
 {
-    using namespace p9_stop_recov_ffdc;
     char l_lineStr[BUF_LENGTH];
     char l_hdrStr[BUF_LENGTH];
     //NOTE: Ensure this register list always matches with list in
@@ -528,7 +557,6 @@ uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
     return l_rc;
 
 }
-*/
 
 //------------------------------------------------------------------------------------------------
 
@@ -539,10 +567,8 @@ uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 256733
 uint32_t parseCmeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
-    using namespace p9_stop_recov_ffdc;
     char l_lineStr[LINE_LENGTH];
     uint32_t l_rc            =  PARSE_SUCCESS;
     uint32_t secLength       =  0;
@@ -591,7 +617,6 @@ uint32_t parseCmeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
 
     return l_rc;
 }
-*/
 
 //------------------------------------------------------------------------------------------------
 
@@ -602,10 +627,8 @@ uint32_t parseCmeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 256733
 uint32_t parseSgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
-    using namespace p9_stop_recov_ffdc;
     uint32_t l_rc   =   PARSE_SUCCESS;
 
     do
@@ -628,7 +651,6 @@ uint32_t parseSgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
 
     return l_rc;
 }
-*/
 
 //------------------------------------------------------------------------------------------------
 
@@ -639,10 +661,8 @@ uint32_t parseSgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 256733
 uint32_t parsePgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
-    using namespace p9_stop_recov_ffdc;
     uint32_t l_rc = PARSE_SUCCESS;
 
     do
@@ -665,7 +685,6 @@ uint32_t parsePgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
 
     return l_rc;
 }
-*/
 
 //------------------------------------------------------------------------------------------------
 
@@ -676,10 +695,8 @@ uint32_t parsePgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 256733
 uint32_t parseSysState( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
-    using namespace p9_stop_recov_ffdc;
     std::vector < std::string > l_occRegMap;
     uint32_t l_rc = PARSE_SUCCESS;
 
@@ -725,7 +742,6 @@ uint32_t parseSysState( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
 
     return l_rc;
 }
-*/
 
 //------------------------------------------------------------------------------------------------
 
@@ -736,10 +752,8 @@ uint32_t parseSysState( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 256733
 uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
-    using namespace p9_stop_recov_ffdc;
     std::vector < std::string > l_cppmRegMap;
     uint32_t l_rc               =       PARSE_SUCCESS;
     uint32_t l_cppm             =       0;
@@ -789,7 +803,6 @@ uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
 
     return l_rc;
 }
-*/
 
 //------------------------------------------------------------------------------------------------
 
@@ -800,10 +813,8 @@ uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 256733
 uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
-    using namespace p9_stop_recov_ffdc;
     std::vector < std::string > l_qppmRegMap;
     uint32_t l_rc = PARSE_SUCCESS;
     char l_lineStr[LINE_LENGTH];
@@ -852,7 +863,6 @@ uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
 
     return l_rc;
 }
-*/
 
 //------------------------------------------------------------------------------------------------
 
@@ -864,12 +874,10 @@ uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_subsec  sub section id
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 256733
 bool parsePmFfdcData( void* i_buf, uint32_t i_length,
                       ErrlUsrParser& i_parser, errlver_t i_subsec )
 {
     uint32_t l_rc = PARSE_SUCCESS;
-    using namespace p9_stop_recov_ffdc;
     uint8_t* l_pBuf = (uint8_t*)i_buf;
 
     switch( i_subsec )
@@ -926,7 +934,6 @@ bool parsePmFfdcData( void* i_buf, uint32_t i_length,
 
     return (l_rc == PARSE_SUCCESS);
 }
-*/
 
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
 } // end namespace FSP/HOSTBOOT

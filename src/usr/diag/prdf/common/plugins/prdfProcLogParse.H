@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,9 +31,7 @@
 #define __prdfProcLogParse_H
 
 #include <stdint.h>
-/* TODO RTC 256733
-#include <p9_pm_recovery_ffdc_defines.H>
-*/
+#include <errlusrparser.H>
 
 class ErrlUsrParser;
 
@@ -85,10 +83,8 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
  * @param[in] i_subsec  sub section id
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 256733
 bool parsePmFfdcData( void * i_buf, uint32_t i_length,
                       ErrlUsrParser & i_parser, errlver_t i_subsec );
-*/
 
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
 } // end namespace FSP/HOSTBOOT

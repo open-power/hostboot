@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -846,11 +846,9 @@ bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
             rc = parseExtMemMru( i_buffer, i_buflen, i_parser );
             break;
 
-/* TODO RTC 256733
         case ErrlPmFfdcData:
             rc = parsePmFfdcData(i_buffer, i_buflen, i_parser, i_ver);
             break;
-*/
 
         default:
             printUnknown( i_parser, i_ver, i_sst );
