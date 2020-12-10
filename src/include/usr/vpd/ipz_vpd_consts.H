@@ -43,6 +43,11 @@ constexpr uint8_t  VPD_RECORD_END_MAGIC_NUM   = 0x78;
 constexpr uint16_t MAX_RECORD_SIZE            = 0xFFFF;
 constexpr uint8_t  MAX_KEYWORD_SIZE           = 0xFF;
 constexpr uint16_t ASCII_RT                   = 0x5254;
+// Total size of VPD Header (VHDR) record, includes ECC, magic numbers, etc
+constexpr uint16_t VPD_HEADER_TOTAL_RECORD_SIZE = 55;
+const char* const VPD_HEADER_RECORD_NAME("VHDR");
+const char* const VPD_TABLE_OF_CONTENTS_RECORD_NAME("VTOC");
+const char* const VPD_KEYWORD_POINTER_TO_RECORD("PT");
 
 /**
   * @brief Structure representing the first 10 bytes of all

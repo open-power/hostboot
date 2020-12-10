@@ -64,6 +64,7 @@ enum vpdModuleId
     VPD_IPVPD_GET_RECORD_LIST_SEEPROM       = 0x34,
     VPD_IPVPD_ECC_DATA_UPDATE               = 0x35,
     VPD_IPVPD_ECC_DATA_CHECK                = 0x36,
+    VPD_IPVPD_GET_VTOC_RECORD_META_DATA     = 0x37,
 
 
     // PVPD

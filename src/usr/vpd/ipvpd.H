@@ -352,18 +352,10 @@ class IpVpdFacade
      *          data for each record.  If *not* in HB runtime and a validation fails on
      *          an MVPD then the next source for the MVPD will be examined until all
      *          MVPD sources are exhausted.
-     *          A target will deconfigured for the following reasons:
-     *              * In HB Runtime: Validation of a record's ECC data failed.
-     *              * Not in HB Runtime: Validation of a record's ECC data failed
-     *                                   after all MVPD sources have been exhausted.
-     *              * Not in HB Runtime: The API to get the next MVPD source erred.
-     *                                   Not a validation of a record's ECC data, in
-     *                                   the strictest sense, but prevents validation.
-     *
-     * @note This is just a wrapper around method _validateAllRecordEccData.  This
-     *       wrapper will iterate thru the different MVPD sources, if *not* in HB
-     *       runtime and if necessary.  If there is an issue validating a record's
-     *       ECC data then the associated target will be deconfigured.
+     *          A target will be deconfigured for the following reasons:
+     *              * Validation of a record's ECC data failed after all MVPD
+     *                sources have been exhausted.
+     *              * The API to get the next MVPD source erred that prevents validation.
      *
      * @param[in] i_target - Pointer to the PROC target where the records are located.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
@@ -910,6 +902,34 @@ class IpVpdFacade
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
      */
     errlHndl_t _validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_target );
+
+
+    /**
+     * @brief Retrieve the VTOC meta data - record name, record type, record offset,
+     *        record length, ecc offset and ecc length.
+     *
+     * @details If the input parameter i_vhdrFullRecordData is NULL then the meta
+     *          data will be retrieved via the retrieveKeyword API using the
+     *          input i_args as a param.  If i_vhdrFullRecordData is not NULL,
+     *          then the VTOC meta data will be extracted from this input.
+     *
+     * @post If no error occurs then the output parameter o_ptEntry will contain
+     *       the record meta data.  If an error occurs, an error log will be
+     *       returned and the output parameter o_ptEntry will be zeroed out.
+     *
+     * @param[in] i_target - Pointer to the PROC target to retrieve the VTOC record from
+     * @param[in] i_args   - Device driver input args: Struct that contains the record
+     *                       ID, keyword ID, location of record and EEPROM source.
+     * @param[out] o_ptEntry - Struct to contain the record meta data - record name, record
+     *                         type, record offset, record length, ecc offset and ecc length.
+     * @param[in](optional) i_vhdrFullRecordData - If given the VHDR record, then
+     *                      the VTOC record meta data will be extracted from this record.
+     * @return errlHndl_t  - NULL if successful, otherwise a pointer to an error log.
+     */
+    errlHndl_t getVtocRecordMetaData ( TARGETING::Target*      i_target,
+                                       const input_args_t      &i_args,
+                                       pt_entry                &o_ptEntry,
+                                       const vhdr_record* const i_vhdrFullRecordData = nullptr );
 
   protected: // Variables
 

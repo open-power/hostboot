@@ -727,7 +727,7 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
                                               iv_vpdSectionSize,
                                               pRecOffset + sRecLength ),
                                            true /*Add HB SW Callout*/ );
-            err->collectTrace( "VPD", 256 );
+            err->collectTrace( VPD_COMP_NAME, 256 );
             break;
         }
 
@@ -887,7 +887,7 @@ errlHndl_t IpVpdFacade::translateRecord ( VPD::vpdRecord i_record,
                                            0x0,
                                            true /*Add HB SW Callout*/ );
 
-            err->collectTrace( "VPD", 256 );
+            err->collectTrace( VPD_COMP_NAME, 256 );
             break;
         }
 
@@ -952,7 +952,7 @@ errlHndl_t IpVpdFacade::translateKeyword ( VPD::vpdKeyword i_keyword,
             err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
                                      HWAS::SRCI_PRIORITY_MED);
 
-            err->collectTrace( "VPD", 256 );
+            err->collectTrace( VPD_COMP_NAME, 256 );
             break;
         }
 
@@ -1088,7 +1088,7 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
                             iv_configInfo.vpdWritePNOR,
                             iv_configInfo.vpdWriteHW
                           ).addToLog(err);
-        err->collectTrace( "VPD", 256 );
+        err->collectTrace( VPD_COMP_NAME, 256 );
     }
 
     return err;
@@ -1285,7 +1285,7 @@ errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
                                     HWAS::SRCI_PRIORITY_LOW);
 
         // Add trace to the log so we know what record was being requested.
-        err->collectTrace( "VPD", 256 );
+        err->collectTrace( VPD_COMP_NAME, 256 );
 
 
     }
@@ -1345,63 +1345,25 @@ errlHndl_t IpVpdFacade::findRecordMetaDataSeeprom ( const char * i_record,
                                                     const input_args_t &i_args )
 {
     errlHndl_t err = nullptr;
-    char l_buffer[256] = { 0 };
-    uint16_t offset = 0x0;
 
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"IpVpdFacade::findRecordMetaDataSeeprom()" );
 
-    // Skip the ECC data + large resource ID in the VHDR
-    offset = VHDR_ECC_DATA_SIZE + RESOURCE_ID_SIZE;
-
-    // Read PT keyword from VHDR to find the VTOC.
-    size_t pt_len = sizeof(l_buffer);
-    err = retrieveKeyword( "PT", "VHDR", offset, 0, i_target, l_buffer,
-                           pt_len, i_args );
-    if (err) {
-        return err;
-    }
-
-    pt_entry *toc_rec = reinterpret_cast<pt_entry*>(l_buffer);
-    if (pt_len < sizeof(pt_entry) ||
-        (memcmp(toc_rec->record_name, "VTOC",
-                sizeof(toc_rec->record_name)) != 0))
+    // Get the VTOC record meta data
+    pt_entry vtoc_rec;  // The struct to contain the VTOC meta data
+    err = getVtocRecordMetaData(i_target, i_args, vtoc_rec);
+    if (err)
     {
-        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::findRecordMetaDataSeeprom: "
-                   "VHDR is invalid!");
-
-        /*@
-         * @errortype
-         * @reasoncode       VPD::VPD_RECORD_INVALID_VHDR
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM
-         * @userdata1        VHDR length
-         * @userdata2        Target HUID
-         * @devdesc          The VHDR was invalid
-         */
-        err = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            VPD::VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM,
-                            VPD::VPD_RECORD_INVALID_VHDR,
-                            pt_len,
-                            TARGETING::get_huid(i_target) );
-
-        // Could be the VPD of the target wasn't set up properly
-        // -- DECONFIG so that we can possibly keep booting
-        err->addHwCallout( i_target,
-                           HWAS::SRCI_PRIORITY_HIGH,
-                           HWAS::DECONFIG,
-                           HWAS::GARD_NULL );
-
-        // Or HB code didn't look for the record properly
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_LOW);
-
-        err->collectTrace( "VPD" );
         return err;
     }
 
-    offset = le16toh( toc_rec->record_offset ) + 1;  // skip 'large resource'
+    // skip 'large resource'
+    uint16_t offset = le16toh( vtoc_rec.record_offset ) + 1;
+
+    // Create some useful variables
+    char l_buffer[256] = { 0 };
+    size_t pt_len = sizeof(l_buffer);
+    pt_entry *toc_rec(nullptr);
 
     // Read the PT keyword(s) (there may be more than 1) from the VTOC to
     // find the requested record.
@@ -1409,7 +1371,9 @@ errlHndl_t IpVpdFacade::findRecordMetaDataSeeprom ( const char * i_record,
     for (uint16_t index = 0; !found; ++index)
     {
         pt_len = sizeof(l_buffer);
-        err = retrieveKeyword( "PT", "VTOC", offset, index, i_target, l_buffer,
+        err = retrieveKeyword( VPD_KEYWORD_POINTER_TO_RECORD,
+                               VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                               offset, index, i_target, l_buffer,
                                pt_len, i_args );
         if ( err ) {
             // There may be only one PT record
@@ -1476,12 +1440,12 @@ errlHndl_t IpVpdFacade::findRecordMetaDataSeeprom ( const char * i_record,
         err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_LOW);
 
-        err->collectTrace( "VPD" );
+        err->collectTrace( VPD_COMP_NAME );
     }
 
     TRACSSCOMP( g_trac_vpd,
                 EXIT_MRK"IpVpdFacade::findRecordMetaDataSeeprom(): returning %s errors",
-                (l_err ? "with" : "with no") );
+                (err ? "with" : "with no") );
 
     return err;
 } // findRecordMetaDataSeeprom
@@ -1496,64 +1460,14 @@ IpVpdFacade::getRecordListSeeprom ( std::list<pt_entry> & o_recList,
                                     input_args_t i_args )
 {
     errlHndl_t err = NULL;
-    char l_buffer[256] = { 0 };
-    uint16_t offset = 0x0;
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordListSeeprom()" );
 
-    // Skip the ECC data + large resource ID in the VHDR
-    offset = VHDR_ECC_DATA_SIZE + RESOURCE_ID_SIZE;
-
-    // Read PT keyword from VHDR to find the VTOC.
-    size_t pt_len = sizeof(l_buffer);
-    err = retrieveKeyword( "PT",
-                           "VHDR",
-                           offset,
-                           0,
-                           i_target,
-                           l_buffer,
-                           pt_len,
-                           i_args );
+    // Get the VTOC record meta data
+    pt_entry vtoc_rec;  // The struct to contain the VTOC meta data
+    err = getVtocRecordMetaData(i_target, i_args, vtoc_rec);
     if (err)
     {
-        return err;
-    }
-
-    pt_entry *toc_rec = reinterpret_cast<pt_entry*>(l_buffer);
-    if (pt_len < sizeof(pt_entry) ||
-        (memcmp(toc_rec->record_name, "VTOC",
-                sizeof(toc_rec->record_name)) != 0))
-    {
-        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getRecordListSeeprom: VHDR is invalid!");
-
-        /*@
-         * @errortype
-         * @reasoncode       VPD::VPD_RECORD_INVALID_VHDR
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         VPD::VPD_IPVPD_GET_RECORD_LIST_SEEPROM
-         * @userdata1        VHDR length
-         * @userdata2        Target HUID
-         * @devdesc          The VHDR was invalid
-         */
-        err = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            VPD::VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM,
-                            VPD::VPD_RECORD_INVALID_VHDR,
-                            pt_len,
-                            TARGETING::get_huid(i_target) );
-
-        // Could be the VPD of the target wasn't set up properly
-        // -- DECONFIG so that we can possibly keep booting
-        err->addHwCallout( i_target,
-                           HWAS::SRCI_PRIORITY_HIGH,
-                           HWAS::DECONFIG,
-                           HWAS::GARD_NULL );
-
-        // Or HB code didn't look for the record properly
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_LOW);
-
-        err->collectTrace( "VPD" );
         return err;
     }
 
@@ -1570,14 +1484,20 @@ IpVpdFacade::getRecordListSeeprom ( std::list<pt_entry> & o_recList,
                    l_altVpdRecords,
                    l_altRecSize);
 
-    offset = le16toh( toc_rec->record_offset ) + 1;  // skip 'large resource'
+    // skip 'large resource'
+    uint16_t offset = le16toh( vtoc_rec.record_offset ) + 1;
+
+    // Create some useful variables
+    char l_buffer[256] = { 0 };
+    size_t pt_len = sizeof(l_buffer);
+    pt_entry *toc_rec(nullptr);
 
     // Read the PT keyword(s) from the VTOC
     for (uint16_t index = 0; index < 3; ++index)
     {
         pt_len = sizeof(l_buffer);
-        err = retrieveKeyword( "PT",
-                               "VTOC",
+        err = retrieveKeyword( VPD_KEYWORD_POINTER_TO_RECORD,
+                               VPD_TABLE_OF_CONTENTS_RECORD_NAME,
                                offset,
                                index,
                                i_target,
@@ -1866,8 +1786,8 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
         }
         // Automatically populate a bunch of infrastructure records that
         //   we would never override (makes the error checks pass cleaner)
-        else if( (0 == memcmp( i_record, "VHDR", 4 ))
-                 || (0 == memcmp( i_record, "VTOC", 4 )) )
+        else if( (0 == memcmp( i_record, VPD_HEADER_RECORD_NAME, 4 ))
+                 || (0 == memcmp( i_record, VPD_TABLE_OF_CONTENTS_RECORD_NAME, 4 )) )
         {
             iv_overridePtr[l_recTarg] = nullptr;
         }
@@ -1934,7 +1854,7 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
                                             iv_configInfo.vpdReadPNOR,
                                             iv_configInfo.vpdReadHW ),
                                        true /*Add HB SW Callout*/ );
-        err->collectTrace( "VPD", 256 );
+        err->collectTrace( VPD_COMP_NAME, 256 );
     }
 
     return err;
@@ -2160,7 +2080,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                      HWAS::SRCI_PRIORITY_LOW);
 
             // Add trace so we see what record was being compared
-            err->collectTrace( "VPD", 256 );
+            err->collectTrace( VPD_COMP_NAME, 256 );
 
             break;
         }
@@ -2305,7 +2225,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                  HWAS::SRCI_PRIORITY_LOW);
 
         // Add trace so we know what Record/Keyword was missing
-        err->collectTrace( "VPD", 256 );
+        err->collectTrace( VPD_COMP_NAME, 256 );
     }
 
     TRACSSCOMP( g_trac_vpd,
@@ -2413,7 +2333,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                         l_recTarg.first,
                                         l_kw),
                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-                    err->collectTrace( "VPD", 256 );
+                    err->collectTrace( VPD_COMP_NAME, 256 );
 
                     mutex_unlock(&iv_mutex);
 
@@ -2517,7 +2437,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                                 iv_configInfo.vpdWritePNOR,
                                                 iv_configInfo.vpdWriteHW ),
                                            true /*Add HB SW Callout*/ );
-            err->collectTrace( "VPD", 256 );
+            err->collectTrace( VPD_COMP_NAME, 256 );
         }
     } while(0);
 
@@ -2574,7 +2494,7 @@ errlHndl_t IpVpdFacade::checkBufferSize( size_t i_bufferSize,
         err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_LOW);
 
-        err->collectTrace( "VPD", 256 );
+        err->collectTrace( VPD_COMP_NAME, 256 );
 
     }
 
@@ -2676,3 +2596,138 @@ errlHndl_t IpVpdFacade::loadUnloadSecureSection( input_args_t i_args,
     return nullptr;
 }
 #endif
+
+
+// ------------------------------------------------------------------
+// IpVpdFacade::getVtocRecordMetaData
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
+                                     const input_args_t      &i_args,
+                                     pt_entry                &o_ptEntry,
+                                     const vhdr_record* const i_vhdrFullRecordData )
+{
+    errlHndl_t l_err(nullptr);
+
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getVtocRecordMetaData() "
+                "for target 0x%.8X", TARGETING::get_huid(i_target) );
+
+    // Clear the outgoing data
+    memset(&o_ptEntry, 0, sizeof(o_ptEntry));
+
+    do
+    {
+        // If the VHDR record is provided, then extract the VTOC meta data from it
+        if (unlikely(nullptr != i_vhdrFullRecordData))
+        {
+            // Copy the VTOC meta data for caller
+            memcpy( &(o_ptEntry.record_name),
+                    &(i_vhdrFullRecordData->pt_kw_vtoc_name),
+                    RECORD_BYTE_SIZE);
+            o_ptEntry.record_type   = i_vhdrFullRecordData->pt_kw_vtoc_type;
+            o_ptEntry.record_offset = i_vhdrFullRecordData->pt_kw_vtoc_off;
+            o_ptEntry.record_length = i_vhdrFullRecordData->pt_kw_vtoc_len;
+            o_ptEntry.ecc_offset    = i_vhdrFullRecordData->pt_kw_vtoc_ecc_off;
+            o_ptEntry.ecc_length    = i_vhdrFullRecordData->pt_kw_vtoc_ecc_len;
+        }
+        // Need to get the PT keyword from the VHDR record to get the VTOC meta data
+        else
+        {
+            // Considering that the struct vhdr_record contains the VTOC meta data
+            // as a data member, then a buffer size equal to the size of the
+            // struct vhdr_record should be sufficient to gather the VTOC meta data.
+            size_t   l_bufferSize(sizeof(vhdr_record));
+            char     l_buffer[l_bufferSize] = { 0 };
+
+            // Skip the ECC data + large resource ID in the VHDR record
+            uint16_t l_offset(VHDR_ECC_DATA_SIZE + RESOURCE_ID_SIZE);
+
+            // Read PT (Pointer to Record) keyword from VHDR to find the VTOC.
+            l_err = retrieveKeyword( VPD_KEYWORD_POINTER_TO_RECORD, VPD_HEADER_RECORD_NAME,
+                                     l_offset, 0, i_target, l_buffer, l_bufferSize, i_args );
+            if (l_err)
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+                           "Error with getting PT (Pointer to Record) keyword "
+                           "from VHDR record for target 0x%.8X",
+                           TARGETING::get_huid(i_target) );
+                break;
+            }
+
+            TRACSSCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+                        "Success with getting PT (Pointer to Record) keyword "
+                        "from VHDR record for target 0x%.8X",
+                        TARGETING::get_huid(i_target) );
+
+            pt_entry *l_tocRecord = reinterpret_cast<pt_entry*>(l_buffer);
+            if (l_bufferSize < sizeof(pt_entry)       ||
+                (memcmp(l_tocRecord->record_name, VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                        RECORD_BYTE_SIZE) != 0))
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+                           "The VPD Header (VHDR) record is invalid for "
+                           "target 0x%.8X!", TARGETING::get_huid(i_target) );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       VPD::VPD_RECORD_INVALID_VHDR
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         VPD::VPD_IPVPD_GET_VTOC_RECORD_META_DATA
+                 * @userdata1        VHDR length
+                 * @userdata2        Target HUID
+                 * @devdesc          The VHDR was invalid
+                 * @custdesc         Firmware error reading VPD
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    VPD::VPD_IPVPD_GET_VTOC_RECORD_META_DATA,
+                                    VPD::VPD_RECORD_INVALID_VHDR,
+                                    l_bufferSize,
+                                    TARGETING::get_huid(i_target) );
+
+                // Could be the VPD of the target wasn't set up properly
+                // -- DECONFIG so that we can possibly keep booting
+                l_err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_HIGH,
+                                   HWAS::DECONFIG,
+                                   HWAS::GARD_NULL );
+
+                // Or HB code didn't look for the record properly
+                l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_LOW);
+
+                l_err->collectTrace( VPD_COMP_NAME );
+                break;
+            }
+
+            // Copy the VTOC meta data for caller
+            memcpy(&(o_ptEntry.record_name), l_tocRecord->record_name,  RECORD_BYTE_SIZE);
+            o_ptEntry.record_type   = l_tocRecord->record_type;
+            o_ptEntry.record_offset = l_tocRecord->record_offset;
+            o_ptEntry.record_length = l_tocRecord->record_length;
+            o_ptEntry.ecc_offset    = l_tocRecord->ecc_offset;
+            o_ptEntry.ecc_length    = l_tocRecord->ecc_length;
+        }
+    } while (0);
+
+
+    if (!l_err)
+    {
+        TRACSSCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+                    "Successfully retrieved VTOC meta data: record name(%s), "
+                    "record type(0x%.4X), record offset(0x%.4X), record length(%d) "
+                    "ecc offset(0x%.4X) and ecc length(%d) for target 0x%.8X",
+                    o_ptEntry.record_name, le16toh(o_ptEntry.record_type),
+                    le16toh(o_ptEntry.record_offset), le16toh(o_ptEntry.record_length),
+                    le16toh(o_ptEntry.ecc_offset), le16toh(o_ptEntry.ecc_length),
+                    TARGETING::get_huid(i_target) );
+    }
+
+    TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::getVtocRecordMetaData(): "
+                "returning %s errors for target 0x%.8X",
+                (l_err ? "with" : "with no"), TARGETING::get_huid(i_target));
+
+    return l_err;
+}
+
+
