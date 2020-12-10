@@ -1070,10 +1070,9 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandl
                                               [](const TargetHandle_t& i)
                                               {
                                                  auto l_iohsConfigMode = i->getAttr<ATTR_IOHS_CONFIG_MODE>();
-                                                 // Only want all SMPX and present SMPA IOHS targets.
+                                                 // Only want all SMPX and SMPA IOHS targets.
                                                  return !((l_iohsConfigMode == IOHS_CONFIG_MODE_SMPX)
-                                                        || ((l_iohsConfigMode == IOHS_CONFIG_MODE_SMPA)
-                                                            && (i->getAttr<ATTR_HWAS_STATE>().present)));
+                                                        || (l_iohsConfigMode == IOHS_CONFIG_MODE_SMPA));
                                               }), l_busChiplets.end());
 
 
