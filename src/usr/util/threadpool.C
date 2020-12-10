@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,8 @@
 #include <sys/misc.h>
 #include <util/util_reasoncodes.H>
 #include <errl/errlmanager.H>
+#include <errl/errludprintk.H>
+#include <errl/errlentry.H>
 #include <hbotcompid.H>
 
 void Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__init()
@@ -145,9 +147,10 @@ errlHndl_t Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__shutdown()
                                              l_childRc,
                                              TWO_UINT32_TO_UINT64(l_returnedTid,
                                                                   child),
-                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT
-                                            );
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
+                                             ERRORLOG::ErrlEntry::FORCE_DUMP);
             l_errl->collectTrace(UTIL_COMP_NAME);
+            ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
 
             if(!l_origError)
             {
