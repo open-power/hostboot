@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,17 +79,17 @@ p10_hcd_core_poweroff(
     // Stop11: Set RF -> MMA PFET[OFF] -> Drop RF -> CL2 PFET[OFF]
     // Exit11:                                       CL2 PFET[ON] -> Set RF -> MMA PFET[ON] (keep RF on)
     FAPI_DBG("Assert VDD_PFET_REGULATION_FINGER_EN via CPMS_CL2_PFETCNTL[8]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CL2_PFETCNTL_WO_OR, MMIO_1BIT(8) ) );
+    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CL2_PFETCNTL_WO_OR, BIT64(8) ) );
 
     // Only VDD for MMA
     FAPI_TRY( p10_hcd_mma_poweroff( i_target ) );
 
     // Clear Regulation Finger for CL2 power off below, only MMA/Vmin require it to be on.
     FAPI_DBG("Drop VDD_PFET_REGULATION_FINGER_EN via CPMS_CL2_PFETCNTL[8]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CL2_PFETCNTL_WO_CLEAR, MMIO_1BIT(8) ) );
+    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CL2_PFETCNTL_WO_CLEAR, BIT64(8) ) );
 
     FAPI_DBG("Drop sram_enable via CPMS_CL2_PFETCNTL[63:SRAM_ENABLE]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, MMIO_LOWADDR(CPMS_CL2_PFETCNTL_WO_CLEAR), MMIO_1BIT( MMIO_LOWBIT(63) ) ) );
+    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CL2_PFETCNTL_WO_CLEAR, BIT64(63) ) );
 
     // VCS off first, VDD off after
     FAPI_TRY( p10_hcd_corecache_power_control( i_target, HCD_POWER_CL2_OFF ) );

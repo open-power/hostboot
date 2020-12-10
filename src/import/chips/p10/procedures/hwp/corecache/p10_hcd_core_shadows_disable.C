@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,7 @@ p10_hcd_core_shadows_disable(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
     fapi2::buffer<buffer_t> l_mmioData = 0;
+    fapi2::buffer<uint64_t> l_scomData = 0;
     uint32_t                l_timeout  = 0;
     uint32_t                l_shadow_states = 0;
     fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > l_eq_target =
@@ -98,14 +99,17 @@ p10_hcd_core_shadows_disable(
     FAPI_INF(">>p10_hcd_core_shadows_disable");
 
     FAPI_DBG("Disable CORE_SAMPLE via CUCR[1]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CUCR_WO_CLEAR, MMIO_LOAD32H(BIT32(1)) ) );
+    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CUCR_WO_CLEAR, BIT64(1) ) );
 
     FAPI_TRY(HCD_GETMMIO_Q( l_eq_target, QME_FLAGS_RW, l_mmioData ) );
 
     if( MMIO_GET(QME_FLAGS_DDS_ENABLED) == 1 )
     {
         FAPI_DBG("Disable Droop Detection and Cancel Active Droop Response via FDCR[0,2-3]");
-        FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_FDCR_WO_OR, MMIO_LOAD32H( (BIT32(0) | BITS32(2, 2)) ) ) );
+        FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_FDCR_WO_OR, (BIT64(0) | BITS64(2, 2)) ) );
+#if POWER10_DD_LEVEL == 10 //HW555711
+        FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_FDCR_WO_OR, (BIT64(0) | BITS64(2, 2)) ) );
+#endif
 
         FAPI_DBG("Wait for FDCR_UPDATE_IN_PROGRESS to be 0x0 via CUCR[31]");
         l_timeout = HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS /
@@ -113,10 +117,10 @@ p10_hcd_core_shadows_disable(
 
         do
         {
-            FAPI_TRY( HCD_GETMMIO_C( i_target, CPMS_CUCR, l_mmioData ) );
+            FAPI_TRY( HCD_GETMMIO_S( i_target, CPMS_CUCR, l_scomData ) );
 
             // use multicastAND to check 0
-            if( MMIO_GET(31) == 0 )
+            if( SCOM_GET(31) == 0 )
             {
                 break;
             }
@@ -129,13 +133,13 @@ p10_hcd_core_shadows_disable(
         FAPI_ASSERT((l_timeout != 0),
                     fapi2::SHADOW_DIS_FDCR_UPDATE_IN_PROG_TIMEOUT()
                     .set_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS)
-                    .set_CPMS_CUCR(l_mmioData)
+                    .set_CPMS_CUCR(l_scomData)
                     .set_CORE_TARGET(i_target),
                     "ERROR: FDCR Update Timeout");
     }
 
     FAPI_DBG("Disable CORE_SHADOW via CUCR[0]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CUCR_WO_CLEAR, MMIO_LOAD32H(BIT32(0)) ) );
+    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CUCR_WO_CLEAR, BIT64(0)) );
 
     FAPI_DBG("Wait for FTC/PP/DPT_SHADOW_STATE to be Idle via CUCR[33-35,40-41,45-46]");
     l_timeout = HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS /
@@ -143,10 +147,10 @@ p10_hcd_core_shadows_disable(
 
     do
     {
-        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CUCR), l_mmioData ) );
+        FAPI_TRY( HCD_GETMMIO_S( i_target, CPMS_CUCR, l_scomData ) );
 
         // use multicastAND to check 0
-        MMIO_GET32L(l_shadow_states);
+        SCOM_GET32L(l_shadow_states);
 
         if( !( l_shadow_states & ( BITS64SH(33, 3) | BITS64SH(40, 2) | BITS64SH(45, 2) ) ) )
         {
@@ -161,7 +165,7 @@ p10_hcd_core_shadows_disable(
     FAPI_ASSERT((l_timeout != 0),
                 fapi2::SHADOW_DIS_CORE_SHADOW_STATE_TIMEOUT()
                 .set_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS)
-                .set_CPMS_CUCR(l_mmioData)
+                .set_CPMS_CUCR(l_scomData)
                 .set_CORE_TARGET(i_target),
                 "ERROR: Shadow Disable FTC/PP/DPT Shadow State Timeout");
 

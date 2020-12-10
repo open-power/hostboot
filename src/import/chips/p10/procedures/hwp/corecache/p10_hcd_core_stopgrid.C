@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,7 +102,7 @@ p10_hcd_core_stopgrid(
     FAPI_TRY( p10_hcd_mma_stopclocks( i_target ) );
 
     FAPI_DBG("Disable ECL2 Skewadjust via CPMS_CGCSR_[1:CL2_CLK_SYNC_ENABLE]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(1) ) );
+    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CGCSR_WO_CLEAR, BIT64(1) ) );
 
     FAPI_DBG("Check ECL2 Skewadjust Removed via CPMS_CGCSR[33:CL2_CLK_SYNC_DONE]");
     l_timeout = HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS /
@@ -110,11 +110,11 @@ p10_hcd_core_stopgrid(
 
     do
     {
-        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CGCSR), l_mmioData ) );
+        FAPI_TRY( HCD_GETMMIO_S( i_target, CPMS_CGCSR, l_scomData ) );
 
         // use multicastOR to check 0
         if( ( !l_attr_runn_mode ) &&
-            ( MMIO_GET(MMIO_LOWBIT(33)) == 0 ) )
+            ( SCOM_GET(33) == 0 ) )
         {
             break;
         }
@@ -124,10 +124,10 @@ p10_hcd_core_stopgrid(
     }
     while( (--l_timeout) != 0 );
 
-    FAPI_ASSERT( ( l_attr_runn_mode ? ( MMIO_GET(MMIO_LOWBIT(33)) == 0 ) : (l_timeout != 0) ),
+    FAPI_ASSERT( ( l_attr_runn_mode ? ( SCOM_GET(33) == 0 ) : (l_timeout != 0) ),
                  fapi2::ECL2_CLK_SYNC_DROP_TIMEOUT()
                  .set_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS(HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS)
-                 .set_CPMS_CGCSR(l_mmioData)
+                 .set_CPMS_CGCSR(l_scomData)
                  .set_CORE_TARGET(i_target),
                  "ERROR: ECL2 Clock Sync Drop Timeout");
 
@@ -164,7 +164,7 @@ p10_hcd_core_stopgrid(
                  "ERROR: Core Resclk Change Done Entry Timeout");
 
     FAPI_DBG("Switch glsmux to refclk to save clock grid power via CPMS_CGCSR[11]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(11) ) );
+    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CGCSR_WO_CLEAR, BIT64(11) ) );
 
 fapi_try_exit:
 

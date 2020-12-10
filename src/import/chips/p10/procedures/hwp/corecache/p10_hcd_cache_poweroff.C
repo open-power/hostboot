@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,7 +74,7 @@ p10_hcd_cache_poweroff(
     fapi2::buffer<buffer_t> l_mmioData = 0;
 
     FAPI_DBG("Drop sram_enable via CPMS_L3_PFETCNTL[63:SRAM_ENABLE]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, MMIO_LOWADDR(CPMS_L3_PFETCNTL_WO_CLEAR), MMIO_1BIT( MMIO_LOWBIT(63) ) ) );
+    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_L3_PFETCNTL_WO_CLEAR, BIT64(63) ) );
 
     // VCS off first, VDD off after
     FAPI_TRY( p10_hcd_corecache_power_control( i_target, HCD_POWER_L3_OFF ) );

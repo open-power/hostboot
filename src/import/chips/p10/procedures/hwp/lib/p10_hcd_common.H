@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,6 +143,9 @@
     #define MMIO_LOWADDR(addr)                 (addr+4)
     #define MMIO_LOWBIT(bit)                   (bit-32)
 
+    #define HCD_PUTMMIO_S(target, addr, data)  putMmioCpms(target, addr, data)
+    #define HCD_GETMMIO_S(target, addr, data)  getMmioCpms(target, addr, data)
+
     #define HCD_PUTMMIO_C(target, addr, data)  putMmioCore(target, addr, data)
     #define HCD_GETMMIO_C(target, addr, data)  getMmioCore(target, addr, data)
     #define HCD_PUTMMIO_Q(target, addr, data)  putMmioQuad(target, addr, data)
@@ -156,6 +159,9 @@
     typedef uint64_t buffer_t;
     #define MMIO_LOWADDR(addr)                 (addr)
     #define MMIO_LOWBIT(bit)                   (bit)
+
+    #define HCD_PUTMMIO_S(target, addr, data)  putScom(target, addr, data)
+    #define HCD_GETMMIO_S(target, addr, data)  getScom(target, addr, data)
 
     #define HCD_PUTMMIO_C(target, addr, data)  putScom(target, addr, data)
     #define HCD_GETMMIO_C(target, addr, data)  getScom(target, addr, data)
