@@ -1584,4 +1584,18 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_RESTORE_REPAIRS_NIBBLE_OUT_OF_RANGE</rc>
+    <description>
+        The nibble index to perform repairs on / deploy a spare was out of range.
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>NIBBLE_IDX</ffdc>
+    <ffdc>MAX_NIBBLE_IDX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

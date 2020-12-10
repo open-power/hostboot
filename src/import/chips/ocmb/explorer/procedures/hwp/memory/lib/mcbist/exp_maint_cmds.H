@@ -72,10 +72,10 @@ enum class mux_type : size_t
 ///
 /// @brief Used to specify steer type
 ///
-enum class steer_type : size_t
+enum steer_type : size_t
 {
-    DRAM_SPARE0,    // Spare DRAM on port0
-    DRAM_SPARE1,    // Spare DRAM on port1
+    DRAM_SPARE0 = 0,    // Spare DRAM on port0
+    DRAM_SPARE1 = 1,    // Spare DRAM on port1
 };
 
 static constexpr uint8_t SPARE_INDICES = 18;
@@ -87,6 +87,7 @@ static constexpr uint8_t EXP_INVALID_SYMBOL = 0xff;
 /// @note the vector index matches the spare index and holds the symbol value
 ///       the vector index also matches the Spare values for Steer mux registers
 ///
+
 static const std::vector<uint8_t> spare_to_symbol(
 {
     68,    36,    64,    32,    60,
@@ -239,6 +240,17 @@ fapi2::ReturnCode symbol(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const uint8_t i_symbol);
 
+///
+/// @brief Checks the symbol input for steer functions, but also allows the user to program a value to clear the spare
+/// @param[in] i_target Mem Port target
+/// @param[in] i_symbol First symbol index of the DRAM Spare
+/// @return EXP_MAINT_INVALID_SYMBOL for an invalid symbol, SUCCESS otherwise.
+/// @note the value to clear the spare is enumerated by EXP_INVALID_SYMBOL
+///
+fapi2::ReturnCode symbol_or_clear(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const uint8_t i_symbol);
+
 } // ns check
 
 ///
@@ -357,7 +369,9 @@ fapi2::ReturnCode put_steer_mux(
     //    We cannot use PHY rank due to rank swizzling caused by JIRA355
     FAPI_TRY( check::rank(i_target, i_port_rank) );
     FAPI_TRY( check::mux_type(i_target, i_steer_type) );
-    FAPI_TRY( check::symbol(i_target, i_symbol) );
+
+    // Allow the user to write a "clear this value" constant
+    FAPI_TRY( check::symbol_or_clear(i_target, i_symbol) );
 
     // Read Write Mux
     FAPI_TRY(fapi2::getScom(i_target, TT::MUX_REGISTER, l_steer_mux));
@@ -404,14 +418,43 @@ fapi2::ReturnCode check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
                                  uint8_t& o_dram_spare1_symbol );
 
 ///
+/// @brief Checks if a spare can be deployed or not
+/// @param[in] i_target MEM_PORT target
+/// @param[in] i_port_rank Rank we want to read steer mux for.
+/// @param[out] o_spare0_free True if the spare is free, othewise false
+/// @param[out] o_spare1_free True if the spare is free, othewise false
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+/// @note Checks that the spare exists, is free of bad bits, and has not been deployed
+/// If those three conditions are met, then return true, for that spare, otherwise return false
+///
+fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_port_rank,
+        bool& o_spare0_free,
+        bool& o_spare1_free );
+
+///
 /// @brief Set write mux, wait for periodic cal, set read mux, for the given rank.
 /// @param[in] i_target MEM PORT target
-/// @param[in] i_rank Rank we want to write steer mux for.
+/// @param[in] i_port_rank Rank we want to write steer mux for.
+/// @param[in] i_steer_type DRAM_SPARE0 or DRAM_SPARE1
+/// @param[in] i_symbol First symbol index of the DRAM to steer  around.
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+/// @note Allows the user to manually set or clear one steering mux
+///
+fapi2::ReturnCode program_steering_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_port_rank,
+        const steer_type i_steer_type,
+        const uint8_t i_symbol);
+
+///
+/// @brief Set write mux, wait for periodic cal, set read mux, for the given rank.
+/// @param[in] i_target MEM PORT target
+/// @param[in] i_port_rank Rank we want to write steer mux for.
 /// @param[in] i_symbol First symbol index of the DRAM to steer  around.
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
 ///
 fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                              const uint8_t i_rank,
+                              const uint8_t i_port_rank,
                               const uint8_t i_symbol);
 } // ns steer
 

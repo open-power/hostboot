@@ -298,6 +298,11 @@ enum generic_consts
     // Number of DRAM for x4 vs x8
     EXP_NUM_DRAM_X4 = 20,
     EXP_NUM_DRAM_X8 = 10,
+
+    // Note: restore repairs and our ECC logic use the MC/DFI perspective
+    // As such, our spare is located on byte 5
+    // Byte where the spare DRAM(s) are located
+    SPARE_DQ_BYTE = 5,
 };
 
 namespace i2c

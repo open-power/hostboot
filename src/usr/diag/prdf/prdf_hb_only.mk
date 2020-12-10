@@ -199,6 +199,7 @@ prd_obj_no_sim += exp_port.o
 prd_obj_no_sim += exp_kind.o
 prd_obj_no_sim += exp_fir_workarounds.o
 prd_obj_no_sim += exp_phy_utils.o
+prd_obj_no_sim += exp_maint_cmds.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the

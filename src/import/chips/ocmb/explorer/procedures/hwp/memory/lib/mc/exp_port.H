@@ -90,6 +90,10 @@ class portTraits< mss::mc_type::EXPLORER >
         static constexpr uint64_t MAGIC_NUMBER_SIM = 765;
         static constexpr uint64_t MAGIC_NUMBER_NOT_SIM = 196605;
 
+        // This number includes the two spare nibbles, it is compared against
+        // the actual nibble index we're at
+        static constexpr uint8_t MAX_NIBBLE_IDX = 19;
+
         // scom register field definition
         enum
         {
@@ -234,6 +238,13 @@ inline fapi2::ReturnCode change_force_str<DEFAULT_MC_TYPE>(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Round the symbol from dq_to_symbol to its base multiple of 4, for use with steering
+/// @param[in] i_symbol symbol from dq_to_symbol
+/// @return uint8_t rounded DQ symbol
+///
+uint8_t symbol_rounder(const uint8_t i_symbol);
 
 }// mss
 

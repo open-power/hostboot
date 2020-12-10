@@ -124,11 +124,11 @@ inline size_t get_dimm_from_rank(const uint64_t i_port_rank)
 /// @note Outputs the port rank numbers for this DIMM
 ///
 template<>
-inline fapi2::ReturnCode ranks_on_dimm_helper<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
-        i_dimm_target,
-        std::vector<uint64_t>& o_dimm_ranks)
+inline fapi2::ReturnCode ranks_on_dimm_helper<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
+    std::vector<uint64_t>& o_port_ranks)
 {
-    std::vector<uint64_t> l_dimm_ranks;
+    std::vector<uint64_t> l_port_ranks;
     std::vector<mss::rank::info<>> l_vect;
 
     FAPI_TRY( mss::rank::ranks_on_dimm<mss::mc_type::EXPLORER>(i_dimm_target, l_vect) );
@@ -136,10 +136,10 @@ inline fapi2::ReturnCode ranks_on_dimm_helper<mss::mc_type::EXPLORER>(const fapi
     // Loop through and get ranks or each
     for (const auto l_rank_info : l_vect)
     {
-        l_dimm_ranks.push_back( l_rank_info.get_port_rank() );
+        l_port_ranks.push_back( l_rank_info.get_port_rank() );
     }
 
-    o_dimm_ranks = l_dimm_ranks;
+    o_port_ranks = l_port_ranks;
 
 fapi_try_exit:
     return fapi2::current_err;

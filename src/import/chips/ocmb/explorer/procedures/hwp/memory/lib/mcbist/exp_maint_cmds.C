@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_rank.H>
+#include <exp_port.H>
 
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
@@ -202,6 +203,27 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Checks the symbol input for steer functions, but also allows the user to program a value to clear the spare
+/// @param[in] i_target Mem Port target
+/// @param[in] i_symbol First symbol index of the DRAM Spare
+/// @return EXP_MAINT_INVALID_SYMBOL for an invalid symbol, SUCCESS otherwise.
+/// @note the value to clear the spare is enumerated by EXP_INVALID_SYMBOL
+///
+fapi2::ReturnCode symbol_or_clear(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const uint8_t i_symbol)
+{
+    // If the user passed in a symbol as "clear the spares," return success
+    if(i_symbol == EXP_INVALID_SYMBOL)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Check for i_symbol out of range
+    return symbol(i_target,  i_symbol);
+}
+
 } // ns check
 
 ///
@@ -213,6 +235,13 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode symbol_to_spare( const uint8_t i_symbol, uint8_t& o_spare_index )
 {
+    // If the user passed in the value asking us to clear the spare, then mass back the clear the spare encoding
+    if(i_symbol == EXP_INVALID_SYMBOL)
+    {
+        o_spare_index = SPARE_UNUSED;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     // Check if symbol is in table
     const auto l_it = std::find(spare_to_symbol.begin(), spare_to_symbol.end(), i_symbol);
 
@@ -254,51 +283,85 @@ fapi2::ReturnCode check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 }
 
 ///
-/// @brief  Set write mux, wait for periodic cal, set read mux, for the given rank.
+/// @brief Checks if a spare can be deployed or not
+/// @param[in] i_target MEM_PORT target
+/// @param[in] i_port_rank Rank we want to read steer mux for.
+/// @param[out] o_spare0_free True if the spare is free, othewise false
+/// @param[out] o_spare1_free True if the spare is free, othewise false
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+/// @note Checks that the spare exists, is free of bad bits, and has not been deployed
+/// If those three conditions are met, then return true, for that spare, otherwise return false
+///
+fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_port_rank,
+        bool& o_spare0_free,
+        bool& o_spare1_free )
+{
+    constexpr uint8_t SPARE0_MASK = 0xf0;
+    constexpr uint8_t SPARE1_MASK = 0x0f;
+    constexpr uint8_t SPARE_FREE = EXP_INVALID_SYMBOL;
+
+    // If we have errors, we can't be sure we have spares, mark em as bad
+    o_spare0_free = false;
+    o_spare1_free = false;
+
+    // Variable declaration
+    uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
+    uint8_t l_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+    bool l_spare0_exists = false;
+    bool l_spare1_exists = false;
+    bool l_spare0_is_clean = false;
+    bool l_spare1_is_clean = false;
+    uint8_t l_dram_spare0_symbol = 0;
+    uint8_t l_dram_spare1_symbol = 0;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    mss::rank::info<> l_rank_info(i_target, i_port_rank, l_rc);
+    FAPI_TRY(l_rc, "%s failed to obtain rank info", mss::c_str(i_target));
+
+    // 1) Checks if the spares exist
+    FAPI_TRY(mss::attr::get_dimm_spare(l_rank_info.get_dimm_target(), l_dimm_spare));
+    // The logic is inverted to what we want. True means the spare doesn't exist when returned out of the function
+    l_spare0_exists = !mss::skip_dne_spare_nibble<mss::mc_type::EXPLORER>(l_dimm_spare[l_rank_info.get_dimm_rank()],
+                      SPARE_DQ_BYTE, 0);
+    l_spare1_exists = !mss::skip_dne_spare_nibble<mss::mc_type::EXPLORER>(l_dimm_spare[l_rank_info.get_dimm_rank()],
+                      SPARE_DQ_BYTE, 1);
+
+    // 2) Checks if the spare is clear of errors
+    FAPI_TRY(get_bad_dq_bitmap<mss::mc_type::EXPLORER>(l_rank_info.get_dimm_target(), l_bad_bits));
+
+    l_spare0_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][SPARE_DQ_BYTE] & SPARE0_MASK);
+    l_spare1_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][SPARE_DQ_BYTE] & SPARE1_MASK);
+
+    // 3) Checks if the spare has been deployed
+    FAPI_TRY(check_steering(i_target, i_port_rank, l_dram_spare0_symbol, l_dram_spare1_symbol));
+
+    // Assembles all of the information - the spare is only free if all of the bellow are true
+    o_spare0_free = l_spare0_exists && l_spare0_is_clean && (l_dram_spare0_symbol == SPARE_FREE);
+    o_spare1_free = l_spare1_exists && l_spare1_is_clean && (l_dram_spare1_symbol == SPARE_FREE);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set write mux, wait for periodic cal, set read mux, for the given rank.
 /// @param[in] i_target MEM PORT target
 /// @param[in] i_port_rank Rank we want to write steer mux for.
+/// @param[in] i_steer_type DRAM_SPARE0 or DRAM_SPARE1
 /// @param[in] i_symbol First symbol index of the DRAM to steer  around.
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+/// @note Allows the user to manually set or clear one steering mux
 ///
-fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                              const uint8_t i_port_rank,
-                              const uint8_t i_symbol)
+fapi2::ReturnCode program_steering_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_port_rank,
+        const steer_type i_steer_type,
+        const uint8_t i_symbol)
 {
     constexpr uint64_t  HW_MODE_DELAY = (250 * mss::DELAY_1MS);
     // 200000 sim cycle delay for SIM mode
     constexpr uint64_t  SIM_MODE_DELAY = (2 * mss::DELAY_100US);
 
-    uint8_t l_spare0_symbol = 0;
-    uint8_t l_spare1_symbol = 0;
-    steer_type l_target_spare;
-
-    // Check for i_port_rank or i_symbol out of range
-    FAPI_TRY( check::rank(i_target, i_port_rank) );
-    FAPI_TRY( check::symbol(i_target, i_symbol) );
-
-    //------------------------------------------------------
-    // Determine which spare is free
-    //------------------------------------------------------
-    FAPI_TRY(check_steering(i_target, i_port_rank, l_spare0_symbol, l_spare1_symbol));
-
-    if (l_spare0_symbol == EXP_INVALID_SYMBOL)
-    {
-        l_target_spare = steer_type::DRAM_SPARE0;
-    }
-    else if (l_spare1_symbol == EXP_INVALID_SYMBOL)
-    {
-        l_target_spare = steer_type::DRAM_SPARE1;
-    }
-    else
-    {
-        FAPI_ASSERT(false,
-                    fapi2::EXP_MAINT_DO_STEER_ALL_SPARES_DEPLOYED()
-                    .set_PORT_TARGET(i_target)
-                    .set_RANK(i_port_rank)
-                    .set_SYMBOL(i_symbol),
-                    "Both Spare0 and Spare1 are already deployed on %s.",
-                    mss::c_str(i_target));
-    }
+    // Note: we check the rank and mux type in put_steer_mux, so we're not rechecking them here
 
     //------------------------------------------------------
     // Update write mux
@@ -306,7 +369,7 @@ fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
     FAPI_TRY(put_steer_mux<mux_type::WRITE_MUX>(
                  i_target,               // MEM PORT
                  i_port_rank,            // Rank: 0-7
-                 l_target_spare,         // DRAM_SPARE0/DRAM_SPARE1
+                 i_steer_type,           // DRAM_SPARE0/DRAM_SPARE1
                  i_symbol));             // First symbol index of DRAM to steer around
 
 
@@ -321,8 +384,51 @@ fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
     FAPI_TRY(put_steer_mux<mux_type::READ_MUX>(
                  i_target,               // MEM PORT
                  i_port_rank,            // Rank: 0-7
-                 l_target_spare,         // DRAM_SPARE0/DRAM_SPARE1
+                 i_steer_type,           // DRAM_SPARE0/DRAM_SPARE1
                  i_symbol));             // First symbol index of DRAM to steer around
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set write mux, wait for periodic cal, set read mux, for the given rank.
+/// @param[in] i_target MEM PORT target
+/// @param[in] i_port_rank Rank we want to write steer mux for.
+/// @param[in] i_symbol First symbol index of the DRAM to steer around.
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                              const uint8_t i_port_rank,
+                              const uint8_t i_symbol)
+{
+    bool l_spare0_free = false;
+    bool l_spare1_free = false;
+    steer_type l_target_spare;
+
+    // Check for i_port_rank or i_symbol out of range
+    FAPI_TRY( check::rank(i_target, i_port_rank) );
+
+    // If we're doing steering, we can't be clearing a steer, only check for a valid symbol
+    FAPI_TRY( check::symbol(i_target, i_symbol) );
+
+    //------------------------------------------------------
+    // Determine which spare is free
+    //------------------------------------------------------
+    FAPI_TRY(check_if_spare_is_free(i_target, i_port_rank, l_spare0_free, l_spare1_free));
+
+    // If neither spare is free, assert out
+    FAPI_ASSERT(l_spare0_free || l_spare1_free,
+                fapi2::EXP_MAINT_DO_STEER_ALL_SPARES_DEPLOYED()
+                .set_PORT_TARGET(i_target)
+                .set_RANK(i_port_rank)
+                .set_SYMBOL(i_symbol),
+                "Both Spare0 and Spare1 are already deployed on %s rank %u symbol %u.",
+                mss::c_str(i_target), i_port_rank, i_symbol);
+
+    // Default to using spare 0 first
+    l_target_spare = l_spare0_free ? steer_type::DRAM_SPARE0 : steer_type::DRAM_SPARE1;
+    FAPI_TRY(program_steering_helper(i_target, i_port_rank, l_target_spare, i_symbol));
 
 fapi_try_exit:
     return fapi2::current_err;

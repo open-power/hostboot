@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,6 +182,7 @@ class eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
         };
 
         // Symbol to DQ index mapping table for Explorer
+        // dq = symbol2dq[symbol]
         constexpr static const uint8_t symbol2dq[] =
         {
             39, 38, 37, 36,

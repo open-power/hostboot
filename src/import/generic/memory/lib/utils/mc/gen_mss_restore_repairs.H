@@ -383,7 +383,23 @@ class symbol_mark_only : public repair_state<MC, T>
             // leave an unrepaired DQ
             const auto new_state = std::make_shared< symbol_mark_plus_unrepaired_dq<MC, T> >();
             mss::repair_state<MC, T>::set_state(io_machine, new_state);
-            return fapi2::FAPI2_RC_SUCCESS;
+
+            uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
+            FAPI_TRY(mss::dimm_spare<MC>(i_target, l_dimm_spare));
+
+            // For 4U - we want to mark repairs exceeded
+            // Spec was written such that "4U" = DDIMM with spares = DDIMM with
+            // the best RAS. So to key off of "are we 4U", we will really key off
+            // of "DDIMM with spares"
+            if (l_dimm_spare[i_port_rank % MAX_RANK_PER_DIMM_ATTR] != fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE)
+            {
+                FAPI_TRY( io_repairs_exceeded.setBit(mss::index(i_target)) );
+                FAPI_INF("%s Repairs exceeded (chip mark exists, plus bad nibble) on port rank:%d DQ:%d",
+                         mss::c_str(i_target), i_port_rank, i_dq);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -560,6 +576,7 @@ class no_fails : public repair_state<MC, T>
                 const auto new_state = std::make_shared<chip_mark_only<MC, T>>();
                 mss::repair_state<MC, T>::set_state(io_machine, new_state);
             }
+
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -591,7 +608,7 @@ class repair_state_machine
         /// @param[in] i_port_rank the port rank
         /// @param[in] i_dq the DQ bit index
         /// @param[in,out] io_repairs_applied 8-bit mask, where a bit set means that rank had repairs applied
-        /// @param[in,out] io_repai:rs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
+        /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
         fapi2::ReturnCode one_bad_dq(const fapi2::Target<T>& i_target,
@@ -688,86 +705,208 @@ bool skip_dne_spare_nibble(const uint8_t i_spare_support,
                            const uint64_t i_byte,
                            const size_t i_nibble);
 
-//
+///
+/// @brief Grab a vector of non-spare nibbles
+/// @tparam MC the memory controller type
+/// @return a vector of bytes/nibbles based upon the MC type
+/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
+///
+template< mss::mc_type MC >
+void get_nonspare_nibbles(std::vector<uint8_t>& o_nonspare_nibbles);
+
+///
+/// @brief Grab a vector of non-spare nibbles
+/// @tparam MC the memory controller type
+/// @param[in] i_target A target representing a DIMM
+/// @param[in] i_rank Rank info object
+/// @param[out] o_spare_nibbles a vector of nibbles based upon the MC type
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
+///
+template< mss::mc_type MC >
+fapi2::ReturnCode get_spare_nibbles(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    const mss::rank::info<MC>& i_rank,
+                                    std::vector<uint8_t>& o_spare_nibbles);
+
+///
+/// @brief Deploys a spare and marks it as deployed
+/// @tparam MC the memory controller type
+/// @param[in] i_target A target representing a DIMM
+/// @param[in] i_dimm_rank The DIMM rank for this target
+/// @param[in] i_nibble_idx Index of the nibble to spare out
+/// @param[in] i_spare_nibbles a vector of bytes/nibbles for the spare nibbles
+/// @param[in,out] io_deployed_spares a vector of bytes/nibbles containing which byte/nibble is spared out
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
+///
+template< mss::mc_type MC >
+fapi2::ReturnCode deploy_spare_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                       const mss::rank::info<MC>& i_dimm_rank,
+                                       const uint8_t i_nibble_idx,
+                                       const std::vector<uint8_t>& i_spare_nibbles,
+                                       std::vector<uint8_t>& io_deployed_spares);
+
+///
+/// @brief Undeploy the specified spare on the provided rank
+///
+/// @tparam MC MC type
+/// @param[in] i_spare spare number (0,1)
+/// @param[in] i_rank rank info object
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+template<mss::mc_type MC>
+fapi2::ReturnCode unspare(const size_t i_spare, const mss::rank::info<MC>& i_rank);
+
+///
 /// @brief Restore symbol and chip marks according to BAD_DQ_BITMAP attribute, helper function for unit testing
 /// @tparam MC the memory controller type
-/// @tparam T, the fapi2 target type of the DIMM (derived)
-/// @param[in] i_target A target representing a DIMM
+/// @param[in] i_dimm A target representing a DIMM
 /// @param[in] i_bad_bits the bad bits values from the VPD, for the specified DIMM
 /// @param[in,out] io_repairs_applied 8-bit mask, where a bit set means that rank had repairs applied
 /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC, fapi2::TargetType T >
-fapi2::ReturnCode restore_repairs_helper( const fapi2::Target<T>& i_target,
+template< mss::mc_type MC>
+fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
         const uint8_t i_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
         fapi2::buffer<uint8_t>& io_repairs_applied,
         fapi2::buffer<uint8_t>& io_repairs_exceeded)
 {
-    FAPI_INF("%s Restore repair marks from bad DQ data", mss::c_str(i_target));
+    FAPI_INF("%s Restore repair marks from bad DQ data", mss::c_str(i_dimm));
 
-    // The ranks are returned as port values for this specific DIMM
-    // That way, we can callout each rank correctly with no additional encoding needed
-    std::vector<uint64_t> l_port_ranks;
-    const auto l_dimm_idx = index(i_target);
+    std::vector<mss::rank::info<MC>> l_ranks;
     uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
+    std::vector<uint8_t> l_nonspare_nibbles;
+    get_nonspare_nibbles<MC>(l_nonspare_nibbles);
 
     // gets spare availability
-    FAPI_TRY( mss::dimm_spare<MC>(i_target, l_dimm_spare) );
+    FAPI_TRY(mss::dimm_spare<MC>(i_dimm, l_dimm_spare));
 
     // gets all of the ranks to loop over
-    // Yes, we get port rank values from this function (documented it in doxygen)
-    FAPI_TRY( mss::rank::ranks_on_dimm_helper<MC>(i_target, l_port_ranks) );
+    FAPI_TRY(mss::rank::ranks_on_dimm<MC>(i_dimm, l_ranks));
 
     // loop through ranks
-    for (const auto l_port_rank : l_port_ranks)
+    for (const auto l_rank : l_ranks)
     {
-        const auto l_rank_idx = index(l_port_rank);
-
-        // don't process last byte if it's a non-existent spare. Non-existent spare bits are marked 'bad' in the attribute
-        const auto l_total_bytes = get_total_bytes<MC>(l_dimm_spare[l_port_rank]);
+        const auto l_dimm_rank = l_rank.get_dimm_rank();
+        const auto l_port_rank = l_rank.get_port_rank();
+        const auto l_dimm_idx = mss::rank::get_dimm_from_rank(l_port_rank);
 
         repair_state_machine<MC, fapi2::TARGET_TYPE_DIMM> l_machine;
 
-        for (uint64_t l_byte = 0; l_byte < l_total_bytes; ++l_byte)
+        // List of byte, nibble pairs of available spares, and deployed spares
+        std::vector<uint8_t> l_spare_nibbles;
+        std::vector<uint8_t> l_deployed_spares;
+        FAPI_TRY(get_spare_nibbles<MC>( i_dimm,
+                                        l_rank,
+                                        l_spare_nibbles));
+
+        // Loop over nonspare nibbles
+        for (const auto& l_nibble_idx : l_nonspare_nibbles)
         {
-            for (size_t l_nibble = 0; l_nibble < mss::conversions::NIBBLES_PER_BYTE; ++l_nibble)
+            const auto l_byte = l_nibble_idx / NIBBLES_PER_BYTE;
+            const auto l_nibble = l_nibble_idx % NIBBLES_PER_BYTE;
+
+            const auto l_bad_dq_vector = mss::bad_dq_attr_to_vector(i_bad_bits[l_dimm_rank][l_byte], l_nibble);
+            FAPI_DBG("%s Total bad bits on DIMM:%d rank:%d nibble%d: %d",
+                     mss::c_str(i_dimm), l_dimm_idx, l_dimm_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble, l_bad_dq_vector.size());
+
+            // If there is at least one bad bit and we have an undeployed spare, deploy the next spare we have available
+            // For DIMM's that lack spares this becomes a no-op as the spare nibbles and deployed spares will be empty
+            if((l_bad_dq_vector.size() >= 1) && (l_deployed_spares.size() < l_spare_nibbles.size()))
             {
-                // don't process non-existent spare nibble because all non-existent spare bits are marked 'bad' in the attribute
-                if (skip_dne_spare_nibble<MC>(l_dimm_spare[l_port_rank], l_byte, l_nibble))
-                {
-                    FAPI_DBG("Skip processing bits on DIMM:%d rank:%d nibble%d because they are non-existent spares",
-                             l_dimm_idx, l_port_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble);
-                    continue;
-                }
+                FAPI_TRY(deploy_spare_helper<MC>(i_dimm, l_rank, l_nibble_idx, l_spare_nibbles, l_deployed_spares));
+            }
 
-                const auto l_bad_dq_vector = mss::bad_dq_attr_to_vector(i_bad_bits[l_rank_idx][l_byte], l_nibble);
-                FAPI_DBG("Total bad bits on DIMM:%d rank:%d nibble%d: %d",
-                         l_dimm_idx, l_port_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble, l_bad_dq_vector.size());
+            // apply repairs and update repair machine state
+            // if there are no bad bits (l_bad_dq_vector.size() == 0) no action is necessary
+            else if (l_bad_dq_vector.size() == 1)
+            {
+                // l_bad_dq_vector is per byte, so multiply up to get the bad dq's index
+                const uint64_t l_dq = l_bad_dq_vector[0] + (l_byte * BITS_PER_BYTE);
+                FAPI_TRY( l_machine.one_bad_dq(i_dimm, l_port_rank, l_dq, io_repairs_applied, io_repairs_exceeded) );
+            }
+            else if (l_bad_dq_vector.size() > 1)
+            {
+                // l_bad_dq_vector is per byte, so multiply up to get the bad dq's index
+                const uint64_t l_dq = l_bad_dq_vector[0] + (l_byte * BITS_PER_BYTE);
+                FAPI_TRY( l_machine.multiple_bad_dq(i_dimm, l_port_rank, l_dq, io_repairs_applied, io_repairs_exceeded) );
+            }
 
-                // apply repairs and update repair machine state
-                // if there are no bad bits (l_bad_dq_vector.size() == 0) no action is necessary
-                if (l_bad_dq_vector.size() == 1)
-                {
-                    // l_bad_dq_vector is per byte, so multiply up to get the bad dq's index
-                    const uint64_t l_dq = l_bad_dq_vector[0] + (l_byte * BITS_PER_BYTE);
-                    FAPI_TRY( l_machine.one_bad_dq(i_target, l_port_rank, l_dq, io_repairs_applied, io_repairs_exceeded) );
-                }
-                else if (l_bad_dq_vector.size() > 1)
-                {
-                    // l_bad_dq_vector is per byte, so multiply up to get the bad dq's index
-                    const uint64_t l_dq = l_bad_dq_vector[0] + (l_byte * BITS_PER_BYTE);
-                    FAPI_TRY( l_machine.multiple_bad_dq(i_target, l_port_rank, l_dq, io_repairs_applied, io_repairs_exceeded) );
-                }
+            // if repairs have been exceeded, we're done
+            if (io_repairs_exceeded.getBit(l_dimm_idx))
+            {
+                FAPI_INF("Repairs exceeded on DIMM %s", c_str(i_dimm));
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+        } // end loop through non spares
 
-                // if repairs have been exceeded, we're done
-                if (io_repairs_exceeded.getBit(l_dimm_idx))
-                {
-                    FAPI_INF("Repairs exceeded on DIMM %s", c_str(i_target));
-                    return fapi2::FAPI2_RC_SUCCESS;
-                }
-            } // end loop through nibbles
-        } // end loop through bytes
+        // Loops through and checks spares
+        // We use an index based for loop to allow us to increment through both of the vectors as needed
+        for (uint8_t l_spare = 0; l_spare < l_spare_nibbles.size(); ++l_spare )
+        {
+            const auto l_spare_idx = l_spare_nibbles[l_spare];
+            const auto l_spare_byte = l_spare_idx / NIBBLES_PER_BYTE;
+            const auto l_spare_nibble = l_spare_idx % NIBBLES_PER_BYTE;
+
+            const auto l_bad_dq_vector = mss::bad_dq_attr_to_vector(i_bad_bits[l_dimm_idx][l_spare_byte], l_spare_nibble);
+            FAPI_DBG("%s Total bad bits on spare%u DIMM:%d rank:%d nibble%d: %d",
+                     mss::c_str(i_dimm), l_spare, l_dimm_idx, l_port_rank, (l_spare_byte * NIBBLES_PER_BYTE) + l_spare_nibble,
+                     l_bad_dq_vector.size());
+
+            // If this spare is undeployed, we can exit out of this loop
+            // No other spare will be deployed and we don't need to apply any repairs on a spare we're not using
+            if (l_spare >= l_deployed_spares.size())
+            {
+                FAPI_DBG("%s Spare%u is undeployed. No further repairs needed on rank%u",
+                         mss::c_str(i_dimm), l_spare, l_port_rank);
+                break;
+            }
+
+            // We want to apply repairs on the nibbles on which we deployed spares
+            const auto l_nibble_idx = l_deployed_spares[l_spare];
+            const auto l_byte = l_nibble_idx / NIBBLES_PER_BYTE;
+
+            // Available spares
+            uint8_t l_undeployed_spare_count = l_spare_nibbles.size() - l_deployed_spares.size();
+
+            // If there is at least one bad bit and we have another undeployed spare, deploy the next spare we have available
+            // We also undeploy our current spare
+            if ((l_bad_dq_vector.size() >= 1) && l_undeployed_spare_count > 0)
+            {
+                // deploy_spare_helper will always pick the next available spare,
+                // so it should skip over the currently deployed and correctly choose the next
+                FAPI_TRY(deploy_spare_helper<MC>(i_dimm, l_rank, l_nibble_idx, l_spare_nibbles, l_deployed_spares));
+
+                // Undeploy the current spare
+                FAPI_TRY(mss::unspare(l_spare, l_rank));
+
+                // We will leave the newly undeployed spare in l_deplored_spares,
+                // to leave a record of what happened
+            }
+
+            // apply repairs and update repair machine state
+            // if there are no bad bits (l_bad_dq_vector.size() == 0) no action is necessary
+            else if (l_bad_dq_vector.size() == 1)
+            {
+                // l_bad_dq_vector is per byte, so multiply up to get the bad dq's index
+                const uint64_t l_dq = l_bad_dq_vector[0] + (l_byte * BITS_PER_BYTE);
+                FAPI_TRY( l_machine.one_bad_dq(i_dimm, l_port_rank, l_dq, io_repairs_applied, io_repairs_exceeded) );
+            }
+            else if (l_bad_dq_vector.size() > 1)
+            {
+                // l_bad_dq_vector is per byte, so multiply up to get the bad dq's index
+                const uint64_t l_dq = l_bad_dq_vector[0] + (l_byte * BITS_PER_BYTE);
+                FAPI_TRY( l_machine.multiple_bad_dq(i_dimm, l_port_rank, l_dq, io_repairs_applied, io_repairs_exceeded) );
+            }
+
+            // if repairs have been exceeded, we're done
+            if (io_repairs_exceeded.getBit(l_dimm_idx))
+            {
+                FAPI_INF("Repairs exceeded on DIMM %s", c_str(i_dimm));
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
     } // end loop through ranks
 
 fapi_try_exit:
@@ -798,7 +937,7 @@ fapi2::ReturnCode restore_repairs( const fapi2::Target<T>& i_target,
     {
         FAPI_TRY( mss::get_bad_dq_bitmap<MC>(l_dimm, l_bad_bits) );
 
-        FAPI_TRY( (restore_repairs_helper<MC, fapi2::TARGET_TYPE_DIMM>(
+        FAPI_TRY( (restore_repairs_helper<MC>(
                        l_dimm, l_bad_bits, io_repairs_applied, io_repairs_exceeded)) );
     }
 
