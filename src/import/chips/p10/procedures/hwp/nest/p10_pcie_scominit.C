@@ -299,7 +299,7 @@ fapi2::ReturnCode p10_load_iop_override(
                 FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
                          "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
             }
-            else if ((l_fw_ver_0 == FW_VER_0_OCT_2020) && (l_fw_ver_1 == FW_VER_1_OCT_2020))
+            else
             {
                 //Disable scratch_15 algo
                 l_data = 0;
