@@ -1166,7 +1166,7 @@ class base_0_3
         ///
         virtual fapi2::ReturnCode set_mem_dimm_size(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
+            uint32_t l_field = 0;
             uint8_t l_dram_width = 0;
             uint8_t l_dram_density = 0;
             uint8_t l_logical_rank_per_dimm = 0;
