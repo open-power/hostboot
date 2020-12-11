@@ -27,10 +27,15 @@ import socket
 import struct
 from udparsers.helpers.symbols import hbSymbolTable
 import udparsers.helpers.hwasCallout
+from udparsers.helpers.errludtarget import errlud_parse_entity_path
 from udparsers.helpers.errludP_Helpers import (
     hexDump, memConcat, hexConcat, intConcat, findNull, strConcat, unknownStr )
 
 class errludP_errl:
+    #Generated parsers
+    from udparsers.b0100.errludtarget import ErrlUserDetailsParserTarget
+    from udparsers.b0100.errludattributeP_gen import ErrlUserDetailsParserAttribute
+
     def ErrlUserDetailsParserString(ver, data):
         d = dict()
         i = 0
@@ -229,9 +234,7 @@ class errludP_errl:
             i += 4
             cpuID, i=hexConcat(data, i, i+4)
 
-            # @TODO RTC:214799 - Add parsing for entity path
-            #d['Target']=errludP_errl.entityPath(data, i)
-
+            d['Target']=errludP_errl.entityPath(data, i)[0]
             d['CPU ID']=cpuID
             d['Deconfig State']=deconfigState
             d['GARD Error Type']=gardError
@@ -261,9 +264,8 @@ class errludP_errl:
                                                         unknownStr(data, i, i+4))
             i += 4
 
-            # @TODO RTC:214799 - Add parsing for entity path
-            #d['Target 1']=errludP_errl.entityPath(data, i)
-            #d['Target 2']=errludP_errl.entityPath(data, j)
+            d['Target 1'], i=errludP_errl.entityPath(data, i)
+            d['Target 2'], i=errludP_errl.entityPath(data, i)
 
          # HWAS::CLOCK_CALLOUT
         elif cType == hwasCallout.calloutType.get("CLOCK_CALLOUT"):
@@ -285,8 +287,7 @@ class errludP_errl:
                                                                 unknownStr(data, i, i+4))
             i += 4
 
-            # @TODO RTC:214799 - Add parsing for entity path
-            #d['Target']=errludP_errl.entityPath(data, i)
+            d['Target'], i=errludP_errl.entityPath(data, i)
 
         # HWAS::PART_CALLOUT
         elif cType == hwasCallout.calloutType.get("PART_CALLOUT"):
@@ -308,8 +309,7 @@ class errludP_errl:
                                                                 unknownStr(data, i, i+4))
             i += 4
 
-            # @TODO RTC:214799 - Add parsing for entity path
-            #d['Target']=errludP_errl.entityPath(data, i)
+            d['Target'], i=errludP_errl.entityPath(data, i)
 
         # HWAS::SENSOR_CALLOUT
         elif calloutType == hwasCallout.calloutType.get("SENSOR_CALLOUT"):
@@ -339,9 +339,7 @@ class errludP_errl:
             d['Engine'], i=hexConcat(data, i, i+1)
             d['Port'], i=hexConcat(data, i, i+1)
             d['Dev Address'], i=hexConcat(data, i, i+1)
-
-            # @TODO RTC:214799 - Add parsing for entity path
-            #d['Target']=errludP_errl.entityPath(data, j)
+            d['Target'], i=errludP_errl.entityPath(data, i)
 
         else:
             d['Callout type']='UNKNOWN: ' + hex(cType)
@@ -504,23 +502,22 @@ class errludP_errl:
 
     @param[in] data: memoryview object to get data from
     @param[in] index: offset to start reading data for entity path
-    @returns: a string of the entity path
+    @returns: a string of the entity path and an int to increment the current offset value
     """
     def entityPath(data, index):
         if data[index] == 0xF0:
             return "MASTER_PROCESSOR_CHIP_TARGET_SENTINEL"
-        # @TODO RTC:214799 - Create Generated function to print entity path
-        #else:
-            #return errlud_parse_entity_path()
+        else:
+            return errlud_parse_entity_path(data, index)
 
 #Dictionary with parser functions for each subtype
 #Values from errlUserDetailDataSubsection enum in src/include/usr/errl/errlreasoncodes.H
 errlUserDetailDataSubsection = { 1: "ErrlUserDetailsParserString",
-                                 2: "ErrlUserDetailsParserTarget", # generated
+                                 2: "ErrlUserDetailsParserTarget", #Generated
                                  3: "ErrlUserDetailsParserBackTrace",
-                                 4: "ErrlUserDetailsParserAttribute", # generated
+                                 4: "ErrlUserDetailsParserAttribute", #Generated
                                  5: "ErrlUserDetailsParserLogRegister",
-                                 6: "ErrlUserDetailsParserCallout", # uses generated function
+                                 6: "ErrlUserDetailsParserCallout", #Uses generated function
                                  9: "ErrlUserDetailsParserStringSet",
                                  10: "ErrlUserDetailsParserBuild",
                                  11: "ErrlUserDetailsParserSysState",
