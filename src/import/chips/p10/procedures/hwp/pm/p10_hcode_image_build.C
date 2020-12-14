@@ -54,6 +54,8 @@
 #include <p10_qme_build_attributes.H>
 #include <p10_scan_compression.H>
 #include <p10_stop_util.H>
+#include <p10_fbc_utils.H>
+#include <p10_fbc_core_topo.H>
 
 extern "C"
 {
@@ -2045,6 +2047,43 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
     return fapi2::current_err;
 }
 
+/**
+ * @brief       Inserts Runtime SCOMs into SCOM restore section
+ * @param[in]   i_procTgt           fapi2 target for P10 proc chip
+ * @param[in]   i_pChipHomer        models HOMER region in memory
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode insertRuntimeSCOMs( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *i_pChipHomer )
+{
+    FAPI_INF( ">> insertRuntimeSCOMs" );
+
+    std::vector<uint64_t> l_topo_scoms;
+
+    // Get the register values for the SCOMs to setup the topology id table
+    FAPI_TRY(topo::get_topology_table_scoms(i_procTgt, l_topo_scoms));
+
+    for (const auto& l_core : i_procTgt.getChildren<fapi2::TARGET_TYPE_CORE>())
+    {
+        FAPI_INF("Put core runtime SCOM updates into HOMER ");
+        FAPI_TRY( p10_fbc_core_topo( l_core,
+                                     l_topo_scoms,
+                                     i_pChipHomer,
+                                     stopImageSection::PROC_STOP_SECTION_CORE,
+                                     rt_topo::RT_TOPO_MODE_HOMER));
+
+        FAPI_INF("Put cache runtime SCOM updates into HOMER ");
+        FAPI_TRY( p10_fbc_core_topo( l_core,
+                                     l_topo_scoms,
+                                     i_pChipHomer,
+                                     stopImageSection::PROC_STOP_SECTION_CACHE,
+                                     rt_topo::RT_TOPO_MODE_HOMER));
+    }
+
+fapi_try_exit:
+    FAPI_INF( "<< insertRuntimeSCOMs" );
+    return fapi2::current_err;
+
+}
 //----------------------------------------------------------------------------------------------
 /**
  * @brief   build CPMR region
@@ -2106,6 +2145,9 @@ fapi2::ReturnCode buildCpmrImage( CONST_FAPI2_PROC& i_procTgt,
 
     FAPI_TRY( initCpmrAttribute( i_pChipHomer, l_qmeBuildRecord ),
               "Failed To Initialize CPMR Attribute" );
+
+    FAPI_TRY( insertRuntimeSCOMs( i_procTgt, i_pChipHomer ),
+              "Failed To Insert Runtime SCOMs" );
 
     #ifdef __AUTO_WAKEUP_TEST_
 

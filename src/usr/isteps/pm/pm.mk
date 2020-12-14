@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -74,6 +74,7 @@ OBJS += p10_pm_sram_access_utils.o
 OBJS += p10_pm_qme_firinit.o
 OBJS += p10_pm_pba_firinit.o
 OBJS += p10_pm_pba_init.o
+OBJS += p10_fbc_core_topo.o
 OBJS += p10_fbc_utils.o
 OBJS += p10_pm_ocb_init.o
 OBJS += p10_pm_ocb_indir_setup_linear.o

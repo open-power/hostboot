@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -27,6 +27,7 @@ HCODE_UTIL=$(ROOTPATH)/chips/p10/procedures/utils/stopreg/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/utils/imageProcs/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/lib/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/pm/
+HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/nest/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/common/include/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/customize/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/accessors/
@@ -50,5 +51,7 @@ lib$(PROCEDURE)_DEPLIBS	+= p10_scan_compression
 lib$(PROCEDURE)_DEPLIBS	+= p10_tor
 lib$(PROCEDURE)_DEPLIBS += common_ringId
 lib$(PROCEDURE)_DEPLIBS += p10_ringId
+lib$(PROCEDURE)_DEPLIBS += p10_fbc_core_topo
+lib$(PROCEDURE)_DEPLIBS += p10_fbc_utils
 lib$(PROCEDURE)_COMMONFLAGS += -DP10_RS4_CONTANER_SIZE_TRACING
 $(call BUILD_PROCEDURE)
