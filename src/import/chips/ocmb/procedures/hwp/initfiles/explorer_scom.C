@@ -68,6 +68,7 @@ constexpr uint64_t literal_0b110 = 0b110;
 constexpr uint64_t literal_0b011 = 0b011;
 constexpr uint64_t literal_0b101 = 0b101;
 constexpr uint64_t literal_0b111 = 0b111;
+constexpr uint64_t literal_0x10 = 0x10;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_0x0100 = 0x0100;
 constexpr uint64_t literal_10 = 10;
@@ -180,6 +181,10 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                                             l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1]);
         uint64_t l_def_SLOT1_DRAM_STACK_HEIGHT = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] /
                 l_def_SLOT1_DENOMINATOR);
+        fapi2::ATTR_MEM_SI_DRAM_PREAMBLE_Type l_TGT1_ATTR_MEM_SI_DRAM_PREAMBLE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_DRAM_PREAMBLE, TGT1, l_TGT1_ATTR_MEM_SI_DRAM_PREAMBLE));
+        uint64_t l_def_RD_PREAMBLE = ((l_TGT1_ATTR_MEM_SI_DRAM_PREAMBLE[literal_0][literal_0] & literal_0x10) >> literal_4);
+        uint64_t l_def_WR_PREAMBLE = (l_TGT1_ATTR_MEM_SI_DRAM_PREAMBLE[literal_0][literal_0] & literal_0x01);
         fapi2::ATTR_MEM_SI_ODT_RD_Type l_TGT1_ATTR_MEM_SI_ODT_RD;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_RD, TGT1, l_TGT1_ATTR_MEM_SI_ODT_RD));
         uint64_t l_def_dual_drop = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] > literal_0)
@@ -620,6 +625,24 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             else if ((l_def_NUM_MRANKS_1 == literal_4))
             {
                 l_scom_buffer.insert<45, 3, 61, uint64_t>(literal_0b111 );
+            }
+
+            if ((l_def_RD_PREAMBLE == literal_1))
+            {
+                l_scom_buffer.insert<50, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if ((l_def_RD_PREAMBLE == literal_0))
+            {
+                l_scom_buffer.insert<50, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if ((l_def_WR_PREAMBLE == literal_1))
+            {
+                l_scom_buffer.insert<51, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if ((l_def_WR_PREAMBLE == literal_0))
+            {
+                l_scom_buffer.insert<51, 1, 63, uint64_t>(literal_0b0 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011416ull, l_scom_buffer));

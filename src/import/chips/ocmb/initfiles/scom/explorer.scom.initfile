@@ -191,6 +191,10 @@ define def_cs_tied = (def_four_rank_mode == 0 && def_dual_drop == 0);
 #define def_disable_fast_act = ((def_NUM_SRANKS_0 > 1 || def_NUM_SRANKS_1 >1) && (def_NUM_MRANKS_0 == 4 || def_NUM_MRANKS_1 == 4)) || def_half_dimm_mode;
 define def_disable_fast_act = 1; #Performance testing showed fast act yielded no significant bandwidth / latency advantages
 
+# Preamble logic
+define def_WR_PREAMBLE       =  MP.ATTR_MEM_SI_DRAM_PREAMBLE[0][0] & 0x01;
+define def_RD_PREAMBLE       =  (MP.ATTR_MEM_SI_DRAM_PREAMBLE[0][0] & 0x10) >> 4;
+
 #--******************************************************************************
 #-- Dial Assignments
 #--******************************************************************************
@@ -600,6 +604,18 @@ ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S7_CID [when=S] {
   0b111, (def_SLOT1_DRAM_STACK_HEIGHT == 8 && def_NUM_MRANKS_1 != 4);
   0b110, (def_SLOT1_DRAM_STACK_HEIGHT != 8 && def_NUM_MRANKS_1 != 4);
   0b111, (def_NUM_MRANKS_1 == 4);
+}
+
+# Preamble information
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_READ_2CYC_PREAMBLE_EN [when=S] {
+  spyv, expr;
+  0b1, (def_RD_PREAMBLE == 1);
+  0b0, (def_RD_PREAMBLE == 0);
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_WRITE_2CYC_PREAMBLE_EN [when=S] {
+  spyv, expr;
+  0b1, (def_WR_PREAMBLE == 1);
+  0b0, (def_WR_PREAMBLE == 0);
 }
 
 # ODT RD
