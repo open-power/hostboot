@@ -193,12 +193,8 @@ fapi2::ReturnCode initiateSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     FAPI_TRY( getScom( l_eq_mc_and, QME_FLAGS_RW, l_qme_flag ) );
     FAPI_TRY( getScom( l_eq_mc_and, QME_SCOM_XIDBGPRO, l_xsr ) );
 
-    if( l_qme_flag.getBit<p10hcd::QME_FLAGS_STOP_READY>() == 1  &&
-        !(l_xsr.getBit<0>()))
-    {
-        FAPI_DBG("Enable special wakeup for all functional  Core targets");
-        fapi2::specialWakeup (i_target, p10specialWakeup::SPCWKUP_ENABLE);
-    }
+    FAPI_INF("Enable special wakeup for all functional  Core targets");
+    fapi2::specialWakeup (i_target, true);
 
 fapi_try_exit:
 

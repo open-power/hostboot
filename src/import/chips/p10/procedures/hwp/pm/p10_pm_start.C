@@ -148,7 +148,7 @@ fapi2::ReturnCode p10_pm_start(
     //  p10_pm_qme_init(halt) procedure."
     //  ************************************************************************
     FAPI_DBG("Disable special wakeup for all functional  core targets");
-    fapi2::specialWakeup (i_target, p10specialWakeup::SPCWKUP_DISABLE);
+    fapi2::specialWakeup (i_target, false);
 
     //  Initialize the XGPE Engine
     //  ************************************************************************
