@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -562,6 +562,14 @@ static const uint32_t VAS_VA_RG_SCF_MISCCTL_HMI_ACTIVE = 58;
 static const uint32_t VAS_VA_RG_SCF_MISCCTL_RG_IS_IDLE = 59;
 //<< [VAS_VA_RG_SCF_MISCCTL]
 // proc/reg00069.H
+
+//>> [TP_TPBR_PSI_WRAP_RX_DF_FSM_REG]
+static const uint64_t TP_TPBR_PSI_WRAP_RX_DF_FSM_REG = 0x03011c0eull;
+
+static const uint32_t TP_TPBR_PSI_WRAP_RX_DF_FSM_REG_RX_DF_FSM = 0;
+static const uint32_t TP_TPBR_PSI_WRAP_RX_DF_FSM_REG_RX_DF_FSM_LEN = 4;
+//<< [TP_TPBR_PSI_WRAP_RX_DF_FSM_REG]
+// proc/reg00066.H
 
 //>>THE END<<
 
