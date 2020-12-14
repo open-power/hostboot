@@ -33,23 +33,12 @@
  */
 
 #include <errl/errlentry.H>
+#include <expupd/expupd.H>
 
 namespace expupd
 {
 
 constexpr uint32_t HEADER_SHA512_SIZE = 64;
-
-/**
- * @brief Parameters pertaining to an unpackaged (raw) OCMB firmware image
- */
-typedef struct rawImageInfo
-{
-    const uint8_t* imagePtr;
-    size_t         imageSize;
-    const uint8_t* imageSHA512HashPtr;
-    const uint8_t* fwVersionStrPtr;  // pointer to explorer firmware version string
-    size_t         fwVersionStrSize; // size of explorer firmware version string
-}rawImageInfo_t;
 
 /**
  * @brief Validates OCMB firmware header of packaged image

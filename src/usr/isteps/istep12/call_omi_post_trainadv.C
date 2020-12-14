@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,7 +89,7 @@ void* call_omi_post_trainadv (void *io_pArgs)
                 TRACE_ERR_ARGS(l_err));
 
             // Capture error
-            captureError(l_err, l_StepError, HWPF_COMP_ID, l_proc_target);
+            captureErrorOcmbUpdateCheck(l_err, l_StepError, HWPF_COMP_ID, l_proc_target);
         }
         else
         {

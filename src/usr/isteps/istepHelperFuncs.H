@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,5 +129,34 @@ void captureError(errlHndl_t                        &io_err,
                   ISTEP_ERROR::IStepError           &io_stepError,
                   compId_t                           i_componentId,
                   const TARGETING::TargetHandleList &i_targetList);
+
+
+/**
+ *  @brief  Determines if the error is recoverable by I2C Explorer OCMB update
+ *          If recoverable, commits error as recovered and triggers reconfig loop
+ *          If not-recoverable, will act as normal captureError() call
+ *
+ *  @param[in/out] io_err
+ *      An error log handle, that contains the error log info. Can be NULL.  If
+ *      NULL then this function becomes a no-op.  BEWARE: Upon exit of
+ *      this function, the handle will be NULL.
+ *
+ *  @param[out] io_stepError
+ *      The details from the error handle, io_err, which will be added to this.
+ *
+ *  @param[in] i_componentId
+ *      The component ID that will be associated with the error handler, io_err,
+ *      when the error is committed.
+ *
+ *  @param[in] i_target
+ *      The target that will be assimilated and have its knowledge
+ *      added to the collective and when I say collective, I mean the error log
+ *      handle, io_err ... resistance is futile. If not target is given, then
+ *      target data will not be collected.
+ */
+void captureErrorOcmbUpdateCheck(errlHndl_t               &io_err,
+                                 ISTEP_ERROR::IStepError  &io_stepError,
+                                 compId_t                  i_componentId,
+                                 const TARGETING::Target*  i_target = nullptr);
 
 #endif

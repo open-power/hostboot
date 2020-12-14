@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,9 +26,57 @@
 #define __EXPUPD_H
 
 #include <isteps/hwpisteperror.H>
+#include <targeting/common/target.H>
 
 namespace expupd
 {
+
+/**
+ * @brief Parameters pertaining to an unpackaged (raw) Explorer OCMB firmware image
+ */
+typedef struct rawImageInfo
+{
+    const uint8_t* imagePtr;
+    size_t         imageSize;
+    const uint8_t* imageSHA512HashPtr;
+    const uint8_t* fwVersionStrPtr;  // pointer to explorer firmware version string
+    size_t         fwVersionStrSize; // size of explorer firmware version string
+}rawImageInfo_t;
+
+
+/**
+ * @brief Find out which explorer chips need an update.
+ *        Check flash image SHA512 hash value of each explorer chip
+ *        and add to list if the value does not match the SHA512 hash
+ *        of the image in PNOR.
+ *
+ * @note  Cleanup call PNOR::unloadSecureSection(PNOR::OCMBFW)
+ *        if o_imageLoaded returns true
+ *
+ * @param[out] o_stepError Error handle for logging istep failures
+ * @param[out] o_flashUpdateList List of Explorer OCMB's that mismatch
+ * @param[out] o_imageInfo PNOR image information for update
+ * @param[out] o_imageLoaded true if PNOR::OCMBFW secure section loaded
+ *
+ * @return true if an update is needed, else false
+ */
+bool explorerUpdateCheck(ISTEP_ERROR::IStepError& o_stepError,
+                         TARGETING::TargetHandleList& o_flashUpdateList,
+                         rawImageInfo_t & o_imageInfo,
+                         bool & o_imageLoaded );
+
+/**
+ * @brief Call the HWP to perform update on list of Ocmb chips.
+ *        This will try to update multiple OCMBs at a time via threads.
+ *
+ * @param[out] o_stepError Error handle for logging istep failures
+ * @param[in]  i_explorerList List of Explorer OCMB's that need to update
+ * @param[in]  i_imageInfo PNOR OCMBFW image information for update
+ */
+void performUpdate(ISTEP_ERROR::IStepError& o_stepError,
+                   TARGETING::TargetHandleList& i_explorerList,
+                   rawImageInfo_t& i_imageInfo );
+
 
 /**
  * @brief Check flash image SHA512 hash value of each explorer chip
@@ -39,6 +87,14 @@ namespace expupd
  *
  */
 void updateAll(ISTEP_ERROR::IStepError& o_stepError);
+
+
+/**
+ *  @brief Checks if update is needed and will perform i2c update if necessary
+ *  @param[out] o_stepError Error handle for logging istep failures
+ */
+void ocmbFwI2cUpdateStatusCheck( ISTEP_ERROR::IStepError & io_StepError);
+
 
 }//namespace expupd
 

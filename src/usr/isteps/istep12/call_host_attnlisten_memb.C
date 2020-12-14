@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,7 +111,7 @@ void* call_host_attnlisten_memb (void *io_pArgs)
                  "ERROR : call send_analyzable_procs_and_membufs(): failed. "
                  TRACE_ERR_FMT,
                  TRACE_ERR_ARGS(l_err));
-        captureError(l_err, l_StepError, ISTEP_COMP_ID);
+        captureErrorOcmbUpdateCheck(l_err, l_StepError, ISTEP_COMP_ID);
     }
 
     TRACFCOMP(g_trac_isteps_trace, "call_host_attnlisten_memb exit" );

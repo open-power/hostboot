@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,8 @@
 
 #include    <initservice/isteps_trace.H>
 #include    <istepHelperFuncs.H>          // captureError
+
+#include    <expupd/expupd.H> // i2c update check
 
 // Fapi Support
 #include    <config.h>
@@ -178,7 +180,7 @@ void OmicWorkItem::operator()()
 
     // Any deconfigs happening above are delayed, so need to exit
     // early if istep errors out
-    if (!iv_pStepError->isNull())
+    if( !iv_pStepError->isNull() )
     {
         TRACFCOMP(g_trac_isteps_trace,
                 INFO_MRK "call_omi_setup exited early because exp_omi_setup "
@@ -202,7 +204,7 @@ void OmicWorkItem::operator()()
                 get_huid(iv_pOmic),
                 TRACE_ERR_ARGS(l_err));
 
-            // addErrorDetails may not be thread-safe. Proect with mutex.
+            // addErrorDetails may not be thread-safe. Protect with mutex.
             mutex_lock(&g_stepErrorMutex);
 
             // Capture error
@@ -287,11 +289,30 @@ void* call_omi_setup (void *io_pArgs)
 
     } while (0);
 
+    TargetHandle_t sys = UTIL::assertGetToplevelTarget();
+
+    // Check explorer FW levels and do an i2c update if needed.
+    // The update will fail before step 12.6 because the inbound doorbell
+    // register (along with many other parts of the scommable logic) in Explorer
+    // isn't clocked before we run the FW_BOOT_CONFIG0 command.
+    // This prevents all inband commands from working, even using the i2c
+    // interface, until after exp_omi_setup runs.
+    if (l_StepError.isNull())
+    {
+        // Check if explorer chips need an update (skipped on MPIPL)
+        if (sys->getAttr<ATTR_IS_MPIPL_HB>())
+        {
+            TRACFCOMP( g_trac_isteps_trace,
+                   "skipping ocmbFwI2cUpdateStatusCheck() due to MPIPL");
+        }
+        else
+        {
+            expupd::ocmbFwI2cUpdateStatusCheck(l_StepError);
+        }
+    }
+
     // Set ATTR_ATTN_CHK_OCMBS to let ATTN know that we may now get attentions
     // from the OCMB, but interrupts from the OCMB are not enabled yet.
-    TargetHandle_t sys = nullptr;
-    targetService().getTopLevelTarget( sys );
-    assert( sys != nullptr );
     sys->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_omi_setup ");

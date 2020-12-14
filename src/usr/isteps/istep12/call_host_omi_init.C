@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,7 @@ void* call_host_omi_init (void *io_pArgs)
     errlHndl_t l_err = nullptr;
     TRACFCOMP( g_trac_isteps_trace, "call_host_omi_init entry" );
     TargetHandleList l_ocmbTargetList;
+    bool encounteredHwpError = false;
     do
     {
         // 12.11.a exp_omi_init.C
@@ -106,7 +107,8 @@ void* call_host_omi_init (void *io_pArgs)
                     TRACE_ERR_ARGS(l_err));
 
                 // Capture error
-                captureError(l_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
+                captureErrorOcmbUpdateCheck(l_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
+                encounteredHwpError = true;
             }
             else
             {
@@ -117,7 +119,7 @@ void* call_host_omi_init (void *io_pArgs)
         } // ocmb loop
 
         // Do not continue if an error was encountered
-        if(!l_StepError.isNull())
+        if(encounteredHwpError)
         {
             TRACFCOMP( g_trac_isteps_trace,
                 INFO_MRK "call_host_omi_init exited early because exp_omi_init "
@@ -155,7 +157,8 @@ void* call_host_omi_init (void *io_pArgs)
                     TRACE_ERR_ARGS(l_err));
 
                 // Capture error
-                captureError(l_err, l_StepError, HWPF_COMP_ID, l_mcc_target);
+                captureErrorOcmbUpdateCheck(l_err, l_StepError, HWPF_COMP_ID, l_mcc_target);
+                encounteredHwpError = true;
             }
             else
             {
@@ -172,7 +175,7 @@ void* call_host_omi_init (void *io_pArgs)
         } // MCC loop
 
         // Do not continue if an error was encountered
-        if(!l_StepError.isNull())
+        if(encounteredHwpError)
         {
             TRACFCOMP( g_trac_isteps_trace,
                 INFO_MRK "call_host_omi_init exited early because p10_omi_init "
@@ -214,7 +217,9 @@ void* call_host_omi_init (void *io_pArgs)
                     get_huid(l_proc),
                     TRACE_ERR_ARGS(l_err));
 
-                // Capture error
+                // Once we execute p10_disable_ocmb_i2c on something we won't
+                // be able to use the i2c mode to update.
+                // Just capture error and don't look to do i2c code update recovery
                 captureError(l_err, l_StepError, HWPF_COMP_ID, l_proc);
             }
             else

@@ -66,6 +66,7 @@ void* call_omi_io_run_training (void *io_pArgs)
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
     TRACFCOMP( g_trac_isteps_trace, "call_omi_io_run_training entry" );
+    bool encounteredHwpError = false;
 
     do
     {
@@ -103,7 +104,8 @@ void* call_omi_io_run_training (void *io_pArgs)
                     TRACE_ERR_ARGS(l_err));
 
                 // Capture error
-                captureError(l_err, l_StepError, HWPF_COMP_ID, l_omic_target);
+                captureErrorOcmbUpdateCheck(l_err, l_StepError, HWPF_COMP_ID, l_omic_target);
+                encounteredHwpError = true;
             }
             else
             {
@@ -114,7 +116,7 @@ void* call_omi_io_run_training (void *io_pArgs)
         }
 
         // Do not continue if an error was encountered
-        if(!l_StepError.isNull())
+        if(encounteredHwpError)
         {
             TRACFCOMP( g_trac_isteps_trace,
                 INFO_MRK "call_omi_io_run_training exited early because "
@@ -151,8 +153,9 @@ void* call_omi_io_run_training (void *io_pArgs)
                         TRACE_ERR_ARGS(l_err));
 
                     // Capture error
-                    captureError(l_err, l_StepError, HWPF_COMP_ID,
+                    captureErrorOcmbUpdateCheck(l_err, l_StepError, HWPF_COMP_ID,
                                  l_ocmb_target);
+                    encounteredHwpError = true;
                 }
                 else
                 {

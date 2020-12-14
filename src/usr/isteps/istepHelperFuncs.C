@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@
 
 #include    <pnor/pnorif.H>
 #include    <pnor/pnor_const.H>
+
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -315,3 +316,118 @@ void captureError(errlHndl_t                        &io_err,
     } // end if ( i_err )
 }
 
+// Helper function to capture OMI errors and check if update will resolve
+void captureErrorOcmbUpdateCheck(errlHndl_t               &io_err,
+                                 ISTEP_ERROR::IStepError  &io_stepError,
+                                 compId_t                  i_componentId,
+                                 const TARGETING::Target*  i_target)
+{
+    // Get a handle to the System target
+    TargetHandle_t l_systemTarget = UTIL::assertGetToplevelTarget();
+
+    bool runNormalErrorCapture = true;
+    do {
+        if (l_systemTarget->getAttr<ATTR_IS_MPIPL_HB>())
+        {
+            // just do regular captureError call
+            break;
+        }
+
+        TARGETING::ATTR_OCMB_FW_UPDATE_STATUS_type l_updStatus =
+            l_systemTarget->getAttr<ATTR_OCMB_FW_UPDATE_STATUS>();
+
+        if ( !l_updStatus.updateRequired)
+        {
+            // no OCMB update needed, so just capture the error
+            break;
+        }
+
+        /////////////////////////////
+        // OCMB update is needed
+        /////////////////////////////
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "captureErrorOcmbUpdateCheck: "
+                "ATTR_OCMB_FW_UPDATE_STATUS: updateRequired = %d, "
+                "updateI2c = %d, i2cUpdateAttepted = %d, hardFailure = %d",
+                l_updStatus.updateRequired, l_updStatus.updateI2c,
+                l_updStatus.i2cUpdateAttempted, l_updStatus.hardFailure);
+
+        // Has an I2C update been tried yet?
+        if (l_updStatus.i2cUpdateAttempted)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "captureErrorOcmbUpdateCheck: "
+                "ATTR_OCMB_FW_UPDATE_STATUS set to hardFailure");
+            l_updStatus.hardFailure = 1;
+            l_systemTarget->setAttr<ATTR_OCMB_FW_UPDATE_STATUS>(l_updStatus);
+
+            // do normal error capture
+            break;
+        }
+
+        // Has I2C update been set?
+        if ( !l_updStatus.updateI2c )
+        {
+            // try to update OCMBs via I2C
+            l_updStatus.updateI2c = 1;
+            l_systemTarget->setAttr<ATTR_OCMB_FW_UPDATE_STATUS>(l_updStatus);
+
+            // trigger reconfig loop
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "captureErrorOcmbUpdateCheck: OMI failure EID: 0x%.8X "
+                  "Requesting reboot to do OCMB update ...",
+                  io_err?io_err->eid():0);
+            auto l_reconfigAttr =
+                l_systemTarget->getAttr<ATTR_RECONFIGURE_LOOP>();
+            l_reconfigAttr |= RECONFIGURE_LOOP_OCMB_FW_UPDATE;
+            l_systemTarget->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+
+            // commit error as recovered
+            // to prevent any deconfig or gard actions
+            if (io_err)
+            {
+                if ( i_target)
+                {
+                    // Capture the target data in the error log
+                    ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(io_err);
+                }
+                io_err->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+                errlCommit( io_err, i_componentId );
+            }
+            // skip normal error capture
+            runNormalErrorCapture = false;
+            break;
+        }
+        else
+        {
+            // Can go down this path in multithread case where previous
+            // thread set the updateI2c and triggered reconfig loop.
+
+            // updateI2c is set but has not run update yet
+            // commit error as recovered
+            // to prevent any deconfig or gard actions
+            if (io_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "captureErrorOcmbUpdateCheck: OMI failure EID: 0x%.8X, "
+                    "I2C OCMB update already requested", io_err->eid());
+                if ( i_target)
+                {
+                    // Capture the target data in the error log
+                    ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(io_err);
+                }
+                io_err->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+                errlCommit( io_err, i_componentId );
+            }
+            // skip normal error capture
+            runNormalErrorCapture = false;
+            break;
+        }
+
+    } while (0);
+
+    if (runNormalErrorCapture)
+    {
+        captureError(io_err, io_stepError, i_componentId, i_target);
+    }
+}
