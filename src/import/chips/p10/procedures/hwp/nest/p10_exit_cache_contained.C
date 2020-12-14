@@ -548,6 +548,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
     fapi2::ATTR_SYS_DISABLE_HWFM_Type l_TGT1_ATTR_SYS_DISABLE_HWFM;
     fapi2::ATTR_CHIP_EC_FEATURE_HW548941_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW555009_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW555009;
     uint64_t l_def_MC_EPSILON_CFG_T0;
     uint64_t l_def_MC_EPSILON_CFG_T1;
     uint64_t l_def_MC_EPSILON_CFG_T2;
@@ -562,6 +563,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_mcc_target, l_unit_num),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW548941, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555009, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW555009));
 
     l_def_MC_EPSILON_CFG_T0 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0 + 0x6) / 0x4);
     l_def_MC_EPSILON_CFG_T1 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1 + 0x6) / 0x4);
@@ -811,10 +813,16 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     l_scom_mask = 0;
 
     //data
-    l_scom_data |= (uint64_t)  0x1 << (64 - (62 + 1));
+    if(l_TGT2_ATTR_CHIP_EC_FEATURE_HW555009)
+    {
+        l_scom_data |= (uint64_t)  0x1 << (64 - (20 + 1)); //USTLCFG_SELF_DETECT_DEAD_CYCLE_EN
+    }
+
+    l_scom_data |= (uint64_t)  0x1 << (64 - (62 + 1)); //USTLCFG_CS_HW475333_DISABLE
     //mask
-    l_scom_mask |= (uint64_t)  0xF << (64 - (40 + 4));
-    l_scom_mask |= (uint64_t)  0x1 << (64 - (62 + 1));
+    l_scom_mask |= (uint64_t)  0x1 << (64 - (20 + 1)); //USTLCFG_SELF_DETECT_DEAD_CYCLE_EN
+    l_scom_mask |= (uint64_t)  0xF << (64 - (40 + 4)); //USTLCFG_TMPL9_COLD_START_THRESHOLD
+    l_scom_mask |= (uint64_t)  0x1 << (64 - (62 + 1)); //USTLCFG_CS_HW475333_DISABLE
 
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,
