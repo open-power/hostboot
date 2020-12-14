@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -5322,6 +5322,71 @@
     <simpleType>
       <uint8_t/>
     </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
+       Status for OCMB Firmware update
+       - update is needed
+       - method of update (I2C vs MMIO) to try
+       - i2c update has been tried
+       - hard failure hit (failure after i2c update tried)
+    </description>
+    <id>OCMB_FW_UPDATE_STATUS</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <complexType>
+      <description>Structure which defines update status</description>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+              0b0: No update necessary
+              0b1: At least one explorer needs update
+          </description>
+        <name>updateRequired</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Update via I2C
+              0b0:  Next update via MMIO (default)
+              0b1:  Next update via I2C
+          </description>
+        <name>updateI2c</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+              0b0: I2C update not done
+              0b1: I2C update has been attempted
+          </description>
+        <name>i2cUpdateAttempted</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+              0b0: I2C update still available to try
+              0b1: Hard failure (failure after I2C update)
+          </description>
+        <name>hardFailure</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>4</bits>
+        <default>0</default>
+        <description>Reserved for future use</description>
+        <name>reserved</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <writeable/>
     <no_export/>
   </attribute>
 
