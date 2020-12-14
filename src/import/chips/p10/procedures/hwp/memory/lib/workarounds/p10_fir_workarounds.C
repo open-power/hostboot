@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/mss_p10_attribute_setters.H>
 
 namespace mss
 {
@@ -129,34 +130,26 @@ void override_dstl_subchannel_firs_after_omi_init( const fapi2::Target<fapi2::TA
         case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_XSTOP:
             FAPI_DBG("%s Setting DSTLFIR subchannel FIRs to checkstop per attribute setting", mss::c_str(i_target));
             io_mcc_dstlfir_reg.checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
-            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>()
-            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
-            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>();
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>();
             break;
 
         case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_MASKED:
             FAPI_DBG("%s Setting DSTLFIR subchannel FIRs to masked per attribute setting", mss::c_str(i_target));
             io_mcc_dstlfir_reg.masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
-            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>()
-            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
-            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>();
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>();
             break;
 
         case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_RECOVERABLE:
             FAPI_DBG("%s Setting DSTLFIR subchannel FIRs to recoverable per attribute setting", mss::c_str(i_target));
             io_mcc_dstlfir_reg.recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
-            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>()
-            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
-            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>();
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>();
             break;
 
         default:
             // By default just leave it local_checkstop
             FAPI_DBG("%s Leaving DSTLFIR subchannel FIRs as local_checkstop per attribute setting", mss::c_str(i_target));
             io_mcc_dstlfir_reg.local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
-            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>()
-            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
-            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>();
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>();
             break;
     }
 }
