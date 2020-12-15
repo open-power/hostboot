@@ -470,7 +470,6 @@ uint32_t isDramSparingEnabled<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
     uint32_t o_rc = SUCCESS;
     o_spareEnable = false;
 
-    /* TODO RTC 199032 - DRAM Sparing disabled for now
     do
     {
         TargetHandle_t dimm = getConnectedDimm( i_trgt, i_rank, i_ps );
@@ -494,11 +493,23 @@ uint32_t isDramSparingEnabled<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
         o_spareEnable = (TARGETING::MEM_EFF_DIMM_SPARE_NO_SPARE != cnfg);
 
     }while(0);
-    */
 
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+template<>
+uint32_t isDramSparingEnabled<TYPE_OCMB_CHIP>( TARGETING::TargetHandle_t i_trgt,
+                                               MemRank i_rank, uint8_t i_ps,
+                                               bool & o_spareEnable )
+{
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
+
+    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, i_ps );
+    return isDramSparingEnabled<TYPE_MEM_PORT>( memPort, i_rank, i_ps,
+                                                o_spareEnable );
 }
 
 //------------------------------------------------------------------------------

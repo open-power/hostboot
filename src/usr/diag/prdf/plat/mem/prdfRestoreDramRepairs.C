@@ -40,6 +40,7 @@
 #include "common/plat/mem/prdfMemSymbol.H"
 #include "common/plat/mem/prdfMemoryMru.H"
 #include <prdfPlatServices.H>
+#include <fapi2.H>
 
 using namespace HWAS;
 using namespace std;
@@ -228,7 +229,21 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
                 continue; // skip this rank
             }
 
-            if ( cm.isValid() && sm.isValid() ) // CM and SM used
+            // Check whether sparing is enabled
+            // TODO RTC 210072 - support for multiple ports
+            bool spareEnable = false;
+            if ( SUCCESS !=
+                 isDramSparingEnabled<T>(i_trgt, rank, 0, spareEnable) )
+            {
+                PRDF_ERR( PRDF_FUNC "isDramSparingEnabled(0x%08x, 0x%02x) "
+                          "failed", getHuid(i_trgt), rank.getKey() );
+                break;
+            }
+
+            // If sparing is enabled, we only check if the chip mark was used.
+            // If sparing is not enabled we check if both the chip and symbol
+            // marks are used.
+            if ( cm.isValid() && ( sm.isValid() || spareEnable ) )
             {
                 // All repairs on the rank have been used. Callout all repairs.
 
@@ -240,7 +255,11 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
 
                 std::vector<MemSymbol> symList;
                 symList.push_back( cm.getSymbol() );
-                symList.push_back( sm.getSymbol() );
+
+                if ( sm.isValid() )
+                {
+                    symList.push_back( sm.getSymbol() );
+                }
 
                 for ( auto & sym : symList )
                 {
