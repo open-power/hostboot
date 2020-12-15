@@ -2,7 +2,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/build/debug/fsp-memdump.sh $
+# $Source: src/build/debug/hb-memdump.sh $
 #
 # OpenPOWER HostBoot Project
 #
@@ -29,7 +29,7 @@
 # Print usage statement.
 usage()
 {
-    echo "fsp-memdump.sh <filename> [STATE|discover|discovernotrace|limit] [Node #] [Chunk Size]"
+    echo "hb-memdump.sh <filename> [STATE|discover|discovernotrace|limit] [Node #] [Chunk Size]"
     echo
     echo "    STATE should be a two nibble hex value corresponding to the"
     echo "    MemSize enumeration in <kernel/memstate.H> or the ASCII strings"

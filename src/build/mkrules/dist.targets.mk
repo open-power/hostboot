@@ -66,7 +66,7 @@ COPY_FILES = \
     src/build/simics/eecache-gen.py:openpower-sim \
     src/build/simics/ecc.py:openpower-sim \
     src/build/debug/eSEL.pl:openpower,openpower-sim \
-    src/build/debug/fsp-memdump.sh:tools,vpo \
+    src/build/debug/hb-memdump.sh:tools,vpo \
     src/build/debug/ffdcExpander:openpower,tools \
     src/build/tools/genIstepWaitOverride.pl:tools,openpower,openpower-sim \
     src/build/vpo/hb-dump:vpo \
@@ -356,7 +356,7 @@ fsp.tar_CONTENTS = \
         $(call ROOTPATH_WILDCARD,src/usr/secureboot/common/plugins/*)) \
     $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,src/usr/isteps/nvdimm/plugins/*)) \
-    src/build/debug/fsp-memdump.sh:src/build/debug/ \
+    src/build/debug/hb-memdump.sh:src/build/debug/ \
     src/build/debug/ffdcExpander:src/build/debug/ \
     obj/genfiles/hbfw_term_rc.H \
     obj/genfiles/srcListing \
