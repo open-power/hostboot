@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -770,6 +770,44 @@
      </ec>
     </chip>
   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_OMI_CH_FIRS_XSTOP</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Set ATTR_OMI_CHANNEL_FAIL_ACTION related FIRs to XSTOP for DD1.
+     For DD2+ leave it as LOCAL_XSTOP. Affects the following FIRs:
+     DSTLFIR_SUBCHANNEL_A/B_COUNTER_ERROR
+     DSTLFIR_SUBCHANNEL_A/B_BUFFER_OVERUSE_ERROR
+     DSTLFIR_SUBCHANNEL_A/B_CHANNEL_TIMEOUT
+     DSTLFIR_SUBCHANNEL_A/B_PARITY_ERROR
+     DSTLFIR_SUBCHANNEL_A/B_TLX_CHECKSTOP
+     USTLFIR_CHANA/B_UNEXP_DATA_ERR
+     USTLFIR_CHANA/B_INVALID_TEMPLATE_ERROR
+     USTLFIR_CHANA/B_FAIL_RESP_CHECKSTOP
+     USTLFIR_CHANA/B_FLIT_PARITY_ERROR
+     USTLFIR_CHANA/B_FATAL_PARITY_ERROR
+     USTLFIR_CHANA/B_BAD_RESP_LOG_VAL
+     USTLFIR_CHANA/B_EXCESS_BAD_DATA_BITS
+     USTLFIR_CHANA/B_COMP_TMPL0_DATA_NOT_MMIO
+     USTLFIR_CHANA/B_EXCESS_DATA_ERROR
+     USTLFIR_CHANA/B_BADCRC_DATA_NOT_VALID_ERROR
+     USTLFIR_CHANA/B_FIFO_OVERFLOW_ERROR
+     USTLFIR_CHANA/B_INVALID_CMD_ERROR
+     USTLFIR_CHANA/B_INVALID_DL_DP_COMBO
+     MC_OMI_FIR_REG_DL0_FATAL_ERROR (recoverable on DD2+)
+     MC_OMI_FIR_REG_DL1_FATAL_ERROR (recoverable on DD2+)
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>

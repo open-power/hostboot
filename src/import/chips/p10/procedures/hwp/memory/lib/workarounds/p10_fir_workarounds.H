@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,13 @@ namespace fir
 {
 
 ///
+/// @brief Function handling the chip_ec default for ATTR_OMI_CHANNEL_FAIL_ACTION
+/// @param[in] i_target the MC target of the OMI channel FIRs in question
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code
+///
+fapi2::ReturnCode setup_attr_omi_channel_fail_action( const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target );
+
+///
 /// @brief Function handling the subchannel FIR settings after chiplet_scominit
 /// @param[in] i_target the MCC target of the DSTL fir
 /// @param[in] i_omi_fail_action value from ATTR_OMI_CHANNEL_FAIL_ACTION
@@ -86,6 +93,16 @@ void override_ustl_subchannel_firs_after_omi_init( const fapi2::Target<fapi2::TA
 void dstl_cronus_settings( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
                            const bool i_hostboot_mode,
                            mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg );
+
+///
+/// @brief Function handling the OMI FIR settings after chiplet_scominit
+/// @param[in] i_target the MCC target of the DSTL fir
+/// @param[in] i_omi_fail_action value from ATTR_OMI_CHANNEL_FAIL_ACTION
+/// @param[in,out] io_mc_omi_fir_reg the OMI FIR register instance
+///
+void override_dl_fir_actions( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                              const uint8_t i_omi_fail_action,
+                              mss::fir::reg<scomt::omic::MC_OMI_FIR_REG_RW>& io_mc_omi_fir_reg );
 
 ///
 /// @brief Function handling the MC_OMI_FIR x4 degrade FIR settings

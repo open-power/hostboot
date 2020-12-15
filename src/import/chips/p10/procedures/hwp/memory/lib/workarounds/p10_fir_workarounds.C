@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,27 @@ namespace workarounds
 {
 namespace fir
 {
+
+///
+/// @brief Function handling the chip_ec default for ATTR_OMI_CHANNEL_FAIL_ACTION
+/// @param[in] i_target the MC target of the OMI channel FIRs in question
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code
+///
+fapi2::ReturnCode setup_attr_omi_channel_fail_action( const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target )
+{
+    fapi2::ATTR_CHIP_EC_FEATURE_OMI_CH_FIRS_XSTOP_Type l_override = false;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_CH_FIRS_XSTOP,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target), l_override));
+
+    if (l_override)
+    {
+        FAPI_TRY(mss::attr::set_omi_channel_fail_action(fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_XSTOP));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Function handling the subchannel FIR settings after chiplet_scominit
@@ -306,6 +327,46 @@ void dstl_cronus_settings( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target
         FAPI_DBG("%s Setting DSTLFIR to Cronus mode settings", mss::c_str(i_target));
         io_mcc_dstlfir_reg.masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_SPECIAL_ATTENTION>()
         .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION>();
+    }
+}
+
+///
+/// @brief Function handling the OMI FIR settings after chiplet_scominit
+/// @param[in] i_target the MCC target of the DSTL fir
+/// @param[in] i_omi_fail_action value from ATTR_OMI_CHANNEL_FAIL_ACTION
+/// @param[in,out] io_mc_omi_fir_reg the OMI FIR register instance
+///
+void override_dl_fir_actions( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                              const uint8_t i_omi_fail_action,
+                              mss::fir::reg<scomt::omic::MC_OMI_FIR_REG_RW>& io_mc_omi_fir_reg )
+{
+    // Write OMI_FIR register per attr setting
+    switch(i_omi_fail_action)
+    {
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_XSTOP:
+            FAPI_DBG("%s Setting OMI_DL FATAL_ERROR FIRs to checkstop per attribute setting", mss::c_str(i_target));
+            io_mc_omi_fir_reg.checkstop<scomt::omic::MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+            .checkstop<scomt::omic::MC_OMI_FIR_REG_DL1_FATAL_ERROR>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_MASKED:
+            FAPI_DBG("%s Setting OMI_DL FATAL_ERROR FIRs to masked per attribute setting", mss::c_str(i_target));
+            io_mc_omi_fir_reg.masked<scomt::omic::MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+            .masked<scomt::omic::MC_OMI_FIR_REG_DL1_FATAL_ERROR>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_RECOVERABLE:
+            FAPI_DBG("%s Setting OMI_DL FATAL_ERROR FIRs to recoverable per attribute setting", mss::c_str(i_target));
+            io_mc_omi_fir_reg.recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+            .recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL1_FATAL_ERROR>();
+            break;
+
+        default:
+            // By default just leave it recoverable (local_checkstop is not an option for these FIRs)
+            FAPI_DBG("%s Leaving OMI_DL FATAL_ERROR FIRs as recoverable per attribute setting", mss::c_str(i_target));
+            io_mc_omi_fir_reg.recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+            .recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL1_FATAL_ERROR>();
+            break;
     }
 }
 

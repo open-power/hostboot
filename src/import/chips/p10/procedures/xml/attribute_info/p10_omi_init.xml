@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -230,7 +230,7 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
       Selects the settings for DSTLFIR and USTLFIR channel fail FIRs
-      Default: XSTOP (channel based FIRs will cause checkstop)
+      Default: LOCAL_XSTOP (channel based FIRs will cause local checkstop)
       Note that this will get overridden by ATTR_CHIP_EC_FEATURE_OMI_CHANNEL_FIRS
       on DD1 unless set as CONST.
       Affects the following FIRs:
@@ -252,6 +252,8 @@
       USTLFIR_CHANA/B_FIFO_OVERFLOW_ERROR
       USTLFIR_CHANA/B_INVALID_CMD_ERROR
       USTLFIR_CHANA/B_INVALID_DL_DP_COMBO
+      MC_OMI_FIR_REG_DL0_FATAL_ERROR (LOCAL_XSTOP will set to recoverable)
+      MC_OMI_FIR_REG_DL1_FATAL_ERROR (LOCAL_XSTOP will set to recoverable)
   </description>
   <valueType>uint8</valueType>
   <enum>
@@ -260,8 +262,7 @@
     LOCAL_XSTOP = 0x02,
     RECOVERABLE = 0x03
   </enum>
-  <default>XSTOP</default>
-  <platInit/>
+  <default>LOCAL_XSTOP</default>
   <writeable/>
   <mssAccessorName>omi_channel_fail_action</mssAccessorName>
 </attribute>

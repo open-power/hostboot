@@ -531,6 +531,9 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
 
     FAPI_TRY(l_rc, "unable to create fir::reg for MBA_SCOMFIR_MISCFIRQ_RW 0x%08X", scomt::mc::MBA_SCOMFIR_MISCFIRQ_RW);
 
+    // First set up ATTR_OMI_CHANNEL_FAIL_ACTION according to the chip EC level
+    FAPI_TRY(mss::workarounds::fir::setup_attr_omi_channel_fail_action(i_target));
+
     FAPI_TRY(mss::attr::get_omi_channel_fail_action(l_omi_fail_action));
     FAPI_TRY(mss::attr::get_omi_x4_degrade_action(l_degrade_fail_action));
     FAPI_TRY(mss::attr::get_omi_crc_debug(l_omi_crc_debug));
@@ -567,6 +570,9 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
 
         // Set up x4 degrade FIR attribute overrides
         mss::workarounds::fir::override_x4_degrade_firs(l_omic, l_degrade_fail_action, l_mc_omi_fir_reg);
+
+        // Set up other DL FIR attribute overrides
+        mss::workarounds::fir::override_dl_fir_actions(l_omic, l_omi_fail_action, l_mc_omi_fir_reg);
 
         // Re-mask any subchannel FIRs that are on non-configured OMI channels
         subchannel_config(l_omic, l_subchannel_a_config, l_subchannel_b_config);
