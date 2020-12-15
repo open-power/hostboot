@@ -533,19 +533,18 @@ namespace KernelMisc
         bool l_kernelSpace = true;
         if( i_task == nullptr ) //user-space
         {
-            l_kernelSpace = false;
-            printk("U:");
-            l_frame = static_cast<uint64_t*>(framePointer());
             l_tid = task_gettid();
+            l_kernelSpace = false;
+            printk("U:Backtrace for %d\n  ", l_tid);
+            l_frame = static_cast<uint64_t*>(framePointer());
         }
         else //kernel-space
         {
-            printk("K:");
             l_frame = reinterpret_cast<uint64_t*>( i_task->context.gprs[1] );
             l_tid = i_task->tid;
+            printk("K:Backtrace for %d (lr = 0x%lx):\n  ", l_tid, i_task->context.lr );
         }
 
-        printk("Backtrace for %d:\n  ", l_tid );
         printkd("frame=%p\n",l_frame);isync();
         while (l_frame != NULL)
         {
