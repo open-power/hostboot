@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -365,6 +365,18 @@
   </description>
   <valueType>uint8</valueType>
   <enum>LPAR_PER_THREAD = 0x0, LPAR_PER_CORE = 0x1</enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ZERO_CORE_CHIP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Set if the MVPD PG keyword indicates that there are no good cores on the chip.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0, TRUE = 0x1</enum>
   <writeable/>
   <initToZero/>
 </attribute>
