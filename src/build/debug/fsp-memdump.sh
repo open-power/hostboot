@@ -84,6 +84,33 @@ set_total_dump_size()
     fi
 }
 
+set_hrmor()
+{
+    node=$1
+    # HRMOR is stored in bits 4:51 of core scratch 1
+    # See memstate.H for details.
+    # Multicast to all good cores.
+    HRMOR=`getscom pu 4602F487 4 48 -p0 -n$node | grep 0x | sed 's/.*0x/0x/'`
+
+    # if there was an error reading the hrmor it will
+    # have multi-line output, set it to a default
+    n="${HRMOR//[^\n]}";
+    if [ ${#n} -eq 1 ]; then
+      echo "Attempt to read HRMOR from scom failed, falling back to default 4 GB - 512 MB error found :"
+      echo "$HRMOR"
+      # HB HRMOR offset is at: 4 GB - 512 MB = 3584 MB
+      HB_OFFSET=`expr 3584 \* 1024 \* 1024`
+      # (64TB - 0x400000000000 OR 35184372088832)
+      # see NODE_OFFSET in memorymap.H
+      HB_BASE_HRMOR=`expr 64 \* 1024 \* 1024 \* 1024 \* 1024`
+      # Calculate HRMOR (in decimal).
+      HRMOR=`expr ${HB_BASE_HRMOR} \* ${node} + ${HB_OFFSET}`
+    else
+      #convert string to a int
+      HRMOR=$(( HRMOR ))
+    fi
+}
+
 # @fn update_progress_bar
 # Print an update to the progress bar displayed to the user
 #
@@ -180,13 +207,13 @@ dump()
     fi
 }
 
-# @fn dumpChunkSize
+# @fn dumpInChunks
 # Extract a block of memory using (multiple) getmempba calls
 #
 # @param addr - Address to extract.
 # @param size - Full Size (in bytes) to extract.
 # @param chunksize - extract data this many bytes at a time
-dumpChunkSize()
+dumpInChunks()
 {
     dumpAddr=$1
     dumpSize=$2
@@ -283,149 +310,51 @@ fi
 DISPLAY=1
 LOG_LOCATION="/tmp/memdumpoutput.tmp"
 
-
-# HRMOR is stored in bits 4:51 of core scratch 1
-# See memstate.H for details.
-# Multicast to all good cores.
-HRMOR=`getscom pu 4602F487 4 48 -p0 -n$NODE | grep 0x | sed 's/.*0x/0x/'`
-
-# if there was an error reading the hrmor it will
-# have multi-line output, set it to a default
-n="${HRMOR//[^\n]}";
-if [ ${#n} -eq 1 ]; then
-  echo "Attempt to read HRMOR from scom failed, falling back to default 4 GB - 512 MB error found :"
-  echo "$HRMOR"
-  # HB HRMOR offset is at: 4 GB - 512 MB = 3584 MB
-  HB_OFFSET=`expr 3584 \* 1024 \* 1024`
-  # (64TB - 0x400000000000 OR 35184372088832)
-  # see NODE_OFFSET in memorymap.H
-  HB_BASE_HRMOR=`expr 64 \* 1024 \* 1024 \* 1024 \* 1024`
-  # Calculate HRMOR (in decimal).
-  HRMOR=`expr ${HB_BASE_HRMOR} \* ${NODE} + ${HB_OFFSET}`
-else
-  #convert string to a int
-  HRMOR=$(( HRMOR ))
-fi
+# Set the HRMOR variable based on the NODE set above
+set_hrmor ${NODE}
 
 printf "\nDumping hostboot memory for NODE%d where HRMOR is 0x%X. " ${NODE} ${HRMOR}
 
 # create the output file
 `touch ${FILE}`
 
-# Using initial STATE, iterate through all the included states dumping each
-# appropriate memory sections.
-while [[ ${STATE} != BREAK ]]
-do
-    # *** NOTE: Keep in sync with Dump.pm and bootloaderif.H (MAX_HBB_SIZE)
-    case ${STATE} in
-        00|0)
-            # Size of HBB PNOR partition without ECC, page aligned down, minus 4K header
-            set_total_dump_size 925696
-            dumpChunkSize 0 925696 ${CHUNK_SIZE}
-            printf "SUCCESS! Dump completed and can be found at ${FILE}\n\n"
-            STATE=BREAK
-            ;;
-        04|4)
-            set_total_dump_size `expr 3145728 + 1048576`
-            dumpChunkSize 925696 122880 ${CHUNK_SIZE}
-            dumpChunkSize 1048576 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 2097152 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 3145728 1048576 ${CHUNK_SIZE}
-            STATE=00
-            ;;
-        08|8)
-            set_total_dump_size `expr 7340032 + 1048576`
-            dumpChunkSize 4194304 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 5242880 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 6291456 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 7340032 1048576 ${CHUNK_SIZE}
-            STATE=04
-            ;;
-         0A|A)
-            set_total_dump_size `expr 9437184 + 1048576`
-            dumpChunkSize 8388608 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 9437184 1048576 ${CHUNK_SIZE}
-            STATE=08
-            ;;
-        30)
-            set_total_dump_size `expr 49283072 + 1048576`
-            dumpChunkSize 10485760 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 11534336 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 12582912 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 13631488 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 14680064 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 15728640 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 16777216 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 17825792 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 18874368 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 19922944 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 20971520 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 22020096 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 23068672 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 24117248 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 25165824 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 26214400 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 27262976 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 28311552 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 29360128 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 30408704 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 31457280 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 32505856 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 33554432 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 34603008 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 35651584 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 36700160 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 37748736 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 38797312 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 39845888 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 40894464 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 41943040 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 42991616 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 44040192 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 45088768 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 46137344 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 47185920 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 48234496 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 49283072 1048576 ${CHUNK_SIZE}
-            STATE=0A
-            ;;
-        40)
-            set_total_dump_size `expr 66060288 + 1048576`
-            dumpChunkSize 50331648 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 51380224 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 52428800 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 53477376 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 54525952 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 55574528 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 56623104 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 57671680 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 58720256 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 59768832 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 60817408 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 61865984 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 62914560 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 63963136 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 65011712 1048576 ${CHUNK_SIZE}
-            dumpChunkSize 66060288 1048576 ${CHUNK_SIZE}
-            STATE=30
-            ;;
-        discovernotrace) # Call discover function to determine state.
-            # do not allow any fail output or progress updates
-            LOG_LOCATION="/dev/null"
-            DISPLAY=0
-            discover
-            ;;
-        discover)  # Call discover function to determine state.
-            discover
-            ;;
-        limit) # Call discover function and then reduce to 8MB if bigger.
-            discover
-            limit_memory
-            ;;
-        *)
-            echo Unsupported STATE.
-            STATE=BREAK
-            ;;
-    esac
-done
+case ${STATE} in
+    (discovernotrace) # Call discover function to determine state.
+        # do not allow any fail output or progress updates
+        LOG_LOCATION="/dev/null"
+        DISPLAY=0
+        discover
+        ;;
+    (discover)  # Call discover function to determine state.
+        discover
+        ;;
+    (limit) # Call discover function and then reduce to 8MB if bigger.
+        discover
+        limit_memory
+        ;;
+    *[0-9])
+        echo "Requested to dump $STATE MB"
+        ;;
+    (*)
+        echo "Unsupported STATE: $STATE"
+        exit 1
+        ;;
+esac
+
+if [[ $STATE == '00' ]] || [[ $STATE == '0' ]]; then
+  # STATE has not been set, just dump HBB
+  # The size of the HBB section in PNOR
+  # *** NOTE: Keep in sync with Dump.pm and bootloaderif.H (MAX_HBB_SIZE)
+  MAX_HBB_SIZE=925696
+  set_total_dump_size $MAX_HBB_SIZE
+else
+  # otherwise STATE is the number of MB we need to dump
+  mb_count_decimal=$(( 16#$STATE ))
+  MEGABYTE_DECIMAL=1048576
+  set_total_dump_size `expr $mb_count_decimal \* $MEGABYTE_DECIMAL`
+fi
+
+dumpInChunks 0 $total_dump_size ${CHUNK_SIZE}
+
+printf "SUCCESS! Dump completed and can be found at ${FILE}\n\n"
 
