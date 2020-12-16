@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,6 +145,7 @@ extern "C"
     {
         PSCOM_RING_ID = 0x0,
         PERV_RING_ID  = 0x1,
+        PBA_RING_ID   = 0x3,
     } p10_PSCOM_PERV_RingId_t;
 
     /// P10 AXONE chiplet ring ID enumeration
