@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,7 +183,7 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
         }
 
 #if __HOSTBOOT_RUNTIME
-        if(l_needsWakeup)
+        if(false/*l_needsWakeup*/) //@FIXME-Skip these extra wakeups for now
         {
             TRACDCOMP(g_trac_scom,"Special wakeup required, starting now..");
             g_wakeupInProgress = true;
@@ -221,7 +221,7 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
         // @todo RTC:124196 need to move this to a more general location so that
         //       the disable occurs after the HBRT is complete.
 #if __HOSTBOOT_RUNTIME
-        if(l_needsWakeup && !g_wakeupInProgress)
+        if(false /*l_needsWakeup && !g_wakeupInProgress*/)  //@FIXME-Skip these extra wakeups for now
         {
             g_wakeupInProgress = true;
             errlHndl_t l_errSW = NULL;
