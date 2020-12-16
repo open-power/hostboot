@@ -630,21 +630,26 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
             case TYPE_OMI:
             {
                 HWAS_DBG("_deconfigParentAssoc OMI deconfig parent proc");
+
+                // Deconfigure related OMIC if necessary
                 TargetHandleList pOmicParentList;
                 getParentOmicTargetsByState(pOmicParentList,
                         &i_target, CLASS_NA, TYPE_OMIC,
                         UTIL_FILTER_ALL);
 
-                TargetHandle_t parentOmic = pOmicParentList[0];
-
                 HWAS_ASSERT((pOmicParentList.size() == 1),
                     "HWAS _deconfigParentAssoc: pOmicParentList != 1");
+
+                TargetHandle_t parentOmic = pOmicParentList[0];
 
                 if (!anyChildFunctional(*parentOmic, TargetService::OMI_CHILD))
                 {
                     _deconfigureTarget(*parentOmic, i_errlEid, NULL,
                                        i_deconfigRule);
                 }
+
+                // Deconfigure parent MCC if necessary
+                _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
 
                 break;
             } // TYPE_OMI
@@ -748,7 +753,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
             {
               HWAS_DBG("_deconfigParentAssoc default case _deconfigAffinityParent");
               // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MC, TYPE_MI, TYPE_DMI,
-              // TYPE_MBA, TYPE_PHB, TYPE_OBUS_BRICK, TYPE_EQ
+              // TYPE_MCC, TYPE_MBA, TYPE_PHB, TYPE_OBUS_BRICK, TYPE_EQ
               _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
             }
             break;
