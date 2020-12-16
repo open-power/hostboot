@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,12 +159,53 @@ void eepromInit(errlHndl_t & io_rtaskReturnErrl)
                 "eepromInit() Found Empty Cache, set version of cache structure to be 0x%.02x",
                 EECACHE_VERSION_LATEST);
     }
+    else if(l_eecacheSectionHeaderPtr->version != EECACHE_VERSION_LATEST)
+    {
+        const auto original_version = l_eecacheSectionHeaderPtr->version;
+        // In order to update to the latest EECACHE version we must invalidate
+        // entire cache
+        io_rtaskReturnErrl = PNOR::clearSection(PNOR::EECACHE);
 
-    // @TODO RTC 247228 - replace assert with a better recovery strategy
-    // Do not continue using PNOR EECACHE if it is at an unsupported version
-    assert(l_eecacheSectionHeaderPtr->version == EECACHE_VERSION_LATEST,
-            "eepromInit() EECACHE PNOR version %d is not supported.  Currently supporting %d version",
-            l_eecacheSectionHeaderPtr->version, EECACHE_VERSION_LATEST );
+        if (io_rtaskReturnErrl != nullptr)
+        {
+            TRACFCOMP(g_trac_eeprom, ERR_MRK"eepromInit(): "
+                    "An error occurred during initialization of libeeprom.so! "
+                    "Could not clear EECACHE when version mismatch detected!");
+            break;
+        }
+
+        l_eecacheSectionHeaderPtr->version = EECACHE_VERSION_LATEST;
+        /*@
+          * @errortype   ERRORLOG::ERRL_SEV_PREDICTIVE
+          * @moduleid    EEPROM_CACHE_INIT
+          * @reasoncode  EEPROM_VERSION_UPDATED
+          * @userdata1   Old Version of EECACHE
+          * @userdata2   New Version of EEACHE
+          * @devdesc     A new EECACHE layout found and Hostboot must rebuild EECACHE
+          * @custdesc    Firmware detected we need to recollect hardware information
+          */
+        io_rtaskReturnErrl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                EEPROM_CACHE_INIT,
+                EEPROM_VERSION_UPDATED,
+                original_version,
+                EECACHE_VERSION_LATEST,
+                ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+        io_rtaskReturnErrl->collectTrace(EEPROM_COMP_NAME, 256);
+        io_rtaskReturnErrl->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                                HWAS::SRCI_PRIORITY_HIGH);
+        errlCommit(io_rtaskReturnErrl, EEPROM_COMP_ID);
+
+#ifdef CONFIG_CONSOLE
+        CONSOLE::displayf(CONSOLE::DEFAULT,
+                EEPROM_COMP_NAME,
+                "New EECACHE layout version 0x%.02x detected, we have cleared EECACHE to recollect HW data.",
+                EECACHE_VERSION_LATEST);
+#endif
+        TRACSSCOMP(g_trac_eeprom,
+                "New EECACHE layout version 0x%.02x detected, we have cleared EECACHE to recollect HW data.",
+                EECACHE_VERSION_LATEST);
+    }
 
     if(l_eecacheSectionHeaderPtr->end_of_cache == UNSET_END_OF_CACHE_VALUE)
     {

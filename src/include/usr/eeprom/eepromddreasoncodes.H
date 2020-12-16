@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,7 @@ enum eepromModuleId
     EEPROM_FLUSH_TO_PNOR                    = 0x10,
     EEPROM_FIND_EEPROM_HEADER_IN_CACHE      = 0x11,
     EEPROM_DISABLE_NEXT_MVPD_SOURCE         = 0x12,
+    EEPROM_CACHE_INIT                       = 0x13,
 };
 
 /**
@@ -111,6 +112,7 @@ enum eepromReasonCode
     EEPROM_FAILED_TO_FLUSH_PAGE             = EEPROM_COMP_ID | 0x15,
     EEPROM_NO_FUNCTIONAL_EEPROM             = EEPROM_COMP_ID | 0x16,   // Couldn't find an EEPROM source to operate on.
     EEPROM_INVALID_OFFSET                   = EEPROM_COMP_ID | 0x17,   // Tried to access an EEPROM beyond the end.
+    EEPROM_VERSION_UPDATED                  = EEPROM_COMP_ID | 0x18,
 };
 
 enum UserDetailsTypes
