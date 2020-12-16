@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,7 @@ enum TargetType : uint64_t
     TARGET_TYPE_PMIC            = 0x0000000800000000, ///< PMIC type
     TARGET_TYPE_PAUC            = 0x0000001000000000, ///< PAUC type
     TARGET_TYPE_GENERICI2CSLAVE = 0x0000002000000000, ///< GENERICI2CSLAVE type
+    TARGET_TYPE_IOLINK          = 0x0000004000000000, ///< IOLINK type
     TARGET_TYPE_MULTICAST       = 0x8000000000000000, ///< MULTICAST type
     TARGET_TYPE_ALL             = 0x7FFFFFFFFFFFFFFF, ///< Any/All types
     TARGET_TYPE_ALL_MC          = 0xFFFFFFFFFFFFFFFF, ///< Any/All types + Multicast
@@ -121,7 +122,8 @@ enum TargetType : uint64_t
                                 TARGET_TYPE_PAU           |
                                 TARGET_TYPE_IOHS          |
                                 TARGET_TYPE_FC            |
-                                TARGET_TYPE_PAUC,
+                                TARGET_TYPE_PAUC          |
+                                TARGET_TYPE_IOLINK,
 
     TARGET_TYPE_MULTICASTABLE = TARGET_TYPE_CORE   |
                                 TARGET_TYPE_EQ     |
