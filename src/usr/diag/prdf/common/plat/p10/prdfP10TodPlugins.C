@@ -181,13 +181,13 @@ int32_t todCleanUpErrors( STEP_CODE_DATA_STRUCT & i_stepcode )
         RegDataCache & regCache = RegDataCache::getCachedRegisters();
         regCache.flush( l_procChip, l_todError );
 
-        // Clear bits 18 and 20 in TPLFIR
+        // Clear bits 25 and 27 in TPLFIR
         SCAN_COMM_REGISTER_CLASS * l_andTpFir =
                         l_procChip->getRegister( "TP_LOCAL_FIR_AND" );
 
         l_andTpFir->setAllBits();
-        l_andTpFir->ClearBit(18);
-        l_andTpFir->ClearBit(20);
+        l_andTpFir->ClearBit(25);
+        l_andTpFir->ClearBit(27);
 
         l_rc = l_andTpFir->Write();
         if ( SUCCESS != l_rc )
