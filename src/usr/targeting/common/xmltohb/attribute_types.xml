@@ -949,6 +949,26 @@
   </attribute>
 
   <attribute>
+    <id>EECACHE_DISABLE_AUTO_RESET</id>
+    <description>
+      Disable the ability to auto reset the EECACHE
+
+      0 = Automatically clear the EECACHE on correctable errors
+      1 = Disables the automatic EECACHE clearing to allow for debug
+
+      Default:  0
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <description>State of the VPD synchronization
     between the in memory eecache, the SEEPROM and
     the EECACHE partition.  This will be used to

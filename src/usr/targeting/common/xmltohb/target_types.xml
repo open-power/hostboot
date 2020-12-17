@@ -2547,6 +2547,9 @@
       <id>DPO_MIN_FREQ_PERCENT</id>
     </attribute>
     <attribute>
+      <id>EECACHE_DISABLE_AUTO_RESET</id>
+    </attribute>
+    <attribute>
       <id>EFFECTIVE_EC</id>
     </attribute>
     <attribute>

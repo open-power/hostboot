@@ -64,6 +64,8 @@
 #include <errl/errludtarget.H>
 #include <console/consoleif.H>
 
+#include <targeting/targplatutil.H>     // assertGetToplevelTarget
+
 extern trace_desc_t* g_trac_eeprom;
 
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
@@ -219,40 +221,13 @@ void eepromInit(errlHndl_t & io_rtaskReturnErrl)
                 sizeof(eecacheSectionHeader));
     }
 
-    }while(0);
+    } while(0);
 }
 
 /**
  * _start() task entry procedure using the macro found in taskargs.H
  */
 TASK_ENTRY_MACRO( eepromInit );
-
-uint64_t packEepromHdrIntoUint64(const eepromRecordHeader & i_eepromRecordHeader)
-{
-    uint64_t retVal = 0;
-    if (i_eepromRecordHeader.completeRecord.accessType ==
-        EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
-    {
-        retVal = TWO_UINT32_TO_UINT64(
-            i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.i2c_master_huid,
-            TWO_UINT16_TO_UINT32(
-              TWO_UINT8_TO_UINT16(i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.port,
-                                  i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.engine),
-              TWO_UINT8_TO_UINT16(i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.devAddr,
-                                  i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.mux_select)));
-    }
-    else
-    {
-        retVal = TWO_UINT32_TO_UINT64(
-            i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.spi_master_huid,
-            TWO_UINT16_TO_UINT32(
-              TWO_UINT8_TO_UINT16(0xFF,
-                i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.engine),
-                i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.offset_KB) );
-    }
-
-    return retVal;
-}
 
 /* @brief Calls a syscall to remove page(s). In this case, only writes dirty and
  *        write-tracked pages out to PNOR.
@@ -274,12 +249,13 @@ errlHndl_t flushToPnor(void * i_vaddr, uint64_t i_size)
                 "Error from mm_remove_pages trying for flush to pnor, rc=%d",
                 rc);
         /*@
-         * @errortype
+         * @errortype    ERRL_SEV_UNRECOVERABLE
          * @moduleid     EEPROM_FLUSH_TO_PNOR
          * @reasoncode   EEPROM_FAILED_TO_FLUSH_PAGE
          * @userdata1    Requested Address
          * @userdata2    rc from mm_remove_pages
          * @devdesc      flushToPnor mm_remove_pages FLUSH failed
+         * @custdesc     Firmware detected a problem during the boot
          */
         l_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -386,10 +362,37 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
                     " eeprom length 0x%.08X  eecache vaddr %p" ,
                     get_huid(i_target), i_eepromBuflen, l_internalSectionAddr);
 
-            assert(i_eepromBuflen <= l_eepromLen,
-                   "eeprom buflen %d > eeprom length %d",
-                   i_eepromBuflen,
-                   l_eepromLen);
+            if (i_eepromBuflen > l_eepromLen)
+            {
+                TRACFCOMP(g_trac_eeprom, "updateEecacheContents(): eeprom buflen %d > eeprom length %d",
+                       i_eepromBuflen,
+                       l_eepromLen);
+                /*@
+                 * @errortype   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    EEPROM_UPDATE_EECACHE_CONTENTS
+                 * @reasoncode  EEPROM_UPDATE_BUFFER_MISMATCH
+                 * @userdata1[0:31]  HUID of Master
+                 * @userdata1[32:39] Port (or 0xFF)
+                 * @userdata1[40:47] Engine
+                 * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+                 * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+                 * @userdata2[0:31]  i_eepromBuflen
+                 * @userdata2[32:63] l_eepromLen
+                 * @devdesc   Size of data in l_eepromLen is not matching requester
+                 * @custdesc  Improper handling of Vital Product Data by boot firmware
+                 */
+
+                l_errl = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    EEPROM_UPDATE_EECACHE_CONTENTS,
+                    EEPROM_UPDATE_BUFFER_MISMATCH,
+                    getEepromHeaderUserData(i_recordHeader),
+                    TWO_UINT32_TO_UINT64(TO_UINT32(i_eepromBuflen),
+                                         TO_UINT32(l_eepromLen)),
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+                break;
+            }
 
             // copy in the new buffer
             memcpy(l_internalSectionAddr, i_eepromBuffer ,  i_eepromBuflen);
@@ -575,8 +578,34 @@ errlHndl_t createNewEecacheEntry(TARGETING::Target  *   i_target,
                            eepromRecordHeader   const & i_recordHeaderToAdd,
                            eepromRecordHeader * const & io_recordHeaderFromPnor)
 {
-    assert(io_recordHeaderFromPnor != nullptr, "createNewEecacheEntry: "
-           "io_recordHeaderFromPnor must not be nullptr.");
+    errlHndl_t errl = nullptr;
+    do {
+    if (io_recordHeaderFromPnor == nullptr)
+    {
+        /*@
+         * @errortype   ERRL_SEV_UNRECOVERABLE
+         * @moduleid    EEPROM_CREATE_NEW_EECACHE_ENTRY
+         * @reasoncode  EEPROM_CREATE_PNOR_ENTRY_EMPTY
+         * @userdata1[0:31]  HUID of Master
+         * @userdata1[32:39] Port (or 0xFF)
+         * @userdata1[40:47] Engine
+         * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+         * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+         * @userdata2[0:63]  size of buffer
+         * @devdesc   Attempted to create a new eecache entry without a PNOR slot
+         * @custdesc  Improper handling of Vital Product Data by boot firmware
+         */
+
+        errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            EEPROM_CREATE_NEW_EECACHE_ENTRY,
+            EEPROM_CREATE_PNOR_ENTRY_EMPTY,
+            getEepromHeaderUserData(i_recordHeaderToAdd),
+            i_eepromBuflen,
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        errl->collectTrace(EEPROM_COMP_NAME, 256);
+        break;
+    }
 
     // It's possible this record isn't complete. Create a local to update it.
     eepromRecordHeader l_recordHeaderToAdd = i_recordHeaderToAdd;
@@ -588,24 +617,76 @@ errlHndl_t createNewEecacheEntry(TARGETING::Target  *   i_target,
         // present then the cached_copy_valid bit should be set since the entry
         // contents will be updated and therefor valid. Otherwise, the entry
         // contents will not be filled in and thus the cache will not be valid.
-        assert((i_updateContents && (copyValid == true))
-                || (!i_updateContents && (copyValid == false)),
-                "createNewEecacheEntry: Mismatch between cached_copy_valid %d "
-                "and target presence %d.",
-                copyValid, i_updateContents);
+
+        if ( (!i_updateContents && (copyValid == true) ) ||
+            (i_updateContents && (copyValid == false)) )
+        {
+            TRACFCOMP(g_trac_eeprom, "createNewEecacheEntry: Mismatch between cached_copy_valid %d "
+                "and target presence %d.", copyValid, i_updateContents);
+            /*@
+             * @errortype   ERRL_SEV_UNRECOVERABLE
+             * @moduleid    EEPROM_CREATE_NEW_EECACHE_ENTRY
+             * @reasoncode  EEPROM_MISMATCH_TARGET_PRESENCE
+             * @userdata1[0:31]  HUID of Master
+             * @userdata1[32:39] Port (or 0xFF)
+             * @userdata1[40:47] Engine
+             * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+             * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+             * @userdata2[0:31]  i_updateContents
+             * @userdata2[32:63] copyValid
+             * @devdesc   Mismatch between cached_copy_valid and target presence
+             * @custdesc  Improper handling of Vital Product Data by boot firmware
+             */
+
+            errl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                EEPROM_CREATE_NEW_EECACHE_ENTRY,
+                EEPROM_MISMATCH_TARGET_PRESENCE,
+                getEepromHeaderUserData(l_recordHeaderToAdd),
+                TWO_UINT32_TO_UINT64(TO_UINT32(i_updateContents),
+                                     TO_UINT32(copyValid)),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            errl->collectTrace(EEPROM_COMP_NAME, 256);
+            break;
+        }
     }
 
     eecacheSectionHeader * l_eecacheSectionHeader = getEecachePnorVaddr();
     size_t  l_eepromLen = l_recordHeaderToAdd.completeRecord.cache_copy_size
                         * KILOBYTE;
 
-    assert((l_eecacheSectionHeader->end_of_cache
-                + l_eepromLen) < g_eecachePnorSize,
-            "createNewEecacheEntry: Sum of system EEPROMs (%lld + %lld) "
+    if ( (l_eecacheSectionHeader->end_of_cache + l_eepromLen) >= g_eecachePnorSize )
+    {
+        TRACFCOMP(g_trac_eeprom, "createNewEecacheEntry: Sum of system EEPROMs (%lld + %lld) "
             "is larger than space allocated (%lld) for EECACHE pnor section",
             l_eecacheSectionHeader->end_of_cache,
             l_eepromLen,
             g_eecachePnorSize);
+
+            /*@
+             * @errortype   ERRL_SEV_UNRECOVERABLE
+             * @moduleid    EEPROM_CREATE_NEW_EECACHE_ENTRY
+             * @reasoncode  EEPROM_EECACHE_OUT_OF_SPACE
+             * @userdata1[0:31]  HUID of Master
+             * @userdata1[32:39] Port (or 0xFF)
+             * @userdata1[40:47] Engine
+             * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+             * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+             * @userdata2[0:63]  Size of EECACHE in PNOR
+             * @devdesc   Out of space for adding to PNOR EECACHE
+             * @custdesc  Improper handling of Vital Product Data by boot firmware
+             */
+
+            errl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                EEPROM_CREATE_NEW_EECACHE_ENTRY,
+                EEPROM_EECACHE_OUT_OF_SPACE,
+                getEepromHeaderUserData(l_recordHeaderToAdd),
+                g_eecachePnorSize,
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            errl->collectTrace(EEPROM_COMP_NAME, 256);
+            break;
+    }
 
     // When creating a new entry from scratch the data in i_recordHeaderToAdd
     // isn't (likely) complete because when a user calls buildEepromRecordHeader
@@ -649,14 +730,38 @@ errlHndl_t createNewEecacheEntry(TARGETING::Target  *   i_target,
                                          l_recordHeaderToAdd,
                                          io_recordHeaderFromPnor);
 
-    assert(!alreadyUpdated, "createNewEecacheEntry: "
+    if (alreadyUpdated)
+    {
+        TRACFCOMP(g_trac_eeprom, "createNewEecacheEntry: "
            "Cache map indicates this entry already exists in EECACHE. "
            "Non-new entry was given to createNewEecacheEntry().");
+        /*@
+         * @errortype   ERRL_SEV_UNRECOVERABLE
+         * @moduleid    EEPROM_CREATE_NEW_EECACHE_ENTRY
+         * @reasoncode  EEPROM_DUP_EECACHE_UPDATE
+         * @userdata1[0:31]  HUID of Master
+         * @userdata1[32:39] Port (or 0xFF)
+         * @userdata1[40:47] Engine
+         * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+         * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+         * @devdesc   Attempt to add an already existing EECACHE entry
+         * @custdesc  Improper handling of Vital Product Data by boot firmware
+         */
+
+        errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            EEPROM_CREATE_NEW_EECACHE_ENTRY,
+            EEPROM_DUP_EECACHE_UPDATE,
+            getEepromHeaderUserData(l_recordHeaderToAdd),
+            0,
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        errl->collectTrace(EEPROM_COMP_NAME, 256);
+        break;
+    }
 
     // Set cached_copy_valid to 0 until the cache contents actually gets loaded
     io_recordHeaderFromPnor->completeRecord.cached_copy_valid = 0;
 
-    errlHndl_t errl = nullptr;
     if (i_updateContents)
     {
         errl = updateEecacheContents(i_target,
@@ -675,6 +780,7 @@ errlHndl_t createNewEecacheEntry(TARGETING::Target  *   i_target,
 
     }
 
+    } while (0);
     return errl;
 
 }
@@ -751,10 +857,36 @@ errlHndl_t checkForEecacheEntryUpdate(
             }
             else
             {
-               auto l_eepromCacheAddr = lookupEepromCacheAddr(*i_recordFromPnor);
+                auto l_eepromCacheAddr = lookupEepromCacheAddr(*i_recordFromPnor);
 
-               // if we found a matching record header above this should never happen
-               assert(l_eepromCacheAddr != 0, "unable to find cache address for *i_recordFromPnor");
+                // if we found a matching record header above this should never happen
+                if (l_eepromCacheAddr == 0)
+                {
+                    TRACFCOMP(g_trac_eeprom, "checkForEecacheEntryUpdate(): unable to find cache address for *i_recordFromPnor");
+                    /*@
+                     * @errortype   ERRL_SEV_UNRECOVERABLE
+                     * @moduleid    EEPROM_CHECK_EECACHE_UPDATE
+                     * @reasoncode  EEPROM_UNEXPECTED_CACHE_ADDR
+                     * @userdata1[0:31]  HUID of Master
+                     * @userdata1[32:39] Port (or 0xFF)
+                     * @userdata1[40:47] Engine
+                     * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+                     * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+                     * @userdata2[0:63]  i_eepromBuflen
+                     * @devdesc   Unexpected cache address
+                     * @custdesc  Improper handling of Vital Product Data by boot firmware
+                     */
+
+                    l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        EEPROM_CHECK_EECACHE_UPDATE,
+                        EEPROM_UNEXPECTED_CACHE_ADDR,
+                        getEepromHeaderUserData(*i_recordFromPnor),
+                        i_eepromBuflen,
+                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+                    break;
+               }
                // if we were given a buffer do a memcmp
                // between the cached copy and the provided buffer
                if(memcmp(reinterpret_cast<void *>(l_eepromCacheAddr),
@@ -877,7 +1009,7 @@ errlHndl_t checkForEecacheEntryUpdate(
                     i_recordFromPnor->completeRecord.eepromAccess.spiAccess.engine);
         }
     }
-    }while(0);
+    } while(0);
 
     return l_errl;
 }
@@ -1011,10 +1143,35 @@ errlHndl_t findEepromHeaderInPnorEecache(
         eepromRecordHeader const & i_searchRecordHeader,
         eepromRecordHeader      *& o_recordHeaderFromPnor)
 {
-    assert(o_recordHeaderFromPnor == nullptr,
-            "o_recordHeaderFromPnor must be nullptr as it will be reassigned.");
 
     errlHndl_t l_errl = nullptr;
+    do {
+    if (o_recordHeaderFromPnor != nullptr)
+    {
+        /*@
+         * @errortype   ERRL_SEV_UNRECOVERABLE
+         * @moduleid    EEPROM_FIND_EEPROM_HEADER_IN_CACHE
+         * @reasoncode  EEPROM_NEED_O_RECORD_PTR_EMPTY
+         * @userdata1[0:31]  HUID of Master
+         * @userdata1[32:39] Port (or 0xFF)
+         * @userdata1[40:47] Engine
+         * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+         * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+         * @userdata2        Target HUID
+         * @devdesc   Expecting nullptr for o_recordHeaderFromPnor
+         * @custdesc  Improper handling of Vital Product Data by boot firmware
+         */
+
+        l_errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            EEPROM_FIND_EEPROM_HEADER_IN_CACHE,
+            EEPROM_NEED_O_RECORD_PTR_EMPTY,
+            getEepromHeaderUserData(i_searchRecordHeader),
+            TO_UINT64(TARGETING::get_huid(i_target)),
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+        break;
+    }
     eecacheSectionHeader* l_eecacheSectionHeader = getEecachePnorVaddr();
 
     // Parse through PNOR section header to determine which of three cases we
@@ -1076,9 +1233,6 @@ errlHndl_t findEepromHeaderInPnorEecache(
                     errlCommit(l_errl, EEPROM_COMP_ID);
                 }
 
-                uint64_t l_userdata2 =
-                    packEepromHdrIntoUint64(i_searchRecordHeader);
-
                 /*@
                  * @errortype    ERRORLOG::ERRL_SEV_PREDICTIVE
                  * @moduleid     EEPROM_FIND_EEPROM_HEADER_IN_CACHE
@@ -1099,9 +1253,10 @@ errlHndl_t findEepromHeaderInPnorEecache(
                         EEPROM_NEW_DEVICE_DETECTED,
                         TWO_UINT32_TO_UINT64(o_recordHeaderFromPnor->completeRecord.cache_copy_size ,
                             i_searchRecordHeader.completeRecord.cache_copy_size),
-                        l_userdata2,
+                        getEepromHeaderUserData(i_searchRecordHeader),
                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+                // Since we should be TI'ing, commit to keep progressing
                 errlCommit(l_errl, EEPROM_COMP_ID);
 
 #ifdef CONFIG_CONSOLE
@@ -1123,9 +1278,68 @@ errlHndl_t findEepromHeaderInPnorEecache(
         }
     }
 
-    // Case 1: eeprom doesn't exist in cache and there is no space.
-    assert(o_recordHeaderFromPnor != nullptr,
-           "Exceeded the max %d records in PNOR EECACHE", MAX_EEPROMS_LATEST);
+    // Case 1: eeprom doesn't exist in existing cache and there is no room to add it
+    if (o_recordHeaderFromPnor == nullptr)
+    {
+        TRACFCOMP(g_trac_eeprom, "findEepromHeaderInPnorEecache(): Reached the max limit of %d records in PNOR EECACHE", MAX_EEPROMS_LATEST);
+        bool l_do_reconfig = true;
+        TARGETING::Target* sys = TARGETING::UTIL::assertGetToplevelTarget();
+        if ( sys->getAttr<TARGETING::ATTR_EECACHE_DISABLE_AUTO_RESET>() )
+        {
+            l_do_reconfig = false;
+            // Someone had to have overrode the default
+            TRACFCOMP(g_trac_eeprom, "findEepromHeaderInPnorEecache(): ATTR_EECACHE_DISABLE_AUTO_RESET "
+                " so will -NOT- be clearing PNOR EECACHE, someone did this intentionally, ERRL_SEV_PREDICTIVE");
+        }
+        else
+        {
+            // clear the EECACHE to recover
+            TRACFCOMP(g_trac_eeprom, "findEepromHeaderInPnorEecache(): Starting recovery, clearing EECACHE");
+            l_errl = PNOR::clearSection(PNOR::EECACHE);
+
+            // If there was an error clearing the cache commit it because we
+            // are TIing.
+            if(l_errl)
+            {
+                errlCommit(l_errl, EEPROM_COMP_ID);
+            }
+        }
+        /*@
+         * @errortype    ERRORLOG::ERRL_SEV_PREDICTIVE
+         * @moduleid     EEPROM_FIND_EEPROM_HEADER_IN_CACHE
+         * @reasoncode   EEPROM_REACHED_MAX_CAPACITY
+         * @userdata1[0:31]  HUID of Master
+         * @userdata1[32:39] Port (or 0xFF)
+         * @userdata1[40:47] Engine
+         * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+         * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+         * @userdata2[0:63]  Capcity is FULL at MAX_EEPROMS_LATEST
+         * @devdesc     Max records allowable has been reached in PNOR EECACHE
+         * @custdesc    Improper handling of Vital Product Data by boot firmware
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                 ERRORLOG::ERRL_SEV_PREDICTIVE,
+                 EEPROM_FIND_EEPROM_HEADER_IN_CACHE,
+                 EEPROM_REACHED_MAX_CAPACITY,
+                 getEepromHeaderUserData(i_searchRecordHeader),
+                 MAX_EEPROMS_LATEST,
+                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+#ifdef CONFIG_CONSOLE
+        CONSOLE::displayf(CONSOLE::DEFAULT, EEPROM_COMP_NAME,
+                "Reached the MAX CAPACITY for allowable records "
+                "in the PNOR EECACHE");
+#endif
+        if (l_do_reconfig)
+        {
+            TRACFCOMP(g_trac_eeprom, "findEepromHeaderInPnorEecache(): Performing RECONFIG LOOP to complete recovery from clearing PNOR EECACHE");
+            // Since we should be TI'ing, commit to keep progressing
+            errlCommit(l_errl, EEPROM_COMP_ID);
+            INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
+        }
+    }
+
+    } while(0);
 
     return l_errl;
 }
@@ -1208,10 +1422,8 @@ errlHndl_t cacheEeprom(TARGETING::Target*        i_target,
                       "0x%.08x bytes",
                       i_eepromBuflen, TARGETING::get_huid(i_target),
                       i_eepromType, l_eepromLen);
-            uint64_t l_userdata2 =
-                packEepromHdrIntoUint64(l_partialRecordHeader);
             /*@
-            * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @errortype    ERRORLOG::ERRL_SEV_PREDICTIVE
             * @moduleid     EEPROM_CACHE_EEPROM
             * @reasoncode   EEPROM_INVALID_LENGTH
             * @userdata1[0:63]  Size of buffer
@@ -1223,14 +1435,14 @@ errlHndl_t cacheEeprom(TARGETING::Target*        i_target,
             * @devdesc     Attempting to overwrite eeprom cache with a
             *              buffer that is larger than the eeprom device
             *              itself
-            * @custdesc    Firmware detected a problem during the boot
+            * @custdesc    Improper handling of Vital Product Data by boot firmware
             */
             l_errl = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_PREDICTIVE,
                         EEPROM_CACHE_EEPROM,
                         EEPROM_INVALID_LENGTH,
                         i_eepromBuflen,
-                        l_userdata2,
+                        getEepromHeaderUserData(l_partialRecordHeader),
                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
             l_errl->collectTrace(EEPROM_COMP_NAME, 256);
 
@@ -1297,7 +1509,7 @@ errlHndl_t cacheEeprom(TARGETING::Target*        i_target,
                                                 l_recordFromPnorToUpdate);
         }
 
-    }while(0);
+    } while(0);
 
     TRACSSCOMP(g_trac_eeprom, EXIT_MRK"cacheEeprom(): Target HUID 0x%.08X, "
             "l_errl rc = 0x%02X",
@@ -1360,7 +1572,7 @@ errlHndl_t genericEepromCache(DeviceFW::OperationType i_opType,
           * @userdata2[0:31]  1 if target is present, 0 if not
           * @userdata2[32:63] EEPROM::EEPROM_ROLE
           * @devdesc      Attempting to cache empty buffer in EEACHE
-          * @custdesc     An error occurred during the FW boot
+          * @custdesc     Improper handling of Vital Product Data by boot firmware
           */
           l_errl = new ERRORLOG::ErrlEntry(
                           ERRORLOG::ERRL_SEV_PREDICTIVE,
@@ -1384,7 +1596,7 @@ errlHndl_t genericEepromCache(DeviceFW::OperationType i_opType,
         break;
     }
 
-    }while(0);
+    } while(0);
 
     TRACSSCOMP( g_trac_eeprom, EXIT_MRK"genericI2CEepromCache() "
             "Target HUID 0x%.08X EXIT, rc = %d", TARGETING::get_huid(i_target),
@@ -1437,7 +1649,7 @@ errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
 
         l_errl = setIsValidCacheEntry(l_eepromRecordHeader, i_isValid);
 
-    }while(0);
+    } while(0);
 
     return l_errl;
 }
@@ -1462,7 +1674,7 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
                         "eeprom but we could not find in global eecache map");
 
               /*@
-              * @errortype
+              * @errortype    ERRL_SEV_UNRECOVERABLE
               * @moduleid     EEPROM_INVALIDATE_CACHE
               * @reasoncode   EEPROM_CACHE_NOT_FOUND_IN_MAP
               * @userdata1[0:31]  HUID of Master
@@ -1495,7 +1707,7 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
                         "eeprom but we could not find the entry in table of contents of EECACHE section of pnor");
 
               /*@
-              * @errortype
+              * @errortype    ERRL_SEV_UNRECOVERABLE
               * @moduleid     EEPROM_INVALIDATE_CACHE
               * @reasoncode   EEPROM_CACHE_NOT_FOUND_IN_PNOR
               * @userdata1[0:31]  HUID of Master
@@ -1534,7 +1746,7 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
             break;
         }
 
-    }while(0);
+    } while(0);
 
     return l_errl;
 }
@@ -1947,16 +2159,37 @@ errlHndl_t cacheEECACHEPartition()
         else
         {
             TRACFBIN(g_trac_eeprom,
-                     ERR_MRK"cacheEECACHEPartition: record already exists",
+                     ERR_MRK"cacheEECACHEPartition: Problem found while populating the global eecache from PNOR "
+                     "and found a duplicate record for one that already exists (verify calling this once)",
                      l_pRecordHeader,
                      sizeof(*l_pRecordHeader));
-            assert(false,"cacheEECACHEPartition: Attempted to cache a duplicate"
-                  " record. Ensure that cacheEECACHEPartition is called once "
-                  "and no duplicate entries exist in EECACHE.");
+
+            /*@
+             * @errortype   ERRL_SEV_UNRECOVERABLE
+             * @moduleid    EEPROM_CACHE_EECACHE_PARTITION
+             * @reasoncode  EEPROM_CACHE_PNOR_DUP_FOUND
+             * @userdata1[0:31]  HUID of Master
+             * @userdata1[32:39] Port (or 0xFF)
+             * @userdata1[40:47] Engine
+             * @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+             * @userdata1[56:63] mux_select (or byte 1 offset_KB)
+             * @devdesc   Attempted to add a duplicate entry from the PNOR to the global eecache
+             * @custdesc  Improper handling of Vital Product Data by boot firmware
+             */
+
+            l_errl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                EEPROM_CACHE_EECACHE_PARTITION,
+                EEPROM_CACHE_PNOR_DUP_FOUND,
+                getEepromHeaderUserData(l_recordToAdd),
+                0,
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+            break;
         }
     }
 
-    }while(0);
+    } while(0);
     return l_errl;
 }
 
@@ -2001,7 +2234,7 @@ errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
     }
 
     TRACSCOMP(g_trac_eeprom,"eecachePresenceDetect> %.8X present=%d", TARGETING::get_huid(i_target), o_present);
-    }while(0);
+    } while(0);
 
     return l_errl;
 }

@@ -67,6 +67,10 @@ enum eepromModuleId
     EEPROM_FIND_EEPROM_HEADER_IN_CACHE      = 0x11,
     EEPROM_DISABLE_NEXT_MVPD_SOURCE         = 0x12,
     EEPROM_CACHE_INIT                       = 0x13,
+    EEPROM_CREATE_NEW_EECACHE_ENTRY         = 0x14,
+    EEPROM_CACHE_EECACHE_PARTITION          = 0x15,
+    EEPROM_UPDATE_EECACHE_CONTENTS          = 0x16,
+    EEPROM_CHECK_EECACHE_UPDATE             = 0x17,
 };
 
 /**
@@ -107,12 +111,19 @@ enum eepromReasonCode
                                                                        // (see structs defined in eeprom_const.H)
     EEPROM_INVALID_ACCESS_METHOD            = EEPROM_COMP_ID | 0x13,   // See EepromHwAccessMethodType in eeprom_const.H
     EEPROM_INVALID_LENGTH                   = EEPROM_COMP_ID | 0x14,
-
-    // Error occured while trying to flush the MMIO page out.
-    EEPROM_FAILED_TO_FLUSH_PAGE             = EEPROM_COMP_ID | 0x15,
+    EEPROM_FAILED_TO_FLUSH_PAGE             = EEPROM_COMP_ID | 0x15,   // Error occured while trying to flush the MMIO page out
     EEPROM_NO_FUNCTIONAL_EEPROM             = EEPROM_COMP_ID | 0x16,   // Couldn't find an EEPROM source to operate on.
     EEPROM_INVALID_OFFSET                   = EEPROM_COMP_ID | 0x17,   // Tried to access an EEPROM beyond the end.
     EEPROM_VERSION_UPDATED                  = EEPROM_COMP_ID | 0x18,
+    EEPROM_REACHED_MAX_CAPACITY             = EEPROM_COMP_ID | 0x19,   // Reached the MAX_EEPROMS_LATEST limit
+    EEPROM_CREATE_PNOR_ENTRY_EMPTY          = EEPROM_COMP_ID | 0x1A,   // Need to have a valid ENTRY to create new
+    EEPROM_CACHE_PNOR_DUP_FOUND             = EEPROM_COMP_ID | 0x1B,   // Duplicate entry found from PNOR while populating global eecache
+    EEPROM_NEED_O_RECORD_PTR_EMPTY          = EEPROM_COMP_ID | 0x1C,   // Need a nullptr to populate output record
+    EEPROM_MISMATCH_TARGET_PRESENCE         = EEPROM_COMP_ID | 0x1D,   // Mismatch between target presence and copy_cache_valid
+    EEPROM_EECACHE_OUT_OF_SPACE             = EEPROM_COMP_ID | 0x1E,   // Out of space to add to EECACHE
+    EEPROM_UPDATE_BUFFER_MISMATCH           = EEPROM_COMP_ID | 0x1F,   // Mismatch between request size and buffer size
+    EEPROM_DUP_EECACHE_UPDATE               = EEPROM_COMP_ID | 0x20,   // Attempt to add an already existing EECACHE entry
+    EEPROM_UNEXPECTED_CACHE_ADDR            = EEPROM_COMP_ID | 0x21,   // Unexpected cache address
 };
 
 enum UserDetailsTypes

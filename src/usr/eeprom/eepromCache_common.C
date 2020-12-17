@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,9 +137,13 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
         o_eepromRecordHeader.completeRecord.accessType = io_eepromInfo.accessMethod;
         o_eepromRecordHeader.completeRecord.cache_copy_size = static_cast<uint32_t>(io_eepromInfo.devSize_KB);
 
+        // mask out top byte which contains node ID
+        // eecache scope is node agnostic, so use only the non-node HUID ID
+        uint32_t huid_node_mask = 0x00ffffff;
+
         if(io_eepromInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
         {
-            o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.i2c_master_huid = l_masterTarget->getAttr<TARGETING::ATTR_HUID>();
+            o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.i2c_master_huid = l_masterTarget->getAttr<TARGETING::ATTR_HUID>() & huid_node_mask;
             o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.port       = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.port);
             o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.engine     = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.engine);
             o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.devAddr    = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.devAddr);
@@ -147,7 +151,7 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
         }
         else
         {
-            o_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.spi_master_huid = l_masterTarget->getAttr<TARGETING::ATTR_HUID>();
+            o_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.spi_master_huid = l_masterTarget->getAttr<TARGETING::ATTR_HUID>() & huid_node_mask;
             o_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.engine     = static_cast<uint8_t>(io_eepromInfo.accessAddr.spi_addr.engine);
             o_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.offset_KB = static_cast<uint16_t>(io_eepromInfo.accessAddr.spi_addr.roleOffset_KB);
         }
