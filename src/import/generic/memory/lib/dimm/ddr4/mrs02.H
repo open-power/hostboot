@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,14 +58,14 @@ namespace ddr4
 /// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// @param[in] i_data an mrs02_data object, filled in
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs02_data<MC>& i_data,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     constexpr uint64_t CWL_LENGTH = 3;
     constexpr uint64_t CWL_START = 7;
@@ -84,13 +84,13 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     fapi2::buffer<uint8_t> l_cwl_buffer;
 
     // Ensures our rank is inbounds for the attribute array
-    const auto l_dimm_rank = mss::index(i_rank);
+    const auto l_dimm_rank = mss::index(i_port_rank);
     FAPI_ASSERT(l_dimm_rank < MAX_RANK_PER_DIMM,
                 fapi2::MSS_INVALID_RANK()
                 .set_PORT_TARGET(mss::find_target<MRS::PORT_TARGET_TYPE>(i_target))
-                .set_RANK(i_rank)
+                .set_RANK(i_port_rank)
                 .set_FUNCTION(generic_ffdc_codes::MRS01_GEN),
-                "%s MRS01 rank out of bounds rank%u", mss::c_str(i_target), i_rank);
+                "%s MRS01 rank out of bounds rank%u", mss::c_str(i_target), i_port_rank);
 
     {
         fapi2::buffer<uint8_t> l_rtt_wr_buffer = i_data.iv_dram_rtt_wr[l_dimm_rank];
@@ -108,7 +108,7 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
         // Printed here as opposed to the ctor as it uses the rank information
         FAPI_INF("%s MR2 rank %d attributes: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x(0x%x), WRITE_CRC: 0x%x",
-                 mss::c_str(i_target), i_rank, uint8_t(i_data.iv_lpasr), i_data.iv_cwl,
+                 mss::c_str(i_target), i_port_rank, uint8_t(i_data.iv_lpasr), i_data.iv_cwl,
                  uint8_t(l_cwl_buffer), uint8_t(l_rtt_wr_buffer), i_data.iv_write_crc);
 
         mss::swizzle<TT::A3, CWL_LENGTH, CWL_START>(l_cwl_buffer, io_inst.arr0);
@@ -133,20 +133,20 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
     mrs02_data<MC> l_data( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err,
               "%s Unable to construct MRS02 data from attributes",
               mss::c_str(i_target) );
-    FAPI_TRY( mrs02(i_target, l_data, io_inst, i_rank) );
+    FAPI_TRY( mrs02(i_target, l_data, io_inst, i_port_rank) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -157,7 +157,7 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @tparam TT traits type defaults to ccsTraits<MC>
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @param[out] o_write_crc the write crc bit
 /// @param[out] o_lpasr the low power array self refresh setting
 /// @param[out] o_cwl the cas write latency setting
@@ -166,7 +166,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank,
+                                      const uint64_t i_port_rank,
                                       uint8_t& o_write_crc,
                                       fapi2::buffer<uint8_t>& o_lpasr,
                                       fapi2::buffer<uint8_t>& o_cwl,
@@ -182,7 +182,7 @@ fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t& i_inst,
     mss::swizzle<5, 3, TT::A11>(i_inst.arr0, o_rtt_wr);
 
     FAPI_INF("MR2 rank %d deocode: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x, WRITE_CRC: 0x%x",
-             i_rank, uint8_t(o_lpasr), uint8_t(o_cwl), uint8_t(o_rtt_wr), o_write_crc);
+             i_port_rank, uint8_t(o_lpasr), uint8_t(o_cwl), uint8_t(o_rtt_wr), o_write_crc);
 
     return fapi2::FAPI2_RC_SUCCESS;
 }
@@ -191,18 +191,18 @@ fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t& i_inst,
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS2,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
+/// @param[in] i_port_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode mrs02_decode(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank)
+                                      const uint64_t i_port_rank)
 {
     uint8_t l_write_crc = 0;
     fapi2::buffer<uint8_t> l_lpasr;
     fapi2::buffer<uint8_t> l_cwl;
     fapi2::buffer<uint8_t> l_rtt_wr;
 
-    return mrs02_decode_helper(i_inst, i_rank, l_write_crc, l_lpasr, l_cwl, l_rtt_wr);
+    return mrs02_decode_helper(i_inst, i_port_rank, l_write_crc, l_lpasr, l_cwl, l_rtt_wr);
 }
 
 } // ns ddr4

@@ -186,16 +186,16 @@ inline fapi2::ReturnCode read_rank7( const fapi2::Target<T>& i_target, fapi2::bu
 /// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_rank the master rank index
+/// @param[in] i_port_rank the master rank index
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target,
-                               const uint64_t i_rank,
+                               const uint64_t i_port_rank,
                                fapi2::buffer<uint64_t>& o_data )
 {
-    switch (i_rank)
+    switch (i_port_rank)
     {
         case(0):
             return ( read_rank0<MC>(i_target, o_data) );
@@ -224,12 +224,12 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target,
         default:
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_RANK_PASSED()
-                         .set_RANK(i_rank)
+                         .set_RANK(i_port_rank)
                          .set_TARGET(i_target)
                          .set_FUNCTION(HWMS_READ),
                          "%s Invalid rank passed to fwms::ecc::hwms::read (%d)",
                          mss::c_str(i_target),
-                         i_rank);
+                         i_port_rank);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -374,16 +374,16 @@ inline fapi2::ReturnCode write_rank7( const fapi2::Target<T>& i_target, const fa
 /// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_rank the master rank index
+/// @param[in] i_port_rank the master rank index
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
-                                const uint64_t i_rank,
+                                const uint64_t i_port_rank,
                                 const fapi2::buffer<uint64_t>& i_data )
 {
-    switch (i_rank)
+    switch (i_port_rank)
     {
         case(0):
             return ( write_rank0<MC>(i_target, i_data) );
@@ -412,12 +412,12 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
         default:
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_RANK_PASSED()
-                         .set_RANK(i_rank)
+                         .set_RANK(i_port_rank)
                          .set_TARGET(i_target)
                          .set_FUNCTION(HWMS_WRITE),
                          "%s Invalid rank passed to fwms::ecc::hwms::write(%d)",
                          mss::c_str(i_target),
-                         i_rank);
+                         i_port_rank);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -530,20 +530,20 @@ inline void get_exit_1( const fapi2::buffer<uint64_t>& i_data, mss::states& o_st
 /// @tparam MC the memory controller type
 /// @tparam T the fapi2::TargetType - derived
 /// @param[in] i_target the fapi2 target
-/// @param[in] i_rank the desired port rank
+/// @param[in] i_port_rank the desired port rank
 /// @param[out] o_galois the Galois code of the mark
 /// @param[out] o_confirmed true if the mark is a chipmark
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode get_hwms( const fapi2::Target<T>& i_target,
-                            const uint64_t i_rank,
+                            const uint64_t i_port_rank,
                             uint64_t& o_galois,
                             mss::states& o_confirmed )
 {
     fapi2::buffer<uint64_t> l_buffer;
 
-    FAPI_TRY( mss::ecc::hwms::read<MC>(i_target, i_rank, l_buffer) );
+    FAPI_TRY( mss::ecc::hwms::read<MC>(i_target, i_port_rank, l_buffer) );
     mss::ecc::hwms::get_chipmark<MC>(l_buffer, o_galois);
     mss::ecc::hwms::get_confirmed<MC>(l_buffer, o_confirmed);
 
@@ -556,13 +556,13 @@ fapi_try_exit:
 /// @tparam MC the memory controller type
 /// @tparam T the fapi2::TargetType - derived
 /// @param[in] i_target the fapi2 target
-/// @param[in] i_rank the desired port rank
+/// @param[in] i_port_rank the desired port rank
 /// @param[in] i_galois the Galois code of the mark, or set to 0 to clear mark
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode set_hwms( const fapi2::Target<T>& i_target,
-                            const uint64_t i_rank,
+                            const uint64_t i_port_rank,
                             const uint64_t i_galois )
 {
     fapi2::buffer<uint64_t> l_buffer;
@@ -579,7 +579,7 @@ fapi2::ReturnCode set_hwms( const fapi2::Target<T>& i_target,
         mss::ecc::hwms::set_exit_1<MC>(l_buffer, mss::YES);
     }
 
-    FAPI_TRY( mss::ecc::hwms::write<MC>(i_target, i_rank, l_buffer) );
+    FAPI_TRY( mss::ecc::hwms::write<MC>(i_target, i_port_rank, l_buffer) );
 
 fapi_try_exit:
     return fapi2::current_err;

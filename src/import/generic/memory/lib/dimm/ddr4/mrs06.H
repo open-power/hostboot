@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,14 +58,14 @@ namespace ddr4
 /// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// @param[in] i_data an mrs06_data object, filled in
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs06_data<MC>& i_data,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     constexpr uint64_t VREFDQ_TRAIN_LENGTH = 6;
     constexpr uint64_t VREFDQ_TRAIN_START = 7;
@@ -91,16 +91,16 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 mss::c_str(i_target));
 
     l_tccd_l_buffer = tccd_l_map[i_data.iv_tccd_l - LOWEST_TCCD];
-    l_vrefdq_train_value_buffer = i_data.iv_vrefdq_train_value[mss::index(i_rank)];
+    l_vrefdq_train_value_buffer = i_data.iv_vrefdq_train_value[mss::index(i_port_rank)];
 
     FAPI_INF("%s MR6 rank %d attributes: TRAIN_V: 0x%x(0x%x), TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x(0x%x)",
-             mss::c_str(i_target), i_rank, i_data.iv_vrefdq_train_value[mss::index(i_rank)],
-             uint8_t(l_vrefdq_train_value_buffer), i_data.iv_vrefdq_train_range[mss::index(i_rank)],
-             i_data.iv_vrefdq_train_enable[mss::index(i_rank)], i_data.iv_tccd_l, uint8_t(l_tccd_l_buffer));
+             mss::c_str(i_target), i_port_rank, i_data.iv_vrefdq_train_value[mss::index(i_port_rank)],
+             uint8_t(l_vrefdq_train_value_buffer), i_data.iv_vrefdq_train_range[mss::index(i_port_rank)],
+             i_data.iv_vrefdq_train_enable[mss::index(i_port_rank)], i_data.iv_tccd_l, uint8_t(l_tccd_l_buffer));
 
     mss::swizzle<TT::A0, VREFDQ_TRAIN_LENGTH, VREFDQ_TRAIN_START>(l_vrefdq_train_value_buffer, io_inst.arr0);
-    io_inst.arr0.writeBit<TT::A6>(i_data.iv_vrefdq_train_range[mss::index(i_rank)]);
-    io_inst.arr0.writeBit<TT::A7>(i_data.iv_vrefdq_train_enable[mss::index(i_rank)]);
+    io_inst.arr0.writeBit<TT::A6>(i_data.iv_vrefdq_train_range[mss::index(i_port_rank)]);
+    io_inst.arr0.writeBit<TT::A7>(i_data.iv_vrefdq_train_enable[mss::index(i_port_rank)]);
     mss::swizzle<TT::A10, TCCD_L_LENGTH, TCCD_L_START>(l_tccd_l_buffer, io_inst.arr0);
 
     FAPI_INF("%s MR6: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
@@ -116,18 +116,18 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
     mrs06_data<MC> l_data( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS06 data from attributes", mss::c_str(i_target) );
-    FAPI_TRY( mrs06(i_target, l_data, io_inst, i_rank) );
+    FAPI_TRY( mrs06(i_target, l_data, io_inst, i_port_rank) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -138,7 +138,7 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @tparam TT traits type defaults to ccsTraits<MC>
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @param[out] o_vrefdq_train_range the vrefdq training range setting
 /// @param[out] o_vrefdq_train_enable the vrefdq training enable setting
 /// @param[out] o_tccd_l_buffer the tccd_l setting
@@ -147,7 +147,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank,
+                                      const uint64_t i_port_rank,
                                       uint8_t& o_vrefdq_train_range,
                                       uint8_t& o_vrefdq_train_enable,
                                       fapi2::buffer<uint8_t>& o_tccd_l_buffer,
@@ -162,7 +162,7 @@ fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t& i_inst,
     mss::swizzle<5, 3, TT::A12>(i_inst.arr0, o_tccd_l_buffer);
 
     FAPI_INF("MR6 rank %d decode: TRAIN_V: 0x%x, TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x",
-             i_rank, uint8_t(o_vrefdq_train_value_buffer), o_vrefdq_train_range,
+             i_port_rank, uint8_t(o_vrefdq_train_value_buffer), o_vrefdq_train_range,
              o_vrefdq_train_enable, uint8_t(o_tccd_l_buffer));
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -172,18 +172,18 @@ fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t& i_inst,
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS6,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode mrs06_decode(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank)
+                                      const uint64_t i_port_rank)
 {
     fapi2::buffer<uint8_t> l_tccd_l_buffer;
     fapi2::buffer<uint8_t> l_vrefdq_train_value_buffer;
     uint8_t l_vrefdq_train_range = 0;
     uint8_t l_vrefdq_train_enable = 0;
 
-    return mrs06_decode_helper(i_inst, i_rank, l_vrefdq_train_range, l_vrefdq_train_enable,
+    return mrs06_decode_helper(i_inst, i_port_rank, l_vrefdq_train_range, l_vrefdq_train_enable,
                                l_tccd_l_buffer, l_vrefdq_train_value_buffer);
 }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -421,12 +421,18 @@ class bad_bit_interface
         fapi2::ReturnCode record_bad_bits_interface( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t (&o_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]) const
         {
-            std::vector<mss::rank::info<>> l_ranks;
-            FAPI_TRY(mss::rank::ranks_on_dimm(i_target, l_ranks));
+            std::vector<mss::rank::info<>> l_rank_infos;
+            FAPI_TRY(mss::rank::ranks_on_dimm(i_target, l_rank_infos));
 
-            for(const auto& l_rank : l_ranks)
+            for(const auto& l_rank_info : l_rank_infos)
             {
-                memcpy(&o_bad_dq[l_rank.get_phy_rank()], &iv_bad_bits[l_rank.get_phy_rank()], sizeof(uint8_t[BAD_DQ_BYTE_COUNT]));
+                // Note: we copy from the PHY rank to the DIMM rank
+                // The we take in is taken from the PHY structure, which uses PHY rank perspective
+                // Our attributes use the IBM rank perspective
+                // If there is any swizzle (see quad encoded chip select bug JIRA355), then this will fix it for us
+                std::copy(std::begin(iv_bad_bits[l_rank_info.get_phy_rank()]),
+                          std::end(iv_bad_bits[l_rank_info.get_phy_rank()]),
+                          std::begin(o_bad_dq[l_rank_info.get_dimm_rank()]));
             }
 
             return fapi2::FAPI2_RC_SUCCESS;

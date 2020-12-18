@@ -75,32 +75,9 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
 
         // Get ranks via rank API
-        std::vector<mss::rank::info<>> l_ranks;
-        mss::rank::ranks_on_dimm(dimm, l_ranks);
+        std::vector<mss::rank::info<>> l_rank_infos;
 
-        for (const auto& l_rank : l_ranks)
-        {
-            std::shared_ptr<mss::efd::ddimm_efd_base> l_ddimm_efd;
-
-            // Get EFD size
-            const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
-            fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::EFD);
-            fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
-            l_vpd_info.iv_rank = l_rank.get_dimm_rank();
-            l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
-            FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, nullptr), "failed getting VPD size from getVPD" );
-
-            // Get EFD data
-            std::vector<uint8_t> l_vpd_raw (l_vpd_info.iv_size, 0);
-            FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, l_vpd_raw.data()) );
-
-            // Instantiate EFD engine
-            {
-                FAPI_TRY(mss::efd::factory(dimm, l_spd_rev, l_rank.get_dimm_rank(), l_ddimm_efd));
-                FAPI_TRY(l_ddimm_efd->process(l_vpd_raw));
-            }
-        }
-
+        // We run the base module + the DDIMM module first as our rank API needs to know if we are in quad encoded CS mode or not
         {
             std::vector<uint8_t> l_raw_spd;
             FAPI_TRY(mss::spd::get_raw_data(dimm, l_raw_spd));
@@ -114,6 +91,40 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
                 FAPI_TRY(l_base_cfg->process(l_raw_spd));
                 FAPI_TRY(l_ddimm_module->process(l_raw_spd));
                 FAPI_TRY(l_base_cfg->process_derived(l_raw_spd));
+            }
+        }
+
+        // Make sure to run ranks_on_dimm AFTER the base and DDIMM module data has been processed!
+        // This is so we handle the decoding of the ranks properly
+        FAPI_TRY(mss::rank::ranks_on_dimm(dimm, l_rank_infos));
+
+        for (const auto& l_rank_info : l_rank_infos)
+        {
+            std::shared_ptr<mss::efd::ddimm_efd_base> l_ddimm_efd;
+
+            // Get EFD size
+            const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+            fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::EFD);
+            fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
+
+            // Our EFD is stored in terms of our PHY ranks
+            l_vpd_info.iv_rank = l_rank_info.get_phy_rank();
+            l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
+            FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, nullptr), "failed getting VPD size from getVPD" );
+
+            // Get EFD data
+            std::vector<uint8_t> l_vpd_raw (l_vpd_info.iv_size, 0);
+            FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, l_vpd_raw.data()) );
+
+            // Instantiate EFD engine
+            {
+                // We pass in our rank information class - we need to know both the PHY perspective and IBM perspective ranks
+                // The EFD data is stored in terms of the PHY perspective
+                // The attributes use the IBM perspective, which aligns to the DIMM rank
+                // Knowing both allows us to decode from the SPD and encode the data for the attributes
+                // The encode/decode is in accordance with fixes for JIRA355
+                FAPI_TRY(mss::efd::factory(dimm, l_spd_rev, l_rank_info, l_ddimm_efd));
+                FAPI_TRY(l_ddimm_efd->process(l_vpd_raw));
             }
         }
     }// dimm

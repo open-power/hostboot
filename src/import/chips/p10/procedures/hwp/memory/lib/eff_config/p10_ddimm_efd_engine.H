@@ -49,6 +49,7 @@
 #include <mss_generic_attribute_setters.H>
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
+#include <lib/dimm/exp_rank.H>
 
 namespace mss
 {
@@ -70,19 +71,22 @@ class ddimm_efd_0_3
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_port;
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
         uint8_t iv_dimm_rank;
+        uint8_t iv_phy_rank;
 
     public:
 
         ///
         /// @brief Construct a new DDIMM EFD rev 0.3 object
         /// @param[in] i_dimm DIMM target
-        /// @param[in] i_dimm_rank dimm rank
+        /// @param[in] i_rank_info the current rank info class
         ///
-        ddimm_efd_0_3(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm, const uint8_t i_dimm_rank) :
+        ddimm_efd_0_3(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                      const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info) :
             iv_dimm(i_dimm),
             iv_port(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm)),
             iv_ocmb(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm)),
-            iv_dimm_rank(i_dimm_rank) {}
+            iv_dimm_rank(i_rank_info.get_dimm_rank()),
+            iv_phy_rank(i_rank_info.get_phy_rank()) {}
 
         ///
         /// @brief Destroy the ddimm_efd_0_3 object
@@ -2020,7 +2024,8 @@ class ddimm_efd_0_3
 
             FAPI_TRY(mss::attr::get_si_dram_rtt_nom(iv_dimm, l_field));
 
-            switch(iv_dimm_rank)
+            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_phy_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_RANK0, i_efd, mss::SET_SI_DRAM_RTT_NOM, l_rtt_nom));
@@ -2050,6 +2055,7 @@ class ddimm_efd_0_3
                     break;
             };
 
+            // We store the data in terms of the DIMM rank as the attributes are encoded in terms of the IBM perspective
             // Map SPD value to desired setting
             FAPI_TRY(lookup_table_check(iv_ocmb, RTT_NOM_MAP, mss::SET_SI_DRAM_RTT_NOM, l_rtt_nom, l_field[iv_dimm_rank]));
 
@@ -2081,7 +2087,8 @@ class ddimm_efd_0_3
 
             FAPI_TRY(mss::attr::get_si_dram_rtt_wr(iv_dimm, l_field));
 
-            switch(iv_dimm_rank)
+            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_phy_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_RANK0, i_efd, mss::SET_SI_DRAM_RTT_WR, l_rtt_wr));
@@ -2111,6 +2118,7 @@ class ddimm_efd_0_3
                     break;
             };
 
+            // We store the data in terms of the DIMM rank as the attributes are encoded in terms of the IBM perspective
             // Map SPD value to desired setting
             FAPI_TRY(lookup_table_check(iv_ocmb, RTT_WR_MAP, mss::SET_SI_DRAM_RTT_WR, l_rtt_wr, l_field[iv_dimm_rank]));
 
@@ -2147,7 +2155,8 @@ class ddimm_efd_0_3
 
             FAPI_TRY(mss::attr::get_si_dram_rtt_park(iv_dimm, l_field));
 
-            switch(iv_dimm_rank)
+            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_phy_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_RANK0, i_efd, mss::SET_SI_DRAM_RTT_PARK, l_rtt_park));
@@ -2177,6 +2186,7 @@ class ddimm_efd_0_3
                     break;
             };
 
+            // We store the data in terms of the DIMM rank as the attributes are encoded in terms of the IBM perspective
             // Map SPD value to desired setting
             FAPI_TRY(lookup_table_check(iv_ocmb, RTT_PARK_MAP, mss::SET_SI_DRAM_RTT_PARK, l_rtt_park, l_field[iv_dimm_rank]));
 
@@ -2298,7 +2308,8 @@ class ddimm_efd_0_3
 
             FAPI_TRY(mss::attr::get_si_odt_wr(iv_dimm, l_field));
 
-            switch(iv_dimm_rank)
+            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_phy_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_WR_MAP_RANK0, i_efd, mss::SET_SI_ODT_WR, l_si_odt_wr));
@@ -2339,6 +2350,7 @@ class ddimm_efd_0_3
                                   SET_SI_ODT_WR,
                                   "ODT WR Map"));
 
+            // We store the data in terms of the DIMM rank as the attributes are encoded in terms of the IBM perspective
             // Map to attribute bitmap
             l_field[iv_dimm_rank] = mss::gen::align_odt_field_to_attr(l_si_odt_wr);
 
@@ -2360,7 +2372,8 @@ class ddimm_efd_0_3
             uint8_t l_si_odt_rd = 0;
             FAPI_TRY(mss::attr::get_si_odt_rd(iv_dimm, l_field));
 
-            switch(iv_dimm_rank)
+            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_phy_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_RD_MAP_RANK0, i_efd, mss::SET_SI_ODT_RD, l_si_odt_rd));
@@ -2401,6 +2414,7 @@ class ddimm_efd_0_3
                                   SET_SI_ODT_RD,
                                   "ODT RD Map"));
 
+            // We store the data in terms of the DIMM rank as the attributes are encoded in terms of the IBM perspective
             // Map to attribute bitmap
             l_field[iv_dimm_rank] = mss::gen::align_odt_field_to_attr(l_si_odt_rd);
 
@@ -2529,10 +2543,11 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         /// @brief Construct a new ddimm efd rev 0.4 object
         ///
         /// @param[in] i_dimm DIMM target
-        /// @param[in] i_dimm_rank dimm rank
+        /// @param[in] i_rank_info the current rank info class
         ///
-        ddimm_efd_0_4(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm, const uint8_t i_dimm_rank)
-            : ddimm_efd_0_3(i_dimm, i_dimm_rank)
+        ddimm_efd_0_4(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                      const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info)
+            : ddimm_efd_0_3(i_dimm, i_rank_info)
         {
         }
 

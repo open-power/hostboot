@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -275,32 +275,29 @@ fapi2::ReturnCode get_steer_mux(
     fapi2::buffer<uint64_t> l_data;
     uint8_t l_dramSpare0Index = 0;
     uint8_t l_dramSpare1Index = 0;
-    uint8_t l_phy_rank = 0;
 
     o_dram_spare0_symbol = EXP_INVALID_SYMBOL;
     o_dram_spare1_symbol = EXP_INVALID_SYMBOL;
 
-    // Get rank information
-    mss::rank::info<> l_rank_info(i_target, i_port_rank, l_rc);
-    FAPI_TRY(l_rc, "%s failed to obtain rank info", mss::c_str(i_target));
-
     // Check for i_port_rank out of range
+    // TODO:ZEN306 Add HWP support for planar OCMB
+    // Update this function to decode the port rank to be 0-3 for dual drop cases
+    //    As of right now, dual drop should be 0,1,4,5
+    //    We cannot use DIMM rank as we would have overlap on ranks 0/1
+    //    We cannot use PHY rank due to rank swizzling caused by JIRA355
     FAPI_TRY( check::rank(i_target, i_port_rank) );
-
-    // Convert port rank into phy_rank
-    l_phy_rank = l_rank_info.get_phy_rank();
 
     // Read Steer Mux
     FAPI_TRY(fapi2::getScom(i_target, TT::MUX_REGISTER, l_steer_mux));
 
     // Get correct ranks spare data for spare0
     FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare0Index,
-                                        TT::get_muxregs_left(l_phy_rank),
+                                        TT::get_muxregs_left(i_port_rank),
                                         TT::SPARE_MUX_LEN));
 
     // Get correct ranks spare data for spare1
     FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare1Index,
-                                        TT::get_muxregs_right(l_phy_rank),
+                                        TT::get_muxregs_right(i_port_rank),
                                         TT::SPARE_MUX_LEN));
 
     // Check for spare indeces out of range
@@ -347,19 +344,20 @@ fapi2::ReturnCode put_steer_mux(
     fapi2::buffer<uint64_t> l_steer_mux;
     fapi2::buffer<uint64_t> l_data;
     uint8_t l_dramSpareIndex = 0;
-    uint8_t l_phy_rank = 0;
 
     // Get rank information
     mss::rank::info<> l_rank_info(i_target, i_port_rank, l_rc);
     FAPI_TRY(l_rc, "%s failed to obtain rank info", mss::c_str(i_target));
 
     // Check for i_port_rank or i_steer_type or i_symbol out of range
+    // TODO:ZEN306 Add HWP support for planar OCMB
+    // Update this function to decode the port rank to be 0-3 for dual drop cases
+    //    As of right now, dual drop should be 0,1,4,5
+    //    We cannot use DIMM rank as we would have overlap on ranks 0/1
+    //    We cannot use PHY rank due to rank swizzling caused by JIRA355
     FAPI_TRY( check::rank(i_target, i_port_rank) );
     FAPI_TRY( check::mux_type(i_target, i_steer_type) );
     FAPI_TRY( check::symbol(i_target, i_symbol) );
-
-    // Convert port rank into phy_rank
-    l_phy_rank = l_rank_info.get_phy_rank();
 
     // Read Write Mux
     FAPI_TRY(fapi2::getScom(i_target, TT::MUX_REGISTER, l_steer_mux));
@@ -372,14 +370,14 @@ fapi2::ReturnCode put_steer_mux(
     {
         // Get correct ranks spare data for spare0
         FAPI_TRY(l_steer_mux.insertFromRight(l_dramSpareIndex,
-                                             TT::get_muxregs_left(l_phy_rank),
+                                             TT::get_muxregs_left(i_port_rank),
                                              TT::SPARE_MUX_LEN));
     }
     else
     {
         // Get correct ranks spare data for spare1
         FAPI_TRY(l_steer_mux.insertFromRight(l_dramSpareIndex,
-                                             TT::get_muxregs_right(l_phy_rank),
+                                             TT::get_muxregs_right(i_port_rank),
                                              TT::SPARE_MUX_LEN));
     }
 

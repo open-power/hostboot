@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,8 @@
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
 #include <lib/exp_attribute_accessors_manual.H>
+#include <lib/dimm/exp_rank.H>
+#include <lib/dimm/exp_kind.H>
 
 ///
 /// @class ccsTraits
@@ -225,19 +227,29 @@ class ccsTraits<mss::mc_type::EXPLORER>
             BG1 = 15,
         };
 
-        // CSN Regular Settings
+        // CSN Quad encoded settings
+        // Note: ranks 1/2 are swapped in the quad encoded mapping below compared to the JEDEC perspective
+        // The reason for this is that there is a bug in the explorer logic documented in JIRA355
+        // This bug swaps the signals on the DFI interface for ranks 1/2
+        // So, IBM's memory controller perspective rank 2 accesses JEDEC rank 1
+        // While IBM's memory controller perspective rank 1 accesses JEDEC rank 2
+        // The decision was made to swap these encodings
+        // This way any row repair/CCS requests will match the memory controller rank called out in the IBM register
+        // Other CCS relevant information (ODT signals, etc) should be handled via the attributes being encoded in the IBM perspective
         static constexpr std::pair<uint64_t, uint64_t> CS_N[mss::MAX_RANK_PER_DIMM] =
         {
-            // CS0 L, CS1 H, CID0-> L => Rank 0
+            // CS0 L, CS1 H, CID0-> L => JEDEC Rank 0 - Memory controller rank 0
             { 0b01, 0b00 },
 
-            // CS0 L, CS1 H, CID0-> H => Rank 1
-            { 0b01, 0b11 },
-
-            // CS0 H, CS1 L, CID0-> L => Rank 2
+            // CS0 H, CS1 L, CID0-> L => JEDEC Rank 2 - Memory controller rank 1
+            // Note: swapped from JEDEC perspective per JIRA355 - see above comment
             { 0b10, 0b00 },
 
-            // CS0 H, CS1 L, CID0-> H => Rank 3
+            // CS0 L, CS1 H, CID0-> H => JEDEC Rank 1 - Memory controller rank 2
+            // Note: swapped from JEDEC perspective per JIRA355 - see above comment
+            { 0b01, 0b11 },
+
+            // CS0 H, CS1 L, CID0-> H => JEDEC Rank 3 - Memory controller rank 3
             { 0b10, 0b11 },
         };
 
@@ -325,6 +337,18 @@ class ccsTraits<mss::mc_type::EXPLORER>
                 uint8_t (&o_array)[2])
         {
             return mss::attr::get_num_master_ranks_per_dimm(i_target, o_array);
+        }
+
+        ///
+        /// @brief Gets if this port has an RCD
+        /// @param[in] i_target the port target on which to operate
+        /// @param[out] o_has_rcd true if this port has an RCD
+        /// @return SUCCESS iff the code executes successfully
+        ///
+        static fapi2::ReturnCode get_has_rcd(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                             bool& o_has_rcd)
+        {
+            return mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, o_has_rcd);
         }
 
         ///

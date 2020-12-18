@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,29 +74,29 @@ class mrsTraits<mss::mc_type::EXPLORER>
         ///
         /// @brief Returns if mirror mode is enabled, currently set to disabled
         /// @param[in] const ref to the fapi2::Target<fapi2::TARGET_TYPE_DIMM>
-        /// @param[in] i_rank the rank on which to operate from the port perspective
+        /// @param[in] i_port_rank the rank on which to operate from the port perspective
         /// @param[out] ref to the value uint8_t
         /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
         ///
         static fapi2::ReturnCode mirror_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                             const uint64_t i_rank,
+                                             const uint64_t i_port_rank,
                                              uint8_t& o_value)
         {
             constexpr uint64_t SINGLE_RANK_MASK = 0x1;
 
             // Makes sure that we have a good rank passed in
-            FAPI_ASSERT(i_rank < mss::exp::MAX_MRANK_PER_PORT,
+            FAPI_ASSERT(i_port_rank < mss::exp::MAX_MRANK_PER_PORT,
                         fapi2::MSS_INVALID_RANK().
                         set_FUNCTION(mss::generic_ffdc_codes::MRS_MIRROR_MODE).
-                        set_RANK(i_rank).
+                        set_RANK(i_port_rank).
                         set_PORT_TARGET(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target)),
                         "%s mirror mode received invalid rank: %d",
-                        mss::c_str(i_target), i_rank);
+                        mss::c_str(i_target), i_port_rank);
 
             FAPI_TRY(mss::attr::get_exp_dram_address_mirroring(i_target, o_value));
 
             {
-                const auto l_dimm_rank = i_rank % mss::exp::MAX_RANK_PER_DIMM;
+                const auto l_dimm_rank = i_port_rank % mss::exp::MAX_RANK_PER_DIMM;
                 o_value = o_value >> l_dimm_rank;
                 o_value &= SINGLE_RANK_MASK;
             }

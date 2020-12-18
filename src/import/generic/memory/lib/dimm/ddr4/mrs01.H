@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,14 +72,14 @@ fapi2::ReturnCode odic_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
 /// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// @param[in] i_data an mrs01_data object, filled in
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs01_data<MC>& i_data,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     constexpr uint64_t ODIC_LENGTH = 2;
     constexpr uint64_t ODIC_START_BIT = 7;
@@ -94,14 +94,14 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     fapi2::buffer<uint8_t> l_rtt_nom_buffer;
 
     // check here to make sure the rank indexes correctly into the attribute array
-    // It's equivalent to mss::index(i_rank) < l_rtt_nom.size() if C arrays had a .size() method
-    const auto l_dimm_rank = mss::index(i_rank);
+    // It's equivalent to mss::index(i_port_rank) < l_rtt_nom.size() if C arrays had a .size() method
+    const auto l_dimm_rank = mss::index(i_port_rank);
     FAPI_ASSERT(l_dimm_rank < MAX_RANK_PER_DIMM,
                 fapi2::MSS_INVALID_RANK()
                 .set_PORT_TARGET(mss::find_target<MRS::PORT_TARGET_TYPE>(i_target))
-                .set_RANK(i_rank)
+                .set_RANK(i_port_rank)
                 .set_FUNCTION(generic_ffdc_codes::MRS01_GEN),
-                "%s MRS01 rank out of bounds rank%u", mss::c_str(i_target), i_rank);
+                "%s MRS01 rank out of bounds rank%u", mss::c_str(i_target), i_port_rank);
 
     // ODIC decode
     FAPI_TRY(odic_helper<MC>(i_target, i_data.iv_odic[l_dimm_rank], l_odic_buffer));
@@ -112,7 +112,7 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     // Print this here as opposed to the MRS01 ctor as we want to see the specific rtt now information
     FAPI_INF("%s MR1 rank %d attributes: DLL_ENABLE: 0x%x, ODIC: 0x%x(0x%x), AL: 0x%x, WLE: 0x%x, "
              "RTT_NOM:0x%x, TDQS: 0x%x, QOFF: 0x%x",
-             mss::c_str(i_target), i_rank, i_data.iv_dll_enable,
+             mss::c_str(i_target), i_port_rank, i_data.iv_dll_enable,
              i_data.iv_odic[l_dimm_rank], uint8_t(l_odic_buffer),
              uint8_t(l_additive_latency), i_data.iv_wl_enable,
              uint8_t(l_rtt_nom_buffer), i_data.iv_tdqs, i_data.iv_qoff);
@@ -139,18 +139,18 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
     mrs01_data<MC> l_data( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS01 data from attributes", mss::c_str(i_target) );
-    FAPI_TRY( mrs01(i_target, l_data, io_inst, i_rank) );
+    FAPI_TRY( mrs01(i_target, l_data, io_inst, i_port_rank) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -161,7 +161,7 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @tparam TT traits type defaults to ccsTraits<MC>
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
+/// @param[in] i_port_rank ths rank in question
 /// @param[out] o_dll_enable the dll enable bit
 /// @param[out] o_wrl_enable the write leveling enable bit
 /// @param[out] o_tdqs the tdqs enable bit
@@ -173,7 +173,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank,
+                                      const uint64_t i_port_rank,
                                       uint8_t& o_dll_enable,
                                       uint8_t& o_wrl_enable,
                                       uint8_t& o_tdqs,
@@ -197,7 +197,7 @@ fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t& i_inst,
 
     FAPI_INF("MR1 rank %d decode: DLL_ENABLE: 0x%x, ODIC: 0x%x, AL: 0x%x, WLE: 0x%x, "
              "RTT_NOM: 0x%x, TDQS: 0x%x, QOFF: 0x%x",
-             i_rank, o_dll_enable, uint8_t(o_odic), uint8_t(o_additive_latency),
+             i_port_rank, o_dll_enable, uint8_t(o_odic), uint8_t(o_additive_latency),
              o_wrl_enable, uint8_t(o_rtt_nom), o_tdqs, o_qoff);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -207,11 +207,11 @@ fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t& i_inst,
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS1,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
+/// @param[in] i_port_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode mrs01_decode(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank)
+                                      const uint64_t i_port_rank)
 {
     uint8_t l_dll_enable = 0;
     uint8_t l_wrl_enable = 0;
@@ -221,7 +221,7 @@ inline fapi2::ReturnCode mrs01_decode(const ccs::instruction_t& i_inst,
     fapi2::buffer<uint8_t> l_additive_latency;
     fapi2::buffer<uint8_t> l_rtt_nom;
 
-    return mrs01_decode_helper(i_inst, i_rank, l_dll_enable, l_wrl_enable, l_tdqs, l_qoff, l_odic,
+    return mrs01_decode_helper(i_inst, i_port_rank, l_dll_enable, l_wrl_enable, l_tdqs, l_qoff, l_odic,
                                l_additive_latency, l_rtt_nom);
 }
 

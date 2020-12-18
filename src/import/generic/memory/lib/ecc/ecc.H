@@ -81,9 +81,9 @@ inline fapi2::ReturnCode get_hw_marks( const fapi2::Target<T>& i_target,
 
     o_marks.clear();
 
-    for (uint64_t l_rank = 0; l_rank < TT::ECC_MAX_MRANK_PER_PORT; ++l_rank)
+    for (uint64_t l_port_rank = 0; l_port_rank < TT::ECC_MAX_MRANK_PER_PORT; ++l_port_rank)
     {
-        FAPI_TRY( get_hwms<MC>(i_target, l_rank, l_galois, l_confirmed) );
+        FAPI_TRY( get_hwms<MC>(i_target, l_port_rank, l_galois, l_confirmed) );
 
         if (l_confirmed == mss::states::YES)
         {
@@ -119,9 +119,9 @@ inline fapi2::ReturnCode get_fw_marks( const fapi2::Target<T>& i_target,
 
     o_marks.clear();
 
-    for (uint64_t l_rank = 0; l_rank < TT::ECC_MAX_MRANK_PER_PORT; ++l_rank)
+    for (uint64_t l_port_rank = 0; l_port_rank < TT::ECC_MAX_MRANK_PER_PORT; ++l_port_rank)
     {
-        FAPI_TRY( get_fwms<MC>(i_target, l_rank, l_galois, l_type, l_region, l_address) );
+        FAPI_TRY( get_fwms<MC>(i_target, l_port_rank, l_galois, l_type, l_region, l_address) );
 
         if (l_region != mss::ecc::fwms::mark_region::DISABLED)
         {
@@ -340,19 +340,19 @@ fapi_try_exit:
 /// @tparam T the fapi2::TargetType - derived
 /// @param[in] i_target the fapi2 target
 /// @param[out] o_chipmark the mark location (Galois code) of the last mark placed
-/// @param[out] o_rank the rank of the last mark placed
+/// @param[out] o_port_rank the rank of the last mark placed
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< fapi2::TargetType T >
 inline fapi2::ReturnCode get_impe_addr_trap( const fapi2::Target<T>& i_target,
         uint64_t& o_chipmark,
-        uint64_t& o_rank )
+        uint64_t& o_port_rank )
 {
     fapi2::buffer<uint64_t> l_buffer;
 
     FAPI_TRY( mss::ecc::mark_shadow_reg::read(i_target, l_buffer) );
     mss::ecc::mark_shadow_reg::get_chipmark(l_buffer, o_chipmark);
-    mss::ecc::mark_shadow_reg::get_rank(l_buffer, o_rank);
+    mss::ecc::mark_shadow_reg::get_rank(l_buffer, o_port_rank);
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,14 +58,14 @@ namespace ddr4
 /// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// @param[in] i_data an mrs00_data object, filled in
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs00_data<MC>& i_data,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     // Map from Write Recovery attribute value to bits in the MRS.
     // Bit 4 is A13, bits 5:7 are A11:A9
@@ -150,18 +150,18 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
     mrs00_data<MC> l_data( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS00 data from attributes", mss::c_str(i_target) );
-    FAPI_TRY( mrs00(i_target, l_data, io_inst, i_rank) );
+    FAPI_TRY( mrs00(i_target, l_data, io_inst, i_port_rank) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -172,7 +172,7 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @tparam TT traits type defaults to ccsTraits<MC>
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
+/// @param[in] i_port_rank ths rank in question
 /// @param[out] o_burst_length the burst length
 /// @param[out] o_read_burst_type the burst type
 /// @param[out] o_dll_reset the dll reset bit
@@ -183,7 +183,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank,
+                                      const uint64_t i_port_rank,
                                       uint8_t& o_burst_length,
                                       uint8_t& o_read_burst_type,
                                       uint8_t& o_dll_reset,
@@ -225,11 +225,11 @@ fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t& i_inst,
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS0,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
+/// @param[in] i_port_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode mrs00_decode(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank)
+                                      const uint64_t i_port_rank)
 {
     uint8_t l_burst_length = 0;
     uint8_t l_read_burst_type = 0;
@@ -238,7 +238,7 @@ inline fapi2::ReturnCode mrs00_decode(const ccs::instruction_t& i_inst,
     fapi2::buffer<uint8_t> l_wr_index;
     fapi2::buffer<uint8_t> l_cas_latency;
 
-    return mrs00_decode_helper(i_inst, i_rank, l_burst_length, l_read_burst_type, l_dll_reset, l_test_mode,
+    return mrs00_decode_helper(i_inst, i_port_rank, l_burst_length, l_read_burst_type, l_dll_reset, l_test_mode,
                                l_wr_index, l_cas_latency);
 }
 

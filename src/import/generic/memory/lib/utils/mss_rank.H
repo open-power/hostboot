@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,17 @@ namespace rank
 {
 
 ///
+/// @brief Works around any issues with swizzle on the PHY ranks
+/// @tparam MC the memory controller type
+/// @tparam fapi2::TargetType T the target type on which to operate
+/// @param[in] i_target the target on which to operate
+/// @param[in,out] io_phy_rank the PHY rank which might need to be updated
+/// @return FAPI2_RC_SUCCESS iff success
+///
+template <mss::mc_type MC, fapi2::TargetType T>
+inline fapi2::ReturnCode phy_rank_swizzle_workaround(const fapi2::Target<T>& i_target, uint8_t& io_phy_rank);
+
+///
 /// @brief Rank traits class for variations depending on MC
 /// @tparam MC the memory controller type
 ///
@@ -79,6 +90,11 @@ class info
         info(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target, const uint8_t i_index, fapi2::ReturnCode& o_rc)
         {
             o_rc = fapi2::FAPI2_RC_SUCCESS;
+            // Predeclaring these to avoid "may be un declared" compile issues
+            // We'll get good values below if our asserts pass
+            iv_dimm_rank = 0;
+            iv_port_rank = 0;
+            iv_phy_rank = 0;
 
             uint8_t l_master_ranks_per_dimm = 0;
             FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_dimm_target, l_master_ranks_per_dimm));
@@ -97,6 +113,8 @@ class info
             iv_dimm_rank = i_index;
             iv_port_rank = iv_dimm_rank + ((mss::index(i_dimm_target) * TT::RANK_INDEX_STEP));
             iv_phy_rank = iv_dimm_rank + ((mss::index(i_dimm_target) * TT::PHY_RANK_INDEX_STEP));
+            FAPI_TRY(phy_rank_swizzle_workaround<MC>(i_dimm_target, iv_phy_rank));
+
         fapi_try_exit:
             o_rc = fapi2::current_err;
         }
@@ -162,7 +180,15 @@ class info
 
                 // Ranks
                 iv_dimm_rank = i_index % TT::RANK_INDEX_STEP;
-                iv_phy_rank = get_phy_rank_from_port_rank(i_index);
+                {
+                    const uint8_t l_dimm_index = i_index / TT::RANK_INDEX_STEP;
+
+                    // Dimm index * 2 sets the center point at 2
+                    // Add on the dimm rank
+                    // Note that this logic does NOT apply in a hypothetical/impossible 2 4-rank dimm configuration
+                    iv_phy_rank = ((l_dimm_index * TT::PHY_RANK_INDEX_STEP) + (iv_dimm_rank));
+                }
+                FAPI_TRY(phy_rank_swizzle_workaround<MC>(i_port_target, iv_phy_rank));
                 iv_port_rank = i_index;
             }
 
@@ -214,23 +240,6 @@ class info
         inline const fapi2::Target<DEFAULT_MEM_PORT_TARGET> get_port_target() const
         {
             return iv_port_target;
-        }
-
-        ///
-        /// @brief Calculate phy rank given port rank (unit testable)
-        ///
-        /// @param[in] l_port_rank port rank
-        /// @return phy rank
-        ///
-        inline static uint8_t get_phy_rank_from_port_rank(const uint8_t i_port_rank)
-        {
-            const uint8_t l_dimm_rank = i_port_rank % TT::RANK_INDEX_STEP;
-            const uint8_t l_dimm_index = i_port_rank / TT::RANK_INDEX_STEP;
-
-            // Dimm index * 2 sets the center point at 2
-            // Add on the dimm rank
-            // Note that this logic does NOT apply in a hypothetical/impossible 2 4-rank dimm configuration
-            return ((l_dimm_index * TT::PHY_RANK_INDEX_STEP) + (l_dimm_rank));
         }
 
         ///
@@ -370,12 +379,13 @@ fapi_try_exit:
 /// @brief Return a vector of rank numbers which represent the ranks for this dimm
 /// @tparam MC the memory controller type
 /// @param[in] i_dimm_target TARGET_TYPE_DIMM
-/// @param[out] o_ranks a vector of ranks for dimm (numbers)
+/// @param[out] o_dimm_ranks a vector of port ranks for dimm (numbers)
 /// @return FAPI2_RC_SUCCESS iff all is ok
+/// @note Outputs the port rank numbers for this DIMM
 ///
 template<mss::mc_type MC>
 fapi2::ReturnCode ranks_on_dimm_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
-                                       std::vector<uint64_t>& o_ranks);
+                                       std::vector<uint64_t>& o_dimm_ranks);
 
 } // rank
 } // mss

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,8 @@
 #include <mss_pmic_attribute_setters.H>
 #include <mss_explorer_attribute_setters.H>
 #include <mss_generic_attribute_setters.H>
+#include <exp_attribute_accessors_manual.H>
+#include <lib/workarounds/exp_quad_encoded_cs_workarounds.H>
 
 namespace mss
 {
@@ -879,6 +881,7 @@ class ddimm_0_3
         virtual fapi2::ReturnCode set_address_mirror(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
+            bool l_is_quad_encoded_cs = false;
             FAPI_TRY(get_field_spd(iv_ocmb, F::ADDRESS_MIRROR, i_spd, exp::SET_EXP_DRAM_ADDRESS_MIRRORING, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -888,6 +891,10 @@ class ddimm_0_3
                                   l_field,
                                   exp::SET_EXP_DRAM_ADDRESS_MIRRORING,
                                   "Address Mirror"));
+
+            // Swaps the bitmap to the IBM perspective if needed
+            FAPI_TRY(mss::is_quad_encoded_cs(iv_dimm, l_is_quad_encoded_cs));
+            mss::exp::workarounds::fix_mirroring_bitmap_for_quad_encoded_cs(l_is_quad_encoded_cs, l_field);
 
             FAPI_TRY(mss::attr::set_exp_dram_address_mirroring(iv_dimm, l_field));
 
@@ -3507,6 +3514,9 @@ class ddimm_0_3
         ///
         virtual fapi2::ReturnCode process(const std::vector<uint8_t>& i_spd) const
         {
+            // This needs to be run first as it will be consumed for a workaround below
+            FAPI_TRY(set_module_rcd(i_spd));
+
             FAPI_TRY(set_module_base_height(i_spd));
             FAPI_TRY(set_mod_thermal_sensor(i_spd));
             FAPI_TRY(set_address_mirror(i_spd));
@@ -3590,7 +3600,6 @@ class ddimm_0_3
             FAPI_TRY(set_therm_sensor_1_second_location(i_spd));
             FAPI_TRY(set_module_mfg_id(i_spd));
             FAPI_TRY(set_dram_mfg_id(i_spd));
-            FAPI_TRY(set_module_rcd(i_spd));
             FAPI_TRY(set_rcd_mfg_id(i_spd));
 
             return fapi2::FAPI2_RC_SUCCESS;

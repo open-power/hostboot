@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,14 +50,14 @@ namespace efd
 /// @brief Generates the EFD engine based upon the EFD type
 /// @param[in] i_target DIMM target
 /// @param[in] i_rev SPD revision
-/// @param[in] i_dimm_rank the current rank
+/// @param[in] i_rank_info the current rank info class
 /// @param[out] o_efd_engine shared pointer to the EFD engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
 /// @note TODO/TK can be updated in the future for different dimm types and DDR4/5
 ///
 fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                           const uint8_t i_rev,
-                          const uint8_t i_dimm_rank,
+                          const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info,
                           std::shared_ptr<mss::efd::ddimm_efd_base>& o_efd_engine);
 
 } // ns efd

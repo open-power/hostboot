@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -41,6 +41,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/
 EXTRAINCDIR += ${IMPORT_PATH}/
 
 # Generic support
@@ -72,6 +75,7 @@ MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/mcbist
 MSS_LIB += ${IMPORT_PATH}/generic/memory/
 
 MSS_LIB += ${IMPORT_PATH}/chips/p10/procedures/hwp/memory/lib/utils/
+MSS_LIB += ${IMPORT_PATH}/chips/ocmb/explorer/procedures/hwp/memory/lib/
 
 EXTRAINCDIR += ${MSS_LIB}
 
@@ -81,6 +85,7 @@ VPATH += ${MSS_LIB}
 # Add the specific files we need for HBRT
 OBJS += c_str.o
 OBJS += gen_mss_mcbist_patterns.o
+OBJS += exp_attribute_accessors_manual.o
 
 
 #HWP build tool

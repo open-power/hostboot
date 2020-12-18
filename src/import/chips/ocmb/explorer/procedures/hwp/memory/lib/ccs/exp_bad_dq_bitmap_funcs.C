@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,11 +55,11 @@ namespace exp
 
 ///
 /// @brief Row Repair Utility function that gets the Bad DQ Bitmap.
-/// @param[in]  i_rank Rank info to get bitmap
+/// @param[in]  i_rank_info Rank info to get bitmap
 /// @param[in,out] io_data Reference to data where Bad DQ bitmap is copied to
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode get_bad_dq_bitmap( const mss::rank::info<>& i_rank,
+fapi2::ReturnCode get_bad_dq_bitmap( const mss::rank::info<>& i_rank_info,
                                      uint8_t io_data[BAD_DQ_BYTE_COUNT])
 {
     using RT = mss::rank::rankTraits<mss::mc_type::EXPLORER>;
@@ -68,10 +68,11 @@ fapi2::ReturnCode get_bad_dq_bitmap( const mss::rank::info<>& i_rank,
     // Use a heap based array to avoid large stack alloc
     uint8_t l_dqBitmap[RT::MAX_RANKS_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
 
-    FAPI_TRY( mss::attr::get_bad_dq_bitmap(i_rank.get_dimm_target(), l_dqBitmap) );
+    FAPI_TRY( mss::attr::get_bad_dq_bitmap(i_rank_info.get_dimm_target(), l_dqBitmap) );
 
     // Write contents of DQ bitmap for specific rank to io_data.
-    std::copy(std::begin(l_dqBitmap[i_rank.get_dimm_rank()]), std::end(l_dqBitmap[i_rank.get_dimm_rank()]), io_data);
+    std::copy(std::begin(l_dqBitmap[i_rank_info.get_dimm_rank()]), std::end(l_dqBitmap[i_rank_info.get_dimm_rank()]),
+              io_data);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -79,15 +80,15 @@ fapi_try_exit:
 
 ///
 /// @brief Row Repair Utility function that sets the Bad DQ Bitmap.
-/// @param[in] i_rank Rank info to get bitmap
+/// @param[in] i_rank_info Rank info to get bitmap
 /// @param[in] i_data Reference to data where Bad DQ bitmap is copied to
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode set_bad_dq_bitmap( const mss::rank::info<>& i_rank,
+fapi2::ReturnCode set_bad_dq_bitmap( const mss::rank::info<>& i_rank_info,
                                      const uint8_t i_data[BAD_DQ_BYTE_COUNT])
 {
     using RT = mss::rank::rankTraits<mss::mc_type::EXPLORER>;
-    const auto& l_dimm = i_rank.get_dimm_target();
+    const auto& l_dimm = i_rank_info.get_dimm_target();
 
     // Get the Bad DQ bitmap by querying ATTR_BAD_DQ_BITMAP.
     // Use a heap based array to avoid large stack alloc
@@ -96,7 +97,7 @@ fapi2::ReturnCode set_bad_dq_bitmap( const mss::rank::info<>& i_rank,
     FAPI_TRY( mss::attr::get_bad_dq_bitmap(l_dimm, l_dqBitmap) );
 
     // Add the rank bitmap to the DIMM bitmap and write the bitmap
-    std::copy(i_data, i_data + BAD_DQ_BYTE_COUNT, std::begin(l_dqBitmap[i_rank.get_dimm_rank()]));
+    std::copy(i_data, i_data + BAD_DQ_BYTE_COUNT, std::begin(l_dqBitmap[i_rank_info.get_dimm_rank()]));
 
     FAPI_TRY( mss::attr::set_bad_dq_bitmap(l_dimm, l_dqBitmap) );
 

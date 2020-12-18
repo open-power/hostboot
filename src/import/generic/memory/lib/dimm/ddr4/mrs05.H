@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,14 +58,14 @@ namespace ddr4
 /// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// @param[in] i_data an mrs05_data object, filled in
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs05_data<MC>& i_data,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     constexpr uint64_t CA_PARITY_LATENCY_LENGTH = 3;
     constexpr uint64_t CA_PARITY_LATENCY_START = 7;
@@ -78,16 +78,16 @@ fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     fapi2::buffer<uint8_t> l_ca_parity_latency_buffer;
 
-    fapi2::buffer<uint8_t> l_rtt_park_buffer = i_data.iv_rtt_park[mss::index(i_rank)];
+    fapi2::buffer<uint8_t> l_rtt_park_buffer = i_data.iv_rtt_park[mss::index(i_port_rank)];
 
     //check here to make sure the rank indexes correctly into the attribute array
-    FAPI_ASSERT( (mss::index(i_rank) < MAX_RANK_PER_DIMM),
+    FAPI_ASSERT( (mss::index(i_port_rank) < MAX_RANK_PER_DIMM),
                  fapi2::MSS_BAD_MR_PARAMETER()
                  .set_MR_NUMBER(5)
                  .set_PARAMETER(RANK)
-                 .set_PARAMETER_VALUE(i_rank)
+                 .set_PARAMETER_VALUE(i_port_rank)
                  .set_DIMM_IN_ERROR(i_target),
-                 "Bad value for RTT park: %d (%s)", i_rank, mss::c_str(i_target));
+                 "Bad value for RTT park: %d (%s)", i_port_rank, mss::c_str(i_target));
 
     FAPI_ASSERT( (i_data.iv_ca_parity_latency < CA_PARITY_COUNT),
                  fapi2::MSS_BAD_MR_PARAMETER()
@@ -101,7 +101,7 @@ fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     FAPI_INF("%s MR5 rank %d attributes: CAPL: 0x%x(0x%x), CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "
              "RTT_PARK: 0x%x, CAP: 0x%x, DM: 0x%x, WDBI: 0x%x, RDBI: 0x%x",
-             mss::c_str(i_target), i_rank, i_data.iv_ca_parity_latency, uint8_t(l_ca_parity_latency_buffer),
+             mss::c_str(i_target), i_port_rank, i_data.iv_ca_parity_latency, uint8_t(l_ca_parity_latency_buffer),
              i_data.iv_crc_error_clear, i_data.iv_ca_parity_error_status, i_data.iv_odt_input_buffer,
              uint8_t(l_rtt_park_buffer), i_data.iv_ca_parity,
              i_data.iv_data_mask, i_data.iv_write_dbi, i_data.iv_read_dbi);
@@ -129,18 +129,18 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
     mrs05_data<MC> l_data( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS05 data from attributes", mss::c_str(i_target) );
-    FAPI_TRY( mrs05(i_target, l_data, io_inst, i_rank) );
+    FAPI_TRY( mrs05(i_target, l_data, io_inst, i_port_rank) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -151,7 +151,7 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @tparam TT traits type defaults to ccsTraits<MC>
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @param[out] o_crc_error_clear the crc error clear setting
 /// @param[out] o_ca_parity_error_status the c/a parity error status
 /// @param[out] o_odt_input_buffer the odt input buffer during power down mode setting
@@ -165,7 +165,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank,
+                                      const uint64_t i_port_rank,
                                       uint8_t& o_crc_error_clear,
                                       uint8_t& o_ca_parity_error_status,
                                       uint8_t& o_odt_input_buffer,
@@ -193,7 +193,7 @@ fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t& i_inst,
 
     FAPI_INF("MR5 rank %d decode: CAPL: 0x%x, CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "
              "RTT_PARK: 0x%x, CAP: 0x%x, DM: 0x%x, WDBI: 0x%x, RDBI: 0x%x",
-             i_rank, uint8_t(o_ca_parity_latency_buffer), o_crc_error_clear, o_ca_parity_error_status,
+             i_port_rank, uint8_t(o_ca_parity_latency_buffer), o_crc_error_clear, o_ca_parity_error_status,
              o_odt_input_buffer, uint8_t(o_rtt_park_buffer), o_ca_parity, o_data_mask,
              o_write_dbi, o_read_dbi);
 
@@ -204,11 +204,11 @@ fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t& i_inst,
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS5,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
+/// @param[in] i_port_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode mrs05_decode(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank)
+                                      const uint64_t i_port_rank)
 {
     fapi2::buffer<uint8_t> l_ca_parity_latency_buffer;
     fapi2::buffer<uint8_t> l_rtt_park_buffer;
@@ -221,7 +221,7 @@ inline fapi2::ReturnCode mrs05_decode(const ccs::instruction_t& i_inst,
     uint8_t l_write_dbi = 0;
     uint8_t l_read_dbi = 0;
 
-    return mrs05_decode_helper(i_inst, i_rank, l_crc_error_clear, l_ca_parity_error_status,
+    return mrs05_decode_helper(i_inst, i_port_rank, l_crc_error_clear, l_ca_parity_error_status,
                                l_odt_input_buffer, l_ca_parity, l_data_mask, l_write_dbi,
                                l_read_dbi, l_ca_parity_latency_buffer, l_rtt_park_buffer);
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,8 @@ namespace mss
 
 constexpr mss::proc_type DEFAULT_PROC_TYPE = mss::proc_type::PROC_P10;
 constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::EXPLORER;
+constexpr fapi2::TargetType DEFAULT_MC_TARGET = fapi2::TARGET_TYPE_OCMB_CHIP;
+constexpr fapi2::TargetType DEFAULT_MEM_PORT_TARGET = fapi2::TARGET_TYPE_MEM_PORT;
 
 } // ns mss
 

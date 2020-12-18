@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,8 +99,8 @@ class instruction_t
     public:
         fapi2::buffer<uint64_t> arr0;
         fapi2::buffer<uint64_t> arr1;
-        // The MCA indexed rank on which to operate. If this is invalid, all ranks will be disabled
-        uint64_t iv_rank;
+        // The port indexed rank on which to operate. If this is invalid, all ranks will be disabled
+        uint64_t iv_port_rank;
         // We want to have a switch to update rank or not. A user might want to setup CS in some weird way
         // In that case, they don't want us "fixing" their CS values
         // We'll default the rank to be updated - we want to send out CS properly
@@ -108,18 +108,18 @@ class instruction_t
 
         ///
         /// @brief intstruction_t ctor
-        /// @param[in] i_rank the rank this instruction is headed for
+        /// @param[in] i_port_rank the port rank this instruction is headed for
         /// @param[in] i_arr0 the initial value for arr0, defaults to 0
         /// @param[in] i_arr1 the initial value for arr1, defaults to 0
         /// @param[in] i_update_rank true if the rank should be updated before being sent, defaults to true
         ///
-        instruction_t( const uint64_t i_rank = NO_CHIP_SELECT_ACTIVE,
+        instruction_t( const uint64_t i_port_rank = NO_CHIP_SELECT_ACTIVE,
                        const fapi2::buffer<uint64_t> i_arr0 = 0,
                        const fapi2::buffer<uint64_t> i_arr1 = 0,
                        const bool i_update_rank = true):
             arr0(i_arr0),
             arr1(i_arr1),
-            iv_rank(i_rank),
+            iv_port_rank(i_port_rank),
             iv_update_rank(i_update_rank)
         {
             // Skip setting up the rank if the user doesn't want us to
@@ -151,7 +151,7 @@ class instruction_t
             }
 
             // Regardless of rank configurations, if we have NO_CHIP_SELECT_ACTIVE, deactivate all CS
-            if(iv_rank == NO_CHIP_SELECT_ACTIVE)
+            if(iv_port_rank == NO_CHIP_SELECT_ACTIVE)
             {
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(0b11);
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(0b11);
@@ -159,12 +159,12 @@ class instruction_t
             }
 
             // First, check rank - we need to make sure that we have a valid rank
-            FAPI_ASSERT(iv_rank < TT::CCS_MAX_MRANK_PER_PORT,
+            FAPI_ASSERT(iv_port_rank < TT::CCS_MAX_MRANK_PER_PORT,
                         fapi2::MSS_INVALID_RANK()
                         .set_PORT_TARGET(i_target)
-                        .set_RANK(iv_rank)
+                        .set_RANK(iv_port_rank)
                         .set_FUNCTION(generic_ffdc_codes::CCS_INST_CONFIGURE_RANK),
-                        "%s rank out of bounds rank%u", mss::c_str(i_target), iv_rank);
+                        "%s rank out of bounds rank%u", mss::c_str(i_target), iv_port_rank);
 
             // Now the fun happens and we can deal with the actual encoding
 
@@ -178,8 +178,8 @@ class instruction_t
                 // CS0 will select rank 0/1
                 // CS1 will select rank 2/3
 
-                const auto l_dimm_rank = mss::index(iv_rank);
-                const bool l_is_dimm0 = iv_rank < TT::CCS_MAX_RANK_PER_DIMM;
+                const auto l_dimm_rank = mss::index(iv_port_rank);
+                const bool l_is_dimm0 = iv_port_rank < TT::CCS_MAX_RANK_PER_DIMM;
                 constexpr uint64_t NON_DIMM_CS = 0b11;
 
                 // Assigns the CS based upon which DIMM we're at
@@ -201,8 +201,8 @@ class instruction_t
             // Otherwise, setup for dual-direct mode (our only other supported mode at the moment)
             else
             {
-                const auto l_dimm_rank = mss::index(iv_rank);
-                const bool l_is_dimm0 = iv_rank < TT::CCS_MAX_RANK_PER_DIMM;
+                const auto l_dimm_rank = mss::index(iv_port_rank);
+                const bool l_is_dimm0 = iv_port_rank < TT::CCS_MAX_RANK_PER_DIMM;
 
                 // Assigns the CS based upon which DIMM we're at
                 const uint64_t CS01 = l_is_dimm0 ? TT::CS_ND[l_dimm_rank].first : TT::CS_ND[l_dimm_rank].second;
@@ -225,9 +225,9 @@ class instruction_t
                 FAPI_ASSERT((l_dimm_rank < TT::CCS_MAX_RANKS_DIMM1) || l_is_dimm0,
                             fapi2::MSS_INVALID_RANK()
                             .set_PORT_TARGET(i_target)
-                            .set_RANK(iv_rank)
+                            .set_RANK(iv_port_rank)
                             .set_FUNCTION(generic_ffdc_codes::CCS_INST_CONFIGURE_RANK),
-                            "%s rank out of bounds rank%u", mss::c_str(i_target), iv_rank);
+                            "%s rank out of bounds rank%u", mss::c_str(i_target), iv_port_rank);
             }
 
             return fapi2::FAPI2_RC_SUCCESS;
@@ -244,7 +244,7 @@ class instruction_t
         {
             return arr0 == i_rhs.arr0 &&
                    arr1 == i_rhs.arr1 &&
-                   iv_rank == i_rhs.iv_rank &&
+                   iv_port_rank == i_rhs.iv_port_rank &&
                    iv_update_rank == i_rhs.iv_update_rank;
         }
 };
@@ -263,12 +263,15 @@ inline fapi2::ReturnCode get_rank_config(const fapi2::Target<DEFAULT_MEM_PORT_TA
     o_rank_config = rank_configuration::DUAL_DIRECT;
 
     uint8_t l_num_master_ranks[TT::CCS_MAX_DIMM_PER_PORT] = {};
+    bool l_has_rcd = false;
     FAPI_TRY(TT::get_rank_config_attr(i_target, l_num_master_ranks));
+    FAPI_TRY(TT::get_has_rcd(i_target, l_has_rcd));
 
     // We only need to check DIMM0
     // Our number of ranks should be the same between DIMM's 0/1
     // Check if we have the right number for encoded mode
-    o_rank_config = l_num_master_ranks[0] == QUAD_RANK_ENABLE ?
+    // And that we have an RCD
+    o_rank_config = ((l_num_master_ranks[0] == QUAD_RANK_ENABLE) && (l_has_rcd)) ?
                     rank_configuration::QUAD_ENCODED :
                     rank_configuration::DUAL_DIRECT;
 
@@ -356,9 +359,9 @@ static void mrs_rcd_helper( fapi2::buffer<uint64_t>& i_arr0 )
 /// @brief Setup activate command instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the rank on this dimm
 ///
-inline instruction_t act_command( const uint64_t i_rank )
+inline instruction_t act_command( const uint64_t i_port_rank )
 {
     using TT = ccsTraits<DEFAULT_MC_TYPE>;
 
@@ -385,7 +388,7 @@ inline instruction_t act_command( const uint64_t i_rank )
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>();
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_2>();
 
-    return instruction_t(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
@@ -438,14 +441,14 @@ inline instruction_t rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
 /// @brief Create, initialize an MRS CCS command
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_mrs the specific MRS
 /// @return the MRS CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t mrs_command ( const uint64_t i_rank,
+inline instruction_t mrs_command ( const uint64_t i_port_rank,
                                    const uint64_t i_mrs )
 {
     using TT = ccsTraits<DEFAULT_MC_TYPE>;
@@ -466,7 +469,7 @@ inline instruction_t mrs_command ( const uint64_t i_rank,
     rcd_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_1>();
     mss::swizzle<TT::ARR0_DDR_BANK_0_1, 3, 7>(mrs, rcd_boilerplate_arr0);
     FAPI_DBG("mrs rcd boiler 0x%016lx 0x%llx", uint8_t(mrs), uint64_t(rcd_boilerplate_arr0));
-    return instruction_t(i_rank, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+    return instruction_t(i_port_rank, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
 }
 
 ///
@@ -603,14 +606,14 @@ inline instruction_t pde_command()
 
 ///
 /// @brief Setup ZQ Long instruction
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the MRS CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t zqcl_command( const uint64_t i_rank,
+inline instruction_t zqcl_command( const uint64_t i_port_rank,
                                    const uint16_t i_idle = 0 )
 {
     using TT = ccsTraits<DEFAULT_MC_TYPE>;
@@ -635,12 +638,12 @@ inline instruction_t zqcl_command( const uint64_t i_rank,
     // Insert idle
     l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
 
-    return instruction_t(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup read command helper function
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
 /// @param[in] i_column_addr column address bits [A0:A9] = [54:63] (right aligned)
@@ -649,7 +652,7 @@ inline instruction_t zqcl_command( const uint64_t i_rank,
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-static fapi2::buffer<uint64_t> read_cmd_boilerplate( const uint64_t i_rank,
+static fapi2::buffer<uint64_t> read_cmd_boilerplate( const uint64_t i_port_rank,
         const fapi2::buffer<uint64_t>& i_bank_addr = 0,
         const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
         const fapi2::buffer<uint64_t>& i_column_addr = 0)
@@ -691,7 +694,7 @@ static fapi2::buffer<uint64_t> read_cmd_boilerplate( const uint64_t i_rank,
 ///
 /// @brief Setup write command (Fixed BL8 or BC4) instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_bank_addr bank address bits [BA0:BA1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BG0:BG1] = [62:63] (right aligned)
 /// @param[in] i_column_addr column address bits [A0:A9] = [54:63] (right aligned)
@@ -700,7 +703,7 @@ static fapi2::buffer<uint64_t> read_cmd_boilerplate( const uint64_t i_rank,
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t wr_command( const uint64_t i_rank,
+inline instruction_t wr_command( const uint64_t i_port_rank,
                                  const fapi2::buffer<uint64_t>& i_bank_addr = 0,
                                  const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
                                  const fapi2::buffer<uint64_t>& i_column_addr = 0)
@@ -708,7 +711,7 @@ inline instruction_t wr_command( const uint64_t i_rank,
     using TT = ccsTraits<DEFAULT_MC_TYPE>;
 
     // WR's and RD's are very similar, so we just use the RD command boiler plate and modify the command to a WR
-    fapi2::buffer<uint64_t> l_boilerplate_arr0 = read_cmd_boilerplate(i_rank,
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = read_cmd_boilerplate(i_port_rank,
             i_bank_addr,
             i_bank_group_addr,
             i_column_addr);
@@ -719,13 +722,13 @@ inline instruction_t wr_command( const uint64_t i_rank,
     .template clearBit<TT::ARR0_DDR_ADDRESS_15>()
     .template clearBit<TT::ARR0_DDR_ADDRESS_14>();
 
-    return instruction_t(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup read command (Fixed BL8 or BC4) instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_bank_addr bank address bits [BA0:BA1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BG0:BG1] = [62:63] (right aligned)
 /// @param[in] i_column_addr column address bits [A0:A9] = [54:63] (right aligned)
@@ -734,7 +737,7 @@ inline instruction_t wr_command( const uint64_t i_rank,
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t rd_command( const uint64_t i_rank,
+inline instruction_t rd_command( const uint64_t i_port_rank,
                                  const fapi2::buffer<uint64_t>& i_bank_addr = 0,
                                  const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
                                  const fapi2::buffer<uint64_t>& i_column_addr = 0)
@@ -744,7 +747,7 @@ inline instruction_t rd_command( const uint64_t i_rank,
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
-    l_boilerplate_arr0 = read_cmd_boilerplate(i_rank,
+    l_boilerplate_arr0 = read_cmd_boilerplate(i_port_rank,
                          i_bank_addr,
                          i_bank_group_addr,
                          i_column_addr);
@@ -752,13 +755,13 @@ inline instruction_t rd_command( const uint64_t i_rank,
     // Setup ADDR10/AP based on read type
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_10>();
 
-    return instruction_t(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup read w/auto precharge command (Fixed BL8 or BC4) instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
 /// @param[in] i_column_addr column address bits [A0:A9] = [54:63] (right aligned)
@@ -767,7 +770,7 @@ inline instruction_t rd_command( const uint64_t i_rank,
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t rda_command( const uint64_t i_rank,
+inline instruction_t rda_command( const uint64_t i_port_rank,
                                   const fapi2::buffer<uint64_t>& i_bank_addr = 0,
                                   const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
                                   const fapi2::buffer<uint64_t>& i_column_addr = 0)
@@ -777,7 +780,7 @@ inline instruction_t rda_command( const uint64_t i_rank,
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
-    l_boilerplate_arr0 = read_cmd_boilerplate(i_rank,
+    l_boilerplate_arr0 = read_cmd_boilerplate(i_port_rank,
                          i_bank_addr,
                          i_bank_group_addr,
                          i_column_addr);
@@ -785,20 +788,20 @@ inline instruction_t rda_command( const uint64_t i_rank,
     // Setup ADDR10/AP based on read type
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
 
-    return instruction_t(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup precharge all banks command instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the precharge all banks command CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
-inline instruction_t precharge_all_command( const uint64_t i_rank,
+inline instruction_t precharge_all_command( const uint64_t i_port_rank,
         const uint16_t i_idle = 0 )
 {
     using TT = ccsTraits<DEFAULT_MC_TYPE>;
@@ -826,18 +829,18 @@ inline instruction_t precharge_all_command( const uint64_t i_rank,
     // From DDR4 Spec table 17:
     // All other bits from the command truth table or 'V', for valid (1 or 0)
 
-    return instruction_t(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup self-refresh entry command instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh entry command CCS instruction
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
-inline instruction_t self_refresh_entry_command( const uint64_t i_rank, const uint16_t i_idle = 0 )
+inline instruction_t self_refresh_entry_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
 {
     using TT = ccsTraits<DEFAULT_MC_TYPE>;
 
@@ -845,7 +848,7 @@ inline instruction_t self_refresh_entry_command( const uint64_t i_rank, const ui
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     // Set all CKE to high except the rank passed in
-    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_ARY_SRE[i_rank]);
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_ARY_SRE[i_port_rank]);
 
     // ACT is high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ACTN>();
@@ -861,19 +864,19 @@ inline instruction_t self_refresh_entry_command( const uint64_t i_rank, const ui
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
-    return instruction_t(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup self-refresh exit using NOP command instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh exit command CCS instruction
 /// @note Using NOP in case SDRAM is in gear down mode and max power saving mode exit
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
-inline instruction_t self_refresh_exit_command( const uint64_t i_rank, const uint16_t i_idle = 0 )
+inline instruction_t self_refresh_exit_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
 {
     using TT = ccsTraits<DEFAULT_MC_TYPE>;
 
@@ -881,7 +884,7 @@ inline instruction_t self_refresh_exit_command( const uint64_t i_rank, const uin
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     // Set all CKE to low except the rank passed in
-    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_ARY_SRX[i_rank]);
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_ARY_SRX[i_port_rank]);
 
     // ACT is high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ACTN>();
@@ -897,7 +900,7 @@ inline instruction_t self_refresh_exit_command( const uint64_t i_rank, const uin
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
-    return instruction_t(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
@@ -905,17 +908,17 @@ inline instruction_t self_refresh_exit_command( const uint64_t i_rank, const uin
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
-/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_port_rank the port rank
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh entry command CCS instruction
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
-inline instruction_t refresh_command( const uint64_t i_rank, const uint16_t i_idle = 0 )
+inline instruction_t refresh_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
 {
     using TT = ccsTraits<DEFAULT_MC_TYPE>;
 
     // Refresh is self-refresh entry with CKE high
-    auto l_refresh_template = self_refresh_entry_command(i_rank, i_idle);
+    auto l_refresh_template = self_refresh_entry_command(i_port_rank, i_idle);
 
     // CKE is high
     l_refresh_template.arr0.template insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
