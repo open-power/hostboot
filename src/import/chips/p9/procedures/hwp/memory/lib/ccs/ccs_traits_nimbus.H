@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/mss_attribute_accessors.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
+#include <lib/dimm/nimbus_kind.H>
 
 ///
 /// @class ccsTraits
@@ -312,6 +313,18 @@ class ccsTraits<mss::mc_type::NIMBUS>
                 uint8_t (&o_array)[2])
         {
             return mss::eff_num_master_ranks_per_dimm(i_target, o_array);
+        }
+
+        ///
+        /// @brief Gets if this port has an RCD
+        /// @param[in] i_target the port target on which to operate
+        /// @param[out] o_has_rcd true if this port has an RCD
+        /// @return SUCCESS iff the code executes successfully
+        ///
+        static fapi2::ReturnCode get_has_rcd(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                             bool& o_has_rcd)
+        {
+            return mss::dimm::has_rcd<mss::mc_type::NIMBUS>(i_target, o_has_rcd);
         }
 
         ///

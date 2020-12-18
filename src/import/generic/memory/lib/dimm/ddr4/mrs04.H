@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,14 +58,14 @@ namespace ddr4
 /// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// @param[in] i_data an mrs04_data object, filled in
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC>, typename MRS = mrsTraits<MC> >
 fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs04_data<MC>& i_data,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     constexpr uint64_t CS_CMD_LATENCY_LENGTH = 3;
     constexpr uint64_t CS_CMD_LATENCY_START = 7;
@@ -112,18 +112,18 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank thes rank in question
+/// @param[in] i_port_rank thes rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
+                        const uint64_t i_port_rank)
 {
     // Check to make sure our ctor worked ok
     mrs04_data<MC> l_data( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS04 data from attributes", mss::c_str(i_target) );
-    FAPI_TRY( mrs04(i_target, l_data, io_inst, i_rank) );
+    FAPI_TRY( mrs04(i_target, l_data, io_inst, i_port_rank) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -134,7 +134,7 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type memory controller type
 /// @tparam TT traits type defaults to ccsTraits<MC>
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @param[out] o_max_pd_mode the maximum power down mode setting
 /// @param[out] o_temp_refresh_range the temperature controlled refresh range setting
 /// @param[out] o_temp_ref_mode the temperature controlled refresh mode setting
@@ -149,7 +149,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank,
+                                      const uint64_t i_port_rank,
                                       uint8_t& o_max_pd_mode,
                                       uint8_t& o_temp_refresh_range,
                                       uint8_t& o_temp_ref_mode,
@@ -180,7 +180,7 @@ fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t& i_inst,
     FAPI_INF("MR4 rank %d decode: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
              "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
              "WR_PRE: 0x%x, PPR: 0x%x",
-             i_rank, o_max_pd_mode, o_temp_refresh_range, o_temp_ref_mode,
+             i_port_rank, o_max_pd_mode, o_temp_refresh_range, o_temp_ref_mode,
              o_vref_mon, uint8_t(o_cs_cmd_latency_buffer), o_ref_abort,
              o_rd_pre_train_mode, o_rd_preamble, o_wr_preamble, o_ppr);
 
@@ -191,11 +191,11 @@ fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t& i_inst,
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS4,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank the rank in question
+/// @param[in] i_port_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode mrs04_decode(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank)
+                                      const uint64_t i_port_rank)
 {
     uint8_t l_max_pd_mode = 0;
     uint8_t l_temp_refresh_range = 0;
@@ -210,7 +210,7 @@ inline fapi2::ReturnCode mrs04_decode(const ccs::instruction_t& i_inst,
 
     fapi2::buffer<uint8_t> l_cs_cmd_latency_buffer;
 
-    return mrs04_decode_helper(i_inst, i_rank, l_max_pd_mode, l_temp_refresh_range, l_temp_ref_mode,
+    return mrs04_decode_helper(i_inst, i_port_rank, l_max_pd_mode, l_temp_refresh_range, l_temp_ref_mode,
                                l_vref_mon, l_ref_abort, l_rd_pre_train_mode, l_rd_preamble,
                                l_wr_preamble, l_ppr, l_soft_ppr, l_cs_cmd_latency_buffer);
 }

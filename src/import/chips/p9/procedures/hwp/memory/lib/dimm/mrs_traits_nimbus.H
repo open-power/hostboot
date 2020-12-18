@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,18 @@ class mrsTraits<mss::mc_type::NIMBUS>
                                              const uint64_t i_rank,
                                              uint8_t& o_value)
         {
-            return mss::eff_dimm_rcd_mirror_mode(i_target, o_value);
+            uint8_t l_value = 0;
+            o_value = fapi2::ENUM_ATTR_EFF_DIMM_RCD_MIRROR_MODE_OFF;
+            FAPI_TRY(mss::eff_dimm_rcd_mirror_mode(i_target, l_value));
+
+            // We want to mirror if this DIMM has mirroring and we're an odd rank
+            o_value = ((l_value == fapi2::ENUM_ATTR_EFF_DIMM_RCD_MIRROR_MODE_ON) &&
+                       (i_rank & 0x1)) ?
+                      fapi2::ENUM_ATTR_EFF_DIMM_RCD_MIRROR_MODE_ON :
+                      fapi2::ENUM_ATTR_EFF_DIMM_RCD_MIRROR_MODE_OFF;
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -527,8 +527,6 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         FAPI_TRY(l_set_phy_params.set_CKTxSlewRate(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_AlertOdtImpedance(o_phy_params));
 
-        // TK to use the rank API once it's available
-        // For now we are assuming ranks 2 and 3 are on DIMM1 for RttNom, RttWr and RttPark
         FAPI_TRY(l_set_phy_params.set_RttNom(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_RttWr(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_RttPark(o_phy_params));
@@ -598,6 +596,8 @@ fapi2::ReturnCode print_phy_params(
     for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         FAPI_LAB("// Struct passed to data buffer during EXP_FW_DDR_PHY_INIT for %s", mss::c_str(l_port));
+        FAPI_LAB("//     NOTE: Ranks are in terms of the PHY perspective");
+        FAPI_LAB("//           This means ranks 1/2 will be swizzled from the IBM perspective for quad encoded CS mode");
         FAPI_LAB("struct user_input_msdg m = {");
         FAPI_LAB("  .version_number         = %u,", i_phy_params.iv_user_msdg_upto_ver397559.version_number);
         FAPI_LAB("  .DimmType               = %u,", i_phy_params.iv_user_msdg_upto_ver397559.DimmType);

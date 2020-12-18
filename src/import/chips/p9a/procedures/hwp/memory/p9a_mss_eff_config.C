@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,7 @@
 #include <lib/freq/axone_sync.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/workarounds/exp_ccs_2666_write_workarounds.H>
+#include <lib/workarounds/exp_quad_encoded_cs_workarounds.H>
 #include <lib/plug_rules/p9a_plug_rules.H>
 
 ///
@@ -74,44 +75,8 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
         // Get ranks via rank API
         std::vector<mss::rank::info<>> l_ranks;
-        mss::rank::ranks_on_dimm(dimm, l_ranks);
 
-        for (const auto& l_rank : l_ranks)
-        {
-            uint8_t l_spd_rev = 0;
-            std::shared_ptr<mss::efd::base_decoder> l_efd_data;
-
-            // Get EFD size
-            const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
-            fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::EFD);
-            fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
-            l_vpd_info.iv_rank = l_rank.get_dimm_rank();
-            l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
-            FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, nullptr), "failed getting VPD size from getVPD" );
-
-            // Get EFD data
-            std::vector<uint8_t> l_vpd_raw (l_vpd_info.iv_size, 0);
-            FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, l_vpd_raw.data()) );
-
-            // Instantiate EFD decoder
-            FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
-            FAPI_TRY( mss::efd::factory(l_ocmb, l_spd_rev, l_vpd_raw, l_vpd_info.iv_rank, l_efd_data) );
-
-            // Set up SI ATTRS
-            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::attr_si_engine_fields>::set(l_efd_data)) );
-
-            // Explorer EFD
-            FAPI_TRY( mss::exp::efd::process(dimm, l_efd_data));
-
-            // PMIC EFD fields do not change per dimm. These attributes and processes will ocurr at the OCMB level,
-            // and we will just choose the fields from DIMM 0 to use as the efd_data
-            if (l_rank.get_dimm_rank() == 0)
-            {
-                // PMIC EFD
-                FAPI_TRY(mss::pmic::efd::process(l_ocmb, l_efd_data));
-            }
-        }
-
+        // We run the base module + the DDIMM module first as our rank API needs to know if we are in quad encoded CS mode or not
         {
             std::vector<uint8_t> l_raw_spd;
             FAPI_TRY(mss::spd::get_raw_data(dimm, l_raw_spd));
@@ -131,6 +96,48 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
                 // Set up pmic SPD ATTRS
                 FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::pmic::attr_eff_engine_fields>::set(l_spd_decoder)) );
+            }
+        }
+
+        // Make sure to run ranks_on_dimm AFTER the base and DDIMM module data has been processed!
+        // This is so we handle the decoding of the ranks properly
+        mss::rank::ranks_on_dimm(dimm, l_ranks);
+
+        for (const auto& l_rank : l_ranks)
+        {
+            uint8_t l_spd_rev = 0;
+            std::shared_ptr<mss::efd::base_decoder> l_efd_data;
+
+            // Get EFD size
+            const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+            fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::EFD);
+            fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
+            l_vpd_info.iv_rank = l_rank.get_phy_rank();
+            l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
+            FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, nullptr), "failed getting VPD size from getVPD" );
+
+            // Get EFD data
+            std::vector<uint8_t> l_vpd_raw (l_vpd_info.iv_size, 0);
+            FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, l_vpd_raw.data()) );
+
+            // Instantiate EFD decoder
+            FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
+            FAPI_TRY( mss::efd::factory(l_ocmb, l_spd_rev, l_vpd_raw, l_rank.get_phy_rank(), l_rank.get_dimm_rank(), l_efd_data) );
+
+            // Set up SI ATTRS
+            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::attr_si_engine_fields>::set(l_efd_data)) );
+
+            // Explorer EFD
+            FAPI_TRY( mss::exp::efd::process(dimm, l_efd_data));
+
+            // PMIC EFD fields do not change per dimm. These attributes and processes will ocurr at the OCMB level,
+            // and we will just choose the fields from DIMM 0 to use as the efd_data
+            if (l_rank.get_dimm_rank() == 0)
+            {
+                // PMIC EFD
+                FAPI_TRY(mss::pmic::efd::process(l_ocmb, l_efd_data));
+
+                FAPI_TRY(mss::exp::workarounds::fix_mirroring_bitmap_attribute(l_rank.get_dimm_target()));
             }
         }
 

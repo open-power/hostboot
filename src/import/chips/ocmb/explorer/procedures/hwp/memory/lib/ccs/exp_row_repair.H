@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,22 +100,21 @@ enum guard_key_step
 
 ///
 /// @brief Clear a row repair entry from rank
-/// @param[in] i_rank master rank
+/// @param[in] i_rank_info master rank
 /// @param[in,out] io_row_repair_data data for this DIMM/rank
 ///
-void clear_row_repair_entry( const mss::rank::info<>& i_rank,
+void clear_row_repair_entry( const mss::rank::info<>& i_rank_info,
                              uint8_t (&io_row_repair_data)[MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK]);
 
 ///
 /// @brief Create CCS instruction with proper bits for guard key
-/// @param[in] i_mrs_data mrs00 data to be parsed
-/// @param[in] i_rank rank of address for instruction
+/// @param[in] i_rank_info rank of address for instruction
 /// @param[in] i_delay_in_cycles delay in cycles for instruction
 /// @param[in] i_guard_key_addr guardkey sequence addr value
 /// @param[in,out] io_inst ccs instruction to create guardkey for
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode add_sppr_guardkey( const mss::rank::info<>& i_rank,
+fapi2::ReturnCode add_sppr_guardkey( const mss::rank::info<>& i_rank_info,
                                      const uint64_t i_delay_in_cycles,
                                      const uint64_t i_guard_key_addr,
                                      std::vector< mss::ccs::instruction_t >& io_inst );
@@ -153,12 +152,12 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
 
 ///
 /// @brief Perform a PPR row repair operation
-/// @param[in] i_rank rank info of the address to repair
+/// @param[in] i_rank_info rank info of the address to repair
 /// @param[in] i_repair the address repair information
 /// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank,
+fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
                               const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
                               const uint64_t i_dram_bitmap);
 ///

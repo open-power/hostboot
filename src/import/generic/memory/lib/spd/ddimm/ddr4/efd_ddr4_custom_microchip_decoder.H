@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,12 +69,14 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         /// @brief ctor
         /// @param[in] i_target dimm target
         /// @param[in] i_spd_data vector DIMM SPD data
-        /// @param[in] i_rank the current rank
+        /// @param[in] i_phy_rank the current PHY rank
+        /// @param[in] i_dimm_rank the current DIMM rank
         ///
         decoder(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                 const std::vector<uint8_t>& i_spd_data,
-                const size_t i_rank):
-            base_decoder(i_target, i_spd_data, i_rank)
+                const size_t i_phy_rank,
+                const size_t i_dimm_rank):
+            base_decoder(i_target, i_spd_data, i_phy_rank, i_dimm_rank)
         {
             // Using the emulation value here
             static_assert( R <= mss::spd::rev::DDIMM_MAX, " R > rev::DDIMM_MAX");

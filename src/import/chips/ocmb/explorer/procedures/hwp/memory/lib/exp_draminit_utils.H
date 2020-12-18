@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @file exp_draminit_utils.H
 /// @brief Procedure definition to initialize DRAM
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
@@ -51,6 +51,7 @@
 #include <lib/phy/exp_train_handler.H>
 #include <lib/exp_attribute_accessors_manual.H>
 #include <lib/inband/exp_inband.H>
+#include <lib/workarounds/exp_quad_encoded_cs_workarounds.H>
 
 namespace mss
 {
@@ -463,6 +464,8 @@ class phy_params
         /// @param[in] i_phy_param_ranks array of pointers to the rank fields to be filled in
         /// @param[in] i_phy_param_attr pointer to the iv array indexed by dimm & rank
         /// @note this function assumes i_phy_param_ranks is properly populated with 4 fields (1 per phy rank)
+        /// i_phy_param_ranks fields are in terms of the PHY perspective for ranks
+        /// i_phy_param_attr fields are in terms of the IBM perspective for ranks
         ///
         void set_phy_field_by_rank(const std::vector<uint16_t*>& i_phy_param_ranks,
                                    const uint8_t (&i_phy_param_attr)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM]) const
@@ -476,11 +479,11 @@ class phy_params
             // For each rank, the phy rank value (0-4) is what needs to be filled in for draminit
             // This maps to the field corresponding to the ATTR index value
             // indexed by the rank's dimm index and dimm rank
-            for (const auto& l_rank : iv_rank_info)
+            for (const auto& l_rank_info : iv_rank_info)
             {
-                const uint8_t l_dimm_index = mss::index(l_rank.get_dimm_target());
-                const uint8_t l_dimm_rank = l_rank.get_dimm_rank();
-                *i_phy_param_ranks[l_rank.get_phy_rank()] = i_phy_param_attr[l_dimm_index][l_dimm_rank];
+                const uint8_t l_dimm_index = mss::index(l_rank_info.get_dimm_target());
+                const uint8_t l_dimm_rank = l_rank_info.get_dimm_rank();
+                *i_phy_param_ranks[l_rank_info.get_phy_rank()] = i_phy_param_attr[l_dimm_index][l_dimm_rank];
             }
         }
 
@@ -505,7 +508,7 @@ class phy_params
                 odt_fields::RANK3,
             };
 
-            for (const auto& l_rank : iv_rank_info)
+            for (const auto& l_rank_info : iv_rank_info)
             {
                 if (iv_attrs_params.iv_rank4_mode[0] == fapi2::ENUM_ATTR_MEM_EFF_FOUR_RANK_MODE_ENABLE)
                 {
@@ -520,9 +523,9 @@ class phy_params
                     // OdtRdMapCs BIT [3:2] ODT_B[1:0] value when reading to rank 0
                     // ...
 
-                    const auto OFFSET = l_buffer_rank_offset[l_rank.get_phy_rank()];
-                    const auto DIMM_RANK = l_rank.get_dimm_rank();
-                    const auto DIMM_INDEX = mss::index(l_rank.get_dimm_target());
+                    const auto OFFSET = l_buffer_rank_offset[l_rank_info.get_phy_rank()];
+                    const auto DIMM_RANK = l_rank_info.get_dimm_rank();
+                    const auto DIMM_INDEX = mss::index(l_rank_info.get_dimm_target());
 
                     uint8_t l_data = 0;
 
@@ -549,9 +552,9 @@ class phy_params
                     // OdtRdMapCs BIT [1:0] ODTA/B[1:0] value when reading to rank 0
                     // So it already accounts for any mirroring, we just need to plop in the value
 
-                    const auto OFFSET = l_buffer_rank_offset[l_rank.get_phy_rank()];
-                    const auto DIMM_RANK = l_rank.get_dimm_rank();
-                    const auto DIMM_INDEX = mss::index(l_rank.get_dimm_target());
+                    const auto OFFSET = l_buffer_rank_offset[l_rank_info.get_phy_rank()];
+                    const auto DIMM_RANK = l_rank_info.get_dimm_rank();
+                    const auto DIMM_INDEX = mss::index(l_rank_info.get_dimm_target());
 
                     uint8_t l_data = 0;
                     l_data = i_odt_rd_wr_attr[DIMM_INDEX][DIMM_RANK];
@@ -594,21 +597,13 @@ class phy_params
             iv_target(i_target)
         {
             uint32_t l_fw_version = 0;
-            uint8_t l_master_ranks[MAX_DIMM_PER_PORT] = {};
+            bool l_is_quad_encoded_cs = false;
 
             FAPI_TRY(mss::get_booted_fw_version(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(iv_target), l_fw_version));
-            FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_master_ranks));
 
-            {
-                // We're in quad encoded mode IF
-                // 1) 4R per DIMM
-                // 2) we have an RCD
-                bool l_has_rcd = false;
-                const bool l_4r = l_master_ranks[0] == fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_4R;
-
-                FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
-                iv_attrs_params.iv_encoded_quadcs = (l_has_rcd && l_4r) ? MSDG_QUAD_ENCODE_MODE : MSDG_DUAL_DIRECT_MODE;
-            }
+            // Set quad encoded CS mode first
+            FAPI_TRY(mss::is_quad_encoded_cs(i_target, l_is_quad_encoded_cs));
+            iv_attrs_params.iv_encoded_quadcs = l_is_quad_encoded_cs ? MSDG_QUAD_ENCODE_MODE : MSDG_DUAL_DIRECT_MODE;
 
             if (is_new_fw_msdg_supported(l_fw_version))
             {
@@ -909,7 +904,13 @@ class phy_params
         ///
         fapi2::ReturnCode set_AddrMirror(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.iv_user_msdg_upto_ver397559.AddrMirror = iv_attrs_params.iv_addr_mirror[0];
+            // We might have to swap some bits if we're in a quad encoded CS mode
+            uint8_t l_input(iv_attrs_params.iv_addr_mirror[0]);
+            const bool l_is_quad_encoded_cs = iv_attrs_params.iv_encoded_quadcs == MSDG_QUAD_ENCODE_MODE;
+            mss::exp::workarounds::fix_mirroring_bitmap_for_quad_encoded_cs(l_is_quad_encoded_cs, l_input);
+
+            // Assign the final value
+            io_phy_params.iv_user_msdg_upto_ver397559.AddrMirror = l_input;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 

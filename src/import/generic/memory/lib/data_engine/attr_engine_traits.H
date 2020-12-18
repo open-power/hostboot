@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1384,7 +1384,8 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
         };
         const auto l_ocmb = i_efd_data->get_target();
 
-        switch(i_efd_data->get_rank())
+        // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+        switch(i_efd_data->get_phy_rank())
         {
             case 0:
                 FAPI_TRY( i_efd_data->dram_rtt_nom_rank0(l_rtt_nom) );
@@ -1406,11 +1407,11 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
                 FAPI_ASSERT(false,
                             fapi2::MSS_INVALID_SPD_RANK().
                             set_FUNCTION(SET_SI_DRAM_RTT_NOM).
-                            set_RANK( i_efd_data->get_rank() ).
+                            set_RANK( i_efd_data->get_phy_rank() ).
                             set_TARGET(l_ocmb),
                             "%s SPD decoder returned invalid rank: %d",
                             spd::c_str(l_ocmb),
-                            i_efd_data->get_rank());
+                            i_efd_data->get_phy_rank());
                 break;
         };
 
@@ -1482,7 +1483,8 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
         };
         const auto l_ocmb = i_efd_data->get_target();
 
-        switch(i_efd_data->get_rank())
+        // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+        switch(i_efd_data->get_phy_rank())
         {
             case 0:
                 FAPI_TRY( i_efd_data->dram_rtt_wr_rank0(l_rtt_wr) );
@@ -1504,11 +1506,11 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
                 FAPI_ASSERT(false,
                             fapi2::MSS_INVALID_SPD_RANK().
                             set_FUNCTION(SET_SI_DRAM_RTT_WR).
-                            set_RANK( i_efd_data->get_rank() ).
+                            set_RANK( i_efd_data->get_phy_rank() ).
                             set_TARGET(l_ocmb),
                             "%s SPD decoder returned invalid rank: %d",
                             spd::c_str(l_ocmb),
-                            i_efd_data->get_rank());
+                            i_efd_data->get_phy_rank());
                 break;
         };
 
@@ -1585,7 +1587,8 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
         };
         const auto l_ocmb = i_efd_data->get_target();
 
-        switch(i_efd_data->get_rank())
+        // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+        switch(i_efd_data->get_phy_rank())
         {
             case 0:
                 FAPI_TRY( i_efd_data->dram_rtt_park_rank0(l_rtt_park) );
@@ -1607,11 +1610,11 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
                 FAPI_ASSERT(false,
                             fapi2::MSS_INVALID_SPD_RANK().
                             set_FUNCTION(SET_SI_DRAM_RTT_PARK).
-                            set_RANK( i_efd_data->get_rank() ).
+                            set_RANK( i_efd_data->get_phy_rank() ).
                             set_TARGET(l_ocmb),
                             "%s SPD decoder returned invalid rank: %d",
                             spd::c_str(l_ocmb),
-                            i_efd_data->get_rank());
+                            i_efd_data->get_phy_rank());
                 break;
         };
 
@@ -1858,7 +1861,8 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
 
         const auto l_ocmb = i_efd_data->get_target();
 
-        switch(i_efd_data->get_rank())
+        // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+        switch(i_efd_data->get_phy_rank())
         {
             case 0:
                 FAPI_TRY( i_efd_data->odt_wr_map_rank0(l_value) );
@@ -1880,11 +1884,11 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
                 FAPI_ASSERT(false,
                             fapi2::MSS_INVALID_SPD_RANK().
                             set_FUNCTION(SET_SI_ODT_WR).
-                            set_RANK( i_efd_data->get_rank() ).
+                            set_RANK( i_efd_data->get_phy_rank() ).
                             set_TARGET(l_ocmb),
                             "%s SPD decoder returned invalid rank: %d",
                             spd::c_str(l_ocmb),
-                            i_efd_data->get_rank());
+                            i_efd_data->get_phy_rank());
                 break;
         };
 
@@ -1950,7 +1954,8 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
 
         const auto l_ocmb = i_efd_data->get_target();
 
-        switch(i_efd_data->get_rank())
+        // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
+        switch(i_efd_data->get_phy_rank())
         {
             case 0:
                 FAPI_TRY( i_efd_data->odt_rd_map_rank0(l_value) );
@@ -1972,11 +1977,11 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
                 FAPI_ASSERT(false,
                             fapi2::MSS_INVALID_SPD_RANK().
                             set_FUNCTION(SET_SI_ODT_RD).
-                            set_RANK( i_efd_data->get_rank() ).
+                            set_RANK( i_efd_data->get_phy_rank() ).
                             set_TARGET(l_ocmb),
                             "%s SPD decoder returned invalid rank: %d",
                             spd::c_str(l_ocmb),
-                            i_efd_data->get_rank());
+                            i_efd_data->get_phy_rank());
                 break;
         };
 

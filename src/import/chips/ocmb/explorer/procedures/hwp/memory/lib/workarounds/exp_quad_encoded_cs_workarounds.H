@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ccs/exp_bad_dq_bitmap_funcs.H $ */
+/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/workarounds/exp_quad_encoded_cs_workarounds.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,46 +22,48 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
 
 ///
-/// @file exp_bad_dq_bitmap_funcs.H
-/// @brief Functions that access the Bad DQ Bitmap.
+/// @file exp_quad_encoded_cs_workarounds.H
+/// @brief Workarounds for Explorer quad encoded CS
 ///
-/// *HWP HWP Owner: Matt Hickman <Matthew.Hickman@ibm.com>
-/// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
-/// *HWP Team: Memory
-/// *HWP Level: 2
-/// *HWP Consumed by: HB:CI
-/// EKB-Mirror-To: hostboot
-///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: Memory
 
-#ifndef __EXP_BAD_DQ_BITMAP_FUNCS__
-#define __EXP_BAD_DQ_BITMAP_FUNCS__
+#ifndef _EXP_QUAD_ENCODED_CS_WORKAROUNDS_H_
+#define _EXP_QUAD_ENCODED_CS_WORKAROUNDS_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
 namespace exp
 {
-///
-/// @brief Row Repair Utility function that gets the Bad DQ Bitmap.
-/// @param[in] i_rank_info Rank info to get bitmap
-/// @param[out] o_data Reference to data where Bad DQ bitmap is copied to
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-fapi2::ReturnCode get_bad_dq_bitmap( const mss::rank::info<>& i_rank_info,
-                                     uint8_t o_data[BAD_DQ_BYTE_COUNT]);
+namespace workarounds
+{
 
 ///
-/// @brief Row Repair Utility function that sets the Bad DQ Bitmap.
-/// @param[in] i_rank_info Rank info to get bitmap
-/// @param[in] i_data Reference to data where Bad DQ bitmap is copied to
-/// @return FAPI2_RC_SUCCESS iff okay
+/// @brief Fixes the mirroring bitmap based upon the quad encoded CS configuration
+/// @param[in] i_is_quad_encoded_cs true if quad encoded CS is used
+/// @param[in,out] io_mirroring the mirroring bitmap to fix up
+/// @note Only swaps the bits in the mirroring bitmap associated with the ranks affected by the quad encoded CS bug
+/// Associated with JIRA355
 ///
-fapi2::ReturnCode set_bad_dq_bitmap( const mss::rank::info<>& i_rank_info,
-                                     const uint8_t i_data[BAD_DQ_BYTE_COUNT]);
-} // namespace exp
-} // namespace mss
+void fix_mirroring_bitmap_for_quad_encoded_cs(const bool i_is_quad_encoded_cs, uint8_t& io_mirroring);
+
+///
+/// @brief Fixes the mirroring bitmap for a target
+/// @param[in] i_target the DIMM target on which to operate
+/// @return fapi2 RC SUCCESS IFF the procedure passes correctly
+///
+fapi2::ReturnCode fix_mirroring_bitmap_attribute(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+} // workarounds
+} // exp
+} // mss
+
 #endif

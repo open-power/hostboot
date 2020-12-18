@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,7 @@ namespace exp
 {
 namespace train
 {
+
 ///
 /// @brief Displays training information
 /// @param[in] i_target the OCMB target
@@ -110,6 +111,8 @@ template <typename T>
 void display_lane_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                        const T& i_training_info)
 {
+    FAPI_MFG("%s Ranks for the lane info section are in the PHY perspectives", mss::c_str(i_target));
+
     for(uint8_t l_lane = 0; l_lane < exp_struct_sizes::TRAINING_RESPONSE_NUM_LANES; ++l_lane)
     {
         display_lane_results( i_target, l_lane, i_training_info.err_resp.Failure_Lane[l_lane]);
@@ -127,6 +130,8 @@ fapi2::ReturnCode display_mrs_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
                                    const T& i_training_info)
 {
     // Loop through all ports
+    FAPI_MFG("%s Ranks for the MRS info section are in the PHY perspectives", mss::c_str(i_target));
+
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         // Rank info object for
@@ -139,15 +144,14 @@ fapi2::ReturnCode display_mrs_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         for (const auto& l_rank_info : l_rank_info_vect)
         {
             const uint8_t l_phy_rank = l_rank_info.get_phy_rank();
-            const uint8_t l_port_rank = l_rank_info.get_port_rank();
             const uint8_t l_dram_width_for_dimm = l_dram_width[mss::index(l_rank_info.get_dimm_target())];
             // MR0->5 are easy, just display the value
-            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_port_rank, 0, i_training_info.mrs_resp.MR0);
-            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_port_rank, 1, i_training_info.mrs_resp.MR1[l_phy_rank]);
-            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_port_rank, 2, i_training_info.mrs_resp.MR2[l_phy_rank]);
-            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_port_rank, 3, i_training_info.mrs_resp.MR3);
-            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_port_rank, 4, i_training_info.mrs_resp.MR4);
-            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_port_rank, 5, i_training_info.mrs_resp.MR5[l_phy_rank]);
+            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 0, i_training_info.mrs_resp.MR0);
+            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 1, i_training_info.mrs_resp.MR1[l_phy_rank]);
+            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 2, i_training_info.mrs_resp.MR2[l_phy_rank]);
+            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 3, i_training_info.mrs_resp.MR3);
+            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 4, i_training_info.mrs_resp.MR4);
+            FAPI_MFG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 5, i_training_info.mrs_resp.MR5[l_phy_rank]);
 
             // The number of the DRAM's and the position to access each DRAM changes based upon x4 vs x8
             const auto l_num_dram = l_dram_width_for_dimm == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ?
@@ -158,7 +162,7 @@ fapi2::ReturnCode display_mrs_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
             for (uint64_t l_dram = 0; l_dram < l_num_dram; ++l_dram)
             {
                 const auto l_dram_pos = l_correction_factor * l_dram;
-                FAPI_MFG("%s rank%u MR6 dram%u 0x%04x", mss::c_str(i_target), l_port_rank, l_dram,
+                FAPI_MFG("%s rank%u MR6 dram%u 0x%04x", mss::c_str(i_target), l_phy_rank, l_dram,
                          i_training_info.mrs_resp.MR6[l_phy_rank][l_dram_pos]);
             }
         }
@@ -268,13 +272,13 @@ inline fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARG
         FAPI_MFG("%s DFIMRL_DDRCLK_trained: %u", mss::c_str(i_target), i_training_info.tm_resp.DFIMRL_DDRCLK_trained);
 
         // RD to RD
+        FAPI_MFG("%s Ranks for the response timings are in the PHY perspectives", mss::c_str(i_target));
         FAPI_MFG("%s RD-to-RD      :  0  1  2  3", mss::c_str(i_target));
 
         for(const auto& l_rank : l_rank_info_vect)
         {
             const auto l_phy_rank = l_rank.get_phy_rank();
-            const auto l_port_rank = l_rank.get_port_rank();
-            FAPI_MFG("%s RD-to-RD rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_port_rank,
+            FAPI_MFG("%s RD-to-RD rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_phy_rank,
                      i_training_info.tm_resp.CDD_RR[l_phy_rank][0], i_training_info.tm_resp.CDD_RR[l_phy_rank][1],
                      i_training_info.tm_resp.CDD_RR[l_phy_rank][2], i_training_info.tm_resp.CDD_RR[l_phy_rank][3]);
         }
@@ -285,8 +289,7 @@ inline fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARG
         for(const auto& l_rank : l_rank_info_vect)
         {
             const auto l_phy_rank = l_rank.get_phy_rank();
-            const auto l_port_rank = l_rank.get_port_rank();
-            FAPI_MFG("%s WR-to-WR rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_port_rank,
+            FAPI_MFG("%s WR-to-WR rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_phy_rank,
                      i_training_info.tm_resp.CDD_WW[l_phy_rank][0], i_training_info.tm_resp.CDD_WW[l_phy_rank][1],
                      i_training_info.tm_resp.CDD_WW[l_phy_rank][2], i_training_info.tm_resp.CDD_WW[l_phy_rank][3]);
         }
@@ -297,8 +300,7 @@ inline fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARG
         for(const auto& l_rank : l_rank_info_vect)
         {
             const auto l_phy_rank = l_rank.get_phy_rank();
-            const auto l_port_rank = l_rank.get_port_rank();
-            FAPI_MFG("%s WR-to-RD rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_port_rank,
+            FAPI_MFG("%s WR-to-RD rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_phy_rank,
                      i_training_info.tm_resp.CDD_WR[l_phy_rank][0], i_training_info.tm_resp.CDD_WR[l_phy_rank][1],
                      i_training_info.tm_resp.CDD_WR[l_phy_rank][2], i_training_info.tm_resp.CDD_WR[l_phy_rank][3]);
         }
@@ -309,8 +311,7 @@ inline fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARG
         for(const auto& l_rank : l_rank_info_vect)
         {
             const auto l_phy_rank = l_rank.get_phy_rank();
-            const auto l_port_rank = l_rank.get_port_rank();
-            FAPI_MFG("%s RD-to-WR rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_port_rank,
+            FAPI_MFG("%s RD-to-WR rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_phy_rank,
                      i_training_info.tm_resp.CDD_RW[l_phy_rank][0], i_training_info.tm_resp.CDD_RW[l_phy_rank][1],
                      i_training_info.tm_resp.CDD_RW[l_phy_rank][2], i_training_info.tm_resp.CDD_RW[l_phy_rank][3]);
         }

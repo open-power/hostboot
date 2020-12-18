@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -41,7 +41,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/
 EXTRAINCDIR += ${IMPORT_PATH}/
+EXTRAINCDIR += $(if $(CONFIG_AXONE),${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/,)
+EXTRAINCDIR += $(if $(CONFIG_AXONE),${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib,)
+EXTRAINCDIR += $(if $(CONFIG_AXONE),${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/,)
+EXTRAINCDIR += $(if $(CONFIG_AXONE),${ROOTPATH}/obj/genfiles/generic/memory/lib/,)
 
 # Generic support
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory
@@ -69,6 +74,7 @@ MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/shared/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/freq/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/mcbist
+MSS_LIB += $(if $(CONFIG_AXONE),${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib,)
 
 # Axone
 MSS_LIB += ${IMPORT_PATH}/chips/p9a/procedures/hwp/memory/lib/utils/
@@ -92,6 +98,7 @@ OBJS += gen_mss_mcbist_patterns.o
 OBJS += nimbus_pos.o
 OBJS += unmask.o
 OBJS += latch_wr_vref_nimbus.o
+OBJS += $(if $(CONFIG_AXONE),exp_attribute_accessors_manual.o,)
 
 #HWP build tool
 include ${ROOTPATH}/procedure.rules.mk

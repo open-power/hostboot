@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -242,8 +242,9 @@ fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i_efd_da
     const auto l_ocmb = i_efd_data->get_target();
 
     // mss::index of rank number will % 4 (RANKS_PER_DIMM) to get us the corresponding dimm
-    const auto l_dimm_index = i_efd_data->get_rank() / mss::MAX_RANK_PER_DIMM;
-    const auto l_dimm_rank = i_efd_data->get_rank() % mss::MAX_RANK_PER_DIMM;
+    // DIMM rank isn't really correct here, but I don't think we'll have a p9 dual drop system anytime soon
+    const auto l_dimm_index = i_efd_data->get_dimm_rank() / mss::MAX_RANK_PER_DIMM;
+    const auto l_dimm_rank = i_efd_data->get_dimm_rank() % mss::MAX_RANK_PER_DIMM;
 
     FAPI_TRY( check::index_within_bounds(l_ocmb, l_dimm_index, X, i_ffdc_code) );
     FAPI_TRY( check::index_within_bounds(l_ocmb, l_dimm_rank, Y, i_ffdc_code) );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -223,7 +223,7 @@ fapi_try_exit:
 ///
 /// @brief Get the firwmare revision based upon the partition that was booted
 /// @param[in] i_target OCMB_CHIP target
-/// @param[in] o_fw_version the FW version that was booted
+/// @param[out] o_fw_version the FW version that was booted
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 inline fapi2::ReturnCode get_booted_fw_version(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
@@ -246,6 +246,19 @@ inline fapi2::ReturnCode get_booted_fw_version(const fapi2::Target<fapi2::TARGET
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+
+///
+/// @brief Gets if the given target has a quad encoded CS
+/// @tparam TargetType T target type
+/// @param[in] i_target the target
+/// @param[out] o_is_quad_encoded_cs true if the part uses quad encoded CS otherwise false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note Used for the workaround to JIRA355 - quad encoded CS rank1/2 being swapped between IBM's logic and the DFI
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode is_quad_encoded_cs(const fapi2::Target<T>& i_target,
+                                     bool& o_is_quad_encoded_cs);
 
 } // ns mss
 

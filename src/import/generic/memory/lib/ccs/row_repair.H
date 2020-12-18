@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,20 +61,20 @@ namespace ccs
 /// @brief Adds a delay to the ccs instruction, performing necessary mirroring/swizzling
 /// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rank rank
+/// @param[in] i_rank_info rank information class
 /// @param[in] i_delay_in_cyles The delay to be added after instruction
 /// @param[in,out] io_inst_a_side The ccs instruction to process
 /// @param[in,out] io_inst The vector of ccs instructions to add to
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-fapi2::ReturnCode process_inst(const mss::rank::info<MC>& i_rank,
+fapi2::ReturnCode process_inst(const mss::rank::info<MC>& i_rank_info,
                                const uint64_t i_delay_in_cycles,
                                mss::ccs::instruction_t& io_instruction,
                                std::vector< mss::ccs::instruction_t >& io_inst)
 {
-    const auto l_port_rank = i_rank.get_port_rank();
-    const auto l_dimm_target = i_rank.get_dimm_target();
+    const auto l_port_rank = i_rank_info.get_port_rank();
+    const auto l_dimm_target = i_rank_info.get_dimm_target();
 
     // Perform Address Mirroring if necessary
     FAPI_TRY( mss::address_mirror<MC>(l_dimm_target, l_port_rank, io_instruction),
@@ -194,7 +194,7 @@ void set_odt_bits( const uint8_t i_odt_bits,
 ///
 /// @brief Loads an Activate command to the program of ccs instructions
 /// @tparam MC the memory controller type which executes the CCS instruction
-/// @param[in] i_rank Rank
+/// @param[in] i_rank_info Rank information class
 /// @param[in] i_bank_addr Bank Address
 /// @param[in] i_bank_group_addr Bank Group Address
 /// @param[in] i_row_addr Row Address to activate
@@ -202,14 +202,14 @@ void set_odt_bits( const uint8_t i_odt_bits,
 /// @return ccs::instruction_t for a loaded act command
 ///
 template< mss::mc_type MC >
-mss::ccs::instruction_t act_load( const mss::rank::info<MC>& i_rank,
+mss::ccs::instruction_t act_load( const mss::rank::info<MC>& i_rank_info,
                                   const fapi2::buffer<uint64_t>& i_bank_addr,
                                   const fapi2::buffer<uint64_t>& i_bank_group_addr,
                                   const fapi2::buffer<uint64_t>& i_row_addr,
                                   const uint64_t i_delay_in_cycles )
 {
     // Create Activate command
-    mss::ccs::instruction_t l_inst = act_command(i_rank.get_port_rank());
+    mss::ccs::instruction_t l_inst = act_command(i_rank_info.get_port_rank());
 
     // Set Row address
     set_row_addr<MC>(i_row_addr, l_inst);
@@ -224,20 +224,20 @@ mss::ccs::instruction_t act_load( const mss::rank::info<MC>& i_rank,
 /// @brief Loads a WRITE command to the program of ccs instructions
 /// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rank Rank
+/// @param[in] i_rank_info Rank information class
 /// @param[in] i_bank_addr Bank Address
 /// @param[in] i_bank_group_addr Bank Group Address
 /// @param[in] i_delay_in_cycles Delay to add after instruction
 /// @return ccs::instruction_t for a loaded act command
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-mss::ccs::instruction_t wr_load( const mss::rank::info<MC>& i_rank,
+mss::ccs::instruction_t wr_load( const mss::rank::info<MC>& i_rank_info,
                                  const fapi2::buffer<uint64_t>& i_bank_addr,
                                  const fapi2::buffer<uint64_t>& i_bank_group_addr,
                                  const uint64_t i_delay_in_cycles)
 {
     // Create Write command
-    mss::ccs::instruction_t l_inst = wr_command(i_rank.get_port_rank(), i_bank_addr, i_bank_group_addr);
+    mss::ccs::instruction_t l_inst = wr_command(i_rank_info.get_port_rank(), i_bank_addr, i_bank_group_addr);
 
     // Set A10 low
     l_inst.arr0.template clearBit<TT::ARR0_DDR_ADDRESS_10>();
@@ -251,20 +251,20 @@ mss::ccs::instruction_t wr_load( const mss::rank::info<MC>& i_rank,
 /// @brief Loads a PRECHARGE command to the program of ccs instructions
 /// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_rank Rank
+/// @param[in] i_rank_info Rank information class
 /// @param[in] i_bank_addr Buffer of all Bank Addresses
 /// @param[in] i_bank_group_addr Buffer of all Bank Group Addresses
 /// @param[in] i_delay_in_cycles Delay to add after instruction
 /// @return ccs::instruction_t for a loaded act command
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-mss::ccs::instruction_t pre_load( const mss::rank::info<MC>& i_rank,
+mss::ccs::instruction_t pre_load( const mss::rank::info<MC>& i_rank_info,
                                   const fapi2::buffer<uint64_t>& i_bank_addr,
                                   const fapi2::buffer<uint64_t>& i_bank_group_addr,
                                   const uint64_t i_delay_in_cycles)
 {
     // Create Precharge command
-    mss::ccs::instruction_t l_inst = precharge_all_command(i_rank.get_port_rank());
+    mss::ccs::instruction_t l_inst = precharge_all_command(i_rank_info.get_port_rank());
 
     // Set Bank address
     set_bank_group_addr<MC>( i_bank_addr, i_bank_group_addr, l_inst );
@@ -284,7 +284,7 @@ namespace row_repair
 ///
 /// @brief A row repair entry
 /// @tparam MC the memory controller type which executes the CCS instruction
-/// @note contains repair data from attribtemplate <mss::mc_type MC = DEFAULT_MC_TYPE>
+/// @note contains repair data from the attribute
 template< mss::mc_type MC >
 struct repair_entry
 {

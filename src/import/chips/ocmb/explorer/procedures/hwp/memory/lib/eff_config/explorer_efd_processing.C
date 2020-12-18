@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,7 +146,7 @@ fapi2::ReturnCode init_vref_dq(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_t
     l_combined_vref.writeBit<VREF_RANGE_BIT_LEFT_ALGINED>(l_range);
 
     // Insert
-    l_vref_dq[i_efd_data->get_rank()] = l_combined_vref;
+    l_vref_dq[i_efd_data->get_dimm_rank()] = l_combined_vref;
 
     // Set the attribute
     FAPI_TRY(mss::attr::set_exp_init_vref_dq(i_target, l_vref_dq));
@@ -170,7 +170,7 @@ fapi2::ReturnCode init_phy_vref(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
     FAPI_TRY(mss::attr::get_exp_init_phy_vref(i_target, l_phy_vref));
 
     // Update the values
-    FAPI_TRY(i_efd_data->init_phy_vref(l_phy_vref[i_efd_data->get_rank()]));
+    FAPI_TRY(i_efd_data->init_phy_vref(l_phy_vref[i_efd_data->get_dimm_rank()]));
 
     // Set the attribute
     FAPI_TRY(mss::attr::set_exp_init_phy_vref(i_target, l_phy_vref));

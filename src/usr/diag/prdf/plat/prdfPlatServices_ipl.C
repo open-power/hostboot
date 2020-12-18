@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -218,8 +218,9 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 {
     uint32_t o_rc = SUCCESS;
 
-    errlHndl_t errl = NULL;
+    #ifdef CONFIG_AXONE
 
+    errlHndl_t errl = NULL;
 
     fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
     FAPI_INVOKE_HWP( errl, exp_restore_repairs,
@@ -237,6 +238,8 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 
     o_repairedRankMask = (uint8_t)tmpRepairedRankMask;
     o_badDimmMask = (uint8_t)tmpBadDimmMask;
+
+    #endif 
 
     return o_rc;
 }

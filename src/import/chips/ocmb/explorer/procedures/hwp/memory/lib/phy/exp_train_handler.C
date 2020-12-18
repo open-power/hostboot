@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,8 +141,8 @@ fapi2::ReturnCode parse_mrs_data_attributes(const fapi2::Target<fapi2::TARGET_TY
         uint8_t l_vrefdq_range[mss::exp::MAX_DIMM_PER_PORT][TT::MAX_RANKS_PER_DIMM][mss::exp::MAX_NIBBLES_PER_PORT] = {0};
         uint8_t l_vrefdq_enable[mss::exp::MAX_DIMM_PER_PORT][TT::MAX_RANKS_PER_DIMM][mss::exp::MAX_NIBBLES_PER_PORT] = {0};
 
-        std::vector<mss::rank::info<>> l_ranks;
-        FAPI_TRY(mss::rank::ranks_on_port(l_port_target, l_ranks));
+        std::vector<mss::rank::info<>> l_rank_infos;
+        FAPI_TRY(mss::rank::ranks_on_port(l_port_target, l_rank_infos));
 
         // Parse MR0 Attributes
         l_temp_attr = l_MR0.getBit<MR0_EFF_DRAM_RBT>();
@@ -250,8 +250,12 @@ fapi2::ReturnCode parse_mrs_data_attributes(const fapi2::Target<fapi2::TARGET_TY
         // Note: we're only parsing for existing ranks
         // Any ranks that do not exist will have 0 values for their attributes
         // That's ok, we should not use those values anyways
-        for(const auto& l_rank_info : l_ranks)
+        for(const auto& l_rank_info : l_rank_infos)
         {
+            // Microchip's firmware outputs their data in terms of the PHY perspective
+            // Our attributes are encoded in terms of the IBM perspective
+            // As such, we copy the data from the PHY perspective and record it as the DIMM perspective
+            // Any swizzles should be taken into account in this way
             const auto l_phy_rank = l_rank_info.get_phy_rank();
             const auto l_dimm_rank = l_rank_info.get_dimm_rank();
             const auto l_dimm_index = mss::index(l_rank_info.get_dimm_target());

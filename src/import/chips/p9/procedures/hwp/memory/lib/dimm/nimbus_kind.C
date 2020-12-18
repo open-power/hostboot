@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,31 @@ fapi2::ReturnCode has_rcd<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARG
     // Set RCD if we have an RDIMM or LRDIMM type
     o_has_rcd = ((l_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ||
                  (l_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM));
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if any dimms exist that have RCD enabled - nimbus/MCA specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode has_rcd<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        bool& o_has_rcd )
+{
+    // Assume RCD is not supported at beginning of check
+    o_has_rcd = false;
+
+    for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        bool l_has_rcd = false;
+        FAPI_TRY(has_rcd<mss::mc_type::NIMBUS>(l_dimm, l_has_rcd));
+        o_has_rcd |= l_has_rcd;
+    }
 
 fapi_try_exit:
 

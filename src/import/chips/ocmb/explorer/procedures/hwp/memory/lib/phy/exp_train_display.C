@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@ namespace exp
 {
 namespace train
 {
+
 ///
 /// @brief Displays training information
 /// @param[in] i_target the OCMB target
@@ -99,6 +100,7 @@ void display_train_2d_read_eye(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                                const user_2d_eye_response_1_msdg_t& i_training_info)
 {
     FAPI_MFG("%s %s (EYE MIN/MAX):", mss::c_str(i_target), "VrefDAC0");
+    FAPI_MFG("%s Ranks for the 2D RD eye are in the PHY perspectives", mss::c_str(i_target));
 
     for (uint8_t l_rank = 0; l_rank < TRAINING_RESPONSE_NUM_RANKS; ++l_rank)
     {
@@ -151,6 +153,7 @@ void display_train_2d_write_eye(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                                 const user_2d_eye_response_2_msdg_t& i_training_info)
 {
     FAPI_MFG("%s %s (EYE MIN/MAX):", mss::c_str(i_target), "VrefDQ");
+    FAPI_MFG("%s Ranks for the 2D WR eye are in the PHY perspectives", mss::c_str(i_target));
 
     for (uint8_t l_rank = 0; l_rank < TRAINING_RESPONSE_NUM_RANKS; ++l_rank)
     {

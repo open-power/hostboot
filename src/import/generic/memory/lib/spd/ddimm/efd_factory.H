@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,8 @@ namespace efd
 /// @param[in] i_target DIMM target
 /// @param[in] i_rev SPD revision
 /// @param[in] i_data SPD data
-/// @param[in] i_rank the current rank
+/// @param[in] i_phy_rank the current PHY rank
+/// @param[in] i_dimm_rank the current dimm rank
 /// @param[out] o_decoder shared pointer to the decoder in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
 ///
@@ -57,7 +58,8 @@ namespace efd
 inline fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                  const uint8_t i_rev,
                                  const std::vector<uint8_t>& i_data,
-                                 const size_t i_rank,
+                                 const size_t i_phy_rank,
+                                 const size_t i_dimm_rank,
                                  std::shared_ptr<base_decoder>& o_decoder_ptr)
 {
     // Poor man's fallback technique: if we receive a revision that's later than (or numerically
@@ -70,7 +72,7 @@ inline fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             {
                 o_decoder_ptr = std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4,
                 DDR4_CUSTOM_MICROCHIP,
-                mss::spd::rev::V0_3>>(i_target, i_data, i_rank);
+                mss::spd::rev::V0_3>>(i_target, i_data, i_phy_rank, i_dimm_rank);
                 return fapi2::FAPI2_RC_SUCCESS;
                 break;
             }
@@ -79,7 +81,7 @@ inline fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
             {
                 o_decoder_ptr = std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4,
                 DDR4_CUSTOM_MICROCHIP,
-                mss::spd::rev::V0_4>>(i_target, i_data, i_rank);
+                mss::spd::rev::V0_4>>(i_target, i_data, i_phy_rank, i_dimm_rank);
                 return fapi2::FAPI2_RC_SUCCESS;
                 break;
             }
