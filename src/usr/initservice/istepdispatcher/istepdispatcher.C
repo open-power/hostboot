@@ -72,6 +72,7 @@
 #include <istep18/establish_system_smp.H>
 #include <arch/magic.H>
 #include <pldm/requests/pldm_pdr_requests.H>
+#include <pldm/base/hb_bios_attrs.H>
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
@@ -284,10 +285,39 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         TARGETING::Target* l_pSys = NULL;
         TARGETING::targetService().getTopLevelTarget(l_pSys);
 
+        // Only consider Tracelite if OpenPOWER XML is used
 #ifdef CONFIG_INCLUDE_XML_OPENPOWER
-        uint8_t l_tlEnabled = l_pSys->getAttr<TARGETING::ATTR_OP_TRACE_LITE>();
+        bool l_tlEnabled = false;
+#ifdef CONFIG_PLDM
+        // first check if the BMC has told us the debug
+        // console is enabled
+        errlHndl_t err_pldm = PLDM::getDebugConsoleEnabled(l_tlEnabled);
+        if(err_pldm)
+        {
+           TRACFCOMP(g_trac_initsvc,
+                          ERR_MRK"init: Attempt to see if debug console is enabled via PLDM failed");
+            err_pldm->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            err_pldm->collectTrace("INITSVC", 1024);
+            errlCommit(err_pldm, INITSVC_COMP_ID );
+        }
+#endif // CONFIG_PLDM
+
+#ifdef CONFIG_CONSOLE_TRACE_LITE
+        // If this config flag is set the user always ways tracelite data
+        // sent to the debug console (UART2)
+        l_tlEnabled = true;
+#endif // CONFIG_CONSOLE_TRACE_LITE
+
+        // Support legacy OP_TRACE_LITE attribute by checking
+        // it if the BMC/config flags have not told us to enable
+        // debug console already. If the BMC/config are already telling us
+        // to enable the debug console just ignore this attribute.
+        if(!l_tlEnabled)
+        {
+            l_tlEnabled = l_pSys->getAttr<TARGETING::ATTR_OP_TRACE_LITE>();
+        }
         TRACE::setTraceLite(l_tlEnabled);
-#endif
+#endif // CONFIG_INCLUDE_XML_OPENPOWER
 
 
         //////////////////
@@ -335,7 +365,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
             printk( "SBE Boot Side = %d\n", l_bootside );
 
             // Sending to console SBE side
-            CONSOLE::displayf(CONSOLE::DEFAULT,  NULL,
+            CONSOLE::displayf(CONSOLE::VUART1,  NULL,
                     "Booting from SBE side %d on master proc=%.8X",
                     l_bootside, TARGETING::get_huid(l_masterTarget) );
             CONSOLE::flush();
@@ -688,7 +718,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                 l_deconfig = true;
                             }
 
-                            CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
+                            CONSOLE::displayf(CONSOLE::VUART1, NULL,
                               "System Shutting Down"
                               "To Perform Reconfiguration After %s",
                               l_deconfig ? "Deconfig" : "Recoverable Error" );
@@ -759,7 +789,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     "error log has been committed. Stopping the IPL.");
 
                 #ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Manufacturing Mode is set and an "
+                CONSOLE::displayf(CONSOLE::VUART1, NULL, "Manufacturing Mode is set and an "
                     "error log has been committed. Stopping the IPL.");
                 CONSOLE::flush();
                 #endif
@@ -800,7 +830,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 if(err_ipmi)
                 {
                     #ifdef CONFIG_CONSOLE
-                    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Failed to disable BMC auto reboots....");
+                    CONSOLE::displayf(CONSOLE::VUART1, NULL, "Failed to disable BMC auto reboots....");
                     CONSOLE::flush();
                     #endif
                     TRACFCOMP(g_trac_initsvc,
@@ -856,7 +886,7 @@ void IStepDispatcher::stop()
 {
 
 #ifdef CONFIG_CONSOLE
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL,"Stopping istep dispatcher");
+    CONSOLE::displayf(CONSOLE::VUART1, NULL,"Stopping istep dispatcher");
     CONSOLE::flush();
 #endif
 
@@ -2549,7 +2579,7 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     if ((iv_curIStep != lastIstep) || (iv_curSubStep != lastSubstep))
     {
         const TaskInfo *taskinfo = findTaskInfo(iv_curIStep, iv_curSubStep);
-        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "ISTEP %2d.%2d - %s",
+        CONSOLE::displayf(CONSOLE::VUART1, NULL, "ISTEP %2d.%2d - %s",
                      iv_curIStep, iv_curSubStep,
                      taskinfo && taskinfo->taskname ? taskinfo->taskname : "");
         CONSOLE::flush();
@@ -3106,7 +3136,7 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
                         );
 
 #ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "istepPauseSet: "
+                CONSOLE::displayf(CONSOLE::VUART1, NULL, "istepPauseSet: "
                         "pauseLen=0x%02X, Permanent pause enabled.",
                         l_p_pauseCfg->pauseLen
                         );

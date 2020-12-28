@@ -54,7 +54,7 @@ namespace TRACE
         iv_compList = &(Singleton<ComponentList>::instance());
 
         // initialize tracelite setting to off
-        iv_traceLite = 0;
+        iv_traceLite = false;
 
         DEBUG::add_debug_pointer(DEBUG::TRACESERVICE,
                                  this,
@@ -67,22 +67,22 @@ namespace TRACE
         assert(0);
     }
 
-    void Service::setTraceLite(uint8_t i_isEnabled)
+    void Service::setTraceLite(bool i_isEnabled)
     {
         iv_traceLite = i_isEnabled;
     }
 
-    void setTraceLite(uint8_t i_isEnabled)
+    void setTraceLite(bool i_isEnabled)
     {
         Singleton<Service>::instance().setTraceLite(i_isEnabled);
     }
 
-    uint8_t Service::getTraceLite()
+    bool Service::getTraceLite()
     {
         return iv_traceLite;
     }
 
-    uint8_t getTraceLite()
+    bool getTraceLite()
     {
         return Singleton<Service>::instance().getTraceLite();
     }
@@ -121,7 +121,7 @@ namespace TRACE
                          CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME) )
             {
             #endif
-                CONSOLE::vdisplayf(CONSOLE::DEFAULT, i_td->iv_compName,
+                CONSOLE::vdisplayf(CONSOLE::VUART1, i_td->iv_compName,
                                    i_fmt, i_args);
             #ifdef CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME
             }
@@ -334,18 +334,6 @@ namespace TRACE
                 l_cb.append(l_s);  // append to format string for tracelite
             }
 
-#ifdef CONFIG_CONSOLE_TRACE_LITE
-
-        #ifdef CONFIG_NO_FAPI_IN_TRACE_LITE_OUTPUT
-            if (strcmp( i_td->iv_compName, "FAPI" ))
-        #endif
-            {
-                char tmpstr[sizeof(i_td->iv_compName)+sizeof(l_time.tid)+1];
-                sprintf(tmpstr, "%u %s", l_time.tid, i_td->iv_compName );
-                CONSOLE::vdisplayf(CONSOLE::DEFAULT, tmpstr,
-                                   *l_cb, l_tl_args);
-            }
-#else
             if (iv_traceLite)
             {
             #ifdef CONFIG_NO_FAPI_IN_TRACE_LITE_OUTPUT
@@ -354,12 +342,10 @@ namespace TRACE
                 {
                     char tmpstr[sizeof(i_td->iv_compName)+sizeof(l_time.tid)+1];
                     sprintf(tmpstr, "%d %s", l_time.tid, i_td->iv_compName );
-                    CONSOLE::vdisplayf(CONSOLE::DEFAULT, tmpstr,
+                    CONSOLE::vdisplayf(CONSOLE::VUART2, tmpstr,
                                        *l_cb, l_tl_args);
                 }
             }
-
-#endif //CONFIG_CONSOLE_TRACE_LITE
 
             // "Commit" entry to buffer.
             l_buffer->commitEntry(l_entry);
@@ -472,7 +458,7 @@ namespace TRACE
             if ( !strcmp(i_td->iv_compName,
                          CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME) )
             #endif
-            {CONSOLE::displayf(CONSOLE::DEFAULT, i_td->iv_compName,"%s",output);}
+            {CONSOLE::displayf(CONSOLE::VUART1, i_td->iv_compName,"%s",output);}
 
             free(output);
 

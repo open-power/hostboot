@@ -217,14 +217,14 @@ namespace TRACE
     /**
      *  @brief Sets TraceLite as enabled or disabled.
      *
-     *  @param [in] i_tlEnabled - 1 for enabled 0 for disabled.
+     *  @param [in] i_tlEnabled - true for enabled false for disabled.
      */
-    void setTraceLite(uint8_t i_tlEnabled);
+    void setTraceLite(bool i_tlEnabled);
 
     /** @brief Gets TraceLite setting (either enabled or disabled).
-     *  @return 1 for enabled, 0 for disabled
+     *  @return true for enabled, false for disabled
      */
-    uint8_t getTraceLite();
+    bool getTraceLite();
 
 };
 

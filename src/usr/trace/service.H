@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -149,12 +149,12 @@ namespace TRACE
             /** @brief Sets TraceLite as enabled or disabled.
              *  @param[in] i_isEnabled - 1 for enabled, 0 for disabled
              */
-            void setTraceLite(uint8_t i_isEnabled);
+            void setTraceLite(bool i_isEnabled);
 
             /** @brief Gets TraceLite setting (either enabled or disabled).
              *  @return 1 for enabled, 0 for disabled
              */
-            uint8_t getTraceLite();
+            bool getTraceLite();
 
 #ifndef __HOSTBOOT_RUNTIME
             /** @brief Enable Continous Trace mode (for FSPless)
@@ -186,7 +186,7 @@ namespace TRACE
             DaemonIf* iv_daemon;
 
                 /** tracelite enabled **/
-            uint8_t iv_traceLite;
+            bool iv_traceLite;
 #else
                 /** Runtime daemon **/
             TRACEDAEMON::Daemon * iv_daemon;
