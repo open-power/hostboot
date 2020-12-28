@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2014,27 +2014,29 @@ _raw4_overlay( Raw4ScanData_t* o_raw4Final,
             bNewRecord = true;
         }
 
-        rc = _overlay_nibble_pair( careDataFinal,
-                                   careDataTgt,
-                                   careDataOvly,
-                                   i_ovlyMode,
-                                   i_bOvrd,
-                                   i_dbgl );
-
-        if (rc)
-        {
-            if (rc == SCAN_COMPRESSION_OVERLAY_BIT_CONFLICT)
-            {
-                MY_ERR("ERROR: _raw4_overlay: Bit conflict found during overlay"
-                       " of careData{Tgt,Ovly}={0x%02x,0x%02x} in nibble=%u\n",
-                       careDataTgt, careDataOvly, iNib);
-            }
-
-            return rc;
-        }
-
         if (bNewRecord)
         {
+            // Only do overlay when new records are found. Otherwise, would just be repeating
+            // previous identical overlay operation.
+            rc = _overlay_nibble_pair( careDataFinal,
+                                       careDataTgt,
+                                       careDataOvly,
+                                       i_ovlyMode,
+                                       i_bOvrd,
+                                       i_dbgl );
+
+            if (rc)
+            {
+                if (rc == SCAN_COMPRESSION_OVERLAY_BIT_CONFLICT)
+                {
+                    MY_ERR("ERROR: _raw4_overlay: Bit conflict found during overlay"
+                           " of careData{Tgt,Ovly}={0x%02x,0x%02x} in nibble=%u\n",
+                           careDataTgt, careDataOvly, iNib);
+                }
+
+                return rc;
+            }
+
             if (careDataFinal == 0 && careDataFinalPrev == 0 && recsCountFinal > 0)
             {
                 // Nothing to do (unless we're in the very first nibble, ie, the recsCountFinal
