@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,8 @@ namespace EXPUPD
     {
         MOD_OCMB_FW_VALIDATE_IMAGE = 0x01,
         MOD_PARSE_TAGGED_DATA_TRIPLET = 0x02,
+        MOD_SET_FW_VERSION_INFO = 0x03,
+        MOD_WRITE_EXPLORER_FW_VERSION = 0x04,
     };
 
     enum ExpUpdReasonCode
@@ -47,6 +49,8 @@ namespace EXPUPD
         INVALID_DATA_TRIPLET_SIZE                 = EXPUPD_COMP_ID | 0x06,
         INVALID_HASH_TRIPLET_SIZE                 = EXPUPD_COMP_ID | 0x07,
         INVALID_TAG_ID                            = EXPUPD_COMP_ID | 0x08,
+        MISSING_FW_VERSION                        = EXPUPD_COMP_ID | 0x09,
+        UNSUPPORTED_NUMBER_OF_DIMMS               = EXPUPD_COMP_ID | 0x0a,
     };
 
 }; // namespace EXPUPD

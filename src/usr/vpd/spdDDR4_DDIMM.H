@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,7 +95,7 @@ const KeywordData ddr4DDIMMData[] =
     { SDRAM_THERMAL_REFRESH_OPTIONS,    0x08,   0x01,   0x00,   0x00, false, false, ALL },
     { MODULE_THERMAL_SENSOR,            0x0e,   0x01,   0x00,   0x00, false, false, ALL },
     { THERMAL_SENSOR_PRESENT,           0x0e,   0x01,   0x80,   0x07, false, false, ALL },
-    { SDRAM_DEVICE_TYPE       ,         0x06,   0x01,   0x80,   0x07, false, false, ALL },
+    { SDRAM_DEVICE_TYPE,                0x06,   0x01,   0x80,   0x07, false, false, ALL },
     { SDRAM_DIE_COUNT,                  0x06,   0x01,   0x70,   0x04, false, false, ALL },
     { SDRAM_DEVICE_TYPE_SIGNAL_LOADING, 0x06,   0x01,   0x03,   0x00, false, false, ALL },
     { TCKMIN_FINE_OFFSET,               0x7d,   0x01,   0x00,   0x00, false, false, ALL },
@@ -131,6 +131,7 @@ const KeywordData ddr4DDIMMData[] =
     { BASE_CONFIG_CRC,                  0x7f,   0x02,   0x00,   0x00, true,  false, ALL },
     { IBM_11S_PN,                       0x1a3,  0x07,   0x00,   0x00, false, false, ALL },
     { IBM_11S_SN,                       0x1aa,  0x0c,   0x00,   0x00, false, false, ALL },
+    { EXPLORER_FW_VERSION,              0x3c0,  0x40,   0x00,   0x00, false, true,  ALL },
     // Module Specific fields supported on DDR4 only
     { ENTIRE_SPD_WITHOUT_EFD,           0x00,   0x280,  0x00,   0x00, false, false, ALL },
     { ENTIRE_SPD,                       0x00,   0x800,  0x00,   0x00, false, false, ALL },

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -356,9 +356,10 @@ enum
     LRMM_CRC                         = SPD_FIRST_MOD_SPEC | 0xb4,
     IBM_11S_PN                       = SPD_FIRST_MOD_SPEC | 0xb5,
     IBM_11S_SN                       = SPD_FIRST_MOD_SPEC | 0xb6,
-    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb7,
+    EXPLORER_FW_VERSION              = SPD_FIRST_MOD_SPEC | 0xb7,
+    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb8,
 
-    // Latest DDR SPD specifcations have standard SPD
+    // Latest DDR SPD specifications have standard SPD
     // in the front followed by extendable function
     // descriptors (EFDs). ENTIRE_SPD will grab everything
     // ENTIRE_SPD_WITHOUT_EFD will skip getting the EFD info

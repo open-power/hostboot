@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -29,9 +29,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/vpd
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
+EXTRAINCDIR += ${ROOTPATH}/src/usr/vpd
 
 OBJS += expupd.o
 OBJS += ocmbFwImage.o

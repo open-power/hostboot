@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,8 @@ typedef struct rawImageInfo
     const uint8_t* imagePtr;
     size_t         imageSize;
     const uint8_t* imageSHA512HashPtr;
+    const uint8_t* fwVersionStrPtr;  // pointer to explorer firmware version string
+    size_t         fwVersionStrSize; // size of explorer firmware version string
 }rawImageInfo_t;
 
 /**

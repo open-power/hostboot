@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,8 @@
 #include <initservice/istepdispatcherif.H>
 #include <istepHelperFuncs.H>               // captureError
 #include <util/threadpool.H>
+#include <spdenums.H>
+#include <spd.H>
 
 
 using namespace ISTEP_ERROR;
@@ -126,6 +128,90 @@ errlHndl_t getFlashedHash(TargetHandle_t i_target, sha512regs_t& o_regs)
     }
 
     return l_err;
+}
+
+/**
+ * @brief Write Explorer Firmware version into SPD of the given OCMB target.
+ * The SPD has byte 960 to 1023 reserved for this information.
+ * Any errors found will be committed inside of the function itself.
+ *
+ * @param[in] i_ocmb        OCMB chip target handler. Firmware version will be written to its corresponding SPD.
+ * @param[in] i_versionStr  The version string, e.g. "version=0.1", not null-terminated
+ * @param[in] i_strSize     Number of bytes making up i_versionStr
+ */
+void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, const size_t i_strSize)
+{
+    errlHndl_t l_err = nullptr;
+
+    // Get SPD keyword EXPLORER_FW_VERSION info
+    const SPD::KeywordData *l_fWVerKeyword = {nullptr};
+    l_err = getKeywordEntry(SPD::EXPLORER_FW_VERSION, SPD::SPD_DDR4_TYPE, i_ocmb, l_fWVerKeyword);
+
+    const size_t l_spdKeywordSize = l_fWVerKeyword->length;
+
+    // The actual data being written to the SPD::EXPLORER_FW_VERSION keyword must be of size
+    // 64-bytes for the SPD-write API to work.
+    uint8_t l_paddedData [l_spdKeywordSize] = {};
+
+    // Data copied over to l_paddedData should be at most l_spdKeywordSize
+    size_t l_copySize = std::min(l_spdKeywordSize, i_strSize);
+    memcpy(l_paddedData, i_versionStr, l_copySize);
+
+    TargetHandleList l_dimmList;
+    getChildAffinityTargets(l_dimmList, i_ocmb, CLASS_LOGICAL_CARD, TYPE_DIMM);
+
+    do
+    {
+        // Only one DIMM target is expected. If a number other than one is found, then there's an
+        // issue with the targeting layout.
+        if (l_dimmList.size() != 1)
+        {
+            TRACFCOMP(g_trac_expupd, ERR_MRK"writeExplorerFwVersion: Unsupported number of DDIMMs "
+                "(%lu) found for OCMB with HUID 0x%X.", l_dimmList.size(), get_huid(i_ocmb));
+           /*@errorlog
+            * @errortype       ERRL_SEV_PREDICTIVE
+            * @moduleid        EXPUPD::MOD_WRITE_EXPLORER_FW_VERSION
+            * @reasoncode      EXPUPD::UNSUPPORTED_NUMBER_OF_DIMMS
+            * @userdata1       HUID of OCMB target whose DDIMM is being searched for
+            * @userdata2       Number of DDIMMs found
+            * @devdesc         Unsupported number of DDIMMs found tied to one OCMB in targeting layout.
+            * @custdesc        Error occurred during system boot.
+            */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                            EXPUPD::MOD_WRITE_EXPLORER_FW_VERSION,
+                                            EXPUPD::UNSUPPORTED_NUMBER_OF_DIMMS,
+                                            get_huid(i_ocmb),
+                                            l_dimmList.size(),
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        TargetHandle_t l_dimm = l_dimmList[0];
+
+        TRACDCOMP(g_trac_expupd, "writeExplorerFwVersion: Attempting to write FW version of "
+            "OCMB: 0x%X, into SPD of DDIMM: 0x%X", get_huid(i_ocmb), get_huid(l_dimm));
+        TRACDBIN(g_trac_expupd, "writeExplorerFwVersion: OCMB FW Version string: ",
+            l_paddedData, l_spdKeywordSize);
+
+        l_err = deviceWrite(l_dimm, l_paddedData, (size_t&)l_spdKeywordSize, DEVICE_SPD_ADDRESS(SPD::EXPLORER_FW_VERSION));
+
+    } while (0);
+
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_expupd, ERR_MRK"writeExplorerFwVersion: Failed to update version keyword "
+            "for OCMB: 0x%X", get_huid(i_ocmb));
+        TRACFBIN(g_trac_expupd, ERR_MRK"writeExplorerFwVersion: Failed trying to write this "
+            "version string: ", i_versionStr, i_strSize);
+        l_err->collectTrace(EXPUPD_COMP_NAME);
+        errlCommit(l_err, EXPUPD_COMP_ID);
+    }
+    else
+    {
+        TRACDCOMP(g_trac_expupd, "writeExplorerFwVersion: successfully updated version string in "
+            "SPD of OCMB 0x%08x", TARGETING::get_huid(i_ocmb));
+    }
+
 }
 
 //
@@ -206,7 +292,7 @@ void OcmbWorkItem::operator()()
     if (l_err)
     {
         TRACFCOMP(g_trac_expupd,
-                  "Error from exp_fw_update for OCMB 0x%08x",
+                  ERR_MRK"Error from exp_fw_update for OCMB 0x%08x",
                   TARGETING::get_huid(iv_ocmb));
 
         l_err->collectTrace(EXPUPD_COMP_NAME);
@@ -226,14 +312,19 @@ void OcmbWorkItem::operator()()
         captureError(l_err, *iv_pStepError, EXPUPD_COMP_ID);
 
         mutex_unlock(&g_stepErrorMutex);
-
-        errlCommit(l_err, EXPUPD_COMP_ID);
     }
     else
     {
         TRACFCOMP(g_trac_expupd,
                   "updateAll: successfully updated OCMB 0x%08x",
                   TARGETING::get_huid(iv_ocmb));
+
+        // Write updated firmware version to SPD of DDIMM that belongs to OCMB chip
+        if (iv_imageInfo->fwVersionStrPtr && iv_imageInfo->fwVersionStrSize != 0)
+        {
+            writeExplorerFwVersion((TargetHandle_t)iv_ocmb, iv_imageInfo->fwVersionStrPtr,
+                iv_imageInfo->fwVersionStrSize);
+        }
 
         // Request reboot for new firmware to be used
         iv_rebootRequired = true;
