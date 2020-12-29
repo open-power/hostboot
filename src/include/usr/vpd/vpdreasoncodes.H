@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -65,6 +65,7 @@ enum vpdModuleId
     VPD_IPVPD_ECC_DATA_UPDATE               = 0x35,
     VPD_IPVPD_ECC_DATA_CHECK                = 0x36,
     VPD_IPVPD_GET_VTOC_RECORD_META_DATA     = 0x37,
+    VPD_IPVPD_GET_RECORD_META_DATA          = 0x38,
 
 
     // PVPD

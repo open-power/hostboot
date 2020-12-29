@@ -315,9 +315,6 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
             {
                 break;
             }
-
-            //@TODO-RTC:250100-Enable Enterprise VPD ECC
-            // Need add the VPD ECC update code here
         }
     } while( 0 );
 
@@ -2741,8 +2738,120 @@ errlHndl_t
 IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
                                    const IpVpdFacade::input_args_t &i_args )
 {
-    // @TODO 250100  Need to add implementation
-    return nullptr;
+    // Get a copy of the target huid, once, for tracing purposes
+    auto l_targetHuid = TARGETING::get_huid(i_target);
+
+    // Target needs to be a PROC
+    assert(TARGETING::TYPE_PROC == i_target->getAttr<TARGETING::ATTR_TYPE>(),
+           "IpVpdFacade::updateRecordEccData(): Target 0x%.8X is not a PROC",
+           l_targetHuid );
+
+    TRACFCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::updateRecordEccData() target(0x%.8X) "
+               "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), eepromSource(0x%.4X)",
+               l_targetHuid, i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+
+    errlHndl_t  l_err(nullptr);
+    const char* l_recordName(nullptr);
+
+    do
+    {
+        // Get the record name
+        l_err = translateRecord(i_args.record, l_recordName);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::updateRecordEccData(): "
+                       "Error with call to translateRecord for record ID 0x%.4X "
+                       "on target 0x%.8X", i_args.record, l_targetHuid );
+            break;
+        }
+
+        TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::updateRecordEccData(): "
+                    "translateRecord for record ID 0x%.4X returned %s "
+                    "on target 0x%.8X", i_args.record, l_recordName, l_targetHuid );
+
+        // Get the record meta data
+        pt_entry l_ptEntry;
+        l_err = getRecordMetaData ( i_target, i_args, l_ptEntry );
+        if (l_err)
+        {
+            break;
+        }
+
+        // Convert the meta data to the correct format
+        size_t l_recordOffset(le16toh(l_ptEntry.record_offset));
+        size_t l_recordLength(le16toh(l_ptEntry.record_length));
+        size_t l_eccOffset(le16toh(l_ptEntry.ecc_offset));
+        size_t l_eccLength(le16toh(l_ptEntry.ecc_length));
+
+        TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::updateRecordEccData(): "
+                    "getRecordMetaData returned record offset(0x%.4x), record length(0x%.4x) "
+                    "ecc offset(0x%.4x), ecc length(0x%.4x) for record %s on target 0x%.8X",
+                    l_recordOffset, l_recordLength, l_eccOffset,
+                    l_eccLength,    l_recordName,   l_targetHuid );
+
+        // Retrieve the record data.
+        uint8_t l_recordData[l_recordLength];  // Create record data buffer
+        l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData,
+                                    i_target,       i_args.eepromSource);
+
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::updateRecordEccData(): "
+                       "Failure: Error with fetchData to retrieve record data %s on "
+                       "target 0x%.8X", l_recordName, l_targetHuid );
+            break;
+        }
+
+        TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::updateRecordEccData(): "
+                    "Success: FetchData returned record data %s on target 0x%.8X",
+                    l_recordName, l_targetHuid );
+
+        // Create the ECC data using the record's data
+        uint8_t l_eccData[l_eccLength];  // Create record data buffer
+        int l_returnCode = vpdeccCreateEcc(l_recordData, l_recordLength,
+                                        l_eccData,   &l_eccLength);
+
+        // Check the return code of the call to "vpdeccCreateEcc()" and create the
+        // appropriate error log if necessary.
+        l_err = checkCreateEccDataReturnCode(l_returnCode, i_target, i_args, l_recordName,
+                                l_recordOffset, l_recordLength, l_eccOffset, l_eccLength);
+        if (l_err)
+        {
+            break;
+        }
+
+        // Write the ECC data to the ECC data's offset
+        l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                    i_target,
+                                    l_eccData,
+                                    l_eccLength,
+                                    DEVICE_EEPROM_ADDRESS(
+                                      EEPROM::VPD_AUTO,
+                                      l_eccOffset,
+                                      EEPROM::AUTOSELECT) );
+
+        if ( l_err )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::updateRecordEccData(): "
+                "Error with call to DeviceFW::deviceOp(WRITE) for target(0x%.8X) "
+                "failed to update the ECC data for record(%s) at ECC offset(0x%.4x) "
+                "with ECC length(0x%.4x)",
+                TARGETING::get_huid(i_target), l_recordName, l_eccOffset, l_eccLength );
+            break;
+        }
+
+        TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::updateRecordEccData(): "
+                "Success with call to DeviceFW::deviceOp(WRITE) for target(0x%.8X) "
+                "succeeded in updating the ECC data for record(%s) at ECC offset(0x%.4x) "
+                "with ECC length(0x%.4x)",
+                TARGETING::get_huid(i_target), l_recordName, l_eccOffset, l_eccLength );
+    } while (0);
+
+    TRACFCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::updateRecordEccData(): "
+                            "returning %s errors for record %s on target 0x%.8X",
+                            (l_err ? "with" : "with no"), l_recordName, l_targetHuid );
+
+    return l_err;
 } // updateRecordEccData
 
 // ------------------------------------------------------------------
@@ -3273,6 +3382,111 @@ IpVpdFacade::getAllRecordMetaData (
 } // getAllRecordMetaData
 
 // ------------------------------------------------------------------
+// IpVpdFacade::getRecordMetaData
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::getRecordMetaData (
+                const TARGETING::TargetHandle_t  i_target,
+                const input_args_t              &i_args,
+                pt_entry                        &o_recordMetaData )
+{
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordMetaData() target(0x%.8X) "
+                "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
+                "eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
+                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+
+    errlHndl_t l_err = nullptr;
+
+    // Clear the outgoing meta data
+    memset(&o_recordMetaData, 0, sizeof(o_recordMetaData));
+
+    do
+    {
+        // Get the record name from the input args
+        const char* l_recordName;
+        l_err = translateRecord(i_args.record, l_recordName);
+        if ( unlikely(nullptr != l_err) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getRecordMetaData(): "
+                       "translateRecord failed to translate record 0x%.8X", i_args.record);
+            break;
+        }
+
+        // Get the VTOC record meta data
+        pt_entry l_vtocRecordMetaData;  // The struct to contain the VTOC meta data
+        l_err = getVtocRecordMetaData(i_target, i_args, l_vtocRecordMetaData);
+        if ( unlikely(nullptr != l_err) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getRecordMetaData(): "
+                       "getVtocRecordMetaData failed to get the record VTOC's meta data");
+            break;
+        }
+
+        // Get the meta data for the record
+        std::list<pt_entry> l_recordMetaDataList;
+        l_err = _getRecordMetaData (i_target, l_vtocRecordMetaData, i_args,
+                                    l_recordMetaDataList, l_recordName );
+        if ( unlikely(nullptr != l_err) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getRecordMetaData(): "
+                       "_getRecordMetaData failed to get the record's %s meta data", l_recordName);
+            break;
+        }
+
+        // If there is meta data in the list, then retrieve it
+        if (l_recordMetaDataList.size())
+        {
+            o_recordMetaData = l_recordMetaDataList.front();
+
+            TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::getRecordMetaData(): Record %s "
+                        "found, returning the record's meta data: record offset 0x%.4X, "
+                        "record length %d, ecc offset 0x%.4X and ecc length %d",
+                        o_recordMetaData.record_name,
+                        le16toh(o_recordMetaData.record_offset),
+                        le16toh(o_recordMetaData.record_length),
+                        le16toh(o_recordMetaData.ecc_offset),
+                        le16toh(o_recordMetaData.ecc_length) );
+        }
+        // Else, if the list is empty, then the record was not found
+        else
+        {
+            TRACFCOMP( g_trac_vpd, "IpVpdFacade::getRecordMetaData(): "
+                       "Record 0x%.4X not found", i_args.record );
+
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_RECORD_NOT_FOUND
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_IPVPD_GET_RECORD_META_DATA
+             * @userdata1[00:31] Target to find record in
+             * @userdata1[32:64] Input arg: Record ID
+             * @userdata2[00:31] Input arg: Location
+             * @userdata2[32:64] Input arg: EEEPROM SOURCE
+             * @devdesc          VPD record was not found.
+             * @custdesc         Firmware error with the VPD.
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             VPD::VPD_IPVPD_GET_RECORD_META_DATA,
+                                             VPD::VPD_RECORD_NOT_FOUND,
+                                             TWO_UINT32_TO_UINT64(
+                                                 TARGETING::get_huid(i_target),
+                                                 i_args.record ),
+                                             TWO_UINT32_TO_UINT64(
+                                                 i_args.location,
+                                                 i_args.eepromSource ),
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            break;
+        }
+    } while (0);
+
+    TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::getRecordMetaData(): "
+                "returning %s errors on target 0x%.8X",
+                (l_err ? "with" : "with no"), TARGETING::get_huid(i_target) );
+
+    return l_err;
+} // getRecordMetaData
+
+// ------------------------------------------------------------------
 // IpVpdFacade::_getRecordMetaData
 // ------------------------------------------------------------------
 errlHndl_t
@@ -3400,6 +3614,119 @@ IpVpdFacade::_getRecordMetaData (
 
     return l_err;
 } // _getRecordMetaData
+
+
+// ------------------------------------------------------------------
+// IpVpdFacade::checkCreateEccDataReturnCode
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::checkCreateEccDataReturnCode(
+                const size_t                     i_createEccDataReturnCode,
+                const TARGETING::TargetHandle_t  i_target,
+                const IpVpdFacade::input_args_t &i_args,
+                const char *                     i_recordName,
+                const uint16_t                   i_recordOffset,
+                const uint16_t                   i_recordLength,
+                const uint16_t                   i_eccOffset,
+                const uint16_t                   i_eccLength )
+{
+    errlHndl_t l_err(nullptr);
+
+    // Get a copy of the target huid, once, for tracing/logging purposes
+    auto l_targetHuid = TARGETING::get_huid(i_target);
+
+    if ( VPD_ECC_NOT_ENOUGH_BUFFER == i_createEccDataReturnCode )
+    {
+        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::checkCreateEccDataReturnCode(): "
+                   "vpdecc_create_ecc failed with error VPD_ECC_NOT_ENOUGH_BUFFER, "
+                   "error code %d, for record %s on target 0x%.8X; record offset(0x%.4X), "
+                   "record length(0x%.4X), ecc offset(0x%.4X), ecc length(0x%.4X)",
+                   i_createEccDataReturnCode, i_recordName, l_targetHuid, i_recordOffset,
+                   i_recordLength, i_eccOffset, i_eccLength );
+
+        /*@
+         * @errortype
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_IPVPD_ECC_DATA_UPDATE
+         * @reasoncode       VPD::VPD_ECC_DATA_ECC_SIZE_ISSUE
+         * @userdata1[00:31] HUID of target
+         * @userdata1[32:47] Record to create ECC data for
+         * @userdata1[48:63] Error code returned from call to vpdecc_create_ecc
+         * @userdata2[00:15] Record data offset
+         * @userdata2[16:31] Record data length
+         * @userdata2[32:47] ECC data offset
+         * @userdata2[48:63] ECC data length
+         * @devdesc          Buffer to store ECC data is not large enough
+         * @custdesc         Firmware error updating the VPD
+         */
+        l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            VPD::VPD_IPVPD_ECC_DATA_UPDATE,
+                            VPD::VPD_ECC_DATA_ECC_SIZE_ISSUE,
+                            TWO_UINT32_TO_UINT64(
+                                l_targetHuid,
+                                TWO_UINT16_TO_UINT32(
+                                    i_args.record,
+                                    i_createEccDataReturnCode ) ),
+                            FOUR_UINT16_TO_UINT64(
+                                i_recordOffset,
+                                i_recordLength,
+                                i_eccOffset,
+                                i_eccLength ),
+                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+    }
+    else if ( i_createEccDataReturnCode != VPD_ECC_OK  )
+    {
+        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::checkCreateEccDataReturnCode(): "
+                   "vpdecc_create_ecc failed with an UNKNOWN error %d "
+                   "for record %s on target 0x%.8X; record offset(0x%.4X), "
+                   "record length(0x%.4X), ecc offset(0x%.4X), ecc length(0x%.4X)",
+                   i_createEccDataReturnCode, i_recordName, l_targetHuid, i_recordOffset,
+                   i_recordLength, i_eccOffset, i_eccLength );
+
+        /*@
+         * @errortype
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_IPVPD_ECC_DATA_UPDATE
+         * @reasoncode       VPD::VPD_ECC_DATA_UNKNOWN_FAILURE
+         * @userdata1[00:31] HUID of target
+         * @userdata1[32:47] Record to create ECC data for
+         * @userdata1[48:63] Error code returned from call to vpdecc_create_ecc
+         * @userdata2[00:15] Record data offset
+         * @userdata2[16:31] Record data length
+         * @userdata2[32:47] ECC data offset
+         * @userdata2[48:63] ECC data length
+         * @devdesc          API vpdecc_create_ecc returned unknown error
+         * @custdesc         Firmware error updating the VPD
+         */
+        l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            VPD::VPD_IPVPD_ECC_DATA_UPDATE,
+                            VPD::VPD_ECC_DATA_UNKNOWN_FAILURE,
+                            TWO_UINT32_TO_UINT64(
+                                l_targetHuid,
+                                TWO_UINT16_TO_UINT32(
+                                    i_args.record,
+                                    i_createEccDataReturnCode ) ),
+                            FOUR_UINT16_TO_UINT64(
+                                i_recordOffset,
+                                i_recordLength,
+                                i_eccOffset,
+                                i_eccLength ),
+                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+    }
+    else
+    {
+        TRACSSCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::checkCreateEccDataReturnCode(): "
+                   "vpdecc_create_ecc successfully updated ECC data for record %s "
+                   "on target 0x%.8X; record offset(0x%.4X), record length(0x%.4X), "
+                   "ecc offset(0x%.4X), ecc length(0x%.4X)",
+                   i_recordName, l_targetHuid, i_recordOffset, i_recordLength,
+                   i_eccOffset, i_eccLength );
+    }
+
+    return l_err;
+} // checkCreateEccDataReturnCode
 
 // ------------------------------------------------------------------
 // IpVpdFacade::checkEccDataValidationReturnCode

@@ -990,6 +990,24 @@ class IpVpdFacade
                 const vhdr_record              &i_vhdrRecordData );
 
     /**
+     * @brief Get the meta data for the record named in the input args, i_args.record,
+     *        from the VPD.
+     *
+     * @param[in] i_target - Pointer to the PROC target where the record is located.
+     * @param[in] i_args   - Device driver input args: Struct that contains the record
+     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       The record ID, identifies the record that the meta data
+     *                       will be retrieved for. Keyword ID is not used.
+     * @param[out] o_recordMetaData - Will contain the record meta data, if found, else
+     *                                will be "zeroed" out.
+     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
+     */
+    errlHndl_t getRecordMetaData (
+                const TARGETING::TargetHandle_t  i_target,
+                const input_args_t              &i_args,
+                pt_entry                        &o_recordMetaData );
+
+    /**
      * @brief If i_recordName is NULL, then get the meta data for all records of the VPD,
      *        excluding the VHDR and VTOC record, else if i_recordName if not NULL, then
      *        only get the meta data for i_recordName.
@@ -1015,6 +1033,44 @@ class IpVpdFacade
                 const input_args_t              &i_args,
                 std::list<pt_entry>             &o_recordMetaDataList,
                 const char* const                i_recordName = nullptr );
+
+    /**
+     * @brief Check the return code of the create ECC data API, returning
+     *        a proper error log, if necessary, for the return code given.
+     *
+     * @details This method just creates an error log, it is up to the caller
+     *          to expand upon/modify/commit or delete the error log as needed.
+     *          The error log returned will be of type unrecoverable,
+     *          ERRL_SEV_UNRECOVERABLE.
+     *          The module ID will be VPD::VPD_IPVPD_ECC_DATA_UPDATE with an
+     *          appropriate reason code: VPD::VPD_ECC_DATA_ECC_SIZE_ISSUE
+     *          or VPD::VPD_ECC_DATA_UNKNOWN_FAILURE.
+     *          The user data will consist of the HUID of the target, record to create
+     *          the ECC data for, error code returned from call to vpdecc_create_ecc,
+     *          record data offset, record data length, ecc data offset and ecc data length.
+     *
+     * @param[in] i_createEccDataReturnCode - The return code from calling the
+     *                                        create the ECC data API.
+     * @param[in] i_target  - Pointer to the PROC target where the record is located.
+     * @param[in] i_args    - Struct that contains the record ID, location of record
+     *                        and EEPROM source.  Keyword data is not used.
+     * @param[in] i_recordName   - Name of the record having it's ECC data validated.
+     * @param[in] i_recordOffset - Offset to the record's data.
+     * @param[in] i_recordLength - Length of the record's data.
+     * @param[in] i_eccOffset    - Offset to the record's ECC data.
+     * @param[in] i_eccLength    - Length of the record's ECC data.
+     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the
+     *                       error log.
+     */
+    errlHndl_t checkCreateEccDataReturnCode(
+                      size_t                     i_createEccDataReturnCode,
+                const TARGETING::TargetHandle_t  i_target,
+                const IpVpdFacade::input_args_t &i_args,
+                const char *                     i_recordName,
+                      uint16_t                   i_recordOffset,
+                      uint16_t                   i_recordLength,
+                      uint16_t                   i_eccOffset,
+                      uint16_t                   i_eccLength );
 
     /**
      * @brief Check the return code of the ECC data validation API, returning

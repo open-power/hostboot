@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -164,10 +164,29 @@ namespace MVPD
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"mvpdWrite()" );
 
-        err = Singleton<MvpdFacade>::instance().write(i_target,
-                                                   io_buffer,
-                                                   io_buflen,
-                                                   args);
+        do
+        {
+            err = Singleton<MvpdFacade>::instance().write( i_target,  io_buffer,
+                                                           io_buflen, args );
+            if (err)
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"mvpdWrite(): MvpdFacade::write() failed "
+                           "to write record(0x%.4X)/keyword(0x%.4X) for target 0x%.8X",
+                           args.record, args.keyword, TARGETING::get_huid(i_target) );
+                break;
+            }
+
+            err = Singleton<MvpdFacade>::instance().updateRecordEccData( i_target, args );
+            if (err)
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"mvpdWrite(): MvpdFacade::updateRecordEccData() "
+                           "failed to update ECC data for record 0x%.4X for target 0x%.8X",
+                           args.record, TARGETING::get_huid(i_target) );
+
+                break;
+            }
+
+        } while (0);
 
         return err;
     }
