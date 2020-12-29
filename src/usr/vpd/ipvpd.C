@@ -2789,8 +2789,17 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
             break;
         }
 
-        // @TODO RTC:250100 Need to validate the VTOC record and all the other
-        // records that the VTOC points to.
+        // Validate the VTOC record's ECC data, the second record in the MVPD data.
+        l_err = validateVtocRecordEccData(i_target, l_args, l_vhdrRecordData);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllRecordEccData(): "
+                       "validateVtocRecordEccData failed to validate the VTOC record");
+            break;
+        }
+
+        // @TODO RTC:250100 Need to validate all the records that the VTOC points to.
+
     } while ( 0 );
 
     if ( unlikely(nullptr != l_err) )
@@ -2944,6 +2953,128 @@ IpVpdFacade::getFullVhdrRecordData ( const TARGETING::TargetHandle_t i_target,
 
     return l_err;
 } // getFullVhdrRecordData
+
+// ------------------------------------------------------------------
+// IpVpdFacade::validateVtocRecordEccData
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::validateVtocRecordEccData(
+                const TARGETING::TargetHandle_t i_target,
+                const input_args_t              &i_args,
+                const vhdr_record               &i_vhdrRecordData )
+{
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateVtocRecordEccData() for "
+                "record %s on target 0x%.8X; i_args = record(0x%.4X), keyword(0x%.4X), "
+                "location(0x%.4X), eepromSource(0x%.4X)",
+                VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target),
+                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+
+    errlHndl_t l_err(nullptr);
+
+    do
+    {
+        // Get the VTOC's meta data
+        pt_entry l_ptEntry;
+        l_err = getVtocRecordMetaData(i_target, i_args, l_ptEntry, &i_vhdrRecordData);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                       "getVtocRecordMetaData failed to get the record VTOC's meta data");
+            break;
+        }
+
+        // Convert the meta data to the correct endianness
+        size_t l_recordOffset(le16toh(l_ptEntry.record_offset));
+        size_t l_recordLength(le16toh(l_ptEntry.record_length));
+        size_t l_eccOffset(le16toh(l_ptEntry.ecc_offset));
+        size_t l_eccLength(le16toh(l_ptEntry.ecc_length));
+
+        TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                    "The record %s meta data: record length %d, record offset 0x%.4X, "
+                    "ecc length %d and ecc offset 0x%.4X",
+                    VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                    l_recordLength, l_recordOffset, l_eccLength, l_eccOffset);
+
+        // Retrieve the record data.
+        uint8_t l_recordData[l_recordLength];  // Create record data buffer
+        l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData,
+                                    i_target,       i_args.eepromSource);
+
+        if ( unlikely(nullptr != l_err) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                       "fetchDataFromEeprom failed to retrieve record %s with record length %d "
+                       "and record offset 0x%.4X on target 0x%.8X",
+                       VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                       l_recordLength, l_recordOffset, TARGETING::get_huid(i_target) );
+            break;
+        }
+
+        // Retrieve the ECC data.
+        uint8_t l_eccData[l_eccLength];  // Create ECC data buffer
+        l_err = fetchDataFromEeprom(l_eccOffset, l_eccLength, l_eccData,
+                                    i_target,    i_args.eepromSource);
+
+        if ( unlikely(nullptr != l_err) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                       "fetchDataFromEeprom failed to retrieve ECC data for record %s "
+                       "with ecc length %d and ecc offset 0x%.4X on target 0x%.8X",
+                       VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                       l_eccLength, l_eccOffset, TARGETING::get_huid(i_target) );
+            break;
+        }
+
+        // Verify that the retrieved ECC data is as expected.
+        size_t l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
+                                              l_eccData,    l_eccLength);
+
+        // If the return code from the call to vpdeccCheckData is not VPD_ECC_OK, then an error occurred
+        if ( unlikely(VPD_ECC_OK != l_returnCode) )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                       "vpdeccCheckData failed with error code %d for record %s "
+                       "on target 0x%.8X", l_returnCode, VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                       TARGETING::get_huid(i_target) );
+
+            // Check the return code of the call to "vpdeccCheckData()" and create the
+            // appropriate error log if necessary.
+            l_err = checkEccDataValidationReturnCode(l_returnCode, i_target, i_args,
+                    VPD_TABLE_OF_CONTENTS_RECORD_NAME, l_recordOffset, l_recordLength,
+                    l_eccOffset, l_eccLength);
+
+            if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                           "vpdeccCheckData returned a correctable error code for record %s "
+                           "on target 0x%.8X",
+                           VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
+
+                // @TODO RTC:263440 Need to update the record in the cache with l_recordData:
+                //       This is a correctable error, which means the record data has been
+                //       updated and corrected.  The corrected/updated record data needs to
+                //       be written back.
+                // Commit the error for now.
+                errlCommit(l_err, VPD_COMP_ID);
+            }
+            else if (l_err)
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                           "vpdeccCheckData failed with error code %d for record %s "
+                           "on target 0x%.8X", l_returnCode,
+                           VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
+                break;
+            }
+        } // if ( unlikely(VPD_ECC_OK != l_returnCode) )
+    } while( 0 );
+
+    TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                "returning %s errors for record %s on target 0x%.8X",
+                (l_err ? "with" : "with no"), VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                TARGETING::get_huid(i_target) );
+
+    return l_err;
+} // validateVtocRecordEccData
 
 // ------------------------------------------------------------------
 // IpVpdFacade::checkEccDataValidationReturnCode

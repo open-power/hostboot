@@ -940,6 +940,21 @@ class IpVpdFacade
                 vhdr_record                     &o_vhdrRecordData );
 
     /**
+     * @brief Validate the VTOC's (VPD Table of Content) record ECC data
+     *
+     * @param[in] i_target - Pointer to the PROC target to retrieve the VTOC record from.
+     * @param[in] i_args   - Device driver input args: Struct that contains the record
+     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       Record ID and keyword ID are not used and therefore not necessary.
+     * @param[in] i_vhdrRecordData - The VHDR record data that contains the VTOC meta data.
+     * @return errlHndl_t  - NULL if successful, otherwise a pointer to an error log.
+     */
+    errlHndl_t validateVtocRecordEccData (
+               const TARGETING::TargetHandle_t  i_target,
+               const IpVpdFacade::input_args_t &i_args,
+               const vhdr_record               &i_vhdrRecordData);
+
+    /**
      * @brief Check the return code of the ECC data validation API, returning
      *        a proper error log, if necessary, for the return code given.
      *
