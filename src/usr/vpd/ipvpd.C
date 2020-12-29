@@ -2798,8 +2798,15 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
             break;
         }
 
-        // @TODO RTC:250100 Need to validate all the records that the VTOC points to.
-
+        // Validate all the other record's ECC data.
+        l_err = validateAllOtherRecordEccData(i_target, l_args, l_vhdrRecordData);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllRecordEccData(): "
+                       "validateAllOtherRecordEccData failed to validate all records "
+                       "excluding the VHDR and VTOC record");
+            break;
+        }
     } while ( 0 );
 
     if ( unlikely(nullptr != l_err) )
@@ -3075,6 +3082,324 @@ IpVpdFacade::validateVtocRecordEccData(
 
     return l_err;
 } // validateVtocRecordEccData
+
+// ------------------------------------------------------------------
+// IpVpdFacade::validateAllOtherRecordEccData
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::validateAllOtherRecordEccData(
+                const TARGETING::TargetHandle_t  i_target,
+                const input_args_t              &i_args,
+                const vhdr_record               &i_vhdrRecordData )
+{
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateAllOtherRecordEccData() "
+                "target(0x%.8X); i_args = record(0x%.4X), keyword(0x%.4X), "
+                "location(0x%.4X), eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
+                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+
+    errlHndl_t l_err(nullptr);
+
+    do
+    {
+        // Get the all the record meta data, minus the VHDR and VTOC records
+        std::list<pt_entry> l_recordMetaDataList;
+        l_err = getAllRecordMetaData(i_target, i_args, l_recordMetaDataList, i_vhdrRecordData);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                        "getAllRecordMetaData failed");
+            break;
+        }
+
+        // There will be multiple records to examine and validate their ECC data.
+        // That will require allocating a buffer for each record and it's associated
+        // ECC data to be retrieved and validated.  To expedite this, create one large
+        // buffer, for each of the data buffers, that can hold any one of the respective
+        // data member rather than constantly allocating and freeing up memory.
+
+        // Find the largest buffer size, for each data member, to be used to create
+        // the largest data buffer necessary.
+        uint16_t l_maxRecordBufferLength(0);
+        uint16_t l_maxEccBufferLength(0);
+        for (const pt_entry &l_ptEntry: l_recordMetaDataList)
+        {
+            uint16_t l_recordLength(le16toh(l_ptEntry.record_length));
+            uint16_t l_eccLength(le16toh(l_ptEntry.ecc_length));
+            l_maxRecordBufferLength = std::max(l_maxRecordBufferLength, l_recordLength);
+            l_maxEccBufferLength = std::max(l_maxEccBufferLength, l_eccLength);
+        }
+
+        // Pre-allocate the buffers, once, with the largest buffer size needed
+        uint8_t l_recordData[l_maxRecordBufferLength];
+        uint8_t l_eccData[l_maxEccBufferLength];
+
+        // Iterate thru the records validating it's ECC data
+        for (const pt_entry &l_ptEntry: l_recordMetaDataList)
+        {
+            // Convert the meta data to the correct format
+            size_t l_recordOffset(le16toh(l_ptEntry.record_offset));
+            size_t l_recordLength(le16toh(l_ptEntry.record_length));
+            size_t l_eccOffset(le16toh(l_ptEntry.ecc_offset));
+            size_t l_eccLength(le16toh(l_ptEntry.ecc_length));
+
+            TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                        "Validating record's %s meta data: record length %d, record offset "
+                        "0x%.4X, ecc length %d and ecc offset 0x%.4X", l_ptEntry.record_name,
+                        l_recordLength, l_recordOffset, l_eccLength, l_eccOffset);
+
+            // Retrieve the record data.
+            l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData,
+                                        i_target,       i_args.eepromSource);
+
+            if ( unlikely(nullptr != l_err) )
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                           "fetchDataFromEeprom failed to retrieve record %s with record length "
+                           "%d and record offset 0x%.4X on target 0x%.8X", l_ptEntry.record_name,
+                           l_recordLength, l_recordOffset, TARGETING::get_huid(i_target) );
+                break;
+            }
+
+            // Retrieve the ECC data.
+            l_err = fetchDataFromEeprom(l_eccOffset, l_eccLength, l_eccData,
+                                        i_target,    i_args.eepromSource);
+
+            if ( unlikely(nullptr != l_err) )
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                           "fetchDataFromEeprom failed to retrieve ECC data for record %s "
+                           "with ecc length %d and ecc offset 0x%.4X on target 0x%.8X",
+                           l_ptEntry.record_name, l_eccLength,
+                           l_eccOffset, TARGETING::get_huid(i_target) );
+                break;
+            }
+
+            // Verify that the retrieved ECC data is as expected.
+            size_t l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
+                                               l_eccData,    l_eccLength);
+
+            // If the return code from the call to vpdeccCheckData is not VPD_ECC_OK, then an error occurred
+            if ( unlikely(VPD_ECC_OK != l_returnCode) )
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                           "vpdeccCheckData failed with error code %d for record %s "
+                           "on target 0x%.8X", l_returnCode, l_ptEntry.record_name,
+                           TARGETING::get_huid(i_target) );
+
+                // Check the return code of the call to "vpdeccCheckData()" and create the
+                // appropriate error log if necessary.
+                l_err = checkEccDataValidationReturnCode(l_returnCode, i_target, i_args,
+                        l_ptEntry.record_name, l_recordOffset, l_recordLength,
+                        l_eccOffset, l_eccLength);
+
+                if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
+                {
+                    TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                               "vpdeccCheckData returned a correctable error code for record %s "
+                               "on target 0x%.8X",
+                               l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+
+                    // @TODO RTC:263440 Need to update the record in the cache with l_recordData:
+                    //       This is a correctable error, which means the record data has been
+                    //       updated and corrected.  The corrected/updated record data needs to
+                    //       be written back.
+                    // Commit the error for now.
+                    errlCommit(l_err, VPD_COMP_ID);
+                }
+                else if (l_err)
+                {
+                    TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                               "vpdeccCheckData failed with error code %d for record %s "
+                               "on target 0x%.8X", l_returnCode,
+                               l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+                    break;
+                }
+            } // if ( unlikely(VPD_ECC_OK != l_returnCode) )
+        } // for (const pt_entry &l_ptEntry: l_recordMetaDataList)
+    } while (0);
+
+    TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+               "returning %s errors on target 0x%.8X",
+               (l_err ? "with" : "with no"), TARGETING::get_huid(i_target) );
+
+    return l_err;
+} // validateAllOtherRecordEccData
+
+// ------------------------------------------------------------------
+// IpVpdFacade::getAllRecordMetaData
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::getAllRecordMetaData (
+                const TARGETING::TargetHandle_t  i_target,
+                const input_args_t              &i_args,
+                std::list<pt_entry>             &o_recordMetaDataList,
+                const vhdr_record               &i_vhdrRecordData  )
+{
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getAllRecordMetaData() target(0x%.8X) "
+                "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
+                "eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
+                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
+
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // Get the VTOC record meta data
+        pt_entry l_vtocRecordMetaData;  // The struct to contain the VTOC meta data
+        l_err = getVtocRecordMetaData(i_target, i_args, l_vtocRecordMetaData, &i_vhdrRecordData);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getAllRecordMetaData(): "
+                       "getVtocRecordMetaData failed to get the record VTOC's meta data");
+            break;
+        }
+
+        l_err = _getRecordMetaData (i_target, l_vtocRecordMetaData, i_args, o_recordMetaDataList);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getAllRecordMetaData(): "
+                       "_getRecordMetaData failed to get all the record meta data");
+
+            break;
+        }
+    } while (0);
+
+    TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::getAllRecordMetaData(): "
+                "returning %s errors on target 0x%.8X and record meta data list with %d entries",
+                (l_err ? "with" : "with no"), TARGETING::get_huid(i_target),
+                o_recordMetaDataList.size() );
+
+    return l_err;
+} // getAllRecordMetaData
+
+// ------------------------------------------------------------------
+// IpVpdFacade::_getRecordMetaData
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::_getRecordMetaData (
+                const TARGETING::TargetHandle_t  i_target,
+                const pt_entry                  &i_vtocRecordMetaData,
+                const input_args_t              &i_args,
+                std::list<pt_entry>             &o_recordMetaDataList,
+                const char* const                i_recordName )
+{
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::_getRecordMetaData() target(0x%.8X); "
+                "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
+                "eepromSource(0x%.4X); %s %s", TARGETING::get_huid(i_target),
+                i_args.record, i_args.keyword, i_args.location, i_args.eepromSource,
+                (i_recordName ? "find record" : "gather all records" ),
+                (i_recordName ? i_recordName : ""));
+
+    errlHndl_t l_err(nullptr);
+
+    // Clear the outgoing list
+    o_recordMetaDataList.clear();
+
+    do
+    {
+        // Skip the 'large resource'
+        uint16_t l_offset = le16toh( i_vtocRecordMetaData.record_offset ) + 1;
+
+        // Create a buffer to hold the VTOC's PT keyword data
+        size_t l_ptKeywordBufferLength(MAX_KEYWORD_SIZE);
+        char   l_ptKeywordBuffer[l_ptKeywordBufferLength] = { 0 };
+
+        // Pointer to the meta data structure; used as a convenient way
+        // to access the record's meta data.
+        pt_entry *l_recordMetaData(nullptr);
+
+        bool l_recordFound(false);
+
+        // Read the PT keyword(s). The VTOC can have multiple PT keywords
+        // but must have at least one.
+        // Exit loop when an error occurs when reading one past the number of PT keywords.
+        for (uint16_t l_index(0); /* exit criteria in code */ ; ++l_index)
+        {
+            l_err = retrieveKeyword( VPD_KEYWORD_POINTER_TO_RECORD,
+                                     VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                                     l_offset, l_index, i_target, l_ptKeywordBuffer,
+                                     l_ptKeywordBufferLength, i_args );
+
+            if ( l_err )
+            {
+                // If index greater than 0, and/or module ID and reason code are of "keyword not
+                // found" then exhausted the number of PT keywords and this error is expected,
+                // delete error log and exit method.
+                if ( ( 0 != l_index ) && ( VPD::VPD_KEYWORD_NOT_FOUND == l_err->reasonCode() ) &&
+                     ( VPD::VPD_IPVPD_FIND_KEYWORD_ADDR == l_err->moduleId() )                   )
+                {
+                    delete l_err;
+                    l_err = nullptr;
+                }
+                // Else, index is 0 and/or there was an issue getting a PT keyword.
+
+                // Exit with or without error log
+                break;
+            }
+
+            // Scan through the VTOC PT keyword buffer, collecting the meta data of each record.
+            for (size_t l_vtocPtOffset = 0; l_vtocPtOffset < l_ptKeywordBufferLength;
+                 l_vtocPtOffset += sizeof(pt_entry))
+            {
+                l_recordMetaData = reinterpret_cast<pt_entry*>(l_ptKeywordBuffer + l_vtocPtOffset);
+                // Caller passed in a record name, then caller is only interested in a particular record
+                if (i_recordName)
+                {
+                    if (0 == memcmp(l_recordMetaData->record_name, i_recordName, RECORD_BYTE_SIZE))
+                    {
+                        TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::_getRecordMetaData(): Record %s "
+                                    "found, returning the record's meta data: record offset "
+                                    "0x%.4X, record length %d, ecc offset 0x%.4X and ecc length %d",
+                                    l_recordMetaData->record_name,
+                                    le16toh(l_recordMetaData->record_offset),
+                                    le16toh(l_recordMetaData->record_length),
+                                    le16toh(l_recordMetaData->ecc_offset),
+                                    le16toh(l_recordMetaData->ecc_length) );
+
+                        o_recordMetaDataList.push_back(*l_recordMetaData);
+                        l_recordFound = true;
+
+                        // Record found, ergo, break out of for loop
+                        break;
+                    }
+                } // if (i_recordName)
+                // Called did not pass in a record name, therefore collect all records
+                else
+                {
+                    TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::_getRecordMetaData(): "
+                                "Collecting the record's %s meta data: record offset 0x%.4X, "
+                                "record length %d, ecc offset 0x%.4X and ecc length %d",
+                                l_recordMetaData->record_name,
+                                le16toh(l_recordMetaData->record_offset),
+                                le16toh(l_recordMetaData->record_length),
+                                le16toh(l_recordMetaData->ecc_offset),
+                                le16toh(l_recordMetaData->ecc_length) );
+
+                    o_recordMetaDataList.push_back(*l_recordMetaData);
+                }
+            } // for (size_t l_vtocPtOffset = 0; ...
+
+            if (l_recordFound)
+            {
+                break;
+            }
+        }; // for (uint16_t l_index(0); /* exit criteria in code */ ; ++l_index)
+
+    } while (0);
+
+    if ( unlikely(nullptr != l_err) )
+    {
+        // Clear the outgoing list
+        o_recordMetaDataList.clear();
+    }
+
+    TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::_getRecordMetaData(): "
+                "returning %s errors on target 0x%.8X and record meta data list with %d entries",
+                (l_err ? "with" : "with no"), TARGETING::get_huid(i_target),
+                o_recordMetaDataList.size() );
+
+    return l_err;
+} // _getRecordMetaData
 
 // ------------------------------------------------------------------
 // IpVpdFacade::checkEccDataValidationReturnCode

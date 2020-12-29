@@ -955,6 +955,68 @@ class IpVpdFacade
                const vhdr_record               &i_vhdrRecordData);
 
     /**
+     * @brief This method will validate all record's ECC data, not including the
+     *        VHDR and the VTOC records.
+     *
+     * @param[in] i_target - Pointer to the PROC target where the records are located.
+     * @param[in] i_args   - Device driver input args: Struct that contains the record
+     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       Record ID and keyword ID are not used and therefore not necessary.
+     * @param[in] i_vhdrRecordData - The VHDR record data that contains the VTOC meta data.
+     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
+     */
+    errlHndl_t validateAllOtherRecordEccData(
+                const TARGETING::TargetHandle_t  i_target,
+                const input_args_t              &i_args,
+                const vhdr_record               &i_vhdrRecordData );
+
+    /**
+     * @brief Get the meta data for all records of the VPD, excluding the VHDR
+     *        and VTOC record.
+     *
+     * @param[in] i_target - Pointer to the PROC target where the records are located.
+     * @param[in] i_args   - Device driver input args: Struct that contains the record
+     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       Record ID and keyword ID are not used and therefore not necessary.
+     * @param[out] o_recordMetaDataList - The list of meta data for each record found,
+     *                                    minus the VHDR and VTOC record.
+     * @param[in] i_vhdrRecordData - The VHDR record data that contains the VTOC meta data.
+     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
+     */
+    errlHndl_t getAllRecordMetaData (
+                const TARGETING::TargetHandle_t i_target,
+                const input_args_t             &i_args,
+                std::list<pt_entry>            &o_recordMetaDataList,
+                const vhdr_record              &i_vhdrRecordData );
+
+    /**
+     * @brief If i_recordName is NULL, then get the meta data for all records of the VPD,
+     *        excluding the VHDR and VTOC record, else if i_recordName if not NULL, then
+     *        only get the meta data for i_recordName.
+     *
+     * @param[in] i_target - Pointer to the PROC target where the records are located.
+     * @param[in] i_args   - Device driver input args: Struct that contains the record
+     *                       ID, keyword ID, location of record and EEPROM source.
+     *                       Record ID and keyword ID are not used and therefore not necessary.
+     * @param[in] i_vtocRecordMetaData - The VTOC record meta data.  The VTOC record contains a
+     *                                   reference to all other records.
+     * @param[out] o_recordMetaDataList - If i_recordName is not null then will contain a single
+     *                                    entry for that record else, if i_recordName is null, then
+     *                                    the list of meta data for each record found,
+     *                                    minus the VHDR and VTOC record.
+     * @param[in](optional) i_recordName - If not null, will only retrieve the meta data for this
+     *                                     record, if NULL, then all record meta data is retrieved
+     *                                     excluding the VHDR and VTOC record.
+     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
+     */
+    errlHndl_t _getRecordMetaData (
+                const TARGETING::TargetHandle_t  i_target,
+                const pt_entry                  &i_vtocRecordMetaData,
+                const input_args_t              &i_args,
+                std::list<pt_entry>             &o_recordMetaDataList,
+                const char* const                i_recordName = nullptr );
+
+    /**
      * @brief Check the return code of the ECC data validation API, returning
      *        a proper error log, if necessary, for the return code given.
      *
