@@ -97,11 +97,11 @@ struct vhdr_record
    uint16_t    pt_kw_name = 0x5054;     // "PT"
    uint8_t     pt_kw_len  = 0x0E;       // 0x0E
    uint32_t    pt_kw_vtoc_name = 0x56544F43; // "VTOC"
-   uint16_t    pt_kw_vtoc_type = 0x0000;     // (unused, doesn't really matter)
+   uint16_t    pt_kw_vtoc_type = 0x0000;     // not known at compile time
    uint16_t    pt_kw_vtoc_off  = 0x3700;     // 0x3700   (little-endian)
    uint16_t    pt_kw_vtoc_len  = 0x0000;     // set by ctor (little-endian)
-   uint16_t    pt_kw_vtoc_ecc_off = 0x0000; // (unused, doesn't really matter)
-   uint16_t    pt_kw_vtoc_ecc_len = 0x0000; // (unused, doesn't really matter)
+   uint16_t    pt_kw_vtoc_ecc_off = 0x0000;  // not known at compile time
+   uint16_t    pt_kw_vtoc_ecc_len = 0x0000;  // not known at compile time
    uint16_t    pf_kw_name = 0x5046;  // "PF"
    uint8_t     pf_kw_len  = 0x08;    // 0x08
    uint64_t    pf_kw_data = 0x0000000000000000;
