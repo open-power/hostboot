@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,34 +186,16 @@ namespace VPD
                    uint32_t i_location, uint32_t i_eepromSource );
 
     /**
-     * @brief Retrieve the record's ECC data and validate.
-     *
-     * @param[in] i_target  - Pointer to the PROC target where the record is located.
-     * @param[in] i_record  - The record ID.
-     * @param[in] i_keyword - The keyword ID.
-     * @param[in] i_location     - The location of the record - AUTOSELECT, SEEPROM, etc.
-     * @param[in] i_eepromSource - The EEPROM source - AUTOSELECT, CACHE or HARDWARE.
-     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
-     */
-    errlHndl_t validateRecordEccData (
-                   const TARGETING::TargetHandle_t  i_target,
-                   uint32_t i_record,   uint32_t i_keyword,
-                   uint32_t i_location, uint32_t i_eepromSource );
-
-    /**
-     * @brief Validate all the record's ECC data
+     * @brief Validate all the records' ECC data
      *
      * @details This method will iterate thru all the MVPDs and validate the ECC
      *          data for each record.  If *not* in HB runtime and a validation fails on
      *          an MVPD then the next source for the MVPD will be examined until all
      *          MVPD sources are exhausted.
-     *          A target will deconfigured for the following reasons:
-     *              * In HB Runtime: Validation of a record's ECC data failed.
-     *              * Not in HB Runtime: Validation of a record's ECC data failed
-     *                                   after all MVPD sources have been exhausted.
-     *              * Not in HB Runtime: The API to get the next MVPD source erred.
-     *                                   Not a validation of a record's ECC data, in
-     *                                   the strictest sense, but prevents validation.
+     *          A target will be deconfigured for the following reasons:
+     *              * Validation of a record's ECC data failed after all MVPD
+     *                sources have been exhausted.
+     *              * The API to get the next MVPD source erred which prevents validation.
      *
      * @param[in] i_target - Pointer to the PROC target where the records are located.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.

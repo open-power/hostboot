@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,71 +23,29 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// ----------------------------------------------
+// ------------------------------------------------------------------
 // Includes
-// ----------------------------------------------
-#include "ipvpd.H"              // translateRecord, findRecordMetaDataSeeprom, fetchData
+// ------------------------------------------------------------------
+#include "ipvpd.H"   // vpdeccCreateEcc, vpdeccCheckData
 
-// ----------------------------------------------
-// Macros for unit testing
-// ----------------------------------------------
-//#define TRACSSCOMP(args...)  TRACFCOMP(args)
-#define TRACSSCOMP(args...)
-
-// ----------------------------------------------
-// Trace definitions
-// ----------------------------------------------
-extern trace_desc_t* g_trac_vpd;
-
-// ----------------------------------------------
-// Forward declarations
-// ----------------------------------------------
-errlHndl_t validateCreateEccResults(
-               const size_t                     i_results,
-               const TARGETING::TargetHandle_t  i_target,
-               const IpVpdFacade::input_args_t &i_args,
-               const char *                     i_recordName,
-               const uint16_t                   i_recordOffset,
-               const uint16_t                   i_recordLength,
-               const uint16_t                   i_eccOffset,
-               const uint16_t                   i_eccLength );
-
-errlHndl_t validateCheckDataResults(
-               const size_t                     i_results,
-               const TARGETING::TargetHandle_t  i_target,
-               const IpVpdFacade::input_args_t &i_args,
-               const char *                     i_recordName,
-               const uint16_t                   i_recordOffset,
-               const uint16_t                   i_recordLength,
-               const uint16_t                   i_eccOffset,
-               const uint16_t                   i_eccLength );
 
 // ------------------------------------------------------------------
-// IpVpdFacade::updateRecordEccData
+// IpVpdFacade::vpdeccCreateEcc
 // ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::updateRecordEccData (
-               const TARGETING::TargetHandle_t  i_target,
-               const IpVpdFacade::input_args_t &i_args )
+int IpVpdFacade::vpdeccCreateEcc(
+                const unsigned char* i_recordData, size_t  i_recordLength,
+                unsigned char*       o_eccData,    size_t* io_eccLength)
 {
-    return nullptr;
-} // updateRecordEccData
+    return 0;
+} // vpdeccCreateEcc
 
 // ------------------------------------------------------------------
-// IpVpdFacade::validateRecordEccData
+// IpVpdFacade::vpdeccCheckData
 // ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::validateRecordEccData (
-               const TARGETING::TargetHandle_t  i_target,
-               const IpVpdFacade::input_args_t &i_args )
+int IpVpdFacade::vpdeccCheckData(
+                unsigned char*       io_recordData, size_t i_recordLength,
+                const unsigned char* i_eccData,     size_t i_eccLength)
 {
-    return nullptr;
-} // validateRecordEccData
-
-// ------------------------------------------------------------------
-// IpVpdFacade::validateAllRecordEccData
-// ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::validateAllRecordEccData (
-               const TARGETING::TargetHandle_t  i_target )
-{
-    return nullptr;
-} // validateAllRecordEccData
+    return 0;
+} // vpdeccCheckData
 

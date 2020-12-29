@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -327,26 +327,16 @@ class IpVpdFacade
      * @brief Retrieve the record and update the record's ECC data
      *
      * @param[in] i_target - Pointer to the PROC target where the record is located.
-     * @param[in] i_args   - Struct that contains the record ID, location of record
-     *                       and EEPROM source.  Keyword data is not used.
+     * @param[in] i_args   - Device driver input args: Struct that contains the
+     *                       record ID, location of record and EEPROM source.
+     *                       Keyword data is not used.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
      */
     errlHndl_t updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
                                      const IpVpdFacade::input_args_t &i_args );
 
     /**
-     * @brief Retrieve the record's ECC data and validate.
-     *
-     * @param[in] i_target - Pointer to the PROC target where the record is located.
-     * @param[in] i_args   - Struct that contains the record ID, location of record
-     *                       and EEPROM source.  Keyword data is not used.
-     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
-     */
-    errlHndl_t validateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
-                                       const IpVpdFacade::input_args_t &i_args);
-
-    /**
-     * @brief Validate all the record's ECC data
+     * @brief Validate all the records' ECC data
      *
      * @details This method will iterate thru all the MVPDs and validate the ECC
      *          data for each record.  If *not* in HB runtime and a validation fails on
@@ -355,7 +345,7 @@ class IpVpdFacade
      *          A target will be deconfigured for the following reasons:
      *              * Validation of a record's ECC data failed after all MVPD
      *                sources have been exhausted.
-     *              * The API to get the next MVPD source erred that prevents validation.
+     *              * The API to get the next MVPD source erred which prevents validation.
      *
      * @param[in] i_target - Pointer to the PROC target where the records are located.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
@@ -379,7 +369,7 @@ class IpVpdFacade
 #endif
 
 
-  protected:
+  protected:  // Methods
 
     /**
      * @brief This function will translate the enumeration for the VPD record
@@ -873,45 +863,20 @@ class IpVpdFacade
                                                uint8_t*& o_ptr );
 
     /**
-     * @brief Retrieve the record's ECC data and validate.
-     *
-     * @param[in] i_target - Pointer to the PROC target where the record is located.
-     * @param[in] i_args   - Struct that contains the record ID, location of record
-     *                       and EEPROM source.  Keyword data is not used.
-     * @param[in] i_recordName   - Name of the record having it's ECC data validated.
-     * @param[in] i_recordOffset - Offset to the record's data.
-     * @param[in] i_recordLength - Length of the record's data.
-     * @param[in] i_eccOffset    - Offset to the record's ECC data.
-     * @param[in] i_eccLength    - Length of the record's ECC data.
-     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the
-     *                       error log.
-     */
-    errlHndl_t validateRecordEccData (
-               const TARGETING::TargetHandle_t  i_target,
-               const IpVpdFacade::input_args_t &i_args,
-               const char *                     i_recordName,
-               const uint16_t                   i_recordOffset,
-               const uint16_t                   i_recordLength,
-               const uint16_t                   i_eccOffset,
-               const uint16_t                   i_eccLength);
-
-    /**
-     * @brief Validate all the record's ECC data
-     *
-     * @param[in] i_target - Pointer to the PROC target where the records are located.
-     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
-     */
-    errlHndl_t _validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_target );
-
-
-    /**
      * @brief Retrieve the VTOC meta data - record name, record type, record offset,
      *        record length, ecc offset and ecc length.
      *
      * @details If the input parameter i_vhdrFullRecordData is NULL then the meta
      *          data will be retrieved via the retrieveKeyword API using the
-     *          input i_args as a param.  If i_vhdrFullRecordData is not NULL,
+     *          input i_args as parameters.  If i_vhdrFullRecordData is not NULL,
      *          then the VTOC meta data will be extracted from this input.
+     *
+     * @pre If the optional input argument i_vhdrFullRecordData is given, then
+     *      it must be fully initialized, meaning that the VTOC meta data must
+     *      be filled in. The constructor for the argument i_vhdrFullRecordData,
+     *      of type vhdr_record, will not fill in the VTOC data therefore it must
+     *      be filled in by other means. If the VTOC meta data is not present then
+     *      an assertion will be raised.
      *
      * @post If no error occurs then the output parameter o_ptEntry will contain
      *       the record meta data.  If an error occurs, an error log will be
@@ -920,16 +885,78 @@ class IpVpdFacade
      * @param[in] i_target - Pointer to the PROC target to retrieve the VTOC record from
      * @param[in] i_args   - Device driver input args: Struct that contains the record
      *                       ID, keyword ID, location of record and EEPROM source.
-     * @param[out] o_ptEntry - Struct to contain the record meta data - record name, record
-     *                         type, record offset, record length, ecc offset and ecc length.
+     * @param[out] o_vtocRecordMetaData - Struct to contain the record meta data - record name,
+     *                                    record type, record offset, record length, ecc offset
+     *                                    and ecc length.
      * @param[in](optional) i_vhdrFullRecordData - If given the VHDR record, then
      *                      the VTOC record meta data will be extracted from this record.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to an error log.
      */
-    errlHndl_t getVtocRecordMetaData ( TARGETING::Target*      i_target,
-                                       const input_args_t      &i_args,
-                                       pt_entry                &o_ptEntry,
-                                       const vhdr_record* const i_vhdrFullRecordData = nullptr );
+    errlHndl_t getVtocRecordMetaData (
+                TARGETING::Target*      i_target,
+                const input_args_t      &i_args,
+                pt_entry                &o_vtocRecordMetaData,
+                const vhdr_record* const i_vhdrFullRecordData = nullptr );
+
+    /**
+     * @brief A wrapper around the vpdecc_create_ecc API.
+     *
+     * @details For the given record data and length of the record this method
+     *          returns the created ECC data for that given record. Caller must
+     *          create the ECC data buffer to contain the created ECC data. If
+     *          the ECC data buffer is not large enough to contain the created
+     *          ECC data then an error code will be returned indicating that.
+     *
+     * @note The parameters are not in HB style, but match the API vpdecc_create_ecc.
+     *
+     * @pre Caller must create the ECC data buffer that will be populated with the ECC
+     *      data.  The ECC data length should be size of the created ECC data buffer.
+     *
+     * @post If no error occurs then the output parameter, o_eccData, will contain
+     *       the created ECC data for the given record.  The returned ECC data length,
+     *       of the created ECC data, may or may not be smaller than the given ECC
+     *       data length.
+     *
+     * @param[in] i_recordData  - Pointer to a VPD's record data. Starting with
+     *                            the Large Resource ID, 0x84, and ending with the
+     *                            Small Resource ID, 0x78, inclusively.
+     * @param[in] i_recordLength - The length of the record data.
+     * @param[out] o_eccData     - Pointer to the created ECC data that is
+     *                             associated with the record data.
+     * @param[in/out] io_eccLength - [in]  The length of the ECC data buffer.
+     *                               [out] The length of the returned ECC data,
+     *                                     created in the ECC data buffer.
+     * @return 0 if success, non-zero for failure/issues
+     */
+    int vpdeccCreateEcc (
+                const unsigned char* i_recordData, size_t  i_recordLength,
+                unsigned char*       o_eccData,    size_t* io_eccLength);
+
+    /**
+     * @brief A wrapper around the vpdecc_check_data API.
+     *
+     * @details For the given record data and ECC data of the given record, this
+     *          method will verify that the ECC data is correct for the record
+     *          data. If the given record data has an issue and can be corrected
+     *          then the record data will be updated and a return code indicating
+     *          that. If there was an issue validating the ECC data then an error
+     *          code is returned indicating the failure.
+     *
+     * @note The parameters are not in HB style, but match the API vpdecc_create_ecc.
+     *
+     * @param[in/out] io_recordData  - [in] Pointer to a VPD's record data. Starting
+     *                                      with the Large Resource ID, 0x84, and ending
+     *                                      with the Small Resource ID, 0x78, inclusively.
+     *                                 [out] If a correctable error occurrs then this will
+     *                                       contain an updated buffer with the corrected data.
+     * @param[in] i_recordLength - The length of the record data.
+     * @param[in] i_eccData      - Pointer to the ECC data associated with the record data.
+     * @param[in] i_eccLength    - The length of the ecc data.
+     * @return 0 if success, non-zero for failure/issues
+     */
+    int vpdeccCheckData(
+                unsigned char*       io_recordData, size_t i_recordLength,
+                const unsigned char* i_eccData,     size_t i_eccLength);
 
   protected: // Variables
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -2597,14 +2597,13 @@ errlHndl_t IpVpdFacade::loadUnloadSecureSection( input_args_t i_args,
 }
 #endif
 
-
 // ------------------------------------------------------------------
 // IpVpdFacade::getVtocRecordMetaData
 // ------------------------------------------------------------------
 errlHndl_t
 IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
                                      const input_args_t      &i_args,
-                                     pt_entry                &o_ptEntry,
+                                     pt_entry                &o_vtocRecordMetaData,
                                      const vhdr_record* const i_vhdrFullRecordData )
 {
     errlHndl_t l_err(nullptr);
@@ -2613,22 +2612,25 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
                 "for target 0x%.8X", TARGETING::get_huid(i_target) );
 
     // Clear the outgoing data
-    memset(&o_ptEntry, 0, sizeof(o_ptEntry));
+    memset(&o_vtocRecordMetaData, 0, sizeof(o_vtocRecordMetaData));
 
     do
     {
         // If the VHDR record is provided, then extract the VTOC meta data from it
         if (unlikely(nullptr != i_vhdrFullRecordData))
         {
+            assert( 0 != i_vhdrFullRecordData->pt_kw_vtoc_ecc_len, "IpVpdFacade::"
+                    "getVtocRecordMetaData(): The VHDR record data has not been properly initialized" );
+
             // Copy the VTOC meta data for caller
-            memcpy( &(o_ptEntry.record_name),
+            memcpy( &(o_vtocRecordMetaData.record_name),
                     &(i_vhdrFullRecordData->pt_kw_vtoc_name),
                     RECORD_BYTE_SIZE);
-            o_ptEntry.record_type   = i_vhdrFullRecordData->pt_kw_vtoc_type;
-            o_ptEntry.record_offset = i_vhdrFullRecordData->pt_kw_vtoc_off;
-            o_ptEntry.record_length = i_vhdrFullRecordData->pt_kw_vtoc_len;
-            o_ptEntry.ecc_offset    = i_vhdrFullRecordData->pt_kw_vtoc_ecc_off;
-            o_ptEntry.ecc_length    = i_vhdrFullRecordData->pt_kw_vtoc_ecc_len;
+            o_vtocRecordMetaData.record_type   = i_vhdrFullRecordData->pt_kw_vtoc_type;
+            o_vtocRecordMetaData.record_offset = i_vhdrFullRecordData->pt_kw_vtoc_off;
+            o_vtocRecordMetaData.record_length = i_vhdrFullRecordData->pt_kw_vtoc_len;
+            o_vtocRecordMetaData.ecc_offset    = i_vhdrFullRecordData->pt_kw_vtoc_ecc_off;
+            o_vtocRecordMetaData.ecc_length    = i_vhdrFullRecordData->pt_kw_vtoc_ecc_len;
         }
         // Need to get the PT keyword from the VHDR record to get the VTOC meta data
         else
@@ -2654,7 +2656,7 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
                 break;
             }
 
-            TRACSSCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+            TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::getVtocRecordMetaData: "
                         "Success with getting PT (Pointer to Record) keyword "
                         "from VHDR record for target 0x%.8X",
                         TARGETING::get_huid(i_target) );
@@ -2701,25 +2703,19 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
             }
 
             // Copy the VTOC meta data for caller
-            memcpy(&(o_ptEntry.record_name), l_tocRecord->record_name,  RECORD_BYTE_SIZE);
-            o_ptEntry.record_type   = l_tocRecord->record_type;
-            o_ptEntry.record_offset = l_tocRecord->record_offset;
-            o_ptEntry.record_length = l_tocRecord->record_length;
-            o_ptEntry.ecc_offset    = l_tocRecord->ecc_offset;
-            o_ptEntry.ecc_length    = l_tocRecord->ecc_length;
+            o_vtocRecordMetaData = *l_tocRecord;
         }
     } while (0);
 
-
     if (!l_err)
     {
-        TRACSSCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+        TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::getVtocRecordMetaData: "
                     "Successfully retrieved VTOC meta data: record name(%s), "
                     "record type(0x%.4X), record offset(0x%.4X), record length(%d) "
                     "ecc offset(0x%.4X) and ecc length(%d) for target 0x%.8X",
-                    o_ptEntry.record_name, le16toh(o_ptEntry.record_type),
-                    le16toh(o_ptEntry.record_offset), le16toh(o_ptEntry.record_length),
-                    le16toh(o_ptEntry.ecc_offset), le16toh(o_ptEntry.ecc_length),
+                    o_vtocRecordMetaData.record_name, le16toh(o_vtocRecordMetaData.record_type),
+                    le16toh(o_vtocRecordMetaData.record_offset), le16toh(o_vtocRecordMetaData.record_length),
+                    le16toh(o_vtocRecordMetaData.ecc_offset), le16toh(o_vtocRecordMetaData.ecc_length),
                     TARGETING::get_huid(i_target) );
     }
 
@@ -2728,6 +2724,27 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
                 (l_err ? "with" : "with no"), TARGETING::get_huid(i_target));
 
     return l_err;
-}
+} // getVtocRecordMetaData
+
+// ------------------------------------------------------------------
+// IpVpdFacade::updateRecordEccData
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
+                                   const IpVpdFacade::input_args_t &i_args )
+{
+    // @TODO 250100  Need to add implementation
+    return nullptr;
+} // updateRecordEccData
+
+// ------------------------------------------------------------------
+// IpVpdFacade::validateAllRecordEccData
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_target )
+{
+    // @TODO 250100  Need to add implementation
+    return nullptr;
+} // validateAllRecordEccData
 
 
