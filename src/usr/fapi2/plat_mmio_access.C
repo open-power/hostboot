@@ -46,7 +46,7 @@ static const uint64_t EXPLR_IB_MMIO_OFFSET       = 0x0000000100000000ull;
 
 // Valid I2C access to 256MB SRAM space, starts at offset 0x01000000
 static const uint64_t MIN_I2C_SRAM_SPACE_ADDRESS = 0x0000000001000000ull;
-static const uint64_t MAX_I2C_SRAM_SPACE_ADDRESS = 0x0000000001030000ull;
+static const uint64_t MAX_I2C_SRAM_SPACE_ADDRESS = 0x0000000011000000ull;
 
 // byte transaction sizes for i2c
 static const size_t I2C_TRANSACTION_SIZE      = 4; // actual size sent
