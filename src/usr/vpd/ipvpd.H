@@ -39,6 +39,10 @@
  *  @brief Provides base support for i/p-Series style IBM VPD
  */
 
+// Global variable to determine if the ECC APIs are present and available.
+// Defined and set in file vpd_ecc_api.C.
+extern const bool g_vpd_ecc_api_present;
+
 /**
  *  @brief  Base class for i/p-Series VPD
  *
@@ -336,16 +340,18 @@ class IpVpdFacade
                                      const IpVpdFacade::input_args_t &i_args );
 
     /**
-     * @brief Validate all the records' ECC data
+     * @brief Validate all the MVPD records' ECC data
      *
-     * @details This method will iterate thru all the MVPDs and validate the ECC
-     *          data for each record.  If *not* in HB runtime and a validation fails on
-     *          an MVPD then the next source for the MVPD will be examined until all
-     *          MVPD sources are exhausted.
+     * @details This method will iterate thru all the MVPD records and validate
+     *          the ECC data for each record. If validation fails on an MVPD then
+     *          the next source for the MVPD will be examined until all MVPD
+     *          sources are exhausted.
      *          A target will be deconfigured for the following reasons:
      *              * Validation of a record's ECC data failed after all MVPD
      *                sources have been exhausted.
      *              * The API to get the next MVPD source erred which prevents validation.
+     *
+     * @pre Target handle (i_target) must be of type PROC.
      *
      * @param[in] i_target - Pointer to the PROC target where the records are located.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
@@ -898,6 +904,19 @@ class IpVpdFacade
                 const input_args_t      &i_args,
                 pt_entry                &o_vtocRecordMetaData,
                 const vhdr_record* const i_vhdrFullRecordData = nullptr );
+
+    /**
+     * @brief Validate all the MVPD records' ECC data
+     *
+     * @details This method will iterate thru all the MVPD records and validate
+     *          the ECC data for each record.
+     *
+     * @pre Target handle (i_target) must be of type PROC, if not, an assertion is raised.
+     *
+     * @param[in] i_target - Pointer to the PROC target where the records are located.
+     * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
+     */
+    errlHndl_t _validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_target );
 
     /**
      * @brief Validate the VHDR's (VPD Header Record) ECC data.

@@ -28,6 +28,10 @@
 // ------------------------------------------------------------------
 #include "ipvpd.H"   // vpdeccCreateEcc, vpdeccCheckData
 
+// ------------------------------------------------------------------
+// Global variable to determine if the ECC APIs are present and available.
+// ------------------------------------------------------------------
+const bool g_vpd_ecc_api_present(false);
 
 // ------------------------------------------------------------------
 // IpVpdFacade::vpdeccCreateEcc

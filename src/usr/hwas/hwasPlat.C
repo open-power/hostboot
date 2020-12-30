@@ -1098,8 +1098,16 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 #if defined(CONFIG_SUPPORT_EEPROM_CACHING) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)
         EEPROM::cacheEepromVpd(pTarget, present);
 
-        //@TODO-RTC:250100-Enable Enterprise VPD ECC
-        // Need to add the VPD ECC data check here
+        // Validate the ECC data of the VPD cache if target is a PROC
+        if (TYPE_PROC == l_attrType)
+        {
+            errl = VPD::validateAllRecordEccData( pTarget );
+            if (errl)
+            {
+                break;
+            }
+        }
+
 #endif
         // FSP normally sets PN/SN so if FSP isn't present, do it here
         //(after VPD has been cached if caching is enabled)
