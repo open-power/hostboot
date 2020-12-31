@@ -3999,6 +3999,14 @@
     <id>unit-mi</id>
     <parent>unit</parent>
     <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>MEM</default>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>
@@ -4059,14 +4067,6 @@
   <targetType>
     <id>unit-mi-power9</id>
     <parent>unit-mi</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>MEM</default>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
     <attribute>
       <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
