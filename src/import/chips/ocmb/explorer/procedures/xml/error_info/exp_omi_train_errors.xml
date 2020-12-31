@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -39,6 +39,7 @@
     <ffdc>DL0_CONFIG1</ffdc>
     <ffdc>DL0_ERROR_HOLD</ffdc>
     <ffdc>OMI_FREQ</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_EXP_OMI_TRAIN_ERR_INFO</id>
       <target>OCMB_TARGET</target>
@@ -54,6 +55,7 @@
       <target>OMIC_TARGET</target>
       <targetType>TARGET_TYPE_OMIC</targetType>
     </collectRegisterFfdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
         <target>OCMB_TARGET</target>
         <priority>HIGH</priority>

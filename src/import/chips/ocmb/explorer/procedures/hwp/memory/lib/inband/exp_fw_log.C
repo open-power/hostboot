@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -194,11 +194,13 @@ fapi2::ReturnCode check_log_cmd_response(
     trace_rsp(i_rsp);
 
     // check if command was successful
+    // setting active log to 0 size to avoid an endless failure loop in exp_fw_log
     FAPI_ASSERT(l_rsp_args.status == STATUS_OP_SUCCESSFUL,
                 fapi2::MSS_EXP_RSP_ARG_FAILED().
                 set_TARGET(i_target).
                 set_RSP_ID(i_rsp.response_id).
-                set_ERROR_CODE(l_rsp_args.err_code),
+                set_ERROR_CODE(l_rsp_args.err_code).
+                set_EXP_ACTIVE_LOG_SIZE(0),
                 "EXP_FW_LOG command 0x%02X failed for %s.  "
                 "Status: 0x%02X, err_code 0x%04X, num_bytes_returned 0x%04X",
                 l_rsp_args.op, mss::c_str(i_target), l_rsp_args.status,

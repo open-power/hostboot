@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1096,7 +1096,8 @@ fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_
                 set_EXTENDED_ERROR_CODE(l_error_code).
                 set_ERROR_CODE(i_rsp.response_argument[5]).
                 set_EXPECTED_REQID(i_cmd.request_identifier).
-                set_ACTUAL_REQID(i_rsp.request_identifier),
+                set_ACTUAL_REQID(i_rsp.request_identifier).
+                set_EXP_ACTIVE_LOG_SIZE(4096),
                 "Failed Explorer command on %s, cmd_id=0x%X, rsp_id=0x%X, response_arg[0]=0x%X, extended_error_code=0x%08X error_code=0x%02X "
                 "RSP RQ ID: %u CMD RQ ID: %u",
                 mss::c_str(i_target), i_cmd.cmd_id, i_rsp.response_id, i_rsp.response_argument[0], l_error_code,

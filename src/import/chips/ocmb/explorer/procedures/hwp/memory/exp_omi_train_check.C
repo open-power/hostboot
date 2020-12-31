@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,7 +138,8 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                 .set_DL0_TRAINING_STATUS(l_omi_training_status)
                 .set_DL0_CONFIG1(l_dl0_config1)
                 .set_DL0_ERROR_HOLD(l_dl0_error_hold)
-                .set_OMI_FREQ(l_omi_freq),
+                .set_OMI_FREQ(l_omi_freq)
+                .set_EXP_ACTIVE_LOG_SIZE(4096),
                 "%s EXP OMI Training Failure, expected state:%d/actual state:%d, "
                 "DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx, DL0_ERROR_HOLD:0x%016llx",
                 mss::c_str(i_target),

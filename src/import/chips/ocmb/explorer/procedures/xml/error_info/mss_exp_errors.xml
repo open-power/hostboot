@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -555,6 +555,8 @@
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
     <ffdc>EXPECTED_REQID</ffdc>
     <ffdc>ACTUAL_REQID</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -837,6 +839,8 @@
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>EXPECTED_LENGTH</ffdc>
     <ffdc>ACTUAL_LENGTH</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>

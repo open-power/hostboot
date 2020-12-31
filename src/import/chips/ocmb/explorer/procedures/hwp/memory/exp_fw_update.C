@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,7 +85,8 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
-                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered device info retrieve error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
                             mss::c_str(i_target),
@@ -103,7 +104,8 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
-                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered device sector info retrieve error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
                             mss::c_str(i_target),
@@ -121,7 +123,8 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
-                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered device erase error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
                             mss::c_str(i_target),
@@ -139,7 +142,8 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
-                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered device write error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
                             mss::c_str(i_target),
@@ -158,7 +162,8 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
-                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command encountered invalid image length error. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
                             mss::c_str(i_target),
@@ -176,7 +181,8 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
-                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_EXP_ACTIVE_LOG_SIZE(4096),
                             "%s Firmware update command reported an authentication failure. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
                             mss::c_str(i_target),
@@ -194,8 +200,9 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                             set_MCHP_STATUS_CODE(i_rsp.response_argument[MCHP_STATUS_CODE]).
                             set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
                             set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
-                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
-                            "%s Recieved unknown failure response for firmware update command. "
+                            set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]).
+                            set_EXP_ACTIVE_LOG_SIZE(4096),
+                            "%s Received unknown failure response for firmware update command. "
                             "MCHP Error codes: response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
                             mss::c_str(i_target),
                             i_rsp.response_argument[MCHP_ERROR_CODE_1],

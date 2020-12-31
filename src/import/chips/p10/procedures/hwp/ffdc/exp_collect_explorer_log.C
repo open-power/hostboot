@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,6 +105,13 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
 
     // How much explorer log data are we allowed to add to the HWP error?
     uint32_t l_allowable_size = *(reinterpret_cast<const uint32_t*>(i_size.ptr()));
+
+    // Just don't grab log if size is zero
+    if (l_allowable_size == 0)
+    {
+        FAPI_INF("exp_collect_explorer_logs(%d) called with 0 size", i_log_type);
+        return l_rc;
+    }
 
     // verify not trying to grab more than allowed per explorer log
     if (l_allowable_size > mss::exp::ib::MAX_BYTES_PER_LOG)
