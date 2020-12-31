@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,8 @@ namespace CxxTest
 std::vector<const char *> CxxSerialTests{ "libtesthwas.so",
                                           "libtesteeprom.so",
                                           "libtestspiserial.so",
-                                          "libtestfapi2serial.so" };
+                                          "libtestfapi2serial.so",
+                                          "libtestvpd.so" };
 
 //
 // TestSuite members
