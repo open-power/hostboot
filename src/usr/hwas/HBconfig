@@ -4,7 +4,7 @@ config NO_GARD_SUPPORT
         Skip guarding when set
 
 config RECALL_DECONFIG_ON_RECONFIG
-    default n
+    default y
     help
         Remember both garded and deconfigured parts on a reconfig loop.
         Normally only garded parts are remembered.
