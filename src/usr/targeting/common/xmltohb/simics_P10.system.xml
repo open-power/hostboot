@@ -293,6 +293,10 @@
         <id>PROC_FABRIC_TOPOLOGY_MODE</id>
         <default>MODE0</default>
     </attribute>
+    <attribute>
+          <id>SBE_SELECT_EX_POLICY</id>
+          <default>HB_DEFAULT</default><!-- Run with minimum cache -->
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -398,7 +402,7 @@
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
     <attribute>
         <id>FREQ_OMI_MHZ</id>
-        <default>21330</default>
+        <default>25600</default>
     </attribute>
     <attribute>
         <id>PROC_FABRIC_TOPOLOGY_ID</id>
@@ -474,7 +478,7 @@
     </attribute>
     <attribute>
         <id>FREQ_OMI_MHZ</id>
-        <default>21330</default>
+        <default>25600</default>
     </attribute>
     <attribute>
         <id>PROC_FABRIC_TOPOLOGY_ID</id>

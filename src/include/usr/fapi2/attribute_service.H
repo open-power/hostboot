@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -336,51 +336,6 @@ ReturnCode platSetSecurityMode();
 ///
 ReturnCode platGetSimicsMode(fapi2::ATTR_IS_SIMICS_Type& o_simicsMode);
 
-/* @TODO RTC 245732: Implement getPllBucket for IOHS
-/// @brief Function to be called by GETMACRO_OB[0,1,2,3]_PLL_BUCKET
-///         functions
-/// @param[in] i_fapiTarget      FAPI2 Target pointer
-/// @param[out] o_bucket_val     corresponding number in PLL frequency list
-/// @param[in] i_index           The index number of the OBUS (0,1,2,3)
-ReturnCode getPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                        uint8_t &o_bucket_val,
-                        const uint8_t i_index);
-*/
-
-/// @brief Retrieves the OMI frequency of the system in Mhz
-//
-//  The OMI frequency attribute is on the processor target but
-//  it is expected that all of the values match.  If all values
-//  do not match then an error will be returned.
-//
-//  @param[out] o_omiFreqMhz  OMI Frequency of the system in Mhz
-//  @return ReturnCode Zero on success, else platform specified error.
-//
-errlHndl_t getOmiFreq(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreqMhz);
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  ATTR_FREQ_MCA_MHZ
-//  @param[in] i_fapiTarget    FAPI2 Target pointer
-//  @param[out] o_val          PB frequency from ATTR_FREQ_PB_MHZ
-//  @return ReturnCode Zero on success, else platform specified error.
-ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                             uint32_t& o_val);
-
-/// @brief This function is called by the FAPI_ATTR_SET macro when getting
-//  ATTR_FREQ_MCA_MHZ
-//  @param[in] i_fapiTarget    FAPI2 Target pointer
-//  @param[in] i_val           New frequency
-//  @return ReturnCode Zero on success, else platform specified error.
-ReturnCode platSetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                             uint32_t i_val);
-
-/// @brief This function is called by the FAPI_ATTR_GET macro when getting
-//  ATTR_MC_PLL_BUCKET
-//  @param[in] i_fapiTarget    FAPI2 Target pointer
-//  @param[in] o_val           PLL bucket associated with a given OMI freq
-//  @return ReturnCode Zero on success, else platform specified error.
-ReturnCode platGetMcPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                              uint8_t& o_val);
 
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
@@ -517,21 +472,5 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetSimicsMode(VAL)
 
-//----------------------------------------------------------------------------
-// MACRO to route ATTR_FREQ_MCA_MHZ access to the correct HB function
-//----------------------------------------------------------------------------
-/* TODO RTC 215209
-#undef ATTR_FREQ_MCA_MHZ_GETMACRO
-#define ATTR_FREQ_MCA_MHZ_GETMACRO(ID, TARGET, VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::\
-    platGetFreqMcaMhz(TARGET, VAL)
-#undef ATTR_FREQ_MCA_MHZ_SETMACRO
-#define ATTR_FREQ_MCA_MHZ_SETMACRO(ID, TARGET, VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::platErrorOnSet(TARGET, VAL)
-*/
 
 #endif // ATTRIBUTESERVICE_H_

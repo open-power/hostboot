@@ -170,8 +170,10 @@ if ($hostboot_profile == FALSE) {
 # Scratch6:  Set isMaster (Bit 24)
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3D*4 0x00000080 4 -b
 
-# Scratch9:  Set pauPllFreqMhz (0:15) mc(0-3)PllBucket (16:27) ndlMeshCtlSetup (28:31)
-(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x180*4 0x09604800 4 -b
+# Scratch9:
+#   Set iohs<bucket>PllBucket (0:15) 4 bits/bucket : FREQ_PAU_MHZ=2400=0x0960
+#   Set mc<bucket>PllBucket (16:27) 3 bits/bucket : FREQ_OMI_MHZ=25600->bucket0
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x180*4 0x09600000 4 -b
 
 # Scratch10: Set iohs<bucket>PllBucket (0:31) 4 bits/bucket
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x181*4 0x33333333 4 -b

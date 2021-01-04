@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -603,13 +603,6 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
                     l_bkt,l_attr_iohs_pll_bkt[l_bkt]);
             }
         }
-    }
-
-    // TODO RTC:259097 remove simics check
-    if (l_reconfigLoop && Util::isSimicsRunning())
-    {
-        TRACFCOMP(g_trac_isteps_trace,"Skipping scratch reg mismatch reboot in Simics");
-        l_reconfigLoop = false;
     }
 
     // If we had a scratch/attribute mismatch do reconfig loop
