@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -2095,6 +2095,8 @@ sub setCommonAttrForChiplet
     {
         $targetType = "SMPGROUP";
         $targetObj->setAttribute($target, "TYPE", $targetType);
+        my $abus_path = $targetObj->getAttribute($target, "INSTANCE_PATH");
+        $targetObj->setAttribute($target, "INSTANCE_PATH", $abus_path."/".$instanceName);
     }
 
     # Make sure the target's parent has been processed.
