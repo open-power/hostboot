@@ -71,6 +71,7 @@ const uint64_t XSCOM_BAR_MASK = 0xFF000003FFFFFFFFULL;
 const uint64_t LPC_BAR_MASK = 0xFF000000FFFFFFFFULL;
 
 namespace Bootloader{
+
     /**
      * @brief Set Secureboot Config Data structure so it is accessible via
      *        Hostboot code
@@ -148,15 +149,18 @@ namespace Bootloader{
                                                l_pSecRomInfo->branchtableOffset;
             g_blData->blToHbData.secureRom = l_pRomStart;
 
-            // Set HW key hash pointer (MAX_HBBL_SIZE - 64 bytes) and size
-            g_blData->blToHbData.hwKeysHash = reinterpret_cast<const void *>
-                                                            (HW_KEYS_HASH_ADDR);
+            // Set HW key hash pointer
+            // @TODO RTC 208821 Temporarily defaulting the HW Key Hash to this value
+            // Will remove once SBE code passes this value in via the BootloaderConfigData_t
+            g_blData->blToHbData.hwKeysHash = default_hw_key_hash;
+
+
             g_blData->blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;
 
-            // Set Minimum FW Secure Version from the 1 byte before HW key hash pointer
-            memcpy(&g_blData->blToHbData.min_secure_version,
-                   reinterpret_cast<const void *>(SECURE_VERSION_ADDR),
-                   sizeof(g_blData->blToHbData.min_secure_version));
+            // Set Minimum FW Secure Version
+            // @TODO RTC 208821 Temporarily defaulting this value to zero
+            // Will remove once SBE code passes this value in via the BootloaderConfigData_t
+            g_blData->blToHbData.min_secure_version = 0;
 
             // Set HBB header and size
             g_blData->blToHbData.hbbHeader = i_pHbbSrc;

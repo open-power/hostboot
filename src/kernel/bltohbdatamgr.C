@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -215,8 +215,10 @@ void BlToHbDataManager::relocatePreservedArea()
     l_pBltoHbDataStart += iv_data.secureRomSize;
 
     // Copy in HW keys' Hash
+    // @TODO RTC 208821 Temporarily defaulting the HW Key Hash to this imprint / development value
+    // Will remove once SBE code passes this value in via the BootloaderConfigData_t
     memcpy(l_pBltoHbDataStart,
-           iv_data.hwKeysHash,
+           Bootloader::default_hw_key_hash,
            iv_data.hwKeysHashSize);
     // Change pointer to new location and increment
     iv_data.hwKeysHash = l_pBltoHbDataStart;

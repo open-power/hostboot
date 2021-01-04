@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,21 @@ namespace Bootloader{
 // boundary for use in getting this information from locations that might already
 // have ECC applied
 #define HBBL_SECURE_VERSION_LOCATION_ALIGNED ALIGN_DOWN_8(HBBL_SECURE_VERSION_LOCATION)
+
+// @TODO RTC 208821 Temporarily defaulting the HW Key Hash to this imprint / development value
+// Will remove once SBE code passes this value in via the BootloaderConfigData_t
+const SHA512_t default_hw_key_hash =
+{
+    0x40,0xd4,0x87,0xff,0x73,0x80,0xed,0x6a,
+    0xd5,0x47,0x75,0xd5,0x79,0x5f,0xea,0x0d,
+    0xe2,0xf5,0x41,0xfe,0xa9,0xdb,0x06,0xb8,
+    0x46,0x6a,0x42,0xa3,0x20,0xe6,0x5f,0x75,
+    0xb4,0x86,0x65,0x46,0x00,0x17,0xd9,0x07,
+    0x51,0x5d,0xc2,0xa5,0xf9,0xfc,0x50,0x95,
+    0x4d,0x6e,0xe0,0xc9,0xb6,0x7d,0x21,0x9d,
+    0xfb,0x70,0x85,0x35,0x1d,0x01,0xd6,0xd1
+};
+
 
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
