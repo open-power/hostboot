@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,6 +177,10 @@ typedef enum
     DDS_S_N_INDEX = 3
 } DDS_JUMP_VALUE_INDEX;
 #endif
+
+
+//WOF_VRATIO Attribute Index
+#define NUM_WOF_VRATIO_PCT      8
 
 #ifndef __ASSEMBLER__
 #ifdef __cplusplus

@@ -162,6 +162,32 @@ enum PGPE_FLAGS_IDX
     PGPE_FLAG_MAX_DEFINED                   = 20
 };
 
+//WOF Vratio vdd attribute indices
+typedef enum
+{
+    WOF_VRATIO_VDD_IDX_CORE                 = 0,
+    WOF_VRATIO_VDD_IDX_CACHE_BASE           = 1,
+    WOF_VRATIO_VDD_IDX_RACETRACK_PER_CORE   = 2,
+    WOF_VRATIO_VDD_IDX_MMA                  = 3,
+    WOF_VRATIO_VDD_IDX_RESERVED4            = 4,
+    WOF_VRATIO_VDD_IDX_RESERVED5            = 5,
+    WOF_VRATIO_VDD_IDX_RESERVED6            = 6,
+    WOF_VRATIO_VDD_IDX_RESERVED7            = 7,
+} WOF_VRATIO_VDD_IDX;
+
+//WOF Vratio vdd attribute indices
+typedef enum
+{
+    WOF_VRATIO_VCS_IDX_CORE                 = 0,
+    WOF_VRATIO_VCS_IDX_CACHE_BASE           = 1,
+    WOF_VRATIO_VCS_IDX_RESERVED2            = 2,
+    WOF_VRATIO_VCS_IDX_RESERVED3            = 3,
+    WOF_VRATIO_VCS_IDX_RESERVED4            = 4,
+    WOF_VRATIO_VCS_IDX_RESERVED5            = 5,
+    WOF_VRATIO_VCS_IDX_RESERVED6            = 6,
+    WOF_VRATIO_VCS_IDX_RESERVED7            = 7,
+} WOF_VRATIO_VCS_IDX;
+
 /// Control Attributes
 typedef union
 {
@@ -484,6 +510,8 @@ typedef struct
     //AvsBusTopology
     AvsBusTopology_t avs_bus_topology;
 
+
+    //To be deleted - WOF
     uint32_t core_on_ratio_vdd;
     uint32_t l3_on_ratio_vdd;
     uint32_t mma_on_ratio_vdd;
@@ -491,6 +519,8 @@ typedef struct
     uint32_t l3_on_ratio_vcs;
     uint32_t vdd_vratio_weight;
     uint32_t vcs_vratio_weight;
+
+    //Array write
     uint16_t array_write_vdn_mv;
     uint16_t array_write_vdd_mv;
 
@@ -573,6 +603,11 @@ typedef struct
     ///   1: VCS
     ///   2: VDN
     uint8_t                 current_scaling_factor[3];
+
+
+    /// WOF vratio attributes
+    uint16_t vratio_vdd_64ths[NUM_WOF_VRATIO_PCT];
+    uint16_t vratio_vcs_64ths[NUM_WOF_VRATIO_PCT];
 
 // __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_t;

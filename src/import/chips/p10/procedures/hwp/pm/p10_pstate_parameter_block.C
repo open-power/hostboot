@@ -1119,6 +1119,11 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
             io_globalppb->current_scaling_factor[i] = iv_attrs.attr_current_scaling_factor[i];
             FAPI_INF("Current_scaling_factor[%u]=%u, attr=%u",io_globalppb->current_scaling_factor[i],iv_attrs.attr_current_scaling_factor[i]);
         }
+        for (uint8_t i = 0; i < NUM_WOF_VRATIO_PCT; i++) {
+            io_globalppb->vratio_vdd_64ths[i] = uint16_t(internal_ceil(iv_attrs.attr_vratio_vdd_10th_pct[i] / 15.625));
+            io_globalppb->vratio_vcs_64ths[i] = uint16_t(internal_ceil(iv_attrs.attr_vratio_vcs_10th_pct[i] / 15.625));
+        }
+
 
     } while (0);
 
@@ -1624,18 +1629,19 @@ FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 
 #define DATABLOCK_GET_ATTR_8(attr_name, target, attr_assign) \
 FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
-FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
-FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
-FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);\
-FAPI_INF("%-54s[4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[4], iv_attrs.attr_assign[4]);\
-FAPI_INF("%-54s[5] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[5], iv_attrs.attr_assign[5]);\
-FAPI_INF("%-54s[6] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[6], iv_attrs.attr_assign[6]);\
-FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.attr_assign[7]);
+FAPI_INF("%-60s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
+FAPI_INF("%-60s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
+FAPI_INF("%-60s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
+FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);\
+FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[4], iv_attrs.attr_assign[4]);\
+FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[5], iv_attrs.attr_assign[5]);\
+FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[6], iv_attrs.attr_assign[6]);\
+FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.attr_assign[7]);
 
     // Frequency attributes
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATE0_FREQ_MHZ, FAPI_SYSTEM, attr_pstate0_freq_mhz);
     DATABLOCK_GET_ATTR(ATTR_NOMINAL_FREQ_MHZ, FAPI_SYSTEM, attr_nominal_freq_mhz);
+
 
     // Frequency Bias attributes
     DATABLOCK_GET_ATTR(ATTR_FREQ_BIAS, iv_procChip, attr_freq_bias);
@@ -1698,6 +1704,9 @@ FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_DDS_TRIP_INTERPOLATION_CONTROL,    FAPI_SYSTEM, attr_dds_trip_interpolation_control);
     DATABLOCK_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT, FAPI_SYSTEM, attr_system_wof_altitude_temp_adjustment);
     DATABLOCK_GET_ATTR(ATTR_WOF_TDP_ALTITUDE_REFERENCE_M, FAPI_SYSTEM, attr_system_wof_tdp_altitude_reference);
+    DATABLOCK_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT, FAPI_SYSTEM, attr_system_wof_altitude_temp_adjustment);
+    DATABLOCK_GET_ATTR_8(ATTR_WOF_VRATIO_VDD_10THPCT, iv_procChip, attr_vratio_vdd_10th_pct);
+    DATABLOCK_GET_ATTR_8(ATTR_WOF_VRATIO_VCS_10THPCT, iv_procChip, attr_vratio_vcs_10th_pct);
 
     //TBD
     //DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
@@ -1907,6 +1916,7 @@ FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.a
     if (iv_attrs.attr_throttle_pstate_number_limit > THROTTLE_PSTATES) {
         iv_attrs.attr_throttle_pstate_number_limit = THROTTLE_PSTATES;
     }
+
 
 
 fapi_try_exit:

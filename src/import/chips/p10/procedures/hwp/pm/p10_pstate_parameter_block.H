@@ -165,6 +165,7 @@ typedef struct
     uint32_t attr_proc_r_loadline_uohm[4];
     uint32_t attr_proc_vrm_voffset_uv[4];
     uint8_t  attr_boot_voltage_biase_0p5pct;
+
     // External Voltage Timing attributes VDD,VCS,VDN,VIO
     uint32_t attr_ext_vrm_transition_start_ns[4];
     uint32_t attr_ext_vrm_transition_rate_inc_uv_per_us[4];
@@ -172,13 +173,16 @@ typedef struct
     uint32_t attr_ext_vrm_stabilization_time_us[4];
     uint32_t attr_ext_vrm_step_size_mv[4];
     uint32_t attr_save_mode_nodds_uplift_mv[2]; //VDD,VCS
-
     uint32_t attr_pstate0_freq_mhz;
     uint32_t attr_nominal_freq_mhz;
-
+    uint32_t attr_pstate0_freq;
     uint32_t freq_proc_refclock_khz;
     uint32_t proc_dpll_divider;
     uint8_t  attr_throttle_pstate_number_limit;
+
+    //WOF Attributes
+    uint16_t attr_vratio_vdd_10th_pct[NUM_WOF_VRATIO_PCT];
+    uint16_t attr_vratio_vcs_10th_pct[NUM_WOF_VRATIO_PCT];
 
     ///Undervolt and Overvolt Attributes
     uint8_t attr_wov_underv_disable;
