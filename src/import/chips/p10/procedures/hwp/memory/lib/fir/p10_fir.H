@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -423,8 +423,7 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
 
     // TODO:ZEN695 USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE for p10 DD2
 
-    l_reg_data.setBit<scomt::mcc::USTL_USTLCFG_DATE_ERROR_RETRY_ENABLE>()
-    .insertFromRight<scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE, scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE_LEN>
+    l_reg_data.insertFromRight<scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE, scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE_LEN>
     (0b11)
     .setBit<scomt::mcc::USTL_USTLCFG_DL_WIDTH_X4_LOL_ENABLE>()
     .setBit<scomt::mcc::USTL_USTLCFG_DL_WIDTH_X2_LOL_ENABLE>()
