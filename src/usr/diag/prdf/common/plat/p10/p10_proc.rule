@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -1245,42 +1245,6 @@ chip p10_proc
         scomaddr    0x03011387;
         capture     group default;
         capture     req nonzero("PB_STATION_FIR_14");
-    };
-
-    ############################################################################
-    # P10 chip PB_EXT_FIR
-    ############################################################################
-
-    register PB_EXT_FIR
-    {
-        name        "P10 chip PB_EXT_FIR";
-        scomaddr    0x030113ae;
-        reset       (&, 0x030113af);
-        mask        (|, 0x030113b3);
-        capture     group default;
-    };
-
-    register PB_EXT_FIR_MASK
-    {
-        name        "P10 chip PB_EXT_FIR MASK";
-        scomaddr    0x030113b1;
-        capture     group default;
-    };
-
-    register PB_EXT_FIR_ACT0
-    {
-        name        "P10 chip PB_EXT_FIR ACT0";
-        scomaddr    0x030113b4;
-        capture     group default;
-        capture     req nonzero("PB_EXT_FIR");
-    };
-
-    register PB_EXT_FIR_ACT1
-    {
-        name        "P10 chip PB_EXT_FIR ACT1";
-        scomaddr    0x030113b5;
-        capture     group default;
-        capture     req nonzero("PB_EXT_FIR");
     };
 
     ############################################################################

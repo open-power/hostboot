@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -39,6 +39,26 @@
 #        scomaddr    0x4602F489;
 #        capture     group default;
 #    };
+
+    ############################################################################
+    # P10 chip PB_EXT_FIR - FOR FFDC ONLY
+    ############################################################################
+
+    register PB_EXT_FIR
+    {
+        name        "P10 chip PB_EXT_FIR";
+        scomaddr    0x030113ae;
+        reset       (&, 0x030113af);
+        mask        (|, 0x030113b3);
+        capture     group default;
+    };
+
+    register PB_EXT_FIR_MASK
+    {
+        name        "P10 chip PB_EXT_FIR MASK";
+        scomaddr    0x030113b1;
+        capture     group default;
+    };
 
     ############################################################################
     # Misc Registers
