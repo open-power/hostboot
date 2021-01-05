@@ -667,28 +667,18 @@ sub manipulateImages
                 # HBBL + ROM combination
                 if ($eyeCatch eq "HBBL")
                 {
-                    # Ensure there is enough room at the end of the HBBL partition
-                    # to store the HW keys' hash.
+                    # Ensure the HBBL partition isn't too large
                     my $hbblRawSize = (-s $bin_file or die "Cannot get size of file $bin_file");
                     print "HBBL raw size ($bin_file) (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
-                    if ($hbblRawSize > $MAX_HBBL_SIZE - HW_KEYS_HASH_SIZE - SECURE_VERSION_SIZE)
+                    if ($hbblRawSize > $MAX_HBBL_SIZE)
                     {
-                        die "HBBL cannot fit Secure Version then HW Keys' Hash (65 bytes) at the end without overwriting real data";
+                        die "HBBL raw size is too large";
                     }
 
-                    # Pad HBBL to max size
+                    # Pad HBBL to max size before Header Phase
                     run_command("cp $bin_file $tempImages{TEMP_BIN}");
                     run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
 
-                    # Add Secure Version then HW key hash to end of HBBL - 65 Bytes
-                    my $insertPtr = (-s $bin_file or die "Cannot get size of file $bin_file")
-                                          - HW_KEYS_HASH_SIZE - SECURE_VERSION_SIZE;
-
-                    # dd used with seek to add the secure version right before hw keys' hash
-                    # at the end of the hbbl padded bin file
-                    run_command("echo -n -e '\\x$secureVersionHbbl' | dd conv=notrunc of=$bin_file bs=1 seek=\$(($insertPtr))");
-                    $insertPtr += 1; # move it past Secure Version byte
-                    run_command("dd if=$hwKeyHashFile conv=notrunc of=$bin_file bs=1 seek=\$(($insertPtr))");
                 }
 
                 # Header Phase
