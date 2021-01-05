@@ -185,6 +185,7 @@ group gMC_OMI_DL_FIR
      *  OMI-DL0 threshold reached
      */
     (rMC_OMI_DL_FIR, bit(10)) ? threshold_and_mask_dl0_omi_bus_CRC;
+    # P10_10: RE dl0_omi_bus_th_32perDay
 
     /** MC_OMI_DL_FIR[11]
      *  OMI-DL0 trained
@@ -285,6 +286,7 @@ group gMC_OMI_DL_FIR
      *  OMI-DL1 threshold reached
      */
     (rMC_OMI_DL_FIR, bit(30)) ? threshold_and_mask_dl1_omi_bus_CRC;
+    # P10_10: RE dl1_omi_bus_th_32perDay
 
     /** MC_OMI_DL_FIR[31]
      *  OMI-DL1 trained

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -296,12 +296,12 @@ group gPCI_CHIPLET_CS_FIR attntype CHECK_STOP
     (rPCI_CHIPLET_CS_FIR, bit(11)) ? analyzeConnectedPHB2;
 
     /** PCI_CHIPLET_CS_FIR[12]
-     *  Attention from PCI_IOP_FIR
+     *  Attention from PCI_IOP_FIR_0
      */
     (rPCI_CHIPLET_CS_FIR, bit(12)) ? analyze(gPCI_IOP_FIR_0);
 
     /** PCI_CHIPLET_CS_FIR[13]
-     *  Attention from PCI_IOP_FIR
+     *  Attention from PCI_IOP_FIR_1
      */
     (rPCI_CHIPLET_CS_FIR, bit(13)) ? analyze(gPCI_IOP_FIR_1);
 
@@ -356,12 +356,12 @@ group gPCI_CHIPLET_RE_FIR attntype RECOVERABLE
     (rPCI_CHIPLET_RE_FIR, bit(11)) ? analyzeConnectedPHB2;
 
     /** PCI_CHIPLET_RE_FIR[12]
-     *  Attention from PCI_IOP_FIR
+     *  Attention from PCI_IOP_FIR_0
      */
     (rPCI_CHIPLET_RE_FIR, bit(12)) ? analyze(gPCI_IOP_FIR_0);
 
     /** PCI_CHIPLET_RE_FIR[13]
-     *  Attention from PCI_IOP_FIR
+     *  Attention from PCI_IOP_FIR_1
      */
     (rPCI_CHIPLET_RE_FIR, bit(13)) ? analyze(gPCI_IOP_FIR_1);
 
@@ -386,12 +386,12 @@ group gPCI_CHIPLET_UCS_FIR attntype UNIT_CS
     (rPCI_CHIPLET_UCS_FIR, bit(4)) ? analyze(gPCI_LOCAL_FIR);
 
     /** PCI_CHIPLET_UCS_FIR[12]
-     *  Attention from PCI_IOP_FIR
+     *  Attention from PCI_IOP_FIR_0
      */
     (rPCI_CHIPLET_UCS_FIR, bit(12)) ? analyze(gPCI_IOP_FIR_0);
 
     /** PCI_CHIPLET_UCS_FIR[13]
-     *  Attention from PCI_IOP_FIR
+     *  Attention from PCI_IOP_FIR_1
      */
     (rPCI_CHIPLET_UCS_FIR, bit(13)) ? analyze(gPCI_IOP_FIR_1);
 
@@ -448,22 +448,22 @@ group gPCI_LOCAL_FIR
     (rPCI_LOCAL_FIR, bit(1)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[2]
-     *  CC - PCB access error -
+     *  CC - PCB access error
      */
     (rPCI_LOCAL_FIR, bit(2)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[3]
-     *  CC - Clock Control Error -
+     *  CC - Clock Control Error
      */
     (rPCI_LOCAL_FIR, bit(3)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[4]
-     *  PSC - PSCOM access error -
+     *  PSC - PSCOM access error
      */
     (rPCI_LOCAL_FIR, bit(4)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error -
+     *  PSC - internal or ring interface error
      */
     (rPCI_LOCAL_FIR, bit(5)) ? self_th_32perDay;
 

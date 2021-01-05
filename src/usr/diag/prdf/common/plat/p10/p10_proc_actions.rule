@@ -98,6 +98,15 @@ actionclass pmRecovery
     threshold1;
 };
 
+# The bits characterized by this action are all handled in the PLL error
+# analysis code. This action is just in case the PLL error handler failed and we
+# got an errant attention.
+actionclass rcs_error_handling { level2_th_1; };
+
+# The bit characterized by this action should be routed to the OCC and should
+# never be seen by PRD.
+actionclass occInterrupt { level2_th_1; };
+
 ###############################################################################
 # TOD actions
 ###############################################################################

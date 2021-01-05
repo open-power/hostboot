@@ -248,7 +248,7 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[9]
      *  A credit reset was attempted while rd and wdf buff
      */
-    (rMC_DSTL_FIR, bit(9)) ? self_th_1;
+    (rMC_DSTL_FIR, bit(9)) ? level2_th_1;
 
     /** MC_DSTL_FIR[10]
      *  Config reg recoverable parity error
@@ -321,47 +321,47 @@ group gMC_DSTL_FIR
     (rMC_DSTL_FIR, bit(23)) ? chnl1_omi_bus_th_1_CRC_UERE;
 
     /** MC_DSTL_FIR[24]
-     *  Error info from decrypt
+     *  decrypt err: scom reg has parity error
      */
     (rMC_DSTL_FIR, bit(24)) ? self_th_1;
 
     /** MC_DSTL_FIR[25]
-     *  Error info from decrypt
+     *  decrypt err: attempt to write or access key when l
      */
     (rMC_DSTL_FIR, bit(25)) ? level2_th_1;
 
     /** MC_DSTL_FIR[26]
-     *  Error info from decrypt
+     *  decrypt err: address pipe parity error
      */
     (rMC_DSTL_FIR, bit(26)) ? self_th_1;
 
     /** MC_DSTL_FIR[27]
-     *  Error info from decrypt
+     *  decrypt err: CL to decrypt parity error on valid t
      */
     (rMC_DSTL_FIR, bit(27)) ? self_th_1;
 
     /** MC_DSTL_FIR[28]
-     *  Error info from decrypt
+     *  decrypt err: parity error on USTL decrypt DMX inte
      */
     (rMC_DSTL_FIR, bit(28)) ? self_th_1;
 
     /** MC_DSTL_FIR[29]
-     *  Error info from encrypt
+     *  encrypt err: scom reg has parity error
      */
     (rMC_DSTL_FIR, bit(29)) ? self_th_1;
 
     /** MC_DSTL_FIR[30]
-     *  Error info from encrypt
+     *  encrypt err: attempt to write or access key when l
      */
     (rMC_DSTL_FIR, bit(30)) ? level2_th_1;
 
     /** MC_DSTL_FIR[31]
-     *  Error info from encrypt
+     *  encrypt err: parity error on address encryption ro
      */
     (rMC_DSTL_FIR, bit(31)) ? self_th_1;
 
     /** MC_DSTL_FIR[32]
-     *  Error info from encrypt
+     *  encrypt err: parity error on data encryption round
      */
     (rMC_DSTL_FIR, bit(32)) ? self_th_1;
 
@@ -394,6 +394,16 @@ group gMC_DSTL_FIR
      *  Reserved
      */
     (rMC_DSTL_FIR, bit(38)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[39]
+     *  Indicates that this subchannel has significant tra
+     */
+    (rMC_DSTL_FIR, bit(39)) ? defaultMaskedError; # P10_20
+
+    /** MC_DSTL_FIR[40]
+     *  Indicates that this subchannel has significant tra
+     */
+    (rMC_DSTL_FIR, bit(40)) ? defaultMaskedError; # P10_20
 
 };
 
@@ -613,12 +623,12 @@ group gMC_USTL_FIR
     (rMC_USTL_FIR, bit(38)) ? chnl1_omi_th_1_UERE;
 
     /** MC_USTL_FIR[39]
-     *  Bad response detected from chan a
+     *  Unexpected read or write response received, chana
      */
     (rMC_USTL_FIR, bit(39)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[40]
-     *  Bad response detected from chan b
+     *  Unexpected read or write response received, chanb
      */
     (rMC_USTL_FIR, bit(40)) ? chnl1_ocmb_th_1_UERE;
 

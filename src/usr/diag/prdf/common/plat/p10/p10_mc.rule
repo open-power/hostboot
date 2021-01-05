@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -531,12 +531,12 @@ group gMC_LOCAL_FIR
     /** MC_LOCAL_FIR[4]
      *  PSC - PSCOM access error
      */
-    (rMC_LOCAL_FIR, bit(4)) ? self_th_32perDay;
+    (rMC_LOCAL_FIR, bit(4)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[5]
      *  PSC - internal or ring interface error
      */
-    (rMC_LOCAL_FIR, bit(5)) ? self_th_32perDay;
+    (rMC_LOCAL_FIR, bit(5)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[6]
      *  THERM - Internal errors
@@ -876,7 +876,7 @@ group gMC_FIR
     (rMC_FIR, bit(4)) ? self_th_1;
 
     /** MC_FIR[5]
-     *  Commandlist early hang trigger activated
+     *  Command list early hang trigger activated
      */
     (rMC_FIR, bit(5)) ? threshold_and_mask_level2;
 
@@ -938,15 +938,15 @@ group gMC_FIR
     /** MC_FIR[17]
      *  Parity Error in WAT/Debug config register.
      */
-    (rMC_FIR, bit(17)) ? self_th_1;
+    (rMC_FIR, bit(17)) ? defaultMaskedError;
 
     /** MC_FIR[18]
-     *  reserved
+     *  PBI received overcommit signal from READ0
      */
     (rMC_FIR, bit(18)) ? defaultMaskedError;
 
     /** MC_FIR[19]
-     *  reserved
+     *  PBI received ocercommit signal from READ1
      */
     (rMC_FIR, bit(19)) ? defaultMaskedError;
 

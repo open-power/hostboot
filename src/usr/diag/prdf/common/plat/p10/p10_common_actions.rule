@@ -137,6 +137,12 @@ actionclass threshold_and_mask_self_th1
     threshold_and_mask_th1;
 };
 
+actionclass threshold_and_mask_parent_proc_th1
+{
+    calloutParentProcMed;
+    threshold_and_mask_th1;
+};
+
 /**
  * Log the error, mask, but do not log as predictive. Applies to both field and
  * manufacturing mode.

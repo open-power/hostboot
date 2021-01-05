@@ -2521,7 +2521,7 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(4)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error - read and
+     *  PSC - internal or ring interface error
      */
     (rTP_LOCAL_FIR, bit(5)) ? self_th_32perDay;
 
@@ -2636,7 +2636,7 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(27)) ? analyzePhypTodError;
 
     /** TP_LOCAL_FIR[28]
-     *  PCB Slave error
+     *  PCB Slave error (includes PLL unlocks)
      */
     (rTP_LOCAL_FIR, bit(28)) ? pcb_slave_internal_parity;
 
@@ -2696,7 +2696,7 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(39)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[40]
-     *  PCB Master - DECMCAST_GRP_ERR
+     *  PCB Master - Multicast group member count underrun
      */
     (rTP_LOCAL_FIR, bit(40)) ? self_th_32perDay;
 
@@ -2706,24 +2706,24 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(41)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[42]
-     *  RCS OSC error on clk0
+     *  RCS OSC error on clk A
      */
-    (rTP_LOCAL_FIR, bit(42)) ? level2_th_1;
+    (rTP_LOCAL_FIR, bit(42)) ? rcs_error_handling;
 
     /** TP_LOCAL_FIR[43]
-     *  RCS OSC error on clk1
+     *  RCS OSC error on clk B
      */
-    (rTP_LOCAL_FIR, bit(43)) ? level2_th_1;
+    (rTP_LOCAL_FIR, bit(43)) ? rcs_error_handling;
 
     /** TP_LOCAL_FIR[44]
-     *  RCS unlock detect on clk0
+     *  RCS - Up/down counter A unlock
      */
-    (rTP_LOCAL_FIR, bit(44)) ? level2_th_1;
+    (rTP_LOCAL_FIR, bit(44)) ? rcs_error_handling;
 
     /** TP_LOCAL_FIR[45]
-     *  RCS unlock detect on clk1
+     *  RCS - Up/down counter B unlock
      */
-    (rTP_LOCAL_FIR, bit(45)) ? level2_th_1;
+    (rTP_LOCAL_FIR, bit(45)) ? rcs_error_handling;
 
     /** TP_LOCAL_FIR[46]
      *  PIBMEM
@@ -2736,37 +2736,37 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(47)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[48]
-     *  OTP - CE/UE combo
+     *  OTP - ECC UE or CE count overflow
      */
     (rTP_LOCAL_FIR, bit(48)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[49]
-     *  DPLL_FIR_NEST_DCO_EMPTY
+     *  Nest DPLL: DCO empty
      */
     (rTP_LOCAL_FIR, bit(49)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[50]
-     *  DPLL_FIR_NEST_DCO_FULL
+     *  Nest DPLL: DCO full
      */
     (rTP_LOCAL_FIR, bit(50)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[51]
-     *  DPLL_FIR_NEST_INT_ERROR
+     *  Nest DPLL: internal error
      */
     (rTP_LOCAL_FIR, bit(51)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[52]
-     *  DPLL_FIR_PAU_DCO_EMPTY
+     *  PAU DPLL: DCO empty
      */
     (rTP_LOCAL_FIR, bit(52)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[53]
-     *  DPLL_FIR_PAU_DCO_FULL
+     *  PAU DPLL: DCO full
      */
     (rTP_LOCAL_FIR, bit(53)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[54]
-     *  DPLL_FIR_PAU_INT_ERROR
+     *  PAU DPLL: internal error
      */
     (rTP_LOCAL_FIR, bit(54)) ? defaultMaskedError;
 
@@ -2849,7 +2849,7 @@ group gOCC_FIR
     (rOCC_FIR, bit(2)) ? defaultMaskedError;
 
     /** OCC_FIR[3]
-     *  STOP_RECOVERY_NOTIFY_PRD
+     *  Stop recovery, notify PRD
      */
     (rOCC_FIR, bit(3)) ? pmRecovery;
 
@@ -2906,7 +2906,7 @@ group gOCC_FIR
     /** OCC_FIR[14]
      *  SRAM UE
      */
-    (rOCC_FIR, bit(14)) ? self_th_1;
+    (rOCC_FIR, bit(14)) ? occInterrupt;
 
     /** OCC_FIR[15]
      *  SRAM CE
@@ -2964,27 +2964,27 @@ group gOCC_FIR
     (rOCC_FIR, bit(25)) ? defaultMaskedError;
 
     /** OCC_FIR[26]
-     *  EXTERNAL_TRAP:
+     *  External Trigger pin active
      */
     (rOCC_FIR, bit(26)) ? defaultMaskedError;
 
     /** OCC_FIR[27]
-     *  PPC405 Core Reset Output asserted (??? firmware)
+     *  PPC405 Core Reset Output asserted
      */
     (rOCC_FIR, bit(27)) ? defaultMaskedError;
 
     /** OCC_FIR[28]
-     *  PPC405 Chip Reset Output asserted (??? firmware)
+     *  PPC405 Chip Reset Output asserted
      */
     (rOCC_FIR, bit(28)) ? defaultMaskedError;
 
     /** OCC_FIR[29]
-     *  PPC405 System Reset Output asserted (??? firmware)
+     *  PPC405 System Reset Output asserted
      */
     (rOCC_FIR, bit(29)) ? defaultMaskedError;
 
     /** OCC_FIR[30]
-     *  PPC405 Wait State asserted (??? firmware)
+     *  PPC405 Wait State asserted
      */
     (rOCC_FIR, bit(30)) ? defaultMaskedError;
 
@@ -3049,7 +3049,7 @@ group gOCC_FIR
     (rOCC_FIR, bit(42)) ? threshold_and_mask_self;
 
     /** OCC_FIR[43]
-     *  Any OCI Slave error occurreds
+     *  Any OCI Slave error occurred
      */
     (rOCC_FIR, bit(43)) ? defaultMaskedError;
 
@@ -3081,12 +3081,12 @@ group gOCC_FIR
     /** OCC_FIR[49]
      *  Reserved
      */
-    (rOCC_FIR, bit(49)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(49)) ? defaultMaskedError;
 
     /** OCC_FIR[50]
      *  Reserved
      */
-    (rOCC_FIR, bit(50)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(50)) ? defaultMaskedError;
 
     /** OCC_FIR[51]
      *  OCI slave error for GPE0
@@ -3111,7 +3111,7 @@ group gOCC_FIR
     /** OCC_FIR[55]
      *  PPC405 ICU timeout on OCI  request
      */
-    (rOCC_FIR, bit(55)) ? defaultMaskedError;
+    (rOCC_FIR, bit(55)) ? threshold_and_mask_self;
 
     /** OCC_FIR[56]
      *  PPC405 DCU timeout on OCI  request
@@ -3164,17 +3164,17 @@ group gPBAO_FIR
     /** PBAO_FIR[0]
      *  OCI Address Parity Error Det
      */
-    (rPBAO_FIR, bit(0)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(0)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[1]
      *  PBA OCI Slave Initialization Error
      */
-    (rPBAO_FIR, bit(1)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(1)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[2]
      *  OCI Write Data Parity Error Detected
      */
-    (rPBAO_FIR, bit(2)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(2)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[3]
      *  Spare -was OCI Re-Request Timeout
@@ -3184,72 +3184,72 @@ group gPBAO_FIR
     /** PBAO_FIR[4]
      *  BCUE Setup Error
      */
-    (rPBAO_FIR, bit(4)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(4)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[5]
      *  BCUE Read Data Parity Error OR MRDERR Asserted
      */
-    (rPBAO_FIR, bit(5)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(5)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[6]
      *  BCDE Setup Error
      */
-    (rPBAO_FIR, bit(6)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(6)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[7]
      *  BCDE Write Data error indicated by OCI Slave
      */
-    (rPBAO_FIR, bit(7)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[8]
      *  Internal Logic Error.  See PBAERRRPT2 for more det
      */
-    (rPBAO_FIR, bit(8)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[9]
      *  Illegal access to OCI Register
      */
-    (rPBAO_FIR, bit(9)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[10]
      *  Push Write Error.
      */
-    (rPBAO_FIR, bit(10)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[11]
      *  Push Write Error.
      */
-    (rPBAO_FIR, bit(11)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(11)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[12]
      *  Illegal PBAX Flow.
      */
-    (rPBAO_FIR, bit(12)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(12)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[13]
      *  Illegal PBAX Flow.
      */
-    (rPBAO_FIR, bit(13)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(13)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[14]
      *  PBAXSND Reservation Error.
      */
-    (rPBAO_FIR, bit(14)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(14)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[15]
      *  PBAXISND Reservation Error.
      */
-    (rPBAO_FIR, bit(15)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(15)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[16]
      *  The htm fifo interface fequency variation error
      */
-    (rPBAO_FIR, bit(16)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(16)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[17]
      *  The PBA has been configured to use the PowerBus To
      */
-    (rPBAO_FIR, bit(17)) ? defaultMaskedError;
+    (rPBAO_FIR, bit(17)) ? threshold_and_mask_self;
 
     /** PBAO_FIR[18]
      *  Spare
@@ -4154,7 +4154,7 @@ rule rNX_CQ_FIR
 
 group gNX_CQ_FIR
     filter singlebit,
-           cs_root_cause(16,21)
+           cs_root_cause(7,16,21)
 {
     /** NX_CQ_FIR[0]
      *  PBI internal parity error
@@ -4194,7 +4194,7 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[7]
      *  PowerBus command hang error
      */
-    (rNX_CQ_FIR, bit(7)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(7)) ? nx_th_1;
 
     /** NX_CQ_FIR[8]
      *  PowerBus read address error
@@ -5568,14 +5568,14 @@ group gN1_LOCAL_FIR
     (rN1_LOCAL_FIR, bit(56)) ? self_th_1;
 
     /** N1_LOCAL_FIR[57]
-     *  Firmware signaled deadman timer tigger occurred
-     */
-    (rN1_LOCAL_FIR, bit(57)) ? TBDDefaultCallout;
-
-    /** N1_LOCAL_FIR[58]
      *  Firmware signaled power bus system quiesce failed
      */
-    (rN1_LOCAL_FIR, bit(58)) ? self_th_1;
+    (rN1_LOCAL_FIR, bit(57)) ? self_th_1;
+
+    /** N1_LOCAL_FIR[58]
+     *  Firmware signaled deadman timer tigger occurred
+     */
+    (rN1_LOCAL_FIR, bit(58)) ? TBDDefaultCallout;
 
     /** N1_LOCAL_FIR[59]
      *  Fimware signaled power bus chip quiesce failed
@@ -5583,17 +5583,17 @@ group gN1_LOCAL_FIR
     (rN1_LOCAL_FIR, bit(59)) ? self_th_1;
 
     /** N1_LOCAL_FIR[60]
-     *  unused
+     *  Hypervisor / Hostboot / OPAL initiated Terminate I
      */
     (rN1_LOCAL_FIR, bit(60)) ? defaultMaskedError;
 
     /** N1_LOCAL_FIR[61]
-     *  unused
+     *  reserved for software use
      */
     (rN1_LOCAL_FIR, bit(61)) ? defaultMaskedError;
 
     /** N1_LOCAL_FIR[62]
-     *  unused
+     *  reserved for software use
      */
     (rN1_LOCAL_FIR, bit(62)) ? defaultMaskedError;
 
@@ -7814,37 +7814,37 @@ group gPSIHB_FIR
     /** PSIHB_FIR[14]
      *  Interrupt register change while interrupt still pe
      */
-    (rPSIHB_FIR, bit(14)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(14)) ? defaultMaskedError; # P10_10
 
     /** PSIHB_FIR[15]
      *  PSI Interrupt address Error
      */
-    (rPSIHB_FIR, bit(15)) ? self_M_level2_L_th_1;
+    (rPSIHB_FIR, bit(15)) ? self_M_level2_L_th_1; # P10_10
 
     /** PSIHB_FIR[16]
      *  OCC Interrupt address Error
      */
-    (rPSIHB_FIR, bit(16)) ? self_M_level2_L_th_1;
+    (rPSIHB_FIR, bit(16)) ? self_M_level2_L_th_1; # P10_10
 
     /** PSIHB_FIR[17]
      *  FSI Interrupt address Error
      */
-    (rPSIHB_FIR, bit(17)) ? self_M_level2_L_th_1;
+    (rPSIHB_FIR, bit(17)) ? self_M_level2_L_th_1; # P10_10
 
     /** PSIHB_FIR[18]
      *  LPC Interrupt address Error
      */
-    (rPSIHB_FIR, bit(18)) ? self_M_level2_L_th_1;
+    (rPSIHB_FIR, bit(18)) ? self_M_level2_L_th_1; # P10_10
 
     /** PSIHB_FIR[19]
      *  LOCAL ERROR Interrupt address Error
      */
-    (rPSIHB_FIR, bit(19)) ? self_M_level2_L_th_1;
+    (rPSIHB_FIR, bit(19)) ? self_M_level2_L_th_1; # P10_10
 
     /** PSIHB_FIR[20]
      *  HOST ERROR Interrupt address Error
      */
-    (rPSIHB_FIR, bit(20)) ? self_M_level2_L_th_1;
+    (rPSIHB_FIR, bit(20)) ? self_M_level2_L_th_1; # P10_10
 
     /** PSIHB_FIR[21]
      *  PSI global error bit 0
@@ -8060,12 +8060,12 @@ group gPBAF_FIR
     /** PBAF_FIR[0]
      *  PB CRESP Addr Error Received for Forwarded Read Re
      */
-    (rPBAF_FIR, bit(0)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(0)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[1]
      *  PB Read Data Timeout  for Forwarded Request
      */
-    (rPBAF_FIR, bit(1)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(1)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[2]
      *  PB Read Data SUE Error  for Forwarded Request
@@ -8075,172 +8075,172 @@ group gPBAF_FIR
     /** PBAF_FIR[3]
      *  PB Read Data UE Error  for Forwarded Request
      */
-    (rPBAF_FIR, bit(3)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(3)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[4]
      *  PB Read Data CE Error  for Forwarded Request
      */
-    (rPBAF_FIR, bit(4)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(4)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[5]
      *  PB Unexpected CRESP
      */
-    (rPBAF_FIR, bit(5)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(5)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[6]
      *  PB Unexpected Data
      */
-    (rPBAF_FIR, bit(6)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(6)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[7]
      *  PB Tag parity Error Detected
      */
-    (rPBAF_FIR, bit(7)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[8]
      *  PB CRESP Addr Error Received for Forwarded Write R
      */
-    (rPBAF_FIR, bit(8)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[9]
      *  PB Invalid CRESP
      */
-    (rPBAF_FIR, bit(9)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[10]
-     *  PB CRESP ACK Dead response received for Forwarded 
+     *  PB CRESP ACK Dead response received for Forwarded
      */
-    (rPBAF_FIR, bit(10)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[11]
      *  PB OPERATIONAL Timeout detected
      */
-    (rPBAF_FIR, bit(11)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(11)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[12]
      *  BCUE PowerBus Link Dead
      */
-    (rPBAF_FIR, bit(12)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(12)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[13]
      *  PB CRESP Addr Error Received for BCUE  Write Reque
      */
-    (rPBAF_FIR, bit(13)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(13)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[14]
      *  BCDE PowerBus Link Dead
      */
-    (rPBAF_FIR, bit(14)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(14)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[15]
      *  PB CRESP Addr Error Received for BCDE  Read Reques
      */
-    (rPBAF_FIR, bit(15)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(15)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[16]
      *  PB Read Data Timeout  for BCDE Request
      */
-    (rPBAF_FIR, bit(16)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(16)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[17]
      *  PB Read Data SUE Error  for BCDE Request
      */
-    (rPBAF_FIR, bit(17)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(17)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[18]
      *  PB Read Data UE Error  for BCDE Request
      */
-    (rPBAF_FIR, bit(18)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(18)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[19]
      *  PB Read Data CE Error  for BCDE Request
      */
-    (rPBAF_FIR, bit(19)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(19)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[20]
      *  Internal Logic Error
      */
-    (rPBAF_FIR, bit(20)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(20)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[21]
      *  Byte count is less than full cache line
      */
-    (rPBAF_FIR, bit(21)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(21)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[22]
      *  PBAXRCV Low data before High Data
      */
-    (rPBAF_FIR, bit(22)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(22)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[23]
      *  PBAXRCV Low data timeout
      */
-    (rPBAF_FIR, bit(23)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(23)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[24]
      *  PBAXRCV Reservation data timeout
      */
-    (rPBAF_FIR, bit(24)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(24)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[25]
      *  Illegal PBAX Flow.  See PBAERRRPT2 for more info
      */
-    (rPBAF_FIR, bit(25)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(25)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[26]
      *  PBAXSND engine retry threshold reached sending Pha
      */
-    (rPBAF_FIR, bit(26)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(26)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[27]
      *  PBAXSND engine retry threshold reached sending Pha
      */
-    (rPBAF_FIR, bit(27)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(27)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[28]
      *  PBAXSND Reservation Timeout
      */
-    (rPBAF_FIR, bit(28)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(28)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[29]
      *  PB CRESP ACK Dead response received
      */
-    (rPBAF_FIR, bit(29)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(29)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[30]
      *  PBAXIRCV Low data before High Data
      */
-    (rPBAF_FIR, bit(30)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(30)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[31]
      *  PBAXIRCV Low data timeout.
      */
-    (rPBAF_FIR, bit(31)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(31)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[32]
      *  PBAXIRCV Reservation data timeout
      */
-    (rPBAF_FIR, bit(32)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(32)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[33]
      *  Illegal PBAX Flow.  See PBAERRRPT2 for more info.
      */
-    (rPBAF_FIR, bit(33)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(33)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[34]
      *  PBAXISND engine retry threshold reached sending Ph
      */
-    (rPBAF_FIR, bit(34)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(34)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[35]
      *  PBAXISND engine retry threshold reached sending Ph
      */
-    (rPBAF_FIR, bit(35)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(35)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[36]
      *  PBAXISND Reservation Timeout
      */
-    (rPBAF_FIR, bit(36)) ? defaultMaskedError;
+    (rPBAF_FIR, bit(36)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[37]
      *  Spare

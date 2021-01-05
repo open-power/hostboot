@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -517,22 +517,22 @@ group gEQ_LOCAL_FIR
     (rEQ_LOCAL_FIR, bit(1)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[2]
-     *  CC - PCB access error - read and clear nn03000F
+     *  CC - PCB access error
      */
     (rEQ_LOCAL_FIR, bit(2)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[3]
-     *  CC - Clock Control Error - read and clear nn03000F
+     *  CC - Clock Control Error
      */
     (rEQ_LOCAL_FIR, bit(3)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[4]
-     *  PSC - PSCOM access error - read and clear nn01001
+     *  PSC - PSCOM access error
      */
     (rEQ_LOCAL_FIR, bit(4)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error - read and 
+     *  PSC - internal or ring interface error
      */
     (rEQ_LOCAL_FIR, bit(5)) ? parent_proc_th_32perDay;
 
@@ -950,7 +950,7 @@ group gEQ_QME_FIR
     (rEQ_QME_FIR, bit(20)) ? defaultMaskedError;
 
     /** EQ_QME_FIR[21]
-     *  RS4 engine forward progress error
+     *  Reserved
      */
     (rEQ_QME_FIR, bit(21)) ? defaultMaskedError;
 
@@ -1015,7 +1015,7 @@ group gEQ_QME_FIR
     (rEQ_QME_FIR, bit(33)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[34]
-     *  Implemented but not used. Input tied to 0.
+     *  A parity error was detected in one of the CCFG lat
      */
     (rEQ_QME_FIR, bit(34)) ? defaultMaskedError;
 

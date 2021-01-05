@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -830,62 +830,62 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[0]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(0)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(0)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[1]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(1)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(1)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[2]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(2)) ? threshold_and_mask_self_th1;
+    (rPAU_PHY_FIR, bit(2)) ? threshold_and_mask_parent_proc_th1;
 
     /** PAU_PHY_FIR[3]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(3)) ? threshold_and_mask_self_th1;
+    (rPAU_PHY_FIR, bit(3)) ? threshold_and_mask_parent_proc_th1;
 
     /** PAU_PHY_FIR[4]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(4)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(4)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[5]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(5)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(5)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[6]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(6)) ? threshold_and_mask_self_th1;
+    (rPAU_PHY_FIR, bit(6)) ? threshold_and_mask_parent_proc_th1;
 
     /** PAU_PHY_FIR[7]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(7)) ? threshold_and_mask_self_th1;
+    (rPAU_PHY_FIR, bit(7)) ? threshold_and_mask_parent_proc_th1;
 
     /** PAU_PHY_FIR[8]
      *  TX ZCAL state machine parity or mode register pari
      */
-    (rPAU_PHY_FIR, bit(8)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(8)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[9]
      *  A PPE internal error has occurred.
      */
-    (rPAU_PHY_FIR, bit(9)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(9)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[10]
      *  A PPE external error has occurred.
      */
-    (rPAU_PHY_FIR, bit(10)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(10)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[11]
      *  A PPE Halt due to Watchdog or Interrupt has occurr
      */
-    (rPAU_PHY_FIR, bit(11)) ? self_M_level2_L_th_1;
+    (rPAU_PHY_FIR, bit(11)) ? parent_proc_M_level2_L_th_1;
 
     /** PAU_PHY_FIR[12]
      *  A PPE Halt due to Debug has occurred.
@@ -895,27 +895,27 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[13]
      *  PPE Halted.
      */
-    (rPAU_PHY_FIR, bit(13)) ? self_M_level2_L_th_1;
+    (rPAU_PHY_FIR, bit(13)) ? parent_proc_M_level2_L_th_1;
 
     /** PAU_PHY_FIR[14]
      *  A PPE Watchdog Timeout has occurred.
      */
-    (rPAU_PHY_FIR, bit(14)) ? self_M_level2_L_th_1;
+    (rPAU_PHY_FIR, bit(14)) ? parent_proc_M_level2_L_th_1;
 
     /** PAU_PHY_FIR[15]
      *  A PPE Array Scrub was missed.
      */
-    (rPAU_PHY_FIR, bit(15)) ? threshold_and_mask_self;
+    (rPAU_PHY_FIR, bit(15)) ? threshold_and_mask_parent_proc;
 
     /** PAU_PHY_FIR[16]
      *  A PPE Array uncorrectable error has occurred.
      */
-    (rPAU_PHY_FIR, bit(16)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(16)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[17]
      *  A PPE Array correctable error has occurred.
      */
-    (rPAU_PHY_FIR, bit(17)) ? self_th_32perDay;
+    (rPAU_PHY_FIR, bit(17)) ? parent_proc_th_32perDay;
 
     /** PAU_PHY_FIR[18]
      *  A PPE Code Recal Abort has occurred.
@@ -925,12 +925,12 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[19]
      *  A PPE Code Fatal Error has occurred.
      */
-    (rPAU_PHY_FIR, bit(19)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(19)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[20]
      *  A PPE Code Warning has occurred.
      */
-    (rPAU_PHY_FIR, bit(20)) ? threshold_and_mask_self;
+    (rPAU_PHY_FIR, bit(20)) ? threshold_and_mask_parent_proc;
 
     /** PAU_PHY_FIR[21]
      *  A PPE Code DFT Error has occurred.
@@ -957,6 +957,11 @@ group gPAU_PHY_FIR
      */
     (rPAU_PHY_FIR, bit(25)) ? defaultMaskedError;
 
+    /** PAU_PHY_FIR[26]
+     *  A SCOM FSM or FIR register parity error has occurr
+     */
+    (rPAU_PHY_FIR, bit(26)) ? defaultMaskedError; # P10_20
+
 };
 
 ################################################################################
@@ -980,7 +985,7 @@ group gPAU_DL_FIR
     /** PAU_DL_FIR[0]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_DL_FIR, bit(0)) ? defaultMaskedError;
+    (rPAU_DL_FIR, bit(0)) ? self_th_1;
 
     /** PAU_DL_FIR[1]
      *  RX state machine parity or mode register parity er

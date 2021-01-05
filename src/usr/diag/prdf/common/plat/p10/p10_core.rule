@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -254,7 +254,7 @@ rule rEQ_L3_FIR
 
 group gEQ_L3_FIR
     filter singlebit,
-           cs_root_cause(5,8,11,17)
+           cs_root_cause(2,5,8,11,17)
 {
     /** EQ_L3_FIR[0]
      *  No members available for a CGC.
@@ -403,7 +403,7 @@ group gEQ_L3_FIR
     /** EQ_L3_FIR[28]
      *  LRU intended to victimize a line, but invalid line
      */
-    (rEQ_L3_FIR, bit(28)) ? l3_lru_parity_error;
+    (rEQ_L3_FIR, bit(28)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[29]
      *  L3 cache congruence class deleted
@@ -441,7 +441,7 @@ rule rEQ_NCU_FIR
 
 group gEQ_NCU_FIR
     filter singlebit,
-           cs_root_cause(3,4,7,8,10,11)
+           cs_root_cause(3,4,5,7,8,10,11)
 {
     /** EQ_NCU_FIR[0]
      *  NCU store queue control error
@@ -471,7 +471,7 @@ group gEQ_NCU_FIR
     /** EQ_NCU_FIR[5]
      *  Topology table error - tried accessing invalid ent
      */
-    (rEQ_NCU_FIR, bit(5)) ? level2_th_1;
+    (rEQ_NCU_FIR, bit(5)) ? self_M_level2_L_th_1;
 
     /** EQ_NCU_FIR[6]
      *  An NCU machine triggerd PB into early hang recover
@@ -574,7 +574,7 @@ rule rEQ_L2_FIR
 
 group gEQ_L2_FIR
     filter singlebit,
-           cs_root_cause(1,12,13,17,18,20)
+           cs_root_cause(1,12,13,17,18,20,27)
 {
     /** EQ_L2_FIR[0]
      *  L2 cache read CE
@@ -716,7 +716,7 @@ group gEQ_L2_FIR
     /** EQ_L2_FIR[27]
      *  Bad topology table config software error
      */
-    (rEQ_L2_FIR, bit(27)) ? level2_th_1;
+    (rEQ_L2_FIR, bit(27)) ? self_M_level2_L_th_1;
 
     /** EQ_L2_FIR[28]
      *  Darn timed out waiting for data.
@@ -866,7 +866,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[13]
      *  ISU recoverable if not in MT window
      */
-    (rEQ_CORE_FIR, bit(13)) ? self_th_5perHour;
+    (rEQ_CORE_FIR, bit(13)) ? self_th_5perHour; # P10_10
 
     /** EQ_CORE_FIR[14]
      *  MCHK received while ME=0 - non recoverable
