@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2020
+# Contributors Listed Below - COPYRIGHT 2018,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -153,16 +153,16 @@ actionclass chnl1_ocmb_H_omi_L_th_32_perDay
 
 actionclass threshold_and_mask_chnl0_ocmb_th_1
 {
-    threshold_and_mask;
     chnl0_ocmb;
     threshold1;
+    funccall("ClearServiceCallFlag");
 };
 
 actionclass threshold_and_mask_chnl1_ocmb_th_1
 {
-    threshold_and_mask;
     chnl1_ocmb;
     threshold1;
+    funccall("ClearServiceCallFlag");
 };
 
 # Bits using these actions are CRC-related errors that are potential
