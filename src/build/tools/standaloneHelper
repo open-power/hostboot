@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2020
+# Contributors Listed Below - COPYRIGHT 2012,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -189,7 +189,7 @@ generate_hcode_image()
         CTEPATH=/afs/awd.austin.ibm.com/projects/cte PROJECT_ROOT=${EKB_DIR} \
                ./ekb workon<<<'unset HOST_PREFIX && \
         git submodule update --init chips/p10/engd/p10 && \
-        ./ekb build -j2 p10.hw_image && \
+        ./ekb build p10.hw_image && \
         exit'
         cd ${PROJECT_ROOT}
     else
