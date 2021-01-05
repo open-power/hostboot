@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -263,12 +263,12 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[12]
      *  Subchannel A counter error
      */
-    (rMC_DSTL_FIR, bit(12)) ? chnl0_omi_bus_th_1;
+    (rMC_DSTL_FIR, bit(12)) ? chnl0_omi_bus_th_1_UERE;
 
     /** MC_DSTL_FIR[13]
      *  Subchannel B counter error
      */
-    (rMC_DSTL_FIR, bit(13)) ? chnl1_omi_bus_th_1;
+    (rMC_DSTL_FIR, bit(13)) ? chnl1_omi_bus_th_1_UERE;
 
     /** MC_DSTL_FIR[14]
      *  Subchannel A valid cmd timeout error
@@ -283,12 +283,12 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[16]
      *  Subchannel A buffer overuse error
      */
-    (rMC_DSTL_FIR, bit(16)) ? chnl0_ocmb_th_1;
+    (rMC_DSTL_FIR, bit(16)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_DSTL_FIR[17]
      *  Subchannel B buffer overuse error
      */
-    (rMC_DSTL_FIR, bit(17)) ? chnl1_ocmb_th_1;
+    (rMC_DSTL_FIR, bit(17)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_DSTL_FIR[18]
      *  Subchannel A DL link down
@@ -313,12 +313,12 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[22]
      *  DSTLFIR channel timeout on subch A
      */
-    (rMC_DSTL_FIR, bit(22)) ? chnl0_omi_bus_th_1_CRC;
+    (rMC_DSTL_FIR, bit(22)) ? chnl0_omi_bus_th_1_CRC_UERE;
 
     /** MC_DSTL_FIR[23]
      *  DSTLFIR channel timeout on subch B
      */
-    (rMC_DSTL_FIR, bit(23)) ? chnl1_omi_bus_th_1_CRC;
+    (rMC_DSTL_FIR, bit(23)) ? chnl1_omi_bus_th_1_CRC_UERE;
 
     /** MC_DSTL_FIR[24]
      *  Error info from decrypt
@@ -378,12 +378,12 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[35]
      *  A parity error local to Subchhanel A occurred.
      */
-    (rMC_DSTL_FIR, bit(35)) ? chnl0_omi_th_1;
+    (rMC_DSTL_FIR, bit(35)) ? chnl0_omi_th_1_UERE;
 
     /** MC_DSTL_FIR[36]
      *  A parity error local to Subchhanel B occurred.
      */
-    (rMC_DSTL_FIR, bit(36)) ? chnl1_omi_th_1;
+    (rMC_DSTL_FIR, bit(36)) ? chnl1_omi_th_1_UERE;
 
     /** MC_DSTL_FIR[37]
      *  Reserved
@@ -420,22 +420,22 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[0]
      *  Unexpected Flit Data showed up for Chana
      */
-    (rMC_USTL_FIR, bit(0)) ? chnl0_ocmb_th_1;
+    (rMC_USTL_FIR, bit(0)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[1]
      *  Unexpected Flit Data showed up for Chanb
      */
-    (rMC_USTL_FIR, bit(1)) ? chnl1_ocmb_th_1;
+    (rMC_USTL_FIR, bit(1)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[2]
      *  A unsupported template for a command flit for chan
      */
-    (rMC_USTL_FIR, bit(2)) ? chnl0_ocmb_th_1;
+    (rMC_USTL_FIR, bit(2)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[3]
      *  A unsupported template for a command flit for chan
      */
-    (rMC_USTL_FIR, bit(3)) ? chnl1_ocmb_th_1;
+    (rMC_USTL_FIR, bit(3)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[4]
      *  Reserved.
@@ -555,12 +555,12 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[27]
      *  A fail response set as checkstop occurred for chan
      */
-    (rMC_USTL_FIR, bit(27)) ? chnl0_ocmb_th_1;
+    (rMC_USTL_FIR, bit(27)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[28]
      *  A fail response set as checkstop occurred for chan
      */
-    (rMC_USTL_FIR, bit(28)) ? chnl1_ocmb_th_1;
+    (rMC_USTL_FIR, bit(28)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[29]
      *  A fail response set as recoverable occurred for ch
@@ -595,52 +595,52 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[35]
      *  flit data pariry error from dl for chana
      */
-    (rMC_USTL_FIR, bit(35)) ? chnl0_omi_th_1;
+    (rMC_USTL_FIR, bit(35)) ? chnl0_omi_th_1_UERE;
 
     /** MC_USTL_FIR[36]
      *  flit data pariry error from dl for chanb
      */
-    (rMC_USTL_FIR, bit(36)) ? chnl1_omi_th_1;
+    (rMC_USTL_FIR, bit(36)) ? chnl1_omi_th_1_UERE;
 
     /** MC_USTL_FIR[37]
      *  internal fifo parity error for chana
      */
-    (rMC_USTL_FIR, bit(37)) ? chnl0_omi_th_1;
+    (rMC_USTL_FIR, bit(37)) ? chnl0_omi_th_1_UERE;
 
     /** MC_USTL_FIR[38]
      *  internal fifo parity error for chanb
      */
-    (rMC_USTL_FIR, bit(38)) ? chnl1_omi_th_1;
+    (rMC_USTL_FIR, bit(38)) ? chnl1_omi_th_1_UERE;
 
     /** MC_USTL_FIR[39]
      *  Bad response detected from chan a
      */
-    (rMC_USTL_FIR, bit(39)) ? chnl0_ocmb_th_1;
+    (rMC_USTL_FIR, bit(39)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[40]
      *  Bad response detected from chan b
      */
-    (rMC_USTL_FIR, bit(40)) ? chnl1_ocmb_th_1;
+    (rMC_USTL_FIR, bit(40)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[41]
      *  Bad data set for data that is not valid chana
      */
-    (rMC_USTL_FIR, bit(41)) ? chnl0_ocmb_th_1;
+    (rMC_USTL_FIR, bit(41)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[42]
      *  Bad data set for data that is not valid chanb
      */
-    (rMC_USTL_FIR, bit(42)) ? chnl1_ocmb_th_1;
+    (rMC_USTL_FIR, bit(42)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[43]
      *  Memory read data returned in template 0, chana
      */
-    (rMC_USTL_FIR, bit(43)) ? chnl0_ocmb_th_1;
+    (rMC_USTL_FIR, bit(43)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[44]
      *  Memory read data returned in template 0, chanb
      */
-    (rMC_USTL_FIR, bit(44)) ? chnl1_ocmb_th_1;
+    (rMC_USTL_FIR, bit(44)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[45]
      *  Recieved mmio response while in LOL mode chana
@@ -665,42 +665,42 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[49]
      *  ChanA excessive data error
      */
-    (rMC_USTL_FIR, bit(49)) ? chnl0_ocmb_th_1;
+    (rMC_USTL_FIR, bit(49)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[50]
      *  ChanB excessive data error
      */
-    (rMC_USTL_FIR, bit(50)) ? chnl1_ocmb_th_1;
+    (rMC_USTL_FIR, bit(50)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[51]
      *  Commit state where commit data is not marked as va
      */
-    (rMC_USTL_FIR, bit(51)) ? chnl0_omi_th_1;
+    (rMC_USTL_FIR, bit(51)) ? chnl0_omi_th_1_UERE;
 
     /** MC_USTL_FIR[52]
      *  Commit state where commit data is not marked as va
      */
-    (rMC_USTL_FIR, bit(52)) ? chnl1_omi_th_1;
+    (rMC_USTL_FIR, bit(52)) ? chnl1_omi_th_1_UERE;
 
     /** MC_USTL_FIR[53]
      *  A fifo in the ustl chana overflowed
      */
-    (rMC_USTL_FIR, bit(53)) ? chnl0_omi_th_1;
+    (rMC_USTL_FIR, bit(53)) ? chnl0_omi_th_1_UERE;
 
     /** MC_USTL_FIR[54]
      *  A fifo in the ustl chanb overflowed
      */
-    (rMC_USTL_FIR, bit(54)) ? chnl1_omi_th_1;
+    (rMC_USTL_FIR, bit(54)) ? chnl1_omi_th_1_UERE;
 
     /** MC_USTL_FIR[55]
      *  Invalid command decoded in USTL FF subchannel A
      */
-    (rMC_USTL_FIR, bit(55)) ? chnl0_ocmb_th_1;
+    (rMC_USTL_FIR, bit(55)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[56]
      *  Invalid command decoded in USTL FF subchannel B
      */
-    (rMC_USTL_FIR, bit(56)) ? chnl1_ocmb_th_1;
+    (rMC_USTL_FIR, bit(56)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[57]
      *  Fatal register parity error
@@ -715,12 +715,12 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[59]
      *  ChanA response invalid(dlength and/or dpart receiv
      */
-    (rMC_USTL_FIR, bit(59)) ? chnl0_ocmb_th_1;
+    (rMC_USTL_FIR, bit(59)) ? chnl0_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[60]
      *  ChanB response invalid(dlength and/or dpart receiv
      */
-    (rMC_USTL_FIR, bit(60)) ? chnl1_ocmb_th_1;
+    (rMC_USTL_FIR, bit(60)) ? chnl1_ocmb_th_1_UERE;
 
     /** MC_USTL_FIR[61]
      *  USTLFIR mirror chanfail related parity error

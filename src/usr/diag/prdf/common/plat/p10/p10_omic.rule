@@ -134,7 +134,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[0]
      *  OMI-DL0 fatal error
      */
-    (rMC_OMI_DL_FIR, bit(0)) ? dl0_fatal_error;
+    (rMC_OMI_DL_FIR, bit(0)) ? dl0_fatal_error_UERE;
 
     /** MC_OMI_DL_FIR[1]
      *  OMI-DL0 UE on data flit
@@ -234,7 +234,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[20]
      *  OMI-DL1 fatal error
      */
-    (rMC_OMI_DL_FIR, bit(20)) ? dl1_fatal_error;
+    (rMC_OMI_DL_FIR, bit(20)) ? dl1_fatal_error_UERE;
 
     /** MC_OMI_DL_FIR[21]
      *  OMI-DL1 UE on data flit

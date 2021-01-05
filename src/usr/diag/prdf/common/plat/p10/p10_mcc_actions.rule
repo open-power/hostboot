@@ -178,6 +178,15 @@ actionclass chnl1_omi_bus_th_1_CRC
     threshold1;
 };
 
+actionclass chnl0_omi_th_1_UERE         { SueSource; chnl0_omi_th_1; };
+actionclass chnl1_omi_th_1_UERE         { SueSource; chnl1_omi_th_1; };
+actionclass chnl0_ocmb_th_1_UERE        { SueSource; chnl0_ocmb_th_1; };
+actionclass chnl1_ocmb_th_1_UERE        { SueSource; chnl1_ocmb_th_1; };
+actionclass chnl0_omi_bus_th_1_UERE     { SueSource; chnl0_omi_bus_th_1; };
+actionclass chnl1_omi_bus_th_1_UERE     { SueSource; chnl1_omi_bus_th_1; };
+actionclass chnl0_omi_bus_th_1_CRC_UERE { SueSource; chnl0_omi_bus_th_1_CRC; };
+actionclass chnl1_omi_bus_th_1_CRC_UERE { SueSource; chnl1_omi_bus_th_1_CRC; };
+
 ################################################################################
 # Analyze connected
 ################################################################################

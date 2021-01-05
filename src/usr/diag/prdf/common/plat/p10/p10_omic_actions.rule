@@ -73,6 +73,9 @@ actionclass dl1_fatal_error
     threshold1;
 };
 
+actionclass dl0_fatal_error_UERE { SueSource; dl0_fatal_error; };
+actionclass dl1_fatal_error_UERE { SueSource; dl1_fatal_error; };
+
 actionclass dl0_omi_th_1
 {
     dl0_omi;
