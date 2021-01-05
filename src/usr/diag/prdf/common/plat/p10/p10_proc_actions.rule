@@ -75,22 +75,22 @@ actionclass hang_recovery_gte
     funccall("ClearServiceCallFlag_mnfgInfo");
 };
 
-actionclass hang_recovery_gte_0  {capture(PbStationMode0 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_1  {capture(PbStationMode1 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_2  {capture(PbStationMode2 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_3  {capture(PbStationMode3 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_4  {capture(PbStationMode4 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_5  {capture(PbStationMode5 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_6  {capture(PbStationMode6 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_7  {capture(PbStationMode7 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_8  {capture(PbStationMode8 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_9  {capture(PbStationMode9 ); hang_recovery_gte;};
-actionclass hang_recovery_gte_10 {capture(PbStationMode10); hang_recovery_gte;};
-actionclass hang_recovery_gte_11 {capture(PbStationMode11); hang_recovery_gte;};
-actionclass hang_recovery_gte_12 {capture(PbStationMode12); hang_recovery_gte;};
-actionclass hang_recovery_gte_13 {capture(PbStationMode13); hang_recovery_gte;};
-actionclass hang_recovery_gte_14 {capture(PbStationMode14); hang_recovery_gte;};
-actionclass hang_recovery_gte_15 {capture(PbStationMode15); hang_recovery_gte;};
+actionclass hang_recovery_gte_eq0 {capture(PbStationModeEQ0); hang_recovery_gte;};
+actionclass hang_recovery_gte_eq1 {capture(PbStationModeEQ1); hang_recovery_gte;};
+actionclass hang_recovery_gte_eq2 {capture(PbStationModeEQ2); hang_recovery_gte;};
+actionclass hang_recovery_gte_eq3 {capture(PbStationModeEQ3); hang_recovery_gte;};
+actionclass hang_recovery_gte_eq4 {capture(PbStationModeEQ4); hang_recovery_gte;};
+actionclass hang_recovery_gte_eq5 {capture(PbStationModeEQ5); hang_recovery_gte;};
+actionclass hang_recovery_gte_eq6 {capture(PbStationModeEQ6); hang_recovery_gte;};
+actionclass hang_recovery_gte_eq7 {capture(PbStationModeEQ7); hang_recovery_gte;};
+actionclass hang_recovery_gte_en1 {capture(PbStationModeEN1); hang_recovery_gte;};
+actionclass hang_recovery_gte_en2 {capture(PbStationModeEN2); hang_recovery_gte;};
+actionclass hang_recovery_gte_en3 {capture(PbStationModeEN3); hang_recovery_gte;};
+actionclass hang_recovery_gte_en4 {capture(PbStationModeEN4); hang_recovery_gte;};
+actionclass hang_recovery_gte_es1 {capture(PbStationModeES1); hang_recovery_gte;};
+actionclass hang_recovery_gte_es2 {capture(PbStationModeES2); hang_recovery_gte;};
+actionclass hang_recovery_gte_es3 {capture(PbStationModeES3); hang_recovery_gte;};
+actionclass hang_recovery_gte_es4 {capture(PbStationModeES4); hang_recovery_gte;};
 
 actionclass pmRecovery
 {

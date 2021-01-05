@@ -64,116 +64,116 @@
     # Misc Registers
     ############################################################################
 
-    register PB_STATION_MODE_04
+    register PB_STATION_MODE_EQ0
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301100A;
-        capture     group PbStationMode4;
+        capture     group PbStationModeEQ0;
     };
 
-    register PB_STATION_MODE_05
+    register PB_STATION_MODE_EQ1
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301104A;
-        capture     group PbStationMode5;
+        capture     group PbStationModeEQ1;
     };
 
-    register PB_STATION_MODE_06
+    register PB_STATION_MODE_EQ2
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301108A;
-        capture     group PbStationMode6;
+        capture     group PbStationModeEQ2;
     };
 
-    register PB_STATION_MODE_07
+    register PB_STATION_MODE_EQ3
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x030110CA;
-        capture     group PbStationMode7;
+        capture     group PbStationModeEQ3;
     };
 
-    register PB_STATION_MODE_08
+    register PB_STATION_MODE_EQ4
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301110A;
-        capture     group PbStationMode8;
+        capture     group PbStationModeEQ4;
     };
 
-    register PB_STATION_MODE_09
+    register PB_STATION_MODE_EQ5
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301114A;
-        capture     group PbStationMode9;
+        capture     group PbStationModeEQ5;
     };
 
-    register PB_STATION_MODE_10
+    register PB_STATION_MODE_EQ6
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301118A;
-        capture     group PbStationMode10;
+        capture     group PbStationModeEQ6;
     };
 
-    register PB_STATION_MODE_11
+    register PB_STATION_MODE_EQ7
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x030111CA;
-        capture     group PbStationMode11;
+        capture     group PbStationModeEQ7;
     };
 
-    register PB_STATION_MODE_00
+    register PB_STATION_MODE_EN1
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301120A;
-        capture     group PbStationMode0;
+        capture     group PbStationModeEN1;
     };
 
-    register PB_STATION_MODE_01
+    register PB_STATION_MODE_EN2
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301124A;
-        capture     group PbStationMode1;
+        capture     group PbStationModeEN2;
     };
 
-    register PB_STATION_MODE_02
+    register PB_STATION_MODE_EN3
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301128A;
-        capture     group PbStationMode2;
+        capture     group PbStationModeEN3;
     };
 
-    register PB_STATION_MODE_03
+    register PB_STATION_MODE_EN4
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x030112CA;
-        capture     group PbStationMode3;
+        capture     group PbStationModeEN4;
     };
 
-    register PB_STATION_MODE_12
+    register PB_STATION_MODE_ES1
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301130A;
-        capture     group PbStationMode12;
+        capture     group PbStationModeES1;
     };
 
-    register PB_STATION_MODE_13
+    register PB_STATION_MODE_ES2
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301134A;
-        capture     group PbStationMode13;
+        capture     group PbStationModeES2;
     };
 
-    register PB_STATION_MODE_14
+    register PB_STATION_MODE_ES3
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x0301138A;
-        capture     group PbStationMode14;
+        capture     group PbStationModeES3;
     };
 
-    register PB_STATION_MODE_15
+    register PB_STATION_MODE_ES4
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
         scomaddr    0x030113CA;
-        capture     group PbStationMode15;
+        capture     group PbStationModeES4;
     };
 
     ############################################################################
