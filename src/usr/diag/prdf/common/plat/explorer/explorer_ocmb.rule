@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2020
+# Contributors Listed Below - COPYRIGHT 2018,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -842,7 +842,7 @@ group gSRQFIR
     /** SRQFIR[25]
      *  Firmware initiated channel fail
      */
-    (rSRQFIR, bit(25)) ? mask_self_th1;
+    (rSRQFIR, bit(25)) ? threshold_and_mask_self_th1;
 
     /** SRQFIR[26]
      *  NCF logic error

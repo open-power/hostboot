@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2020
+# Contributors Listed Below - COPYRIGHT 2018,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -209,32 +209,44 @@ actionclass mem_port_th_32perDay
  * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
  * threshold in the field, instead just mask.
  */
-actionclass threshold_and_mask
+actionclass threshold_and_mask_th32
 {
     threshold32pday;
-    funccall("ClearServiceCallFlag");
+    funccall("ClearServiceCallFlag"); # must be called after thresholding
 };
 
-actionclass threshold_and_mask_self   { calloutSelfMed;   threshold_and_mask; };
+actionclass threshold_and_mask_self
+{
+    calloutSelfMed;
+    threshold_and_mask_th32;
+};
 
 actionclass threshold_and_mask_level2
 {
-    level2_th_32perDay;
-    threshold_and_mask;
+    callout2ndLvlMed;
+    threshold_and_mask_th32;
 };
 
 actionclass threshold_and_mask_mem_port
 {
-    mem_port_th_32perDay;
-    threshold_and_mask;
+    mem_port;
+    threshold_and_mask_th32;
 };
 
-/** Mask on 1st occurrence and do not predictively callout */
-actionclass mask_self_th1
+/**
+ * Threshold on first occurence. Do not predictively callout on threshold in the
+ * field, instead just mask.
+ */
+actionclass threshold_and_mask_th1
+{
+    threshold1;
+    funccall("ClearServiceCallFlag"); # must be called after thresholding
+};
+
+actionclass threshold_and_mask_self_th1
 {
     calloutSelfMed;
-    threshold1;
-    funccall("ClearServiceCallFlag");
+    threshold_and_mask_th1;
 };
 
 ################################################################################

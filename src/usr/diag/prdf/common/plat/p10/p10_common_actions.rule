@@ -97,25 +97,44 @@ actionclass threshold5pday
  * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
  * threshold in the field, instead just mask.
  */
-actionclass threshold_and_mask
+actionclass threshold_and_mask_th32
 {
     threshold32pday;
-    funccall("ClearServiceCallFlag");
+    funccall("ClearServiceCallFlag"); # must be called after thresholding
 };
 
-actionclass threshold_and_mask_self   { calloutSelfMed;   threshold_and_mask; };
-actionclass threshold_and_mask_self_th1
+actionclass threshold_and_mask_self
 {
     calloutSelfMed;
-    threshold1;
-    funccall("ClearServiceCallFlag");
+    threshold_and_mask_th32;
 };
-actionclass threshold_and_mask_level2 { callout2ndLvlMed; threshold_and_mask; };
+
+actionclass threshold_and_mask_level2
+{
+    callout2ndLvlMed;
+    threshold_and_mask_th32;
+};
 
 actionclass threshold_and_mask_parent_proc
 {
     calloutParentProcMed;
-    threshold_and_mask;
+    threshold_and_mask_th32;
+};
+
+/**
+ * Threshold on first occurence. Do not predictively callout on threshold in the
+ * field, instead just mask.
+ */
+actionclass threshold_and_mask_th1
+{
+    threshold1;
+    funccall("ClearServiceCallFlag"); # must be called after thresholding
+};
+
+actionclass threshold_and_mask_self_th1
+{
+    calloutSelfMed;
+    threshold_and_mask_th1;
 };
 
 /**

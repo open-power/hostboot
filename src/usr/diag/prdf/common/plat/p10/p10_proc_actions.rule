@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -391,8 +391,8 @@ group gTodErrors filter singlebit
  */
 actionclass maskTodError
 {
-    self_H_th_1;
-    funccall("ClearServiceCallFlag");
+    calloutSelfHigh;
+    threshold_and_mask_th1;
     funccall("todNewTopologyIfBackupMDMT");
 };
 

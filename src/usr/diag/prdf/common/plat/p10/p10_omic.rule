@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -149,7 +149,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[3]
      *  OMI-DL0 detected a CRC error
      */
-    (rMC_OMI_DL_FIR, bit(3)) ? dl0_omi_threshold_and_mask;
+    (rMC_OMI_DL_FIR, bit(3)) ? threshold_and_mask_dl0_omi;
 
     /** MC_OMI_DL_FIR[4]
      *  OMI-DL0 received a nack
@@ -164,7 +164,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[6]
      *  OMI-DL0 parity error detection on a lane
      */
-    (rMC_OMI_DL_FIR, bit(6)) ? dl0_omi_threshold_and_mask;
+    (rMC_OMI_DL_FIR, bit(6)) ? threshold_and_mask_dl0_omi;
 
     /** MC_OMI_DL_FIR[7]
      *  OMI-DL0 retrained due to no forward progress
@@ -184,7 +184,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[10]
      *  OMI-DL0 threshold reached
      */
-    (rMC_OMI_DL_FIR, bit(10)) ? dl0_omi_bus_CRC_threshold_and_mask;
+    (rMC_OMI_DL_FIR, bit(10)) ? threshold_and_mask_dl0_omi_bus_CRC;
 
     /** MC_OMI_DL_FIR[11]
      *  OMI-DL0 trained
@@ -249,7 +249,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[23]
      *  OMI-DL1 detected a CRC error
      */
-    (rMC_OMI_DL_FIR, bit(23)) ? dl1_omi_threshold_and_mask;
+    (rMC_OMI_DL_FIR, bit(23)) ? threshold_and_mask_dl1_omi;
 
     /** MC_OMI_DL_FIR[24]
      *  OMI-DL1 received a nack
@@ -264,7 +264,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[26]
      *  OMI-DL1 parity error detection on a lane
      */
-    (rMC_OMI_DL_FIR, bit(26)) ? dl1_omi_threshold_and_mask;
+    (rMC_OMI_DL_FIR, bit(26)) ? threshold_and_mask_dl1_omi;
 
     /** MC_OMI_DL_FIR[27]
      *  OMI-DL1 retrained due to no forward progress
@@ -284,7 +284,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[30]
      *  OMI-DL1 threshold reached
      */
-    (rMC_OMI_DL_FIR, bit(30)) ? dl1_omi_bus_CRC_threshold_and_mask;
+    (rMC_OMI_DL_FIR, bit(30)) ? threshold_and_mask_dl1_omi_bus_CRC;
 
     /** MC_OMI_DL_FIR[31]
      *  OMI-DL1 trained

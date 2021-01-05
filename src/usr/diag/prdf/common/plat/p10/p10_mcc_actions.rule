@@ -154,15 +154,13 @@ actionclass chnl1_ocmb_H_omi_L_th_32_perDay
 actionclass threshold_and_mask_chnl0_ocmb_th_1
 {
     chnl0_ocmb;
-    threshold1;
-    funccall("ClearServiceCallFlag");
+    threshold_and_mask_th1;
 };
 
 actionclass threshold_and_mask_chnl1_ocmb_th_1
 {
     chnl1_ocmb;
-    threshold1;
-    funccall("ClearServiceCallFlag");
+    threshold_and_mask_th1;
 };
 
 # Bits using these actions are CRC-related errors that are potential
