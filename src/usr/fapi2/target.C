@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@ extern const std::array<fapi2_targeting_type, NUM_FAPI_TARGETING_TYPES>
     { fapi2::TARGET_TYPE_PAUC      , TARGETING::TYPE_PAUC      },
     { fapi2::TARGET_TYPE_PMIC      , TARGETING::TYPE_PMIC      },
     { fapi2::TARGET_TYPE_GENERICI2CSLAVE, TARGETING::TYPE_GENERIC_I2C_DEVICE },
+    { fapi2::TARGET_TYPE_IOLINK    , TARGETING::TYPE_SMPGROUP },
 };
 
 } // end fapi2::impl namespace

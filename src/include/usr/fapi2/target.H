@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,7 +178,7 @@ namespace impl
 {
 
 // Size of the array below
-constexpr size_t NUM_FAPI_TARGETING_TYPES = 23;
+constexpr size_t NUM_FAPI_TARGETING_TYPES = 24;
 
 // Declaration of the array holding the associations between fapi2 target
 // types and Targeting types.
@@ -386,6 +386,7 @@ constexpr bool isProperParent(const TargetType i_child,
           | TARGET_TYPE_MCC
           | TARGET_TYPE_OMIC
           | TARGET_TYPE_OMI       , TARGET_TYPE_PERV },
+        {   TARGET_TYPE_IOLINK    , TARGET_TYPE_IOHS     },
 
         // OMI has a logical relationship with the OMIC that it is a member of
         {   TARGET_TYPE_OMI       , TARGET_TYPE_OMIC },
