@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -355,15 +355,6 @@ void* host_build_stop_image (void *io_pArgs)
         TARGETING::Target* l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(l_sys);
         assert( l_sys != nullptr );
-
-        // Temporary hack to allow ci to pass. There is a bug where any value other than 0 causes a fail in
-        // p10_block_wakeup_intr
-        // @TODO RTC 258692: Remove once issue is resolved.
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image: ATTR_SYSTEM_IPL_PHASE is: 0x%d",
-                                                        l_sys->getAttr<TARGETING::ATTR_SYSTEM_IPL_PHASE>());
-        l_sys->setAttr<TARGETING::ATTR_SYSTEM_IPL_PHASE>(0);
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image: ATTR_SYSTEM_IPL_PHASE overwrote to: 0x%d",
-                                                        l_sys->getAttr<TARGETING::ATTR_SYSTEM_IPL_PHASE>());
 
         if (l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
         {
