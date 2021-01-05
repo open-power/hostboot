@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -46,7 +46,8 @@
       TARGET_TYPE_PAU,
       TARGET_TYPE_IOHS,
       TARGET_TYPE_PAUC,
-      TARGET_TYPE_GENERICI2CSLAVE
+      TARGET_TYPE_GENERICI2CSLAVE,
+      TARGET_TYPE_IOLINK
     </targetType>
     <description>
       1 if the target is functional, else 0.  Set by the platform.
@@ -93,7 +94,8 @@
       TARGET_TYPE_IOHS,
       TARGET_TYPE_FC,
       TARGET_TYPE_PAUC,
-      TARGET_TYPE_GENERICI2CSLAVE
+      TARGET_TYPE_GENERICI2CSLAVE,
+      TARGET_TYPE_IOLINK
     </targetType>
     <description>
       Logical position of target within a system. This is derived from the SMP location
@@ -129,7 +131,8 @@
       TARGET_TYPE_PAU,
       TARGET_TYPE_IOHS,
       TARGET_TYPE_PAUC,
-      TARGET_TYPE_GENERICI2CSLAVE
+      TARGET_TYPE_GENERICI2CSLAVE,
+      TARGET_TYPE_IOLINK
     </targetType>
     <description>
       A target's position relative to its immediate parent target.
@@ -145,12 +148,11 @@
       PROC - NMMU
       PROC - PAUC
       PROC - PAU
-      PROC - IOHS
+      PROC - IOHS - IOLINK
       PROC - MCBIST - MCS - MCA/MEM_PORT - DIMM
       PROC - MC - MI - DMI
       PROC - MC - MI - MCC - OMI
         (OMIC - OMI is not supported)
-      PROC - PMIC
       OCMB - PMIC
       OCMB - GENERICI2CSLAVE
       MEMBUF - MBA - DIMM
