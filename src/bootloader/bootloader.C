@@ -500,26 +500,6 @@ namespace Bootloader{
             break;
         }
 
-        // Set the TPM locality to 0
-        uint8_t l_locality = TPMDD::TPM_ACCESS_REQUEST_LOCALITY_USE;
-        size_t l_size = sizeof(l_locality);
-        l_rc = tpm_write(TPMDD::TPM_REG_75x_TPM_ACCESS, &l_locality, l_size);
-        if(l_rc)
-        {
-            bl_console::putString("Could not set TPM locality\r\n");
-            break;
-        }
-
-        // Start the TPM
-        l_rc = tpmCmdStartup();
-        if(l_rc)
-        {
-            bl_console::putString("TPM init FAILED; RC: 0x");
-            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
-            bl_console::putString("\r\n");
-            break;
-        }
-
         // Extend the input hash to TPM PCR0
         l_rc = tpmExtendHash(i_hash);
         if(l_rc)

@@ -531,29 +531,24 @@ errlHndl_t tpmCmdStartup(TpmTarget* io_target)
         else if (TPM_SUCCESS == resp->responseCode)
         {
             TRACFCOMP( g_trac_trustedboot,
-                "TPM STARTUP - TPM not initialized by SBE" );
-            // TODO RTC:211958 - change to predictive error and possibly remove commit
+                ERR_MRK"TPM STARTUP - TPM not initialized by SBE" );
             /*@
              * @errortype
              * @reasoncode      RC_TPM_START_SBE_SETUP_FAILED
-             * @severity        ERRL_SEV_INFORMATIONAL
+             * @severity        ERRL_SEV_UNRECOVERABLE
              * @moduleid        MOD_TPM_CMD_STARTUP
              * @userdata1       responseCode
-             * @userdata2       TPM
+             * @userdata2       TPM HUID
              * @devdesc         SBE failed to setup the TPM
              * @custdesc        Failure detected in security subsystem
              */
-             err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                MOD_TPM_CMD_STARTUP,
-                                RC_TPM_START_SBE_SETUP_FAILED,
-                                resp->responseCode,
-                                TARGETING::get_huid(io_target),
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            err = tpmCreateErrorLog(MOD_TPM_CMD_STARTUP,
+                                    RC_TPM_START_SBE_SETUP_FAILED,
+                                    resp->responseCode,
+                                    TARGETING::get_huid(io_target),
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-              err->collectTrace(SECURE_COMP_NAME);
-              err->collectTrace(TRBOOT_COMP_NAME);
-              errlCommit(err, TRBOOT_COMP_ID);
+            break;
         }
         else if (TPM_RC_INITIALIZE == resp->responseCode)
         {
@@ -573,15 +568,15 @@ errlHndl_t tpmCmdStartup(TpmTarget* io_target)
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       MOD_TPM_CMD_STARTUP
              * @userdata1      responseCode
-             * @userdata2      0
+             * @userdata2      TPM HUID
              * @devdesc        TPM_Startup operation failure.
              * @custdesc       Failure detected in security subsystem
              */
             err = tpmCreateErrorLog(MOD_TPM_CMD_STARTUP,
                                     RC_TPM_START_FAIL,
                                     resp->responseCode,
-                                    0);
-
+                                    TARGETING::get_huid(io_target),
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             break;
         }
 

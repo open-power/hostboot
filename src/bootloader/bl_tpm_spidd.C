@@ -782,40 +782,6 @@ static Bootloader::hbblReasonCode tpmTransmit(void* io_buffer,
     return l_rc;
 }
 
-Bootloader::hbblReasonCode tpmCmdStartup()
-{
-    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
-    uint32_t l_cmdData[] = { 0x80010000, // Header and some TPM-specific params
-                             0x000C0000, // TPM-specific params cont.
-                             0x01440000 }; // 144 is the TPM startup command
-    size_t l_cmdLen = TPM_STARTUP_CMD_LEN;
-
-    // l_cmdData will be reused for the TPM response
-    l_rc = tpmTransmit(l_cmdData,
-                       l_cmdLen,
-                       l_cmdLen);
-    if(!l_rc)
-    {
-        TPM_BaseOut* l_resp = reinterpret_cast<TPM_BaseOut*>(l_cmdData);
-        if(l_resp->responseCode == Bootloader::RC_NO_ERROR)
-        {
-            bl_console::putString("Successfully started TPM (SBE has NOT started the TPM before)\r\n");
-        }
-        else if(l_resp->responseCode == Bootloader::RC_TPM_INITIALIZE)
-        {
-            bl_console::putString("Successfully started TPM (SBE started the TPM)\r\n");
-        }
-        else
-        {
-            bl_console::putString("TPM Init fail! TPM RC: 0x");
-            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_resp->responseCode), sizeof(l_resp->responseCode));
-            bl_console::putString("\r\n");
-            l_rc = Bootloader::RC_TPM_INIT_FAIL;
-        }
-    }
-    return l_rc;
-}
-
 Bootloader::hbblReasonCode tpmExtendHash(const uint8_t* const i_hash)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
