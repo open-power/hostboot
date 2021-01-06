@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,9 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 #include <fapi2.H>
 #include <exp_data_structs.H>
-#include <generic/memory/lib/data_engine/data_engine_utils.H>
+#include <generic/memory/lib/utils/mss_field.H>
 
 namespace mss
 {
@@ -77,41 +78,6 @@ struct rc_resp_adaptor
     {
         return iv_target;
     }
-};
-
-} // namespace exp
-
-namespace gen
-{
-
-///
-/// @class get - TARGET_TYPE_MEM_PORT, rc_resp_adaptor specialization
-/// @brief get target helper class for attr_engine
-///
-template <>
-struct get<fapi2::TARGET_TYPE_MEM_PORT, exp::rc_resp_adaptor>
-{
-    ///
-    /// @brief Get target for TARGET_TYPE_MEM_PORT and rc_resp_adaptor
-    ///
-    /// @param[in] i_data rc_resp_adaptor
-    /// @return fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> Attribute target type
-    ///
-    static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> target(const exp::rc_resp_adaptor& i_data)
-    {
-        return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.iv_target);
-    }
-};
-
-} // namespace gen
-
-namespace exp
-{
-
-enum rcw_max_val : uint8_t
-{
-    RCW_4BIT_MAX = 0x0F,
-    RCW_8BIT_MAX = 0xFF,
 };
 
 ///
@@ -216,6 +182,8 @@ struct rc_rsp_fields
     static constexpr mss::field_t<mss::endian::LITTLE> F1RC05{F1RC05_IDX, F1RC05_START, F1RC05_LEN};
 };
 
+using attr_setter = fapi2::ReturnCode (*)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, uint8_t);
+
 ///
 /// @brief Helper function to retrieve the F0RC_D0 data
 /// @param[in] i_rc_resp explorer RC response adapter
@@ -269,263 +237,99 @@ inline void get_data_F1RC_D1(const rc_resp_adaptor& i_rc_resp,
 }
 
 ///
-/// @class readerTraits
-/// @brief trait structure to hold static SPD information
-/// @tparam F holds RCW field info
+/// @brief Set the rc resp field object
 ///
-template <const field_t<endian::LITTLE> &F>
-class readerTraits;
-
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_pair Pair of field to matching attr setter
+/// @param[in] i_cw_binary CW binary vector
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-/// @brief RCW reader
-/// @tparam F the SPD field to read
-/// @tparam OT data output type
-/// @tparam TT traits associated with reader, defaulted to readerTraits<F, T>
-/// @param[in] i_target the fapi2 target
-/// @param[in] i_data the SPD data
-/// @param[out] o_value raw value for this SPD field
-/// @return FAPI2_RC_SUCCESS iff okay
-/// @warning reader for F0RC_D0 and F0RC_D1 (DIMM0 vs DIMM1) are equivalent.
-/// Will need to be updated if the array from the RC response structure varies.
-///
-template <const field_t<endian::LITTLE> &F,
-          typename OT,
-          typename TT = readerTraits<F>>
-fapi2::ReturnCode reader(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                         const std::vector<uint8_t>& i_data,
-                         OT& o_value)
+inline fapi2::ReturnCode set_rc_resp_field(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const std::pair<mss::field_t<mss::endian::LITTLE>, attr_setter>& i_pair,
+    const std::vector<uint8_t>& i_cw_binary)
 {
-    FAPI_TRY((mss::get_field<endian::LITTLE, F, TT>(i_target, i_data, READ_RC_RSP_FIELD, o_value)),
-             "Failed read_field() for %s", spd::c_str(i_target));
+    uint8_t l_field = 0;
+    const auto& FIELD = i_pair.first;
 
+    {
+        // Extracting desired bits
+        // API enforces uint8_t vector data, so no conversion check needed to uint8_t buffer
+        const fapi2::buffer<uint8_t> BYTE(i_cw_binary[FIELD.get_byte(i_cw_binary)]);
+        FAPI_TRY(BYTE.extractToRight(l_field, FIELD.get_start(), FIELD.get_length()));
+
+        // Finally, call the attribute setter
+        FAPI_TRY(i_pair.second(i_dimm, l_field));
+    }
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC00 field specialization
+/// @brief Set the rc resp attrs
+/// @param[in] i_rc_resp explorer RC response adapter
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC00>
+inline fapi2::ReturnCode rc_resp_engine(const rc_resp_adaptor& i_rc_resp)
 {
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Global Features Control Word";
+    std::vector<uint8_t> l_f0rc;
+    std::vector<uint8_t> l_f1rc;
 
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
+    // Grab dimm target
+    const auto& l_dimm = i_rc_resp.get_target();
 
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC01 field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC01>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Clock Driver Enable Control Word";
+    // And grab the correct data depending on the dimm index
+    if (mss::index(l_dimm) == 0)
+    {
+        get_data_F0RC_D0(i_rc_resp, l_f0rc);
+        get_data_F1RC_D0(i_rc_resp, l_f1rc);
+    }
+    else
+    {
+        get_data_F0RC_D1(i_rc_resp, l_f0rc);
+        get_data_F1RC_D1(i_rc_resp, l_f1rc);
+    }
 
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
+    // F0RCXX fields
+    const std::vector<std::pair<mss::field_t<mss::endian::LITTLE>, attr_setter>> l_f0_fields =
+    {
+        {exp::rc_rsp_fields::F0RC00, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc00)},
+        {exp::rc_rsp_fields::F0RC01, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc01)},
+        {exp::rc_rsp_fields::F0RC03, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc03)},
+        {exp::rc_rsp_fields::F0RC04, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc04)},
+        {exp::rc_rsp_fields::F0RC05, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc05)},
+        {exp::rc_rsp_fields::F0RC0B, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc0b)},
+        {exp::rc_rsp_fields::F0RC0E, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc0e)},
+        {exp::rc_rsp_fields::F0RC0F, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc0f)},
+        {exp::rc_rsp_fields::F0RC1X, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc1x)},
+        {exp::rc_rsp_fields::F0RC7X, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f0rc7x)},
+    };
 
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC03 field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC03>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "CA and CS Signals Driver Characteristics Control Word";
+    // F1RCXX fields
+    const std::vector<std::pair<mss::field_t<mss::endian::LITTLE>, attr_setter>> l_f1_fields =
+    {
+        {exp::rc_rsp_fields::F1RC00, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f1rc00)},
+        {exp::rc_rsp_fields::F1RC02, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f1rc02)},
+        {exp::rc_rsp_fields::F1RC03, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f1rc03)},
+        {exp::rc_rsp_fields::F1RC04, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f1rc04)},
+        {exp::rc_rsp_fields::F1RC05, static_cast<attr_setter>(&mss::attr::set_exp_resp_ddr4_f1rc05)},
+    };
 
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
+    // Now grab the F0RCXX fields
+    for (const auto& l_pair : l_f0_fields)
+    {
+        FAPI_TRY(set_rc_resp_field(l_dimm, l_pair, l_f0rc));
+    }
 
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC04 field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC04>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "ODT and CKE Signals Driver Characteristics Control Word";
+    // And next, the F1RCXX fields
+    for (const auto& l_pair : l_f1_fields)
+    {
+        FAPI_TRY(set_rc_resp_field(l_dimm, l_pair, l_f1rc));
+    }
 
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC05 field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC05>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Clock Driver Characteristics Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC0B field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC0B>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Operating Voltage VDD and VREFCA Source Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC0E field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC0E>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Parity, NV Mode Enable, and ALERT Configuration Control Word ";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC0F field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC0F>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Command Latency Adder Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC1X field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC1X>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_8BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Internal VrefCA Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F0RC7X field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F0RC7X>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_8BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "IBT Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F1RC00 field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F1RC00>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Data Buffer Interface Driver Characteristics Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F1RC02 field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F1RC02>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "CA and CS Output Slew Rate Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F1RC03 field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F1RC03>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "ODT and CKEn Output Slew Rate Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F1RC04 field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F1RC04>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Clock Driver Output Slew Rate Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static explorer RC response information
-/// @note F1RC05 field specialization
-///
-template <>
-struct readerTraits<rc_rsp_fields::F1RC05>
-{
-    static constexpr size_t COMPARISON_VAL = RCW_4BIT_MAX; ///< Largest valid explorer RC resp encoding
-    static constexpr const char* FIELD_STR = "Data Buffer Interface Output Slew Rate Control Word";
-
-    template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
-};
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 } // namespace exp
 } // namespace mss

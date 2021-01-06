@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -239,7 +239,7 @@ fapi2::ReturnCode set_rc_resp_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
         if(l_is_rcd_supported != fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_NO_RCD)
         {
             mss::exp::rc_resp_adaptor l_rcws(d, i_rc_resp);
-            FAPI_TRY((mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::exp::attr_rc_resp_engine_fields>::set(l_rcws)));
+            FAPI_TRY(mss::exp::rc_resp_engine(l_rcws));
         }
     }
 

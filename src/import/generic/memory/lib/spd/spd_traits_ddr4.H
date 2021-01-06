@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,9 @@
 #ifndef _MSS_SPD_TRAITS_DDR4_H_
 #define _MSS_SPD_TRAITS_DDR4_H_
 
+// Can be brought back if additional traits are needed
+#if 0
+
 #include <cstdint>
 #include <generic/memory/lib/spd/spd_fields_ddr4.H>
 #include <generic/memory/lib/spd/spd_traits.H>
@@ -45,7 +48,6 @@ namespace mss
 {
 namespace spd
 {
-
 ///
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
@@ -1022,5 +1024,5 @@ class readerTraits < fields<DDR4, BASE_CNFG>::CRC_LSB, R >
 
 }// spd
 }// mss
-
+#endif
 #endif //_MSS_SPD_TRAITS_DDR4_H_

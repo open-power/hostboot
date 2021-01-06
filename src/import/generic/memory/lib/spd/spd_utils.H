@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,6 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/spd/spd_facade.H>
 
 namespace mss
 {
@@ -53,14 +52,15 @@ namespace spd
 /// @param[in] i_ftb_multiplier SPD fine timebase
 /// @return the timing value in picoseconds
 ///
-inline int64_t calc_timing_from_timebase(const int64_t i_timing_mtb,
-        const int64_t i_mtb_multiplier,
-        const int64_t i_timing_ftb,
-        const int64_t i_ftb_multiplier)
+inline uint32_t calc_timing_from_timebase(
+    const uint32_t i_timing_mtb,
+    const uint32_t i_mtb_multiplier,
+    const uint32_t i_timing_ftb,
+    const uint32_t i_ftb_multiplier)
 {
     // JEDEC algorithm
-    const int64_t l_timing_val = i_timing_mtb * i_mtb_multiplier;
-    const int64_t l_fine_offset = i_timing_ftb * i_ftb_multiplier;
+    const uint32_t l_timing_val = i_timing_mtb * i_mtb_multiplier;
+    const uint32_t l_fine_offset = i_timing_ftb * i_ftb_multiplier;
 
     return l_timing_val + l_fine_offset;
 }
@@ -137,32 +137,41 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function to retrieves medium and fine timebase values
-/// @param[in] i_spd_decoder the SPD decoder
+/// @param[in] i_ocmb OCMB target
+/// @param[in] i_spd the SPD binary
 /// @param[out] o_mtb the medium timebase (MTB) from SPD
 /// @param[out] o_ftb the fine timebase (FTB) from SPD
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode get_timebases( const mss::spd::facade& i_spd_decoder,
-                                 int64_t& o_mtb,
-                                 int64_t& o_ftb );
+fapi2::ReturnCode get_timebases(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+    const std::vector<uint8_t>& i_spd,
+    uint8_t& o_mtb,
+    uint8_t& o_ftb );
 
 ///
 /// @brief Retrieves SDRAM Minimum Cycle Time (tCKmin) from SPD
-/// @param[in] i_spd_decoder the SPD decoder
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
 /// @param[out] o_value tCKmin value in ps
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode get_tckmin( const mss::spd::facade& i_spd_decoder,
-                              uint64_t& o_value );
+fapi2::ReturnCode get_tckmin(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const std::vector<uint8_t>& i_spd,
+    uint64_t& o_value);
 
 ///
 /// @brief Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD
-/// @param[in] i_spd_decoder SPD decoder
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
 /// @param[out] o_value tCKmax value in ps
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode get_tckmax( const mss::spd::facade& i_spd_decoder,
-                              uint64_t& o_value );
+fapi2::ReturnCode get_tckmax(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const std::vector<uint8_t>& i_spd,
+    uint64_t& o_value);
 
 }// spd
 

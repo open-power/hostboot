@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -348,6 +348,10 @@ enum generic_ffdc_codes : uint16_t
     SET_DIMM_DDR4_F1RC5X = 0x10CB,
     SET_DIMM_DDR4_F1RC6X = 0x10CC,
     SET_DIMM_DDR4_F1RC7X = 0x10CD,
+
+    SET_OPERABLE_FLD = 0x10CE,
+    SET_ENDURANT_FLD = 0x10CF,
+    SET_SPD_CL_SUPPORTED = 0x10D0,
 };
 
 ///

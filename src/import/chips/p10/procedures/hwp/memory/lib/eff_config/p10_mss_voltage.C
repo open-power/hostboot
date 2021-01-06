@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,9 +42,11 @@
 // Generic libraries
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/utils/voltage/gen_mss_voltage_traits.H>
 #include <generic/memory/lib/utils/voltage/gen_mss_volt.H>
+#include <generic/memory/lib/spd/spd_fields_ddr4.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
+#include <generic/memory/lib/data_engine/data_engine_utils.H>
 
 namespace mss
 {
@@ -67,30 +69,32 @@ TT::voltage_setters =
 /// @note P10, DDR4 specialization
 ///
 template<>
-fapi2::ReturnCode get_supported_voltages<mss::mc_type::EXPLORER, mss::spd::device_type::DDR4>
-(const fapi2::Target<TT::SPD_TARGET_TYPE>& i_target,
- std::vector<uint32_t>& o_supported_dram_voltages)
+fapi2::ReturnCode get_supported_voltages<mss::mc_type::EXPLORER, mss::spd::device_type::DDR4>(
+    const fapi2::Target<TT::SPD_TARGET_TYPE>& i_target,
+    std::vector<uint32_t>& o_supported_dram_voltages)
 {
+    using F = mss::spd::fields<mss::spd::device_type::DDR4, mss::spd::module_params::BASE_CNFG>;
+
     o_supported_dram_voltages.clear();
 
-    FAPI_INF("Populating decoder cache for %s", mss::c_str(i_target));
-
-    // Factory cache is per port
-    std::vector< mss::spd::facade > l_spd_facades;
-    FAPI_TRY( get_spd_decoder_list(i_target, l_spd_facades), "%s Failed to get SPD decoder list", mss::c_str(i_target) );
-
     // Get DIMM for each port
-    for ( const auto& l_cache : l_spd_facades )
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
-        const auto l_dimm = l_cache.get_target();
+        std::vector<uint8_t> l_spd;
         uint8_t l_dimm_nominal = 0;
         uint8_t l_dimm_endurant = 0;
 
-        // Read nominal and endurant bits from SPD, 0 = 1.2V is not operable and endurant, 1 = 1.2 is valid
-        FAPI_TRY( l_cache.operable_nominal_voltage(l_dimm_nominal) );
-        FAPI_TRY( l_cache.endurant_nominal_voltage(l_dimm_endurant) );
+        const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm);
 
-        //Check to make sure 1.2 V is both operable and endurant, fail if it is not
+        FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_spd));
+
+        // Read nominal and endurant bits from SPD, 0 = 1.2V is not operable and endurant, 1 = 1.2 is valid
+        // TK - will need to be updated for Odyssey / DDR5
+        FAPI_TRY(spd::get_field_spd(l_ocmb, F::OPERABLE_FLD, l_spd, SET_OPERABLE_FLD, l_dimm_nominal));
+        FAPI_TRY(spd::get_field_spd(l_ocmb, F::ENDURANT_FLD, l_spd, SET_ENDURANT_FLD, l_dimm_endurant));
+
+        // Range checks for those fields performed here
+        // Check to make sure 1.2 V is both operable and endurant, fail if it is not
         FAPI_ASSERT ( (l_dimm_nominal == mss::spd::OPERABLE) && (l_dimm_endurant == mss::spd::ENDURANT),
                       fapi2::MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE().
                       set_ACTUAL_OPERABLE(l_dimm_nominal).

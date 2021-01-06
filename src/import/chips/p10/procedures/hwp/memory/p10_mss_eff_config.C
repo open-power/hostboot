@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,6 @@
 #include <generic/memory/lib/utils/find.H>
 #include <vpd_access.H>
 #include <mss_generic_attribute_getters.H>
-#include <generic/memory/lib/data_engine/attr_engine_traits.H>
 
 #include <lib/freq/p10_freq_traits.H>
 #include <lib/freq/p10_sync.H>
@@ -106,16 +105,11 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             std::vector<uint8_t> l_raw_spd;
             FAPI_TRY(mss::spd::get_raw_data(dimm, l_raw_spd));
             {
-                // Gets the SPD facade
-                fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-
+                // Create the module decoder objects
                 std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg;
                 std::shared_ptr<mss::spd::ddimm_base> l_ddimm_module;
 
                 FAPI_TRY(mss::spd::factory(dimm, l_spd_rev, l_base_cfg, l_ddimm_module));
-
-                // Checks that the facade was setup correctly
-                FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(dimm) );
 
                 FAPI_TRY(l_base_cfg->process(l_raw_spd));
                 FAPI_TRY(l_ddimm_module->process(l_raw_spd));

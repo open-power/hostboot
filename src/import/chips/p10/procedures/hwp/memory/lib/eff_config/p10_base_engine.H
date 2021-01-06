@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,9 +49,11 @@
 #include <mss_pmic_attribute_setters.H>
 #include <mss_explorer_attribute_setters.H>
 #include <mss_generic_attribute_setters.H>
-#include <generic/memory/lib/data_engine/attr_engine_traits.H>
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
+#include <mss_generic_system_attribute_getters.H>
+#include <generic/memory/lib/utils/dimm/mss_timing.H>
+#include <generic/memory/lib/spd/spd_checker.H>
 
 namespace mss
 {
@@ -180,51 +182,86 @@ class base_0_3
             return (i_field == 0);
         }
 
-        // TK needs to be ported from old engine to new engine
-        virtual bool check_fine_timebase(const uint8_t i_field) const
-        {
-            return (i_field == 0);
-        }
+#endif
 
-        virtual bool check_medium_timebase(const uint8_t i_field) const
-        {
-            return (i_field == 0);
-        }
-
+        ///
+        /// @brief Traits tck min
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_tck_min(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits tck max
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_tck_max(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits taa min
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_taa_min(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits trcd min
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trcd_min(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits trp min
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trp_min(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits trasmin msn
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trasmin_msn(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits trasmin lsb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trasmin_lsb(const uint8_t i_field) const
         {
             return true;
         }
+
+#if 0
 
         virtual bool check_trcmin_msn(const uint8_t i_field) const
         {
@@ -236,46 +273,96 @@ class base_0_3
             return true;
         }
 
+#endif
+        ///
+        /// @brief Traits trfc1min lsb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trfc1min_lsb(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits trfc1min msb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trfc1min_msb(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits trfc2min lsb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trfc2min_lsb(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits trfc2min msb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trfc2min_msb(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits trfc4min lsb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trfc4min_lsb(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits trfc4min msb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_trfc4min_msb(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits tfawmin msn
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_tfawmin_msn(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits tfawmin lsb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_tfawmin_lsb(const uint8_t i_field) const
         {
             return true;
         }
 
+#if 0
         virtual bool check_trrd_s_min(const uint8_t i_field) const
         {
             return true;
@@ -285,47 +372,95 @@ class base_0_3
         {
             return true;
         }
-
+#endif
+        ///
+        /// @brief Traits tccd l min
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_tccd_l_min(const uint8_t i_field) const
         {
-            return true;
+            return (i_field > 0);
         }
 
+        ///
+        /// @brief Traits twrmin msn
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_twrmin_msn(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits twrmin lsb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_twrmin_lsb(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits twtrmin s msn
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_twtrmin_s_msn(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits twtrmin s lsb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_twtrmin_s_lsb(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits twtrmin l msn
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_twtrmin_l_msn(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits twtrmin l lsb
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_twtrmin_l_lsb(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits offset tccd l min
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_offset_tccd_l_min(const uint8_t i_field) const
         {
             return true;
         }
-
+#if 0
         virtual bool check_offset_trrd_l_min(const uint8_t i_field) const
         {
             return true;
@@ -341,21 +476,40 @@ class base_0_3
             return true;
         }
 
+#endif
+        ///
+        /// @brief Traits offset trp min
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_offset_trp_min(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits offset trcd min
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_offset_trcd_min(const uint8_t i_field) const
         {
             return true;
         }
 
+        ///
+        /// @brief Traits offset taa min
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
         virtual bool check_offset_taa_min(const uint8_t i_field) const
         {
             return true;
         }
-
+#if 0
         virtual bool check_offset_tck_max(const uint8_t i_field) const
         {
             return true;
@@ -792,54 +946,10 @@ class base_0_3
         ///
         virtual fapi2::ReturnCode set_supported_cas_latencies(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_first_raw_byte = 0;
-            uint8_t l_sec_raw_byte = 0;
-            uint8_t l_third_raw_byte = 0;
-            uint8_t l_fourth_raw_byte = 0;
-            uint8_t l_dimm_type = 0;
             uint32_t l_field = 0;
-            uint8_t l_rev = get_spd_revision();
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::CL_FIRST_BYTE, i_spd, exp::SET_SPD_CL_SUPPORTED, l_first_raw_byte));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::CL_SECOND_BYTE, i_spd, exp::SET_SPD_CL_SUPPORTED, l_sec_raw_byte));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::CL_THIRD_BYTE, i_spd, exp::SET_SPD_CL_SUPPORTED, l_third_raw_byte));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::CL_FOURTH_BYTE, i_spd, exp::SET_SPD_CL_SUPPORTED, l_fourth_raw_byte));
+            FAPI_TRY(mss::gen::get_supported_cas_latencies(iv_dimm, i_spd, get_spd_revision(), l_field))
 
-            FAPI_TRY(mss::attr::get_dimm_type(iv_dimm, l_dimm_type));
-
-            {
-                // Buffers used for bit manipulation
-                // Combine Bytes to create bitmap - right aligned
-                fapi2::buffer<uint64_t> l_buffer;
-                right_aligned_insert(l_buffer, l_fourth_raw_byte, l_third_raw_byte, l_sec_raw_byte, l_first_raw_byte);
-
-                // According to the JEDEC spec:
-                // Byte 22 (Bits 7~0) and Byte 23 are reserved in the base revision SPD general section
-                // Only bit 6 (right-aligned) for Byte 23 is reserved for subsequent SPD revisions
-                // Check for a valid value, and that reserved bit is not set
-                // We return Byte 23 arbitrarily as the failed byte, but any byte (20 - 23) would work
-                // This rev 1.0 does not apply to DDIMM 1.0 - so make sure we are not a ddimm
-                const size_t MAX_VALID_VAL = mss::gen::get_max_valid_cl_val(l_rev, l_dimm_type);
-
-                constexpr uint64_t DATA_START_OFFSET  = 32;
-                constexpr uint64_t RESERVED_BIT = DATA_START_OFFSET + 1;
-                // Bit 6 of byte 23 must be 0 (reserved for future use)
-                const bool RESERVED_BIT_VALUE = l_buffer.getBit<RESERVED_BIT>();
-
-                FAPI_TRY( mss::check::invalid_value(iv_dimm,
-                                                    l_buffer <= MAX_VALID_VAL && !RESERVED_BIT_VALUE,
-                                                    23,
-                                                    l_buffer,
-                                                    mss::BAD_SPD_DATA,
-                                                    "Failed check on CAS latencies supported") );
-
-                // Update output value only if range check passes
-                l_field = uint32_t(l_buffer);
-
-                FAPI_INF("%s. CAS latencies supported (bitmap): 0x%llX",
-                         spd::c_str(iv_dimm),
-                         l_field);
-            }
             FAPI_TRY(mss::attr::set_exp_spd_cl_supported(iv_port, l_field));
         fapi_try_exit:
             return fapi2::current_err;
@@ -1272,26 +1382,6 @@ class base_0_3
             return fapi2::current_err;
         }
 
-        fapi2::ReturnCode set_fine_timebase(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::FINE_TIMEBASE, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_fine_timebase(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        fapi2::ReturnCode set_medium_timebase(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::MEDIUM_TIMEBASE, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_medium_timebase(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
         fapi2::ReturnCode set_tck_min(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
@@ -1312,361 +1402,915 @@ class base_0_3
             return fapi2::current_err;
         }
 
-        // TK populate these when timing fields are ported to the new API
-        virtual fapi2::ReturnCode set_taa_min(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TAA_MIN, i_spd, XXXXX, l_field));
+#endif
 
-            FAPI_TRY(mss::attr::set_exp_spd_taa_min(iv_dimm, l_field));
+        ///
+        /// @brief Set the taa field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_taa(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_timing_mtb = 0;
+            uint8_t l_timing_ftb = 0;
+            uint8_t l_mtb = 0;
+            uint8_t l_ftb = 0;
+            uint16_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TAA_MIN, i_spd, exp::SET_TAA_MIN, l_timing_mtb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TAA_MIN, i_spd, exp::SET_TAA_MIN, l_timing_ftb));
+
+            // Range checks
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_taa_min(l_timing_mtb),
+                                  F::TAA_MIN.get_byte(i_spd),
+                                  l_timing_mtb,
+                                  exp::SET_TAA_MIN,
+                                  "TAA Min"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_offset_taa_min(l_timing_ftb),
+                                  F::OFFSET_TAA_MIN.get_byte(i_spd),
+                                  l_timing_ftb,
+                                  exp::SET_TAA_MIN,
+                                  "Offset TAA Min"));
+
+            FAPI_TRY( spd::get_timebases(iv_ocmb, i_spd, l_mtb, l_ftb) );
+            FAPI_DBG("%s medium timebase (ps): %ld, fine timebase (ps): %ld, %s (MTB): %ld, (FTB): %ld",
+                     spd::c_str(iv_dimm), l_mtb, l_ftb, "TAA", l_timing_mtb, l_timing_ftb );
+
+            l_field = spd::calc_timing_from_timebase(l_timing_mtb, l_mtb, l_timing_ftb, l_ftb);
+
+            FAPI_TRY(mss::attr::set_exp_spd_taa_min(iv_port, l_field));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Set the tcd min field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
         virtual fapi2::ReturnCode set_trcd_min(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRCD_MIN, i_spd, XXXXX, l_field));
+            uint8_t l_timing_mtb = 0;
+            uint8_t l_timing_ftb = 0;
+            uint32_t l_field = 0;
 
-            FAPI_TRY(mss::attr::set_trcd_min(iv_dimm, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRCD_MIN, i_spd, SET_DRAM_TRCD, l_timing_mtb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRCD_MIN, i_spd, SET_DRAM_TRCD, l_timing_ftb));
+
+            // Range checks
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trcd_min(l_timing_mtb),
+                                  F::TRCD_MIN.get_byte(i_spd),
+                                  l_timing_mtb,
+                                  SET_DRAM_TRCD,
+                                  "TRCD Min"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_offset_trcd_min(l_timing_ftb),
+                                  F::OFFSET_TRCD_MIN.get_byte(i_spd),
+                                  l_timing_ftb,
+                                  SET_DRAM_TRCD,
+                                  "Offset TRCD Min"));
+
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, "TRCDmin", l_field));
+
+            FAPI_TRY(mss::attr::set_dram_trcd(iv_port, static_cast<uint8_t>(l_field)));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Set the tcp min field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
         virtual fapi2::ReturnCode set_trp_min(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRP_MIN, i_spd, XXXXX, l_field));
+            uint8_t l_timing_mtb = 0;
+            uint8_t l_timing_ftb = 0;
+            uint32_t l_field = 0;
 
-            FAPI_TRY(mss::attr::set_trp_min(iv_dimm, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRP_MIN, i_spd, SET_DRAM_TRP, l_timing_mtb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRP_MIN, i_spd, SET_DRAM_TRP, l_timing_ftb));
+
+            // Range checks
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trp_min(l_timing_mtb),
+                                  F::TRP_MIN.get_byte(i_spd),
+                                  l_timing_mtb,
+                                  SET_DRAM_TRP,
+                                  "TRP Min"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_offset_trp_min(l_timing_ftb),
+                                  F::OFFSET_TRP_MIN.get_byte(i_spd),
+                                  l_timing_ftb,
+                                  SET_DRAM_TRP,
+                                  "Offset TRP Min"));
+
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, "TRPmin", l_field));
+
+            FAPI_TRY(mss::attr::set_dram_trp(iv_port, static_cast<uint8_t>(l_field)));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trasmin_msn(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the tras min field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_trasmin(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRASMIN_MSN, i_spd, XXXXX, l_field));
+            uint8_t l_trasmin_msn = 0;
+            uint8_t l_trasmin_lsb = 0;
+            uint32_t l_trasmin = 0;
 
-            FAPI_TRY(mss::attr::set_trasmin_msn(iv_dimm, l_field));
+            // There is no fine offset for this field, this will remain 0
+            uint32_t l_ftb = 0;
+            uint32_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRASMIN_MSN, i_spd, SET_DRAM_TRAS, l_trasmin_msn));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRASMIN_LSB, i_spd, SET_DRAM_TRAS, l_trasmin_lsb));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trasmin_msn(l_trasmin_msn),
+                                  F::TRASMIN_MSN.get_byte(i_spd),
+                                  l_trasmin_msn,
+                                  SET_DRAM_TRAS,
+                                  "TRAS MSN"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trasmin_lsb(l_trasmin_lsb),
+                                  F::TRASMIN_LSB.get_byte(i_spd),
+                                  l_trasmin_lsb,
+                                  SET_DRAM_TRAS,
+                                  "TRAS LSB"));
+
+            {
+                fapi2::buffer<uint16_t> l_buffer;
+                right_aligned_insert(l_buffer, l_trasmin_msn, l_trasmin_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_ocmb, l_buffer, get_spd_revision(), SET_DRAM_TRAS));
+                l_trasmin = l_buffer;
+
+                FAPI_INF("%s. Minimum Active to Precharge Delay Time (tRASmin) in MTB units: %d",
+                         spd::c_str(iv_dimm),
+                         l_trasmin);
+            }
+
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_trasmin, l_ftb, "TRASmin", l_field));
+
+            FAPI_TRY(mss::attr::set_dram_tras(iv_port, static_cast<uint8_t>(l_field)));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trasmin_lsb(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 1
+        /// @param[in] i_spd SPD binary
+        /// @param[out] o_value tRFC1min in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trfc1(const std::vector<uint8_t>& i_spd, int64_t& o_value) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRASMIN_LSB, i_spd, XXXXX, l_field));
+            uint8_t l_trfc1min_msb = 0;
+            uint8_t l_trfc1min_lsb = 0;
 
-            FAPI_TRY(mss::attr::set_trasmin_lsb(iv_dimm, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC1MIN_MSB, i_spd, SET_DRAM_TRFC, l_trfc1min_msb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC1MIN_LSB, i_spd, SET_DRAM_TRFC, l_trfc1min_lsb));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trfc1min_msb(l_trfc1min_msb),
+                                  F::TRFC1MIN_MSB.get_byte(i_spd),
+                                  l_trfc1min_msb,
+                                  SET_DRAM_TRFC,
+                                  "TRFC1 MSB"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trfc1min_lsb(l_trfc1min_lsb),
+                                  F::TRFC1MIN_LSB.get_byte(i_spd),
+                                  l_trfc1min_lsb,
+                                  SET_DRAM_TRFC,
+                                  "TRFC1 LSB"));
+            {
+                // Combining bits to create timing value (in a buffer)
+                fapi2::buffer<int64_t> l_buffer;
+                right_aligned_insert(l_buffer, l_trfc1min_msb, l_trfc1min_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS16>(iv_ocmb, l_buffer, get_spd_revision(), TRFC1MIN));
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Minimum Refresh Recovery Delay Time 1 (tRFC1min) in MTB units: %d",
+                         spd::c_str(iv_dimm),
+                         o_value);
+            }
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trcmin_msn(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 2
+        /// @param[in] i_spd SPD binary
+        /// @param[out] o_value tRFC2min in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trfc2(const std::vector<uint8_t>& i_spd, int64_t& o_value) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRCMIN_MSN, i_spd, XXXXX, l_field));
+            uint8_t l_trfc2min_msb = 0;
+            uint8_t l_trfc2min_lsb = 0;
 
-            FAPI_TRY(mss::attr::set_trcmin_msn(iv_dimm, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC2MIN_MSB, i_spd, SET_DRAM_TRFC, l_trfc2min_msb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC2MIN_LSB, i_spd, SET_DRAM_TRFC, l_trfc2min_lsb));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trfc2min_msb(l_trfc2min_msb),
+                                  F::TRFC2MIN_MSB.get_byte(i_spd),
+                                  l_trfc2min_msb,
+                                  SET_DRAM_TRFC,
+                                  "TRFC2 MSB"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trfc2min_lsb(l_trfc2min_lsb),
+                                  F::TRFC2MIN_LSB.get_byte(i_spd),
+                                  l_trfc2min_lsb,
+                                  SET_DRAM_TRFC,
+                                  "TRFC2 LSB"));
+            {
+                // Combining bits to create timing value (in a buffer)
+                fapi2::buffer<int64_t> l_buffer;
+                right_aligned_insert(l_buffer, l_trfc2min_msb, l_trfc2min_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS16>(iv_ocmb, l_buffer, get_spd_revision(), TRFC2MIN));
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Minimum Refresh Recovery Delay Time 2 (tRFC2min) in MTB units: %d",
+                         spd::c_str(iv_dimm),
+                         o_value);
+            }
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trcmin_lsb(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 4
+        /// @param[in] i_spd SPD binary
+        /// @param[out] o_value tRFC4min in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trfc4(const std::vector<uint8_t>& i_spd, int64_t& o_value) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRCMIN_LSB, i_spd, XXXXX, l_field));
+            uint8_t l_trfc4min_msb = 0;
+            uint8_t l_trfc4min_lsb = 0;
 
-            FAPI_TRY(mss::attr::set_trcmin_lsb(iv_dimm, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC4MIN_MSB, i_spd, SET_DRAM_TRFC, l_trfc4min_msb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC4MIN_LSB, i_spd, SET_DRAM_TRFC, l_trfc4min_lsb));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trfc4min_msb(l_trfc4min_msb),
+                                  F::TRFC4MIN_MSB.get_byte(i_spd),
+                                  l_trfc4min_msb,
+                                  SET_DRAM_TRFC,
+                                  "TRFC4 MSB"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_trfc4min_lsb(l_trfc4min_lsb),
+                                  F::TRFC4MIN_LSB.get_byte(i_spd),
+                                  l_trfc4min_lsb,
+                                  SET_DRAM_TRFC,
+                                  "TRFC4 LSB"));
+
+            {
+                // Combining bits to create timing value (in a buffer)
+                fapi2::buffer<int64_t> l_buffer;
+                right_aligned_insert(l_buffer, l_trfc4min_msb, l_trfc4min_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS16>(iv_ocmb, l_buffer, get_spd_revision(), TRFC4MIN));
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Minimum Refresh Recovery Delay Time 4 (tRFC4min) in MTB units: %d",
+                         spd::c_str(iv_dimm),
+                         o_value);
+            }
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trfc1min_lsb(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the trfc field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_trfc(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC1MIN_LSB, i_spd, XXXXX, l_field));
+            int64_t l_tck_in_ps = 0;
+            uint64_t l_freq = 0;
+            uint8_t l_refresh_mode = 0;
+            int64_t l_trfc_mtb = 0;
+            int64_t l_trfc_in_ps = 0;
+            uint16_t l_trfc_in_nck = 0;
 
-            FAPI_TRY(mss::attr::set_trfc1min_lsb(iv_dimm, l_field));
+            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
+                      "%s Failed to calculate clock period (tCK)", spd::c_str(iv_dimm) );
+
+            FAPI_TRY( mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode) );
+
+            // Selects appropriate tRFC based on fine refresh mode
+            switch(l_refresh_mode)
+            {
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
+                    FAPI_TRY(min_trfc1(i_spd, l_trfc_mtb),
+                             "%s Failed to decode SPD for tRFC1", spd::c_str(iv_dimm) );
+                    break;
+
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
+                    FAPI_TRY(min_trfc2(i_spd, l_trfc_mtb),
+                             "%s Failed to decode SPD for tRFC2", spd::c_str(iv_dimm) );
+                    break;
+
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_4X:
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
+                    FAPI_TRY(min_trfc4(i_spd, l_trfc_mtb),
+                             "%s Failed to decode SPD for tRFC4", spd::c_str(iv_dimm) );
+                    break;
+
+                default:
+                    // Fine Refresh Mode will be a platform attribute set by the MRW,
+                    // which they "shouldn't" mess up as long as use "attribute" enums.
+                    // if openpower messes this up we can at least catch it
+                    FAPI_ASSERT(false,
+                                fapi2::MSS_INVALID_FINE_REFRESH_MODE().
+                                set_FINE_REF_MODE(l_refresh_mode),
+                                "%s Incorrect Fine Refresh Mode received: %d ",
+                                spd::c_str(iv_dimm),
+                                l_refresh_mode);
+                    break;
+            }// switch
+
+            // Calculate trfc (in ps)
+            {
+                uint8_t l_trfc_ftb = 0;
+                uint8_t l_ftb = 0;
+                uint8_t l_mtb = 0;
+
+                FAPI_TRY( spd::get_timebases(iv_ocmb, i_spd, l_mtb, l_ftb) );
+
+                FAPI_INF( "%s medium timebase (ps): %ld, fine timebase (ps): %ld, tRFC (MTB): %ld, tRFC(FTB): %ld",
+                          spd::c_str(iv_dimm), l_mtb, l_ftb, l_trfc_mtb, l_trfc_ftb );
+
+                l_trfc_in_ps = spd::calc_timing_from_timebase(l_trfc_mtb, l_mtb, l_trfc_ftb, l_ftb);
+            }
+
+            {
+                // Calculate refresh cycle time in nCK & set attribute
+
+                // Calculate nck
+                FAPI_TRY( spd::calc_nck(l_trfc_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_in_nck),
+                          "%s Error in calculating l_tRFC, with value of l_trfc_in_ps: %d", spd::c_str(iv_dimm), l_trfc_in_ps);
+
+                FAPI_INF("%s tCK (ps): %d, tRFC (ps): %d, tRFC (nck): %d",
+                         spd::c_str(iv_dimm), l_tck_in_ps, l_trfc_in_ps, l_trfc_in_nck);
+
+                FAPI_DBG("%s DRAM TRFC %d", spd::c_str(iv_dimm), l_trfc_in_nck);
+            }
+
+            FAPI_TRY(mss::attr::set_dram_trfc(iv_port, l_trfc_in_nck));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trfc1min_msb(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the tfawmin msn object
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_tfawmin(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC1MIN_MSB, i_spd, XXXXX, l_field));
+            uint8_t l_tfawmin_msn = 0;
+            uint8_t l_tfawmin_lsb = 0;
+            uint32_t l_tfawmin = 0;
 
-            FAPI_TRY(mss::attr::set_trfc1min_msb(iv_dimm, l_field));
+            // There is no fine offset for this field, this will remain 0
+            uint32_t l_ftb = 0;
+            uint32_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TFAWMIN_MSN, i_spd, SET_DRAM_TFAW, l_tfawmin_msn));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TFAWMIN_LSB, i_spd, SET_DRAM_TFAW, l_tfawmin_lsb));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_tfawmin_msn(l_tfawmin_msn),
+                                  F::TFAWMIN_MSN.get_byte(i_spd),
+                                  l_tfawmin_msn,
+                                  SET_DRAM_TFAW,
+                                  "TFAW S MSN"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_tfawmin_lsb(l_tfawmin_lsb),
+                                  F::TFAWMIN_LSB.get_byte(i_spd),
+                                  l_tfawmin_lsb,
+                                  SET_DRAM_TFAW,
+                                  "TFAW S LSB"));
+
+            {
+                fapi2::buffer<uint16_t> l_buffer;
+                right_aligned_insert(l_buffer, l_tfawmin_msn, l_tfawmin_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_ocmb, l_buffer, get_spd_revision(), SET_DRAM_TFAW));
+                l_tfawmin = l_buffer;
+
+                FAPI_INF("%s. TFAW_MIN in MTB units: %d",
+                         spd::c_str(iv_dimm),
+                         l_tfawmin);
+            }
+
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_tfawmin, l_ftb, "TFAW", l_field));
+
+            FAPI_TRY(mss::attr::set_dram_tfaw(iv_port, static_cast<uint8_t>(l_field)));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trfc2min_lsb(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the trrd l min field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_trrd_l(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC2MIN_LSB, i_spd, XXXXX, l_field));
+            // Taking the worst case required minimum JEDEC value
+            // instead of calculating proposed value from SPD -- which selects optimistic values
+            // leading to errors in expected timing values
+            uint8_t l_dram_width = 0;
+            uint64_t l_trrd_l_in_nck = 0;
+            uint64_t l_freq = 0;
 
-            FAPI_TRY(mss::attr::set_trfc2min_lsb(iv_dimm, l_field));
+            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( attr::get_dram_width(iv_dimm, l_dram_width) );
+            FAPI_TRY( trrd_l( iv_dimm, l_dram_width, l_freq, l_trrd_l_in_nck) );
+
+            FAPI_INF("%s SDRAM width: %d, tRRD_L (nck): %d",
+                     spd::c_str(iv_dimm), l_dram_width, l_trrd_l_in_nck);
+
+            FAPI_DBG("%s DRAM TRRD_L %d", spd::c_str(iv_dimm), l_trrd_l_in_nck);
+
+            FAPI_TRY(mss::attr::set_dram_trrd_l(iv_port, l_trrd_l_in_nck));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trfc2min_msb(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the tccd l min field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_tccd_l(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC2MIN_MSB, i_spd, XXXXX, l_field));
+            uint8_t l_timing_mtb = 0;
+            uint8_t l_timing_ftb = 0;
+            uint32_t l_field = 0;
 
-            FAPI_TRY(mss::attr::set_trfc2min_msb(iv_dimm, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TCCD_L_MIN, i_spd, SET_DRAM_TCCD_L, l_timing_mtb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TCCD_L_MIN, i_spd, SET_DRAM_TCCD_L, l_timing_ftb));
+
+            // Range checks
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_tccd_l_min(l_timing_mtb),
+                                  F::TCCD_L_MIN.get_byte(i_spd),
+                                  l_timing_mtb,
+                                  SET_DRAM_TCCD_L,
+                                  "TCCD_L Min"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_offset_tccd_l_min(l_timing_ftb),
+                                  F::OFFSET_TCCD_L_MIN.get_byte(i_spd),
+                                  l_timing_ftb,
+                                  SET_DRAM_TCCD_L,
+                                  "Offset TCCD_L Min"));
+
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, "TCCD_l", l_field));
+
+            FAPI_TRY(mss::attr::set_dram_tccd_l(iv_port, static_cast<uint8_t>(l_field)));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trfc4min_lsb(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the twr min field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_twrmin(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC4MIN_LSB, i_spd, XXXXX, l_field));
 
-            FAPI_TRY(mss::attr::set_trfc4min_lsb(iv_dimm, l_field));
+            uint8_t l_twrmin_msn = 0;
+            uint8_t l_twrmin_lsb = 0;
+            uint32_t l_twrmin = 0;
+
+            // There is no fine offset for this field, this will remain 0
+            uint32_t l_ftb = 0;
+            uint32_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TWRMIN_MSN, i_spd, SET_DRAM_TWR, l_twrmin_msn));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TWRMIN_LSB, i_spd, SET_DRAM_TWR, l_twrmin_lsb));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_twrmin_msn(l_twrmin_msn),
+                                  F::TWRMIN_MSN.get_byte(i_spd),
+                                  l_twrmin_msn,
+                                  SET_DRAM_TWR,
+                                  "TWR S MSN"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_twrmin_lsb(l_twrmin_lsb),
+                                  F::TWRMIN_LSB.get_byte(i_spd),
+                                  l_twrmin_lsb,
+                                  SET_DRAM_TWR,
+                                  "TWR S LSB"));
+
+            {
+                fapi2::buffer<uint16_t> l_buffer;
+                right_aligned_insert(l_buffer, l_twrmin_msn, l_twrmin_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_ocmb, l_buffer, get_spd_revision(), SET_DRAM_TWR));
+                l_twrmin = l_buffer;
+
+                FAPI_INF("%s. TWR_MIN in MTB units: %d",
+                         spd::c_str(iv_dimm),
+                         l_twrmin);
+            }
+
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_twrmin, l_ftb, "TWRmin", l_field));
+
+            FAPI_TRY(mss::attr::set_dram_twr(iv_port, static_cast<uint8_t>(l_field)));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trfc4min_msb(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the trtp field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_trtp(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRFC4MIN_MSB, i_spd, XXXXX, l_field));
+            int64_t l_tck_in_ps = 0;
+            uint64_t l_freq = 0;
 
-            FAPI_TRY(mss::attr::set_trfc4min_msb(iv_dimm, l_field));
+            // Values from proposed DDR4 Full spec update(79-4A)
+            // Item No. 1716.78C
+            // Page 241 & 246
+            constexpr int64_t l_max_trtp_in_ps = trtp();
+            uint8_t l_calc_trtp_in_nck = 0;
+
+            FAPI_TRY(mss::attr::get_freq(iv_port, l_freq));
+            FAPI_TRY(freq_to_ps(l_freq, l_tck_in_ps),
+                     "%s Failed to calculate clock period (tCK)", spd::c_str(iv_dimm) );
+
+            // Calculate nck
+            FAPI_TRY(spd::calc_nck(l_max_trtp_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_calc_trtp_in_nck),
+                     "%s Error in calculating trtp, with value of l_twtr_in_ps: %d",
+                     spd::c_str(iv_dimm), l_max_trtp_in_ps);
+
+            FAPI_INF("%s tCK (ps): %d, tRTP (ps): %d, tRTP (nck): %d",
+                     spd::c_str(iv_dimm), l_tck_in_ps, l_max_trtp_in_ps, l_calc_trtp_in_nck);
+
+            FAPI_DBG("%s DRAM TRTP %d", spd::c_str(iv_dimm), l_calc_trtp_in_nck);
+
+            FAPI_TRY(mss::attr::set_dram_trtp(iv_port, l_calc_trtp_in_nck));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_tfawmin_msn(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the twtr min s
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_twtrmin_s(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TFAWMIN_MSN, i_spd, XXXXX, l_field));
+            uint8_t l_twtrmin_s_msn = 0;
+            uint8_t l_twtrmin_s_lsb = 0;
+            uint32_t l_twtrmin_s = 0;
 
-            FAPI_TRY(mss::attr::set_tfawmin_msn(iv_dimm, l_field));
+            // There is no fine offset for this field, this will remain 0
+            uint32_t l_ftb = 0;
+            uint32_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_S_MSN, i_spd, SET_DRAM_TWTR_S, l_twtrmin_s_msn));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_S_LSB, i_spd, SET_DRAM_TWTR_S, l_twtrmin_s_lsb));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_twtrmin_s_msn(l_twtrmin_s_msn),
+                                  F::TWTRMIN_S_MSN.get_byte(i_spd),
+                                  l_twtrmin_s_msn,
+                                  SET_DRAM_TWTR_S,
+                                  "TWTRMIN S MSN"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_twtrmin_s_lsb(l_twtrmin_s_lsb),
+                                  F::TWTRMIN_S_LSB.get_byte(i_spd),
+                                  l_twtrmin_s_lsb,
+                                  SET_DRAM_TWTR_S,
+                                  "TWTRMIN S LSB"));
+
+            {
+                fapi2::buffer<uint16_t> l_buffer;
+                right_aligned_insert(l_buffer, l_twtrmin_s_msn, l_twtrmin_s_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_ocmb, l_buffer, get_spd_revision(), SET_DRAM_TWTR_S));
+                l_twtrmin_s = l_buffer;
+
+                FAPI_INF("%s. Minimum Write to Read Time - Different Bank Group (tWTR_Smin) in MTB units: %d",
+                         spd::c_str(iv_dimm),
+                         l_twtrmin_s);
+            }
+
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_twtrmin_s, l_ftb, "TWTRmin s", l_field));
+
+            FAPI_TRY(mss::attr::set_dram_twtr_s(iv_port, static_cast<uint8_t>(l_field)));
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_tfawmin_lsb(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the twtr min l
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_twtrmin_l(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TFAWMIN_LSB, i_spd, XXXXX, l_field));
+            uint8_t l_twtrmin_l_msn = 0;
+            uint8_t l_twtrmin_l_lsb = 0;
+            uint32_t l_twtrmin_l = 0;
 
-            FAPI_TRY(mss::attr::set_tfawmin_lsb(iv_dimm, l_field));
+            // There is no fine offset for this field, this will remain 0
+            uint32_t l_ftb = 0;
+            uint32_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_L_MSN, i_spd, SET_DRAM_TWTR_L, l_twtrmin_l_msn));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_L_LSB, i_spd, SET_DRAM_TWTR_L, l_twtrmin_l_lsb));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_twtrmin_l_msn(l_twtrmin_l_msn),
+                                  F::TWTRMIN_L_MSN.get_byte(i_spd),
+                                  l_twtrmin_l_msn,
+                                  SET_DRAM_TWTR_L,
+                                  "TWTRMIN L MSN"));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_twtrmin_l_lsb(l_twtrmin_l_lsb),
+                                  F::TWTRMIN_L_LSB.get_byte(i_spd),
+                                  l_twtrmin_l_lsb,
+                                  SET_DRAM_TWTR_L,
+                                  "TWTRMIN L LSB"));
+
+            {
+                fapi2::buffer<uint16_t> l_buffer;
+                right_aligned_insert(l_buffer, l_twtrmin_l_msn, l_twtrmin_l_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_ocmb, l_buffer, get_spd_revision(), SET_DRAM_TWTR_L));
+                l_twtrmin_l = l_buffer;
+
+                FAPI_INF("%s. Minimum Write to Read Time - Different Bank Group (tWTR_Lmin) in MTB units: %d",
+                         spd::c_str(iv_dimm),
+                         l_twtrmin_l);
+            }
+
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_twtrmin_l, l_ftb, "TWTRmin l", l_field));
+
+            FAPI_TRY(mss::attr::set_dram_twtr_l(iv_port, static_cast<uint8_t>(l_field)));
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trrd_s_min(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the trrd s field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_offset_trrd_s(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRRD_S_MIN, i_spd, XXXXX, l_field));
+            // Taking the worst case required minimum JEDEC value
+            // instead of calculating proposed value from SPD -- which selects optimistic values
+            // leading to errors in expected timing values
+            uint64_t l_trrd_s_in_nck = 0;
+            uint64_t l_freq = 0;
+            uint8_t l_dram_width = 0;
+            FAPI_TRY( attr::get_dram_width(iv_dimm, l_dram_width) );
+            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( trrd_s( iv_dimm, l_dram_width, l_freq, l_trrd_s_in_nck) );
 
-            FAPI_TRY(mss::attr::set_trrd_s_min(iv_dimm, l_field));
+            FAPI_INF("%s SDRAM width: %d, tRRD_S (nck): %d",
+                     spd::c_str(iv_dimm), l_dram_width, l_trrd_s_in_nck);
+
+            FAPI_DBG("%s DRAM TRRD_S %d", spd::c_str(iv_dimm), l_trrd_s_in_nck);
+
+            FAPI_TRY(mss::attr::set_dram_trrd_s(iv_port, l_trrd_s_in_nck));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_trrd_l_min(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the offset trfc dlr field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_offset_trfc_dlr(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TRRD_L_MIN, i_spd, XXXXX, l_field));
+            int64_t l_tck_in_ps = 0;
+            uint64_t l_freq = 0;
+            uint8_t l_refresh_mode = 0;
+            uint8_t l_dram_density = 0;
+            uint64_t l_trfc_dlr_in_ps = 0;
+            uint16_t l_trfc_dlr_in_nck = 0;
 
-            FAPI_TRY(mss::attr::set_trrd_l_min(iv_dimm, l_field));
+            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
+                      "%s Failed to calculate clock period (tCK)", spd::c_str(iv_dimm) );
+
+            FAPI_TRY( mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode) );
+            FAPI_TRY( mss::attr::get_dram_density(iv_dimm, l_dram_density) );
+
+            // Calculate refresh cycle time in ps
+            FAPI_TRY( calc_trfc_dlr(iv_dimm, l_refresh_mode, l_dram_density, l_trfc_dlr_in_ps),
+                      "%s Failed calc_trfc_dlr()", spd::c_str(iv_dimm) );
+
+            // Calculate refresh cycle time in nck
+            FAPI_TRY( spd::calc_nck(l_trfc_dlr_in_ps, static_cast<uint64_t>(l_tck_in_ps), spd::INVERSE_DDR4_CORRECTION_FACTOR,
+                                    l_trfc_dlr_in_nck));
+
+            FAPI_INF("%s tCK (ps): %d, tRFC_DLR (ps): %d, tRFC_DLR (nck): %d",
+                     spd::c_str(iv_dimm), l_tck_in_ps, l_trfc_dlr_in_ps, l_trfc_dlr_in_nck);
+
+            FAPI_DBG("%s DRAM TRFC_DLR %d", spd::c_str(iv_dimm), l_trfc_dlr_in_nck);
+
+            FAPI_TRY(mss::attr::set_dram_trfc_dlr(iv_port, l_trfc_dlr_in_nck));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-        virtual fapi2::ReturnCode set_tccd_l_min(const std::vector<uint8_t>& i_spd) const
+        ///
+        /// @brief Set the offset trfc dlr field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_trefi(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TCCD_L_MIN, i_spd, XXXXX, l_field));
+            uint8_t l_refresh_mode = 0;
+            uint8_t l_refresh_rate = 0;
+            uint64_t l_trefi_in_ps = 0;
+            int64_t l_tck_in_ps = 0;
+            uint64_t l_freq = 0;
 
-            FAPI_TRY(mss::attr::set_tccd_l_min(iv_dimm, l_field));
+            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
+                      "%s Failed to calculate clock period (tCK)", spd::c_str(iv_dimm) );
+
+            FAPI_TRY( mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode) );
+            FAPI_TRY( mss::attr::get_mrw_refresh_rate_request(l_refresh_rate) );
+
+            switch(l_refresh_mode)
+            {
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
+
+                    FAPI_TRY( calc_trefi( mss::refresh_rate::REF1X,
+                                          l_refresh_rate,
+                                          l_trefi_in_ps),
+                              "%s Failed to calculate tREF1", spd::c_str(iv_dimm) );
+                    break;
+
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
+
+                    FAPI_TRY( calc_trefi( mss::refresh_rate::REF2X,
+                                          l_refresh_rate,
+                                          l_trefi_in_ps),
+                              "%s Failed to calculate tREF2", spd::c_str(iv_dimm) );
+                    break;
+
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_4X:
+                case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
+
+                    FAPI_TRY( calc_trefi( mss::refresh_rate::REF4X,
+                                          l_refresh_rate,
+                                          l_trefi_in_ps),
+                              "%s Failed to calculate tREF4", spd::c_str(iv_dimm) );
+                    break;
+
+                default:
+                    // Fine Refresh Mode will be a platform attribute set by the MRW,
+                    // which they "shouldn't" mess up as long as use "attribute" enums.
+                    // if openpower messes this up we can at least catch it
+                    FAPI_ASSERT(false,
+                                fapi2::MSS_INVALID_FINE_REFRESH_MODE().
+                                set_FINE_REF_MODE(l_refresh_mode),
+                                "%s Incorrect Fine Refresh Mode received: %d ",
+                                spd::c_str(iv_dimm),
+                                l_refresh_mode);
+                    break;
+            };
+
+            {
+                // Calculate refresh cycle time in nCK & set attribute
+                constexpr double PERCENT_ADJUST = 0.99;
+
+                // Calculate nck
+                uint64_t l_trefi_in_nck = 0;
+                FAPI_TRY(  spd::calc_nck( l_trefi_in_ps,
+                                          static_cast<uint64_t>(l_tck_in_ps),
+                                          spd::INVERSE_DDR4_CORRECTION_FACTOR,
+                                          l_trefi_in_nck),
+                           "%s Error in calculating tREFI, with value of l_trefi_in_ps: %d", spd::c_str(iv_dimm), l_trefi_in_ps);
+
+                // Lab requested 99% of tREFI calculation to avoid any latency impact and violation of any
+                // refresh specification (across all number of ranks and frequencies) observed
+                // during lab power/thermal tests.
+
+                FAPI_INF("%s adjusting tREFI calculation by 99%, calculated tREFI (nck): %lu, adjusted tREFI (nck): %lu,",
+                         spd::c_str(iv_dimm), l_trefi_in_nck, l_trefi_in_nck * PERCENT_ADJUST);
+
+                // The compiler does this under the covers but just to be explicit on intent:
+                // Floating point arithmetic and truncation of result saved to an unsigned integer
+                l_trefi_in_nck = static_cast<double>(l_trefi_in_nck * PERCENT_ADJUST);
+
+                FAPI_INF("%s tCK (ps): %d, tREFI (ps): %d, tREFI (nck): %d",
+                         spd::c_str(iv_dimm), l_tck_in_ps, l_trefi_in_ps, l_trefi_in_nck);
+
+                FAPI_TRY(mss::attr::set_dram_trefi(iv_port, l_trefi_in_nck));
+
+                FAPI_DBG("%s DRAM TREFI %d", spd::c_str(iv_dimm), l_trefi_in_nck);
+            }
+
         fapi_try_exit:
             return fapi2::current_err;
         }
-
-        virtual fapi2::ReturnCode set_twrmin_msn(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TWRMIN_MSN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_twrmin_msn(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_twrmin_lsb(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TWRMIN_LSB, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_twrmin_lsb(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_twtrmin_s_msn(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_S_MSN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_twtrmin_s_msn(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_twtrmin_s_lsb(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_S_LSB, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_twtrmin_s_lsb(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_twtrmin_l_msn(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_L_MSN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_twtrmin_l_msn(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_twtrmin_l_lsb(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_L_LSB, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_twtrmin_l_lsb(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_offset_tccd_l_min(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TCCD_L_MIN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_offset_tccd_l_min(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_offset_trrd_l_min(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRRD_L_MIN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_offset_trrd_l_min(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_offset_trrd_s_min(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRRD_S_MIN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_offset_trrd_s_min(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_offset_trc_min(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRC_MIN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_offset_trc_min(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_offset_trp_min(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRP_MIN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_offset_trp_min(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_offset_trcd_min(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRCD_MIN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_offset_trcd_min(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_offset_taa_min(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TAA_MIN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_offset_taa_min(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_offset_tck_max(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TCK_MAX, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_offset_tck_max(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        virtual fapi2::ReturnCode set_offset_tck_min(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TCK_MIN, i_spd, XXXXX, l_field));
-
-            FAPI_TRY(mss::attr::set_offset_tck_min(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        fapi2::ReturnCode set_crc(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_crc_msb = 0;
-            uint8_t l_crc_lsb = 0;
-            uint16_t l_field = 0;
-            fapi2::buffer<uint16_t> l_buffer;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::CRC_LSB, i_spd, XXXXX, l_crc_lsb));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::CRC_MSB, i_spd, XXXXX, l_crc_msb));
-
-            // Combining bits to create timing value (in a buffer)
-            right_aligned_insert(l_buffer, l_crc_msb, l_crc_lsb);
-
-            // This value isn't bounded in the SPD document
-            l_field = l_buffer;
-
-            FAPI_INF("%s. Cyclical Redundancy Code (CRC): %d",
-                     spd::c_str(iv_dimm),
-                     l_field);
-
-            FAPI_TRY(mss::attr::set_crc_lsb(iv_dimm, l_field));
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-#endif
 
         ///
         /// @brief Process the data init fields - these fields should be processed first
@@ -1722,9 +2366,6 @@ class base_0_3
         ///
         virtual fapi2::ReturnCode process(const std::vector<uint8_t>& i_spd) const
         {
-            fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-            auto l_facade = mss::spd::facade(iv_dimm, i_spd, l_rc);
-
             // These likely should have been done already, but just in case
             FAPI_TRY(process_data_init_fields(i_spd));
 
@@ -1738,102 +2379,22 @@ class base_0_3
             FAPI_TRY(set_bus_width(i_spd));
             FAPI_TRY(set_supported_cas_latencies(i_spd));
 
-            // Use engine for these until we replace it
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::exp::attr_eff_engine_fields, mss::exp::attr_eff_engine_fields::SPD_TAA_MIN>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine<proc_type::PROC_P10, mss::attr_eff_engine_fields>::set(l_facade);
-
-// TK populate when timing fields are ported to the new API
-#if 0
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TRFC_DLR>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TRCD>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TRP>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TRAS>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TRFC>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TFAW>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TRRD_S>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TRRD_L>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TCCD_L>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TWR>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TWTR_S>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TWTR_L>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TRTP>::single_set(
-                l_facade);
-
-            mss::gen::attr_engine
-            <proc_type::PROC_P10, mss::attr_eff_engine_fields, mss::attr_eff_engine_fields::DRAM_TREFI>::single_set(
-                l_facade);
-#endif
-
-// TK populate functions when timing fields are ported to the new API
-#if 0
-            FAPI_TRY(set_taa_min(i_spd)); // eng
-            FAPI_TRY(set_trcd_min(i_spd)); // eng
-            FAPI_TRY(set_trp_min(i_spd)); // eng
-            FAPI_TRY(set_trasmin_msn(i_spd));// eng
-            FAPI_TRY(set_trasmin_lsb(i_spd)); //eng
-            FAPI_TRY(set_trcmin_msn(i_spd)); // skip
-            FAPI_TRY(set_trcmin_lsb(i_spd)); // skip
-            FAPI_TRY(set_trfc1min_lsb(i_spd)); // eng
-            FAPI_TRY(set_trfc1min_msb(i_spd)); // eng
-            FAPI_TRY(set_trfc2min_lsb(i_spd)); // eng
-            FAPI_TRY(set_trfc2min_msb(i_spd)); // eng
-            FAPI_TRY(set_trfc4min_lsb(i_spd)); // eng
-            FAPI_TRY(set_trfc4min_msb(i_spd)); // eng
-            FAPI_TRY(set_tfawmin_msn(i_spd)); //  eng
-            FAPI_TRY(set_tfawmin_lsb(i_spd)); //  eng
-            FAPI_TRY(set_trrd_s_min(i_spd)); // eng
-            FAPI_TRY(set_trrd_l_min(i_spd)); // eng
-            FAPI_TRY(set_tccd_l_min(i_spd)); // eng
-            FAPI_TRY(set_twrmin_msn(i_spd)); // eng
-            FAPI_TRY(set_twrmin_lsb(i_spd)); // eng
-            FAPI_TRY(set_twtrmin_s_msn(i_spd)); // eng
-            FAPI_TRY(set_twtrmin_s_lsb(i_spd)); // eng
-            FAPI_TRY(set_twtrmin_l_msn(i_spd)); // eng
-            FAPI_TRY(set_twtrmin_l_lsb(i_spd)); // eng
-            FAPI_TRY(set_offset_tck_max(i_spd)); // skip
-            FAPI_TRY(set_offset_tck_min(i_spd)); // skip
-#endif
-
+            // Timing fields
+            FAPI_TRY(set_taa(i_spd));
+            FAPI_TRY(set_trcd_min(i_spd));
+            FAPI_TRY(set_trp_min(i_spd));
+            FAPI_TRY(set_trasmin(i_spd));
+            FAPI_TRY(set_trfc(i_spd));
+            FAPI_TRY(set_tfawmin(i_spd));
+            FAPI_TRY(set_trrd_l(i_spd));
+            FAPI_TRY(set_tccd_l(i_spd));
+            FAPI_TRY(set_twrmin(i_spd));
+            FAPI_TRY(set_trtp(i_spd));
+            FAPI_TRY(set_twtrmin_s(i_spd));
+            FAPI_TRY(set_twtrmin_l(i_spd));
+            FAPI_TRY(set_offset_trrd_s(i_spd));
+            FAPI_TRY(set_offset_trfc_dlr(i_spd));
+            FAPI_TRY(set_trefi(i_spd));
 
             FAPI_TRY(set_module_mfg_id(i_spd));
             FAPI_TRY(set_dram_mfg_id(i_spd));

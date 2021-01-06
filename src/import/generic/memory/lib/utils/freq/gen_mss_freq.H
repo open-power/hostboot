@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,6 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq_traits.H>
 #include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/utils/freq/cas_latency.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
@@ -253,46 +252,36 @@ inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_DOMAIN_
     // Start with a really high value so we can use std::min to reduce it below
     o_supported_freqs = std::vector<uint32_t>(TT::PORTS_PER_FREQ_DOMAIN, ~(0));
 
-    // Get cached decoder
-    std::vector< mss::spd::facade > l_spd_facades;
-
-    for (const auto& l_port : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target))
-    {
-        std::vector< mss::spd::facade > l_these_spd_facades;
-        FAPI_TRY( get_spd_decoder_list(l_port, l_these_spd_facades), "%s get decoder - spd", mss::c_str(l_port) );
-
-        for (const auto& l_spd_facade : l_these_spd_facades)
-        {
-            l_spd_facades.push_back(l_spd_facade);
-        }
-    }
-
     // Looking for the biggest application period on an MC.
     // This will further reduce supported frequencies the system can run on.
-    for ( const auto& l_cache : l_spd_facades )
+    for (const auto& l_port : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target))
     {
-        const auto l_dimm = l_cache.get_target();
-        const auto l_port = mss::find_target<TT::PORT_TARGET_TYPE>(l_dimm);
-        const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(l_port);
-        uint64_t l_tckmax_in_ps = 0;
-        uint64_t l_tck_min_in_ps = 0;
-        uint32_t l_dimm_freq = 0;
+        for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port) )
+        {
+            std::vector<uint8_t> l_spd;
 
-        FAPI_TRY( spd::get_tckmax(l_cache, l_tckmax_in_ps),
-                  "%s. Failed to get tCKmax", mss::c_str(l_dimm) );
-        FAPI_TRY( spd::get_tckmin(l_cache, l_tck_min_in_ps),
-                  "%s. Failed to get tCKmin", mss::c_str(l_dimm) );
+            const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(l_port);
+            uint64_t l_tckmax_in_ps = 0;
+            uint64_t l_tck_min_in_ps = 0;
+            uint32_t l_dimm_freq = 0;
 
-        // Determine a proposed tCK value that is greater than or equal tCKmin
-        // But less than tCKmax
-        l_largest_tck = std::max(l_largest_tck, l_tck_min_in_ps);
-        l_largest_tck = std::min(l_largest_tck, l_tckmax_in_ps);
+            FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_spd));
+            FAPI_TRY( spd::get_tckmax(l_dimm, l_spd, l_tckmax_in_ps),
+                      "%s. Failed to get tCKmax", mss::c_str(l_dimm) );
+            FAPI_TRY( spd::get_tckmin(l_dimm, l_spd, l_tck_min_in_ps),
+                      "%s. Failed to get tCKmin", mss::c_str(l_dimm) );
 
-        FAPI_TRY( mss::ps_to_freq(l_largest_tck, l_dimm_freq), "%s ps to freq %lu", mss::c_str(i_target), l_largest_tck );
-        FAPI_DBG("Biggest freq supported from SPD %d MT/s for %s",
-                 l_dimm_freq, mss::c_str(l_dimm));
+            // Determine a proposed tCK value that is greater than or equal tCKmin
+            // But less than tCKmax
+            l_largest_tck = std::max(l_largest_tck, l_tck_min_in_ps);
+            l_largest_tck = std::min(l_largest_tck, l_tckmax_in_ps);
 
-        o_supported_freqs[l_port_pos] = std::min(l_dimm_freq, o_supported_freqs[l_port_pos]);
+            FAPI_TRY( mss::ps_to_freq(l_largest_tck, l_dimm_freq), "%s ps to freq %lu", mss::c_str(i_target), l_largest_tck );
+            FAPI_DBG("Biggest freq supported from SPD %d MT/s for %s",
+                     l_dimm_freq, mss::c_str(l_dimm));
+
+            o_supported_freqs[l_port_pos] = std::min(l_dimm_freq, o_supported_freqs[l_port_pos]);
+        }
     }
 
 fapi_try_exit:
@@ -401,12 +390,8 @@ inline fapi2::ReturnCode find_min_dimm_freq(const fapi2::Target<TT::FREQ_DOMAIN_
         fapi2::ReturnCode l_rc;
         uint64_t l_desired_cl = 0;
 
-        // Get cached decoder
-        std::vector< mss::spd::facade > l_spd_facades;
-        FAPI_TRY( get_spd_decoder_list(l_port, l_spd_facades) );
-
         // Instantiation of class that calculates CL algorithm
-        mss::cas_latency<TT::MC> l_cas_latency( l_port, l_spd_facades, i_supported_freqs, l_rc );
+        mss::cas_latency<TT::MC> l_cas_latency( l_port, i_supported_freqs, l_rc );
 
         FAPI_TRY( l_rc, "%s. Failed to initialize cas_latency ctor", mss::c_str(l_port) );
 

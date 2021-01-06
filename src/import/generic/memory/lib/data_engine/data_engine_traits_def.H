@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,34 +43,6 @@ namespace mss
 {
 
 ///
-/// @brief enum list of SPD based attr fields to set
-///
-enum class attr_eff_engine_fields
-{
-    // Template recursive base case
-    ATTR_EFF_BASE_CASE = 0,
-
-    // Attrs to set
-    DRAM_TREFI = 1,
-    DRAM_TCCD_L = 2,
-    DRAM_TWTR_L = 3,
-    DRAM_TWTR_S = 4,
-    DRAM_TFAW = 5,
-    DRAM_TRCD = 6,
-    DRAM_TRP = 7,
-    DRAM_TRAS = 8,
-    DRAM_TWR = 9,
-    DRAM_TRTP = 10,
-    DRAM_TRRD_S = 11,
-    DRAM_TRRD_L = 12,
-    DRAM_TRFC = 13,
-    DRAM_TRFC_DLR = 14,
-
-    // Dispatcher set to last enum value
-    DISPATCHER = DRAM_TRFC_DLR,
-};
-
-///
 /// @brief Traits associated with DIMM positioning
 /// @class dimmPosTraits
 /// @tparam MC the memory controller type
@@ -87,15 +59,6 @@ class dimmPosTraits;
 ///
 template < proc_type P, typename ET, ET T = ET::DISPATCHER>
 struct attrEngineTraits;
-
-///
-/// @brief Forward declartion of traits for setTimingTraits
-/// @class setTimingTraits
-/// @tparam ET enum type
-/// @tparam T enum value
-///
-template < typename ET, ET T >
-struct setTimingTraits;
 
 namespace gen
 {
@@ -114,7 +77,6 @@ template < proc_type P,
            typename TT = attrEngineTraits<P, ET, F>,
            bool B = false>
 struct attr_engine;
-
 }// gen
 }// mss
 
