@@ -887,7 +887,8 @@ class IpVpdFacade
      *                       ID, keyword ID, location of record and EEPROM source.
      * @param[out] o_vtocRecordMetaData - Struct to contain the record meta data - record name,
      *                                    record type, record offset, record length, ecc offset
-     *                                    and ecc length.
+     *                                    and ecc length. The meta data returned is in big endian,
+     *                                    will need to convert to little endian, if necessary.
      * @param[in](optional) i_vhdrFullRecordData - If given the VHDR record, then
      *                      the VTOC record meta data will be extracted from this record.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to an error log.
@@ -979,7 +980,9 @@ class IpVpdFacade
      *                       ID, keyword ID, location of record and EEPROM source.
      *                       Record ID and keyword ID are not used and therefore not necessary.
      * @param[out] o_recordMetaDataList - The list of meta data for each record found,
-     *                                    minus the VHDR and VTOC record.
+     *                                    minus the VHDR and VTOC record. The meta data returned
+     *                                    is in big endian, will need to convert to little endian,
+     *                                    if necessary.
      * @param[in] i_vhdrRecordData - The VHDR record data that contains the VTOC meta data.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
      */
@@ -999,16 +1002,22 @@ class IpVpdFacade
      *                       The record ID, identifies the record that the meta data
      *                       will be retrieved for. Keyword ID is not used.
      * @param[out] o_recordMetaData - Will contain the record meta data, if found, else
-     *                                will be "zeroed" out.
+     *                                will be "zeroed" out. The meta data returned is in
+     *                                big endian, will need to convert to little endian,
+     *                                if necessary.
+     * @param[in](optional) i_recordName - If not a nullptr, must be the translated record
+     *                                     name of i_args.record. Providing a value will
+     *                                     expedite the execution of this method.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
      */
     errlHndl_t getRecordMetaData (
                 const TARGETING::TargetHandle_t  i_target,
                 const input_args_t              &i_args,
-                pt_entry                        &o_recordMetaData );
+                pt_entry                        &o_recordMetaData,
+                const char* const                i_recordName = nullptr );
 
     /**
-     * @brief If i_recordName is NULL, then get the meta data for all records of the VPD,
+     * @brief If i_recordName is a nullptr, then get the meta data for all records of the VPD,
      *        excluding the VHDR and VTOC record, else if i_recordName if not NULL, then
      *        only get the meta data for i_recordName.
      *
@@ -1017,11 +1026,13 @@ class IpVpdFacade
      *                       ID, keyword ID, location of record and EEPROM source.
      *                       Record ID and keyword ID are not used and therefore not necessary.
      * @param[in] i_vtocRecordMetaData - The VTOC record meta data.  The VTOC record contains a
-     *                                   reference to all other records.
-     * @param[out] o_recordMetaDataList - If i_recordName is not null then will contain a single
+     *                                   reference to all other records. The meta data will need
+     *                                   to be in big endian.
+     * @param[out] o_recordMetaDataList - If i_recordName is not a nullptr then will contain a single
      *                                    entry for that record else, if i_recordName is null, then
-     *                                    the list of meta data for each record found,
-     *                                    minus the VHDR and VTOC record.
+     *                                    the list of meta data for each record found, minus the
+     *                                    VHDR and VTOC record. The meta data returned is in big endian,
+     *                                    will need to convert to little endian, if necessary.
      * @param[in](optional) i_recordName - If not null, will only retrieve the meta data for this
      *                                     record, if NULL, then all record meta data is retrieved
      *                                     excluding the VHDR and VTOC record.
@@ -1137,9 +1148,9 @@ class IpVpdFacade
      * @param[in] i_recordLength - The length of the record data.
      * @param[out] o_eccData     - Pointer to the created ECC data that is
      *                             associated with the record data.
-     * @param[in/out] io_eccLength - [in]  The length of the ECC data buffer.
-     *                               [out] The length of the returned ECC data,
-     *                                     created in the ECC data buffer.
+     * @param[in/out] io_eccLength - [in]  A pointer to the length of the ECC data buffer.
+     *                               [out] A pointer to the length of the returned ECC
+     *                                     data, created in the ECC data buffer.
      * @return 0 if success, non-zero for failure/issues
      */
     int vpdeccCreateEcc (

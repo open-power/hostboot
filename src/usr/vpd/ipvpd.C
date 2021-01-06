@@ -69,12 +69,15 @@ static const uint64_t IPVPD_TOC_ENTRY_SIZE = 8;
 static const uint64_t IPVPD_TOC_INVALID_DATA = 0xFFFFFFFFFFFFFFFF;
 
 // Return codes for the vpdeccCreateEcc and vpdeccCheckData methods
-static const size_t VPD_ECC_OK                 = 0;
-static const size_t VPD_ECC_NOT_ENOUGH_BUFFER  = 1;
-static const size_t VPD_ECC_WRONG_ECC_SIZE     = 2;
-static const size_t VPD_ECC_WRONG_BUFFER_SIZE  = 9;
-static const size_t VPD_ECC_UNCORRECTABLE_DATA = 90;
-static const size_t VPD_ECC_CORRECTABLE_DATA   = 91;
+enum VPD_ECC_RC: size_t
+{
+    VPD_ECC_OK                 = 0,
+    VPD_ECC_NOT_ENOUGH_BUFFER  = 1,
+    VPD_ECC_WRONG_ECC_SIZE     = 2,
+    VPD_ECC_WRONG_BUFFER_SIZE  = 9,
+    VPD_ECC_UNCORRECTABLE_DATA = 90,
+    VPD_ECC_CORRECTABLE_DATA   = 91,
+};
 
 /**
  * @brief  Constructor
@@ -2770,8 +2773,8 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
                     "on target 0x%.8X", i_args.record, l_recordName, l_targetHuid );
 
         // Get the record meta data
-        pt_entry l_ptEntry;
-        l_err = getRecordMetaData ( i_target, i_args, l_ptEntry );
+        pt_entry l_ptEntry = {0};
+        l_err = getRecordMetaData ( i_target, i_args, l_ptEntry, l_recordName );
         if (l_err)
         {
             break;
@@ -2790,7 +2793,7 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
                     l_eccLength,    l_recordName,   l_targetHuid );
 
         // Retrieve the record data.
-        uint8_t l_recordData[l_recordLength];  // Create record data buffer
+        uint8_t l_recordData[l_recordLength] = {0};  // Create record data buffer
         l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData,
                                     i_target,       i_args.eepromSource);
 
@@ -2807,8 +2810,8 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
                     l_recordName, l_targetHuid );
 
         // Create the ECC data using the record's data
-        uint8_t l_eccData[l_eccLength];  // Create record data buffer
-        int l_returnCode = vpdeccCreateEcc(l_recordData, l_recordLength,
+        uint8_t l_eccData[l_eccLength] = {0};  // Create record data buffer
+        auto l_returnCode = vpdeccCreateEcc(l_recordData, l_recordLength,
                                         l_eccData,   &l_eccLength);
 
         // Check the return code of the call to "vpdeccCreateEcc()" and create the
@@ -2982,7 +2985,7 @@ IpVpdFacade::validateVhdrRecordEccData( const TARGETING::TargetHandle_t i_target
         size_t l_eccLength(VHDR_ECC_DATA_SIZE);
 
         // Verify that retrieved ECC data is as expected.
-        size_t l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
+        auto l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
                                               l_eccData,    l_eccLength);
 
         // If the return code from the call to vpdeccCheckData is not VPD_ECC_OK, then an error occurred
@@ -3001,17 +3004,15 @@ IpVpdFacade::validateVhdrRecordEccData( const TARGETING::TargetHandle_t i_target
 
             if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
             {
-                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVhdrRecordEccData(): "
-                            "vpdeccCheckData returned a correctable error for record %s "
-                            "on target 0x%.8X",
-                            VPD_HEADER_RECORD_NAME, TARGETING::get_huid(i_target) );
-
                 // @TODO RTC:263440 Need to update the record in the cache with l_recordData:
                 //       This is a correctable error, which means the record data has been
                 //       updated and corrected.  The corrected/updated record data needs to
                 //       be written back.
-                // Commit the error for now.
-                errlCommit(l_err, VPD_COMP_ID);
+                // Reinstate below when able to update a record successfully
+                // errlCommit(l_err, VPD_COMP_ID);
+                // Remove below when able to update a record successfully.
+                l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                break;
             }
             else if (l_err)
             {
@@ -3061,6 +3062,38 @@ IpVpdFacade::getFullVhdrRecordData ( const TARGETING::TargetHandle_t i_target,
                    "%d and record offset 0x%.4X on target 0x%.8X", VPD_HEADER_RECORD_NAME,
                    l_recordLength, l_recordOffset, TARGETING::get_huid(i_target));
     }
+    else if (0 == o_vhdrRecordData.pt_kw_vtoc_ecc_len)
+    {
+        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getFullVhdrRecordData(): "
+                   "fetchDataFromEeprom failed to properly retrieve the meta data for "
+                   "record %s with record length %d and record offset 0x%.4X on target "
+                   "0x%.8X. The VTOC ECC meta data for the record is missing.",
+                   VPD_HEADER_RECORD_NAME,
+                   l_recordLength, l_recordOffset, TARGETING::get_huid(i_target));
+
+        /*@
+         * @errortype
+         * @reasoncode       VPD::VPD_RECORD_INVALID_VHDR
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_IPVPD_FETCH_DATA
+         * @userdata1[00:31] Target to find record in
+         * @userdata1[32:64] Input arg: Record ID
+         * @userdata2[00:31] Input arg: Location
+         * @userdata2[32:64] Input arg: EEEPROM SOURCE
+         * @devdesc          The retrieved VPD Header Record (VHDR) is incomplete.
+         * @custdesc         Firmware error with the VPD.
+         */
+        l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         VPD::VPD_IPVPD_FETCH_DATA,
+                                         VPD::VPD_RECORD_INVALID_VHDR,
+                                         TWO_UINT32_TO_UINT64(
+                                             TARGETING::get_huid(i_target),
+                                             i_args.record ),
+                                         TWO_UINT32_TO_UINT64(
+                                             i_args.location,
+                                             i_args.eepromSource ),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+    }
 
     TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::getFullVhdrRecordData(): "
                 "returning %s errors for record %s on target 0x%.8X",
@@ -3090,7 +3123,7 @@ IpVpdFacade::validateVtocRecordEccData(
     do
     {
         // Get the VTOC's meta data
-        pt_entry l_ptEntry;
+        pt_entry l_ptEntry = {0};
         l_err = getVtocRecordMetaData(i_target, i_args, l_ptEntry, &i_vhdrRecordData);
         if (l_err)
         {
@@ -3112,7 +3145,7 @@ IpVpdFacade::validateVtocRecordEccData(
                     l_recordLength, l_recordOffset, l_eccLength, l_eccOffset);
 
         // Retrieve the record data.
-        uint8_t l_recordData[l_recordLength];  // Create record data buffer
+        uint8_t l_recordData[l_recordLength] = {0};  // Create record data buffer
         l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData,
                                     i_target,       i_args.eepromSource);
 
@@ -3127,7 +3160,7 @@ IpVpdFacade::validateVtocRecordEccData(
         }
 
         // Retrieve the ECC data.
-        uint8_t l_eccData[l_eccLength];  // Create ECC data buffer
+        uint8_t l_eccData[l_eccLength] = {0};  // Create ECC data buffer
         l_err = fetchDataFromEeprom(l_eccOffset, l_eccLength, l_eccData,
                                     i_target,    i_args.eepromSource);
 
@@ -3142,7 +3175,7 @@ IpVpdFacade::validateVtocRecordEccData(
         }
 
         // Verify that the retrieved ECC data is as expected.
-        size_t l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
+        auto l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
                                               l_eccData,    l_eccLength);
 
         // If the return code from the call to vpdeccCheckData is not VPD_ECC_OK, then an error occurred
@@ -3161,17 +3194,15 @@ IpVpdFacade::validateVtocRecordEccData(
 
             if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
             {
-                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
-                           "vpdeccCheckData returned a correctable error code for record %s "
-                           "on target 0x%.8X",
-                           VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
-
                 // @TODO RTC:263440 Need to update the record in the cache with l_recordData:
                 //       This is a correctable error, which means the record data has been
                 //       updated and corrected.  The corrected/updated record data needs to
                 //       be written back.
-                // Commit the error for now.
-                errlCommit(l_err, VPD_COMP_ID);
+                // Reinstate below when able to update a record successfully
+                // errlCommit(l_err, VPD_COMP_ID);
+                // Remove below when able to update a record successfully.
+                l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                break;
             }
             else if (l_err)
             {
@@ -3239,8 +3270,8 @@ IpVpdFacade::validateAllOtherRecordEccData(
         }
 
         // Pre-allocate the buffers, once, with the largest buffer size needed
-        uint8_t l_recordData[l_maxRecordBufferLength];
-        uint8_t l_eccData[l_maxEccBufferLength];
+        uint8_t l_recordData[l_maxRecordBufferLength] = {0};
+        uint8_t l_eccData[l_maxEccBufferLength] = {0};
 
         // Iterate thru the records validating it's ECC data
         for (const pt_entry &l_ptEntry: l_recordMetaDataList)
@@ -3303,17 +3334,15 @@ IpVpdFacade::validateAllOtherRecordEccData(
 
                 if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
                 {
-                    TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
-                               "vpdeccCheckData returned a correctable error code for record %s "
-                               "on target 0x%.8X",
-                               l_ptEntry.record_name, TARGETING::get_huid(i_target) );
-
                     // @TODO RTC:263440 Need to update the record in the cache with l_recordData:
                     //       This is a correctable error, which means the record data has been
                     //       updated and corrected.  The corrected/updated record data needs to
                     //       be written back.
-                    // Commit the error for now.
-                    errlCommit(l_err, VPD_COMP_ID);
+                    // Reinstate below when able to update a record successfully
+                    // errlCommit(l_err, VPD_COMP_ID);
+                    // Remove below when able to update a record successfully.
+                    l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    break;
                 }
                 else if (l_err)
                 {
@@ -3354,7 +3383,7 @@ IpVpdFacade::getAllRecordMetaData (
     do
     {
         // Get the VTOC record meta data
-        pt_entry l_vtocRecordMetaData;  // The struct to contain the VTOC meta data
+        pt_entry l_vtocRecordMetaData = {0};  // The struct to contain the VTOC meta data
         l_err = getVtocRecordMetaData(i_target, i_args, l_vtocRecordMetaData, &i_vhdrRecordData);
         if (l_err)
         {
@@ -3388,7 +3417,8 @@ errlHndl_t
 IpVpdFacade::getRecordMetaData (
                 const TARGETING::TargetHandle_t  i_target,
                 const input_args_t              &i_args,
-                pt_entry                        &o_recordMetaData )
+                pt_entry                        &o_recordMetaData,
+                const char* const                i_recordName )
 {
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordMetaData() target(0x%.8X) "
                 "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
@@ -3402,18 +3432,21 @@ IpVpdFacade::getRecordMetaData (
 
     do
     {
-        // Get the record name from the input args
-        const char* l_recordName;
-        l_err = translateRecord(i_args.record, l_recordName);
-        if ( unlikely(nullptr != l_err) )
+        // Get the record name from the input args, if not provided
+        const char* l_recordName(i_recordName);
+        if (nullptr == l_recordName)
         {
-            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getRecordMetaData(): "
-                       "translateRecord failed to translate record 0x%.8X", i_args.record);
-            break;
+            l_err = translateRecord(i_args.record, l_recordName);
+            if ( unlikely(nullptr != l_err) )
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getRecordMetaData(): "
+                           "translateRecord failed to translate record 0x%.8X", i_args.record);
+                break;
+            }
         }
 
         // Get the VTOC record meta data
-        pt_entry l_vtocRecordMetaData;  // The struct to contain the VTOC meta data
+        pt_entry l_vtocRecordMetaData = {0};  // The struct to contain the VTOC meta data
         l_err = getVtocRecordMetaData(i_target, i_args, l_vtocRecordMetaData);
         if ( unlikely(nullptr != l_err) )
         {
@@ -3536,16 +3569,27 @@ IpVpdFacade::_getRecordMetaData (
 
             if ( l_err )
             {
-                // If index greater than 0, and/or module ID and reason code are of "keyword not
-                // found" then exhausted the number of PT keywords and this error is expected,
-                // delete error log and exit method.
+                // If the index is greater than 0, and/or module ID and reason code are of "keyword not
+                // found" then the number of PT keywords have been exhausted, for the VTOC record,
+                // and this is an expected error, delete error log and exit method.
                 if ( ( 0 != l_index ) && ( VPD::VPD_KEYWORD_NOT_FOUND == l_err->reasonCode() ) &&
                      ( VPD::VPD_IPVPD_FIND_KEYWORD_ADDR == l_err->moduleId() )                   )
                 {
+                    TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::_getRecordMetaData(): Exhausted "
+                               "all PT keywords for record %s with a total of %d PT keywords "
+                               "found. Deleting the produced error log because an error is "
+                               "expected when retrieving all PT keywords",
+                               VPD_TABLE_OF_CONTENTS_RECORD_NAME, l_index);
                     delete l_err;
                     l_err = nullptr;
                 }
+                else
                 // Else, index is 0 and/or there was an issue getting a PT keyword.
+                {
+                    TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::_getRecordMetaData(): "
+                               "Failed to get all the PT keywords for record %s, at index %d",
+                               VPD_TABLE_OF_CONTENTS_RECORD_NAME, l_index);
+                }
 
                 // Exit with or without error log
                 break;
@@ -3850,7 +3894,7 @@ IpVpdFacade::checkEccDataValidationReturnCode(
          * @userdata2[32:47] ECC data offset
          * @userdata2[48:63] ECC data length
          * @devdesc          Encountered a correctable error with the VPD check
-         * @custdesc         Firmware error checking the VPD
+         * @custdesc         A correctable firmware error checking the VPD
          */
         l_err = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
