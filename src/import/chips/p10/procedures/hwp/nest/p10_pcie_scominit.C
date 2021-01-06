@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,7 @@ const uint64_t PIPEDOUTCTL2_OFFSET = 22;
 const uint64_t PIPEDOUTCTL0_OFFSET = 20;
 const uint64_t NANO_SEC_DELAY = 1000000;
 const uint64_t SIM_CYC_DELAY = 512;
+const uint64_t MICRO_SEC_DELAY = 1000;
 
 //Maximum number of iterations (So, 1ms * 100 = 100ms before timeout)
 const uint32_t MAX_NUM_POLLS = 100;
@@ -123,6 +124,24 @@ const uint64_t  RAWCMN_DIG_AON_FW_VERSION_1[NUM_OF_INSTANCES] =
     0x800101790801153F,
 };
 
+// MPLLA Calibration Override Registers
+const uint8_t MPLLA_FDIV_EN_OVRD_EN = 49;
+const uint8_t MPLLA_FDIV_EN = 50;
+const uint8_t MPLLA_FBCLK_OVRD_EN = 51;
+const uint8_t MPLLA_FBCLK_DIV4_EN = 52;
+const uint8_t MPLLA_FBCLK_EN = 53;
+const uint8_t MPLLA_ANA_VREG_SPEEDUP_OVRD_EN = 56;
+const uint8_t MPLLA_ANA_VREG_SPEEDUP = 57;
+const uint8_t MPLLA_ANA_EN_OVRD_EN = 62;
+const uint8_t MPLLA_ANA_EN = 63;
+
+const uint64_t  SUP_DIG_ANA_MPLLA_OVRD_OUT0[NUM_OF_INSTANCES] =
+{
+    0x800000800801113F,
+    0x800100800801113F,
+    0x800000800801153F,
+    0x800100800801153F,
+};
 
 ///-----------------------------------------------------------------------------
 /// Function definitions
@@ -308,6 +327,57 @@ fapi2::ReturnCode p10_load_iop_override(
                 FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEN_DIG_FSM_FW_SCRATCH_15[i] , l_data),
                          "Error from putScom 0x%.16llX", RAWLANEN_DIG_FSM_FW_SCRATCH_15[i]);
             }
+
+            // GEN1/GEN2 workaround - Yield issue.
+            // Step 1
+            l_data = 0;
+            FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+                     "Error from getScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
+            l_data.setBit<MPLLA_ANA_EN_OVRD_EN>();
+            l_data.setBit<MPLLA_ANA_EN>();
+            FAPI_DBG("Step1: SUP_DIG_ANA_MPLLA_OVRD_OUT0 0x%.0x", l_data);
+            FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+                     "Error from putScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
+
+            FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+
+            // Step 2 - This step was only needed to bring out the FB clock for observability. Not needed for the workaround.
+            //l_data = 0;
+            //FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+            //         "Error from getScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
+            //l_data.setBit<MPLLA_FBCLK_OVRD_EN>();
+            //l_data.clearBit<MPLLA_FBCLK_DIV4_EN>();
+            //l_data.setBit<MPLLA_FBCLK_EN>();
+            //FAPI_DBG("Step2: SUP_DIG_ANA_MPLLA_OVRD_OUT0 0x%.0x", l_data);
+            //FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+            //         "Error from putScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
+            //
+            //FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+
+            // Step 3
+            l_data = 0;
+            FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+                     "Error from getScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
+            l_data.setBit<MPLLA_ANA_VREG_SPEEDUP_OVRD_EN>();
+            l_data.clearBit<MPLLA_ANA_VREG_SPEEDUP>();
+            FAPI_DBG("Step3: SUP_DIG_ANA_MPLLA_OVRD_OUT0 0x%.0x", l_data);
+            FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+                     "Error from putScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
+
+            FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+
+            // Step 4
+            l_data = 0;
+            FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+                     "Error from getScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
+            l_data.setBit<MPLLA_FDIV_EN_OVRD_EN>();
+            l_data.setBit<MPLLA_FDIV_EN>();
+            FAPI_DBG("Step4: SUP_DIG_ANA_MPLLA_OVRD_OUT0 0x%.0x", l_data);
+            FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+                     "Error from putScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
+
+            FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+
         }
     }
 
