@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -359,6 +359,13 @@ enum errlUserDataVersion
  * when switching to PNOR.
  */
 const uint32_t ERRL_STORAGE_SIZE = 65536;
+
+
+/**
+ * @brief  This is the number of additional error logs available to store
+ * additional error log data (usually traces), beyond the original error log.
+ */
+const uint32_t MAX_EXTRA_LOGS_PER_ORIGINAL = 5;
 
 /**
  *

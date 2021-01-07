@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -487,6 +487,17 @@ public:
      */
     bool collectTrace(const char i_name[],
                       const uint64_t i_max = KILOBYTE);
+
+    /**
+     *  @brief Get the flattened size of the errl entry and the max possible
+     *  size of the errl entry.  Function also rmeoves duplicate traces.
+     *
+     *  @param[in]  o_flatSize      Size of flattened error log
+     *  @param[in]  o_maxSize       Max possible size of error log
+     *
+     */
+    void getErrlSize(uint32_t& o_flatSize,
+                     uint32_t& o_maxSize);
 
     /**
      *  @brief Remove the duplicate trace entries from user detail data

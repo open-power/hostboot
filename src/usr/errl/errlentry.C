@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -67,6 +67,7 @@
 #include <util/misc.H>
 
 #ifdef CONFIG_BMC_IPMI
+#include <ipmi/ipmisel.H>
 #include <ipmi/ipmisensor.H>
 #include <errl/errludsensor.H>
 #endif
@@ -2135,6 +2136,34 @@ void ErrlEntry::removeDeconfigure()
     }
 }
 
+
+void ErrlEntry::getErrlSize(uint32_t& o_flatSize,
+                            uint32_t& o_maxSize)
+{
+    TARGETING::Target * sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget( sys );
+
+#ifdef CONFIG_BMC_IPMI
+    if ( !(sys &&
+           sys->tryGetAttr
+                <TARGETING::ATTR_BMC_MAX_ERROR_LOG_SIZE>( o_maxSize )) )
+    {
+        // Can't get value from attribute, so
+        // use default IPMI value for max log size
+        o_maxSize =  IPMISEL::ESEL_MAX_SIZE_DEFAULT;
+    }
+#else
+    // Default to 4K for all others
+    o_maxSize = 4096;
+#endif
+
+    // Remove any duplicate traces
+    removeDuplicateTraces();
+    o_flatSize = flattenedSize();
+
+}
+
+
 void ErrlEntry::removeDuplicateTraces()
 {
     // Define a custom comparator function for std::map.find()
@@ -2475,6 +2504,7 @@ void ErrlEntry::addI2cDeviceCallout(const TARGETING::Target *i_i2cMaster,
     } while (0);
 
 } // addI2cDeviceCallout
+
 
 std::vector<ErrlUD*> ErrlEntry::removeExcessiveUDsections(uint64_t i_maxSize, bool i_keep_trace_sections)
 {

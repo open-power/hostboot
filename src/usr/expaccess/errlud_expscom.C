@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -544,9 +544,14 @@ bool EXPSCOM::expAddLog( const exp_log_type i_log_type,
     const uint32_t META_SECTION_SIZE = sizeof(explog_section_header_t) +
                                        sizeof(ERRORLOG::pelSectionHeader_t);
 
-    // @todo RTC 214628
-    // Hopefully create a way to tell how much room is left in io_errl
-    uint32_t l_bytesAvailableInLog = (4 * KILOBYTE) * 5;
+    // Get available space in error log and the max errl entry size
+    uint32_t l_flatSize = 0;
+    uint32_t l_maxSize  = 0;
+    io_errl->getErrlSize(l_flatSize, l_maxSize);
+
+    // Total available = remaining in current log + full extra logs
+    uint32_t l_bytesAvailableInLog = (l_maxSize - l_flatSize)
+                + (l_maxSize * ERRORLOG::MAX_EXTRA_LOGS_PER_ORIGINAL);
     uint32_t l_exp_bytes_left_to_grab = i_max_log_size;
     uint32_t l_overall_explog_offset = 0;
 

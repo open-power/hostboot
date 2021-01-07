@@ -1,4 +1,3 @@
-
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
@@ -6,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
 #include <errl/errlreasoncodes.H>
@@ -1109,8 +1109,6 @@ void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)
 
 void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committerComp, bool i_keepTraces )
 {
-    constexpr unsigned int MAX_EXTRA_LOGS_PER_ORIGINAL = 5;
-
     // Additional sections are added to error log during commit time
     // like backtrace, code level, etc...
     // (varies between 740 and 800 bytes)
@@ -1120,32 +1118,18 @@ void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committ
     TARGETING::Target * sys = nullptr;
     TARGETING::targetService().getTopLevelTarget( sys );
     uint32_t l_maxErrLogSize;
+    uint32_t l_totalErrlSize;
+
+    // Get the current log size and max log size
+    io_err->getErrlSize(l_totalErrlSize, l_maxErrLogSize);
 
 #ifdef CONFIG_BMC_IPMI
-    if ( !(sys &&
-         sys->tryGetAttr<TARGETING::ATTR_BMC_MAX_ERROR_LOG_SIZE>( l_maxErrLogSize )) )
-    {
-        // Can't get value from attribute, so
-        // use default IPMI value for max log size
-        l_maxErrLogSize =  IPMISEL::ESEL_MAX_SIZE_DEFAULT;
-        TRACFCOMP( g_trac_errl, INFO_MRK
-                   "commitErrAllowExtraLogs: "
-                   "Attribute ATTR_BMC_MAX_ERROR_LOG_SIZE not found, "
-                   "%d used", l_maxErrLogSize );
-    }
     // Remove required selRecord size from maximum log size
     if ( l_maxErrLogSize > sizeof(IPMISEL::selRecord) )
     {
         l_maxErrLogSize -= sizeof(IPMISEL::selRecord);
     }
-#else
-    // default to 4K for all others
-    l_maxErrLogSize = 4096;
 #endif
-
-    // first remove any duplicate traces to help fit in one error log
-    io_err->removeDuplicateTraces();
-    uint64_t l_totalErrlSize = io_err->flattenedSize();
 
     if (l_totalErrlSize > l_maxErrLogSize)
     {
