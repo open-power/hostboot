@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,7 +120,7 @@ errlHndl_t psuSendSbeOcmbConfig(const TargetHandle_t i_pProc)
                         l_psuResponse.primaryStatus,
                         l_psuResponse.secondaryStatus);
 
-            /*
+            /*@
              * @errortype        ERRL_SEV_UNRECOVERABLE
              * @moduleid         SBEIO_PSU
              * @reasoncode       SBEIO_PSU_SEND

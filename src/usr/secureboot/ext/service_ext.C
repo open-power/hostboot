@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,7 @@ void lockAbusSecMailboxes()
             ERRORLOG::ErrlUserDetailsTarget(*l_pProc).addToLog(l_errl);
             ERRORLOG::errlCommit(l_errl, SECURE_COMP_ID);
 
-            /*
+            /*@
              * @errortype
              * @reasoncode RC_LOCK_MAILBOXES_FAILED
              * @moduleid   MOD_LOCK_ABUS_SEC_MAILBOXES

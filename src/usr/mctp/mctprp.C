@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -315,7 +315,7 @@ void MctpRP::handle_outbound_messages(void)
                   // first 8 bytes of MCTP payload
                   const uint64_t mctp_payload =
                           *reinterpret_cast<uint64_t*>(msg->extra_data);
-                  /*
+                  /*@
                   * @errortype  ERRL_SEV_UNRECOVERABLE
                   * @moduleid   MOD_HANDLE_OUTBOUND
                   * @reasoncode RC_SEND_PLDM_FAIL

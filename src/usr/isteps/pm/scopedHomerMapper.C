@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,7 +134,7 @@ errlHndl_t HBPM::ScopedHomerMapper::map()
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   ERR_MRK"ScopedHomerMapper::map: Could not map HOMER for proc HUID 0x%08x",
                   TARGETING::get_huid(iv_proc));
-        /**
+        /*@
          * @errortype
          * @reasoncode ISTEP::RC_COULD_NOT_MAP_HOMER
          * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -180,7 +180,7 @@ errlHndl_t HBPM::ScopedHomerMapper::getRuntimePMAddresses(uint64_t& o_homer,
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       ERR_MRK"ScopedHomerMapper::getRuntimePMAddresses: Invalid HOMER and/or OCC Common physical addresses; HOMER phys: 0x%016lx, OCC Common phys: 0x%016lx",
                       o_homer, o_occCommon);
-            /**
+            /*@
              * @errortype
              * @reasoncode ISTEP::RC_INVALID_PM_ADDRESS
              * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -205,7 +205,7 @@ errlHndl_t HBPM::ScopedHomerMapper::getRuntimePMAddresses(uint64_t& o_homer,
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   ERR_MRK"ScopedHomerMapper::getRuntimePMAddresses: get_pm_complex_addresses is not provided!");
-        /**
+        /*@
          * @errortype
          * @reasoncode ISTEP::RC_PM_COMPLEX_ADDRESSES_NOT_FOUND
          * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -233,7 +233,7 @@ errlHndl_t HBPM::ScopedHomerMapper::getRuntimePMAddresses(uint64_t& o_homer,
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   ERR_MRK"ScopedHomerMapper::getRuntimePMAddresses: get_pm_complex_addresses returned RC %d",
                   l_rc);
-        /**
+        /*@
          * @errortype
          * @reasoncode ISTEP::RC_BAD_INTERFACE_RETURN_CODE
          * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -270,7 +270,7 @@ errlHndl_t HBPM::ScopedHomerMapper::unmap()
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       ERR_MRK"ScopedHomerMapper::unmap: Could not unmap HOMER for proc HUID 0x%08x",
                       TARGETING::get_huid(iv_proc));
-            /**
+            /*@
              * @errortype
              * @reasoncode ISTEP::RC_COULD_NOT_UNMAP_HOMER
              * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE

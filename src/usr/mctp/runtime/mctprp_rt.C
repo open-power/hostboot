@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,7 +117,7 @@ static void rx_message(uint8_t i_eid, void * i_data,
                         *reinterpret_cast<const pldm_msg*>(msg_bytes + sizeof(MCTP::message_type)));
               }
               TRACFBIN(g_trac_mctp, "Failed to cache mctp payload:", i_msg, i_len);
-              /*
+              /*@
               * @errortype  ERRL_SEV_PREDICTIVE
               * @moduleid   MOD_RX_CALLBACK
               * @reasoncode RC_ERROR_CACHING_MSG
@@ -148,7 +148,7 @@ static void rx_message(uint8_t i_eid, void * i_data,
                     *msg_bytes,
                     i_eid);
           TRACFBIN(g_trac_mctp, "failing mctp rx_message:", i_msg, i_len);
-          /*
+         /*@
           * @errortype  ERRL_SEV_PREDICTIVE
           * @moduleid   MOD_RX_CALLBACK
           * @reasoncode RC_INVALID_MSG_TYPE

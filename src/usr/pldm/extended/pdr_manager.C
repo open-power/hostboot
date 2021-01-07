@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -338,7 +338,7 @@ errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
     {
         PLDM_INF("PdrManager::notifyBmcPdrRepoChanged: msg_send failed (rc = %d)",
                  rc);
-        /*
+        /*@
          * @errortype  ERRL_SEV_UNRECOVERABLE
          * @moduleid   MOD_PDR_MANAGER
          * @reasoncode RC_SEND_FAIL
@@ -389,7 +389,7 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
     }
     else
     {
-        /*
+        /*@
          * @errortype  ERRL_SEV_PREDICTIVE
          * @moduleid   MOD_PDR_MANAGER
          * @reasoncode RC_MULTIPLE_AWAIT

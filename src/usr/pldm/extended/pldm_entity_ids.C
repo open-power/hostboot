@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,7 +100,7 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
     {
         PLDM_ERR("Cannot find entity by FRU RSID 0x%04x", i_rsid);
 
-        /*
+        /*@
          * @errortype  ERRL_SEV_UNRECOVERABLE
          * @moduleid   MOD_PLDM_ENTITY_IDS
          * @reasoncode RC_NO_ENTITY_FROM_RSID
@@ -132,7 +132,7 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
                  ent.entity_type,
                  ent.entity_instance_num);
 
-        /*
+        /*@
          * @errortype  ERRL_SEV_UNRECOVERABLE
          * @moduleid   MOD_PLDM_ENTITY_IDS
          * @reasoncode RC_MISSING_ENTITY_ID
@@ -232,7 +232,7 @@ errlHndl_t PLDM::assignTargetEntityIds()
                      target_rsid.size(),
                      attrToString<ATTR_TYPE>(entity_info.target_type));
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_PLDM_ENTITY_IDS
              * @reasoncode RC_EXPECTED_UNIQUE_ENTITY
@@ -263,7 +263,7 @@ errlHndl_t PLDM::assignTargetEntityIds()
 
         if (target.size() != target_rsid.size())
         {
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_PLDM_ENTITY_IDS
              * @reasoncode RC_EXPECTED_UNIQUE_TARGET
@@ -316,7 +316,7 @@ errlHndl_t PLDM::assignTargetEntityIds()
             {
                 PLDM_ERR("Cannot find target from RSID 0x%04x", rsid);
 
-                /*
+                /*@
                  * @errortype  ERRL_SEV_UNRECOVERABLE
                  * @moduleid   MOD_PLDM_ENTITY_IDS
                  * @reasoncode RC_NO_TARGET_FROM_RSID

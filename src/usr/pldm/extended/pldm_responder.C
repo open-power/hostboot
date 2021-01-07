@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,7 +185,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
                      static_cast<uint32_t>(i_msg_len),
                      static_cast<uint32_t>(sizeof(pldm_msg_hdr)));
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_HANDLE_INBOUND_REQ
              * @reasoncode RC_INVALID_LENGTH
@@ -227,7 +227,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 
             send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_INVALID_PLDM_TYPE);
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_HANDLE_INBOUND_REQ
              * @reasoncode RC_INVALID_MSG_CATEGORY
@@ -262,7 +262,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 
                 send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_INVALID_DATA);
 
-                /*
+                /*@
                  * @errortype  ERRL_SEV_UNRECOVERABLE
                  * @moduleid   MOD_HANDLE_INBOUND_REQ
                  * @reasoncode RC_INVALID_HEADER
@@ -292,7 +292,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 
             send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR);
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_HANDLE_INBOUND_REQ
              * @reasoncode RC_INVALID_MSG_TYPE
@@ -329,7 +329,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
 
             send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_UNSUPPORTED_PLDM_CMD);
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_HANDLE_INBOUND_REQ
              * @reasoncode RC_INVALID_COMMAND

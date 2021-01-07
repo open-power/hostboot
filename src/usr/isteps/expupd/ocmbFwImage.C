@@ -209,7 +209,7 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
                       l_reqdSize,
                       l_allocSize);
 
-           /* @errorlog
+           /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
             * @moduleid        EXPUPD::MOD_PARSE_TAGGED_DATA_TRIPLET
             * @reasoncode      EXPUPD::INVALID_DATA_TRIPLET_SIZE
@@ -239,7 +239,7 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
                       HEADER_SHA512_SIZE,
                       l_ttPtr->dataSize);
 
-               /* @errorlog
+               /*@errorlog
                 * @errortype       ERRL_SEV_PREDICTIVE
                 * @moduleid        EXPUPD::MOD_PARSE_TAGGED_DATA_TRIPLET
                 * @reasoncode      EXPUPD::INVALID_HASH_TRIPLET_SIZE
@@ -282,7 +282,7 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
                       "parseTaggedDataTriplet: Invalid tag id[%u].",
                       l_ttPtr->tagId);
 
-           /* @errorlog
+           /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
             * @moduleid        EXPUPD::MOD_PARSE_TAGGED_DATA_TRIPLET
             * @reasoncode      EXPUPD::INVALID_TAG_ID
@@ -351,7 +351,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
                       " size[%u]",
                       l_imageStartPtr, i_imageSize);
 
-           /* @errorlog
+           /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
             * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
             * @reasoncode      EXPUPD::INVALID_PARMS
@@ -379,7 +379,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
                       "ocmbFwValidateImage: Invalid eye catcher value: "
                       "expected[0x%016llx] actual[0x%016llx]",
                       EYE_CATCHER_VALUE, l_header->eyeCatcher);
-           /* @errorlog
+           /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
             * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
             * @reasoncode      EXPUPD::INVALID_EYE_CATCHER
@@ -404,7 +404,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
             TRACFCOMP(g_trac_expupd, ERR_MRK
                       "ocmbFwValidateImage: Unsupported header version: %u.%u",
                       l_header->majorVersion, l_header->minorVersion);
-           /* @errorlog
+           /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
             * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
             * @reasoncode      EXPUPD::INVALID_HEADER_VERSION
@@ -430,7 +430,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
             TRACFCOMP(g_trac_expupd, ERR_MRK
                       "ocmbFwValidateImage: Unsupported header size: %u bytes",
                       l_header->headerSize);
-           /* @errorlog
+           /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
             * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
             * @reasoncode      EXPUPD::INVALID_HEADER_SIZE
@@ -496,7 +496,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         {
             TRACFCOMP(g_trac_expupd, ERR_MRK
                       "ocmbFwValidateImage: No SHA512 Hash found in header!");
-           /* @errorlog
+           /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
             * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
             * @reasoncode      EXPUPD::MISSING_SHA512_HASH

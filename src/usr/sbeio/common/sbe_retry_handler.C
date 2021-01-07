@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -289,7 +289,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             if(this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
             {
                 SBE_TRACF("main_sbe_handler(): We have concluded there are no further recovery actions to take, deconfiguring proc and exiting handler");
-                /* There is no action possible. Gard and Callout the proc
+                /*@ There is no action possible. Gard and Callout the proc
                     * @errortype  ERRL_SEV_UNRECOVERABLE
                     * @moduleid   SBEIO_EXTRACT_RC_HANDLER
                     * @reasoncode SBEIO_NO_RECOVERY_ACTION

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1164,7 +1164,7 @@ errlHndl_t expandTpmLog(TpmTarget* i_target)
     int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
     if(l_rc)
     {
-        /**
+        /*@
          * @errortype ERRL_SEV_UNRECOVERABLE
          * @moduleid MOD_EXPAND_TPM_LOG
          * @reasoncode RC_SENDRECV_FAIL

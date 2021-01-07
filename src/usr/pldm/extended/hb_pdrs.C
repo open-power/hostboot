@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -340,7 +340,7 @@ errlHndl_t addOccStateControlPdrs(pldm_pdr* const io_repo)
         {
             PLDM_ERR("addOccStateControlPdrs> Unable to find an entity matching RSI 0x%04x for HUID 0x%08x",
                       parent_proc_rsi, get_huid(parent_proc));
-            /*
+            /*@
             * @errortype  ERRL_SEV_UNRECOVERABLE
             * @moduleid   MOD_ADD_OCC_PDRS
             * @reasoncode RC_NO_ENTITY_FROM_RSID

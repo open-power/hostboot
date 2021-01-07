@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,7 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
               reinterpret_cast<pldm_msg*>(response_bytes.data());
             const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_GET_BIOS_TABLE
              * @reasoncode RC_BAD_COMPLETION_CODE
@@ -250,7 +250,7 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
               reinterpret_cast<pldm_msg*>(response_bytes.data());
             const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_GET_BIOS_ATTR_FROM_HANDLE
              * @reasoncode RC_BAD_COMPLETION_CODE
@@ -276,7 +276,7 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
             pldm_msg* const pldm_response =
               reinterpret_cast<pldm_msg*>(response_bytes.data());
             const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_GET_BIOS_ATTR_FROM_HANDLE
              * @reasoncode RC_INVALID_LENGTH

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,7 +125,7 @@ void pldmRequester::handle_outbound_req_messages(void)
         {
             const uint64_t request_hdr_data = pldmHdrToUint64(*l_pldm_req_msg);
 
-            /*
+            /*@
               * @errortype  ERRL_SEV_UNRECOVERABLE
               * @moduleid   MOD_PLDM_REQUESTER
               * @reasoncode RC_SENDRECV_FAIL

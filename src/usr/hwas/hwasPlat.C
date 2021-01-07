@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1570,7 +1570,7 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target,
                     {
                         HWAS_ERR("verifyDeconfiguration: One or more SBE/HB deconfiguration mismatches exist");
 
-                        /*
+                        /*@
                          * @errortype  ERRL_SEV_INFORMATIONAL
                          * @moduleid   MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD
                          * @reasoncode RC_HB_SBE_DECONFIG_MISMATCHES_EXIST

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -198,7 +198,7 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
               reinterpret_cast<pldm_msg*>(response_bytes.data());
             const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_GET_PDR_REPO
              * @reasoncode RC_BAD_COMPLETION_CODE
@@ -425,7 +425,7 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
                              completion_code,
                              status);
 
-                    /*
+                    /*@
                      * @errortype  ERRL_SEV_UNRECOVERABLE
                      * @moduleid   MOD_SEND_REPO_CHANGED_EVENT
                      * @reasoncode RC_BAD_COMPLETION_CODE
@@ -548,7 +548,7 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
                          completion_code,
                          status);
 
-                /*
+                /*@
                  * @errortype  ERRL_SEV_UNRECOVERABLE
                  * @moduleid   MOD_SEND_SENSOR_STATE_CHANGED_EVENT
                  * @reasoncode RC_BAD_COMPLETION_CODE
@@ -688,7 +688,7 @@ errlHndl_t sendSetStateEffecterStatesRequest(
             PLDM_ERR("decode_set_state_effecter_states_resp failed with rc 0x%.02x",
                     response.completion_code);
 
-            /*
+            /*@
             * @errortype  ERRL_SEV_UNRECOVERABLE
             * @moduleid   MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST
             * @reasoncode RC_BAD_COMPLETION_CODE

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -199,7 +199,7 @@ errlHndl_t AssociationManager::reconnectSyAndNodeTargets()
     {
         TARG_ERR("Failed to find master system target");
 
-        /*
+        /*@
          * @errortype
          * @refcode      LIC_REFCODE
          * @subsys       EPUB_FIRMWARE_SP
@@ -304,7 +304,7 @@ errlHndl_t AssociationManager::_clearAssocsOfTypeFromSysOrNodeTarget(
             pAssocsItrPreTrans,
             i_pSysOrNodeTarget->getAttr<TARGETING::ATTR_HUID>(),
             i_pSysOrNodeTarget);
-        /*
+        /*@
          * @errortype
          * @refcode      LIC_REFCODE
          * @subsys       EPUB_FIRMWARE_SP
@@ -447,7 +447,7 @@ errlHndl_t AssociationManager::_addAssocToSysOrNodeTarget(
             pAssocsItrPreTrans,
             i_pSourceSysOrNodeTarget->getAttr<TARGETING::ATTR_HUID>(),
             i_pSourceSysOrNodeTarget);
-        /*
+        /*@
          * @errortype
          * @refcode      LIC_REFCODE
          * @subsys       EPUB_FIRMWARE_SP
@@ -482,7 +482,7 @@ errlHndl_t AssociationManager::_addAssocToSysOrNodeTarget(
             "maxLinks = %d, i_assocType = 0x%08X, HUID = 0x%08X",
             association, maxLinks, i_assocType,
             i_pSourceSysOrNodeTarget->getAttr<TARGETING::ATTR_HUID>());
-        /*
+        /*@
          * @errortype
          * @refcode      LIC_REFCODE
          * @subsys       EPUB_FIRMWARE_SP

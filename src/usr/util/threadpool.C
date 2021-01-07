@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,10 +130,10 @@ errlHndl_t Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__shutdown()
            ((l_returnedTid != child) ||
             (l_childRc != TASK_STATUS_EXITED_CLEAN)))
         {
-            /**
+            /*@
              * @errortype
-             * @moduleid         UTIL_MOD_TP_SHUTDOWN
-             * @reasoncode       UTIL_RC_CHILD_TASK_FAILED
+             * @moduleid         Util::UTIL_MOD_TP_SHUTDOWN
+             * @reasoncode       Util::UTIL_RC_CHILD_TASK_FAILED
              * @userdata1        The return code of the child thread
              * @userdata2[0:31]  The returned task ID of the child thread
              * @userdata2[32:63] The original task ID of the child thread

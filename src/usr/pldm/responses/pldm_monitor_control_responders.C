@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,7 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
                 PLDM_ERR("Failed to decode getPDR request, rc = %d",
                          rc);
 
-                /*
+                /*@
                  * @errortype  ERRL_SEV_UNRECOVERABLE
                  * @moduleid   MOD_HANDLE_GET_PDR
                  * @reasoncode RC_MSG_DECODE_FAIL
@@ -274,7 +274,7 @@ errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
             PLDM_ERR("Invalid event class %d in platform event handler",
                      event_class);
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_INFORMATIONAL
              * @moduleid   MOD_HANDLE_REPO_CHANGED_EVENT
              * @reasoncode RC_INVALID_MSG_TYPE
@@ -377,7 +377,7 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
             PLDM_ERR("Received invalid state effecter ID 0x%x",
                      req.effecter_id);
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_PREDICTIVE
              * @moduleid   MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST
              * @reasoncode RC_INVALID_EFFECTER_ID
@@ -412,7 +412,7 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
                      req.field[0].set_request,
                      req.field[0].effecter_state);
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_PREDICTIVE
              * @moduleid   MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST
              * @reasoncode RC_INVALID_EFFECTER_STATE
@@ -447,7 +447,7 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
                      "(request too early - HOMER_PHYS_ADDR is 0)",
                      get_huid(occ_proc));
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_PREDICTIVE
              * @moduleid   MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST
              * @reasoncode RC_OCC_RESET_TOO_SOON

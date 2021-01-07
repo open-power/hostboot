@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ errlHndl_t getAndSetPLDMBiosAttrs(void)
       if(payload_kind != PAYLOAD_KIND_PHYP &&
          payload_kind != PAYLOAD_KIND_SAPPHIRE)
       {
-         /*
+         /*@
           * @errortype
           * @severity   ERRL_SEV_UNRECOVERABLE
           * @moduleid   MOD_SET_IPL_PARMS

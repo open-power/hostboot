@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,7 +125,7 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
                 reinterpret_cast<pldm_msg*>(l_responseBytes.data());
             const uint64_t l_responseHeader = pldmHdrToUint64(*l_pldmResponse);
 
-            /*
+            /*@
              * @errortype
              * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_GET_FILE_TABLE
@@ -153,7 +153,7 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
                 reinterpret_cast<pldm_msg*>(l_responseBytes.data());
             const uint64_t l_responseHeader = pldmHdrToUint64(*l_pldmResponse);
 
-            /*
+            /*@
              * @errortype
              * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_GET_FILE_TABLE
@@ -334,7 +334,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
             const uint64_t l_responseHeader =
                 pldmHdrToUint64(*l_pldmResponse);
 
-            /*
+            /*@
              * @errortype
              * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_GET_LID_FILE

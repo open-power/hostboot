@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,7 +119,7 @@ errlHndl_t getFruRecordTableMetaData(pldm_fru_record_table_metadata_t& o_table_m
         PLDM_ERR("decode_get_fru_record_table_metadata_resp failed with rc 0x%.02x",
                  completion_code);
 
-        /*
+        /*@
         * @errortype  ERRL_SEV_UNRECOVERABLE
         * @moduleid   MOD_GET_FRU_METADATA
         * @reasoncode RC_BAD_COMPLETION_CODE
@@ -144,7 +144,7 @@ errlHndl_t getFruRecordTableMetaData(pldm_fru_record_table_metadata_t& o_table_m
         PLDM_ERR("decode_get_fru_record_table_metadata_resp invalid version %d.%d when expecting 1.0",
                   o_table_metadata.fruDataVerMajor,
                   o_table_metadata.fruDataVerMinor);
-        /*
+        /*@
         * @errortype  ERRL_SEV_UNRECOVERABLE
         * @moduleid   MOD_GET_FRU_METADATA
         * @reasoncode RC_UNSUPPORTED_VERSION
@@ -257,7 +257,7 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
         PLDM_ERR("decode_get_fru_record_table_metadata_resp failed with completion code 0x%.02x",
                  response.completion_code);
 
-        /*
+        /*@
         * @errortype  ERRL_SEV_UNRECOVERABLE
         * @moduleid   MOD_GET_FRU_TABLE
         * @reasoncode RC_BAD_COMPLETION_CODE
@@ -288,7 +288,7 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
 
         PLDM_ERR("decode_get_fru_record_table_resp table_data_len - i_table_buffer_len = %d  , expected this difference to be between 0-3",
                 table_data_len - i_table_buffer_len );
-        /*
+        /*@
         * @errortype  ERRL_SEV_UNRECOVERABLE
         * @moduleid   MOD_GET_FRU_TABLE
         * @reasoncode RC_INVALID_LENGTH

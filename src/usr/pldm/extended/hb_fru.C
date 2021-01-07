@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,7 +182,7 @@ errlHndl_t getRecordSetLocationCode(const uint8_t* const i_pldm_fru_table_buf,
                  "records associated with RSI 0x%04x",
                  record_set_id);
 
-        /*
+        /*@
          * @errortype  ERRL_SEV_UNRECOVERABLE
          * @moduleid   MOD_GET_LOCATION_CODE
          * @reasoncode RC_INVALID_LENGTH
@@ -340,7 +340,7 @@ errlHndl_t generate_pt_entries(const std::vector<std::vector<uint8_t>>& i_ipz_re
           PLDM_ERR("generate_pt_entries:: IPZ record size is 0x%x bytes when we expect at least 0x%x bytes",
                    ipz_record.size(),
                    sizeof(standard_ipz_record_hdr));
-          /*
+          /*@
           * @errortype  ERRL_SEV_UNRECOVERABLE
           * @moduleid   MOD_GENERATE_PT_ENTRIES
           * @reasoncode RC_INVALID_LENGTH
@@ -365,7 +365,7 @@ errlHndl_t generate_pt_entries(const std::vector<std::vector<uint8_t>>& i_ipz_re
       if(record_hdr_ptr->rt_kw_name != ASCII_RT)
       {
           PLDM_ERR("generate_pt_entries:: IPZ record is not in the format we expect. Could not find RT keyword");
-          /*
+          /*@
           * @errortype  ERRL_SEV_UNRECOVERABLE
           * @moduleid   MOD_GENERATE_PT_ENTRIES
           * @reasoncode RC_INVALID_IPZ_FORMAT
@@ -483,7 +483,7 @@ errlHndl_t generate_vtoc_record(std::vector<uint8_t>& o_vtoc_buf,
     {
         PLDM_ERR("generate_vtoc_record:: estimated PT kw size 0x%x will exceed max size for a pt keyword, or is 0 and is invalid",
                  sizeof(pt_entry)*i_ipz_records.size());
-        /*
+        /*@
         * @errortype  ERRL_SEV_UNRECOVERABLE
         * @moduleid   MOD_GENERATE_VTOC_RECORD
         * @reasoncode RC_INVALID_LENGTH
@@ -674,7 +674,7 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
             PLDM_ERR("generate_ipz_formatted_vpd: cannot process non-oem type 0x%02x in pldmFruRecordSetToIPZ. "
                      "Note: this is also a sanity check, this will be the first fail we hit if contents of"
                      " i_pldm_fru_table_buf is junk.", record_data->record_type);
-            /*
+            /*@
             * @errortype  ERRL_SEV_UNRECOVERABLE
             * @moduleid   MOD_PLDM_FRU_TO_IPZ
             * @reasoncode RC_UNSUPPORTED_TYPE
@@ -757,7 +757,7 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
                 {
                     PLDM_ERR("generate_ipz_formatted_vpd: Unsupported PLDM Fru Record Field Type %u for record 0x%04x found",
                              fru_tlv->type, record_name)
-                    /*
+                    /*@
                     * @errortype  ERRL_SEV_UNRECOVERABLE
                     * @moduleid   MOD_PLDM_FRU_TO_IPZ
                     * @reasoncode RC_UNSUPPORTED_FIELD
@@ -980,7 +980,7 @@ errlHndl_t setAttribute(TARGETING::Target* const i_target, const char* const i_v
                      sizeof(value) - 1,
                      strlen(i_value));
 
-            /*
+            /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
              * @reasoncode RC_OVERLONG_LOCATION_CODE
@@ -1088,7 +1088,7 @@ errlHndl_t cacheRemoteFruVpd()
                      device_rsis.size(),
                      map_entry.pldm_entity_type,
                      map_entry.max_expected_records);
-            /*
+            /*@
             * @errortype  ERRL_SEV_UNRECOVERABLE
             * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
             * @reasoncode RC_INVALID_RSI_COUNT
@@ -1122,7 +1122,7 @@ errlHndl_t cacheRemoteFruVpd()
                 PLDM_ERR("cacheRemoteFruVpd: Failed to find any OEM Fru records"
                          " matching record set id 0x%.4x entity type 0x%.02x",
                          device_rsi, map_entry.pldm_entity_type);
-                /*
+                /*@
                 * @errortype  ERRL_SEV_UNRECOVERABLE
                 * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
                 * @reasoncode RC_INVALID_RECORD_COUNT
@@ -1161,7 +1161,7 @@ errlHndl_t cacheRemoteFruVpd()
             if(entity_target == nullptr)
             {
                 PLDM_ERR("cacheRemoteFruVpd: Failed to find target associated w/ location code found");
-                /*
+                /*@
                  * @errortype  ERRL_SEV_UNRECOVERABLE
                  * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
                  * @reasoncode RC_INVALID_LOCATION_CODE

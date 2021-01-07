@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -811,7 +811,7 @@ namespace HBPM
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                      ERR_MRK"startPMComplex: returned HOMER VAddr is nullptr!");
-                /**
+                /*@
                  * @errortype
                  * @reasoncode ISTEP::RC_INVALID_HOMER_VADDR
                  * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE

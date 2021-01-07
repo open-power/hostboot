@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -200,7 +200,8 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
                       "PNOR::parseTOC Found checksum error in TOC's header"
                       " during pnor initialization");
 
-            /* @errortype
+            /*@
+            * @errortype
             * @moduleid PNOR::MOD_PNORRP_READTOC
             * @reasoncode PNOR::RC_TOC_HDR_CHECKSUM_ERR
             * @userdata1 Address of toc buffer
@@ -233,7 +234,8 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
             assert(i_pnorInitialized,
                       "PNOR::parseTOC Error found parsing hdr of TOC"
                       " during pnor initialization");
-            /* @errortype
+            /*@
+            * @errortype
             * @moduleid PNOR::MOD_PNORRP_READTOC
             * @reasoncode PNOR::RC_BAD_TOC_HEADER
             * @userdata1 Address of toc buffer
@@ -279,7 +281,8 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
                     "PNOR::parseTOC parseEntries returned an error code"
                     " during pnor initialization");
 
-            /* @errortype
+            /*@
+            * @errortype
             * @moduleid PNOR::MOD_PNORRP_READTOC
             * @reasoncode PNOR::RC_PNOR_PARSE_ENTRIES_ERR
             * @userdata1 Address of toc buffer
