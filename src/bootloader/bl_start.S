@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -42,7 +42,9 @@
 # Should be HBBL_MAX_SIZE + 12K (0xB000 currently)
 .set HBBL_DATA_ADDR_OFFSET,      0x0000B000 ;// offset of external data
 
-.set HBBL_TI_OFFSET,             0x50       ;// offset within external data
+# @sync_ti_area_size if bl_TIDataArea moves from the start of blData struct,
+# HBBL_TI_OFFSET will need to be updated to the new offset of the TI Data.
+.set HBBL_TI_OFFSET,             0x0        ;// offset within external data
 .set HBBL_SCRATCH_ADDR_OFFSET,   0x00010000 ;// offset of scratch space
 .set HBBL_system_reset,          0x100
 .set HBBL_machine_check,         0x200
