@@ -47,8 +47,8 @@
 namespace PLDM {
 
 // Attributes
-const char PLDM_BIOS_HB_HYP_SWITCH_STRING[] = "hb-hyp-switch";
-const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[] = "hb-debug-console";
+const char PLDM_BIOS_HB_HYP_SWITCH_STRING[] = "hb_hyp_switch";
+const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[] = "hb_debug_console";
 
 // Possible Values
 constexpr char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";

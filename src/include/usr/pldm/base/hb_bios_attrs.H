@@ -51,14 +51,14 @@
 
 namespace PLDM
 {
-    /** @brief Retrieve the current value of the hb-hyp-switch
+    /** @brief Retrieve the current value of the hb_hyp_switch
     *          PLDM bios attribute and return the value converted
     *          to a ATTR_PAYLOAD_KIND enum.
     *
     * @param[in,out] io_string_table  See brief at the top of this file.
     * @param[in,out] io_attr_table    See brief at the top of this file.
     * @param[out]    o_payloadType    If no error occurs will contain the value
-    *                                 we found for hb-hyp-switch translated to
+    *                                 we found for hb_hyp_switch translated to
     *                                 terms of ATTR_PAYLOAD_KIND_type.
     *
     * @return Error if any, otherwise nullptr.
@@ -67,7 +67,7 @@ namespace PLDM
                                  std::vector<uint8_t>& io_attr_table,
                                  TARGETING::ATTR_PAYLOAD_KIND_type &o_payloadType);
 
-    /** @brief Retrieve the current value of the hb-debug-console
+    /** @brief Retrieve the current value of the hb_debug_console
     *          PLDM bios attribute, convert it to a boolean value.
     *
     * @param[out] o_debugConsoleEnabled  Will return true if "Enabled" is
