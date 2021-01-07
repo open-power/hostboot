@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -349,7 +349,7 @@ if [[ $STATE == '00' ]] || [[ $STATE == '0' ]]; then
   set_total_dump_size $MAX_HBB_SIZE
 else
   # otherwise STATE is the number of MB we need to dump
-  mb_count_decimal=$(( 16#$STATE ))
+  mb_count_decimal=`printf '%d' 0x$STATE`
   MEGABYTE_DECIMAL=1048576
   set_total_dump_size `expr $mb_count_decimal \* $MEGABYTE_DECIMAL`
 fi
