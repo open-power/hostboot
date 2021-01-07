@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ namespace ERRORLOG
     class ErrlUserDetailsPrintk : public ErrlUserDetails
     {
         public:
-            enum { DEFAULT_SIZE_BYTES = 1280 };
+            enum { DEFAULT_SIZE_BYTES = 2048 };
 
             /** @brief Constructor
              *
