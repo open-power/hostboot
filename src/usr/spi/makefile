@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -51,4 +51,5 @@ SUBDIRS += test.d
 
 include ${ROOTPATH}/procedure.rules.mk
 include ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.mk
+include ${HWP_PATH}/hwp/spi/p10_spi_clear_status_errors.mk
 include ${ROOTPATH}/config.mk

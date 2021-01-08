@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@
 // SPI HWP
 #include <p10_spi_init_pib.H>
 #include <p10_spi_init_fsi.H>
+#include <p10_spi_clear_status_errors.H>
 
 // Max node and proc constants from these headers
 #include <sys/internode.h>
@@ -560,6 +561,19 @@ errlHndl_t spiInitEngine(
 
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapiProc(i_pProc);
     SpiControlHandle spiHandle(fapiProc,i_engine,1,pibAccess);
+
+    FAPI_INVOKE_HWP(pError, p10_spi_clear_status_errors, spiHandle);
+    if(pError != nullptr)
+    {
+        TRACFCOMP(g_trac_spi, ERR_MRK"spiInitEngine(): "
+                  "p10_spi_clear_status_errors HWP call returned an error for "
+                  "proc HUID 0x%08X, engine %d, pibAccess %d. "
+                  TRACE_ERR_FMT,
+                  TARGETING::get_huid(i_pProc),i_engine,pibAccess,
+                  TRACE_ERR_ARGS(pError));
+        pError->collectTrace(SPI_COMP_NAME, KILOBYTE);
+        break;
+    }
 
     FAPI_INVOKE_HWP(pError,p10_spi_clock_init,spiHandle);
     if(pError != nullptr)
