@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -1627,7 +1627,20 @@ foreach my $argnum ( 0 .. $#ARGV )
             if ( $arg_empty_ffdc eq undef )
             {
                 print ECFILE "        {\n";
-                print ECFILE "            FAPI_SET_HWP_ERROR(iv_rc,$err->{rc});\n\n";
+
+                # Need to create a temporary RC if using current_err,
+                # since FAPI_SET_HWP_ERROR can call a HWP that changes
+                # fapi2::current_err
+                print ECFILE "            if (iv_rc == fapi2::current_err)\n";
+                print ECFILE "            {\n";
+                print ECFILE "                fapi2::ReturnCode l_rc = iv_rc;\n";
+                print ECFILE "                FAPI_SET_HWP_ERROR(l_rc,$err->{rc});\n";
+                print ECFILE "                iv_rc = l_rc;\n";
+                print ECFILE "            }\n";
+                print ECFILE "            else\n";
+                print ECFILE "            {\n";
+                print ECFILE "                FAPI_SET_HWP_ERROR(iv_rc,$err->{rc});\n";
+                print ECFILE "            }\n\n";
                 print ECFILE "            if( commit )\n";
                 print ECFILE "            {\n";
                 print ECFILE "                fapi2::logError(iv_rc, "
