@@ -725,8 +725,11 @@ errlHndl_t sendGracefulRebootRequest( const char* i_reason )
             pldm_effecter_state_fields::PLDM_GRACEFUL_REBOOT;
     fields_to_set.push_back({set_request::PLDM_REQUEST_SET, graceful_reboot});
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, nullptr,
-                      "Triggering graceful reboot for %s", i_reason);
+    if(i_reason)
+    {
+        CONSOLE::displayf(CONSOLE::DEFAULT, nullptr,
+                          "Triggering graceful reboot for %s", i_reason);
+    }
 
     return sendSetStateEffecterStatesRequest(SOFTWARE_TERMINATION_STATUS_EFFECTER_ID,
                                              fields_to_set);

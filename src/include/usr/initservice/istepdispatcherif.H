@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,13 +95,17 @@ errlHndl_t sendAttnMonitorChipIdMsg(
 bool isShutdownRequested ( void );
 
 
-#ifdef CONFIG_BMC_IPMI
 /**
  *  @brief This function is to be used by external code to
- *    initiate a system reboot via IPMI commands
+ *    initiate a system reboot. The function will figure out which reboot
+ *    mechanism it needs to use to reboot the system (IPMI message, PLDM
+ *    message, or shutdown() call)
+ *
+ * @param[in] i_reason the reason for reboot (printed to the console)
  */
-void requestReboot( void );
+void requestReboot(const char* i_reason = nullptr);
 
+#ifdef CONFIG_BMC_IPMI
 /**
  *  @brief This function is to be used by external code to
  *    initiate a system power off via IPMI commands

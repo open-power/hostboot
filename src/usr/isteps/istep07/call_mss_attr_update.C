@@ -47,6 +47,7 @@
 #include    <initservice/isteps_trace.H>
 #include    <initservice/initserviceif.H>
 #include    <initservice/initsvcreasoncodes.H>
+#include    <initservice/istepdispatcherif.H>
 #include    <initservice/mboxRegs.H>
 
 // SBE
@@ -614,27 +615,15 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
                   "bitwise failing scratch reg: 0x%.8X "
                   "triggering reconfig loop", l_reconfigReg);
 
-#ifdef CONFIG_PLDM
+#if defined(CONFIG_PLDM) or defined(CONFIG_BMC_IPMI)
         // Explicitly for a devtree sync because we don't currently
         //  go through a shutdown when we send a reboot request
         // Remove with RTC:259366 ?
         TARGETING::AttrRP::syncAllAttributesToSP();
 
-        TRACFCOMP(g_trac_isteps_trace, "check_scratch_regs_vs_attrs: requesting PLDM reboot");
-        INITSERVICE::stopIpl();
-        l_err = PLDM::sendGracefulRebootRequest("boot parm adjustment");
-        if(l_err)
-        {
-            TRACFCOMP(g_trac_isteps_trace, "check_scratch_regs_vs_attrs(): could not request PLDM reboot");
-            errlCommit(l_err, ISTEP_COMP_ID);
-            break;
-        }
-
-#elif defined (CONFIG_BMC_IPMI)
         // Initiate a graceful power cycle
         TRACFCOMP( g_trac_isteps_trace,"check_scratch_regs_vs_attrs(): requesting power cycle");
-        INITSERVICE::requestReboot();
-
+        INITSERVICE::requestReboot("boot parm adjustment");
 
 #else // FSP Systems
         /*@

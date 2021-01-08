@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -6013,38 +6013,26 @@ errlHndl_t sbeDoReboot( void )
         }
 #endif
 
-#ifdef CONFIG_PLDM
+#if defined(CONFIG_PLDM) or defined(CONFIG_BMC_IPMI)
         if(g_do_hw_keys_hash_transition)
         {
+#ifdef CONFIG_PLDM
             // TODO RTC: 259366 the PLDM equivalent of
             // INITSERVICE::requestPowerOff() goes here.
-        }
-        else
-        {
-            TRACFCOMP(g_trac_sbe, "sbeDoReboot: requesting PLDM reboot");
-            INITSERVICE::stopIpl();
-            err = PLDM::sendGracefulRebootRequest("SBE update");
-            if(err)
-            {
-                TRACFCOMP(g_trac_sbe, "sbeDoReboot(): could not request PLDM reboot");
-                break;
-            }
-        }
-#elif defined (CONFIG_BMC_IPMI)
-        if(g_do_hw_keys_hash_transition)
-        {
+#elif defined(CONFIG_BMC_IPMI)
             // Initiate a graceful power off
             TRACFCOMP(g_trac_sbe,
                 INFO_MRK"sbeDoReboot(): Performing Secure Boot key transition. "
                 "Requesting power off");
             INITSERVICE::requestPowerOff();
+#endif
         }
         else
         {
             // Initiate a graceful power cycle
             TRACFCOMP( g_trac_sbe,"sbeDoReboot: "
                        "requesting power cycle");
-            INITSERVICE::requestReboot();
+            INITSERVICE::requestReboot("SBE update");
         }
 #else //non-IPMI and non-PLDM
         if(g_do_hw_keys_hash_transition)

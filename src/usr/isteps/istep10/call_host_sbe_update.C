@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -224,23 +224,11 @@ errlHndl_t rediscoverI2CTargets(void)
             }
 #endif
 
-#ifdef CONFIG_PLDM
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                      "rediscoverI2CTargets: requesting PLDM reboot");
-            INITSERVICE::stopIpl();
-            err = PLDM::sendGracefulRebootRequest("I2C rediscovery");
-            if(err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                          "rediscoverI2CTargets: PLDM reboot request failed");
-                break;
-            }
-#elif defined (CONFIG_BMC_IPMI)
             // Initiate a graceful power cycle
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
                    "rediscoverI2CTargets: requesting power cycle");
-            INITSERVICE::requestReboot();
-#endif
+            INITSERVICE::requestReboot("I2C rediscovery");
+
             // sleep here to give BMC a chance to get us rebooting so
             // SBE Update will not take place
             while(true)

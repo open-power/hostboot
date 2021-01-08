@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -281,9 +281,6 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         iv_istepMode = l_pTopLevelTarget->getAttr<TARGETING::ATTR_ISTEP_MODE>();
 
         TRACFCOMP(g_trac_initsvc, "IStepDispatcher: IStep Mode: %d", iv_istepMode);
-        // Get tracelite setting from top level target attributes
-        TARGETING::Target* l_pSys = NULL;
-        TARGETING::targetService().getTopLevelTarget(l_pSys);
 
         // Only consider Tracelite if OpenPOWER XML is used
 #ifdef CONFIG_INCLUDE_XML_OPENPOWER
@@ -314,7 +311,8 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         // to enable the debug console just ignore this attribute.
         if(!l_tlEnabled)
         {
-            l_tlEnabled = l_pSys->getAttr<TARGETING::ATTR_OP_TRACE_LITE>();
+            // Get tracelite setting from top level target attributes
+            l_tlEnabled = l_pTopLevelTarget->getAttr<TARGETING::ATTR_OP_TRACE_LITE>();
         }
         TRACE::setTraceLite(l_tlEnabled);
 #endif // CONFIG_INCLUDE_XML_OPENPOWER
@@ -758,23 +756,10 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                     "not increment reboot count.");
                             }
                             #endif // CONFIG_BMC_IPMI
-                            #ifdef CONFIG_PLDM
-                            TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending PLDM reboot request");
-                            INITSERVICE::stopIpl();
-                            err = PLDM::sendGracefulRebootRequest("reconfig loop");
-                            if(err)
-                            {
-                                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: could not send PLDM reboot request");
-                                break;
-                            }
-                            #elif defined (CONFIG_BMC_IPMI)
+                            TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending reboot request");
                             // Request BMC to do power cycle that sends shutdown
                             // and reset the host
-                            requestReboot();
-                            #else // non-IPMI and non-PLDM
-                            shutdownDuringIpl();
-                            #endif
-
+                            requestReboot("reconfig loop");
                         }
                     }
                     // else return the error from doIstep
@@ -1873,16 +1858,40 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleShutdownMsg");
 }
 
-#ifdef CONFIG_BMC_IPMI
-void IStepDispatcher::requestReboot()
+void IStepDispatcher::requestReboot(const char* i_reason)
 {
-    // Always stop dispatching isteps before calling for the reboot
-    INITSERVICE::stopIpl();
+    const auto l_istepMode = TARGETING::UTIL::assertGetToplevelTarget()->
+                                getAttr<TARGETING::ATTR_ISTEP_MODE>();
 
-    // Send a reboot message to the BMC
-    (void)IPMI::initiateReboot();
+    if(l_istepMode)
+    {
+        // Do not issue a reboot - just shut HB down
+        shutdownDuringIpl();
+    }
+    else
+    {
+        // Always stop dispatching isteps before calling for the reboot
+        INITSERVICE::stopIpl();
+
+#ifdef CONFIG_PLDM
+        // Issue a PLDM request for a reboot
+        errlHndl_t l_errl = PLDM::sendGracefulRebootRequest(i_reason);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"IStepDispatcher::requestReboot(): Could not request PLDM reboot");
+            errlCommit(l_errl, INITSVC_COMP_ID);
+        }
+#elif defined (CONFIG_BMC_IPMI)
+        // Send an IPMI reboot message to the BMC
+        (void)IPMI::initiateReboot();
+#else
+        // Non-PLDM and non-IPMI shutdown
+        shutdownDuringIpl();
+#endif
+    }
 }
 
+#ifdef CONFIG_BMC_IPMI
 void IStepDispatcher::requestPowerOff()
 {
     // Always stop dispatching isteps before calling for the power off
@@ -2804,12 +2813,13 @@ void setNewGardRecord()
 {
     return IStepDispatcher::getTheInstance().setNewGardRecord();
 }
-#ifdef CONFIG_BMC_IPMI
-void requestReboot()
+
+void requestReboot(const char* i_reason)
 {
-    IStepDispatcher::getTheInstance().requestReboot();
+    IStepDispatcher::getTheInstance().requestReboot(i_reason);
 }
 
+#ifdef CONFIG_BMC_IPMI
 void requestPowerOff()
 {
     IStepDispatcher::getTheInstance().requestPowerOff();
