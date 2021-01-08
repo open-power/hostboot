@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,7 @@ void* call_host_activate_boot_core(void* const io_pArgs)
               "call_host_activate_boot_core entry");
 
     errlHndl_t l_errl = nullptr;
+    bool l_attempt_mbox_resume = false; // do a resume outside the loop
 
     do
     {
@@ -195,6 +196,7 @@ void* call_host_activate_boot_core(void* const io_pArgs)
                       "call_host_activate_boot_core ERROR : MBOX::suspend");
             break;
         }
+        l_attempt_mbox_resume = true; //attempt to resume if we fail out
 
         std::vector<std::pair<uint64_t, uint64_t>> l_regInits;
 
@@ -390,6 +392,7 @@ void* call_host_activate_boot_core(void* const io_pArgs)
         }
 
         //Re-enable the mailbox
+        l_attempt_mbox_resume = false; // no need to attempt this again below
         l_errl = MBOX::resume();
         if (l_errl)
         {
@@ -438,6 +441,21 @@ void* call_host_activate_boot_core(void* const io_pArgs)
             break;
         }
     } while (0);
+
+    //In case we take an error prior to resuming the MBOX in the normal flow
+    //  we should resume it here to flow messsages to the service processor
+    if( l_attempt_mbox_resume )
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_host_activate_boot_core: attempting to resume mbox after error occurred");
+        errlHndl_t l_errl_mbox = MBOX::resume();
+        if (l_errl_mbox)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_boot_core ERROR : MBOX::resume");
+            errlCommit(l_errl_mbox,  HWPF_COMP_ID);
+        }
+    }
 
     IStepError l_stepError;
 
