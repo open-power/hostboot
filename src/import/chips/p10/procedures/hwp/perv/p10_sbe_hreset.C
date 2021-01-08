@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,8 +65,11 @@ fapi2::ReturnCode p10_sbe_hreset(
                            l_masterProc),
              "Error from FAPI_ATTR_GET (ATTR_PROC_SBE_MASTER_CHIP)");
 
+#ifndef __HOSTBOOT_RUNTIME
+
     // Must do SCOM access for master; CFAM access for slaves
     if (l_masterProc)
+#endif
     {
         // Clear Self Boot message reg
         FAPI_TRY(PREP_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG(i_target));
@@ -90,6 +93,8 @@ fapi2::ReturnCode p10_sbe_hreset(
         SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1(l_data64);
         FAPI_TRY(PUT_FSXCOMP_FSXLOG_SB_CS(i_target, l_data64));
     }
+
+#ifndef __HOSTBOOT_RUNTIME
     else
     {
         // Clear Self Boot message reg
@@ -116,6 +121,8 @@ fapi2::ReturnCode p10_sbe_hreset(
         FAPI_TRY(fapi2::putCfamRegister(i_target, FSXCOMP_FSXLOG_SB_CS_FSI, l_data32),
                  "Error from putCfamRegister to FSXCOMP_FSXLOG_SB_CS_FSI");
     }
+
+#endif
 
 fapi_try_exit:
     FAPI_INF("p10_sbe_hreset: Exiting ...");
