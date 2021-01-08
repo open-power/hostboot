@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,9 +77,6 @@ void __dyndealloc( uint64_t i_saddr, uint64_t i_eaddr, MemoryError_t i_type )
 {
     #define PRDF_FUNC "[PlatServices::__dyndealloc] "
 
-    PRDF_TRAC( PRDF_FUNC "Dynamic memory deallocation currently disabled" );
-
-    /* TODO SW513726 - reenable dynamic memory deallocation
     do
     {
         if ( !g_hostInterfaces || !g_hostInterfaces->memory_error )
@@ -96,7 +93,6 @@ void __dyndealloc( uint64_t i_saddr, uint64_t i_eaddr, MemoryError_t i_type )
         }
 
     } while (0);
-    */
 
     #undef PRDF_FUNC
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -213,40 +213,6 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
 
     uint8_t bitPos = 0;
 
-    // Split the row into its components.
-    uint8_t  r17    = (row & 0x20000) >> 17;
-    uint8_t  r16    = (row & 0x10000) >> 16;
-    uint8_t  r15    = (row & 0x08000) >> 15;
-    uint16_t r14_r0 = (row & 0x07fff);
-
-    // Split the master rank and slave rank into their components
-    uint8_t m0 = (mrnk & 0x2) >> 1;
-    uint8_t m1 = (mrnk & 0x1);
-
-    uint8_t s0 = (srnk & 0x4) >> 2;
-    uint8_t s1 = (srnk & 0x2) >> 1;
-    uint8_t s2 = (srnk & 0x1);
-
-    // Split the column into its components
-    uint8_t c9 = (col & 0x40) >> 6;
-    uint8_t c8 = (col & 0x20) >> 5;
-    uint8_t c7 = (col & 0x10) >> 4;
-    uint8_t c6 = (col & 0x08) >> 3;
-    uint8_t c5 = (col & 0x04) >> 2;
-    uint8_t c4 = (col & 0x02) >> 1;
-    uint8_t c3 = (col & 0x01);
-
-    // Split the bank and bank group into their components
-    // Note: B2 is not used for OCMB
-    uint8_t b0 = (bnk & 0x10) >> 4;
-    uint8_t b1 = (bnk & 0x08) >> 3;
-
-    uint8_t bg0 = (bnk & 0x2) >> 1;
-    uint8_t bg1 = (bnk & 0x1);
-
-    // Row bits 14:0 are always at CAPI addr position 30:16
-    o_addr |= (r14_r0 << 16);
-
     // Check MC_ADDR_TRANS0 register for bit positions
     SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MC_ADDR_TRANS" );
     o_rc = reg->Read();
@@ -266,41 +232,60 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         o_addr |= (dslct << bitPos);
     }
 
-    // Insert any of the master rank bits that are valid
-    switch( mrnkBits )
+    if ( 0 != mrnk )
     {
-        case 2:
-            // Master rank 0 bitmap: MC_ADDR_TRANS0[38:42]
-            bitPos = reg->GetBitFieldJustified( 38, 5 );
-            __adjustCapiAddrBitPos( bitPos );
-            o_addr |= (m0 << bitPos);
-        case 1:
-            // Master rank 1 bitmap: MC_ADDR_TRANS0[43:47]
-            bitPos = reg->GetBitFieldJustified( 43, 5 );
-            __adjustCapiAddrBitPos( bitPos );
-            o_addr |= (m1 << bitPos);
-            break;
+        // Split the master rank into components
+        uint64_t m0 = (mrnk & 0x2) >> 1;
+        uint64_t m1 = (mrnk & 0x1);
+
+        // Insert any of the master rank bits that are valid
+        switch( mrnkBits )
+        {
+            case 2:
+                // Master rank 0 bitmap: MC_ADDR_TRANS0[38:42]
+                bitPos = reg->GetBitFieldJustified( 38, 5 );
+                __adjustCapiAddrBitPos( bitPos );
+                o_addr |= (m0 << bitPos);
+            case 1:
+                // Master rank 1 bitmap: MC_ADDR_TRANS0[43:47]
+                bitPos = reg->GetBitFieldJustified( 43, 5 );
+                __adjustCapiAddrBitPos( bitPos );
+                o_addr |= (m1 << bitPos);
+                break;
+        }
     }
 
-    // Insert any extra row bits (17:15) that are valid
-    switch ( extraRowBits )
+    if ( 0 != row )
     {
-        case 3:
-            // Row 17 bitmap: MC_ADDR_TRANS0[49:53]
-            bitPos = reg->GetBitFieldJustified( 49, 5 );
-            __adjustCapiAddrBitPos( bitPos );
-            o_addr |= (r17 << bitPos);
-        case 2:
-            // Row 16 bitmap: MC_ADDR_TRANS0[54:58]
-            bitPos = reg->GetBitFieldJustified( 54, 5 );
-            __adjustCapiAddrBitPos( bitPos );
-            o_addr |= (r16 << bitPos);
-        case 1:
-            // Row 15 bitmap: MC_ADDR_TRANS0[59:63]
-            bitPos = reg->GetBitFieldJustified( 59, 5 );
-            __adjustCapiAddrBitPos( bitPos );
-            o_addr |= (r15 << bitPos);
-            break;
+        // Split the row into its components.
+        uint64_t r17    = (row & 0x20000) >> 17;
+        uint64_t r16    = (row & 0x10000) >> 16;
+        uint64_t r15    = (row & 0x08000) >> 15;
+        uint64_t r14_r0 = (row & 0x07fff);
+
+        // Row bits 14:0 are always at CAPI addr position 30:16
+        o_addr |= (r14_r0 << 16);
+
+        // Insert any extra row bits (17:15) that are valid
+        switch ( extraRowBits )
+        {
+            case 3:
+                // Row 17 bitmap: MC_ADDR_TRANS0[49:53]
+                bitPos = reg->GetBitFieldJustified( 49, 5 );
+                __adjustCapiAddrBitPos( bitPos );
+                o_addr |= (r17 << bitPos);
+            case 2:
+                // Row 16 bitmap: MC_ADDR_TRANS0[54:58]
+                bitPos = reg->GetBitFieldJustified( 54, 5 );
+                __adjustCapiAddrBitPos( bitPos );
+                o_addr |= (r16 << bitPos);
+            case 1:
+                // Row 15 bitmap: MC_ADDR_TRANS0[59:63]
+                bitPos = reg->GetBitFieldJustified( 59, 5 );
+                __adjustCapiAddrBitPos( bitPos );
+                o_addr |= (r15 << bitPos);
+                break;
+        }
     }
 
     // Check MC_ADDR_TRANS1 register for bit positions
@@ -313,51 +298,69 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         return o_rc;
     }
 
-    // Insert any of the slave rank bits that are valid
-    switch ( srnkBits )
+    if ( 0 != srnk )
     {
-        case 3:
-            // Slave rank 0 bitmap: MC_ADDR_TRANS1[3:7]
-            bitPos = reg->GetBitFieldJustified( 3, 5 );
-            __adjustCapiAddrBitPos( bitPos );
-            o_addr |= (s0 << bitPos);
-        case 2:
-            // Slave rank 1 bitmap: MC_ADDR_TRANS1[11:15]
-            bitPos = reg->GetBitFieldJustified( 11, 5 );
-            __adjustCapiAddrBitPos( bitPos );
-            o_addr |= (s1 << bitPos);
-        case 1:
-            // Slave rank 2 bitmap: MC_ADDR_TRANS1[19:23]
-            bitPos = reg->GetBitFieldJustified( 19, 5 );
-            __adjustCapiAddrBitPos( bitPos );
-            o_addr |= (s2 << bitPos);
-            break;
+        // Split the slave rank into components
+        uint64_t s0 = (srnk & 0x4) >> 2;
+        uint64_t s1 = (srnk & 0x2) >> 1;
+        uint64_t s2 = (srnk & 0x1);
+
+        // Insert any of the slave rank bits that are valid
+        switch ( srnkBits )
+        {
+            case 3:
+                // Slave rank 0 bitmap: MC_ADDR_TRANS1[3:7]
+                bitPos = reg->GetBitFieldJustified( 3, 5 );
+                __adjustCapiAddrBitPos( bitPos );
+                o_addr |= (s0 << bitPos);
+            case 2:
+                // Slave rank 1 bitmap: MC_ADDR_TRANS1[11:15]
+                bitPos = reg->GetBitFieldJustified( 11, 5 );
+                __adjustCapiAddrBitPos( bitPos );
+                o_addr |= (s1 << bitPos);
+            case 1:
+                // Slave rank 2 bitmap: MC_ADDR_TRANS1[19:23]
+                bitPos = reg->GetBitFieldJustified( 19, 5 );
+                __adjustCapiAddrBitPos( bitPos );
+                o_addr |= (s2 << bitPos);
+                break;
+        }
     }
 
-    // Column 3 bitmap: MC_ADDR_TRANS1[30:34]
-    bitPos = reg->GetBitFieldJustified( 30, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (c3 << bitPos);
+    if ( 0 != col )
+    {
+        // Split the column into its components
+        uint64_t c7 = (col & 0x10) >> 4;
+        uint64_t c6 = (col & 0x08) >> 3;
+        uint64_t c5 = (col & 0x04) >> 2;
+        uint64_t c4 = (col & 0x02) >> 1;
+        uint64_t c3 = (col & 0x01);
 
-    // Column 4 bitmap: MC_ADDR_TRANS1[35:39]
-    bitPos = reg->GetBitFieldJustified( 35, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (c4 << bitPos);
+        // Column 3 bitmap: MC_ADDR_TRANS1[30:34]
+        bitPos = reg->GetBitFieldJustified( 30, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (c3 << bitPos);
 
-    // Column 5 bitmap: MC_ADDR_TRANS1[43:47]
-    bitPos = reg->GetBitFieldJustified( 43, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (c5 << bitPos);
+        // Column 4 bitmap: MC_ADDR_TRANS1[35:39]
+        bitPos = reg->GetBitFieldJustified( 35, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (c4 << bitPos);
 
-    // Column 6 bitmap: MC_ADDR_TRANS1[51:55]
-    bitPos = reg->GetBitFieldJustified( 51, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (c6 << bitPos);
+        // Column 5 bitmap: MC_ADDR_TRANS1[43:47]
+        bitPos = reg->GetBitFieldJustified( 43, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (c5 << bitPos);
 
-    // Column 7 bitmap: MC_ADDR_TRANS1[59:63]
-    bitPos = reg->GetBitFieldJustified( 59, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (c7 << bitPos);
+        // Column 6 bitmap: MC_ADDR_TRANS1[51:55]
+        bitPos = reg->GetBitFieldJustified( 51, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (c6 << bitPos);
+
+        // Column 7 bitmap: MC_ADDR_TRANS1[59:63]
+        bitPos = reg->GetBitFieldJustified( 59, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (c7 << bitPos);
+    }
 
     // Check MC_ADDR_TRANS2 register for bit positions
     reg = i_chip->getRegister( "MC_ADDR_TRANS2" );
@@ -369,38 +372,56 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
         return o_rc;
     }
 
-    // Column 8 bitmap: MC_ADDR_TRANS2[3:7]
-    bitPos = reg->GetBitFieldJustified( 3, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (c8 << bitPos);
+    if ( 0 != col )
+    {
+        // Split the column into its components
+        uint64_t c9 = (col & 0x40) >> 6;
+        uint64_t c8 = (col & 0x20) >> 5;
 
-    // Column 9 bitmap: MC_ADDR_TRANS2[11:15]
-    bitPos = reg->GetBitFieldJustified( 11, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (c9 << bitPos);
+        // Column 8 bitmap: MC_ADDR_TRANS2[3:7]
+        bitPos = reg->GetBitFieldJustified( 3, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (c8 << bitPos);
 
-    // Bank 0 bitmap: MC_ADDR_TRANS2[19:23]
-    bitPos = reg->GetBitFieldJustified( 19, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (b0 << bitPos );
+        // Column 9 bitmap: MC_ADDR_TRANS2[11:15]
+        bitPos = reg->GetBitFieldJustified( 11, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (c9 << bitPos);
+    }
 
-    // Bank 1 bitmap: MC_ADDR_TRANS2[27:31]
-    bitPos = reg->GetBitFieldJustified( 27, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (b1 << bitPos);
+    if ( 0 != bnk )
+    {
+        // Split the bank and bank group into their components
+        // Note: B2 is not used for OCMB
+        uint64_t b0 = (bnk & 0x10) >> 4;
+        uint64_t b1 = (bnk & 0x08) >> 3;
 
-    // Bank 2 bitmap: MC_ADDR_TRANS2[35:39]
-    // Note: Bank2 not used for OCMB
+        uint64_t bg0 = (bnk & 0x2) >> 1;
+        uint64_t bg1 = (bnk & 0x1);
 
-    // Bank group 0 bitmap: MC_ADDR_TRANS2[43:47]
-    bitPos = reg->GetBitFieldJustified( 43, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (bg0 << bitPos);
+        // Bank 0 bitmap: MC_ADDR_TRANS2[19:23]
+        bitPos = reg->GetBitFieldJustified( 19, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (b0 << bitPos );
 
-    // Bank group 1 bitmap: MC_ADDR_TRANS2[51:55]
-    bitPos = reg->GetBitFieldJustified( 51, 5 );
-    __adjustCapiAddrBitPos( bitPos );
-    o_addr |= (bg1 << bitPos);
+        // Bank 1 bitmap: MC_ADDR_TRANS2[27:31]
+        bitPos = reg->GetBitFieldJustified( 27, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (b1 << bitPos);
+
+        // Bank 2 bitmap: MC_ADDR_TRANS2[35:39]
+        // Note: Bank2 not used for OCMB
+
+        // Bank group 0 bitmap: MC_ADDR_TRANS2[43:47]
+        bitPos = reg->GetBitFieldJustified( 43, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (bg0 << bitPos);
+
+        // Bank group 1 bitmap: MC_ADDR_TRANS2[51:55]
+        bitPos = reg->GetBitFieldJustified( 51, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (bg1 << bitPos);
+    }
 
     return o_rc;
 
@@ -1013,16 +1034,9 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
                       i_chip->getHuid() );
             break;
         }
-        if ( T == TYPE_OCMB_CHIP )
-        {
-            // Send the address range to the hypervisor.
-            sendDynMemDeallocRequest( ssAddr, seAddr );
-        }
-        else
-        {
-            // Send the address range to the hypervisor.
-            sendDynMemDeallocRequest( ssAddr, seAddr );
-        }
+
+        // Send the address range to the hypervisor.
+        sendDynMemDeallocRequest( ssAddr, seAddr );
 
         PRDF_TRAC( PRDF_FUNC "Rank dealloc for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llx", ssAddr, seAddr );
@@ -1073,16 +1087,8 @@ int32_t port( ExtensibleChip * i_chip )
             break;
         }
 
-        if ( T == TYPE_OCMB_CHIP )
-        {
-            // Send the address range to the hypervisor.
-            sendDynMemDeallocRequest( ssAddr, seAddr );
-        }
-        else
-        {
-            // Send the address range to the hypervisor.
-            sendDynMemDeallocRequest( ssAddr, seAddr );
-        }
+        // Send the address range to the hypervisor.
+        sendDynMemDeallocRequest( ssAddr, seAddr );
 
         PRDF_TRAC( PRDF_FUNC "Port dealloc for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llx", ssAddr, seAddr );
@@ -1171,16 +1177,9 @@ int32_t dimmSlct( TargetHandle_t i_dimm )
             break;
         }
 
-        if ( T == TYPE_OCMB_CHIP )
-        {
-            // Send the address range to the hypervisor.
-            sendDynMemDeallocRequest( ssAddr, seAddr );
-        }
-        else
-        {
-            // Send the address range to the hypervisor.
-            sendDynMemDeallocRequest( ssAddr, seAddr );
-        }
+        // Send the address range to the hypervisor.
+        sendDynMemDeallocRequest( ssAddr, seAddr );
+
         PRDF_TRAC( PRDF_FUNC "DIMM Slct dealloc for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llx", ssAddr, seAddr );
 
