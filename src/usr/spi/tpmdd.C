@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -373,6 +373,12 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                     "is not XSCOM accessible",
                     get_huid(i_pTpm),
                     get_huid(tpmInfo.spiTarget));
+                // Until we have access to this TPM, use the presence value
+                // that the service processor found.
+                const auto sp_presence =
+                  i_pTpm->getAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>();
+                present =
+                  sp_presence == TARGETING::FOUND_PRESENT_BY_SP_FOUND ? true : false;
                 break;
             }
         }
