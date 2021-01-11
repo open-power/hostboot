@@ -3837,6 +3837,8 @@ sub setCommonBusConfigAttributes
     # can only work with targets that have absolute paths.
     my $busSrcTarget = $prependingPathData . $busSrcPath;
     my $busDestTarget = $prependingPathData . $busDestPath;
+    my $busSrcTargetCopy = $busSrcTarget;
+    my $busDestTargetCopy = $busDestTarget;
 
     if ( $nullifyFlag == false )
     {
@@ -3857,8 +3859,25 @@ sub setCommonBusConfigAttributes
             }
             my $smpgroup = $1;
 
-            $busSrcTarget .= "/$abusSrc/$smpgroup";
-            $busDestTarget .= "/$abusDest/$smpgroup";;
+            $busSrcTargetCopy .= "/$abusSrc/$smpgroup";
+            $busDestTargetCopy .= "/$abusDest/$smpgroup";
+
+            my $busSrcHuid = $targetObj->getAttribute($busSrcTargetCopy, "HUID");
+            my $busSrcPhysicalPath = $targetObj->getAttribute($busSrcTargetCopy, "PHYS_PATH");
+
+            my $busDestHuid = $targetObj->getAttribute($busDestTargetCopy, "HUID");
+            my $busDestPhysicalPath = $targetObj->getAttribute($busDestTargetCopy, "PHYS_PATH");
+
+            # Set attributes for the target ends
+            $targetObj->setAttribute($busSrcTargetCopy, "PEER_TARGET", $busDestPhysicalPath);
+            $targetObj->setAttribute($busSrcTargetCopy, "PEER_PATH",   $busDestPhysicalPath);
+            $targetObj->setAttribute($busSrcTargetCopy, "PEER_HUID",   $busDestHuid);
+            $targetObj->setAttribute($busSrcTargetCopy, "BUS_TYPE",    $busType);
+
+            $targetObj->setAttribute($busDestTargetCopy, "PEER_TARGET", $busSrcPhysicalPath);
+            $targetObj->setAttribute($busDestTargetCopy, "PEER_PATH",   $busSrcPhysicalPath);
+            $targetObj->setAttribute($busDestTargetCopy, "PEER_HUID",   $busSrcHuid);
+            $targetObj->setAttribute($busDestTargetCopy, "BUS_TYPE",    $busType);
         }
 
         my $busSrcHuid = $targetObj->getAttribute($busSrcTarget, "HUID");
