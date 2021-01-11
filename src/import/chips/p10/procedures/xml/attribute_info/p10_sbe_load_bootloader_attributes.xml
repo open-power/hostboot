@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -109,6 +109,33 @@
   <id>ATTR_NUM_KEY_ADDR_PAIR</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Defines the number of key-addr pair available to hostboot</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_SBE_MEASUREMENT_SEEPROM_VERSION</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>SBE Measurement Seeprom Versioning</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_SBE_HW_KEY_HASH_ADDR</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Instruction for HB Boatloader to pick the HW Key Hash from this memory</description>
+  <valueType>uint64</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_SBE_MINIMUM_SECURE_VERSION</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Minimum secure version for the container</description>
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
