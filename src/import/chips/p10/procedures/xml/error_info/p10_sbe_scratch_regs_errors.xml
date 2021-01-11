@@ -96,7 +96,7 @@
     <priority>HIGH</priority>
   </callout>
   <callout>
-    <target>TARGET</target>
+    <target>TARGET_CHIP</target>
     <priority>MEDIUM</priority>
   </callout>
 </hwpError>
