@@ -17,8 +17,6 @@ This secure channel is used in a multi-node evironment for nodes to exchange
 * The files are built into libnode_comm.so
 * This module implements the interfaces defined in
  [nodecommif.H](../../../include/usr/secureboot/nodecommif.H)
-* NOTE: For P10 the IOHS will be configured to communicate with a specific
- role, rather than the OBUS chiplet used in P9
 
 ## Algorithm
 * First, each node does the following:
@@ -28,7 +26,7 @@ This secure channel is used in a multi-node evironment for nodes to exchange
  other nodes
 
 * ***The Master Processor on Master Node*** does the following
- (see node_comm_exchange.C's nodeCommAbusExchangeMaster()):
+ (see node_comm_exchange.C's nodeCommExchangeMaster()):
   * **Loop 1:** Exchange SBID/nonces between Master and each of the Slave Nodes
     * Generate SBID/nonce and send to slave node
     * Look for return SBID/nonce from the slave
@@ -43,7 +41,7 @@ This secure channel is used in a multi-node evironment for nodes to exchange
  Family "2.0" for more details.
 
 * ***The Master Processor on each Slave Node*** does the following
- (see node_comm_exchange.C's nodeCommAbusExchangeSlave()):
+ (see node_comm_exchange.C's nodeCommExchangeSlave()):
 
   * Wait for SBID/nonce from the master node
   * Send a SBID/nonce back to the master node
@@ -76,10 +74,10 @@ This secure channel is used in a multi-node evironment for nodes to exchange
  with the a-bus mailbox registers
 
 * __node_comm_exchange.C__
-  * The core of this module - the primary function nodeCommAbusExchange()
+  * The core of this module - the primary function nodeCommExchange()
  is implemented here and shows the high-level data flow between the nodes
-  * The procedure for the master node is defined in nodeCommAbusExchangeMaster()
-  * The procedure for the slave nodes is defiend in nodeCommAbusExchangeSlave()
+  * The procedure for the master node is defined in nodeCommExchangeMaster()
+  * The procedure for the slave nodes is defiend in nodeCommExchangeSlave()
   * The interactions with the TPM - generating and logging SBID/Nonces, Quote
  Requests, Quote Responses - are all in this file
 

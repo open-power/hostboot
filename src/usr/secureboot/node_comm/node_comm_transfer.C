@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ namespace NODECOMM
 {
 
 
-errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
+errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pTarget,
                                 const uint8_t i_linkId,
                                 const uint8_t i_mboxId,
                                 const uint8_t i_recvNode,
@@ -66,10 +66,10 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
 
     auto my_node = TARGETING::UTIL::getCurrentNodePhysId();
 
-    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommTransferSend: iProc=0x%.08X "
+    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommTransferSend: i_pTarget=0x%.08X "
               "to send %d bytes of data through linkId=%d mboxId=%d over "
               "%d data messages to node %d",
-              get_huid(i_pProc), i_dataSize, i_linkId, i_mboxId,
+              get_huid(i_pTarget), i_dataSize, i_linkId, i_mboxId,
               total_data_msgs, i_recvNode);
 
     do
@@ -78,10 +78,10 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
         if ((TransferSizeMap.count(i_transferType) > 0) &&
             (TransferSizeMap.at(i_transferType) != i_dataSize))
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferSend: iProc=0x%.08X: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferSend: i_pTarget=0x%.08X: "
               "i_dataSize %d bytes does not align with i_transferType 0x%X: "
               "Expected size %d bytes.",
-              get_huid(i_pProc), i_dataSize, i_transferType,
+              get_huid(i_pTarget), i_dataSize, i_transferType,
               TransferSizeMap.at(i_transferType));
 
             /*@
@@ -99,7 +99,7 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
                                           MOD_NCT_SEND,
                                           RC_NCT_TYPE_SIZE_MISMATCH,
                                           TWO_UINT32_TO_UINT64(
-                                            get_huid(i_pProc),
+                                            get_huid(i_pTarget),
                                             i_dataSize),
                                           TWO_UINT32_TO_UINT64(
                                             i_transferType,
@@ -161,35 +161,35 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
                       "bytes_left=%d)",
                       msg_seq, data, bytes_sent, bytes_left);
 
-            err = nodeCommAbusSendMessage(i_pProc,
-                                          data,
-                                          i_linkId,
-                                          i_mboxId);
+            err = nodeCommSendMessage(i_pTarget,
+                                      data,
+                                      i_linkId,
+                                      i_mboxId);
 
             if (err)
             {
                 TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferSend: "
-                          "nodeCommAbusSendMessage returned an error: "
+                          "nodeCommSendMessage returned an error: "
                           "Tgt=0x%.08X, data=0x%.16llX, link=%d, mbox=%d: "
                           TRACE_ERR_FMT,
-                          get_huid(i_pProc), data, i_linkId, i_mboxId,
+                          get_huid(i_pTarget), data, i_linkId, i_mboxId,
                           TRACE_ERR_ARGS(err));
                 break;
             }
 
             // Get ACK
             uint64_t data_recv = 0;
-            err = nodeCommAbusRecvMessage(i_pProc,
-                                          i_linkId,
-                                          i_mboxId,
-                                          data_recv);
+            err = nodeCommRecvMessage(i_pTarget,
+                                      i_linkId,
+                                      i_mboxId,
+                                      data_recv);
             if (err)
             {
                 TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferSend: "
-                          "nodeCommAbusRecvMessage returned an error: "
+                          "nodeCommRecvMessage returned an error: "
                           "Tgt=0x%.08X, data=0x%.16llX, link=%d, mbox=%d: "
                           TRACE_ERR_FMT,
-                          get_huid(i_pProc), data, i_linkId, i_mboxId,
+                          get_huid(i_pTarget), data, i_linkId, i_mboxId,
                           TRACE_ERR_ARGS(err));
 
                 break;
@@ -272,7 +272,7 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
 
 
 
-errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
+errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pTarget,
                                 const uint8_t i_linkId,
                                 const uint8_t i_mboxId,
                                 const uint8_t i_sentNode,
@@ -284,10 +284,10 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
 
     auto my_node = TARGETING::UTIL::getCurrentNodePhysId();
 
-    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommTransferRecv: i_pProc=0x%.08X "
+    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommTransferRecv: i_pTarget=0x%.08X "
               "expecting messages of type 0x%.02x from linkId=%d mboxId=%d, "
               "node=%d",
-              get_huid(i_pProc), i_transferType, i_linkId, i_mboxId,
+              get_huid(i_pTarget), i_transferType, i_linkId, i_mboxId,
               i_sentNode);
 
     // Clear the output variables to be safe
@@ -299,17 +299,17 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
 
         // Wait for Message
         uint64_t data_recv = 0;
-        err = nodeCommAbusRecvMessage(i_pProc,
-                                      i_linkId,
-                                      i_mboxId,
-                                      data_recv);
+        err = nodeCommRecvMessage(i_pTarget,
+                                  i_linkId,
+                                  i_mboxId,
+                                  data_recv);
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferRecv: "
-                      "nodeCommAbusRecvMessage returned an error: "
+                      "nodeCommRecvMessage returned an error: "
                       "Tgt=0x%.08X, data=0x%.16llX, link=%d, mbox=%d: "
                       TRACE_ERR_FMT,
-                      get_huid(i_pProc), data_recv, i_linkId, i_mboxId,
+                      get_huid(i_pTarget), data_recv, i_linkId, i_mboxId,
                       TRACE_ERR_ARGS(err));
 
             break;
@@ -387,18 +387,18 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
         ack_msg.totalDataMsgs = init_msg.totalDataMsgs;
 
         // Send ACK message
-        err = nodeCommAbusSendMessage(i_pProc,
-                                      ack_msg.value,
-                                      i_linkId,
-                                      i_mboxId);
+        err = nodeCommSendMessage(i_pTarget,
+                                  ack_msg.value,
+                                  i_linkId,
+                                  i_mboxId);
 
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferRecv: "
-                      "nodeCommAbusSendMessage returned an error: "
+                      "nodeCommSendMessage returned an error: "
                       "Tgt=0x%.08X, data=0x%.16llX, link=%d, mbox=%d: "
                       TRACE_ERR_FMT,
-                      get_huid(i_pProc), ack_msg.value, i_linkId, i_mboxId,
+                      get_huid(i_pTarget), ack_msg.value, i_linkId, i_mboxId,
                       TRACE_ERR_ARGS(err));
             break;
         }
@@ -423,17 +423,17 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
         {
             // Wait for Data Message
             data_recv = 0;
-            err = nodeCommAbusRecvMessage(i_pProc,
-                                          i_linkId,
-                                          i_mboxId,
-                                          data_recv);
+            err = nodeCommRecvMessage(i_pTarget,
+                                      i_linkId,
+                                      i_mboxId,
+                                      data_recv);
             if (err)
             {
                 TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferRecv: "
-                          "nodeCommAbusRecvMessage returned an error: "
+                          "nodeCommRecvMessage returned an error: "
                           "Tgt=0x%.08X, data=0x%.16llX, link=%d, mbox=%d: "
                           TRACE_ERR_FMT,
-                          get_huid(i_pProc), data_recv, i_linkId, i_mboxId,
+                          get_huid(i_pTarget), data_recv, i_linkId, i_mboxId,
                           TRACE_ERR_ARGS(err));
 
                     break;
@@ -465,18 +465,18 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
                       "bytes_left=%d)",
                       msg_seq, ack_msg.value, bytes_read, bytes_left);
 
-            err = nodeCommAbusSendMessage(i_pProc,
-                                          ack_msg.value,
-                                          i_linkId,
-                                          i_mboxId);
+            err = nodeCommSendMessage(i_pTarget,
+                                      ack_msg.value,
+                                      i_linkId,
+                                      i_mboxId);
 
             if (err)
             {
                 TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferRecv: "
-                          "nodeCommAbusSendMessage returned an error: "
+                          "nodeCommSendMessage returned an error: "
                           "Tgt=0x%.08X, data=0x%.16llX, link=%d, mbox=%d: "
                           TRACE_ERR_FMT,
-                          get_huid(i_pProc), ack_msg.value, i_linkId, i_mboxId,
+                          get_huid(i_pTarget), ack_msg.value, i_linkId, i_mboxId,
                           TRACE_ERR_ARGS(err));
                 break;
             }
@@ -504,7 +504,7 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
                           "iProc=0x%.08X: o_dataSize %d bytes does not "
                           "align with i_transferType 0x%X: "
                           "Expected size %d bytes.",
-                          get_huid(i_pProc), o_dataSize, i_transferType,
+                          get_huid(i_pTarget), o_dataSize, i_transferType,
                           TransferSizeMap.at(i_transferType));
 
                 /*@
@@ -524,7 +524,7 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
                               MOD_NCT_RECEIVE,
                               RC_NCT_TYPE_SIZE_MISMATCH,
                               TWO_UINT32_TO_UINT64(
-                                get_huid(i_pProc),
+                                get_huid(i_pTarget),
                                 o_dataSize),
                               TWO_UINT32_TO_UINT64(
                                 i_transferType,

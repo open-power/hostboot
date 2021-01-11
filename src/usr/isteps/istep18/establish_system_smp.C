@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -213,22 +213,20 @@ void* host_sys_fab_iovalid_processing(void* io_ptr )
         } // end for (uint8_t i = 0; i < l_drawerCount; i++)
 
         l_sys->setAttr<ATTR_HB_EXISTING_IMAGE>(l_hbExistingImage);
-// @TODO: RTC 244858 Do not make calls to Secure Boot at this time.
-//#ifdef CONFIG_TPMDD
-#if 0
+#ifdef CONFIG_TPMDD
         {  // CONFIG_TPMDD scoping
             // Run Secure Node-to-Node Communication Procedure
             TRACFCOMP( g_trac_isteps_trace, ERR_MRK
                 "host_sys_fab_iovalid_processing: l_hbExistingImage = 0x%X, "
-                "isMaster=%d.  Calling nodeCommAbusExchange()",
+                "isMaster=%d.  Calling nodeCommExchange()",
                 l_hbExistingImage, UTIL::isCurrentMasterNode());
 
-            errlHndl_t l_err = SECUREBOOT::NODECOMM::nodeCommAbusExchange();
+            errlHndl_t l_err = SECUREBOOT::NODECOMM::nodeCommExchange();
             if (l_err)
             {
                 // Commit error here and the FSP will handle it
                 TRACFCOMP( g_trac_isteps_trace, ERR_MRK
-                    "host_sys_fab_iovalid_processing: nodeCommAbusExchange() "
+                    "host_sys_fab_iovalid_processing: nodeCommExchange() "
                     "returned err: plid=0x%X. Deleting err and continuing",
                     l_err->plid());
                 l_err->collectTrace("ISTEPS_TRACE");
@@ -237,8 +235,11 @@ void* host_sys_fab_iovalid_processing(void* io_ptr )
                 errlCommit(l_err, SECURE_COMP_ID);
            }
 
+// TODO RTC: 244858 figure out whether we need to do this and how exactly
+/*
             // Lock the secure ABUS Link Mailboxes now
             SECUREBOOT::lockAbusSecMailboxes();
+*/
         }
 #endif
     }  // end if (io_pMsg->extra_data)

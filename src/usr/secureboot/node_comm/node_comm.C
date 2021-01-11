@@ -68,13 +68,15 @@ namespace NODECOMM
 
 
 /**
- *  @brief This function waits for the processor to receive a message over
- *         ABUS from a processor on another node.
+ *  @brief This function waits for the processor to receive a message
+ *         from a processor on another node.
+ *
+ *  @note PAUC target is expected as the input
  */
-errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
-                                   const uint8_t i_linkId,
-                                   const uint8_t i_mboxId,
-                                   uint64_t & o_data)
+errlHndl_t nodeCommRecvMessage(TARGETING::Target* i_pTarget,
+                               const uint8_t i_linkId,
+                               const uint8_t i_mboxId,
+                               uint64_t & o_data)
 {
     errlHndl_t err = nullptr;
     bool attn_found = false;
@@ -84,8 +86,8 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
     const uint64_t interval_ns = NODE_COMM_POLL_DELAY_NS;
     uint64_t time_polled_ns = 0;
 
-    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusRecvMessage: pProc=0x%.08X",
-              get_huid(i_pProc));
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommRecvMessage: i_pTarget=0x%.08X",
+              get_huid(i_pTarget));
 
     do
     {
@@ -93,31 +95,31 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
         {
 
         // Look for Attention
-        err = nodeCommMapAttn(i_pProc,
+        err = nodeCommMapAttn(i_pTarget,
                               attn_found,
                               actual_linkId,
                               actual_mboxId);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusRecvMessage: Error Back "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: Error Back "
                       "From nodeCommMapAttn: Tgt=0x%.08X: "
                       TRACE_ERR_FMT,
-                      get_huid(i_pProc),
+                      get_huid(i_pTarget),
                       TRACE_ERR_ARGS(err));
             break;
         }
         if (attn_found == true)
         {
-            TRACUTCOMP(g_trac_nc,INFO_MRK"nodeCommAbusRecvMessage: "
+            TRACUTCOMP(g_trac_nc,INFO_MRK"nodeCommRecvMessage: "
               "nodeCommMapAttn attn_found (%d) for Tgt=0x%.08X, link=%d, "
               "mbox=%d",
-              attn_found, get_huid(i_pProc), actual_linkId, actual_mboxId);
+              attn_found, get_huid(i_pTarget), actual_linkId, actual_mboxId);
             break;
         }
 
         if (time_polled_ns >= NODE_COMM_POLL_DELAY_TOTAL_NS)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusRecvMessage: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: "
               "timeout: time_polled_ns-0x%.16llX, MAX=0x%.16llX, "
               "interval=0x%.16llX",
               time_polled_ns, NODE_COMM_POLL_DELAY_TOTAL_NS, interval_ns);
@@ -126,26 +128,26 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
              * @errortype
              * @reasoncode       RC_NC_WAITING_TIMEOUT
              * @moduleid         MOD_NC_RECV
-             * @userdata1[0:31]  Master Proc Target HUID
+             * @userdata1[0:31]  Target HUID
              * @userdata1[32:63] Time Polled in ns
              * @userdata2[0:31]  Defined MAX Poll Time in ns
              * @userdata2[32:63] Time Interval Between Polls in ns
-             * @devdesc          Timed out waiting to receive message over
-             *                   ABUS Link Mailbox
+             * @devdesc          Timed out waiting to receive message from
+             *                   another node
              * @custdesc         Trusted Boot failure
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            MOD_NC_RECV,
                                            RC_NC_WAITING_TIMEOUT,
                                            TWO_UINT32_TO_UINT64(
-                                             get_huid(i_pProc),
+                                             get_huid(i_pTarget),
                                              time_polled_ns),
                                            TWO_UINT32_TO_UINT64(
                                              NODE_COMM_POLL_DELAY_TOTAL_NS,
                                              interval_ns));
 
             // Since we know what bus we expected the message on, call it out
-            addNodeCommBusCallout(i_pProc,
+            addNodeCommBusCallout(i_pTarget,
                                   i_linkId,
                                   err);
 
@@ -154,7 +156,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
                                      HWAS::SRCI_PRIORITY_LOW);
 
             // Grab FFDC from the target
-            getNodeCommFFDC(i_pProc,
+            getNodeCommFFDC(i_pTarget,
                             err);
 
             break;
@@ -179,7 +181,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
         if ((actual_linkId != i_linkId) ||
             (actual_mboxId != i_mboxId))
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusRecvMessage: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: "
                       "Expected Link (%d) Mbox (%d) IDs DO NOT Match the "
                       "Actual Link (%d) Mbox (%d) IDs the message was "
                       "received on",
@@ -190,19 +192,19 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
              * @errortype
              * @reasoncode       RC_NCEX_MISMATCH_RECV_LINKS
              * @moduleid         MOD_NC_RECV
-             * @userdata1        Master Proc Target HUID
+             * @userdata1        Target HUID
              * @userdata2[0:15]  Expected Link Id to receive message on
              * @userdata2[16:31] Expected Mailbox Id to receive message on
              * @userdata2[32:47] Actual Link Id message was received on
              * @userdata2[48:63] Actual Mailbox Id message was receiveed on
              * @devdesc          Mismatch between expected and actual Link Mbox
-             *                   Ids a secure ABUS message was received on
+             *                   Ids a secure message was received on
              * @custdesc         Trusted Boot failure
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            MOD_NC_RECV,
                                            RC_NCEX_MISMATCH_RECV_LINKS,
-                                           get_huid(i_pProc),
+                                           get_huid(i_pTarget),
                                            FOUR_UINT16_TO_UINT64(
                                              i_linkId,
                                              i_mboxId,
@@ -210,7 +212,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
                                              actual_mboxId));
 
             // Since we know what bus we expected the message on, call it out
-            addNodeCommBusCallout(i_pProc,
+            addNodeCommBusCallout(i_pTarget,
                                   i_linkId,
                                   err);
 
@@ -219,17 +221,17 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
                                      HWAS::SRCI_PRIORITY_LOW);
 
             // Grab FFDC from the target
-            getNodeCommFFDC(i_pProc,
+            getNodeCommFFDC(i_pTarget,
                             err);
 
             break;
         }
 
-        //  Read message on proc with Link Mailbox found above
+        //  Read message on the target with Link Mailbox found above
         o_data = 0;
         size_t expSize = sizeof(o_data);
         auto reqSize = expSize;
-        err = DeviceFW::deviceRead(i_pProc,
+        err = DeviceFW::deviceRead(i_pTarget,
                                    &o_data,
                                    reqSize,
                                    DEVICE_NODECOMM_ADDRESS(actual_linkId,
@@ -238,9 +240,9 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: Error Back From "
-                      "Abus MBox Read: Tgt=0x%.08X, link=%d, mbox=%d: "
+                      "MBox Read: Tgt=0x%.08X, link=%d, mbox=%d: "
                       TRACE_ERR_FMT,
-                      get_huid(i_pProc), actual_linkId, actual_mboxId,
+                      get_huid(i_pTarget), actual_linkId, actual_mboxId,
                       TRACE_ERR_ARGS(err));
             break;
         }
@@ -251,33 +253,35 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
 
     } while( 0 );
 
-    TRACUTCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusRecvMessage: "
+    TRACUTCOMP(g_trac_nc,EXIT_MRK"nodeCommRecvMessage: "
               "Tgt=0x%.08X, link=%d, mbox=%d attn_found=%d: "
               "data=0x%.16llX. "
               TRACE_ERR_FMT,
-              get_huid(i_pProc), actual_linkId, actual_mboxId,
+              get_huid(i_pTarget), actual_linkId, actual_mboxId,
               attn_found, o_data,
               TRACE_ERR_ARGS(err));
 
     return err;
 
-} // end of nodeCommAbusRecvMessage
+} // end of nodeCommRecvMessage
 
 
 /**
- *  @brief This function sends a message over the ABUS from the processor of
+ *  @brief This function sends a message from the processor of
  *         the current node to a processor on another node.
+ *
+ *  @note PAUC target is expected as the input
  */
-errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
+errlHndl_t nodeCommSendMessage(TARGETING::Target* i_pTarget,
                                    const uint64_t i_data,
                                    const uint8_t i_linkId,
                                    const uint8_t i_mboxId)
 {
     errlHndl_t err = nullptr;
 
-    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommSendMessage: i_pTarget=0x%.08X "
               "to send data=0x%.16llX through linkId=%d mboxId=%d",
-              get_huid(i_pProc), i_data, i_linkId, i_mboxId);
+              get_huid(i_pTarget), i_data, i_linkId, i_mboxId);
 
     do
     {
@@ -285,42 +289,44 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
         uint64_t data = i_data; // to keep i_data const
         size_t expSize = sizeof(i_data);
         auto reqSize = expSize;
-        err = DeviceFW::deviceWrite(i_pProc,
+        err = DeviceFW::deviceWrite(i_pTarget,
                                     &data,
                                     reqSize,
                                     DEVICE_NODECOMM_ADDRESS(i_linkId,
                                                             i_mboxId));
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusSendMessage: Error Back "
-                      "From Abus MBox Send: Tgt=0x%.08X, data=0x%.16llX, "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommSendMessage: Error Back "
+                      "From MBox Send: Tgt=0x%.08X, data=0x%.16llX, "
                       "link=%d, mbox=%d: "
                       TRACE_ERR_FMT,
-                      get_huid(i_pProc), i_data, i_linkId, i_mboxId,
+                      get_huid(i_pTarget), i_data, i_linkId, i_mboxId,
                       TRACE_ERR_ARGS(err));
             break;
         }
-        assert(reqSize==expSize,"nodeCommAbusSendMessage: SCOM deviceRead didn't return expected data size of %d (it was %d)",
+        assert(reqSize==expSize,"nodeCommSendMessage: SCOM deviceRead didn't return expected data size of %d (it was %d)",
                expSize,reqSize);
 
     } while( 0 );
 
-    TRACUTCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
+    TRACUTCOMP(g_trac_nc,EXIT_MRK"nodeCommSendMessage: iProc=0x%.08X "
               "send data=0x%.16llX through linkId=%d mboxId=%d: "
               TRACE_ERR_FMT,
-              get_huid(i_pProc), i_data, i_linkId, i_mboxId,
+              get_huid(i_pTarget), i_data, i_linkId, i_mboxId,
               TRACE_ERR_ARGS(err));
 
     return err;
 
-} // end of nodeCommAbusSendMessage
+} // end of nodeCommSendMessage
 
 
 
 /**
  *  @brief Map Attention Bits in FIR Register to specific Link Mailbox
+ *
+ *  @note PAUC target is expected as the input
  */
-errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
+errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pTarget,
                            bool & o_attn_found,
                            uint8_t & o_linkId,
                            uint8_t & o_mboxId)
@@ -338,7 +344,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 
     TRACUTCOMP(g_trac_nc,ENTER_MRK
               "nodeCommMapAttn: tgt=0x%X, fir_addr=0x%.16llX",
-              get_huid(i_pProc),
+              get_huid(i_pTarget),
               fir_addr);
 
 
@@ -346,7 +352,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
     {
     // Read the FIR reg
     auto reqSize = expSize;
-    err = DeviceFW::deviceRead(i_pProc,
+    err = DeviceFW::deviceRead(i_pTarget,
                                &fir_data,
                                reqSize,
                                DEVICE_SCOM_ADDRESS(fir_addr));
@@ -356,7 +362,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
         TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommMapAttn Read Fail! "
                   " tgt=0x%X, reg_addr=0x%.16llX, data=0x%.16llX "
                   TRACE_ERR_FMT,
-                  TARGETING::get_huid(i_pProc),
+                  TARGETING::get_huid(i_pTarget),
                   fir_addr, fir_data,
                   TRACE_ERR_ARGS(err));
         break;
@@ -402,20 +408,20 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
                                        fir_data,
                                        TWO_UINT32_TO_UINT64(
                                          bit_count,
-                                         get_huid(i_pProc)));
+                                         get_huid(i_pTarget)));
 
         // Likely HB code failed to do the procedure correctly
         err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
 
         // Or unlikely an issue with Processor or its bus
-        err->addHwCallout( i_pProc,
+        err->addHwCallout( i_pTarget,
                            HWAS::SRCI_PRIORITY_LOW,
                            HWAS::NO_DECONFIG,
                            HWAS::GARD_NULL );
 
         // Collect FFDC
-        getNodeCommFFDC(i_pProc, err);
+        getNodeCommFFDC(i_pTarget, err);
 
         err->collectTrace(SECURE_COMP_NAME);
         err->collectTrace(NODECOMM_TRACE_NAME);
@@ -437,7 +443,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
             TRACUTCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: tgt=0x%X: "
                       "o_attn_found=%d, o_linkId=%d, mboxId=%d, "
                       TRACE_ERR_FMT,
-                      get_huid(i_pProc), o_attn_found, o_linkId, o_mboxId,
+                      get_huid(i_pTarget), o_attn_found, o_linkId, o_mboxId,
                       TRACE_ERR_ARGS(err));
             break;
         }
@@ -448,7 +454,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
     TRACUTCOMP(g_trac_nc,EXIT_MRK"nodeCommMapAttn: tgt=0x%X: "
               "o_attn_found=%d, o_linkId=%d, mboxId=%d, "
               TRACE_ERR_FMT,
-              get_huid(i_pProc), o_attn_found, o_linkId, o_mboxId,
+              get_huid(i_pTarget), o_attn_found, o_linkId, o_mboxId,
               TRACE_ERR_ARGS(err));
 
     return err;
@@ -456,14 +462,14 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 } // end of nodeCommMapAttn
 
 /**
- *  @brief For OBUS OLL FIR Register (0x9010800) bit0 represents whether or
+ *  @brief For IOHS OLL FIR Register (0x18011000) bit0 represents whether or
  *         not link0 has been trained and bit1 represents whether or not
  *         link1 has been trained
  */
 enum link_trained_values : uint64_t
 {
-    // Register to read to find out which links on an OBUS are trained
-    OLL_FIR_REGISTER      = 0x0000000009010800,
+    // Register to read to find out which links on an IOHS are trained
+    OLL_FIR_REGISTER      = 0x0000000018011000,
 
     // Bit Mask values
     IS_LINK0_TRAINED_MASK = 0x8000000000000000,
@@ -472,9 +478,9 @@ enum link_trained_values : uint64_t
 
 /**
  *  @brief Return the status of whether or not the 2 links connected to the
- *         OBUS Chiplet are trained
+ *         IOHS Chiplet are trained
  */
-errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
+errlHndl_t getIohsTrainedLinks(TARGETING::Target* i_pIohs,
                                bool & o_link0_trained,
                                bool & o_link1_trained,
                                uint64_t & o_fir_data)
@@ -486,17 +492,17 @@ errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
     const uint64_t fir_addr = OLL_FIR_REGISTER;
     const size_t expSize = sizeof(o_fir_data);
 
-    assert(i_pObus != nullptr, "getObusTrainedLinks: i_pObus == nullptr");
+    assert(i_pIohs != nullptr, "getObusTrainedLinks: i_pIohs == nullptr");
 
     TRACUTCOMP(g_trac_nc,ENTER_MRK
-              "getObusTrainedLinks: OBUS tgt=0x%X",
-              get_huid(i_pObus));
+              "getIohsTrainedLinks: IOHS tgt=0x%X",
+              get_huid(i_pIohs));
 
     do
     {
-    // Read the OBUS OLL FIR Register
+    // Read the IOHS OLL FIR Register
     auto reqSize = expSize;
-    err = DeviceFW::deviceRead(i_pObus,
+    err = DeviceFW::deviceRead(i_pIohs,
                                &o_fir_data,
                                reqSize,
                                DEVICE_SCOM_ADDRESS(fir_addr));
@@ -506,7 +512,7 @@ errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
         TRACFCOMP(g_trac_nc,ERR_MRK"getObusTrainedLinks: Read Fail! "
                   "tgt=0x%X, fir_addr=0x%.16llX, fir_data=0x%.16llX "
                   TRACE_ERR_FMT,
-                  TARGETING::get_huid(i_pObus),
+                  TARGETING::get_huid(i_pIohs),
                   fir_addr, o_fir_data,
                   TRACE_ERR_ARGS(err));
         break;
@@ -520,10 +526,10 @@ errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
 
     } while( 0 );
 
-    TRACFCOMP(g_trac_nc,EXIT_MRK"getObusTrainedLinks: OBUS tgt=0x%X: "
+    TRACFCOMP(g_trac_nc,EXIT_MRK"getIohsTrainedLinks: IOHS tgt=0x%X: "
               "o_link0_trained=%d, o_link1_trained=%d (fir_data=0x%.16llX) "
               TRACE_ERR_FMT,
-              get_huid(i_pObus), o_link0_trained, o_link1_trained, o_fir_data,
+              get_huid(i_pIohs), o_link0_trained, o_link1_trained, o_fir_data,
               TRACE_ERR_ARGS(err));
 
     return err;
@@ -533,13 +539,15 @@ errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
 
 /**
  * @brief Add FFDC for the target to an error log
+ *
+ * @note PAUC target is expected as the input
  */
-void getNodeCommFFDC(TARGETING::Target*  i_pProc,
+void getNodeCommFFDC(TARGETING::Target*  i_pTarget,
                       errlHndl_t          &io_log)
 {
     TRACFCOMP(g_trac_nc,ENTER_MRK
               "getNodeCommFFDC: tgt=0x%X, err_plid=0x%X",
-              get_huid(i_pProc),
+              get_huid(i_pTarget),
               ERRL_GETPLID_SAFE(io_log));
 
     do
@@ -548,15 +556,15 @@ void getNodeCommFFDC(TARGETING::Target*  i_pProc,
     {
         TRACFCOMP(g_trac_nc,INFO_MRK"getNodeCommFFDC: io_log==nullptr, so "
                   "no FFDC has been collected for tgt=0x%X",
-                  get_huid(i_pProc));
+                  get_huid(i_pTarget));
         break;
     }
 
     // Add Target to log
-    ERRORLOG::ErrlUserDetailsTarget(i_pProc,"Proc Target").addToLog(io_log);
+    ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Target").addToLog(io_log);
 
     // Add HW regs
-    ERRORLOG::ErrlUserDetailsLogRegister ffdc(i_pProc);
+    ERRORLOG::ErrlUserDetailsLogRegister ffdc(i_pTarget);
 
     // FIR/Control/Status/Data Registers
     ffdc.addData(DEVICE_SCOM_ADDRESS(NCDD_REG_FIR));
@@ -589,8 +597,10 @@ void getNodeCommFFDC(TARGETING::Target*  i_pProc,
 
 /**
  * @brief Add a bus callout to an error log
+ *
+ * @note PAUC target is expected as the input
  */
-void addNodeCommBusCallout(TARGETING::Target* i_pProc,
+void addNodeCommBusCallout(TARGETING::Target* i_pTarget,
                            const uint8_t i_linkId,
                            errlHndl_t & io_log,
                            HWAS::callOutPriority i_priority)
@@ -598,11 +608,11 @@ void addNodeCommBusCallout(TARGETING::Target* i_pProc,
     TRACFCOMP(g_trac_nc,ENTER_MRK
               "addNodeCommBusCallout: tgt=0x%X, linkId=%d, "
               "err_plid=0x%X, priority=%d",
-              get_huid(i_pProc),
+              get_huid(i_pTarget),
               i_linkId,
               ERRL_GETPLID_SAFE(io_log), i_priority);
 
-    // Bus associated with i_pProc and i_linkId (PHYS_PATH)
+    // Bus associated with i_pTarget and i_linkId (PHYS_PATH)
     char * l_ep1_path_str = nullptr;
 
     // PEER_PATH associated with l_ep1
@@ -613,11 +623,11 @@ void addNodeCommBusCallout(TARGETING::Target* i_pProc,
     do
     {
     if ((io_log == nullptr) ||
-        (i_pProc == nullptr))
+        (i_pTarget == nullptr))
     {
         TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: io_log==nullptr or "
                   "tgt=0x%X is nullptr, so no bus callout has beed added",
-                  get_huid(i_pProc));
+                  get_huid(i_pTarget));
         break;
     }
 
@@ -626,11 +636,11 @@ void addNodeCommBusCallout(TARGETING::Target* i_pProc,
 
     // Get all Chiplets for this target aligned with the input mode
     TargetHandleList l_busTargetList;
-    TYPE l_type = TYPE_OBUS;
-    getChildChiplets(l_busTargetList, i_pProc, l_type, false);
+    TYPE l_type = TYPE_IOHS;
+    getChildChiplets(l_busTargetList, i_pTarget, l_type, false);
 
     // Get BUS Instance
-    // For each OBUS or XBUS instance there are 2 links and 2 mailboxes,
+    // For each IOHS instance there are 2 links and 2 mailboxes,
     // so divide the linkId by 2 to get bus instance
     uint8_t l_bus_instance_ep1 = i_linkId / 2;
 
@@ -656,8 +666,8 @@ void addNodeCommBusCallout(TARGETING::Target* i_pProc,
         l_ep2_path_str = l_ep2.toString();
 
         TRACUTCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: Checking "
-                      "i_pProc 0x%.08X BUS HUID 0x%.08X's (%s) PEER_PATH: %s",
-                      get_huid(i_pProc), get_huid(l_busTgt),
+                      "i_pTarget 0x%.08X BUS HUID 0x%.08X's (%s) PEER_PATH: %s",
+                      get_huid(i_pTarget), get_huid(l_busTgt),
                       l_ep1_path_str,
                       l_ep2_path_str);
 
@@ -666,17 +676,17 @@ void addNodeCommBusCallout(TARGETING::Target* i_pProc,
         if(l_ep2_peBus.type == TYPE_NA)
         {
             TRACUTCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
-                      "Skipping i_pProc 0x%.08X "
+                      "Skipping i_pTarget 0x%.08X "
                       "BUS HUID 0x%.08X's (%s) PEER_PATH %s because "
                       "cannot find BUS in PEER_PATH",
-                      get_huid(i_pProc), get_huid(l_busTgt),
+                      get_huid(i_pTarget), get_huid(l_busTgt),
                       l_ep1_path_str, l_ep2_path_str);
             continue;
         }
 
         if (l_bus_instance_ep1 == l_busTgt->getAttr<ATTR_REL_POS>())
         {
-            // Go to depth of TYPE_SMPGROUP, which is one level below OBUS
+            // Go to depth of TYPE_SMPGROUP, which is one level below IOHS
             TargetHandleList l_smpGroupTargetList;
             getChildAffinityTargets(l_smpGroupTargetList,
                                     l_busTgt,
@@ -751,10 +761,10 @@ void addNodeCommBusCallout(TARGETING::Target* i_pProc,
         else
         {
             TRACUTCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
-                      "Skipping i_pProc 0x%.08X BUS HUID 0x%.08X's "
+                      "Skipping i_pTarget 0x%.08X BUS HUID 0x%.08X's "
                       "PEER_PATH %s because ep1 bus instance (%d) does not "
                       "match instance (%d) converted from i_linkId (%d)",
-                      get_huid(i_pProc), get_huid(l_busTgt),
+                      get_huid(i_pTarget), get_huid(l_busTgt),
                       l_ep2_path_str, l_busTgt->getAttr<ATTR_ORDINAL_ID>(),
                       l_bus_instance_ep1, i_linkId);
         }
@@ -763,14 +773,14 @@ void addNodeCommBusCallout(TARGETING::Target* i_pProc,
         {
             break;
         }
-    }  // for loop for OBUS
+    }  // for loop for IOHS
 
     if (found_peer_endpoint == false)
     {
         TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: Unable to find a "
                   "peer_tgt for tgt=0x%X, linkId=%d, so no bus "
                   "callout has been added",
-                  get_huid(i_pProc),
+                  get_huid(i_pTarget),
                   i_linkId);
         break;
     }

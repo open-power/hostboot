@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,10 +95,10 @@ const std::map<node_comm_transfer_types_t, size_t>
 
 
 /**
- *  @brief This function sends multiple messages with data over the ABUS from
+ *  @brief This function sends multiple messages with data from
            the processor of the current node to a processor on another node.
  *
- *  @param[in] i_pProc         - Processor target that is sending the data
+ *  @param[in] i_pTarget       - The target containing the node comm registers.
  *                               Can't be nullptr
  *  @param[in] i_linkId        - Link Id Message is sent from
  *  @param[in] i_mboxId        - Mailbox Id Message is sent from
@@ -114,7 +114,7 @@ const std::map<node_comm_transfer_types_t, size_t>
  *  @retval nullptr Operation was successful
  *  @retval !nullptr Operation failed with valid error log
  */
-errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
+errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pTarget,
                                 uint8_t i_linkId,
                                 uint8_t i_mboxId,
                                 uint8_t i_recvNode,
@@ -123,10 +123,10 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
                                 size_t i_dataSize);
 
 /**
- *  @brief This function waits to receive multiple messages over the ABUS
+ *  @brief This function waits to receive multiple messages
  *         from a processor on another node.
  *
- *  @param[in]  i_pProc         - Processor target to receive messages on
+ *  @param[in]  i_pTarget       - The target containing the node comm registers.
  *                                Can't be nullptr
  *  @param[in]  i_linkId        - Link Id Message is expected from
  *  @param[in]  i_mboxId        - Mailbox Id Message is expected from
@@ -148,7 +148,7 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
  *  @retval nullptr Operation was successful
  *  @retval !nullptr Operation failed with valid error log
  */
-errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
+errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pTarget,
                                 uint8_t i_linkId,
                                 uint8_t i_mboxId,
                                 uint8_t i_sentNode,

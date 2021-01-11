@@ -81,6 +81,13 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        TARGETING::TYPE_PROC,
                        nodeCommPerformOp );
 
+// Register a Op with PAUC as the target. Most of the nodecomm registers
+// live on PAUC targets.
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::NODECOMM,
+                      TARGETING::TYPE_PAUC,
+                      nodeCommPerformOp);
+
 errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
                          TARGETING::Target * i_target,
                          void * io_buffer,
