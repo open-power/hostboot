@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,8 @@ typedef struct
 {
     /// Pstate number
     Pstate_t pstate;
+
+    uint8_t padding;
 
     /// Assocated Frequency (in MHz)
     uint16_t    frequency_mhz;
