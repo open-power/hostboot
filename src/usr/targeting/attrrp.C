@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -358,7 +358,7 @@ namespace TARGETING
 #ifdef CONFIG_DEVTREE
                 TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
                         "Calling devtree attribute sync for BMC.");
-                DEVTREE::devtreeSyncAttrs();
+                (void)DEVTREE::devtreeSyncAttrs();
 #endif
                 break;
             }

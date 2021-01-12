@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,7 +115,7 @@ namespace TARGETING
 #ifdef CONFIG_DEVTREE
 namespace DEVTREE
 {
-    void devtreeSyncAttrs();
+    bool devtreeSyncAttrs();
 }
 #endif
 #endif
@@ -966,7 +966,7 @@ class Target
 
 #ifndef __HOSTBOOT_RUNTIME
 #ifdef CONFIG_DEVTREE
-        friend void DEVTREE::devtreeSyncAttrs();
+        friend bool DEVTREE::devtreeSyncAttrs();
 #endif
 #endif
 } PACKED;

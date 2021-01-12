@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <pnor/pnorif.H>
+#include <console/consoleif.H>
 
 // Devtree
 #include <devtree/devtree.H>
@@ -292,20 +293,25 @@ void debugReadCmpData(const void* i_fdt,
 /**
  * @brief Function to sync targeting attributes to devtree
  */
-void devtreeSyncAttrs()
+bool devtreeSyncAttrs( void )
 {
     TRACFCOMP(g_trac_devtree, ENTER_MRK"DEVTREE::devtreeSyncAttrs");
 
+    bool l_hitError = false;
     errlHndl_t l_err = nullptr;
 
     do
     {
+        CONSOLE::displayf(CONSOLE::DEFAULT,DEVTREE_COMP_NAME,
+                          "Syncing to BMC");
+
         // Get a pointer to the flattened device tree in the pnor
         PNOR::SectionInfo_t l_devtreeInfo;
 
         l_err = PNOR::getSectionInfo(PNOR::DEVTREE, l_devtreeInfo);
         if(l_err)
         {
+            l_hitError = true;
             TRACFCOMP( g_trac_devtree, ERR_MRK
                        "devtreeSyncAttrs(): Error loading DEVTREE PNOR");
             ERRORLOG::errlCommit(l_err, DEVTREE_COMP_ID);
@@ -383,6 +389,7 @@ void devtreeSyncAttrs()
                 // Attr size check
                 if(l_attrSize == 0)
                 {
+                    l_hitError = true;
                     TRACFCOMP( g_trac_devtree, ERR_MRK "devtreeSyncAttrs() "
                                "Size = 0 for "
                                "attribute ID 0x%.8x, target HUID 0x%08X",
@@ -424,6 +431,7 @@ void devtreeSyncAttrs()
                                            l_attrSize,
                                            l_attrData))
                 {
+                    l_hitError = true;
                     TRACFCOMP(g_trac_devtree, ERR_MRK "devtreeSyncAttrs() "
                         "Can't get attribute data for ID 0x%.8x HUID 0x%08X",
                         *l_attributeId, l_targetHuid);
@@ -473,6 +481,7 @@ void devtreeSyncAttrs()
                                         l_attrSize);
                 if (l_rc < 0)
                 {
+                    l_hitError = true;
                     handleDtreeError(l_rc, l_targetHuid, l_attrName);
                     continue;
                 }
@@ -485,6 +494,7 @@ void devtreeSyncAttrs()
         l_err = PNOR::flush( l_devtreeInfo.id );
         if (l_err)
         {
+            l_hitError = true;
             TRACFCOMP(g_trac_devtree, ERR_MRK
                       "Error flushing DEVTREE data to PNOR");
             ERRORLOG::errlCommit(l_err, DEVTREE_COMP_ID);
@@ -494,7 +504,53 @@ void devtreeSyncAttrs()
     } while(0);  // end do loop
 
     TRACFCOMP(g_trac_devtree, EXIT_MRK"DEVTREE::devtreeSyncAttrs");
+    return l_hitError;
 } // devtreeSyncAttrs()
 
+
+/**
+ * @brief Check if any new targets have showed up, if so force a devtree
+ *        sync so that the BMC has an accurate idea of present/functional
+ *        parts..
+ */
+void syncIfChanged()
+{
+    // Create the predicate with HWAS changed state and our GARD bit
+    PredicateHwasChanged l_notSynced;
+    l_notSynced.changedBit(HWAS_CHANGED_BIT_DEVTREE_SYNC, true);
+
+    // Remember all the changed targets
+    std::vector<Target*> l_changedTargets;
+
+    // Go through all targets to find any with a change
+    for (TargetIterator t_iter = targetService().begin();
+         t_iter != targetService().end();
+         ++t_iter)
+    {
+        Target* l_pTarget = *t_iter;
+
+        // Check if target has not yet been synced
+        if (l_notSynced(l_pTarget))
+        {
+            TRACFCOMP(g_trac_devtree, "DEVTREE::syncIfChanged> %.8X",
+                      TARGETING::get_huid(l_pTarget));
+            l_changedTargets.push_back(l_pTarget);
+        }
+    } // for all targets
+
+    // Force a sync if anything is new
+    bool l_error = devtreeSyncAttrs();
+
+    // Clear the bit so we don't waste time on the next ipl if the
+    //  sync was successful
+    if( !l_error )
+    {
+        for( auto& l_targ : l_changedTargets )
+        {
+            clear_hwas_changed_bit(l_targ,
+                                   HWAS_CHANGED_BIT_DEVTREE_SYNC);
+        }
+    }
+}
 
 } // end namespace

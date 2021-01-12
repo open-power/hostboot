@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -60,6 +60,7 @@
 #include <fapi2/target.H>
 #include <eeprom/eepromCache.H>
 #include <runtime/customize_attrs_for_payload.H>
+#include <devtree/devtree.H>
 
 //SBE interfacing
 #include <sbeio/sbeioif.H>
@@ -770,6 +771,10 @@ void* host_discover_targets( void *io_pArgs )
 #endif
     }
 
+    // Force a sync to the BMC if there were any new parts
+    //  This will give the BMC a more accurate view of things in case
+    //  anyone looks before we do the full sync at the end of step16
+    DEVTREE::syncIfChanged();
 
     // Cross-check our list with what the SP saw
     //  Any errors will be committed inline

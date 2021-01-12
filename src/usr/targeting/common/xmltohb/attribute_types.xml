@@ -2684,6 +2684,10 @@
       <name>GARD_APPLIED</name>
       <value>0x00000020</value>
     </enumerator>
+    <enumerator>
+      <name>DEVTREE_SYNC</name>
+      <value>0x00000040</value>
+    </enumerator>
     <id>HWAS_CHANGED_BIT</id>
   </enumerationType>
 

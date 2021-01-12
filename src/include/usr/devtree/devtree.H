@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,8 +39,26 @@ namespace DEVTREE
  *        This function does not return an error log.  This is because
  *        it is a friend function inside target.H, which does not know
  *        what an error log is.  Error logs must be committed before return.
+ * @return  True if any errors were encountered
  */
-void devtreeSyncAttrs();
+bool devtreeSyncAttrs( void )
+#ifdef CONFIG_DEVTREE
+;
+#else
+{return false;};
+#endif
+
+/**
+ * @brief Check if any new targets have showed up, if so force a devtree
+ *        sync so that the BMC has an accurate idea of present/functional
+ *        parts..
+ */
+void syncIfChanged()
+#ifdef CONFIG_DEVTREE
+;
+#else
+{};
+#endif
 
 
 }; // end namespace
