@@ -85,7 +85,7 @@
 #include <secureboot/smf_utils.H>
 #include <secureboot/smf.H>
 #include <isteps/istep_reasoncodes.H>
-
+#include <dump/dumpif.H>
 namespace RUNTIME
 {
 
@@ -1209,6 +1209,30 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         {
             uint64_t l_addr = l_archAddr +
               (l_procNum++ * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
+
+            //Update the MPIPL Dump metadata structure for particular Proc
+            uint64_t l_vAddr = 0x0;
+            l_elog = mapPhysAddr(l_addr, sizeof(DUMP::sbeArchHWDumpMetaData_t), l_vAddr);
+            if(l_elog)
+            {
+                TRACFCOMP( g_trac_runtime,"Faled in mapPhysAddr() for address:0x%.16llx",
+                           l_addr);
+                break;
+            }
+            DUMP::sbeArchHWDumpMetaData_t metadata;
+            metadata.init();
+            metadata.archDataMemoryAddr = l_addr +sizeof(DUMP::sbeArchHWDumpMetaData_t);
+            metadata.archDataMemAllocSize = VMM_ARCH_REG_DATA_PER_PROC_SIZE;
+            memcpy(reinterpret_cast<void*>(l_vAddr),
+                   reinterpret_cast<void*>(&metadata),
+                   sizeof(DUMP::sbeArchHWDumpMetaData_t));
+            l_elog = unmapVirtAddr(l_vAddr);
+            if(l_elog)
+            {
+                TRACFCOMP( g_trac_runtime,"Faled in unmapVirtAddr() to unmap address:0x%.16llx",
+                           l_vAddr);
+                break;
+            }
 
             //Pass start address down to SBE via chipop
             l_elog = SBEIO::sendPsuStashKeyAddrRequest(

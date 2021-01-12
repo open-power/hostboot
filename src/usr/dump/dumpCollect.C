@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -450,7 +450,7 @@ errlHndl_t copyArchitectedRegs(void)
         assert(l_sys != NULL);
         auto srcAddr =
                   l_sys->getAttr<TARGETING::ATTR_SBE_ARCH_DUMP_ADDR>();
-
+ 
         pSrcAddrBase = reinterpret_cast<void * const>(srcAddr);
         vMapSrcAddrBase = mm_block_map(pSrcAddrBase,
                                        VMM_ARCH_REG_DATA_SIZE_ALL_PROC);
@@ -459,9 +459,6 @@ errlHndl_t copyArchitectedRegs(void)
                  "vMapSrcAddrBase=[%p], HYP assigned dest addr [0x%.16llx] pDstAddrBase=[%p] "
                  "vMapDstAddrBase=[%p]", srcAddr, vMapSrcAddrBase,procTableEntry->iv_nodeSrcArcRegDataTOC
                  [nodeId].dataOffset, pDstAddrBase, vMapDstAddrBase);
-
-
-
 
         // Get list of functional processor chips, in MPIPL path we
         // don't expect any deconfiguration
@@ -478,6 +475,8 @@ errlHndl_t copyArchitectedRegs(void)
             // and used for reference below to calculate all other addresses
             uint64_t procSrcAddr = (reinterpret_cast<uint64_t>(vMapSrcAddrBase)+
                                     procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
+            //Valid data will be post metadata structure
+            procSrcAddr = procSrcAddr + sizeof(sbeArchHWDumpMetaData_t);
             TRACDCOMP(g_trac_dump, "Proc[%d] Data Source Address[%p]", procNum, procSrcAddr);
             TRACDCOMP(g_trac_dump, "VMM_ARCH_REG_DATA_PER_PROC_SIZE=0x%.8x",VMM_ARCH_REG_DATA_PER_PROC_SIZE);
             sbeArchRegDumpProcHdr_t *sbeProcHdr =

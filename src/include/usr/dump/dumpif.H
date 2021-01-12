@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -244,6 +244,59 @@ namespace DUMP
         uint64_t regNum:32;
         uint64_t regVal;
     } PACKED;
+
+     /**
+     *  @brief Defines the 128 bytes metadata structure used for capturing architected
+     *         and HW data as part of MPIPL.
+     *
+     *  @var metaDataVersion   : Metadata format version
+     *
+     *  @var reserved          : 7 Bytes reserved for alignment
+     *
+     *  @var archDataMemoryAddr : HB reserved Memory address for architected
+     *                            data(Source:HB)
+     *
+     *  @var archDataMemAllocSize : Total size allocated for Architected data
+     *                              collection(Source:HB)
+     *
+     *  @var hwDataMemoryAddr     : Memory address to capture Processor specific
+     *                              HW dump data(Source:PHYP/OPAL)
+     *
+     *  @var hwDataMemAllocSize   : Size allocated for Processor specific HW
+     *                              dump data(Source:PHYP/OPAL)
+     *
+     *  @var hwDataMemCapturedSize : Actual Captured HW dump size(Source:SBE)
+     *
+     *  @var reserved           : 80bytes reserved for making it 128byte
+     *                            structure
+     *
+     */
+    struct sbeArchHWDumpMetaData_t
+    {
+        uint8_t metaDataVersion;
+        uint8_t reserved1[7];
+        uint64_t archDataMemoryAddr;
+        uint64_t archDataMemAllocSize;
+        uint64_t hwDataMemoryAddr;
+        uint64_t hwDataMemAllocSize;
+        uint64_t hwDataMemCapturedSize;
+        uint64_t reserved2[10];
+
+        //Init all parameters to zero
+        void init()
+        {
+            metaDataVersion = 0x1;
+            memset(reserved1,0,7);
+            archDataMemoryAddr = 0x0;
+            archDataMemAllocSize = 0x0;
+            hwDataMemoryAddr = 0x0;
+            hwDataMemAllocSize = 0x0;
+            hwDataMemCapturedSize = 0x0;
+            memset(reserved2,0,80);
+        }
+
+    } PACKED;
+
 
     /**
     * @brief This function copies the architected register data content
