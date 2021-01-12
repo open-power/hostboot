@@ -322,6 +322,7 @@ fapi2::ReturnCode check_fw_status_busy(const fapi2::Target<fapi2::TARGET_TYPE_OC
     FAPI_TRY(get_fw_status(i_target, l_data));
 
     FAPI_TRY(status::get_status_code(i_target, l_data, l_status));
+    FAPI_TRY(capture_status(i_target, l_data, l_fw_status_data));
 
     // Post bootconfig1, we should see a busy status until p10_omi_train is kicked off (setting p10 to AUTO_TRAIN)
     // explorer will return busy status until then. if we have another status, then we may not have executed bootconfig1
