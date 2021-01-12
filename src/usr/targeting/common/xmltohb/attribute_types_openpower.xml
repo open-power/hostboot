@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -484,7 +484,7 @@
     </description>
     <simpleType>
       <uint8_t/>
-      <array>32</array>
+      <array>192</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -499,7 +499,7 @@
     </description>
     <simpleType>
       <uint32_t/>
-      <array>32</array>
+      <array>192</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -516,7 +516,7 @@
       <string>
         <sizeInclNull>64</sizeInclNull>
       </string>
-      <array>32</array>
+      <array>192</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -531,7 +531,7 @@
     </description>
     <simpleType>
       <uint8_t/>
-      <array>32</array>
+      <array>192</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -546,7 +546,7 @@
     </description>
     <simpleType>
       <uint8_t/>
-      <array>32</array>
+      <array>192</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -575,7 +575,7 @@
     </description>
     <simpleType>
       <uint8_t/>
-      <array>32</array>
+      <array>192</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -590,7 +590,7 @@
     </description>
     <simpleType>
       <uint8_t/>
-      <array>32</array>
+      <array>192</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -605,7 +605,7 @@
     </description>
     <simpleType>
       <uint8_t/>
-      <array>32</array>
+      <array>192</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>

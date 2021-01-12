@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -5371,6 +5371,29 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
             // The arrays are non-existent or empty
             continue;
         }
+
+        // These checks ensure we don't try to read too many elements from any
+        // of the arrays. We use assert() here because the values are
+        // essentially constants, and any MRW change that violates these
+        // constraints would crash on every IPL, so the changes couldn't pass
+        // testing.
+
+        assert(l_arrayLength < std::size(TARGETING::ATTR_HDAT_I2C_ADDR_type{}),
+               "HDAT_I2C_ELEMENTS specifies more elements than HDAT_I2C_ADDR contains");
+        assert(l_arrayLength < std::size(TARGETING::ATTR_HDAT_I2C_BUS_FREQ_type{}),
+               "HDAT_I2C_ELEMENTS specifies more elements than HDAT_I2C_BUS_FREQ contains");
+        assert(l_arrayLength < std::size(TARGETING::ATTR_HDAT_I2C_DEVICE_LABEL_type{}),
+               "HDAT_I2C_ELEMENTS specifies more elements than HDAT_I2C_DEVICE_LABEL contains");
+        assert(l_arrayLength < std::size(TARGETING::ATTR_HDAT_I2C_DEVICE_PURPOSE_type{}),
+               "HDAT_I2C_ELEMENTS specifies more elements than HDAT_I2C_DEVICE_PURPOSE contains");
+        assert(l_arrayLength < std::size(TARGETING::ATTR_HDAT_I2C_DEVICE_TYPE_type{}),
+               "HDAT_I2C_ELEMENTS specifies more elements than HDAT_I2C_DEVICE_TYPE contains");
+        assert(l_arrayLength < std::size(TARGETING::ATTR_HDAT_I2C_ENGINE_type{}),
+               "HDAT_I2C_ELEMENTS specifies more elements than HDAT_I2C_ENGINE contains");
+        assert(l_arrayLength < std::size(TARGETING::ATTR_HDAT_I2C_MASTER_PORT_type{}),
+               "HDAT_I2C_ELEMENTS specifies more elements than HDAT_I2C_MASTER_PORT contains");
+        assert(l_arrayLength < std::size(TARGETING::ATTR_HDAT_I2C_SLAVE_PORT_type{}),
+               "HDAT_I2C_ELEMENTS specifies more elements than HDAT_I2C_SLAVE_PORT contains");
 
         // Assume all required attributes are present from this point
         TARGETING::ATTR_HDAT_I2C_ENGINE_type l_i2cEngine = {0};

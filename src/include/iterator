@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,7 +109,7 @@ typename iterator_traits<InputIterator>::difference_type
  *  arrays because those are a GNU extension and technically illegal in C++.
  */
 template <typename T, size_t Size>
-constexpr size_t size(T(&array)[Size])
+constexpr size_t size(const T(&array)[Size])
 {
     return Size;
 }
