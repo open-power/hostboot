@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2020
+# Contributors Listed Below - COPYRIGHT 2012,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -59,7 +59,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/cache/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/corecache/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/

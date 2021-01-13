@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -62,7 +62,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/io/
-prd_incpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/cache/
+prd_incpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/corecache/
 prd_incpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 prd_incpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 prd_incpath += ${ROOTPATH}/src/import/chips/p10/procedures/utils/stopreg/
@@ -218,15 +218,14 @@ prd_obj_no_sim += exp_phy_utils.o
 ################################################################################
 
 ifeq (${HOSTBOOT_RUNTIME},1)
-#TODO RTC 256733
-#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/cache/
-#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
+prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/corecache/
+prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
-#prd_obj_no_sim += p9_l2err_linedelete.o
-#prd_obj_no_sim += p9_l2err_extract.o
-#prd_obj_no_sim += p9_l3err_linedelete.o
-#prd_obj_no_sim += p9_l3err_extract.o
-#prd_obj_no_sim += p9_l2_flush.o
+prd_obj_no_sim += p10_l2err_linedelete.o
+prd_obj_no_sim += p10_l2err_extract.o
+prd_obj_no_sim += p10_l3err_linedelete.o
+prd_obj_no_sim += p10_l3err_extract.o
+prd_obj_no_sim += p10_l2_flush.o
 prd_obj_no_sim += p10_pm_callout.o
 
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/

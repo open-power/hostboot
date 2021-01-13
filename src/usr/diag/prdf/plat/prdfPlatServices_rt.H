@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,10 +26,8 @@
 #ifndef __prdfPlatServices_rt_H
 #define __prdfPlatServices_rt_H
 
-/* TODO RTC 256733
-#include <p9_l3err_extract.H>
-#include <p9_l2err_extract.H>
-*/
+#include <p10_l3err_extract.H>
+#include <p10_l2err_extract.H>
 #include <p10_pm_callout.H>
 #include <prdfMemAddress.H>
 
@@ -105,50 +103,43 @@ uint32_t resumeBgScrub( ExtensibleChip * i_chip,
 
 /**
  * @brief Extracts address of an error from L3 Trace arrays
- * @param i_exTgt EX target
- * @param o_errorAddr struct containing address of the CE
- * @return non-SUCCESS for failure, SUCCESS otherwise
- */
-/* TODO RTC 256733
-int32_t extractL3Err( TARGETING::TargetHandle_t i_exTgt,
-                      p9_l3err_extract_err_data &o_errorAddr);
-*/
-
-/**
- * @brief Calls HWP to execute a line delete. Saves Line delete command in
-          HCODE image.
- * @param i_exTgt EX target
- * @param i_errorAddr struct containing address of the CE
- * @return non-SUCCESS for failure, SUCCESS otherwise
- */
-/* TODO RTC 256733
-int32_t l3LineDelete(TARGETING::TargetHandle_t i_exTgt,
-                     const p9_l3err_extract_err_data& i_l3_err_data);
-*/
-
-/**
- * @brief Extracts address of an error from L2 Trace arrays
- * @param i_exTgt EX target
+ * @param i_coreTgt CORE target
  * @param i_ce Type of error we're looking for: CE or UE
  * @param o_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
-/* TODO RTC 256733
-int32_t extractL2Err( TARGETING::TargetHandle_t i_exTgt, bool i_ce,
-                      p9_l2err_extract_err_data &o_errorAddr);
-*/
+int32_t extractL3Err( TARGETING::TargetHandle_t i_coreTgt, bool i_ce,
+                      p10_l3err_extract_err_data &o_errorAddr);
 
 /**
  * @brief Calls HWP to execute a line delete. Saves Line delete command in
           HCODE image.
- * @param i_exTgt EX target
+ * @param i_coreTgt CORE target
  * @param i_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
-/* TODO RTC 256733
-int32_t l2LineDelete(TARGETING::TargetHandle_t i_exTgt,
-                     const p9_l2err_extract_err_data& i_l2_err_data);
-*/
+int32_t l3LineDelete(TARGETING::TargetHandle_t i_coreTgt,
+                     const p10_l3err_extract_err_data& i_l3_err_data);
+
+/**
+ * @brief Extracts address of an error from L2 Trace arrays
+ * @param i_coreTgt CORE target
+ * @param i_ce Type of error we're looking for: CE or UE
+ * @param o_errorAddr struct containing address of the CE
+ * @return non-SUCCESS for failure, SUCCESS otherwise
+ */
+int32_t extractL2Err( TARGETING::TargetHandle_t i_coreTgt, bool i_ce,
+                      p10_l2err_extract_err_data &o_errorAddr);
+
+/**
+ * @brief Calls HWP to execute a line delete. Saves Line delete command in
+          HCODE image.
+ * @param i_coreTgt CORE target
+ * @param i_errorAddr struct containing address of the CE
+ * @return non-SUCCESS for failure, SUCCESS otherwise
+ */
+int32_t l2LineDelete(TARGETING::TargetHandle_t i_coreTgt,
+                     const p10_l2err_extract_err_data& i_l2_err_data);
 
 
 /**

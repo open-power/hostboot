@@ -42,15 +42,13 @@
 
 // Other includes
 #include <runtime/interface.h>
-/* TODO RTC 256733
-#include <p9_l3err_extract.H>
-#include <p9_l2err_extract.H>
-#include <p9_l3err_linedelete.H>
-#include <p9_l2err_linedelete.H>
-#include <p9_proc_gettracearray.H>
-*/
+#include <p10_l3err_extract.H>
+#include <p10_l2err_extract.H>
+#include <p10_l3err_linedelete.H>
+#include <p10_l2err_linedelete.H>
+#include <p10_proc_gettracearray.H>
 #include <pm_common_ext.H>
-//#include <p9_stop_api.H>
+#include <p10_stop_api.H>
 
 #include <rt_todintf.H>
 
@@ -225,25 +223,52 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //##############################################################################
 //##                       Line Delete Functions
 //##############################################################################
-/* TODO RTC 256733
-int32_t extractL3Err( TargetHandle_t i_exTgt,
-                      p9_l3err_extract_err_data &o_errorAddr)
+
+int32_t extractL3Err( TargetHandle_t i_coreTgt, bool i_ce,
+                      p10_l3err_extract_err_data &o_errorAddr)
 {
     int32_t o_rc = SUCCESS;
     errlHndl_t err = nullptr;
     bool errFound = false;
 
-    fapi2::Target<fapi2::TARGET_TYPE_EX> fapiTrgt (i_exTgt);
+    fapi2::variable_buffer ta_data( P10_TRACEARRAY_NUM_ROWS *
+                                    P10_TRACEARRAY_BITS_PER_ROW);
+    proc_gettracearray_args args;
+
+    args.trace_bus = PROC_TB_L3_0;
+    args.stop_pre_dump = true;
+    args.ignore_mux_setting = false;
+    args.collect_dump = true;
+    args.reset_post_dump = false;
+    args.restart_post_dump = false;
+
+    fapi2::Target<fapi2::TARGET_TYPE_CORE> fapiTrgt (i_coreTgt);
+
     FAPI_INVOKE_HWP( err,
-                     p9_l3err_extract,
-                     i_exTgt,
+                     p10_proc_gettracearray,
+                     fapiTrgt,
+                     args,
+                     ta_data);
+    if (nullptr != err)
+    {
+        PRDF_ERR( "[PlatServices::extractL2Err] huid: 0x%08x gettracearray "
+                  "failed", getHuid(i_coreTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        return FAIL;
+    }
+
+    FAPI_INVOKE_HWP( err,
+                     p10_l3err_extract,
+                     fapiTrgt,
+                     ta_data,
+                     i_ce ? L3ERR_CE : L3ERR_CE_UE,
                      o_errorAddr,
                      errFound );
 
     if (nullptr != err)
     {
         PRDF_ERR( "[PlatServices::extractL3Err] huid: 0x%08x failed",
-                  getHuid(i_exTgt));
+                  getHuid(i_coreTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
@@ -251,33 +276,32 @@ int32_t extractL3Err( TargetHandle_t i_exTgt,
     if ( !errFound )
     {
         PRDF_ERR( "[PlatServices::extractL3Err] huid: 0x%08x No Error Found",
-                  getHuid(i_exTgt));
+                  getHuid(i_coreTgt));
         o_rc = FAIL;
     }
 
     return o_rc;
 }
-*/
 
-/* TODO RTC 256733
-int32_t l3LineDelete(TargetHandle_t i_exTgt,
-                     const p9_l3err_extract_err_data& i_l3_err_data)
+
+int32_t l3LineDelete(TargetHandle_t i_coreTgt,
+                     const p10_l3err_extract_err_data& i_l3_err_data)
 {
     using namespace stopImageSection;
     errlHndl_t err = nullptr;
     const uint64_t retryCount = 100;
 
     // Apply Line Delete
-    fapi2::Target<fapi2::TARGET_TYPE_EX> fapiTrgt (i_exTgt);
+    fapi2::Target<fapi2::TARGET_TYPE_CORE> fapiTrgt (i_coreTgt);
     FAPI_INVOKE_HWP( err,
-                     p9_l3err_linedelete,
+                     p10_l3err_linedelete,
                      fapiTrgt,
                      i_l3_err_data,
                      retryCount);
     if(nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l3LineDelete] HUID: 0x%08x failed",
-                  getHuid(i_exTgt));
+                  getHuid(i_coreTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
@@ -287,33 +311,31 @@ int32_t l3LineDelete(TargetHandle_t i_exTgt,
     ldData.setBit(0); //Trigger
     ldData.setFieldJustify(1, 4, 0x2); // Purge Type (LD=0x2)
     ldData.setFieldJustify(12, 5, i_l3_err_data.member);
-    ldData.setFieldJustify(17, 12, i_l3_err_data.hashed_real_address_45_56);
+    ldData.setFieldJustify(17, 12, i_l3_err_data.real_address_46_57);
 
     uint64_t scomVal = (((uint64_t)ldData.getFieldJustify(0, 32)) << 32) |
                         ((uint64_t)ldData.getFieldJustify(32, 32));
 
-    err = RTPM::hcode_update(P9_STOP_SECTION_L3, P9_STOP_SCOM_APPEND,
-                             i_exTgt, 0x1001180E, scomVal);
+    err = RTPM::hcode_update(PROC_STOP_SECTION_L3, PROC_STOP_SCOM_APPEND,
+                             i_coreTgt, 0x1001180E, scomVal);
     if (nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l3LineDelete] HUID: 0x%08x hcode_update "
-                  "failed", getHuid(i_exTgt));
+                  "failed", getHuid(i_coreTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
 
     return SUCCESS;
 }
-*/
 
-/* TODO RTC 256733
-int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
-                      p9_l2err_extract_err_data &o_errorAddr)
+int32_t extractL2Err( TargetHandle_t i_coreTgt, bool i_ce,
+                      p10_l2err_extract_err_data &o_errorAddr)
 {
     errlHndl_t err = nullptr;
     bool errFound = false;
-    fapi2::variable_buffer ta_data( P9_TRACEARRAY_NUM_ROWS *
-                                    P9_TRACEARRAY_BITS_PER_ROW);
+    fapi2::variable_buffer ta_data( P10_TRACEARRAY_NUM_ROWS *
+                                    P10_TRACEARRAY_BITS_PER_ROW);
     proc_gettracearray_args args;
 
     args.trace_bus = PROC_TB_L20;
@@ -323,24 +345,24 @@ int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
     args.reset_post_dump = false;
     args.restart_post_dump = false;
 
-    fapi2::Target<fapi2::TARGET_TYPE_EX> fapiTrgt (i_exTgt);
+    fapi2::Target<fapi2::TARGET_TYPE_CORE> fapiTrgt (i_coreTgt);
 
     FAPI_INVOKE_HWP( err,
-                     p9_proc_gettracearray,
-                     i_exTgt,
+                     p10_proc_gettracearray,
+                     fapiTrgt,
                      args,
                      ta_data);
     if (nullptr != err)
     {
         PRDF_ERR( "[PlatServices::extractL2Err] huid: 0x%08x gettracearray "
-                  "failed", getHuid(i_exTgt));
+                  "failed", getHuid(i_coreTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
 
     FAPI_INVOKE_HWP( err,
-                     p9_l2err_extract,
-                     i_exTgt,
+                     p10_l2err_extract,
+                     fapiTrgt,
                      ta_data,
                      i_ce ? L2ERR_CE : L2ERR_CE_UE,
                      o_errorAddr,
@@ -349,7 +371,7 @@ int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
     if (nullptr != err)
     {
         PRDF_ERR( "[PlatServices::extractL2Err] huid: 0x%08x failed",
-                  getHuid(i_exTgt));
+                  getHuid(i_coreTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
@@ -357,33 +379,31 @@ int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
     if ( !errFound )
     {
         PRDF_ERR( "[PlatServices::extractL2Err] huid: 0x%08x No Error Found",
-                  getHuid(i_exTgt));
+                  getHuid(i_coreTgt));
         return FAIL;
     }
 
     return SUCCESS;
 }
-*/
 
-/* TODO RTC 256733
-int32_t l2LineDelete(TargetHandle_t i_exTgt,
-                     const p9_l2err_extract_err_data& i_l2_err_data)
+int32_t l2LineDelete(TargetHandle_t i_coreTgt,
+                     const p10_l2err_extract_err_data& i_l2_err_data)
 {
     using namespace stopImageSection;
     errlHndl_t err = nullptr;
     const uint64_t retryCount = 100;
 
     // Apply Line Delete
-    fapi2::Target<fapi2::TARGET_TYPE_EX> fapiTrgt (i_exTgt);
+    fapi2::Target<fapi2::TARGET_TYPE_CORE> fapiTrgt (i_coreTgt);
     FAPI_INVOKE_HWP( err,
-                     p9_l2err_linedelete,
+                     p10_l2err_linedelete,
                      fapiTrgt,
                      i_l2_err_data,
                      retryCount);
     if(nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l2LineDelete] HUID: 0x%08x failed",
-                  getHuid(i_exTgt));
+                  getHuid(i_coreTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
@@ -393,26 +413,25 @@ int32_t l2LineDelete(TargetHandle_t i_exTgt,
     ldData.setBit(0); //Trigger
     ldData.setFieldJustify(1, 4, 0x2); // Purge Type (LD=0x2)
     ldData.setFieldJustify(17, 3, i_l2_err_data.member);
-    ldData.setFieldJustify(20, 8, i_l2_err_data.address);
+    ldData.setFieldJustify(20, 8, i_l2_err_data.real_address_47_56);
     if (i_l2_err_data.bank)
         ldData.setBit(28);
 
     uint64_t scomVal = (((uint64_t)ldData.getFieldJustify(0, 32)) << 32) |
                         ((uint64_t)ldData.getFieldJustify(32, 32));
 
-    err = RTPM::hcode_update(P9_STOP_SECTION_L2, P9_STOP_SCOM_APPEND,
-                             i_exTgt, 0x1001080E, scomVal);
+    err = RTPM::hcode_update(PROC_STOP_SECTION_L2, PROC_STOP_SCOM_APPEND,
+                             i_coreTgt, 0x1001080E, scomVal);
     if (nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l2LineDelete] HUID: 0x%08x hcode_update "
-                  "failed", getHuid(i_exTgt));
+                  "failed", getHuid(i_coreTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         return FAIL;
     }
 
     return SUCCESS;
 }
-*/
 
 int32_t pmCallout( TargetHandle_t i_tgt,
                    RasAction& o_ra,
