@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #include <prdfPluginDef.H>
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
+#include <prdfP10CoreDataBundle.H>
 #include <prdfPluginMap.H>
 #include <prdfErrlUtil.H>
 #ifdef __HOSTBOOT_RUNTIME
@@ -42,6 +43,19 @@ using namespace PlatServices;
 
 namespace p10_core
 {
+
+/**
+ * @brief  Plugin that initializes the Core data bundle.
+ * @param  i_coreChip A core chip.
+ * @return SUCCESS
+ */
+int32_t Initialize( ExtensibleChip * i_coreChip )
+{
+    i_coreChip->getDataBundle() = new P10CoreDataBundle( i_coreChip );
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( p10_core, Initialize );
+
 #ifdef __HOSTBOOT_RUNTIME
 void maskIfCoreCs( ExtensibleChip * i_chip )
 {

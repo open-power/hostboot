@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9ExDataBundle.H $       */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10CoreDataBundle.H $   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,11 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef _PRDFP9EXDATABUNDLE_H
-#define _PRDFP9EXDATABUNDLE_H
+#ifndef _PRDFP10COREDATABUNDLE_H
+#define _PRDFP10COREDATABUNDLE_H
 
-/** @file  prdfP9ExDataBundle.H
- *  @brief Contains the data bundle for a P9 Ex object.
+/** @file  prdfP10CoreDataBundle.H
+ *  @brief Contains the data bundle for a P10 Core object.
  */
 
 #include <iipSystem.h>
@@ -41,19 +41,19 @@ namespace PRDF
 {
 
 /**
- * @brief The P9 EX data bundle.
+ * @brief The P10 Core data bundle.
  */
-class P9ExDataBundle : public DataBundle
+class P10CoreDataBundle : public DataBundle
 {
   public: // functions
 
     /**
      * @brief Constructor.
-     * @param i_exChip The ex chip.
+     * @param i_coreChip The core chip.
      */
-    explicit P9ExDataBundle( ExtensibleChip * i_exChip ) :
+    explicit P10CoreDataBundle( ExtensibleChip * i_coreChip ) :
         iv_L2LDCount(0), iv_L3LDCount(0), iv_prevMember(0xFFFF),
-        iv_exChip(i_exChip)
+        iv_coreChip(i_coreChip)
     {
         // Set up thresholds for line deletes.
         iv_L2CETable = new LineDelete::PrdfCacheCETable(
@@ -67,7 +67,7 @@ class P9ExDataBundle : public DataBundle
     /**
      * @brief Destructor.
      */
-    ~P9ExDataBundle()
+    ~P10CoreDataBundle()
     {
         delete iv_L2CETable;
         delete iv_L3CETable;
@@ -85,23 +85,23 @@ class P9ExDataBundle : public DataBundle
     Timer    iv_blfTimeout;
 
   private:
-    ExtensibleChip * iv_exChip;  ///< This ex chip
+    ExtensibleChip * iv_coreChip;  ///< This core chip
 
-    P9ExDataBundle( const P9ExDataBundle & );
-    const P9ExDataBundle & operator=( const P9ExDataBundle & );
+    P10CoreDataBundle( const P10CoreDataBundle & );
+    const P10CoreDataBundle & operator=( const P10CoreDataBundle & );
 
 };
 
 /**
- * @brief  Wrapper function for the P9ExDataBundle.
- * @param  i_exChip The ex chip.
- * @return This ex's data bundle.
+ * @brief  Wrapper function for the P10CoreDataBundle.
+ * @param  i_coreChip The core chip.
+ * @return This core's data bundle.
  */
-inline P9ExDataBundle * getExDataBundle( ExtensibleChip * i_exChip )
+inline P10CoreDataBundle * getCoreDataBundle( ExtensibleChip * i_coreChip )
 {
-    return static_cast<P9ExDataBundle *>(i_exChip->getDataBundle());
+    return static_cast<P10CoreDataBundle *>(i_coreChip->getDataBundle());
 }
 
 } // end namespace PRDF
 
-#endif /* _PRDFP9EXDATABUNDLE_H */
+#endif /* _PRDFP10COREDATABUNDLE_H */
