@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -244,10 +244,14 @@ class TraceArrayFinder
                             debug_scom_base = TA_EQ_DEBUG_BASE_SCOM;
 
                             // L3 / NCU / CLKADJ need an offset based on which one is requested.
+                            // Skip checking for reduceType because it has already been run on this
+                            // target (before the TraceArrayFinder was called)
                             if (i_trace_bus >= _PROC_TB_LAST_CORE_TARGET && i_trace_bus < _PROC_TB_LAST_CORE_EQ_TARGET)
                             {
                                 trace_scom_base += get_eq_scom_offset(i_target);
-                                i_target = i_target.getParent<fapi2::TARGET_TYPE_EQ>();
+                                fapi2::Target<fapi2::TARGET_TYPE_CORE> l_temp_target;
+                                i_target.reduceType<fapi2::TARGET_TYPE_CORE>(l_temp_target);
+                                i_target = l_temp_target.getParent<fapi2::TARGET_TYPE_EQ>();
                             }
                         }
                         else
@@ -385,20 +389,36 @@ fapi2::ReturnCode p10_sbe_tracearray(
 
     fapi2::Target < P10_SBE_TRACEARRAY_TARGET_TYPES > l_trctrl_target = i_target;
     fapi2::Target < P10_SBE_TRACEARRAY_TARGET_TYPES > l_dbg_target;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
-    if (i_args.trace_bus > _PROC_TB_LAST_IOHS_TARGET)
+    // Because we have a composite target type at this point
+    // we need to do some figuring before we can "legally" call
+    // getParent (requires/should get a non-composite type)
+    //
+    // Also, if we get handed an out of boumds trace bus for some reason we probably
+    // shouldn't try any hokie-ness on it
+    if (i_args.trace_bus < _PROC_TB_LAST_IOHS_TARGET || i_args.trace_bus > PROC_TB_QME1)
     {
-        l_dbg_target = l_trctrl_target.getParent<fapi2::TARGET_TYPE_PERV>();
+        l_dbg_target = l_trctrl_target.get();
+    }
+    else if (i_args.trace_bus < _PROC_TB_LAST_CORE_EQ_TARGET)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_CORE> l_temp_target;
+        l_rc = l_trctrl_target.reduceType<fapi2::TARGET_TYPE_CORE>(l_temp_target);
+        l_dbg_target = l_temp_target.getParent<fapi2::TARGET_TYPE_PERV>();
     }
     else
     {
-        l_dbg_target = l_trctrl_target.get();
+        fapi2::Target<fapi2::TARGET_TYPE_EQ> l_temp_target;
+        l_rc = l_trctrl_target.reduceType<fapi2::TARGET_TYPE_EQ>(l_temp_target);
+        l_dbg_target = l_temp_target.getParent<fapi2::TARGET_TYPE_PERV>();
     }
 
     TraceArrayFinder l_ta_finder(i_args.trace_bus, l_trctrl_target);
     FAPI_DBG("Assigning targets");
     fapi2::TargetType arg_type = l_trctrl_target.getType();
     fapi2::TargetType ta_type = p10_sbe_tracearray_target_type(i_args.trace_bus);
+
 
     FAPI_DBG("Assignment of trace control and trace base");
 
@@ -410,6 +430,12 @@ fapi2::ReturnCode p10_sbe_tracearray(
 
 
     FAPI_DBG("Bus Checking");
+    FAPI_ASSERT(l_rc != fapi2::FAPI2_RC_INVALID_PARAMETER,
+                fapi2::PROC_GETTRACEARRAY_INVALID_TARGET()
+                .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
+                "Specified trace bus could not be converted to required target type 0x%X, the supplied"
+                " target is of type 0x%X", ta_type, arg_type);
+
     FAPI_ASSERT(l_ta_finder.valid, fapi2::PROC_GETTRACEARRAY_INVALID_BUS()
                 .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
                 "Invalid trace bus specified: 0x%X", i_args.trace_bus);
@@ -487,9 +513,9 @@ fapi2::ReturnCode p10_sbe_tracearray(
     if (i_args.collect_dump)
     {
         /* Run the do_dump subroutine, turn the TRACE_RUNNING return code into FFDC */
-        fapi2::ReturnCode l_rc = p10_sbe_tracearray_do_dump(l_trctrl_target,
-                                 TRACE_SCOM_BASE,
-                                 i_num_rows, o_ta_data);
+        l_rc = p10_sbe_tracearray_do_dump(l_trctrl_target,
+                                          TRACE_SCOM_BASE,
+                                          i_num_rows, o_ta_data);
         FAPI_ASSERT(l_rc != fapi2::ReturnCode(fapi2::RC_PROC_GETTRACEARRAY_TRACE_RUNNING),
                     fapi2::PROC_GETTRACEARRAY_TRACE_RUNNING()
                     .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
