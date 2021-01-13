@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,7 @@ MODULE = testeeprom
 
 TESTS += eepromddtest.H
 TESTS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING), eecachetest.H, )
+TESTS += eepromUtilstest.H
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
