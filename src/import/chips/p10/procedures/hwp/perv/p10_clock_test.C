@@ -38,6 +38,7 @@
 #include "p10_scom_perv_d.H"
 #include "p10_scom_perv_f.H"
 #include "p10_scom_perv_7.H"
+#include "p10_clock_test_cmn.H"
 
 enum P10_CLOCK_TEST_Private_Constants
 {
@@ -48,6 +49,7 @@ enum P10_CLOCK_TEST_Private_Constants
 
 static fapi2::ReturnCode p10_clock_test_latches(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const uint8_t i_cp_refclock_select,
     bool set_rcs_clock_test_in);
 
 fapi2::ReturnCode p10_clock_test(const
@@ -62,10 +64,12 @@ fapi2::ReturnCode p10_clock_test(const
 
     fapi2::ATTR_CHIP_EC_FEATURE_HW543822_Type l_hw543822;
     fapi2::ATTR_HW543822_WAR_MODE_Type l_hw543822_war_mode;
+    fapi2::ATTR_CP_REFCLOCK_SELECT_Type l_cp_refclck_select;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     FAPI_INF("p10_clock_test: Entering ...");
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543822, i_target_chip, l_hw543822));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HW543822_WAR_MODE, FAPI_SYSTEM, l_hw543822_war_mode));
 
@@ -97,11 +101,11 @@ fapi2::ReturnCode p10_clock_test(const
 
     for(int i = 0; i < POLL_COUNT; i++)
     {
-        FAPI_DBG("Set input valuse to clock test latches - RCS_CLOCK_TEST_IN = 1");
-        FAPI_TRY(p10_clock_test_latches(i_target_chip, true));
+        FAPI_DBG("Set input value to clock test latches - RCS_CLOCK_TEST_IN = 1");
+        FAPI_TRY(p10_clock_test_latches(i_target_chip, l_cp_refclck_select, true));
 
-        FAPI_DBG("Set input valuse to clock test latches - RCS_CLOCK_TEST_IN = 0");
-        FAPI_TRY(p10_clock_test_latches(i_target_chip, false));
+        FAPI_DBG("Set input value to clock test latches - RCS_CLOCK_TEST_IN = 0");
+        FAPI_TRY(p10_clock_test_latches(i_target_chip, l_cp_refclck_select, false));
     }
 
     if ((l_hw543822 != 0) &&
@@ -124,69 +128,25 @@ fapi_try_exit:
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 static fapi2::ReturnCode p10_clock_test_latches(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-    bool set_rcs_clock_test_in)
+    const uint8_t i_cp_refclock_select,
+    const bool set_rcs_clock_test_in)
 {
     using namespace scomt;
     using namespace scomt::perv;
 
     fapi2::buffer<uint32_t> l_data32;
-    uint8_t l_cp_refclck_select;
-    bool check_clockA;
-    bool check_clockB;
-
-    FAPI_INF("p10_clock_test_latches: Entering ...");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select),
-             "Error from FAPI_ATTR_GET (ATTR_CP_REFCLOCK_SELECT)");
 
     l_data32.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_CLK_TEST_IN_DC>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
-                                    set_rcs_clock_test_in ? FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FSI : FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI,
+                                    set_rcs_clock_test_in ? FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FSI :
+                                    FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI,
                                     l_data32));
 
     fapi2::delay(HW_NS_DELAY, SIM_CYCLE_DELAY);
 
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SNS1LTH_FSI,
-                                    l_data32));
-
-    check_clockA = set_rcs_clock_test_in ? (l_data32.getBit<4>() == 1) : (l_data32.getBit<4>() == 0) ;
-    check_clockB = set_rcs_clock_test_in ? (l_data32.getBit<5>() == 1) : (l_data32.getBit<5>() == 0) ;
-
-    if (! (l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1))
-    {
-        // when clock_pos set directly, its not working.
-        // So assigning this to variable as a work around.
-        // Need to clean this, after finding the root cause of issue.
-        uint8_t l_clock_pos_0 = fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0;
-        FAPI_ASSERT(check_clockA,
-                    fapi2::CLOCK_TEST_OUT_RCS_ERR()
-                    .set_MASTER_CHIP(i_target_chip)
-                    .set_READ_SNS1LTH(l_data32)
-                    .set_ATTR_CP_REFCLOCK_SELECT_VALUE(l_cp_refclck_select)
-                    .set_RCS_CLOCK_TEST_IN(set_rcs_clock_test_in)
-                    .set_CLOCK_POS(l_clock_pos_0),
-                    "Clock A is bad");
-    }
-
-    if (! (l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0))
-    {
-        // when clock_pos set directly, its not working.
-        // So assigning this to variable as a work around.
-        // Need to clean this, after finding the root cause of issue.
-        uint8_t l_clock_pos_1 = fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1;
-        FAPI_ASSERT(check_clockB,
-                    fapi2::CLOCK_TEST_OUT_RCS_ERR()
-                    .set_MASTER_CHIP(i_target_chip)
-                    .set_READ_SNS1LTH(l_data32)
-                    .set_ATTR_CP_REFCLOCK_SELECT_VALUE(l_cp_refclck_select)
-                    .set_RCS_CLOCK_TEST_IN(set_rcs_clock_test_in)
-                    .set_CLOCK_POS(l_clock_pos_1),
-                    "Clock B is bad");
-    }
-
-    FAPI_INF("p10_clock_test_latches: Exiting ...");
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_SNS1LTH_FSI, l_data32));
+    FAPI_TRY(p10_clock_test_check_error(i_target_chip, i_cp_refclock_select, set_rcs_clock_test_in, l_data32));
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }

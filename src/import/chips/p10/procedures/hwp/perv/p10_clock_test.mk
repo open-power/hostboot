@@ -23,4 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_clock_test
+OBJS+=p10_clock_test_cmn.o
 $(call BUILD_PROCEDURE)
