@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -809,6 +809,7 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
         fapi2::buffer<uint32_t> l_scratch6_reg = 0;
         fapi2::ATTR_FILTER_PLL_BUCKET_Type l_attr_filter_pll_bucket;
         fapi2::ATTR_PCI_PLL_BUCKET_Type l_attr_pci_pll_bucket;
+        fapi2::ATTR_CP_REFCLOCK_SELECT_Type l_attr_cp_refclock_select;
         fapi2::ATTR_SKEWADJ_BYPASS_Type l_attr_skewadj_bypass;
         fapi2::ATTR_DCADJ_BYPASS_Type l_attr_dcadj_bypass;
         fapi2::ATTR_CP_PLLTODFLT_BYPASS_Type l_attr_cp_plltodflt_bypass;
@@ -835,6 +836,12 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
         FAPI_TRY(p10_sbe_scratch_regs_get_pci_pll_bucket(i_target_chip, l_attr_pci_pll_bucket),
                  "Error from p10_sbe_scratch_regs_get_pci_pll_bucket");
         l_scratch6_reg.insertFromRight<ATTR_PCI_PLL_BUCKET_STARTBIT, ATTR_PCI_PLL_BUCKET_LENGTH>(l_attr_pci_pll_bucket);
+
+        FAPI_DBG("Setting up refclock select value");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_attr_cp_refclock_select),
+                 "Error from FAPI_ATTR_GET (ATTR_CP_REFCLOCK_SELECT)");
+        l_scratch6_reg.insertFromRight<ATTR_CP_REFCLOCK_SELECT_STARTBIT, ATTR_CP_REFCLOCK_SELECT_LENGTH>
+        (l_attr_cp_refclock_select);
 
         FAPI_DBG("Reading skew adjust/duty cycle adjust bypass attributes");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SKEWADJ_BYPASS, i_target_chip, l_attr_skewadj_bypass),

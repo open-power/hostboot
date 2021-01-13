@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -76,9 +76,14 @@
 <attribute>
   <id>ATTR_CP_REFCLOCK_SELECT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Osc refclock configurations</description>
+  <description>
+    Osc refclock configurations:
+    OSCx - Set up single oscillator
+    BOTH_OSCx - Set up for redundant oscillators, OSCx as primary, both must be good
+    BOTH_OSCx_NORED - Same but without redundancy: Set up for redundant oscillators, OSCx as primary, secondary osc may be bad
+  </description>
   <valueType>uint8</valueType>
-  <enum>OSC0 = 0x0, OSC1 = 0x1, BOTH_OSC0 = 0x2, BOTH_OSC1 = 0x3</enum>
+  <enum>OSC0 = 0x0, OSC1 = 0x1, BOTH_OSC0 = 0x2, BOTH_OSC1 = 0x3, BOTH_OSC0_NORED = 0x4, BOTH_OSC1_NORED = 0x5</enum>
   <initToZero/>
   <writeable/>
   <persistRuntime/>

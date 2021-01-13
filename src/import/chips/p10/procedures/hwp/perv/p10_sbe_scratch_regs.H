@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,6 +138,8 @@ enum p10_sbe_scratch_regs
     ATTR_PROC_FABRIC_BROADCAST_MODE_STARTBIT        = 22,
     ATTR_PROC_FABRIC_BROADCAST_MODE_LENGTH          = 2,
     ATTR_PROC_SBE_MASTER_CHIP_BIT                   = 24,
+    ATTR_CP_REFCLOCK_SELECT_STARTBIT                = 25,
+    ATTR_CP_REFCLOCK_SELECT_LENGTH                  = 3,
     ATTR_PROC_FABRIC_TOPOLOGY_ID_STARTBIT           = 28,
     ATTR_PROC_FABRIC_TOPOLOGY_ID_LENGTH             = 4,
 
