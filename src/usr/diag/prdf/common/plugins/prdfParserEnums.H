@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -244,21 +244,16 @@ namespace LD_CR_FFDC
 
         uint32_t L2errMember    : 3;
         uint32_t L2errDW        : 3;
-        uint32_t L2errMacro     : 2;
         uint32_t L2errBank      : 1;
-        uint32_t L2errOWSelect  : 1;
-        uint32_t L2errBitLine   : 4;
-        uint32_t L2errIsTopSA   : 1;
-        uint32_t L2errIsLeftSA  : 1;
+        uint32_t L2errBack2to1  : 1;
+        uint32_t L2errSynCol    : 8;
         uint32_t L2errAddress   :10;
         uint32_t L2reserved2    : 6;
 
         L2LdCrFfdc():
-           L2LDcnt(0), L2LDMaxAllowed(0),
-           L2CRMaxAllowed(0), L2CRPresent(0), L2reserved1(0),
-           L2errMember(0), L2errDW(0), L2errMacro(0),
-           L2errBank(0), L2errOWSelect(0), L2errBitLine(0),
-           L2errIsTopSA(0), L2errIsLeftSA(0), L2errAddress(0), L2reserved2(0)
+           L2LDcnt(0), L2LDMaxAllowed(0), L2CRMaxAllowed(0), L2CRPresent(0),
+           L2reserved1(0), L2errMember(0), L2errDW(0), L2errBank(0),
+           L2errBack2to1(0), L2errSynCol(0), L2errAddress(0), L2reserved2(0)
         {}
 #else
         uint32_t L2reserved1    :16;
@@ -269,21 +264,16 @@ namespace LD_CR_FFDC
 
         uint32_t L2reserved2    : 6;
         uint32_t L2errAddress   :10;
-        uint32_t L2errIsLeftSA  : 1;
-        uint32_t L2errIsTopSA   : 1;
-        uint32_t L2errBitLine   : 4;
-        uint32_t L2errOWSelect  : 1;
+        uint32_t L2errSynCol    : 8;
+        uint32_t L2errBack2to1  : 1;
         uint32_t L2errBank      : 1;
-        uint32_t L2errMacro     : 2;
         uint32_t L2errDW        : 3;
         uint32_t L2errMember    : 3;
 
         L2LdCrFfdc():
-           L2reserved1(0), L2CRPresent(0), L2CRMaxAllowed(0),
-           L2LDMaxAllowed(0), L2LDcnt(0), L2reserved2(0),
-           L2errAddress(0), L2errIsLeftSA(0), L2errIsTopSA(0),
-           L2errBitLine(0), L2errOWSelect(0), L2errBank(0),
-           L2errMacro(0), L2errDW(0), L2errMember(0)
+           L2reserved1(0), L2CRPresent(0), L2CRMaxAllowed(0), L2LDMaxAllowed(0),
+           L2LDcnt(0), L2reserved2(0), L2errAddress(0), L2errSynCol(0),
+           L2errBack2to1(0), L2errBank(0), L2errDW(0), L2errMember(0)
         {}
 #endif
 
@@ -296,39 +286,40 @@ namespace LD_CR_FFDC
         uint32_t L3LDMaxAllowed    : 4;
         uint32_t L3CRMaxAllowed    : 4;
         uint32_t L3CRPresent       : 4;
-        uint32_t L3errBank         : 3;
         uint32_t L3errDataOut      : 8;
-        uint32_t L3reserved1       : 5;
+        uint32_t L3reserved1       : 8;
 
         uint32_t L3errMember       : 3;
         uint32_t L3errDW           : 3;
-        uint32_t L3errHshAddress   :12;
-        uint32_t L3errCacheAddress :14;
+        uint32_t L3errBank         : 1;
+        uint32_t L3errSynCol       : 8;
+        uint32_t L3errAddress      :12;
+        uint32_t L3reserved2       : 5;
 
         L3LdCrFfdc():
-           L3LDcnt(0), L3LDMaxAllowed(0), L3CRMaxAllowed(0),
-           L3CRPresent(0), L3errBank(0), L3errDataOut(0),
-           L3reserved1(0), L3errMember(0), L3errDW(0),
-           L3errHshAddress(0), L3errCacheAddress(0)
+           L3LDcnt(0), L3LDMaxAllowed(0), L3CRMaxAllowed(0), L3CRPresent(0),
+           L3errDataOut(0), L3reserved1(0), L3errMember(0), L3errDW(0),
+           L3errBank(0), L3errSynCol(0), L3errAddress(0), L3reserved2(0)
         {}
 #else
-        uint32_t L3reserved1       : 5;
+        uint32_t L3reserved1       : 8;
         uint32_t L3errDataOut      : 8;
-        uint32_t L3errBank         : 3;
         uint32_t L3CRPresent       : 4;
         uint32_t L3CRMaxAllowed    : 4;
         uint32_t L3LDMaxAllowed    : 4;
         uint32_t L3LDcnt           : 4;
 
-        uint32_t L3errCacheAddress :14;
-        uint32_t L3errHshAddress   :12;
+        uint32_t L3reserved2       : 5;
+        uint32_t L3errAddress      :12;
+        uint32_t L3errSynCol       : 8;
+        uint32_t L3errBank         : 1;
         uint32_t L3errDW           : 3;
         uint32_t L3errMember       : 3;
 
         L3LdCrFfdc():
-           L3reserved1(0), L3errDataOut(0), L3errBank(0), L3CRPresent(0),
-           L3CRMaxAllowed(0), L3LDMaxAllowed(0), L3LDcnt(0),
-           L3errCacheAddress(0), L3errHshAddress(0), L3errDW(0), L3errMember(0)
+           L3reserved1(0), L3errDataOut(0), L3CRPresent(0), L3CRMaxAllowed(0),
+           L3LDMaxAllowed(0), L3LDcnt(0), L3reserved2(0), L3errAddress(0),
+           L3errSynCol(0), L3errBank(0), L3errDW(0), L3errMember(0)
         {}
 #endif
 

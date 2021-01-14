@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -251,18 +251,12 @@ bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
         i_parser.PrintNumber( "   L2 Error Member", "%d",
                                                ldcrffdc.L2errMember );
         i_parser.PrintNumber( "   L2 Error DW", "%d", ldcrffdc.L2errDW );
-        i_parser.PrintNumber( "   L2 Error Macro", "%d",
-                                               ldcrffdc.L2errMacro );
         i_parser.PrintNumber( "   L2 Error Bank", "%d",
                                                ldcrffdc.L2errBank );
-        i_parser.PrintNumber( "   L2 Error OW Select", "%d",
-                                               ldcrffdc.L2errOWSelect );
-        i_parser.PrintNumber( "   L2 Error Bit Line", "%d",
-                                               ldcrffdc.L2errBitLine );
-        i_parser.PrintBool(   "   L2 Error Is Top SA",
-                                               0 != ldcrffdc.L2errIsTopSA );
-        i_parser.PrintBool(   "   L2 Error Is Left SA",
-                                               0 != ldcrffdc.L2errIsLeftSA );
+        i_parser.PrintBool(   "   L2 Error Back of 2to1 Next Cycle",
+                                               0 != ldcrffdc.L2errBack2to1 );
+        i_parser.PrintNumber( "   L2 Error Syndrome Col", "%d",
+                                               ldcrffdc.L2errSynCol );
         i_parser.PrintNumber( "   L2 Error Address", "%d",
                                                ldcrffdc.L2errAddress );
 
@@ -308,13 +302,10 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
                                                 ldcrffdc.L3errMember );
         i_parser.PrintNumber( "   L3 Error DW", "%d", ldcrffdc.L3errDW );
         i_parser.PrintNumber( "   L3 Error Bank", "%d", ldcrffdc.L3errBank );
-        i_parser.PrintNumber( "   L3 Error Data Out", "%d",
-                                                ldcrffdc.L3errDataOut );
-        i_parser.PrintNumber( "   L3 Error Hashed Address", "%d",
-                                                ldcrffdc.L3errHshAddress );
-        i_parser.PrintNumber( "   L3 Error Cache Address", "%d",
-                                                ldcrffdc.L3errCacheAddress );
-
+        i_parser.PrintNumber( "   L3 Error Syndrome Col", "%d",
+                                                ldcrffdc.L3errSynCol );
+        i_parser.PrintNumber( "   L3 Error Address", "%d",
+                                                ldcrffdc.L3errAddress );
     } while (0);
 
     if ( !o_rc && i_buffer )

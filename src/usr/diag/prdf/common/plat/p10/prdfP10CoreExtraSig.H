@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9ExExtraSig.H $         */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10CoreExtraSig.H $     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,20 +22,20 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __prdfP9ExExtraSig_H
-#define __prdfP9ExExtraSig_H
+#ifndef __prdfP10CoreExtraSig_H
+#define __prdfP10CoreExtraSig_H
 
 #include <prdrSignatures.H>
 
-PRDR_ERROR_SIGNATURE( P9EX_L2CE_LD_ISSUED, 0x0fff0000, "L2FIR[0]",
+PRDR_ERROR_SIGNATURE( P10CORE_L2CE_LD_ISSUED, 0x0fff0000, "EQ_L2_FIR[0]",
                       "L2 Cache Read CE, Line Delete Issued");
-PRDR_ERROR_SIGNATURE( P9EX_L2CE_LD_FAILURE, 0x0fff0001, "L2FIR[0]",
+PRDR_ERROR_SIGNATURE( P10CORE_L2CE_LD_FAILURE, 0x0fff0001, "EQ_L2_FIR[0]",
                       "L2 Cache Read CE, Line Delete Failed");
-PRDR_ERROR_SIGNATURE( P9EX_L3CE_LD_ISSUED, 0x0fff0005, "L3FIR[4]",
+PRDR_ERROR_SIGNATURE( P10CORE_L3CE_LD_ISSUED, 0x0fff0005, "EQ_L3_FIR[4]",
                       "L3 Cache Read CE, Line Delete Issued");
-PRDR_ERROR_SIGNATURE( P9EX_L3CE_LD_FAILURE, 0x0fff0006, "L3FIR[4]",
+PRDR_ERROR_SIGNATURE( P10CORE_L3CE_LD_FAILURE, 0x0fff0006, "EQ_L3_FIR[4]",
                       "L3 Cache Read CE, Line Delete Failed");
-PRDR_ERROR_SIGNATURE( P9EX_L3CE_MBF_FAIL, 0x0fff0007, "L3FIR[4]",
+PRDR_ERROR_SIGNATURE( P10CORE_L3CE_MBF_FAIL, 0x0fff0007, "EQ_L3_FIR[4]",
                       "L3 Cache Read CE, Multi-bitline failure");
-#endif // __prdfP9ExExtraSig_H
+#endif // __prdfP10CoreExtraSig_H
 

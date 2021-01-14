@@ -34,14 +34,14 @@ actionclass l3_cache_ce
 {
     calloutSelfMed;
     threshold( field(128 / day), mfg_file(ATTR_MNFG_TH_L3_CACHE_CES) );
-#    funccall("L3CE");
+    funccall("L3CE");
 };
 
 actionclass l3_cache_ue_UERE
 {
     SueSource;
     self_th_1;
-#    funccall("L3UE");
+    funccall("L3UE");
 };
 
 actionclass l3_dir_ce
@@ -54,14 +54,14 @@ actionclass l2_cache_ce
 {
     calloutSelfMed;
     threshold( field(128 / day), mfg_file(ATTR_MNFG_TH_L2_CACHE_CES) );
-#    funccall("L2CE");
+    funccall("L2CE");
 };
 
 actionclass l2_cache_ue_UERE
 {
     SueSource;
     self_th_1;
-#    funccall("L2UE");
+    funccall("L2UE");
 };
 
 actionclass l2_dir_ce
