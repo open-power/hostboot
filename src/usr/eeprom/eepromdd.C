@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -729,8 +729,36 @@ errlHndl_t eepromPerformOp(DeviceFW::OperationType i_opType,
 }
 
 #ifndef __HOSTBOOT_RUNTIME
+errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target,
+                                            errlHndl_t &io_triggerErrorLog )
+{
+    errlHndl_t errl = reloadMvpdEecacheFromNextSource(i_target);
 
-errlHndl_t reloadMvpdEecacheFromNextSource(TARGETING::Target* const i_target)
+    // if reloadMvpdEecacheFromNextSource is successful and io_triggerErrorLog
+    // is not a nullptr then commit io_triggerErrorLog
+    if ( (nullptr == errl)               &&
+         (nullptr != io_triggerErrorLog)   )
+    {
+        // If reloadMvpdEecacheFromNextSource is successful then commit the error,
+        // that precipitated the call to this API, as revovered.
+        io_triggerErrorLog->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+        TRACFCOMP( g_trac_eeprom, ERR_MRK"reloadMvpdEecacheFromNextSource: "
+                   "The error log that precipitated the reloading of the MVPD EECACHE "
+                   "for target 0x%.8X has module Id 0x%.2X and reason code 0x%.4X.",
+                   TARGETING::get_huid(i_target),
+                   io_triggerErrorLog->moduleId(),
+                   io_triggerErrorLog->reasonCode() );
+        io_triggerErrorLog->collectTrace(EEPROM_COMP_NAME);
+        ERRORLOG::errlCommit( io_triggerErrorLog, EEPROM_COMP_ID );
+        io_triggerErrorLog = nullptr;
+    }
+    // else do not commit nor modify original error
+
+    return errl;
+}
+
+
+errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target)
 {
     using namespace TARGETING;
     using namespace ERRORLOG;

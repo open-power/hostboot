@@ -2894,8 +2894,8 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
 
                     // If validation of record ECC Data fails,
                     // then move onto the next MVPD source and try again.
-                    l_mvpdSourceError = EEPROM::reloadMvpdEecacheFromNextSource(i_target);
-                    if (l_mvpdSourceError) // test with error
+                    l_mvpdSourceError = EEPROM::reloadMvpdEecacheFromNextSource(i_target, l_validationError);
+                    if (l_mvpdSourceError)
                     {
                         // Validation of the record ECC data failed AND getting the next MVPD
                         // EECACHE source failed as well. Commit the MVPD source error, keep
@@ -2905,18 +2905,6 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
                                    "reloadMvpdEecacheFromNextSource failed to get the next MVPD "
                                    "source for target 0x%.8X",  l_targetHuid );
                         errlCommit( l_mvpdSourceError, VPD_COMP_ID );
-                    }
-                    else
-                    {
-                        // Validation of the record ECC data failed, BUT getting the next MVPD
-                        // EECACHE source succeeded.  Commit the validation error and try again
-                        // with new EECACHE source.
-                        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllRecordEccData(): "
-                                   "failed to validate all the MVPD records' ECC data with "
-                                   "current EECACHE for target 0x%.8X.  Committing error log "
-                                   "associated with failure and will try validation on next "
-                                   "EECACHE source ",  l_targetHuid );
-                        errlCommit( l_validationError, VPD_COMP_ID );
                     }
                 #endif
 

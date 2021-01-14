@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,6 +167,22 @@ void cacheEepromAncillaryRoles();
 uint64_t getEepromHeaderUserData(const eepromRecordHeader& i_eepromRecordHeader);
 
 #ifndef __HOSTBOOT_RUNTIME
+
+/* @brief  A wrapper around the call to reloadMvpdEecacheFromNextSource with the
+ *         additional error log parameter.  See reloadMvpdEecacheFromNextSource
+ *         below for more details.
+ *
+ * @param[in] i_target  The target to operate on
+ * @param[in/out] io_triggerErrorLog  The error that precipitated the call to this API.
+ *                 * if reloadMvpdEecacheFromNextSource is successful - This error log
+ *                        will be committed and set to nullptr.
+ *                 * if reloadMvpdEecacheFromNextSource fails - This error log will
+ *                        *not* be committed nor modified and will be returned as is.
+ *
+ * @return errlHndl_t   Error if any, otherwise nullptr.
+ */
+errlHndl_t reloadMvpdEecacheFromNextSource(TARGETING::Target* i_target,
+                                           errlHndl_t &io_triggerErrorLog );
 
 /* @brief  Disable the current redundant MVPD source for the given target, and
  *         reload the VPD EECACHE entry from the next source. If there are no
