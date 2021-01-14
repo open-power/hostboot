@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -284,6 +284,18 @@ extern "C"
         uint32_t i_address,
         uint32_t i_length,
         uint8_t* i_buffer );
+
+///
+/// @brief  API to reset the SPI master and its internal sequencer.
+///
+/// @param[in] i_handle          Reference to SPI Control Handle
+///
+/// @return FAPI_RC_SUCCESS if the spi master reset completes successfully,
+///         else error code.
+///
+    fapi2::ReturnCode spi_master_reset(SpiControlHandle i_handle);
+
+
 
 } //extern "C"
 

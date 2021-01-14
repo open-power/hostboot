@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1409,5 +1409,43 @@ spi_write(SpiControlHandle& i_handle, uint32_t i_address,
                       i_handle.base_addr + SPIM_SEQREG, SPI_DEFAULT_SEQ) );
 
 fapi_try_exit:
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode spi_master_reset(SpiControlHandle i_handle)
+{
+    fapi2::buffer<uint64_t> buffer = 0;
+
+    // The pervasive spec says that to reset the SPI master and its internal sequencer we must
+    // write 0x5 followed by 0xA to the clock configuration register in the 24-27 bit field. The
+    // SPI master will then be reset unconditionally and any pending or running operation is
+    // discontinued.
+    //
+    // However, the configuration register values are not changed, the status register is not reset,
+    // and the SPI data registers are not reset. The reset also doesn't have any affect on attached
+    // slaves.
+
+    // Get the contents of the clock config register
+    FAPI_TRY(getScom(i_handle.target_chip, i_handle.base_addr + SPIM_CLOCKCONFIGREG, buffer));
+    FAPI_DBG("Clock Configuration Buffer Contents - Initial Read: 0x%.16X", buffer());
+
+    // Write 0x5 to reset control bit field
+    buffer.clearBit<24>().setBit<25>().clearBit<26>().setBit<27>();
+
+    // Write the first portion of the reset sequence to the register.
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_CLOCKCONFIGREG, buffer));
+
+    // Read back the contents of the register.
+    FAPI_TRY(getScom(i_handle.target_chip, i_handle.base_addr + SPIM_CLOCKCONFIGREG, buffer));
+    FAPI_DBG("Clock Configuration Buffer Contents - 0x5 written: 0x%.16X", buffer());
+
+    // Write 0xA to reset control bit field
+    buffer.setBit<24>().clearBit<25>().setBit<26>().clearBit<27>();
+
+    // Finish the reset request sequence by writing the final portion of the reset sequence.
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_CLOCKCONFIGREG, buffer));
+
+fapi_try_exit:
+    FAPI_INF("spi_master_reset: exiting...");
     return fapi2::current_err;
 }
