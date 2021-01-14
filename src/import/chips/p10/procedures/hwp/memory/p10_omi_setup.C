@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <p10_io_omi_prbs.H>
 
 ///
 /// @brief Setup OMI for P10
@@ -48,6 +49,7 @@
 fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target )
 {
     uint8_t l_sim = 0;
+    uint8_t l_is_apollo = 0;
 
     mss::display_git_commit_info("p10_omi_setup");
     FAPI_INF("%s Start p10_omi_setup", mss::c_str(i_target));
@@ -59,6 +61,17 @@ fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i
     {
         FAPI_INF("Sim, exiting p10_omi_setup %s", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+
+    // Terminate downstream PRBS23 pattern
+    if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+    {
+        for (const auto& l_omi_target : i_target.getChildren<fapi2::TARGET_TYPE_OMI>())
+        {
+            FAPI_TRY(p10_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMI>(l_omi_target), false));
+        }
     }
 
     FAPI_TRY(mss::omi::setup_mc_cmn_config(i_target));

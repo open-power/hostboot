@@ -178,12 +178,6 @@ extern "C"
             }
         }
 
-        // Terminate downstream PRBS23 pattern
-        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
-        {
-            FAPI_TRY(p10_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target), false));
-        }
-
         FAPI_TRY(mss::exp::workarounds::omi::gem_menterp(i_target, l_gem_menterp_workaround));
 
         // If no workaround (explorer), we can perform menterp reads/writes
