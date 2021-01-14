@@ -1593,6 +1593,14 @@
     <id>chip-tpm-cectpm</id>
     <parent>chip</parent>
     <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>SECURITY</default>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
       <default>CECTPM</default>
       <id>MODEL</id>
     </attribute>
