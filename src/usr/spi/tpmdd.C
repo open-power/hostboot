@@ -1218,6 +1218,8 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
         if (tpmModel == TPM_MODEL_75x)
         {
+            const auto force_tpm_not_present =
+                i_target->getAttr<TARGETING::ATTR_FORCE_TPM_NOT_PRESENT>();
             io_tpmInfo.model          = tpmModel;
             io_tpmInfo.sts            = TPM_REG_75x_STS;
             io_tpmInfo.burstCount     = TPM_REG_75x_BURSTCOUNT;
@@ -1226,6 +1228,11 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
             io_tpmInfo.rdFifo         = TPM_REG_75x_RD_FIFO;
             io_tpmInfo.vendorIdOffset = TPM_REG_75x_VENDOR_ID_OFFSET;
             io_tpmInfo.vendorId       = TPM_VENDORID_75x;
+            // Force bug the TPM to appear as not present
+            if (force_tpm_not_present)
+            {
+                io_tpmInfo.vendorId = 0xDEADBEEF;
+            }
         }
         else
         {

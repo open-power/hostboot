@@ -225,6 +225,26 @@
   </attribute>
 
   <attribute>
+    <id>FORCE_TPM_NOT_PRESENT</id>
+    <description>
+        Force a TPM to appear as not present for testing
+    </description>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>FRU_CCIN</id>
     <description>The ccin number for a particular FRU target</description>
     <simpleType>

@@ -175,6 +175,9 @@
   <targetTypeExtension>
     <id>chip-tpm-cectpm</id>
     <attribute>
+      <id>FORCE_TPM_NOT_PRESENT</id>
+    </attribute>
+    <attribute>
       <id>HB_TPM_INIT_ATTEMPTED</id>
     </attribute>
     <attribute>
