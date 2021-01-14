@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -418,6 +418,9 @@ enum fields : uint8_t
     EFUSE_POLARITY_SETTING      = 0x00,
 
     // 1's are inputs, 0's are outputs
+    CONFIGURATION_EFUSE_EN_0    = 7,
+    CONFIGURATION_EFUSE_EN_1    = 6,
+
     CONFIGURATION_IO_MAP        = 0xFC,
     CONFIGURATION_IO_MAP_OFF    = 0xFF,
 };

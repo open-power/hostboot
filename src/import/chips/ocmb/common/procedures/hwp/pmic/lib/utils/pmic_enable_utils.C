@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1076,6 +1076,15 @@ fapi2::ReturnCode enable_efuse(
                 mss::pmic::n_mode::N_MODE);
         }));
     }
+
+    // Since we had seen some issues in FW where some of the other bits in the CONFIGURATION
+    // register seemed to randomly flip, we will use our expected "efuses on" value as a mask
+    // to make sure the other bits in the register are set accordingly on. The bits are active low,
+    // so we can "or" them to make sure they stay high / off.
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+
+    l_reg_contents |= mss::gpio::fields::CONFIGURATION_IO_MAP;
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
 
 fapi_try_exit:
     return fapi2::current_err;

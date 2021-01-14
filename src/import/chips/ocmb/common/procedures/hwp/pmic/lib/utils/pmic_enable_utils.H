@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -947,7 +947,11 @@ fapi2::ReturnCode gpio_already_enabled(const fapi2::Target<fapi2::TARGET_TYPE_GE
 ///
 inline bool gpio_already_enabled_helper(const uint8_t i_config)
 {
-    return (i_config == mss::gpio::fields::CONFIGURATION_IO_MAP);
+    fapi2::buffer<uint8_t> l_config(i_config);
+
+    // The efuse is enabled when the bits are low, so when both are low, we are on.
+    return (!(l_config.getBit<mss::gpio::fields::CONFIGURATION_EFUSE_EN_0>()) &&
+            !(l_config.getBit<mss::gpio::fields::CONFIGURATION_EFUSE_EN_1>()));
 }
 
 ///
