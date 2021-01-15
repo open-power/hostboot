@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include <errl/errlmanager.H>
 #include <initservice/taskargs.H>
 #include <cxxtest/TestSuite.H>
+#include <console/consoleif.H>
 
 namespace CxxTest
 {
@@ -115,13 +116,16 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         TS_FAIL("Error logs committed previously during IPL.");
     }
 
+    TRACFCOMP( g_trac_cxxtest,
+               "Now executing Serial Test Cases!");
+
     for(std::vector<const char *>::const_iterator i = serial_module_list.begin();
         i != serial_module_list.end(); ++i)
     {
         __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
 
-        TRACFCOMP( g_trac_cxxtest,
-                   "Now executing Serial Test Cases!");
+        CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
+                          "Load test %s", *i);
 
         // load module and call _init()
         l_errl = VFS::module_load( *i );
@@ -162,7 +166,12 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         {
             TRACFCOMP( g_trac_cxxtest, "Task %d finished.", tidrc );
         }
+        CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
+                          "Stop test %s : status=%d", *i, status);
     }
+
+    TRACFCOMP( g_trac_cxxtest,
+               "Now executing Parallel Test Cases!");
 
     //Then run all parallel testcases
     for(std::vector<const char *>::const_iterator i = parallel_module_list.begin();
@@ -173,6 +182,9 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         TRACDCOMP( g_trac_cxxtest,
                    "ModulesStarted=%d",
                    CxxTest::g_ModulesStarted );
+
+        CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
+                          "Load test %s", *i);
 
         // load module and call _init()
         l_errl = VFS::module_load( *i );
@@ -208,8 +220,8 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
 
         if (status != TASK_STATUS_EXITED_CLEAN)
         {
-            TRACFCOMP( g_trac_cxxtest, "Task %d crashed with status %d.",
-                       t->tid, status );
+            TRACFCOMP( g_trac_cxxtest, "Task %d (%s) crashed with status %d.",
+                       t->tid, t->module, status );
             if(CxxTest::g_FailedTests < CxxTest::CXXTEST_FAIL_LIST_SIZE)
             {
                 CxxTest::CxxTestFailedEntry *l_failedEntry =
@@ -223,8 +235,12 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         }
         else
         {
-            TRACFCOMP( g_trac_cxxtest, "Task %d finished.", t->tid );
+            TRACFCOMP( g_trac_cxxtest, "Task %d (%s) finished.",
+                       t->tid, t->module );
         }
+
+        CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
+                          "Stop test %s : status=%d", t->module, status);
     }
 
     __sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);
@@ -249,6 +265,10 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
                    CxxTest::g_FailedTestList[i].failTestFile,
                    CxxTest::g_FailedTestList[i].failTestData);
     }
+
+    CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
+                      "Results : %d fails out of %d total",
+                      CxxTest::g_FailedTests, CxxTest::g_TotalTests);
 
     //  @todo dump out an informational errorlog??
 
