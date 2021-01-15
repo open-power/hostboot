@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -467,9 +467,6 @@ class MVPDTest: public CxxTest::TestSuite
          */
         void testMvpdWrite ( void )
         {
-// @TODO: RTC 244854: This test is currently only working in HB runtime
-//                    When running under HB IPL, calls never return and thus fails
-#ifdef __HOSTBOOT_RUNTIME
             auto l_record  = MVPD::VWML;
             auto l_keyword = MVPD::pdI;
 
@@ -635,7 +632,6 @@ class MVPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_vpd,
                        "testMvpdWrite - %d/%d fails",
                        fails, cmds );
-#endif  // end #ifdef __HOSTBOOT_RUNTIME
         }
 
         /**

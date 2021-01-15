@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -108,6 +108,10 @@
     <attribute>
         <id>ASYNC_NEST_FREQ_MHZ</id>
         <default>0x7D0</default>
+    </attribute>
+    <attribute>
+        <id>ALLOW_EEPROM_WRITES</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>

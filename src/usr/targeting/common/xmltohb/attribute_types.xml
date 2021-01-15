@@ -35,6 +35,19 @@
   </attribute>
 
   <attribute>
+    <description>Set to non-zero to enable EEPROM writes to Hardware</description>
+    <id>ALLOW_EEPROM_WRITES</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
     <description>
         System attribute.

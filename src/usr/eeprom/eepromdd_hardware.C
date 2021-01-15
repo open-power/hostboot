@@ -33,6 +33,7 @@
 #include <errl/errludstring.H>
 #include <errl/errludtarget.H>
 #include <util/misc.H>
+#include <targeting/common/targetservice.H>
 
 extern trace_desc_t* g_trac_eeprom;
 
@@ -127,12 +128,16 @@ errlHndl_t eepromPerformSpiOpHW( DeviceFW::OperationType i_opType,
         }
         else if ( i_opType == DeviceFW::WRITE )
         {
-            if( !Util::isSimicsRunning() &&
-                (io_spiInfo.eepromRole == VPD_PRIMARY
+            if( (io_spiInfo.eepromRole == VPD_PRIMARY
                  || io_spiInfo.eepromRole == VPD_BACKUP) )
             {
-                TRACFCOMP( g_trac_eeprom,"Skipping EEPROM write for module vpd (isSimicsRunning and conditions)" );
-                break;
+                auto l_allowWrite = TARGETING::UTIL::assertGetToplevelTarget()
+                  ->getAttr<TARGETING::ATTR_ALLOW_EEPROM_WRITES>();
+                if( !l_allowWrite )
+                {
+                    TRACFCOMP( g_trac_eeprom,"Skipping EEPROM write for vpd" );
+                    break;
+                }
             }
 
             // total length to write via SPI

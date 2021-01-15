@@ -2516,6 +2516,9 @@
       <id>AFFINITY_PATH</id>
     </attribute>
     <attribute>
+      <id>ALLOW_EEPROM_WRITES</id>
+    </attribute>
+    <attribute>
       <id>ASYNC_NEST_FREQ_MHZ</id>
     </attribute>
     <attribute>
