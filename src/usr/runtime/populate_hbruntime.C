@@ -86,6 +86,7 @@
 #include <secureboot/smf.H>
 #include <isteps/istep_reasoncodes.H>
 #include <dump/dumpif.H>
+#include <hdatpcrd.H>
 namespace RUNTIME
 {
 
@@ -1205,10 +1206,19 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 
         // Loop through all functional Procs
         uint32_t l_procNum = 0;
+        uint64_t l_pcrdAddr = 0;
+        uint64_t l_pcrdSizeMax = 0;
+        uint64_t l_numInstances = 0;
+        l_elog = RUNTIME::get_instance_count(RUNTIME::PCRD, l_numInstances);
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime,"Failed in get_instance_count() to obtain PCRD instances");
+            break;
+        }
         for (const auto & l_procChip: l_procChips)
         {
             uint64_t l_addr = l_archAddr +
-              (l_procNum++ * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
+              (l_procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
 
             //Update the MPIPL Dump metadata structure for particular Proc
             uint64_t l_vAddr = 0x0;
@@ -1245,6 +1255,61 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                        "failed for target: %x",TARGETING::get_huid(l_procChip));
                 break;
             }
+
+            TARGETING::ATTR_ORDINAL_ID_type l_procOrdinalId = 
+                                            l_procChip->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+            //Update proc specific metadata address into the PCRD table
+            for (uint64_t l_pcrdInstance = 0;
+                 l_pcrdInstance < l_numInstances;++l_pcrdInstance)
+            {
+                //Update proc specific metadata address into the PCRD table
+                l_elog = RUNTIME::get_host_data_section(RUNTIME::PCRD,
+                         l_pcrdInstance,l_pcrdAddr,l_pcrdSizeMax);
+                if(l_elog)
+                {
+                    TRACFCOMP(g_trac_runtime, ERR_MRK"Failed in obtaining the PCRD section for instance :%d",
+                            l_procNum);
+                    break;
+                }
+
+                HDAT::hdatSpPcrd_t *l_pcrd = nullptr;
+                l_pcrd = reinterpret_cast<HDAT::hdatSpPcrd_t*>(l_pcrdAddr);
+
+                if(l_pcrd->hdatChipData.hdatPcrdProcChipId != l_procOrdinalId)
+                {
+                    TRACFCOMP(g_trac_runtime, ERR_MRK" l_pcrdInstance=%d hdatPcrdProcChipId=0x%.8x and ORDINAL_ID=%d",
+                              l_pcrdInstance,l_pcrd->hdatChipData.hdatPcrdProcChipId,l_procOrdinalId);
+                    continue;
+                }
+
+                TRACDCOMP(g_trac_runtime, " l_pcrdInstance=%d hdatPcrdProcChipId=0x%.8x and ORDINAL_ID=%d",
+                          l_pcrdInstance,l_pcrd->hdatChipData.hdatPcrdProcChipId,l_procOrdinalId);
+
+                TRACDCOMP(g_trac_runtime, " get_host_data_section():PCRD Instance=%d  l_pcrdAddr=0x%.16llx"
+                "after mm_virt_to_phys()=0x%.16llx() and l_pcrdSizeMax=0x%.16llx " l_procNum,l_pcrdAddr,
+                mm_virt_to_phys( reinterpret_cast<void*>(l_pcrdAddr)),l_pcrdSizeMax);
+
+                l_pcrd->hdatChipData.hdatPcrdMPIPLMetadataAddr = l_addr;
+
+                TRACDCOMP(g_trac_runtime," PCRD table with hdatPcrdProcChipId=0x%.8x hdatPcrdFabTopologyId=0x%.8x "
+                "and hdatPcrdMPIPLMetadataAddr=0x%.16llx", (uint32_t)l_pcrd->hdatChipData.hdatPcrdProcChipId,
+                (uint32_t)l_pcrd->hdatChipData.hdatPcrdFabTopologyId,(uint64_t)l_pcrd->hdatChipData.hdatPcrdMPIPLMetadataAddr);
+
+                TRACDCOMP(g_trac_runtime," Address of l_pcrd->hdatChipData.hdatPcrdProcChipId=0x%.16llx : "
+                "after mm_virt_to_phys()=0x%.16llx", &(l_pcrd->hdatChipData.hdatPcrdProcChipId), 
+                mm_virt_to_phys( reinterpret_cast<void*>(&(l_pcrd->hdatChipData.hdatPcrdProcChipId)))); 
+
+                TRACFCOMP(g_trac_runtime," Address of l_pcrd->hdatChipData.hdatPcrdMPIPLMetadataAddr=0x%.16llx "
+                ": after mm_virt_to_phys()=0x%.16llx ",  &(l_pcrd->hdatChipData.hdatPcrdMPIPLMetadataAddr),
+                mm_virt_to_phys( reinterpret_cast<void*>(&(l_pcrd->hdatChipData.hdatPcrdMPIPLMetadataAddr))));
+
+                break;//Break out of the for loop as match was found and metadata was updated
+            }
+            if(l_elog)
+            {
+                break;
+            }
+            l_procNum++;
         }
         if(l_elog)
         {

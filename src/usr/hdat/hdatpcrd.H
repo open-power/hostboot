@@ -93,7 +93,7 @@ enum hdatPcrdDataPtrs
     HDAT_PCRD_DA_HOST_SPI       = 9,
     HDAT_PCRD_DA_EEPROM_PART    = 10,
     HDAT_PCRD_DA_CNT            = 11,
-    HDAT_PCRD_DA_LAST           = 12,
+    HDAT_PCRD_DA_LAST           = HDAT_PCRD_DA_CNT,
 };
 
 /*----------------------------------------------------------------------------*/
@@ -133,8 +133,10 @@ struct hdatPcrdChipInfo_t
                                         //        to indicate the primary
                                         //        topology id
     uint32_t  hdatPcrdABCBusSpeed;      // 0x006A A-bus speed
-    uint32_t  hdatPcrdXYZBusSpeed;      // 0x007E X-bus speed
+    uint32_t  hdatPcrdXYZBusSpeed;      // 0x006E X-bus speed
     uint8_t   hdatPcrdFabTopologyId;    // 0x0072 Fabric topology id
+    uint8_t   reserved[5];              // 0x0073 Reserved 5 bytes
+    uint64_t  hdatPcrdMPIPLMetadataAddr;// 0x0078 Hostboot reserved metadata address for MPIPL
 } __attribute__ ((packed));
 
 /* @brief Defines 'chip time-of-day structure in the PCRD */
