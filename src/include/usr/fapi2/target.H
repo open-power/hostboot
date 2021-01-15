@@ -58,6 +58,9 @@
 //#include <errl/errlentry.H>
 //#include <errl/errlmanager.H>
 
+// Handy macro to get the Hostboot target from the fapi target
+#define FAPI_TO_HBTARG(__fapi) (static_cast<TARGETING::Target*>(__fapi->get()))
+
 namespace PLAT_TARGET
 {
 ///
@@ -430,7 +433,7 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
     // for parent proc
     if ((T_SELF & TARGET_TYPE_MULTICAST) != 0)
     {
-        TARGETING::Target* l_target = static_cast<TARGETING::Target*>(this->get());
+        TARGETING::Target* l_target = FAPI_TO_HBTARG(this);
         assert(l_target != nullptr, "platform target handle is nullptr");
         TARGETING::TYPE requiredCType =
             l_target->getAttr<TARGETING::ATTR_TYPE>();
@@ -446,7 +449,7 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
         {
             TARGETING::getParentPervasiveTargetsByState(
                 l_parentList,
-                static_cast<TARGETING::Target*>(this->get()),
+                FAPI_TO_HBTARG(this),
                 TARGETING::CLASS_NA,
                 requiredPType,
                 TARGETING::UTIL_FILTER_ALL);
@@ -455,7 +458,7 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
         {
             TARGETING::getParentOmicTargetsByState(
                 l_parentList,
-                static_cast<TARGETING::Target*>(this->get()),
+                FAPI_TO_HBTARG(this),
                 TARGETING::CLASS_NA,
                 requiredPType,
                 TARGETING::UTIL_FILTER_ALL);
@@ -465,7 +468,7 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
         {
             TARGETING::getParentPaucTargetsByState(
                 l_parentList,
-                static_cast<TARGETING::Target*>(this->get()),
+                FAPI_TO_HBTARG(this),
                 TARGETING::CLASS_NA,
                 requiredPType,
                 TARGETING::UTIL_FILTER_ALL);
@@ -474,7 +477,7 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
         {
             TARGETING::getParentAffinityTargetsByState(
                 l_parentList,
-                static_cast<TARGETING::Target*>(this->get()),
+                FAPI_TO_HBTARG(this),
                 TARGETING::CLASS_NA,
                 requiredPType,
                 TARGETING::UTIL_FILTER_ALL);
@@ -567,7 +570,7 @@ inline std::vector<Target<K_CHILD, M, V> >
         if(T_SELF == fapi2::TARGET_TYPE_PERV)
         {
             TARGETING::getPervasiveChildTargetsByState(l_childList,
-                        static_cast<TARGETING::Target*>(this->get()),
+                        FAPI_TO_HBTARG(this),
                         TARGETING::CLASS_NA,
                         l_type,
                         l_state);
@@ -575,7 +578,7 @@ inline std::vector<Target<K_CHILD, M, V> >
         else if(T_SELF == fapi2::TARGET_TYPE_OMIC)
         {
             TARGETING::getChildOmiTargetsByState(l_childList,
-                            static_cast<TARGETING::Target*>(this->get()),
+                            FAPI_TO_HBTARG(this),
                             TARGETING::CLASS_NA,
                             l_type,
                             l_state);
@@ -584,7 +587,7 @@ inline std::vector<Target<K_CHILD, M, V> >
                 && (K_CHILD == fapi2::TARGET_TYPE_OMIC))
         {
             TARGETING::getChildPaucTargetsByState(l_childList,
-                            static_cast<TARGETING::Target*>(this->get()),
+                            FAPI_TO_HBTARG(this),
                             TARGETING::CLASS_NA,
                             l_type,
                             l_state);
@@ -594,7 +597,7 @@ inline std::vector<Target<K_CHILD, M, V> >
         else
         {
             TARGETING::getChildAffinityTargetsByState(l_childList,
-                            static_cast<TARGETING::Target*>(this->get()),
+                            FAPI_TO_HBTARG(this),
                             TARGETING::CLASS_NA,
                             l_type,
                             l_state);
@@ -729,7 +732,7 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
         TARGETING::PredicatePostfixExpr l_funcAndpeerFilter;
         l_funcAndpeerFilter.push(&l_peerFilter).push(&l_funcFilter).And();
         getPeerTargets( l_peerTargetList,    // list of targets on other end
-        static_cast<TARGETING::Target*>(this->get()),//To this target
+        FAPI_TO_HBTARG(this),//To this target
         nullptr, // Don't need to filter peers
         &l_funcAndpeerFilter);//filter results to be the right class & state
     }
@@ -739,7 +742,7 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
         l_presAndpeerFilter.push(&l_peerFilter);
 
         getPeerTargets( l_peerTargetList,   // list of targets on other end
-        static_cast<TARGETING::Target*>(this->get()), //to this target
+        FAPI_TO_HBTARG(this), //to this target
         nullptr,                               //No need to filter peers
         &l_presAndpeerFilter);//filter results to be the right class & state
     }
@@ -814,7 +817,7 @@ template< TargetType T_SELF, MulticastType M, typename V >
 inline bool Target< T_SELF, M, V >::isFunctional(void) const
 {
     TARGETING::PredicateIsFunctional l_functional;
-    return l_functional(static_cast<TARGETING::Target*>(this->get()));
+    return l_functional(FAPI_TO_HBTARG(this));
 }
 
 
@@ -1011,7 +1014,7 @@ template< TargetType T_SELF, MulticastType M, typename V >
 inline uint8_t Target< T_SELF, M, V >::getChipletNumber(void) const
 {
     const TARGETING::Target * l_pTarget =
-        static_cast<TARGETING::Target*>(this->get());
+        FAPI_TO_HBTARG(this);
     uint8_t  l_chiplet_id = 0;
     if(!l_pTarget->tryGetAttr<TARGETING::ATTR_CHIPLET_ID>(l_chiplet_id))
     {
@@ -1020,6 +1023,47 @@ inline uint8_t Target< T_SELF, M, V >::getChipletNumber(void) const
     return l_chiplet_id;
 }
 
+
+///
+/// @brief Convert this target into a type that is a subset of K, with type checking
+/// @tparam T The type of the expected output target
+/// @param[out] o_target The converted target will be stored here
+/// @return FAPI2_RC_SUCCESS if the target was compatible
+///         FAPI2_RC_INVALID_PARAMETER if not
+///
+/// This method is supposed to be a way out of composite target hell.
+/// If a HWP must accept a wide variety of potential targets, most target
+/// transformations (like getParent, getChildren, getChipletNumber, ...) will
+/// not work because the template type includes too many different types and the
+/// result of those operations is not clearly defined.
+///
+/// The idea is that the HWP will eventually be able to narrow down the set of
+/// allowed types for its target depending on the code path it's taking, such as
+/// "must be a PROC_CHIP" or "must be a chiplet target". It can then call this
+/// method to transform the template type into the expected type (which may still
+/// be composite). The method will fail if the target's _actual_ type (only known
+/// to platform code) does not fit into the requested type.
+///
+template<TargetType K, MulticastType M, typename V>
+template< TargetType T>
+inline ReturnCodes
+Target<K, M, V>::reduceType(Target<T, M, V>& o_target) const
+{
+    // call the builtin checker first
+    check_reduceType<T>();
+
+    // Hostboot's targets are never composite so all we need to do is to confirm
+    // that the desired type matches the type we really are
+    TARGETING::Target* l_hbTarget = FAPI_TO_HBTARG(this);
+    TARGETING::TYPE l_type = fapi2::convertFapi2TypeToTargeting(T);
+    if( l_type != l_hbTarget->getAttr<TARGETING::ATTR_TYPE>() )
+    {
+        return FAPI2_RC_INVALID_PARAMETER;
+    }
+
+    o_target = Target < T, M, V > ();
+    return FAPI2_RC_SUCCESS;
+}
 
 ///
 /// @brief Get a multicast target for a given chip
