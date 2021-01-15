@@ -249,6 +249,12 @@ actionclass threshold_and_mask_self_th1
     threshold_and_mask_th1;
 };
 
+actionclass omiRunningInDegradedMode
+{
+    omi_bus_th_1;
+    funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
+};
+
 ################################################################################
 #                           Callouts with flags                                #
 ################################################################################

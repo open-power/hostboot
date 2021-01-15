@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,6 +111,48 @@ PRDF_PLUGIN_DEFINE_NS(p10_mc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(p10_mcc,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(p10_omic, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(explorer_ocmb, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+
+/**
+ * @brief   P10 DD1 workaround to clear the service call flag for OMI degrade
+ * @param   i_chip OMIC or OCMB
+ * @param   io_sc   Step code data struct
+ * @returns SUCCESS always
+ */
+int32_t OmiDegradeDD1Workaround( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    // For P10 DD1, if we hit OMIDLFIR[5] or MC_OMI_DL_FIR[5,25] for an
+    // OMI running in degraded mode, we will clear gard and keep the log hidden
+    // as long as the PRD_DD1_OMI_DEGRADE_PREDICTIVE attribute isn't set.
+    ExtensibleChip * check = i_chip;
+
+    // Make sure to get a target on the proc side if we have an OCMB so we can
+    // check the correct model and EC level
+    if ( TYPE_OCMB_CHIP == i_chip->getType() )
+    {
+        check = getConnectedParent( i_chip, TYPE_MCC );
+    }
+
+    // If we are on P10 DD10, clear gard
+    if ( (MODEL_POWER10 == getChipModel(check->getTrgt())) &&
+         (0x10 == getChipLevel(check->getTrgt())) &&
+         (CHECK_STOP != io_sc.service_data->getPrimaryAttnType()) )
+    {
+        io_sc.service_data->clearMruListGard();
+
+        // If the PRD_DD1_OMI_DEGRADE_PREDICTIVE attribute isn't set, we also
+        // clear the service call flag to keep the log hidden.
+        TargetHandle_t sys = getSystemTarget();
+        if ( (0 == sys->getAttr<ATTR_PRD_DD1_OMI_DEGRADE_PREDICTIVE>()) )
+        {
+            ClearServiceCallFlag_mnfgInfo( i_chip, io_sc );
+        }
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS(p10_omic, CommonPlugins, OmiDegradeDD1Workaround);
+PRDF_PLUGIN_DEFINE_NS(explorer_ocmb, CommonPlugins, OmiDegradeDD1Workaround);
 
 /**
  * @brief   Analyze for unit checkstops on this target.

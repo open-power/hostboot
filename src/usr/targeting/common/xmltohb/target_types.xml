@@ -2747,6 +2747,9 @@
       <id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id>
     </attribute>
     <attribute>
+      <id>PRD_DD1_OMI_DEGRADE_PREDICTIVE</id>
+    </attribute>
+    <attribute>
       <id>PROC_MODULE_TYPE</id>
     </attribute>
     <attribute>

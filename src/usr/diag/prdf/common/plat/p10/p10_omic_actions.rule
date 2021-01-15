@@ -143,6 +143,7 @@ actionclass dl0_omi_bus_th_1_CRC
 {
     try( funccall("CrcSideEffect_0"), dl0_omi_bus );
     threshold1;
+    funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
 };
 
 actionclass dl0_omi_bus_th_32perDay_CRC
@@ -161,6 +162,7 @@ actionclass dl1_omi_bus_th_1_CRC
 {
     try( funccall("CrcSideEffect_1"), dl1_omi_bus );
     threshold1;
+    funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
 };
 
 actionclass dl1_omi_bus_th_32perDay_CRC

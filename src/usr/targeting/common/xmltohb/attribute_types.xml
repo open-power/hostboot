@@ -6253,6 +6253,21 @@
   </attribute>
 
   <attribute>
+    <description>
+      Used to tell PRD to make DD1 OMI x4 degrade logs predictive.
+    </description>
+    <id>PRD_DD1_OMI_DEGRADE_PREDICTIVE</id>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>PRD_HWP_PLID</id>
     <description>
       PRD will perform error isolation for certain errors that may cause a HWP
