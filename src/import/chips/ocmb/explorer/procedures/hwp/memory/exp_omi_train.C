@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,18 +78,10 @@ extern "C"
             // Issues the command and checks for completion
             FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_data));
 
-            // Check for expected busy status (this won't work for gemini)
+            // Return success code for Gemini
             FAPI_TRY(mss::exp::workarounds::omi::ocmb_is_explorer(i_target, l_ocmb_is_explorer));
 
-            if (l_ocmb_is_explorer)
-            {
-                // Explorer & P9A environment should see a busy status until auto train is kicked off from both sides
-                l_rc = mss::exp::i2c::check_fw_status_busy(i_target);
-
-                // If BOOT_CONFIG_1 failed or timed out, we need to check some FIRs
-                FAPI_TRY( (mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, l_rc)) );
-            }
-            else
+            if (!l_ocmb_is_explorer)
             {
                 // Gemini should return success code
                 FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
