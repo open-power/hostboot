@@ -46,7 +46,6 @@
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <i2c/exp_i2c_fields.H>
-#include <p10_io_lib.H>
 
 extern "C"
 {
@@ -61,20 +60,11 @@ extern "C"
         mss::display_git_commit_info("exp_omi_train");
 
         fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-        uint8_t l_is_apollo = 0;
         uint8_t l_sim = 0;
         FAPI_TRY(mss::attr::get_is_simulation(l_sim));
-        FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
 
         if (!l_sim)
         {
-            if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
-            {
-                // Poll that P10 is done with its PHY training
-                // NOTE: need to do this here to not break parallelization of p10_omi_setup
-                FAPI_TRY(p10_io_omi_poll_init_done(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target)));
-            }
-
             // Train mode 1 (PATTERN_A)
             FAPI_TRY(mss::exp::workarounds::omi::training_prbs(i_target));
         }
@@ -96,21 +86,13 @@ extern "C"
             // Issues the command and checks for completion
             FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_cmd_data));
 
-            // Check for expected busy status (this won't work for gemini)
+            // Return success code for Gemini
             if (!l_sim)
             {
                 FAPI_TRY(mss::exp::workarounds::omi::ocmb_is_explorer(i_target, l_ocmb_is_explorer));
             }
 
-            if (l_ocmb_is_explorer)
-            {
-                // Explorer & P10 environment should see a busy status until auto train is kicked off from both sides
-                l_rc = mss::exp::i2c::check_fw_status_busy(i_target);
-
-                // If BOOT_CONFIG_1 failed or timed out, we need to check some FIRs
-                FAPI_TRY( (mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, l_rc)) );
-            }
-            else
+            if (!l_ocmb_is_explorer)
             {
                 // Gemini should return success code
                 FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_rsp_data));

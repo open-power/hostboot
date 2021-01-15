@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -28,4 +28,7 @@
 
 PROCEDURE=p10_omi_train
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_P10_INCLUDES))
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/io)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/io)
+lib$(PROCEDURE)_DEPLIBS += p10_io_lib
 $(call BUILD_PROCEDURE)
