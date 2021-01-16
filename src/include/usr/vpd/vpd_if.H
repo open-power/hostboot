@@ -115,12 +115,14 @@ namespace VPD
      * @param[in]   i_eepromType  Eeprom content type of target device
      * @param[out]  o_isInSync    true if part and serial numbers in cache match
      *                            hardware. Otherwise, false.
+     * @param[out]  o_isNewPart   false for EECACHE_VPD_STATE_VPD_NEEDS_REFRESH
      * @return errlHndl_t - NULL if successful, otherwise a pointer to the
      *      error log.
      */
     errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target * i_target,
                             TARGETING::EEPROM_CONTENT_TYPE   i_eepromType,
-                                         bool              & o_isInSync);
+                                         bool              & o_isInSync,
+                                         bool              & o_isNewPart);
 
     /**
      * @brief This function invalidates the VPD data in the PNOR cache.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -256,12 +256,14 @@ void setEepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
  * @param[in] - eeprom record to check
  * @param[in] - eeprom role
  * @param[out] - true if record is in-sync, else false
+ * @param[out] - false if EECACHE_VPD_STATE_VPD_NEEDS_REFRESH
  * @return  error log if failure found
  */
 errlHndl_t isEepromInSync(TARGETING::Target * i_target,
                           const eepromRecordHeader& i_eepromRecordHeader,
                           EEPROM::EEPROM_ROLE i_eepromType,
-                          bool & o_isInSync);
+                          bool & o_isInSync,
+                          bool & o_isNewPart);
 
 /**
  * @brief Compares the two headers to see if they are on the same eeprom

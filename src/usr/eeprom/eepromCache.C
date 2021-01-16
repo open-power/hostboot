@@ -708,6 +708,8 @@ errlHndl_t createNewEecacheEntry(TARGETING::Target  *   i_target,
  * @param[out]  o_updateHeader    Determines if the eeprom header should be
  *                                updated.
  *
+ * @param[out]  o_isNewPart       Determines if the target to be marked changed
+ *
  * @return  errlHndl_t
  */
 errlHndl_t checkForEecacheEntryUpdate(
@@ -718,12 +720,14 @@ errlHndl_t checkForEecacheEntryUpdate(
         size_t               const   i_eepromBuflen,
         eepromRecordHeader * const & i_recordFromPnor,
         bool                       & o_updateContents,
-        bool                       & o_updateHeader)
+        bool                       & o_updateHeader,
+        bool                       & o_isNewPart)
 {
     errlHndl_t l_errl = nullptr;
 
     o_updateContents = true;
     o_updateHeader = true;
+    o_isNewPart = true;
 
     do {
     // Only check if the cache is in sync with HARDWARE if there is an
@@ -739,7 +743,7 @@ errlHndl_t checkForEecacheEntryUpdate(
             {
                 l_isInSync = true;
                 l_errl = isEepromInSync(i_target, *i_recordFromPnor,
-                                    i_eepromType, l_isInSync);
+                                    i_eepromType, l_isInSync, o_isNewPart);
                 if (l_errl != nullptr)
                 {
                     break;
@@ -926,6 +930,7 @@ errlHndl_t updateExistingEecacheEntry(
     // as well as the contents in the body of the EECACHE section
     bool l_updateHeader = true;
     bool l_updateContents = true;
+    bool l_isNewPart = true;
 
     do {
         // Make a local copy to ensure that internal_offset has been set.
@@ -959,7 +964,8 @@ errlHndl_t updateExistingEecacheEntry(
                                           i_eepromBuflen,
                                           io_recordFromPnorToUpdate,
                                           l_updateContents,
-                                          l_updateHeader);
+                                          l_updateHeader,
+                                          l_isNewPart);
         if (errl)
         {
             break;
@@ -971,7 +977,8 @@ errlHndl_t updateExistingEecacheEntry(
                                          i_eepromType,
                                          i_eepromBuffer,
                                          i_eepromBuflen,
-                                         l_completeRecordHeader);
+                                         l_completeRecordHeader,
+                                         l_isNewPart);
             if (errl)
             {
                 break;
@@ -2004,7 +2011,8 @@ errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
 errlHndl_t isEepromInSync(TARGETING::Target * i_target,
                           const eepromRecordHeader& i_eepromRecordHeader,
                           EEPROM::EEPROM_ROLE i_eepromType,
-                          bool & o_isInSync)
+                          bool & o_isInSync,
+                          bool & o_isNewPart)
 {
     errlHndl_t l_errl = nullptr;
     if (i_eepromRecordHeader.completeRecord.master_eeprom)
@@ -2046,7 +2054,8 @@ errlHndl_t isEepromInSync(TARGETING::Target * i_target,
 
         l_errl = VPD::ensureEepromCacheIsInSync(i_target,
                                                 l_eepromContentType,
-                                                o_isInSync);
+                                                o_isInSync,
+                                                o_isNewPart);
     }
     else
     {

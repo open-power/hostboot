@@ -660,7 +660,8 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target *            i_target,
 // ------------------------------------------------------------------
 errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
                                   TARGETING::EEPROM_CONTENT_TYPE   i_eepromType,
-                                  bool                           & o_isInSync)
+                                  bool                           & o_isInSync,
+                                  bool                           & o_isNewPart)
 {
     errlHndl_t l_err = nullptr;
 
@@ -736,6 +737,7 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
         if (i_target->getAttr<TARGETING::ATTR_EECACHE_VPD_STATE>() == TARGETING::EECACHE_VPD_STATE_VPD_NEEDS_REFRESH)
         {
             o_isInSync = false;
+            o_isNewPart = false;
             TRACFCOMP(g_trac_vpd, "VPD::ensureEepromCacheIsInSync EECACHE_VPD_STATE o_isInSync=%d HUID=0x%X", o_isInSync, get_huid(i_target));
             // EECACHE_VPD_STATE reset to VPD_GOOD since we flagged for the refresh via o_isInSync
             i_target->setAttr<TARGETING::ATTR_EECACHE_VPD_STATE>(TARGETING::EECACHE_VPD_STATE_VPD_GOOD);
