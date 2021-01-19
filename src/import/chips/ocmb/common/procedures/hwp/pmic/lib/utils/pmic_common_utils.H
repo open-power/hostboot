@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -303,6 +303,20 @@ namespace status
 {
 
 ///
+/// @brief Data for each status rgeister for error reporting
+///
+struct status_regs
+{
+    uint8_t iv_r04;
+    uint8_t iv_r05;
+    uint8_t iv_r06;
+    uint8_t iv_r08;
+    uint8_t iv_r09;
+    uint8_t iv_r0A;
+    uint8_t iv_r0B;
+};
+
+///
 /// @brief Information for each field that we can iterate through
 ///
 struct status_field
@@ -440,10 +454,14 @@ fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 /// @brief Check the PMIC's status codes and report back if an error occurred
 ///
 /// @param[in] i_pmic_target PMIC target
+/// @param[in,out] io_values value of status registers on this PMIC
 /// @param[out] o_error true/false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
 ///
-fapi2::ReturnCode check_pmic(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_error);
+fapi2::ReturnCode check_pmic(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    status_regs& io_values,
+    bool& o_error);
 
 ///
 /// @brief Clear PMIC status registers
@@ -454,11 +472,24 @@ fapi2::ReturnCode check_pmic(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmi
 fapi2::ReturnCode clear(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
+/// @brief Helper to fill in pmic::status::status_regs struct
+///
+/// @param[in] i_reg status register address
+/// @param[in] i_value status register value
+/// @param[in,out] io_values value of status registers on this PMIC
+///
+void status_reg_save_helper(
+    const uint8_t i_reg,
+    const uint8_t i_value,
+    status_regs& io_values);
+
+///
 /// @brief Check an individual set of PMIC status codes
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_error_type error type for the PMIC in question
 /// @param[in] i_statuses STATUS object to check
+/// @param[in,out] io_values value of status registers on this PMIC
 /// @param[out] o_error At least one error bit was found to be set
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error in case of an I2C read error
 ///
@@ -466,6 +497,7 @@ fapi2::ReturnCode check_fields(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const char* i_error_type,
     const std::vector<std::pair<uint8_t, std::vector<status_field>>>& i_statuses,
+    status_regs& io_values,
     bool& o_error);
 
 } // status

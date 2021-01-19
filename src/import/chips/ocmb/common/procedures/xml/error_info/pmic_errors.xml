@@ -35,10 +35,6 @@
     <ffdc>SIZE_RETURNED</ffdc>
     <ffdc>SIZE_REQUESTED</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
@@ -51,10 +47,6 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>VENDOR_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -70,10 +62,6 @@
     <ffdc>VOLTAGE_BITMAP</ffdc>
     <ffdc>RAIL</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
@@ -87,10 +75,6 @@
     <ffdc>TARGET</ffdc>
     <ffdc>RAIL</ffdc>
     <ffdc>ORDER</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -124,10 +108,6 @@
     <ffdc>RAIL</ffdc>
     <ffdc>DELAY</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
@@ -152,6 +132,20 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_GPIO_INPUT_PORT_TIMEOUT</rc>
+    <description>
+       Polling timeout for the GPIO input port while attempting initial communication
+       with PMIC.
+    </description>
+    <ffdc>GPIO</ffdc>
+    <ffdc>PMIC_PAIR_BIT</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_PMIC_NOT_ENABLED</rc>
     <description>
        After running pmic_enable, the PMIC VR Enable bit did not remain set.
@@ -159,10 +153,6 @@
     </description>
     <ffdc>PMIC_TARGET</ffdc>
     <ffdc>OCMB_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>HIGH</priority>
@@ -186,10 +176,13 @@
     </description>
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>PMIC_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
+    <ffdc>R04_VALUE</ffdc>
+    <ffdc>R05_VALUE</ffdc>
+    <ffdc>R06_VALUE</ffdc>
+    <ffdc>R08_VALUE</ffdc>
+    <ffdc>R09_VALUE</ffdc>
+    <ffdc>R0A_VALUE</ffdc>
+    <ffdc>R0B_VALUE</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>HIGH</priority>
@@ -216,10 +209,6 @@
     <ffdc>VENDOR_REG</ffdc>
     <ffdc>PMIC_TARGET</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
       <target>PMIC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
@@ -234,10 +223,6 @@
     <ffdc>REVISION_ATTR</ffdc>
     <ffdc>REVISION_REG</ffdc>
     <ffdc>PMIC_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>HIGH</priority>
@@ -271,9 +256,22 @@
     <ffdc>MINIMUM_MV</ffdc>
     <ffdc>ACTUAL_MV</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_EFUSE_BLOWN</rc>
+    <description>
+       PMIC EFUSE data shows VIN to be out of valid range,
+       indicating the EFUSE must be blown. Before the EFUSE is enabled VIN
+       should be below the EFUSE_OFF_HIGH threshold, and after it should be
+       between EFUSE_ON_LOW and EFUSE_ON_HIGH.
+    </description>
+    <ffdc>EFUSE_DATA</ffdc>
+    <ffdc>THRESHOLD_LOW</ffdc>
+    <ffdc>THRESHOLD_HIGH</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>HIGH</priority>
@@ -335,6 +333,26 @@
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_ENABLE_FAIL</rc>
+    <description>
+       A PMIC had errors during pmic_enable. See previous recoverable errors to further diagnose.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
+    <ffdc>RETURN_CODE</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>

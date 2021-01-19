@@ -98,10 +98,16 @@ fapi2::ReturnCode poll_input_port_ready(
 
     if (!l_success)
     {
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        FAPI_ASSERT_NOEXIT(false,
+                           fapi2::GPIO_INPUT_PORT_TIMEOUT(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                           .set_TARGET(i_pmic_target)
+                           .set_GPIO(i_gpio_target)
+                           .set_PMIC_PAIR_BIT(i_pmic_pair_bit),
+                           "%s Did not report input bit %u ready, %s does not have 12V, declaring N-Mode",
+                           l_gpio_string, i_pmic_pair_bit, mss::c_str(i_pmic_target));
 
-        FAPI_DBG("%s Did not report input bit %u ready, %s does not have 12V, declaring N-Mode",
-                 l_gpio_string, i_pmic_pair_bit, mss::c_str(i_pmic_target));
+        // Set current_err back to success
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
         // As the trace implies, now we will declare N-mode
         FAPI_TRY(mss::attr::set_n_mode_helper(
@@ -408,7 +414,7 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
 
         // The SPD allows for up to 8 sequences, but there are only 4 on the PMIC. The SPD defaults never go higher than 2.
         // We put this check in here as with anything over 4, we don't really know what we can do.
-        FAPI_ASSERT(((l_sequence_orders[l_rail_index] < CONSTS::ORDER_LIMIT)),
+        FAPI_ASSERT((l_sequence_orders[l_rail_index] < CONSTS::ORDER_LIMIT),
                     fapi2::PMIC_ORDER_OUT_OF_RANGE()
                     .set_TARGET(i_pmic_target)
                     .set_RAIL(l_rail_index)
@@ -794,6 +800,9 @@ fapi2::ReturnCode enable_1u_2u(
 {
     auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
+    // We're guaranteed to have at least one PMIC here due to the check in pmic_enable
+    auto l_current_pmic = l_pmics[0];
+
     // Now the PMICs are in the right order of DIMM and the right order by their defined SPD sequence within each dimm
     // Let's kick off the enables
 
@@ -801,6 +810,7 @@ fapi2::ReturnCode enable_1u_2u(
     {
         for (const auto& l_pmic : l_pmics)
         {
+            l_current_pmic = l_pmic;
             // Check to make sure VIN_BULK reports good, then we can enable the chip and write/read registers
             FAPI_TRY(check_vin_bulk_good(l_pmic),
                      "pmic_enable: Check for VIN_BULK good either failed, or returned not good status on PMIC %s",
@@ -816,6 +826,7 @@ fapi2::ReturnCode enable_1u_2u(
         // 1U/2U enable process
         for (const auto& l_pmic : l_pmics)
         {
+            l_current_pmic = l_pmic;
             uint16_t l_vendor_id = 0;
 
             // Get vendor ID
@@ -834,6 +845,13 @@ fapi2::ReturnCode enable_1u_2u(
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
+    FAPI_ASSERT_NOEXIT(false,
+                       fapi2::PMIC_ENABLE_FAIL(fapi2::FAPI2_ERRL_SEV_PREDICTIVE)
+                       .set_OCMB_TARGET(i_ocmb_target)
+                       .set_PMIC_TARGET(l_current_pmic)
+                       .set_RETURN_CODE(static_cast<uint32_t>(fapi2::current_err)),
+                       "PMIC %s failed to enable. See previous errors for details.",
+                       mss::c_str(l_current_pmic));
     return fapi2::current_err;
 }
 
@@ -941,8 +959,19 @@ fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC
     // Otherwise the efuse must be blown, and we should declare N-mode.
     if (l_reg_contents > CONSTS::R31_VIN_BULK_EFUSE_OFF_HIGH)
     {
-        // FAPI INF as we will have a fail-in-place model. Don't alert the user with an ERR
-        FAPI_DBG("EFUSE for %s appears blown, declaring N-Mode", mss::c_str(i_pmic_target));
+        constexpr uint8_t THRESHOLD_HIGH = CONSTS::R31_VIN_BULK_EFUSE_OFF_HIGH;
+        FAPI_ASSERT_NOEXIT(false,
+                           fapi2::PMIC_EFUSE_BLOWN(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                           .set_PMIC_TARGET(i_pmic_target)
+                           .set_EFUSE_DATA(l_reg_contents)
+                           .set_THRESHOLD_LOW(0)
+                           .set_THRESHOLD_HIGH(THRESHOLD_HIGH),
+                           "EFUSE for %s appears blown (data:0x%02X), declaring N-Mode",
+                           mss::c_str(i_pmic_target), l_reg_contents);
+
+        // Set current_err back to success
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
         return mss::attr::set_n_mode_helper(
                    mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target),
                    mss::index(i_pmic_target),
@@ -989,7 +1018,19 @@ fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
     if ((l_reg_contents < CONSTS::R31_VIN_BULK_EFUSE_ON_LOW) ||
         (l_reg_contents > CONSTS::R31_VIN_BULK_EFUSE_ON_HIGH))
     {
-        FAPI_DBG("EFUSE for %s did not appear on, declaring N-Mode", mss::c_str(i_pmic_target));
+        constexpr uint8_t THRESHOLD_LOW = CONSTS::R31_VIN_BULK_EFUSE_ON_LOW;
+        constexpr uint8_t THRESHOLD_HIGH = CONSTS::R31_VIN_BULK_EFUSE_ON_HIGH;
+        FAPI_ASSERT_NOEXIT(false,
+                           fapi2::PMIC_EFUSE_BLOWN(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                           .set_PMIC_TARGET(i_pmic_target)
+                           .set_EFUSE_DATA(l_reg_contents)
+                           .set_THRESHOLD_LOW(THRESHOLD_LOW)
+                           .set_THRESHOLD_HIGH(THRESHOLD_HIGH),
+                           "EFUSE for %s did not appear on (data:0x%02X), declaring N-Mode",
+                           mss::c_str(i_pmic_target), l_reg_contents);
+
+        // Set current_err back to success
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
         return mss::attr::set_n_mode_helper(
                    mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target),
