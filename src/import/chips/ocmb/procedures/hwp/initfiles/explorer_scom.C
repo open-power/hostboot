@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,7 @@ constexpr uint64_t literal_0b101 = 0b101;
 constexpr uint64_t literal_0b111 = 0b111;
 constexpr uint64_t literal_0x10 = 0x10;
 constexpr uint64_t literal_6 = 6;
+constexpr uint64_t literal_0x4 = 0x4;
 constexpr uint64_t literal_0x0100 = 0x0100;
 constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_15 = 15;
@@ -190,6 +191,11 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FOUR_RANK_MODE, TGT1, l_TGT1_ATTR_MEM_EFF_FOUR_RANK_MODE));
         uint64_t l_def_four_rank_mode = (l_TGT1_ATTR_MEM_EFF_FOUR_RANK_MODE[literal_0] == literal_1);
         uint64_t l_def_cs_tied = ((l_def_four_rank_mode == literal_0) && (l_def_dual_drop == literal_0));
+        fapi2::ATTR_MEM_EFF_SUPPORTED_RCD_Type l_TGT1_ATTR_MEM_EFF_SUPPORTED_RCD;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_SUPPORTED_RCD, TGT1, l_TGT1_ATTR_MEM_EFF_SUPPORTED_RCD));
+        uint64_t l_def_HAS_RCD = (l_def_RDIMM_TYPE || (l_TGT1_ATTR_MEM_EFF_SUPPORTED_RCD[literal_0] == literal_1));
+        uint64_t l_def_encoded_quad_cs = (l_def_HAS_RCD
+                                          && (l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] == literal_0x4));
         fapi2::ATTR_MEM_SI_ODT_WR_Type l_TGT1_ATTR_MEM_SI_ODT_WR;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_WR, TGT1, l_TGT1_ATTR_MEM_SI_ODT_WR));
         uint64_t l_def_NUM_RANKS = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] +
@@ -663,12 +669,20 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                     || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<8, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_7) );
             l_scom_buffer.insert<9, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_6) );
-            l_scom_buffer.insert<10, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_3) );
-            l_scom_buffer.insert<11, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_2) );
+            l_scom_buffer.insert<10, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_3)
+                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1))) );
+            l_scom_buffer.insert<11, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_2)
+                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1))) );
             l_scom_buffer.insert<12, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_7) );
             l_scom_buffer.insert<13, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_6) );
-            l_scom_buffer.insert<14, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_3) );
-            l_scom_buffer.insert<15, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_2) );
+            l_scom_buffer.insert<14, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_3)
+                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1))) );
+            l_scom_buffer.insert<15, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_2)
+                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1))) );
             l_scom_buffer.insert<16, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_0] >> literal_7) );
             l_scom_buffer.insert<17, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_0] >> literal_6) );
             l_scom_buffer.insert<18, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_0] >> literal_3) );
@@ -703,12 +717,20 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                     || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<40, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_7) );
             l_scom_buffer.insert<41, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_6) );
-            l_scom_buffer.insert<42, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_3) );
-            l_scom_buffer.insert<43, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_2) );
+            l_scom_buffer.insert<42, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_3)
+                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1))) );
+            l_scom_buffer.insert<43, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_2)
+                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1))) );
             l_scom_buffer.insert<44, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_7) );
             l_scom_buffer.insert<45, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_6) );
-            l_scom_buffer.insert<46, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_3) );
-            l_scom_buffer.insert<47, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_2) );
+            l_scom_buffer.insert<46, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_3)
+                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1))) );
+            l_scom_buffer.insert<47, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_2)
+                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1))) );
             l_scom_buffer.insert<48, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_0] >> literal_7) );
             l_scom_buffer.insert<49, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_0] >> literal_6) );
             l_scom_buffer.insert<50, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_0] >> literal_3) );
