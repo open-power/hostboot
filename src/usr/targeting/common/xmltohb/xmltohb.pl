@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2020
+# Contributors Listed Below - COPYRIGHT 2012,2021
 # [+] International Business Machines Corp.
 # [+] YADRO
 #
@@ -2763,8 +2763,25 @@ sub writeTraitFileTraits {
                     {
                         $type = $simpleTypeProperties->{$typeName}{typeName};
                     }
+                    # Set char array
+                    if(exists $simpleType->{string})
+                    {
+                        # Note: A 1-dimensional char array (noted as a "<string>..." type in an XML)
+                        # won't trigger the std::array setup below, therefore it must be setup as a
+                        # std::array here.
+                        # A multidimensional array that holds type char (also using "<string>...")
+                        # will not process the char array-dimensions below, so that set up is
+                        # started here.
+                        if(exists $simpleType->{string}->{sizeInclNull})
+                        {
+                            # Use the char dimension
+                            my $charDimension = $simpleType->{string}->{sizeInclNull};
+                            $dimensions = "[$charDimension]";
+                            $stdArrAddOn = "std::array<$type, $charDimension>";
+                        }
+                    }
 
-
+                    # Setup for a 1,2,3...N-dimensional std::array.
                     if(   (exists $simpleType->{array})
                         && ($simpleTypeProperties->{$typeName}{supportsArray}) )
                     {
@@ -2774,30 +2791,20 @@ sub writeTraitFileTraits {
                         for my $idx (0 .. $#revBounds)
                         {
                             $dimensions = "[@revBounds[$idx]]$dimensions";
-
-                            # Creating std::array, even if multi-dimensional
-                            if ($idx == 0)
-                            {
-                                $stdArrAddOn = "std::array<$type, "
-                                    ."@revBounds[$idx]>";
-                            }
-                            else
+                            # If $stdArrAddOn is already filled, then we need to append even more
+                            # dimensions to the outside of it.
+                            if ($stdArrAddOn ne "")
                             {
                                 $stdArrAddOn = "std::array<$stdArrAddOn, "
                                     ."@revBounds[$idx]>";
                             }
+                            else
+                            {
+                                $stdArrAddOn = "std::array<$type, "
+                                    ."@revBounds[$idx]>";
+                            }
                         }
 
-                    }
-
-                    if(exists $simpleType->{string})
-                    {
-                        # Create the string dimension
-                        if(exists $simpleType->{string}->{sizeInclNull})
-                        {
-                            $dimensions .=
-                            "[$simpleType->{string}->{sizeInclNull}]";
-                        }
                     }
 
                     last;
