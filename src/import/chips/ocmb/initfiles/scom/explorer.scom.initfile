@@ -181,8 +181,9 @@ define def_enterprise_mode = (OCMB.ATTR_MSS_OCMB_ENTERPRISE_MODE == 1) && (OCMB.
 define def_half_dimm_mode  = (def_enterprise_mode == 1) && ((OCMB.ATTR_MSS_OCMB_HALF_DIMM_MODE == 1) && (OCMB.ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE != 1) ||
                                                             (OCMB.ATTR_MSS_OCMB_HALF_DIMM_MODE == 0) && (OCMB.ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE == 2));
 # For ODT RD/WR register setting
+define def_HAS_RCD = (def_RDIMM_TYPE || MP.ATTR_MEM_EFF_SUPPORTED_RCD[0] == 1);
 define def_four_rank_mode = (MP.ATTR_MEM_EFF_FOUR_RANK_MODE[0] == 1);
-define def_encoded_quad_cs = def_RDIMM_TYPE && (MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[0] == 0x4); # For future use
+define def_encoded_quad_cs = def_HAS_RCD && (MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[0] == 0x4);
 define def_dual_drop = ((MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[0] > 0) && (MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[1] > 0));
 define def_cs_tied = (def_four_rank_mode == 0 && def_dual_drop == 0);
 
@@ -641,8 +642,8 @@ ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK2_RD_ODT [when=S] {
   # otherwise they will just remain blank and unused
   0, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 7;
   1, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 2;
+  2, ((MP.ATTR_MEM_SI_ODT_RD[0][2] >> 3) && (def_encoded_quad_cs == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][2] >> 7) && (def_encoded_quad_cs == 1));
+  3, ((MP.ATTR_MEM_SI_ODT_RD[0][2] >> 2) && (def_encoded_quad_cs == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][2] >> 6) && (def_encoded_quad_cs == 1));
 }
 ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK3_RD_ODT [when=S] {
   bits, spyv;
@@ -650,8 +651,8 @@ ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK3_RD_ODT [when=S] {
   # otherwise they will just remain blank and unused
   0, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 7;
   1, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 2;
+  2, ((MP.ATTR_MEM_SI_ODT_RD[0][3] >> 3) && (def_encoded_quad_cs == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][3] >> 7) && (def_encoded_quad_cs == 1));
+  3, ((MP.ATTR_MEM_SI_ODT_RD[0][3] >> 2) && (def_encoded_quad_cs == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][3] >> 6) && (def_encoded_quad_cs == 1));
 }
 # Slot 1
 ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK4_RD_ODT [when=S] {
@@ -704,15 +705,15 @@ ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK2_WR_ODT [when=S] {
   bits, spyv;
   0, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 7;
   1, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 2;
+  2, ((MP.ATTR_MEM_SI_ODT_WR[0][2] >> 3) && (def_encoded_quad_cs == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][2] >> 7) && (def_encoded_quad_cs == 1));
+  3, ((MP.ATTR_MEM_SI_ODT_WR[0][2] >> 2) && (def_encoded_quad_cs == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][2] >> 6) && (def_encoded_quad_cs == 1));
 }
 ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK3_WR_ODT [when=S] {
   bits, spyv;
   0, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 7;
   1, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 2;
+  2, ((MP.ATTR_MEM_SI_ODT_WR[0][3] >> 3) && (def_encoded_quad_cs == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][3] >> 7) && (def_encoded_quad_cs == 1));
+  3, ((MP.ATTR_MEM_SI_ODT_WR[0][3] >> 2) && (def_encoded_quad_cs == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][3] >> 6) && (def_encoded_quad_cs == 1));
 }
 # Slot 1
 ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK4_WR_ODT [when=S] {
