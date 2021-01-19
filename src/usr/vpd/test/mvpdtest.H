@@ -545,6 +545,7 @@ class MVPDTest: public CxxTest::TestSuite
 
                 if( err )
                 {
+#ifndef __HOSTBOOT_RUNTIME
                     fails++;
                     TRACFCOMP( g_trac_vpd,
                                ERR_MRK"testMvpdWrite() - failure writing VWML/#I, RC=%.4X",
@@ -553,6 +554,23 @@ class MVPDTest: public CxxTest::TestSuite
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
+#else
+                TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH Expected err from deviceWrite, -NOT- supported in HBRT");
+                delete err;
+                err = NULL;
+#endif
+                }
+                else
+                {
+                    // no err so make sure its proper
+#ifdef __HOSTBOOT_RUNTIME
+                    fails++;
+                    TRACFCOMP( g_trac_vpd, "testMvpdWrite() - Expected err from deviceWrite in HBRT");
+                    TS_FAIL( "testMvpdWrite() - Unexpected, we should have received err from HBRT from calling deviceWrite!" );
+                    continue;
+#else
+                    TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH results from deviceWrite");
+#endif
                 }
 
                 // verify the data got written
@@ -573,19 +591,27 @@ class MVPDTest: public CxxTest::TestSuite
                                 VPD_COMP_ID );
                     continue;
                 }
-                TRACFBIN( g_trac_vpd, "testMvpdWrite() - verif=",
+                TRACFBIN( g_trac_vpd, "testMvpdWrite() - verify=",
                           verifyData, theSize );
 
                 // compare what we read to what we wrote
+#ifndef __HOSTBOOT_RUNTIME
                 if( memcmp( testData, verifyData, theSize ) )
                 {
                     fails++;
-                    TRACFBIN( g_trac_vpd, "testMvpdWrite() - wrote=",
-                              testData, theSize );
-                    TRACFBIN( g_trac_vpd, "testMvpdWrite() - read=",
-                              verifyData, theSize );
                     TS_FAIL( "testMvpdWrite - Data mismatch!" );
                 }
+#else
+                if( memcmp( testData, verifyData, theSize ) )
+                {
+                    TS_INFO( "testMvpdWrite - Data mismatch! Expected since MVPD Writes during HBRT -NOT- supported" );
+                }
+
+#endif
+                TRACFBIN( g_trac_vpd, "testMvpdWrite() - wrote=",
+                          testData, theSize );
+                TRACFBIN( g_trac_vpd, "testMvpdWrite() - read=",
+                          verifyData, theSize );
 
                 // put the original data back to be a good citizen
                 cmds++;
@@ -595,6 +621,7 @@ class MVPDTest: public CxxTest::TestSuite
                                    DEVICE_MVPD_ADDRESS(l_record, l_keyword) );
                 if( err )
                 {
+#ifndef __HOSTBOOT_RUNTIME
                     fails++;
                     TRACFCOMP( g_trac_vpd,
                                ERR_MRK"testMvpdWrite() - failure writing original data back into VWML/#I, RC=%.4X",
@@ -603,6 +630,23 @@ class MVPDTest: public CxxTest::TestSuite
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
+#else
+                TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH Expected err from deviceWrite original data, -NOT- supported in HBRT");
+                delete err;
+                err = NULL;
+#endif
+                }
+                else
+                {
+                    // no err so make sure its proper
+#ifdef __HOSTBOOT_RUNTIME
+                    fails++;
+                    TRACFCOMP( g_trac_vpd, "testMvpdWrite() - Expected err from deviceWrite in HBRT");
+                    TS_FAIL( "testMvpdWrite() - Unexpected, we should have received err from HBRT from calling deviceWrite!" );
+                    continue;
+#else
+                    TRACFCOMP( g_trac_vpd, "testMvpdWrite() - GOOD PATH results from deviceWrite original data");
+#endif
                 }
             } while( 0 );
 

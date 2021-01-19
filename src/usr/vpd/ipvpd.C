@@ -2393,6 +2393,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
         }
         else if ( vpdDest == VPD::SEEPROM )
         {
+#ifndef __HOSTBOOT_RUNTIME
             // Write directly to target's EEPROM.
             err = DeviceFW::deviceOp( DeviceFW::WRITE,
                                       i_target,
@@ -2419,6 +2420,37 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
             {
                 break;
             }
+#else
+            TRACFCOMP(g_trac_vpd, ERR_MRK"IpVpdFacade::writeKeyword> No MVPD write support in HBRT");
+            VPD::RecordTargetPair_t l_recTarg
+              = VPD::makeRecordTargetPair(i_recordName,i_target);
+            uint32_t l_kw = 0;
+            memcpy( &l_kw, i_keywordName, KEYWORD_BYTE_SIZE );
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_IPVPD_WRITE_KEYWORD
+             * @userdata1[0:31]  Target HUID
+             * @userdata1[32:63] Requested VPD Destination
+             * @userdata2[0:31]  VPD Record (ASCII)
+             * @userdata2[32:63] VPD Keyword (ASCII)
+             * @devdesc          No MVPD write support in HBRT
+             * @custdesc         Firmware error writing VPD
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           VPD::VPD_IPVPD_WRITE_KEYWORD,
+                                           VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT,
+                                           TWO_UINT32_TO_UINT64(
+                                                TARGETING::get_huid(i_target),
+                                                i_args.location ),
+                                           TWO_UINT32_TO_UINT64(
+                                                l_recTarg.first,
+                                                l_kw),
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            err->collectTrace( VPD_COMP_NAME, 256 );
+            break;
+#endif
         }
         else
         {
