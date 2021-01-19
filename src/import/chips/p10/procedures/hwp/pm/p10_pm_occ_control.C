@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -285,19 +285,31 @@ fapi2::ReturnCode pollOCCHearbeat(
 
     fapi2::buffer<uint64_t>  l_occhbr;
     uint32_t                 l_timeout_counter = TIMEOUT_COUNT;
+    uint32_t retry_cnt = 2;
 
     FAPI_DBG("OCC heartbeat polling...");
 
-    do
+    while( retry_cnt-- )
     {
-        FAPI_TRY(GET_TP_TPCHIP_OCC_OCI_OCB_OCCHBR(i_target, l_occhbr));
-        FAPI_DBG("OCC Heartbeat Reg: 0x%016lx; Timeout: %d",
-                 l_occhbr, l_timeout_counter);
-        // fapi2::delay takes ns as the arg
-        fapi2::delay(OCC_HB_POLLTIME_MS * 1000 * 1000, OCC_HB_POLLTIME_MCYCLES * 1000 * 1000);
+        l_timeout_counter = TIMEOUT_COUNT;
+
+        do
+        {
+            FAPI_TRY(GET_TP_TPCHIP_OCC_OCI_OCB_OCCHBR(i_target, l_occhbr));
+            FAPI_DBG("OCC Heartbeat Reg: 0x%016lx; Timeout: %d",
+                     l_occhbr, l_timeout_counter);
+            // fapi2::delay takes ns as the arg
+            fapi2::delay(OCC_HB_POLLTIME_MS * 1000 * 1000, OCC_HB_POLLTIME_MCYCLES * 1000 * 1000);
+        }
+        while((l_occhbr.getBit<TP_TPCHIP_OCC_OCI_OCB_OCCHBR_EN>() != 1) &&
+              (--l_timeout_counter != 0));
+
+        if (l_occhbr.getBit<TP_TPCHIP_OCC_OCI_OCB_OCCHBR_EN>())
+        {
+            break;
+        }
+
     }
-    while((l_occhbr.getBit<TP_TPCHIP_OCC_OCI_OCB_OCCHBR_EN>() != 1) &&
-          (--l_timeout_counter != 0));
 
     FAPI_ASSERT((l_timeout_counter &&
                  l_occhbr.getBit<TP_TPCHIP_OCC_OCI_OCB_OCCHBR_EN>()),
@@ -497,6 +509,8 @@ fapi2::ReturnCode p10_pm_occ_control
             if (! Util::isSimicsRunning())
             {
 #endif
+                //As we are seeing some intermittent issue in occ start, so will
+                // retry couple of times and then will error out.
                 FAPI_TRY(pollOCCHearbeat(i_target));
 
 #ifdef __HOSTBOOT_MODULE
