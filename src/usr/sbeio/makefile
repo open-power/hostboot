@@ -57,6 +57,8 @@ OBJS += p10_ppe_utils.o
 OBJS += p10_ppe_common.o
 OBJS += sbe_psuSendOcmbConfig.o
 OBJS += sbe_psuSyncFabTopoIdTable.o
+OBJS += sbe_halt.o
+
 
 # sbeio's sub directories
 SUBDIRS += test.d

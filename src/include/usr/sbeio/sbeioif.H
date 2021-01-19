@@ -167,6 +167,7 @@ namespace SBEIO
     */
     errlHndl_t sendContinueMpiplRequest(TARGETING::Target * i_procChip);
 
+
     /**
      * @brief Sends a PSU chipOp to quiesce the SBE
      *
@@ -485,6 +486,20 @@ namespace SBEIO
     *
     */
     errlHndl_t psuSendTopologyIdTable(void);
+
+
+    /**
+    * @brief Send halt message to the secondary/non-boot SBE
+    *        No response for halt message.
+    *        User should monitor SBE ATTN bit to verify SBE is halted.
+    *
+    * @param[in] i_procChip The proc you would like to request halt on
+    *            NOTE: HB should only be sending this to non-boot procs
+    *
+    * @return errlHndl_t Error log handle on failure.
+    */
+    errlHndl_t sendSecondarySbeHaltRequest(TARGETING::Target * i_procChip);
+
 
 } //end namespace SBEIO
 

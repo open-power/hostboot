@@ -139,7 +139,7 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
 
 SbeRetryHandler::~SbeRetryHandler() {}
 
-void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
+void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbeHalted )
 {
     SBE_TRACF(ENTER_MRK "main_sbe_handler()");
     do
@@ -183,7 +183,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
         // we will always TI and let hwsv deal with the problem. This is a unique path
         // so we will have it handled in a separate procedure
 #ifndef __HOSTBOOT_RUNTIME
-        if(INITSERVICE::spBaseServicesEnabled())
+        if(INITSERVICE::spBaseServicesEnabled() && !i_sbeHalted)
         {
             if(iv_initialPowerOn)
             {
@@ -225,7 +225,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
 
         // if the sbe is not booted at all extract_rc will fail so we only
         // will run extract RC if we know the sbe has at least tried to boot
-        if(this->iv_sbeRegister.sbeBooted)
+        if(this->iv_sbeRegister.sbeBooted && !i_sbeHalted)
         {
             SBE_TRACF("main_sbe_handler(): No async ffdc found and sbe says it has been booted, running p10_sbe_extract_rc.");
             // Call the function that runs extract_rc, this needs to run to determine

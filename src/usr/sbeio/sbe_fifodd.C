@@ -119,11 +119,19 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
                             i_pFifoRequest);
         if (errl) break;  // return with error
 
-        errl = readResponse(i_target,
-                            i_pFifoRequest,
-                            i_pFifoResponse,
-                            i_responseSize);
-        if (errl) break;  // return with error
+        // skip reading a response for commands that don't have one
+        if ((i_pFifoResponse != nullptr) && (i_responseSize > 0))
+        {
+            errl = readResponse(i_target,
+                                i_pFifoRequest,
+                                i_pFifoResponse,
+                                i_responseSize);
+            if (errl) break;  // return with error
+        }
+        else
+        {
+            SBE_TRACD("performFifoChipOp: skipping readResponse()");
+        }
 
     }
     while (0);

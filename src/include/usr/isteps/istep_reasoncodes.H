@@ -84,6 +84,11 @@ namespace ISTEP
         MOD_GET_RUNTIME_PM_ADDRESSES                      = 0x35,
         MOD_ENABLE_MEMORY_ENCRYPTION                      = 0x36,
         MOD_SECUREBOOT_LOCKDOWN                           = 0x37,
+        MOD_RECOVER_SBE                                   = 0x38,
+        MOD_RETRIEVE_EXTEND_SECONDARY_MEASUREMENTS        = 0x39,
+        MOD_CALL_HOST_SECUREBOOT_LOCKDOWN                 = 0x3A,
+        MOD_WAIT_FOR_SBE_ATTN                             = 0x3B,
+        MOD_CHECK_FOR_SECURITY_ACCESS_MISMATCH            = 0x3C,
     };
 
     /**
@@ -177,6 +182,11 @@ namespace ISTEP
         RC_MEMORY_ENCRYPTION_ENABLED             = ISTEP_COMP_ID | 0x61,
         RC_INVALID_PAYLOAD_KIND                  = ISTEP_COMP_ID | 0x62,
         RC_SBE_REPORTED_FFDC                     = ISTEP_COMP_ID | 0x63,
+        RC_FAILED_SBE_HRESET                     = ISTEP_COMP_ID | 0x64,
+        RC_PCR6_MISMATCH_DETECTED                = ISTEP_COMP_ID | 0x65,
+        RC_SBE_COMPROMISED                       = ISTEP_COMP_ID | 0x66,
+        RC_WAIT_ATTN_TIMEOUT                     = ISTEP_COMP_ID | 0x67,
+        RC_SAB_MISMATCH_DETECTED                 = ISTEP_COMP_ID | 0x68,
     };
 
 };

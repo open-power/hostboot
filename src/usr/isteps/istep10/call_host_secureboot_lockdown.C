@@ -28,14 +28,15 @@
  *  Support file for IStep: host_secureboot_lockdown
  *    This istep will do these things (not necessarily in this order):
  *      1) Check for TPM policies are valid
- *      2) Check for secureboot consistency between procs
- *      3) Set the SUL security bit so that SBE image cannot be updated
- *      4) Ensure that the SAB security bit is read only
- *      5) If a TPM is non functional, set the TDP (TPM Deconfig Protection)
+ *      2) Check for compromised SBE security
+ *      3) Check for secureboot consistency between procs
+ *      4) Set the SUL security bit so that SBE image cannot be updated
+ *      5) Ensure that the SAB security bit is read only
+ *      6) If a TPM is non functional, set the TDP (TPM Deconfig Protection)
  *         to prevent attack vector
- *      6) Check for a reason, such as a Key Clear Request, to re-IPL the
+ *      7) Check for a reason, such as a Key Clear Request, to re-IPL the
  *         system so the system owner can assert physical presence
- *      7) Check Scratch Regiser 11 (0x50182) to see if SBE is reporting a previous fail.
+ *      8) Check Scratch Regiser 11 (0x50182) to see if SBE is reporting a previous fail.
  *
  */
 
@@ -160,6 +161,46 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 l_proc->setAttr<
                     TARGETING::ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM
                                                                     >(l_set_protectTpm);
+            }
+
+            // Check for compromised SBE security
+            uint32_t l_sbe_compromised_eid = l_proc->getAttr<TARGETING::ATTR_SBE_COMPROMISED_EID>();
+            if (l_sbe_compromised_eid)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK"call_host_secureboot_lockdown: Found compromised SBE"
+                    " for Proc HUID 0x%08x - see EID 0x%08X for more details",
+                    TARGETING::get_huid(l_proc), l_sbe_compromised_eid );
+                /*@
+                 * @errortype
+                 * @moduleid   ISTEP::MOD_CALL_HOST_SECUREBOOT_LOCKDOWN
+                 * @reasoncode ISTEP::RC_SBE_COMPROMISED
+                 * @userdata1  Huid of processor with compromised SBE
+                 * @userdata2  EID with more details of why compromised
+                 * @devdesc    SBE security compromise detected in 10.1 and not resolved
+                 * @custdesc   Platform security problem detected
+                 */
+                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                ISTEP::MOD_CALL_HOST_SECUREBOOT_LOCKDOWN,
+                                                ISTEP::RC_SBE_COMPROMISED,
+                                                TARGETING::get_huid(l_proc),
+                                                l_sbe_compromised_eid);
+
+                // Note: secureboot is enabled, so deconfig
+                l_err->addHwCallout( l_proc,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DELAYED_DECONFIG,
+                                     HWAS::GARD_NULL );
+
+                l_err->collectTrace(ISTEP_COMP_NAME);
+
+                // Associate the previous error with this one so as not
+                // to report a new problem
+                l_err->plid(l_sbe_compromised_eid);
+                captureError(l_err, l_istepError, ISTEP_COMP_ID, l_proc);
+
+                // no sense in continuing on this compromised proc
+                continue;
             }
 
             // Check that the SBE did not use Scratch Register 11 (0x50182) to pass FFDC

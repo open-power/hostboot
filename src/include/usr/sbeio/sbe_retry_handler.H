@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -176,9 +176,10 @@ class SbeRetryHandler
          *         SBE handler functions.
          *
          * @param[in]  i_target    - current proc target
+         * @param[in]  i_sbeHalted - sbe is halted on purpose, skip error path collection
          */
 
-        void main_sbe_handler( TARGETING::Target * i_target);
+        void main_sbe_handler( TARGETING::Target * i_target, bool i_sbeHalted = false);
 
     private:
 #ifndef __HOSTBOOT_RUNTIME

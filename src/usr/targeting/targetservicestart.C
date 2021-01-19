@@ -487,6 +487,7 @@ static void initializeAttributes(TargetService& i_targetService,
                 l_chip->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
                 l_chip->setAttr<ATTR_HB_INITIATED_PM_RESET>
                   (HB_INITIATED_PM_RESET_INACTIVE);
+                l_chip->setAttr<ATTR_SBE_COMPROMISED_EID>(0);
 
                 // clear the NVDIMM arming status so it gets redone when OCC is active
                 ATTR_NVDIMM_ARMED_type l_nvdimms_armed_state =

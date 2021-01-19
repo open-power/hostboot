@@ -610,12 +610,12 @@ namespace TRUSTEDBOOT
      *
      *  @param[in] i_pTpm    - Handle to TPM target
      *
-     *  @param[in] io_errLog - Handle to Error Log used to collect FFDC
-     *                         -- This log will be COMMITED in this function
-     *                            and the handle will be set to nullptr
-     *                         -- Any additional fails in marking the TPM as
-     *                            non-functional will be linked to this
-     *                         -- If nullptr, then the above actions are no-ops
+     *  @param[in/out] io_errLog - Handle to Error Log used to collect FFDC
+     *                    -- This log will be COMMITED in this function
+     *                       and the handle will be set to nullptr
+     *                    -- Any additional fails in marking the TPM as
+     *                       non-functional will be linked to this
+     *                    -- If nullptr, then the above actions are no-ops
      */
     void tpmMarkFailed(TpmTarget * i_pTpm,
                        errlHndl_t & io_errLog);

@@ -80,6 +80,7 @@ class SbeFifo
             SBE_FIFO_CLASS_GENERIC_MESSAGE     = 0xA8,
             SBE_FIFO_CLASS_MPIPL_COMMANDS      = 0xA9,
             SBE_FIFO_CLASS_SECURE_HWP          = 0xAA,
+            SBE_FIFO_CLASS_HOST_COMMANDS       = 0xAB,
         };
 
         /**
@@ -153,6 +154,14 @@ class SbeFifo
             SBE_FIFO_CMD_CONTINUE_MPIPL      = 0x02,
             SBE_FIFO_CMD_STOP_CLOCKS         = 0x03,
         };
+
+        /**
+         * @brief enums for FIFO Host Messages
+         */
+         enum fifoHostMessage
+         {
+            SBE_FIFO_CMD_HOST_HALT           = 0x01,
+         };
 
         /**
         * @brief Struct for FIFO PutMem request
@@ -250,6 +259,26 @@ class SbeFifo
             fifoContinueMpiplRequest() :
             wordCnt(2),
             reserved(0)
+            {
+            }
+        } PACKED;
+
+
+        /**
+        * @brief Struct for FIFO Host Commands request
+        *
+        */
+        struct fifoHostCommandsRequest
+        {
+            uint32_t wordCnt;
+            uint16_t reserved;
+            uint8_t  commandClass;
+            uint8_t  command;
+            fifoHostCommandsRequest() :
+            wordCnt(2),
+            reserved(0),
+            commandClass(SBE_FIFO_CLASS_HOST_COMMANDS),
+            command(SBE_FIFO_CMD_HOST_HALT)
             {
             }
         } PACKED;
@@ -497,7 +526,8 @@ class SbeFifo
             statusHeader status;
             struct       fapi2::ffdc_struct ffdc;  // ffdc data
             uint32_t     status_distance; // distance to status
-            fifoGetCapabilitiesResponseEnd() {}
+            fifoGetCapabilitiesResponseEnd():
+                status_distance(0) {}
         } PACKED;
 
         /**
