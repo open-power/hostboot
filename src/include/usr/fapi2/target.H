@@ -1075,6 +1075,8 @@ Target<K, M, V>::reduceType(Target<T, M, V>& o_target) const
     TARGETING::TYPE l_type = fapi2::convertFapi2TypeToTargeting(T);
     if( l_type != l_hbTarget->getAttr<TARGETING::ATTR_TYPE>() )
     {
+        FAPI_ERR("reduceType(): Cannot reduce to %X for target %.8X",
+                 l_type, TARGETING::get_huid(l_hbTarget));
         return FAPI2_RC_INVALID_PARAMETER;
     }
 
