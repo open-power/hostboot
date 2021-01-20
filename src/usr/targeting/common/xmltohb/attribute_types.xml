@@ -262,8 +262,12 @@
       <value>9</value>
     </enumerator>
     <enumerator>
-      <name>ALL</name>
+      <name>SECURITY</name>
       <value>10</value>
+    </enumerator>
+    <enumerator>
+      <name>ALL</name>
+      <value>11</value>
     </enumerator>
     <id>CDM_DOMAIN</id>
   </enumerationType>
