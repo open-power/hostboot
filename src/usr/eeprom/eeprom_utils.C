@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #include <eeprom/eeprom_const.H>
 #include <i2c/i2c_common.H>
 #include <fsi/fsiif.H>
-
+#include <spi/spi.H>
 
 // ----------------------------------------------
 // Trace definitions
@@ -161,20 +161,15 @@ bool eepromPresence ( TARGETING::Target * i_target )
         }
         else if (eepInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_SPI)
         {
-            // RTC 251866 - implement spiPresence
-            /*
             // Check for the target at the SPI level
-            l_present = SPI::spiPresence(masterTarget,
-                                         eepInfo.accessAddr.spi_addr.engine,
-                                         eepInfo.accessAddr.spi_addr.devAddr);
-            */
-            // For now just default to true if the eeprom masterTarget is present
-            l_present = true;
+            err = SPI::spiPresence(l_eepromMasterTarget,
+                                   eepInfo.accessAddr.spi_addr.engine,
+                                   l_present);
         }
         if( !l_present )
         {
-            TRACDCOMP(g_trac_eeprom,
-                     ERR_MRK"Presence check returned false! chip NOT present!");
+            TRACUCOMP(g_trac_eeprom,
+                     ERR_MRK"eepromPresence(): Presence check returned false! chip NOT present!");
             break;
         }
 
@@ -1130,7 +1125,8 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
          i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>
           (spiEepromData) )
     {
-        TRACFCOMP(g_trac_eeprom, "Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, target present = %d , eeprom type = %d",
+        TRACFCOMP(g_trac_eeprom, "cacheEepromVpd(): Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, "
+                                 "target present = %d , eeprom type = %d",
                   TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
 
         void * empty_buffer = nullptr;
@@ -1158,7 +1154,8 @@ errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
          i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>
           (spiEepromData) )
     {
-        TRACFCOMP(g_trac_eeprom, "Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, target present = %d , eeprom type = %d",
+        TRACFCOMP(g_trac_eeprom, "cacheEepromBuffer(): Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_AUTO, "
+                                 "target present = %d , eeprom type = %d",
                   TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_AUTO));
 
         size_t eeprom_data_size = i_eeprom_data.size();

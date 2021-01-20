@@ -49,6 +49,10 @@
 // SPI
 #include <spi/spi.H>
 #include "spidd.H"
+#include <spi/spireasoncodes.H>
+
+// Error Log
+#include <errl/errlentry.H>
 
 // FAPI2
 #include <fapi2/plat_hwp_invoker.H> // FAPI_INVOKE_HWP
@@ -537,6 +541,10 @@ errlHndl_t spiInitEngine(
           TARGETING::Target* i_pProc,
     const uint8_t            i_engine)
 {
+    TRACFCOMP(g_trac_spi, "spiInitEngine(): Initialze engine %d on Proc 0x%.8X",
+                          i_engine,
+                          TARGETING::get_huid(i_pProc));
+
     errlHndl_t pError = nullptr;
     bool procLocked = false;
 
@@ -794,5 +802,72 @@ errlHndl_t spiLockProcessor(TARGETING::Target * i_processor, bool i_lock)
     return l_err;
 }
 
+errlHndl_t spiPresence(TARGETING::Target* i_target,
+                       uint8_t const      i_engine,
+                       bool&              o_present)
+{
+    assert(i_target->getAttr<ATTR_TYPE>() == TYPE_PROC, "spiPresence(): i_target must be a processor.");
+    TRACDCOMP(g_trac_spi, "spiPresence(): Detect presense of EEPROM on engine %d for Proc 0x%.8X",
+                           i_engine,
+                           TARGETING::get_huid(i_target));
+    errlHndl_t errl = nullptr;
+
+    // Assume not present
+    o_present = false;
+
+    // Determine which access type to use.
+    const auto scomSwitches =
+        i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+    const bool pibAccess = !scomSwitches.useSpiFsiScom;
+
+    // Convert to fapi2 target
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapiProc(i_target);
+
+    // Create a SPI handle from the given parameters
+    SpiControlHandle handle(fapiProc, i_engine, 1, pibAccess);
+
+    if ((i_engine == SPI_ENGINE_PRIMARY_MVPD_SEEPROM) || (i_engine == SPI_ENGINE_BACKUP_MVPD_SEEPROM))
+    {
+        uint64_t id = 0;
+
+        // Read the manufacturer id from the device.
+        FAPI_INVOKE_HWP(errl,
+                        spi_read_manufacturer_id,
+                        handle,
+                        reinterpret_cast<uint8_t*>(&id));
+
+        if ((errl == nullptr) && (id != 0))
+        {
+            o_present = true;
+        }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_spi, ERR_MRK"spiPresence(): Unsupported engine[%d] provided for SPI presence detection for "
+                              "PROC 0x%.8X.", i_engine, TARGETING::get_huid(i_target));
+        /*@
+         * @errortype
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         SPI::SPI_PRESENCE
+         * @reasoncode       SPI::SPI_PRESENCE_UNSUPPORTED_ENGINE
+         * @userdata1        Target HUID of the SPI Master
+         * @userdata2        SPI Engine
+         * @devdesc          An unsupported engine was provided to attempt presence detection on.
+         * @custdesc         A problem occurred during IPL of the system.
+         */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       SPI::SPI_PRESENCE,
+                                       SPI::SPI_PRESENCE_UNSUPPORTED_ENGINE,
+                                       TARGETING::get_huid(i_target),
+                                       i_engine,
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+        o_present = false;
+    }
+
+    TRACDCOMP(g_trac_spi, EXIT_MRK"spiPresence(): present? %s", o_present ? "YES" : "NO");
+    return errl;
+
+}
 
 }

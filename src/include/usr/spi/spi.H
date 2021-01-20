@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -265,6 +265,23 @@ errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
  * @return error if lock operation failed
  */
 errlHndl_t spiLockProcessor(TARGETING::Target * i_processor, bool i_lock);
+
+/**
+ * @brief spiPresence
+ *
+ *        Determines presence of SPI EEPROMs by reading the manufacturer id and if there is no error and the id isn't all zeroes
+ *        then the EEPROM is considered present.
+ *
+ * @param[in]  i_target       SPI processor to attempt presence detection on
+ * @param[in]  i_engine       The engine to attempt presence detection on. Only supports MVPD engines (2 & 3)
+ * @param[out] o_present      TRUE: EEPROM is present
+ *                            FALSE: EEPROM is not present or an error occurred during attempted detection.
+ *
+ * @return errlHndl_t         nullptr or an error log if an error occurred.
+ */
+errlHndl_t spiPresence(TARGETING::Target* i_target,
+                       uint8_t            i_engine,
+                       bool&              o_present);
 
 }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,26 +71,17 @@ class FSIPresTest : public CxxTest::TestSuite
             // Iterate through all processors and mem-buffers.
             while(target)
             {
-                TS_TRACE("FSI-PRES: Testing target %x",
-                          TARGETING::get_huid(*target)); 
+                TS_INFO("FSI-PRES: Testing target %x",
+                          TARGETING::get_huid(*target));
 
                 // Read presence detect.
                 errlHndl_t l_errl = NULL;
                 bool present = false;
-                size_t l_size = 1;
 
-                l_errl = deviceRead(*target, &present, l_size,
-                                    DEVICE_PRESENT_ADDRESS());
+                auto hwasState = target->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                present = hwasState.present;
 
-                if (l_errl)
-                {
-                    TS_FAIL("FSI-PRES: Cannot perform presence detect. %x",
-                             TARGETING::get_huid(*target));
-                    TRACFCOMP(g_trac_fsi,
-                              "Failed presence detect. %x",
-                               TARGETING::get_huid(*target));
-                }
-                else if ((*target == l_masterChip) && (!present))
+                if ((*target == l_masterChip) && (!present))
                 {
                     TS_FAIL("FSI-PRES: Claiming master chip is not present!");
                 }
@@ -123,7 +114,7 @@ class FSIPresTest : public CxxTest::TestSuite
                                   TARGETING::get_huid(*target));
                         // commit this log for debug
                         l_errl->collectTrace("UNIT_TEST",512);
-                        errlCommit(l_errl,FSI_COMP_ID);                        
+                        errlCommit(l_errl,FSI_COMP_ID);
                     }
                     else if (!present && !l_errl)
                     {

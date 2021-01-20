@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@ namespace SPI
         SPI_COPY_TO_BUFFER      = 0x03,
         SPI_ENGINE_LOCK_OP      = 0x04,
         SPI_PERFORM_OP          = 0x05,
+        SPI_PRESENCE            = 0x06,
     };
 
     enum spiReasonCode
@@ -46,6 +47,7 @@ namespace SPI
         SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX = SPI_COMP_ID | 0x03,
         SPI_UNKNOWN_OP_TYPE                 = SPI_COMP_ID | 0x04,
         SPI_INVALID_BUFFER_SIZE             = SPI_COMP_ID | 0x05,
+        SPI_PRESENCE_UNSUPPORTED_ENGINE     = SPI_COMP_ID | 0x06,
     };
 
     enum SpiUserDetailsTypes
