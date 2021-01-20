@@ -201,6 +201,20 @@ extern "C"
         uint64_t i_pib_master_id );
 
 ///
+/// @brief Reads out the EEPROM Manufacturer Id for the given SPI handle. According to the spec, the manufacturer
+///        id is 5 bytes long: 1 byte Manufacturer Id, 2 bytes Device Id, 2 bytes Extended Device Info (EDI) data.
+///
+/// @param[in] i_handle          Reference to SPI Control Handle
+/// @param[in] o_buffer          A pointer to the buffer that will hold the Manufacturer Id.
+///
+/// @return FAPI_RC_SUCCESS if the read of the manufacturer id completes successfully,
+///                         else error code.
+///
+    fapi2::ReturnCode spi_read_manufacturer_id(SpiControlHandle& i_handle,
+            uint8_t* o_buffer);
+
+
+///
 /// @brief  API to read the seeprom using SPI
 ///
 /// @param[in] i_handle     Reference to SPI Control Handle

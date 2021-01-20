@@ -48,6 +48,7 @@
 #define SPI_SLAVE_RD_CMD  0x0300000000000000
 #define SPI_SLAVE_RD_STAT 0x0500000000000000
 #define SPI_SLAVE_WR_EN   0x0600000000000000
+#define SPI_SLAVE_ID_CMD  0x9F00000000000000
 
 // Timeout values so not stuck in wait loops forever
 constexpr uint64_t SPI_TIMEOUT_MAX_WAIT_COUNT      = 10000;   // 10 seconds
@@ -55,7 +56,6 @@ constexpr uint64_t SPI_TIMEOUT_DELAY_NS            = 1000000; // 1 msec
 constexpr uint64_t SPI_TIMEOUT_DELAY_NS_SIM_CYCLES = 1000000; // 1 msec
 
 using namespace fapi2;
-
 
 // TPM SPI command
 // From Trusted Computing Group(TCG) 2.0 spec for SPI Bit Protocol
@@ -1018,6 +1018,94 @@ fapi2::ReturnCode spi_tpm_read_secure( SpiControlHandle& i_handle,
 
     return rc;
 }
+
+fapi2::ReturnCode spi_read_manufacturer_id(SpiControlHandle& i_handle, uint8_t* o_buffer)
+{
+    fapi2::buffer<uint64_t> data64;
+    uint64_t temp = 0;
+    // The sequence that will write the op code and then read five bytes of manufacturer id.
+    uint64_t SEQ = 0x1031451000000000ULL | ((uint64_t)((i_handle.slave)) << 56);
+    // Ensure the Counter Config Reg is cleared as this function doesn't require loop logic and default settings
+    // will be sufficient enough.
+    uint64_t CNT = 0x0ULL;
+    // The value to write into the TDR, this is just the op code that requests the manufacturer id
+    // from the slave device.
+    uint64_t TDR = SPI_SLAVE_ID_CMD;
+
+    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // If ECC is on then it will need to be off to avoid errors.
+    bool l_ecc = false;
+    is_ecc_on(i_handle, l_ecc);
+
+    if (l_ecc)
+    {
+        spi_set_ecc_off(i_handle);
+    }
+
+    // Check the state of the h/w
+    rc = spi_precheck(i_handle);
+
+    if (rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        return rc;
+    }
+
+    // Set the sequence
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_SEQREG, SEQ));
+
+    // Clear the Counter Config Reg
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_COUNTERREG, CNT));
+
+    // Write the op code to the TDR, this executes the sequence.
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, TDR));
+
+    // Wait for the RDR to be full
+    rc = spi_wait_for_rdr_full(i_handle);
+
+    if (rc)
+    {
+        FAPI_ERR("Error in spi_wait_for_rdr_full");
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
+    }
+
+    // Read the manufacturer id from the RDR.
+    FAPI_TRY(getScom(i_handle.target_chip, i_handle.base_addr + SPIM_RDR, data64));
+
+    // Since this read was less than 8 bytes, there are 3 bytes of "don't care" in the RDR.
+    // So, just extract off the data we care about and return that.
+    // RDR is a right aligned reg, so use the right aligned extract since caller expects right
+    // aligned return data per the spec.
+    data64.extractToRight<24, 40>(temp);
+#ifndef _BIG_ENDIAN
+    fapi2::endian_swap(temp);
+#endif
+
+    *((uint64_t*)o_buffer) = temp;
+
+    rc = spi_wait_for_idle(i_handle);
+
+    if (rc)
+    {
+        FAPI_ERR("Multiplexing Error in spi_wait_for_idle ");
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
+    }
+
+    // Restore the default counter and seq used by the side band path
+    FAPI_TRY(putScom(i_handle.target_chip,
+                     i_handle.base_addr + SPIM_SEQREG, SPI_DEFAULT_SEQ));
+
+    if (l_ecc)
+    {
+        spi_set_ecc_on(i_handle);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 //Reads data. For this implementation of one time use to counter,
 //we can read at max of MAX_LENGTH_TRNS.
