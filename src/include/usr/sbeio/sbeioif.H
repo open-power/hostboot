@@ -195,6 +195,17 @@ namespace SBEIO
      */
     errlHndl_t psuSendSbeOcmbConfig(TARGETING::Target* i_pProc);
 
+    /**
+     * @brief Send Memory configuration info to the SBE
+     *
+     * @param[in] i_pProc - Pointer to the PROC target that contains
+     *                      the Memory Targets
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t psuSendSbeMemConfig(TARGETING::Target* i_pProc);
+
      /**
      * @brief Get the capabilities of the SBE via PSU
      *

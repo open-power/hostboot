@@ -39,6 +39,8 @@ extern trace_desc_t* g_trac_sbeio;
 #define SBE_TRACFBIN(printf_string,args...) \
     TRACFBIN(g_trac_sbeio, "getOcmbConfigInfo: " printf_string,##args)
 
+// @TODO RTC:261634 Need to remove this module
+
 namespace SBEIO
 {
 using namespace TARGETING;

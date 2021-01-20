@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,8 @@
 #include <sbeio/sbe_psudd.H>                   // SbePsu::psuCommand
 #include <targeting/common/commontargeting.H>  // get_huid
 #include <targeting/common/utilFilter.H>       // getAllChips
+
+// @TODO RTC:261634 Remove this module
 
 namespace SBEIO
 {

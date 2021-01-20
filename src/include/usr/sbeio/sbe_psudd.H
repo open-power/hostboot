@@ -77,6 +77,15 @@ class SbePsu
          * @brief enums for SBE command class
          */
 
+        // Memory Config Version Tracking related info
+        enum psuConfigVersion
+        {
+            SBE_PSU_I2C_CONFIG_VERSION_1 = 0x01,
+            SBE_PSU_I2C_CONFIG_VERSION_2 = 0x02,
+            SBE_PSU_I2C_CONFIG_VERSION_LATEST = SBE_PSU_I2C_CONFIG_VERSION_1,
+            SBE_PSU_I2C_CONFIG_TYPES_SUPPORTED = 0x03, // see MemConfigData_t
+        };
+
         // BYTE 6 options
         enum psuCommandClass
         {
@@ -87,10 +96,6 @@ class SbePsu
             SBE_PSU_CLASS_SECURITY_CONTROL  = 0xD6,
             SBE_PSU_GENERIC_MESSAGE         = 0xD7,
         };
-
-        /**
-         * @brief enums for SBE core state control commands
-         */
 
         // BYTE 7 options
         enum psuCoreStateControlCommands
@@ -133,6 +138,7 @@ class SbePsu
             SBE_PSU_SECURITY_LIST_BIN_DUMP   = 0x08,
             SBE_PSU_OCMB_CONFIG              = 0x09,
             SBE_PSU_TOPOLOGY_ID_TABLE        = 0x0A, //syncFabTopoIdTable
+            SBE_CMD_MEM_CONFIG               = 0x0B, //getMemConfigInfo
         };
 
         /**
@@ -225,6 +231,27 @@ class SbePsu
         };
 
         /**
+         * @brief non reserved word enums
+         *
+         * Shows which of the request and response msg registers are
+         * not reserved. Reserved registers do not need to be written
+         * or read.
+         *
+         * This is a 4 bit field, each bit indicates as follows:
+         * 0x1 - Reg 0 is non-reserved (read or write this reg)
+         * 0x2 - Reg 1 is non-reserved (read or write this reg)
+         * 0x4 - Reg 2 is non-reserved (read or write this reg)
+         * 0x8 - Reg 3 is non-reserved (read or write this reg)
+         */
+        enum psuMemConfigNonReservedMsgs
+        {
+            // Use Request Reg 0,2 (0x1 + 0x4)
+            SBE_MEM_CONFIG_REQ_USED_REGS  = 0x05,
+            // Use Response Reg 4 (0x1)
+            SBE_MEM_CONFIG_RSP_USED_REGS  = 0x01,
+        };
+
+        /**
         * @brief non reserved word enums
         *
         * Shows which of the request and response msg registers are
@@ -304,8 +331,59 @@ class SbePsu
             // after sending the OCMB updates
             SBE_RSP_SEND_OCMB_CONFIG_REGS  = 0x01,
             // The maximum number of OCMB config info the PSU command can handle
-            SBE_OCMB_CONFIG_MAX_NUMBER_OF_PORTS = 16,
+            SBE_OCMB_CONFIG_MAX_NUMBER_OF_PORTS = 16, // @TODO RTC:261634 will remove this one
+            // The maximum number of OCMB config info the PSU command can handle
+            SBE_OCMB_CONFIG_MAX_NUMBER = 16,
+            // The maximum number of PMIC config info the PSU command can handle
+            SBE_PMIC_CONFIG_MAX_NUMBER = 64,
+            // The maximum number of GENERIC I2C config info the PSU command can handle
+            SBE_GENERIC_I2C_CONFIG_MAX_NUMBER = 64,
         };
+
+        typedef struct i2cdevice_t
+        {
+            uint8_t i2c_port;
+            uint8_t i2c_engine;
+            uint8_t i2c_devAddr;
+            uint8_t i2c_functional;
+            uint8_t i2c_present;
+            uint8_t i2c_reserved[3];
+        } PACKED i2cdevice_t;
+
+        struct MemConfigData_t
+        {
+            // Struct data initialized in sbe_psuSendMemConfig.C
+            // SBE_PSU_I2C_CONFIG_VERSION_LATEST
+
+            // ** IMPORTANT **
+            // If this structure changes, need to update sbe_psuSendMemConfig.C
+            // and sbe_psuSendMemConfigTest.H modified to properly handle
+            //
+            // SBE PPE repo also needs to stay in sync
+            //
+            // ** IMPORTANT **
+            uint16_t i2c_config_version;
+
+            // How many unique types we support today ?
+            // TYPE_PMIC+TYPE_GENERIC_I2C_DEVICE+TYPE_OCMB_CHIP = 3
+            // SBE_PSU_I2C_CONFIG_TYPES_SUPPORTED
+            uint16_t i2c_config_types_supported;  // pmic gi2c ocmb
+
+            // FAPI_POS will be used as an index into the arrays created below
+
+            // TYPE_PMIC
+            uint16_t pmic_chips_max_number;
+            i2cdevice_t pmic_chips[SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER];
+
+            // TYPE_GENERIC_I2C_DEVICE
+            uint16_t gi2c_chips_max_number;
+            i2cdevice_t gi2c_chips[SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER];
+
+            // TYPE_OCMB_CHIP
+            uint16_t ocmb_chips_max_number;
+            i2cdevice_t ocmb_chips[SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER];
+        } PACKED;
+
 
         /**
         * @brief non reserved word enums
@@ -651,7 +729,7 @@ class SbePsu
                 uint64_t cd7_readSeeprom_MbxReg3Reserved; // mbxReg3
             } PACKED;
 
-            struct // sendOcmbConfig
+            struct
             {
                 // Mailbox Registry 0, Bytes 0..3
                 uint16_t cd7_sendOcmbConfig_Reserved0;     // Mbx Reg 0, Bytes 0..1
@@ -705,6 +783,17 @@ class SbePsu
                 uint64_t cd7_syncFabTopoIdTable_Reserved2; // mbxReg3
             } PACKED;
 
+            struct
+            {
+                uint16_t cd7_sendMemConfig_Reserved0;
+                uint16_t cd7_sendMemConfig_ControlFlags;
+                uint16_t cd7_sendMemConfig_SeqID;
+                uint8_t  cd7_sendMemConfig_CommandClass;    // Mbx Reg 0, Byte 6: 0xD7 (SBE_PSU_GENERIC_MESSAGE)
+                uint8_t  cd7_sendMemConfig_Command;         // Mbx Reg 0, Byte 7: 0x0B (SBE_CMD_MEM_CONFIG)
+                uint64_t cd7_sendMemConfig_MbxReg1Reserved; // mbxReg1
+                uint64_t cd7_sendMemConfig_DataAddr;        // mbxReg2
+                uint64_t cd7_sendMemConfig_MbxReg3Reserved; // mbxReg3
+            } PACKED;
 
             psuCommand(uint16_t i_controlFlags, //Mbx Reg 0 input
                        uint8_t  i_commandClass, //Mbx Reg 0 input

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -46,6 +46,8 @@ TESTS += sbe_fifo_buffer_test.H
 TESTS += sbe_retry_handler_test.H
 TESTS += sbe_memregiontest.H
 TESTS += sbe_psucommandstest.H
+// @TODO RTC:261634 Remove sbe_psuSendOcmbConfigTest.H
 TESTS += sbe_psuSendOcmbConfigTest.H
+TESTS += sbe_psuSendMemConfigTest.H
 
 include ${ROOTPATH}/config.mk
