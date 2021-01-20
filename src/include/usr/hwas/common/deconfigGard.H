@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -673,10 +673,11 @@ private:
     /**
      * @brief Maximum number of endpoints. Used to initialize ProcInfo structs.
      */
+    // @TODO RTC-256842: Need to account for Everest's half-links
     // Max number of IOHS links that connect procs outside a particular fabric group
-    static const uint8_t NUM_OUT_GROUP_BUSES = 3;
+    static const uint8_t NUM_OUT_GROUP_BUSES = 5;
     // Max number of IOHS links that connect procs within the same fabric group
-    static const uint8_t NUM_IN_GROUP_BUSES = 4;
+    static const uint8_t NUM_IN_GROUP_BUSES = 7;
 
     /**
      * @brief  Struct representing a particular processor.  Used by

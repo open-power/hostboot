@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <vector>
 #include <iterator>
 
+#include <hwas/hwasPlatAssert.H>
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/deconfigGard.H>
@@ -1142,6 +1143,9 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandl
                         // and increment appropriate index:
                         if (l_peerProcInfoIt->procFabricGroup == l_currentProcInfoIt->procFabricGroup)
                         {
+                            HWAS_ASSERT(inGroupBusIndex < NUM_IN_GROUP_BUSES,
+                                        "Number of in-group bus connections %d exceeds maximum allowed: %d",
+                                        inGroupBusIndex, NUM_IN_GROUP_BUSES);
                             l_currentProcInfoIt->iv_pInGroupProcInfos[inGroupBusIndex] = &(*l_peerProcInfoIt);
                             // HWAS state
                             l_currentProcInfoIt->iv_InGroupLinkDeconfigured[inGroupBusIndex] =
@@ -1162,6 +1166,9 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandl
                         // If subsystem owns SMPA deconfigs consider them
                         else if (l_peerProcInfoIt->procFabricGroup != l_currentProcInfoIt->procFabricGroup)
                         {
+                            HWAS_ASSERT(outGroupBusIndex < NUM_OUT_GROUP_BUSES,
+                                        "Number of out-group bus connections %d exceeds maximum allowed: %d",
+                                        outGroupBusIndex, NUM_OUT_GROUP_BUSES);
                             (*l_currentProcInfoIt).iv_pOutGroupProcInfos[outGroupBusIndex] = &(*l_peerProcInfoIt);
                             // HWAS state
                             l_currentProcInfoIt->iv_OutGroupLinkDeconfigured[outGroupBusIndex] =
