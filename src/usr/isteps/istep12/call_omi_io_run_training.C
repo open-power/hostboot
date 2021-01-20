@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,51 @@ void* call_omi_io_run_training (void *io_pArgs)
         assert(sys != nullptr);
         sys->setAttr<ATTR_ATTN_POLL_PLID>(1);
 
-        // 12.7.a exp_omi_train.C
+        // 12.7.a p10_omi_train.C
+        TargetHandleList l_omicTargetList;
+        getAllChiplets(l_omicTargetList, TYPE_OMIC);
+
+        for (const auto & l_omic_target : l_omicTargetList)
+        {
+            TRACFCOMP(g_trac_isteps_trace, "p10_omi_train HWP target HUID %.8x",
+                get_huid(l_omic_target));
+
+            //  call the HWP with each OMIC target
+            fapi2::Target<fapi2::TARGET_TYPE_OMIC>
+                l_fapi_omic_target(l_omic_target);
+
+            FAPI_INVOKE_HWP(l_err, p10_omi_train, l_fapi_omic_target );
+
+            //  process return code.
+            if ( l_err )
+            {
+                TRACFCOMP( g_trac_isteps_trace,
+                    "ERROR : call p10_omi_train HWP: failed on target 0x%08X. "
+                    TRACE_ERR_FMT,
+                    get_huid(l_omic_target),
+                    TRACE_ERR_ARGS(l_err));
+
+                // Capture error
+                captureError(l_err, l_StepError, HWPF_COMP_ID, l_omic_target);
+            }
+            else
+            {
+                TRACFCOMP( g_trac_isteps_trace,
+                        "SUCCESS :  p10_omi_train HWP on 0x%.08X",
+                        get_huid(l_omic_target));
+            }
+        }
+
+        // Do not continue if an error was encountered
+        if(!l_StepError.isNull())
+        {
+            TRACFCOMP( g_trac_isteps_trace,
+                INFO_MRK "call_omi_io_run_training exited early because "
+                "p10_omi_train had failures" );
+            break;
+        }
+
+        // 12.7.b exp_omi_train.C
         TargetHandleList l_ocmbTargetList;
         getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
@@ -127,49 +171,6 @@ void* call_omi_io_run_training (void *io_pArgs)
             }
         }
 
-        // Do not continue if an error was encountered
-        if(!l_StepError.isNull())
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                INFO_MRK "call_omi_io_run_training exited early because "
-                "exp_omi_train had failures" );
-            break;
-        }
-
-        // 12.7.b p10_omi_train.C
-        TargetHandleList l_omicTargetList;
-        getAllChiplets(l_omicTargetList, TYPE_OMIC);
-
-        for (const auto & l_omic_target : l_omicTargetList)
-        {
-            TRACFCOMP(g_trac_isteps_trace, "p10_omi_train HWP target HUID %.8x",
-                get_huid(l_omic_target));
-
-            //  call the HWP with each OMIC target
-            fapi2::Target<fapi2::TARGET_TYPE_OMIC>
-                l_fapi_omic_target(l_omic_target);
-
-            FAPI_INVOKE_HWP(l_err, p10_omi_train, l_fapi_omic_target );
-
-            //  process return code.
-            if ( l_err )
-            {
-                TRACFCOMP( g_trac_isteps_trace,
-                    "ERROR : call p10_omi_train HWP: failed on target 0x%08X. "
-                    TRACE_ERR_FMT,
-                    get_huid(l_omic_target),
-                    TRACE_ERR_ARGS(l_err));
-
-                // Capture error
-                captureError(l_err, l_StepError, HWPF_COMP_ID, l_omic_target);
-            }
-            else
-            {
-                TRACFCOMP( g_trac_isteps_trace,
-                        "SUCCESS :  p10_omi_train HWP on 0x%.08X",
-                        get_huid(l_omic_target));
-            }
-        }
     } while (0);
 
     TRACFCOMP( g_trac_isteps_trace, "call_omi_io_run_training exit" );
