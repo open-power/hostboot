@@ -44,11 +44,11 @@
     #include <string.h>
 #endif
 
-#define SPI_SLAVE_WR_CMD  0x0200000000000000
-#define SPI_SLAVE_RD_CMD  0x0300000000000000
-#define SPI_SLAVE_RD_STAT 0x0500000000000000
-#define SPI_SLAVE_WR_EN   0x0600000000000000
-#define SPI_SLAVE_ID_CMD  0x9F00000000000000
+#define SPI_SLAVE_WR_CMD  0x0200000000000000ULL
+#define SPI_SLAVE_RD_CMD  0x0300000000000000ULL
+#define SPI_SLAVE_RD_STAT 0x0500000000000000ULL
+#define SPI_SLAVE_WR_EN   0x0600000000000000ULL
+#define SPI_SLAVE_ID_CMD  0x9F00000000000000ULL
 
 // Timeout values so not stuck in wait loops forever
 constexpr uint64_t SPI_TIMEOUT_MAX_WAIT_COUNT      = 10000;   // 10 seconds
@@ -499,11 +499,13 @@ spi_set_write_enable(SpiControlHandle& i_handle)
 {
     fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
     uint64_t SEQ = 0x1031100000000000ULL;
-    SEQ |= ((uint64_t)((i_handle.slave)) << 56);
+    SEQ |= (static_cast<uint64_t>((i_handle.slave)) << 56);
     uint64_t TDR = SPI_SLAVE_WR_EN;
+    uint64_t CNT = 0x0;
 
     FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_SEQREG, SEQ));
     FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, TDR));
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_COUNTERREG, CNT));
 
     rc = spi_wait_for_tdr_empty(i_handle);
 
@@ -1188,8 +1190,8 @@ fapi_try_exit:
  */
 #ifndef BOOTLOADER
 static fapi2::ReturnCode
-spi_read_internal(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
-                  uint8_t* o_buffer, SPI_ECC_CONTROL_STATUS i_eccStatus)
+spi_read_secure(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
+                uint8_t* o_buffer, SPI_ECC_CONTROL_STATUS i_eccStatus)
 {
     fapi2::buffer<uint64_t> data64;
     uint64_t temp;
@@ -1197,6 +1199,7 @@ spi_read_internal(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_len
     uint64_t CNT = 0;
     uint64_t TDR;
     fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+    int number_rdr = i_length / 8;
 
     if ((i_length > MAX_LENGTH_TRNS) || (i_length % 8))
     {
@@ -1212,30 +1215,60 @@ spi_read_internal(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_len
             return fapi2::FAPI2_RC_INVALID_PARAMETER;
         }
 
-        if (i_length == 8)
+        if (i_length <= 8)
         {
-            SEQ = 0x1034491000000000ULL;
+            SEQ = 0x1034491000000000ULL | (static_cast<uint64_t>(i_handle.slave) << 56); // slave0, TX4, RX9, loop
+            CNT = 0x0;
+        }
+        else if (i_length <= 40)
+        {
+            SEQ = 0x1034000000000000ULL | (static_cast<uint64_t>(i_handle.slave) << 56);
+
+            for(int i = 0; i < number_rdr; i++)
+            {
+                SEQ |= static_cast<uint64_t>(0x40) << (40 - (i * 8));
+            }
+
+            SEQ |= static_cast<uint64_t>(0x10) << (40 - ((number_rdr) * 8));
+            // #shifted bits (9x8=64=0x48) | reload+tx+rx
+            CNT = (static_cast<uint64_t>(0x48) << 48) | (static_cast<uint64_t>(0xb) << 8);
         }
         else
         {
-            SEQ = 0x103449E210000000ULL;
+            FAPI_ERR( "spi_read_secure: (ecc) Read length is greater than 40 bytes, which cannot be"
+                      " done in a secure write. i_length = %d", i_length);
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
         }
 
         i_address = i_address * 9 / 8;
     }
     else
     {
-        if (i_length == 8)
+        if (i_length <= 8)
         {
-            SEQ = 0x1034481000000000ULL;
+            SEQ = 0x1034481000000000ULL | (static_cast<uint64_t>(i_handle.slave) << 56); //slave0, TX4, RX8, loop
+            CNT = 0x0;
+        }
+        else if(i_length <= 40)
+        {
+            SEQ = 0x1034000000000000ULL | (static_cast<uint64_t>(i_handle.slave) << 56);
+
+            for(int i = 0; i < number_rdr; i++)
+            {
+                SEQ |= static_cast<uint64_t>(0x40) << (40 - (i * 8));
+            }
+
+            SEQ |= static_cast<uint64_t>(0x10) << (40 - ((number_rdr) * 8));
+            // #shifted bits (8x8=64=0x40) | reload+tx+rx
+            CNT = (static_cast<uint64_t>(0x40) << 48) | (static_cast<uint64_t>(0xb) << 8);
         }
         else
         {
-            SEQ = 0x103448E210000000ULL;
+            FAPI_ERR( "spi_read_secure: Read length is greater than 40 bytes, which cannot be"
+                      " done in a secure write. i_length = %d", i_length);
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
         }
     }
-
-    SEQ |= ((uint64_t)((i_handle.slave)) << 56);
 
     //Check the state of the h/w
     rc = spi_precheck(i_handle);
@@ -1249,30 +1282,23 @@ spi_read_internal(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_len
     TDR = SPI_SLAVE_RD_CMD | ((uint64_t)i_address << 32);
 
     FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_SEQREG, SEQ));
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_COUNTERREG, CNT));
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, TDR));
 
-    /*Generate the loop counter value*/
     if (i_length > 8)
     {
-        CNT = ((uint64_t)(((i_length + 7) / 8) - 1) << 32);
-        //Use counter reload N2 to avoid RDR overflows
+        //one time zeros to trigger read
+        rc = spi_wait_for_tdr_empty(i_handle);
+
+        if (rc)
+        {
+            FAPI_ERR("Error in spi_wait_for_tdr_empty ");
+            fapi2::current_err = rc;
+            goto fapi_try_exit;
+        }
+
+        FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, 0x0ULL));
     }
-
-    CNT = CNT | ((uint64_t)(0xF) << 8);
-    FAPI_TRY(putScom(i_handle.target_chip,
-                     i_handle.base_addr + SPIM_COUNTERREG, CNT));
-
-
-    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, TDR));
-    rc = spi_wait_for_tdr_empty(i_handle);
-
-    if (rc)
-    {
-        FAPI_ERR("Error in spi_wait_for_tdr_empty ");
-        fapi2::current_err = rc;
-        goto fapi_try_exit;
-    }
-
-    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, 0x0ULL));
 
     for (uint32_t i = 0; i < i_length; i += 8)
     {
@@ -1332,8 +1358,8 @@ spi_read( SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
 
         if (i_length <= MAX_LENGTH_TRNS)
         {
-            rc = spi_read_internal( i_handle, i_address,
-                                    i_length, o_buffer, i_eccStatus );
+            rc = spi_read_secure( i_handle, i_address,
+                                  i_length, o_buffer, i_eccStatus );
             break;
         }
 
@@ -1347,8 +1373,8 @@ spi_read( SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
                 break;
             }
 
-            rc = spi_read_internal( i_handle, i_address,
-                                    readlen, o_buffer, i_eccStatus );
+            rc = spi_read_secure( i_handle, i_address,
+                                  readlen, o_buffer, i_eccStatus );
 
             if (rc != fapi2::FAPI2_RC_SUCCESS)
             {
@@ -1374,11 +1400,11 @@ spi_read( SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
 
 #ifndef BOOTLOADER
 fapi2::ReturnCode
-spi_write_prep_seq(SpiControlHandle& i_handle, uint64_t address, uint32_t length, uint64_t SEQ)
+spi_write_prep_seq(SpiControlHandle& i_handle, uint64_t address, uint64_t SEQ)
 {
     uint32_t rc = fapi2::FAPI2_RC_SUCCESS;
-    uint64_t TDR = 0;
-    uint64_t CNT = ((uint64_t)(length / 8 - (length % 8 > 0 ? 0 : 1)) << 32);
+    uint64_t TDR = SPI_SLAVE_WR_CMD | (((static_cast<uint64_t>(address) << 32) & 0x00ffffffffffffffULL));
+    uint64_t CNT = 0;
 
     rc = spi_set_write_enable(i_handle);
 
@@ -1389,8 +1415,14 @@ spi_write_prep_seq(SpiControlHandle& i_handle, uint64_t address, uint32_t length
         goto fapi_try_exit;
     }
 
-    TDR = SPI_SLAVE_WR_CMD |
-          (((uint64_t)address << 32) & 0x00ffffffffffffffULL);
+    rc = spi_wait_for_idle(i_handle);
+
+    if (rc)
+    {
+        FAPI_ERR("Multiplexing Error in spi_wait_for_idle");
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
+    }
 
     // Place sequence and send write command
     FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_SEQREG, SEQ));
@@ -1449,36 +1481,44 @@ fapi_try_exit:
 }
 #endif // #ifndef BOOTLOADER
 
+// Perform secure write for SEEPROM. address and i_length are expected to be 8-byte aligned.
+// i_length is expected to be of size SEEPROM_SECURE_DATA_LEN or less
 #ifndef BOOTLOADER
 fapi2::ReturnCode
-spi_write_data(SpiControlHandle& i_handle, uint32_t address, uint8_t* i_data, uint32_t i_length)
+spi_write_secure(SpiControlHandle& i_handle, uint32_t address, uint8_t* i_data, uint32_t i_length)
 {
     uint32_t rc = fapi2::FAPI2_RC_SUCCESS;
 
     do
     {
-        uint64_t SEQ = 0;
-
-        if (i_length == 8)
+        if (i_length > SEEPROM_SECURE_DATA_LEN)
         {
-            SEQ = 0x1034381000000000ULL;
-        }
-        else
-        {
-            SEQ = 0x103438E210000000ULL;
+            FAPI_ERR("Data to be written is too long for secure mode. Expected %u bytes or less, "
+                     "received %u bytes.", SEEPROM_SECURE_DATA_LEN, i_length);
+            rc = fapi2::FAPI2_RC_INVALID_PARAMETER;
+            goto fapi_try_exit;
         }
 
-        SEQ |= ((uint64_t)((i_handle.slave)) << 56);
-        fapi2::buffer<uint64_t> TDR = 0;
-        uint64_t l_temp = 0;
+        int l_number_tdr = i_length / 8;
+        uint64_t SEQ = 0x1034000000000000ULL | (static_cast<uint64_t>(i_handle.slave) << 56);
 
-        rc = spi_write_prep_seq(i_handle, address, i_length, SEQ);
+        for(int i = 0; i < l_number_tdr; i++)
+        {
+            SEQ |= static_cast<uint64_t>(0x38) << (40 - (i * 8));
+        }
+
+        SEQ |= static_cast<uint64_t>(0x10) << (40 - ((l_number_tdr) * 8));
+
+        rc = spi_write_prep_seq(i_handle, address, SEQ);
 
         if (rc)
         {
             FAPI_ERR("Error while preparing for SPI write");
             goto fapi_try_exit;
         }
+
+        uint64_t l_temp = 0;
+        fapi2::buffer<uint64_t> TDR = 0;
 
         for (uint32_t i = 0; i < i_length; i += 8)
         {
@@ -1535,18 +1575,16 @@ spi_write(SpiControlHandle& i_handle, uint32_t i_address,
         return rc;
     }
 
+    // Secure writes can only be done at byte-length of SEEPROM_SECURE_DATA_LEN or less
     do
     {
-        // Write length is determined either by:
-        // (1) number of bytes left to write ;
-        // (2) place in the current page of SEEPROM
-        // (3) SEEPROM_PAGE_SIZE
-        // The smallest of these three is written
-        write_len = (remaining_len > SEEPROM_PAGE_SIZE) ? SEEPROM_PAGE_SIZE : remaining_len;
+        // Min between remaining_len and SEEPROM_SECURE_DATA_LEN
+        write_len = (remaining_len > SEEPROM_SECURE_DATA_LEN) ? SEEPROM_SECURE_DATA_LEN : remaining_len;
         page_offset = (cur_address & (SEEPROM_PAGE_SIZE - 1));
-        write_len = ((SEEPROM_PAGE_SIZE - page_offset) < remaining_len) ? (SEEPROM_PAGE_SIZE - page_offset) : write_len;
+        // Min between above and byte-length left to reach a page
+        write_len = ((SEEPROM_PAGE_SIZE - page_offset) < write_len) ? (SEEPROM_PAGE_SIZE - page_offset) : write_len;
 
-        rc = spi_write_data(i_handle, cur_address, &i_buffer[cur_buf_byte], write_len);
+        rc = spi_write_secure (i_handle, cur_address, &i_buffer[cur_buf_byte], write_len);
 
         if (rc)
         {
