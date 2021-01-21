@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -77,7 +77,7 @@ function    stopserver()
 function    runtraceHB()
 {
 
-    echo    "Collect traceHB info..."
+    echo    "Collect hb-trace-wrapped info..."
 
     #autosim $NOWIN --simcmd   "run-python-file ${SBXHOME}/src/build/simics/hb-simdebug.py"
     #if [ $? -ne 0 ] ; then
@@ -87,7 +87,7 @@ function    runtraceHB()
     #    exit 1
     #fi
 
-    autosim $NOWIN --simcmd   "pipe hb-trace \"cat > traceHB.log\"" \
+    autosim $NOWIN --simcmd   "pipe hb-trace \"cat > hb-trace-wrapped.log\"" \
             --timeout 300
     if [ $? -ne 0 ] ; then
         echo "ERROR 4 : Unable to run $?"
@@ -96,7 +96,7 @@ function    runtraceHB()
         exit 1
     fi
 
-    find ${SANDBOXBASE} -type f -name "traceHB.log" | xargs mv -t ${SBXHOME}
+    find ${SANDBOXBASE} -type f -name "hb-trace-wrapped.log" | xargs mv -t ${SBXHOME}
 }
 
 
@@ -484,8 +484,8 @@ runtraceHB
 if [ $? -ne 0 ] ; then
     echo "ERROR: Unable to run $?"
 else
-    echo    "----------------- traceHB Buffer -------------------"
-    cat $SBXHOME/traceHB.log
+    echo    "----------------- hb-trace-wrapped Buffer -------------------"
+    cat $SBXHOME/hb-trace-wrapped.log
 fi
 
 echo "====> dump L3..."
