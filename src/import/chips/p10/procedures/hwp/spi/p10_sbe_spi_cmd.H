@@ -56,8 +56,8 @@
 //8-byte transfers don't use the restricted 0xEX op code.
 #define MAX_LENGTH_TRNS 8
 
-//Secure reads via TPM require not using 0xEX command
-#define TPM_SECURE_READ_TRNS 8
+//Byte-length of data to do secure write or read for TPM
+#define TPM_SECURE_DATA_LEN 8
 
 //Each page in the seeprom is 256 bytes in size
 #define SEEPROM_PAGE_SIZE 256
@@ -266,6 +266,7 @@ extern "C"
 
 ///
 /// @brief  API to write to the TPM using SPI
+///         Note: All writes are passed through the secure-mode write
 ///
 /// @param[in] i_handle   Reference to SPI control handle
 /// @param[in] i_locality TPM locality (0-4)

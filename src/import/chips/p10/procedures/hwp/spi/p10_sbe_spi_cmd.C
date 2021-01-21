@@ -630,7 +630,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-fapi2::ReturnCode spi_tpm_write_with_wait( SpiControlHandle& i_handle,
+fapi2::ReturnCode spi_tpm_write_with_wait_internal( SpiControlHandle& i_handle,
         const uint32_t i_locality,
         const uint32_t i_address,
         const uint8_t i_length,
@@ -662,10 +662,11 @@ fapi2::ReturnCode spi_tpm_write_with_wait( SpiControlHandle& i_handle,
         //                  00 = STOP
         SEQ = 0x1034416230100000ULL | (static_cast<uint64_t>(i_length) << 24) |
               (static_cast<uint64_t>(i_handle.slave) << 56);
-        CNT = ((0x65) << 8);
+        CNT = 0x0;
     }
     else if((i_length % 8) == 0)
     {
+        // NON-SECURE OPERATION - 0xEx cmd op not allowed
         // Sequencer Basic Operations
         //    0x1X = Select_Slave X -Select slave X (X = handle.slave)
         //        34 = Shift_N1 - M = 4 bytes of data being sent in TDR
@@ -680,6 +681,7 @@ fapi2::ReturnCode spi_tpm_write_with_wait( SpiControlHandle& i_handle,
     }
     else
     {
+        // NON-SECURE OPERATION - 0xEx cmd op not allowed
         // Sequencer Basic Operations
         //    0x1X = Select_Slave X -Select slave X (X = handle.slave)
         //        34 = Shift_N1 - M = 4 bytes of data being sent in TDR
@@ -760,10 +762,58 @@ fapi2::ReturnCode spi_tpm_write_with_wait( SpiControlHandle& i_handle,
     }
 
 fapi_try_exit:
-    FAPI_DBG("spi_tpm_write_with_wait() exit. RC: 0x%08X", static_cast<uint32_t>(rc));
+    FAPI_DBG("spi_tpm_write_with_wait_internal() exit. RC: 0x%08X", static_cast<uint32_t>(rc));
     return rc;
 }
 
+// Force the secure mode path by breaking up data writes of length greater than 8-bytes into
+// 8-byte chunks or less
+fapi2::ReturnCode spi_tpm_write_with_wait( SpiControlHandle& i_handle,
+        const uint32_t i_locality,
+        const uint32_t i_address,
+        const uint8_t i_length,
+        const uint8_t* i_buffer )
+{
+    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // We're only allowing secure TPM writes, which are of length TPM_SECURE_DATA_LEN or less.
+    // l_lengthTraversed will increase from 0 up to i_length in TPM_SECURE_DATA_LEN intervals or less.
+    // l_lengthTraversed will be used to know from what offset in the buffer we're writing to the TPM.
+
+    uint8_t l_lengthTraversed = 0;
+
+    while (l_lengthTraversed < i_length)
+    {
+        uint8_t l_minTravelLength = std::min(TPM_SECURE_DATA_LEN, (i_length - l_lengthTraversed));
+
+        // TODO RTC: 268091 Current SPI issue when writing 3 bytes. Must be broken down into smaller write ops.
+        if (l_minTravelLength == 3)
+        {
+            l_minTravelLength = 2;
+        }
+
+        rc = spi_tpm_write_with_wait_internal(i_handle, i_locality, i_address, l_minTravelLength,
+                                              i_buffer + l_lengthTraversed);
+
+        if (rc)
+        {
+            break;
+        }
+
+        l_lengthTraversed += l_minTravelLength;
+    }
+
+    if (rc)
+    {
+        FAPI_ERR("spi_tpm_write_with_wait: Error doing secure write.");
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("spi_tpm_write_with_wait() exit. RC: 0x%08X", static_cast<uint32_t>(rc));
+    return rc;
+}
 
 /**
   * @brief  Internal read TPM with wait
@@ -810,7 +860,7 @@ fapi2::ReturnCode spi_tpm_read_internal_with_wait( SpiControlHandle& i_handle,
         // bytes the TPM is trying to send back
         SEQ = 0x1034416240100000ULL | (static_cast<uint64_t>(i_length) << 24) |
               (static_cast<uint64_t>(i_handle.slave) << 56);
-        CNT = ((0x6F) << 8);
+        CNT = 0;
     }
     else if((i_length % 8) == 0)
     {
@@ -868,9 +918,12 @@ fapi2::ReturnCode spi_tpm_read_internal_with_wait( SpiControlHandle& i_handle,
         goto fapi_try_exit;
     }
 
-    FAPI_DBG("spi_wait_for_tdr_empty() done, TDR 0");
-    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, 0x0ULL));
-    FAPI_DBG("TDR 0 done");
+    if (i_length > 8)
+    {
+        FAPI_DBG("spi_wait_for_tdr_empty() done, TDR 0");
+        FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, 0x0ULL));
+        FAPI_DBG("TDR 0 done");
+    }
 
     //receive data
     if(i_length <= 8)
@@ -994,19 +1047,19 @@ fapi2::ReturnCode spi_tpm_read_secure( SpiControlHandle& i_handle,
     uint32_t l_address = 0x00D40000 + (i_locality << 12) + (i_address & 0x0FFF);
 
     // 0xEX Op code is not allowed in secure mode so need to split
-    // read into multiple transactions of TPM_SECURE_READ_TRNS max size
+    // read into multiple transactions of TPM_SECURE_DATA_LEN max size
     do
     {
-        if (i_length <= TPM_SECURE_READ_TRNS)
+        if (i_length <= TPM_SECURE_DATA_LEN)
         {
             rc = spi_tpm_read_internal_with_wait( i_handle, l_address, readlen, o_buffer );
             break;
         }
 
-        for(uint8_t i = 0; i < i_length; i += TPM_SECURE_READ_TRNS)
+        for(uint8_t i = 0; i < i_length; i += TPM_SECURE_DATA_LEN)
         {
-            readlen = (i_length - i) < TPM_SECURE_READ_TRNS ?
-                      (i_length - i) : TPM_SECURE_READ_TRNS;
+            readlen = (i_length - i) < TPM_SECURE_DATA_LEN ?
+                      (i_length - i) : TPM_SECURE_DATA_LEN;
 
             if (readlen == 0)
             {
