@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1017,6 +1017,126 @@ void DeconfigGard::platPostDeconfigureTarget(
    l_req_fw_msg = l_resp_fw_msg = nullptr;
 #endif  // __HOSTBOOT_RUNTIME
 }
+
+/******************************************************************************/
+// platProcessFieldCoreOverride
+/******************************************************************************/
+errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
+{
+    errlHndl_t l_pErr = NULL;
+
+#ifndef __HOSTBOOT_RUNTIME
+    HWAS_DBG("Process Field Core Override FCO: platProcessFieldCoreOverride");
+
+    do
+    {
+        // otherwise, process and reduce cores.
+        // find all functional NODE targets
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        PredicateCTM predNode(CLASS_ENC, TYPE_NODE);
+        PredicateHwas predFunctional;
+        predFunctional.functional(true);
+        PredicatePostfixExpr nodeCheckExpr;
+        nodeCheckExpr.push(&predNode).push(&predFunctional).And();
+
+        TargetHandleList pNodeList;
+        targetService().getAssociated(pNodeList, pSys,
+                        TargetService::CHILD, TargetService::IMMEDIATE,
+                        &nodeCheckExpr);
+
+        // sort the list by ATTR_HUID to ensure that we
+        //  start at the same place each time
+        std::sort(pNodeList.begin(), pNodeList.end(),
+                    compareTargetHuid);
+
+        // for each of the nodes
+        for (TargetHandleList::const_iterator
+                pNode_it = pNodeList.begin();
+                pNode_it != pNodeList.end();
+                ++pNode_it
+            )
+        {
+            const TargetHandle_t pNode = *pNode_it;
+
+            // Get FCO value
+            uint32_t l_fco(0);
+            l_pErr = platGetFCO(pNode, l_fco);
+            if (l_pErr)
+            {
+                HWAS_ERR("Error from platGetFCO");
+                break;
+            }
+
+            // FCO of 0 means no overrides for this node
+            if (l_fco == 0)
+            {
+                HWAS_INF("FCO: node %.8X: no overrides, done.",
+                        get_huid(pNode));
+                continue; // next node
+            }
+            else if (is_fused_mode())
+            {
+                l_fco += l_fco;
+                HWAS_INF("FCO: node %.8X: Doubling EC count in fused_mode. "
+                         "l_fco=0x%X", get_huid(pNode), l_fco);
+            }
+            else
+            {
+                HWAS_INF("FCO: node %.8X: value %d",
+                         get_huid(pNode), l_fco);
+            }
+
+            // find all functional child PROC targets
+            TargetHandleList pProcList;
+            getChildAffinityTargets(pProcList, pNode,
+                    CLASS_CHIP, TYPE_PROC, true);
+
+            // sort the list by ATTR_HUID to ensure that we
+            //  start at the same place each time
+            std::sort(pProcList.begin(), pProcList.end(),
+                    compareTargetHuid);
+
+            // create list for restrictECunits() function
+            procRestrict_t l_procEntry;
+            std::vector <procRestrict_t> l_procRestrictList;
+            for (TargetHandleList::const_iterator
+                    pProc_it = pProcList.begin();
+                    pProc_it != pProcList.end();
+                    ++pProc_it
+                )
+            {
+                const TargetHandle_t pProc = *pProc_it;
+
+                // save info so that we can
+                //  restrict the number of EC units
+                HWAS_DBG("pProc %.8X - pushing to proclist",
+                    get_huid(pProc));
+                l_procEntry.target = pProc;
+                l_procEntry.group = 0;
+                l_procEntry.procs = pProcList.size();
+                l_procEntry.maxECs = l_fco;
+                l_procRestrictList.push_back(l_procEntry);
+            } // for pProc_it
+
+            // restrict the EC units; units turned off are marked
+            //  present=true, functional=false, and marked with the
+            //  appropriate deconfigure code.
+            HWAS_INF("FCO: calling restrictECunits with %d entries",
+                    l_procRestrictList.size());
+
+            l_pErr = restrictECunits(l_procRestrictList,
+                                     DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
+            if (l_pErr)
+            {
+                break;
+            }
+        } // for pNode_it
+    }
+    while (0);
+#endif  // #ifndef __HOSTBOOT_RUNTIME
+    return l_pErr;
+} // platProcessFieldCoreOverride
 
 //*****************************************************************************
 bool platSystemIsAtRuntime()

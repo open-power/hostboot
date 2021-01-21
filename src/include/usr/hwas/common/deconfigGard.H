@@ -419,7 +419,7 @@ public:
      *
      * @return errlHndl_t. Error log handle.
      */
-    errlHndl_t processFieldCoreOverride();
+    errlHndl_t platProcessFieldCoreOverride();
 
     /**
      * @brief Deconfigures a Target.
