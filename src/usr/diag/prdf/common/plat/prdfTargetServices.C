@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -499,14 +499,16 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
         // We can use this map to avoid copying code in those cases.
         std::map<std::pair<TYPE,TYPE>,uint8_t> connMap =
         {
-            { {TYPE_EQ,   TYPE_CORE}, MAX_EC_PER_EQ    },
-            { {TYPE_MC,   TYPE_MI  }, MAX_MI_PER_MC    },
-            { {TYPE_MC,   TYPE_MCC }, MAX_MCC_PER_MC   },
-            { {TYPE_MC,   TYPE_OMIC}, MAX_OMIC_PER_MC  },
-            { {TYPE_MI,   TYPE_MCC }, MAX_MCC_PER_MI   },
-            { {TYPE_MCC,  TYPE_OMI }, MAX_OMI_PER_MCC  },
-            { {TYPE_OMIC, TYPE_OMI }, MAX_OMI_PER_OMIC },
-            { {TYPE_PEC,  TYPE_PHB }, MAX_PHB_PER_PEC  },
+            { {TYPE_EQ,   TYPE_CORE     }, MAX_EC_PER_EQ      },
+            { {TYPE_MC,   TYPE_MI       }, MAX_MI_PER_MC      },
+            { {TYPE_MC,   TYPE_MCC      }, MAX_MCC_PER_MC     },
+            { {TYPE_MC,   TYPE_OMIC     }, MAX_OMIC_PER_MC    },
+            { {TYPE_MI,   TYPE_MCC      }, MAX_MCC_PER_MI     },
+            { {TYPE_MCC,  TYPE_OMI      }, MAX_OMI_PER_MCC    },
+            { {TYPE_OMIC, TYPE_OMI      }, MAX_OMI_PER_OMIC   },
+            { {TYPE_PEC,  TYPE_PHB      }, MAX_PHB_PER_PEC    },
+            // Note: TARGETING::TYPE_SMPGROUP == fapi2::TARGET_TYPE_IOLINK
+            { {TYPE_IOHS, TYPE_SMPGROUP }, MAX_LINK_PER_IOHS  },
         };
 
         // Connection found in connMap

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,16 +130,6 @@ void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
                 TARGETING::TargetHandle_t i_txTrgt,
                 HWAS::busTypeEnum i_busType,
                 HWAS::CalloutFlag_t i_flags = HWAS::FLAG_NONE);
-
-/**
- * @brief Adds the OpenCAPI adapter attached to the given IOHS link to the
- *        callout list.
- * @param i_chip IOHS processor unit.
- * @param i_link IOHS link.
- * @param io_sc  The step code data struct.
- */
-void calloutOpenCapiAdapter(ExtensibleChip* i_chip, unsigned int i_link,
-                            STEP_CODE_DATA_STRUCT& io_sc);
 
 //##############################################################################
 //##                        Memory specific functions

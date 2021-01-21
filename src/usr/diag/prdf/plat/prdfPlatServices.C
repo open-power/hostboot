@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -306,34 +306,6 @@ void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
     PRDF_ASSERT(nullptr != errl);
     errl->addBusCallout(i_rxTrgt, i_txTrgt, i_busType,
                         HWAS::SRCI_PRIORITY_LOW, i_flags);
-}
-
-//------------------------------------------------------------------------------
-
-void calloutOpenCapiAdapter(ExtensibleChip* i_chip, unsigned int i_link,
-                            STEP_CODE_DATA_STRUCT& io_sc)
-{
-    PRDF_ASSERT(nullptr != i_chip);
-    PRDF_ASSERT(TYPE_IOHS == i_chip->getType());
-    PRDF_ASSERT(i_link < MAX_LINK_PER_IOHS);
-
-    // TODO: Remove once below is supported.
-    io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_MED, NO_GARD);
-/* TODO: RTC 259327 - See action items below.
-    // Get the connected brick target.
-    // TODO: Need to add the following to the connMap map in getConnectedChild()
-    //       so we can get a brick from an IOHS.
-    //          { {TYPE_IOHS, TYPE_???}, MAX_LINK_PER_IOHS },
-    TargetHandle_t brickTrgt = getConnectedChild(i_chip->getTrgt(), TYPE_???,
-                                                 i_link);
-    PRDF_ASSERT(nullptr != brickTrgt);
-
-    // Callout the adapter on this brick.
-    errlHndl_t errl = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
-    PRDF_ASSERT(nullptr != errl);
-    errl->addPartCallout(brickTrgt, HWAS::OPEN_CAPI_ADAPTER_PART_TYPE,
-                         HWAS::SRCI_PRIORITY_MED);
-*/
 }
 
 //##############################################################################

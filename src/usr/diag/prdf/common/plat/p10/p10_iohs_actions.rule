@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -77,25 +77,29 @@ actionclass smp_failure_l1_th_1
 
 actionclass opencapi_l0_th_32perDay
 {
-    funccall("opencapi_callout_l0");
+    # NOTE: TARGETING::TYPE_SMPGROUP == fapi2::TARGET_TYPE_IOLINK
+    callout(connected(TYPE_SMPGROUP,0), MRU_MED, NO_GARD);
     threshold32pday;
 };
 
 actionclass opencapi_l1_th_32perDay
 {
-    funccall("opencapi_callout_l1");
+    # NOTE: TARGETING::TYPE_SMPGROUP == fapi2::TARGET_TYPE_IOLINK
+    callout(connected(TYPE_SMPGROUP,1), MRU_MED, NO_GARD);
     threshold32pday;
 };
 
 actionclass opencapi_l0_th_1
 {
-    funccall("opencapi_callout_l0");
+    # NOTE: TARGETING::TYPE_SMPGROUP == fapi2::TARGET_TYPE_IOLINK
+    callout(connected(TYPE_SMPGROUP,0), MRU_MED, NO_GARD);
     threshold1;
 };
 
 actionclass opencapi_l1_th_1
 {
-    funccall("opencapi_callout_l1");
+    # NOTE: TARGETING::TYPE_SMPGROUP == fapi2::TARGET_TYPE_IOLINK
+    callout(connected(TYPE_SMPGROUP,1), MRU_MED, NO_GARD);
     threshold1;
 };
 

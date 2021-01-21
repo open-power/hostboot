@@ -190,6 +190,13 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
                       l_node, l_chip, l_chiplet );
             break;
 
+        case TYPE_SMPGROUP:
+            l_chip    = l_chip / MAX_LINK_PER_PROC;
+            l_chiplet = l_chiplet % MAX_LINK_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "iolink(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
         case TYPE_PAU:
             l_chip    = l_chip / MAX_PAU_PER_PROC;
             l_chiplet = l_chiplet % MAX_PAU_PER_PROC;
