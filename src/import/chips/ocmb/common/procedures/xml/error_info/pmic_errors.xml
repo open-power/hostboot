@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -281,18 +281,34 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_INVALID_NUMBER_OF_TARGETS</rc>
+    <rc>RC_INVALID_PMIC_TARGET_CONFIG</rc>
     <description>
-       Expected 4 GENERICI2CSLAVE targets and at least 2 PMICs, otherwise,
-       we can not properly enable the PMICs on the 4U DIMM.
+       Expected to see 2 PMICs on the provided OCMB_TARGET in order to
+       properly perform pmic_enable.
     </description>
     <ffdc>OCMB_TARGET</ffdc>
-    <ffdc>NUM_GENERICI2CSLAVE</ffdc>
-    <ffdc>NUM_PMIC</ffdc>
+    <ffdc>NUM_PMICS</ffdc>
+    <ffdc>EXPECTED_PMICS</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INVALID_PMIC_GI2C_TARGET_CONFIG</rc>
+    <description>
+       Expected 4 GENERICI2CSLAVE targets and at least 2 PMICs in order to
+       properly perform 4U pmic_enable.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_GI2CS</ffdc>
+    <ffdc>NUM_PMICS</ffdc>
+    <ffdc>EXPECTED_GI2CS</ffdc>
+    <ffdc>EXPECTED_MIN_PMICS</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
