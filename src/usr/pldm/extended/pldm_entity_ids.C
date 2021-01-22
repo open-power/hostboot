@@ -41,6 +41,9 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_errl.H>
 
+// Error logs
+#include <errl/errlmanager.H>
+
 // libpldm header from pldm subtree
 #include <openbmc/pldm/libpldm/pdr.h>
 
@@ -263,24 +266,33 @@ errlHndl_t PLDM::assignTargetEntityIds()
 
         if (target.size() != target_rsid.size())
         {
+            PLDM_ERR("Hostboot has %llu targets of type %s, but BMC has %llu PLDM entities of type %d",
+                     target.size(),
+                     attrToString<ATTR_TYPE>(entity_info.target_type),
+                     target_rsid.size(),
+                     entity_info.ent_type);
+
             /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_PLDM_ENTITY_IDS
-             * @reasoncode RC_EXPECTED_UNIQUE_TARGET
-             * @userdata1  The number of targets found
-             * @userdata2  The number of PLDM entities found
-             * @devdesc    Software problem, mismatching number of Targets and Entities
-             * @custdesc   A software error occurred during system boot
+             * @errortype        ERRL_SEV_INFORMATIONAL
+             * @moduleid         MOD_PLDM_ENTITY_IDS
+             * @reasoncode       RC_EXPECTED_UNIQUE_TARGET
+             * @userdata1[0:31]  The number of targets found
+             * @userdata1[32:63] The number of PLDM entities found
+             * @userdata2[0:31]  The target class
+             * @userdata2[32:63] The target type
+             * @devdesc          Software problem, mismatching number of Targets and Entities
+             * @custdesc         A software error occurred during system boot
              */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                  MOD_PLDM_ENTITY_IDS,
                                  RC_EXPECTED_UNIQUE_TARGET,
-                                 target.size(),
-                                 target_rsid.size(),
+                                 TWO_UINT32_TO_UINT64(target.size(), target_rsid.size()),
+                                 TWO_UINT32_TO_UINT64(entity_info.target_class, entity_info.target_type),
                                  ErrlEntry::ADD_SW_CALLOUT);
 
             addBmcErrorCallouts(errl);
-            break;
+            errlCommit(errl, PLDM_COMP_ID);
+            continue;
         }
 
         if (!target.empty())
