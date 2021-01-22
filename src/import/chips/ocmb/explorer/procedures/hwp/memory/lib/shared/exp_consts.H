@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -390,6 +390,7 @@ enum fw_boot_cfg_status
 };
 
 #endif
+
 ///
 /// @brief I2C boot stage options
 /// @note certain cmds work in certain boot stages
@@ -438,6 +439,27 @@ enum addrSide
 };
 
 } // namespace i2c
+
+///
+/// @brief status codes for FW_DDR_PHY_INIT
+///
+enum fw_ddr_phy_init_status
+{
+    FW_DDR_PHY_INIT_SUCCESS             = 0x00,
+
+    // Unsupported phy_init_mode
+    FW_DDR_PHY_INIT_UNSUPPORTED_MODE    = 0x01,
+    // Incorrect user_input_msdg size error
+    FW_DDR_PHY_INIT_USER_MSDG_SIZE_ERR  = 0x02,
+    // Missing user_input_msdg extended data flag
+    FW_DDR_PHY_INIT_USER_MSDG_FLAG_ERR  = 0x03,
+    // Misc user_input_msdg error
+    FW_DDR_PHY_INIT_USER_MSDG_ERROR     = 0x04,
+    // TODO: Training fail error will need to be split
+    // Todo awaiting follow up RC meetings
+    // Training returned as a fail
+    FW_DDR_PHY_INIT_TRAINING_FAIL       = 0x05,
+};
 
 #ifndef __PPE__
 namespace omi

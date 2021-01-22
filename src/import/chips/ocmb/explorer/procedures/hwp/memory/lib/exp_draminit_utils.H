@@ -215,8 +215,8 @@ fapi2::ReturnCode host_fw_phy_normal_init(const fapi2::Target<fapi2::TARGET_TYPE
 /// @param[in] i_target OCMB target
 /// @param[in] i_response_1 response struct for EYE_CAPTURE_STEP_1
 /// @param[in] i_response_2 response struct for EYE_CAPTURE_STEP_2
-/// @param[in] i_response_1_rc response from check_host_fw_response from EYE_CAPTURE_STEP_1
-/// @param[in] i_response_2_rc response from check_host_fw_response from EYE_CAPTURE_STEP_2
+/// @param[in] i_response_1_rc response from check::host_fw_response from EYE_CAPTURE_STEP_1
+/// @param[in] i_response_2_rc response from check::host_fw_response from EYE_CAPTURE_STEP_2
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else an error from above as defined in the function algorithm
 /// @note return codes are passed by value, caller should not expect these to change
 ///
@@ -240,6 +240,21 @@ fapi2::ReturnCode send_host_phy_init_cmd(const fapi2::Target<fapi2::TARGET_TYPE_
         const uint8_t i_phy_init_mode,
         host_fw_command_struct& o_cmd);
 
+namespace check
+{
+
+///
+/// @brief Check the error code returned from DDR_PHY_INIT
+///
+/// @param[in] i_target OCMB chip
+/// @param[in] i_cmd host_fw_command_struct used to generate the response
+/// @param[in] i_rsp_arg response arguement buffer
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const host_fw_command_struct& i_cmd,
+        const uint8_t i_rsp_arg[ARGUMENT_SIZE]);
+
 ///
 /// @brief Get and check the host fw response from the explorer
 /// @param[in] i_target OCMB chip
@@ -248,10 +263,11 @@ fapi2::ReturnCode send_host_phy_init_cmd(const fapi2::Target<fapi2::TARGET_TYPE_
 /// @param[out] o_rc return code from mss::exp::check::response()
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode check_host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        host_fw_command_struct& i_cmd,
-        std::vector<uint8_t>& o_rsp_data,
-        fapi2::ReturnCode& o_rc);
+fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   const host_fw_command_struct& i_cmd,
+                                   std::vector<uint8_t>& o_rsp_data);
+
+} // namespace check
 
 ///
 /// @brief Reads and displays the normal draminit training response
@@ -261,7 +277,7 @@ fapi2::ReturnCode check_host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_
 /// @param[in] i_rc return code from checking response
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode read_and_display_normal_training_repsonse(
+fapi2::ReturnCode read_and_display_normal_training_response(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const std::vector<uint8_t> i_resp_data,
     const fapi2::ReturnCode i_rc);
@@ -1549,7 +1565,6 @@ namespace impl_details
 /// @tparam T eye_response struct
 /// @param[in] i_phy_init_mode phy_init_mode
 /// @param[in] i_phy_info phy information of interest
-/// @param[out] o_check_response_rc response RC
 /// @param[out] o_read_display_response_rc display response RC
 /// @param[out] o_response_rc eye response
 /// @return FAPI2_RC_SUCCESS iff okay
@@ -1569,7 +1584,7 @@ fapi2::ReturnCode common_init_eye_capture(const fapi2::Target<fapi2::TARGET_TYPE
 
     // Return code output param is that of check::response
     // A fail of getRSP will go to fapi_try_exit
-    FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, o_check_response_rc));
+    FAPI_TRY(mss::exp::check::host_fw_response(i_target, l_cmd, l_rsp_data));
 
     o_read_display_response_rc = check_rsp_data_size(i_target,
                                  l_rsp_data.size(),

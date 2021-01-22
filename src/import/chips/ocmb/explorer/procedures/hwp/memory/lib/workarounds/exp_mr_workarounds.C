@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,8 +90,9 @@ fapi2::ReturnCode update_lpasr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
         default:
             // Will catch incorrect MRW value set
             FAPI_ASSERT(false,
-                        fapi2::MSS_INVALID_REFRESH_RATE_REQUEST().
-                        set_REFRESH_RATE_REQUEST(l_refresh_rate_request),
+                        fapi2::MSS_INVALID_REFRESH_RATE_REQUEST()
+                        .set_PORT_TARGET(i_target)
+                        .set_REFRESH_RATE_REQUEST(l_refresh_rate_request),
                         "Incorrect refresh request rate received: %d for %s",
                         l_refresh_rate_request, mss::c_str(i_target));
             break;
