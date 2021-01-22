@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -502,12 +502,38 @@ bool __queryUcsMcc( ExtensibleChip * i_mcc, TargetHandle_t i_omi )
     return o_activeAttn;
 }
 
-bool __queryUcsOcmb( ExtensibleChip * i_ocmb )
+bool __queryUcsOcmb( ExtensibleChip * i_ocmb, TargetHandle_t i_omi )
 {
     PRDF_ASSERT( nullptr != i_ocmb );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
 
     bool o_activeAttn = false;
+
+    // Check that the MC_DSTL_FIR bits that normally analyze to the OCMB for
+    // UNIT_CS are setup correct. If they aren't set up as UNIT_CS, skip
+    // querying for channel fails on the OCMB. This is primarily needed for the
+    // P10 DD1 workaround where all channel fails are being defaulted to CS.
+    ExtensibleChip * mcc = getConnectedParent( i_ocmb, TYPE_MCC );
+
+    SCAN_COMM_REGISTER_CLASS * dstl_act0 = mcc->getRegister("MC_DSTL_FIR_ACT0");
+    SCAN_COMM_REGISTER_CLASS * dstl_act1 = mcc->getRegister("MC_DSTL_FIR_ACT1");
+    SCAN_COMM_REGISTER_CLASS * dstl_act2 = mcc->getRegister("MC_DSTL_FIR_ACT2");
+
+    if (SUCCESS == (dstl_act0->Read() | dstl_act1->Read() | dstl_act2->Read()))
+    {
+        uint8_t omiPos = getTargetPosition(i_omi) % MAX_OMI_PER_MCC; // 0:1
+        uint8_t bitPos = 4*omiPos; // check either bit 0 or 4
+
+        // UNIT_CS: MC_DSTL_FIR_ACT0 &  MC_DSTL_FIR_ACT1 & ~MC_DSTL_FIR_ACT2;
+        if ( !dstl_act0->IsBitSet(bitPos) || !dstl_act1->IsBitSet(bitPos) ||
+             dstl_act2->IsBitSet(bitPos) )
+        {
+            // The MC_DSTL_FIR UNIT_CS bit analyzing to this OCMB is not setup
+            // to analyze UNIT_CS attentions. As such, skip querying this OCMB
+            // for channel fails.
+            return o_activeAttn;
+        }
+    }
 
     // Query the OCMB chiplet level FIR to determine if we have a UNIT_CS.
     SCAN_COMM_REGISTER_CLASS * fir = i_ocmb->getRegister("OCMB_CHIPLET_CS_FIR");
@@ -567,7 +593,7 @@ bool __analyzeChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         // recoverable attention or not.
         if ( !__queryUcsOmic(omicChip, mccChip, i_omi) &&
              !__queryUcsMcc(mccChip, i_omi) &&
-             !__queryUcsOcmb(ocmbChip) )
+             !__queryUcsOcmb(ocmbChip, i_omi) )
         {
             // If no channel fail attentions found, just break out.
             break;
@@ -621,7 +647,7 @@ bool __analyzeChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         }
 
         // Check OCMB for unit checkstops
-        if ( __queryUcsOcmb( ocmbChip ) )
+        if ( __queryUcsOcmb( ocmbChip, i_omi ) )
         {
             // Analyze UNIT_CS on the OCMB chip
             if ( SUCCESS == ocmbChip->Analyze(io_sc, UNIT_CS) )
