@@ -30,7 +30,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <secureboot/secure_reasoncodes.H>
-
+#include <util/misc.H>
 #include "../common/securetrace.H"
 
 #include <fapi2.H>
@@ -334,6 +334,14 @@ void validateSecuritySettings()
     #ifdef CONFIG_SECUREBOOT
     // Enforce Synchronized Proc Security State
     do {
+
+    // @TODO RTC 208821 Once SBEs have "sb_settings" in them by default, this
+    // code block can be removed
+    if (Util::isSimicsRunning())
+    {
+        SB_INF("Running In Simics so skipping most of validateSecuritySettings()");
+        break;
+    }
 
     uint64_t l_mainCbs = 0;
 

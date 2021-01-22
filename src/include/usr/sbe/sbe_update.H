@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -216,6 +216,8 @@ namespace SBE
 
     /**
      * @brief Layout of P9_XIP_SECTION_SBE_SB_SETTINGS section in the SBE
+     *
+     * @note  This could eventually be replaced by a define in SBE code
      */
     struct sbeSectionSbSettings_t
     {

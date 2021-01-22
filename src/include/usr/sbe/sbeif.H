@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,20 +80,6 @@ namespace SBE
         KEY_TRANSITION_PERM i_keyTransPerm = INHIBIT_KEY_TRANSITION);
 
     /**
-     * @brief Determines whether we are on the Golden side or not
-     *
-     * @param[out] o_isGolden boolean, True if we are on Golden side, False
-     *                        otherwise.
-     *
-     * @return errlHndl_t Error log handle on failure.
-     *
-     * NOTE: -Golden Side means we booted from the Golden Seeprom pointing
-     *        at the Golden side of PNOR.
-     *       -Using master processor to make this determination.
-     */
-    errlHndl_t isGoldenSide( bool & o_isGolden );
-
-    /**
      * @brief Sets the target processor to boot SBE from the side that is
      *        indicated by the SBE MVPD
      *
@@ -105,7 +91,7 @@ namespace SBE
 
     /**
      * @brief Retrieves the HW Key Hash and the Secure Version from the
-     *        Bootloader (HBBL) Section of the SBE Image. By default, the
+     *        "sb_settings" section of the SBE Image. By default, the
      *        image is read from a SBE SEEPROM (where ECC is removed), but
      *        it also can be read from a SBE Image in System Memory
      *
@@ -115,19 +101,19 @@ namespace SBE
      *                        (ie, != nullptr).
      *
      * @param[in] i_seeprom   Specific SEEPROM on the processor to read the
-     *                        HW Key Hash from.
+     *                        HW Key Hash and Secure Version from.
      *                        Assert if neither SBE_PRIMARY nor SBE_BACKUP.
      *                        NOTE: Ignored if i_image_ptr specifies an image
      *                        (ie, != nullptr).
      *
      * @param[in] i_bootSide  Designates which Seeprom the processor booted on.
      *                        If i_bootSide and i_seeprom match then ChipOps
-     *                        will be used to read the Seeprom to avoid I2C
+     *                        will be used to read the Seeprom to avoid SPI
      *                        collisions.
      *
-     * @param[out] o_hash     HW Key Hash returned from the Processor SEEPROM
+     * @param[out] o_hash     HW Key Hash returned from the SBE Image
      *
-     * @param[out] o_secure_Version Secure Version returned from the Processor SEEPROM
+     * @param[out] o_secure_Version Secure Version returned from the SBE Image
      *
      * @param[in] i_image_ptr  Defaults to nullptr.
      *                         If nullptr, then read SBE Image from i_target
