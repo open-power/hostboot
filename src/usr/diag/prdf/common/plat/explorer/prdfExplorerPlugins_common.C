@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,6 +152,10 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     }
 
     #endif // __HOSTBOOT_RUNTIME
+
+    // If there was a channel failure some cleanup is required to ensure
+    // there are no more attentions from this channel.
+    MemUtils::cleanupChnlFail<TYPE_OCMB_CHIP>( i_chip, io_sc );
 
     // Cleanup processor FIR bits on the other side of the channel.
     MemUtils::cleanupChnlAttns<TYPE_OCMB_CHIP>( i_chip, io_sc );
