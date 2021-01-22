@@ -32,11 +32,13 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 #include <lib/exp_draminit_utils.H>
+#include <exp_data_structs.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <exp_inband.H>
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <lib/exp_attribute_accessors_manual.H>
+#include <lib/shared/exp_consts.H>
 
 namespace mss
 {
@@ -143,10 +145,10 @@ fapi2::ReturnCode host_fw_phy_normal_init(
 
     // Issue full boot mode cmd though EXP-FW REQ buffer
     FAPI_TRY(send_host_phy_init_cmd(i_target, i_phy_info, phy_init_mode::NORMAL, l_cmd));
-    FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, l_rc));
+    FAPI_TRY(mss::exp::check::host_fw_response(i_target, l_cmd, l_rsp_data));
 
     FAPI_TRY(check_rsp_data_size(i_target, l_rsp_data.size(), phy_init_mode::NORMAL));
-    FAPI_TRY(mss::exp::read_and_display_normal_training_repsonse(i_target, l_rsp_data, l_rc));
+    FAPI_TRY(mss::exp::read_and_display_normal_training_response(i_target, l_rsp_data, l_rc));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -292,8 +294,8 @@ fapi_try_exit:
 /// @param[in] i_target OCMB target
 /// @param[in] i_response_1 response struct for EYE_CAPTURE_STEP_1
 /// @param[in] i_response_2 response struct for EYE_CAPTURE_STEP_2
-/// @param[in] i_response_1_rc response from check_host_fw_response from EYE_CAPTURE_STEP_1
-/// @param[in] i_response_2_rc response from check_host_fw_response from EYE_CAPTURE_STEP_2
+/// @param[in] i_response_1_rc response from check::host_fw_response from EYE_CAPTURE_STEP_1
+/// @param[in] i_response_2_rc response from check::host_fw_response from EYE_CAPTURE_STEP_2
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else an error from above as defined in the function algorithm
 /// @note return codes are passed by value, caller should not expect these to change
 ///
@@ -375,6 +377,98 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+namespace check
+{
+
+///
+/// @brief Check the error code returned from DDR_PHY_INIT
+///
+/// @param[in] i_target OCMB chip
+/// @param[in] i_cmd host_fw_command_struct used to generate the response
+/// @param[in] i_rsp_arg response arguement buffer
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const host_fw_command_struct& i_cmd,
+        const uint8_t i_rsp_arg[ARGUMENT_SIZE])
+{
+    const uint8_t l_rsp_status = i_rsp_arg[0];
+
+    // If the response isn't a success check the return code
+    if (l_rsp_status != omi::response_arg::RESPONSE_SUCCESS)
+    {
+        fapi2::buffer<uint32_t> l_error_extended_code;
+        const uint8_t l_error_code = i_rsp_arg[5];
+
+        l_error_extended_code.insertFromRight<0, BITS_PER_BYTE>(i_rsp_arg[4]).
+        insertFromRight<BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp_arg[3]).
+        insertFromRight<2 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp_arg[2]).
+        insertFromRight<3 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp_arg[1]);
+
+        // Check Explorer return code
+        FAPI_ASSERT( (l_error_code != FW_DDR_PHY_INIT_UNSUPPORTED_MODE),
+                     fapi2::MSS_EXP_DDR_PHY_INIT_UNSUPPORTED_MODE().
+                     set_TARGET(i_target).
+                     set_PHY_INIT_MODE(i_cmd.command_argument[0]).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT unsupported mode error (TARGET %s, PHY_INIT_MODE 0x%08X, "
+                     "error_code 0x%02X, extended_error_code=0x%08X)",
+                     mss::c_str(i_target), i_cmd.command_argument[0], l_error_code, l_error_extended_code);
+
+        FAPI_ASSERT( (l_error_code != mss::exp::fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_SIZE_ERR),
+                     fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_SIZE_ERROR().
+                     set_TARGET(i_target).
+                     set_COMMAND_SIZE(i_cmd.cmd_length).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT incorrect user_input_msdg size error (TARGET %s, CMD SIZE 0x%08X, "
+                     "error_code 0x%02X, extended_error_code=0x%08X)",
+                     mss::c_str(i_target), i_cmd.cmd_length, l_error_code, l_error_extended_code);
+
+        FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_FLAG_ERR),
+                     fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_MISSING_FLAG().
+                     set_TARGET(i_target).
+                     set_COMMAND_FLAGS(i_cmd.cmd_flags).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT user_input_msdg missing extended data flag (TARGET %s, CMD FLAGS 0x%08X, "
+                     "error_code 0x%02X, extended_error_code=0x%08X)",
+                     mss::c_str(i_target), i_cmd.cmd_flags, l_error_code, l_error_extended_code);
+
+        FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_ERROR),
+                     fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_ERROR().
+                     set_TARGET(i_target).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT encountered a user_input_msdg error (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
+                     mss::c_str(i_target), l_error_code, l_error_extended_code);
+
+        // TODO: Zenhub #818: Training callout will need to be updated
+        //       Pending additional followup meetings with MCHP
+        FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_TRAINING_FAIL),
+                     fapi2::MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL().
+                     set_TARGET(i_target).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT encountered a training fail (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
+                     mss::c_str(i_target), l_error_code, l_error_extended_code);
+
+        FAPI_ASSERT( false,
+                     fapi2::MSS_EXP_DDR_PHY_INIT_UNKNOWN_ERROR().
+                     set_TARGET(i_target).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT encountered an unknown error code causing a fail(TARGET %s, error_code 0x%02X, extended_error_code=0x%08X) for ",
+                     mss::c_str(i_target), l_error_code, l_error_extended_code);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Get and check the host fw response from the explorer
 ///
@@ -384,24 +478,25 @@ fapi_try_exit:
 /// @param[out] o_rc return code from mss::exp::check::response()
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode check_host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        host_fw_command_struct& i_cmd,
-        std::vector<uint8_t>& o_rsp_data,
-        fapi2::ReturnCode& o_rc)
+fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   const host_fw_command_struct& i_cmd,
+                                   std::vector<uint8_t>& o_rsp_data)
 {
-    o_rc = fapi2::FAPI2_RC_SUCCESS;
-
     host_fw_response_struct l_response;
+
     FAPI_TRY(mss::exp::ib::getRSP(i_target, l_response, o_rsp_data),
              "Failed getRSP() for  %s", mss::c_str(i_target));
 
-    o_rc = mss::exp::ib::check::response(i_target, l_response, i_cmd);
+    FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, i_cmd, l_response.response_argument),
+             "Encountered error from host fw ddr_phy_init for %s", mss::c_str(i_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+} //namespace check
 
 ///
 /// @brief Reads and displays the normal draminit training response
@@ -411,7 +506,7 @@ fapi_try_exit:
 /// @param[in] i_rc return code from checking response
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode read_and_display_normal_training_repsonse(
+fapi2::ReturnCode read_and_display_normal_training_response(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const std::vector<uint8_t> i_resp_data,
     const fapi2::ReturnCode i_rc)

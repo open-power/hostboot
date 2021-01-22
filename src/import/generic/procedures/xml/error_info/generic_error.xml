@@ -540,6 +540,7 @@
       Invalid refresh request rate received.
       Possibly due to bad MRW setting for ATTR_MSS_MRW_REFRESH_RATE_REQUEST.
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>REFRESH_RATE_REQUEST</ffdc>
     <callout>
       <procedure>CODE</procedure>

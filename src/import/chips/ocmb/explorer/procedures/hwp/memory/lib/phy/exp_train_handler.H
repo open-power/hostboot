@@ -312,6 +312,7 @@ fapi2::ReturnCode read_tm_err_mrs_rc_response(const fapi2::Target<fapi2::TARGET_
                  .set_TARGET(i_target)
                  .set_FUNCTION(mss::exp::READ_TRAINING_RESPONSE_STRUCT)
                  .set_DATA_SIZE(i_data.size())
+                 .set_CURRENT_INDEX(i_current_idx)
                  .set_MAX_INDEX(sizeof(T)),
                  "%s Failed to convert from data to host_fw_response_struct data size %u expected size %u",
                  mss::c_str(i_target), i_data.size(), sizeof(T));
