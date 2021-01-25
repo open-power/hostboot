@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -92,21 +92,39 @@
     <description>
       When considering the frequencies in the MRW and the max supported
       frequencies based on DIMM config, there are no applicable frequencies
-      remaining
+      remaining. User data PORTX_FREQ_SUPPORT is a bitmap of DDR frequencies
+      supported by each memory port due to MRW and SPD constraints, with
+      bit0=2666 bit1=2933 bit2=3200 MT/s
     </description>
-    <ffdc>MEM_PORT_TARGET</ffdc>
+    <ffdc>FREQ_DOMAIN_TARGET</ffdc>
     <ffdc>MRW_MAX_FREQ_0</ffdc>
     <ffdc>MRW_MAX_FREQ_1</ffdc>
     <ffdc>MRW_MAX_FREQ_2</ffdc>
     <ffdc>MRW_MAX_FREQ_3</ffdc>
     <ffdc>MRW_MAX_FREQ_4</ffdc>
+    <ffdc>PORT0_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT1_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT2_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT3_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT4_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT5_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT6_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT7_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT8_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT9_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT10_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT11_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT12_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT13_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT14_FREQ_SUPPORT</ffdc>
+    <ffdc>PORT15_FREQ_SUPPORT</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
      <callout>
       <childTargets>
-          <parent>MEM_PORT_TARGET</parent>
+          <parent>FREQ_DOMAIN_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>MEDIUM</priority>

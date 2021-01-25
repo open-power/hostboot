@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,9 +63,9 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // We will first set pre-eff_config attribes
+    // We will first set pre-eff_config attributes
     // Note that we have to go through the MEM_PORT to get to the DIMM targets because of the
-    // target hierarchy in Axone
+    // target hierarchy on P10
     for(const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         for(const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(p))
@@ -77,7 +77,6 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
                 FAPI_TRY(l_base_cfg->process_data_init_fields(l_raw_spd));
             }
         }
-
     }
 
     // Check plug rules.

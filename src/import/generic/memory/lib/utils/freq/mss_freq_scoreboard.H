@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,18 +83,33 @@ template<mss::proc_type P>
 fapi2::ReturnCode max_allowed_dimm_freq(uint32_t* o_allowed_dimm_freq);
 
 ///
+/// @brief Creates a bitmap of supported frequencies per port
+/// @tparam P mss::proc_type on which to operate
+/// @tparam FT mss::frequency_traits of proc_type P
+/// @param[in] i_vpd_supported_freqs vector of hardware supported freqs
+/// @param[out] o_supported_freq_bitmap array of bitmaps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::proc_type P, typename FT = mss::frequency_traits<P>>
+fapi2::ReturnCode freq_support_bitmap_helper(
+    const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs,
+    fapi2::buffer<uint8_t> (&o_supported_freq_bitmap)[FT::PORTS_PER_FREQ_DOMAIN]);
+
+///
 /// @brief Calls out the target if no DIMM frequencies are supported
 /// @tparam P mss::proc_type on which to operate
 /// @tparam T fapi2::TargetType on which to set the frequency
 /// @param[in] i_target target on which to operate
 /// @param[in] i_supported_freq true if any FREQ's are supported
 /// @param[in] i_num_ports number of ports on the frequency domain
+/// @param[in] i_vpd_supported_freqs vector of hardware supported freqs
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::proc_type P, fapi2::TargetType T>
 fapi2::ReturnCode callout_no_common_freq(const fapi2::Target<T>& i_target,
         const bool l_supported_freq,
-        const uint64_t i_num_ports);
+        const uint64_t i_num_ports,
+        const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs);
 
 ///
 /// @brief Calls out the target if no DIMM frequencies are supported
@@ -355,7 +370,8 @@ class freq_scoreboard
             FAPI_INF("%s Fastest common frequency is %d", mss::c_str(i_target), TT::SUPPORTED_FREQS[l_best_freq_index]);
 
             // Assert if we don't have any frequencies supported by at least one configured port
-            FAPI_TRY(callout_no_common_freq<P>(i_target, l_common_ports > l_empty_port_count, l_port_count));
+            FAPI_TRY(callout_no_common_freq<P>(i_target, (l_common_ports > l_empty_port_count), l_port_count,
+                                               i_vpd_supported_freqs));
 
             // Now find and deconfigure all ports that don't support our selected frequency
             FAPI_TRY(deconfigure_ports<P>(i_target, l_ports, l_best_freq_index, o_deconfigured, o_deconfigured_targets));
@@ -496,7 +512,8 @@ class freq_scoreboard
 
                 if (!iv_supported_port_freqs[l_pos][i_best_freq_index])
                 {
-                    FAPI_INF("Port %d (%s) does not support the common frequency so will be deconfigured", l_pos, mss::c_str(p));
+                    FAPI_INF("Port %d (%s) does not support the common frequency (%d) so will be deconfigured",
+                             l_pos, mss::c_str(p), TT::SUPPORTED_FREQS[i_best_freq_index]);
                     auto& l_port_supported_freqs = iv_supported_port_freqs[l_pos];
 
                     o_deconfigured.push_back(l_pos);

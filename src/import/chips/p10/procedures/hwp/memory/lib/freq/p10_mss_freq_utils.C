@@ -354,30 +354,112 @@ fapi2::ReturnCode num_master_ranks_per_dimm<mss::proc_type::PROC_P10>(
 }
 
 ///
+/// @brief Creates a bitmap of supported frequencies per port - specialization for the PROC_P10 processor type
+/// @param[in] i_vpd_supported_freqs vector of hardware supported freqs
+/// @param[out] o_supported_freq_bitmap array of bitmaps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode freq_support_bitmap_helper<mss::proc_type::PROC_P10>(
+    const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs,
+    fapi2::buffer<uint8_t>
+    (&o_supported_freq_bitmap)[mss::frequency_traits<mss::proc_type::PROC_P10>::PORTS_PER_FREQ_DOMAIN])
+{
+    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
+
+    for (size_t l_port = 0; l_port < TT::PORTS_PER_FREQ_DOMAIN; ++l_port)
+    {
+        // NOTE: the size of i_vpd_supported_freqs was checked in limit_freq_by_vpd
+        // so we should not overrun it here
+        for (const auto l_freq : i_vpd_supported_freqs[l_port])
+        {
+            // Set to the 'unknown freq' position (shouldn't occur, but just in case)
+            uint8_t l_freq_bit = 7;
+
+            switch (l_freq)
+            {
+                case TT::SUPPORTED_FREQ0:
+                    l_freq_bit = 0;
+                    break;
+
+                case TT::SUPPORTED_FREQ1:
+                    l_freq_bit = 1;
+                    break;
+
+                case TT::SUPPORTED_FREQ2:
+                    l_freq_bit = 2;
+                    break;
+
+                default:
+                    break;
+            }
+
+            FAPI_TRY(o_supported_freq_bitmap[l_port].setBit(l_freq_bit));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Calls out the target if no DIMM frequencies are supported - specialization for PROC_P10 and MEM_PORT
 /// @param[in] i_target target on which to operate
 /// @param[in] i_supported_freq true if any FREQ's are supported
-/// @param[in,out] i_num_ports number of configured ports
+/// @param[in] i_num_ports number of configured ports
+/// @param[in] i_vpd_supported_freqs vector of hardware supported freqs
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode callout_no_common_freq<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const bool i_supported_freq,
-    const uint64_t i_num_ports)
+    const uint64_t i_num_ports,
+    const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs)
 {
+    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
+
+    fapi2::buffer<uint8_t> l_supported_freq_bitmap[TT::PORTS_PER_FREQ_DOMAIN] = {0};
     uint32_t l_max_mrw_freqs[NUM_MAX_FREQS] = {0};
     FAPI_TRY( mss::attr::get_max_allowed_dimm_freq(l_max_mrw_freqs) );
 
+    // Fill in a bitmap of supported freqs for each port in the domain
+    FAPI_TRY(freq_support_bitmap_helper<mss::proc_type::PROC_P10>(i_vpd_supported_freqs, l_supported_freq_bitmap));
+
     FAPI_ASSERT(i_supported_freq,
                 fapi2::P10_MSS_NO_SUPPORTED_FREQ()
-                .set_MEM_PORT_TARGET(i_target)
+                .set_FREQ_DOMAIN_TARGET(i_target)
                 .set_MRW_MAX_FREQ_0(l_max_mrw_freqs[0])
                 .set_MRW_MAX_FREQ_1(l_max_mrw_freqs[1])
                 .set_MRW_MAX_FREQ_2(l_max_mrw_freqs[2])
                 .set_MRW_MAX_FREQ_3(l_max_mrw_freqs[3])
-                .set_MRW_MAX_FREQ_4(l_max_mrw_freqs[4]),
-                "%s didn't find a frequency that was supported on any ports", mss::c_str(i_target));
+                .set_MRW_MAX_FREQ_4(l_max_mrw_freqs[4])
+                .set_PORT0_FREQ_SUPPORT(l_supported_freq_bitmap[0])
+                .set_PORT1_FREQ_SUPPORT(l_supported_freq_bitmap[1])
+                .set_PORT2_FREQ_SUPPORT(l_supported_freq_bitmap[2])
+                .set_PORT3_FREQ_SUPPORT(l_supported_freq_bitmap[3])
+                .set_PORT4_FREQ_SUPPORT(l_supported_freq_bitmap[4])
+                .set_PORT5_FREQ_SUPPORT(l_supported_freq_bitmap[5])
+                .set_PORT6_FREQ_SUPPORT(l_supported_freq_bitmap[6])
+                .set_PORT7_FREQ_SUPPORT(l_supported_freq_bitmap[7])
+                .set_PORT8_FREQ_SUPPORT(l_supported_freq_bitmap[8])
+                .set_PORT9_FREQ_SUPPORT(l_supported_freq_bitmap[9])
+                .set_PORT10_FREQ_SUPPORT(l_supported_freq_bitmap[10])
+                .set_PORT11_FREQ_SUPPORT(l_supported_freq_bitmap[11])
+                .set_PORT12_FREQ_SUPPORT(l_supported_freq_bitmap[12])
+                .set_PORT13_FREQ_SUPPORT(l_supported_freq_bitmap[13])
+                .set_PORT14_FREQ_SUPPORT(l_supported_freq_bitmap[14])
+                .set_PORT15_FREQ_SUPPORT(l_supported_freq_bitmap[15]),
+                "%s didn't find a frequency that was supported on any ports. Freq support bitmap: "
+                "port0:0x%02X port1:0x%02X port2:0x%02X port3:0x%02X port4:0x%02X "
+                "port5:0x%02X port6:0x%02X port7:0x%02X port8:0x%02X port9:0x%02X "
+                "port10:0x%02X port11:0x%02X port12:0x%02X port13:0x%02X port14:0x%02X port15:0x%02X",
+                mss::c_str(i_target), l_supported_freq_bitmap[0], l_supported_freq_bitmap[1],
+                l_supported_freq_bitmap[2], l_supported_freq_bitmap[3], l_supported_freq_bitmap[4],
+                l_supported_freq_bitmap[5], l_supported_freq_bitmap[6], l_supported_freq_bitmap[7],
+                l_supported_freq_bitmap[8], l_supported_freq_bitmap[9], l_supported_freq_bitmap[10],
+                l_supported_freq_bitmap[11], l_supported_freq_bitmap[12], l_supported_freq_bitmap[13],
+                l_supported_freq_bitmap[14], l_supported_freq_bitmap[15]);
 
 fapi_try_exit:
     return fapi2::current_err;
