@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -193,8 +193,8 @@ void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
     if ( i_mm.s.isOcmb ) // OCMB
     {
         compStr = "omi";
-        chipPos = (i_mm.s.procPos << 3) | i_mm.s.chnlPos;
-        compPos = i_mm.s.omiPos;
+        chipPos = i_mm.s.procPos;
+        compPos = (i_mm.s.chnlPos * MAX_MCC_PER_PROC) + i_mm.s.omiPos;
     }
 
     // Build the header string.
