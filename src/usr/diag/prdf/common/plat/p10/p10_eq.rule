@@ -845,9 +845,9 @@ group gEQ_QME_FIR
            cs_root_cause(27)
 {
     /** EQ_QME_FIR[0]
-     *  PPE halted due to an error
+     *  PPE halted due to an error. Notify OCC Complex
      */
-    (rEQ_QME_FIR, bit(0)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(0)) ? pigInterrupt;
 
     /** EQ_QME_FIR[1]
      *  PPE asserted debug trigger.
@@ -855,7 +855,7 @@ group gEQ_QME_FIR
     (rEQ_QME_FIR, bit(1)) ? defaultMaskedError;
 
     /** EQ_QME_FIR[2]
-     *  Used for TBD testing or workarounds
+     *  Spare trigger for testing or workarounds
      */
     (rEQ_QME_FIR, bit(2)) ? defaultMaskedError;
 
@@ -875,9 +875,9 @@ group gEQ_QME_FIR
     (rEQ_QME_FIR, bit(5)) ? defaultMaskedError;
 
     /** EQ_QME_FIR[6]
-     *  SRAM Uncorrectable Error.
+     *  SRAM Uncorrectable Error. QME Hcode handled or bit
      */
-    (rEQ_QME_FIR, bit(6)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(6)) ? defaultMaskedError;
 
     /** EQ_QME_FIR[7]
      *  SRAM Correctable Error.
@@ -885,39 +885,39 @@ group gEQ_QME_FIR
     (rEQ_QME_FIR, bit(7)) ? parent_proc_th_32perDay;
 
     /** EQ_QME_FIR[8]
-     *  Resonant Clock Table array Parity Error.
+     *  Resonant Clock Table array Parity Error. QME Hcode
      */
-    (rEQ_QME_FIR, bit(8)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(8)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[9]
      *  PIG request of PCB interrupt before its previous i
      */
-    (rEQ_QME_FIR, bit(9)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(9)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[10]
      *  Scrub timer tick occurred when scrub is still pend
      */
-    (rEQ_QME_FIR, bit(10)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(10)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[11]
      *  QME_LFIR_CTFS_ERR
      */
-    (rEQ_QME_FIR, bit(11)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(11)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[12]
      *  QME_LFIR_CPMS_ERR
      */
-    (rEQ_QME_FIR, bit(12)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(12)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[13]
      *  PGPE Heartbeat Lost from a hw deadman timer contro
      */
-    (rEQ_QME_FIR, bit(13)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(13)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[14]
      *  BCE forward progress error
      */
-    (rEQ_QME_FIR, bit(14)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(14)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[15]
      *  Resclk TARGET_PSTATE Change Protocol Error
@@ -927,27 +927,27 @@ group gEQ_QME_FIR
     /** EQ_QME_FIR[16]
      *  PCB Network or Endpoint Reset occurred when QME wa
      */
-    (rEQ_QME_FIR, bit(16)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(16)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[17]
      *  Firmware cleared special wakeup request before SPE
      */
-    (rEQ_QME_FIR, bit(17)) ? level2_th_1;
+    (rEQ_QME_FIR, bit(17)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[18]
      *  A new special wakeup right after previous cleared
      */
-    (rEQ_QME_FIR, bit(18)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(18)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[19]
      *  Core External Interrupt wakeup sources present but
      */
-    (rEQ_QME_FIR, bit(19)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(19)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[20]
      *  Core External Interrupt present but the chiplet is
      */
-    (rEQ_QME_FIR, bit(20)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(20)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[21]
      *  Reserved
@@ -957,37 +957,37 @@ group gEQ_QME_FIR
     /** EQ_QME_FIR[22]
      *  PB read cmd waited too long for lost data (hang)
      */
-    (rEQ_QME_FIR, bit(22)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(22)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[23]
-     *  PPE tried to write a protected addr as defined by 
+     *  PPE tried to write a protected addr as defined by
      */
-    (rEQ_QME_FIR, bit(23)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(23)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[24]
      *  DTC Sequencer read a UE from SRAM
      */
-    (rEQ_QME_FIR, bit(24)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(24)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[25]
-     *  Correctable error detected on incoming data for a 
+     *  Correctable error detected on incoming data for a
      */
     (rEQ_QME_FIR, bit(25)) ? parent_proc_th_32perDay;
 
     /** EQ_QME_FIR[26]
      *  UE Detected on incoming data for a PowerBus read.
      */
-    (rEQ_QME_FIR, bit(26)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(26)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[27]
      *  SUE Detected on incoming data for a PowerBus read.
      */
-    (rEQ_QME_FIR, bit(27)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(27)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[28]
      *  PB Request address hit an invalid entry in the TOP
      */
-    (rEQ_QME_FIR, bit(28)) ? parent_proc_th_1;
+    (rEQ_QME_FIR, bit(28)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[29]
      *  Parity error detected on a powerbus tag
@@ -997,12 +997,12 @@ group gEQ_QME_FIR
     /** EQ_QME_FIR[30]
      *  Code attempted to write the PIG register when the
      */
-    (rEQ_QME_FIR, bit(30)) ? level2_th_1;
+    (rEQ_QME_FIR, bit(30)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[31]
      *  Local access error bit(s) set
      */
-    (rEQ_QME_FIR, bit(31)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(31)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[32]
      *  CE detected on read to the SSA located in QME powe
@@ -1015,12 +1015,12 @@ group gEQ_QME_FIR
     (rEQ_QME_FIR, bit(33)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[34]
-     *  A parity error was detected in one of the CCFG lat
+     *  Resonant clock CCFG parity error.
      */
-    (rEQ_QME_FIR, bit(34)) ? defaultMaskedError;
+    (rEQ_QME_FIR, bit(34)) ? qmeInterrupt;
 
     /** EQ_QME_FIR[35]
-     *  Implemented but not used. Input tied to 0.
+     *  Implemented but not used. Input tied to 0. Unsed f
      */
     (rEQ_QME_FIR, bit(35)) ? defaultMaskedError;
 

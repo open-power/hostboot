@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,11 @@ actionclass coreUnitCheckstop
 {
     funccall("coreUcsSummary");
 };
+
+# The bits characterized by these actions should be routed to other components
+# and should never be seen by PRD.
+actionclass qmeInterrupt { level2_th_1; };
+actionclass pigInterrupt { level2_th_1; };
 
 ###############################################################################
 # Analyze connected

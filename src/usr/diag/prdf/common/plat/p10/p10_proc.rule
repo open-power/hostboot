@@ -2844,7 +2844,7 @@ group gOCC_FIR
     (rOCC_FIR, bit(1)) ? defaultMaskedError;
 
     /** OCC_FIR[2]
-     *  OCC_CME_ERROR_NOTIFY
+     *  OCC_QME_ERROR_NOTIFY.  Set by XGPE code to indicat
      */
     (rOCC_FIR, bit(2)) ? defaultMaskedError;
 
@@ -2899,12 +2899,12 @@ group gOCC_FIR
     (rOCC_FIR, bit(12)) ? defaultMaskedError;
 
     /** OCC_FIR[13]
-     *  OCB Error (recoverable error)
+     *  OCB Error to PM Hcode for PM Complex Restart
      */
-    (rOCC_FIR, bit(13)) ? defaultMaskedError;
+    (rOCC_FIR, bit(13)) ? occInterrupt;
 
     /** OCC_FIR[14]
-     *  SRAM UE
+     *  SRAM UE to PM Hcode for PM Complex Restart
      */
     (rOCC_FIR, bit(14)) ? occInterrupt;
 
@@ -2914,17 +2914,17 @@ group gOCC_FIR
     (rOCC_FIR, bit(15)) ? threshold_and_mask_self;
 
     /** OCC_FIR[16]
-     *  GPE0 asserted a halt condition
+     *  GPE0 asserted a halt condition. Handled by OCC Fir
      */
     (rOCC_FIR, bit(16)) ? defaultMaskedError;
 
     /** OCC_FIR[17]
-     *  GPE1 asserted a halt condition
+     *  GPE1 asserted a halt condition. Handled by OCC Fir
      */
     (rOCC_FIR, bit(17)) ? defaultMaskedError;
 
     /** OCC_FIR[18]
-     *  GPE2 asserted a halt condition
+     *  GPE2 asserted a halt condition. Handled by OCC Fir
      */
     (rOCC_FIR, bit(18)) ? defaultMaskedError;
 
@@ -2954,7 +2954,7 @@ group gOCC_FIR
     (rOCC_FIR, bit(23)) ? threshold_and_mask_self;
 
     /** OCC_FIR[24]
-     *  Reserved
+     *  Safe Mode for debug use
      */
     (rOCC_FIR, bit(24)) ? defaultMaskedError;
 
@@ -2964,27 +2964,27 @@ group gOCC_FIR
     (rOCC_FIR, bit(25)) ? defaultMaskedError;
 
     /** OCC_FIR[26]
-     *  External Trigger pin active
+     *  EXTERNAL_TRAP. Handled by OCC Firmware via direct
      */
     (rOCC_FIR, bit(26)) ? defaultMaskedError;
 
     /** OCC_FIR[27]
-     *  PPC405 Core Reset Output asserted
+     *  PPC405 Core Reset Output asserted (OCC firmware)
      */
     (rOCC_FIR, bit(27)) ? defaultMaskedError;
 
     /** OCC_FIR[28]
-     *  PPC405 Chip Reset Output asserted
+     *  PPC405 Chip Reset Output asserted (OCC firmware)
      */
     (rOCC_FIR, bit(28)) ? defaultMaskedError;
 
     /** OCC_FIR[29]
-     *  PPC405 System Reset Output asserted
+     *  PPC405 System Reset Output asserted (OCC firmware)
      */
     (rOCC_FIR, bit(29)) ? defaultMaskedError;
 
     /** OCC_FIR[30]
-     *  PPC405 Wait State asserted
+     *  PPC405 Wait State asserted (OCC firmware)
      */
     (rOCC_FIR, bit(30)) ? defaultMaskedError;
 
@@ -3011,7 +3011,7 @@ group gOCC_FIR
     /** OCC_FIR[35]
      *  Parity error detected on OPIT interrupt bus. Inter
      */
-    (rOCC_FIR, bit(35)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(35)) ? occInterrupt;
 
     /** OCC_FIR[36]
      *  OPIT interrupt state machine error occurred.
@@ -3021,27 +3021,27 @@ group gOCC_FIR
     /** OCC_FIR[37]
      *  Reserved
      */
-    (rOCC_FIR, bit(37)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(37)) ? defaultMaskedError;
 
     /** OCC_FIR[38]
      *  Reserved
      */
-    (rOCC_FIR, bit(38)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(38)) ? defaultMaskedError;
 
     /** OCC_FIR[39]
      *  Reserved
      */
-    (rOCC_FIR, bit(39)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(39)) ? defaultMaskedError;
 
     /** OCC_FIR[40]
      *  Reserved
      */
-    (rOCC_FIR, bit(40)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(40)) ? defaultMaskedError;
 
     /** OCC_FIR[41]
      *  Reserved
      */
-    (rOCC_FIR, bit(41)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(41)) ? defaultMaskedError;
 
     /** OCC_FIR[42]
      *  JTAG accelerator error
@@ -3051,12 +3051,12 @@ group gOCC_FIR
     /** OCC_FIR[43]
      *  Any OCI Slave error occurred
      */
-    (rOCC_FIR, bit(43)) ? defaultMaskedError;
+    (rOCC_FIR, bit(43)) ? threshold_and_mask_self;
 
     /** OCC_FIR[44]
-     *  PPC405 cache UE
+     *  PPC405 cache UE to PM Hcode for PM Complex Restart
      */
-    (rOCC_FIR, bit(44)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(44)) ? occInterrupt;
 
     /** OCC_FIR[45]
      *  PPC405 cache CE
@@ -3074,7 +3074,7 @@ group gOCC_FIR
     (rOCC_FIR, bit(47)) ? threshold_and_mask_self;
 
     /** OCC_FIR[48]
-     *  Read, write, or parity error in the  SRAM tank con
+     *  Read, write, or parity error in the SRAM tank cont
      */
     (rOCC_FIR, bit(48)) ? threshold_and_mask_self;
 
@@ -3109,24 +3109,24 @@ group gOCC_FIR
     (rOCC_FIR, bit(54)) ? threshold_and_mask_self;
 
     /** OCC_FIR[55]
-     *  PPC405 ICU timeout on OCI  request
+     *  PPC405 ICU timeout on OCI request
      */
     (rOCC_FIR, bit(55)) ? threshold_and_mask_self;
 
     /** OCC_FIR[56]
-     *  PPC405 DCU timeout on OCI  request
+     *  PPC405 DCU timeout on OCI request
      */
     (rOCC_FIR, bit(56)) ? threshold_and_mask_self;
 
     /** OCC_FIR[57]
-     *  Fault occurred (to achieve safe mode)
+     *  OCC fault occurred (to achieve safe mode)
      */
     (rOCC_FIR, bit(57)) ? threshold_and_mask_self;
 
     /** OCC_FIR[58]
-     *  Used by OCC to notify another firmware entity that
+     *  Read by HYP as part of the communication of a Powe
      */
-    (rOCC_FIR, bit(58)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(58)) ? defaultMaskedError;
 
     /** OCC_FIR[59]
      *  reserved
@@ -3209,7 +3209,7 @@ group gPBAO_FIR
     /** PBAO_FIR[9]
      *  Illegal access to OCI Register
      */
-    (rPBAO_FIR, bit(9)) ? threshold_and_mask_self;
+    (rPBAO_FIR, bit(9)) ? defaultMaskedError;
 
     /** PBAO_FIR[10]
      *  Push Write Error.
@@ -8063,22 +8063,22 @@ group gPBAF_FIR
     (rPBAF_FIR, bit(0)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[1]
-     *  PB Read Data Timeout  for Forwarded Request
+     *  PB Read Data Timeout for Forwarded Request
      */
     (rPBAF_FIR, bit(1)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[2]
-     *  PB Read Data SUE Error  for Forwarded Request
+     *  PB Read Data SUE Error for Forwarded Request
      */
     (rPBAF_FIR, bit(2)) ? defaultMaskedError;
 
     /** PBAF_FIR[3]
-     *  PB Read Data UE Error  for Forwarded Request
+     *  PB Read Data UE Error for Forwarded Request
      */
     (rPBAF_FIR, bit(3)) ? threshold_and_mask_self;
 
     /** PBAF_FIR[4]
-     *  PB Read Data CE Error  for Forwarded Request
+     *  PB Read Data CE Error for Forwarded Request
      */
     (rPBAF_FIR, bit(4)) ? threshold_and_mask_self;
 
