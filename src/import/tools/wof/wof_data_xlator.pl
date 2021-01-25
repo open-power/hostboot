@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2020
+# Contributors Listed Below - COPYRIGHT 2017,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -101,7 +101,9 @@ my $g_amb_cond_size;
 my $G_MIN_FREQ_ENCODE = 108;
 my $G_MAX_FREQ_ENCODE = 255;
 my $G_MIN_OVRG_ENCODE = 1;
-my $G_MAX_OVRG_ENCODE = 107;    # $G_MIN_FREQ_ENCODE - 1;
+my $G_MAX_OVRG_ENCODE = 107;    # This value is: $G_MIN_FREQ_ENCODE - 1;
+
+my $G_MAX_READ_SIZE = 4096;
 ################################################################################
 #
 # Internal global variables
@@ -384,17 +386,8 @@ our $csv_vratio_index_count = 12;
 # Number of columns in the CSV file
 our $CSV_COLUMN_COUNT;
 
-# Number of file scope columns we are storing
-our $CSV_FILE_SCOPE_COLUMN_COUNT;
-
 # Columns we want to store that have file scope (all rows have same value)
 our @CSV_FILE_SCOPE_COLUMN_INDEXES;
-
-# hash to store values according to index.
-our %CSV_INDEX_TO_VCS_CEFF_MAP;
-our %CSV_INDEX_TO_VDD_CEFF_MAP;
-our %CSV_INDEX_TO_IO_POWER_MAP;
-our %CSV_INDEX_TO_AMB_COND_MAP;
 
 # Columns in the CSV file.  Index value is important, but case is not.
 # This contains the latest CSV version of columns
@@ -406,6 +399,7 @@ our %CSV_COLUMN_INDEX_TO_NAME;
 
 # Attribute names in this class
 our $CSV_ATTR_file_name                 = 'file_name';
+our $CSV_ATTR_sort                      = 'sort';
 our $CSV_ATTR_vrts                      = 'vrts';
 our $CSV_ATTR_package                   = 'package';
 our $CSV_ATTR_table_version             = 'table_version';
@@ -448,29 +442,52 @@ our $CSV_ATTR_vratio                    = 'vratio';
 our $CSV_ATTR_vratio_index              = 'vratio_index';
 our $CSV_ATTR_wof_freq                  = 'wof_freq';
 our $CSV_ATTR_wof_ceff_ratio_overage    = 'wof_ceff_ratio_overage';
+our $CSV_ATTR_override_match_freq       = 'override_match_freq';
+our $CSV_ATTR_override_match_power      = 'override_match_power';
+our $CSV_ATTR_pdv_sort_fixed_freq       = 'pdv_sort_fixed_freq';
 
-# columns in csv files that are of csv file scope.
-our @CSV_SCOPE_COLUMN_NAMES = (
-    $CSV_ATTR_package,                   $CSV_ATTR_table_version,          $CSV_ATTR_table_date,
-    $CSV_ATTR_PN,                        $CSV_ATTR_ocs_mode,               $CSV_ATTR_socket_power,
-    $CSV_ATTR_rdp_current,               $CSV_ATTR_boost_current,          $CSV_ATTR_tdp_vcs_ceff_index,
-    $CSV_ATTR_tdp_vdd_ceff_index,        $CSV_ATTR_tdp_io_power_index,     $CSV_ATTR_tdp_amb_cond_index,
-    $CSV_ATTR_io_full_power,             $CSV_ATTR_io_disabled_power,      $CSV_ATTR_core_count,
-    $CSV_ATTR_pdv_sort_ultra_turbo_freq, $CSV_ATTR_pdv_sort_throttle_freq, $CSV_ATTR_pdv_sort_power_save_freq,
-    $CSV_ATTR_pdv_sort_wof_base_freq,    $CSV_ATTR_vdd_ceff_start,         $CSV_ATTR_vdd_ceff_step,
-    $CSV_ATTR_vcs_ceff_start,            $CSV_ATTR_vcs_ceff_step,          $CSV_ATTR_io_power_start,
-    $CSV_ATTR_io_power_step,             $CSV_ATTR_amb_cond_start,         $CSV_ATTR_amb_cond_step,
-    $CSV_ATTR_vratio_start,              $CSV_ATTR_vratio_step,
+# columns of csv file scope in csv files.
+our @CSV_FILE_SCOPE_COLUMN_NAMES = (
+    $CSV_ATTR_sort,                     $CSV_ATTR_package,                   $CSV_ATTR_table_version,
+    $CSV_ATTR_table_date,               $CSV_ATTR_PN,                        $CSV_ATTR_ocs_mode,
+    $CSV_ATTR_socket_power,             $CSV_ATTR_rdp_current,               $CSV_ATTR_boost_current,
+    $CSV_ATTR_tdp_vcs_ceff_index,       $CSV_ATTR_tdp_vdd_ceff_index,        $CSV_ATTR_tdp_io_power_index,
+    $CSV_ATTR_tdp_amb_cond_index,       $CSV_ATTR_io_full_power,             $CSV_ATTR_io_disabled_power,
+    $CSV_ATTR_core_count,               $CSV_ATTR_pdv_sort_ultra_turbo_freq, $CSV_ATTR_pdv_sort_throttle_freq,
+    $CSV_ATTR_pdv_sort_power_save_freq, $CSV_ATTR_pdv_sort_wof_base_freq,    $CSV_ATTR_vdd_ceff_start,
+    $CSV_ATTR_vdd_ceff_step,            $CSV_ATTR_vcs_ceff_start,            $CSV_ATTR_vcs_ceff_step,
+    $CSV_ATTR_io_power_start,           $CSV_ATTR_io_power_step,             $CSV_ATTR_amb_cond_start,
+    $CSV_ATTR_amb_cond_step,            $CSV_ATTR_vratio_start,              $CSV_ATTR_vratio_step,
+    $CSV_ATTR_override_match_freq,      $CSV_ATTR_override_match_power,      $CSV_ATTR_pdv_sort_fixed_freq,
 );
 
-our @CSV_COLUMN_NAMES_EXTRA = (
+# columns of csv vrt scope in csv files.
+# accourding the requirement doc, the followings are for debug purpose and not processed
+# by this program:
+# CSV_ATTR_vdd_ceff
+# CSV_ATTR_vcs_ceff
+# CSV_ATTR_io_power
+# CSV_ATTR_amb_cond
+# CSV_ATTR_vratio
+our @CSV_VRT_SCOPE_COLUMN_NAMES = (
     $CSV_ATTR_vdd_ceff, $CSV_ATTR_vdd_ceff_index, $CSV_ATTR_vcs_ceff, $CSV_ATTR_vcs_ceff_index,
     $CSV_ATTR_io_power, $CSV_ATTR_io_power_index, $CSV_ATTR_amb_cond, $CSV_ATTR_amb_cond_index,
     $CSV_ATTR_vratio,   $CSV_ATTR_vratio_index,   $CSV_ATTR_wof_freq, $CSV_ATTR_wof_ceff_ratio_overage,
 );
 
 # Columns in csv file that will be processed in this tool
-our @CSV_COLUMN_NAMES = ( @CSV_SCOPE_COLUMN_NAMES, @CSV_COLUMN_NAMES_EXTRA );
+our @CSV_COLUMN_NAMES = ( @CSV_FILE_SCOPE_COLUMN_NAMES, @CSV_VRT_SCOPE_COLUMN_NAMES );
+
+# Columns in csv file that could be skipped in the file.
+# If the columns can be skipped, they must be included in the table here.
+my %CSV_FILE_SCOPE_COLUMN_NOT_FOUND_DEFAULT_VALUES = (
+    $CSV_ATTR_override_match_freq  => 0,
+    $CSV_ATTR_override_match_power => 0,
+    $CSV_ATTR_pdv_sort_fixed_freq  => 0,
+);
+
+# If the column is really skipped in CSV file, but in teh table above, added to this array.
+our @CSV_FILE_SCOPE_COLUMN_NOT_FOUND;
 
 sub new
 {
@@ -483,7 +500,7 @@ sub new
         $CSV_ATTR_vrts      => [],
     };
 
-    # continue to populate hash %self with remaining columns value.
+    # Set hash %self of remaining columns with undef value.
     foreach my $column (@CSV_COLUMN_NAMES)
     {
         $self->{$column} = undef;
@@ -520,7 +537,11 @@ sub new
 
 sub access
 {
-    my ( $self, $attr_name ) = @_;
+    my ( $self, $attr_name, $attr_value ) = @_;
+    if ( defined($attr_value) )
+    {
+        $self->{$attr_name} = $attr_value;
+    }
     return $self->{$attr_name};
 }
 
@@ -537,15 +558,18 @@ sub parse
 
     # Open the CSV file
     my $csv_file = IO::File->new();
-    Log::log_print $p_log_lvl, "  opening file, " . $self->access($CSV_ATTR_file_name) . ".\n";
+    Log::log_print $LOG_LVL_3, "  Processing, " . $self->access($CSV_ATTR_file_name) . ".\n";
     if ( !( $csv_file->open( $self->access($CSV_ATTR_file_name), 'r' ) ) )
     {
         die "Error: Unable to open file " . $self->access($CSV_ATTR_file_name) . ": $!.\n";
     }
 
+    # Clear the column not found array for the new file
+    @CSV_FILE_SCOPE_COLUMN_NOT_FOUND = ();
+
     # Parse rows in the CSV file
     my $row;
-    my $row_number = 1;
+    my $row_number = 1;    # starting row index is 1.
     my @columns;
     while ( defined( $row = $csv_file->getline() ) )
     {
@@ -556,19 +580,34 @@ sub parse
         $self->_parse_row( $row, $row_number, \@columns );
         if ( $row_number == 1 )
         {
+            # Row#1 only contains column names.
             # Column header row. Extract values and indexes of columns in the row.
             $self->_extract_column_names_indexes( \@columns );
         }
+        elsif ( $row_number == 2 )
+        {
+            # From Row#2, contains column values. But for file scope columns, all values are the same.
+            # But
+            # Data row.  Store the column values in our data structure.
+
+            # Verify and store column values that have file scope
+            $self->_store_file_scope_columns( $row_number, \@columns );
+
+            # Save VRT scope values.
+            # Verify and store column values that are scoped to a specific VRT entry
+            $self->_store_vrt_scope_columns( $row_number, \@columns );
+        }
         else
         {
-            # Data row.  Store the column values in our data structure.
-            $self->_store_columns( $row_number, \@columns );
+            # Save VRT scope values.
+            # Verify and store column values that are scoped to a specific VRT entry
+            $self->_store_vrt_scope_columns( $row_number, \@columns );
         }
         $row_number++;
     }
 
     # Verify the data we stored in our data structure
-    $self->_verify_stored_data();
+    $self->_verify_stored_vrt_data();
 
     # Close the CSV file
     if ( !( $csv_file->close() ) )
@@ -596,7 +635,7 @@ sub _parse_row
     while ( $row !~ /^\s*$/ )
     {
         # If row starts with a simple column without double quotes
-        if ( $row =~ /^(([^,"\n]*)(?:,|\n|$))/ )
+        if ( $row =~ /^(([^,"\v]*)(?:,|\v|$))/ )
         {
             # Match #1 contains column value with comma.  Delete it from row.
             $row = substr( $row, length($1) );
@@ -604,7 +643,7 @@ sub _parse_row
             # Match #2 contains column value without the comma.  Add to column array.
             push( @$columns, $2 );
         }
-        elsif ( $row =~ /^("((?:[^"]|"")*)"(?:,|\n|$))/ )
+        elsif ( $row =~ /^("((?:[^"]|"")*)"(?:,|\v|$))/ )
         {
             # Complex column found with double quotes.  May contain commas or nested
             # double quotes.
@@ -638,20 +677,8 @@ sub _extract_column_names_indexes
         die "Error: the array lenth of columns is zero.";
     }
     $CSV_COLUMN_COUNT = scalar @CSV_COLUMN_NAMES;
-    if ( $p_log_lvl >= $g_log_lvl_target )
-    {
-        #  Log::log_print $LOG_LVL_1, "  columns:\n";
-        foreach my $column (@$columns)
-        {
-            Log::log_print $p_log_lvl, "  column: $column.\n";
-        }
-        Log::log_print $p_log_lvl, "  CSV_COLUMN_NAMES:\n";
-        foreach my $column_name (@CSV_COLUMN_NAMES)
-        {
-            Log::log_print $p_log_lvl, "  column_name: $column_name.\n";
-        }
-    }
 
+    # populate the $CSV_COLUMN_NAME_TO_INDEX table.
     # outer loop, iterate through array @CSV_COLUMN_NAMES.
     foreach my $column_name (@CSV_COLUMN_NAMES)
     {
@@ -666,28 +693,59 @@ sub _extract_column_names_indexes
                 last;
             }
         }
+    }
+
+    # populate the @CSV_FILE_SCOPE_COLUMN_NOT_FOUND table.
+    # outer loop, iterate through array @CSV_COLUMN_NAMES.
+    foreach my $column_name (@CSV_COLUMN_NAMES)
+    {
+        # Check if the column is in csv column default value table.
         if ( !exists( $CSV_COLUMN_NAME_TO_INDEX{$column_name} ) )
         {
-            die "Error: CSV file columns do not include column: " . $column_name;
+            Log::log_print $LOG_LVL_0, "  Not exist column_name: $column_name.\n";
+
+            # the column in @CSV_COLUMN_NAMES table, but the column not exist in the CSV file.
+            # check if it is in not found table.
+            if ( exists( $CSV_FILE_SCOPE_COLUMN_NOT_FOUND_DEFAULT_VALUES{$column_name} ) )
+            {
+                # it is in the not found table, so it is expected.
+                push( @CSV_FILE_SCOPE_COLUMN_NOT_FOUND, $column_name );
+            }
+            else
+            {
+                # it is not in the not found table. so it is not expected.
+                die "Error: CSV file "
+                    . $self->access($CSV_ATTR_file_name)
+                    . " columns do not include column: "
+                    . $column_name;
+            }
         }
     }
-    if ( scalar @CSV_COLUMN_NAMES != keys %CSV_COLUMN_NAME_TO_INDEX )
+
+    if (scalar @CSV_COLUMN_NAMES != ( ( keys %CSV_COLUMN_NAME_TO_INDEX ) + ( keys @CSV_FILE_SCOPE_COLUMN_NOT_FOUND ) ) )
     {
-        die "Error: the number of required columns in CSV file " . "is different from the number set in the program.";
+        my $output =
+              "Error: the number of required columns in CSV file "
+            . $self->access($CSV_ATTR_file_name)
+            . " is different from the number set in the program. ";
+        $output = $output . " number of columns: " . scalar @CSV_COLUMN_NAMES;
+        $output = $output . " keys CSV_COLUMN_NAME_TO_INDEX: " . keys %CSV_COLUMN_NAME_TO_INDEX;
+        $output = $output . " keys CSV_FILE_SCOPE_COLUMN_NOT_FOUND: " . keys @CSV_FILE_SCOPE_COLUMN_NOT_FOUND;
+        print "$output\n";
+        die $output;
     }
 
     # populate the CSV_COLUMN_INDEX_TO_NAME hash table with reverse.
     %CSV_COLUMN_INDEX_TO_NAME = reverse %CSV_COLUMN_NAME_TO_INDEX;
-    Log::log_print $p_log_lvl, "  CSV_COLUMN_NAME_TO_INDEX:\n";
 
     #    Log::log_print $p_log_lvl, "  key: $_ and value: $CSV_COLUMN_NAME_TO_INDEX{$_}.\n";
 
-    # make sure @CSV_SCOPE_COLUMN_NAMES is subset of @CSV_COLUMN_NAMES.
+    # verify that @CSV_FILE_SCOPE_COLUMN_NAMES is subset of @CSV_COLUMN_NAMES.
     # use a temp hash as storage, and compare two arrays.
     my %temp_hash;
 
-    # add a hash key for each element of @CSV_SCOPE_COLUMN_NAMES
-    undef @temp_hash{@CSV_SCOPE_COLUMN_NAMES};
+    # add a hash key for each element of @CSV_FILE_SCOPE_COLUMN_NAMES
+    undef @temp_hash{@CSV_FILE_SCOPE_COLUMN_NAMES};
 
     # remove all keys for elements of @CSV_COLUMN_NAMES
     delete @temp_hash{@CSV_COLUMN_NAMES};
@@ -696,21 +754,122 @@ sub _extract_column_names_indexes
     # if not empty, print error and exit.
     if (%temp_hash)
     {
-        die "Error: @CSV_SCOPE_COLUMN_NAMES is not " . "subset of @CSV_COLUMN_NAMES.\n";
+        die "Error: @CSV_FILE_SCOPE_COLUMN_NAMES is not " . "subset of @CSV_COLUMN_NAMES.\n";
     }
 
     # populate @CSV_FILE_SCOPE_COLUMN_INDEXES array with column's index.
-    foreach my $column (@CSV_SCOPE_COLUMN_NAMES)
+    foreach my $column (@CSV_FILE_SCOPE_COLUMN_NAMES)
     {
         push @CSV_FILE_SCOPE_COLUMN_INDEXES, $CSV_COLUMN_NAME_TO_INDEX{$column};
     }
-    $CSV_FILE_SCOPE_COLUMN_COUNT = scalar(@CSV_FILE_SCOPE_COLUMN_INDEXES);
 }
 
-sub _verify_stored_data
+sub _store_file_scope_columns
+{
+    my ( $self, $row_number, $columns ) = @_;
+    Log::log_print $p_log_lvl, "_store_file_scope_columns():\n";
+
+    # Store value of all file scope columns.  Values should be same for all rows.
+    my ( $column_index, $column_name, $column_value, $stored_value );
+    for ( my $i = 0; $i < scalar(@CSV_FILE_SCOPE_COLUMN_INDEXES); $i++ )
+    {
+        $column_index = $CSV_FILE_SCOPE_COLUMN_INDEXES[$i];
+        $column_name  = $CSV_COLUMN_INDEX_TO_NAME{$column_index};
+
+        # Get column value from current row
+        $column_value = $columns->[$column_index];
+
+        # Get column value currently stored in this object from a previous row
+        $stored_value = $self->access($column_name);
+        Log::log_print $p_log_lvl, "  column_index: $column_index.\n";
+        Log::log_print $p_log_lvl, "  column_name: $column_name.\n";
+        Log::log_print $p_log_lvl, "  column_value: $column_value.\n";
+
+        if ( !defined($stored_value) )
+        {
+            # We do not have a stored value yet for this column; store it
+            $self->access( $column_name, $column_value );
+        }
+        elsif ( $column_value ne $stored_value )
+        {
+            # Column value in current row doesn't match stored value from previous row.
+            # file scope column, all values of the same column in a single csv file should be same.
+            die "Error: Unexpected column value in "
+                . $self->access($CSV_ATTR_file_name) . ".\n"
+                . "Row $row_number contains the value $column_value for column "
+                . "$column_name, but the previous row contains the value $stored_value.\n";
+        }
+    }
+
+    # for columns that not found in CSV file, but in not found table,
+    # assign default values from not found value table.
+    foreach my $column_no_found (@CSV_FILE_SCOPE_COLUMN_NOT_FOUND)
+    {
+        $column_value = $CSV_FILE_SCOPE_COLUMN_NOT_FOUND_DEFAULT_VALUES{$column_no_found};
+        Log::log_print $p_log_lvl, "  column not found value: $column_value.\n";
+
+        # Get column value currently stored in this object from a previous row
+        $stored_value = $self->access($column_no_found);
+
+        if ( !defined($stored_value) )
+        {
+            # We do not have a stored value yet for this column; store it
+            $self->access( $column_no_found, $column_value );
+        }
+    }
+}
+
+sub _store_vrt_scope_columns
+{
+    my ( $self, $row_number, $columns ) = @_;
+    Log::log_print $p_log_lvl, "_store_vrt_scope_columns():\n";
+
+    # values of VRT scope columns are not saved to new hash.
+
+    # Get VRT that corresponds to column values from CSV row
+    my $vrt = $self->_get_vrt( $row_number, $columns );
+
+    # Get vratio_index value and verify it is valid.  This is the VRT column index.
+    my $vratio_index = $columns->[ $CSV_COLUMN_NAME_TO_INDEX{$CSV_ATTR_vratio_index} ];
+    Log::log_print $p_log_lvl, "  vratio_index: $vratio_index.\n";
+    if ( ( $vratio_index < 0 ) || ( $vratio_index >= $VRT_COLUMN_COUNT ) )
+    {
+        die "Error: Invalid vratio_index value $vratio_index in row "
+            . "$row_number of file "
+            . $self->access($CSV_ATTR_file_name) . ".\n";
+    }
+
+    # Get wof_freq value and verify it is valid
+    my $wof_freq = $columns->[ $CSV_COLUMN_NAME_TO_INDEX{$CSV_ATTR_wof_freq} ];
+    Log::log_print $p_log_lvl, "  wof_freq: $wof_freq.\n";
+    if ( $wof_freq < 0 )
+    {
+        die "Error: Invalid wof_freq value $wof_freq in row "
+            . "$row_number of file "
+            . $self->access($CSV_ATTR_file_name) . ".\n";
+    }
+
+    # Get wof_ceff_ratio_overage value and verify it is valid
+    my $wof_ceff_ratio_overage = $columns->[ $CSV_COLUMN_NAME_TO_INDEX{$CSV_ATTR_wof_ceff_ratio_overage} ];
+    Log::log_print $p_log_lvl, "  wof_ceff_ratio_overage: $wof_ceff_ratio_overage.\n";
+    if ( $wof_ceff_ratio_overage < 0 )
+    {
+        die "Error: Invalid wof_freq value wof_ceff_ratio_overage in row "
+            . "$row_number of file "
+            . $self->access($CSV_ATTR_file_name) . ".\n";
+    }
+
+    # Set wof_freq value in VRT
+    $vrt->wof_freq( $vratio_index, $wof_freq );
+
+    # Set wof_ceff_ratio_overage value in VRT
+    $vrt->wof_ceff_ratio_overage( $vratio_index, $wof_ceff_ratio_overage );
+}
+
+sub _verify_stored_vrt_data
 {
     my ($self) = @_;
-    Log::log_print $p_log_lvl, "_verify_stored_data():\n";
+    Log::log_print $p_log_lvl, "_verify_stored_vrt_data():\n";
 
     # Verify all VRTs were found
     for ( my $vcs_ceff_index = 0; $vcs_ceff_index < $csv_vcs_ceff_index_count; $vcs_ceff_index++ )
@@ -769,112 +928,6 @@ sub _verify_stored_data
             . $self->access($CSV_ATTR_file_name)
             . "\nResults in vratio value of $last_vratio.\n";
     }
-}
-
-sub _store_columns
-{
-    my ( $self, $row_number, $columns ) = @_;
-    Log::log_print $p_log_lvl, "_store_columns():\n";
-    Log::log_print $p_log_lvl, "  row_number: $row_number.\n";
-
-    #  Log::log_print $p_log_lvl, "  columns: $columns.\n";
-    # Verify and store column values that have file scope
-    $self->_store_file_scope_columns( $row_number, $columns );
-
-    # Verify and store column values that are scoped to a specific VRT entry
-    $self->_store_vrt_scope_columns( $row_number, $columns );
-}
-
-sub _store_file_scope_columns
-{
-    my ( $self, $row_number, $columns ) = @_;
-    Log::log_print $p_log_lvl, "_store_file_scope_columns():\n";
-
-    # Store value of all file scope columns.  Values should be same for all rows.
-    my ( $column_index, $column_name, $column_value, $stored_value );
-    for ( my $i = 0; $i < $CSV_FILE_SCOPE_COLUMN_COUNT; $i++ )
-    {
-        $column_index = $CSV_FILE_SCOPE_COLUMN_INDEXES[$i];
-        $column_name  = $CSV_COLUMN_INDEX_TO_NAME{$column_index};
-
-        # Get column value from current row
-        $column_value = $columns->[$column_index];
-
-        # Get column value currently stored in this object from a previous row
-        $stored_value = $self->{$column_name};
-        Log::log_print $p_log_lvl, "  column_index: $column_index.\n";
-        Log::log_print $p_log_lvl, "  column_name: $column_name.\n";
-        Log::log_print $p_log_lvl, "  column_value: $column_value.\n";
-        if ( $p_log_lvl >= $g_log_lvl_target )
-        {
-            if ( !defined($stored_value) )
-            {
-                Log::log_print $p_log_lvl, "  stored_value not defined.\n";
-            }
-            else
-            {
-                Log::log_print $p_log_lvl, "  stored_value: $stored_value.\n";
-            }
-        }
-        if ( !defined($stored_value) )
-        {
-            # We do not have a stored value yet for this column; store it
-            $self->{$column_name} = $column_value;
-        }
-        elsif ( $column_value ne $stored_value )
-        {
-            # Column value in current row doesn't match stored value from previous row
-            #      die "Error: Unexpected column value in "
-            #        . $self->access($CSV_ATTR_file_name) . ".\n"
-            #        . "Row $row_number contains the value $column_value for column "
-            #        . "$column_name, but the previous row contains the value $stored_value.\n";
-        }
-    }
-}
-
-sub _store_vrt_scope_columns
-{
-    my ( $self, $row_number, $columns ) = @_;
-    Log::log_print $p_log_lvl, "_store_vrt_scope_columns():\n";
-
-    # Get VRT that corresponds to column values from CSV row
-    my $vrt = $self->_get_vrt( $row_number, $columns );
-
-    # Get vratio_index value and verify it is valid.  This is the VRT column index.
-    my $vratio_index = $columns->[ $CSV_COLUMN_NAME_TO_INDEX{$CSV_ATTR_vratio_index} ];
-    Log::log_print $p_log_lvl, "  vratio_index: $vratio_index.\n";
-    if ( ( $vratio_index < 0 ) || ( $vratio_index >= $VRT_COLUMN_COUNT ) )
-    {
-        die "Error: Invalid vratio_index value $vratio_index in row "
-            . "$row_number of file "
-            . $self->access($CSV_ATTR_file_name) . ".\n";
-    }
-
-    # Get wof_freq value and verify it is valid
-    my $wof_freq = $columns->[ $CSV_COLUMN_NAME_TO_INDEX{$CSV_ATTR_wof_freq} ];
-    Log::log_print $p_log_lvl, "  wof_freq: $wof_freq.\n";
-    if ( $wof_freq < 0 )
-    {
-        die "Error: Invalid wof_freq value $wof_freq in row "
-            . "$row_number of file "
-            . $self->access($CSV_ATTR_file_name) . ".\n";
-    }
-
-    # Get wof_ceff_ratio_overage value and verify it is valid
-    my $wof_ceff_ratio_overage = $columns->[ $CSV_COLUMN_NAME_TO_INDEX{$CSV_ATTR_wof_ceff_ratio_overage} ];
-    Log::log_print $p_log_lvl, "  wof_ceff_ratio_overage: $wof_ceff_ratio_overage.\n";
-    if ( $wof_ceff_ratio_overage < 0 )
-    {
-        die "Error: Invalid wof_freq value wof_ceff_ratio_overage in row "
-            . "$row_number of file "
-            . $self->access($CSV_ATTR_file_name) . ".\n";
-    }
-
-    # Set wof_freq value in VRT
-    $vrt->wof_freq( $vratio_index, $wof_freq );
-
-    # Set wof_ceff_ratio_overage value in VRT
-    $vrt->wof_ceff_ratio_overage( $vratio_index, $wof_ceff_ratio_overage );
 }
 
 sub _get_vrt
@@ -1229,6 +1282,10 @@ our $IMH_ATTR_section_table_entry_count = 'section_table_entry_count';
 our $IMH_ATTR_section_table_offset      = 'section_table_offset';
 our $IMH_ATTR_table_set_id              = 'table_set_id';
 
+# dd_level is for all WOF tables.
+our $IMH_ATTR_major_dd_level = 'major_dd_level';
+our $IMH_ATTR_minor_dd_level = 'minor_dd_level';
+
 sub new
 {
     my ($class) = @_;
@@ -1241,6 +1298,8 @@ sub new
         $IMH_ATTR_section_table_entry_count => 0,
         $IMH_ATTR_section_table_offset      => 0,
         $IMH_ATTR_table_set_id              => undef,
+        $IMH_ATTR_major_dd_level            => undef,
+        $IMH_ATTR_minor_dd_level            => undef,
     };
     bless($self);
     return $self;
@@ -1517,8 +1576,12 @@ our $WOF_ATTR_io_full_power             = 'io_full_power';
 our $WOF_ATTR_io_disabled_power         = 'io_diabled_power';
 our $WOF_ATTR_sort_ultra_turbo_freq_mhz = 'sort_ultra_turbo_tgt_freq_mhz';
 our $WOF_ATTR_table_date_timestamp      = 'table_date_timestamp';
+our $WOF_ATTR_override_match_freq       = 'override_match_freq';
+our $WOF_ATTR_override_match_power      = 'override_match_power';
 our $WOF_ATTR_table_version             = 'table_version';
 our $WOF_ATTR_package_name              = 'package_name';
+our $WOF_ATTR_sort_power_save_freq_mhz  = 'sort_power_save_freq_mhz';
+our $WOF_ATTR_sort_fixed_freq_mhz       = 'sort_fixed_freq_mhz';
 
 sub new
 {
@@ -1564,8 +1627,13 @@ sub new
         $WOF_ATTR_io_disabled_power         => undef,
         $WOF_ATTR_sort_ultra_turbo_freq_mhz => undef,
         $WOF_ATTR_table_date_timestamp      => undef,
+        $WOF_ATTR_override_match_freq       => undef,
+        $WOF_ATTR_override_match_power      => undef,
         $WOF_ATTR_table_version             => undef,
-        $WOF_ATTR_package_name              => undef
+        $WOF_ATTR_package_name              => undef,
+        $WOF_ATTR_sort_power_save_freq_mhz  => undef,
+        $WOF_ATTR_sort_fixed_freq_mhz       => undef,
+
     };
     bless($self);
     return $self;
@@ -1634,20 +1702,33 @@ sub read
     $self->access( $WOF_ATTR_io_disabled_power,         $file->read_uint8() );
     $self->access( $WOF_ATTR_sort_ultra_turbo_freq_mhz, $file->read_uint16() );
     $self->access( $WOF_ATTR_table_date_timestamp,      $file->read_uint32() );
-    $file->skip_bytes(4);    # Reserved 4 bytes
-    $self->access( $WOF_ATTR_table_version, $file->read_ascii_text(16) );
-    $self->access( $WOF_ATTR_package_name,  $file->read_ascii_text(16) );
+    $self->access( $WOF_ATTR_override_match_freq,       $file->read_uint16() );
+    $self->access( $WOF_ATTR_override_match_power,      $file->read_uint16() );
+    $self->access( $WOF_ATTR_table_version,             $file->read_ascii_text(16) );
+    $self->access( $WOF_ATTR_package_name,              $file->read_ascii_text(16) );
+    $self->access( $WOF_ATTR_sort_power_save_freq_mhz,  $file->read_uint16() );
+    $self->access( $WOF_ATTR_sort_fixed_freq_mhz,       $file->read_uint16() );
+    $file->skip_bytes(20);    # Reserved 20 bytes
 
     my $actual_data_size = $file->get_pos() - $pos;
     Log::log_print $p_log_lvl, "actual_data_size: $actual_data_size.\n";
 
     if ( $actual_data_size > $WOF_TABLES_HEADER_SIZE )
     {
+        # if the program comes to here. The something is not correct.
+        # check the writing statements against the definition of WOF Table Header.
+        Log::log_print $LOG_LVL_3, "Actual size of WOF Table Header: $actual_data_size.\n";
+        Log::log_print $LOG_LVL_3, "Defined size of WOF Table Header: $WOF_TABLES_HEADER_SIZE.\n";
         die "Error: acutual WOF table header data size is larger than header size.";
     }
     elsif ( $actual_data_size < $WOF_TABLES_HEADER_SIZE )
     {
+        # if the program comes to here. The something seems not correct.
+        # check the writing statements against the definition of WOF Table Header.
+        Log::log_print $LOG_LVL_2, "Actual size of WOF Table Header: $actual_data_size.\n";
+        Log::log_print $LOG_LVL_2, "Defined size of WOF Table Header: $WOF_TABLES_HEADER_SIZE.\n";
         my $padding_size = $WOF_TABLES_HEADER_SIZE - $actual_data_size;
+        Log::log_print $LOG_LVL_2, "The size of extra reserved bytes: $padding_size.\n";
         $file->skip_bytes($padding_size);    # Reserved bytes
     }
 
@@ -1677,7 +1758,7 @@ sub write
     $file->write_ascii_text( $self->access($WOF_ATTR_magic_value), 4 );
     $file->write_uint8( $self->access($WOF_ATTR_major_dd_level) );
     $file->write_uint8( $self->access($WOF_ATTR_minor_dd_level) );
-    $file->fill_bytes( 1, 0x00 );    # Padding 1 bytes
+    $file->fill_bytes( 1, 0x00 );    # Reserved 1 bytes
     $file->write_uint8( $self->access($WOF_ATTR_header_version) );
     $file->write_uint16( $self->access($WOF_ATTR_vrt_block_size) );
     $file->write_uint16( $self->access($WOF_ATTR_vrt_block_header_size) );
@@ -1712,20 +1793,33 @@ sub write
     $file->write_uint8( $self->access($WOF_ATTR_io_disabled_power) );
     $file->write_uint16( $self->access($WOF_ATTR_sort_ultra_turbo_freq_mhz) );
     $file->write_uint32( $self->access($WOF_ATTR_table_date_timestamp) );
-    $file->fill_bytes( 4, 0x00 );    # Padding 4 bytes
+    $file->write_uint16( $self->access($WOF_ATTR_override_match_freq) );
+    $file->write_uint16( $self->access($WOF_ATTR_override_match_power) );
     $file->write_ascii_text( $self->access($WOF_ATTR_table_version), 16 );
     $file->write_ascii_text( $self->access($WOF_ATTR_package_name),  16 );
+    $file->write_uint16( $self->access($WOF_ATTR_sort_power_save_freq_mhz) );
+    $file->write_uint16( $self->access($WOF_ATTR_sort_fixed_freq_mhz) );
+    $file->fill_bytes( 20, 0x00 );    # Reserved 20 bytes
 
     my $actual_data_size = $file->get_pos() - $pos;
     Log::log_print $p_log_lvl, "actual_data_size: $actual_data_size.\n";
 
     if ( $actual_data_size > $WOF_TABLES_HEADER_SIZE )
     {
+        # if the program comes to here. The something is not correct.
+        # check the writing statements against the definition of WOF Table Header.
+        Log::log_print $LOG_LVL_3, "Actual size of WOF Table Header: $actual_data_size.\n";
+        Log::log_print $LOG_LVL_3, "Defined size of WOF Table Header: $WOF_TABLES_HEADER_SIZE.\n";
         die "Error: acutual WOF table header data size is larger than header size.";
     }
     elsif ( $actual_data_size < $WOF_TABLES_HEADER_SIZE )
     {
+        # if the program comes to here. The something seems not correct.
+        # check the writing statements against the definition of WOF Table Header.
+        Log::log_print $LOG_LVL_2, "Actual size of WOF Table Header: $actual_data_size.\n";
+        Log::log_print $LOG_LVL_2, "Defined size of WOF Table Header: $WOF_TABLES_HEADER_SIZE.\n";
         my $padding_size = $WOF_TABLES_HEADER_SIZE - $actual_data_size;
+        Log::log_print $LOG_LVL_2, "The size of extra reserved bytes: $padding_size.\n";
         $file->fill_bytes( $padding_size, 0x00 );    # Reserved bytes.
     }
 }
@@ -1774,8 +1868,12 @@ sub print
     printf( "  Io Disabled Power              : %u\n", $self->access($WOF_ATTR_io_disabled_power) );
     printf( "  Sort Ultra Turbo Frequency MHz : %u\n", $self->access($WOF_ATTR_sort_ultra_turbo_freq_mhz) );
     printf( "  Table Date Timestamp           : %u\n", $self->access($WOF_ATTR_table_date_timestamp) );
+    printf( "  Override Match Freq MHz        : %s\n", $self->access($WOF_ATTR_override_match_freq) );
+    printf( "  Override Match Power           : %s\n", $self->access($WOF_ATTR_override_match_power) );
     printf( "  Table Version                  : %s\n", $self->access($WOF_ATTR_table_version) );
     printf( "  Package Name                   : %s\n", $self->access($WOF_ATTR_package_name) );
+    printf( "  Sort Power Save Frequency MHz  : %s\n", $self->access($WOF_ATTR_sort_power_save_freq_mhz) );
+    printf( "  Sort Fixed Frequency MHz       : %s\n", $self->access($WOF_ATTR_sort_fixed_freq_mhz) );
     printf("\n");
 }
 ################################################################################
@@ -2264,17 +2362,20 @@ sub retrieve_wof_table_header
 
     Log::log_print $p_log_lvl, "Entry Number: $section_number\n";
 
-    my $major_dd_level        = $wof_tables_header->access($WOF_ATTR_major_dd_level);
-    my $minor_dd_level        = $wof_tables_header->access($WOF_ATTR_minor_dd_level);
-    my $core_count            = $wof_tables_header->access($WOF_ATTR_core_count);
-    my $socket_power_w        = $wof_tables_header->access($WOF_ATTR_socket_power_w);
-    my $sort_pwr_tgt_freq_mhz = $wof_tables_header->access($WOF_ATTR_sort_pwr_tgt_freq_mhz);
-    my $package_name          = $wof_tables_header->access($WOF_ATTR_package_name);
+    my $major_dd_level          = $wof_tables_header->access($WOF_ATTR_major_dd_level);
+    my $minor_dd_level          = $wof_tables_header->access($WOF_ATTR_minor_dd_level);
+    my $core_count              = $wof_tables_header->access($WOF_ATTR_core_count);
+    my $socket_power_w          = $wof_tables_header->access($WOF_ATTR_socket_power_w);
+    my $sort_pwr_tgt_freq_mhz   = $wof_tables_header->access($WOF_ATTR_sort_pwr_tgt_freq_mhz);
+    my $override_match_freq_mhz = $wof_tables_header->access($WOF_ATTR_override_match_freq);
+    my $override_match_power    = $wof_tables_header->access($WOF_ATTR_override_match_power);
+    my $package_name            = $wof_tables_header->access($WOF_ATTR_package_name);
 
     # Close image file
     $self->access($IMF_ATTR_binary_file_io)->close();
 
-    return ( $major_dd_level, $minor_dd_level, $core_count, $socket_power_w, $sort_pwr_tgt_freq_mhz, $package_name );
+    return ( $major_dd_level, $minor_dd_level, $core_count, $socket_power_w, $sort_pwr_tgt_freq_mhz,
+        $override_match_power, $override_match_freq_mhz, $package_name );
 }
 
 #------------------------------------------------------------------------------
@@ -2290,6 +2391,9 @@ sub _write
     my $section_count = scalar(@csv_file_names);
     $self->_write_image_header($section_count);
 
+    my $major_dd_level = $self->access($IMF_ATTR_image_header)->access($IMH_ATTR_major_dd_level);
+    my $minor_dd_level = $self->access($IMF_ATTR_image_header)->access($IMH_ATTR_minor_dd_level);
+
     # Write section table to image file with default section offsets/sizes
     $self->_write_section_table();
 
@@ -2297,7 +2401,7 @@ sub _write
     for ( my $i = 0; $i < $section_count; $i++ )
     {
         # Write section to image file containing the CSV file data
-        $self->_write_wof_section( $csv_file_names[$i], $i );
+        $self->_write_wof_section( $csv_file_names[$i], $i, $major_dd_level, $minor_dd_level );
     }
 
     # Update section table in image file with actual section offsets/sizes
@@ -2400,7 +2504,7 @@ sub _update_section_table
 
 sub _write_wof_section
 {
-    my ( $self, $csv_file_name, $section_number ) = @_;
+    my ( $self, $csv_file_name, $section_number, $major_dd_level, $minor_dd_level ) = @_;
     Log::log_print $p_log_lvl, "_write_wof_section():\n";
     Log::log_print $p_log_lvl, "  section_number: $section_number.\n";
 
@@ -2412,8 +2516,11 @@ sub _write_wof_section
     $csv_file->parse();
 
     # Write WOF Tables Header to the image file
-    my $wof_tables_header = $self->_write_wof_tables_header($csv_file);
-    $self->_print_wof_tables_header($wof_tables_header);
+    my $wof_tables_header = $self->_set_wof_tables_header( $csv_file, $major_dd_level, $minor_dd_level );
+    if ( $p_log_lvl >= $LOG_LVL_1 )
+    {
+        $self->_print_wof_tables_header($wof_tables_header);
+    }
 
     # Write all the VRTs to the image file
     $self->_write_tables_vrts( $csv_file, $wof_tables_header );
@@ -2454,7 +2561,7 @@ sub _extract_section
     $output_file->open('w');
 
     # Copy section bytes from image file to output file
-    my $max_read_size = 4096;
+    my $max_read_size = $G_MAX_READ_SIZE;
     my $bytes_left    = $entry->access($STE_ATTR_section_size);
     while ( $bytes_left > 0 )
     {
@@ -2489,14 +2596,20 @@ sub _read_wof_tables_header
     return $wof_tables_header;
 }
 
-sub _write_wof_tables_header
+sub _set_wof_tables_header
 {
-    my ( $self, $csv_file ) = @_;
-    Log::log_print $p_log_lvl, "_write_wof_tables_header():\n";
+    my ( $self, $csv_file, $major_dd_level, $minor_dd_level ) = @_;
+    Log::log_print $p_log_lvl, "_set_wof_tables_header():\n";
     Log::log_print $p_log_lvl, "  csvfile: $csv_file.\n";
+    Log::log_print $p_log_lvl, "  $major_dd_level: $major_dd_level.\n";
+    Log::log_print $p_log_lvl, "  $minor_dd_level: $minor_dd_level.\n";
 
     # Create WOF Tables header
     my $wof_tables_header = WOFTablesHeader->new();
+
+    # set dd level to values from input parameter.
+    $wof_tables_header->access( $WOF_ATTR_major_dd_level, $major_dd_level );
+    $wof_tables_header->access( $WOF_ATTR_minor_dd_level, $minor_dd_level );
 
     # Set header field values based on columns from CSV file.  CSV columns that
     # contain percentages are expressed as a decimal.  For example, 4.7% is 0.047.
@@ -2555,8 +2668,13 @@ sub _write_wof_tables_header
     $wof_tables_header->access( $WOF_ATTR_sort_ultra_turbo_freq_mhz,
         $csv_file->access($CSV_ATTR_pdv_sort_ultra_turbo_freq) );
     $wof_tables_header->access( $WOF_ATTR_table_date_timestamp, $csv_file->access($CSV_ATTR_table_date) );
+    $wof_tables_header->access( $WOF_ATTR_override_match_freq,  $csv_file->access($CSV_ATTR_override_match_freq) );
+    $wof_tables_header->access( $WOF_ATTR_override_match_power, $csv_file->access($CSV_ATTR_override_match_power) );
     $wof_tables_header->access( $WOF_ATTR_table_version,        $csv_file->access($CSV_ATTR_table_version) );
     $wof_tables_header->access( $WOF_ATTR_package_name,         $csv_file->access($CSV_ATTR_package) );
+    $wof_tables_header->access( $WOF_ATTR_sort_power_save_freq_mhz,
+        $csv_file->access($CSV_ATTR_pdv_sort_power_save_freq) );
+    $wof_tables_header->access( $WOF_ATTR_sort_fixed_freq_mhz, $csv_file->access($CSV_ATTR_pdv_sort_fixed_freq) );
 
     # Write header to image file
     $wof_tables_header->write( $self->access($IMF_ATTR_binary_file_io) );
@@ -2614,9 +2732,16 @@ sub _print_wof_tables_header
         . $wof_tables_header->access($WOF_ATTR_sort_ultra_turbo_freq_mhz) . "\n";
     Log::log_print $p_log_lvl,
         "  WOF_ATTR_table_date_timestamp:" . $wof_tables_header->access($WOF_ATTR_table_date_timestamp) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_override_match_freq:" . $wof_tables_header->access($WOF_ATTR_override_match_freq) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_override_match_power:" . $wof_tables_header->access($WOF_ATTR_override_match_power) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_table_version:" . $wof_tables_header->access($WOF_ATTR_table_version) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_package_name:" . $wof_tables_header->access($WOF_ATTR_package_name) . "\n";
-
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_sort_power_save_freq_mhz:" . $wof_tables_header->access($WOF_ATTR_sort_power_save_freq_mhz) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_sort_fixed_freq_mhz:" . $wof_tables_header->access($WOF_ATTR_sort_fixed_freq_mhz) . "\n";
 }
 
 sub _write_tables_vrts
@@ -3509,13 +3634,20 @@ sub read
     my ( $self, $file ) = @_;
 
     # Read field values from binary file
-    $self->access( $OVRH_ATTR_magic_number,              $file->read_ascii_text(4) );
-    $self->access( $OVRH_ATTR_version,                   $file->read_uint8() );
-    $self->access( $OVRH_ATTR_section_table_entry_count, $file->read_uint8() );
+    my $magic_number              = $file->read_ascii_text(4);
+    my $version                   = $file->read_uint8();
+    my $section_table_entry_count = $file->read_uint8();
     $file->skip_bytes(2);    # skip padding 2 bytes for reserved.
-    $self->access( $OVRH_ATTR_section_table_offset, $file->read_uint16() );
-    $self->access( $OVRH_ATTR_wof_override_id,      $file->read_ascii_text(16) );
+    my $section_table_offset = $file->read_uint16();
+    my $wof_override_id      = $file->read_ascii_text(16);
     $file->skip_bytes(6);    # skip padding 6 bytes for reserved.
+
+    # set values to object's attributes.
+    $self->access( $OVRH_ATTR_magic_number,              $magic_number );
+    $self->access( $OVRH_ATTR_version,                   $version );
+    $self->access( $OVRH_ATTR_section_table_entry_count, $section_table_entry_count );
+    $self->access( $OVRH_ATTR_section_table_offset,      $section_table_offset );
+    $self->access( $OVRH_ATTR_wof_override_id,           $wof_override_id );
 
     # Verify field values
     if ( $self->access($OVRH_ATTR_magic_number) ne $OVERRIDE_HEADER_MAGIC_NUMBER )
@@ -3534,15 +3666,21 @@ sub write
 {
     my ( $self, $file ) = @_;
 
+    # get values from object's attributes.
+    my $magic_number              = $self->access($OVRH_ATTR_magic_number);
+    my $version                   = $self->access($OVRH_ATTR_version);
+    my $section_table_entry_count = $self->access($OVRH_ATTR_section_table_entry_count);
+    my $section_table_offset      = $self->access($OVRH_ATTR_section_table_offset);
+    my $wof_override_id           = $self->access($OVRH_ATTR_wof_override_id);
+
     # Write field values to binary file
-    $file->write_ascii_text( $self->access($OVRH_ATTR_magic_number), 4 );
-    $file->write_uint8( $self->access($OVRH_ATTR_version) );
-    $file->write_uint8( $self->access($OVRH_ATTR_section_table_entry_count) );
+    $file->write_ascii_text( $magic_number, 4 );
+    $file->write_uint8($version);
+    $file->write_uint8($section_table_entry_count);
     $file->fill_bytes( 2, 0x00 );    # padding 2 bytes for reserved.
-    $file->write_uint16( $self->access($OVRH_ATTR_section_table_offset) );
-    $file->write_ascii_text( $self->access($OVRH_ATTR_wof_override_id), 16 );
+    $file->write_uint16($section_table_offset);
+    $file->write_ascii_text( $wof_override_id, 16 );
     $file->fill_bytes( 6, 0x00 );    # padding 6 bytes for reserved.
-                                     # align
 }
 
 sub print
@@ -3576,7 +3714,9 @@ our $WTSTE_ATTR_socket_power_w        = 'socket_power_w';
 our $WTSTE_ATTR_sort_pwr_tgt_freq_mhz = 'sort_pwr_tgt_freq_mhz';
 our $WTSTE_ATTR_package_name          = 'package_name';
 
-our $WTS_TABLE_ENTRY = 32;
+# Size of WTS Table Entry.
+# Please verify this value when the layout of WTS Table Entry is updated.
+our $WTS_TABLE_ENTRY_SIZE = 32;
 
 sub new
 {
@@ -3821,14 +3961,14 @@ sub access
 
 sub combine
 {
-    my ( $self, $dd_level, @combine_file_names ) = @_;
+    my ( $self, $dd_level, $override_id, @combine_file_names ) = @_;
     Log::log_print $p_log_lvl, "combine():\n";
 
     # Open override file for writing
     $self->access($OVRF_ATTR_binary_file_io)->open('w');
 
     # Write override file contents
-    $self->_write_override_file( $dd_level, @combine_file_names );
+    $self->_write_override_file( $dd_level, $override_id, @combine_file_names );
 
     # Close override file
     $self->access($OVRF_ATTR_binary_file_io)->close();
@@ -3884,7 +4024,7 @@ sub split_ovr_file
 #------------------------------------------------------------------------------
 sub _write_override_file
 {
-    my ( $self, $dd_level, @combine_file_names ) = @_;
+    my ( $self, $dd_level, $override_id, @combine_file_names ) = @_;
     Log::log_print $p_log_lvl, "_write_override_file():\n";
 
     my $image_file;
@@ -3895,6 +4035,8 @@ sub _write_override_file
     my $core_count;
     my $socket_power_w;
     my $sort_pwr_tgt_freq_mhz;
+    my $override_match_power;
+    my $override_match_freq_mhz;
     my $package_name;
     my $entry;
 
@@ -3908,7 +4050,7 @@ sub _write_override_file
 
     # Write override header to override file.
     my $section_count = scalar(@combine_file_names);
-    $self->_write_override_header($section_count);
+    $self->_write_override_header( $section_count, $override_id );
 
     my $override_table_pos = $self->access($OVRF_ATTR_binary_file_io)->get_pos();
 
@@ -3933,8 +4075,9 @@ sub _write_override_file
         $image_file = ImageFile->new( $combine_file_names[$i] );
 
         # Get WOF table info from the input image file.
-        ( $major_dd_level, $minor_dd_level, $core_count, $socket_power_w, $sort_pwr_tgt_freq_mhz, $package_name ) =
-            $image_file->retrieve_wof_table_header(0);
+        (   $major_dd_level, $minor_dd_level, $core_count, $socket_power_w, $sort_pwr_tgt_freq_mhz,
+            $override_match_power, $override_match_freq_mhz, $package_name
+        ) = $image_file->retrieve_wof_table_header(0);
 
         my $filesize = -s $combine_file_names[$i];
         if ( $filesize <= 0 )
@@ -3954,6 +4097,8 @@ sub _write_override_file
         $wfs_offset = $next_wts_table_set_pos;
         $wfs_size   = $filesize;
 
+        # if dd_level is specified in command option,
+        # the values are derived from command opition.
         # if dd_level is not specified in command option,
         # the value from input image file will be used.
         if ( defined($dd_level) )
@@ -3961,6 +4106,10 @@ sub _write_override_file
             $major_dd_level = $major_dd_level_in_option;
             $minor_dd_level = $minor_dd_level_in_option;
         }
+
+        ( $socket_power_w, $sort_pwr_tgt_freq_mhz ) =
+            $self->_evaluate_override_match( $socket_power_w, $sort_pwr_tgt_freq_mhz,
+            $override_match_power, $override_match_freq_mhz );
 
         $entry->access( $WTSTE_ATTR_wfs_offset,            $wfs_offset );
         $entry->access( $WTSTE_ATTR_wfs_size,              $wfs_size );
@@ -3972,7 +4121,7 @@ sub _write_override_file
         $entry->access( $WTSTE_ATTR_package_name,          $package_name );
 
         # calculate position of next wfs table entry.
-        my $current_wts_table_entry_pos = $override_table_pos + $WTS_TABLE_ENTRY * $i;
+        my $current_wts_table_entry_pos = $override_table_pos + $WTS_TABLE_ENTRY_SIZE * $i;
 
         # set position of override file to the beginning of wfs table entry.
         $self->access($OVRF_ATTR_binary_file_io)->set_pos($current_wts_table_entry_pos);
@@ -3997,6 +4146,25 @@ sub _write_override_file
                 "two variable should be same, but not. next_wts_table_set_pos: $next_wts_table_set_pos, wfs_offset: $wfs_offset\n";
         }
     }
+}
+
+sub _evaluate_override_match
+{
+    my ( $self, $socket_power_w, $sort_pwr_tgt_freq_mhz, $override_match_power, $override_match_freq_mhz ) = @_;
+
+    Log::log_print $p_log_lvl, "_evaluate_override_match():\n";
+
+    if ( $override_match_power ne 0 )
+    {
+        $socket_power_w = $override_match_power;
+    }
+
+    if ( $override_match_freq_mhz ne 0 )
+    {
+        $sort_pwr_tgt_freq_mhz = $override_match_freq_mhz;
+    }
+
+    return ( $socket_power_w, $sort_pwr_tgt_freq_mhz );
 }
 
 sub _split_override_file
@@ -4051,7 +4219,7 @@ sub _split_override_file
         # copy from Image File to external file.
 
         # calculate position of next wfs table entry.
-        my $current_wts_table_entry_pos = $override_table_pos + $WTS_TABLE_ENTRY * $i;
+        my $current_wts_table_entry_pos = $override_table_pos + $WTS_TABLE_ENTRY_SIZE * $i;
 
         # set position of override file to next wfs table set.
         $self->access($OVRF_ATTR_binary_file_io)->set_pos($wfs_offset);
@@ -4076,7 +4244,7 @@ sub _read_override_header
 
 sub _write_override_header
 {
-    my ( $self, $section_count ) = @_;
+    my ( $self, $section_count, $override_id ) = @_;
     Log::log_print $p_log_lvl, "_write_override_header():\n";
     Log::log_print $p_log_lvl, "  section_count: $section_count.\n";
 
@@ -4086,12 +4254,13 @@ sub _write_override_header
     my $section_table_offset = $OVERRIDE_HEADER_SIZE;
     $self->{$OVRF_ATTR_override_header}->access( $OVRH_ATTR_section_table_offset, $section_table_offset );
 
+    # set overrid id.
+    $self->{$OVRF_ATTR_override_header}->access( $OVRH_ATTR_wof_override_id, $override_id );
+
     # Write override header to override file
     $self->{$OVRF_ATTR_override_header}->write( $self->access($OVRF_ATTR_binary_file_io) );
 
-    # Write any necessary padding so header ends on proper byte boundary
-    # The data structure is defined so that this is not needed. Comment it out.
-    # $self->_write_padding();
+    # The data structure is defined as 32 bytes, and padding is not needed.
 }
 
 sub _read_override_table
@@ -5198,9 +5367,11 @@ sub create_image_file
     # Get relevant command line options
     my $image_file_name = $options->image_file();
     my @csv_file_names  = $options->csv_files();
+    my $dd_level        = $options->access($OPT_ATTR_dd_level);
 
     # get --tsi command option.
     my $table_set_id = $options->access($OPT_ATTR_table_set_id);
+
     Log::log_print $p_log_lvl, "  image_file_name: $image_file_name.\n";
     Log::log_print $p_log_lvl, "  csv_file_names: " . join( ", ", @csv_file_names ) . ".\n";
 
@@ -5210,7 +5381,29 @@ sub create_image_file
     {
         die "Error: -- cannot create image file object for $image_file_name.\n";
     }
-    $image_file->access($IMF_ATTR_image_header)->access( $IMH_ATTR_table_set_id, $table_set_id );
+
+    my $major_dd_level;
+    my $minor_dd_level;
+
+    # if dd_level is specified in command option,
+    # the values are derived from command opition.
+    # if dd_level is not specified in command option,
+    # set the values to zero.
+    if ( defined($dd_level) )
+    {
+        $major_dd_level = substr( $dd_level, 0, 1 );
+        $minor_dd_level = substr( $dd_level, 1, 1 );
+    }
+    else
+    {
+        $major_dd_level = 0;
+        $minor_dd_level = 0;
+    }
+
+    $image_file->access($IMF_ATTR_image_header)->access( $IMH_ATTR_table_set_id,   $table_set_id );
+    $image_file->access($IMF_ATTR_image_header)->access( $IMH_ATTR_major_dd_level, $major_dd_level );
+    $image_file->access($IMF_ATTR_image_header)->access( $IMH_ATTR_minor_dd_level, $minor_dd_level );
+
     $image_file->create(@csv_file_names);
 }
 
@@ -5307,7 +5500,7 @@ sub combine_to_override_file
         die "Error: -- cannot create override file object for $override_file_name.\n";
     }
     $override_file->access($OVRF_ATTR_override_header)->access( $OVRH_ATTR_wof_override_id, $wof_override_id );
-    $override_file->combine( $dd_level, @combine_file_names );
+    $override_file->combine( $dd_level, $wof_override_id, @combine_file_names );
 }
 
 sub list_ovr_file_contents
@@ -5344,7 +5537,7 @@ sub split_ovr_file
 $p_log_lvl = $g_log_lvl if ( $g_use_global_log_lvl == 1 );
 
 # print out current directory invoking this program.
-Log::log_print $LOG_LVL_3, "Starting the program...\n";
+Log::log_print $LOG_LVL_0, "Starting the program...\n";
 use Cwd qw(cwd);
 my $dir = cwd;
 Log::log_print $LOG_LVL_3, "Current Working Directory: $dir\n";
