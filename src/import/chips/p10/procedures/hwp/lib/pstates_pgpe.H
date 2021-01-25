@@ -609,6 +609,9 @@ typedef struct
     uint16_t vratio_vdd_64ths[NUM_WOF_VRATIO_PCT];
     uint16_t vratio_vcs_64ths[NUM_WOF_VRATIO_PCT];
 
+    //WOV-OCS Current Threshold
+    uint16_t wov_idd_thresh;
+
 // __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_t;
 
@@ -724,6 +727,9 @@ typedef struct
     uint8_t wov_overv_max_pct;
 
     uint8_t pad;
+
+    //WOV-OCS Current Threshold
+    uint16_t wov_idd_thresh;
 } GlobalPstateParmBlockWOV_t;
 
 enum GPPB_OFFSET_IDX

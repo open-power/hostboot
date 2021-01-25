@@ -1104,6 +1104,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
             FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov_underv_vmin_mv));
             FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
         }
+        io_globalppb->wov_idd_thresh                =  revle16(iv_attr_mvpd_poundV_other_info.idd_rdp_limit_0p1A);
+
         io_globalppb->attr.fields.pstates_enabled = iv_pstates_enabled;
         io_globalppb->attr.fields.resclk_enabled  = iv_resclk_enabled;
         io_globalppb->attr.fields.wof_enabled     = iv_wof_enabled;
