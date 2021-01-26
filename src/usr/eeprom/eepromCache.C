@@ -1044,6 +1044,9 @@ errlHndl_t checkForEecacheEntryUpdate(
  * @param[in/out] io_recordFromPnorToUpdate  A pointer to the header in PNOR
  *                                           which may need updating.
  *
+ * @param[in]   i_normal_update  Flag to indicate if a forced update should
+ *                               be performed, set to false to force the update
+ *
  *
  * @return  errlHndl_t
  */
@@ -1054,7 +1057,8 @@ errlHndl_t updateExistingEecacheEntry(
         void         const * const   i_eepromBuffer,
         size_t               const   i_eepromBuflen,
         eepromRecordHeader   const & i_partialRecordHeader,
-        eepromRecordHeader * const & io_recordFromPnorToUpdate)
+        eepromRecordHeader * const & io_recordFromPnorToUpdate,
+        bool                 const   i_normal_update)
 {
     errlHndl_t errl = nullptr;
 
@@ -1084,7 +1088,12 @@ errlHndl_t updateExistingEecacheEntry(
                                              io_recordFromPnorToUpdate);
         if (alreadyUpdated)
         {
-            break;
+            // Force the update for EECACHE_VPD_NEEDS_REFRESH
+            // i_normal_update will be set to false if we need to force the update
+            if (i_normal_update)
+            {
+                break;
+            }
         }
 
         // Check to see if an update is necessary to the header, contents, both,
@@ -1359,13 +1368,17 @@ errlHndl_t findEepromHeaderInPnorEecache(
  *                             target is present.
  * @param[in]   i_eepromBuflen Length of i_eepromBuffer, if i_eepromBuffer is nullptr
  *                             then this should be 0
+ *
+ * @param[in]   i_normal_update Flag to indicate if a forced update should
+ *                              be performed, set to false to force the update
  * @return  errlHndl_t
  */
 errlHndl_t cacheEeprom(TARGETING::Target*        i_target,
                        bool                const i_present,
                        EEPROM::EEPROM_ROLE const i_eepromType,
                        void const * const        i_eepromBuffer,
-                       size_t const              i_eepromBuflen)
+                       size_t const              i_eepromBuflen,
+                       bool                const i_normal_update)
 {
     TRACSSCOMP(g_trac_eeprom, ENTER_MRK"cacheEeprom(): target HUID 0x%.08X, "
             "present %d, role %d",
@@ -1484,7 +1497,7 @@ errlHndl_t cacheEeprom(TARGETING::Target*        i_target,
         {
             // Case 2
             TRACFCOMP(g_trac_eeprom,
-                    "cacheEeprom() - no eecache record in PNOR found for "
+                    "Case 2 cacheEeprom() - no eecache record in PNOR found for "
                     "%s %.8X target w/ eepromRole = %d, adding to empty slot",
                     i_present ? "present" : "non-present",
                     TARGETING::get_huid(i_target), i_eepromType);
@@ -1500,13 +1513,19 @@ errlHndl_t cacheEeprom(TARGETING::Target*        i_target,
         else
         {
             // Case 3: Record will only be updated if necessary.
+            TRACSSCOMP(g_trac_eeprom,
+                    "Case 3 cacheEeprom() - record in PNOR found for "
+                    "%s HUID=0x%X eepromRole=%d, check for updates",
+                    i_present ? "present" : "non-present",
+                    TARGETING::get_huid(i_target), i_eepromType);
             l_errl = updateExistingEecacheEntry(i_target,
                                                 i_present,
                                                 i_eepromType,
                                                 i_eepromBuffer,
                                                 i_eepromBuflen,
                                                 l_partialRecordHeader,
-                                                l_recordFromPnorToUpdate);
+                                                l_recordFromPnorToUpdate,
+                                                i_normal_update);
         }
 
     } while(0);
@@ -1545,6 +1564,7 @@ errlHndl_t genericEepromCache(DeviceFW::OperationType i_opType,
                               va_list i_args)
 {
     errlHndl_t l_errl = nullptr;
+    bool l_normal_update = true; // flag to force an update, like EECACHE_VPD_STATE_VPD_NEEDS_REFRESH
 
     TRACSSCOMP( g_trac_eeprom, ENTER_MRK"genericI2CEepromCache() "
             "Target HUID 0x%.08X Enter", TARGETING::get_huid(i_target));
@@ -1587,7 +1607,7 @@ errlHndl_t genericEepromCache(DeviceFW::OperationType i_opType,
     }
 
     // Run the cache eeprom function on the target passed in
-    l_errl = cacheEeprom(i_target, l_present,  l_eepromType, io_buffer, io_buflen);
+    l_errl = cacheEeprom(i_target, l_present,  l_eepromType, io_buffer, io_buflen, l_normal_update);
     if(l_errl)
     {
         TRACFCOMP(g_trac_eeprom,
@@ -2118,6 +2138,77 @@ uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader)
     return l_vaddr;
 }
 
+errlHndl_t refreshVPD()
+{
+    errlHndl_t l_errl = nullptr;
+    bool l_present = true;
+    void* l_buffer = nullptr;
+    size_t l_buflen = 0;
+    EEPROM::EEPROM_ROLE l_eepromType = EEPROM::VPD_PRIMARY;
+    bool l_normal_update = false;
+
+    do {
+
+    TRACFCOMP(g_trac_eeprom, ENTER_MRK"refreshVPD()");
+
+    for( TARGETING::TargetIterator target = TARGETING::targetService().begin();
+         target != TARGETING::targetService().end();
+         ++target )
+    {
+        TARGETING::ATTR_EECACHE_VPD_STATE_type vpd_state = TARGETING::EECACHE_VPD_STATE_VPD_GOOD;
+        if (target->tryGetAttr<TARGETING::ATTR_EECACHE_VPD_STATE>(vpd_state))
+        {
+            if (vpd_state == TARGETING::EECACHE_VPD_STATE_VPD_NEEDS_REFRESH)
+            {
+                TRACFCOMP(g_trac_eeprom, "refreshVPD() FORCE update for HUID=0x%X for EECACHE_VPD_STATE_VPD_NEEDS_REFRESH",
+                    get_huid(*target));
+                l_errl = cacheEeprom(*target, l_present,  l_eepromType, l_buffer, l_buflen, l_normal_update);
+                if (l_errl)
+                {
+                    // Trace the attempt but carry on, next full IPL should sync with PNOR EECACHE partition
+                    TRACFCOMP(g_trac_eeprom, "refreshVPD() UNABLE to FORCE update for HUID=0x%X to cache eeprom for role %d",
+                        get_huid(*target), l_eepromType);
+                    // Commit the originating l_errl and make a new l_errl for further tracing
+                    errlCommit(l_errl, EEPROM_COMP_ID);
+
+                    /*@
+                     * @errortype    ERRORLOG::ERRL_SEV_INFORMATIONAL
+                     * @moduleid     EEPROM_GENERIC_CACHE
+                     * @reasoncode   EEPROM_PNOR_CACHE_SYNC
+                     * @userdata1        Target HUID
+                     * @userdata2[0:31]  1 if target is present, 0 if not
+                     * @userdata2[32:63] EEPROM::EEPROM_ROLE
+                     * @devdesc      Unable to sync target with PNOR EECACHE
+                     * @custdesc     An error occurred during the FW boot
+                     */
+                     l_errl = new ERRORLOG::ErrlEntry(
+                          ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                          EEPROM_GENERIC_CACHE,
+                          EEPROM_PNOR_CACHE_SYNC,
+                          TO_UINT64(TARGETING::get_huid(*target)),
+                          TWO_UINT32_TO_UINT64(TO_UINT32(l_present),
+                                               TO_UINT32(l_eepromType)),
+                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                     l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+                    // Commit l_errl next full IPL should sync with PNOR EECACHE partition
+                    errlCommit(l_errl, EEPROM_COMP_ID);
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_eeprom, "refreshVPD() UPDATED EECACHE_VPD_STATE for HUID=0x%X role %d",
+                    get_huid(*target), l_eepromType);
+                    // Set the EECACHE_VPD_STATE back to VPD_GOOD
+                    target->setAttr<TARGETING::ATTR_EECACHE_VPD_STATE>(TARGETING::EECACHE_VPD_STATE_VPD_GOOD);
+                }
+            }
+        }
+    }
+
+    }while(0);
+    TRACFCOMP(g_trac_eeprom, EXIT_MRK"refreshVPD()");
+    return l_errl;
+}
+
 errlHndl_t cacheEECACHEPartition()
 {
     errlHndl_t l_errl = nullptr;
@@ -2189,7 +2280,14 @@ errlHndl_t cacheEECACHEPartition()
         }
     }
 
-    } while(0);
+    // check if any EECACHE_VPD_STATE_VPD_NEEDS_REFRESH persisted, in case we need to force the sync
+    l_errl = refreshVPD();
+    if (l_errl)
+    {
+        break;
+    }
+
+    }while(0);
     return l_errl;
 }
 

@@ -909,12 +909,18 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
         else
         {
             TRACFCOMP(g_trac_vpd,
-                      "VPD::ensureEepromCacheIsInSync: CACHE_PN/SN != HARDWARE_PN/SN -OR- VPD_NEEDS_REFRESHED, CACHE must be loaded from HARDWARE for target %.8X",
+                      "VPD::ensureEepromCacheIsInSync: CACHE_PN/SN != HARDWARE_PN/SN -OR- VPD_NEEDS_REFRESH, CACHE must be loaded from HARDWARE for target %.8X",
                       TARGETING::get_huid(i_target));
             CONSOLE::flush();
 #ifndef CONFIG_SUPPORT_EEPROM_CACHING
-            //Set the targets as changed since the p/n's don't match
-            HWAS::markTargetChanged(i_target);
+            //  o_isNewPart comes in as true and is set to false above -ONLY- when VPD_NEEDS_REFRESH
+            //  so if we have a PN/SN update needed from HARDWARE we want to markTargetChanged
+            //  but -ONLY- skip markTargetChanged if this is a VPD_NEEDS_REFRESH flow
+            if (o_isNewPart)
+            {
+                //Set the targets as changed since the p/n's don't match
+                HWAS::markTargetChanged(i_target);
+            )
 #else
             //No need to mark target changed here, it will be handled by eecache code
 #endif

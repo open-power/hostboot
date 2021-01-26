@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,3 +89,115 @@ An EEPROM access fails when none of the attempted accesses to physical
 EEPROM devices succeed. This can happen because one or more accesses
 fail, or because no accesses were attempted (i.e. all devices had
 failed before and were masked in the accessibility attribute).
+
+### HBRT VPD Update Flow
+
+When system state is at Hostboot Runtime, writes
+to the PNOR Partitions are -NOT- permitted (on FSP systems),
+e.g. PNOR EECACHE partition.
+
+Hostboot owns the VPD/EEPROM content (processor
+module seeproms and DDIMM SPD).
+
+Hostboot as the owner of the EEPROMs can write
+directly to the SEEPROM hardware (as well as
+to the in memory eecache content).
+
+If writes are made to the VPD/EEPROM content
+at HBRT, the PNOR EECACHE partition needs
+to be synchronized at the next IPL when writes
+to the PNOR EECACHE partition is allowed (either
+at the next full IPL or the next MPIPL).
+
+To faciliate the synchronization, the
+attribute EECACHE_VPD_STATE tracks the flag
+which identifies if the target is out-of-sync,
+i.e. EECACHE_VPD_STATE_VPD_NEEDS_REFRESH.
+
+During IPL and MPIPL flows, the targets will
+be queried and if the flag triggers a
+forced synchronization to update the PNOR EECACHE
+partition the sync will be completed.
+
+On FSP systems there is also the need to
+communicate any VPD updates made during HBRT
+to the FSP to allow the FSP to update the FSP's
+VPD cache (which is outside the control of Hostboot).
+
+During HBRT (for FSP based systems) a sendMboxWriteMsg
+will be sent to the FSP.  FSP receives this message
+and updates the FSP VPD cache.  The target's attribute
+EECACHE_VPD_STATE is persisted across IPL/MPIPL
+which allows the Hostboot handling of the PNOR EECACHE
+partition synchronization to occur.
+
+
+ Example FLOW:
+                                             -----------------------DIMM HUID
+                                            |       ----------------DIMM_BAD_DQ_DATA
+               ADJUNCT                      |      |       ---------DUMMY DATA
+                 |                          |      |      |
+                 V                          V      V      V
+   phyp# onafw 32769 hbrt -exec writevpd 0x30000 0x2c 0x12345678
+            |
+            V
+  +-------------------+               |   |          +-------------------+
+  | PHYP              |               |   |          | FSP               |
+  |  +-------------+  |               |   |          |  +-------------+  |
+  |  |    HBRT     |------------------|   |------------>|    HWSV     |  | ---> fsp-trace "HBRT Cmd"
+  |  |             |  |               | M |          |  +-------------+  |                "HBRTPayloadMsg"
+  |  +-------------+  |               | B |          |                   |
+  |                   |               | O |          |  +-------------+  |
+  |                   |               | X |          |  |  VPD CACHE  |  | ---> /opt/p1/svpd/svpd_state_info.dat
+  |                   |               |   |          |  +-------------+  |      $ svpdMFGTool --rid=0xD01B --find_kw=#I -v
+  |                   |               |   |          |                   |
+  |                   |               |   |          |  +-------------+  |
+  |                   |               |   |          |  |    PNOR     |  | ---> /dev/mtdblock/sfc.L*
+  |                   |               |   |          |  +-------------+  |
+  |                   |               |   |          |  ^ |              |
+  +-------------------+               |   |          +-/--|--------------+
+                                                      /   |
+                                                     /    | I
+                                                    /     | N
+                                                   /      | I
+                                                  /       | T
+                                                 /        |
+  +-------------------+                         /    _____v_______________
+  |                   |                        /     |      |     |      |
+  |                   |                       /      |  E   /  S  /   S  /
+  |                   |                      /       |  E   \  E  \   E  \
+  |                   |                     /        |  C   /  E  /   E  /
+  |                   |                    /         |  A   \  P  \   P  \
+  |                   |                   /          |  C   /  R  /   R  /
+  | HOSTBOOT IPL      |<-----------------/           |  H   \  O  \   O  \
+  |                   |                              |  E   /  M  /   M  /
+  |                   |                              |      \     \      \
+  |                   |                              |  M   /  P  /   B  /
+  |                   |                              |  E   \  R  \   A  \
+  |                   |                              |  M   /  I  /   C  /
+  |                   |                              |      \     \   K  \
+  +-------------------+                              |______|_____|______|
+                                                           PHYSICAL
+                                                         DATA SOURCES
+
+The following information is provided as a point-in-time aide for the
+above example flow to identify how the HUID and RID map in relationship
+to each other.  The PHYP writepvd command uses the HUID, the FSP svpdMFGTool
+command uses the RID.
+
+Target Types for EECACHE_VPD_STATE (enums VPD_GOOD and VPD_NEEDS_REFRESH)
+  - enc-node-power10
+  - chip-processor
+  - chip-ocmb
+  - lcard-dimm
+
+
+$ gard --gc dimm
+DOMAIN: DIMM Node: 20000
+     HUID     TYPE     SIZE RID  GARDed ERROR TYPE        EID      CURRENT STATE
+  0) 00030000 Dimm     8000 D01B None   None              00000000 Config
+  1) 00030002 Dimm     8000 D019 None   None              00000000 Config
+  2) 00030020 Dimm     8000 D003 None   None              00000000 Config
+  3) 00030022 Dimm     8000 D001 None   None              00000000 Config
+  4) 00030060 Dimm     8000 D00B None   None              00000000 Config
+
