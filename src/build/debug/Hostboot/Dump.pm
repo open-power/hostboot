@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,7 @@ use constant    MEMSTATE_NO_MEM => 0x0;
 use constant    MEMSTATE_HALF_CACHE => 0x4;
 use constant    MEMSTATE_REDUCED_CACHE => 0x8;
 use constant    MEMSTATE_FULL_CACHE => 0xa;
+use constant    MEMSTATE_MS_32MEG => 0x20;
 use constant    MEMSTATE_MS_48MEG => 0x30;
 use constant    MEMSTATE_MS_64MEG => 0x40;
 
@@ -66,6 +67,14 @@ our %memory_maps = (
         # Full cache is 10MB
         [ 8 * _MB,                      2 * _MB, #8M..10M
         ],
+    MEMSTATE_MS_16MEG() =>
+        # Add next 6MB after we expand to memory.
+        [ 10 * _MB,                    6 * _MB, #10M..16M
+        ],
+    MEMSTATE_MS_32MEG() =>
+        # Add next 22MB after we expand to memory.
+        [ 10 * _MB,                    22 * _MB, #10M..32M
+        ],
     MEMSTATE_MS_48MEG() =>
         # Add next 38MB after we expand to memory.
         [ 10 * _MB,                    38 * _MB, #10M..48M
@@ -87,6 +96,12 @@ our %memory_states = (
     MEMSTATE_FULL_CACHE() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
                              MEMSTATE_FULL_CACHE ],
+    MEMSTATE_MS_16MEG() => [ MEMSTATE_NO_MEM,
+                             MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
+                             MEMSTATE_FULL_CACHE, MEMSTATE_MS_16MEG ],
+    MEMSTATE_MS_32MEG() => [ MEMSTATE_NO_MEM,
+                             MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
+                             MEMSTATE_FULL_CACHE, MEMSTATE_MS_32MEG ],
     MEMSTATE_MS_48MEG() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
                              MEMSTATE_FULL_CACHE, MEMSTATE_MS_48MEG ],
