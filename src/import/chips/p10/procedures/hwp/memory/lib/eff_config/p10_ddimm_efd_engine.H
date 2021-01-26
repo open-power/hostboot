@@ -439,7 +439,7 @@ class ddimm_efd_0_3
         ///
         virtual bool check_phy_equalization(const uint8_t i_field) const
         {
-            return true;
+            return (i_field <= 0x03);
         }
 
         ///
@@ -2238,17 +2238,17 @@ class ddimm_efd_0_3
         }
 
         ///
-        /// @brief Set the si mc drv eq dq dqs field
+        /// @brief Set the phy_equalization field
         ///
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        virtual fapi2::ReturnCode set_si_mc_drv_eq_dq_dqs(const std::vector<uint8_t>& i_efd) const
+        virtual fapi2::ReturnCode set_si_phy_equalization(const std::vector<uint8_t>& i_efd) const
         {
             uint8_t l_field[mss::exp::sizes::MAX_RANK_PER_DIMM] = {0};
-            FAPI_TRY(mss::attr::get_si_mc_drv_eq_dq_dqs(iv_dimm, l_field));
+            FAPI_TRY(mss::attr::get_si_phy_equalization(iv_dimm, l_field));
 
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_EQUALIZATION, i_efd, mss::SET_SI_MC_DRV_EQ_DQ_DQS,
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_EQUALIZATION, i_efd, mss::SET_SI_PHY_EQUALIZATION,
                                              l_field[iv_dimm_rank]));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -2256,10 +2256,10 @@ class ddimm_efd_0_3
                                   check_phy_equalization(l_field[iv_dimm_rank]),
                                   F::PHY_EQUALIZATION.get_byte(i_efd),
                                   l_field[iv_dimm_rank],
-                                  SET_SI_MC_DRV_EQ_DQ_DQS,
+                                  SET_SI_PHY_EQUALIZATION,
                                   "PHY Equalization"));
 
-            FAPI_TRY(mss::attr::set_si_mc_drv_eq_dq_dqs(iv_dimm, l_field));
+            FAPI_TRY(mss::attr::set_si_phy_equalization(iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2518,7 +2518,7 @@ class ddimm_efd_0_3
             FAPI_TRY(set_si_dram_rtt_wr(i_efd));
             FAPI_TRY(set_si_dram_rtt_park(i_efd));
             FAPI_TRY(set_si_dram_preamble(i_efd));
-            FAPI_TRY(set_si_mc_drv_eq_dq_dqs(i_efd));
+            FAPI_TRY(set_si_phy_equalization(i_efd));
             FAPI_TRY(set_si_dram_drv_imp_dq_dqs(i_efd));
             FAPI_TRY(set_si_odt_wr(i_efd));
             FAPI_TRY(set_si_odt_rd(i_efd));

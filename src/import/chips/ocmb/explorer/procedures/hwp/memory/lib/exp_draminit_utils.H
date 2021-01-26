@@ -654,7 +654,7 @@ class phy_params
             FAPI_TRY(mss::attr::get_si_dram_rtt_park(i_target, iv_attrs_params.iv_dram_rtt_park));
             FAPI_TRY(mss::attr::get_si_dram_drv_imp_dq_dqs(i_target, iv_attrs_params.iv_dram_dic));
             FAPI_TRY(mss::attr::get_si_dram_preamble(i_target, iv_attrs_params.iv_dram_preamble));
-            FAPI_TRY(mss::attr::get_si_mc_rcv_eq_dq_dqs(i_target, iv_attrs_params.iv_phy_equalization));
+            FAPI_TRY(mss::attr::get_si_phy_equalization(i_target, iv_attrs_params.iv_phy_equalization));
             FAPI_TRY(mss::attr::get_exp_init_vref_dq(i_target, iv_attrs_params.iv_init_vref_dq));
             FAPI_TRY(mss::attr::get_exp_init_phy_vref(i_target, iv_attrs_params.iv_init_phy_vref));
             FAPI_TRY(mss::attr::get_si_odt_wr(i_target, iv_attrs_params.iv_odt_wr_map_cs));
