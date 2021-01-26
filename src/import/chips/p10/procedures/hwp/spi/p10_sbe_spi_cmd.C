@@ -155,6 +155,7 @@ fapi_try_exit:
 }
 
 // ECC methods for SPI slave status reads
+#ifndef BOOTLOADER
 static fapi2::ReturnCode
 is_ecc_on(SpiControlHandle& i_handle, bool& o_ecc)
 {
@@ -177,7 +178,9 @@ is_ecc_on(SpiControlHandle& i_handle, bool& o_ecc)
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif // #ifndef BOOTLOADER
 
+#ifndef BOOTLOADER
 static fapi2::ReturnCode
 spi_set_ecc_on(SpiControlHandle& i_handle)
 {
@@ -191,7 +194,9 @@ spi_set_ecc_on(SpiControlHandle& i_handle)
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif // #ifndef BOOTLOADER
 
+#ifndef BOOTLOADER
 static fapi2::ReturnCode
 spi_set_ecc_off(SpiControlHandle& i_handle)
 {
@@ -205,6 +210,7 @@ spi_set_ecc_off(SpiControlHandle& i_handle)
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif // #ifndef BOOTLOADER
 
 //waits for transmit-data-register empty
 static fapi2::ReturnCode
@@ -365,6 +371,7 @@ fapi_try_exit:
 //@nlandi Note: in order for SPI slave status reads to not cause an ECC error, ECC must be turned off for
 //              the duration of the read
 //waits for write complete flag of the spi-slave
+#ifndef BOOTLOADER
 static fapi2::ReturnCode
 spi_wait_for_write_complete(SpiControlHandle& i_handle)
 {
@@ -422,8 +429,10 @@ spi_wait_for_write_complete(SpiControlHandle& i_handle)
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif // #ifndef BOOTLOADER
 
 // Poll SPI slave to see if a write has been enabled yet
+#ifndef BOOTLOADER
 static fapi2::ReturnCode
 spi_check_write_enable(SpiControlHandle& i_handle)
 {
@@ -481,8 +490,10 @@ spi_check_write_enable(SpiControlHandle& i_handle)
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif // #ifndef BOOTLOADER
 
 //enables SPI-slave write
+#ifndef BOOTLOADER
 static fapi2::ReturnCode
 spi_set_write_enable(SpiControlHandle& i_handle)
 {
@@ -524,9 +535,10 @@ spi_set_write_enable(SpiControlHandle& i_handle)
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif // #ifndef BOOTLOADER
 
 //Check the h/w is in the expected state
-static fapi2::ReturnCode
+fapi2::ReturnCode
 spi_precheck(SpiControlHandle& i_handle)
 {
     fapi2::buffer<uint64_t> status_reg = 0;
@@ -1019,6 +1031,7 @@ fapi2::ReturnCode spi_tpm_read_secure( SpiControlHandle& i_handle,
     return rc;
 }
 
+#ifndef BOOTLOADER
 fapi2::ReturnCode spi_read_manufacturer_id(SpiControlHandle& i_handle, uint8_t* o_buffer)
 {
     fapi2::buffer<uint64_t> data64;
@@ -1105,6 +1118,7 @@ fapi2::ReturnCode spi_read_manufacturer_id(SpiControlHandle& i_handle, uint8_t* 
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif // #ifndef BOOTLOADER
 
 
 //Reads data. For this implementation of one time use to counter,
@@ -1119,6 +1133,7 @@ fapi_try_exit:
  * 5. Deselect the slave to stop it from sending any more data
  *
  */
+#ifndef BOOTLOADER
 static fapi2::ReturnCode
 spi_read_internal(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
                   uint8_t* o_buffer, SPI_ECC_CONTROL_STATUS i_eccStatus)
@@ -1242,7 +1257,9 @@ spi_read_internal(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_len
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif // #ifndef BOOTLOADER
 
+#ifndef BOOTLOADER
 fapi2::ReturnCode
 spi_read( SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
           SPI_ECC_CONTROL_STATUS i_eccStatus, uint8_t* o_buffer )
@@ -1300,7 +1317,9 @@ spi_read( SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
 
     return rc;
 }
+#endif // #ifndef BOOTLOADER
 
+#ifndef BOOTLOADER
 fapi2::ReturnCode
 spi_write_prep_seq(SpiControlHandle& i_handle, uint64_t address, uint32_t length, uint64_t SEQ)
 {
@@ -1337,7 +1356,9 @@ spi_write_prep_seq(SpiControlHandle& i_handle, uint64_t address, uint32_t length
 fapi_try_exit:
     return rc;
 }
+#endif // #ifndef BOOTLOADER
 
+#ifndef BOOTLOADER
 fapi2::ReturnCode
 spi_write_post_seq(SpiControlHandle& i_handle)
 {
@@ -1373,7 +1394,9 @@ spi_write_post_seq(SpiControlHandle& i_handle)
 fapi_try_exit:
     return rc;
 }
+#endif // #ifndef BOOTLOADER
 
+#ifndef BOOTLOADER
 fapi2::ReturnCode
 spi_write_data(SpiControlHandle& i_handle, uint32_t address, uint8_t* i_data, uint32_t i_length)
 {
@@ -1431,7 +1454,10 @@ spi_write_data(SpiControlHandle& i_handle, uint32_t address, uint8_t* i_data, ui
 fapi_try_exit:
     return rc;
 }
+#endif // #ifndef BOOTLOADER
 
+
+#ifndef BOOTLOADER
 fapi2::ReturnCode
 spi_write(SpiControlHandle& i_handle, uint32_t i_address,
           uint32_t i_length,  uint8_t* i_buffer)
@@ -1499,6 +1525,7 @@ spi_write(SpiControlHandle& i_handle, uint32_t i_address,
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif // #ifndef BOOTLOADER
 
 fapi2::ReturnCode spi_master_reset(SpiControlHandle i_handle)
 {

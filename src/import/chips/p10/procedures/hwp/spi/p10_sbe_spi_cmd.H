@@ -120,7 +120,7 @@ inline uint8_t spiReceiveDelay(const size_t i_delayCycles)
 
 extern "C"
 {
-
+#ifndef BOOTLOADER
     enum SPI_ECC_CONTROL_STATUS
     {
         STANDARD_ECC_ACCESS = 0x00, // The data is used with standard ECC byte
@@ -128,6 +128,7 @@ extern "C"
         // applied and all data is returned
         DISCARD_ECC_ACCESS = 0x02   // Ignore ECC and access data without ECC byte
     };
+#endif // #ifndef BOOTLOADER
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -210,9 +211,10 @@ extern "C"
 /// @return FAPI_RC_SUCCESS if the read of the manufacturer id completes successfully,
 ///                         else error code.
 ///
+#ifndef BOOTLOADER
     fapi2::ReturnCode spi_read_manufacturer_id(SpiControlHandle& i_handle,
             uint8_t* o_buffer);
-
+#endif // #ifndef BOOTLOADER
 
 ///
 /// @brief  API to read the seeprom using SPI
@@ -230,13 +232,14 @@ extern "C"
 /// @return FAPI_RC_SUCCESS if the spi master read completes successfully,
 ///         else error code.
 ///
-
+#ifndef BOOTLOADER
     fapi2::ReturnCode spi_read(
         SpiControlHandle& i_handle,
         uint32_t i_address,
         uint32_t i_length,
         SPI_ECC_CONTROL_STATUS i_eccStatus,
         uint8_t* o_buffer);
+#endif // #ifndef BOOTLOADER
 
 ///
 /// @brief  API to read from the TPM using SPI
@@ -293,11 +296,13 @@ extern "C"
 /// @return FAPI_RC_SUCCESS if the spi master read completes successfully,
 ///         else error code.
 ///
+#ifndef BOOTLOADER
     fapi2::ReturnCode spi_write(
         SpiControlHandle& i_handle,
         uint32_t i_address,
         uint32_t i_length,
         uint8_t* i_buffer );
+#endif // #ifndef BOOTLOADER
 
 ///
 /// @brief  API to reset the SPI master and its internal sequencer.
@@ -309,7 +314,15 @@ extern "C"
 ///
     fapi2::ReturnCode spi_master_reset(SpiControlHandle i_handle);
 
-
+///
+/// @brief  API to Check that the HW is in the expected state
+///
+/// @param[in] i_handle          Reference to SPI Control Handle
+///
+/// @return FAPI_RC_SUCCESS if the spi precheck completes successfully,
+///         else error code.
+///
+    fapi2::ReturnCode spi_precheck(SpiControlHandle& i_handle);
 
 } //extern "C"
 
