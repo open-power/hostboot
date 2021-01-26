@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,8 @@
 #include    <p10_mss_eff_config.H>
 #include    <exp_mss_eff_config_thermal.H>
 #include    <p10_mss_eff_grouping.H>
+#include    <mss_check_ddimm_config.H>
+
 
 // SMF Support
 #include    <secureboot/smf.H>
@@ -198,6 +200,10 @@ void* call_mss_eff_config (void *io_pArgs)
         // Build up this list from memport parents, used in exp_mss_eff_config_thermal
         std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>> l_fapi2_ocmb_targets;
 
+        //----- p10_mss_eff_config
+        // Consumes SPD/VPD to determine proper memory configuration
+        // supported by this system
+
         // Get all functional MEM_PORT chiplets
         TargetHandleList l_memportTargetList;
         getAllChiplets(l_memportTargetList, TYPE_MEM_PORT);
@@ -229,8 +235,7 @@ void* call_mss_eff_config (void *io_pArgs)
 
                 // Ensure istep error created and has same plid as this error
                 ErrlUserDetailsTarget(l_memport_target).addToLog(l_err);
-                l_err->collectTrace(EEPROM_COMP_NAME);
-                l_err->collectTrace(I2C_COMP_NAME);
+                l_err->collectTrace(FAPI2_COMP_NAME);
                 l_StepError.addErrorDetails(l_err);
                 errlCommit(l_err, ISTEP_COMP_ID);
             }
@@ -247,6 +252,48 @@ void* call_mss_eff_config (void *io_pArgs)
             break;
         }
 
+
+        //----- mss_check_ddimm_config
+        // Verify any DDIMM device (e.g. PMIC, GPIOs, etc) functionality
+
+        for(const auto & l_ocmb_target: l_fapi2_ocmb_targets)
+        {
+            TARGETING::Target* l_targOCMB = l_ocmb_target.get();
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call mss_check_ddimm_config HWP on OCMB %.8X",
+                       TARGETING::get_huid(l_targOCMB));
+
+            FAPI_INVOKE_HWP(l_err, mss_check_ddimm_config, l_ocmb_target);
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR in mss_check_ddimm_config HWP on target 0x%.08X. "
+                          TRACE_ERR_FMT,
+                          get_huid(l_targOCMB),
+                          TRACE_ERR_ARGS(l_err));
+
+                // Ensure istep error created and has same plid as this error
+                l_err->collectTrace(FAPI2_COMP_NAME);
+                l_StepError.addErrorDetails(l_err);
+                errlCommit(l_err, ISTEP_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "SUCCESS :  mss_check_ddimm_config HWP on target 0x%.08X",
+                          get_huid(l_targOCMB));
+            }
+        }
+
+        if(!l_StepError.isNull())
+        {
+            break;
+        }
+
+
+        //----- exp_mss_eff_config_thermal
+        // Consumes SPD/VPD and system policies to determine thermal properties
+
         if(l_fapi2_ocmb_targets.size() > 0)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -261,8 +308,7 @@ void* call_mss_eff_config (void *io_pArgs)
                           TRACE_ERR_FMT, TRACE_ERR_ARGS(l_err));
 
                 // Ensure istep error created and has same plid as this error
-                l_err->collectTrace(EEPROM_COMP_NAME);
-                l_err->collectTrace(I2C_COMP_NAME);
+                l_err->collectTrace(FAPI2_COMP_NAME);
                 l_StepError.addErrorDetails(l_err);
                 errlCommit(l_err, ISTEP_COMP_ID);
             }
@@ -277,6 +323,9 @@ void* call_mss_eff_config (void *io_pArgs)
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                       "No OCMB targets found, skipping exp_mss_eff_config_thermal HWP");
         }
+
+        //----- p10_mss_eff_grouping
+        // Group memory across all chips
 
         // Stack the memory on each chip
         call_mss_eff_grouping(l_StepError);

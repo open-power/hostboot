@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -46,6 +46,7 @@ OBJS += p10_fbc_utils.o
 #mss_eff_config - Need in istep07 to group memory
 OBJS += p10_mss_eff_grouping.o
 OBJS += p10_sbe_scratch_regs.o
+OBJS += mss_check_ddimm_config.o
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
