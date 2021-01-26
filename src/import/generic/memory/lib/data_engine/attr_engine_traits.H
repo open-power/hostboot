@@ -1692,16 +1692,16 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits - partial specialization
 /// @tparam P processor type
-/// @note attr_si_engine_fields, SI_MC_DRV_EQ_DQ_DQS specialization
+/// @note attr_si_engine_fields, SI_PHY_EQUALIZATION specialization
 ///
 template< proc_type P >
-struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_DRV_EQ_DQ_DQS>
+struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_PHY_EQUALIZATION>
 {
-    using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_EQ_DQ_DQS_Type;
+    using attr_type = fapi2::ATTR_MEM_SI_PHY_EQUALIZATION_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
     using attr_type_to_set = attr_integral_type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_DRV_EQ_DQ_DQS_TargetType;
-    static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_DRV_EQ_DQ_DQS;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_PHY_EQUALIZATION_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_PHY_EQUALIZATION;
 
     ///
     /// @brief attribute getter
@@ -1712,7 +1712,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
     static inline fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
             attr_type& o_setting)
     {
-        return mss::attr::get_si_mc_drv_eq_dq_dqs(i_target, o_setting);
+        return mss::attr::get_si_phy_equalization(i_target, o_setting);
     }
 
     ///
@@ -1724,7 +1724,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
     static inline fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
             attr_type& i_setting)
     {
-        return mss::attr::set_si_mc_drv_eq_dq_dqs(i_target, i_setting);
+        return mss::attr::set_si_phy_equalization(i_target, i_setting);
     }
 
     ///

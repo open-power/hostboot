@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -213,6 +213,8 @@
         <id>ATTR_MEM_SI_MC_RCV_EQ_DQ_DQS</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
+          (DEPRECATED) Superceded by ATTR_MEM_SI_PHY_EQUALIZATION
+          Left in as a workaround to hostboot CI failing due to removal of attribute
           Array[DIMM][RANK]
           Memory Controller side Receiver Equalization for Data and Data Strobe Lines.
         </description>
@@ -228,6 +230,8 @@
         <id>ATTR_MEM_SI_MC_DRV_EQ_DQ_DQS</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
+          (DEPRECATED) Superceded by ATTR_MEM_SI_PHY_EQUALIZATION
+          Left in as a workaround to hostboot CI failing due to removal of attribute
           Array[DIMM][RANK]
           Memory Controller side Drive Equalization for Data and Data Strobe Lines.
         </description>
@@ -236,6 +240,23 @@
         <writeable/>
         <enum>DISABLE = 0, FFE = 1</enum>
         <mssAccessorName>si_mc_drv_eq_dq_dqs</mssAccessorName>
+        <array>2 4</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_SI_PHY_EQUALIZATION</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Array[DIMM][RANK]
+          Memory Controller side Drive and Receive Equalization for Data and Data Strobe Lines.
+          Bit 6 - Driver FFE
+          Bit 7 - Receiver DFE
+          0 = disable, 1 = enable
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>si_phy_equalization</mssAccessorName>
         <array>2 4</array>
     </attribute>
 

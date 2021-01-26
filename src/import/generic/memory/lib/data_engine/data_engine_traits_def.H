@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,7 +148,7 @@ enum class attr_si_engine_fields
     SI_DRAM_RTT_WR = 11,
     SI_DRAM_RTT_PARK = 12,
     SI_DRAM_PREAMBLE = 13,
-    SI_MC_DRV_EQ_DQ_DQS = 14,
+    SI_PHY_EQUALIZATION = 14,
     SI_DRAM_DRV_IMP_DQ_DQS = 15,
     SI_ODT_WR = 16,
     SI_ODT_RD = 17,
