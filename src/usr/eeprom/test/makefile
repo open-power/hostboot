@@ -29,6 +29,7 @@ MODULE = testeeprom
 TESTS += eepromddtest.H
 TESTS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING), eecachetest.H, )
 TESTS += eepromUtilstest.H
+TESTS += eepromddHWtest.H
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
