@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,8 @@ enum hdatSpiraHDataAreas
     SPIRAH_MS_DUMP_DST_TBL  = 4,    // mainstore dump destination table
     SPIRAH_MS_DUMP_RSLT_TBL = 5,    // mainstore dump results table
     SPIRAH_PROC_DUMP_TBL    = 6,    // Proc reg dump area table
-    SPIRAH_LAST             = 6
+    SPIRAH_HW_DUMP_TBL      = 7,    // Processor HW Dump Area table
+    SPIRAH_LAST             = 7
 };
 
 /** @enum hdatSpiraSDataAreas

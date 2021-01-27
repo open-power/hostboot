@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -929,6 +929,21 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             errhdl = getSpiraTupleVA(tuple, o_dataAddr);
             if( errhdl ) { break; }
         }
+        // Hardware  Dump Area table
+        else if( RUNTIME::HW_DUMP_AREA_TBL == i_section )
+        {
+            // Find the right tuple and verify it makes sense
+            errhdl = getAndCheckTuple(i_section, tuple);
+            if( errhdl ) { break; }
+            TRACUCOMP( g_trac_runtime, "HARDWARE_DUMP_AREA_TBL tuple=%p", tuple );
+
+            //Note - there is no header for the Processor dump area table
+            //return the total allocated size since it is empty at first
+            o_dataSize = tuple->hdatAllocSize * tuple->hdatAllocCnt;
+            record_size = tuple->hdatAllocSize;
+            errhdl = getSpiraTupleVA(tuple, o_dataAddr);
+            if( errhdl ) { break; }
+        }
         else if( RUNTIME::HRMOR_STASH == i_section )
         {
             //Look up the tuple that this section is located in
@@ -1285,6 +1300,37 @@ errlHndl_t hdatService::updateHostProcDumpActual( SectionId i_section,
     return errhdl;
 }
 
+errlHndl_t hdatService::updateHWDumpActual( SectionId i_section,
+                                            uint32_t maxHwDumpSize)
+{
+    errlHndl_t errhdl = nullptr;
+    TRACFCOMP( g_trac_runtime,
+               "RUNTIME::updateHWDumpActual( i_section=%d )", i_section);
+    do
+    {
+        uint64_t l_hostDataAddr = 0;
+        uint64_t l_hostDataSize = 0;
+        DUMP::HwDumpAreaTable  *hwDumpTable = nullptr;
+
+        // Get proc dump area ntuple address
+        errhdl = getHostDataSection(i_section, 0,
+                                    l_hostDataAddr, l_hostDataSize);
+        if (errhdl)
+        {
+            TRACFCOMP( g_trac_runtime, "updateHWDumpActual> Failed to "
+                       "get host data section (i_section=%d )", i_section);
+            break;
+        }
+
+        hwDumpTable = reinterpret_cast<DUMP::HwDumpAreaTable *>(l_hostDataAddr);
+        hwDumpTable->hwDataFormatVersion = 0x1;
+        hwDumpTable->hwDataSizePerProc = maxHwDumpSize;
+    } while(0);
+
+    return errhdl;
+}
+
+
 errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
                                                      uint16_t i_count )
 {
@@ -1603,6 +1649,10 @@ errlHndl_t hdatService::getAndCheckTuple(const SectionId i_section,
             l_spiraH = SPIRAH_PROC_DUMP_TBL;
             l_spiraL = SPIRAL_INVALID;
             break;
+        case RUNTIME::HW_DUMP_AREA_TBL:
+            l_spiraH = SPIRAH_HW_DUMP_TBL;
+            l_spiraL = SPIRAL_INVALID;
+            break;
         case RUNTIME::HSVC_SYSTEM_DATA:
         case RUNTIME::HSVC_NODE_DATA:
             l_spiraS = SPIRAS_HSVC_DATA;
@@ -1833,6 +1883,14 @@ errlHndl_t updateHostProcDumpActual( SectionId i_section,
     return Singleton<hdatService>::instance().updateHostProcDumpActual(i_section,
                                                    threadRegSize, threadRegVersion);
 }
+
+errlHndl_t updateHWDumpActual( SectionId i_section,uint32_t maxHwDumpSize)
+{
+    return Singleton<hdatService>::instance().updateHWDumpActual(i_section,
+                                                         maxHwDumpSize);
+}
+
+
 
 void useRelocatedPayloadAddr(bool val)
 {

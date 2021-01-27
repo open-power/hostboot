@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,6 +140,19 @@ namespace RUNTIME
         errlHndl_t updateHostProcDumpActual( SectionId i_section,
                                              uint32_t threadRegSize,
                                              uint8_t threadRegVersion);
+
+        /**
+         * @brief  Update Hardware Dump area section
+         *
+         * @param[in] i_section        Chunk of data to find
+         * @param[in] maxHwDumpSize    HW Data size per processor (Includes FFDC)
+         * @param[in] threadRegVersion Register data format version
+         *
+         * @return errlHndl_t          NULL on success
+         */
+        errlHndl_t updateHWDumpActual( SectionId i_section,
+                                             uint32_t maxHwDumpSize);
+
 
         /**
          * @brief  Retrieve and log FFDC data relevant to a given section of

@@ -741,6 +741,42 @@ errlHndl_t copyArchitectedRegs(void)
                                               procTableEntry->threadRegVersion);
         l_sys->setAttr<TARGETING::ATTR_PDA_THREAD_REG_ENTRY_SIZE>(
                                                  procTableEntry->threadRegSize);
+
+        //Update teh HW Dump Area table
+        TRACFCOMP(g_trac_dump, "Updating the HW Dump Area Table");
+        //Fetch the reference to the HW Dump area table to update the proc specific offset
+        uint64_t l_hostDataAddr = 0;
+        uint64_t l_hostDataSize = 0;
+        l_err = RUNTIME::get_host_data_section(RUNTIME::HW_DUMP_AREA_TBL,0,l_hostDataAddr,
+                l_hostDataSize);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_dump,"Failed to obatain the HW_DUMP_AREA_TBL section");
+            break;
+        }
+        DUMP::HwDumpAreaTable  *hwDumpTable = nullptr;
+        hwDumpTable = reinterpret_cast<DUMP::HwDumpAreaTable *>(l_hostDataAddr);
+
+        for (uint32_t procNum = 0; procNum < procChips.size(); procNum++)
+        {
+            //Fetch PROC specific Meta Data
+            uint64_t procSrcAddr = (reinterpret_cast<uint64_t>(vMapSrcAddrBase)+
+                                  procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
+            DUMP::sbeArchHWDumpMetaData_t *metadata =
+                   reinterpret_cast<DUMP::sbeArchHWDumpMetaData_t *>(procSrcAddr);
+
+            TRACDCOMP(g_trac_dump, "METADATA OF PROC WITH SRC address:0x%.16llx",
+                      metadata->archDataMemoryAddr);
+            uint32_t procId = procChips[procNum]->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+
+            hwDumpTable->procHwRegDataToc[procId].dataOffset= metadata->hwDataMemoryAddr;
+            hwDumpTable->procHwRegDataToc[procId].dataSize=metadata->hwDataMemCapturedSize;
+            hwDumpTable->procHwRegDataToc[procId].nodeId = nodeId;
+            TRACFCOMP(g_trac_dump, "PROC[%d] HWDataOffset=0x%.16llx Size=0x%.8x",
+                      procId,hwDumpTable->procHwRegDataToc[procId].dataOffset,hwDumpTable->procHwRegDataToc[procId].dataSize);
+
+        }
+
     } while (0);
 
     // Unmap destination memory

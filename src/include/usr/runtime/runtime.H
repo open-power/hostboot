@@ -231,7 +231,8 @@ enum SectionId
                           //  where PHYP can write HRMOR
     CPU_CTRL,             // Spira-H CPU controls area
     PROC_DUMP_AREA_TBL,   //< Processor dump area table
-    LAST_SECTION = PROC_DUMP_AREA_TBL   //< Placeholder for arrays
+    HW_DUMP_AREA_TBL,     //< Hardware Dump Area Table
+    LAST_SECTION = HW_DUMP_AREA_TBL  //< Placeholder for arrays
 };
 
 /**
@@ -317,6 +318,20 @@ errlHndl_t writeActualCount( SectionId i_id );
 errlHndl_t updateHostProcDumpActual( SectionId i_section,
                                      uint32_t threadRegSize,
                                      uint8_t threadRegVersion);
+
+/**
+ * @brief  Update Hardware Dump area section
+ *
+ * @param[in] i_section        Chunk of data to find
+ * @param[in] maxHwDumpSize    HW Data size per processor (Includes FFDC)
+ * @param[in] threadRegVersion Register data format version
+ *
+ * @return errlHndl_t          NULL on success
+ */
+errlHndl_t updateHWDumpActual( SectionId i_section,
+        uint32_t maxHwDumpSize);
+
+
 
 /**
  * @brief  Use relocated payload base address

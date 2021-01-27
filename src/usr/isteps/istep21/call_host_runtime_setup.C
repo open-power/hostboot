@@ -66,6 +66,11 @@
 
 #include <dump/dumpif.H>
 
+//This is a constant size used to store HW dump data
+//per processor chip. PHYP will allocate this memory
+//per proc chip to capture the HW dump data. Any change 
+//to this value needs to be communicated with PHYP team
+constexpr uint32_t MAX_HW_DUMP_SIZE=0x580000;
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -454,6 +459,10 @@ void* call_host_runtime_setup (void *io_pArgs)
         // Ignore return value
         RUNTIME::updateHostProcDumpActual( RUNTIME::PROC_DUMP_AREA_TBL,
                                            threadRegSize, threadRegFormat);
+
+        //Update Maximum HW Dump data size per proc 
+        RUNTIME::updateHWDumpActual( RUNTIME::HW_DUMP_AREA_TBL,
+                                     MAX_HW_DUMP_SIZE);
 
         //Update the MDRT value (for MS Dump)
         l_err = RUNTIME::writeActualCount(RUNTIME::MS_DUMP_RESULTS_TBL);

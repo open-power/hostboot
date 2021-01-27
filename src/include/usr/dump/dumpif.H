@@ -118,7 +118,6 @@ namespace DUMP
         uint64_t reserved;
     } PACKED;
 
-
     //Architected Register Data TOC.
     //Same structure will be used for storing the node and processor
     //specific details into the HDAT
@@ -295,6 +294,25 @@ namespace DUMP
             memset(reserved2,0,80);
         }
 
+    } PACKED;
+
+    //Hardware Register Data TOC.
+    struct HwRegDataToc_t
+    {
+        uint64_t dataOffset;//Proc specific hardware data start address
+        uint32_t dataSize;  //Total data size for processor specific data
+        uint8_t  nodeId;    //Node to which the proc is related to
+        uint8_t  reserved[3];  //Future use reserve
+    } PACKED;
+
+
+    //Hardware Dump Area table format
+    struct HwDumpAreaTable
+    {
+        uint8_t  hwDataFormatVersion;
+        uint8_t  reserved1[3];
+        uint32_t hwDataSizePerProc;
+        HwRegDataToc_t procHwRegDataToc[16];
     } PACKED;
 
 
