@@ -261,17 +261,18 @@ fapi2::ReturnCode pm_pba_fir_init(
     FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::OCI_SLAVE_INIT),       FIR_REC_ATTN_ERROR);    // 1
     FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::OCI_WRPAR_ERR),        FIR_REC_ATTN_ERROR);    // 2
     FAPI_TRY(l_pbaoFir.mask(pbao::RESERVED_3),                  FIR_MASK_ERROR);        // 3
-    FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::BCUE_SETUP_ERR),       FIR_REC_ATTN_ERROR);    // 4
-    FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::BCUE_OCI_DATERR),      FIR_REC_ATTN_ERROR);    // 5
-    FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::BCDE_SETUP_ERR),       FIR_REC_ATTN_ERROR);    // 6
-    FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::BCDE_OCI_DATERR),      FIR_REC_ATTN_ERROR);    // 7
+    FAPI_TRY(l_pbaoFir.mask(pbao::RESERVED_3),                  FIR_MASK_ERROR);        // 3
+    FAPI_TRY(l_pbaoFir.mask(pbao::BCUE_SETUP_ERR),              FIR_MASK_ERROR);        // 4
+    FAPI_TRY(l_pbaoFir.mask(pbao::BCUE_OCI_DATERR),             FIR_MASK_ERROR);        // 5
+    FAPI_TRY(l_pbaoFir.mask(pbao::BCDE_SETUP_ERR),              FIR_MASK_ERROR);        // 6
+    FAPI_TRY(l_pbaoFir.mask(pbao::BCDE_OCI_DATERR),             FIR_MASK_ERROR);        // 7
     FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::INTERNAL_ERR),         FIR_REC_ATTN_ERROR);    // 8
     FAPI_TRY(l_pbaoFir.mask(pbao::OCI_BAD_REG_ADDR),            FIR_MASK_ERROR);        // 9  Firmware error
-    FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::AXPUSH_WRERR),         FIR_REC_ATTN_ERROR);    // 10
+    FAPI_TRY(l_pbaoFir.mask(pbao::AXPUSH_WRERR),                FIR_MASK_ERROR);        // 10
     FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::AXIPUSH_WRERR),        FIR_REC_ATTN_ERROR);    // 11
-    FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::AXFLOW_ERR),           FIR_REC_ATTN_ERROR);    // 12
+    FAPI_TRY(l_pbaoFir.mask(pbao::AXFLOW_ERR),                  FIR_MASK_ERROR);        // 12
     FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::AXIFLOW_ERR),          FIR_REC_ATTN_ERROR);    // 13
-    FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::AXSND_RSVERR),         FIR_REC_ATTN_ERROR);    // 14
+    FAPI_TRY(l_pbaoFir.mask(pbao::AXSND_RSVERR),                FIR_MASK_ERROR);        // 14
     FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::AXISND_RSVERR),        FIR_REC_ATTN_ERROR);    // 15
     FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::HTM_WRITE_OVERFLOW),   FIR_REC_ATTN_ERROR);    // 16
     FAPI_TRY(l_pbaoFir.setRecvAttn(pbao::INVALID_TOPOLOGY_ID),  FIR_REC_ATTN_ERROR);    // 17
@@ -281,7 +282,7 @@ fapi2::ReturnCode pm_pba_fir_init(
     // PBAF
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_RDADRERR_FW),       FIR_REC_ATTN_ERROR);    // 0
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_RDDATATO_FW),       FIR_REC_ATTN_ERROR);    // 1
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_SUE_FW),            FIR_REC_ATTN_ERROR);    // 2
+    FAPI_TRY(l_pbafFir.mask(pbaf::PB_SUE_FW),                   FIR_MASK_ERROR);        // 2
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_UE_FW),             FIR_REC_ATTN_ERROR);    // 3
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_CE_FW),             FIR_REC_ATTN_ERROR);    // 4
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_UNEXPCRESP),        FIR_REC_ATTN_ERROR);    // 5
@@ -291,24 +292,24 @@ fapi2::ReturnCode pm_pba_fir_init(
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_BADCRESP),          FIR_REC_ATTN_ERROR);    // 9
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_ACKDEAD_FW_RD),     FIR_REC_ATTN_ERROR);    // 10
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_OPERTO),            FIR_REC_ATTN_ERROR);    // 11
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::BCUE_PB_ACK_DEAD),     FIR_REC_ATTN_ERROR);    // 12
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::BCUE_PB_ADRERR),       FIR_REC_ATTN_ERROR);    // 13
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::BCDE_PB_ACK_DEAD),     FIR_REC_ATTN_ERROR);    // 14
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::BCDE_PB_ADRERR),       FIR_REC_ATTN_ERROR);    // 15
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::BCDE_RDDATATO_ERR),    FIR_REC_ATTN_ERROR);    // 16
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::BCDE_SUE_ERR),         FIR_REC_ATTN_ERROR);    // 17
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::BCDE_UE_ERR),          FIR_REC_ATTN_ERROR);    // 18
+    FAPI_TRY(l_pbafFir.mask(pbaf::BCUE_PB_ACK_DEAD),            FIR_MASK_ERROR);        // 12
+    FAPI_TRY(l_pbafFir.mask(pbaf::BCUE_PB_ADRERR),              FIR_MASK_ERROR);        // 13
+    FAPI_TRY(l_pbafFir.mask(pbaf::BCDE_PB_ACK_DEAD),            FIR_MASK_ERROR);        // 14
+    FAPI_TRY(l_pbafFir.mask(pbaf::BCDE_PB_ADRERR),              FIR_MASK_ERROR);        // 15
+    FAPI_TRY(l_pbafFir.mask(pbaf::BCDE_RDDATATO_ERR),           FIR_MASK_ERROR);        // 16
+    FAPI_TRY(l_pbafFir.mask(pbaf::BCDE_SUE_ERR),                FIR_MASK_ERROR);        // 17
+    FAPI_TRY(l_pbafFir.mask(pbaf::BCDE_UE_ERR),                 FIR_MASK_ERROR);        // 18
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::BCDE_CE),              FIR_REC_ATTN_ERROR);    // 19
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::INTERNAL_ERR),         FIR_REC_ATTN_ERROR);    // 20
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::ILLEGAL_CACHE_OP),     FIR_REC_ATTN_ERROR);    // 21
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXRCV_DLO_ERR),        FIR_REC_ATTN_ERROR);    // 22
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXRCV_DLO_TO),         FIR_REC_ATTN_ERROR);    // 23
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXRCV_RSVDATA_TO),     FIR_REC_ATTN_ERROR);    // 24
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXFLOW_ERR),           FIR_REC_ATTN_ERROR);    // 25
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXSND_DHI_RTYTO),      FIR_REC_ATTN_ERROR);    // 26
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXSND_DLO_RTYTO),      FIR_REC_ATTN_ERROR);    // 27
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXSND_RSVTO),          FIR_REC_ATTN_ERROR);    // 38
-    FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::PB_ACKDEAD_FW_WR),     FIR_REC_ATTN_ERROR);    // 39
+    FAPI_TRY(l_pbafFir.mask(pbaf::AXRCV_DLO_ERR),               FIR_MASK_ERROR);        // 22
+    FAPI_TRY(l_pbafFir.mask(pbaf::AXRCV_DLO_TO),                FIR_MASK_ERROR);        // 23
+    FAPI_TRY(l_pbafFir.mask(pbaf::AXRCV_RSVDATA_TO),            FIR_MASK_ERROR);        // 24
+    FAPI_TRY(l_pbafFir.mask(pbaf::AXFLOW_ERR),                  FIR_MASK_ERROR);        // 25
+    FAPI_TRY(l_pbafFir.mask(pbaf::AXSND_DHI_RTYTO),             FIR_MASK_ERROR);        // 26
+    FAPI_TRY(l_pbafFir.mask(pbaf::AXSND_DLO_RTYTO),             FIR_MASK_ERROR);        // 27
+    FAPI_TRY(l_pbafFir.mask(pbaf::AXSND_RSVTO),                 FIR_MASK_ERROR);        // 28
+    FAPI_TRY(l_pbafFir.mask(pbaf::PB_ACKDEAD_FW_WR),            FIR_MASK_ERROR);        // 29
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXIRCV_DLO_ERR),       FIR_REC_ATTN_ERROR);    // 30
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXIRCV_DLO_TO),        FIR_REC_ATTN_ERROR);    // 31
     FAPI_TRY(l_pbafFir.setRecvAttn(pbaf::AXIRCV_RSVDATA_TO),    FIR_REC_ATTN_ERROR);    // 32
