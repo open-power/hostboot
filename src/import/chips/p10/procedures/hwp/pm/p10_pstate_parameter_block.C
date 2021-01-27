@@ -1195,9 +1195,18 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         // frequency_min_khz - Value from Power safe operating point after biases
         Pstate l_ps;
 
-        //Translate safe mode frequency to pstate
-        freq2pState((iv_attrs.attr_pm_safe_frequency_mhz * 1000),
+        if (iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+        {
+            //Translate pau  frequency to pstate
+            freq2pState((iv_attrs.attr_pau_frequency_mhz * 1000),
                     &l_ps, ROUND_FAST);
+        }
+        else
+        {
+            //Translate safe mode frequency to pstate
+            freq2pState((iv_attrs.attr_pm_safe_frequency_mhz * 1000),
+                    &l_ps, ROUND_FAST);
+        }
 
         //Compute real frequency
         i_occppb->frequency_min_khz = iv_reference_frequency_khz -
@@ -5904,9 +5913,11 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     uint16_t l_fmax_freq;
     uint16_t l_ut_freq;
     uint16_t l_powr_watts;
+    uint16_t l_fixed_freq;
     uint16_t l_psav_freq;
     uint16_t l_wofbase_freq;
     uint8_t l_sys_pdv_mode;
+    uint8_t l_cnt =0;
     uint16_t l_tmp_psav_freq = 0;
     uint16_t l_tmp_ceil_freq = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz;
@@ -6009,6 +6020,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
             l_psav_freq     = revle16(l_poundV_data.other_info.VddPsavCoreFreq);
             l_wofbase_freq  = revle16(l_poundV_data.other_info.VddTdpWofCoreFreq);
             l_powr_watts    = revle16(l_poundV_data.other_info.TSrtSocPowTgt);
+            l_fixed_freq    = revle16(l_poundV_data.other_info.FxdFreqMdeCoreFreq);
             FAPI_INF("VPD fmax_freq=%04d, ut_freq=%04d  psav_freq=%04d, psav_freq=%04d powr = %04d",
                     l_fmax_freq, l_ut_freq, l_wofbase_freq, l_psav_freq, l_powr_watts);
 
@@ -6146,6 +6158,20 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
                 iv_attrs.attr_nominal_freq_mhz = l_sys_freq_core_floor_mhz;
                 FAPI_INF("Raising the nominal frequency to the floor frequency:  %04d ",
                         iv_attrs.attr_nominal_freq_mhz);
+            }
+
+            //Temporary code
+            //This change is a placeholder for correcting the setting of
+            //ATTR_NOMINAL_FREQ_MHZ from the Fixed Frequency #V value until the
+            //new structures for the WOF Tables source of this is in place
+            if ( !l_cnt )
+            {
+                iv_attrs.attr_nominal_freq_mhz = l_fixed_freq;
+                l_cnt = 1;
+            }
+            if (iv_attrs.attr_nominal_freq_mhz < l_fixed_freq)
+            {
+                iv_attrs.attr_nominal_freq_mhz = l_fixed_freq;
             }
 
         } //end of proc list
