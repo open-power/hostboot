@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -790,7 +790,7 @@ int main( int argc,  char *argv[] )
     {
         // Not found, so this one should be found for most users.
         pszErrlTool =
-        "/esw/fips1020/Builds/built/obj/x86.nfp/errl/nfp/tool/errl";
+        "/esw/fips1010/Builds/built/obj/x86.nfp/errl/nfp/tool/errl";
 
         rc = stat( pszErrlTool, &statbuffer );
         if(  -1 == rc )
