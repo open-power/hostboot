@@ -98,6 +98,15 @@ actionclass pmRecovery
     threshold1;
 };
 
+actionclass sbe_vital_attn
+{
+    # Thresholding is only necessary to prevent flooding. PRD should not need to
+    # do any service action (unless in MNFG mode). Instead, call SBE interface
+    # initiate SBE recovery.
+    threshold_and_mask_self;
+    funccall("handleSbeVital");
+};
+
 # The bits characterized by this action are all handled in the PLL error
 # analysis code. This action is just in case the PLL error handler failed and we
 # got an errant attention.

@@ -2663,7 +2663,7 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[33]
      *  SBE - PPE in halted state
      */
-    (rTP_LOCAL_FIR, bit(33)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(33)) ? sbe_vital_attn;
 
     /** TP_LOCAL_FIR[34]
      *  SBE - PPE watchdog timeout

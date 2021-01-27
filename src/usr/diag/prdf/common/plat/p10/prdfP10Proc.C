@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -260,42 +260,33 @@ PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleDeadmanTimer );
 
 //------------------------------------------------------------------------------
 
-/** Call hostboot to indicate SBE bad, extract FFDC and handle recovery */
-int32_t handleSbeVital( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc )
+/**
+ * @brief The SBE has failed. Call the Hostboot interface to collect FFDC,
+ *        initiate recovery, etc.
+ */
+int32_t handleSbeVital(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
 {
-    // Hostboot code is suppose to handle all Vital attentions
-    // and initiate recovery with FSP,etc... if needed
-#ifdef __HOSTBOOT_MODULE
-    TARGETING::TargetHandle_t  l_target = i_chip->getTrgt();
-    SCAN_COMM_REGISTER_CLASS * l_tpmask_or;
+    #ifdef __HOSTBOOT_MODULE
 
-   PRDF_ERR("Invoking HB SBE vital routine");
-   errlHndl_t  l_elog = SBEIO::handleVitalAttn( l_target );
-
-    // commit any failures
-    if (nullptr != l_elog)
+    errlHndl_t errl = SBEIO::handleVitalAttn(i_chip->getTrgt());
+    if (nullptr != errl)
     {
-        // Need to MASK bit 26 of TPLFIR to avoid getting this again
-        // (will use the 'OR' reg for doing the masking)
-        l_tpmask_or = i_chip->getRegister("TP_LFIR_MASK_OR");
-        l_tpmask_or->clearAllBits();
-        l_tpmask_or->SetBit( 26  );
+        PRDF_ERR("[handleSbeVital] SBEIO::handleVitalAttn(0x%08x) failed",
+                 i_chip->getHuid());
 
-        int32_t l_rc = l_tpmask_or->Write();
-        if (l_rc != SUCCESS)
-        {   // we are probably stuck in an infinite loop now
-            PRDF_ERR("Failed(%d) masking SBE bit for chip: 0x%08x",
-                      l_rc,  i_chip->getHuid() );
-        }
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
 
-        PRDF_ERR("handleVitalAttn failure");
-        PRDF_COMMIT_ERRL( l_elog, ERRL_ACTION_REPORT );
+        // Set the threshold flag so that rule code will mask this attention. Do
+        // not set the service call flag. The SBE error log should take care of
+        // the callouts.
+        io_sc.service_data->setFlag(ServiceDataCollector::AT_THRESHOLD);
     }
-#endif
+
+    #endif
+
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleSbeVital );
+PRDF_PLUGIN_DEFINE_NS(p10_proc, Proc, handleSbeVital);
 
 //------------------------------------------------------------------------------
 
