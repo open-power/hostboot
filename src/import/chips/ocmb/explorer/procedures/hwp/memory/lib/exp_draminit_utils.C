@@ -596,231 +596,277 @@ fapi2::ReturnCode print_phy_params(
     for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         FAPI_LAB("// Struct passed to data buffer during EXP_FW_DDR_PHY_INIT for %s", mss::c_str(l_port));
-        FAPI_LAB("//     NOTE: Ranks are in terms of the PHY perspective");
-        FAPI_LAB("//           This means ranks 1/2 will be swizzled from the IBM perspective for quad encoded CS mode");
+        FAPI_LAB("//     NOTE: Ranks are in terms of the PHY perspective %s", mss::c_str(l_port));
+        FAPI_LAB("//           This means ranks 1/2 will be swizzled from the IBM perspective for quad encoded CS mode %s",
+                 mss::c_str(l_port));
         FAPI_LAB("struct user_input_msdg m = {");
-        FAPI_LAB("  .version_number         = %u,", i_phy_params.iv_user_msdg_upto_ver397559.version_number);
-        FAPI_LAB("  .DimmType               = %u,", i_phy_params.iv_user_msdg_upto_ver397559.DimmType);
-        FAPI_LAB("  .CsPresent              = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.CsPresent);
-        FAPI_LAB("  .DramDataWidth          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.DramDataWidth);
-        FAPI_LAB("  .Height3DS              = %u,", i_phy_params.iv_user_msdg_upto_ver397559.Height3DS);
-        FAPI_LAB("  .ActiveDBYTE            = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.ActiveDBYTE);
-        FAPI_LAB("  .ActiveNibble           = 0x%08X,", i_phy_params.iv_user_msdg_upto_ver397559.ActiveNibble);
-        FAPI_LAB("  .AddrMirror             = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.AddrMirror);
-        FAPI_LAB("  .ColumnAddrWidth        = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.ColumnAddrWidth);
-        FAPI_LAB("  .RowAddrWidth           = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.RowAddrWidth);
-        FAPI_LAB("  .SpdCLSupported         = 0x%08X,", i_phy_params.iv_user_msdg_upto_ver397559.SpdCLSupported);
-        FAPI_LAB("  .SpdtAAmin              = %u,", i_phy_params.iv_user_msdg_upto_ver397559.SpdtAAmin);
-        FAPI_LAB("  .Rank4Mode              = %u,", i_phy_params.iv_user_msdg_upto_ver397559.Rank4Mode);
-        FAPI_LAB("  .EncodedQuadCs          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.EncodedQuadCs);
-        FAPI_LAB("  .DDPCompatible          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.DDPCompatible);
-        FAPI_LAB("  .TSV8HSupport           = %u,", i_phy_params.iv_user_msdg_upto_ver397559.TSV8HSupport);
-        FAPI_LAB("  .MRAMSupport            = %u,", i_phy_params.iv_user_msdg_upto_ver397559.MRAMSupport);
-        FAPI_LAB("  .MDSSupport             = %u,", i_phy_params.iv_user_msdg_upto_ver397559.MDSSupport);
-        FAPI_LAB("  .NumPStates             = %u,", i_phy_params.iv_user_msdg_upto_ver397559.NumPStates);
+        // Note: Format here is important. We want the prints to be compilable C code for Microchip
+        FAPI_LAB("  .version_number         = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.version_number,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .DimmType               = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.DimmType,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .CsPresent              = 0x%04X, // %s", i_phy_params.iv_user_msdg_upto_ver397559.CsPresent,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .DramDataWidth          = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.DramDataWidth,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .Height3DS              = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.Height3DS,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .ActiveDBYTE            = 0x%04X, // %s", i_phy_params.iv_user_msdg_upto_ver397559.ActiveDBYTE,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .ActiveNibble           = 0x%08X, // %s", i_phy_params.iv_user_msdg_upto_ver397559.ActiveNibble,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .AddrMirror             = 0x%04X, // %s", i_phy_params.iv_user_msdg_upto_ver397559.AddrMirror,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .ColumnAddrWidth        = 0x%04X, // %s", i_phy_params.iv_user_msdg_upto_ver397559.ColumnAddrWidth,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .RowAddrWidth           = 0x%04X, // %s", i_phy_params.iv_user_msdg_upto_ver397559.RowAddrWidth,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .SpdCLSupported         = 0x%08X, // %s", i_phy_params.iv_user_msdg_upto_ver397559.SpdCLSupported,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .SpdtAAmin              = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.SpdtAAmin,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .Rank4Mode              = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.Rank4Mode,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .EncodedQuadCs          = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.EncodedQuadCs,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .DDPCompatible          = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.DDPCompatible,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .TSV8HSupport           = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.TSV8HSupport,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .MRAMSupport            = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.MRAMSupport,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .MDSSupport             = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.MDSSupport,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .NumPStates             = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.NumPStates,
+                 mss::c_str(i_target));
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .Frequency[%u]           = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.Frequency[l_pstate]);
+            FAPI_LAB("  .Frequency[%u]           = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.Frequency[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhyOdtImpedance[%u]     = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.PhyOdtImpedance[l_pstate]);
+            FAPI_LAB("  .PhyOdtImpedance[%u]     = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.PhyOdtImpedance[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhyDrvImpedancePU[%u]   = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.PhyDrvImpedancePU[l_pstate]);
+            FAPI_LAB("  .PhyDrvImpedancePU[%u]   = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.PhyDrvImpedancePU[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhyDrvImpedancePD[%u]   = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.PhyDrvImpedancePD[l_pstate]);
+            FAPI_LAB("  .PhyDrvImpedancePD[%u]   = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.PhyDrvImpedancePD[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhySlewRate[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.PhySlewRate[l_pstate]);
+            FAPI_LAB("  .PhySlewRate[%u]         = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.PhySlewRate[l_pstate], mss::c_str(i_target));
         }
 
-        FAPI_LAB("  .ATxImpedance           = %u,", i_phy_params.iv_user_msdg_upto_ver397559.ATxImpedance);
-        FAPI_LAB("  .ATxSlewRate            = %u,", i_phy_params.iv_user_msdg_upto_ver397559.ATxSlewRate);
-        FAPI_LAB("  .CKTxImpedance          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.CKTxImpedance);
-        FAPI_LAB("  .CKTxSlewRate           = %u,", i_phy_params.iv_user_msdg_upto_ver397559.CKTxSlewRate);
-        FAPI_LAB("  .AlertOdtImpedance      = %u,", i_phy_params.iv_user_msdg_upto_ver397559.AlertOdtImpedance);
+        FAPI_LAB("  .ATxImpedance           = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.ATxImpedance,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .ATxSlewRate            = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.ATxSlewRate,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .CKTxImpedance          = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.CKTxImpedance,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .CKTxSlewRate           = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.CKTxSlewRate,
+                 mss::c_str(i_target));
+        FAPI_LAB("  .AlertOdtImpedance      = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.AlertOdtImpedance,
+                 mss::c_str(i_target));
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttNomR0[%u]        = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR0[l_pstate]);
-        }
-
-        for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
-        {
-            FAPI_LAB("  .DramRttNomR1[%u]        = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR1[l_pstate]);
-        }
-
-        for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
-        {
-            FAPI_LAB("  .DramRttNomR2[%u]        = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR2[l_pstate]);
+            FAPI_LAB("  .DramRttNomR0[%u]        = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR0[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttNomR3[%u]        = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR3[l_pstate]);
+            FAPI_LAB("  .DramRttNomR1[%u]        = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR1[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttWrR0[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR0[l_pstate]);
+            FAPI_LAB("  .DramRttNomR2[%u]        = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR2[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttWrR1[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR1[l_pstate]);
+            FAPI_LAB("  .DramRttNomR3[%u]        = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR3[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttWrR2[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR2[l_pstate]);
+            FAPI_LAB("  .DramRttWrR0[%u]         = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR0[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttWrR3[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR3[l_pstate]);
+            FAPI_LAB("  .DramRttWrR1[%u]         = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR1[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttParkR0[%u]       = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR0[l_pstate]);
+            FAPI_LAB("  .DramRttWrR2[%u]         = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR2[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttParkR1[%u]       = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR1[l_pstate]);
+            FAPI_LAB("  .DramRttWrR3[%u]         = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR3[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttParkR2[%u]       = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR2[l_pstate]);
+            FAPI_LAB("  .DramRttParkR0[%u]       = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR0[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttParkR3[%u]       = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR3[l_pstate]);
+            FAPI_LAB("  .DramRttParkR1[%u]       = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR1[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramDic[%u]             = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramDic[l_pstate]);
+            FAPI_LAB("  .DramRttParkR2[%u]       = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR2[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramWritePreamble[%u]   = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.DramWritePreamble[l_pstate]);
+            FAPI_LAB("  .DramRttParkR3[%u]       = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR3[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramReadPreamble[%u]    = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.DramReadPreamble[l_pstate]);
+            FAPI_LAB("  .DramDic[%u]             = %u, // %s", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramDic[l_pstate],
+                     mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhyEqualization[%u]     = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.PhyEqualization[l_pstate]);
+            FAPI_LAB("  .DramWritePreamble[%u]   = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramWritePreamble[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .InitVrefDQ[%u]          = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.InitVrefDQ[l_pstate]);
+            FAPI_LAB("  .DramReadPreamble[%u]    = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramReadPreamble[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .InitPhyVref[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.InitPhyVref[l_pstate]);
+            FAPI_LAB("  .PhyEqualization[%u]     = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.PhyEqualization[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .OdtWrMapCs[%u]          = 0x%04X,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.OdtWrMapCs[l_pstate]);
+            FAPI_LAB("  .InitVrefDQ[%u]          = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.InitVrefDQ[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .OdtRdMapCs[%u]          = 0x%04X,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.OdtRdMapCs[l_pstate]);
+            FAPI_LAB("  .InitPhyVref[%u]         = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.InitPhyVref[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .Geardown[%u]            = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.Geardown[l_pstate]);
+            FAPI_LAB("  .OdtWrMapCs[%u]          = 0x%04X, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.OdtWrMapCs[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .CALatencyAdder[%u]      = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.CALatencyAdder[l_pstate]);
+            FAPI_LAB("  .OdtRdMapCs[%u]          = 0x%04X, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.OdtRdMapCs[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .BistCALMode[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.BistCALMode[l_pstate]);
+            FAPI_LAB("  .Geardown[%u]            = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.Geardown[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .BistCAParityLatency[%u] = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.BistCAParityLatency[l_pstate]);
+            FAPI_LAB("  .CALatencyAdder[%u]      = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.CALatencyAdder[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdDic[%u]              = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdDic[l_pstate]);
+            FAPI_LAB("  .BistCALMode[%u]         = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.BistCALMode[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdVoltageCtrl[%u]      = %u,", l_pstate,
-                     i_phy_params.iv_user_msdg_upto_ver397559.RcdVoltageCtrl[l_pstate]);
+            FAPI_LAB("  .BistCAParityLatency[%u] = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.BistCAParityLatency[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdIBTCtrl[%u]          = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdIBTCtrl[l_pstate]);
+            FAPI_LAB("  .RcdDic[%u]              = %u, // %s", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdDic[l_pstate],
+                     mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdDBDic[%u]            = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdDBDic[l_pstate]);
+            FAPI_LAB("  .RcdVoltageCtrl[%u]      = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.RcdVoltageCtrl[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdSlewRate[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdSlewRate[l_pstate]);
+            FAPI_LAB("  .RcdIBTCtrl[%u]          = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.RcdIBTCtrl[l_pstate], mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DFIMRL_DDRCLK          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.DFIMRL_DDRCLK);
+            FAPI_LAB("  .RcdDBDic[%u]            = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.RcdDBDic[l_pstate], mss::c_str(i_target));
+        }
+
+        for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+        {
+            FAPI_LAB("  .RcdSlewRate[%u]         = %u, // %s", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.RcdSlewRate[l_pstate], mss::c_str(i_target));
+        }
+
+        for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+        {
+            FAPI_LAB("  .DFIMRL_DDRCLK          = %u, // %s", i_phy_params.iv_user_msdg_upto_ver397559.DFIMRL_DDRCLK,
+                     mss::c_str(i_target));
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
             for(uint8_t l_addr = 0; l_addr < DRAMINIT_NUM_ADDR_DELAYS; ++l_addr)
             {
-                FAPI_LAB("  .ATxDly_A[%u][%u]         = 0x%02X,", l_pstate, l_addr,
-                         i_phy_params.iv_user_msdg_upto_ver397559.ATxDly_A[l_pstate][l_addr]);
+                FAPI_LAB("  .ATxDly_A[%u][%u]         = 0x%02X, // %s", l_pstate, l_addr,
+                         i_phy_params.iv_user_msdg_upto_ver397559.ATxDly_A[l_pstate][l_addr], mss::c_str(i_target));
             }
         }
 
@@ -828,8 +874,8 @@ fapi2::ReturnCode print_phy_params(
         {
             for(uint8_t l_addr = 0; l_addr < DRAMINIT_NUM_ADDR_DELAYS; ++l_addr)
             {
-                FAPI_LAB("  .ATxDly_B[%u][%u]         = 0x%02X,", l_pstate, l_addr,
-                         i_phy_params.iv_user_msdg_upto_ver397559.ATxDly_B[l_pstate][l_addr]);
+                FAPI_LAB("  .ATxDly_B[%u][%u]         = 0x%02X, // %s", l_pstate, l_addr,
+                         i_phy_params.iv_user_msdg_upto_ver397559.ATxDly_B[l_pstate][l_addr], mss::c_str(i_target));
             }
         }
 
@@ -838,13 +884,13 @@ fapi2::ReturnCode print_phy_params(
 
         if(is_new_fw_msdg_supported(l_fw_version))
         {
-            FAPI_LAB("  .F1RC1x      = %u,", i_phy_params.F1RC1x);
-            FAPI_LAB("  .F1RC2x      = %u,", i_phy_params.F1RC2x);
-            FAPI_LAB("  .F1RC3x      = %u,", i_phy_params.F1RC3x);
-            FAPI_LAB("  .F1RC4x      = %u,", i_phy_params.F1RC4x);
-            FAPI_LAB("  .F1RC5x      = %u,", i_phy_params.F1RC5x);
-            FAPI_LAB("  .F1RC6x      = %u,", i_phy_params.F1RC6x);
-            FAPI_LAB("  .F1RC7x      = %u,", i_phy_params.F1RC7x);
+            FAPI_LAB("  .F1RC1x      = %u, // %s", i_phy_params.F1RC1x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC2x      = %u, // %s", i_phy_params.F1RC2x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC3x      = %u, // %s", i_phy_params.F1RC3x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC4x      = %u, // %s", i_phy_params.F1RC4x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC5x      = %u, // %s", i_phy_params.F1RC5x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC6x      = %u, // %s", i_phy_params.F1RC6x, mss::c_str(i_target));
+            FAPI_LAB("  .F1RC7x      = %u, // %s", i_phy_params.F1RC7x, mss::c_str(i_target));
         }
 
         FAPI_LAB("};");
