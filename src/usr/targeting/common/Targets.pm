@@ -936,6 +936,10 @@ sub getFapiName
         {
             $chipName = "ocmb.mp";
         }
+        elsif ($targetType eq "SMPGROUP")
+        {
+            $chipName = "pu.iolink";
+        }
         else
         {
             $chipName = "pu.$targetType";
