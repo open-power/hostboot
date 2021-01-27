@@ -1263,7 +1263,7 @@ sub processDdimmAndChildren
     # In the future, to support planar configs, where there will be 2 DIMMs behind
     # a mem port. Therefore the DIMM position will need to be an offset of 2.
     # Hard code the offset for now.
-    my $dimmFapiPosition = $dimmPosPerSystem * 2;
+    my $dimmFapiPosition = $dimmPosPerNode * 2;
 
     # Get the FAPI_NAME by using the data gathered above.
     my $dimmFapiName = $targetObj->getFapiName($type, $nodeParentPos, $dimmFapiPosition);
@@ -1425,7 +1425,7 @@ sub processPmic
     my $pmicId = ($dimmId * $maxPmicPerDdimm) + $pmicInstancePos;
 
     # Get the FAPI_NAME by using the data gathered above
-    my $pmicFapiName = $targetObj->getFapiName($targetType, $nodeParentPos, $pmicPosPerSystem);
+    my $pmicFapiName = $targetObj->getFapiName($targetType, $nodeParentPos, $pmicPosPerNode);
 
     # Take advantage of previous work done on the DDIMMs and NODEs.  Use these
     # parent affinity/physical path for our self and append pmic to the end.
@@ -1562,7 +1562,7 @@ sub processGenericI2cDevice
     my $deviceId = ($dimmId * $maxDevicePerDdimm) + $instancePos;
 
     # Get the FAPI_NAME by using the data gathered above
-    my $fapiName = $targetObj->getFapiName($targetType, $nodeParentPos, $posPerSystem);
+    my $fapiName = $targetObj->getFapiName($targetType, $nodeParentPos, $posPerNode);
 
     # Take advantage of previous work done on the DDIMMs and NODEs.  Use these
     # parent affinity/physical path for our self and append "generic_i2c_device" to the end.
@@ -1634,13 +1634,8 @@ sub processOcmbChipAndChildren
     # (target type SYS).
     my $ocmbPosPerSystem = $targetObj->getAttribute($ddimmParent, "ORDINAL_ID");
 
-    # Use the OCMB's position per system to calculate the OCMB's position per
-    # parent.  This is done by taking the modulo of the OCMB's position per
-    # system against the maximum instance per parent.
-    my $ocmbPosPerParent = $ocmbPosPerSystem % getMaxInstPerParent($type);
-
     # Get the FAPI_NAME by using the data gathered above.
-    my $ocmbFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbPosPerSystem);
+    my $ocmbFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbPosPerNode);
 
     # Take advantage of previous work done on the DDIMMs.  Use the parent DDIMM's
     # affinity path for our self, but remove trailing parts we don't want/need.
@@ -1739,7 +1734,7 @@ sub processMemPort
 
     # Get the FAPI_NAME by using the data gathered above.
     my $chipPos = 0; # The chip position for MEM_PORT is 0
-    my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $chipPos, $memPortPosPerSystem);
+    my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $chipPos, $memPortPosPerNode);
 
     # Take advantage of previous work done on the DDIMMs.  Use the parent DDIMM's
     # affinity/physical path for our self and append the mem_port to the end.

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -862,8 +862,8 @@ sub getFapiName
     my $self        = shift;
     my $targetType  = shift;
     my $node        = shift;
-    my $chipPos     = shift;
-    my $chipletPos  = shift;
+    my $chipPos     = shift; # chip position relative to node
+    my $chipletPos  = shift; # unit position relative to chip
 
     if ($targetType eq "")
     {
