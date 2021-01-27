@@ -5575,7 +5575,7 @@ group gN1_LOCAL_FIR
     /** N1_LOCAL_FIR[58]
      *  Firmware signaled deadman timer tigger occurred
      */
-    (rN1_LOCAL_FIR, bit(58)) ? TBDDefaultCallout;
+    (rN1_LOCAL_FIR, bit(58)) ? deadmanTimer;
 
     /** N1_LOCAL_FIR[59]
      *  Fimware signaled power bus chip quiesce failed

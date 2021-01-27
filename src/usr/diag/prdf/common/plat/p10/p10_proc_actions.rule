@@ -107,6 +107,11 @@ actionclass sbe_vital_attn
     funccall("handleSbeVital");
 };
 
+actionclass deadmanTimer
+{
+    funccall("handleDeadmanTimer");
+};
+
 # The bits characterized by this action are all handled in the PLL error
 # analysis code. This action is just in case the PLL error handler failed and we
 # got an errant attention.

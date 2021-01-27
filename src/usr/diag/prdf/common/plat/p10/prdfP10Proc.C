@@ -243,20 +243,18 @@ PRDF_PLUGIN_DEFINE_NS(p10_proc, Proc, GetCheckstopInfo);
 
 //------------------------------------------------------------------------------
 
-/** Call HW server rtn for Deadman Timer */
-int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
-                            STEP_CODE_DATA_STRUCT & io_sc )
+/**
+ * @brief Call the HWSV interface to collect FFDC, add callouts, etc. for
+ *        deadman timer error.
+ */
+int32_t handleDeadmanTimer(ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & io_sc)
 {
-    TARGETING::TargetHandle_t  l_target = i_chip->getTrgt();
-
-
-    // This routine adds FFDC information to the elog
-    // and will also do the callouts as needed.
-    deadmanTimerFFDC( l_target, io_sc );
+    deadmanTimerFFDC(i_chip->getTrgt(), io_sc);
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleDeadmanTimer );
+PRDF_PLUGIN_DEFINE_NS(p10_proc, Proc, handleDeadmanTimer);
 
 //------------------------------------------------------------------------------
 
