@@ -249,22 +249,26 @@ namespace check
 /// @param[in] i_target OCMB chip
 /// @param[in] i_cmd host_fw_command_struct used to generate the response
 /// @param[in] i_rsp_arg response arguement buffer
+/// @param[in] i_procedure procedure identifier for FFDC
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const host_fw_command_struct& i_cmd,
-        const uint8_t i_rsp_arg[ARGUMENT_SIZE]);
+        const uint8_t i_rsp_arg[ARGUMENT_SIZE],
+        const uint16_t i_procedure);
 
 ///
 /// @brief Get and check the host fw response from the explorer
+///
 /// @param[in] i_target OCMB chip
 /// @param[in] i_cmd host_fw_command_struct used to generate the response
+/// @param[in] i_procedure procedure identifier for FFDC
 /// @param[out] o_rsp_data response data
-/// @param[out] o_rc return code from mss::exp::check::response()
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                    const host_fw_command_struct& i_cmd,
+                                   const uint16_t i_procedure,
                                    std::vector<uint8_t>& o_rsp_data);
 
 } // namespace check
@@ -1584,7 +1588,7 @@ fapi2::ReturnCode common_init_eye_capture(const fapi2::Target<fapi2::TARGET_TYPE
 
     // Return code output param is that of check::response
     // A fail of getRSP will go to fapi_try_exit
-    FAPI_TRY(mss::exp::check::host_fw_response(i_target, l_cmd, l_rsp_data));
+    FAPI_TRY(mss::exp::check::host_fw_response(i_target, l_cmd, mss::EXP_DRAMINIT, l_rsp_data));
 
     o_read_display_response_rc = check_rsp_data_size(i_target,
                                  l_rsp_data.size(),

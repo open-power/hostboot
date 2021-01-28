@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -312,6 +312,14 @@ enum generic_ffdc_codes
     // CW engine information
     CW_DATA_ENGINE = 0x10A6,
     CW_INFO_ENGINE = 0x10A7,
+
+    // PHY_INIT_RESP functions
+    EXP_SCOMINIT = 0x10A8,
+    EXP_DRAMINIT = 0x10A9,
+
+    // gen_throttle functions
+    SET_PWR_CNTRL_REG = 0x10AA,
+    SET_STR_REG = 0x10AB,
 };
 
 ///

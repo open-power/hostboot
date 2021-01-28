@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1421,6 +1421,7 @@ fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<T>& i_target)
         default:
             FAPI_ASSERT( false,
                          fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
+                         .set_FUNCTION(mss::SET_PWR_CNTRL_REG)
                          .set_VALUE(l_pwr_cntrl),
                          "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: %u",
                          mss::c_str(i_target),
@@ -1479,6 +1480,7 @@ fapi2::ReturnCode set_str_reg(const fapi2::Target<T>& i_target)
         default:
             FAPI_ASSERT( false,
                          fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
+                         .set_FUNCTION(mss::SET_STR_REG)
                          .set_VALUE(l_str_enable),
                          "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: %u",
                          mss::c_str(i_target),

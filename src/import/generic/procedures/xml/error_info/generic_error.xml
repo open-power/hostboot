@@ -1243,6 +1243,7 @@
       The value of ATTR_MSS_MRW_POWER_CONTROL_REQUESTED is unsupported
     </description>
     <ffdc>VALUE</ffdc>
+    <ffdc>FUNCTION</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

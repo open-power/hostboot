@@ -58,7 +58,7 @@ fapi2::ReturnCode send_phy_reset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
     std::vector<uint8_t> l_rsp_data;
 
     FAPI_TRY(send_host_phy_init_cmd(i_target, i_phy_info, mss::exp::phy_init_mode::RESET, l_cmd));
-    FAPI_TRY(mss::exp::check::host_fw_response(i_target, l_cmd, l_rsp_data));
+    FAPI_TRY(mss::exp::check::host_fw_response(i_target, l_cmd, mss::EXP_SCOMINIT, l_rsp_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -95,7 +95,7 @@ fapi_try_exit:
 /// @param[in] i_target the explorer chip target in question
 /// @return FAPI2_RC_SUCCESS if ok
 ///
-fapi2::ReturnCode reset( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     // Checks if the PHY reset is needed
     mss::states l_is_reset_supported = mss::states::YES;

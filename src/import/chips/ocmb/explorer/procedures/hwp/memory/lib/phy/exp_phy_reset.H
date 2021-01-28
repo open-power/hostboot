@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,18 +51,18 @@ namespace phy
 ///
 /// @brief Send Host phy_init_cmd and check resp
 /// @param[in] i_target an explorer chip
-/// @param[in] i_crc crc calculated from data
+/// @param[in] i_phy_info phy information of interest
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode send_phy_reset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                 const mss::exp::phy_param_info& i_crc);
+                                 const mss::exp::phy_param_info& i_phy_info);
 
 ///
 /// @brief Resets the explorer's PHY if needed
 /// @param[in] i_target the explorer chip target in question
 /// @return FAPI2_RC_SUCCESS if ok
 ///
-fapi2::ReturnCode reset( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
+fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 ///
 /// @brief Checks if the Explorer FW supports the separate reset procedure

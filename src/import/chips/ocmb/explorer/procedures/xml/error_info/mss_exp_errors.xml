@@ -593,6 +593,7 @@
       Phy Init command configured with an unsupported phy init mode.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>PROCEDURE</ffdc>
     <ffdc>PHY_INIT_MODE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
@@ -608,6 +609,7 @@
       Phy Init command sent user_input_msdg with an incorrect size.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>PROCEDURE</ffdc>
     <ffdc>COMMAND_SIZE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
@@ -623,6 +625,7 @@
       Phy Init command sent user_input_msdg missing extended data flag.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>PROCEDURE</ffdc>
     <ffdc>COMMAND_FLAGS</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
@@ -639,6 +642,7 @@
       This could be caused by bad SPD or attribute overrides.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>PROCEDURE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
     <callout>
@@ -653,6 +657,7 @@
       Phy Init command encountered a training fail.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>PROCEDURE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
     <callout>
@@ -668,6 +673,7 @@
       Check error code and extended codes in trace data.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>PROCEDURE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
     <callout>
