@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,6 +167,37 @@ namespace TRUSTEDBOOT
         TPM_ALG_SHA256    = 0x000B,   ///< SHA256 Id
         TPM_ALG_INVALID_ID          ///< Used for error checking
     } TPM_Alg_Id;
+
+
+    // Enum defines and struct used to group SBE Measurement Registers
+
+    // Details of SBE measurement registers results - from P10SecurityInitFlow document
+    /*
+     * - 0-1   (x10010-x10011) : PCR 6   : Security state boolean : 0x(00,01)|MinSecFWVer(xx)|0...
+     * - 2-3   (x10012-x10013) : PCR 0   : Security state :
+     *                                     (SSR)|IsPrimary(0,1)|MSMLock(0,1)|MinSecFWVer(xx)|0..
+     * - 4-7   (x10014-x10017) : PCR 0/6 : Hash of SBE secureboot validation code
+     * - 8-11  (x10018-x1001B) : PCR 0   : Hash of boot SEEProm L1/L2 boot loaders and boot
+     *                                     SEEProm base
+     * - 12-15 (x1001C-x1001F) : PCR 0   : Hash of HBBL
+     */
+    typedef enum
+    {
+        TPM_SBE_MEASUREMENT_REGS_0_1_SIZE   = 0x10,
+        TPM_SBE_MEASUREMENT_REGS_2_3_SIZE   = 0x10,
+        TPM_SBE_MEASUREMENT_REGS_4_7_SIZE   = 0x20,
+        TPM_SBE_MEASUREMENT_REGS_8_11_SIZE  = 0x20,
+        TPM_SBE_MEASUREMENT_REGS_12_15_SIZE = 0x20,
+    } TPM_sbe_measurement_reg_defines;
+
+    struct TPM_sbe_measurements_regs_grouped
+    {
+        uint8_t sbe_measurement_regs_0_1[TPM_SBE_MEASUREMENT_REGS_0_1_SIZE]     = {0};
+        uint8_t sbe_measurement_regs_2_3[TPM_SBE_MEASUREMENT_REGS_2_3_SIZE]     = {0};
+        uint8_t sbe_measurement_regs_4_7[TPM_SBE_MEASUREMENT_REGS_4_7_SIZE]     = {0};
+        uint8_t sbe_measurement_regs_8_11[TPM_SBE_MEASUREMENT_REGS_8_11_SIZE]   = {0};
+        uint8_t sbe_measurement_regs_12_15[TPM_SBE_MEASUREMENT_REGS_12_15_SIZE] = {0};
+    } PACKED;
 
     /**
      * @brief Initialize trusted boot/TPM components for the primary TPM
@@ -476,6 +507,53 @@ namespace TRUSTEDBOOT
      * @return nullptr on success; non-nullptr on error
      */
     errlHndl_t expandTpmLog(TpmTarget* i_target);
+
+
+
+    /**
+     * @brief Reads the SBE Measurement Registers from a Processor and then
+     *        groups them together in certain ways as defined by the
+     *        TPM_sbe_measurements_regs_grouped struct.
+     * @param[in] i_proc_target - the pointer to the Processor target:
+     *                            -- must not be nullptr or will fail
+     *                            -- must be of TYPE_PROC or will fail
+     *                            -- must be XSCOMMABLE or will fail
+     * @param[out] o_regs - structure filled in from SBE Measurement registers read
+     *                      from a processor.
+     * @return nullptr on success; non-nullptr on error
+     */
+    errlHndl_t groupSbeMeasurementRegs(TARGETING::Target*    i_proc_target,
+                                       TPM_sbe_measurements_regs_grouped & o_regs);
+
+    /**
+     * @brief Adds the SBE Measurement Registers from a Processor to the TPM Log.
+     *        Optionally can extend the registers to the TPM, as well.
+     *        The registers are logged and optionally extended grouped together as
+     *        defined in TPM_sbe_measurements_regs_grouped struct.
+     * @param[in] i_tpm_target the pointer to the TPM target; must not be nullptr
+     * @param[in] i_proc_target the pointer to the Processor target; must not be nullptr
+     * @param[in] i_regs - structure containing grouped SBE Measurement registers
+     *                     read from a processor.
+     *                     This gets ignored if i_extend == false;
+     * @param[in] i_extend If true, extend values to PCR 0; false, do not extend values to PCR 0;
+     *                     Defaults to false
+     * @return nullptr on success; non-nullptr on error
+     */
+    errlHndl_t logSbeMeasurementRegs(TpmTarget* i_tpm_target,
+                                     TARGETING::Target*    i_proc_target,
+                                     TPM_sbe_measurements_regs_grouped i_regs,
+                                     bool i_extend = false);
+
+    /**
+     * @brief Synchronizes the TPM Log to what has already been extended by
+     *         the SBE and Hostboot Bootloader code
+     *
+     * @warning No-op if trusted boot compiled out
+     *
+     * @return nullptr on success; non-nullptr on error
+     */
+    errlHndl_t synchronizeTpmLog();
+
 
 } // end TRUSTEDBOOT namespace
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,7 @@
 #include <console/consoleif.H>
 #include <util/misc.H>
 
+#include <secureboot/settings.H>
 #include "../common/securetrace.H"
 #include "../common/errlud_secure.H"
 
@@ -71,15 +72,6 @@ namespace SECUREBOOT
 
 
 // Local structure and function prototypes used below
-/**
- *  @brief Structure used to capture values of Processor Security Registers
- */
-struct SecureRegisterValues
-{
-    TARGETING::Target * tgt;
-    uint32_t addr;
-    uint64_t data;
-};
 
 /*
  * HB specific secureboot setting which is aliased to the FAPI attribute
@@ -88,6 +80,145 @@ struct SecureRegisterValues
  * bit 6 is set.  Otherwise, if 0b1, SBE will not override proc security.
  */
 uint8_t g_sbeSecurityMode = 1;
+
+
+/** @brief Get All SBE Measurement Registers
+ *
+ *  See service.H for more details
+ */
+errlHndl_t getSbeMeasurementRegisters(
+            std::vector<SecureRegisterValues> & o_regs,
+            TARGETING::Target* i_pProc)
+{
+    errlHndl_t err = nullptr;
+    o_regs.clear();
+
+    SB_ENTER("getSbeMeasurementRegisters: Target=0x%.08X",
+             get_huid(i_pProc));
+
+    SecureRegisterValues l_regValue;
+
+    do {
+
+    // Check that i_pProc isn't nullptr and is of type proc
+    assert((i_pProc != nullptr) &&
+           (i_pProc->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC ),
+           "getSbeMeasurementRegisters: i_pProc either nullptr or !TYPE_PROC");
+
+    if (i_pProc->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
+    {
+        l_regValue.procTgt=i_pProc;
+
+        for ( const auto scom_reg : sbe_measurement_regs )
+        {
+            l_regValue.addr = scom_reg;
+
+            SB_DBG("getSbeMeasurementRegisters: Getting Target=0x%.08X Reg=0x%.08X",
+                   TARGETING::get_huid(l_regValue.procTgt), l_regValue.addr);
+
+            // Read the register via
+            l_regValue.data = 0x0;
+            size_t op_actual_size = sizeof(l_regValue.data);
+            const size_t op_expected_size = op_actual_size;
+
+            err = deviceRead( l_regValue.procTgt,
+                              &(l_regValue.data),
+                              op_actual_size,
+                              DEVICE_SCOM_ADDRESS(l_regValue.addr));
+
+            if( err )
+            {
+                // Something failed on the read.  Commit the error
+                // here but continue
+                SB_ERR("getSbeMeasurementRegisters: Error from scom read: "
+                       "Target 0x%.8X: Register: 0x%.8X "
+                       TRACE_ERR_FMT,
+                       TARGETING::get_huid(l_regValue.procTgt),
+                       l_regValue.addr,
+                       TRACE_ERR_ARGS(err));
+
+                // Don't expect any xscom errors so break and return this error
+                err->collectTrace(SECURE_COMP_NAME);
+                break;
+            }
+
+            if (op_actual_size != op_expected_size)
+            {
+                SB_ERR("getSbeMeasurementRegisters: size returned from device write (%d) is not the expected size of %d",
+                       op_actual_size, op_expected_size);
+                /*@
+                 * @errortype
+                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        SECUREBOOT::MOD_SECURE_GET_SBE_MEASUREMENT_REGS
+                 * @reasoncode      SECUREBOOT::RC_DEVICE_READ_ERR
+                 * @userdata1       Actual size written
+                 * @userdata2       Expected size written
+                 * @devdesc         Device write did not return expected size
+                 * @custdesc        Firmware Error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                SECUREBOOT::MOD_SECURE_GET_SBE_MEASUREMENT_REGS,
+                                SECUREBOOT::RC_DEVICE_READ_ERR,
+                                op_actual_size,
+                                op_expected_size,
+                                ErrlEntry::ADD_SW_CALLOUT);
+
+                // Don't expect any xscom errors so break and return this error
+                err->collectTrace(SECURE_COMP_NAME);
+                break;
+            }
+
+            // push back result
+            o_regs.push_back(l_regValue);
+
+        } // end of loop on SBE Measurement Registers
+
+        if (err)
+        {
+            break;
+        }
+
+    }
+    else
+    {
+        // Fail since Since proc target is not scommable at this time
+        // NOTE: the master proc is always scommable
+        SB_ERR("getSbeMeasurementRegisters: FAIL: Tgt=0x%.08X not set up to use Xscom at this time",
+               TARGETING::get_huid(i_pProc));
+
+        /*@
+         * @errortype
+         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        SECUREBOOT::MOD_SECURE_GET_SBE_MEASUREMENT_REGS
+         * @reasoncode      SECUREBOOT::RC_SECURE_BAD_TARGET
+         * @userdata1       HUID of Processor Target
+         * @userdata2       <unused>
+         * @devdesc         Processor Parameter is not scommable
+         * @custdesc        Firmware Error
+         */
+        err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        SECUREBOOT::MOD_SECURE_GET_SBE_MEASUREMENT_REGS,
+                        SECUREBOOT::RC_SECURE_BAD_TARGET,
+                        get_huid(i_pProc),
+                        0,
+                        ErrlEntry::ADD_SW_CALLOUT);
+
+        err->collectTrace(SECURE_COMP_NAME);
+        break;
+    }
+
+    } while(0);
+
+    SB_EXIT("getSbeMeasurementRegisters: o_regs.size()=%d "
+            TRACE_ERR_FMT,
+            o_regs.size(),
+            TRACE_ERR_ARGS(err));
+
+    return err;
+}
+
 
 /**
  * @brief Retrieve values of Security Registers of the processors in the
@@ -117,6 +248,7 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
     o_regs.clear();
 
     SecureRegisterValues l_secRegValues;
+    std::vector<SecureRegisterValues> l_sbeMeasurementRegValues;
 
     do
     {
@@ -180,10 +312,10 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
             // If the proc chip supports xscom..
             if (procTgt->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
             {
-                l_secRegValues.tgt=procTgt;
+                l_secRegValues.procTgt=procTgt;
                 l_secRegValues.addr=static_cast<uint32_t>(ProcSecurity::SwitchRegister);
                 err = getSecuritySwitch(l_secRegValues.data,
-                                        l_secRegValues.tgt);
+                                        l_secRegValues.procTgt);
                 if( err )
                 {
                     // Something failed on the read.  Commit the error
@@ -191,7 +323,7 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
                     SB_ERR("getAllSecurityRegisters: Error from getSecuritySwitch: "
                            "(0x%X) from Target 0x%.8X: RC=0x%X, PLID=0x%X",
                            l_secRegValues.addr,
-                           TARGETING::get_huid(l_secRegValues.tgt),
+                           TARGETING::get_huid(l_secRegValues.procTgt),
                            ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
 
                     // Commit error and continue
@@ -272,18 +404,47 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
                                 SECUREBOOT::RC_DEVICE_WRITE_ERR,
                                 op_actual_size,
                                 op_expected_size,
-                                true);
+                                ErrlEntry::ADD_SW_CALLOUT);
                 addSecureUserDetailsToErrlog(err);
                 err->collectTrace(SECURE_COMP_NAME);
                 break;
             }
 
             // push back result
-            l_secRegValues.tgt=procTgt;
+            l_secRegValues.procTgt=procTgt;
             l_secRegValues.addr=op_addr;
             l_secRegValues.data=scomData;
             o_regs.push_back(l_secRegValues);
 
+
+            /****************************************/
+            // Get SBE Measurement Registers
+            /****************************************/
+            // can only get these register if processor target is scommable
+            // ie, the the proc chip supports xscom..
+            if (procTgt->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
+            {
+                err = getSbeMeasurementRegisters(l_sbeMeasurementRegValues, procTgt);
+                if( err )
+                {
+                    // Something failed on the read.  Commit the error
+                    // here but continue
+                    SB_ERR("getAllSecurityRegisters: Error from getSbeMeasurementRegisters: "
+                           "Target 0x%.8X: "
+                           TRACE_ERR_FMT,
+                           TARGETING::get_huid(procTgt),
+                           TRACE_ERR_ARGS(err));
+                    // Commit error and continue
+                    errlCommit( err, SECURE_COMP_ID );
+                    continue;
+                }
+                else
+                {
+                    o_regs.insert(o_regs.end(),
+                                  l_sbeMeasurementRegValues.begin(),
+                                  l_sbeMeasurementRegValues.end());
+                }
+            }
         } // end of targeting loop
 
     } // TargetList has some targets
@@ -292,10 +453,10 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
     {
         // Since targeting is NOT loaded or TargetList is empty only capture
         // data for MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-        l_secRegValues.tgt=TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        l_secRegValues.procTgt=TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
         l_secRegValues.addr=static_cast<uint32_t>(ProcSecurity::SwitchRegister);
         err = getSecuritySwitch(l_secRegValues.data,
-                                l_secRegValues.tgt);
+                                l_secRegValues.procTgt);
 
         if( err )
         {
@@ -304,7 +465,7 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
             SB_ERR("getAllSecurityRegisters: Error from getSecuritySwitch: "
                    "(0x%X) from Target 0x%.8X: RC=0x%X, PLID=0x%X",
                    l_secRegValues.addr,
-                   TARGETING::get_huid(l_secRegValues.tgt),
+                   TARGETING::get_huid(l_secRegValues.procTgt),
                    ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
 
             // Commit error and continue
@@ -312,6 +473,29 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
             break;
         }
         o_regs.push_back(l_secRegValues);
+
+        // Add SBE Mesasurement Registers
+        Target* l_procTgt = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        err = getSbeMeasurementRegisters(l_sbeMeasurementRegValues,
+                                         l_procTgt);
+        if( err )
+        {
+            // Something failed; commit the error here but continue
+            SB_ERR("getAllSecurityRegisters: Error from getSbeMeasurementRegisters: "
+                   "Target 0x%.8X: "
+                   TRACE_ERR_FMT,
+                   TARGETING::get_huid(l_procTgt),
+                   TRACE_ERR_ARGS(err));
+
+            // Commit error and continue
+            errlCommit( err, SECURE_COMP_ID );
+        }
+        else
+        {
+            o_regs.insert(o_regs.end(),
+                           l_sbeMeasurementRegValues.begin(),
+                           l_sbeMeasurementRegValues.end());
+        }
 
     } // using MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
 
@@ -465,15 +649,16 @@ errlHndl_t traceSecuritySettings(bool i_doConsoleTrace)
 
     for( auto l_reg : registerList )
     {
-        SB_DBG("traceSecuritySettings: register: tgt=0x%X, addr=0x%lX, data=0x%.16llX ",
-               TARGETING::get_huid(l_reg.tgt),
+
+        SB_INF("traceSecuritySettings: register:.procTgt=0x%X, addr=0x%lX, data=0x%.16llX ",
+               TARGETING::get_huid(l_reg.procTgt),
                l_reg.addr, l_reg.data);
 
         if ( l_reg.addr == static_cast<uint32_t>(ProcSecurity::SwitchRegister) )
         {
             SB_INF("procTgt=0x%X: ProcSecurity::SwitchRegister(0x%x): 0x%.16llX: "
                    "SabBit=%d, SULBit=%d, SDBBit=%d, CMFSIBit=%d",
-                   TARGETING::get_huid(l_reg.tgt), l_reg.addr, l_reg.data,
+                   TARGETING::get_huid(l_reg.procTgt), l_reg.addr, l_reg.data,
                    l_reg.data & static_cast<uint64_t>(ProcSecurity::SabBit)
                     ? 1 : 0,
                    l_reg.data & static_cast<uint64_t>(ProcSecurity::SULBit)
@@ -489,7 +674,7 @@ errlHndl_t traceSecuritySettings(bool i_doConsoleTrace)
         {
             SB_INF("procTgt=0x%X: ProcCbsControl::StatusRegister(0x%x): 0x%.16llX: "
                    "SabBit=%d, SmdBit=%d",
-                   TARGETING::get_huid(l_reg.tgt), l_reg.addr, l_reg.data,
+                   TARGETING::get_huid(l_reg.procTgt), l_reg.addr, l_reg.data,
                    l_reg.data & static_cast<uint64_t>(ProcCbsControl::SabBit)
                     ? 1 : 0,
                    l_reg.data & static_cast<uint64_t>(ProcCbsControl::JumperStateBit)
@@ -499,7 +684,7 @@ errlHndl_t traceSecuritySettings(bool i_doConsoleTrace)
            {
 
                // Process this register for console output below
-               l_pos=l_reg.tgt->getAttr<TARGETING::ATTR_POSITION>();
+               l_pos=l_reg.procTgt->getAttr<TARGETING::ATTR_POSITION>();
 
                if (l_reg.data & static_cast<uint64_t>(ProcCbsControl::SabBit))
                {
@@ -573,7 +758,7 @@ void addSecurityRegistersToErrlog(errlHndl_t & io_err,
 
         if (l_reg.addr == static_cast<uint32_t>(ProcCbsControl::StatusRegisterFsi))
         {
-            ERRORLOG::ErrlUserDetailsLogRegister l_logReg(l_reg.tgt,
+            ERRORLOG::ErrlUserDetailsLogRegister l_logReg(l_reg.procTgt,
                                                       &l_reg.data,
                                                       sizeof(l_reg.data),
                                                       DEVICE_FSI_ADDRESS(l_reg.addr));
@@ -581,7 +766,7 @@ void addSecurityRegistersToErrlog(errlHndl_t & io_err,
         }
         else
         {
-            ERRORLOG::ErrlUserDetailsLogRegister l_logReg(l_reg.tgt,
+            ERRORLOG::ErrlUserDetailsLogRegister l_logReg(l_reg.procTgt,
                                                       &l_reg.data,
                                                       sizeof(l_reg.data),
                                                       DEVICE_SCOM_ADDRESS(l_reg.addr));
@@ -718,7 +903,7 @@ errlHndl_t setSbeSecurityMode(uint8_t i_sbeSecurityMode)
                         SECUREBOOT::RC_SBE_INVALID_SEC_MODE,
                         i_sbeSecurityMode,
                         0,
-                        true);
+                        ErrlEntry::ADD_SW_CALLOUT);
         l_errl->collectTrace(SECURE_COMP_NAME);
         addSecureUserDetailsToErrlog(l_errl);
         break;

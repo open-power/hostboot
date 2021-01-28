@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,25 @@ inline uint32_t sha512_to_u32(SHA512_t i_hash)
 };
 
 typedef std::vector< std::pair<void*,size_t> > blobPair_t;
+
+/**
+ * @brief Constant Array of SBE Measurement Registers' SCOM Addresses
+ */
+const std::array<uint32_t,16> sbe_measurement_regs { 0x10010, 0x10011, 0x10012, 0x10013,
+                                                     0x10014, 0x10015, 0x10016, 0x10017,
+                                                     0x10018, 0x10019, 0x1001A, 0x1001B,
+                                                     0x1001C, 0x1001D, 0x1001E, 0x1001F };
+
+/**
+ *  @brief Structure used to capture values of Processor Security Registers
+ */
+struct SecureRegisterValues
+{
+    TARGETING::Target * procTgt;
+    uint32_t addr;
+    uint64_t data;
+};
+
 
 // TODO securebootp9 added for spnorrp.C - service.H needs many more updates
 // in order to match the p8 version
@@ -131,6 +150,22 @@ namespace SECUREBOOT
     errlHndl_t getProcCbsControlRegister(uint64_t& o_regValue,
             TARGETING::Target* i_pProc
                 = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+
+    /** @brief Get All SBE Measurement Registers
+     *  @par Detailed Description:
+     *      Returns a vector of SecureRegisterValues structs that represent the read
+     *      values of the SBE Measurement Seeprom of the given target
+     *  @param[out] o_regs       Vector of SecureRegisterValue structs that contain
+     *                          processor security register values
+     *                          NOTE:  The state of the system/processors (ie, SCOM vs
+     *                          FSI) determines which registers can be included
+     *  @param[in] i_pProc The target processor to read the SBE Measurement Registers
+     *      Assert if nullptr or if not of type TYPE_PROC.
+     *  @return errHndl_t Error log handle indicating success or failure
+     */
+    errlHndl_t getSbeMeasurementRegisters(
+            std::vector<SecureRegisterValues> & o_regs,
+            TARGETING::Target* i_pProc);
 
     /**
      *  @brief  Clear specified bits in the processor security switch register
@@ -382,6 +417,7 @@ namespace SECUREBOOT
      *      valid error log otherwise.
      */
     errlHndl_t setSbeSecurityMode(uint8_t i_sbeSecurityMode);
+
 
 }
 

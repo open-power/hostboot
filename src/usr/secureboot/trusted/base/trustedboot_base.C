@@ -44,6 +44,7 @@
 #include <secureboot/trustedboot_reasoncodes.H>
 #include <secureboot/header.H>
 #include <secureboot/containerheader.H>
+#include <secureboot/service.H>
 #include <pnor/pnorif.H>
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
@@ -1201,5 +1202,143 @@ errlHndl_t expandTpmLog(TpmTarget* i_target)
 #endif
     return l_errl;
 }
+
+
+errlHndl_t groupSbeMeasurementRegs(TARGETING::Target*    i_proc_target,
+                                   TPM_sbe_measurements_regs_grouped & o_regs)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+
+    do {
+
+    // Get the SBE Measurement Regs
+    std::vector<SecureRegisterValues> sbe_regs;
+    l_errl = SECUREBOOT::getSbeMeasurementRegisters(sbe_regs, i_proc_target);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK "groupSbeMeasurementRegs() Failed in call to "
+                  "SECUREBOOT::getSbeMeasurementRegisters() with target 0x%.08X: "
+                  TRACE_ERR_FMT,
+                  TARGETING::get_huid(i_proc_target),
+                  TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Clear the output struct
+    memset(&o_regs, 0, sizeof(o_regs));
+
+    //  Start grouping the registers into the output struct
+    // - 0-1   (x10010-x10011)
+    memcpy(&o_regs.sbe_measurement_regs_0_1[0],
+           &sbe_regs[0].data,
+           sizeof(uint64_t));
+
+    memcpy(&o_regs.sbe_measurement_regs_0_1[0] + sizeof(uint64_t),
+           &sbe_regs[1].data,
+           sizeof(uint64_t));
+
+    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _0_1",
+             &o_regs.sbe_measurement_regs_0_1,
+             TPM_SBE_MEASUREMENT_REGS_0_1_SIZE);
+
+    // 2-3   (x10012-x10013)
+    memcpy(&o_regs.sbe_measurement_regs_2_3[0],
+           &sbe_regs[2].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_2_3[0] + sizeof(uint64_t),
+           &sbe_regs[3].data,
+           sizeof(uint64_t));
+
+    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _2_3",
+             &o_regs.sbe_measurement_regs_2_3[0],
+             TPM_SBE_MEASUREMENT_REGS_2_3_SIZE);
+
+    // - 4-7   (x10014-x10017)
+    memcpy(&o_regs.sbe_measurement_regs_4_7[0],
+           &sbe_regs[4].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_4_7[0] + sizeof(uint64_t),
+           &sbe_regs[5].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_4_7[0] + (2*sizeof(uint64_t)),
+           &sbe_regs[6].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_4_7[0] + (3*sizeof(uint64_t)),
+           &sbe_regs[7].data,
+           sizeof(uint64_t));
+
+    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _4_7",
+             &o_regs.sbe_measurement_regs_4_7[0],
+             TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
+
+    // - 8-11  (x10018-x1001B)
+    memcpy(&o_regs.sbe_measurement_regs_8_11[0],
+           &sbe_regs[8].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_8_11[0] + sizeof(uint64_t),
+           &sbe_regs[9].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_8_11[0] + (2*sizeof(uint64_t)),
+           &sbe_regs[10].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_8_11[0] + (3*sizeof(uint64_t)),
+           &sbe_regs[11].data,
+           sizeof(uint64_t));
+
+    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _8_11",
+             &o_regs.sbe_measurement_regs_8_11[0],
+             TPM_SBE_MEASUREMENT_REGS_8_11_SIZE);
+
+    // - 12-15 (x1001C-x1001F)
+    memcpy(&o_regs.sbe_measurement_regs_12_15[0],
+           &sbe_regs[12].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_12_15[0] + sizeof(uint64_t),
+           &sbe_regs[13].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_12_15[0] + (2*sizeof(uint64_t)),
+           &sbe_regs[14].data,
+           sizeof(uint64_t));
+    memcpy(&o_regs.sbe_measurement_regs_12_15[0] + (3*sizeof(uint64_t)),
+           &sbe_regs[15].data,
+           sizeof(uint64_t));
+
+    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _12_15",
+             &o_regs.sbe_measurement_regs_12_15[0],
+             TPM_SBE_MEASUREMENT_REGS_12_15_SIZE);
+
+    TRACFBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - ALL",
+             &o_regs, sizeof(o_regs));
+
+    } while(0);
+#endif
+    return l_errl;
+}
+
+errlHndl_t logSbeMeasurementRegs(TpmTarget* i_tpm_target,
+                                 TARGETING::Target*    i_proc_target,
+                                 const TPM_sbe_measurements_regs_grouped i_regs,
+                                 const bool i_extend)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+
+#endif
+    return l_errl;
+}
+
+errlHndl_t synchronizeTpmLog()
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    do {
+/* TODO RTC 263474 */
+    } while(0);
+#endif
+    return l_errl;
+}
+
+
 
 } // end TRUSTEDBOOT

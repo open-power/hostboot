@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,7 @@ namespace SECUREBOOT
         MOD_SECURE_LOG_PLAT_SECURITY_CONFIG = 0x12,
         MOD_CHECK_RISK_LEVEL_FOR_SMF        = 0x13,
         MOD_SMF_SPLIT_SMF_MEM               = 0x14,
+        MOD_SECURE_GET_SBE_MEASUREMENT_REGS = 0x15,
 
         // Use 0x20-0x3F range for Node Communications
         MOD_NCDD_CHECK_FOR_ERRORS           = 0x20,
