@@ -485,7 +485,7 @@ enum fields
     AUTO_SEQ_CH_SEL_ALL_AUTO_SEQUENCING                 = 0xFF,
     ALERT_CH_SEL_ADC1_LOCAL_VOLTAGES_ALERT              = 0xBE,
     ALERT_CH_SEL_ADC2_LOCAL_VOLTAGES_ALERT              = 0xAC,
-    ALERT_PIN_CFG_ACTIVE_HIGH                           = 0x01,
+    ALERT_PIN_CFG_ACTIVE_HIGH                           = 0x00,
     OPMODE_CFG_AUTONOMOUS                               = 0x31,
     OSR_CFG_8_SAMPLE_OVERSAMPLING                       = 0x07,
 
