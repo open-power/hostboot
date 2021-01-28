@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -294,6 +294,22 @@ namespace HTMGT
                                                    uint8_t *o_data);
 
 
+            /**
+             * @brief Check if the OCCs are running
+             *
+             * @return true if OCC active sensor has been set/enabled
+             */
+            static bool occsAreRunning();
+
+
+            /**
+             * @brief Set flag indicating the OCCs status
+             *
+             * @param[in] i_running set to true if OCCs are running, else false
+             */
+            static void setOccsAreRunning(const bool i_running);
+
+
         private:
 
             typedef std::vector<Occ*> occList_t;
@@ -305,6 +321,7 @@ namespace HTMGT
             uint8_t                 iv_sysResetCount;
             powerMode               iv_mode;
             uint16_t                iv_freqPoint; // for FFO/SFP
+            bool                    iv_occsAreRunning;
 
 
             /**
@@ -420,6 +437,13 @@ namespace HTMGT
 
             /** See queryModeAndFunction() above */
             errlHndl_t _queryModeAndFunction(uint16_t & o_length, uint8_t *o_data);
+
+            /** See occsAreRunning() above */
+            bool _occsAreRunning() { return iv_occsAreRunning; };
+
+            /** See setOccsAreRunning() above */
+            void _setOccsAreRunning(const bool i_running)
+            { iv_occsAreRunning = i_running; };
     };
 
     typedef Singleton<OccManager> occMgr;

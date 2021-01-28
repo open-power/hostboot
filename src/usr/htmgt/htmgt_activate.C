@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -174,6 +174,8 @@ namespace HTMGT
             }
         }
 
+        // Set internal flag indicating if the OCCs are running
+        OccManager::setOccsAreRunning(i_enabled);
 
         return l_err;
     }

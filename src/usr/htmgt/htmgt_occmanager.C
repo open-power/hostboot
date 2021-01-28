@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,8 @@ namespace HTMGT
         :iv_occMaster(nullptr),
         iv_state(OCC_STATE_UNKNOWN),
         iv_targetState(OCC_STATE_ACTIVE),
-        iv_sysResetCount(0)
+        iv_sysResetCount(0),
+        iv_occsAreRunning(false)
     {
     }
 
@@ -69,6 +70,7 @@ namespace HTMGT
     // Remove all OCC objects
     void OccManager::_removeAllOccs()
     {
+        iv_occsAreRunning = false;
         iv_occMaster = nullptr;
         if (iv_occArray.size() > 0)
         {
@@ -562,6 +564,8 @@ namespace HTMGT
         errlHndl_t err = nullptr;
         bool atThreshold = false;
 
+        iv_occsAreRunning = false;
+
         err = _buildOccs(false, i_skipComm); // if not a already built.
         if (nullptr == err)
         {
@@ -699,6 +703,7 @@ namespace HTMGT
                     if(retryCount)
                     {
                         // log if not last retry
+                        err->collectTrace(HTMGT_COMP_NAME);
                         ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                     }
                     else
@@ -806,7 +811,35 @@ namespace HTMGT
                 // Any error at this point means OCCs were not reactivated
                 if(err)
                 {
-                    updateForSafeMode(err);
+                    // PM Complex reset/load calls are recursive.
+                    // If the inital resetOcc call(s) return an error,
+                    // that error can be ignored IF the OCCs were
+                    // actually enabled successfully in later recursive calls.
+                    // Check if OCCs are now active/running
+                    if (OccManager::occsAreRunning())
+                    {
+                        const uint16_t l_rc = err->reasonCode();
+                        // prior reset worked - commit original error as info
+                        err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                        ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                        TMGT_INF("_resetOccs: OCC failed to go "
+                                 "active after reset with 0x%04X, but recovery "
+                                 "was successful", l_rc);
+
+                        // Clear safe reason since recovery was successful.
+                        OccManager::updateSafeModeReason(0, 0);
+                        // Clear system safe mode flag/attribute
+                        if(sys)
+                        {
+                            const uint8_t safeMode = 0;
+                            sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>
+                                (safeMode);
+                        }
+                    }
+                    else
+                    {
+                        updateForSafeMode(err);
+                    }
                 }
             }
             else
@@ -1507,5 +1540,14 @@ namespace HTMGT
         return Singleton<OccManager>::instance()._queryModeAndFunction(o_length, o_data);
     }
 
+    bool OccManager::occsAreRunning()
+    {
+        return Singleton<OccManager>::instance()._occsAreRunning();
+    }
+
+    void OccManager::setOccsAreRunning(const bool i_running)
+    {
+        return Singleton<OccManager>::instance()._setOccsAreRunning(i_running);
+    }
 
 } // end namespace

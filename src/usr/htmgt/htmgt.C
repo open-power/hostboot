@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -209,6 +209,14 @@ namespace HTMGT
 
             if (nullptr != l_err)
             {
+                // If the start failed, HTMGT will attempt reset.
+                // This will end up being a recursive call: After the
+                // reset is done, this function will get called again.
+                // If the reset returns success, then we know the
+                // recovery was successful. When there are multiple reset
+                // failures, the inital resetOcc() calls will return an
+                // error.  That error can be ignored IF the OCCs were
+                // actually enabled successfully in later recursive calls.
                 TMGT_ERR("OCCs not all active (rc=0x%04X).  Attempting OCC "
                          "Reset", l_err->reasonCode());
                 TMGT_CONSOLE("OCCs are not active (rc=0x%04X). "
@@ -217,29 +225,32 @@ namespace HTMGT
                 TMGT_INF("processOccStartStatus: Calling resetOccs");
                 // Reset ALL OCCs, don't skip incrementing reset count, and
                 // if comm has not been established, don't try to talk to OCCs
-                errlHndl_t err2 = OccManager::resetOccs(nullptr,
-                                                        false,
-                                                        skip_comm);
-                if(err2)
+                errlHndl_t reset_err = OccManager::resetOccs(nullptr,
+                                                             false,
+                                                             skip_comm);
+                if(reset_err)
                 {
-                    TMGT_ERR("OccManager::resetOccs failed with 0x%04X",
-                             err2->reasonCode());
+                    // reset failed and OCCs still not running yet
+                    TMGT_ERR("processOccStartStatus: OccManager::resetOccs"
+                             " failed with 0x%04X",
+                             reset_err->reasonCode());
 
                     // Set original error log  as unrecoverable and commit
                     l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
 
                     // Commit occReset error
-                    ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
+                    ERRORLOG::errlCommit(reset_err, HTMGT_COMP_ID);
                 }
                 else
                 {
+                    const uint16_t l_rc = l_err->reasonCode();
                     // retry worked - commit original error as informational
-                    TMGT_INF("processOccStartStatus: OCC failed to go active "
-                             "with 0x%04X, but recovery was successful",
-                             l_err->reasonCode());
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                    TMGT_INF("processOccStartStatus: OCC failed to go active "
+                             "with 0x%04X, but recovery was successful",
+                             l_rc);
                 }
             }
         }
