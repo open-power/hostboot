@@ -842,7 +842,7 @@ rule rEQ_QME_FIR
 
 group gEQ_QME_FIR
     filter singlebit,
-           cs_root_cause(27)
+           cs_root_cause
 {
     /** EQ_QME_FIR[0]
      *  PPE halted due to an error. Notify OCC Complex

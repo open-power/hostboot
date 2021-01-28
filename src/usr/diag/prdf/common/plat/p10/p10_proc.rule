@@ -3111,12 +3111,12 @@ group gOCC_FIR
     /** OCC_FIR[55]
      *  PPC405 ICU timeout on OCI request
      */
-    (rOCC_FIR, bit(55)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(55)) ? defaultMaskedError;
 
     /** OCC_FIR[56]
      *  PPC405 DCU timeout on OCI request
      */
-    (rOCC_FIR, bit(56)) ? threshold_and_mask_self;
+    (rOCC_FIR, bit(56)) ? defaultMaskedError;
 
     /** OCC_FIR[57]
      *  OCC fault occurred (to achieve safe mode)
@@ -3184,22 +3184,22 @@ group gPBAO_FIR
     /** PBAO_FIR[4]
      *  BCUE Setup Error
      */
-    (rPBAO_FIR, bit(4)) ? threshold_and_mask_self;
+    (rPBAO_FIR, bit(4)) ? defaultMaskedError;
 
     /** PBAO_FIR[5]
      *  BCUE Read Data Parity Error OR MRDERR Asserted
      */
-    (rPBAO_FIR, bit(5)) ? threshold_and_mask_self;
+    (rPBAO_FIR, bit(5)) ? defaultMaskedError;
 
     /** PBAO_FIR[6]
      *  BCDE Setup Error
      */
-    (rPBAO_FIR, bit(6)) ? threshold_and_mask_self;
+    (rPBAO_FIR, bit(6)) ? defaultMaskedError;
 
     /** PBAO_FIR[7]
      *  BCDE Write Data error indicated by OCI Slave
      */
-    (rPBAO_FIR, bit(7)) ? threshold_and_mask_self;
+    (rPBAO_FIR, bit(7)) ? defaultMaskedError;
 
     /** PBAO_FIR[8]
      *  Internal Logic Error.  See PBAERRRPT2 for more det
@@ -3214,7 +3214,7 @@ group gPBAO_FIR
     /** PBAO_FIR[10]
      *  Push Write Error.
      */
-    (rPBAO_FIR, bit(10)) ? threshold_and_mask_self;
+    (rPBAO_FIR, bit(10)) ? defaultMaskedError;
 
     /** PBAO_FIR[11]
      *  Push Write Error.
@@ -3224,7 +3224,7 @@ group gPBAO_FIR
     /** PBAO_FIR[12]
      *  Illegal PBAX Flow.
      */
-    (rPBAO_FIR, bit(12)) ? threshold_and_mask_self;
+    (rPBAO_FIR, bit(12)) ? defaultMaskedError;
 
     /** PBAO_FIR[13]
      *  Illegal PBAX Flow.
@@ -3234,7 +3234,7 @@ group gPBAO_FIR
     /** PBAO_FIR[14]
      *  PBAXSND Reservation Error.
      */
-    (rPBAO_FIR, bit(14)) ? threshold_and_mask_self;
+    (rPBAO_FIR, bit(14)) ? defaultMaskedError;
 
     /** PBAO_FIR[15]
      *  PBAXISND Reservation Error.
@@ -8120,37 +8120,37 @@ group gPBAF_FIR
     /** PBAF_FIR[12]
      *  BCUE PowerBus Link Dead
      */
-    (rPBAF_FIR, bit(12)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(12)) ? defaultMaskedError;
 
     /** PBAF_FIR[13]
      *  PB CRESP Addr Error Received for BCUE  Write Reque
      */
-    (rPBAF_FIR, bit(13)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(13)) ? defaultMaskedError;
 
     /** PBAF_FIR[14]
      *  BCDE PowerBus Link Dead
      */
-    (rPBAF_FIR, bit(14)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(14)) ? defaultMaskedError;
 
     /** PBAF_FIR[15]
      *  PB CRESP Addr Error Received for BCDE  Read Reques
      */
-    (rPBAF_FIR, bit(15)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(15)) ? defaultMaskedError;
 
     /** PBAF_FIR[16]
      *  PB Read Data Timeout  for BCDE Request
      */
-    (rPBAF_FIR, bit(16)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(16)) ? defaultMaskedError;
 
     /** PBAF_FIR[17]
      *  PB Read Data SUE Error  for BCDE Request
      */
-    (rPBAF_FIR, bit(17)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(17)) ? defaultMaskedError;
 
     /** PBAF_FIR[18]
      *  PB Read Data UE Error  for BCDE Request
      */
-    (rPBAF_FIR, bit(18)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(18)) ? defaultMaskedError;
 
     /** PBAF_FIR[19]
      *  PB Read Data CE Error  for BCDE Request
@@ -8170,32 +8170,32 @@ group gPBAF_FIR
     /** PBAF_FIR[22]
      *  PBAXRCV Low data before High Data
      */
-    (rPBAF_FIR, bit(22)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(22)) ? defaultMaskedError;
 
     /** PBAF_FIR[23]
      *  PBAXRCV Low data timeout
      */
-    (rPBAF_FIR, bit(23)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(23)) ? defaultMaskedError;
 
     /** PBAF_FIR[24]
      *  PBAXRCV Reservation data timeout
      */
-    (rPBAF_FIR, bit(24)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(24)) ? defaultMaskedError;
 
     /** PBAF_FIR[25]
      *  Illegal PBAX Flow.  See PBAERRRPT2 for more info
      */
-    (rPBAF_FIR, bit(25)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(25)) ? defaultMaskedError;
 
     /** PBAF_FIR[26]
      *  PBAXSND engine retry threshold reached sending Pha
      */
-    (rPBAF_FIR, bit(26)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(26)) ? defaultMaskedError;
 
     /** PBAF_FIR[27]
      *  PBAXSND engine retry threshold reached sending Pha
      */
-    (rPBAF_FIR, bit(27)) ? threshold_and_mask_self;
+    (rPBAF_FIR, bit(27)) ? defaultMaskedError;
 
     /** PBAF_FIR[28]
      *  PBAXSND Reservation Timeout
