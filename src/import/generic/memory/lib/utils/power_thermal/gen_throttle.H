@@ -1451,6 +1451,7 @@ fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<T>& i_target)
             FAPI_ASSERT( false,
                          fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
                          .set_PORT_TARGET(i_target)
+                         .set_FUNCTION(mss::SET_PWR_CNTRL_REG)
                          .set_VALUE(l_pwr_cntrl),
                          "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: %lu",
                          mss::c_str(i_target),
@@ -1510,6 +1511,7 @@ fapi2::ReturnCode set_str_reg(const fapi2::Target<T>& i_target)
             FAPI_ASSERT( false,
                          fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
                          .set_PORT_TARGET(i_target)
+                         .set_FUNCTION(mss::SET_STR_REG)
                          .set_VALUE(l_str_enable),
                          "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: %lu",
                          mss::c_str(i_target),

@@ -353,7 +353,6 @@ enum generic_ffdc_codes : uint16_t
     SET_ENDURANT_FLD = 0x10CF,
     SET_SPD_CL_SUPPORTED = 0x10D0,
 
-
     DDR_TO_OMI_FREQ = 0x10D1,
     OMI_TO_DDR_FREQ = 0x10D2,
     CALC_CAS_LATENCY = 0x10D3,
@@ -366,10 +365,19 @@ enum generic_ffdc_codes : uint16_t
     SET_TRRD_S = 0x10DA,
     SET_TRRD_L = 0x10DB,
 
+    // PHY_INIT_RESP functions
+    EXP_SCOMINIT = 0x10DC,
+    EXP_DRAMINIT = 0x10DD,
+
+    // gen_throttle functions
+    SET_PWR_CNTRL_REG = 0x10DE,
+    SET_STR_REG = 0x10DF,
 };
 
 ///
-/// @brief Supported proc types
+/// @brief
+///
+///
 /// @note Processor types by system generation and sub numbering
 ///
 enum class proc_type

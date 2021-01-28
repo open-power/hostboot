@@ -1378,6 +1378,7 @@
     </description>
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>VALUE</ffdc>
+    <ffdc>FUNCTION</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

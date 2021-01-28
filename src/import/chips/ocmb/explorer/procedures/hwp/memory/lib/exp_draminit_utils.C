@@ -159,7 +159,7 @@ fapi2::ReturnCode host_fw_phy_normal_init(
     // Note: don't FAPI_TRY here!
     // We want to grab this error, then try to update the bad bits appropriately
     // Logging of bad bits happens in read_and_display_normal_training_response
-    l_rc = mss::exp::check::host_fw_response(i_target, l_cmd, l_rsp_data);
+    l_rc = mss::exp::check::host_fw_response(i_target, l_cmd, mss::EXP_DRAMINIT, l_rsp_data);
 
     FAPI_TRY(check_rsp_data_size(i_target, l_rsp_data.size(), phy_init_mode::NORMAL));
     FAPI_TRY(mss::exp::read_and_display_normal_training_response(i_target, l_rsp_data, l_rc));
@@ -401,11 +401,13 @@ namespace check
 /// @param[in] i_target OCMB chip
 /// @param[in] i_cmd host_fw_command_struct used to generate the response
 /// @param[in] i_rsp_arg response arguement buffer
+/// @param[in] i_procedure procedure identifier for FFDC
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const host_fw_command_struct& i_cmd,
-        const uint8_t i_rsp_arg[ARGUMENT_SIZE])
+        const uint8_t i_rsp_arg[ARGUMENT_SIZE],
+        const uint16_t i_procedure)
 {
     const uint8_t l_rsp_status = i_rsp_arg[0];
 
@@ -424,6 +426,7 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
         FAPI_ASSERT( (l_error_code != FW_DDR_PHY_INIT_UNSUPPORTED_MODE),
                      fapi2::MSS_EXP_DDR_PHY_INIT_UNSUPPORTED_MODE().
                      set_TARGET(i_target).
+                     set_PROCEDURE(i_procedure).
                      set_PHY_INIT_MODE(i_cmd.command_argument[0]).
                      set_ERROR_CODE(l_error_code).
                      set_EXTENDED_ERROR_CODE(l_error_extended_code),
@@ -434,6 +437,7 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
         FAPI_ASSERT( (l_error_code != mss::exp::fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_SIZE_ERR),
                      fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_SIZE_ERROR().
                      set_TARGET(i_target).
+                     set_PROCEDURE(i_procedure).
                      set_COMMAND_SIZE(i_cmd.cmd_length).
                      set_ERROR_CODE(l_error_code).
                      set_EXTENDED_ERROR_CODE(l_error_extended_code),
@@ -444,6 +448,7 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
         FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_FLAG_ERR),
                      fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_MISSING_FLAG().
                      set_TARGET(i_target).
+                     set_PROCEDURE(i_procedure).
                      set_COMMAND_FLAGS(i_cmd.cmd_flags).
                      set_ERROR_CODE(l_error_code).
                      set_EXTENDED_ERROR_CODE(l_error_extended_code),
@@ -454,6 +459,7 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
         FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_ERROR),
                      fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_ERROR().
                      set_TARGET(i_target).
+                     set_PROCEDURE(i_procedure).
                      set_ERROR_CODE(l_error_code).
                      set_EXTENDED_ERROR_CODE(l_error_extended_code),
                      "DDR_PHY_INIT encountered a user_input_msdg error (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
@@ -464,6 +470,7 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
         FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_TRAINING_FAIL),
                      fapi2::MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL().
                      set_TARGET(i_target).
+                     set_PROCEDURE(i_procedure).
                      set_ERROR_CODE(l_error_code).
                      set_EXTENDED_ERROR_CODE(l_error_extended_code),
                      "DDR_PHY_INIT encountered a training fail (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
@@ -472,6 +479,7 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
         FAPI_ASSERT( false,
                      fapi2::MSS_EXP_DDR_PHY_INIT_UNKNOWN_ERROR().
                      set_TARGET(i_target).
+                     set_PROCEDURE(i_procedure).
                      set_ERROR_CODE(l_error_code).
                      set_EXTENDED_ERROR_CODE(l_error_extended_code),
                      "DDR_PHY_INIT encountered an unknown error code causing a fail(TARGET %s, error_code 0x%02X, extended_error_code=0x%08X) for ",
@@ -489,12 +497,13 @@ fapi_try_exit:
 ///
 /// @param[in] i_target OCMB chip
 /// @param[in] i_cmd host_fw_command_struct used to generate the response
+/// @param[in] i_procedure procedure identifier for FFDC
 /// @param[out] o_rsp_data response data
-/// @param[out] o_rc return code from mss::exp::check::response()
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                    const host_fw_command_struct& i_cmd,
+                                   const uint16_t i_procedure,
                                    std::vector<uint8_t>& o_rsp_data)
 {
     host_fw_response_struct l_response;
@@ -502,7 +511,7 @@ fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     FAPI_TRY(mss::exp::ib::getRSP(i_target, l_response, o_rsp_data),
              "Failed getRSP() for  %s", mss::c_str(i_target));
 
-    FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, i_cmd, l_response.response_argument),
+    FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, i_cmd, l_response.response_argument, i_procedure),
              "Encountered error from host fw ddr_phy_init for %s", mss::c_str(i_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
