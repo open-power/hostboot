@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -69,21 +69,21 @@
     </description>
     <ffdc>MSS_FREQ</ffdc>
     <ffdc>DOMAIN_FREQ</ffdc>
-    <ffdc>DOMAIN_TARGET</ffdc>
+    <ffdc>MEM_PORT_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
       <childTargets>
-        <parent>DOMAIN_TARGET</parent>
+        <parent>MEM_PORT_TARGET</parent>
         <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
-        <parent>DOMAIN_TARGET</parent>
+        <parent>MEM_PORT_TARGET</parent>
         <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
     </deconfigure>

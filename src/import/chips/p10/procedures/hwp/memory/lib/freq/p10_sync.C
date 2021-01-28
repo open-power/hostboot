@@ -163,7 +163,7 @@ bool deconfigure(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                       fapi2::MSS_FREQ_NOT_EQUAL_MAX_DOMAIN_FREQ()
                       .set_MSS_FREQ(i_dimm_speed)
                       .set_DOMAIN_FREQ(i_max_freq)
-                      .set_DOMAIN_TARGET(i_target),
+                      .set_MEM_PORT_TARGET(i_target),
                       "Deconfiguring %s due to unequal frequencies: this port: %d, Max in freq domain: %d",
                       mss::c_str(i_target),
                       i_dimm_speed,
@@ -208,7 +208,7 @@ fapi2::ReturnCode select_omi_freq(const std::map< fapi2::Target<fapi2::TARGET_TY
                             fapi2::P10_MSS_FAILED_SYNC_MODE()
                             .set_OMI_FREQ(i_omi_freq)
                             .set_MEM_FREQ(o_selected_omi_freq),
-                            "The OMI freq selected by DIMM speed (%d) and the currently selected OMI freq (%d) don't align",
+                            "The OMI freq selected by DIMM speed ATTR_MEM_EFF_FREQ, (%d) and ATTR_FREQ_OMI_MHZ (%d) don't align",
                             o_selected_omi_freq, i_omi_freq);
 #endif
                 return fapi2::FAPI2_RC_SUCCESS;
