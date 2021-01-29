@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,11 +64,15 @@ enum action_t
 
 enum sublink_t
 {
-    BOTH = 0,
-    EVEN = 1,
-    ODD  = 2,
-    NUM_SUBLINK_OPTS = 3,
-    NONE = 4,
+    BOTH_PAUE        = 0,
+    BOTH_PAUO        = 1,
+    BOTH_PAUS        = 2,
+    EVEN_PAUE        = 3,
+    EVEN_PAUO        = 4,
+    ODD_PAUE         = 5,
+    ODD_PAUO         = 6,
+    NUM_SUBLINK_OPTS = 7,
+    NONE             = 8,
 };
 
 //------------------------------------------------------------------------------

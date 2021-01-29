@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -211,8 +211,8 @@
   <id>ATTR_PROC_FABRIC_IOHS_BUS_WIDTH</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    Processor optics bus width per link.
-    Provided by the MRW.
+    Processor optics bus width per logical link.
+    Set by p10_fbc_eff_config.
   </description>
   <valueType>uint8</valueType>
   <array>8</array>
@@ -220,7 +220,8 @@
     1_BYTE = 0x01,
     2_BYTE = 0x02
   </enum>
-  <platInit>mrw</platInit>
+  <default>2_BYTE</default>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -295,9 +296,7 @@
   <id>ATTR_IOHS_LINK_TRAIN</id>
   <targetType>TARGET_TYPE_IOHS</targetType>
   <description>
-    Indicates which sublinks should be initialized/trained. This bus-scoped
-    attribute is used to shadow info into the chip-scoped attribute
-    ATTR_PROC_FABRIC_[XA]_ATTACHED_CHIP_CNFG respectively.
+    Indicates which physical sublinks should be initialized/trained
   </description>
   <valueType>uint8</valueType>
   <enum>
@@ -307,6 +306,22 @@
     NONE      = 0x3
   </enum>
   <writeable/>
+  <default>NONE</default>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IOHS_LINK_SPLIT</id>
+  <targetType>TARGET_TYPE_IOHS</targetType>
+  <description>
+    Indicates whether sublinks are statically intended to be split
+    to service endpoints on distinctly different remote chips
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -404,6 +419,20 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    For each fabric X link on this chip, specifies the 5-bit fabric topology ID
+    of the chip at the receiving end of the link. Should be considered valid
+    only if corresponding ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG index is true.
+  </description>
+  <valueType>uint8</valueType>
+  <array>8</array>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
@@ -423,6 +452,20 @@
   <description>
     For each fabric A link on this chip, specifies the fabric topology ID chip
     bits of the chip at the receiving end of the link. Should be considered valid
+    only if corresponding ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG index is true.
+  </description>
+  <valueType>uint8</valueType>
+  <array>8</array>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    For each fabric A link on this chip, specifies the 5-bit fabric topology ID
+    of the chip at the receiving end of the link. Should be considered valid
     only if corresponding ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG index is true.
   </description>
   <valueType>uint8</valueType>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@
 ///
 fapi2::ReturnCode p10_fabric_link_layer_train_link(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
-    const uint8_t i_en)
+    const fapi2::ATTR_IOHS_LINK_TRAIN_Type i_en)
 {
     using namespace scomt::iohs;
 
@@ -59,10 +59,10 @@ fapi2::ReturnCode p10_fabric_link_layer_train_link(
 
     fapi2::buffer<uint64_t> l_dlp_control_data;
 
-    bool l_even = (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) ||
-                  (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY);
-    bool l_odd  = (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) ||
-                  (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY);
+    bool l_even = (i_en == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH) ||
+                  (i_en == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY);
+    bool l_odd  = (i_en == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH) ||
+                  (i_en == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY);
 
     FAPI_TRY(GET_DLP_CONTROL(i_target, l_dlp_control_data),
              "Error from getScom (DLP_CONTROL)");
@@ -96,46 +96,41 @@ fapi2::ReturnCode p10_fabric_link_layer(
     FAPI_DBG("Start, i_train_intranode = %d, i_train_internode = %d",
              i_train_intranode, i_train_internode);
 
-    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_en;
-    fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_en;
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, i_target, l_x_en),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, i_target, l_a_en),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
-
     for (const auto l_iohs : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
     {
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_link;
+        fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
         fapi2::ATTR_IOHS_DRAWER_INTERCONNECT_Type l_drawer_interconnect;
+        fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_fabric_link_active;
+        char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+        fapi2::toString(l_iohs, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs, l_link),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs, l_link_train),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs, l_drawer_interconnect),
                  "Error from FAPI_ATTR_GET (ATTR_IOHS_DRAWER_INTERCONNECT)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_iohs, l_fabric_link_active),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
 
-        if ((l_x_en[l_link] && i_train_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE))
-            || (l_x_en[l_link] && i_train_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE))
-            || (l_a_en[l_link] && i_train_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
+        if ((l_link_train != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE) &&
+            (l_fabric_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE) &&
+            ((i_train_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE)) ||
+             (i_train_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE))))
         {
-            FAPI_DBG("Training link %d (%s)", l_link, l_x_en[l_link] ? ("SMPX") : ("SMPA"));
 
+            FAPI_DBG("Training link %s", l_targetStr);
             FAPI_TRY(p10_fabric_link_layer_train_link(
                          l_iohs,
-                         l_x_en[l_link] ? (l_x_en[l_link]) : (l_a_en[l_link])),
+                         l_link_train),
                      "Error from p10_fabric_link_layer_train_link");
         }
         else
         {
-            char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
-            fapi2::toString(l_iohs, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
-
             FAPI_DBG("Skipping link training for %s", l_targetStr);
+            FAPI_DBG("  l_link_train:           %d", l_link_train);
+            FAPI_DBG("  l_fabric_link_active:   %d", l_fabric_link_active);
             FAPI_DBG("  i_train_intranode:      %d", i_train_intranode);
             FAPI_DBG("  i_train_internode:      %d", i_train_internode);
             FAPI_DBG("  l_drawer_interconnect:  %d", l_drawer_interconnect);
-            FAPI_DBG("  l_x_enable:             %d", l_x_en[l_link]);
-            FAPI_DBG("  l_a_enable:             %d", l_a_en[l_link]);
         }
     }
 

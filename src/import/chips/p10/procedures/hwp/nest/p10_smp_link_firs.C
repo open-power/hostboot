@@ -51,7 +51,7 @@
 struct fir_registers_btm
 {
     uint64_t EXT_FIR[FABRIC_NUM_IOHS_LINKS];
-    uint64_t PTL_FIR[NUM_SUBLINK_OPTS][FABRIC_NUM_IOHS_LINKS];
+    uint64_t PTL_FIR[NUM_SUBLINK_OPTS];
     uint64_t DLP_FIR[NUM_SUBLINK_OPTS];
     uint64_t PHY_FIR[FABRIC_NUM_IOHS_LINKS];
 };
@@ -60,68 +60,45 @@ const struct fir_registers_btm firs_btm =
 {
     .EXT_FIR =
     {
-        0x8000000000000000, // iohs0
-        0x4000000000000000, // iohs1
-        0x2000000000000000, // iohs2
-        0x1000000000000000, // iohs3
-        0x0800000000000000, // iohs4
-        0x0400000000000000, // iohs5
-        0x0200000000000000, // iohs6
-        0x0100000000000000, // iohs7
+        0x8000000000000000, // AX0
+        0x4000000000000000, // AX1
+        0x2000000000000000, // AX2
+        0x1000000000000000, // AX3
+        0x0800000000000000, // AX4
+        0x0400000000000000, // AX5
+        0x0200000000000000, // AX6
+        0x0100000000000000, // AX7
     },
     .PTL_FIR =
     {
-        {
-            // both even/odd
-            0xCF0E332F0C000000, // iohs0
-            0x30F1CCD0F3000000, // iohs1
-            0xCF0E332F0C000000, // iohs2
-            0x30F1CCD0F3000000, // iohs3
-            0xCF0E332F0C000000, // iohs4
-            0x30F1CCD0F3000000, // iohs5
-            0xCF0E332F0C000000, // iohs6
-            0x30F1CCD0F3000000, // iohs7
-        },
-        {
-            // even only
-            0x8F08222C08000000, // iohs0
-            0x20F18890C2000000, // iohs1
-            0x8F08222C08000000, // iohs2
-            0x20F18890C2000000, // iohs3
-            0x8F08222C08000000, // iohs4
-            0x20F18890C2000000, // iohs5
-            0x8F08222C08000000, // iohs6
-            0x20F18890C2000000, // iohs7
-        },
-        {
-            // odd only
-            0x4F06112304000000, // iohs0
-            0x10F0C45031000000, // iohs1
-            0x4F06112304000000, // iohs2
-            0x10F0C45031000000, // iohs3
-            0x4F06112304000000, // iohs4
-            0x10F0C45031000000, // iohs5
-            0x4F06112304000000, // iohs6
-            0x10F0C45031000000, // iohs7
-        },
+        0xCF0E332F0C000000, // BOTH_PAUE
+        0x30F1CCD0F3000000, // BOTH_PAUO
+        0x9FFCE67819000000, // BOTH_PAUS
+        0x8F08222C08000000, // EVEN_PAUE
+        0x20F18890C2000000, // EVEN_PAUO
+        0x4F06112304000000, // ODD_PAUE
+        0x10F0C45031000000, // ODD_PAUO
     },
     .DLP_FIR =
     {
-        0xFFFFFFFFFFFFFFFF, // both halves
-        0xAAAAAAAAAAAAAAAA, // even only
-        0x5555555555555555, // odd only
+        0xFFFFFFFFFFFFFFFF, // BOTH_PAUE
+        0xFFFFFFFFFFFFFFFF, // BOTH_PAUO
+        0xFFFFFFFFFFFFFFFF, // BOTH_PAUS
+        0xAAAAAAAAAAAAAAAA, // EVEN_PAUE
+        0xAAAAAAAAAAAAAAAA, // EVEN_PAUO
+        0x5555555555555555, // ODD_PAUE
+        0x5555555555555555, // ODD_PAUO
     },
     .PHY_FIR =
     {
-        0x8800000000000000, // iohs0
-        0x4400000000000000, // iohs1
-        0x8800000000000000, // iohs2
-        0x4400000000000000, // iohs3
-        0x8800000000000000, // iohs4
-        0x4400000000000000, // iohs5
-        0x8800000000000000, // iohs6
-        0x4400000000000000, // iohs7
-
+        0x8800000000000000, // IOHS0
+        0x4400000000000000, // IOHS1
+        0x8800000000000000, // IOHS2
+        0x4400000000000000, // IOHS3
+        0x8800000000000000, // IOHS4
+        0x4400000000000000, // IOHS5
+        0x8800000000000000, // IOHS6
+        0x4400000000000000, // IOHS7
     },
 };
 
@@ -202,17 +179,21 @@ const uint8_t DLP_PHY_CONFIG_DL_SELECT_DLP  = 0x01;
 //------------------------------------------------------------------------------
 
 /// @brief Display values to be programmed into FIR registers
-/// @param[in] i_target  Reference to IOHS target
-/// @param[in] i_data    Data to display for given target
+/// @param[in] i_iohs_target  Reference to IOHS target
+/// @param[in] i_pauc_target  Reference to PAUC target
+/// @param[in] i_data         Data to display for given target
 /// @return void.
 void p10_smp_link_firs_display(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
     const struct fir_registers& i_data)
 {
     char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString(i_iohs_target, l_target_str, sizeof(l_target_str));
-
-    FAPI_DBG("Data to be programmed for %s...", l_target_str);
+    FAPI_DBG("Data to be programmed for targets");
+    FAPI_DBG("IOHS: %s...", l_target_str);
+    fapi2::toString(i_pauc_target, l_target_str, sizeof(l_target_str));
+    FAPI_DBG("PAUC: %s...", l_target_str);
     FAPI_DBG("  EXT_FIR_ACTION0  = 0x%016llX", i_data.EXT_FIR_ACTION0);
     FAPI_DBG("  EXT_FIR_ACTION1  = 0x%016llX", i_data.EXT_FIR_ACTION1);
     FAPI_DBG("  EXT_FIR_MASK_AND = 0x%016llX", i_data.EXT_FIR_MASK_CLR);
@@ -234,7 +215,7 @@ void p10_smp_link_firs_display(
 /// @brief Clear contents of FBC EXT FIR register
 /// @param[in] i_proc_target   Reference to processor chip target
 /// @param[in] i_iohs_pos      Chiplet unit position for the selected IOHS target
-/// @param[in] i_sublink       Sublink for the selected IOHS target
+/// @param[in] i_sublink       Sublink option specification
 /// @param[in] i_clear_all     Clear all FIR bits if true, else clear error bits only
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_smp_link_firs_clear(
@@ -246,7 +227,10 @@ fapi2::ReturnCode p10_smp_link_firs_clear(
     using namespace scomt;
     using namespace scomt::proc;
 
-    if(!i_proc_target.isFunctional())
+    uint64_t l_extfir_btm = 0;
+
+    if (!i_proc_target.isFunctional() ||
+        (i_sublink >= sublink_t::NUM_SUBLINK_OPTS))
     {
         goto fapi_try_exit;
     }
@@ -255,17 +239,38 @@ fapi2::ReturnCode p10_smp_link_firs_clear(
 
     FAPI_TRY(PREP_PB_COM_SCOM_ES3_EXTFIR_REG_WO_AND(i_proc_target),
              "Error from prepScom (PB_COM_SCOM_ES3_EXTFIR_REG_WO_AND)");
-    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_REG_WO_AND(i_proc_target, ~firs_btm.EXT_FIR[i_iohs_pos]),
+
+    switch(i_sublink)
+    {
+        case sublink_t::BOTH_PAUS:
+            l_extfir_btm |= firs_btm.EXT_FIR[((i_iohs_pos / 2) * 2)];
+            l_extfir_btm |= firs_btm.EXT_FIR[((i_iohs_pos / 2) * 2) + 1];
+            break;
+
+        case sublink_t::EVEN_PAUE:
+            l_extfir_btm |= firs_btm.EXT_FIR[((i_iohs_pos / 2) * 2)];
+            break;
+
+        case sublink_t::ODD_PAUO:
+            l_extfir_btm |= firs_btm.EXT_FIR[((i_iohs_pos / 2) * 2) + 1];
+            break;
+
+        default:
+            l_extfir_btm |= firs_btm.EXT_FIR[i_iohs_pos];
+            break;
+    }
+
+    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_REG_WO_AND(i_proc_target, ~l_extfir_btm),
              "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_REG_WO_AND)");
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// @brief Clear contents of FBC TL/PHY FIR registers
+/// @brief Clear contents of FBC TL FIR registers
 /// @param[in] i_pauc_target   Reference to pauc target
 /// @param[in] i_iohs_pos      Chiplet unit position for the selected IOHS target
-/// @param[in] i_sublink       Sublink for the selected IOHS target
+/// @param[in] i_sublink       Sublink option specification
 /// @param[in] i_clear_all     Clear all FIR bits if true, else clear error bits only
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_smp_link_firs_clear(
@@ -277,15 +282,25 @@ fapi2::ReturnCode p10_smp_link_firs_clear(
     using namespace scomt;
     using namespace scomt::pauc;
 
-    fapi2::buffer<uint64_t> l_ptl_clear = ~firs_btm.PTL_FIR[i_sublink][i_iohs_pos];
-    fapi2::buffer<uint64_t> l_ptl_clear_mask = ~firs_btm.PTL_FIR[i_sublink][i_iohs_pos];
+    fapi2::buffer<uint64_t> l_ptl_clear;
+    fapi2::buffer<uint64_t> l_ptl_clear_mask;
 
-    if(!i_pauc_target.isFunctional())
+    if (!i_pauc_target.isFunctional() ||
+        (i_sublink >= sublink_t::NUM_SUBLINK_OPTS))
     {
         goto fapi_try_exit;
     }
 
+    FAPI_DBG("Clearing PHY FIR register");
+
+    FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_REG_RW(i_pauc_target),
+             "Error from prepScom (PHY_SCOM_MAC_FIR_REG_RW)");
+    FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_REG_RW(i_pauc_target, ~firs_btm.PHY_FIR[i_iohs_pos]),
+             "Error from putScom (PHY_SCOM_MAC_FIR_REG_RW)");
+
     FAPI_DBG("Clearing FBC TL FIR register");
+    l_ptl_clear = ~firs_btm.PTL_FIR[i_sublink];
+    l_ptl_clear_mask = ~firs_btm.PTL_FIR[i_sublink];
 
     FAPI_TRY(PREP_PB_PTL_FIR_REG_WO_AND(i_pauc_target),
              "Error from prepScom (PB_PTL_FIR_REG_WO_AND)");
@@ -298,21 +313,14 @@ fapi2::ReturnCode p10_smp_link_firs_clear(
     FAPI_TRY(PUT_PB_PTL_FIR_REG_WO_AND(i_pauc_target, i_clear_all ? l_ptl_clear : l_ptl_clear_mask),
              "Error from putScom (PB_PTL_FIR_REG_WO_AND)");
 
-    FAPI_DBG("Clearing PHY FIR register");
-
-    FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_REG_RW(i_pauc_target),
-             "Error from prepScom (PHY_SCOM_MAC_FIR_REG_RW)");
-    FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_REG_RW(i_pauc_target, ~firs_btm.PHY_FIR[i_iohs_pos]),
-             "Error from putScom (PHY_SCOM_MAC_FIR_REG_RW)");
-
 fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// @brief Clear contents of FBC DL FIR registers
+/// @brief Clear contents of FBC DL/PHY FIR registers
 /// @param[in] i_iohs_target   Reference to iohs target
 /// @param[in] i_iohs_pos      Chiplet unit position for the selected IOHS target
-/// @param[in] i_sublink       Sublink for the selected IOHS target
+/// @param[in] i_sublink       Sublink option specification
 /// @param[in] i_clear_all     Clear all FIR bits if true, else clear error bits only
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_smp_link_firs_clear(
@@ -324,15 +332,18 @@ fapi2::ReturnCode p10_smp_link_firs_clear(
     using namespace scomt;
     using namespace scomt::iohs;
 
-    fapi2::buffer<uint64_t> l_clear = ~firs_btm.DLP_FIR[i_sublink];
-    fapi2::buffer<uint64_t> l_clear_mask = ~firs_btm.DLP_FIR[i_sublink];
+    fapi2::buffer<uint64_t> l_clear;
+    fapi2::buffer<uint64_t> l_clear_mask;
 
-    if(!i_iohs_target.isFunctional())
+    if (!i_iohs_target.isFunctional() ||
+        (i_sublink >= NUM_SUBLINK_OPTS))
     {
         goto fapi_try_exit;
     }
 
     FAPI_DBG("Clearing FBC DL FIR register");
+    l_clear = ~firs_btm.DLP_FIR[i_sublink];
+    l_clear_mask = ~firs_btm.DLP_FIR[i_sublink];
 
     FAPI_TRY(PREP_DLP_FIR_REG_WO_AND(i_iohs_target),
              "Error from prepScom (DLP_FIR_REG_WO_AND)");
@@ -540,28 +551,28 @@ fapi2::ReturnCode p10_smp_link_firs(
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
     // Exit if user does not select sublinks to configure
-    if(i_sublink == sublink_t::NONE)
+    if (i_sublink >= sublink_t::NUM_SUBLINK_OPTS)
     {
         FAPI_DBG("No sublinks selected to configure!");
         goto fapi_try_exit;
     }
 
     // Prepare FIR register values for selected operation
-    if(i_action == action_t::INACTIVE)
+    if (i_action == action_t::INACTIVE)
     {
         FAPI_DBG("action INACTIVE selected");
         l_reg_values = firs_inactive;
     }
-    else if(i_action == action_t::RUNTIME)
+    else if (i_action == action_t::RUNTIME)
     {
         FAPI_DBG("action RUNTIME selected");
         l_reg_values = firs_runtime;
     }
-    else if(i_action == action_t::CLEAR_ALL)
+    else if (i_action == action_t::CLEAR_ALL)
     {
         FAPI_DBG("action CLEAR_ALL selected");
     }
-    else if(i_action == action_t::CLEAR_ERR)
+    else if (i_action == action_t::CLEAR_ERR)
     {
         FAPI_DBG("action CLEAR_ERR selected");
     }
@@ -575,7 +586,7 @@ fapi2::ReturnCode p10_smp_link_firs(
     }
 
     // Verify that the IOHS target is configured as an SMP
-    if(i_iohs_target.isFunctional() && (i_action != action_t::INACTIVE))
+    if (i_iohs_target.isFunctional() && (i_action != action_t::INACTIVE))
     {
         fapi2::buffer<uint64_t> l_dlp_config(0x0);
         fapi2::buffer<uint64_t> l_dl_select(0x0);
@@ -593,7 +604,7 @@ fapi2::ReturnCode p10_smp_link_firs(
     }
 
     // Process option to clear all bits in FIR registers
-    if(i_action == action_t::CLEAR_ALL)
+    if (i_action == action_t::CLEAR_ALL)
     {
         FAPI_TRY(p10_smp_link_firs_clear(l_proc_target, l_iohs_pos, i_sublink, true),
                  "Error from p10_smp_link_firs_clear (proc)");
@@ -606,7 +617,7 @@ fapi2::ReturnCode p10_smp_link_firs(
     }
 
     // Process option to clear error bits in FIR registers
-    if(i_action == action_t::CLEAR_ERR)
+    if (i_action == action_t::CLEAR_ERR)
     {
         FAPI_TRY(p10_smp_link_firs_clear(l_proc_target, l_iohs_pos, i_sublink, false),
                  "Error from p10_smp_link_firs_clear (proc)");
@@ -619,20 +630,48 @@ fapi2::ReturnCode p10_smp_link_firs(
     }
 
     // Select FIR MASK register values for given iohs
-    l_reg_values.EXT_FIR_MASK_CLR = ~firs_btm.EXT_FIR[l_iohs_pos];
-    l_reg_values.EXT_FIR_MASK_SET = firs_btm.EXT_FIR[l_iohs_pos] & l_reg_values.EXT_FIR_MASK;
+    // EXT FIR -- guarantee correct l_iohs_pos is used (in case of split links)
+    {
+        uint64_t l_extfir_btm = 0;
 
-    l_reg_values.PTL_FIR_MASK_CLR = ~firs_btm.PTL_FIR[i_sublink][l_iohs_pos];
-    l_reg_values.PTL_FIR_MASK_SET = firs_btm.PTL_FIR[i_sublink][l_iohs_pos] & l_reg_values.PTL_FIR_MASK;
+        switch(i_sublink)
+        {
+            case sublink_t::BOTH_PAUS:
+                l_extfir_btm |= firs_btm.EXT_FIR[((l_iohs_pos / 2) * 2)];
+                l_extfir_btm |= firs_btm.EXT_FIR[((l_iohs_pos / 2) * 2) + 1];
+                break;
 
+            case sublink_t::EVEN_PAUE:
+                l_extfir_btm |= firs_btm.EXT_FIR[((l_iohs_pos / 2) * 2)];
+                break;
+
+            case sublink_t::ODD_PAUO:
+                l_extfir_btm |= firs_btm.EXT_FIR[((l_iohs_pos / 2) * 2) + 1];
+                break;
+
+            default:
+                l_extfir_btm |= firs_btm.EXT_FIR[l_iohs_pos];
+                break;
+        }
+
+        l_reg_values.EXT_FIR_MASK_CLR = ~l_extfir_btm;
+        l_reg_values.EXT_FIR_MASK_SET = l_extfir_btm & l_reg_values.EXT_FIR_MASK;
+    }
+
+    // PTL FIR
+    l_reg_values.PTL_FIR_MASK_CLR = ~firs_btm.PTL_FIR[i_sublink];
+    l_reg_values.PTL_FIR_MASK_SET = firs_btm.PTL_FIR[i_sublink] & l_reg_values.PTL_FIR_MASK;
+
+    // DL FIR
     l_reg_values.DLP_FIR_MASK_CLR = ~firs_btm.DLP_FIR[i_sublink];
     l_reg_values.DLP_FIR_MASK_SET = firs_btm.DLP_FIR[i_sublink] & l_reg_values.DLP_FIR_MASK;
 
+    // PHY FIR
     l_reg_values.PHY_FIR_MASK_CLR = ~firs_btm.PHY_FIR[l_iohs_pos];
     l_reg_values.PHY_FIR_MASK_SET = firs_btm.PHY_FIR[l_iohs_pos] & l_reg_values.PHY_FIR_MASK;
 
     // Print values to be programmed
-    p10_smp_link_firs_display(i_iohs_target, l_reg_values);
+    p10_smp_link_firs_display(i_iohs_target, l_pauc_target, l_reg_values);
 
     // Configure FBC EXT/DL/TL/PHY FIR Registers
     FAPI_TRY(p10_smp_link_firs_ext(l_proc_target, l_reg_values),

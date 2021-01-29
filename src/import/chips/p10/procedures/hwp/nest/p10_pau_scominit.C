@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,10 +99,14 @@ fapi2::ReturnCode p10_pau_scominit_tl(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         if(l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_OCAPI)
         {
             fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_id;
+            fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_iohs_id),
                      "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
             l_ocapi_en[l_iohs_id] = true;
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
+                     "Error from FAPI_ATTR_SET (ATTR_IOHS_LINK_TRAIN)");
         }
     }
 

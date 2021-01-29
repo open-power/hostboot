@@ -412,16 +412,18 @@ fapi_try_exit:
 ///
 /// @brief Check validity of link DL/TL logic
 ///
-/// @param[in] i_iohs_target    Reference to IOHS target
-/// @param[in] i_link_id        Chiplet number for given IOHS target
-/// @param[in] i_link_en        Attribute value that defines active half-links for given IOHS
+/// @param[in] i_target         Reference to chip target
+/// @param[in] i_x_not_a        Link type (true=x, false=a)
+/// @param[in] i_ax_link_id     A/X link number
+/// @param[in] i_ax_link_cnfg   A/X link configuration
 ///
 /// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_build_smp_validate_link(
-    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
-    const fapi2::ATTR_CHIP_UNIT_POS_Type i_link_id,
-    const uint8_t i_link_en)
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_x_not_a,
+    const uint8_t i_ax_link_id,
+    const uint8_t i_ax_link_cnfg)
 {
     using namespace scomt::proc;
     using namespace scomt::pauc;
@@ -436,10 +438,111 @@ fapi2::ReturnCode p10_build_smp_validate_link(
     bool l_tl_trained = false;
     bool l_iovalid_set = false;
 
-    auto l_pauc_target = i_iohs_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+    // find associated IOHS target
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_iohs_target;
+    fapi2::Target<fapi2::TARGET_TYPE_PAUC> l_pauc_target;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit_num_act;
+    fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
+    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+
+    bool l_match_found = false;
+
+    // search for matching IOHS in non-split configuration first
+    // IOHS unit number should match AX number
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit_num_exp = i_ax_link_id;
+    {
+        for (auto l_target : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_target, l_iohs_unit_num_act));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, l_target, l_link_split));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_target, l_link_train));
+
+            if ((l_iohs_unit_num_act != l_iohs_unit_num_exp) ||
+                (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE) ||
+                (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_TRUE))
+            {
+                continue;
+            }
+
+            FAPI_ASSERT(((i_ax_link_cnfg == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY) &&
+                         (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY))
+                        ||
+                        ((i_ax_link_cnfg == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY) &&
+                         (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY))
+                        ||
+                        ((i_ax_link_cnfg == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) &&
+                         (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)),
+                        fapi2::P10_BUILD_SMP_LINK_VALIDATE_IOHS_TARGET_ERR()
+                        .set_TARGET(i_target)
+                        .set_IOHS_TARGET(l_target)
+                        .set_LINK_TYPE(i_x_not_a)
+                        .set_LINK_ID(i_ax_link_id)
+                        .set_LINK_CNFG(i_ax_link_cnfg)
+                        .set_LINK_SPLIT(l_link_split)
+                        .set_LINK_TRAIN(l_link_train),
+                        "Error in matching properties of non-split IOHS target!");
+
+            l_match_found = true;
+            l_iohs_target = l_target;
+            break;
+        }
+    }
+    // search for matching IOHS in split configuration last
+    // IOHS number should be odd
+    l_iohs_unit_num_exp = (i_ax_link_id % 2 == 0) ? (i_ax_link_id + 1) : (i_ax_link_id);
+
+    if (!l_match_found)
+    {
+        for (auto l_target : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_target, l_iohs_unit_num_act));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, l_target, l_link_split));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_target, l_link_train));
+
+            if ((l_iohs_unit_num_act != l_iohs_unit_num_exp) ||
+                (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_FALSE))
+            {
+                continue;
+            }
+
+            FAPI_ASSERT(((i_ax_link_cnfg == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY) &&
+                         (i_ax_link_id % 2 == 0) &&
+                         ((l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+                          || (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)))
+                        ||
+                        ((i_ax_link_cnfg == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY) &&
+                         (i_ax_link_id % 2 == 1) &&
+                         ((l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+                          || (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY))),
+                        fapi2::P10_BUILD_SMP_LINK_VALIDATE_IOHS_TARGET_ERR()
+                        .set_TARGET(i_target)
+                        .set_IOHS_TARGET(l_target)
+                        .set_LINK_TYPE(i_x_not_a)
+                        .set_LINK_ID(i_ax_link_id)
+                        .set_LINK_CNFG(i_ax_link_cnfg)
+                        .set_LINK_SPLIT(l_link_split)
+                        .set_LINK_TRAIN(l_link_train),
+                        "Error in matching properties of split IOHS target!");
+
+            l_match_found = true;
+            l_iohs_target = l_target;
+            break;
+        }
+
+    }
+
+    FAPI_ASSERT(l_match_found,
+                fapi2::P10_BUILD_SMP_LINK_VALIDATE_NO_IOHS_MATCH_ERR()
+                .set_TARGET(i_target)
+                .set_LINK_TYPE(i_x_not_a)
+                .set_LINK_ID(i_ax_link_id)
+                .set_LINK_CNFG(i_ax_link_cnfg),
+                "No IOHS target match found for A/X link!");
+
+    l_pauc_target = l_iohs_target.getParent<fapi2::TARGET_TYPE_PAUC>();
 
     // read DL training state
-    FAPI_TRY(GET_DLP_FIR_REG_RW(i_iohs_target, l_dl_fir_reg),
+    FAPI_TRY(GET_DLP_FIR_REG_RW(l_iohs_target, l_dl_fir_reg),
              "Error from getScom (DLP_FIR_REG_RW)");
     // read TL training state
     FAPI_TRY(GET_PB_PTL_FIR_REG_RW(l_pauc_target, l_tl_fir_reg),
@@ -449,58 +552,64 @@ fapi2::ReturnCode p10_build_smp_validate_link(
     FAPI_TRY(GET_CPLT_CONF1_RW(l_pauc_target, l_cplt_conf1_reg),
              "Error from getScom (CPLT_CONF1_RW)");
 
-    if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE)
+    if (i_ax_link_cnfg == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE)
     {
-        FAPI_TRY(PREP_DLP_FIR_REG_RW(i_iohs_target));
+        FAPI_TRY(PREP_DLP_FIR_REG_RW(l_iohs_target));
         l_dl_trained  = GET_DLP_FIR_REG_0_TRAINED(l_dl_fir_reg) &&
                         GET_DLP_FIR_REG_1_TRAINED(l_dl_fir_reg);
 
         FAPI_TRY(PREP_PB_PTL_FIR_REG_RW(l_pauc_target));
-        l_tl_trained  = (i_link_id % 2) ?
-                        (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
-                        (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
+        l_tl_trained = ((i_ax_link_id % 2 == 0) ?
+                        (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg)) :
+                        (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)));
 
         FAPI_TRY(PREP_CPLT_CONF1_RW(l_pauc_target));
-        l_iovalid_set = (i_link_id % 2) ?
-                        (GET_CPLT_CONF1_3_IOVALID_DC(l_cplt_conf1_reg) && GET_CPLT_CONF1_2_IOVALID_DC(l_cplt_conf1_reg)) :
-                        (GET_CPLT_CONF1_1_IOVALID_DC(l_cplt_conf1_reg) && GET_CPLT_CONF1_0_IOVALID_DC(l_cplt_conf1_reg));
+        l_iovalid_set = ((i_ax_link_id % 2 == 0) ?
+                         (GET_CPLT_CONF1_1_IOVALID_DC(l_cplt_conf1_reg) && GET_CPLT_CONF1_0_IOVALID_DC(l_cplt_conf1_reg)) :
+                         (GET_CPLT_CONF1_3_IOVALID_DC(l_cplt_conf1_reg) && GET_CPLT_CONF1_2_IOVALID_DC(l_cplt_conf1_reg)));
     }
-    else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY)
+    else if (i_ax_link_cnfg == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY)
     {
-        FAPI_TRY(PREP_DLP_FIR_REG_RW(i_iohs_target));
+        FAPI_TRY(PREP_DLP_FIR_REG_RW(l_iohs_target));
         l_dl_trained  = GET_DLP_FIR_REG_0_TRAINED(l_dl_fir_reg);
 
         FAPI_TRY(PREP_PB_PTL_FIR_REG_RW(l_pauc_target));
-        l_tl_trained  = (i_link_id % 2) ?
-                        (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg)) :
-                        (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg));
+        l_tl_trained  = ((i_ax_link_id % 2 == 0) ?
+                         (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg)) :
+                         (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg)));
+
 
         FAPI_TRY(PREP_CPLT_CONF1_RW(l_pauc_target));
-        l_iovalid_set = (i_link_id % 2) ?
-                        (GET_CPLT_CONF1_3_IOVALID_DC(l_cplt_conf1_reg)) :
-                        (GET_CPLT_CONF1_1_IOVALID_DC(l_cplt_conf1_reg));
+        l_iovalid_set = ((i_ax_link_id % 2 == 0) ?
+                         (GET_CPLT_CONF1_1_IOVALID_DC(l_cplt_conf1_reg)) :
+                         (GET_CPLT_CONF1_3_IOVALID_DC(l_cplt_conf1_reg)));
     }
-    else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY)
+    else if (i_ax_link_cnfg == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY)
     {
-        FAPI_TRY(PREP_DLP_FIR_REG_RW(i_iohs_target));
+        FAPI_TRY(PREP_DLP_FIR_REG_RW(l_iohs_target));
         l_dl_trained  = GET_DLP_FIR_REG_1_TRAINED(l_dl_fir_reg);
 
         FAPI_TRY(PREP_PB_PTL_FIR_REG_RW(l_pauc_target));
-        l_tl_trained  = (i_link_id % 2) ?
-                        (GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
-                        (GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
+        l_tl_trained  = ((i_ax_link_id % 2 == 0) ?
+                         (GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg)) :
+                         (GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)));
+
 
         FAPI_TRY(PREP_CPLT_CONF1_RW(l_pauc_target));
-        l_iovalid_set = (i_link_id % 2) ?
-                        (GET_CPLT_CONF1_2_IOVALID_DC(l_cplt_conf1_reg)) :
-                        (GET_CPLT_CONF1_0_IOVALID_DC(l_cplt_conf1_reg));
+        l_iovalid_set = ((i_ax_link_id % 2 == 0) ?
+                         (GET_CPLT_CONF1_0_IOVALID_DC(l_cplt_conf1_reg)) :
+                         (GET_CPLT_CONF1_2_IOVALID_DC(l_cplt_conf1_reg)));
     }
 
     // assert if not in expected state
     FAPI_ASSERT(l_dl_trained && l_tl_trained && l_iovalid_set,
                 fapi2::P10_BUILD_SMP_INVALID_LINK_STATE()
-                .set_TARGET(i_iohs_target)
-                .set_LINK_EN(i_link_en)
+                .set_TARGET(i_target)
+                .set_IOHS_TARGET(l_iohs_target)
+                .set_PAUC_TARGET(l_pauc_target)
+                .set_LINK_TYPE(i_x_not_a)
+                .set_LINK_ID(i_ax_link_id)
+                .set_LINK_CNFG(i_ax_link_cnfg)
                 .set_DL_FIR_REG(l_dl_fir_reg)
                 .set_TL_FIR_REG(l_tl_fir_reg)
                 .set_CPLT_CONF1_REG(l_cplt_conf1_reg),
@@ -584,17 +693,13 @@ fapi2::ReturnCode p10_build_smp_check_topology(
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, *(p_iter->second.target), l_a_rem_group_id),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
 
-            for(auto l_iohs : (*(p_iter->second.target)).getChildren<fapi2::TARGET_TYPE_IOHS>())
+            for (uint8_t l_link_id = 0; l_link_id < P10_FBC_UTILS_MAX_LINKS; l_link_id++)
             {
-                fapi2::ATTR_CHIP_UNIT_POS_Type l_link_id;
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs, l_link_id),
-                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
                 if (l_x_en[l_link_id])
                 {
                     FAPI_INF("Processing X link g%d:p%d:c%d", g_iter->first, p_iter->first, l_link_id);
 
-                    FAPI_TRY(p10_build_smp_validate_link(l_iohs, l_link_id, l_x_en[l_link_id]),
+                    FAPI_TRY(p10_build_smp_validate_link(*(p_iter->second.target), true, l_link_id, l_x_en[l_link_id]),
                              "Error from p10_build_smp_validate_link (g%d:p%d:c%d)", g_iter->first, p_iter->first, l_link_id);
 
                     if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
@@ -611,7 +716,7 @@ fapi2::ReturnCode p10_build_smp_check_topology(
                 {
                     FAPI_INF("Processing A link g%d:p%d:c%d", g_iter->first, p_iter->first, l_link_id);
 
-                    FAPI_TRY(p10_build_smp_validate_link(l_iohs, l_link_id, l_a_en[l_link_id]),
+                    FAPI_TRY(p10_build_smp_validate_link(*(p_iter->second.target), false, l_link_id, l_a_en[l_link_id]),
                              "Error from p10_build_smp_validate_link (g%d:p%dc:%d)", g_iter->first, p_iter->first, l_link_id);
 
                     l_connected_group_ids.setBit(l_a_rem_group_id[l_link_id]);
@@ -631,11 +736,15 @@ fapi2::ReturnCode p10_build_smp_check_topology(
                 if (!intragroup_set_match)
                 {
                     FAPI_ERR("Target %s is not fully connected (X) to all other chips in its group", l_target_str);
+                    FAPI_ERR("l_chip_ids_in_groups = 0x%x", l_chip_ids_in_groups.getBits<0, 8>());
+                    FAPI_ERR("l_connected_chip_ids = 0x%x", l_connected_chip_ids.getBits<0, 8>());
                 }
 
                 if (!intergroup_set_match)
                 {
                     FAPI_ERR("Target %s is not fully connected (X/A) to all other groups in the system", l_target_str);
+                    FAPI_ERR("l_group_ids_in_system = 0x%x", l_group_ids_in_system.getBits<0, 8>());
+                    FAPI_ERR("l_connected_group_ids = 0x%x", l_connected_group_ids.getBits<0, 8>());
                 }
 
                 FAPI_ASSERT(false,
@@ -850,6 +959,8 @@ fapi2::ReturnCode p10_build_smp_link_topo_tables(
             fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE_Type l_topo_id_table;
             fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_cnfg;
             fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_cnfg;
+            fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID_Type l_x_topo;
+            fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID_Type l_a_topo;
             fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS_Type l_x_addr_dis;
             fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS_Type l_a_addr_dis;
 
@@ -859,21 +970,17 @@ fapi2::ReturnCode p10_build_smp_link_topo_tables(
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, l_loc_target, l_a_cnfg),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID, l_loc_target, l_x_topo),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID, l_loc_target, l_a_topo),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID)");
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS, l_loc_target, l_x_addr_dis),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ADDR_DIS)");
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS, l_loc_target, l_a_addr_dis),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ADDR_DIS)");
 
-            for(auto l_loc_iohs_target : l_loc_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+            for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
             {
-                fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_iohs_target;
-                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_rem_target;
-                uint8_t l_topo_index = 0;
-
-                fapi2::ATTR_CHIP_UNIT_POS_Type l_loc_link_id;
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_loc_iohs_target, l_loc_link_id),
-                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
                 FAPI_DBG("Working on link %d\n", l_loc_link_id);
 
                 bool l_link_en = (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) ?
@@ -883,16 +990,13 @@ fapi2::ReturnCode p10_build_smp_link_topo_tables(
                                  (l_x_addr_dis[l_loc_link_id] == fapi2::ENUM_ATTR_PROC_FABRIC_X_ADDR_DIS_OFF) :
                                  (l_a_addr_dis[l_loc_link_id] == fapi2::ENUM_ATTR_PROC_FABRIC_A_ADDR_DIS_OFF);
 
-                if(l_link_en && l_addr_en)
+                if (l_link_en && l_addr_en)
                 {
-                    l_loc_iohs_target.getOtherEnd(l_rem_iohs_target);
-                    l_rem_target = l_rem_iohs_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+                    uint8_t l_topo_index = (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) ?
+                                           (l_x_topo[l_loc_link_id]) :
+                                           (l_a_topo[l_loc_link_id]);
 
-                    // index into topology table is by the 5-bit topology id of remote chip
-                    FAPI_TRY(topo::get_topology_idx(l_rem_target, EFF_TOPOLOGY_ID, l_topo_index),
-                             "Error from topo::get_topology_idx (remote target)");
-
-                    if(l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
+                    if (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
                     {
                         // program the link id used to get from this chip to remote chip for xlinks
                         FAPI_DBG("Set LINK_TOPOLOGY_ID_TABLE[%d]=%d\n", l_topo_index, l_loc_link_id);
@@ -901,9 +1005,9 @@ fapi2::ReturnCode p10_build_smp_link_topo_tables(
                     else
                     {
                         // program all indexes for valid remote groups for alinks
-                        for(uint8_t l_index = 0; l_index < P10_FBC_UTILS_MAX_TOPO_ENTRIES; l_index++)
+                        for (uint8_t l_index = 0; l_index < P10_FBC_UTILS_MAX_TOPO_ENTRIES; l_index++)
                         {
-                            if(l_topo_ids_in_system.getBit(l_index) && ((l_index & 0x1C) == (l_topo_index & 0x1C)))
+                            if (l_topo_ids_in_system.getBit(l_index) && ((l_index & 0x1C) == (l_topo_index & 0x1C)))
                             {
                                 FAPI_DBG("Set LINK_TOPOLOGY_ID_TABLE[%d]=%d\n", l_index, l_loc_link_id);
                                 l_topo_id_table[l_index] = l_loc_link_id;
@@ -915,7 +1019,7 @@ fapi2::ReturnCode p10_build_smp_link_topo_tables(
                 {
                     // link is not enabled for fabric command operations, we don't know the remote chip id
                     // so invalidate any entries in the topology table that references this link
-                    for(uint8_t l_topo_index = 0; l_topo_index < (sizeof(l_topo_id_table) / sizeof(l_topo_id_table[0])); l_topo_index++)
+                    for (uint8_t l_topo_index = 0; l_topo_index < (sizeof(l_topo_id_table) / sizeof(l_topo_id_table[0])); l_topo_index++)
                     {
                         if(l_topo_id_table[l_topo_index] == l_loc_link_id)
                         {

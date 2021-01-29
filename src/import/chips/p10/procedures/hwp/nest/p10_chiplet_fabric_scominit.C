@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,11 +42,120 @@
 #include <p10_fbc_dlp_scom.H>
 
 #include <p10_scom_proc.H>
+#include <p10_scom_pauc_9.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
+///
+/// @brief Reconfigure TL transport mux logic to support configurations
+///        where the half links are split to different remote endpoints
+///
+/// @param[in] i_pauc_target    Reference to PAUC target
+/// @param[in] i_iohs_target    Reference to IOHS target
+///
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_chiplet_fabric_scominit_tl_transport_reconfig(
+    const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target)
+{
+    using namespace scomt;
+    using namespace scomt::pauc;
+
+    FAPI_DBG("Start");
+
+    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_active;
+    fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_id;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, i_iohs_target, l_link_active),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_ACTIVE");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, i_iohs_target, l_link_split),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_iohs_target, l_iohs_id),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+    if ((l_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE) &&
+        (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_TRUE))
+    {
+        fapi2::buffer<uint64_t> l_scom_data(0x0);
+
+        FAPI_TRY(PREP_PB_MISC_CFG(i_pauc_target));
+
+        // Note that split links are always mapped to
+        // ptlx0 (even ptl, even half) and ptly1 (odd ptl, odd half)
+        SET_PB_MISC_CFG_SCOM_PTLX0_ENABLE(l_scom_data);
+        SET_PB_MISC_CFG_SCOM_PTLY1_ENABLE(l_scom_data);
+
+        // Transport Inbound Mux; OPT0/1 are swizzled
+        if ((l_iohs_id == 1) || (l_iohs_id == 2) || (l_iohs_id == 4) || (l_iohs_id == 6))
+        {
+            CLEAR_PB_MISC_CFG_TRANSPORT_0_IB_MUX_CTL0(l_scom_data);
+            SET_PB_MISC_CFG_TRANSPORT_3_IB_MUX_CTL0(l_scom_data);
+        }
+
+        if ((l_iohs_id == 0) || (l_iohs_id == 3) || (l_iohs_id == 5) || (l_iohs_id == 7))
+        {
+            SET_PB_MISC_CFG_TRANSPORT_0_IB_MUX_CTL0(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_3_IB_MUX_CTL0(l_scom_data);
+        }
+
+        // Transport Outbound Mux
+        if ((l_iohs_id == 1) || (l_iohs_id == 2))
+        {
+            SET_PB_MISC_CFG_TRANSPORT_0_ENABLE(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_0_OB_MUX_CTL0(l_scom_data);
+
+            SET_PB_MISC_CFG_TRANSPORT_1_ENABLE(l_scom_data);
+            SET_PB_MISC_CFG_TRANSPORT_1_OB_MUX_CTL0(l_scom_data);
+        }
+
+        if ((l_iohs_id == 0) || (l_iohs_id == 3))
+        {
+            SET_PB_MISC_CFG_TRANSPORT_2_ENABLE(l_scom_data);
+            SET_PB_MISC_CFG_TRANSPORT_2_OB_MUX_CTL0(l_scom_data);
+
+            SET_PB_MISC_CFG_TRANSPORT_3_ENABLE(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_3_OB_MUX_CTL0(l_scom_data);
+        }
+
+        if ((l_iohs_id == 4) || (l_iohs_id == 6))
+        {
+            SET_PB_MISC_CFG_TRANSPORT_0_ENABLE(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_0_OB_MUX_CTL2(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_0_OB_MUX_CTL0(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_0_OB_MUX_CTL1(l_scom_data);
+
+            SET_PB_MISC_CFG_TRANSPORT_1_ENABLE(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_1_OB_MUX_CTL2(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_1_OB_MUX_CTL0(l_scom_data);
+            SET_PB_MISC_CFG_TRANSPORT_1_OB_MUX_CTL1(l_scom_data);
+        }
+
+        if ((l_iohs_id == 5) || (l_iohs_id == 7))
+        {
+            SET_PB_MISC_CFG_TRANSPORT_2_ENABLE(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_2_OB_MUX_CTL2(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_2_OB_MUX_CTL0(l_scom_data);
+            SET_PB_MISC_CFG_TRANSPORT_2_OB_MUX_CTL1(l_scom_data);
+
+            SET_PB_MISC_CFG_TRANSPORT_3_ENABLE(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_3_OB_MUX_CTL2(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_3_OB_MUX_CTL0(l_scom_data);
+            CLEAR_PB_MISC_CFG_TRANSPORT_3_OB_MUX_CTL1(l_scom_data);
+        }
+
+        FAPI_TRY(PUT_PB_MISC_CFG(i_pauc_target, l_scom_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// See doxygen comments in header file
 fapi2::ReturnCode p10_chiplet_fabric_scominit(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const bool i_config_intranode,
@@ -72,7 +181,9 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
         // init all FIRs as inactive before applying configuration
         for(auto l_iohs : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_PRESENT))
         {
-            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
+            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH_PAUE, action_t::INACTIVE),
+                     "Error from p10_smp_link_firs when masking firs for all links");
+            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH_PAUO, action_t::INACTIVE),
                      "Error from p10_smp_link_firs when masking firs for all links");
         }
     }
@@ -83,7 +194,7 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_iohs, l_fabric_link_active),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
 
-        if(l_fabric_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE)
+        if (l_fabric_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE)
         {
             fapi2::ATTR_IOHS_DRAWER_INTERCONNECT_Type l_drawer_interconnect;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs, l_drawer_interconnect),
@@ -94,13 +205,21 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
             {
                 auto l_pauc = l_iohs.getParent<fapi2::TARGET_TYPE_PAUC>();
                 fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
-                sublink_t sublink_opt;
+                fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
+                fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit;
+                sublink_t l_sublink_opt;
 
                 // apply FBC TL scom initfile
+                // (depending on system configuration, same TL registers may be programmed
+                // multiple times but should end up with consistent results)
                 fapi2::toString(l_pauc, l_tgt_str, sizeof(l_tgt_str));
                 FAPI_DBG("Invoking p10.fbc.ptl.scom.initfile on target %s...", l_tgt_str);
                 FAPI_EXEC_HWP(l_rc, p10_fbc_ptl_scom, l_pauc, i_target, FAPI_SYSTEM);
                 FAPI_TRY(l_rc, "Error from p10_fbc_ptl_scom");
+
+                // reconfigure TL transport muxes for split links
+                FAPI_TRY(p10_chiplet_fabric_scominit_tl_transport_reconfig(l_pauc, l_iohs),
+                         "Error from p10_chiplet_fabric_scominit_tl_transport_reconfig");
 
                 // apply FBC DL scom initfile
                 fapi2::toString(l_iohs, l_tgt_str, sizeof(l_tgt_str));
@@ -110,38 +229,35 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
 
                 FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs, l_link_train),
                          "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, l_iohs, l_link_split),
+                         "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs, l_iohs_unit),
+                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
                 switch(l_link_train)
                 {
                     case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
-                        sublink_opt = sublink_t::BOTH;
+                        l_sublink_opt = (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_FALSE) ?
+                                        (((l_iohs_unit % 2) == 0) ? (sublink_t::BOTH_PAUE) : (sublink_t::BOTH_PAUO)) :
+                                        (sublink_t::BOTH_PAUS);
                         break;
 
                     case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
-                        sublink_opt = sublink_t::EVEN;
+                        l_sublink_opt = ((l_iohs_unit % 2) == 0) ? (sublink_t::EVEN_PAUE) : (sublink_t::EVEN_PAUO);
                         break;
 
                     case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
-                        sublink_opt = sublink_t::ODD;
+                        l_sublink_opt = ((l_iohs_unit % 2) == 0) ? (sublink_t::ODD_PAUE) : (sublink_t::ODD_PAUO);
                         break;
 
                     default:
-                        sublink_opt = sublink_t::NONE;
+                        l_sublink_opt = sublink_t::NONE;
                         break;
                 }
 
-                // setup and unmask TL/DL FIRs
-                FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_opt, action_t::RUNTIME),
+                // setup and unmask EXTFIR/TL/DL/PHY FIRs
+                FAPI_TRY(p10_smp_link_firs(l_iohs, l_sublink_opt, action_t::RUNTIME),
                          "Error from p10_smp_link_firs when configuring for runtime operations");
-            }
-        }
-        else
-        {
-            // mask TL/DL FIRs for links that are not configured for smp operations
-            if (i_config_intranode)
-            {
-                FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
-                         "Error from p10_smp_link_firs when configuring both sublinks for inactive operations");
             }
         }
     }

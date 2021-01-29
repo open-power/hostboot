@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -73,6 +73,21 @@
     <ffdc>TARGET</ffdc>
     <ffdc>PATH_DELAY</ffdc>
     <ffdc>LONGEST_DELAY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_TOD_SETUP_IOLINK_TARGET_MATCH_ERR</rc>
+    <description>
+      Procedure: p10_tod_setup
+      No matching IOLINK targets found for IOHS target
+    </description>
+    <ffdc>PARENT_IOHS</ffdc>
+    <ffdc>PARENT</ffdc>
+    <ffdc>CHILD</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

@@ -29,10 +29,10 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x0F = 0x0F;
 constexpr uint64_t literal_0xF = 0xF;
 constexpr uint64_t literal_0x0 = 0x0;
+constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x001A = 0x001A;
 constexpr uint64_t literal_0x5 = 0x5;
 constexpr uint64_t literal_0b0001111 = 0b0001111;
@@ -50,18 +50,10 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT1, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT1, l_chip_ec));
-        fapi2::ATTR_IOHS_LINK_TRAIN_Type l_TGT0_ATTR_IOHS_LINK_TRAIN;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, TGT0, l_TGT0_ATTR_IOHS_LINK_TRAIN));
         fapi2::ATTR_IOHS_CONFIG_MODE_Type l_TGT0_ATTR_IOHS_CONFIG_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, TGT0, l_TGT0_ATTR_IOHS_CONFIG_MODE));
         uint64_t l_def_FBC_ENABLED = ((l_TGT0_ATTR_IOHS_CONFIG_MODE == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
                                       || (l_TGT0_ATTR_IOHS_CONFIG_MODE == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA));
-        uint64_t l_def_FBC_ODD_ENABLED = (l_def_FBC_ENABLED
-                                          && ((l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
-                                              || (l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY)));
-        uint64_t l_def_FBC_EVN_ENABLED = (l_def_FBC_ENABLED
-                                          && ((l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
-                                              || (l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)));
         fapi2::ATTR_IS_SIMULATION_Type l_TGT2_ATTR_IS_SIMULATION;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT2, l_TGT2_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_SIM = (l_TGT2_ATTR_IS_SIMULATION == literal_1);
@@ -70,17 +62,6 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x1801100aull, l_scom_buffer ));
-
-            if ((l_def_FBC_EVN_ENABLED && l_def_FBC_ODD_ENABLED))
-            {
-                constexpr auto l_DLP0_DLP_CONFIG_LINK_PAIR_ON = 0x1;
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_LINK_PAIR_ON );
-            }
-            else if (literal_1)
-            {
-                constexpr auto l_DLP0_DLP_CONFIG_LINK_PAIR_OFF = 0x0;
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_LINK_PAIR_OFF );
-            }
 
             l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0x0F );
             l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0xF );

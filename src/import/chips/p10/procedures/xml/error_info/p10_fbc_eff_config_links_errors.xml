@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -56,6 +56,85 @@
   <ffdc>REM_FBC_GROUP_ID</ffdc>
   <ffdc>LOC_FBC_CHIP_ID</ffdc>
   <ffdc>REM_FBC_CHIP_ID</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_LINKS_IOLINK_POS_ERR</rc>
+  <description>
+    Procedure: p10_fbc_eff_config_links
+    IOHS sublink children have unexpected unit position numbers
+  </description>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>IOLINK_A_TARGET</ffdc>
+  <ffdc>IOLINK_B_TARGET</ffdc>
+  <ffdc>IOLINK_A_UNIT_NUM</ffdc>
+  <ffdc>IOLINK_B_UNIT_NUM</ffdc>
+  <ffdc>IOLINK_COUNT</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_LINKS_IOLINK_ENDP_ERR</rc>
+  <description>
+    Procedure: p10_fbc_eff_config_links
+    IOHS sublink remote endpoints don't match MRW link split specification
+  </description>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>IOLINK_A_TARGET</ffdc>
+  <ffdc>IOLINK_B_TARGET</ffdc>
+  <ffdc>IOLINK_A_UNIT_NUM</ffdc>
+  <ffdc>IOLINK_B_UNIT_NUM</ffdc>
+  <ffdc>IOLINK_LINK_SPLIT</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_LINKS_IOLINK_NUM_ERR</rc>
+  <description>
+    Procedure: p10_fbc_eff_config_links
+    More than two IOHS sublink children found
+  </description>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>IOLINK_CHILDREN</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_LINKS_UNSUPPORTED_SPLIT</rc>
+  <description>
+    Procedure: p10_fbc_eff_config_links
+    IOHS sublink split only supported on odd numbered IOHS targets
+  </description>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>IOHS_LINK_SPLIT</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_LINKS_MULTIPLE_SPECIFICATION</rc>
+  <description>
+    Procedure: p10_fbc_eff_config_links
+    Multiple IOHS endpoint links specify connectivity for the same
+    logical fabric link
+  </description>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>LOC_LINK_ID</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

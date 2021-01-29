@@ -252,8 +252,9 @@
   <id>ATTR_FREQ_PROC_IOHS_MHZ</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    Shadows ATTR_FREQ_IOHS_MHZ to a proc-scoped attribute.
-    Set in p10_fbc_eff_config.
+    Defines IOHS frequency of AX link, accessible on proc-scoped attribute.
+    Index is logical fabric link number
+    Set in p10_fbc_eff_config / p10_fbc_eff_config_links
     Used by fabric initfiles.
   </description>
   <valueType>uint32</valueType>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,23 +109,55 @@ fapi2::ReturnCode p10_io_get_iohs_lanes(
 {
     int l_start_bit = 0;
     int l_end_bit = 0;
+    auto l_iolink_targets = i_iohs_target.getChildren<fapi2::TARGET_TYPE_IOLINK>();
+    uint8_t l_iolink_num_targets;
 
-    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_iohs_target, l_link_train),
-             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
-
-    if (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY)
+    // handle Cronus platform implementation of IOLINK targets -- both
+    // children are always returned as functional, even if no valid remote endpoint
+    // connection exists
+    if (fapi2::is_platform<fapi2::PLAT_CRONUS>())
     {
-        l_start_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES / 2;
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOLINK>> l_iolink_targets_filtered;
+
+        for (auto l_loc_iolink_target : l_iolink_targets)
+        {
+            fapi2::ReturnCode l_rc;
+            fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_iolink_target;
+            l_rc = l_loc_iolink_target.getOtherEnd(l_rem_iolink_target);
+
+            if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+            {
+                l_iolink_targets_filtered.push_back(l_loc_iolink_target);
+            }
+        }
+
+        l_iolink_targets = l_iolink_targets_filtered;
+    }
+
+    l_iolink_num_targets = l_iolink_targets.size();
+
+    if (l_iolink_num_targets == 2)
+    {
         l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
     }
-    else if (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
+
+    if (l_iolink_num_targets == 1)
     {
-        l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES / 2;
-    }
-    else if (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
-    {
-        l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
+        auto l_iolink_target = l_iolink_targets.front();
+
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_iolink_pos;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iolink_target, l_iolink_pos),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+        if (l_iolink_pos % 2)
+        {
+            l_start_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES / 2;
+            l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
+        }
+        else
+        {
+            l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES / 2;
+        }
     }
 
     for (int l_lane = l_start_bit; l_lane < l_end_bit; l_lane++)

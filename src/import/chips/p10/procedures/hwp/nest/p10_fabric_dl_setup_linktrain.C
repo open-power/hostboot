@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,15 +77,20 @@ p10_fabric_dl_setup_linktrain_start(
     SET_DLP_PHY_CONFIG_DL_SELECT(1, l_data); // DLP
     FAPI_TRY(PUT_DLP_PHY_CONFIG(i_target, l_data));
 
-    //## DLP_CONFIG set paired
-    FAPI_TRY(GET_DLP_CONFIG(i_target, l_data))
-
+    //## DLP_CONFIG set paired if links are not split
     if (l_do_even && l_do_odd)
     {
-        SET_DLP_CONFIG_LINK_PAIR(l_data);
-    }
+        fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, i_target, l_link_split),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
 
-    FAPI_TRY(PUT_DLP_CONFIG(i_target, l_data))
+        if(l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_FALSE)
+        {
+            FAPI_TRY(GET_DLP_CONFIG(i_target, l_data))
+            SET_DLP_CONFIG_LINK_PAIR(l_data);
+            FAPI_TRY(PUT_DLP_CONFIG(i_target, l_data))
+        }
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -105,36 +110,29 @@ p10_fabric_dl_setup_linktrain(
 {
     FAPI_DBG("Start");
 
-    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_en;
-    fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_en;
+    bool l_do_even = false;
+    bool l_do_odd = false;
+    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_active;
 
-    auto l_proc = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, l_proc, l_x_en),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, l_proc, l_a_en),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN,
+                           i_target,
+                           l_link_train),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE,
+                           i_target,
+                           l_link_active),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
 
-    fapi2::ATTR_CHIP_UNIT_POS_Type l_link;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_link),
-             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+    l_do_even = l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH ||
+                l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY;
 
-    if (l_x_en[l_link] || l_a_en[l_link])
+    l_do_odd  = l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH ||
+                l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY;
+
+    if ((l_link_train != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE) &&
+        (l_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE))
     {
-        bool l_do_even = false;
-        bool l_do_odd = false;
-        fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN,
-                               i_target,
-                               l_link_train),
-                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
-
-        l_do_even = l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH ||
-                    l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY;
-
-        l_do_odd  = l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH ||
-                    l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY;
-
         FAPI_TRY(p10_fabric_dl_setup_linktrain_start(i_target, l_do_even, l_do_odd));
     }
 

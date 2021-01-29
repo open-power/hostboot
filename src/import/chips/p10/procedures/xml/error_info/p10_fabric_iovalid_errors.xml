@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -73,99 +73,294 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
-  <rc>RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_NONE_ERR</rc>
+  <rc>RC_P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR</rc>
   <description>
-    Link DL training did not complete successfully,
-    both halves of link pair are incapable of training.
+    Full-width link DL training did not complete successfully,
+    no retry possible.
   </description>
   <ffdc>LOC_ENDP_TARGET</ffdc>
+  <ffdc>LOC_IOLINK_EVN_TARGET</ffdc>
+  <ffdc>LOC_IOLINK_ODD_TARGET</ffdc>
   <ffdc>LOC_LINK_TRAIN</ffdc>
   <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
-  <ffdc>LOC_LINK_FAILED0</ffdc>
-  <ffdc>LOC_LINK_FAILED1</ffdc>
-  <ffdc>REM_ENDP_TARGET</ffdc>
+  <ffdc>LOC_IOLINK_EVN_FAIL</ffdc>
+  <ffdc>LOC_IOLINK_ODD_FAIL</ffdc>
+  <ffdc>REM_IOLINK_EVN_TARGET</ffdc>
+  <ffdc>REM_IOLINK_ODD_TARGET</ffdc>
+  <!-- even -->
   <callout>
-    <target>LOC_ENDP_TARGET</target>
+    <target>LOC_IOLINK_EVN_TARGET</target>
     <priority>MEDIUM</priority>
   </callout>
   <callout>
-    <target>REM_ENDP_TARGET</target>
+    <target>REM_IOLINK_EVN_TARGET</target>
     <priority>MEDIUM</priority>
   </callout>
   <callout>
-    <bus>LOC_ENDP_TARGET,REM_ENDP_TARGET</bus>
+    <bus>LOC_IOLINK_EVN_TARGET,REM_IOLINK_EVN_TARGET</bus>
     <priority>HIGH</priority>
   </callout>
   <deconfigure>
-    <target>LOC_ENDP_TARGET</target>
+    <target>LOC_IOLINK_EVN_TARGET</target>
   </deconfigure>
   <deconfigure>
-    <target>REM_ENDP_TARGET</target>
+    <target>REM_IOLINK_EVN_TARGET</target>
   </deconfigure>
   <gard>
-    <target>LOC_ENDP_TARGET</target>
+    <target>LOC_IOLINK_EVN_TARGET</target>
   </gard>
   <gard>
-    <target>REM_ENDP_TARGET</target>
+    <target>REM_IOLINK_EVN_TARGET</target>
+  </gard>
+  <!-- odd -->
+  <callout>
+    <target>LOC_IOLINK_ODD_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>REM_IOLINK_ODD_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <bus>LOC_IOLINK_ODD_TARGET,REM_IOLINK_ODD_TARGET</bus>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>LOC_IOLINK_ODD_TARGET</target>
+  </deconfigure>
+  <deconfigure>
+    <target>REM_IOLINK_ODD_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>LOC_IOLINK_ODD_TARGET</target>
+  </gard>
+  <gard>
+    <target>REM_IOLINK_ODD_TARGET</target>
   </gard>
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
-  <rc>RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_HALF_ERR</rc>
+  <rc>RC_P10_FAB_IOVALID_DL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR</rc>
   <description>
-    Link DL training did not complete successfully,
+    Half-width link DL training did not complete successfully,
+    no retry possible.
+  </description>
+  <ffdc>LOC_ENDP_TARGET</ffdc>
+  <ffdc>LOC_IOLINK_TARGET</ffdc>
+  <ffdc>LOC_LINK_TRAIN</ffdc>
+  <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
+  <ffdc>LOC_IOLINK_EVN_FAIL</ffdc>
+  <ffdc>LOC_IOLINK_ODD_FAIL</ffdc>
+  <ffdc>REM_IOLINK_TARGET</ffdc>
+  <callout>
+    <target>LOC_IOLINK_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>REM_IOLINK_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <bus>LOC_IOLINK_TARGET,REM_IOLINK_TARGET</bus>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>LOC_IOLINK_TARGET</target>
+  </deconfigure>
+  <deconfigure>
+    <target>REM_IOLINK_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>LOC_IOLINK_TARGET</target>
+  </gard>
+  <gard>
+    <target>REM_IOLINK_TARGET</target>
+  </gard>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR</rc>
+  <description>
+    Full-width link DL training did not complete successfully,
     attempt retraining on half link basis.
   </description>
   <ffdc>LOC_ENDP_TARGET</ffdc>
+  <ffdc>LOC_IOLINK_TARGET</ffdc>
   <ffdc>LOC_LINK_TRAIN</ffdc>
   <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
-  <ffdc>LOC_LINK_FAILED0</ffdc>
-  <ffdc>LOC_LINK_FAILED1</ffdc>
+  <ffdc>LOC_IOLINK_EVN_FAIL</ffdc>
+  <ffdc>LOC_IOLINK_ODD_FAIL</ffdc>
   <ffdc>REM_ENDP_TARGET</ffdc>
+  <ffdc>REM_IOLINK_TARGET</ffdc>
   <callout>
-    <target>LOC_ENDP_TARGET</target>
+    <target>LOC_IOLINK_TARGET</target>
     <priority>MEDIUM</priority>
   </callout>
   <callout>
-    <target>REM_ENDP_TARGET</target>
+    <target>REM_IOLINK_TARGET</target>
     <priority>MEDIUM</priority>
   </callout>
   <callout>
-    <bus>LOC_ENDP_TARGET,REM_ENDP_TARGET</bus>
+    <bus>LOC_IOLINK_TARGET,REM_IOLINK_TARGET</bus>
     <priority>HIGH</priority>
   </callout>
+  <deconfigure>
+    <target>LOC_IOLINK_TARGET</target>
+  </deconfigure>
+  <deconfigure>
+    <target>REM_IOLINK_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>LOC_IOLINK_TARGET</target>
+  </gard>
+  <gard>
+    <target>REM_IOLINK_TARGET</target>
+  </gard>
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
-  <rc>RC_P10_FAB_IOVALID_TL_NOT_TRAINED_ERR</rc>
+  <rc>RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR</rc>
   <description>
-    Link TL training did not complete successfully.
+    Full-width link TL training did not complete successfully,
+    no retry possible.
   </description>
+  <ffdc>LOC_ENDP_TARGET</ffdc>
+  <ffdc>LOC_IOLINK_EVN_TARGET</ffdc>
+  <ffdc>LOC_IOLINK_ODD_TARGET</ffdc>
   <ffdc>LOC_LINK_TRAIN</ffdc>
-  <ffdc>REM_ENDP_TARGET</ffdc>
+  <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
+  <ffdc>LOC_IOLINK_EVN_FAIL</ffdc>
+  <ffdc>LOC_IOLINK_ODD_FAIL</ffdc>
+  <ffdc>REM_IOLINK_EVN_TARGET</ffdc>
+  <ffdc>REM_IOLINK_ODD_TARGET</ffdc>
+  <!-- even -->
   <callout>
-    <target>LOC_ENDP_TARGET</target>
+    <target>LOC_IOLINK_EVN_TARGET</target>
     <priority>MEDIUM</priority>
   </callout>
   <callout>
-    <target>REM_ENDP_TARGET</target>
+    <target>REM_IOLINK_EVN_TARGET</target>
     <priority>MEDIUM</priority>
   </callout>
   <callout>
-    <bus>LOC_ENDP_TARGET,REM_ENDP_TARGET</bus>
+    <bus>LOC_IOLINK_EVN_TARGET,REM_IOLINK_EVN_TARGET</bus>
     <priority>HIGH</priority>
   </callout>
   <deconfigure>
-    <target>LOC_ENDP_TARGET</target>
+    <target>LOC_IOLINK_EVN_TARGET</target>
   </deconfigure>
   <deconfigure>
-    <target>REM_ENDP_TARGET</target>
+    <target>REM_IOLINK_EVN_TARGET</target>
   </deconfigure>
   <gard>
-    <target>LOC_ENDP_TARGET</target>
+    <target>LOC_IOLINK_EVN_TARGET</target>
   </gard>
   <gard>
-    <target>REM_ENDP_TARGET</target>
+    <target>REM_IOLINK_EVN_TARGET</target>
+  </gard>
+  <!-- odd -->
+  <callout>
+    <target>LOC_IOLINK_ODD_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>REM_IOLINK_ODD_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <bus>LOC_IOLINK_ODD_TARGET,REM_IOLINK_ODD_TARGET</bus>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>LOC_IOLINK_ODD_TARGET</target>
+  </deconfigure>
+  <deconfigure>
+    <target>REM_IOLINK_ODD_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>LOC_IOLINK_ODD_TARGET</target>
+  </gard>
+  <gard>
+    <target>REM_IOLINK_ODD_TARGET</target>
+  </gard>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR</rc>
+  <description>
+    Full-width link TL training did not complete successfully,
+    attempt retraining on half link basis.
+  </description>
+  <ffdc>LOC_ENDP_TARGET</ffdc>
+  <ffdc>LOC_IOLINK_TARGET</ffdc>
+  <ffdc>LOC_LINK_TRAIN</ffdc>
+  <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
+  <ffdc>LOC_IOLINK_EVN_FAIL</ffdc>
+  <ffdc>LOC_IOLINK_ODD_FAIL</ffdc>
+  <ffdc>REM_ENDP_TARGET</ffdc>
+  <ffdc>REM_IOLINK_TARGET</ffdc>
+  <callout>
+    <target>LOC_IOLINK_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>REM_IOLINK_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <bus>LOC_IOLINK_TARGET,REM_IOLINK_TARGET</bus>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>LOC_IOLINK_TARGET</target>
+  </deconfigure>
+  <deconfigure>
+    <target>REM_IOLINK_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>LOC_IOLINK_TARGET</target>
+  </gard>
+  <gard>
+    <target>REM_IOLINK_TARGET</target>
+  </gard>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FAB_IOVALID_TL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR</rc>
+  <description>
+    Half-width link TL training did not complete successfully,
+    no retry possible.
+  </description>
+  <ffdc>LOC_ENDP_TARGET</ffdc>
+  <ffdc>LOC_IOLINK_TARGET</ffdc>
+  <ffdc>LOC_LINK_TRAIN</ffdc>
+  <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
+  <ffdc>LOC_IOLINK_EVN_FAIL</ffdc>
+  <ffdc>LOC_IOLINK_ODD_FAIL</ffdc>
+  <ffdc>REM_IOLINK_TARGET</ffdc>
+  <callout>
+    <target>LOC_IOLINK_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>REM_IOLINK_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <bus>LOC_IOLINK_TARGET,REM_IOLINK_TARGET</bus>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>LOC_IOLINK_TARGET</target>
+  </deconfigure>
+  <deconfigure>
+    <target>REM_IOLINK_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>LOC_IOLINK_TARGET</target>
+  </gard>
+  <gard>
+    <target>REM_IOLINK_TARGET</target>
   </gard>
 </hwpError>
 <!-- ******************************************************************** -->

@@ -181,7 +181,7 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
             FAPI_DBG("Setting number of lanes and turning off stop_thread for IOHS thread %d", l_thread);
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, l_iohs_target, l_config_mode),
-                     "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+                     "Error from FAPI_ATTR_GET (ATTR_IOHS_CONFIG_MODE)");
 
             //Enable spread spectrum
             FAPI_TRY(p10_io_ppe_fw_spread_en[l_thread].putData(l_pauc_target, l_iohs_ss));

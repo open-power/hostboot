@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,53 +46,207 @@
 /// @brief Determine fabric link enable state, given endpoint target
 ///
 /// @param[in]  i_target           Endpoint iohs target
-/// @param[out] o_link_is_enabled  0=link disabled, else enabled
+/// @param[out] o_link_is_enabled  Logical links enabled by this endpoint
+///                                (0=link disabled, else enabled)
+/// @param[out] o_sublinks         Sublink targets associated with each
+///                                logical link (for remote end query)
+/// @param[out] o_link_train       Endpoint sublink train state
+/// @param[out] o_bus_width        Endpoint link bus width
 ///
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_fbc_eff_config_links_query_link_en(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
-    uint8_t& o_link_is_enabled)
+    uint8_t o_link_is_enabled[],
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> o_sublinks[],
+    fapi2::ATTR_IOHS_LINK_TRAIN_Type& o_link_train,
+    fapi2::ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_Type& o_bus_width)
 {
     FAPI_DBG("Start");
 
+    // *INDENT-OFF*
     fapi2::ATTR_IOHS_CONFIG_MODE_Type l_iohs_config_mode;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit_num;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, i_target, l_iohs_config_mode),
              "Error from FAPI_ATTR_GET (ATTR_IOHS_CONFIG_MODE)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_iohs_unit_num),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
+    // set default state for output parameters
+    o_link_train = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE;
+    for (auto l_link_id = 0; l_link_id < P10_FBC_UTILS_MAX_LINKS; l_link_id++)
+    {
+        o_link_is_enabled[l_link_id] = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
+        o_bus_width[l_link_id]       = fapi2::ENUM_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_2_BYTE;
+    }
+
+    // update only if endpoint is configured to carry X/A SMP traffic
     if ((l_iohs_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX) ||
         (l_iohs_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA))
     {
-        fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_target, l_link_train),
-                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
-
-        switch(l_link_train)
+        // retreive set of associated sublinks on local end
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOLINK>> l_iolink_targets;
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOLINK>> l_iolink_targets_rem;
+        // qualify based on state of remote end -- keeps complexity of
+        // determining logical/physical link relationships in this subroutine
+        for (auto l_iolink_loc : i_target.getChildren<fapi2::TARGET_TYPE_IOLINK>())
         {
-            case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
-                o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE;
+            fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_iolink_rem;
+            fapi2::ReturnCode l_rc = l_iolink_loc.getOtherEnd(l_iolink_rem);
+            if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+            {
+                l_iolink_targets.push_back(l_iolink_loc);
+                l_iolink_targets_rem.push_back(l_iolink_rem);
+            }
+        }
+        auto l_iolink_num_targets = l_iolink_targets.size();
+
+        // retreive set of sublink unit numbers
+        std::vector<fapi2::ATTR_CHIP_UNIT_POS_Type> l_sublink_unit_nums;
+        for (uint8_t ii = 0; ii < l_iolink_targets.size(); ii++)
+        {
+            fapi2::ATTR_CHIP_UNIT_POS_Type l_sublink_unit_num;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iolink_targets[ii], l_sublink_unit_num),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+            l_sublink_unit_nums.push_back(l_sublink_unit_num);
+        }
+
+        // check properites of link split specification in MRW -- special handling
+        // between physical IOHS -> logical A/X link is needed if the link is
+        // marked to be split
+        //   mapping from physical to logical:
+        //     5a (even) =>  ax4
+        //     5b (odd)  =>  ax5
+        //     7a (even) =>  ax6
+        //     7b (odd)  =>  ax7
+        fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split = fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_FALSE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, i_target, l_link_split),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
+        FAPI_ASSERT(((l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_FALSE) ||
+                     (l_iohs_unit_num % 2) == 1),
+                    fapi2::P10_FBC_EFF_CONFIG_LINKS_UNSUPPORTED_SPLIT()
+                    .set_IOHS_TARGET(i_target)
+                    .set_IOHS_LINK_SPLIT(l_link_split),
+                    "IOHS sublink split only supported on odd IOHS targets!");
+
+        switch (l_iolink_num_targets)
+        {
+            case 2:
+                // confirm local link endpoint correctness
+                FAPI_ASSERT(((l_sublink_unit_nums.front() == 2*l_iohs_unit_num) && (l_sublink_unit_nums.back()  == ((2*l_iohs_unit_num)+1))) ||
+                            ((l_sublink_unit_nums.back()  == 2*l_iohs_unit_num) && (l_sublink_unit_nums.front() == ((2*l_iohs_unit_num)+1))),
+                            fapi2::P10_FBC_EFF_CONFIG_LINKS_IOLINK_POS_ERR()
+                            .set_IOHS_TARGET(i_target)
+                            .set_IOLINK_A_TARGET(l_iolink_targets.front())
+                            .set_IOLINK_B_TARGET(l_iolink_targets.back())
+                            .set_IOLINK_A_UNIT_NUM(l_sublink_unit_nums.front())
+                            .set_IOLINK_B_UNIT_NUM(l_sublink_unit_nums.back())
+                            .set_IOLINK_COUNT(2),
+                            "Unexpected IOLINK unit target number");
+
+                // confirm link split specification via remote endpoint properties
+                FAPI_ASSERT((l_link_split &&  (l_iolink_targets_rem.front().getParent<fapi2::TARGET_TYPE_IOHS>() != l_iolink_targets_rem.back().getParent<fapi2::TARGET_TYPE_IOHS>())) ||
+                            (!l_link_split && (l_iolink_targets_rem.front().getParent<fapi2::TARGET_TYPE_IOHS>() == l_iolink_targets_rem.back().getParent<fapi2::TARGET_TYPE_IOHS>())),
+                            fapi2::P10_FBC_EFF_CONFIG_LINKS_IOLINK_ENDP_ERR()
+                            .set_IOHS_TARGET(i_target)
+                            .set_IOLINK_A_TARGET(l_iolink_targets.front())
+                            .set_IOLINK_B_TARGET(l_iolink_targets.back())
+                            .set_IOLINK_A_UNIT_NUM(l_sublink_unit_nums.front())
+                            .set_IOLINK_B_UNIT_NUM(l_sublink_unit_nums.back())
+                            .set_IOLINK_LINK_SPLIT(l_link_split),
+                            "IOHS sublink remote endpoints don't match MRW link split specification!");
+
+                // fill output structures
+                if (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_TRUE)
+                {
+                    o_link_is_enabled[l_iohs_unit_num-1] = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
+                    o_link_is_enabled[l_iohs_unit_num]   = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY;
+
+                    o_sublinks[l_iohs_unit_num-1]        = (l_sublink_unit_nums.front() == (2*l_iohs_unit_num))?
+                                                           (l_iolink_targets.front()):
+                                                           (l_iolink_targets.back());
+                    o_sublinks[l_iohs_unit_num]          = (l_sublink_unit_nums.front() == (2*l_iohs_unit_num))?
+                                                           (l_iolink_targets.back()):
+                                                           (l_iolink_targets.front());
+
+                    o_bus_width[l_iohs_unit_num-1]       = fapi2::ENUM_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_1_BYTE;
+                    o_bus_width[l_iohs_unit_num]         = fapi2::ENUM_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_1_BYTE;
+                }
+                else
+                {
+                    o_link_is_enabled[l_iohs_unit_num]   = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE;
+                    o_sublinks[l_iohs_unit_num]          = l_iolink_targets.front();
+                    o_bus_width[l_iohs_unit_num]         = fapi2::ENUM_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_2_BYTE;
+                }
+
+                o_link_train = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH;
                 break;
 
-            case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
-                o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
+            case 1:
+                // confirm local link endpoint correctness
+                FAPI_ASSERT(((l_sublink_unit_nums.front() == 2*l_iohs_unit_num) || (l_sublink_unit_nums.front() == ((2*l_iohs_unit_num)+1))),
+                            fapi2::P10_FBC_EFF_CONFIG_LINKS_IOLINK_POS_ERR()
+                            .set_IOHS_TARGET(i_target)
+                            .set_IOLINK_A_TARGET(l_iolink_targets.front())
+                            .set_IOLINK_B_TARGET(l_iolink_targets.back())
+                            .set_IOLINK_A_UNIT_NUM(l_sublink_unit_nums.front())
+                            .set_IOLINK_B_UNIT_NUM(l_sublink_unit_nums.back())
+                            .set_IOLINK_COUNT(1),
+                            "Unexpected IOLINK unit target number");
+
+                // fill output structures
+                if ((l_sublink_unit_nums.front() % 2) == 0)
+                {
+                    if (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_TRUE)
+                    {
+                        o_link_is_enabled[l_iohs_unit_num-1] = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
+                        o_sublinks[l_iohs_unit_num-1]        = l_iolink_targets.front();
+                        o_bus_width[l_iohs_unit_num-1]       = fapi2::ENUM_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_1_BYTE;
+                    }
+                    else
+                    {
+                        o_link_is_enabled[l_iohs_unit_num]   = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
+                        o_sublinks[l_iohs_unit_num]          = l_iolink_targets.front();
+                        o_bus_width[l_iohs_unit_num]         = fapi2::ENUM_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_1_BYTE;
+                    }
+                    o_link_train                             = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY;
+                }
+                else
+                {
+                    o_link_is_enabled[l_iohs_unit_num]       = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY;
+                    o_sublinks[l_iohs_unit_num]              = l_iolink_targets.front();
+                    o_bus_width[l_iohs_unit_num]             = fapi2::ENUM_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_1_BYTE;
+                    o_link_train                             = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY;
+                }
                 break;
 
-            case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
-                o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY;
+            case 0:
                 break;
 
             default:
-                o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
+                FAPI_ASSERT(false,
+                            fapi2::P10_FBC_EFF_CONFIG_LINKS_IOLINK_NUM_ERR()
+                            .set_IOHS_TARGET(i_target)
+                            .set_IOLINK_CHILDREN(l_iolink_num_targets),
+                            "Unexpected number of IOLINK unit targets");
                 break;
         }
+
+        // print out debug info
+        if (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_TRUE)
+        {
+            FAPI_DBG("o_link_is_enabled[%d] = 0x%x", l_iohs_unit_num-1, o_link_is_enabled[l_iohs_unit_num-1]);
+            FAPI_DBG("o_link_is_enabled[%d] = 0x%x", l_iohs_unit_num, o_link_is_enabled[l_iohs_unit_num]);
+        }
+        else
+        {
+            FAPI_DBG("o_link_is_enabled[%d] = 0x%x", l_iohs_unit_num, o_link_is_enabled[l_iohs_unit_num]);
+        }
     }
-    else
-    {
-        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
-    }
+    // *INDENT-ON*
 
 fapi_try_exit:
-    FAPI_DBG("End, o_link_is_enabled: 0x%x", o_link_is_enabled);
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
 
@@ -166,7 +320,8 @@ fapi_try_exit:
 /// @param[in]  i_fbc_id_is_chip  Fabric chip ID if true; else group ID
 /// @param[out] o_loc_link_en     Array of local end link enables
 /// @param[out] o_rem_link_id     Array of remote end link IDs
-/// @param[out] o_rem_fbc_id      Array of remote end fabric topology IDs
+/// @param[out] o_rem_fbc_id      Array of remote end fabric chip/node IDs
+/// @param[out] o_rem_topo_id     Array of remote end fabric topology IDs
 ///
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
@@ -175,95 +330,87 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
     const bool i_fbc_id_is_chip,
     uint8_t o_loc_link_en[],
     uint8_t o_rem_link_id[],
-    uint8_t o_rem_fbc_id[])
+    uint8_t o_rem_fbc_id[],
+    uint8_t o_rem_topo_id[])
 {
     FAPI_DBG("Start");
 
-    fapi2::ATTR_CHIP_UNIT_POS_Type l_loc_link_id;
-    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_active;
-
-    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_target;
+    uint8_t l_loc_link_en[P10_FBC_UTILS_MAX_LINKS] = { fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE };
+    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE;
+    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_active = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE;
+    fapi2::ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_Type l_bus_width = { fapi2::ENUM_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_2_BYTE };
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_sublinks[P10_FBC_UTILS_MAX_LINKS];
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_loc_proc_target = i_loc_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_rem_proc_target;
-    auto l_loc_proc_target = i_loc_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_loc_target, l_loc_link_id),
-             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
-    FAPI_TRY(p10_fbc_eff_config_links_query_link_en(i_loc_target, o_loc_link_en[l_loc_link_id]),
+    // populate entries for all links logically enabled by this endpoint
+    FAPI_TRY(p10_fbc_eff_config_links_query_link_en(
+                 i_loc_target,
+                 l_loc_link_en,
+                 l_sublinks,
+                 l_link_train,
+                 l_bus_width),
              "Error from p10_fbc_eff_config_links_query_link_en (local)");
 
-    ////////////////////////////////////////////////////////
-    // Local end link target is enabled, query remote end
-    ////////////////////////////////////////////////////////
-    if (o_loc_link_en[l_loc_link_id])
+    // fill parameters for logical link usage
+    for (auto l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
     {
-        // obtain endpoint target associated with remote end of link
-        fapi2::ReturnCode l_rc = i_loc_target.getOtherEnd(l_rem_target);
-
-        if (l_rc)
+        // local end link target is enabled, query properties of remote end to fill
+        // discern remaining output parameters
+        if (l_loc_link_en[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
         {
-            // endpoint target for remote end of link is not configured
-            o_loc_link_en[l_loc_link_id] = 0;
-        }
-        else
-        {
-            // verify that remote link end is also enabled, otherwise assert that
-            // local link is also not enabled. avoid directly qualifying the local link
-            // enable with the remote endpoint state since this can be problematic for
-            // links with lane swap where one link end may have even-only trained, while
-            // the remote end may have odd-only trained
+            uint8_t l_loc_topo_id = 0, l_rem_topo_id = 0;
 
-            uint8_t l_rem_link_en = 0;
-            FAPI_TRY(p10_fbc_eff_config_links_query_link_en(l_rem_target, l_rem_link_en),
-                     "Error from p10_fbc_eff_config_links_query_link_en (remote)");
+            // across all physical links we should only end up with one contributing
+            // to the specification of a logical link connection
+            FAPI_ASSERT(o_loc_link_en[l_loc_link_id] == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE,
+                        fapi2::P10_FBC_EFF_CONFIG_LINKS_MULTIPLE_SPECIFICATION()
+                        .set_IOHS_TARGET(i_loc_target)
+                        .set_LOC_LINK_ID(l_loc_link_id),
+                        "Multiple endpoints specify connectivity for the same logical fabric link ID", l_loc_link_id);
 
-            if(l_rem_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
-            {
-                o_loc_link_en[l_loc_link_id] = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
-            }
+            // obtain target associated with remote end of link
+            // expect it to be valid based on logic in p10_fbc_eff_config_links_query_link_en()
+            fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_sublink_target;
+            fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_target;
+            FAPI_TRY(l_sublinks[l_loc_link_id].getOtherEnd(l_rem_sublink_target),
+                     "Error from getOtherEnd");
+            l_rem_target = l_rem_sublink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
+            l_rem_proc_target = l_rem_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+            // obtain remote link id
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_rem_target, o_rem_link_id[l_loc_link_id]),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+            // obtain remote fbc id
+            FAPI_TRY(p10_fbc_eff_config_links_rem_fbc_id(
+                         l_loc_proc_target,
+                         l_rem_proc_target,
+                         i_fbc_id_is_chip,
+                         o_rem_fbc_id[l_loc_link_id]),
+                     "Error from p10_fbc_eff_config_links_rem_fbc_id");
+
+            // print out mapped local and remote endpoints for debug
+            FAPI_TRY(topo::get_topology_idx(l_loc_proc_target, EFF_TOPOLOGY_ID, l_loc_topo_id),
+                     "Error from topo::get_topology_idx (local)");
+            FAPI_TRY(topo::get_topology_idx(l_rem_proc_target, EFF_TOPOLOGY_ID, l_rem_topo_id),
+                     "Error from topo::get_topology_idx (remote)");
+            FAPI_DBG("Local topo ID: 0x%x, Remote topo ID: 0x%x, Link ID: %d", l_loc_topo_id, l_rem_topo_id, l_loc_link_id);
+
+            // update output / attribute information
+            o_loc_link_en[l_loc_link_id] = l_loc_link_en[l_loc_link_id];
+            o_rem_topo_id[l_loc_link_id] = l_rem_topo_id;
+            l_link_active = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE;
         }
     }
 
-    ////////////////////////////////////////////////////////
-    // Both local and remote endpoints are enabled, gather
-    // remaining remote end parameters
-    ////////////////////////////////////////////////////////
-    if (o_loc_link_en[l_loc_link_id])
-    {
-        fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type l_loc_proc_id, l_rem_proc_id;
-        l_rem_proc_target = l_rem_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-
-        // obtain remote link id
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_rem_target, o_rem_link_id[l_loc_link_id]),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
-        // obtain remote fbc id
-        FAPI_TRY(p10_fbc_eff_config_links_rem_fbc_id(
-                     l_loc_proc_target,
-                     l_rem_proc_target,
-                     i_fbc_id_is_chip,
-                     o_rem_fbc_id[l_loc_link_id]),
-                 "Error from p10_fbc_eff_config_links_rem_fbc_id");
-
-        // print out mapped local and remote endpoints for debug
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, l_loc_proc_target, l_loc_proc_id),
-                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_TOPOLOGY_ID)");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, l_rem_proc_target, l_rem_proc_id),
-                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_TOPOLOGY_ID)");
-        FAPI_DBG("Local proc ID: 0x%x, Remote proc ID: 0x%x, Link ID: %d", l_loc_proc_id, l_rem_proc_id, l_loc_link_id);
-    }
-
-    ////////////////////////////////////////////////////////
-    // Update attributes based on link state
-    // Note that these need to be configured both when link
-    // is enabled and disabled to support alink repair
-    ////////////////////////////////////////////////////////
-
-    // write fabric link active attribute to indicate that the link is used for fabric operations
-    l_link_active = (o_loc_link_en[l_loc_link_id]) ?
-                    (fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE) : (fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE);
+    // update attributes for physical link
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_LINK_TRAIN, i_loc_target, l_link_train),
+             "Error from FAPI_ATTR_SET (ATTR_IOHS_LINK_TRAIN)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, i_loc_target, l_link_active),
-             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE");
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_IOHS_BUS_WIDTH, l_loc_proc_target, l_bus_width),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_IOHS_BUS_WIDTH)");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -295,6 +442,8 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
     fapi2::ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID_Type l_a_rem_link_id = { 0 };
     fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID_Type l_x_rem_fbc_id  = { 0 };
     fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID_Type l_a_rem_fbc_id  = { 0 };
+    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID_Type l_x_rem_topo_id  = { 0 };
+    fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID_Type l_a_rem_topo_id  = { 0 };
 
     // fabric id type for proc connected to remote end
     fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
@@ -313,6 +462,8 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, i_target, l_x_rem_fbc_id),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID, i_target, l_x_rem_topo_id),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, i_target, l_a_en),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG, i_target, l_a_num),
@@ -321,6 +472,8 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, i_target, l_a_rem_fbc_id),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID, i_target, l_a_rem_topo_id),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID)");
     }
 
     ////////////////////////////////////////////////////////
@@ -360,7 +513,8 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
                          l_fbc_id_is_chip,
                          l_x_en,
                          l_x_rem_link_id,
-                         l_x_rem_fbc_id),
+                         l_x_rem_fbc_id,
+                         l_x_rem_topo_id),
                      "Error from p10_fbc_eff_config_links_query_endp (SMPX)");
         }
         else
@@ -370,7 +524,8 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
                          false,
                          l_a_en,
                          l_a_rem_link_id,
-                         l_a_rem_fbc_id),
+                         l_a_rem_fbc_id,
+                         l_a_rem_topo_id),
                      "Error from p10_fbc_eff_config_links_query_endp (SMPA)");
         }
     }
@@ -400,6 +555,8 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, i_target, l_x_rem_fbc_id),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID, i_target, l_x_rem_topo_id),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, i_target, l_a_en),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG, i_target, l_a_num),
@@ -408,6 +565,8 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, i_target, l_a_rem_fbc_id),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID, i_target, l_a_rem_topo_id),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID)");
 
     ////////////////////////////////////////////////////////
     // For SMP_ACTIVE_PHASE1, init aggregate link attrs

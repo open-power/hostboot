@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -502,15 +502,24 @@ fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
     {
         for (auto l_iohs_target : l_proc_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
         {
+            fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
             // reset fabric link active for concurrent repairs
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_iohs_target, l_link_inactive),
                      "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE");
 
             // shadow iohs frequency to proc scope for fabric initfiles
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, l_iohs_target, l_link_split),
+                     "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_iohs_pos),
                      "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_IOHS_MHZ, l_iohs_target, l_freq_proc_iohs_mhz[l_iohs_pos]),
                      "Error from FAPI_ATTR_GET (ATTR_FREQ_IOHS_MHZ)");
+
+            if ((l_iohs_pos % 2) && (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_TRUE))
+            {
+                l_freq_proc_iohs_mhz[l_iohs_pos - 1] = l_freq_proc_iohs_mhz[l_iohs_pos];
+            }
+
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_PROC_IOHS_MHZ, l_proc_target, l_freq_proc_iohs_mhz),
                      "Error form FAPI_ATTR_GET (ATTR_FREQ_PROC_IOHS_MHZ)");
         }

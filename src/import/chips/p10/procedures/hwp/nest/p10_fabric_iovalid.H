@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,8 +76,8 @@ extern "C"
 /// @param[in] i_set_not_clear      Define iovalid operation (true=set, false=clear)
 /// @param[in] i_update_intranode   Update iovalid state on intranode links (X)
 /// @param[in] i_update_internode   Update iovalid state on internode links (X,A)
-/// @param[out] o_dl_fail_rcs       Vector of return code objects, to append
-///                                 in case of IOHS DL training failures
+/// @param[out] o_dltl_fail_rcs     Vector of return code objects, to append
+///                                 in case of IOHS DL/FBC TL training failures
 ///
 /// @return fapi::ReturnCode        FAPI2_RC_SUCCESS if success, else error code.
 ///
@@ -86,7 +86,7 @@ extern "C"
         const bool i_set_not_clear,
         const bool i_update_intranode,
         const bool i_update_internode,
-        std::vector<fapi2::ReturnCode>& o_dl_fail_rcs);
+        std::vector<fapi2::ReturnCode>& o_dltl_fail_rcs);
 
 } // extern "C"
 

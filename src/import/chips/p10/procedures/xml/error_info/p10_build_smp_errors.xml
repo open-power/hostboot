@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -114,13 +114,50 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <rc>RC_P10_BUILD_SMP_LINK_VALIDATE_IOHS_TARGET_ERR</rc>
+  <description>
+    Error in matching properties of A/X link to IOHS target
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>LINK_TYPE</ffdc>
+  <ffdc>LINK_ID</ffdc>
+  <ffdc>LINK_CNFG</ffdc>
+  <ffdc>LINK_SPLIT</ffdc>
+  <ffdc>LINK_TRAIN</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_BUILD_SMP_LINK_VALIDATE_NO_IOHS_MATCH_ERR</rc>
+  <description>
+    Error finding IOHS target to match A/X link
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>LINK_TYPE</ffdc>
+  <ffdc>LINK_ID</ffdc>
+  <ffdc>LINK_CNFG</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
   <rc>RC_P10_BUILD_SMP_INVALID_LINK_STATE</rc>
   <description>
     Link is marked active, but DL/TL/iovalid state do not support
     functional operation.
   </description>
   <ffdc>TARGET</ffdc>
-  <ffdc>LINK_EN</ffdc>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>PAUC_TARGET</ffdc>b
+  <ffdc>LINK_TYPE</ffdc>
+  <ffdc>LINK_ID</ffdc>
+  <ffdc>LINK_CNFG</ffdc>
   <ffdc>DL_FIR_REG</ffdc>
   <ffdc>TL_FIR_REG</ffdc>
   <ffdc>CPLT_CONF1_REG</ffdc>

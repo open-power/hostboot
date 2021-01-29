@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1390,6 +1390,9 @@ void display_tod_nodes(
     const uint32_t i_depth)
 {
     char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+    uint8_t l_bus_rx; //, l_bus_tx;
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_iohs_target_rx, l_iohs_target_tx;
+    fapi2::ReturnCode l_rc;
 
     if (i_tod_node == NULL || i_tod_node->i_target == NULL)
     {
@@ -1400,8 +1403,62 @@ void display_tod_nodes(
     fapi2::toString(i_tod_node->i_target,
                     l_targetStr,
                     fapi2::MAX_ECMD_STRING_LEN);
-    FAPI_INF("%s (Delay = %d)",
-             l_targetStr, i_tod_node->o_int_path_delay);
+    FAPI_INF("%s",
+             l_targetStr);
+    FAPI_INF("  Parent = %p", i_tod_node->i_parent);
+    FAPI_INF("  Master = %d",
+             i_tod_node->i_tod_master);
+    FAPI_INF("  Drawer master = %d",
+             i_tod_node->i_drawer_master);
+
+    if (i_tod_node->i_tod_master == 0)
+    {
+        // RX
+        l_rc = p10_tod_lookup_iohs_target(*(i_tod_node->i_target),
+                                          i_tod_node->i_bus_rx,
+                                          l_bus_rx,
+                                          l_iohs_target_rx);
+
+        if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::toString(l_iohs_target_rx,
+                            l_targetStr,
+                            fapi2::MAX_ECMD_STRING_LEN);
+
+            FAPI_INF("  Bus RX = %d->%d (%s)",
+                     i_tod_node->i_bus_rx, l_bus_rx, l_targetStr);
+        }
+        else
+        {
+            FAPI_INF("  Bus RX = %d (?)",
+                     i_tod_node->i_bus_rx);
+        }
+
+        // TX
+//        l_rc = p10_tod_lookup_iohs_target(*(i_tod_node->i_parent->i_target),
+//                                          i_tod_node->i_bus_tx,
+//                                          l_bus_tx,
+//                                          l_iohs_target_tx);
+//        if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+//        {
+//            fapi2::toString(l_iohs_target_tx,
+//                            l_targetStr,
+//                            fapi2::MAX_ECMD_STRING_LEN);
+//
+//            FAPI_INF("  Bus TX = %d (%s)",
+//                     l_bus_tx, l_targetStr);
+//        }
+//        else
+//        {
+        FAPI_INF("  Bus TX = %d (?)",
+                 i_tod_node->i_bus_tx);
+//        }
+    }
+
+    FAPI_INF("  Depth = %d",
+             i_depth);
+    FAPI_INF("  Delay = %d",
+             i_tod_node->o_int_path_delay);
 
     for (auto l_child = (i_tod_node->i_children).begin();
          l_child != (i_tod_node->i_children).end();
@@ -1416,12 +1473,14 @@ fapi_try_exit:
 
 
 /// @brief Returns the latency and round-trip values from the FBC-TOD Latency measure register
+/// @param[in] i_iolink_targets => IOLINK targets to measure
 /// @param[in] i_iohs_target  => IOHS target
 /// @param[out] o_iohs_latency => Latency in IOHS clocks from the FBC-TOD Latency measure register
 /// @param[out] o_iohs_round_trip_clocks => IOHS round-trip clocks from the FBC-TOD Latency measure register
 /// @return FAPI2_RC_SUCCESS if successfully returned the values from the Latency measure register
 ///         else error
 fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOLINK>>& i_iolink_targets,
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
     iohs_latency_t& o_iohs_latency,
     iohs_latency_t& o_iohs_round_trip_clocks)
@@ -1430,17 +1489,26 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
     iohs_latency_t l_iohs_local_latency_diff = 0 ;
     iohs_latency_t l_iohs_latency_link0 = 0 ;
     iohs_latency_t l_iohs_latency_link1 = 0 ;
-    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+
+    bool l_paired = true;
+    bool l_link0_only = false;
+    bool l_link1_only = false;
+
+    if (i_iolink_targets.size() == 1)
+    {
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_pos;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_iolink_targets.front(), l_unit_pos));
+
+        l_paired = false;
+        l_link0_only = ((l_unit_pos % 2) == 0) ? (true) : (false);
+        l_link1_only = ((l_unit_pos % 2) == 0) ? (false) : (true);
+    }
 
     FAPI_DBG("Start");
 
     // Initialize
     o_iohs_latency = 0;
     o_iohs_round_trip_clocks = 0;
-
-    // Get attribute that determines whether both link halves are enabled
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_iohs_target, l_link_train),
-             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
 
     // Get the latency measure register
     FAPI_TRY(GET_DLP_LAT_MEASURE(i_iohs_target, l_lat_measure_reg),
@@ -1467,30 +1535,26 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
     // ------------
     // determine TOD latency value
     // ------------
-    switch(l_link_train)
+
+    if (l_paired)
     {
-        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
-            GET_DLP_LAT_MEASURE_LINK0_TOD_LATENCY(l_lat_measure_reg, l_iohs_latency_link0);
-            GET_DLP_LAT_MEASURE_LINK1_TOD_LATENCY(l_lat_measure_reg, l_iohs_latency_link1);
-            o_iohs_latency = (l_iohs_latency_link0 < l_iohs_latency_link1) ? l_iohs_latency_link0 : l_iohs_latency_link1;
-            break;
-
-        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
-            GET_DLP_LAT_MEASURE_LINK0_TOD_LATENCY(l_lat_measure_reg, o_iohs_latency);
-            break;
-
-        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
-            GET_DLP_LAT_MEASURE_LINK1_TOD_LATENCY(l_lat_measure_reg, o_iohs_latency);
-            break;
-
-        default:
-            break;
+        GET_DLP_LAT_MEASURE_LINK0_TOD_LATENCY(l_lat_measure_reg, l_iohs_latency_link0);
+        GET_DLP_LAT_MEASURE_LINK1_TOD_LATENCY(l_lat_measure_reg, l_iohs_latency_link1);
+        o_iohs_latency = (l_iohs_latency_link0 < l_iohs_latency_link1) ? l_iohs_latency_link0 : l_iohs_latency_link1;
+    }
+    else if (l_link0_only)
+    {
+        GET_DLP_LAT_MEASURE_LINK0_TOD_LATENCY(l_lat_measure_reg, o_iohs_latency);
+    }
+    else
+    {
+        GET_DLP_LAT_MEASURE_LINK1_TOD_LATENCY(l_lat_measure_reg, o_iohs_latency);
     }
 
     // ------------
     // determine round-trip clocks
     // ------------
-    if(l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
+    if(l_link0_only)
     {
         GET_DLP_LAT_MEASURE_LINK0_ROUND_TRIP(l_lat_measure_reg, o_iohs_round_trip_clocks);
 
@@ -1501,7 +1565,7 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
                     .set_IOHS_LATENCY(o_iohs_latency)
                     .set_ROUND_TRIP_TIME(o_iohs_round_trip_clocks)
                     .set_LATENCY_MEASURE(l_lat_measure_reg),
-                    "Invalid latency measure register value");
+                    "Invalid latency measure register value (EO)");
 
         FAPI_DBG("Latency measure values : o_iohs_latency = %u o_iohs_round_trip_clocks = %u",
                  o_iohs_latency, o_iohs_round_trip_clocks);
@@ -1509,7 +1573,7 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
         goto fapi_try_exit;
     }
 
-    if(l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY)
+    if(l_link1_only)
     {
         GET_DLP_LAT_MEASURE_LINK1_ROUND_TRIP(l_lat_measure_reg, o_iohs_round_trip_clocks);
 
@@ -1520,7 +1584,7 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
                     .set_IOHS_LATENCY(o_iohs_latency)
                     .set_ROUND_TRIP_TIME(o_iohs_round_trip_clocks)
                     .set_LATENCY_MEASURE(l_lat_measure_reg),
-                    "Invalid latency measure register value");
+                    "Invalid latency measure register value (OO)");
 
         FAPI_DBG("Latency measure values : o_iohs_latency = %u o_iohs_round_trip_clocks = %u",
                  o_iohs_latency, o_iohs_round_trip_clocks);
@@ -1528,6 +1592,7 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
         goto fapi_try_exit;
     }
 
+    // paired here on down:
     if (GET_DLP_LAT_MEASURE_LINK0_ROUND_TRIP_VALID(l_lat_measure_reg))
     {
         GET_DLP_LAT_MEASURE_LINK0_ROUND_TRIP(l_lat_measure_reg, o_iohs_round_trip_clocks);
@@ -1543,7 +1608,7 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
                 .set_IOHS_LATENCY(o_iohs_latency)
                 .set_ROUND_TRIP_TIME(o_iohs_round_trip_clocks)
                 .set_LATENCY_MEASURE(l_lat_measure_reg),
-                "Invalid latency measure register value");
+                "Invalid latency measure register value (zero)");
 
     if (GET_DLP_LAT_MEASURE_LOCAL_LATENCY_LONGER_LINK(l_lat_measure_reg) !=
         GET_DLP_LAT_MEASURE_REMOTE_LATENCY_LONGER_LINK(l_lat_measure_reg))
@@ -1555,7 +1620,7 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
                     .set_IOHS_LATENCY(o_iohs_latency)
                     .set_ROUND_TRIP_TIME(o_iohs_round_trip_clocks)
                     .set_LATENCY_MEASURE(l_lat_measure_reg),
-                    "Invalid latency measure register value");
+                    "Invalid latency measure register value (diff valid)");
 
         // add the local latency difference value to total round trip time
         GET_DLP_LAT_MEASURE_LOCAL_LATENCY_DIFFERENCE(l_lat_measure_reg, l_iohs_local_latency_diff);
@@ -1622,11 +1687,13 @@ fapi_try_exit:
 }
 
 /// @brief Returns the FBC latency in terms of number of TOD grid clocks
-/// @param[in] i_iohs_target  => IOHS target
+/// @param[in] i_iolink_targets => Vector of IOLINK targets
+/// @param[in] i_iohs_target => IOHS target
 /// @param[out] o_fbc_latency => FBC Latency in terms of number of TOD grid clocks
 /// @return FAPI2_RC_SUCCESS if successfully returned the FBC latency, else error
 fapi2::ReturnCode p10_tod_get_fbc_latency(
-    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOLINK>>& i_iolink_targets,
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
     tod_latency_t& o_fbc_latency)
 {
     iohs_latency_t l_iohs_tod_latency_measure = 0 ;
@@ -1637,6 +1704,7 @@ fapi2::ReturnCode p10_tod_get_fbc_latency(
 
     // Get the FBC latency measures.  These are in terms of the IOHS clock
     FAPI_TRY(p10_tod_get_iohs_latency_measures(
+                 i_iolink_targets,
                  i_iohs_target,
                  l_iohs_tod_latency_measure,
                  l_iohs_round_trip_clocks),
@@ -1686,8 +1754,10 @@ fapi2::ReturnCode p10_tod_get_tod_latency_from_parent(
     tod_topology_node* l_parent_tod_node;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_parent_target;
     fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_parent_iohs_target;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOLINK>> l_parent_connected_iolink_targets;
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_child_iohs_target;
     tod_latency_t l_fbc_latency = 0;
-    uint8_t l_bus_num = 0;
+    uint8_t l_bus_num_unused = 0;
 
     FAPI_DBG("Start");
 
@@ -1707,12 +1777,44 @@ fapi2::ReturnCode p10_tod_get_tod_latency_from_parent(
     FAPI_TRY(p10_tod_lookup_iohs_target(
                  l_parent_target,
                  i_tod_node->i_bus_tx,
-                 l_bus_num,
+                 l_bus_num_unused,
                  l_parent_iohs_target),
-             "Error from p10_tod_lookup_iohs_target");
+             "Error from p10_tod_lookup_iohs_target (parent)");
+
+    // i_bus_rx is the current node's bus from which step/sync is received
+    // Lookup the IOHS target
+    FAPI_TRY(p10_tod_lookup_iohs_target(
+                 *(i_tod_node->i_target),
+                 i_tod_node->i_bus_rx,
+                 l_bus_num_unused,
+                 l_child_iohs_target),
+             "Error from p10_tod_lookup_iohs_target (child)");
 
     // Get the parent's FBC latency in terms of TOD grid clocks
+    for (const auto l_parent_iolink_target : l_parent_iohs_target.getChildren<fapi2::TARGET_TYPE_IOLINK>())
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_child_iolink_target;
+        fapi2::ReturnCode l_rc = l_parent_iolink_target.getOtherEnd(l_child_iolink_target);
+
+        if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+        {
+            if (l_child_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>() ==
+                l_child_iohs_target)
+            {
+                l_parent_connected_iolink_targets.push_back(l_parent_iolink_target);
+            }
+        }
+    }
+
+    FAPI_ASSERT(l_parent_connected_iolink_targets.size(),
+                fapi2::P10_TOD_SETUP_IOLINK_TARGET_MATCH_ERR()
+                .set_PARENT_IOHS(l_parent_iohs_target)
+                .set_PARENT(l_parent_target)
+                .set_CHILD(*(i_tod_node->i_target)),
+                "No matching IOLINK targets found for IOHS target!");
+
     FAPI_TRY(p10_tod_get_fbc_latency(
+                 l_parent_connected_iolink_targets,
                  l_parent_iohs_target,
                  l_fbc_latency),
              "Error from p10_tod_get_fbc_latency");
@@ -1956,6 +2058,8 @@ fapi2::ReturnCode p10_tod_setup(
                  "Error from mpipl_clear_tod_node!");
 
     }
+
+    display_tod_nodes(i_tod_node, 0);
 
     // Start configuring each node
     // configure_tod_node will recurse on each child

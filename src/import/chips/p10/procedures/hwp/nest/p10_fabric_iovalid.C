@@ -292,7 +292,7 @@ void p10_fabric_iovalid_append_tl_ffdc(
 
     uint64_t l_parser0123_err_reg;
     fapi2::ffdc_t PARSER0123_ERR_REG;
-    l_scom_addr = PB_PTLSCOM45_PR0123_ERR;
+    l_scom_addr = PB_PTLSCOM10_PR0123_ERR;
     l_scom_data.flush<1>();
     (void) fapi2::getScom(i_pauc_target, l_scom_addr, l_scom_data);
     l_parser0123_err_reg = l_scom_data();
@@ -305,18 +305,18 @@ void p10_fabric_iovalid_append_tl_ffdc(
 ///
 /// @brief Return remote endpoint target for given local endpoint
 ///
-/// @param[in] i_loc_endp_target    Reference to IOHS target for local endpoint
-/// @param[out] o_rem_endp_target   Reference to IOHS target for remote endpoint
+/// @param[in] i_loc_endp_target    Reference to IOLINK target for local endpoint
+/// @param[out] o_rem_endp_target   Reference to IOLINK target for remote endpoint
 ///
 /// @return fapi2::ReturnCode       FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_fabric_iovalid_get_rem_endp(
-    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_loc_endp_target,
-    fapi2::Target<fapi2::TARGET_TYPE_IOHS>& o_rem_endp_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_loc_endp_target,
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& o_rem_endp_target)
 {
     FAPI_DBG("Start");
 
-    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_endp_target;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_endp_target;
     fapi2::ReturnCode l_rc = i_loc_endp_target.getOtherEnd(l_rem_endp_target);
 
     FAPI_ASSERT(!l_rc,
@@ -453,13 +453,11 @@ fapi_try_exit:
 /// @brief Validate DL/TL link layers are trained
 ///
 /// @param[in] i_loc_endp_target    Reference to IOHS target for local endpoint
-/// @param[in] i_link_id            Link ID for given IOHS target
 ///
 /// @return fapi2::ReturnCode       FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_fabric_iovalid_link_validate(
-    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_loc_endp_target,
-    const fapi2::ATTR_CHIP_UNIT_POS_Type& i_link_id)
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_loc_endp_target)
 {
     using namespace scomt::pauc;
     using namespace scomt::iohs;
@@ -474,27 +472,91 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
     bool l_dl_fail_evn = false;
     bool l_dl_fail_odd = false;
     bool l_tl_trained = false;
+    bool l_tl_fail_evn = false;
+    bool l_tl_fail_odd = false;
 
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit_id;
     fapi2::ATTR_IOHS_LINK_TRAIN_Type l_loc_link_train;
     fapi2::ATTR_IOHS_LINK_TRAIN_Type l_loc_link_train_next;
-    fapi2::Target<fapi2::TARGET_TYPE_PAUC> l_loc_pauc_target;
-    fapi2::Target<fapi2::TARGET_TYPE_PAUC> l_rem_pauc_target;
-    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_endp_target;
+    fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
+    fapi2::Target<fapi2::TARGET_TYPE_PAUC> l_rem_evn_pauc_target;
+    fapi2::Target<fapi2::TARGET_TYPE_PAUC> l_rem_odd_pauc_target;
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_evn_endp_target;
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_odd_endp_target;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_loc_evn_iolink_target;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_loc_odd_iolink_target;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_evn_iolink_target;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_odd_iolink_target;
+    auto l_loc_pauc_target = i_loc_endp_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+    auto l_loc_iolink_targets = i_loc_endp_target.getChildren<fapi2::TARGET_TYPE_IOLINK>();
 
     char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString(i_loc_endp_target, l_targetStr, sizeof(l_targetStr));
 
-    // obtain link endpoints for FFDC
-    FAPI_TRY(p10_fabric_iovalid_get_rem_endp(i_loc_endp_target, l_rem_endp_target),
-             "Error from p10_fabric_iovalid_get_rem_endp");
+    // handle Cronus platform implementation of IOLINK targets -- both
+    // children are always returned as functional, even if no valid remote endpoint
+    // connection exists
+    if (fapi2::is_platform<fapi2::PLAT_CRONUS>())
+    {
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOLINK>> l_loc_iolink_targets_filtered;
 
-    // determine associated pauc target for local/remote links
-    l_loc_pauc_target = i_loc_endp_target.getParent<fapi2::TARGET_TYPE_PAUC>();
-    l_rem_pauc_target = l_rem_endp_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+        for (auto l_loc_iolink_target : l_loc_iolink_targets)
+        {
+            fapi2::ReturnCode l_rc;
+            fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_iolink_target;
+            l_rc = l_loc_iolink_target.getOtherEnd(l_rem_iolink_target);
+
+            if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+            {
+                l_loc_iolink_targets_filtered.push_back(l_loc_iolink_target);
+            }
+        }
+
+        l_loc_iolink_targets = l_loc_iolink_targets_filtered;
+    }
+
+    // obtain link endpoints and determine associated targets for FFDC
+    for (auto l_loc_iolink_target : l_loc_iolink_targets)
+    {
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_loc_iolink_id;
+        fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_iolink_target;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_loc_iolink_target, l_loc_iolink_id),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+        if ((l_loc_iolink_id % 2) == 0)
+        {
+            l_loc_evn_iolink_target = l_loc_iolink_target;
+        }
+        else
+        {
+            l_loc_odd_iolink_target = l_loc_iolink_target;
+        }
+
+        FAPI_TRY(p10_fabric_iovalid_get_rem_endp(l_loc_iolink_target, l_rem_iolink_target),
+                 "Error from p10_fabric_iovalid_get_rem_endp");
+
+        if ((l_loc_iolink_id % 2) == 0)
+        {
+            l_rem_evn_iolink_target = l_rem_iolink_target;
+            l_rem_evn_endp_target = l_rem_evn_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
+            l_rem_evn_pauc_target = l_rem_evn_endp_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+        }
+        else
+        {
+            l_rem_odd_iolink_target = l_rem_iolink_target;
+            l_rem_odd_endp_target = l_rem_odd_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
+            l_rem_odd_pauc_target = l_rem_odd_endp_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+        }
+    }
 
     // determine which sublinks are trained
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_loc_endp_target, l_loc_link_train),
              "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, i_loc_endp_target, l_link_split),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_loc_endp_target, l_iohs_unit_id),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
     // validate DL training state; poll for training completion
     for(uint32_t l_poll_loops = DL_MAX_POLL_LOOPS; l_poll_loops > 0 && !l_dl_trained; l_poll_loops--)
@@ -705,27 +767,51 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_LINK_TRAIN, i_loc_endp_target, l_loc_link_train_next),
                  "Error from FAPI_ATTR_SET (ATTR_IOHS_LINK_TRAIN)");
 
-        // if nothing is left to run on, emit RC with callout/deconfig on endpoints (no retraining for this bus)
-        FAPI_ASSERT(l_loc_link_train_next != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE,
-                    fapi2::P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_NONE_ERR()
-                    .set_LOC_ENDP_TARGET(i_loc_endp_target)
-                    .set_LOC_LINK_TRAIN(l_loc_link_train)
-                    .set_LOC_LINK_TRAIN_NEXT(l_loc_link_train_next)
-                    .set_LOC_LINK_FAILED0(l_dl_fail_evn)
-                    .set_LOC_LINK_FAILED1(l_dl_fail_odd)
-                    .set_REM_ENDP_TARGET(l_rem_endp_target),
-                    "Link DL training did not complete successfully!");
+        // if nothing is left to run on, emit RC with callout/deconfig on IOHS endpoints (no retraining for this bus)
+        if (l_loc_link_train_next == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE)
+        {
+            if (l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+            {
+                FAPI_ASSERT(false,
+                            fapi2::P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR()
+                            .set_LOC_ENDP_TARGET(i_loc_endp_target)
+                            .set_LOC_IOLINK_EVN_TARGET(l_loc_evn_iolink_target)
+                            .set_LOC_IOLINK_ODD_TARGET(l_loc_odd_iolink_target)
+                            .set_LOC_LINK_TRAIN(l_loc_link_train)
+                            .set_LOC_LINK_TRAIN_NEXT(l_loc_link_train_next)
+                            .set_LOC_IOLINK_EVN_FAIL(l_dl_fail_evn)
+                            .set_LOC_IOLINK_ODD_FAIL(l_dl_fail_odd)
+                            .set_REM_IOLINK_EVN_TARGET(l_rem_evn_iolink_target)
+                            .set_REM_IOLINK_ODD_TARGET(l_rem_odd_iolink_target),
+                            "Full-width link DL training did not complete successfully, no retry possible!");
+            }
+            else
+            {
+                FAPI_ASSERT(false,
+                            fapi2::P10_FAB_IOVALID_DL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR()
+                            .set_LOC_ENDP_TARGET(i_loc_endp_target)
+                            .set_LOC_IOLINK_TARGET(l_dl_fail_evn ? l_loc_evn_iolink_target : l_loc_odd_iolink_target)
+                            .set_LOC_LINK_TRAIN(l_loc_link_train)
+                            .set_LOC_LINK_TRAIN_NEXT(l_loc_link_train_next)
+                            .set_LOC_IOLINK_EVN_FAIL(l_dl_fail_evn)
+                            .set_LOC_IOLINK_ODD_FAIL(l_dl_fail_odd)
+                            .set_REM_IOLINK_TARGET(l_dl_fail_evn ? l_rem_evn_iolink_target : l_rem_odd_iolink_target),
+                            "Half-width link DL training did not complete successfully, no retry possible!");
+            }
+        }
 
-        // else, emit RC with no deconfig (and attempt retraining on half link)
+        // else, emit RC with callout/deconfig on IOHS sublink (and attempt retraining on other half link)
         FAPI_ASSERT(false,
-                    fapi2::P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_HALF_ERR()
+                    fapi2::P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR()
                     .set_LOC_ENDP_TARGET(i_loc_endp_target)
+                    .set_LOC_IOLINK_TARGET(l_dl_fail_evn ? l_loc_evn_iolink_target : l_loc_odd_iolink_target)
                     .set_LOC_LINK_TRAIN(l_loc_link_train)
                     .set_LOC_LINK_TRAIN_NEXT(l_loc_link_train_next)
-                    .set_LOC_LINK_FAILED0(l_dl_fail_evn)
-                    .set_LOC_LINK_FAILED1(l_dl_fail_odd)
-                    .set_REM_ENDP_TARGET(l_rem_endp_target),
-                    "Link DL training did not complete successfully!");
+                    .set_LOC_IOLINK_EVN_FAIL(l_dl_fail_evn)
+                    .set_LOC_IOLINK_ODD_FAIL(l_dl_fail_odd)
+                    .set_REM_ENDP_TARGET(l_dl_fail_evn ? l_rem_evn_endp_target : l_rem_odd_endp_target)
+                    .set_REM_IOLINK_TARGET(l_dl_fail_evn ? l_rem_evn_iolink_target : l_rem_odd_iolink_target),
+                    "Full-width link DL training did not complete successfully, attempt retraining with passing sublink!");
     }
 
     // validate TL training state
@@ -736,43 +822,114 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
 
     if (l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
     {
-        l_tl_trained  = (i_link_id % 2) ?
-                        (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
-                        (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
-    }
-    else if (l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
-    {
-        l_tl_trained  = (i_link_id % 2) ?
-                        (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg)) :
-                        (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg));
+        if (l_link_split)
+        {
+            l_tl_fail_evn = !GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg);
+            l_tl_fail_odd = !GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg);
+        }
+        else if ((l_iohs_unit_id % 2) == 0)
+        {
+            l_tl_fail_evn = !GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg);
+            l_tl_fail_odd = !GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg);
+        }
+        else
+        {
+            l_tl_fail_evn = !GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg);
+            l_tl_fail_odd = !GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg);
+        }
+
+        l_tl_trained = !l_tl_fail_evn && !l_tl_fail_odd;
+
+        // if nothing is left to run on, emit RC with callout/deconfig on IOHS endpoints (no retraining for this bus)
+        FAPI_ASSERT(!l_tl_fail_evn || !l_tl_fail_odd,
+                    fapi2::P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR()
+                    .set_LOC_ENDP_TARGET(i_loc_endp_target)
+                    .set_LOC_IOLINK_EVN_TARGET(l_loc_evn_iolink_target)
+                    .set_LOC_IOLINK_ODD_TARGET(l_loc_odd_iolink_target)
+                    .set_LOC_LINK_TRAIN(l_loc_link_train)
+                    .set_LOC_LINK_TRAIN_NEXT(l_loc_link_train_next)
+                    .set_LOC_IOLINK_EVN_FAIL(l_tl_fail_evn)
+                    .set_LOC_IOLINK_ODD_FAIL(l_tl_fail_odd)
+                    .set_REM_IOLINK_EVN_TARGET(l_rem_evn_iolink_target)
+                    .set_REM_IOLINK_ODD_TARGET(l_rem_odd_iolink_target),
+                    "Full-width link TL training did not complete successfully, no retry possible!");
+
+        // else if not trained, emit RC with callout/deconfig on IOHS sublink (and attempt retraining on other half link)
+        FAPI_ASSERT(l_tl_trained,
+                    fapi2::P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR()
+                    .set_LOC_ENDP_TARGET(i_loc_endp_target)
+                    .set_LOC_IOLINK_TARGET(l_tl_fail_evn ? l_loc_evn_iolink_target : l_loc_odd_iolink_target)
+                    .set_LOC_LINK_TRAIN(l_loc_link_train)
+                    .set_LOC_LINK_TRAIN_NEXT(l_loc_link_train_next)
+                    .set_LOC_IOLINK_EVN_FAIL(l_tl_fail_evn)
+                    .set_LOC_IOLINK_ODD_FAIL(l_tl_fail_odd)
+                    .set_REM_ENDP_TARGET(l_tl_fail_evn ? l_rem_evn_endp_target : l_rem_odd_endp_target)
+                    .set_REM_IOLINK_TARGET(l_tl_fail_evn ? l_rem_evn_iolink_target : l_rem_odd_iolink_target),
+                    "Full-width link DL training did not complete successfully, attempt retraining with passing sublink!");
     }
     else
     {
-        l_tl_trained  = (i_link_id % 2) ?
-                        (GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
-                        (GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
-    }
+        if (l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
+        {
+            l_tl_fail_odd = false;
 
-    FAPI_ASSERT(l_tl_trained,
-                fapi2::P10_FAB_IOVALID_TL_NOT_TRAINED_ERR()
-                .set_LOC_ENDP_TARGET(i_loc_endp_target)
-                .set_LOC_LINK_TRAIN(l_loc_link_train)
-                .set_REM_ENDP_TARGET(l_rem_endp_target),
-                "Error in TL training for %s (ATTR_IOHS_LINK_TRAIN: 0x%X)",
-                l_targetStr, l_loc_link_train);
+            if (l_link_split ||
+                ((l_iohs_unit_id % 2) == 0))
+            {
+                l_tl_fail_evn = !GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg);
+            }
+            else
+            {
+                l_tl_fail_evn = !GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg);
+            }
+        }
+        else
+        {
+            l_tl_fail_evn = false;
+
+            if ((l_iohs_unit_id % 2) == 0)
+            {
+                l_tl_fail_odd = !GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg);
+            }
+            else
+            {
+                l_tl_fail_odd = !GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg);
+            }
+        }
+
+        l_tl_trained = !l_tl_fail_evn && !l_tl_fail_odd;
+
+        // if nothing is left to run on, emit RC with callout/deconfig on IOHS endpoints (no retraining for this bus)
+        FAPI_ASSERT(l_tl_trained,
+                    fapi2::P10_FAB_IOVALID_TL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR()
+                    .set_LOC_ENDP_TARGET(i_loc_endp_target)
+                    .set_LOC_IOLINK_TARGET(l_tl_fail_evn ? l_loc_evn_iolink_target : l_loc_odd_iolink_target)
+                    .set_LOC_LINK_TRAIN(l_loc_link_train)
+                    .set_LOC_LINK_TRAIN_NEXT(l_loc_link_train_next)
+                    .set_LOC_IOLINK_EVN_FAIL(l_tl_fail_evn)
+                    .set_LOC_IOLINK_ODD_FAIL(l_tl_fail_odd)
+                    .set_REM_IOLINK_TARGET(l_tl_fail_evn ? l_rem_evn_iolink_target : l_rem_odd_iolink_target),
+                    "Half-width link TL training did not complete successfully, no retry possible!");
+
+    }
 
 fapi_try_exit:
 
-    if ((fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
-        (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_HALF_ERR))
+    if ((fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
+        (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR) ||
+        (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR))
     {
         p10_fabric_iovalid_append_dl_ffdc(i_loc_endp_target, fapi2::current_err);
-        p10_fabric_iovalid_append_dl_ffdc(l_rem_endp_target, fapi2::current_err);
+        p10_fabric_iovalid_append_dl_ffdc(l_rem_evn_endp_target, fapi2::current_err);
+        p10_fabric_iovalid_append_dl_ffdc(l_rem_odd_endp_target, fapi2::current_err);
     }
-    else if (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_NOT_TRAINED_ERR)
+    else if ((fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
+             (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR) ||
+             (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR))
     {
         p10_fabric_iovalid_append_tl_ffdc(l_loc_pauc_target, fapi2::current_err);
-        p10_fabric_iovalid_append_tl_ffdc(l_rem_pauc_target, fapi2::current_err);
+        p10_fabric_iovalid_append_tl_ffdc(l_rem_evn_pauc_target, fapi2::current_err);
+        p10_fabric_iovalid_append_tl_ffdc(l_rem_odd_pauc_target, fapi2::current_err);
     }
 
     FAPI_DBG("End");
@@ -783,26 +940,28 @@ fapi_try_exit:
 /// @brief Validate DL/TL link layers are trained
 ///
 /// @param[in] i_iohs_target        Reference to IOHS target
-/// @param[in] i_link_id            Link ID for given IOHS target
 /// @param[in] i_update_internode   True if IOHS link is used as internode connection
-/// @param[out] o_retrain           Indication that DL link training should be re-attempted
+/// @param[out] o_retrain           Indication that DL/TL link training should be re-attempted
 /// @param[out] o_rcs               Vector of return code objects, to append
-///                                 in case of reported DL training failure
+///                                 in case of reported DL/TL training failures
 ///
 /// @return fapi2::ReturnCode       FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_fabric_iovalid_link_validate_wrap(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
-    const fapi2::ATTR_CHIP_UNIT_POS_Type& i_link_id,
     const bool i_update_internode,
     bool& o_retrain,
     std::vector<fapi2::ReturnCode>& o_rcs)
 {
     fapi2::ReturnCode l_rc;
-    l_rc = p10_fabric_iovalid_link_validate(i_iohs_target, i_link_id);
+    l_rc = p10_fabric_iovalid_link_validate(i_iohs_target);
 
-    if (((l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
-         (l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_HALF_ERR))
+    if (((l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
+         (l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR) ||
+         (l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR) ||
+         (l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
+         (l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR) ||
+         (l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR))
         && i_update_internode)
     {
         o_retrain = true;
@@ -823,69 +982,68 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate_wrap(
 }
 
 ///
-/// @brief Compute link delay for a single endpoint of a given link
+/// @brief Compute link delay for a single end of a given sublink
 ///
-/// @param[in]  i_iohs_target   Reference to IOHS target
-/// @param[in]  i_link_train    Sublinks to monitor
-/// @param[out] o_link_delay    Average link delay across sublinks if monitoring
-///                             both, else delay value for individual sublink
+/// @param[in]  i_iolink_target   Reference to IOHS sublink target
+/// @param[out] o_link_delay      Measured delay
 ///
 /// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_fabric_iovalid_get_link_delay(
-    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
-    const fapi2::ATTR_IOHS_LINK_TRAIN_Type i_link_train,
-    uint32_t o_link_delay)
+    const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_target,
+    uint32_t& o_link_delay)
 {
     using namespace scomt::pauc;
 
     FAPI_DBG("Start");
 
-    auto l_pauc_target = i_iohs_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+    auto l_iohs_target = i_target.getParent<fapi2::TARGET_TYPE_IOHS>();
+    auto l_pauc_target = l_iohs_target.getParent<fapi2::TARGET_TYPE_PAUC>();
 
+    uint64_t l_sublink_delay = 0;
     fapi2::buffer<uint64_t> l_link_delay_reg;
-    uint64_t l_sublink_delay_evn;
-    uint64_t l_sublink_delay_odd;
-    bool l_is_even_iohs;
-
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iolink_pos;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_pos;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_iohs_target, l_iohs_pos),
-             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+    fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
+    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
 
-    l_is_even_iohs = ((l_iohs_pos % 2) == 0);
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_iolink_pos),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, iolink)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_iohs_pos),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, iohs)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, l_iohs_target, l_link_split),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
 
     FAPI_TRY(GET_PB_TL_LINK_DLY_0123_REG(l_pauc_target, l_link_delay_reg),
              "Error from getScom (PB_TL_LINK_DLY_0123_REG)");
 
-    if(l_is_even_iohs)
+    // X0
+    if (((l_iolink_pos % 2) == 0) && (((l_iohs_pos % 2) == 0) || (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_TRUE)))
     {
-        GET_PB_TL_LINK_DLY_0123_REG_X0_LINK_DELAY(l_link_delay_reg, l_sublink_delay_evn);
-        GET_PB_TL_LINK_DLY_0123_REG_X1_LINK_DELAY(l_link_delay_reg, l_sublink_delay_odd);
-    }
-    else
-    {
-        GET_PB_TL_LINK_DLY_0123_REG_Y0_LINK_DELAY(l_link_delay_reg, l_sublink_delay_evn);
-        GET_PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY(l_link_delay_reg, l_sublink_delay_odd);
+        GET_PB_TL_LINK_DLY_0123_REG_X0_LINK_DELAY(l_link_delay_reg, l_sublink_delay);
     }
 
-    switch(i_link_train)
+    // X1
+    if (((l_iolink_pos % 2) == 1) && ((l_iohs_pos % 2) == 0))
     {
-        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
-            o_link_delay = (l_sublink_delay_evn + l_sublink_delay_odd) / 2;;
-            break;
-
-        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
-            o_link_delay = l_sublink_delay_evn;
-            break;
-
-        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
-            o_link_delay = l_sublink_delay_odd;
-            break;
-
-        default:
-            o_link_delay = 0xFFFFFFFF;
-            break;
+        GET_PB_TL_LINK_DLY_0123_REG_X1_LINK_DELAY(l_link_delay_reg, l_sublink_delay);
     }
+
+    // Y0
+    if (((l_iolink_pos % 2) == 0) && ((l_iohs_pos % 2) == 1))
+    {
+        GET_PB_TL_LINK_DLY_0123_REG_Y0_LINK_DELAY(l_link_delay_reg, l_sublink_delay);
+    }
+
+    // Y1
+    if (((l_iolink_pos % 2) == 1) && ((l_iohs_pos % 2) == 1))
+    {
+        GET_PB_TL_LINK_DLY_0123_REG_Y1_LINK_DELAY(l_link_delay_reg, l_sublink_delay);
+    }
+
+    o_link_delay = l_sublink_delay;
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -902,42 +1060,95 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode p10_fabric_iovalid_get_link_delays(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_loc_endp_target,
-    uint32_t o_agg_link_delay)
+    uint32_t o_agg_link_delay[])
 {
     FAPI_DBG("Start");
 
-    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_endp_target;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOLINK>> l_loc_iolink_targets;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_pos;
+    fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
+    std::vector<uint8_t> l_loc_link_ids;
 
-    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_loc_link_train;
-    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_rem_link_train;
-    uint32_t l_loc_link_delay = 0xFFF;
-    uint32_t l_rem_link_delay = 0xFFF;
+    // determine which logical links need to have their delay values updated based
+    // on the IOHS endpoint target (up to two logical links depending on configuration)
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_loc_endp_target, l_iohs_pos),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, iohs)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, i_loc_endp_target, l_link_split),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
 
-    // get remote link endpoint target
-    FAPI_TRY(p10_fabric_iovalid_get_rem_endp(i_loc_endp_target, l_rem_endp_target),
-             "Error from p10_fabric_iovalid_get_rem_endp");
+    for (auto l_iolink_target : i_loc_endp_target.getChildren<fapi2::TARGET_TYPE_IOLINK>())
+    {
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_iolink_pos;
+        uint8_t l_loc_link_id = 0;
 
-    // get valid sublinks for local/remote targets
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_loc_endp_target, l_loc_link_train),
-             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN, local)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_rem_endp_target, l_rem_link_train),
-             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN, remote)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iolink_target, l_iolink_pos),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, iolink)");
 
-    // read link delay from local endpoint target
-    FAPI_TRY(p10_fabric_iovalid_get_link_delay(
-                 i_loc_endp_target,
-                 l_loc_link_train,
+        if ((l_iolink_pos % 2) == 0)
+        {
+            if (((l_iohs_pos % 2) == 1) && (l_link_split == fapi2::ENUM_ATTR_IOHS_LINK_SPLIT_TRUE))
+            {
+                l_loc_link_id = l_iohs_pos - 1;
+            }
+            else
+            {
+                l_loc_link_id = l_iohs_pos;
+            }
+        }
+        else
+        {
+            l_loc_link_id = l_iohs_pos;
+        }
+
+        // handle Cronus platform implementation of IOLINK targets -- both
+        // children are always returned as functional, even if no valid remote endpoint
+        // connection exists
+        if (fapi2::is_platform<fapi2::PLAT_CRONUS>())
+        {
+            fapi2::ReturnCode l_rc;
+            fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_iolink_target;
+            l_rc = l_iolink_target.getOtherEnd(l_rem_iolink_target);
+
+            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                continue;
+            }
+        }
+
+        l_loc_iolink_targets.push_back(l_iolink_target);
+        l_loc_link_ids.push_back(l_loc_link_id);
+    }
+
+    for (uint8_t ii = 0; ii < l_loc_iolink_targets.size(); ii++)
+    {
+        uint32_t l_loc_link_delay = 0;
+        uint32_t l_rem_link_delay = 0;
+        fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_iolink;
+
+        // read link delay from local iolink target
+        FAPI_TRY(p10_fabric_iovalid_get_link_delay(l_loc_iolink_targets[ii],
                  l_loc_link_delay),
-             "Error from p10_fabric_iovalid_get_link_delay (local)");
+                 "Error from p10_fabric_iovalid_get_link_delay (local)");
 
-    // read link delay from remote endpoint target
-    FAPI_TRY(p10_fabric_iovalid_get_link_delay(
-                 l_rem_endp_target,
-                 l_rem_link_train,
+        FAPI_TRY(p10_fabric_iovalid_get_rem_endp(l_loc_iolink_targets[ii],
+                 l_rem_iolink),
+                 "Error from p10_fabric_iovalid_get_rem_endp");
+
+        // read link delay from remote iolink target
+        FAPI_TRY(p10_fabric_iovalid_get_link_delay(l_rem_iolink,
                  l_rem_link_delay),
-             "Error from p10_fabric_iovalid_get_link_delay (remote)");
+                 "Error from p10_fabric_iovalid_get_link_delay (remote)");
 
-    o_agg_link_delay = l_loc_link_delay + l_rem_link_delay;
+        // aggregate link delay attribute is normalized to single sublink pair (local/remote)
+        // divide by two if updating same logical link twice
+        o_agg_link_delay[l_loc_link_ids[ii]] += (l_loc_link_delay + l_rem_link_delay);
+
+        if ((ii == 1) &&
+            (l_loc_link_ids[0] == l_loc_link_ids[1]))
+        {
+            o_agg_link_delay[l_loc_link_ids[ii]] /= 2;
+        }
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -945,30 +1156,33 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Update iovalid settings for a single fabric link (X/A)
+/// @brief Update iovalid settings for fabric links (A/X) associated with
+///        provided IOHS target
 ///
 /// @param[in] i_target         Reference to IOHS target to configure
-/// @param[in] i_link_id        Chiplet number for given IOHS target
 /// @param[in] i_set_not_clear  Define iovalid operation (true=set, false=clear)
-/// @param[in] i_en             Defines sublinks to enable
+/// @param[in] i_link_train     Defines sublinks to enable
 ///
 /// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_fabric_iovalid_update_link(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
-    const fapi2::ATTR_CHIP_UNIT_POS_Type i_link_id,
     const bool i_set_not_clear,
-    const uint8_t i_en)
+    const fapi2::ATTR_IOHS_LINK_TRAIN_Type i_link_train)
 {
     using namespace scomt::pauc;
 
     FAPI_DBG("Start");
 
     fapi2::buffer<uint64_t> l_iovalid_mask;
-
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit;
+    fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
     auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
 
-    if(i_set_not_clear)
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_iohs_unit));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_SPLIT, i_target, l_link_split));
+
+    if (i_set_not_clear)
     {
         FAPI_TRY(PREP_CPLT_CONF1_WO_OR(l_pauc_target));
     }
@@ -977,33 +1191,52 @@ fapi2::ReturnCode p10_fabric_iovalid_update_link(
         FAPI_TRY(PREP_CPLT_CONF1_WO_CLEAR(l_pauc_target));
     }
 
-    if ((i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) ||
-        (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY))
+    if (i_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
     {
-        if(i_link_id % 2)
+        if (l_link_split)
         {
-            SET_CPLT_CONF1_3_IOVALID_DC(l_iovalid_mask);
+            SET_CPLT_CONF1_1_IOVALID_DC(l_iovalid_mask);
+            SET_CPLT_CONF1_2_IOVALID_DC(l_iovalid_mask);
+        }
+        else if ((l_iohs_unit % 2) == 0)
+        {
+            SET_CPLT_CONF1_1_IOVALID_DC(l_iovalid_mask);
+            SET_CPLT_CONF1_0_IOVALID_DC(l_iovalid_mask);
         }
         else
+        {
+            SET_CPLT_CONF1_3_IOVALID_DC(l_iovalid_mask);
+            SET_CPLT_CONF1_2_IOVALID_DC(l_iovalid_mask);
+        }
+    }
+    else if (i_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
+    {
+        if (l_link_split)
         {
             SET_CPLT_CONF1_1_IOVALID_DC(l_iovalid_mask);
         }
-    }
-
-    if ((i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) ||
-        (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY))
-    {
-        if(i_link_id % 2)
+        else if ((l_iohs_unit % 2) == 0)
         {
-            SET_CPLT_CONF1_2_IOVALID_DC(l_iovalid_mask);
+            SET_CPLT_CONF1_1_IOVALID_DC(l_iovalid_mask);
         }
         else
         {
+            SET_CPLT_CONF1_3_IOVALID_DC(l_iovalid_mask);
+        }
+    }
+    else if (i_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY)
+    {
+        if ((l_iohs_unit % 2) == 0)
+        {
             SET_CPLT_CONF1_0_IOVALID_DC(l_iovalid_mask);
+        }
+        else
+        {
+            SET_CPLT_CONF1_2_IOVALID_DC(l_iovalid_mask);
         }
     }
 
-    if(i_set_not_clear)
+    if (i_set_not_clear)
     {
         FAPI_TRY(PUT_CPLT_CONF1_WO_OR(l_pauc_target, l_iovalid_mask),
                  "Error setting iovalid bits (CPLT_CONF1_WO_OR)");
@@ -1025,7 +1258,7 @@ fapi2::ReturnCode p10_fabric_iovalid(
     const bool i_set_not_clear,
     const bool i_update_intranode,
     const bool i_update_internode,
-    std::vector<fapi2::ReturnCode>& o_dl_fail_rcs)
+    std::vector<fapi2::ReturnCode>& o_dltl_fail_rcs)
 {
     FAPI_DBG("Start");
 
@@ -1045,19 +1278,28 @@ fapi2::ReturnCode p10_fabric_iovalid(
 
     for (const auto l_iohs : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
     {
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_link;
+        fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+        fapi2::ATTR_IOHS_CONFIG_MODE_Type l_config_mode;
         fapi2::ATTR_IOHS_DRAWER_INTERCONNECT_Type l_drawer_interconnect;
+        fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_fabric_link_active;
+        char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+        fapi2::toString(l_iohs, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs, l_link),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs, l_link_train),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, l_iohs, l_config_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_CONFIG_MODE)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs, l_drawer_interconnect),
                  "Error from FAPI_ATTR_GET (ATTR_IOHS_DRAWER_INTERCONNECT)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_iohs, l_fabric_link_active),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
 
-        if ((l_x_en[l_link] && i_update_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE))
-            || (l_x_en[l_link] && i_update_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE))
-            || (l_a_en[l_link] && i_update_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
+        if ((l_link_train != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE) &&
+            (l_fabric_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE) &&
+            ((i_update_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE)) ||
+             (i_update_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE))))
         {
-            FAPI_DBG("Updating iovalid for link %d (%s)", l_link, l_x_en[l_link] ? ("SMPX") : ("SMPA"));
+            FAPI_DBG("Updating iovalid for link %s");
 
             bool l_link_needs_retraining = false;
 
@@ -1066,10 +1308,9 @@ fapi2::ReturnCode p10_fabric_iovalid(
                 FAPI_DBG("Validating link state prior to iovalid update");
                 FAPI_TRY(p10_fabric_iovalid_link_validate_wrap(
                              l_iohs,
-                             l_link,
                              i_update_internode,
                              l_link_needs_retraining,
-                             o_dl_fail_rcs),
+                             o_dltl_fail_rcs),
                          "Error from p10_fabric_iovalid_link_validate_wrap");
             }
 
@@ -1081,9 +1322,8 @@ fapi2::ReturnCode p10_fabric_iovalid(
             FAPI_DBG("Configuring iovalid state (%s)", i_set_not_clear ? ("set") : ("clear"));
             FAPI_TRY(p10_fabric_iovalid_update_link(
                          l_iohs,
-                         l_link,
                          i_set_not_clear,
-                         l_x_en[l_link] ? (l_x_en[l_link]) : (l_a_en[l_link])),
+                         l_link_train),
                      "Error from p10_fabric_iovalid_update_link");
 
             if (i_set_not_clear)
@@ -1091,7 +1331,9 @@ fapi2::ReturnCode p10_fabric_iovalid(
                 FAPI_DBG("Collecting link delay counter values");
                 FAPI_TRY(p10_fabric_iovalid_get_link_delays(
                              l_iohs,
-                             l_x_en[l_link] ? (l_x_agg_link_delay[l_link]) : (l_a_agg_link_delay[l_link])),
+                             (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX) ?
+                             (l_x_agg_link_delay) :
+                             (l_a_agg_link_delay)),
                          "Error from p10_fabric_iovalid_get_link_delays");
 
                 FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_LINK_DELAY, i_target, l_x_agg_link_delay),
@@ -1102,15 +1344,12 @@ fapi2::ReturnCode p10_fabric_iovalid(
         }
         else
         {
-            char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
-            fapi2::toString(l_iohs, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
-
             FAPI_DBG("Skipping iovalid update for %s", l_targetStr);
+            FAPI_DBG("  l_link_train:           %d", l_link_train);
+            FAPI_DBG("  l_fabric_link_active:   %d", l_fabric_link_active);
             FAPI_DBG("  i_update_intranode:     %d", i_update_intranode);
             FAPI_DBG("  i_update_internode:     %d", i_update_internode);
             FAPI_DBG("  l_drawer_interconnect:  %d", l_drawer_interconnect);
-            FAPI_DBG("  x_enable:               %d", l_x_en[l_link]);
-            FAPI_DBG("  a_enable:               %d", l_a_en[l_link]);
         }
     }
 
