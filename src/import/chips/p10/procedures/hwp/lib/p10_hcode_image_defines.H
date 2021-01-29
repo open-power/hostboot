@@ -297,7 +297,7 @@ HCD_HDR_UINT16( g_xgpe_reserve1,                 0 );
 HCD_HDR_UINT32( g_xgpe_timeBaseHz,               0 );
 HCD_HDR_UINT32( g_xgpe_gpspbSramAddress,         0 );
 HCD_HDR_UINT32( g_xgpe_hcodeLength,              0 );
-HCD_HDR_UINT32( g_xgpe_reserve2,                 0 );
+HCD_HDR_UINT32( g_xgpe_elog_addr,                0 );
 HCD_HDR_UINT32( g_xgpe_gpspbLength,              0 );
 HCD_HDR_UINT32( g_xgpe_coreThrottleAssertCnt,    0 );
 HCD_HDR_UINT32( g_xgpe_coreThrottleDeAssertCnt,  0 );

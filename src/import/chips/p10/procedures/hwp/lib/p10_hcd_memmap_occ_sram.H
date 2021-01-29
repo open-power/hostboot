@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,6 +150,8 @@ HCD_CONST(OCC_SRAM_XGPE_GPPB_ADDR,
           (PGPE_SRAM_BASE_ADDR + PGPE_HEADER_IMAGE_OFFSET + PGPE_GLOBAL_PSTATE_SRAM_ADDR_BYTE))
 HCD_CONST(OCC_SRAM_XGPE_GPPB_LEN,
           (PGPE_SRAM_BASE_ADDR + PGPE_HEADER_IMAGE_OFFSET + PGPE_GLOBAL_PSTATE_PPB_SIZE_BYTE))
+HCD_CONST(OCC_SRAM_XGPE_HEADER_ADDR,
+          (XGPE_SRAM_BASE_ADDR + XGPE_INT_VECTOR_SIZE))
 
 /// XGPE Boot
 HCD_CONST(OCC_SRAM_XGPE_COPY_BOOT_LOADER_SIZE,  ONE_KB)
