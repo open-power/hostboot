@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -823,8 +823,13 @@ namespace Systemcalls
     void CpuNap(task_t *t)
     {
 
-        // This call prevents a live-lock situation.
-        CpuManager::executePeriodics(CpuManager::getCurrentCPU());
+        // This call prevents a live-lock situation, but is expensive
+        // as more threads/memory come online.  Only use for small
+        // (low core) environments (decrementer still calls)
+        if(PageManager::isSmallMemEnv())
+        {
+            CpuManager::executePeriodics(CpuManager::getCurrentCPU());
+        }
 
         uint32_t* instruction = static_cast<uint32_t*>(t->context.nip);
         if (STOP_INSTRUCTION == (*instruction)) // Verify 'nap' instruction,

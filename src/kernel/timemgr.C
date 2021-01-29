@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <kernel/doorbell.H>
 
 uint64_t TimeManager::iv_timebaseFreq = 0xFFFFFFFF;
+uint64_t TimeManager::iv_timeslicePerSec = DEFAULT_TIMESLICE_PER_SEC;
 
 bool TimeManager::cv_isSimicsRunning = Util::isSimicsRunning();
 

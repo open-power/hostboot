@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -358,8 +358,9 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
         {
             VmmManager::flushPageTable();
         }
-        if((0 == (i_cpu->periodic_count % CPU_PERIODIC_DEFRAG)) ||
-           (forceMemoryPeriodic))
+        if(((0 == (i_cpu->periodic_count % CPU_PERIODIC_DEFRAG))
+            && PageManager::isSmallMemEnv()) // only defrag if in small mem env
+           || (forceMemoryPeriodic))
         {
             class MemoryCoalesce : public DeferredWork
             {

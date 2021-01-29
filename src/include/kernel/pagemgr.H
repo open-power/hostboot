@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -201,6 +201,12 @@ class PageManager
         static uint64_t availPages();
 
         /**
+         * Returns if Hostboot is in a small memory environment
+         * @returns True if less than 14MB of memory, else false
+         */
+        static bool isSmallMemEnv();
+
+        /**
          * Add memory to the page manager
          * @param[in] i_addr, The start address of the memory to add
          * @param[in] i_pageCount, The number of pages to add
@@ -263,6 +269,13 @@ class PageManager
         {
             return iv_pagesAvail;
         }
+
+        /** see isSmallMemEnv() */
+        ALWAYS_INLINE bool _isSmallMemEnv() const
+        {
+            return (iv_pagesTotal < 0xE00 /*14MB*/);
+        }
+
 
         // Private data
 

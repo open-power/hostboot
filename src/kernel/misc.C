@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -350,6 +350,11 @@ namespace KernelMisc
                 // threads on other cores send_doorbell_wakeup() is used.
                 send_doorbell_restore_tb(l_pir + i, iv_timebase);
             }
+
+            //At this point there will usually be more threads than actual
+            //work -- tweak the timeslice math so each threads gets a longer
+            //time to work
+            TimeManager::setTimeSlicePerSec(TimeManager::LARGE_THREAD_TIMESLICE_PER_SEC);
         }
 
         // Select a new task if not the master CPU.  Master CPU will resume

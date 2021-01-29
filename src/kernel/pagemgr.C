@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -261,6 +261,11 @@ uint64_t PageManager::queryAvail()
 uint64_t PageManager::availPages()
 {
     return Singleton<PageManager>::instance()._availPages();
+}
+
+bool PageManager::isSmallMemEnv()
+{
+    return Singleton<PageManager>::instance()._isSmallMemEnv();
 }
 
 void PageManager::addDebugPointers()

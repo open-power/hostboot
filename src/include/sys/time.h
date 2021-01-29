@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@
 /**
  *  @brief Duration of one timeslice/context switch in nanoseconds 
  */
-#define ONE_CTX_SWITCH_NS (NS_PER_SEC/TimeManager::TIMESLICE_PER_SEC)
+#define ONE_CTX_SWITCH_NS (NS_PER_SEC/TimeManager::getTimeSlicePerSec())
 
 /**
  *  @brief Duration of ten context switches, in nanoseconds; used by testcases 

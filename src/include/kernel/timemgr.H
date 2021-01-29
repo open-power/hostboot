@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -52,8 +54,10 @@ class TimeManager
             /** Number of time-slices to allow per second.
              *
              *  Context length becomes (1/TIMESLICE_PER_SECOND) sec.
-             */
-            TIMESLICE_PER_SEC = 1000,
+            */
+            DEFAULT_TIMESLICE_PER_SEC = 1000,
+            LARGE_THREAD_TIMESLICE_PER_SEC = 100,
+
 
             /** Yield Threshold per timeslice
              *
@@ -74,7 +78,19 @@ class TimeManager
             /** Return the number of ticks per time-slice. */
         static uint64_t getTimeSliceCount()
             {
-                return iv_timebaseFreq / TIMESLICE_PER_SEC;
+                return iv_timebaseFreq / iv_timeslicePerSec;
+            };
+
+            /** Set the number of slices per second. */
+        static void setTimeSlicePerSec(uint64_t i_slicePerSec)
+            {
+                iv_timeslicePerSec = i_slicePerSec;
+            };
+
+            /** Get the number of slices per second. */
+        static uint64_t getTimeSlicePerSec()
+            {
+                return iv_timeslicePerSec;
             };
 
         /**
@@ -146,6 +162,8 @@ class TimeManager
         /** Frequency of the timebase register in Hz. (ticks per second) */
         static uint64_t iv_timebaseFreq;
         static bool cv_isSimicsRunning;
+        static uint64_t iv_timeslicePerSec;  /** Number of time-slices to allow per second.
+                                              *  Context length  = (1/TIMESLICE_PER_SECOND) sec */
 };
 
 #endif
