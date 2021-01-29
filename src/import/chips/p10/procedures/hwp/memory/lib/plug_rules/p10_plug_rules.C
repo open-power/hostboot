@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,12 +228,14 @@ fapi_try_exit:
 ///
 /// @brief Check DDIMM SPD revision and content revision versus minimum supported
 /// @param[in] i_target dimm target
+/// @param[in] i_key used for logging if an error occurs
 /// @param[in] i_spd_combined_revision the combined SPD revision and content
 /// @param[in] i_min_combined_rev SPD minimum combined revision information
 /// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
 /// @note The return code from this function is only used in unit tests.
 ///
 fapi2::ReturnCode spd_minimum_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const spd_lookup_key& i_key,
         const uint16_t i_spd_combined_rev,
         const uint16_t i_min_combined_rev)
 {
@@ -243,9 +245,13 @@ fapi2::ReturnCode spd_minimum_combined_revision(const fapi2::Target<fapi2::TARGE
                  fapi2::MSS_UNSUPPORTED_SPD_COMBINED_REVISION()
                  .set_DIMM_TARGET(i_target)
                  .set_SPD_COMBINED_REVISION(i_spd_combined_rev)
-                 .set_MINIMUM_FUNCTIONAL_SPD_COMBINED_REVISION(i_min_combined_rev),
-                 "%s DDIMM has an unsupported SPD combined revision and needs to be updated (0x%04X < 0x%04X)",
-                 mss::c_str(i_target), i_spd_combined_rev, i_min_combined_rev );
+                 .set_MINIMUM_FUNCTIONAL_SPD_COMBINED_REVISION(i_min_combined_rev)
+                 .set_MODULE_MFG_ID(i_key.iv_module_mfg_id)
+                 .set_DIMM_HEIGHT(i_key.iv_dimm_height)
+                 .set_DIMM_SIZE(i_key.iv_dimm_size),
+                 "%s DDIMM has an unsupported SPD combined revision and needs to be updated (0x%04X < 0x%04X) MFG ID:0x%04x DIMM height:%u DIMM size:%u",
+                 mss::c_str(i_target), i_spd_combined_rev, i_min_combined_rev, i_key.iv_module_mfg_id, i_key.iv_dimm_height,
+                 i_key.iv_dimm_size );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -259,12 +265,14 @@ fapi_try_exit:
 ///
 /// @brief Check DDIMM SPD revision and content revision versus latest supported
 /// @param[in] i_target dimm target
+/// @param[in] i_key used for logging if an error occurs
 /// @param[in] i_spd_combined_revision the combined SPD revision and content
 /// @param[in] i_latest_combined_rev latest SPD combined revision information
 /// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
 /// @note The return code from this function is only used in unit tests.
 ///
 fapi2::ReturnCode spd_latest_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const spd_lookup_key& i_key,
         const uint16_t i_spd_combined_rev,
         const uint16_t i_latest_combined_rev)
 {
@@ -283,9 +291,13 @@ fapi2::ReturnCode spd_latest_combined_revision(const fapi2::Target<fapi2::TARGET
                      fapi2::MSS_NON_CURRENT_SPD_COMBINED_REVISION()
                      .set_DIMM_TARGET(i_target)
                      .set_SPD_COMBINED_REVISION(i_spd_combined_rev)
-                     .set_LATEST_SPD_COMBINED_REVISION(i_latest_combined_rev),
-                     "%s DDIMM has non-current SPD combined revision and could be updated (0x%04X < 0x%04X)",
-                     mss::c_str(i_target), i_spd_combined_rev, i_latest_combined_rev );
+                     .set_LATEST_SPD_COMBINED_REVISION(i_latest_combined_rev)
+                     .set_MODULE_MFG_ID(i_key.iv_module_mfg_id)
+                     .set_DIMM_HEIGHT(i_key.iv_dimm_height)
+                     .set_DIMM_SIZE(i_key.iv_dimm_size),
+                     "%s DDIMM has non-current SPD combined revision and could be updated (0x%04X < 0x%04X) MFG ID:0x%04x DIMM height:%u DIMM size:%u",
+                     mss::c_str(i_target), i_spd_combined_rev, i_latest_combined_rev, i_key.iv_module_mfg_id, i_key.iv_dimm_height,
+                     i_key.iv_dimm_size );
 #endif
     }
     else
@@ -454,6 +466,7 @@ fapi2::ReturnCode ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
 
         // First make sure we can get the SPD combined revision using the key
         // This is not necessarily a hard fail, so don't bomb out, but we have to skip the SPD revision checks.
+        // Note: the RC is already logged as recovered in spd_revision_key
         l_rc = check::spd_revision_key(l_dimm, l_key, l_min_combined_rev, l_latest_combined_rev);
 
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -474,14 +487,14 @@ fapi2::ReturnCode ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
             // Note: skipping target trace here as the 4th variable appears to cause issues w/ FAPI_TRY
             // The DIMM target should be called out in the combined revision code
             // We do want to callout the key here, so we know what type of DIMM failed
-            FAPI_TRY( check::spd_minimum_combined_revision(l_dimm, l_spd_combined_revision, l_min_combined_rev),
+            FAPI_TRY( check::spd_minimum_combined_revision(l_dimm, l_key, l_spd_combined_revision, l_min_combined_rev),
                       "SPD min rev check failed key MFG_ID:0x%04X Height:%u Size:%u",
                       l_key.iv_module_mfg_id, l_key.iv_dimm_height, l_key.iv_dimm_size );
 
             // Finally check the latest SPD combined revision
             // Don't bother checking the return code here because this check only produces informational logs
             // (and the RC is only used for unit tests)
-            check::spd_latest_combined_revision(l_dimm, l_spd_combined_revision, l_latest_combined_rev);
+            check::spd_latest_combined_revision(l_dimm, l_key, l_spd_combined_revision, l_latest_combined_rev);
         }
     }
 

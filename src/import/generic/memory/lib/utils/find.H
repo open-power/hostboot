@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -440,7 +440,6 @@ inline fapi2::ReturnCode lookup_table_check(const fapi2::Target<T>& i_target,
         OT& o_output)
 {
     const bool l_is_val_found = mss::find_value_from_key(i_map, i_key, o_output);
-
     FAPI_ASSERT( l_is_val_found,
                  fapi2::MSS_LOOKUP_FAILED()
                  .set_KEY(i_key)
@@ -450,6 +449,7 @@ inline fapi2::ReturnCode lookup_table_check(const fapi2::Target<T>& i_target,
                  "Failed to find a mapped value for %d on %s",
                  i_key,
                  mss::spd::c_str(i_target) );
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }

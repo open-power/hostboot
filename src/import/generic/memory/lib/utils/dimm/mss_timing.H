@@ -63,10 +63,11 @@ enum timing_ffdc_codes
     TRRD_L_HALF_AND_1KB_PAGE_HELPER = 8,
     TRRD_S_HALF_AND_1KB_PAGE_HELPER = 9,
     TRRD_S_2KB_PAGE_HELPER = 10,
-    TRRD_S = 11,
-    TRRD_L = 12,
-    TFAW = 13,
-    TDLLK = 14,
+    TRRD_L_2KB_PAGE_HELPER = 11,
+    TRRD_S = 12,
+    TRRD_L = 13,
+    TFAW = 14,
+    TDLLK = 15,
 };
 
 enum refresh_rate : uint8_t
@@ -78,6 +79,56 @@ enum refresh_rate : uint8_t
 
 namespace spd
 {
+
+///
+/// @brief Returns clock cycles form picoseconds based on speed bin
+/// Uses SPD rounding algorithm for DDR4
+/// @tparam OT the output type, derrived from the parameters
+/// @param[in] i_freq frequency of the DIMM
+/// @param[in] timing_in_ps timing parameter in ps
+/// @param[out] o_nck the number of clock cycles
+/// @return fapi2::ReturnCode
+/// @note Uses DDR4 SPD Contents Rounding Algorithm
+/// @note Item 2220.46
+///
+template<typename OT>
+inline fapi2::ReturnCode ps_to_nck( const uint64_t i_freq, const OT& i_timing_in_ps, OT& o_nck)
+{
+    OT l_tck_in_ps = 0;
+    o_nck = 0;
+
+    // No time if MT/s is 0 (well, infinite really but shut up)
+    if (i_freq == 0)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY( freq_to_ps(i_freq, l_tck_in_ps),
+              "Failed freq() accessor" );
+    FAPI_TRY( calc_nck(mss::generic_ffdc_codes::PS_TO_NS_CUSTOM_TIME, i_timing_in_ps, l_tck_in_ps,
+                       spd::INVERSE_DDR4_CORRECTION_FACTOR, o_nck),
+              "Failed calc_nck()" );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Returns clock cycles form nanoseconds based on speed bin
+/// Uses SPD rounding algorithm for DDR4
+/// @tparam OT the output type, derrived from the parameters
+/// @param[in] i_freq frequency of the DIMM
+/// @param[in] i_timing_in_ns timing parameter in ns
+/// @param[out] o_nck the number of clock cycles
+/// @return fapi2::ReturnCode
+/// @note Uses DDR4 SPD Contents Rounding Algorithm
+/// @note Item 2220.46
+///
+template<typename OT>
+inline fapi2::ReturnCode ns_to_nck( const uint64_t i_freq, const OT& i_timing_in_ns, OT& o_nck)
+{
+    return ps_to_nck(i_freq, i_timing_in_ns * CONVERT_PS_IN_A_NS, o_nck);
+}
 
 ///
 /// @brief Returns clock cycles form picoseconds based on speed bin
@@ -103,7 +154,8 @@ inline OT ps_to_nck( const uint64_t i_freq, const OT& i_timing_in_ps)
 
     FAPI_TRY( freq_to_ps(i_freq, l_tck_in_ps),
               "Failed freq() accessor" );
-    FAPI_TRY( calc_nck(i_timing_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_temp_nck),
+    FAPI_TRY( calc_nck(mss::generic_ffdc_codes::PS_TO_NS_ONE_CLOCK, i_timing_in_ps, l_tck_in_ps,
+                       spd::INVERSE_DDR4_CORRECTION_FACTOR, l_temp_nck),
               "Failed calc_nck()" );
 
     return l_temp_nck;
@@ -211,6 +263,7 @@ fapi_try_exit:
 }
 
 /// @brief Calculates Minimum Refresh Recovery Delay Time (different logical rank)
+/// @param[in] i_target the target on which to operate
 /// @param[in] i_mode fine refresh rate mode
 /// @param[in] i_density SDRAM density
 /// @param[out] o_trfc_in_ps timing val in ps
@@ -349,7 +402,7 @@ inline uint64_t tras(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                          .set_FREQ(i_freq)
                          .set_FUNCTION(TRAS)
                          .set_DIMM_TARGET(i_target),
-                         "%s Invalid frequency %lu",
+                         "%s Invalid frequency %lu in TRAS",
                          mss::c_str(i_target),
                          i_freq);
     }
@@ -594,6 +647,9 @@ static fapi2::ReturnCode trrd_l_half_and_1kb_page_helper(const fapi2::Target<T>&
     // 13.3 Timing Parameters by Speed Grade
     // Table 132. Pg 240
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    o_output = 0;
+    uint64_t l_ps = 0;
+    uint64_t l_nck = 0;
 
     // It could have been more "efficient" to hand-calculate the answer and
     // use compile time constants to return the answer. To avoid magic
@@ -606,7 +662,7 @@ static fapi2::ReturnCode trrd_l_half_and_1kb_page_helper(const fapi2::Target<T>&
         case 1866:
         case 2133:
             // From the spec: Max(4nCK,5.3ns)
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 5300) );
+            l_ps = 5300;
             break;
 
         case 2400:
@@ -614,7 +670,7 @@ static fapi2::ReturnCode trrd_l_half_and_1kb_page_helper(const fapi2::Target<T>&
         case 2933:
         case 3200:
             // Max(4nCK,4.9ns)
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 4900) );
+            l_ps = 4900;
             break;
 
         default:
@@ -627,6 +683,9 @@ static fapi2::ReturnCode trrd_l_half_and_1kb_page_helper(const fapi2::Target<T>&
                          mss::c_str(i_target),
                          i_freq);
     }
+
+    FAPI_TRY(spd::ps_to_nck(i_freq, l_ps, l_nck));
+    o_output = std::max( uint64_t(4), l_nck );
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -667,11 +726,22 @@ static fapi2::ReturnCode trrd_l_2kb_page_helper(const fapi2::Target<T>& i_target
         case 2666:
         case 2933:
         case 3200:
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 6400) );
+            {
+                uint64_t l_nck = 0;
+                FAPI_TRY(spd::ps_to_nck(i_freq, uint64_t(6400), l_nck));
+                o_output = std::max( uint64_t(4), l_nck );
+            }
             break;
 
         default:
-            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), i_freq);
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(i_freq)
+                         .set_FUNCTION(TRRD_L_2KB_PAGE_HELPER)
+                         .set_DIMM_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         i_freq);
             break;
     }
 
@@ -711,8 +781,9 @@ fapi2::ReturnCode trrd_l( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_PAGE_SIZE()
                          .set_DRAM_WIDTH(i_dram_width)
-                         .set_DIMM_TARGET(i_target),
-                         "%s Recieved an invalid page size: %lu",
+                         .set_DIMM_TARGET(i_target)
+                         .set_FUNCTION(TRRD_L),
+                         "%s Recieved an invalid page size: %lu in function SET_TRRD_L",
                          mss::c_str(i_target),
                          i_dram_width);
             break;
@@ -741,6 +812,9 @@ static fapi2::ReturnCode trrd_s_half_and_1kb_page_helper(const fapi2::Target<T>&
     // 13.3 Timing Parameters by Speed Grade
     // Table 132. Pg 240
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    o_output = 0;
+    uint64_t l_ps = 0;
+    uint64_t l_nck = 0;
 
     // It could have been more "efficient" to hand-calculate the answer and
     // use compile time constants to return the answer. To avoid magic
@@ -751,27 +825,27 @@ static fapi2::ReturnCode trrd_s_half_and_1kb_page_helper(const fapi2::Target<T>&
     switch(i_freq)
     {
         case 1866:
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 4200) );
+            l_ps = 4200;
             break;
 
         case 2133:
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 3700) );
+            l_ps = 3700;
             break;
 
         case 2400:
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 3300) );
+            l_ps = 3300;
             break;
 
         case 2666:
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 3000) );
+            l_ps = 3000;
             break;
 
         case 2933:
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 2700) );
+            l_ps = 2700;
             break;
 
         case 3200:
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 2500) );
+            l_ps = 2500;
             break;
 
         default:
@@ -780,10 +854,13 @@ static fapi2::ReturnCode trrd_s_half_and_1kb_page_helper(const fapi2::Target<T>&
                          .set_FREQ(i_freq)
                          .set_FUNCTION(TRRD_S_HALF_AND_1KB_PAGE_HELPER)
                          .set_DIMM_TARGET(i_target),
-                         "%s Invalid frequency %lu",
+                         "%s Invalid frequency %lu in TRRD_S_HALF_AND_1KB_PAGE_HELPER",
                          mss::c_str(i_target),
                          i_freq);
     }
+
+    FAPI_TRY(spd::ps_to_nck(i_freq, l_ps, l_nck));
+    o_output = std::max( uint64_t(4), l_nck );
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -823,7 +900,12 @@ static fapi2::ReturnCode trrd_s_2kb_page_helper(const fapi2::Target<T>& i_target
         case 2666:
         case 2933:
         case 3200:
-            o_output = std::max( 4, spd::ps_to_nck(i_freq, 5300) );
+            {
+
+                uint64_t l_nck = 0;
+                FAPI_TRY(spd::ps_to_nck(i_freq, uint64_t(5300), l_nck));
+                o_output = std::max( uint64_t(4), l_nck );
+            }
             break;
 
         default:
@@ -832,7 +914,7 @@ static fapi2::ReturnCode trrd_s_2kb_page_helper(const fapi2::Target<T>& i_target
                          .set_FREQ(i_freq)
                          .set_FUNCTION(TRRD_S_2KB_PAGE_HELPER)
                          .set_DIMM_TARGET(i_target),
-                         "%s Invalid frequency %lu",
+                         "%s Invalid frequency %lu in function TRRD_S_2KB_PAGE_HELPER",
                          mss::c_str(i_target),
                          i_freq);
             break;
@@ -875,8 +957,9 @@ fapi2::ReturnCode trrd_s( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_PAGE_SIZE()
                          .set_DRAM_WIDTH(i_dram_width)
-                         .set_DIMM_TARGET(i_target),
-                         "%s Recieved an invalid page size: %lu",
+                         .set_DIMM_TARGET(i_target)
+                         .set_FUNCTION(TRRD_S),
+                         "%s Recieved an invalid page size: %lu in tRRD_s",
                          mss::c_str(i_target),
                          i_dram_width);
             break;

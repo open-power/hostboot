@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,6 +122,7 @@ inline fapi2::ReturnCode freq_to_ps(const T i_speed_grade, OT& o_tCK_in_ps )
     const uint64_t l_input = static_cast<uint64_t>(i_speed_grade);
     uint64_t l_output = 0;
 
+// TK look at assert. is a target needed/desired?
     FAPI_ASSERT(find_value_from_key(dram_freq::FREQ_TO_CLOCK_PERIOD, l_input, l_output),
                 fapi2::MSS_INVALID_FREQUENCY()
                 .set_FREQ(l_input),

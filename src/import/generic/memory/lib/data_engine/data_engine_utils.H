@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: CI
 
 #ifndef _MSS_DATA_ENGINE_UTILS_H_
@@ -59,6 +59,7 @@ namespace mss
 /// @param[in] i_spd SPD binary
 /// @param[in] i_timing_mtb MTB
 /// @param[in] i_timing_ftb FTB
+/// @param[in] i_function the calling function to log for FFDC
 /// @param[in] i_timing_name Name for ffdc traces
 /// @param[out] o_timing_in_nck nCK calculated timing
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
@@ -68,6 +69,7 @@ fapi2::ReturnCode calc_spd_time_in_nck(
     const std::vector<uint8_t>& i_spd,
     const uint32_t i_timing_mtb,
     const uint32_t i_timing_ftb,
+    const uint16_t i_function,
     const char* i_timing_name,
     uint32_t& o_timing_in_nck);
 

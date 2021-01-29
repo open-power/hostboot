@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -50,6 +50,9 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <!-- Most likely scenario is an unsupported card getting plugged in -->
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
@@ -74,6 +77,9 @@
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
     <!-- The SPD itself has invalid data -->
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
@@ -91,6 +97,9 @@
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
     <!-- The SPD itself has invalid data -->
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
@@ -110,6 +119,9 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
     <!-- The SPD itself has invalid data -->
     <callout>
       <hw>
@@ -128,6 +140,9 @@
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
     <!-- The SPD itself has invalid data -->
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
@@ -226,6 +241,9 @@
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
     <!-- This is always a code bug. -->
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -292,6 +310,9 @@
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
     <!-- The SPD is misconfigured -->
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>

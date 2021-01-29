@@ -29,7 +29,7 @@
 // *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
 // *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:CI
 // EKB-Mirror-To: hostboot
 
@@ -3235,7 +3235,7 @@ class ddimm_0_3
                                   check_rcd_mfg_id_lsb(l_lsb),
                                   F::RCD_MFG_ID_LSB.get_byte(i_spd),
                                   l_lsb,
-                                  SET_DRAM_MFG_ID,
+                                  SET_RCD_MFG_ID,
                                   "RCD MFG ID LSB"));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -3243,7 +3243,7 @@ class ddimm_0_3
                                   check_rcd_mfg_id_msb(l_msb),
                                   F::RCD_MFG_ID_MSB.get_byte(i_spd),
                                   l_msb,
-                                  SET_DRAM_MFG_ID,
+                                  SET_RCD_MFG_ID,
                                   "RCD MFG ID MSB"));
 
             right_aligned_insert(l_buffer, l_msb, l_lsb);

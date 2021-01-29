@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
 // *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: CI
 // EKB-Mirror-To: hostboot
 
@@ -47,6 +47,7 @@ namespace mss
 /// @param[in] i_spd SPD binary
 /// @param[in] i_timing_mtb MTB
 /// @param[in] i_timing_ftb FTB
+/// @param[in] i_function the calling function to log for FFDC
 /// @param[in] i_timing_name Name for ffdc traces
 /// @param[out] o_timing_in_nck nCK calculated timing
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
@@ -56,6 +57,7 @@ fapi2::ReturnCode calc_spd_time_in_nck(
     const std::vector<uint8_t>& i_spd,
     const uint32_t i_timing_mtb,
     const uint32_t i_timing_ftb,
+    const uint16_t i_function,
     const char* i_timing_name,
     uint32_t& o_timing_in_nck)
 {
@@ -81,7 +83,7 @@ fapi2::ReturnCode calc_spd_time_in_nck(
         l_timing_in_ps = spd::calc_timing_from_timebase(i_timing_mtb, l_mtb, i_timing_ftb, l_ftb);
 
         // Calculate nck
-        FAPI_TRY( spd::calc_nck(l_timing_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, o_timing_in_nck),
+        FAPI_TRY( spd::calc_nck(i_function, l_timing_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, o_timing_in_nck),
                   "Error in calculating %s (nCK) for target %s, with value of %d",
                   i_timing_name, spd::c_str(l_ocmb), l_timing_in_ps );
 

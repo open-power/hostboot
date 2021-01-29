@@ -84,8 +84,20 @@ static inline bool jedec_spd_rounding_alg(const T& i_timing_in_ps,
         const guard_band i_inverse_corr_factor,
         OT& o_val_nck)
 {
+    o_val_nck = 0;
+
     // Preliminary nCK calculation, scaled by 1000 per JDEC algorithm
-    T l_temp_nck = (i_timing_in_ps * mss::CONVERT_PS_IN_A_NS) / (i_tck_in_ps == 0 ? 1 : i_tck_in_ps);
+    T l_temp_nck = (i_timing_in_ps * mss::CONVERT_PS_IN_A_NS);
+
+    // Checks for an overflow
+    if((l_temp_nck / mss::CONVERT_PS_IN_A_NS) != i_timing_in_ps)
+    {
+        FAPI_ERR("Found an overflow on the intial timing calculation! %u * %u != %u",
+                 i_timing_in_ps, mss::CONVERT_PS_IN_A_NS, l_temp_nck);
+        return false;
+    }
+
+    l_temp_nck = l_temp_nck / (i_tck_in_ps == 0 ? 1 : i_tck_in_ps);
     l_temp_nck += i_inverse_corr_factor;
     l_temp_nck = l_temp_nck / mss::CONVERT_PS_IN_A_NS;
 
@@ -104,6 +116,7 @@ static inline bool jedec_spd_rounding_alg(const T& i_timing_in_ps,
 /// @brief Returns clock cycles based on input application period
 /// @tparam T input type
 /// @tparam OT output type
+/// @param[in] i_function the calling function to log for FFDC
 /// @param[in] i_timing_in_ps timing parameter in ps
 /// @param[in] i_tck_in_ps  clock period in ps
 /// @param[in] i_inverse_corr_factor inverse correction factor  (defined by JEDEC)
@@ -113,7 +126,8 @@ static inline bool jedec_spd_rounding_alg(const T& i_timing_in_ps,
 /// @note Item 2220.46
 ///
 template<typename T, typename OT>
-inline fapi2::ReturnCode calc_nck(const T& i_timing_in_ps,
+inline fapi2::ReturnCode calc_nck(const uint16_t i_function,
+                                  const T& i_timing_in_ps,
                                   const T& i_tck_in_ps,
                                   const guard_band i_inverse_corr_factor,
                                   OT& o_val_nck)
@@ -125,7 +139,8 @@ inline fapi2::ReturnCode calc_nck(const T& i_timing_in_ps,
                  fapi2::MSS_INVALID_CAST_CALC_NCK().
                  set_TIMING_PS(i_timing_in_ps).
                  set_NCK_NS(i_tck_in_ps).
-                 set_CORRECTION_FACTOR(i_inverse_corr_factor),
+                 set_CORRECTION_FACTOR(i_inverse_corr_factor).
+                 set_FUNCTION(i_function),
                  "Overflow occured. Returned data is %d", o_val_nck);
 
     // If we don't assert, we don't know what's in current_err ...

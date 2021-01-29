@@ -645,7 +645,8 @@ class cas_latency
                                            const uint64_t i_tck,
                                            uint64_t& o_cas_latency) const
         {
-            FAPI_TRY( spd::calc_nck(i_taa, i_tck, spd::INVERSE_DDR4_CORRECTION_FACTOR, o_cas_latency) );
+            FAPI_TRY( spd::calc_nck(mss::generic_ffdc_codes::CALC_CAS_LATENCY, i_taa, i_tck, spd::INVERSE_DDR4_CORRECTION_FACTOR,
+                                    o_cas_latency) );
 
             FAPI_DBG("%s. tAA (ps): %d, tCK (ps): %d, CL (nck): %d",
                      mss::spd::c_str(iv_target),

@@ -56,12 +56,14 @@ inline constexpr T inclusive_range( const T i_start, const T i_end )
 /// @tparam T input and output types
 /// @param[in] i_divisor the divisor (number to be divided)
 /// @param[in] i_dividend the dividend (number to divide by)
+/// @param[in] i_function the calling function
 /// @param[out] o_quotient the quotient
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 template<typename T>
 inline fapi2::ReturnCode divide_and_round( const T i_divisor,
         const T i_dividend,
+        const uint16_t i_function,
         T& o_quotient )
 {
     o_quotient = 0;
@@ -70,7 +72,8 @@ inline fapi2::ReturnCode divide_and_round( const T i_divisor,
     FAPI_ASSERT( (i_dividend != 0),
                  fapi2::MSS_DIVIDE_BY_ZERO()
                  .set_DIVISOR(i_divisor)
-                 .set_DIVIDEND(i_dividend),
+                 .set_DIVIDEND(i_dividend)
+                 .set_FUNCTION(i_function),
                  "Caught an attempt to divide by zero (%d / %d)",
                  i_divisor, i_dividend );
 

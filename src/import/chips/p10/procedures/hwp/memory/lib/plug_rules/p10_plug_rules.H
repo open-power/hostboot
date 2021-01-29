@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,38 +121,30 @@ fapi2::ReturnCode spd_revision_key(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
 ///
 /// @brief Check DDIMM SPD revision and content revision versus minimum supported
 /// @param[in] i_target dimm target
+/// @param[in] i_key used for logging if an error occurs
 /// @param[in] i_spd_combined_revision the combined SPD revision and content
 /// @param[in] i_min_combined_rev SPD minimum combined revision information
 /// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
 /// @note The return code from this function is only used in unit tests.
 ///
 fapi2::ReturnCode spd_minimum_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const spd_lookup_key& i_key,
         const uint16_t i_spd_combined_rev,
         const uint16_t i_min_combined_rev);
 
 ///
 /// @brief Check DDIMM SPD revision and content revision versus latest supported
 /// @param[in] i_target dimm target
+/// @param[in] i_key used for logging if an error occurs
 /// @param[in] i_spd_combined_revision the combined SPD revision and content
 /// @param[in] i_latest_combined_rev latest SPD combined revision information
 /// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
 /// @note The return code from this function is only used in unit tests.
 ///
 fapi2::ReturnCode spd_latest_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const spd_lookup_key& i_key,
         const uint16_t i_spd_combined_rev,
         const uint16_t i_latest_combined_rev);
-
-///
-/// @brief Check DDIMM SPD revision and content revision versus minimum supported
-/// @param[in] i_target dimm target
-/// @param[in] i_spd_combined_revision the combined SPD revision and content
-/// @param[in] i_min_combined_rev SPD minimum combined revision information
-/// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
-/// @note The return code from this function is only used in unit tests.
-///
-fapi2::ReturnCode spd_minimum_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint16_t i_spd_combined_rev,
-        const uint16_t i_min_combined_rev);
 
 } // namespace check
 

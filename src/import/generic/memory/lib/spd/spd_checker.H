@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,7 +98,6 @@ namespace check
 ///
 /// @brief SPD timing boundary check
 /// @tparam BL bit_len selector
-/// @tparam T the TargetType
 /// @tparam TT defaulted to bitRangeTraits<TB>
 /// @param[in] i_target fapi2 target
 /// @param[in] i_timing the timing value
@@ -106,8 +105,8 @@ namespace check
 /// @param[in] i_ffdc ffdc function code
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template < bit_len BL, fapi2::TargetType T, typename TT = bitRangeTraits<BL> >
-fapi2::ReturnCode max_timing_range(const fapi2::Target<T>& i_target,
+template < bit_len BL, typename TT = bitRangeTraits<BL> >
+fapi2::ReturnCode max_timing_range(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                    const int64_t i_timing,
                                    const rev i_rev,
                                    const generic_ffdc_codes i_ffdc)
@@ -117,9 +116,12 @@ fapi2::ReturnCode max_timing_range(const fapi2::Target<T>& i_target,
                  fapi2::MSS_SPD_TIMING_FAIL()
                  .set_FAILED_REVISION(i_rev)
                  .set_FUNCTION_CODE(i_ffdc)
-                 .set_TARGET(i_target),
-                 "Failed timing parameter check for %s",
-                 spd::c_str(i_target));
+                 .set_OCMB_TARGET(i_target)
+                 .set_TIMING(i_timing)
+                 .set_UPPER_BOUND(TT::UPPER_BOUND)
+                 .set_LOWER_BOUND(TT::LOWER_BOUND),
+                 "Failed timing parameter check for %s. %d is outside of %d <= %d for SPD revision 0x%02x",
+                 spd::c_str(i_target), i_timing, TT::LOWER_BOUND, TT::UPPER_BOUND, i_rev );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -246,9 +248,10 @@ inline fapi2::ReturnCode reserved_values(const fapi2::Target<TT>& i_target,
     FAPI_ASSERT( !std::binary_search(i_reserved_bits.begin(), i_reserved_bits.end(), i_input),
                  fapi2::MSS_INVALID_SPD_RESERVED_BITS()
                  .set_FUNCTION_CODE(i_ffdc)
-                 .set_TARGET(i_target),
-                 "Reserved bits seen on %s",
-                 spd::c_str(i_target) );
+                 .set_FAILING_VALUE(i_input)
+                 .set_OCMB_TARGET(i_target),
+                 "Reserved bits seen on %s. Value seen:0x%02x",
+                 spd::c_str(i_target), i_input );
 
     return fapi2::FAPI2_RC_SUCCESS;
 

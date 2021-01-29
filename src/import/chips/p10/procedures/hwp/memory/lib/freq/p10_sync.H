@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,7 +91,8 @@ inline fapi2::ReturnCode convert_ddr_freq_to_omi_freq(const fapi2::Target<fapi2:
     FAPI_TRY(mss::attr::get_host_to_ddr_speed_ratio(i_target, l_ratio));
 
     // Multiply by the ratio and round to the nearest 10GBPS
-    FAPI_TRY(mss::divide_and_round((i_ddr_freq * l_ratio[0]), ROUND_UNITS, l_omi_freq));
+    FAPI_TRY(mss::divide_and_round((i_ddr_freq * l_ratio[0]), ROUND_UNITS, mss::generic_ffdc_codes::DDR_TO_OMI_FREQ,
+                                   l_omi_freq));
     o_omi_freq = ROUND_UNITS * l_omi_freq;
     FAPI_DBG("For ratio %d and DDR freq %d, corresponding OMI freq is %d", l_ratio[0], i_ddr_freq, o_omi_freq);
 
@@ -116,7 +117,8 @@ inline fapi2::ReturnCode convert_omi_freq_to_ddr_freq(const fapi2::Target<fapi2:
     uint8_t l_ratio[TT::MAX_DIMM_PER_PORT] = {0};
     FAPI_TRY(mss::attr::get_host_to_ddr_speed_ratio(i_target, l_ratio));
 
-    FAPI_TRY(mss::divide_and_round(static_cast<uint64_t>(i_omi_freq), static_cast<uint64_t>(l_ratio[0]), o_ddr_freq),
+    FAPI_TRY(mss::divide_and_round(static_cast<uint64_t>(i_omi_freq), static_cast<uint64_t>(l_ratio[0]),
+                                   mss::generic_ffdc_codes::OMI_TO_DDR_FREQ, o_ddr_freq),
              "%s freq system saw a zero Host (OMI) to DDR frequency ratio", mss::c_str(i_target));
     FAPI_DBG( "For ratio %d and OMI freq %d, corresponding DDR freq is %d", l_ratio[0], i_omi_freq, o_ddr_freq);
 

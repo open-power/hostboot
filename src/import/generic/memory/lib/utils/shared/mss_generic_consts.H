@@ -352,6 +352,20 @@ enum generic_ffdc_codes : uint16_t
     SET_OPERABLE_FLD = 0x10CE,
     SET_ENDURANT_FLD = 0x10CF,
     SET_SPD_CL_SUPPORTED = 0x10D0,
+
+
+    DDR_TO_OMI_FREQ = 0x10D1,
+    OMI_TO_DDR_FREQ = 0x10D2,
+    CALC_CAS_LATENCY = 0x10D3,
+    PS_TO_NS_CUSTOM_TIME = 0x10D4,
+    PS_TO_NS_ONE_CLOCK = 0x10D5,
+    SET_TRTP = 0x10D6,
+    OFFSET_TRFC_DLR = 0x10D7,
+    SET_TREFI = 0x10D8,
+    SET_TREFC = 0x10D9,
+    SET_TRRD_S = 0x10DA,
+    SET_TRRD_L = 0x10DB,
+
 };
 
 ///

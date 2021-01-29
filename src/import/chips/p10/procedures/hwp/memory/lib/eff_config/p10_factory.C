@@ -29,7 +29,7 @@
 // *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 // EKB-Mirror-To: hostboot
 
@@ -80,10 +80,10 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
         default:
             {
                 FAPI_ASSERT(false,
-                            fapi2::MSS_INVALID_SPD_PARAMETER_RECEIVED()
-                            .set_SPD_PARAM(i_rev)
+                            fapi2::MSS_INVALID_SPD_REVISION()
+                            .set_SPD_REVISION(i_rev)
                             .set_FUNCTION_CODE(EFD_FACTORY)
-                            .set_TARGET(i_target),
+                            .set_DIMM_TARGET(i_target),
                             "Unsupported SPD revision received in EFD decoder factory 0x%02x for %s",
                             i_rev, spd::c_str(i_target));
             }
@@ -137,10 +137,10 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
         default:
             {
                 FAPI_ASSERT(false,
-                            fapi2::MSS_INVALID_SPD_PARAMETER_RECEIVED()
-                            .set_SPD_PARAM(i_rev)
+                            fapi2::MSS_INVALID_SPD_REVISION()
+                            .set_SPD_REVISION(i_rev)
                             .set_FUNCTION_CODE(SPD_FACTORY)
-                            .set_TARGET(i_target),
+                            .set_DIMM_TARGET(i_target),
                             "Unsupported SPD revision received in SPD decoder factory 0x%02x for %s",
                             i_rev, spd::c_str(i_target));
             }

@@ -29,7 +29,7 @@
 // *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
 // *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:CI
 // EKB-Mirror-To: hostboot
 
@@ -797,6 +797,8 @@ class ddimm_efd_0_3
             uint8_t l_field = 0;
             FAPI_TRY(mss::attr::get_ddr4_f1rc1x(iv_dimm, l_field));
 
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC1X, i_efd, SET_DIMM_DDR4_F1RC1X, l_field));
+
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_f1rc1x(l_field),
@@ -804,8 +806,6 @@ class ddimm_efd_0_3
                                   l_field,
                                   SET_DIMM_DDR4_F1RC1X,
                                   "F1RC1X"));
-
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC1X, i_efd, SET_DIMM_DDR4_F1RC1X, l_field));
 
             FAPI_TRY(mss::attr::set_ddr4_f1rc1x(iv_dimm, l_field));
 
@@ -824,6 +824,8 @@ class ddimm_efd_0_3
             uint8_t l_field = 0;
             FAPI_TRY(mss::attr::get_ddr4_f1rc2x(iv_dimm, l_field));
 
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC2X, i_efd, SET_DIMM_DDR4_F1RC2X, l_field));
+
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_f1rc2x(l_field),
@@ -831,8 +833,6 @@ class ddimm_efd_0_3
                                   l_field,
                                   SET_DIMM_DDR4_F1RC2X,
                                   "F1RC2X"));
-
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC2X, i_efd, SET_DIMM_DDR4_F1RC2X, l_field));
 
             FAPI_TRY(mss::attr::set_ddr4_f1rc2x(iv_dimm, l_field));
 
@@ -851,6 +851,8 @@ class ddimm_efd_0_3
             uint8_t l_field = 0;
             FAPI_TRY(mss::attr::get_ddr4_f1rc3x(iv_dimm, l_field));
 
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC3X, i_efd, SET_DIMM_DDR4_F1RC3X, l_field));
+
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_f1rc3x(l_field),
@@ -858,8 +860,6 @@ class ddimm_efd_0_3
                                   l_field,
                                   SET_DIMM_DDR4_F1RC3X,
                                   "F1RC3X"));
-
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC3X, i_efd, SET_DIMM_DDR4_F1RC3X, l_field));
 
             FAPI_TRY(mss::attr::set_ddr4_f1rc3x(iv_dimm, l_field));
 
@@ -878,6 +878,8 @@ class ddimm_efd_0_3
             uint8_t l_field = 0;
             FAPI_TRY(mss::attr::get_ddr4_f1rc4x(iv_dimm, l_field));
 
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC4X, i_efd, SET_DIMM_DDR4_F1RC4X, l_field));
+
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_f1rc4x(l_field),
@@ -885,8 +887,6 @@ class ddimm_efd_0_3
                                   l_field,
                                   SET_DIMM_DDR4_F1RC4X,
                                   "F1RC4X"));
-
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC4X, i_efd, SET_DIMM_DDR4_F1RC4X, l_field));
 
             FAPI_TRY(mss::attr::set_ddr4_f1rc4x(iv_dimm, l_field));
 
@@ -905,6 +905,8 @@ class ddimm_efd_0_3
             uint8_t l_field = 0;
             FAPI_TRY(mss::attr::get_ddr4_f1rc5x(iv_dimm, l_field));
 
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC5X, i_efd, SET_DIMM_DDR4_F1RC5X, l_field));
+
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_f1rc5x(l_field),
@@ -912,8 +914,6 @@ class ddimm_efd_0_3
                                   l_field,
                                   SET_DIMM_DDR4_F1RC5X,
                                   "F1RC5X"));
-
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC5X, i_efd, SET_DIMM_DDR4_F1RC5X, l_field));
 
             FAPI_TRY(mss::attr::set_ddr4_f1rc5x(iv_dimm, l_field));
 
@@ -932,6 +932,8 @@ class ddimm_efd_0_3
             uint8_t l_field = 0;
             FAPI_TRY(mss::attr::get_ddr4_f1rc6x(iv_dimm, l_field));
 
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC6X, i_efd, SET_DIMM_DDR4_F1RC6X, l_field));
+
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_f1rc6x(l_field),
@@ -939,8 +941,6 @@ class ddimm_efd_0_3
                                   l_field,
                                   SET_DIMM_DDR4_F1RC6X,
                                   "F1RC6X"));
-
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC6X, i_efd, SET_DIMM_DDR4_F1RC6X, l_field));
 
             FAPI_TRY(mss::attr::set_ddr4_f1rc6x(iv_dimm, l_field));
 
@@ -959,6 +959,8 @@ class ddimm_efd_0_3
             uint8_t l_field = 0;
             FAPI_TRY(mss::attr::get_ddr4_f1rc7x(iv_dimm, l_field));
 
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC7X, i_efd, SET_DIMM_DDR4_F1RC7X, l_field));
+
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_f1rc7x(l_field),
@@ -966,8 +968,6 @@ class ddimm_efd_0_3
                                   l_field,
                                   SET_DIMM_DDR4_F1RC7X,
                                   "F1RC7X"));
-
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::F1RC7X, i_efd, SET_DIMM_DDR4_F1RC7X, l_field));
 
             FAPI_TRY(mss::attr::set_ddr4_f1rc7x(iv_dimm, l_field));
 
@@ -2047,11 +2047,13 @@ class ddimm_efd_0_3
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_DRAM_RTT_NOM).
-                                set_RANK(iv_dimm_rank).
-                                set_TARGET(iv_ocmb),
-                                "%s SPD decoder returned invalid rank: %u",
-                                spd::c_str(iv_ocmb),
-                                iv_dimm_rank);
+                                set_PHY_RANK(iv_phy_rank).
+                                set_PORT_TARGET(iv_port).
+                                set_DIMM_TARGET(iv_dimm),
+                                "%s SPD decoder returned invalid PHY rank: %u in %s",
+                                spd::c_str(iv_dimm),
+                                iv_phy_rank,
+                                "RTT_NOM");
                     break;
             };
 
@@ -2110,11 +2112,13 @@ class ddimm_efd_0_3
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_DRAM_RTT_WR).
-                                set_RANK(iv_dimm_rank).
-                                set_TARGET(iv_ocmb),
-                                "%s SPD decoder returned invalid rank: %u",
-                                spd::c_str(iv_ocmb),
-                                iv_dimm_rank);
+                                set_PHY_RANK(iv_phy_rank).
+                                set_PORT_TARGET(iv_port).
+                                set_DIMM_TARGET(iv_dimm),
+                                "%s SPD decoder returned invalid PHY rank: %u in %s",
+                                spd::c_str(iv_dimm),
+                                iv_phy_rank,
+                                "RTT_WR");
                     break;
             };
 
@@ -2178,11 +2182,13 @@ class ddimm_efd_0_3
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_DRAM_RTT_PARK).
-                                set_RANK(iv_dimm_rank).
-                                set_TARGET(iv_ocmb),
-                                "%s SPD decoder returned invalid rank: %u",
-                                spd::c_str(iv_ocmb),
-                                iv_dimm_rank);
+                                set_PHY_RANK(iv_phy_rank).
+                                set_PORT_TARGET(iv_port).
+                                set_DIMM_TARGET(iv_dimm),
+                                "%s SPD decoder returned invalid PHY rank: %u in %s",
+                                spd::c_str(iv_dimm),
+                                iv_phy_rank,
+                                "RTT_PARK");
                     break;
             };
 
@@ -2331,11 +2337,13 @@ class ddimm_efd_0_3
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_ODT_WR).
-                                set_RANK(iv_dimm_rank).
-                                set_TARGET(iv_ocmb),
-                                "%s SPD decoder returned invalid rank: %d",
-                                spd::c_str(iv_ocmb),
-                                iv_dimm_rank);
+                                set_PHY_RANK(iv_phy_rank).
+                                set_PORT_TARGET(iv_port).
+                                set_DIMM_TARGET(iv_dimm),
+                                "%s SPD decoder returned invalid PHY rank: %u in %s",
+                                spd::c_str(iv_dimm),
+                                iv_phy_rank,
+                                "ODT_WR");
                     break;
             };
 
@@ -2395,11 +2403,13 @@ class ddimm_efd_0_3
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_ODT_RD).
-                                set_RANK(iv_dimm_rank).
-                                set_TARGET(iv_ocmb),
-                                "%s SPD decoder returned invalid rank: %d",
-                                spd::c_str(iv_ocmb),
-                                iv_dimm_rank);
+                                set_PHY_RANK(iv_phy_rank).
+                                set_PORT_TARGET(iv_port).
+                                set_DIMM_TARGET(iv_dimm),
+                                "%s SPD decoder returned invalid PHY rank: %u in %s",
+                                spd::c_str(iv_dimm),
+                                iv_phy_rank,
+                                "ODT_RD");
                     break;
             };
 

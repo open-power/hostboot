@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,7 @@ fapi2::ReturnCode index_within_bounds_spd(
                  .set_LIST_SIZE(i_size)
                  .set_FUNCTION(i_ffdc_codes)
                  .set_TARGET(i_target),
-                 "%s Out of bounds indexing (with %d) on a list of size %d for " TARGTIDFORMAT,
+                 "Out of bounds indexing (with %d) on a list of size %d for " TARGTIDFORMAT,
                  i_index, i_size, TARGTID );
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -88,11 +88,11 @@ fapi2::ReturnCode get_field_spd(
 {
     const size_t BYTE = i_field.get_byte(i_binary);
 
-    // May need target for this & FFDC code – can pass those as args into get_field
-    FAPI_TRY(mss::spd::index_within_bounds_spd(i_target, BYTE, i_binary.size(), i_ffdc_code));
-
     // clear out stale state
     o_field = 0;
+
+    // Passes target for better FFDC
+    FAPI_TRY(mss::spd::index_within_bounds_spd(i_target, BYTE, i_binary.size(), i_ffdc_code));
 
     {
         // Extracting desired bits

@@ -29,7 +29,7 @@
 // *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
 // *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:CI
 // EKB-Mirror-To: hostboot
 
@@ -1482,7 +1482,7 @@ class base_0_3
                                   SET_DRAM_TRCD,
                                   "Offset TRCD Min"));
 
-            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, "TRCDmin", l_field));
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, SET_DRAM_TRCD, "TRCDmin", l_field));
 
             FAPI_TRY(mss::attr::set_dram_trcd(iv_port, static_cast<uint8_t>(l_field)));
 
@@ -1522,7 +1522,7 @@ class base_0_3
                                   SET_DRAM_TRP,
                                   "Offset TRP Min"));
 
-            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, "TRPmin", l_field));
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, SET_DRAM_TRP, "TRPmin", l_field));
 
             FAPI_TRY(mss::attr::set_dram_trp(iv_port, static_cast<uint8_t>(l_field)));
 
@@ -1578,7 +1578,7 @@ class base_0_3
                          l_trasmin);
             }
 
-            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_trasmin, l_ftb, "TRASmin", l_field));
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_trasmin, l_ftb, SET_DRAM_TRAS, "TRASmin", l_field));
 
             FAPI_TRY(mss::attr::set_dram_tras(iv_port, static_cast<uint8_t>(l_field)));
 
@@ -1800,7 +1800,8 @@ class base_0_3
                 // Calculate refresh cycle time in nCK & set attribute
 
                 // Calculate nck
-                FAPI_TRY( spd::calc_nck(l_trfc_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_in_nck),
+                FAPI_TRY( spd::calc_nck(mss::generic_ffdc_codes::SET_TREFC, l_trfc_in_ps, l_tck_in_ps,
+                                        spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_in_nck),
                           "%s Error in calculating l_tRFC, with value of l_trfc_in_ps: %d", spd::c_str(iv_dimm), l_trfc_in_ps);
 
                 FAPI_INF("%s tCK (ps): %d, tRFC (ps): %d, tRFC (nck): %d",
@@ -1863,7 +1864,7 @@ class base_0_3
                          l_tfawmin);
             }
 
-            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_tfawmin, l_ftb, "TFAW", l_field));
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_tfawmin, l_ftb, SET_DRAM_TFAW, "TFAW", l_field));
 
             FAPI_TRY(mss::attr::set_dram_tfaw(iv_port, static_cast<uint8_t>(l_field)));
 
@@ -1933,7 +1934,18 @@ class base_0_3
                                   SET_DRAM_TCCD_L,
                                   "Offset TCCD_L Min"));
 
-            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, "TCCD_l", l_field));
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, SET_DRAM_TCCD_L, "TCCD_l", l_field));
+
+            // If our uint8_t equals our uint32_t, we do not have an overflow
+            // Otherwise, assert out
+            FAPI_ASSERT(static_cast<uint8_t>(l_field) == l_field,
+                        fapi2::MSS_TCCDL_OVERFLOW_CALC()
+                        .set_MTB(l_timing_mtb)
+                        .set_FTB(l_timing_ftb)
+                        .set_RESULT(l_field)
+                        .set_DIMM_TARGET(iv_dimm),
+                        "%s had a tCCD_l overflow of %u. MTB:%u FTB:%u",
+                        mss::c_str(iv_dimm), l_timing_mtb, l_timing_ftb, l_field);
 
             FAPI_TRY(mss::attr::set_dram_tccd_l(iv_port, static_cast<uint8_t>(l_field)));
 
@@ -1990,7 +2002,7 @@ class base_0_3
                          l_twrmin);
             }
 
-            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_twrmin, l_ftb, "TWRmin", l_field));
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_twrmin, l_ftb, SET_DRAM_TWR, "TWRmin", l_field));
 
             FAPI_TRY(mss::attr::set_dram_twr(iv_port, static_cast<uint8_t>(l_field)));
 
@@ -2020,7 +2032,8 @@ class base_0_3
                      "%s Failed to calculate clock period (tCK)", spd::c_str(iv_dimm) );
 
             // Calculate nck
-            FAPI_TRY(spd::calc_nck(l_max_trtp_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_calc_trtp_in_nck),
+            FAPI_TRY(spd::calc_nck(mss::generic_ffdc_codes::SET_TRTP, l_max_trtp_in_ps, l_tck_in_ps,
+                                   spd::INVERSE_DDR4_CORRECTION_FACTOR, l_calc_trtp_in_nck),
                      "%s Error in calculating trtp, with value of l_twtr_in_ps: %d",
                      spd::c_str(iv_dimm), l_max_trtp_in_ps);
 
@@ -2083,7 +2096,7 @@ class base_0_3
                          l_twtrmin_s);
             }
 
-            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_twtrmin_s, l_ftb, "TWTRmin s", l_field));
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_twtrmin_s, l_ftb, SET_DRAM_TWTR_S, "TWTRmin s", l_field));
 
             FAPI_TRY(mss::attr::set_dram_twtr_s(iv_port, static_cast<uint8_t>(l_field)));
         fapi_try_exit:
@@ -2138,7 +2151,7 @@ class base_0_3
                          l_twtrmin_l);
             }
 
-            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_twtrmin_l, l_ftb, "TWTRmin l", l_field));
+            FAPI_TRY(mss::calc_spd_time_in_nck(iv_dimm, i_spd, l_twtrmin_l, l_ftb, SET_DRAM_TWTR_L, "TWTRmin l", l_field));
 
             FAPI_TRY(mss::attr::set_dram_twtr_l(iv_port, static_cast<uint8_t>(l_field)));
         fapi_try_exit:
@@ -2201,7 +2214,8 @@ class base_0_3
                       "%s Failed calc_trfc_dlr()", spd::c_str(iv_dimm) );
 
             // Calculate refresh cycle time in nck
-            FAPI_TRY( spd::calc_nck(l_trfc_dlr_in_ps, static_cast<uint64_t>(l_tck_in_ps), spd::INVERSE_DDR4_CORRECTION_FACTOR,
+            FAPI_TRY( spd::calc_nck(mss::generic_ffdc_codes::OFFSET_TRFC_DLR, l_trfc_dlr_in_ps, static_cast<uint64_t>(l_tck_in_ps),
+                                    spd::INVERSE_DDR4_CORRECTION_FACTOR,
                                     l_trfc_dlr_in_nck));
 
             FAPI_INF("%s tCK (ps): %d, tRFC_DLR (ps): %d, tRFC_DLR (nck): %d",
@@ -2283,7 +2297,8 @@ class base_0_3
 
                 // Calculate nck
                 uint64_t l_trefi_in_nck = 0;
-                FAPI_TRY(  spd::calc_nck( l_trefi_in_ps,
+                FAPI_TRY(  spd::calc_nck( mss::generic_ffdc_codes::SET_TREFI,
+                                          l_trefi_in_ps,
                                           static_cast<uint64_t>(l_tck_in_ps),
                                           spd::INVERSE_DDR4_CORRECTION_FACTOR,
                                           l_trefi_in_nck),
