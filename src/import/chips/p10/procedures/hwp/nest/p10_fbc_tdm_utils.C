@@ -58,8 +58,17 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_mask(
 {
     FAPI_DBG("Start");
 
-    sublink_t l_sublink = (i_even_not_odd) ? (sublink_t::EVEN) : (sublink_t::ODD);
-    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink, action_t::INACTIVE),
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit;
+    sublink_t l_sublink_opt;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_iohs_unit),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+    l_sublink_opt = (i_even_not_odd) ?
+                    (((l_iohs_unit % 2) == 0) ? (sublink_t::EVEN_PAUE) : (sublink_t::EVEN_PAUO)) :
+                    (((l_iohs_unit % 2) == 0) ? (sublink_t::ODD_PAUE) : (sublink_t::ODD_PAUO));
+
+    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::INACTIVE),
              "Error from p10_smp_link_firs");
 
 fapi_try_exit:
@@ -76,9 +85,17 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_reset_all(
 {
     FAPI_DBG("Start");
 
-    sublink_t l_sublink = (i_even_not_odd) ? (sublink_t::EVEN) : (sublink_t::ODD);
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit;
+    sublink_t l_sublink_opt;
 
-    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink, action_t::CLEAR_ALL),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_iohs_unit),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+    l_sublink_opt = (i_even_not_odd) ?
+                    (((l_iohs_unit % 2) == 0) ? (sublink_t::EVEN_PAUE) : (sublink_t::EVEN_PAUO)) :
+                    (((l_iohs_unit % 2) == 0) ? (sublink_t::ODD_PAUE) : (sublink_t::ODD_PAUO));
+
+    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::CLEAR_ALL),
              "Error from p10_smp_link_firs");
 
 fapi_try_exit:
@@ -95,9 +112,17 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_reset_err(
 {
     FAPI_DBG("Start");
 
-    sublink_t l_sublink = (i_even_not_odd) ? (sublink_t::EVEN) : (sublink_t::ODD);
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit;
+    sublink_t l_sublink_opt;
 
-    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink, action_t::CLEAR_ERR),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_iohs_unit),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+    l_sublink_opt = (i_even_not_odd) ?
+                    (((l_iohs_unit % 2) == 0) ? (sublink_t::EVEN_PAUE) : (sublink_t::EVEN_PAUO)) :
+                    (((l_iohs_unit % 2) == 0) ? (sublink_t::ODD_PAUE) : (sublink_t::ODD_PAUO));
+
+    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::CLEAR_ERR),
              "Error from p10_smp_link_firs");
 
 fapi_try_exit:
@@ -114,8 +139,17 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_unmask(
 {
     FAPI_DBG("Start");
 
-    sublink_t l_sublink = (i_even_not_odd) ? (sublink_t::EVEN) : (sublink_t::ODD);
-    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink, action_t::RUNTIME),
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit;
+    sublink_t l_sublink_opt;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_iohs_unit),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+    l_sublink_opt = (i_even_not_odd) ?
+                    (((l_iohs_unit % 2) == 0) ? (sublink_t::EVEN_PAUE) : (sublink_t::EVEN_PAUO)) :
+                    (((l_iohs_unit % 2) == 0) ? (sublink_t::ODD_PAUE) : (sublink_t::ODD_PAUO));
+
+    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::RUNTIME),
              "Error from p10_smp_link_firs");
 
 fapi_try_exit:
@@ -171,6 +205,8 @@ fapi2::ReturnCode p10_fbc_tdm_utils_validate_targets(
     using namespace scomt::pauc;
 
     fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_target;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_iolink_target;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_loc_iolink_target;
     fapi2::ATTR_IOHS_CONFIG_MODE_Type l_loc_config_mode;
     fapi2::ATTR_IOHS_CONFIG_MODE_Type l_rem_config_mode;
     fapi2::ReturnCode l_rc;
@@ -178,12 +214,15 @@ fapi2::ReturnCode p10_fbc_tdm_utils_validate_targets(
     FAPI_DBG("Start");
 
     // verify link configuration
-    l_rc = i_target.getOtherEnd(l_rem_target);
+    l_loc_iolink_target = i_target.getChildren<fapi2::TARGET_TYPE_IOLINK>().front();
+    l_rc = l_loc_iolink_target.getOtherEnd(l_rem_iolink_target);
 
     FAPI_ASSERT(!l_rc,
                 fapi2::P10_FBC_TDM_UTILS_REM_ENDP_TARGET_ERR()
                 .set_LOC_ENDP_TARGET(i_target),
                 "No remote endpoint target found for given local link endpoint!");
+
+    l_rem_target = l_rem_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, i_target, l_loc_config_mode),
              "Error from FAPI_ATTR_GET (ATTR_IOHS_CONFIG_MODE)");
