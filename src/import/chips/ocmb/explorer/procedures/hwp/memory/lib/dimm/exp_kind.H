@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,6 +106,16 @@ fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TAR
 ///
 template<>
 fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        bool& o_is_mds );
+
+///
+/// @brief Check if any dimm is hybrid type MDS - explorer/DIMM specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
         bool& o_is_mds );
 
 } // end dimm ns
