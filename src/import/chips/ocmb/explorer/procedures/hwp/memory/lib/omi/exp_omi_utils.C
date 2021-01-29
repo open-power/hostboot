@@ -347,7 +347,7 @@ fapi2::ReturnCode poll_abort(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     FAPI_TRY(mss::exp::i2c::status::get_status_code(i_target, l_rsp_data, l_status));
     FAPI_ASSERT( (l_status != mss::exp::i2c::status_codes::FW_BUSY),
                  fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
-                 set_TARGET(i_target).
+                 set_OCMB_TARGET(i_target).
                  set_CMD_ID(mss::exp::i2c::FW_TWI_POLL_ABORT).
                  set_COMMAND(l_cmd_data).
                  set_STATUS_DATA(l_fw_status_data),
