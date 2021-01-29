@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 
 #include <prdfPlatServices.H>
 #include <prdfP10IohsExtraSig.H>
+#include <fapi2.H>
 
 using namespace TARGETING;
 
@@ -58,16 +59,14 @@ int32_t __smp_callout(ExtensibleChip* i_chip, unsigned int i_link,
     // querying the link quality status register. A zero value indicates the
     // link has failed.
 
-    // TODO: Uncomment once below is supported.
-    //HWAS::CalloutFlag_t calloutFlag = HWAS::FLAG_NONE;
+    HWAS::CalloutFlag_t calloutFlag = HWAS::FLAG_NONE;
 
     const char* reg_str = (0 == i_link) ? "IOHS_DLP_LINK0_QUALITY"
                                         : "IOHS_DLP_LINK1_QUALITY";
     SCAN_COMM_REGISTER_CLASS* reg = i_chip->getRegister(reg_str);
     if (SUCCESS == reg->Read() && reg->BitStringIsZero())
     {
-        // TODO: Uncomment once below is supported.
-        //calloutFlag = HWAS::FLAG_LINK_DOWN;
+        calloutFlag = HWAS::FLAG_LINK_DOWN;
 
         // Indicate in the multi-signature section that the link has failed.
         io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
@@ -77,27 +76,46 @@ int32_t __smp_callout(ExtensibleChip* i_chip, unsigned int i_link,
         io_sc.service_data->setPredictive();
     }
 
-    // TODO: Remove once below is supported.
-    io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_MED, NO_GARD);
-/* TODO: RTC 259316 - See action items below.
     // Get the connected SMPGROUP target.
-    // TODO: Need to add the following to the connMap map in getConnectedChild()
-    //       so we can get an SMPGROUP from an IOHS.
-    //          { {TYPE_IOHS, TYPE_SMPGROUP}, MAX_LINK_PER_IOHS },
     TargetHandle_t rxTrgt = getConnectedChild(i_chip->getTrgt(), TYPE_SMPGROUP,
                                               i_link);
     PRDF_ASSERT(nullptr != rxTrgt);
 
     // Get the peer SMPGROUP target.
-    // TODO: Need to update getConnectedPeerTarget() to allow SMPGROUP targets.
     TargetHandle_t txTrgt = getConnectedPeerTarget(rxTrgt);
-    PRDF_ASSERT(nullptr != txTrgt);
 
-    // Callout the entire bus interface.
-    // TODO: What type should we use for IOHS? Do we need differentiate between
-    //       X or A link types or can we use a generic new IOHS type?
-    calloutBus(io_sc, rxTrgt, txTrgt, HWAS::???, calloutFlag);
-*/
+    // If this SMPGROUP does not have a peer, just callout this target.
+    if ( nullptr == txTrgt )
+    {
+        PRDF_TRAC( "p10_iohs::__smp_callout: No peer SMPGROUP found" );
+        io_sc.service_data->SetCallout( rxTrgt, MRU_MED );
+        return SUCCESS;
+    }
+
+    // Check the IOHS config.
+    const auto configMode = i_chip->getTrgt()->getAttr<ATTR_IOHS_CONFIG_MODE>();
+    HWAS::busTypeEnum busType = HWAS::FSI_BUS_TYPE; // invalid bus type
+
+    switch( configMode )
+    {
+        // XBUS
+        case fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX:
+            busType = HWAS::X_BUS_TYPE;
+            break;
+        // ABUS
+        case fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA:
+            busType = HWAS::A_BUS_TYPE;
+            break;
+        default:
+            PRDF_TRAC( "p10_iohs::__smp_callout: invalid IOHS config mode" );
+            break;
+    }
+
+    if ( HWAS::X_BUS_TYPE == busType || HWAS::A_BUS_TYPE == busType )
+    {
+        // Callout the entire bus interface.
+        calloutBus(io_sc, rxTrgt, txTrgt, busType, calloutFlag);
+    }
 
     return SUCCESS;
 }

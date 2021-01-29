@@ -728,7 +728,8 @@ ExtensibleChip * getNeighborCore( ExtensibleChip * i_core )
 TargetHandle_t getConnectedPeerTarget(TargetHandle_t i_target)
 {
     PRDF_ASSERT(nullptr != i_target);
-    PRDF_ASSERT(TYPE_IOHS == getTargetType(i_target));
+    PRDF_ASSERT(TYPE_IOHS == getTargetType(i_target) ||
+                TYPE_SMPGROUP == getTargetType(i_target));
 
     return i_target->getAttr<ATTR_PEER_TARGET>();
 }
