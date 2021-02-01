@@ -208,6 +208,30 @@
   </attribute>
 
   <attribute>
+    <id>FORCE_ECC_UPDATE_ON_VALIDATION_ERROR</id>
+    <description>
+        This is an attribute override, that when set to 1, will force an ECC
+        update for a record when the ECC data for that record fails the ECC
+        validation.
+            0x00 = Do *not* force an ECC update if a record fails ECC validation
+            0x01 = Do force an ECC update if a record fails ECC validation
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0x00</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+    <no_export/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>FORCE_SBE_UPDATE</id>
     <description>
         Set bits to indicate reason to force an SBE update at various places in the IPL.

@@ -334,10 +334,15 @@ class IpVpdFacade
      * @param[in] i_args   - Device driver input args: Struct that contains the
      *                       record ID, location of record and EEPROM source.
      *                       Keyword data is not used.
+     * @param[in](optional) i_ptEntry - If not a nullptr then the meta data will be
+     *                                  used from this parameter and therefore will not
+     *                                  be retrieved for the record which can be a
+     *                                  time saver.
      * @return errlHndl_t  - NULL if successful, otherwise a pointer to the error log.
      */
     errlHndl_t updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
-                                     const IpVpdFacade::input_args_t &i_args );
+                                     const IpVpdFacade::input_args_t &i_args,
+                                     const pt_entry                  *i_ptEntry = nullptr );
 
     /**
      * @brief Validate all the MVPD records' ECC data

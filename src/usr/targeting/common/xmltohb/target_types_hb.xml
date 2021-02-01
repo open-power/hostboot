@@ -288,6 +288,9 @@
       <id>EARLY_TESTCASES_ISTEP</id>
     </attribute>
     <attribute>
+      <id>FORCE_ECC_UPDATE_ON_VALIDATION_ERROR</id>
+    </attribute>
+    <attribute>
       <id>FORCE_SBE_UPDATE</id>
     </attribute>
     <attribute>
