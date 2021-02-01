@@ -95,6 +95,9 @@
       <id>SBE_COMM_ADDR</id>
     </attribute>
     <attribute>
+      <id>SBE_COMPROMISED_EID</id>
+    </attribute>
+    <attribute>
       <id>SBE_FFDC_ADDR</id>
     </attribute>
     <attribute>

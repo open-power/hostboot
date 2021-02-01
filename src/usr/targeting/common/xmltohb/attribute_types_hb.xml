@@ -1263,6 +1263,22 @@
   </attribute>
 
   <attribute>
+    <id>SBE_COMPROMISED_EID</id>
+    <description>
+        Error ID for log that indicates why the SBE is compromised.
+        Compromised means that the PCR6 data was not matched.
+        (0 = not compromised)
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>SBE_FFDC_ADDR</id>
     <description>
         Virtual address where SBE FFDC is placed in mainstore.
