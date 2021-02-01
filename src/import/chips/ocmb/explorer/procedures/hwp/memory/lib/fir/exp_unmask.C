@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,6 +168,7 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
 {
     constexpr uint8_t EXPLR_TLXT_TLX_ERR1_REPORTQ_TLXT_INTRP_REQ_FAILED = 38;
 
+    fapi2::ATTR_MSS_EXP_INTR_MASK_DISABLE_Type l_intr_mask_disable = 0;
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
@@ -187,6 +188,19 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
              mss::c_str(i_target), EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR);
     FAPI_TRY(l_rc4, "for target %s unable to create fir::reg for EXPLR_DLX_MC_OMI_FIR_REG 0x%0x",
              mss::c_str(i_target), EXPLR_DLX_MC_OMI_FIR_REG);
+
+    FAPI_TRY(mss::attr::get_exp_intr_mask_disable(i_target, l_intr_mask_disable));
+
+    // Now that we've set up obj handles and command tags we can unmask the Explorer interrupts
+    if (l_intr_mask_disable == fapi2::ENUM_ATTR_MSS_EXP_INTR_MASK_DISABLE_ENABLE)
+    {
+        fapi2::buffer<uint64_t> l_interrupt_mask;
+
+        FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG, l_interrupt_mask));
+        l_interrupt_mask.clearBit<EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG_SMASK_IN,
+                                  EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG_SMASK_IN_LEN>();
+        FAPI_TRY(fapi2::putScom(i_target, EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG, l_interrupt_mask));
+    }
 
     // Setup MMIO MFIR unmasks per spec
     FAPI_TRY(l_exp_mmio_mfir_reg.recoverable_error<EXPLR_MMIO_MFIR_SCOM_ERR>()
@@ -326,6 +340,7 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
 
     fapi2::ATTR_OMI_X4_DEGRADE_ACTION_Type l_degrade_fail_action = 0;
     fapi2::ATTR_OMI_CRC_DEBUG_Type l_omi_crc_debug = 0;
+    fapi2::ATTR_MSS_EXP_INTR_MASK_DISABLE_Type l_intr_mask_disable = 0;
     fapi2::buffer<uint64_t> l_dl0_error_mask;
     fapi2::buffer<uint64_t> l_global_fir_mask_reg;
     fapi2::buffer<uint64_t> l_global_spa_attn_reg;
@@ -345,6 +360,18 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
 
     FAPI_TRY(mss::attr::get_omi_x4_degrade_action(l_degrade_fail_action));
     FAPI_TRY(mss::attr::get_omi_crc_debug(l_omi_crc_debug));
+    FAPI_TRY(mss::attr::get_exp_intr_mask_disable(i_target, l_intr_mask_disable));
+
+    // Before we unmask any FIRs we need to mask all Explorer interrupts due to SW515594
+    if (l_intr_mask_disable == fapi2::ENUM_ATTR_MSS_EXP_INTR_MASK_DISABLE_ENABLE)
+    {
+        fapi2::buffer<uint64_t> l_interrupt_mask;
+
+        FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG, l_interrupt_mask));
+        l_interrupt_mask.setBit<EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG_SMASK_IN,
+                                EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG_SMASK_IN_LEN>();
+        FAPI_TRY(fapi2::putScom(i_target, EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG, l_interrupt_mask));
+    }
 
     // Write LOCAL_FIR register per Explorer unmask spec
     FAPI_TRY(l_exp_local_fir_reg.recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_106>()

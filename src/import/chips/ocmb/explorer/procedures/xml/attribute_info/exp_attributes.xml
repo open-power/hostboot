@@ -1392,4 +1392,20 @@
       <mssAccessorName>exp_cdr_bw_override_value</mssAccessorName>
     </attribute>
 
+    <attribute>
+      <id>ATTR_MSS_EXP_INTR_MASK_DISABLE</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          This is a lab override attribute to disable masking Explorer
+          FIR interrupts during OMI training. Disabling this can work
+          around scom fails caused by older FW versions not including
+          the register 0x08040017
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <enum>ENABLE = 0, DISABLE = 1</enum>
+      <writeable/>
+      <mssAccessorName>exp_intr_mask_disable</mssAccessorName>
+    </attribute>
+
 </attributes>
