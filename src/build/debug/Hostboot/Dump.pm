@@ -36,6 +36,7 @@ use constant    MEMSTATE_NO_MEM => 0x0;
 use constant    MEMSTATE_HALF_CACHE => 0x4;
 use constant    MEMSTATE_REDUCED_CACHE => 0x8;
 use constant    MEMSTATE_FULL_CACHE => 0xa;
+use constant    MEMSTATE_MS_16MEG => 0x10;
 use constant    MEMSTATE_MS_32MEG => 0x20;
 use constant    MEMSTATE_MS_48MEG => 0x30;
 use constant    MEMSTATE_MS_64MEG => 0x40;
