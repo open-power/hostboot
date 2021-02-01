@@ -825,6 +825,14 @@ void* host_discover_targets( void *io_pArgs )
     }
 #endif // CONFIG_PLDM
 
+    l_err = TARGETING::AttrRP::notifyResourceReady(
+              TARGETING::AttrRP::RESOURCE::SYNC_WINDOW_OPEN);
+    if (l_err)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_discover_targets PROBLEM with SYNC_WINDOW_OPEN");
+        captureError(l_err, l_stepError, ISTEP_COMP_ID);
+    }
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_discover_targets exit" );
 

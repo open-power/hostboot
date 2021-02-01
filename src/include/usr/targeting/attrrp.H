@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -355,6 +355,8 @@ class AttrRP
             MSG_SHUTDOWN_ATTR_SYNC        = 0x00000005,
             // Attribute overrides and syncs
             MSG_ATTR_OVERRIDE_SYNC        = 0x00000006,
+            // Attribute Sync presence detect completed
+            MSG_ATTR_SYNC_WINDOW_OPEN  = 0x00000007,
             // Sentinel value for when message type is not yet known
             MSG_INVALID                   = 0xFFFFFFFF,
         };
@@ -368,6 +370,7 @@ class AttrRP
         enum RESOURCE : uint8_t
         {
             MAILBOX, ///< FSI mailbox service
+            SYNC_WINDOW_OPEN, ///< State when safe to sync attributes
         };
 
         /**
@@ -502,7 +505,7 @@ class AttrRP
 #ifndef __HOSTBOOT_RUNTIME
             : iv_msgQ(nullptr), iv_attrSyncMsgQ(msg_q_create()),
               iv_sections(nullptr), iv_sectionCount(0),
-              iv_attrSyncPrimed(false),iv_isMpipl(false)
+              iv_attrSyncPrimed(false),iv_attrSyncWindowOpen(false),iv_isMpipl(false)
 #else
             : iv_isTempInstance(false), iv_isMpipl(false)
 #endif
@@ -846,6 +849,8 @@ class AttrRP
 
         // Whether service is primed to invoke attribute synchronization
         bool iv_attrSyncPrimed;
+        // Whether presence detection is completed to allow attribute synchronization
+        bool iv_attrSyncWindowOpen;
 #else
         // Indicator that AttrRP instance is a temporary one, not the singleton
         bool iv_isTempInstance;

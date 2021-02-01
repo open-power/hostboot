@@ -201,6 +201,11 @@ namespace TARGETING
                     msgType = MSG_PRIME_ATTR_SYNC;
                 }
                 break;
+            case SYNC_WINDOW_OPEN:
+                {
+                    msgType = MSG_ATTR_SYNC_WINDOW_OPEN;
+                }
+                break;
             default:
                 {
                     TRACFCOMP(g_trac_targeting, ERR_MRK
@@ -337,11 +342,21 @@ namespace TARGETING
 
         do
         {
+            TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
+                "iv_attrSyncPrimed=%d iv_attrSyncWindowOpen=%d",
+                iv_attrSyncPrimed, iv_attrSyncWindowOpen);
             // Check for sync primed
             if(!iv_attrSyncPrimed)
             {
                 TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
                         "Attribute sync not primed; suppressing "
+                        "attribute sync.");
+                break;
+            }
+            else if (!iv_attrSyncWindowOpen)
+            {
+                TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
+                        "Attribute sync window -NOT- OPEN; suppressing "
                         "attribute sync.");
                 break;
             }
@@ -487,6 +502,15 @@ namespace TARGETING
 
                             pError = _invokeAttrSync();
                             shutdown_requested = true;
+                        }
+                        break;
+                    case MSG_ATTR_SYNC_WINDOW_OPEN:
+                        {
+                            iv_attrSyncWindowOpen=true;
+                            TRACFCOMP(g_trac_targeting, INFO_MRK
+                                "AttrRP: attrSyncTask: "
+                                "Attribute Sync Window OPEN to synchronize "
+                                "attributes.");
                         }
                         break;
                     default:
