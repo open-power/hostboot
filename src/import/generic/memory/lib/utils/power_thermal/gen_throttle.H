@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,7 +142,10 @@ fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
     // Compare ">=" because o_calc_util can be a double, and so we can't compare just equality due to truncation
     FAPI_ASSERT( o_calc_util >= l_calc_util_uint64,
                  fapi2::MSS_OUTPUT_OVERFLOW_CALC_UTIL()
-                 .set_RESULT(o_calc_util),
+                 .set_RESULT(o_calc_util)
+                 .set_THROTTLES(i_n_throttles)
+                 .set_DRAM_CLOCKS(i_num_dram_clocks)
+                 .set_MULTIPLIER(l_multiplier),
                  "Overflow of output variable in calc_util_from_throttles throttles: %d, multiplier %d, dram_clocks %d",
                  i_n_throttles,
                  l_multiplier,
@@ -238,7 +241,7 @@ fapi2::ReturnCode update_runtime_throttle(const fapi2::Target<T>& i_target)
         l_run_port = (l_calc_port != 0) ?
                      std::min(l_run_port, l_calc_port) : l_run_port;
 
-        FAPI_INF("New runtime throttles for %s for slot are %d, port are  %d",
+        FAPI_INF("New runtime throttles for %s for slot are %d, port are %d",
                  mss::c_str(l_port),
                  l_run_slot,
                  l_run_port);
@@ -787,9 +790,9 @@ fapi2::ReturnCode throttle<MC, TT>::calc_port_power(const double i_idle_util [TT
                  static_cast<uint64_t>(i_idle_util[l_pos]) );
         //Sum up the dimm's power to calculate the port power curve
         o_port_power_idle += calc_power(i_idle_util[l_pos], l_pos, l_rc);
-        FAPI_TRY(l_rc, "calc_power failed");
+        FAPI_TRY(l_rc, "calc_power failed on %s", l_dimm);
         o_port_power_max  += calc_power(i_max_util[l_pos], l_pos, l_rc);
-        FAPI_TRY(l_rc, "calc_power failed");
+        FAPI_TRY(l_rc, "calc_power failed on %s", l_dimm);
     }
 
     //Raise the powers by the uplift percent
@@ -800,12 +803,16 @@ fapi2::ReturnCode throttle<MC, TT>::calc_port_power(const double i_idle_util [TT
                  fapi2::MSS_NO_PORT_POWER()
                  .set_PORT_TARGET(iv_target)
                  .set_COUNT_DIMMS(mss::count_dimm(iv_target))
+                 .set_IDLE_UTILIZATION_DIMM_0(i_idle_util[0])
+                 .set_IDLE_UTILIZATION_DIMM_1(i_idle_util[1])
                  .set_MAX_UTILIZATION_DIMM_0(i_max_util[0])
                  .set_MAX_UTILIZATION_DIMM_1(i_max_util[1]),
-                 "No Port Power limit was calculated for %s, %d DIMMs installed, utilizations: DIMM 0 %d, DIMM 1 %d",
+                 "No Port Power limit was calculated for %s, %d DIMMs installed, DIMM 0 Utils Idle %d Max %d, DIMM 1 Utils Idle %d Max %d",
                  mss::c_str(iv_target),
                  mss::count_dimm(iv_target),
+                 i_idle_util[0],
                  i_max_util[0],
+                 i_idle_util[1],
                  i_max_util[1]);
 
     //FAPI_ASSERTs don't set the current err to good
@@ -835,9 +842,9 @@ fapi2::ReturnCode throttle<MC, TT>::calc_dimm_power(const double i_databus_idle,
         fapi2::ReturnCode l_rc;
         const uint8_t l_pos = mss::index(l_dimm);
         o_dimm_power_idle[l_pos] = calc_power(i_databus_idle, l_pos, l_rc);
-        FAPI_TRY(l_rc, "calc_power failed");
+        FAPI_TRY(l_rc, "calc_power failed on %s", l_dimm);
         o_dimm_power_max[l_pos]  = calc_power(i_databus_max, l_pos, l_rc);
-        FAPI_TRY(l_rc, "calc_power failed");
+        FAPI_TRY(l_rc, "calc_power failed on %s", l_dimm);
 
         //Raise the powers by the uplift percent
         calc_power_uplift(iv_power_uplift_idle, o_dimm_power_idle[l_pos]);
@@ -1222,6 +1229,15 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
                                       std::vector< fapi2::Target<TT::PORT_TARGET_TYPE> >& o_exceeded_power)
 
 {
+    // Check if target list is empty
+    if (i_targets.empty())
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Save off failing MC for traces
+    auto l_current_mc = i_targets[0];
+
     o_exceeded_power.clear();
 
     //Set to max values so every compare will change to min value
@@ -1231,6 +1247,8 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
     //Loop through all of the MC targets to find the worst case throttle value (lowest) for the slot and port
     for (const auto& l_mc : i_targets)
     {
+        l_current_mc = l_mc;
+
         for (const auto& l_port : mss::find_targets<TT::PORT_TARGET_TYPE>(l_mc))
         {
             uint16_t l_calc_slot = 0;
@@ -1263,6 +1281,8 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
     {
         for (const auto& l_mc : i_targets)
         {
+            l_current_mc = l_mc;
+
             for (const auto& l_port : mss::find_targets<TT::PORT_TARGET_TYPE>(l_mc))
             {
                 uint16_t l_fin_slot = 0;
@@ -1346,7 +1366,7 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
     }
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
-    FAPI_ERR("Error equalizing memory throttles");
+    FAPI_ERR("Error equalizing memory throttles on %s", mss::c_str(l_current_mc));
     return fapi2::current_err;
 }
 

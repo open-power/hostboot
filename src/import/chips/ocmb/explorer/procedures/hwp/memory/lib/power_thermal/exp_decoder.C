@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -224,7 +224,7 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                                                mss::count_dimm(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm)) :
                                                1;
 
-        FAPI_TRY( l_decoder.generate_encoding(), "%s Error in get_power_attrs", mss::c_str(l_dimm) );
+        FAPI_TRY( l_decoder.generate_encoding(), "Fail encountered while generating encodings on %s", mss::c_str(l_dimm) );
 
         // The first entry into these arrays must be valid
         // If we don't find any values, the attributes aren't found so go with some defaults
@@ -242,7 +242,7 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
         {
             const std::vector< const std::vector<uint64_t>* > l_slope {&i_slope, &i_current_curve_with_limit};
 
-            FAPI_TRY( l_decoder.find_slope(l_slope), "%s Error in get_power_attrs", mss::c_str(l_dimm) );
+            FAPI_TRY( l_decoder.find_slope(l_slope), "Fail encountered in find_slope on %s", mss::c_str(l_dimm) );
 
             o_slope[l_dimm_pos] =
                 ((i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_slope : l_decoder.iv_total_slope) /
@@ -263,7 +263,7 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
         {
             const std::vector< const std::vector<uint64_t>* > l_intercept {&i_intercept, &i_current_curve_with_limit};
 
-            FAPI_TRY( l_decoder.find_intercept(l_intercept), "%s Error in get_power_attrs", mss::c_str(l_dimm) );
+            FAPI_TRY( l_decoder.find_intercept(l_intercept), "Fail encountered in find_intercept on %s", mss::c_str(l_dimm) );
 
             o_intercept[l_dimm_pos] =
                 ((i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_intercept : l_decoder.iv_total_intercept) /
@@ -287,7 +287,7 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
             std::vector< const std::vector<uint64_t>* > l_thermal_power_limit {&i_thermal_power_limit, &i_current_curve_with_limit};
 
             FAPI_TRY( l_decoder.find_thermal_power_limit(l_thermal_power_limit),
-                      "%s Error in get_power_attrs", mss::c_str(l_dimm) );
+                      "Fail encountered during find_thermal_power_limit on %s", mss::c_str(l_dimm) );
             // The unit of limit and intercept is cA but limit is dA in mss::throttle_type::POWER
             // So we need to transfer them to the same unit
             o_limit[l_dimm_pos] =

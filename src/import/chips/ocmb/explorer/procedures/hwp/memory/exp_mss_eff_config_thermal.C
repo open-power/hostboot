@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,7 +72,7 @@ extern "C"
         // Return error if safemode throttle utilization is less than MIN_UTIL
         const uint64_t l_min_util = TT::MIN_UTIL;
         uint32_t l_safemode_util = 0;
-        FAPI_TRY( mss::attr::get_mrw_safemode_dram_databus_util(l_safemode_util), "Error in exp_mss_eff_config_thermal" );
+        FAPI_TRY( mss::attr::get_mrw_safemode_dram_databus_util(l_safemode_util) );
         FAPI_ASSERT( l_safemode_util >= TT::MIN_UTIL,
                      fapi2::MSS_MRW_SAFEMODE_UTIL_THROTTLE_NOT_SUPPORTED()
                      .set_MRW_SAFEMODE_UTIL(l_safemode_util)
@@ -85,7 +85,8 @@ extern "C"
             //Restore runtime_throttles
             //Sets throttles to max_databus_util value
             FAPI_INF("Restoring throttles for %s", mss::c_str(l_ocmb));
-            FAPI_TRY( mss::power_thermal::restore_runtime_throttles<>(l_ocmb), "Error in exp_mss_eff_config_thermal");
+            FAPI_TRY( mss::power_thermal::restore_runtime_throttles<>(l_ocmb),
+                      "Fail encountered in restore runtime throttles for %s", mss::c_str(l_ocmb));
         }
 
         for (const auto& l_throttle_type : throttle_types )
@@ -107,12 +108,10 @@ extern "C"
                 uint64_t l_current_curve_with_limit[TT::SIZE_OF_CURRENT_CURVE_WITH_LIMIT_ATTR] = {0};
 
                 // Get the data from MRW
-                FAPI_TRY( mss::attr::get_mrw_ocmb_thermal_memory_power_limit (l_thermal_power_limit),
-                          "Error in exp_mss_eff_config_thermal");
-                FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_slope (l_thermal_power_slope), "Error in exp_mss_eff_config_thermal");
-                FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_intercept (l_thermal_power_intecept), "Error in exp_mss_eff_config_thermal");
-                FAPI_TRY( mss::attr::get_mrw_ocmb_current_curve_with_limit (l_current_curve_with_limit),
-                          "Error in exp_mss_eff_config_thermal");
+                FAPI_TRY( mss::attr::get_mrw_ocmb_thermal_memory_power_limit (l_thermal_power_limit) );
+                FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_slope (l_thermal_power_slope) );
+                FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_intercept (l_thermal_power_intecept) );
+                FAPI_TRY( mss::attr::get_mrw_ocmb_current_curve_with_limit (l_current_curve_with_limit) );
 
                 // Convert array to vector
                 std::vector<uint64_t> l_thermal_power_limit_v     ( std::begin(l_thermal_power_limit),
@@ -163,25 +162,25 @@ extern "C"
                     }
                 }
 
-                FAPI_INF("Starting pwr_throttles(%s)", mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL");
+                FAPI_INF("Starting pwr_throttles(%s) for %s",
+                         mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL", mss::c_str(l_ocmb));
                 //get the power limits, done per dimm and set to worst case for the slot and port throttles
-                FAPI_TRY(mss::power_thermal::pwr_throttles(l_ocmb, l_throttle_type));
+                FAPI_TRY(mss::power_thermal::pwr_throttles(l_ocmb, l_throttle_type),
+                         "Fail encountered in pwr_throttles for %s", mss::c_str(l_ocmb));
             }
 
             // Equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
-            FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, l_throttle_type));
+            FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, l_throttle_type),
+                     "Fail encountered in equalize_throttles");
 
             for ( const auto& l_ocmb : i_targets)
             {
                 //Set runtime throttles to worst case between ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT
                 //and ATTR_EXP_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
-                FAPI_TRY( mss::power_thermal::update_runtime_throttle(l_ocmb), "Error in exp_mss_eff_config_thermal for %d",
-                          mss::c_str(l_ocmb));
+                FAPI_TRY( mss::power_thermal::update_runtime_throttle(l_ocmb),
+                          "Fail encountered in update_runtime_throttle for %s", mss::c_str(l_ocmb));
             }
         }
-
-        //Done
-        FAPI_INF( "End exp_mss_eff_config_thermal");
 
     fapi_try_exit:
         return fapi2::current_err;

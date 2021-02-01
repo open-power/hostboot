@@ -1028,6 +1028,8 @@
     </description>
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>COUNT_DIMMS</ffdc>
+    <ffdc>IDLE_UTILIZATION_DIMM_0</ffdc>
+    <ffdc>IDLE_UTILIZATION_DIMM_1</ffdc>
     <ffdc>MAX_UTILIZATION_DIMM_0</ffdc>
     <ffdc>MAX_UTILIZATION_DIMM_1</ffdc>
     <callout>
@@ -1169,6 +1171,9 @@
         Type of output variable is not large enough for the calculations
     </description>
     <ffdc>RESULT</ffdc>
+    <ffdc>THROTTLES</ffdc>
+    <ffdc>DRAM_CLOCKS</ffdc>
+    <ffdc>MULTIPLIER</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
