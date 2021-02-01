@@ -319,7 +319,8 @@ fapi2::ReturnCode exp_collect_explorer_active_log(
     const fapi2::ffdc_t& i_size,
     fapi2::ReturnCode& o_rc )
 {
-    return exp_collect_explorer_logs(i_ocmb_chip, i_size, ACTIVE_LOG, o_rc);
+    // @TODO SW516108 Find the crash
+    return fapi2::FAPI2_RC_SUCCESS /*exp_collect_explorer_logs(i_ocmb_chip, i_size, ACTIVE_LOG, o_rc)*/;
 }
 
 /// See header
