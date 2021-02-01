@@ -291,7 +291,6 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     .recoverable_error<scomt::mcc::USTL_USTLFIR_WRT_BUFFER_UE>()
     .checkstop<scomt::mcc::USTL_USTLFIR_WRT_SCOM_SEQ_ERROR>()
     .checkstop<scomt::mcc::USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR>()
-    .recoverable_error<scomt::mcc::USTL_USTLFIR_WRT_DATA_SYNDROME_NE0>()
     .checkstop<scomt::mcc::USTL_USTLFIR_WRT_BUFF_ERR>()
     .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>()
     .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>()
