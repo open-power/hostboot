@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <vmmconst.h>
 #include <sys/misc.h>
 #include <sbeio/runtime/sbe_msg_passing.H>
+#include <sbeio/runtime/sbeio_vpd_override.H>
 #include <sbeio/runtime/sbeio_attr_override.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <errno.h>
@@ -782,6 +783,8 @@ namespace RT_SBEIO
 #endif
            SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_OVERRIDE_ATTR,
                                           sbeApplyAttrOverrides);
+           SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_OVERRIDE_VPD,
+                                          sbeApplyVpdOverrides);
         }
     };
 

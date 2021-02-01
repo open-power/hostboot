@@ -75,6 +75,25 @@ namespace VPD
     bool mvpdPresent ( TARGETING::Target * i_target );
 
     /**
+     * @brief This function translates a character string representing a mvpd record
+     *        to its corresponding enum value
+     * @param[in]  i_record     - pointer record string, must not be nullptr
+     * @param[out] o_recordEnum - enum value corresponding to i_record string
+     * @return nullptr if successful, pointer to error log otherwise
+     */
+    errlHndl_t mvpdRecordStringtoEnum(const char * i_record, uint32_t & o_recordEnum);
+
+
+    /**
+     * @brief This function translates a character string representing a mvpd keyword
+     *        to its corresponding enum value
+     * @param[in]  i_keyword     - pointer keyword string, must not be nullptr
+     * @param[out] o_keywordEnum - enum value corresponding to i_keyword string
+     * @return nullptr if successful, pointer to error log otherwise
+     */
+    errlHndl_t mvpdKeywordStringtoEnum(const char * i_keyword, uint32_t & o_keywordEnum);
+
+    /**
      * @brief This function checks to see if the given cvpd target
      *      is present
      * @param[in] i_target - Target device to search for cvpd

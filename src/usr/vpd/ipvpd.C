@@ -60,7 +60,6 @@
 // ----------------------------------------------
 extern trace_desc_t* g_trac_vpd;
 
-
 // ----------------------------------------------
 // Globals
 // ----------------------------------------------
@@ -118,9 +117,9 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
                                size_t & io_buflen,
                                input_args_t i_args )
 {
-    errlHndl_t err = NULL;
-    const char * recordName = NULL;
-    const char * keywordName = NULL;
+    errlHndl_t err = nullptr;
+    const char * recordName = nullptr;
+    const char * keywordName = nullptr;
     uint16_t recordOffset = 0x0;
 
     TRACUCOMP(g_trac_vpd, "IpVpdFacade::read> " );
@@ -205,7 +204,7 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
     } while( 0 );
 
     // If there is an error, add parameter info to log
-    if ( err != NULL )
+    if ( err != nullptr )
     {
         VPD::UdVpdParms( i_target,
                          io_buflen,
@@ -229,9 +228,9 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
                                 size_t & io_buflen,
                                 input_args_t i_args )
 {
-    errlHndl_t err = NULL;
-    const char * recordName = NULL;
-    const char * keywordName = NULL;
+    errlHndl_t err = nullptr;
+    const char * recordName = nullptr;
+    const char * keywordName = nullptr;
     uint16_t recordOffset = 0x0;
 
     TRACUCOMP(g_trac_vpd, "IpVpdFacade::write> " );
@@ -323,7 +322,7 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
     } while( 0 );
 
     // If there is an error, add parameter info to log
-    if ( err != NULL )
+    if ( err != nullptr )
     {
         VPD::UdVpdParms( i_target,
                          io_buflen,
@@ -458,7 +457,7 @@ errlHndl_t IpVpdFacade::cmpPnorToSeeprom ( TARGETING::Target * i_target,
                                            VPD::vpdKeyword i_keyword,
                                            bool &o_match )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"cmpPnorToSeeprom() " );
 
@@ -479,14 +478,14 @@ errlHndl_t IpVpdFacade::cmpPnorToSeeprom ( TARGETING::Target * i_target,
         // Get the PNOR size
         size_t l_sizePnor = 0;
         l_err = read( i_target,
-                      NULL,
+                      nullptr,
                       l_sizePnor,
                       l_pnorArgs );
         if( l_err || (l_sizePnor == 0) )
         {
             // PNOR may not be loaded, ignore the error
             delete l_err;
-            l_err = NULL;
+            l_err = nullptr;
             break;
         }
 
@@ -504,7 +503,7 @@ errlHndl_t IpVpdFacade::cmpPnorToSeeprom ( TARGETING::Target * i_target,
         // Get the SEEPROM size
         size_t l_sizeSeeprom = 0;
         l_err = read( i_target,
-                      NULL,
+                      nullptr,
                       l_sizeSeeprom,
                       l_seepromArgs );
         if( l_err || (l_sizeSeeprom == 0) )
@@ -555,7 +554,7 @@ errlHndl_t IpVpdFacade::cmpSeepromToZero ( TARGETING::Target * i_target,
                                            VPD::vpdKeyword i_keyword,
                                            bool &o_match )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"cmpSeepromToZero() " );
 
@@ -571,7 +570,7 @@ errlHndl_t IpVpdFacade::cmpSeepromToZero ( TARGETING::Target * i_target,
         // Get the SEEPROM size
         size_t l_sizeSeeprom = 0;
         l_err = read( i_target,
-                      NULL,
+                      nullptr,
                       l_sizeSeeprom,
                       l_seepromArgs );
         if( l_err || (l_sizeSeeprom == 0) )
@@ -633,7 +632,7 @@ errlHndl_t IpVpdFacade::cmpSeepromToZero ( TARGETING::Target * i_target,
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::loadPnor()" );
 
@@ -715,7 +714,11 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
         // Make sure we don't exceed our allocated space in PNOR
         if( (pRecOffset + sRecLength) > iv_vpdSectionSize )
         {
-            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor()> The amount of space required (0x%X) for the VPD cache exceeds the available space (0x%X)", pRecOffset + sRecLength, iv_vpdSectionSize );
+            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor()> The amount of "
+                                 "space required (0x%X) for the VPD cache "
+                                 "exceeds the available space (0x%X)",
+                                  pRecOffset + sRecLength,
+                                  iv_vpdSectionSize );
             /*@
              * @errortype
              * @reasoncode       VPD::VPD_CACHE_SIZE_EXCEEDED
@@ -784,7 +787,7 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
     {
         // Error reading record data, invalidate the TOC
         // Use different errl so we don't overwrite the original
-        errlHndl_t invErr = NULL;
+        errlHndl_t invErr = nullptr;
         invErr = invalidatePnor( i_target );
         if( invErr )
         {
@@ -792,7 +795,7 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
                       "Error invalidating PNOR Target %.8X",
                       TARGETING::get_huid(i_target));
             delete invErr;
-            invErr = NULL;
+            invErr = nullptr;
         }
     }
 
@@ -806,7 +809,7 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::invalidatePnor ( TARGETING::Target * i_target )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::invalidatePnor()" );
 
@@ -857,7 +860,7 @@ errlHndl_t IpVpdFacade::invalidatePnor ( TARGETING::Target * i_target )
 errlHndl_t IpVpdFacade::translateRecord ( VPD::vpdRecord i_record,
                                           const char *& o_record )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"IpVpdFacade::translateRecord(i_record=0x%.8X)",
@@ -902,7 +905,7 @@ errlHndl_t IpVpdFacade::translateRecord ( VPD::vpdRecord i_record,
 
         o_record = entry->recordName;
         TRACDCOMP( g_trac_vpd,
-                   "record name: %s",
+                   "IpVpdFacade::translateRecord: record name: %s",
                    entry->recordName );
     } while( 0 );
 
@@ -918,10 +921,11 @@ errlHndl_t IpVpdFacade::translateRecord ( VPD::vpdRecord i_record,
 errlHndl_t IpVpdFacade::translateKeyword ( VPD::vpdKeyword i_keyword,
                                            const char *& o_keyword )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::translateKeyword()" );
+                ENTER_MRK"IpVpdFacade::translateKeyword(i_keyword=0x%.8X)",
+                i_keyword );
 
     do
     {
@@ -977,6 +981,137 @@ errlHndl_t IpVpdFacade::translateKeyword ( VPD::vpdKeyword i_keyword,
     return err;
 }
 
+// ------------------------------------------------------------------
+// IpVpdFacade::recordStringtoEnum
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::recordStringtoEnum ( const char * i_record,
+                                             VPD::vpdRecord & o_record )
+{
+    errlHndl_t err = nullptr;
+    o_record = IPVPD::INVALID_RECORD;
+
+    assert(i_record != nullptr, "IpVpdFacade::recordStringtoEnum i_record is nullptr");
+
+    TRACSSCOMP( g_trac_vpd,
+                ENTER_MRK"IpVpdFacade::recordStringtoEnum(i_record = %s)",
+                i_record );
+
+    do
+    {
+
+        uint64_t i = 0;
+        for(; i < iv_recSize; i++)
+        {
+            if(compareRecordNames(iv_vpdRecords[i].recordName, i_record))
+            {
+                break;
+            }
+        }
+
+        if(i >= iv_recSize)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::recordStringtoEnum: "
+                       "No matching Record enum found for %s!",
+                       i_record );
+
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_RECORD_NOT_FOUND
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_IPVPD_RECORD_STRING_TO_ENUM
+             * @userdata1        Record string.
+             * @userdata2        <UNUSED>
+             * @devdesc          The record string did not have a
+             *                   corresponding enumeration value.
+             * @custdesc         VPD lookup error
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           VPD::VPD_IPVPD_RECORD_STRING_TO_ENUM,
+                                           VPD::VPD_RECORD_NOT_FOUND,
+                                           *(reinterpret_cast<const uint64_t *>(i_record)),
+                                           0x0,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+            err->collectTrace( VPD_COMP_NAME, 256 );
+            break;
+        }
+
+        o_record = iv_vpdRecords[i].record;
+        TRACDCOMP( g_trac_vpd, "record: 0x%.8X",
+                   iv_vpdRecords[i].record);
+    } while( 0 );
+
+    TRACSSCOMP( g_trac_vpd,
+                EXIT_MRK"IpVpdFacade::recordStringtoEnum()" );
+
+    return err;
+}
+
+// ------------------------------------------------------------------
+// IpVpdFacade::keywordStringtoEnum
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::keywordStringtoEnum ( const char * i_keyword,
+                                              VPD::vpdKeyword & o_keyword )
+{
+    errlHndl_t err = nullptr;
+    o_keyword = IPVPD::INVALID_KEYWORD;
+
+    assert(i_keyword != nullptr, "IpVpdFacade::keywordStringtoEnum i_keyword is nullptr");
+
+    TRACSSCOMP( g_trac_vpd,
+                ENTER_MRK"IpVpdFacade::keywordStringtoEnum(i_keyword = %s)",
+                i_keyword );
+
+    do
+    {
+
+        uint64_t i = 0;
+        for(; i < iv_recSize; i++)
+        {
+            if(compareKeywordNames(iv_vpdKeywords[i].keywordName, i_keyword))
+            {
+                break;
+            }
+        }
+
+        if(i >= iv_recSize)
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::keywordStringtoEnum: "
+                       "No matching Keyword enum found for %s!",
+                       i_keyword );
+
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_KEYWORD_NOT_FOUND
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_IPVPD_KEYWORD_STRING_TO_ENUM
+             * @userdata1        Keyword string.
+             * @userdata2        <UNUSED>
+             * @devdesc          The keyword string did not have a
+             *                   corresponding enumeration value.
+             * @custdesc         VPD lookup error
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           VPD::VPD_IPVPD_KEYWORD_STRING_TO_ENUM,
+                                           VPD::VPD_KEYWORD_NOT_FOUND,
+                                           *(reinterpret_cast<const uint64_t *>(i_keyword)),
+                                           0x0,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+            err->collectTrace( VPD_COMP_NAME, 256 );
+            break;
+        }
+
+        o_keyword = iv_vpdKeywords[i].keyword;
+        TRACDCOMP( g_trac_vpd, "keyword: 0x%.8X",
+                   iv_vpdKeywords[i].keyword);
+    } while( 0 );
+
+    TRACSSCOMP( g_trac_vpd,
+                EXIT_MRK"IpVpdFacade::keywordStringtoEnum()" );
+
+    return err;
+}
 
 // ------------------------------------------------------------------
 // IpVpdFacade::findRecordOffset
@@ -988,7 +1123,7 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
                                            TARGETING::Target * i_target,
                                            input_args_t i_args )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     // Look for a record override in our image unless explicitly told not to
     if( (i_args.location & VPD::OVERRIDE_MASK) != VPD::USEVPD )
@@ -1112,12 +1247,12 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
                                  VPD::vpdRecord i_record,
                                  VPD::vpdRecord i_keyword )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     uint16_t recordOffset = 0x0;
     input_args_t i_args;
     bool vpdPresent = false;
-    const char * l_recordName = NULL;
-    const char * l_keywordName = NULL;
+    const char * l_recordName = nullptr;
+    const char * l_keywordName = nullptr;
 
     i_args.record = i_record;
     i_args.keyword = i_keyword;
@@ -1170,7 +1305,7 @@ bool IpVpdFacade::recordPresent( const char * i_record,
                                  TARGETING::Target * i_target,
                                  VPD::vpdCmdTarget i_location )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     uint64_t tmpOffset = 0x0;
     char l_record[RECORD_BYTE_SIZE] = { '\0' };
     bool matchFound = false;
@@ -1246,7 +1381,7 @@ errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
                                                TARGETING::Target * i_target,
                                                input_args_t i_args )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     uint16_t offset = 0x0;
     bool matchFound = false;
 
@@ -1468,7 +1603,7 @@ IpVpdFacade::getRecordListSeeprom ( std::list<pt_entry> & o_recList,
                                     TARGETING::Target * i_target,
                                     input_args_t i_args )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordListSeeprom()" );
 
@@ -1484,9 +1619,9 @@ IpVpdFacade::getRecordListSeeprom ( std::list<pt_entry> & o_recList,
     // The list of records for this vpd sub class will be the primary list.
     // If the eeprom is being shared, then their might be an alternate list
     // to also include.
-    const  recordInfo* l_primaryVpdRecords = NULL;
+    const  recordInfo* l_primaryVpdRecords = nullptr;
     uint64_t           l_primaryRecSize = 0;
-    const  recordInfo* l_altVpdRecords = NULL;
+    const  recordInfo* l_altVpdRecords = nullptr;
     uint64_t           l_altRecSize = 0;
     getRecordLists(l_primaryVpdRecords,
                    l_primaryRecSize,
@@ -1519,7 +1654,7 @@ IpVpdFacade::getRecordListSeeprom ( std::list<pt_entry> & o_recList,
             if ( index != 0 )
             {
                 delete err;
-                err = NULL;
+                err = nullptr;
             }
             break;
         }
@@ -1581,7 +1716,7 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
                                           size_t & io_buflen,
                                           input_args_t i_args )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"IpVpdFacade::retrieveKeyword(%s, %s, . . .)",
@@ -1606,8 +1741,8 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
             break;
         }
 
-        // If the buffer is NULL, return the keyword size in io_buflen
-        if( NULL == io_buffer )
+        // If the buffer is nullptr, return the keyword size in io_buflen
+        if( nullptr == io_buffer )
         {
             io_buflen = keywordSize;
             break;
@@ -1655,7 +1790,7 @@ errlHndl_t IpVpdFacade::retrieveRecord( const char * i_recordName,
                                           size_t & io_buflen,
                                           input_args_t i_args )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     uint16_t l_size = 0x0;
 
     TRACUCOMP( g_trac_vpd,
@@ -1680,8 +1815,8 @@ errlHndl_t IpVpdFacade::retrieveRecord( const char * i_recordName,
         l_size = le16toh(l_size);
         l_size += 2; // include the 2 byte size field in total record
 
-        // If the buffer is NULL, return the keyword size in io_buflen
-        if( NULL == io_buffer )
+        // If the buffer is nullptr, return the keyword size in io_buflen
+        if( nullptr == io_buffer )
         {
             io_buflen = l_size;
             break;
@@ -1759,7 +1894,7 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
                                     input_args_t i_args,
                                     const char* i_record )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     // Determine the VPD source (PNOR/SEEPROM)
     VPD::vpdCmdTarget vpdSource = VPD::AUTOSELECT;
@@ -1877,7 +2012,7 @@ errlHndl_t IpVpdFacade::fetchDataFromPnor ( uint64_t i_byteAddr,
                                             void * o_data,
                                             TARGETING::Target * i_target )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"IpVpdFacade::fetchDataFromPnor(%ld, %d, . . .)",
                 i_byteAddr,
@@ -1923,7 +2058,7 @@ errlHndl_t IpVpdFacade::fetchDataFromEeprom(uint64_t i_byteAddr,
                                            TARGETING::Target * i_target,
                                            EEPROM::EEPROM_SOURCE i_eepromSource)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"IpVpdFacade::fetchDataFromEeprom(%ld, %d, 0x%.8X . . .)",
                 i_byteAddr,
@@ -1966,15 +2101,15 @@ errlHndl_t IpVpdFacade::fetchDataFromEeprom(uint64_t i_byteAddr,
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                           const char * i_recordName,
-                                          uint16_t i_offset,
+                                          uint16_t i_recordOffset,
                                           uint16_t i_index,
                                           TARGETING::Target * i_target,
                                           size_t& o_keywordSize,
-                                          uint16_t& o_byteAddr,
+                                          uint16_t& o_keywordOffset,
                                           input_args_t i_args )
 {
-    errlHndl_t err = NULL;
-    uint16_t offset = i_offset;
+    errlHndl_t err = nullptr;
+    uint16_t offset = i_recordOffset;
     uint16_t recordSize = 0x0;
     uint16_t keywordSize = 0x0;
     char record[RECORD_BYTE_SIZE] = { '\0' };
@@ -1985,7 +2120,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                 ENTER_MRK"IpVpdFacade::findKeywordAddr(%s, %s, %d, %d, %.8X )",
                 i_keywordName,
                 i_recordName,
-                i_offset,
+                i_recordOffset,
                 i_index,
                 TARGETING::get_huid(i_target) );
 
@@ -2021,7 +2156,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
         if (memcmp( i_keywordName, "RT", KEYWORD_BYTE_SIZE ) == 0) {
             // send back the relevant data
             o_keywordSize = RECORD_BYTE_SIZE;
-            o_byteAddr = offset - i_offset; //make address relative
+            o_keywordOffset = offset - i_recordOffset; //make address relative
 
             // found our match, break out
             matchesFound++;
@@ -2043,7 +2178,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                        "Record(%s) for offset (0x%04x->0x%04x) did not match "
                        "expected record(%s)!",
                        record,
-                       i_offset,
+                       i_recordOffset,
                        offset,
                        i_recordName );
 
@@ -2069,7 +2204,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                            VPD::VPD_IPVPD_FIND_KEYWORD_ADDR,
                                            VPD::VPD_RECORD_MISMATCH,
                                            TWO_UINT32_TO_UINT64(offset,
-                                                                i_offset ),
+                                                                i_recordOffset ),
                                            TWO_UINT32_TO_UINT64(exp_rec,
                                                                 act_rec) );
 
@@ -2097,7 +2232,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
         // While size < size of record
         // Size of record is the input offset, plus the record size, plus
         // 2 bytes for the size value.
-        while( ( offset < (recordSize + i_offset + RECORD_ADDR_BYTE_SIZE) ) )
+        while( ( offset < (recordSize + i_recordOffset + RECORD_ADDR_BYTE_SIZE) ) )
         {
             TRACDCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::findKeywordAddr: "
                        "Looking for keyword, reading offset: 0x%04x",
@@ -2165,8 +2300,8 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
             {
                 // send back the relevant data
                 o_keywordSize = keywordSize;
-                o_byteAddr = offset - i_offset; //make address relative
-
+                o_keywordOffset = offset - i_recordOffset; // make keyword address
+                                                           // relative to the record
                 // found our match, break out
                 matchesFound++;
                 if ( matchesFound == i_index + 1 ) {
@@ -2191,7 +2326,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
 
     // If keyword not found in expected Record, flag error.
     if( matchesFound != i_index + 1 &&
-        NULL == err )
+        nullptr == err )
     {
         TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::findKeywordAddr: "
                    "No matching %s keyword found within %s record!",
@@ -2213,7 +2348,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        VPD::VPD_IPVPD_FIND_KEYWORD_ADDR,
                                        VPD::VPD_KEYWORD_NOT_FOUND,
-                                       TWO_UINT32_TO_UINT64( i_offset,
+                                       TWO_UINT32_TO_UINT64( i_recordOffset,
                                                              i_index ),
                                        TWO_UINT32_TO_UINT64( i_args.record,
                                                              i_args.keyword ) );
@@ -2248,13 +2383,13 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                        const char * i_recordName,
-                                       uint16_t i_offset,
+                                       uint16_t i_recordOffset,
                                        TARGETING::Target * i_target,
                                        void * i_buffer,
                                        size_t & i_buflen,
                                        input_args_t i_args )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"IpVpdFacade::writeKeyword()" );
@@ -2267,21 +2402,21 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
 
         // First go find the keyword in memory
         size_t keywordSize = 0x0;
-        uint16_t byteAddr = 0x0;
+        uint16_t keywordOffset = 0x0;
         err = findKeywordAddr( i_keywordName,
                                i_recordName,
-                               i_offset,
+                               i_recordOffset,
                                0,
                                i_target,
                                keywordSize,
-                               byteAddr,
+                               keywordOffset,
                                i_args );
         if( err )
         {
             break;
         }
 
-        // check size of usr buffer with io_buflen
+        // check size of usr i_buffer with keywordSize
         err = checkBufferSize( i_buflen,
                                keywordSize,
                                i_target );
@@ -2362,7 +2497,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
             info.maxSegments = iv_vpdMaxSections;
             info.pnorSection = iv_pnorSection;
 
-            err = VPD::writePNOR( i_offset+byteAddr,
+            err = VPD::writePNOR( i_recordOffset+keywordOffset,
                                   keywordSize,
                                   i_buffer,
                                   i_target,
@@ -2376,7 +2511,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
 
             VPD::VpdWriteMsg_t msgdata;
 
-            msgdata.offset = i_offset+byteAddr;
+            msgdata.offset = i_recordOffset+keywordOffset;
 
             err = VPD::sendMboxWriteMsg( keywordSize,
                                          i_buffer,
@@ -2393,7 +2528,15 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
         }
         else if ( vpdDest == VPD::SEEPROM )
         {
-#ifndef __HOSTBOOT_RUNTIME
+
+#ifdef __HOSTBOOT_RUNTIME
+            // In general, all writes to MVPD during HBRT are not allowed.
+            // However, allow sbeApplyVpdOverrides() to write to only MVPD CACHE
+            // if the writes to FSP and HW are disabled
+            if(EEPROM::allowVPDOverrides())
+            {
+#endif
+
             // Write directly to target's EEPROM.
             err = DeviceFW::deviceOp( DeviceFW::WRITE,
                                       i_target,
@@ -2401,7 +2544,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                       keywordSize,
                                       DEVICE_EEPROM_ADDRESS(
                                           EEPROM::VPD_AUTO,
-                                          i_offset+byteAddr,
+                                          i_recordOffset+keywordOffset,
                                           EEPROM::AUTOSELECT) );
             if( err )
             {
@@ -2409,7 +2552,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
             }
             VPD::VpdWriteMsg_t msgdata;
 
-            msgdata.offset = i_offset+byteAddr;
+            msgdata.offset = i_recordOffset+keywordOffset;
 
             err = VPD::sendMboxWriteMsg( keywordSize,
                                          i_buffer,
@@ -2420,37 +2563,45 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
             {
                 break;
             }
-#else
-            TRACFCOMP(g_trac_vpd, ERR_MRK"IpVpdFacade::writeKeyword> No MVPD write support in HBRT");
-            VPD::RecordTargetPair_t l_recTarg
-              = VPD::makeRecordTargetPair(i_recordName,i_target);
-            uint32_t l_kw = 0;
-            memcpy( &l_kw, i_keywordName, KEYWORD_BYTE_SIZE );
-            /*@
-             * @errortype
-             * @reasoncode       VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         VPD::VPD_IPVPD_WRITE_KEYWORD
-             * @userdata1[0:31]  Target HUID
-             * @userdata1[32:63] Requested VPD Destination
-             * @userdata2[0:31]  VPD Record (ASCII)
-             * @userdata2[32:63] VPD Keyword (ASCII)
-             * @devdesc          No MVPD write support in HBRT
-             * @custdesc         Firmware error writing VPD
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           VPD::VPD_IPVPD_WRITE_KEYWORD,
-                                           VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT,
-                                           TWO_UINT32_TO_UINT64(
-                                                TARGETING::get_huid(i_target),
-                                                i_args.location ),
-                                           TWO_UINT32_TO_UINT64(
-                                                l_recTarg.first,
-                                                l_kw),
-                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-            err->collectTrace( VPD_COMP_NAME, 256 );
-            break;
+
+#ifdef __HOSTBOOT_RUNTIME
+            } // end if(EEPROM::allowVPDOverrides()
+            else
+            {
+
+                TRACFCOMP(g_trac_vpd, ERR_MRK"IpVpdFacade::writeKeyword> No MVPD write support in HBRT");
+                VPD::RecordTargetPair_t l_recTarg
+                  = VPD::makeRecordTargetPair(i_recordName,i_target);
+                uint32_t l_kw = 0;
+                memcpy( &l_kw, i_keywordName, KEYWORD_BYTE_SIZE );
+                /*@
+                 * @errortype
+                 * @reasoncode       VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         VPD::VPD_IPVPD_WRITE_KEYWORD
+                 * @userdata1[0:31]  Target HUID
+                 * @userdata1[32:63] Requested VPD Destination
+                 * @userdata2[0:31]  VPD Record (ASCII)
+                 * @userdata2[32:63] VPD Keyword (ASCII)
+                 * @devdesc          No MVPD write support in HBRT
+                 * @custdesc         Firmware error writing VPD
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               VPD::VPD_IPVPD_WRITE_KEYWORD,
+                                               VPD::VPD_WRITE_MVPD_UNSUPPORTED_HBRT,
+                                               TWO_UINT32_TO_UINT64(
+                                                    TARGETING::get_huid(i_target),
+                                                    i_args.location ),
+                                               TWO_UINT32_TO_UINT64(
+                                                    l_recTarg.first,
+                                                    l_kw),
+                                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+                err->collectTrace( VPD_COMP_NAME, 256 );
+                break;
+
+            }
 #endif
+
         }
         else
         {
@@ -2501,7 +2652,7 @@ errlHndl_t IpVpdFacade::checkBufferSize( size_t i_bufferSize,
                                          size_t i_expectedSize,
                                          TARGETING::Target * i_target )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     if( !(i_bufferSize >= i_expectedSize) )
     {
@@ -2555,10 +2706,7 @@ errlHndl_t IpVpdFacade::checkBufferSize( size_t i_bufferSize,
 bool IpVpdFacade::compareRecords ( const recordInfo e1,
                                    const recordInfo e2 )
 {
-    if( e2.record > e1.record )
-        return true;
-    else
-        return false;
+    return ( e2.record > e1.record );
 }
 
 
@@ -2568,12 +2716,32 @@ bool IpVpdFacade::compareRecords ( const recordInfo e1,
 bool IpVpdFacade::compareKeywords ( const keywordInfo e1,
                                     const keywordInfo e2 )
 {
-    if( e2.keyword > e1.keyword )
-        return true;
-    else
-        return false;
+    return ( e2.keyword > e1.keyword );
 }
 
+// ------------------------------------------------------------------
+// IpVpdFacade::compareRecordNames
+// ------------------------------------------------------------------
+bool IpVpdFacade::compareRecordNames ( const char * recordName1,
+                                       const char * recordName2 )
+{
+    assert(recordName1 != nullptr, "IpVpdFacade::compareRecordNames recordName1 is nullptr");
+    assert(recordName2 != nullptr, "IpVpdFacade::compareRecordNames recordName2 is nullptr");
+    return (strncmp(recordName2, recordName1, RECORD_BYTE_SIZE) == 0);
+}
+
+
+// ------------------------------------------------------------------
+// IpVpdFacade::compareKeywordNames
+// ------------------------------------------------------------------
+bool IpVpdFacade::compareKeywordNames ( const char * keywordName1,
+                                        const char * keywordName2)
+{
+    assert(keywordName1 != nullptr, "IpVpdFacade::compareKeywordNames keywordName1 is nullptr");
+    assert(keywordName2 != nullptr, "IpVpdFacade::compareKeywordNames keywordName2 is nullptr");
+
+    return (strncmp(keywordName2, keywordName1, KEYWORD_BYTE_SIZE) == 0);
+}
 
 // ------------------------------------------------------------------
 // IpVpdFacade::setConfigFlagsHW
@@ -2606,7 +2774,7 @@ void IpVpdFacade::getRecordLists(
 {
     o_primaryVpdRecords = iv_vpdRecords;
     o_primaryRecSize = iv_recSize;
-    o_altVpdRecords = NULL;
+    o_altVpdRecords = nullptr;
     o_altRecSize = 0;
 }
 

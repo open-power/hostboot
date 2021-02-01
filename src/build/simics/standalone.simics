@@ -169,8 +169,10 @@ if ($hostboot_profile == FALSE) {
 
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3F*4 $scratch8 4 -b
 
-# Scratch3:  Set fwModeCtlFlags (0:31) - Clear all flags
-(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3A*4 0x00000000 4 -b
+# Scratch3:  Set fwModeCtlFlags (0:31) - Read in, and set allowAttrOverrides (bit 7)
+$scratch3 = (read-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x2800 + 0x3A*4 4 -b)
+$scratch3 = $scratch3 | 0x01000000
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3A*4 $scratch3 4 -b
 
 # Scratch4:  Set refSpiBusDivider (0:15) coreBootFreqMhz (16:31)
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3B*4 0x00410000 4 -b

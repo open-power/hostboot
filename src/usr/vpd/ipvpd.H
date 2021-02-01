@@ -146,11 +146,11 @@ class IpVpdFacade
      *
      * @param[in] i_vpdRecords -     Pointer to array of VPD Records to use
      *
-     * @param[in] i_recSize -       size of i_vpdRecords array
+     * @param[in] i_recSize -        number of elements in the i_vpdRecords array
      *
      * @param[in] i_vpdKeywords -    Pointer to array of VPD Keywords to use
      *
-     * @param[in] i_keySize -        size of i_vpdKeywords array
+     * @param[in] i_keySize -        number of elements in the i_vpdKeywords array
      *
      * @param[in] i_pnorSection -    PNOR Section containing VPD for current
      *                               chip
@@ -173,25 +173,25 @@ class IpVpdFacade
 
     /**
      * @brief This function will perform the steps required to do a read from
-     *      the Hostboot I/P Series VPD data.
+     *        the Hostboot I/P Series VPD data.
      *
-     * @param[in] i_target -Target device
+     * @param [in] i_target - Target device
      *
-     * @param [in/out] io_buffer - Pointer to the data that was read from
-     *       the target device.  This parameter, when set to NULL, will return
-     *       the keyword size value in io_buflen.
+     * @param [out] io_buffer - Pointer handle to copy the data that was read
+     *         from the target device. This parameter, when set to NULL, will
+     *         return the keyword size value in io_buflen.
      *
      * @param [in/out] io_buflen - Length of the buffer to be read or written
-     *       to/from the target.  This value should indicate the size of the
-     *       io_buffer parameter that has been allocated.  Being returned it
-     *       will indicate the number of valid bytes in the buffer being
-     *       returned. This parameter will contain the size of a keyword when
-     *       the io_buffer parameter is passed in NULL.
+     *         to/from the target. This value should indicate the size of the
+     *         io_buffer parameter that has been allocated. Being returned it
+     *         will indicate the number of valid bytes in the buffer being
+     *         returned. This parameter will contain the size of a keyword when
+     *         the io_buffer parameter is passed in NULL.
      *
      * @param [in] i_args - Records/Keyword struct
      *
      * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *       error log.
+     *         error log.
      */
     errlHndl_t read ( TARGETING::Target * i_target,
                       void* io_buffer,
@@ -200,24 +200,23 @@ class IpVpdFacade
 
     /**
      * @brief This function will perform the steps required to do a write to
-     *      the Hostboot I/P Series VPD data.
+     *        the Hostboot I/P Series VPD data.
      *
-     * @param[in] i_target -Target device
+     * @param[in] i_target - Target device
      *
-     * @param [in/out] io_buffer - Pointer to the data that was read from
-     *       the target device.  It will also be used to contain data to
-     *       be written to the device.
+     * @param [in/out] io_buffer - Pointer that contains data to be written
+     *         to the device.
      *
-     * @param [in/out] io_buflen - Length of the buffer to be read or written
-     *       to/from the target.  This value should indicate the size of the
-     *       io_buffer parameter that has been allocated.  Being returned it
-     *       willindicate the number of valid bytes in the buffer being
-     *       returned.
+     * @param [in/out] io_buflen - Length of the buffer to be written to the
+     *         target. This value should indicate the size of the io_buffer
+     *         parameter that has been allocated. Being returned it will
+     *         indicate the number of valid bytes in the buffer being
+     *         returned.
      *
      * @param [in] i_args - Records/Keyword struct
      *
      * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *       error log.
+     *         error log.
      */
     errlHndl_t write ( TARGETING::Target * i_target,
                       void* io_buffer,
@@ -225,8 +224,8 @@ class IpVpdFacade
                       input_args_t i_args );
 
     /**
-     * @brief this function checks to see if the given target
-     * is present.
+     * @brief This function checks to see if the given target
+     *        is present.
      *
      * @param[in] i_target - target VPD to search for.
      *
@@ -239,7 +238,7 @@ class IpVpdFacade
 
     /**
      * @brief This function compares the specified record/keyword
-     *        in CACHE/HARDWARE and returns the result.  A mismatch
+     *        in CACHE/HARDWARE and returns the result. A mismatch
      *        will not return an error.
      *
      * @param[in]  i_target    Target device
@@ -260,7 +259,7 @@ class IpVpdFacade
 
     /**
      * @brief This function compares the specified record/keyword
-     *      in PNOR/SEEPROM and returns the result.  A mismatch
+     *      in PNOR/SEEPROM and returns the result. A mismatch
      *      will not return an error.
      *
      * @param[in] i_target - Target device
@@ -281,7 +280,7 @@ class IpVpdFacade
 
     /**
      * @brief This function compares the specified record/keyword
-     *      in SEEPROM to zero and returns the result.  A mismatch
+     *      in SEEPROM to zero and returns the result. A mismatch
      *      will not return an error.
      *
      * @param[in] i_target - Target device
@@ -379,35 +378,68 @@ class IpVpdFacade
                                                 bool& o_loaded );
 #endif
 
+    /**
+     * @brief This function will translate the char* for the VPD record into
+     *        the coresponding mvpdRecord enum val defined in mvpdenums.H to be
+     *        used for VPD reads/writes
+     *
+     * @param[in]  i_record - The char representation of the record. Must not be
+     *                        nullptr and must be RECORD_BYTE_SIZE+1 in size
+     *
+     * @param[out] o_record - The VPD::vpdKeyword (uint32_t) representation of
+     *                        the record.
+     *
+     * @return errHndl_t - nullptr if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t recordStringtoEnum ( const char * i_record,
+                                    VPD::vpdRecord & o_record );
+
+    /**
+     * @brief This function will translate the char* for the VPD keyword into
+     *        the coresponding mvpdRecord enum val defined in mvpdenums.H to be
+     *        used for VPD reads/writes
+     *
+     * @param[in]  i_keyword - The char representation of the keyword. Must not be
+     *                         nullptr and must be KEYWORD_BYTE_SIZE+1 in size
+     *
+     * @param[out] o_keyword - The VPD::vpdKeyword (uint32_t) representation of
+     *                         the keyword.
+     *
+     * @return errHndl_t - nullptr if successful, otherwise a pointer to the
+     *                     error log.
+     */
+    errlHndl_t keywordStringtoEnum ( const char *  i_keyword,
+                                     VPD::vpdKeyword & o_keyword );
 
   protected:  // Methods
 
     /**
      * @brief This function will translate the enumeration for the VPD record
-     *      into a char * variable to be used for comparing what was read from
-     *      the VPD data.
+     *        into a char * variable to be used for comparing what was read from
+     *        the VPD data.
      *
-     * @param[in] i_record - The record enumeration.
+     * @param[in]  i_record - The record enumeration.
      *
      * @param[out] o_record - The char representation of the record.
      *
      * @return errHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
+     *                     error log.
      */
     errlHndl_t translateRecord ( VPD::vpdRecord i_record,
                                  const char *& o_record );
 
     /**
      * @brief This function will translate the enumeration for the VPD keyword
-     *      into a char * variable to be used for comparing what was read from
-     *      the VPD data.
+     *        into a char * variable to be used for comparing what was read from
+     *        the VPD data.
      *
-     * @param[in] i_keyword - The keyword enumeration.
+     * @param[in]  i_keyword - The keyword enumeration.
      *
-     * @param[out] o_keyword - The char representation of the record.
+     * @param[out] o_keyword - The char representation of the keyword.
      *
      * @return errHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
+     *                     error log.
      */
     errlHndl_t translateKeyword ( VPD::vpdKeyword i_keyword,
                                   const char *& o_keyword );
@@ -574,8 +606,8 @@ class IpVpdFacade
      * @param[out] io_buffer - The buffer to place the data in.
      *
      * @param[in/out] io_buflen - Length of the buffer to be read or written
-     *       to/from the target.  This value should indicate the size of the
-     *       io_buffer parameter that has been allocated.  Being returned it
+     *       to/from the target. This value should indicate the size of the
+     *       io_buffer parameter that has been allocated. Being returned it
      *       will indicate the number of valid bytes in the buffer being
      *       returned.
      *
@@ -605,8 +637,8 @@ class IpVpdFacade
      * @param[out] io_buffer - The buffer to place the data in.
      *
      * @param[in/out] io_buflen - Length of the buffer to be read or written
-     *       to/from the target.  This value should indicate the size of the
-     *       io_buffer parameter that has been allocated.  Being returned it
+     *       to/from the target. This value should indicate the size of the
+     *       io_buffer parameter that has been allocated. Being returned it
      *       will indicate the number of valid bytes in the buffer being
      *       returned.
      *
@@ -629,15 +661,15 @@ class IpVpdFacade
      *
      * @param[in] i_recordName - String representation of the record.
      *
-     * @param[in] i_offset - The offset to start writing.
+     * @param[in] i_recordOffset - The record offset to start writing.
      *
      * @param[in] i_target - The target to write data for.
      *
      * @param[in] i_buffer - The buffer to pull the data from.
      *
-     * @param[in] i_buflen - Length of the buffer to be written
-     *       to the target's VPD area.  This value should indicate the
-     *       size of the io_buffer parameter that has been allocated.
+     * @param[in] i_buflen - Length of the buffer to be written to the target's
+     *                       VPD area. This value should indicate the size of
+     *                       the i_buffer parameter that has been allocated.
      *
      * @param[in] i_args - The input arguments.
      *
@@ -646,7 +678,7 @@ class IpVpdFacade
      */
     errlHndl_t writeKeyword ( const char * i_keywordName,
                               const char * i_recordName,
-                              uint16_t i_offset,
+                              uint16_t i_recordOffset,
                               TARGETING::Target * i_target,
                               void * i_buffer,
                               size_t & i_buflen,
@@ -660,17 +692,17 @@ class IpVpdFacade
      *
      * @param[in] i_recordName - String representation of the record.
      *
-     * @param[in] i_offset - The offset to start searching.
+     * @param[in] i_recordOffset - The record offset to start searching.
      *
      * @param[in] i_index - The index of the keyword to return if there are
-     *    multiple instances of the same keyword.
+     *                      multiple instances of the same keyword.
      *
      * @param[in] i_target - The target to write data for.
      *
      * @param[out] o_keywordSize - Size of keyword in bytes.
      *
-     * @param[out] o_byteAddr - Address of keyword, relative to this target's
-     *    section.
+     * @param[out] o_keywordOffset - Address of keyword, relative to
+     *                               i_recordOffset
      *
      * @param[in] i_args - The original input arguments.
      *
@@ -679,11 +711,11 @@ class IpVpdFacade
      */
     errlHndl_t findKeywordAddr ( const char * i_keywordName,
                                  const char * i_recordName,
-                                 uint16_t i_offset,
+                                 uint16_t i_recordOffset,
                                  uint16_t i_index,
                                  TARGETING::Target * i_target,
                                  size_t& o_keywordSize,
-                                 uint16_t& o_byteAddr,
+                                 uint16_t& o_keywordOffset,
                                  input_args_t i_args );
 
 
@@ -779,9 +811,22 @@ class IpVpdFacade
                TARGETING::Target * i_target,
                EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
 
+    /**
+     * @brief This function compares 2 vpd keyword values. Used for binary
+     *        search to find a match.
+     *
+     * @param[in] e1 - Entry 1 to be compared.
+     *
+     * @param[in] e2 - Entry 2 to be compared.
+     *
+     * @return bool - Whether or not the e2 value is larger than the e1 value.
+     */
+    static bool compareRecords ( const recordInfo e1,
+                                 const recordInfo e2 );
+
    /**
-     * @brief This function compares 2 ipvpd record values.  Used for binary
-     *       search to find a match.
+     * @brief This function compares 2 ipvpd record values. Used for binary
+     *        search to find a match.
      *
      * @param[in] e1 - Entry 1 to be compared.
      *
@@ -793,22 +838,33 @@ class IpVpdFacade
                                   const keywordInfo e2 );
 
     /**
-     * @brief This function compares 2 vpd keyword values.  Used for binary
-     *       search to find a match.
+     * @brief This function compares 2 vpd keyword names.
      *
-     * @param[in] e1 - Entry 1 to be compared.
+     * @param[in] e1 - Entry 1 to be compared, must not be nullptr
      *
-     * @param[in] e2 - Entry 2 to be compared.
+     * @param[in] e2 - Entry 2 to be compared, must not be nullptr
      *
-     * @return bool - Whether or not the e2 value is larger than the e1 value.
+     * @return bool - Whether or not the e2 string is the same as the e1 name.
      */
-    static bool compareRecords ( const recordInfo e1,
-                                 const recordInfo e2 );
+    static bool compareRecordNames ( const char * recordName1,
+                                     const char * recordName2 );
+
+   /**
+     * @brief This function compares 2 ipvpd record names.
+     *
+     * @param[in] e1 - Entry 1 to be compared, must not be nullptr
+     *
+     * @param[in] e2 - Entry 2 to be compared, must not be nullptr
+     *
+     * @return bool - Whether or not the e2 string is the same as the e1 name.
+     */
+    static bool compareKeywordNames ( const char * keywordName1,
+                                      const char * keywordName2 );
 
     /**
      * @brief This function compares sizes to be sure buffers are large enough
-     *      to handle the data to be put in them.  If it is not, it will return
-     *      an error.
+     *        to handle the data to be put in them. If it is not, it will return
+     *        an error.
      *
      * @param[in] i_bufferSize - The size of the buffer to check.
      *
@@ -824,7 +880,7 @@ class IpVpdFacade
                                 TARGETING::Target * i_target );
     /**
      * @brief This function returns a primary and an alternate list of records
-     *       that should be copied to pnor. The Alternate list is optional.
+     *        that should be copied to pnor. The Alternate list is optional.
      *
      * @param[out] o_primaryVpdRecords - Pointer to array of VPD Records to use
      *
@@ -907,7 +963,7 @@ class IpVpdFacade
      *
      * @details If the input parameter i_vhdrFullRecordData is NULL then the meta
      *          data will be retrieved via the retrieveKeyword API using the
-     *          input i_args as parameters.  If i_vhdrFullRecordData is not NULL,
+     *          input i_args as parameters. If i_vhdrFullRecordData is not NULL,
      *          then the VTOC meta data will be extracted from this input.
      *
      * @pre If the optional input argument i_vhdrFullRecordData is given, then
@@ -918,7 +974,7 @@ class IpVpdFacade
      *      an assertion will be raised.
      *
      * @post If no error occurs then the output parameter o_ptEntry will contain
-     *       the record meta data.  If an error occurs, an error log will be
+     *       the record meta data. If an error occurs, an error log will be
      *       returned and the output parameter o_ptEntry will be zeroed out.
      *
      * @param[in] i_target - Pointer to the PROC target to retrieve the VTOC record from
@@ -1077,7 +1133,7 @@ class IpVpdFacade
      * @param[in] i_args   - Device driver input args: Struct that contains the record
      *                       ID, keyword ID, location of record and EEPROM source.
      *                       Record ID and keyword ID are not used and therefore not necessary.
-     * @param[in] i_vtocRecordMetaData - The VTOC record meta data.  The VTOC record contains a
+     * @param[in] i_vtocRecordMetaData - The VTOC record meta data. The VTOC record contains a
      *                                   reference to all other records. The meta data will need
      *                                   to be in big endian.
      * @param[out] o_recordMetaDataList - If i_recordName is not a nullptr then will contain a single
@@ -1116,7 +1172,7 @@ class IpVpdFacade
      *                                        create the ECC data API.
      * @param[in] i_target  - Pointer to the PROC target where the record is located.
      * @param[in] i_args    - Struct that contains the record ID, location of record
-     *                        and EEPROM source.  Keyword data is not used.
+     *                        and EEPROM source. Keyword data is not used.
      * @param[in] i_recordName   - Name of the record having it's ECC data validated.
      * @param[in] i_recordOffset - Offset to the record's data.
      * @param[in] i_recordLength - Length of the record's data.
@@ -1187,10 +1243,10 @@ class IpVpdFacade
      * @note The parameters are not in HB style, but match the API vpdecc_create_ecc.
      *
      * @pre Caller must create the ECC data buffer that will be populated with the ECC
-     *      data.  The ECC data length should be size of the created ECC data buffer.
+     *      data. The ECC data length should be size of the created ECC data buffer.
      *
      * @post If no error occurs then the output parameter, o_eccData, will contain
-     *       the created ECC data for the given record.  The returned ECC data length,
+     *       the created ECC data for the given record. The returned ECC data length,
      *       of the created ECC data, may or may not be smaller than the given ECC
      *       data length.
      *

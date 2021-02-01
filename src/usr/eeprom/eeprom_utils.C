@@ -44,6 +44,19 @@ TRAC_INIT( & g_trac_eeprom, EEPROM_COMP_NAME, KILOBYTE );
 
 namespace EEPROM
 {
+#ifdef __HOSTBOOT_RUNTIME
+bool g_allow_vpd_overrides = false;
+
+bool allowVPDOverrides()
+{
+    return g_allow_vpd_overrides;
+}
+
+void setAllowVPDOverrides(bool i_setVal)
+{
+    g_allow_vpd_overrides = i_setVal;
+}
+#endif
 
 #ifndef __HOSTBOOT_RUNTIME
 
@@ -184,7 +197,7 @@ bool eepromPresence ( TARGETING::Target * i_target )
     TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence()");
     return l_present;
 }
-#endif // __HOSTBOOT_RUNTIME
+#endif // #ifndef __HOSTBOOT_RUNTIME
 
 /**
  *

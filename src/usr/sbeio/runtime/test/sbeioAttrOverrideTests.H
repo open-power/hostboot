@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,7 +95,7 @@ else \
 
 using namespace SBE_MSG;
 
-enum class TestResult{OK, WARN, FAIL};
+enum class ClearToSend{OK, WARN, FAIL};
 
 //------------------------------------------------------------------
 class SbePassThroughApplyAttrOverrides: public CxxTest::TestSuite
@@ -127,7 +127,6 @@ public:
 #ifdef CONFIG_SECUREBOOT
        l_allowOverrides = SECUREBOOT::allowAttrOverrides();
 #endif
-
         SBE_PASSTHROUGH_TRACF("SBE_MSG_DATA_OFFSET: 0x%08X",
                               SBE_MSG_DATA_OFFSET
                              );
@@ -193,12 +192,12 @@ public:
             // Step 2 - Ensure that Another SBE pass-through is not in progress
             //#################################################################
 
-            TestResult clearToSend = ensureClearToSend(l_proc);
-            if(TestResult::WARN == clearToSend)
+            ClearToSend clearToSend = ensureClearToSend(l_proc);
+            if(ClearToSend::WARN == clearToSend)
             {
                 clearControlRegister(l_proc);
             }
-            else if(TestResult::FAIL == clearToSend)
+            else if(ClearToSend::FAIL == clearToSend)
             {
                 result = false;
                 break;
@@ -1017,11 +1016,11 @@ private:
     uint32_t iv_seqNumber{0};
 
     //-----------------------------------------------------------
-    TestResult ensureClearToSend(TARGETING::TargetHandle_t i_proc)
+    ClearToSend ensureClearToSend(TARGETING::TargetHandle_t i_proc)
     {
         using namespace INITSERVICE::SPLESS;
 
-        TestResult retval{TestResult::OK};
+        ClearToSend retval{ClearToSend::OK};
 
         do
         {
@@ -1033,7 +1032,7 @@ private:
 
                 TS_FAIL("ensureClearToSend, i_proc is NULL!");
 
-                retval = TestResult::FAIL;
+                retval = ClearToSend::FAIL;
                 break;
             }
 
@@ -1057,16 +1056,16 @@ private:
                                      );
                 TS_FAIL("Failed to read scom register.");
 
-                retval = TestResult::FAIL;
+                retval = ClearToSend::FAIL;
                 break;
             }
 
             if(l_register.sbeMsgProc.sbeMsgProcessingInProgress)
             {
-               TS_WARN("SCOM_ADDR_5003B SBE_MSG_IN_PROGRESS set!");
+                TS_WARN("SCOM_ADDR_5003B SBE_MSG_IN_PROGRESS set!");
 
-               retval = TestResult::WARN;
-               break;
+                retval = ClearToSend::WARN;
+                break;
             }
         }
         while(0);

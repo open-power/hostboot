@@ -38,6 +38,27 @@
 namespace EEPROM
 {
 
+#ifdef __HOSTBOOT_RUNTIME
+/**
+ * @brief This function returns a bool indicating if overrides to VPD data are
+ *        allowed during runtime.
+ *
+ * @return bool - True, writes to only EEPROM CACHE are allowed
+ *                False, writes to EEPROM HW, EEPROM CACHE, and FSP are NOT allowed
+ */
+bool allowVPDOverrides();
+
+/**
+ * @brief This function sets g_allow_vpd_overrides during runtime
+ *        to disable and re-enable writing to EPROM HW and FSP
+ *
+ * @param[in] i_setVal - bool set g_allow_vpd_overrides
+ *                       True, writes to only EEPROM CACHE are allowed
+ *                       False, writes to EEPROM HW, EEPROM CACHE, and FSP are NOT allowed
+ */
+void setAllowVPDOverrides(bool i_setVal);
+#endif
+
 /**
  * @brief This function tests to see if the VPD_PRIMARY eeprom is present
  *        for the specific target.
@@ -50,9 +71,9 @@ bool eepromPresence ( TARGETING::Target * i_target );
 
 /**
  * @brief this function will read all of the associated attributes needed
- *      to access the intended EEPROM.  These attributes will be used to
- *      determine the type of I2C device as well as how to address it via
- *      the I2C device driver.
+ *        to access the intended EEPROM.  These attributes will be used to
+ *        determine the type of I2C device as well as how to address it via
+ *        the I2C device driver.
  *
  * @param[in] i_target - Target device.
  *

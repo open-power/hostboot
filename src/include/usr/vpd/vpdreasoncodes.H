@@ -37,7 +37,7 @@ namespace VPD
 /**
 * @enum vpdModuleid
 *
-* @brief Module Ids used in created errorlogs.  Indicates which
+* @brief Module Ids used in created errorlogs. Indicates which
 *      functions an error log was created in.
 *
 */
@@ -58,6 +58,9 @@ enum vpdModuleId
     VPD_IPVPD_FIND_RECORD_OFFSET            = 0x22,
     VPD_IPVPD_FIND_KEYWORD_ADDR             = 0x23,
     VPD_IPVPD_CHECK_BUFFER_SIZE             = 0x24,
+    VPD_IPVPD_RECORD_STRING_TO_ENUM         = 0x25,
+    VPD_IPVPD_KEYWORD_STRING_TO_ENUM        = 0x26,
+
     VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM    = 0x30,
     VPD_IPVPD_FETCH_DATA                    = 0x31,
     VPD_IPVPD_WRITE_KEYWORD                 = 0x32,
@@ -101,6 +104,12 @@ enum vpdModuleId
     VPD_MOD_XXX                             = 0x84,
     VPD_SEND_I2C_LOCK_MSG                   = 0x85,
     VPD_FILL_I2C_LOCK_MSG                   = 0x86,
+    VPD_RT_OVERRIDE                         = 0x87,
+    VPD_RT_OVERRIDE_MVPD_REC_KEY            = 0x88,
+    VPD_RT_OVERRIDE_MVPD_OFFSET             = 0x89,
+    VPD_RT_OVERRIDE_SPD_REC_KEY             = 0x8A,
+    VPD_RT_OVERRIDE_SPD_OFFSET              = 0x8B,
+    VPD_RT_OVERRIDE_WOF_OFFSET              = 0x8C,
 
     // OCMB SPD
     VPD_OCMB_GET_SPD                        = 0x90,
@@ -175,6 +184,11 @@ enum vpdReasonCode
     VPD_INCORRECT_RECORD_RETURNED       = VPD_COMP_ID | 0x46,
     VPD_WRITE_MVPD_UNSUPPORTED_HBRT     = VPD_COMP_ID | 0x47,
     VPD_DDIMM_SPD_CRC_MISCOMPARE        = VPD_COMP_ID | 0x48,
+    VPD_OVERRIDE_NOT_ALLOWED            = VPD_COMP_ID | 0x49,
+    VPD_SHORT_REQUEST                   = VPD_COMP_ID | 0x4A,
+    VPD_TARGET_NOT_TYPE_PROC            = VPD_COMP_ID | 0x4B,
+    VPD_BYTES_TO_WRITE_MISMATCH         = VPD_COMP_ID | 0x4C,
+    VPD_INVALID_METHOD_OR_DATA_SECTION  = VPD_COMP_ID | 0x4D,
 };
 
 

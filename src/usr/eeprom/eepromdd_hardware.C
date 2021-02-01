@@ -458,6 +458,24 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
 
     do
     {
+#ifdef __HOSTBOOT_RUNTIME
+        // Check if an sbe VPD override is being applied.
+        // If so, then don't write through to hardware
+        if(EEPROM::allowVPDOverrides())
+        {
+            TRACFCOMP( g_trac_eeprom, INFO_MRK "eepromPerformOpHW(): VPD updates to Hardware are "
+                                               "currently disabled, only an update to the runtime "
+                                               "cache was requested");
+            break;
+        }
+        else
+        {
+            // In general, all writes to EEPROM during HBRT are not allowed
+            break;
+
+        }
+#endif
+
         // Read Attributes needed to complete the operation
         err = eepromReadAttributes( i_target,
                                     i_eepromInfo );

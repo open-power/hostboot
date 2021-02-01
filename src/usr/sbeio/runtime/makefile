@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2020
+# Contributors Listed Below - COPYRIGHT 2017,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +37,7 @@ include ../common/common.mk
 OBJS += rt_sbeio.o
 OBJS += rt_sbescom.o
 OBJS += sbeio_attr_override.o
+OBJS += sbeio_vpd_override.o
 OBJS += sbeio_vital_attn.o
 OBJS += p10_extract_sbe_rc.o
 OBJS += p10_ppe_utils.o

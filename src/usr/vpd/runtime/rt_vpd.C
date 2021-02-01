@@ -35,8 +35,9 @@
 #include <targeting/common/util.H>
 #include <util/runtime/util_rt.H>
 #include <targeting/runtime/rt_targeting.H>
-#include <runtime/interface.h>
 #include <initservice/initserviceif.H>
+
+#include <eeprom/eepromif.H>
 
 #include "vpd.H"
 #include "mvpd.H"
@@ -53,7 +54,6 @@ extern trace_desc_t* g_trac_vpd;
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
-
 namespace VPD
 {
 
@@ -65,8 +65,8 @@ struct rtVpdInit
     rtVpdInit()
     {
         // The VPD code that is common to IPL and runtime uses the
-        // pnorCacheValid switch.  During a golden-side boot this switch
-        // gets cleared when the VPD cache is invalidated.  At runtime
+        // pnorCacheValid switch. During a golden-side boot this switch
+        // gets cleared when the VPD cache is invalidated. At runtime
         // we may need to use the VPD cache in memory so we copy the RT
         // switch to the common switch.
 
@@ -83,6 +83,7 @@ struct rtVpdInit
                 target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( l_switch );
             }
         }
+
     }
 };
 rtVpdInit g_rtVpdInit;
@@ -112,6 +113,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
     do
     {
+
         if(!INITSERVICE::spBaseServicesEnabled())
         {
             // No SP Base Services available at runtime then simply return
@@ -119,6 +121,24 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                        "No SP Base Services available at runtime.")
             break;
         }
+
+#ifdef __HOSTBOOT_RUNTIME
+        // Check if an sbe VPD override is being applied.
+        // If so, then don't write through to hardware
+        if(EEPROM::allowVPDOverrides())
+        {
+            TRACFCOMP( g_trac_vpd, INFO_MRK "sendMboxWriteMsg: VPD updates to the FSP are currently disabled, "
+                                            "only an update to the runtime cache was requested");
+            break;
+        }
+        else
+        {
+            // In general, all writes to EEPROM during HBRT are not allowed
+            break;
+
+        }
+
+#endif
 
         if ((nullptr == g_hostInterfaces) ||
             (nullptr == g_hostInterfaces->firmware_request))

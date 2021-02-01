@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,7 @@ namespace SBE_MSG
         PASSTHRU_HBRT_GET_PSTATE    = 0x00E10001, // HBRT Get PState Table
         PASSTHRU_HBRT_OVERRIDE_ATTR = 0x00E10002, // HBRT Apply Override
                                                   // attributes
+        PASSTHRU_HBRT_OVERRIDE_VPD  = 0x00E10003, // HBRT Apply VPD Override
     };
 
 
@@ -192,6 +193,75 @@ namespace SBE_MSG
      */
     errlHndl_t process_sbe_msg_update_cfam(TARGETING::TargetHandle_t i_proc,
                                            sbe_msg_processing_state_t i_state);
+
+    enum dataSectionAndMethodFlag : uint8_t {
+        MVPD_KEYWORD_RECORD            = 0x00,
+        MVPD_OFFSET_NUM_BYTES          = 0x01,
+
+        SPD_KEYWORD_RECORD             = 0x02,
+        SPD_OFFSET_NUM_BYTES           = 0x03,
+
+        WOF_OFFSET_NUM_BYTES           = 0x04,
+
+        DATA_SECTION_MASK              = 0x0F,
+        READ_CMD_MASK                  = 0xF0,
+        INVALID_DATA_SECTION_OR_METHOD = 0xFF,
+    };
+
+    // header at the start of i_reqData from a processCmdFunction_t for sbeApplyVpdOverrides
+    // dataSectionAndMethod - a dataSectionAndMethodFlag enum
+    // ecmdTargetString     - 32 character ecmd ascii string of the target to
+    //                        write (ie "ddimm:n0:p3"). NULL terminated, left justified
+    // keyword              - 8 byte string literal keyword name, NULL terminated, left justified
+    // record               - 8 byte string literal record name, NULL terminated, left justified
+    //
+    // offset               - offset into the given logical section to start writting (ie 0 is
+    //                        the start of MVPD/SPD/WOF section)
+    // write_len            - number of bytes to write, starting at offset, into the data section
+    typedef struct vpdCmdHeader {
+
+        dataSectionAndMethodFlag dataSectionAndMethod;
+        char ecmdTargetString[32];
+
+        union {
+            struct // record/keyword
+            {
+                uint64_t keyword;
+                uint64_t record;
+            } PACKED;
+            struct // offset/write_len
+            {
+                uint64_t offset;
+                uint64_t write_len;
+            } PACKED;
+        };
+
+    } PACKED vpdCmdHeader_t;
+
+
+    typedef struct vpdOverwriteCmd {
+        vpdCmdHeader * header;
+        size_t dataSizeBytes; // size in bytes that 'data' points to
+        uint8_t * data;       // binary data to write to a VPD record
+
+        /**
+         * @brief vpdOverwriteCmd constructor
+         *
+         * @param[in] i_reqData     - pointer to a vpdCmdHeader_t + data blob
+         * @param[in] i_reqDataSize - size of i_reqData in byte
+         *
+         * @return int    Return code
+         */
+        vpdOverwriteCmd (uint8_t * i_reqData, uint32_t i_reqDataSize)
+        {
+            header = reinterpret_cast<vpdCmdHeader *>(i_reqData);
+            data = (i_reqData + sizeof(vpdCmdHeader));
+            dataSizeBytes = i_reqDataSize - sizeof(vpdCmdHeader);
+        }
+
+    } PACKED vpdOverwriteCmd_t;
+
+
 
 } // namespace SBE_MSG
 

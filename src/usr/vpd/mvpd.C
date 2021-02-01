@@ -203,6 +203,17 @@ namespace MVPD
 
 }; // end MVPD namespace
 
+errlHndl_t VPD::mvpdRecordStringtoEnum(const char * i_record, uint32_t & o_recordEnum)
+{
+    return Singleton<MvpdFacade>::instance().recordStringtoEnum(i_record, o_recordEnum);
+}
+
+
+errlHndl_t VPD::mvpdKeywordStringtoEnum(const char * i_keyword, uint32_t & o_keywordEnum)
+{
+    return Singleton<MvpdFacade>::instance().keywordStringtoEnum(i_keyword, o_keywordEnum);
+}
+
 // ---------------------------------------------------------
 // Presence Detection
 // ---------------------------------------------------------

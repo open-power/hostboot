@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -978,10 +978,10 @@ typedef struct runtimeInterfaces
      *  @note   The maximum response data returned will be 4096 bytes
      *
      *  @param[in]      i_cmdLength  number of bytes in pass-thru command data
-     *  @param[in]   *i_cmdData   pointer to pass-thru command data
+     *  @param[in]     *i_cmdData    pointer to pass-thru command data
      *  @param[out]    *o_rspLength  pointer to number of bytes returned
      *                               in o_rspData
-     *  @param[out]    *o_rspData   pointer to a 4096 byte buffer that will
+     *  @param[out]    *o_rspData    pointer to a 4096 byte buffer that will
      *                               contain the response data from the command
      *  @returns 0 on success, or return code if the command failed
      *  @platform OpenPOWER
