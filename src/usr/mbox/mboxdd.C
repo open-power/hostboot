@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -703,9 +703,8 @@ errlHndl_t dumpMboxRegs()
     errlHndl_t l_err = nullptr;
     TARGETING::TargetHandleList l_procList;
     TARGETING::getAllChips( l_procList, TARGETING::TYPE_PROC);
-    assert(l_procList.size(), "No functional processors found");
 
-    TRACFCOMP(g_trac_mbox, "---Dumping Mbox registers---");
+    TRACFCOMP(g_trac_mbox, "---Dumping Mbox registers--- l_procList.size()=%d", l_procList.size());
 
     for( const auto l_procChip : l_procList)
     {
