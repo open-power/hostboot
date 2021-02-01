@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,14 +45,12 @@ struct node_comm_args_t
 {
     TARGETING::Target* tgt;
     uint32_t tgt_huid;
-    node_comm_modes_t mode;
     uint8_t linkId;
     uint8_t mboxId;
     uint64_t* data_ptr;
 
     node_comm_args_t():tgt(nullptr),
                        tgt_huid(0x0),
-                       mode(NCDD_MODE_INVALID),
                        linkId(NCDD_INVALID_LINK_MBOX),
                        mboxId(NCDD_INVALID_LINK_MBOX),
                        data_ptr(nullptr){};

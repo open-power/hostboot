@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,19 +50,6 @@ namespace SECUREBOOT
 
 namespace NODECOMM
 {
-
-/*****************************************************************************/
-/* Node Comm Registers Decription
- *
- * There is a set offset between the equivalent XBUS and ABUS registers such
- * that in all cases ABUS Register Address = XBUS Register Address + 0x400.
- * The offset of 0x400 will be applied if the operation is in ABUS mode.
- */
-/*****************************************************************************/
-#define NCDD_ABUS_REG_OFFSET 0x400
-#define NCDD_ABUS_STRING "ABUS"
-#define NCDD_XBUS_STRING "XBUS"
-
 
 /*
  * @brief Node Comm Registers - see above for description
@@ -122,23 +109,6 @@ struct _MasterQuoteRequestBlob
 } PACKED;
 typedef struct _MasterQuoteRequestBlob MasterQuoteRequestBlob;
 
-
-/**
- *  @brief Convert Link Mailbox Register Address based on mode (XBUS or ABUS)
- *
- *  @param[in] i_reg  - Register Base Address - see node_comm_registers_t
- *  @param[in] i_mode - Indicates if the address is for a ABUS or XBUS operation
- *
- *  @return uint64_t - Calculated Link Mailbox Register Address
- */
-inline uint64_t getLinkMboxRegAddr(const uint64_t i_reg,
-                                   const node_comm_modes_t i_mode)
-{
-    return (i_mode == NCDD_MODE_ABUS)
-              ? (i_reg + NCDD_ABUS_REG_OFFSET)
-              : i_reg;
-}
-
 /**
  *  @brief Calculate Link Mailbox Base Register based on linkId and mboxId
  *
@@ -181,9 +151,8 @@ inline void getLinkMboxFromObusInstance(const uint8_t i_obusInstance,
 
 enum node_comm_fir_reg_helpers_t : uint64_t
 {
-    NCDD_ABUS_FIR_ATTN_MASK = 0x000000000FFFF000,
-    NCDD_XBUS_FIR_ATTN_MASK = 0x000000000FFF0000,
-    NCDD_START_OF_ATTN_BITS = 0x0000000008000000,
+    NCDD_FIR_ATTN_MASK = 0x0000000FF0000000,
+    NCDD_START_OF_ATTN_BITS = 0x0000000800000000,
 };
 
 
@@ -250,7 +219,6 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
  *
  *  @param[in] i_pProc       Processor target to look for attentions on
  *                           Can't be nullptr
- *  @param[in] i_mode        Indicates to look for ABUS or XBUS attentions
  *  @param[out] o_attn_found Returns true if attention was found;
  *                           otherwise false
  *  @param[out] o_linkId     Link Id attention was found on
@@ -262,7 +230,6 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
  *  @retval !nullptr Operation failed with valid error log
  */
 errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
-                           node_comm_modes_t i_mode,
                            bool & o_attn_found,
                            uint8_t & o_linkId,
                            uint8_t & o_mboxId);
@@ -288,21 +255,18 @@ errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
 /**
  * @brief Add FFDC for the target to an error log
  *
- * @param[in] i_mode       Specifies XBUS or ABUS mode
  * @param[in] i_pProc      Proc Chip Target used to collect info from
  * @param[in,out] io_log   Error Log to add FFDC to
  *
  * @return void
  */
-void getNodeCommFFDC(node_comm_modes_t i_mode,
-                     TARGETING::Target* i_pProc,
+void getNodeCommFFDC(TARGETING::Target* i_pProc,
                      errlHndl_t & io_log);
 
 /**
  * @brief Adds a bus callout to the error log by determining the bus and the two
  *        targets associated with it
  *
- * @param[in] i_mode       Specifies XBUS or ABUS mode
  * @param[in] i_pProc      Proc Chip Target used to collect info from
  *                         Can't be nullptr
  * @param[in] i_linkId     Link ID associated with i_pProc
@@ -312,7 +276,6 @@ void getNodeCommFFDC(node_comm_modes_t i_mode,
  * @return void
  */
 void addNodeCommBusCallout(
-    node_comm_modes_t i_mode,
     TARGETING::Target* i_pProc,
     uint8_t i_linkId,
     errlHndl_t & io_log,

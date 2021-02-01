@@ -4826,6 +4826,9 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <id>HB_NODE_COMM_MUTEX</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>

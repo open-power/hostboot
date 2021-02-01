@@ -123,12 +123,6 @@
       <id>EEPROM_PAGE_ARRAY</id>
     </attribute>
     <attribute>
-      <id>HB_NODE_COMM_ABUS_MUTEX</id>
-    </attribute>
-    <attribute>
-      <id>HB_NODE_COMM_XBUS_MUTEX</id>
-    </attribute>
-    <attribute>
       <id>I2C_ENGINE_MUTEX_0</id>
     </attribute>
     <attribute>

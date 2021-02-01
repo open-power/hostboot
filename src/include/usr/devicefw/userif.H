@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -341,20 +341,16 @@ namespace DeviceFW
 
     /**
      * Construct the device addressing parameters for the Node Comm device ops.
-     * @param[in] i_mode        Either ABUS or XBUS mode - see node_comm_modes_t
-     *                          enum defined in nodecommif.H.
      * @param[in] i_link_id     The Link Id used for routing the message.
-     *                          MAX values for ABUS and XBUS mode are defined in
-     *                          nodecommif.H.
+     *                          MAX value is defined in nodecommif.H.
      * @param[in] i_mailbox_id  Tha Mailbox Id used for routing the message.
      *                          NOTE: Only "0" or "1" are supported.
      *
      * @note      This interface only supports the reading and writing of
      *            8 bytes (64 bits) per operation. Anything else will fail.
      */
-    #define DEVICE_NODECOMM_ADDRESS( i_mode, i_link_id, i_mailbox_id )  \
+    #define DEVICE_NODECOMM_ADDRESS( i_link_id, i_mailbox_id )  \
         DeviceFW::NODECOMM,\
-            static_cast<uint64_t>(( i_mode )),\
             static_cast<uint64_t>(( i_link_id )),\
             static_cast<uint64_t>(( i_mailbox_id ))
 

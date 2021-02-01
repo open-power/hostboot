@@ -491,20 +491,8 @@
   </attribute>
 
   <attribute>
-    <id>HB_NODE_COMM_ABUS_MUTEX</id>
-    <description>Mutex to guard Node Comm ABUS register access</description>
-    <simpleType>
-      <hbmutex/>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-  </attribute>
-
-  <attribute>
-    <id>HB_NODE_COMM_XBUS_MUTEX</id>
-    <description>Mutex to guard Node Comm XBUS register access</description>
+    <id>HB_NODE_COMM_MUTEX</id>
+    <description>Mutex to guard Node Comm register access</description>
     <simpleType>
       <hbmutex/>
     </simpleType>

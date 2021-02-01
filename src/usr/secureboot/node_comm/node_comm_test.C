@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,6 @@ errlHndl_t nodeCommXbus2ProcTest(void)
     uint64_t sent_data = gold_data;
     uint64_t read_data = 0;
     Target* read_tgt = nullptr;
-    node_comm_modes_t mode = NCDD_MODE_XBUS;
     uint8_t linkId = 0;
     uint8_t mboxId = 0;
     bool attn_found = false;
@@ -113,7 +112,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
     err = DeviceFW::deviceWrite(proc0,
                                 &sent_data,
                                 size,
-                                DEVICE_NODECOMM_ADDRESS(mode, linkId, mboxId));
+                                DEVICE_NODECOMM_ADDRESS(linkId, mboxId));
 
     if (err)
     {
@@ -131,7 +130,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
         attn_found = false;
         read_tgt = l_cpu_target;
 
-        err = nodeCommMapAttn(read_tgt, mode, attn_found, linkId, mboxId);
+        err = nodeCommMapAttn(read_tgt, attn_found, linkId, mboxId);
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommXbus2ProcTest: Error Back From "
@@ -205,7 +204,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
     err = DeviceFW::deviceRead(read_tgt,
                                &read_data,
                                size,
-                               DEVICE_NODECOMM_ADDRESS(mode, linkId, mboxId));
+                               DEVICE_NODECOMM_ADDRESS(linkId, mboxId));
     if (err)
     {
         TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommXbus2ProcTest: Error Back From "
@@ -264,7 +263,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
                            HWAS::GARD_NULL );
 
         // Collect FFDC
-        getNodeCommFFDC(mode,read_tgt, err);
+        getNodeCommFFDC(read_tgt, err);
 
     }
 

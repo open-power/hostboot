@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -280,7 +280,6 @@ UdNodeCommInfo::UdNodeCommInfo(const uint8_t i_opType,
     // 8 bytes  : Length of In/Out Buffer
     // 8 bytes  : Access Type (DeviceFW::AccessType)
     // 1 byte   : Op Type (DeviceFW::OperationType)
-    // 1 byte   : Mode (XBUS or ABUS)
     // 1 byte   : LinkId
     // 1 byte   : MboxId
 
@@ -290,10 +289,6 @@ UdNodeCommInfo::UdNodeCommInfo(const uint8_t i_opType,
     // These are necessary to keep the parsing in errludP_secure.H correct
     static_assert(DeviceFW::READ==0, "Expected opType READ == 0");
     static_assert(DeviceFW::WRITE==1, "Expected opType WRITE == 1");
-    static_assert(SECUREBOOT::NODECOMM::NCDD_MODE_XBUS==0,
-                  "Expected NCDD_MODE_XBUS==0");
-    static_assert(SECUREBOOT::NODECOMM::NCDD_MODE_ABUS==1,
-                  "Expected NCDD_MODE_ABUS==1");
 
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint32_t)
@@ -316,10 +311,6 @@ UdNodeCommInfo::UdNodeCommInfo(const uint8_t i_opType,
     l_pBuf += sizeof(tmp64);
 
     tmp8 = i_opType;
-    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
-    l_pBuf += sizeof(tmp8);
-
-    tmp8 = i_args.mode;
     memcpy(l_pBuf, &tmp8, sizeof(tmp8));
     l_pBuf += sizeof(tmp8);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,9 +92,6 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
     bool unlock_mutex = false;
     node_comm_args_t node_comm_args;
 
-    uint64_t mode = va_arg( i_args, uint64_t );
-    node_comm_args.mode = static_cast<node_comm_modes_t>(mode);
-
     uint64_t linkId = va_arg( i_args, uint64_t );
     node_comm_args.linkId = static_cast<uint8_t>(linkId);
 
@@ -134,31 +131,26 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
     }
 
     // Check other input parameters
-    const auto max_linkId = (mode==NCDD_MODE_ABUS)
-                              ? NCDD_MAX_ABUS_LINK_ID
-                              : NCDD_MAX_XBUS_LINK_ID;
-
-    if (    (node_comm_args.mode >= NCDD_MODE_INVALID)
-         || (node_comm_args.linkId > max_linkId)
+    if (    (node_comm_args.linkId > NCDD_MAX_LINK_ID)
          || (node_comm_args.mboxId > NCDD_MAX_MBOX_ID)
          || (node_comm_args.data_ptr == nullptr)
        )
     {
         TRACFCOMP( g_trac_nc,ERR_MRK"nodeCommPerformOp: Invalid Input Args!"
-                   " mode=%d, linkId=0x%X (max=0x%X), mboxId=0x%X, "
+                   " linkId=0x%X (max=0x%X), mboxId=0x%X, "
                    " data_ptr=%p",
-                   node_comm_args.mode, node_comm_args.linkId,
-                   max_linkId, node_comm_args.mboxId,
+                   node_comm_args.linkId,
+                   NCDD_MAX_LINK_ID, node_comm_args.mboxId,
                    node_comm_args.data_ptr);
 
         /*@
          * @errortype
          * @reasoncode       RC_NCDD_INVALID_ARGS
          * @moduleid         MOD_NCDD_PERFORM_OP
-         * @userdata1[0:15]  BUS Mode Enum Value
-         * @userdata1[16:31] LinkId Value
-         * @userdata1[32:47] MAX possile LinkId Value based on Mode
-         * @userdata1[48:63] MailboxId Value
+         * @userdata1[0:15]  LinkId Value
+         * @userdata1[16:31] MAX possile LinkId Value
+         * @userdata1[32:47] MailboxId Value
+         * @userdata1[48:63] MAX possible MailboxId Value
          * @userdata2        Input Data Pointer
          * @devdesc          Invalid Input Args for Node Comm DD call
          * @custdesc         Trusted Boot failure
@@ -167,30 +159,25 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
                                        MOD_NCDD_PERFORM_OP,
                                        RC_NCDD_INVALID_ARGS,
                                        FOUR_UINT16_TO_UINT64(
-                                         node_comm_args.mode,
                                          node_comm_args.linkId,
-                                         max_linkId,
-                                         node_comm_args.mboxId),
+                                         NCDD_MAX_LINK_ID,
+                                         node_comm_args.mboxId,
+                                         NCDD_MAX_MBOX_ID),
                                        reinterpret_cast<uint64_t>(
                                          node_comm_args.data_ptr),
                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
         break;
     }
 
-    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommPerformOp: %s: %s: "
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommPerformOp: %s: "
               "tgt=0x%X, LinkId=%d, MboxId=%d, data=0x%.16llX",
-              (node_comm_args.mode == NCDD_MODE_ABUS)
-              ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
               ( i_opType == DeviceFW::READ ) ? "read" : "write",
               node_comm_args.tgt_huid, node_comm_args.linkId,
               node_comm_args.mboxId, (*node_comm_args.data_ptr));
 
     // Mutex Lock
-    (mode==NCDD_MODE_ABUS)
-      ? mutex_lock(node_comm_args.tgt->
-          getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_ABUS_MUTEX>())
-      : mutex_lock(node_comm_args.tgt->
-          getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_XBUS_MUTEX>());
+    mutex_lock(node_comm_args.tgt->
+            getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_MUTEX>());
     unlock_mutex = true;
 
     /***********************************************/
@@ -206,7 +193,7 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
     /***********************************************/
     else if( i_opType == DeviceFW::WRITE )
     {
-        err = ncddWrite( node_comm_args);
+        err = ncddWrite( node_comm_args );
     }
 
     // Handle Error from Operation (like a reset, if necessary)
@@ -236,8 +223,7 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
         if (err->reasonCode() != RC_NCDD_INVALID_ARGS)
         {
             // Collect FFDC - Target and Registers
-            getNodeCommFFDC(node_comm_args.mode,
-                            node_comm_args.tgt,
+            getNodeCommFFDC(node_comm_args.tgt,
                             err);
         }
     }
@@ -245,19 +231,13 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
     // Mutex unlock
     if (unlock_mutex == true)
     {
-        (mode==NCDD_MODE_ABUS)
-          ? mutex_unlock(node_comm_args.tgt->
-              getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_ABUS_MUTEX>())
-          : mutex_unlock(node_comm_args.tgt->
-              getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_XBUS_MUTEX>());
+        mutex_unlock(node_comm_args.tgt->
+              getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_MUTEX>());
     }
 
-
-    TRACUTCOMP (g_trac_nc, EXIT_MRK"nodeCommPerformOp: %s: %s: "
+    TRACUTCOMP (g_trac_nc, EXIT_MRK"nodeCommPerformOp: %s: "
                "tgt=0x%X, LinkId=%d, MboxId=%d, data=0x%.16llX. "
                TRACE_ERR_FMT,
-               (node_comm_args.mode == NCDD_MODE_ABUS)
-                 ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
                ( i_opType == DeviceFW::READ ) ? "read" : "write",
                node_comm_args.tgt_huid,
                node_comm_args.linkId, node_comm_args.mboxId,
@@ -319,14 +299,12 @@ errlHndl_t ncddRead(node_comm_args_t & i_args)
     // Invert the fir bit and WOX_AND it into the register
     uint64_t clear_fir_bit = ~fir_attn_bit;
 
-    uint64_t reg_addr = getLinkMboxRegAddr(NCDD_REG_FIR_WOX_AND, i_args.mode);
+    uint64_t reg_addr = NCDD_REG_FIR_WOX_AND;
 
     TRACUTCOMP(g_trac_nc,"ncddRead: Clearing FIR bit 0x%.16llX based on "
-              "linkId=%d, mboxId=%d, mode=%s, by writing 0x%.16llX to FIR Reg "
+              "linkId=%d, mboxId=%d, by writing 0x%.16llX to FIR Reg "
               "Addr 0x%.16llX on Target 0x%X",
               fir_attn_bit, i_args.linkId, i_args.mboxId,
-              (i_args.mode == NCDD_MODE_ABUS)
-                ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
               clear_fir_bit, reg_addr, i_args.tgt_huid);
 
     err = ncddRegisterOp( DeviceFW::WRITE,
@@ -443,8 +421,7 @@ errlHndl_t ncddWrite (node_comm_args_t & i_args)
                                        i_args.tgt_huid);
 
         // Likely an issue with Processor or its bus
-        addNodeCommBusCallout(i_args.mode,
-                              i_args.tgt,
+        addNodeCommBusCallout(i_args.tgt,
                               i_args.linkId,
                               err);
 
@@ -535,8 +512,7 @@ errlHndl_t ncddCheckStatus (node_comm_args_t & i_args,
                                            i_args.tgt_huid);
 
             // Likely an issue with Processor or its bus
-            addNodeCommBusCallout(i_args.mode,
-                                  i_args.tgt,
+            addNodeCommBusCallout(i_args.tgt,
                                   i_args.linkId,
                                   err);
 
@@ -633,8 +609,7 @@ errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args,
                                                 i_args.tgt_huid));
 
                 // Likely an issue with Processor or its bus
-                addNodeCommBusCallout(i_args.mode,
-                                      i_args.tgt,
+                addNodeCommBusCallout(i_args.tgt,
                                       i_args.linkId,
                                       err);
 
@@ -727,15 +702,12 @@ errlHndl_t ncddRegisterOp ( DeviceFW::OperationType i_opType,
 {
     errlHndl_t err = nullptr;
     const size_t expSize = sizeof(i_reg);
-    uint64_t l_reg = getLinkMboxRegAddr(i_reg, i_args.mode);
 
-    TRACUTCOMP(g_trac_nc,ENTER_MRK"ncddRegisterOp: %s: %s: "
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"ncddRegisterOp: %s: "
               "tgt=0x%X, reg_addr=0x%.16llX, data=0x%.16llX",
-              (i_args.mode == NCDD_MODE_ABUS)
-                ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
               ( i_opType == DeviceFW::READ ) ? "read" : "write",
               i_args.tgt_huid,
-              l_reg, (*io_data_64)) ;
+              i_reg, (*io_data_64)) ;
 
     do
     {
@@ -744,19 +716,17 @@ errlHndl_t ncddRegisterOp ( DeviceFW::OperationType i_opType,
                               i_args.tgt,
                               io_data_64,
                               reqSize,
-                              DEVICE_SCOM_ADDRESS(l_reg));
+                              DEVICE_SCOM_ADDRESS(i_reg));
 
     if(err)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"ncddRegisterOp %s %s Fail! "
+        TRACFCOMP(g_trac_nc,ERR_MRK"ncddRegisterOp %s Fail! "
                   TRACE_ERR_FMT
                   " tgt=0x%X, reg_addr=0x%.8X, data=0x%.16X",
-                  (i_args.mode == NCDD_MODE_ABUS)
-                    ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
                   ( i_opType == DeviceFW::READ ) ? "read" : "write",
                   TRACE_ERR_ARGS(err),
                   i_args.tgt_huid,
-                  l_reg, (*io_data_64) );
+                  i_reg, (*io_data_64) );
             break;
         }
     assert(reqSize==expSize,"ncddRegisterOp: SCOM deviceRead didn't return expected data size of %d (it was %d)",
@@ -764,14 +734,12 @@ errlHndl_t ncddRegisterOp ( DeviceFW::OperationType i_opType,
 
     } while (0);
 
-    TRACUTCOMP(g_trac_nc,EXIT_MRK"ncddRegisterOp: %s: %s: "
+    TRACUTCOMP(g_trac_nc,EXIT_MRK"ncddRegisterOp: %s: "
               "tgt=0x%X, reg_addr=0x%.16llX, data=0x%.16llX. "
               TRACE_ERR_FMT,
-              (i_args.mode == NCDD_MODE_ABUS)
-                ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
               ( i_opType == DeviceFW::READ ) ? "read" : "write",
               i_args.tgt_huid,
-              l_reg, (*io_data_64),
+              i_reg, (*io_data_64),
               TRACE_ERR_ARGS(err));
 
     return err;

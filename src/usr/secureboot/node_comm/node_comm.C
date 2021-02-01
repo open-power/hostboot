@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,7 +94,6 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
 
         // Look for Attention
         err = nodeCommMapAttn(i_pProc,
-                              NCDD_MODE_ABUS,
                               attn_found,
                               actual_linkId,
                               actual_mboxId);
@@ -146,8 +145,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
                                              interval_ns));
 
             // Since we know what bus we expected the message on, call it out
-            addNodeCommBusCallout(NCDD_MODE_ABUS,
-                                  i_pProc,
+            addNodeCommBusCallout(i_pProc,
                                   i_linkId,
                                   err);
 
@@ -156,8 +154,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
                                      HWAS::SRCI_PRIORITY_LOW);
 
             // Grab FFDC from the target
-            getNodeCommFFDC(NCDD_MODE_ABUS,
-                            i_pProc,
+            getNodeCommFFDC(i_pProc,
                             err);
 
             break;
@@ -213,8 +210,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
                                              actual_mboxId));
 
             // Since we know what bus we expected the message on, call it out
-            addNodeCommBusCallout(NCDD_MODE_ABUS,
-                                  i_pProc,
+            addNodeCommBusCallout(i_pProc,
                                   i_linkId,
                                   err);
 
@@ -223,8 +219,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
                                      HWAS::SRCI_PRIORITY_LOW);
 
             // Grab FFDC from the target
-            getNodeCommFFDC(NCDD_MODE_ABUS,
-                            i_pProc,
+            getNodeCommFFDC(i_pProc,
                             err);
 
             break;
@@ -237,8 +232,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
         err = DeviceFW::deviceRead(i_pProc,
                                    &o_data,
                                    reqSize,
-                                   DEVICE_NODECOMM_ADDRESS(NCDD_MODE_ABUS,
-                                                           actual_linkId,
+                                   DEVICE_NODECOMM_ADDRESS(actual_linkId,
                                                            actual_mboxId));
 
         if (err)
@@ -294,8 +288,7 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
         err = DeviceFW::deviceWrite(i_pProc,
                                     &data,
                                     reqSize,
-                                    DEVICE_NODECOMM_ADDRESS(NCDD_MODE_ABUS,
-                                                            i_linkId,
+                                    DEVICE_NODECOMM_ADDRESS(i_linkId,
                                                             i_mboxId));
         if (err)
         {
@@ -328,7 +321,6 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
  *  @brief Map Attention Bits in FIR Register to specific Link Mailbox
  */
 errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
-                           const node_comm_modes_t i_mode,
                            bool & o_attn_found,
                            uint8_t & o_linkId,
                            uint8_t & o_mboxId)
@@ -338,24 +330,15 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
     uint64_t fir_data_with_mask = 0x0;
     o_attn_found = false;
 
-    assert(i_mode < NCDD_MODE_INVALID,"nodeCommMapAttn: Invalid mode: %d",
-           i_mode);
+    const uint64_t fir_mask = NCDD_FIR_ATTN_MASK;
 
-    const uint64_t fir_mask = (i_mode == NCDD_MODE_ABUS)
-                              ? NCDD_ABUS_FIR_ATTN_MASK
-                              : NCDD_XBUS_FIR_ATTN_MASK;
-
-    const uint64_t fir_addr = (i_mode == NCDD_MODE_ABUS)
-                              ? NCDD_REG_FIR + NCDD_ABUS_REG_OFFSET
-                              : NCDD_REG_FIR;
+    const uint64_t fir_addr = NCDD_REG_FIR;
 
     const size_t expSize = sizeof(fir_data);
 
     TRACUTCOMP(g_trac_nc,ENTER_MRK
-              "nodeCommMapAttn: tgt=0x%X, mode=%s, fir_addr=0x%.16llX",
+              "nodeCommMapAttn: tgt=0x%X, fir_addr=0x%.16llX",
               get_huid(i_pProc),
-              (i_mode == NCDD_MODE_ABUS)
-                ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
               fir_addr);
 
 
@@ -370,11 +353,9 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 
     if(err)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommMapAttn Read Fail! (%s): "
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommMapAttn Read Fail! "
                   " tgt=0x%X, reg_addr=0x%.16llX, data=0x%.16llX "
                   TRACE_ERR_FMT,
-                  (i_mode == NCDD_MODE_ABUS)
-                    ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
                   TARGETING::get_huid(i_pProc),
                   fir_addr, fir_data,
                   TRACE_ERR_ARGS(err));
@@ -385,7 +366,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 
     // Map Attention bits in the FIR
     fir_data_with_mask = fir_data & fir_mask;
-    const int bit_count = __builtin_popcount(fir_data_with_mask);
+    const int bit_count = __builtin_popcountll(fir_data_with_mask);
     TRACUTCOMP(g_trac_nc,"nodeCommMapAttn: FIR data = 0x%.16llX, "
               "mask=0x%.16llX, data+mask=0x%.16llX, count=%d",
               fir_data, fir_mask, fir_data_with_mask, bit_count);
@@ -434,7 +415,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
                            HWAS::GARD_NULL );
 
         // Collect FFDC
-        getNodeCommFFDC(i_mode, i_pProc, err);
+        getNodeCommFFDC(i_pProc, err);
 
         err->collectTrace(SECURE_COMP_NAME);
         err->collectTrace(NODECOMM_TRACE_NAME);
@@ -443,7 +424,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
     }
 
     int bit = 0;
-    const int possible_attn_bits = __builtin_popcount(fir_mask);
+    const int possible_attn_bits = __builtin_popcountll(fir_mask);
     for ( ; bit < possible_attn_bits ; ++bit)
     {
         // Start at first bit and shift right to find an attention
@@ -553,15 +534,12 @@ errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
 /**
  * @brief Add FFDC for the target to an error log
  */
-void getNodeCommFFDC( const node_comm_modes_t   i_mode,
-                      TARGETING::Target*  i_pProc,
+void getNodeCommFFDC(TARGETING::Target*  i_pProc,
                       errlHndl_t          &io_log)
 {
     TRACFCOMP(g_trac_nc,ENTER_MRK
-              "getNodeCommFFDC: tgt=0x%X, mode=%s, err_plid=0x%X",
+              "getNodeCommFFDC: tgt=0x%X, err_plid=0x%X",
               get_huid(i_pProc),
-              (i_mode == NCDD_MODE_ABUS)
-                ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
               ERRL_GETPLID_SAFE(io_log));
 
     do
@@ -569,10 +547,8 @@ void getNodeCommFFDC( const node_comm_modes_t   i_mode,
     if (io_log == nullptr)
     {
         TRACFCOMP(g_trac_nc,INFO_MRK"getNodeCommFFDC: io_log==nullptr, so "
-                  "no FFDC has been collected for tgt=0x%X, mode=%s",
-                  get_huid(i_pProc),
-                  (i_mode == NCDD_MODE_ABUS)
-                    ? NCDD_ABUS_STRING : NCDD_XBUS_STRING);
+                  "no FFDC has been collected for tgt=0x%X",
+                  get_huid(i_pProc));
         break;
     }
 
@@ -583,22 +559,19 @@ void getNodeCommFFDC( const node_comm_modes_t   i_mode,
     ERRORLOG::ErrlUserDetailsLogRegister ffdc(i_pProc);
 
     // FIR/Control/Status/Data Registers
-    ffdc.addData(DEVICE_SCOM_ADDRESS(getLinkMboxRegAddr(NCDD_REG_FIR,i_mode)));
-    ffdc.addData(DEVICE_SCOM_ADDRESS(getLinkMboxRegAddr(NCDD_REG_CTRL,i_mode)));
-    ffdc.addData(DEVICE_SCOM_ADDRESS(getLinkMboxRegAddr(NCDD_REG_DATA,i_mode)));
+    ffdc.addData(DEVICE_SCOM_ADDRESS(NCDD_REG_FIR));
+    ffdc.addData(DEVICE_SCOM_ADDRESS(NCDD_REG_CTRL));
+    ffdc.addData(DEVICE_SCOM_ADDRESS(NCDD_REG_DATA));
 
     // Loop Through All of the Mailbox Registers Where the Data Could End Up
     uint64_t l_reg = 0;
-    const auto max_linkId = (i_mode==NCDD_MODE_ABUS)
-                              ? NCDD_MAX_ABUS_LINK_ID
-                              : NCDD_MAX_XBUS_LINK_ID;
 
-    for (size_t linkId=0;  linkId <= max_linkId ; ++linkId)
+    for (size_t linkId=0;  linkId <= NCDD_MAX_LINK_ID; ++linkId)
     {
         for (size_t mboxId=0; mboxId <= NCDD_MAX_MBOX_ID; ++mboxId)
         {
             l_reg = getLinkMboxReg(linkId, mboxId);
-            ffdc.addData(DEVICE_SCOM_ADDRESS(getLinkMboxRegAddr(l_reg,i_mode)));
+            ffdc.addData(DEVICE_SCOM_ADDRESS(l_reg));
         }
     }
 
@@ -617,18 +590,15 @@ void getNodeCommFFDC( const node_comm_modes_t   i_mode,
 /**
  * @brief Add a bus callout to an error log
  */
-void addNodeCommBusCallout(const node_comm_modes_t i_mode,
-                           TARGETING::Target* i_pProc,
+void addNodeCommBusCallout(TARGETING::Target* i_pProc,
                            const uint8_t i_linkId,
                            errlHndl_t & io_log,
                            HWAS::callOutPriority i_priority)
 {
     TRACFCOMP(g_trac_nc,ENTER_MRK
-              "addNodeCommBusCallout: tgt=0x%X, mode=%s, linkId=%d, "
+              "addNodeCommBusCallout: tgt=0x%X, linkId=%d, "
               "err_plid=0x%X, priority=%d",
               get_huid(i_pProc),
-              (i_mode == NCDD_MODE_ABUS)
-                ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
               i_linkId,
               ERRL_GETPLID_SAFE(io_log), i_priority);
 
@@ -643,25 +613,20 @@ void addNodeCommBusCallout(const node_comm_modes_t i_mode,
     do
     {
     if ((io_log == nullptr) ||
-        (i_pProc == nullptr) ||
-        ((i_mode != NCDD_MODE_ABUS) &&
-         (i_mode != NCDD_MODE_XBUS)))
+        (i_pProc == nullptr))
     {
         TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: io_log==nullptr or "
-                  "tgt=0x%X is nullptr or i_mode=%d is invalid (not ABUS (%d) "
-                  "or XBUS (%d)) so no bus callout has beed added",
-                  get_huid(i_pProc), i_mode, NCDD_MODE_ABUS, NCDD_MODE_XBUS);
+                  "tgt=0x%X is nullptr, so no bus callout has beed added",
+                  get_huid(i_pProc));
         break;
     }
 
     // Get Bus Type
-    HWAS::busTypeEnum l_bus_type = (i_mode == NCDD_MODE_ABUS)
-                                    ? HWAS::O_BUS_TYPE : HWAS::X_BUS_TYPE; // using O_ instead of A_BUS_TYPE
+    HWAS::busTypeEnum l_bus_type = HWAS::A_BUS_TYPE;
 
     // Get all Chiplets for this target aligned with the input mode
     TargetHandleList l_busTargetList;
-    TYPE l_type = (i_mode == NCDD_MODE_ABUS)
-                   ? TYPE_OBUS : TYPE_XBUS;
+    TYPE l_type = TYPE_OBUS;
     getChildChiplets(l_busTargetList, i_pProc, l_type, false);
 
     // Get BUS Instance
@@ -711,104 +676,76 @@ void addNodeCommBusCallout(const node_comm_modes_t i_mode,
 
         if (l_bus_instance_ep1 == l_busTgt->getAttr<ATTR_REL_POS>())
         {
-            // If XBUS, make callout here:
-            if (i_mode == NCDD_MODE_XBUS)
+            // Go to depth of TYPE_SMPGROUP, which is one level below OBUS
+            TargetHandleList l_smpGroupTargetList;
+            getChildAffinityTargets(l_smpGroupTargetList,
+                                    l_busTgt,
+                                    CLASS_UNIT,
+                                    TYPE_SMPGROUP,
+                                    false);
+
+            for (auto l_smpGroup : l_smpGroupTargetList)
             {
-                TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
-                          "Using i_pProc 0x%.08X BUS HUID 0x%.08X (%s) "
-                          "PEER_PATH %s as it had right instance %d for ep1",
-                          get_huid(i_pProc), get_huid(l_busTgt), l_ep1_path_str,
-                          l_ep2_path_str, l_bus_instance_ep1);
-
-                found_peer_endpoint = true;
-
-                // Add Bus Callout
-                io_log->addBusCallout(l_ep1,
-                                      l_ep2,
-                                      l_bus_type,
-                                      i_priority);
-
-                // Add HW Callout to deconfigure this XBUS
-                io_log->addHwCallout(l_busTgt,
-                                     i_priority,
-                                     HWAS::DECONFIG,
-                                     HWAS::GARD_NULL);
-
-               break;
-            }
-            else
-            {
-                // Go to depth of TYPE_SMPGROUP, which is one level below OBUS
-                TargetHandleList l_smpGroupTargetList;
-                getChildAffinityTargets(l_smpGroupTargetList,
-                                        l_busTgt,
-                                        CLASS_UNIT,
-                                        TYPE_SMPGROUP,
-                                        false);
-
-                for (auto l_smpGroup : l_smpGroupTargetList)
+                EntityPath l_smpGroup_ep =
+                             l_smpGroup->getAttr<ATTR_PHYS_PATH>();
+                EntityPath::PathElement l_smpGroup_ep_peSmpGroup =
+                             l_smpGroup_ep.pathElementOfType(TYPE_SMPGROUP);
+                if (l_ep1_path_str != nullptr)
                 {
-                    EntityPath l_smpGroup_ep =
-                                 l_smpGroup->getAttr<ATTR_PHYS_PATH>();
-                    EntityPath::PathElement l_smpGroup_ep_peSmpGroup =
-                                 l_smpGroup_ep.pathElementOfType(TYPE_SMPGROUP);
-                    if (l_ep1_path_str != nullptr)
-                    {
-                         free(l_ep1_path_str);
-                    }
-                    l_ep1_path_str = l_smpGroup_ep.toString();
+                     free(l_ep1_path_str);
+                }
+                l_ep1_path_str = l_smpGroup_ep.toString();
 
-                    EntityPath l_smpGroup_peer_ep =
-                                 l_smpGroup->getAttr<ATTR_PEER_PATH>();
-                    if (l_ep2_path_str != nullptr)
-                    {
-                        free(l_ep2_path_str);
-                    }
-                    l_ep2_path_str = l_smpGroup_peer_ep.toString();
+                EntityPath l_smpGroup_peer_ep =
+                             l_smpGroup->getAttr<ATTR_PEER_PATH>();
+                if (l_ep2_path_str != nullptr)
+                {
+                    free(l_ep2_path_str);
+                }
+                l_ep2_path_str = l_smpGroup_peer_ep.toString();
 
-                    TRACUTCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
-                              "SMPGROUP HUID: 0x%.08X (%s): rel_pos=%d, "
-                              "instance=%d: peer=%s",
+                TRACUTCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
+                           "SMPGROUP HUID: 0x%.08X (%s): rel_pos=%d, "
+                           "instance=%d: peer=%s",
+                           get_huid(l_smpGroup),
+                           l_ep1_path_str,
+                           l_smpGroup->getAttr<ATTR_REL_POS>(),
+                           l_smpGroup_ep_peSmpGroup.instance,
+                           l_ep2_path_str);
+
+                // Find matching instance and relative link Id
+                if ((l_smpGroup_ep_peSmpGroup.instance % 2) ==
+                    (i_linkId % 2))
+                {
+                    found_peer_endpoint = true;
+
+                    TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
+                              "Using SMPGROUP HUID: 0x%.08X (%s): "
+                              "i_linkId=%d, rel_pos=%d, instance=%d: "
+                              "peer=%s",
                               get_huid(l_smpGroup),
                               l_ep1_path_str,
+                              i_linkId,
                               l_smpGroup->getAttr<ATTR_REL_POS>(),
                               l_smpGroup_ep_peSmpGroup.instance,
                               l_ep2_path_str);
 
-                    // Find matching instance and relative link Id
-                    if ((l_smpGroup_ep_peSmpGroup.instance % 2) ==
-                        (i_linkId % 2))
-                    {
-                        found_peer_endpoint = true;
+                    // Add Bus Callout
+                    io_log->addBusCallout(l_smpGroup_ep,
+                                          l_smpGroup_peer_ep,
+                                          l_bus_type,
+                                          i_priority);
 
-                        TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
-                                  "Using SMPGROUP HUID: 0x%.08X (%s): "
-                                  "i_linkId=%d, rel_pos=%d, instance=%d: "
-                                  "peer=%s",
-                                  get_huid(l_smpGroup),
-                                  l_ep1_path_str,
-                                  i_linkId,
-                                  l_smpGroup->getAttr<ATTR_REL_POS>(),
-                                  l_smpGroup_ep_peSmpGroup.instance,
-                                  l_ep2_path_str);
+                    // TODO RTC: 256842
+                    // Add HW Callout to deconfigure this SMPGROUP
+                    // NOTE:  GARD is not supported at SMPGORUP level
+                    io_log->addHwCallout(l_smpGroup,
+                                         i_priority,
+                                         HWAS::DECONFIG,
+                                         HWAS::GARD_NULL);
 
-                        // Add Bus Callout
-                        io_log->addBusCallout(l_smpGroup_ep,
-                                              l_smpGroup_peer_ep,
-                                              l_bus_type,
-                                              i_priority);
-
-                        // Add HW Callout to deconfigure this SMPGROUP
-                        // NOTE:  GARD is not supported at SMPGORUP level
-                        io_log->addHwCallout(l_smpGroup,
-                                             i_priority,
-                                             HWAS::DECONFIG,
-                                             HWAS::GARD_NULL);
-
-                        break;
-                    }
-                }  // for loop on SMPGROUP
-
+                    break;
+                }
             }
         }
         else
@@ -831,11 +768,9 @@ void addNodeCommBusCallout(const node_comm_modes_t i_mode,
     if (found_peer_endpoint == false)
     {
         TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: Unable to find a "
-                  "peer_tgt for tgt=0x%X, mode=%s, linkId=%d, so no bus "
+                  "peer_tgt for tgt=0x%X, linkId=%d, so no bus "
                   "callout has been added",
                   get_huid(i_pProc),
-                  (i_mode == NCDD_MODE_ABUS)
-                    ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
                   i_linkId);
         break;
     }

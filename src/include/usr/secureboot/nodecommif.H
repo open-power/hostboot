@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,25 +34,9 @@ namespace SECUREBOOT
 namespace NODECOMM
 {
 
-/*
- * @brief The Node Communications Device Driver can *only* support ABUS or
- *        XBUS operations.  This enum will be passed in by callers and it
- *        will be verified that only the XBUS or ABUS values were passed in.
- */
-enum node_comm_modes_t
-{
-    NCDD_MODE_XBUS    = 0,
-    NCDD_MODE_ABUS    = 1,
-
-    // INVALID value and will be used for checks and asserts, like:
-    // assert(mode < NCDD_MODE_INVALID)
-    NCDD_MODE_INVALID = 2,
-};
-
 enum node_comm_link_mbox_info_t
 {
-    NCDD_MAX_ABUS_LINK_ID  = 7,
-    NCDD_MAX_XBUS_LINK_ID  = 5,
+    NCDD_MAX_LINK_ID       = 3,
     NCDD_MAX_MBOX_ID       = 1,
     NCDD_INVALID_LINK_MBOX = 0xFF,
 };
