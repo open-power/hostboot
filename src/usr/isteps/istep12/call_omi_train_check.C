@@ -166,6 +166,14 @@ void* call_omi_train_check (void *io_pArgs)
         } // OMI loop
     } while (0);
 
+    // Beyond this point, scoms to the OCMBs should be working, so clear the
+    // ATTR_ATTN_POLL_PLID attribute since attention won't need to check the
+    // PRD_HWP_PLID attribute before scomming the OCMBs anymore.
+    TargetHandle_t sys = nullptr;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != nullptr);
+    sys->setAttr<ATTR_ATTN_POLL_PLID>(0);
+
     TRACFCOMP( g_trac_isteps_trace, "call_omi_train_check exit" );
 
     // end task, returning any errorlogs to IStepDisp
