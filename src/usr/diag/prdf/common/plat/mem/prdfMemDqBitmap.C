@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -477,6 +477,9 @@ uint32_t __getSpareInfo( TargetHandle_t i_trgt, MemRank i_rank,
 {
     #define PRDF_FUNC "[__getSpareInfo] "
 
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) ||
+                 TYPE_MEM_PORT  == getTargetType(i_trgt) );
+
     uint32_t o_rc = SUCCESS;
     o_spareSupported = true;
 
@@ -486,11 +489,15 @@ uint32_t __getSpareInfo( TargetHandle_t i_trgt, MemRank i_rank,
         o_lowNibble   = MEM_EFF_DIMM_SPARE_LOW_NIBBLE;
         o_highNibble  = MEM_EFF_DIMM_SPARE_HIGH_NIBBLE;
         o_spareConfig = MEM_EFF_DIMM_SPARE_NO_SPARE;
-        TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT,
-                                                    i_portSlct );
-        o_rc = getDimmSpareConfig<TYPE_MEM_PORT>( memPort, i_rank,
-                i_portSlct, o_spareConfig );
 
+        TargetHandle_t memPort = i_trgt;
+        if ( TYPE_OCMB_CHIP == getTargetType(i_trgt) )
+        {
+            memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, i_portSlct );
+        }
+
+        o_rc = getDimmSpareConfig<TYPE_MEM_PORT>( memPort, i_rank, i_portSlct,
+                                                  o_spareConfig );
         if( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
