@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,34 +23,39 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+// Hwas
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/hwas_reasoncodes.H>
 #include <hwas/hwasPlat.H>
-
 #include <hwas/common/deconfigGard.H>
 
+// Initservice
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
-#include <isteps/hwpisteperror.H>
 
+// Targeting
 #include <targeting/attrsync.H>
 #include <targeting/namedtarget.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/entitypath.H>
+#include <targeting/targplatutil.H>
 
+// SBE
 #include <sbe/sbeif.H>
 #include <sbe/sbe_update.H>
 
-//  targeting support.
-#include  <targeting/common/utilFilter.H>
-#include  <targeting/common/commontargeting.H>
-#include  <targeting/common/entitypath.H>
+// Security
+#include <trustedbootif.H>
+#include <secureboot/phys_presence_if.H>
 
-#include  <errl/errludtarget.H>
-
+// Misc
+#include <config.h>
+#include <errl/errludtarget.H>
 #include <console/consoleif.H>
-
-// Custom compile configs
+#include <isteps/hwpisteperror.H>
 
 namespace ISTEP_06
 {
@@ -60,26 +65,27 @@ void* host_gard( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard entry" );
     errlHndl_t l_err;
     ISTEP_ERROR::IStepError l_stepError;
+    using namespace TARGETING;
 
     do {
-        TARGETING::Target* l_pTopLevel = NULL;
-        TARGETING::targetService().getTopLevelTarget( l_pTopLevel );
+        Target* l_pTopLevel = NULL;
+        targetService().getTopLevelTarget( l_pTopLevel );
         assert(l_pTopLevel, "host_gard: no TopLevelTarget");
 
         // Check whether we're in MPIPL mode
-        if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+        if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "host_gard: MPIPL mode");
 
-            TARGETING::PredicateCTM l_coreFilter(TARGETING::CLASS_UNIT,
-                                                 TARGETING::TYPE_CORE);
-            TARGETING::PredicateCTM l_exFilter(TARGETING::CLASS_UNIT,
-                                               TARGETING::TYPE_EX);
-            TARGETING::PredicateCTM l_eqFilter(TARGETING::CLASS_UNIT,
-                                               TARGETING::TYPE_EQ);
+            PredicateCTM l_coreFilter(CLASS_UNIT,
+                                                 TYPE_CORE);
+            PredicateCTM l_exFilter(CLASS_UNIT,
+                                               TYPE_EX);
+            PredicateCTM l_eqFilter(CLASS_UNIT,
+                                               TYPE_EQ);
 
-            TARGETING::PredicatePostfixExpr l_coreExEq;
+            PredicatePostfixExpr l_coreExEq;
             l_coreExEq.push(&l_coreFilter)
                       .push(&l_exFilter)
                       .push(&l_eqFilter).Or().Or();
@@ -108,29 +114,29 @@ void* host_gard( void *io_pArgs )
         }
 
         // Put out some helpful messages that show which targets are usable
-        std::map<TARGETING::TYPE,uint64_t> l_funcData;
-        for (auto target : TARGETING::targetService())
+        std::map<TYPE,uint64_t> l_funcData;
+        for (auto target : targetService())
         {
-            if (!(target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
+            if (!(target->getAttr<ATTR_HWAS_STATE>().functional))
             {
                 continue;
             }
-            TARGETING::TYPE l_type =target->getAttr<TARGETING::ATTR_TYPE>();
-            TARGETING::ATTR_FAPI_POS_type l_pos = 0;
-            if( target->tryGetAttr<TARGETING::ATTR_FAPI_POS>(l_pos) )
+            TYPE l_type =target->getAttr<ATTR_TYPE>();
+            ATTR_FAPI_POS_type l_pos = 0;
+            if( target->tryGetAttr<ATTR_FAPI_POS>(l_pos) )
             {
                 l_funcData[l_type] |= (0x8000000000000000 >> l_pos);
             }
         }
-        TARGETING::EntityPath l_epath;
+        EntityPath l_epath;
         for( auto l_data : l_funcData)
         {
             auto l_type = l_data.first;
             uint64_t l_val = l_data.second;
             //Only want to display procs, dimms, and cores
-            if((l_type != TARGETING::TYPE_DIMM) &&
-               (l_type != TARGETING::TYPE_PROC) &&
-               (l_type != TARGETING::TYPE_CORE))
+            if((l_type != TYPE_DIMM) &&
+               (l_type != TYPE_PROC) &&
+               (l_type != TYPE_CORE))
             {
                 continue;
             }
@@ -165,19 +171,19 @@ void* host_gard( void *io_pArgs )
         // undesirable behavior, so we need to reset it here:
 
         // Read current value
-        TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-            l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+        ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+            l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
         // Turn off deconfigure bit
-        l_reconfigAttr &= ~TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
+        l_reconfigAttr &= ~RECONFIGURE_LOOP_DECONFIGURE;
         // Write back to attribute
-        l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>
+        l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>
                 (l_reconfigAttr);
 
 
         // Send message to FSP with HUID of master core
         msg_t * core_msg = msg_allocate();
         core_msg->type = SBE::MSG_IPL_MASTER_CORE;
-        const TARGETING::Target*  l_masterCore  = TARGETING::getMasterCore( );
+        const Target*  l_masterCore  = getMasterCore( );
 
         if (l_masterCore == NULL)
         {
@@ -210,7 +216,7 @@ void* host_gard( void *io_pArgs )
             break;
         }
 
-        core_msg->data[0] = TARGETING::get_huid(l_masterCore);
+        core_msg->data[0] = get_huid(l_masterCore);
         core_msg->extra_data = NULL;
 
         //data[1] is unused
@@ -228,6 +234,7 @@ void* host_gard( void *io_pArgs )
             msg_free(core_msg);
             break;
         }
+
     } while (0);
 
     if (l_err)
@@ -237,6 +244,48 @@ void* host_gard( void *io_pArgs )
         // Commit Error
         errlCommit (l_err, ISTEP_COMP_ID);
     }
+
+    (void)SECUREBOOT::logPlatformSecurityConfiguration();
+
+    // Set Minimum Secure Version Attribute
+    // -- safe to do here because targeting is definitely up at this point
+    // -- NOTE: API asserts if there's any issues returning the node target
+    Target* node_tgt = UTIL::getCurrentNodeTarget();
+    node_tgt->setAttr<ATTR_SECURE_VERSION_SEEPROM>(SECUREBOOT::getMinimumSecureVersion());
+
+#ifdef CONFIG_TPMDD
+    // Initialize the master TPM
+    l_err = (errlHndl_t)TRUSTEDBOOT::host_update_primary_tpm(io_pArgs);
+    if (l_err)
+    {
+        l_stepError.addErrorDetails(l_err);
+        ERRORLOG::errlCommit( l_err, TRBOOT_COMP_ID );
+    }
+#endif
+    l_err = SECUREBOOT::traceSecuritySettings(true);
+    if (l_err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_update_primary_tpm: Error back from "
+                  "SECUREBOOT::traceSecuritySettings: rc=0x%X, plid=0x%X",
+                  ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+        l_stepError.addErrorDetails(l_err);
+        ERRORLOG::errlCommit( l_err, SECURE_COMP_ID );
+    }
+    // Check for Physical Presence
+#ifdef CONFIG_PHYS_PRES_PWR_BUTTON
+    l_err = SECUREBOOT::detectPhysPresence();
+    if (l_err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_update_primary_tpm: Error back from "
+                  "SECUREBOOT::detectPhysPresence: "
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(l_err));
+        l_stepError.addErrorDetails(l_err);
+        ERRORLOG::errlCommit( l_err, SECURE_COMP_ID );
+    }
+#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
 
