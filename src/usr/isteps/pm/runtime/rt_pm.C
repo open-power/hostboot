@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -541,20 +541,16 @@ namespace RTPM
         errlHndl_t l_errl = nullptr;
         Target* l_failedProc = nullptr;
 
-        do {
-
-            // No-op on non-PHYP systems
-            if(!is_phyp_load())
-            {
-                break;
-            }
-
+        // Load and start the PM Complex/OCCs on PHYP systems
+        if(is_phyp_load())
+        {
+            bool l_start_completed = true;
             l_errl = HBPM::loadAndStartPMAll(HBPM::PM_LOAD,
                                              l_failedProc);
             if(l_errl)
             {
                 pm_complex_error(l_errl, l_rc);
-                break;
+                l_start_completed = false;
             }
 
             if(l_failedProc)
@@ -562,23 +558,28 @@ namespace RTPM
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           ERR_MRK"load_and_start_pm_complex: could not load/start PM Complex on proc HUID 0x%08x",
                           get_huid(l_failedProc));
-                break;
+                l_start_completed = false;
             }
 
 #ifdef CONFIG_HTMGT
-            HTMGT::processOccStartStatus(true, //i_startCompleted
-                                         l_failedProc); //this is nullptr at this point
+            // Notify HTMGT of the PM Complex start status.
+            // HTMGT will attempt recovery if necessary.
+            HTMGT::processOccStartStatus(l_start_completed,
+                                         l_failedProc);
 #else
-            l_errl = HBPM::verifyOccChkptAll();
-            if(l_errl)
+            // Verify all OCCs completed their init and reached checkpoint
+            if (l_start_completed)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"load_and_start_pm_complex: verifyOccChkptAll failed!");
-                pm_complex_error(l_errl, l_rc);
-                break;
+                l_errl = HBPM::verifyOccChkptAll();
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"load_and_start_pm_complex: verifyOccChkptAll failed!");
+                    pm_complex_error(l_errl, l_rc);
+                }
             }
 #endif
-        }while(0);
+        }
 
         if(l_rc)
         {
