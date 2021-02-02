@@ -54,7 +54,6 @@
 #include <util/align.H>
 
 #include <arch/ppc.H>
-#include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
 #include <targeting/targplatutil.H>
 #include <targeting/common/targetservice.H>
@@ -380,15 +379,6 @@ void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
     ErrlUserDetailsCallout( pData, size, i_clockType,
             i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
 
-    if (i_gardErrorType != GARD_NULL)
-    {
-        setGardBit();
-    }
-    if (i_deconfigState != NO_DECONFIG)
-    {
-        setDeconfigBit();
-    }
-
     if( ep )
     {
         delete ep;
@@ -425,15 +415,6 @@ void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
 
     ErrlUserDetailsCallout( pData, size, i_partType,
             i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
-
-    if (i_gardErrorType != GARD_NULL)
-    {
-        setGardBit();
-    }
-    if (i_deconfigState != NO_DECONFIG)
-    {
-        setDeconfigBit();
-    }
 
     if( ep )
     {
@@ -629,14 +610,6 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
         ErrlUserDetailsCallout(&ep, size1,
                 i_priority, l_deconfigState, i_gardErrorType).addToLog(this);
 
-    }
-    if (i_gardErrorType != GARD_NULL)
-    {
-        setGardBit();
-    }
-    if (i_deconfigState != NO_DECONFIG)
-    {
-        setDeconfigBit();
     }
 } // addHwCallout
 
@@ -1080,6 +1053,52 @@ void ErrlEntry::addSensorDataToErrLog(TARGETING::Target * i_target,
 
 #endif
 
+void ErrlEntry::checkForDeconfigAndGard()
+{
+    //Loop through each section of the errorlog
+    for(auto & section : iv_SectionVector)
+    {
+        if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
+        {
+            const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
+            // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
+            // entry that follows the UDT callout entry
+            if(callout_ud->type == HWAS::HW_CALLOUT)
+            {
+                if(callout_ud->deconfigState != HWAS::NO_DECONFIG)
+                {
+                    setDeconfigBit();
+                }
+                if(callout_ud->gardErrorType != HWAS::GARD_NULL)
+                {
+                    setGardBit();
+                }
+            }
+            else if(callout_ud->type == HWAS::CLOCK_CALLOUT)
+            {
+                if(callout_ud->clkDeconfigState != HWAS::NO_DECONFIG)
+                {
+                    setDeconfigBit();
+                }
+                if(callout_ud->clkGardErrorType != HWAS::GARD_NULL)
+                {
+                    setGardBit();
+                }
+            }
+            else if(callout_ud->type == HWAS::PART_CALLOUT)
+            {
+                if(callout_ud->partDeconfigState != HWAS::NO_DECONFIG)
+                {
+                    setDeconfigBit();
+                }
+                if(callout_ud->partGardErrorType != HWAS::GARD_NULL)
+                {
+                    setGardBit();
+                }
+            }
+        }
+    }
+}
 ///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
 void ErrlEntry::commit( compId_t  i_committerComponent )
@@ -1211,6 +1230,9 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                 "TARGETING has not been initialized yet! Skipping serial/part "
                 "number collection!");
     }
+
+    // Ensure the iv_gard and iv_deconfig bits are set correctly on the ErrlSrc member
+    checkForDeconfigAndGard();
 
     { /* Set Extended Header info */
         char serial_string[sizeof(mtms_t::serial)] = { };

@@ -1007,6 +1007,13 @@ private:
     ErrlEntry(const ErrlEntry& i_right);
     ErrlEntry& operator=(const ErrlEntry& i_right);
 
+    /**
+      * @brief Check if any callouts in this error log have
+      *        any GARD or DECONFIG elements and set the
+      *        iv_gard and iv_deconfig flags accordingly
+      */
+    void checkForDeconfigAndGard( void );
+
 
 
 private:
