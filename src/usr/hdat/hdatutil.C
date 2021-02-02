@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1728,8 +1728,20 @@ void hdatGetI2cDeviceInfo(
 {
     HDAT_ENTER();
 
-    std::vector<DeviceInfo_t> deviceInfo;
-    getDeviceInfo(nullptr,deviceInfo);
+    // This vector is expensive to construct, so initialize it once and then
+    // cache it for future uses.
+    static const std::vector<DeviceInfo_t> deviceInfo =
+        ([] {
+            std::vector<DeviceInfo_t> devinfo;
+            getDeviceInfo(nullptr, devinfo);
+
+            // Order by node ordinal ID, processor position, I2C master target
+            // pointer
+            std::sort(devinfo.begin(), devinfo.end(),
+                      byNodeProcAffinity);
+
+            return devinfo;
+        })();
 
     if(deviceInfo.empty())
     {
@@ -1738,11 +1750,6 @@ void hdatGetI2cDeviceInfo(
     }
     else // At least one device, and index [0] is valid
     {
-        // Order by node ordinal ID, processor position, I2C master target
-        // pointer
-        std::sort(deviceInfo.begin(), deviceInfo.end(),
-            byNodeProcAffinity);
-
         union LinkId
         {
             struct

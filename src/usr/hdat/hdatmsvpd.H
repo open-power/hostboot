@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,14 @@ const uint32_t MAX_DIMMS_PER_MCBIST = 8;
 
 //@TODO:RTC 213230(HDAT Axone additional support)
 //Need to revisit the number if needed
-const uint32_t HDAT_MAX_MSAREA_P10 = 32;
+//This number needs to be at least as large as the maximum number of OCMBs per
+//NODE
+const uint32_t HDAT_MAX_MSAREA_P10 = (1     // OCMB per OMI
+                                      * 2   // OMI per MCC
+                                      * 2   // MCC per MI
+                                      * 1   // MI per MC
+                                      * 4   // MC per PROC
+                                      * 8); // PROC per NODE
 
 /** @brief Structure version number
  */

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,7 +137,7 @@ enum BlockPriority
 /** Hardwired offsets from HRMOR to HOMER images in real mem */
 /** HOMER starts immediately after our HB memory */
 /**    <n0p0 HRMOR = 4GB-512MB> + <memory size = 64MB> = 3684 MB */
-/** HOMER is 4 MB per proc, 4 procs = 16MB */
+/** HOMER is 4 MB per proc, 8 procs = 32MB */
 /** Each HOMER must start on a 4MB offset to meet OCC requirements */
 #define VMM_HOMER_REGION_START_OFFSET (VMM_MEMORY_SIZE)
 #define VMM_HOMER_INSTANCE_SIZE_IN_MB (4)
@@ -164,7 +164,7 @@ enum BlockPriority
  (VMM_OCC_COMMON_SIZE + VMM_HOMER_REGION_SIZE)
 
 /**
- * Memory for Architected state (max 4 procs - 256KB Each)
+ * Memory for Architected state (max 8 procs - 256KB Each)
  * XXX MPIPL depends on memory reservation layout. Any change in the
  *     reservation order impact MPIPL (see copyArchitectedRegs()).
  */
@@ -172,23 +172,31 @@ enum BlockPriority
 #define VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB 256
 #define VMM_ARCH_REG_DATA_PER_PROC_SIZE \
  ( VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB*KILOBYTE )
-//TODO: via RTC:254920 update for Everest
-//(4 Procs * 184 registers) + FAPI FFDC space
-#define VMM_ARCH_REG_DATA_SIZE_ALL_PROC_IN_MB 3
+
+//(8 Procs * 184 registers) + FAPI FFDC space
+// The math here is implicit in the copyArchitectedRegs function:
+// (sizeof(hostArchRegDataEntry) = 24 bytes
+//  * 184 registers
+//  * 4 threads per core
+//  * 32 cores per processor
+//  * 8 processors per node)
+// = ~4.5 MB
+// plus ~1.5 MB (rounding up) for the FAPI FFDC.
+#define VMM_ARCH_REG_DATA_SIZE_ALL_PROC_IN_MB 6
 #define VMM_ARCH_REG_DATA_SIZE_ALL_PROC \
  ( VMM_ARCH_REG_DATA_SIZE_ALL_PROC_IN_MB*MEGABYTE )
 #define VMM_ARCH_REG_DATA_END_OFFSET \
  ( VMM_ARCH_REG_DATA_START_OFFSET + VMM_ARCH_REG_DATA_SIZE_ALL_PROC )
-/** End offset for the Architected region is 217MB **/
+/** End offset for the Architected region is 220MB **/
 
 /** Memory for attribute data */
 #define VMM_ATTR_DATA_START_OFFSET  VMM_ARCH_REG_DATA_END_OFFSET
 #define VMM_ATTR_DATA_SIZE (1*MEGABYTE)
-/** End of Attr Area = 218MB */
+/** End of Attr Area = 221MB */
 
 /** Memory for hostboot data Table of Contents */
 #define VMM_HB_DATA_TOC_START_OFFSET \
-    (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE) /* currently 218MB */
+    (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE) /* currently 221MB */
 
 /** Variable Attribute overrides and Attributes memory here **/
 
