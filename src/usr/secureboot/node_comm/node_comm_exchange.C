@@ -1034,7 +1034,6 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         break;
     }
 
-#if 0 // TODO RTC: 244858 Re-enable Loop 2
     // Loop 2: Master Node will request quotes from each Slave Node by first
     // sending a Quote Request and then waiting to receive a Quote Response
     for ( auto const l_iohs : i_iohs_instances)
@@ -1102,6 +1101,7 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
             free(data_rcv_buffer);
             data_rcv_buffer = nullptr;
         }
+
         err = nodeCommTransferRecv(l_paucParent,
                                    my_linkId,
                                    my_mboxId,
@@ -1136,7 +1136,6 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
     {
         break;
     }
-#endif
     } while( 0 );
 
     if (data_rcv_buffer != nullptr)

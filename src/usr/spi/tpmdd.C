@@ -1914,6 +1914,13 @@ errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
             burstCount = TPM_MAX_SPI_TRANSMIT_SIZE;
         }
 
+        // Limit TPM writes to 2 bytes and write information in chunks if
+        // necessary
+        if(burstCount > 2)
+        {
+            burstCount = 2;
+        }
+
         // Send in some data
         delay = 0;
         curBytePtr = &(bytePtr[curByte]);
@@ -2151,6 +2158,13 @@ errlHndl_t tpmReadFifo( const tpm_info_t & i_tpmInfo,
                 nanosleep(0, 10 * NS_PER_MSEC);  // 10ms
                 delay += 10;
                 continue;
+            }
+
+            // Limit reads to 8 bytes and read out information in chunks if
+            // necessary
+            if(burstCount > 8)
+            {
+                burstCount = 8;
             }
 
             // Read some data
