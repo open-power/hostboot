@@ -2622,6 +2622,9 @@
       <id>ISTEP_MODE</id>
     </attribute>
     <attribute>
+      <id>ISTEP_PAUSE_CONFIG</id>
+    </attribute>
+    <attribute>
       <id>ISTEP_PAUSE_ENABLE</id>
     </attribute>
     <attribute>
