@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1286,6 +1286,14 @@ p10_io_ppe_rx_dfe_fail
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b000000101, 0x4, 2),
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b000000101, 0x4, 2),
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b000000101, 0x4, 2)
+},
+p10_io_ppe_rx_dfe_full_h1_adj
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b110000100, 0x6, 1),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b110000100, 0x6, 1),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b110000100, 0x6, 1),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b110000100, 0x6, 1),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b110000100, 0x6, 1)
 },
 p10_io_ppe_rx_dfe_full_mode
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -245,6 +245,7 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_clkadj_coeff[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_debug[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_fail[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_full_h1_adj[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_full_mode[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_full_quad[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_h1_fail[5];
