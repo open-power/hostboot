@@ -169,7 +169,9 @@ fapi2::ReturnCode p10_l3err_extract(
     //                                                                    //
     //********************************************************************//
 
-    // look for CE/UE
+    ////////////////////////////////////////////////////////////////////////
+    // Look for CE/UE
+    ////////////////////////////////////////////////////////////////////////
     l_err_found = false;
     l_trace_index = P10_TRACEARRAY_NUM_ROWS; // the last entry in the array is the newest
     FAPI_DBG("l_trace_index = %X", l_trace_index);
@@ -363,7 +365,9 @@ fapi2::ReturnCode p10_l3err_extract(
                 l_trace_array[ 7 ].get<uint64_t>( 0 ),
                 l_trace_array[ 7 ].get<uint64_t>( 1 ));
 
-    //Get syndrome
+    ////////////////////////////////////////////////////////////////////////
+    // Determine syndrome/column
+    ////////////////////////////////////////////////////////////////////////
     FAPI_TRY(l_trace_array[ l_trace_index ].extractToRight( l_syndrome,  80,  8 ),
              "extractToRight() Syndrome data call returns an error.");
 
@@ -411,9 +415,15 @@ fapi2::ReturnCode p10_l3err_extract(
         l_syndrome_col = 0;
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    // Determine member
+    ////////////////////////////////////////////////////////////////////////
     FAPI_TRY(l_trace_array[ l_rd_cmd_cycle].extractToRight( l_member, 48, 4 ),
              "extractToRight() - Member returns an error.");
 
+    ////////////////////////////////////////////////////////////////////////
+    // Determine bank and real address(46:57)
+    ////////////////////////////////////////////////////////////////////////
     if (l_rd_cmd & 0x8)
     {
         o_err_data.bank = 0;
@@ -442,6 +452,36 @@ fapi2::ReturnCode p10_l3err_extract(
                  "extractToRight() - l_addr46_57 returns an error.");
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    // Determine which half of cacheline the error is on
+    //   6 cycles back AND a57 = 1 --> odd
+    //   6 cycles back AND a57 = 0 --> even
+    //   7 cycles back AND a57 = 1 --> even
+    //   7 cycles back AND a57 = 0 --> odd
+    ////////////////////////////////////////////////////////////////////////
+    if ((l_rd_cmd_cycle == l_indexes[6]) && ((l_addr46_57 & 0x1) == 1))
+    {
+        o_err_data.cl_half = 1;
+    }
+
+    if ((l_rd_cmd_cycle == l_indexes[6]) && ((l_addr46_57 & 0x1) == 0))
+    {
+        o_err_data.cl_half = 0;
+    }
+
+    if ((l_rd_cmd_cycle == l_indexes[7]) && ((l_addr46_57 & 0x1) == 1))
+    {
+        o_err_data.cl_half = 0;
+    }
+
+    if ((l_rd_cmd_cycle == l_indexes[7]) && ((l_addr46_57 & 0x1) == 0))
+    {
+        o_err_data.cl_half = 1;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Print output info
+    ////////////////////////////////////////////////////////////////////////
     o_err_data.ce_ue = l_err_is_ce ? L3ERR_CE : L3ERR_UE;
     o_err_data.member = l_member;
     o_err_data.dw = l_dw;
@@ -452,6 +492,7 @@ fapi2::ReturnCode p10_l3err_extract(
     FAPI_DBG("   member: %u", o_err_data.member);
     FAPI_DBG("   dw: %u", o_err_data.dw);
     FAPI_DBG("   rd_cmd: %u  bank: %u", l_rd_cmd, o_err_data.bank);
+    FAPI_DBG("   cl_half: %s", o_err_data.cl_half ? "odd" : "even");
     FAPI_DBG("   syndrome_col: %u", o_err_data.syndrome_col);
     FAPI_DBG("   ra 46 to 57: 0x%X", o_err_data.real_address_46_57);
 

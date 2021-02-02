@@ -59,6 +59,7 @@ struct p10_l3err_extract_err_data
     uint8_t member;
     uint8_t dw;
     uint8_t bank;
+    uint8_t cl_half;
     uint8_t syndrome_col;
     uint16_t real_address_46_57;
 };
