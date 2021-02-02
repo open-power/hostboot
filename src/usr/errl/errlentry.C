@@ -2138,26 +2138,179 @@ std::vector<void*> ErrlEntry::getUDSections(compId_t i_compId,
     return copy_vector;
 }
 
-void ErrlEntry::removeDeconfigure()
+uint8_t ErrlEntry::queryCallouts(TARGETING::Target* const i_target)
+{
+    uint8_t criteria_matched = NO_MATCH;
+    //Loop through each section of the errorlog
+    for(auto & section : iv_SectionVector)
+    {
+        if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
+        {
+            const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
+            // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
+            // entry that follows the UDT callout entry
+            if (callout_ud->type == HWAS::HW_CALLOUT ||
+                callout_ud->type == HWAS::CLOCK_CALLOUT ||
+                callout_ud->type == HWAS::PART_CALLOUT)
+            {
+                TARGETING::Target * target_found = nullptr;
+                uint8_t * target_ptr = section->iv_pData + sizeof(HWAS::callout_ud_t);
+                // retrieveTarget will return true if there was an error
+                if(!retrieveTarget(target_ptr, target_found, this) &&
+                   target_found  == i_target)
+                {
+                    criteria_matched |= TARGET_MATCH;
+
+                    bool deconfig_exists = false;
+                    bool gard_exists = false;
+
+                    if(callout_ud->type == HWAS::HW_CALLOUT)
+                    {
+                        deconfig_exists = callout_ud->deconfigState != HWAS::NO_DECONFIG;
+                        gard_exists = callout_ud->gardErrorType != HWAS::GARD_NULL;
+                    }
+                    else if(callout_ud->type == HWAS::CLOCK_CALLOUT)
+                    {
+                        deconfig_exists = callout_ud->clkDeconfigState != HWAS::NO_DECONFIG;
+                        gard_exists = callout_ud->clkGardErrorType != HWAS::GARD_NULL;
+                    }
+                    else if(callout_ud->type == HWAS::PART_CALLOUT)
+                    {
+                        deconfig_exists = callout_ud->partDeconfigState != HWAS::NO_DECONFIG;
+                        gard_exists = callout_ud->partGardErrorType != HWAS::GARD_NULL;
+                    }
+
+                    if(deconfig_exists)
+                    {
+                        criteria_matched |= DECONFIG_FOUND;
+                    }
+                    if(gard_exists)
+                    {
+                        criteria_matched |= GARD_FOUND;
+                    }
+                    // Do not exit loop in case there are multiple callouts
+                    // for the same target type.
+                }
+            }
+        }
+    }
+
+    return criteria_matched;
+}
+
+void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
+                                 DeconfigEnum i_deconfigState)
 {
     //Loop through each section of the errorlog
     for(auto & section : iv_SectionVector)
     {
         if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
         {
-            //Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts have deconfigure entries,
-            //  so only update those to ensure the ErrorType is GARD_NULL
-            if (reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->type == HWAS::HW_CALLOUT)
+            const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
+            // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
+            // entry that follows the UDT callout entry
+            if (callout_ud->type == HWAS::HW_CALLOUT ||
+                callout_ud->type == HWAS::CLOCK_CALLOUT ||
+                callout_ud->type == HWAS::PART_CALLOUT)
+            {
+                TARGETING::Target * target_found = nullptr;
+                uint8_t * target_ptr = section->iv_pData + sizeof(HWAS::callout_ud_t);
+                // retrieveTarget will return true if there was an error
+                if(!retrieveTarget(target_ptr, target_found, this) &&
+                   target_found  == i_target)
+                {
+                    TRACFCOMP(g_trac_errl,
+                              "setDeconfigState: Found target 0x%08X callout match, setting deconfig state 0x%X for errl 0x%08X",
+                              get_huid(i_target), i_deconfigState, eid());
+                    // Depending on the user details' type set the appropriate
+                    // deconfig field.
+                    if (callout_ud->type == HWAS::HW_CALLOUT)
+                    {
+                        callout_ud->deconfigState = i_deconfigState;
+                    }
+                    else if (callout_ud->type == HWAS::CLOCK_CALLOUT)
+                    {
+                        callout_ud->clkDeconfigState = i_deconfigState;
+                    }
+                    else if (callout_ud->type == HWAS::PART_CALLOUT)
+                    {
+                        callout_ud->partDeconfigState = i_deconfigState;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void ErrlEntry::setGardType(TARGETING::Target* const i_target,
+                            GARD_ErrorType i_gardType)
+{
+    //Loop through each section of the errorlog
+    for(auto & section : iv_SectionVector)
+    {
+        if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
+        {
+            const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
+            // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
+            // entry that follows the UDT callout entry
+            if (callout_ud->type == HWAS::HW_CALLOUT ||
+                callout_ud->type == HWAS::CLOCK_CALLOUT ||
+                callout_ud->type == HWAS::PART_CALLOUT)
+            {
+                TARGETING::Target * target_found = nullptr;
+                uint8_t * target_ptr = section->iv_pData + sizeof(HWAS::callout_ud_t);
+                // retrieveTarget will return true if there was an error
+                if(!retrieveTarget(target_ptr, target_found, this) &&
+                   target_found  == i_target)
+                {
+                    TRACFCOMP(g_trac_errl,
+                              "setGardType: Found target 0x%08X callout match, setting gard type 0x%X for errl 0x%08X",
+                              get_huid(i_target), i_gardType, eid());
+                    // Depending on the user details' type set the appropriate
+                    // gard field.
+                    if (callout_ud->type == HWAS::GARD_NULL)
+                    {
+                        callout_ud->gardErrorType = i_gardType;
+                    }
+                    else if (callout_ud->type == HWAS::GARD_NULL)
+                    {
+                        callout_ud->clkGardErrorType = i_gardType;
+                    }
+                    else if (callout_ud->type == HWAS::GARD_NULL)
+                    {
+                        callout_ud->partGardErrorType = i_gardType;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void ErrlEntry::removeGardAndDeconfigure()
+{
+    //Loop through each section of the errorlog
+    for(auto & section : iv_SectionVector)
+    {
+        if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
+        {
+            auto ud_type = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->type;
+            TRACFCOMP(g_trac_errl,
+                      "removeGardAndDeconfigure: setting GARD_NULL and NO_DECONFIG for callout of type 0x%02x for errl 0x%08X",
+                      ud_type, eid());
+            // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts have deconfigure/gard entries,
+            // so only update those to ensure the ErrorType is GARD_NULL and deconfigType is NO_DECONFIG
+            if (ud_type == HWAS::HW_CALLOUT)
             {
                 reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->gardErrorType = HWAS::GARD_NULL;
                 reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->deconfigState = HWAS::NO_DECONFIG;
             }
-            else if (reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->type == HWAS::CLOCK_CALLOUT)
+            else if (ud_type == HWAS::CLOCK_CALLOUT)
             {
                 reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->clkGardErrorType = HWAS::GARD_NULL;
                 reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->clkDeconfigState = HWAS::NO_DECONFIG;
             }
-            else if (reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->type == HWAS::PART_CALLOUT)
+            else if (ud_type == HWAS::PART_CALLOUT)
             {
                 reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->partGardErrorType = HWAS::GARD_NULL;
                 reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->partDeconfigState = HWAS::NO_DECONFIG;

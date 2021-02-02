@@ -530,9 +530,63 @@ public:
     void removeBackTrace();
 
     /**
-     *  @brief remove all deconfigure elements from an errorlog
+     *  @brief These enums can be bit-wise OR'ed together to create a return
+     *  value for queryCallouts defined below to describe what we found after
+     *  iterating through the callouts on this errlEntry looking for ones related
+     *  to the target passed into queryCallouts.
      */
-    void removeDeconfigure(void);
+    enum callout_search_criteria : uint8_t
+    {
+        NO_MATCH     = 0x00,   // no target match found ( exclusive, cannot be OR'ed)
+        TARGET_MATCH = 0x01,   // found at least 1 callout matching target passed to queryCallouts
+        DECONFIG_FOUND = 0x02, // found at least 1 callout with a target match with deconfig set
+        GARD_FOUND = 0x03,     // found at least 1 callout with a target match with gard set
+    };
+
+    /**
+     *  @brief Search through UD details sections for HW, clock, and part
+     *  callouts associated with a given target.
+     *
+     *  @param[in]  i_target        The hardware target we want to look for
+     *
+     *  @return bit-wise mask of matched callout_search_criteria
+     *          Note: DECONFIG_FOUND and GARD_FOUND will only be true
+     *                if TARGET_MATCH is true.
+     */
+    uint8_t queryCallouts(TARGETING::Target* i_target);
+
+    /**
+    *  @brief Search through UD details sections for HW, clock, and part
+    *  callouts associated with a given target and set the gard setting
+    *  associated with the matching callout(s) to be i_gardType
+    *
+    *  @param[in]  i_target        The hardware target we want to look for.
+    *  @param[in]  i_gardType      The gard type we want to force matching
+    *                              callouts to.
+    *
+    *  @return void
+    */
+    void setGardType(TARGETING::Target* i_target,
+                     HWAS::GARD_ErrorType i_gardType);
+
+    /**
+    *  @brief Search through UD details sections for HW, clock, and part
+    *  callouts associated with a given target and set the deconfig setting
+    *  associated with the matching callout(s) to be i_deconfigState
+    *
+    *  @param[in]  i_target        The hardware target we want to look for.
+    *  @param[in]  i_deconfigState The deconfig state we want to force matching
+    *                              callouts to.
+    *
+    *  @return void
+    */
+    void setDeconfigState(TARGETING::Target* i_target,
+                          HWAS::DeconfigEnum i_deconfigState);
+
+    /**
+     *  @brief remove all gard and deconfigure elements from an errorlog
+     */
+    void removeGardAndDeconfigure(void);
 
     /**
      *  @brief Add a clock callout.
