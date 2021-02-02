@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,24 +31,9 @@
       Procedure: exp_omi_init.C
       The Explorer O0DID was not read.
     </description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
-      <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <ffdc>TARGET</ffdc>
     <ffdc>ID</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_EXPLR_OMI_TEMPLATE_ERR</rc>
-    <description>
-      Procedure: exp_omi_init.C
-      Required template not supported
-    </description>
+    <ffdc>EXPECTED</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>LOW</priority>
@@ -57,8 +42,6 @@
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>TARGET</ffdc>
-    <ffdc>TEMPLATE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -68,8 +51,17 @@
       Upstream tempate B was requested, but the
       connected processor does not support it.
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
+    <ffdc>US_TEMPLATES_0159</ffdc>
     <ffdc>B</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PROC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -79,8 +71,17 @@
       Downstream tempate A was requested, but the
       connected processor does not support it.
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
+    <ffdc>DS_TEMPLATES_0147</ffdc>
     <ffdc>A</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PROC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -90,9 +91,17 @@
       Upstream template 5 or 9 need to be enabled for
       metadata enable.
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <ffdc>TMPL_5</ffdc>
     <ffdc>TMPL_9</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
