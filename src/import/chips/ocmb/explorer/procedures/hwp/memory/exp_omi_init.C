@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,21 +55,25 @@
 ///
 fapi2::ReturnCode omiDeviceVerify(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("%s Start omiDeviceVerify", mss::c_str(i_target));
     fapi2::buffer<uint32_t> l_data;
+
+    constexpr uint32_t EXPECTED = (POWER_OCID::EXPLORER << 16) | (POWER_OCID::VENDOR_IBM);
 
     FAPI_TRY(mss::exp::ib::getOCCfg(i_target, EXPLR_OC_O0MBIT_O0DID_LSB, l_data));
 
-    FAPI_ASSERT(l_data == ((POWER_OCID::EXPLORER << 16) | (POWER_OCID::VENDOR_IBM)),
+    FAPI_ASSERT(l_data == EXPECTED,
                 fapi2::OCMB_IS_NOT_EXPLORER()
                 .set_OCMB_TARGET(i_target)
-                .set_TARGET(i_target)
-                .set_ID(l_data),
-                "Explorer ID was not found");
+                .set_ID(l_data)
+                .set_EXPECTED(EXPECTED),
+                "%s Explorer ID was not found. Read: 0x%08X Expected 0x%08X. This could be due to the OMI link going down, or the Cronus "
+                "OCMB_SCOM_MODE is overridden to I2C",
+                mss::c_str(i_target), l_data(), EXPECTED);
 
 fapi_try_exit:
 
-    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    FAPI_DBG("%s Exiting with return code : 0x%08X...", mss::c_str(i_target), (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
 
@@ -113,9 +117,11 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
 
     FAPI_ASSERT(!l_us_only_0159 || !l_enable_tmpl_b,
                 fapi2::PROC_DOES_NOT_SUPPORT_US_B()
-                .set_TARGET(l_proc)
-                .set_B(l_enable_tmpl_b),
-                "Upstream template B requested, but not supported by proc");
+                .set_PROC_TARGET(l_proc)
+                .set_B(l_enable_tmpl_b)
+                .set_US_TEMPLATES_0159(l_us_only_0159),
+                "%s Upstream template B requested, but not supported by proc. EN_TMPL_B: %u, CHIP_EC_TMPL_0159: %u",
+                mss::c_str(l_proc), l_enable_tmpl_b, l_us_only_0159);
 
     FAPI_TRY(mss::attr::get_explr_tmpl_0_pacing(i_target, l_tmpl_0_pacing));
     FAPI_TRY(mss::attr::get_explr_tmpl_1_pacing(i_target, l_tmpl_1_pacing));
@@ -179,7 +185,7 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
 
 fapi_try_exit:
 
-    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    FAPI_DBG("%s Exiting with return code : 0x%08X...", mss::c_str(i_target), (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
 
@@ -219,7 +225,7 @@ fapi2::ReturnCode omiTLVersionShortBackOff(const fapi2::Target<fapi2::TARGET_TYP
 
 fapi_try_exit:
 
-    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    FAPI_DBG("%s Exiting with return code : 0x%08X...", mss::c_str(i_target), (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
 
@@ -244,8 +250,9 @@ fapi2::ReturnCode omiCheckSupportedBit(const fapi2::buffer<uint32_t>& i_data, co
 
     if (i_useFeature != 0 && l_supported == 0)
     {
-        //This feature is not supported by the hardware even though we requested it
-        FAPI_ERR("%s", i_warn);
+        // This feature is not supported by the hardware even though we requested it
+        // We are still be fine to proceed, but we will print an informational message
+        FAPI_INF("%s", i_warn);
         o_val = 0;
     }
 
@@ -275,8 +282,9 @@ fapi2::ReturnCode omiCheckSupportedPacing(const fapi2::buffer<uint32_t>& i_data,
 
     if (i_usePace < l_supported)
     {
-        //This pacing is not supported by the hardware
-        FAPI_ERR("%s", i_warn);
+        // This pacing is not supported by the hardware
+        // We are still be fine to proceed, but we will print a warning.
+        FAPI_INF("%s", i_warn);
         o_val = l_supported;
     }
 
@@ -343,9 +351,11 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
 
     FAPI_ASSERT(!l_ds_only_0147 || !l_enable_tmpl_A,
                 fapi2::PROC_DOES_NOT_SUPPORT_DS_A()
-                .set_TARGET(l_proc)
+                .set_PROC_TARGET(l_proc)
+                .set_DS_TEMPLATES_0147(l_ds_only_0147)
                 .set_A(l_enable_tmpl_A),
-                "Downstream template A requested, but not supported by proc");
+                "%s Downstream template A requested, but not supported by proc. EN_TMPL_A: %u CHIP_EC_TMPL_0147: %u",
+                mss::c_str(l_proc), l_enable_tmpl_A, l_ds_only_0147);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_TMPL_0_PACING,
                            l_mcc_target,
@@ -530,7 +540,7 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
         FAPI_ASSERT((l_enable_template_5 == fapi2::ENUM_ATTR_EXPLR_ENABLE_US_TMPL_5_ENABLED) ||
                     (l_enable_template_9 == fapi2::ENUM_ATTR_EXPLR_ENABLE_US_TMPL_9_ENABLED),
                     fapi2::METADATA_ENABLE_REQUIRES_TEMPLATE_5_OR_9()
-                    .set_TARGET(i_target)
+                    .set_OCMB_TARGET(i_target)
                     .set_TMPL_5(l_enable_template_5)
                     .set_TMPL_9(l_enable_template_9),
                     "%s METADATA_ENABLE requires upstream template either 5 or 9 to be set. "
