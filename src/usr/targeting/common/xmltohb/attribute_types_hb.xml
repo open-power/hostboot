@@ -270,7 +270,10 @@
 
   <attribute>
     <id>FRU_CCIN</id>
-    <description>The ccin number for a particular FRU target</description>
+    <description>
+        The ccin number for a particular FRU target.
+        This is a 4-byte non-null terminated ASCII string.
+    </description>
     <simpleType>
       <uint32_t/>
     </simpleType>

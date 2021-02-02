@@ -712,6 +712,22 @@ typedef struct frucoentry
 constexpr size_t SRC_STRING_SIZE = 32;
 
 /**
+ * @brief PEL SRC Flags
+ *        PEL spec 4.2
+ *
+ */
+typedef struct pelsrcflags
+{
+  uint8_t   srcNotPostedToOpPanel:1;        // bit 0
+  uint8_t   reserved:2;                     // bit 1-2
+  uint8_t   srcIsServiceable:1;             // bit 3
+  uint8_t   srcIsPostedToOpPanel:1;         // bit 4
+  uint8_t   hypDumpInitiated:1;             // bit 5
+  uint8_t   spcnPowerFault:1;               // bit 6
+  uint8_t   additionalSubsection:1;         // bit 7
+} __attribute__((packed)) pelSRCFlags_t;
+
+/**
  * @brief pelSRCSection_t
  *
  * A PEL structure used to flatten error logs to PEL format.
@@ -727,32 +743,31 @@ constexpr size_t SRC_STRING_SIZE = 32;
  * reference (mcdoc 1675). The page numbers below refer
  * to version 0.8 of that document.
  */
-
 typedef struct pelsrcsection
 {
   pelSectionHeader_t sectionheader;
-  uint8_t    ver;        // src version, usually a 2
-  uint8_t    flags;      // src flags
-  uint8_t    reserved0;
-  uint8_t    wordcount;  // usually 9
-  uint16_t   reserved1;  // usually 0, but I put reasonCode here
-  uint16_t   srcLength;  // usually 72
+  uint8_t       ver;        // src version, usually a 2
+  pelSRCFlags_t flags;      // src flags
+  uint8_t       reserved0;
+  uint8_t       wordcount;  // usually 9
+  uint16_t      reserved1;  // usually 0, but I put reasonCode here
+  uint16_t      srcLength;  // usually 72
   // "Hex word 2"
   // Low byte of this word is SRC format 0xE0.
-  uint32_t   word2;
+  uint32_t      word2;
   // "Hex word 3"
-  uint16_t   word3;
-  uint8_t    moduleId;
-  uint8_t    reserved2;
+  uint16_t      word3;
+  uint8_t       moduleId;
+  uint8_t       reserved2;
   // "Hex word 4" last progress code
-  uint32_t   word4;
+  uint32_t      word4;
   // "Hex word 5" error status flags, etc.
-  uint32_t   word5;
+  uint32_t      word5;
   // "Hex word 6-7" optional, iv_user1
-  uint64_t   word6;
+  uint64_t      word6;
   // "Hex word 8-9" optional, iv_user2
-  uint64_t   word8;
-  char       srcString[SRC_STRING_SIZE];
+  uint64_t      word8;
+  char          srcString[SRC_STRING_SIZE];
 } __attribute__((packed)) pelSRCSection_t;
 
 

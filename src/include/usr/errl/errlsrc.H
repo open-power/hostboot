@@ -190,6 +190,14 @@ private:
     void addFruCallout(fruCallOutEntry_t& io_co);
 
     /**
+     *  @brief Truncate the vector of FRU callouts to the
+     *         maximum number of FRU callouts allowed in the SRC.
+     *         This should be called after all callouts are added and sorted.
+     *
+     */
+    void maxFruCallouts(void);
+
+    /**
      *  @brief Translate the HWAS priority to a FRU priority.
      *
      *  @param[in]  i_hwasPri The HWAS priority.

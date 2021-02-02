@@ -131,7 +131,7 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         {
             // Flags bit 7 = 1: Additional subsections present
             // beyond ASCII character string field (FRU callout subsection)
-            psrc->flags |= 0x01;
+            psrc->flags.additionalSubsection = 1;
         }
 #endif
         psrc->wordcount   = ErrlSrc::WORDCOUNT; // 9;
@@ -305,8 +305,6 @@ bool ErrlSrc::checkForDuplicateCallout(fruCallOutEntry_t& io_co)
 
 void ErrlSrc::addFruCallout(fruCallOutEntry_t& io_co)
 {
-    const uint32_t MAX_FRU_CALLOUTS = 10;
-
     do
     {
         // Check for duplicates
@@ -329,22 +327,43 @@ void ErrlSrc::addFruCallout(fruCallOutEntry_t& io_co)
                         return (i_priA.priority > i_priB.priority);
                     }
                  );
-
-        // Limited number of FRU callouts allowed
-        if (iv_coVec.size() > MAX_FRU_CALLOUTS)
-        {
-            iv_coVec.resize(MAX_FRU_CALLOUTS);
-        }
-
     } while(0);
 }
+
+
+void ErrlSrc::maxFruCallouts()
+{
+    const uint32_t MAX_FRU_CALLOUTS = 10;
+
+    // Limited number of FRU callouts allowed
+    if (iv_coVec.size() > MAX_FRU_CALLOUTS)
+    {
+        TRACFCOMP( g_trac_errl,
+            "ErrlSrc: %d FRU callouts > MAX_FRU_CALLOUTS(%d), removing extra",
+            iv_coVec.size(), MAX_FRU_CALLOUTS);
+
+        uint32_t l_overMax = iv_coVec.size() - MAX_FRU_CALLOUTS;
+        while (l_overMax)
+        {
+            fruCallOutEntry_t l_coEnt = iv_coVec.back();
+            TRACFCOMP( g_trac_errl,
+                "Removing FRU callout with priority %c locationCode %s "
+                "partNumber %s ccin %s serialNumber %s",
+                hwasPriToFruPri(l_coEnt.priority), l_coEnt.locationCode,
+                l_coEnt.partNumber, l_coEnt.ccin, l_coEnt.serialNumber);
+            iv_coVec.pop_back();
+            l_overMax--;
+        }
+    }
+}
+
 
 char ErrlSrc::hwasPriToFruPri( uint32_t i_hwasPri )
 {
     // Default to LOW, undefined = LOW
     char retchar = 'L';
 
-    switch( i_hwasPri )
+    switch( static_cast<HWAS::callOutPriority>(i_hwasPri) )
     {
         case HWAS::SRCI_PRIORITY_HIGH:
             retchar = 'H';
@@ -361,7 +380,9 @@ char ErrlSrc::hwasPriToFruPri( uint32_t i_hwasPri )
         case HWAS::SRCI_PRIORITY_MEDC:
             retchar = 'C';
             break;
-        default:
+        case HWAS::SRCI_PRIORITY_LOW:
+        case HWAS::SRCI_PRIORITY_NONE:
+            retchar = 'L';
             break;
    }
    return retchar;
@@ -391,6 +412,9 @@ void ErrlSrc::flattenFruCallouts(pelSRCSection_t* i_psrc)
     uint8_t* l_tmpsrcptr = nullptr;
     if (!iv_coVec.empty())
     {
+        // Limit the number of FRU callouts to the max size allowed
+        maxFruCallouts();
+
         // Pointer to the current src next data entry location
         l_tmpsrcptr =
             reinterpret_cast<uint8_t*>(i_psrc->srcString + SRC_STRING_SIZE);
