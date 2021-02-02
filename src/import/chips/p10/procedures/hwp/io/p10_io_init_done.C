@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,12 +188,14 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    const uint32_t IO_INIT_DONE_NS_DELAY = 10000000;
+    const uint32_t IO_INIT_DONE_CYCLES   = 10000000;
     bool l_done = false;
     p10_io_done l_proc;
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
 
     //Poll for done
-    int POLLING_LOOPS = 200;
+    int POLLING_LOOPS = 1000;
 
     fapi2::ATTR_IS_SIMICS_Type l_simics;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -248,7 +250,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             }
         }
 
-        fapi2::delay(100, 10000000);
+        fapi2::delay(IO_INIT_DONE_NS_DELAY, IO_INIT_DONE_CYCLES);
     }
 
     // Avoid failing in Simics until the models get updated
