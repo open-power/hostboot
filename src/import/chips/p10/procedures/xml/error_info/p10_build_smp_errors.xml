@@ -44,6 +44,22 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <rc>RC_P10_BUILD_SMP_MASTER_CONFIGURATION_ERR</rc>
+  <description>
+    Designated master chip is not properly configured
+    as the current/next master in hardware.
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>OP</ffdc>
+  <ffdc>MASTER_CHIP_CURR</ffdc>
+  <ffdc>MASTER_CHIP_NEXT</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
   <rc>RC_P10_BUILD_SMP_GROUP_ADD_INTERNAL_ERR</rc>
   <description>
     Internal program error; SMP data structure map insert failed.
@@ -199,6 +215,18 @@
   <ffdc>ADDRESS1</ffdc>
   <ffdc>DATA0</ffdc>
   <ffdc>DATA1</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_BUILD_SMP_BAD_OPERATION_ERR</rc>
+  <description>
+    Invalid SMP operation specified.
+  </description>
+  <ffdc>OP</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,10 +46,12 @@
 
 enum p10_build_smp_adu_action
 {
-    SWITCH_AB    = 1,
-    SWITCH_CD    = 2,
-    QUIESCE      = 4,
-    RESET_SWITCH = 8
+    PRE_SWITCH_AB   = 1,
+    PRE_SWITCH_CD   = 2,
+    SWITCH_AB       = 3,
+    SWITCH_CD       = 4,
+    QUIESCE         = 5,
+    RESET_SWITCH    = 6
 };
 
 //------------------------------------------------------------------------------

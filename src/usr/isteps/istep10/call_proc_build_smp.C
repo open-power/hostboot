@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,6 +108,7 @@ void* call_proc_build_smp (void *io_pArgs)
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                             l_fapi2_master_proc (l_masterProc);
 
+        // Call PHASE1
         FAPI_INVOKE_HWP( l_errl, p10_build_smp,
                          l_procList,
                          l_fapi2_master_proc,
@@ -116,7 +117,7 @@ void* call_proc_build_smp (void *io_pArgs)
         if(l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR : call p10_build_smp, PLID=0x%x", l_errl->plid());
+                       "ERROR : call p10_build_smp(SMP_ACTIVATE_PHASE1), PLID=0x%x", l_errl->plid());
             //@FIXME-RTC:254475-Remove once this works everywhere
             if( MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__IGNORESMPFAIL) )
             {
@@ -134,6 +135,41 @@ void* call_proc_build_smp (void *io_pArgs)
                 break;
             }
         }
+
+
+        // Call SMP_ACTIVATE_SWITCH
+        FAPI_INVOKE_HWP( l_errl, p10_build_smp,
+                         l_procList,
+                         l_fapi2_master_proc,
+                         SMP_ACTIVATE_SWITCH );
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR : call p10_build_smp(SMP_ACTIVATE_SWITCH), PLID=0x%x", l_errl->plid());
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails(l_errl);
+            // Commit error
+            errlCommit( l_errl, HWPF_COMP_ID );
+            break;
+        }
+
+
+        // Call SMP_ACTIVATE_POST
+        FAPI_INVOKE_HWP( l_errl, p10_build_smp,
+                         l_procList,
+                         l_fapi2_master_proc,
+                         SMP_ACTIVATE_POST );
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR : call p10_build_smp(SMP_ACTIVATE_POST), PLID=0x%x", l_errl->plid());
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails(l_errl);
+            // Commit error
+            errlCommit( l_errl, HWPF_COMP_ID );
+            break;
+        }
+
 
         // At the point where we can now change the proc chips to use
         // XSCOM rather than SBESCOM which is the default.

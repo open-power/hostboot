@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,14 +47,40 @@ extern "C"
 {
 
 ///
-/// @brief Program fabric configuration register (hotplug, A/B set)
+/// @brief Program fabric configuration registers (hotplug, A/B set)
+///        prior to issuing hotplug switch command
 ///
 /// @param[in] i_smp    Structure encapsulating SMP topology
 /// @param[in] i_op     Enumerated type representing SMP build phase
 ///
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p10_build_smp_set_fbc_ab(
+    fapi2::ReturnCode p10_build_smp_pre_fbc_ab(
+        p10_build_smp_system& i_smp,
+        const p10_build_smp_operation i_op);
+
+///
+/// @brief Issue hotplug switch command (switch_ab)
+///
+/// @param[in] i_smp    Structure encapsulating SMP topology
+/// @param[in] i_op     Enumerated type representing SMP build phase
+///
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p10_build_smp_switch_fbc_ab(
+        p10_build_smp_system& i_smp,
+        const p10_build_smp_operation i_op);
+
+///
+/// @brief Program fabric configuration registers (hotplug, A/B set)
+///        after issuing hotplug switch command
+///
+/// @param[in] i_smp    Structure encapsulating SMP topology
+/// @param[in] i_op     Enumerated type representing SMP build phase
+///
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p10_build_smp_post_fbc_ab(
         p10_build_smp_system& i_smp,
         const p10_build_smp_operation i_op);
 

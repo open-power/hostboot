@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,7 +173,7 @@ fapi_try_exit:
 }
 
 /// See doxygen comments in header file
-fapi2::ReturnCode p10_build_smp_set_fbc_ab(
+fapi2::ReturnCode p10_build_smp_pre_fbc_ab(
     p10_build_smp_system& i_smp,
     const p10_build_smp_operation i_op)
 {
@@ -212,10 +212,76 @@ fapi2::ReturnCode p10_build_smp_set_fbc_ab(
         }
     }
 
+    // confirm from hardware that master chip is currently a master,
+    // and setup to be a master after the switch
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
+    {
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
+        {
+            if (p_iter->second.master_chip_sys_next)
+            {
+                using namespace scomt::proc;
+
+                fapi2::buffer<uint64_t> l_hp_mode1_reg;
+                uint64_t l_master_chip_curr = 0;
+                uint64_t l_master_chip_next = 0;
+
+                FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR(*(p_iter->second.target), l_hp_mode1_reg),
+                         "Error from getScom (PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR)");
+                GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR_PB_CFG_MASTER_CHIP_CURR_ES3(l_hp_mode1_reg, l_master_chip_curr);
+
+                FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_NEXT(*(p_iter->second.target), l_hp_mode1_reg),
+                         "Error from getScom (PB_COM_SCOM_ES3_STATION_HP_MODE1_NEXT)");
+                GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_NEXT_PB_CFG_MASTER_CHIP_NEXT_ES3(l_hp_mode1_reg, l_master_chip_next);
+
+                FAPI_ASSERT(l_master_chip_curr && l_master_chip_next,
+                            fapi2::P10_BUILD_SMP_MASTER_CONFIGURATION_ERR()
+                            .set_TARGET(*(p_iter->second.target))
+                            .set_OP(i_op)
+                            .set_MASTER_CHIP_CURR(l_master_chip_curr)
+                            .set_MASTER_CHIP_NEXT(l_master_chip_next),
+                            "Designated master chip is not properly configured as current/next master (curr: %d, next: %d)",
+                            l_master_chip_curr, l_master_chip_next);
+            }
+        }
+    }
+
+    // set adu action switch
+    FAPI_TRY(p10_build_smp_sequence_adu(i_smp, i_op, PRE_SWITCH_AB),
+             "Error from p10_build_smp_sequence_adu (PRE_SWITCH_AB)");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// See doxygen comments in header file
+fapi2::ReturnCode p10_build_smp_switch_fbc_ab(
+    p10_build_smp_system& i_smp,
+    const p10_build_smp_operation i_op)
+{
+    FAPI_DBG("Start");
+
     // issue switch AB reconfiguration from chip designated as new master
-    // (which is guaranteed to be a master now)
+    // (which is guaranteed to be a master now, confirmed by p10_build_smp_pre_fbc_ab)
     FAPI_TRY(p10_build_smp_sequence_adu(i_smp, i_op, SWITCH_AB),
              "Error from p10_build_smp_sequence_adu (SWITCH_AB)");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// See doxygen comments in header file
+fapi2::ReturnCode p10_build_smp_post_fbc_ab(
+    p10_build_smp_system& i_smp,
+    const p10_build_smp_operation i_op)
+{
+    FAPI_DBG("Start");
+
+    // reset adu action switch
+    FAPI_TRY(p10_build_smp_sequence_adu(i_smp, i_op, RESET_SWITCH),
+             "Error from p10_build_smp_sequence_adu (RESET_SWITCH)");
 
     // reset NEXT register set (copy CURR->NEXT) for all chips
     for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)

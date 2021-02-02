@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,10 +38,19 @@
 ///     reconfiguration option to be performed:
 ///
 ///     SMP_ACTIVATE_PHASE1 (HBI):
-///         - join all single chip 'island' fabrics into drawer level SMP
+///         - configure to join all single chip 'island' fabrics
+///           into drawer level SMP
 ///
 ///     SMP_ACTIVATE_PHASE2 (FSP):
-///         - join collection of drawer level SMPs into full system SMP
+///         - configure to join collection of drawer level SMPs
+///           into full system SMP
+///
+///     SMP_ACTIVATE_SWITCH:
+///         - issues hotplug switch command; separation of this from
+///           phase1/2 requested to support secureboot
+///
+///     SMP_ACTIVATE_POST:
+///         - configures fabric settings after a hotplug switch
 ///
 /// *HWP HW Maintainer: Jenny Huynh <jhuynh@us.ibm.com>
 /// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
@@ -67,12 +76,16 @@ const uint8_t P10_BUILD_SMP_MAX_SIZE = 16;
 //------------------------------------------------------------------------------
 
 // HWP argument, define build smp execution modes
-// - phase1 used to init scope of hbi drawer, call from hb
-// - phase2 used to stitch drawers, call from fsp
+// - phase1: used to init scope of hbi drawer, call from hb
+// - phase2: used to stitch drawers, call from fsp
+// - switch: used to issue hotplug switch command
+// - post:   used to apply settings after hotplug switch
 enum p10_build_smp_operation
 {
     SMP_ACTIVATE_PHASE1 = 1,
-    SMP_ACTIVATE_PHASE2 = 2
+    SMP_ACTIVATE_PHASE2 = 2,
+    SMP_ACTIVATE_SWITCH = 3,
+    SMP_ACTIVATE_POST   = 4
 };
 
 // Structure to represent properties for a single chip in the SMP topology
@@ -131,7 +144,9 @@ extern "C"
 ///                                     currently be designated a master in its enclosing fabric.
 ///                                         - PHASE1/HB : any chip
 ///                                         - PHASE2/FSP: any current drawer master
-/// @param[in] i_op                     Enumerated type representing SMP build phase (HB or FSP)
+///                                         - SWITCH    : any chip/current drawer master
+///                                         - POST      : any chip/current drawer master
+/// @param[in]     i_op                     Enumerated type representing SMP build phase (HB or FSP)
 ///
 /// @return fapi2:ReturnCode            FAPI2_RC_SUCCESS if success, else error code.
 ///

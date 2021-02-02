@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -191,11 +191,11 @@ fapi2::ReturnCode p10_build_smp_adu_set_switch_action(
     uint8_t l_data_unused[1];
     fapi2::ReturnCode l_rc;
 
-    if (i_action == SWITCH_AB)
+    if (i_action == PRE_SWITCH_AB)
     {
         l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE;
     }
-    else if (i_action == SWITCH_CD)
+    else if (i_action == PRE_SWITCH_CD)
     {
         l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE;
     }
@@ -230,22 +230,62 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
 {
     FAPI_DBG("Start");
 
-    // validate input action, set ADU operation parameters
     uint32_t l_flags = fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC;
     uint32_t l_bytes = 1;
     uint64_t l_addr = 0x0ULL;
     uint8_t l_data_unused[1];
     fapi2::ReturnCode l_rc;
 
+    FAPI_DBG("Performing action = %d", i_action);
+
     switch (i_action)
     {
-        case SWITCH_AB:
-        case SWITCH_CD:
-            l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE;
+        case PRE_SWITCH_AB:
+        case PRE_SWITCH_CD:
+        case RESET_SWITCH:
+            for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
+            {
+                for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
+                {
+                    FAPI_TRY(p10_build_smp_adu_set_switch_action(
+                                 *(p_iter->second.target),
+                                 i_action),
+                             "Error from p10_build_smp_adu_set_switch_action");
+                }
+            }
+
             break;
 
+        case SWITCH_AB:
+        case SWITCH_CD:
         case QUIESCE:
-            l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PB_DIS_MODE;
+            l_flags |= (i_action == QUIESCE) ? fapi2::SBE_MEM_ACCESS_FLAGS_PB_DIS_MODE : fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE;
+
+            for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
+            {
+                for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
+                {
+                    if (((i_action == QUIESCE) && (p_iter->second.issue_quiesce_next))
+                        || ((i_action == SWITCH_AB) && (p_iter->second.master_chip_sys_next))
+                        || (i_action == SWITCH_CD))
+                    {
+                        char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
+                        fapi2::toString(*(p_iter->second.target), l_target_str, sizeof(l_target_str));
+
+                        FAPI_INF("Issuing ADU op for %s", l_target_str);
+                        FAPI_CALL_SUBROUTINE(fapi2::current_err,
+                                             p10_putmemproc,
+                                             (*(p_iter->second.target)),
+                                             l_addr,
+                                             l_bytes,
+                                             l_data_unused,
+                                             l_flags);
+
+                        FAPI_TRY(fapi2::current_err, "Error from p10_putmemproc");
+                    }
+                }
+            }
+
             break;
 
         default:
@@ -254,73 +294,7 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
                         .set_OP(i_op)
                         .set_ACTION(i_action),
                         "Invalid ADU action specified");
-    }
-
-    // loop through all chips, set switch operation
-    FAPI_DBG("Setting switch controls");
-
-    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
-    {
-        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
-        {
-            // Condition for hotplug switch operation
-            // all chips which were not quiesced prior to switch AB will need to observe the switch
-            if (i_action != QUIESCE)
-            {
-                FAPI_TRY(p10_build_smp_adu_set_switch_action(
-                             *(p_iter->second.target),
-                             i_action),
-                         "Error from p10_build_smp_adu_set_switch_action (set)");
-            }
-        }
-    }
-
-    // perform action on specified chips
-    FAPI_DBG("Performing action = %d", i_action);
-
-    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
-    {
-        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
-        {
-            if (((i_action == QUIESCE) && (p_iter->second.issue_quiesce_next))
-                || ((i_action == SWITCH_AB) && (p_iter->second.master_chip_sys_next))
-                || (i_action == SWITCH_CD))
-            {
-                char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
-                fapi2::toString(*(p_iter->second.target), l_target_str, sizeof(l_target_str));
-
-                // issue operation
-                FAPI_INF("Issuing ADU op for %s", l_target_str);
-                FAPI_CALL_SUBROUTINE(fapi2::current_err,
-                                     p10_putmemproc,
-                                     (*(p_iter->second.target)),
-                                     l_addr,
-                                     l_bytes,
-                                     l_data_unused,
-                                     l_flags);
-
-                FAPI_TRY(fapi2::current_err,
-                         "Error from p10_putmemproc");
-            }
-        }
-    }
-
-    // loop through all chips, reset switch controls
-    FAPI_DBG("Operation complete, resetting switch controls");
-
-    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
-    {
-        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
-        {
-            // reset switch controls
-            if (i_action != QUIESCE)
-            {
-                FAPI_TRY(p10_build_smp_adu_set_switch_action(
-                             *(p_iter->second.target),
-                             p10_build_smp_adu_action::RESET_SWITCH),
-                         "Error from p10_build_smp_adu_set_switch_action (clear)");
-            }
-        }
+            break;
     }
 
 fapi_try_exit:

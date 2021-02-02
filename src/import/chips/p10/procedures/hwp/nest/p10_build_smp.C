@@ -108,6 +108,13 @@ fapi2::ReturnCode p10_build_smp_process_chip(
     io_smp_chip.group_id = i_group_id;
     io_smp_chip.chip_id = i_chip_id;
 
+    // if not phase1/2, skip the rest of the configuration
+    if((i_op != SMP_ACTIVATE_PHASE1) && (i_op != SMP_ACTIVATE_PHASE2))
+    {
+        io_smp_chip.master_chip_sys_next = i_master_chip_sys_next;
+        goto fapi_try_exit;
+    }
+
     // set group/system master CURR data structure fields from HW
     FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR(i_target, l_hp_mode1_curr),
              "Error from getScom (PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR)");
@@ -1371,34 +1378,58 @@ fapi2::ReturnCode p10_build_smp(
     FAPI_TRY(p10_build_smp_insert_chips(i_chips, i_master_chip_sys_next, i_op, l_smp),
              "Error from p10_build_smp_insert_chips");
 
-    // update link attrs for manufacturing smp wrap config
-    FAPI_TRY(p10_build_smp_mfg_config(l_smp),
-             "Error from p10_build_smp_mfg_config");
+    switch(i_op)
+    {
+        case SMP_ACTIVATE_PHASE1:
+        case SMP_ACTIVATE_PHASE2:
+            // update link attrs for manufacturing smp wrap config
+            FAPI_TRY(p10_build_smp_mfg_config(l_smp),
+                     "Error from p10_build_smp_mfg_config");
 
-    // check topology before continuing
-    FAPI_TRY(p10_build_smp_check_topology(i_op, l_smp),
-             "Error from p10_build_smp_check_topology");
+            // check topology before continuing
+            FAPI_TRY(p10_build_smp_check_topology(i_op, l_smp),
+                     "Error from p10_build_smp_check_topology");
 
-    // update topology id tables prior to activating new config
-    FAPI_TRY(p10_build_smp_topo_tables(l_smp, i_op),
-             "Error from p10_build_smp_topo_tables");
+            // update topology id tables prior to activating new config
+            FAPI_TRY(p10_build_smp_topo_tables(l_smp, i_op),
+                     "Error from p10_build_smp_topo_tables");
 
-    // update link topology id tables prior to activating new config
-    FAPI_TRY(p10_build_smp_link_topo_tables(l_smp),
-             "Error from p10_build_smp_topo_tables");
+            // update link topology id tables prior to activating new config
+            FAPI_TRY(p10_build_smp_link_topo_tables(l_smp),
+                     "Error from p10_build_smp_link_topo_tables");
 
-    // disable dlr prior to activating new config
-    FAPI_TRY(p10_build_smp_dlr_disable(l_smp),
-             "Error from p10_build_smp_dlr_disable");
+            // disable dlr prior to activating new config
+            FAPI_TRY(p10_build_smp_dlr_disable(l_smp),
+                     "Error from p10_build_smp_dlr_disable");
 
-    // set fabric hotplug configuration registers (switch AB)
-    // activates new SMP configuration for given phase1/phase2
-    FAPI_TRY(p10_build_smp_set_fbc_ab(l_smp, i_op),
-             "Error from p10_build_smp_set_fbc_ab");
+            // set fabric hotplug configuration registers before switch
+            FAPI_TRY(p10_build_smp_pre_fbc_ab(l_smp, i_op),
+                     "Error from p10_build_smp_pre_fbc_ab");
+            break;
 
-    // enable dlr after activating new config
-    FAPI_TRY(p10_build_smp_dlr_enable(l_smp),
-             "Error from p10_build_smp_dlr_enable");
+        case SMP_ACTIVATE_SWITCH:
+            // activates new SMP configuration (switch_ab)
+            FAPI_TRY(p10_build_smp_switch_fbc_ab(l_smp, i_op),
+                     "Error from p10_build_smp_switch_fbc_ab");
+            break;
+
+        case SMP_ACTIVATE_POST:
+            // set fabric hotplug configuration registers after switch
+            FAPI_TRY(p10_build_smp_post_fbc_ab(l_smp, i_op),
+                     "Error from p10_build_smp_post_fbc_ab");
+
+            // enable dlr after activating new config
+            FAPI_TRY(p10_build_smp_dlr_enable(l_smp),
+                     "Error from p10_build_smp_dlr_enable");
+            break;
+
+        default:
+            FAPI_ASSERT(false,
+                        fapi2::P10_BUILD_SMP_BAD_OPERATION_ERR()
+                        .set_OP(i_op),
+                        "Invalid SMP operation specified");
+            break;
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
