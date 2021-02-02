@@ -5984,7 +5984,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
                 FAPI_INF("Limited frequency DD level.  Capping to %04d MHz", l_sys_freq_core_ceil_mhz);
             }
 #endif
-            if (l_limited_freq_mhz)
+            if (l_limited_freq_mhz && l_sys_freq_core_ceil_mhz < 2400)
             {
                 l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
             }
