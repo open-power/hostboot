@@ -831,7 +831,9 @@ namespace SBE
 
                 for(uint32_t i=0; i<MAX_SBE_ENTRIES; i++)
                 {
-                    if(static_cast<uint32_t>(ec) == sbeToc->entries[i].ec)
+                    // For P10, the SBE has a single image for all EC levels so
+                    //   we will just use the first image we find.
+                    //if(static_cast<uint32_t>(ec) == sbeToc->entries[i].ec)
                     {
 
                         // EC found in TOC
