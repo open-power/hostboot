@@ -22,6 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+
 <attributes>
 
   <!-- ********************************************************************* -->
@@ -861,6 +862,30 @@
     <valueType>uint8</valueType>
     <platInit/>
     <initToZero/>
+    <group>wof</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_WOF_DISABLE_DIMENSION</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    A bit vector to allow the disablement of WOF dimensions.  If a dimension is
+    disabled, the TDP default value defined in the WOF Tables header is used
+    with the exception of Vratio;  that default is hardcoded to 100%.
+
+     [Index]->5 entries-:
+         0: VDD
+         1: VCS
+         2: IO
+         3: Ambient condition
+         4: Vratio
+    </description>
+    <valueType>uint8</valueType>
+    <array>5</array>
+    <platInit/>
+    <default>0,0,0,0,0</default>
+    <overrideOnly/>
     <group>wof</group>
   </attribute>
 
