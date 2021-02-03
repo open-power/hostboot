@@ -2576,6 +2576,9 @@
       <id>FIELD_TH_L3_LINE_DELETES</id>
     </attribute>
     <attribute>
+      <id>FORCE_SERIAL_ISTEPS</id>
+    </attribute>
+    <attribute>
       <id>FORCE_SRAM_MMIO_OVER_I2C</id>
     </attribute>
     <attribute>

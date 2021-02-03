@@ -1908,6 +1908,19 @@
   </attribute>
 
   <attribute>
+    <id>FORCE_SERIAL_ISTEPS</id>
+    <description>
+    Forces all isteps to run hardware procedures serially, rather than
+    in parallel.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>FORCE_SRAM_MMIO_OVER_I2C</id>
     <description>
     Force inband SRAM access to be over I2C instead of MMIO
