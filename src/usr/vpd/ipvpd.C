@@ -2675,30 +2675,86 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
                         "from VHDR record for target 0x%.8X",
                         TARGETING::get_huid(i_target) );
 
+            // Access the VTOC meta data from the buffer
             pt_entry *l_tocRecord = reinterpret_cast<pt_entry*>(l_buffer);
-            if (l_bufferSize < sizeof(pt_entry)       ||
-                (memcmp(l_tocRecord->record_name, VPD_TABLE_OF_CONTENTS_RECORD_NAME,
-                        RECORD_BYTE_SIZE) != 0))
+
+            // Verify that the returned buffer is large enough to contain the VTOC meta data
+            if (l_bufferSize < sizeof(pt_entry))
             {
                 TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
-                           "The VPD Header (VHDR) record is invalid for "
-                           "target 0x%.8X!", TARGETING::get_huid(i_target) );
+                           "The VPD Header (VHDR) record returned the VTOC meta data "
+                           "of size %d, but expected size of %d or greater on "
+                           "target 0x%.8X!", l_bufferSize, sizeof(pt_entry),
+                           TARGETING::get_huid(i_target) );
+                TRACFBIN( g_trac_vpd, "Returned record meta data:", l_buffer, l_bufferSize );
 
                 /*@
                  * @errortype
-                 * @reasoncode       VPD::VPD_RECORD_INVALID_VHDR
+                 * @reasoncode       VPD::VPD_SIZE_MISMATCH
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid         VPD::VPD_IPVPD_GET_VTOC_RECORD_META_DATA
-                 * @userdata1        VHDR length
+                 * @userdata1[0:31]  Returned buffer size
+                 * @userdata1[32:63] Expected buffer size
                  * @userdata2        Target HUID
-                 * @devdesc          The VHDR was invalid
+                 * @devdesc          Buffer size returned is insufficient to
+                 *                   contain the VTOC meta data.
                  * @custdesc         Firmware error reading VPD
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     VPD::VPD_IPVPD_GET_VTOC_RECORD_META_DATA,
-                                    VPD::VPD_RECORD_INVALID_VHDR,
-                                    l_bufferSize,
+                                    VPD::VPD_SIZE_MISMATCH,
+                                    TWO_UINT32_TO_UINT64( l_bufferSize,
+                                                          sizeof(pt_entry) ),
+                                    TARGETING::get_huid(i_target) );
+
+                // Could be the VPD of the target wasn't set up properly
+                // -- DECONFIG so that we can possibly keep booting
+                l_err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_HIGH,
+                                   HWAS::DECONFIG,
+                                   HWAS::GARD_NULL );
+
+                // Or HB code didn't look for the record properly
+                l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_LOW);
+
+                l_err->collectTrace( VPD_COMP_NAME );
+                break;
+
+            }
+
+            // Verify that indeed the returned meta data is the VTOC meta data
+            if (memcmp(l_tocRecord->record_name, VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                        RECORD_BYTE_SIZE) != 0)
+            {
+                uint32_t* l_recordName = reinterpret_cast<uint32_t*>(l_tocRecord->record_name);
+                const uint32_t* l_vtocRecord =
+                          reinterpret_cast<const uint32_t*>(VPD_TABLE_OF_CONTENTS_RECORD_NAME);
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+                           "The VPD Header (VHDR) record returned record name 0x%.8X, "
+                           "but expected 0x%.8X (VTOC) for target 0x%.8X!",
+                           l_recordName[0], l_vtocRecord[0], TARGETING::get_huid(i_target) );
+
+                TRACFBIN( g_trac_vpd, "Returned record meta data:", l_buffer, l_bufferSize );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       VPD::VPD_INCORRECT_RECORD_RETURNED
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         VPD::VPD_IPVPD_GET_VTOC_RECORD_META_DATA
+                 * @userdata1[0:31]  Returned record name
+                 * @userdata1[32:63] Expected record name
+                 * @userdata2        Target HUID
+                 * @devdesc          Incorrect record returned, expected the VTOC record
+                 * @custdesc         Firmware error reading VPD
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    VPD::VPD_IPVPD_GET_VTOC_RECORD_META_DATA,
+                                    VPD::VPD_INCORRECT_RECORD_RETURNED,
+                                    TWO_UINT32_TO_UINT64( l_recordName[0],
+                                                          l_vtocRecord[0] ),
                                     TARGETING::get_huid(i_target) );
 
                 // Could be the VPD of the target wasn't set up properly
