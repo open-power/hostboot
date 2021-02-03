@@ -51,6 +51,34 @@ namespace fir
 {
 
 ///
+/// @brief Function handling the chip_ec dependent setting of USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE
+/// @param[in] i_doubledead_support value of ATTR_CHIP_EC_FEATURE_USTLCFG_LOL_DOUBLEDEAD_SUPPORT
+/// @param[in,out] io_ustlcfg_data buffer for USTLCFG data
+///
+void set_lol_doubledead_support( const bool i_doubledead_support,
+                                 fapi2::buffer<uint64_t>& io_ustlcfg_data )
+{
+    const uint8_t l_setting = i_doubledead_support ? 0b10 : 0b11;
+    io_ustlcfg_data.insertFromRight<scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE,
+                                    scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE_LEN>
+                                    (l_setting);
+}
+
+///
+/// @brief Function handling the chip_ec dependent setting of P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20
+/// @param[in] i_wrstuck_support value of ATTR_CHIP_EC_FEATURE_USTLCFG_WRSTUCK_MITIGATION
+/// @param[in,out] io_ustlcfg_data buffer for USTLCFG data
+///
+void set_wrstuck_mitigation( const bool i_wrstuck_support,
+                             fapi2::buffer<uint64_t>& io_ustlcfg_data )
+{
+    if (i_wrstuck_support)
+    {
+        io_ustlcfg_data.setBit<scomt::mcc::P10_20_USTL_USTLCFG_WRSTUCK_MITIGATION_EN_P10D20>();
+    }
+}
+
+///
 /// @brief Function handling the chip_ec default for ATTR_OMI_CHANNEL_FAIL_ACTION
 /// @param[in] i_target the MC target of the OMI channel FIRs in question
 /// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code

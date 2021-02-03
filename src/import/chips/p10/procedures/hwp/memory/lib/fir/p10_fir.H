@@ -248,6 +248,8 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ATTR_OMI_CHANNEL_FAIL_ACTION_Type l_omi_fail_action = 0;
+    fapi2::ATTR_CHIP_EC_FEATURE_USTLCFG_WRSTUCK_MITIGATION_Type l_wrstuck_support = false;
+    fapi2::ATTR_CHIP_EC_FEATURE_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_Type l_doubledead_support = false;
     bool l_subchannel_a_config = false;
     bool l_subchannel_b_config = false;
 
@@ -258,6 +260,17 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
              scomt::mcc::USTL_USTLFIR_RW);
 
     FAPI_TRY(mss::attr::get_omi_channel_fail_action(l_omi_fail_action));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_USTLCFG_WRSTUCK_MITIGATION,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                           l_wrstuck_support),
+             "%s Failed to read ATTR_CHIP_EC_FEATURE_USTLCFG_WRSTUCK_MITIGATION",
+             mss::c_str(i_target));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_USTLCFG_LOL_DOUBLEDEAD_SUPPORT,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                           l_doubledead_support),
+             "%s Failed to read ATTR_CHIP_EC_FEATURE_USTLCFG_LOL_DOUBLEDEAD_SUPPORT",
+             mss::c_str(i_target));
 
     // Perform all USTLFIR unmasks per RAS unmask spec
     l_p10_mcc_ustlfir_reg.local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_UNEXP_DATA_ERR>()
@@ -421,11 +434,11 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     // NOTE: These are outside of standard FIR procedure and are being configured due to p10 HW bugs
     FAPI_TRY(fapi2::getScom(i_target, scomt::mcc::USTL_USTLCFG, l_reg_data));
 
-    // TODO:ZEN695 USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE for p10 DD2
+    // Set chip EC dependent fields
+    workarounds::fir::set_lol_doubledead_support(l_doubledead_support, l_reg_data);
+    workarounds::fir::set_wrstuck_mitigation(l_wrstuck_support, l_reg_data);
 
-    l_reg_data.insertFromRight<scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE, scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE_LEN>
-    (0b11)
-    .setBit<scomt::mcc::USTL_USTLCFG_DL_WIDTH_X4_LOL_ENABLE>()
+    l_reg_data.setBit<scomt::mcc::USTL_USTLCFG_DL_WIDTH_X4_LOL_ENABLE>()
     .setBit<scomt::mcc::USTL_USTLCFG_DL_WIDTH_X2_LOL_ENABLE>()
     .insertFromRight<scomt::mcc::USTL_USTLCFG_USTLCFG_OPENCAPI_ERROR_LOG_ENABLE, scomt::mcc::USTL_USTLCFG_USTLCFG_OPENCAPI_ERROR_LOG_ENABLE_LEN>
     (0x7f)
@@ -434,9 +447,6 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     .setBit<scomt::mcc::USTL_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT_ENABLE>()
     .insertFromRight<scomt::mcc::USTL_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT, scomt::mcc::USTL_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT_LEN>
     (0b111);
-
-    // TODO:ZEN690 Update after_p10_omi_init_ustlfir_helper for DD2
-    // Set new DD2 new USTLCFG bit: USTLCFG_wrstuck_mitigation_en_p10d20 -> 1
 
     FAPI_TRY(fapi2::putScom(i_target, scomt::mcc::USTL_USTLCFG, l_reg_data));
 

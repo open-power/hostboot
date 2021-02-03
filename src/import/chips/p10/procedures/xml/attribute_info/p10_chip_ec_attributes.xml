@@ -702,6 +702,40 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+  <id>ATTR_CHIP_EC_FEATURE_USTLCFG_WRSTUCK_MITIGATION</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    USTLCFG WRSTUCK mitigation
+  </description>
+  <chipEcFeature>
+    <chip>
+     <name>ENUM_ATTR_NAME_P10</name>
+     <ec>
+       <value>0x20</value>
+       <test>GREATER_THAN_OR_EQUAL</test>
+     </ec>
+    </chip>
+  </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+  <id>ATTR_CHIP_EC_FEATURE_USTLCFG_LOL_DOUBLEDEAD_SUPPORT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    USTL Low Latency Double Dead Support
+  </description>
+  <chipEcFeature>
+    <chip>
+     <name>ENUM_ATTR_NAME_P10</name>
+     <ec>
+       <value>0x20</value>
+       <test>GREATER_THAN_OR_EQUAL</test>
+     </ec>
+    </chip>
+  </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
   <id>ATTR_CHIP_EC_FEATURE_PBA_CLKGATE_DISABLE_HW538414</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
