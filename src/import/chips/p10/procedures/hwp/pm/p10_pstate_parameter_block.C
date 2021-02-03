@@ -2904,7 +2904,7 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                     }
                     else
                     {
-                        FAPI_ERR("**** ERROR : Relation../../xml/attribute_info/pm_plat_attributes.xmlship "
+                        FAPI_ERR("**** ERROR : Relationship "
                                 "error between #V operating point (%s > %s)(power save <= nominal <= turbo "
                                 "<= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
                                 pv_op_str[i - 1], pv_op_str[i], l_chiplet_num, iv_poundV_bucket_id,i);
@@ -5413,9 +5413,9 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         if (!l_wof_header_data_state)
         {
             iv_wof_enabled = false;
-            if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_INFO)
+            if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_WARN)
             {
-                FAPI_INF("Pstate Parameter Block WOF Header validation failed");
+                FAPI_INF("WARNING: Pstate Parameter Block WOF Header validation failed");
             }
             else
             {
@@ -5520,14 +5520,14 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
     if (iv_poundW_data.other.droop_count_control == 0)
     {
 
-        FAPI_ERR("#W DCCR is 0. Disabling Over-Current Sensor, Undervolting and Overvolting");
+        FAPI_INF("#W DCCR is 0. Disabling Over-Current Sensor, Undervolting and Overvolting");
         iv_ocs_enabled = false;
         iv_wov_underv_enabled = false;
         iv_wov_overv_enabled = false;
 
         if (is_wof_enabled())
         {
-            FAPI_ERR("WARNING: WOF is enabled with Over-Current Sensor disabled!");
+            FAPI_INF("WARNING: WOF is enabled with Over-Current Sensor disabled!");
         }
 
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -5542,7 +5542,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         }
         else if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_WARN)
         {
-            FAPI_ERR("WARNING: #W DCCR has value of 0");
+            FAPI_INF("WARNING: #W DCCR has value of 0");
         }
         else if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_FAIL)
         {
