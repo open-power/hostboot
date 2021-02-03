@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -49,6 +49,7 @@
 #include <devicefw/userif.H>
 #include <arch/pirformat.H>
 #include <isteps/hwpf_reasoncodes.H>
+#include <console/consoleif.H>
 
 //Fapi support
 #include <fapi2/target.H>
@@ -593,6 +594,9 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "callShutdown finished, shutdown = 0x%x.",
                    status );
+        CONSOLE::displayf(CONSOLE::DEFAULT,nullptr,
+                          "Jumping to payload at 0x%llX",
+                          payloadBase+payloadEntry);
         INITSERVICE::doShutdown( status,
                                  false,
                                  payloadBase,
