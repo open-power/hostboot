@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -203,8 +203,20 @@ typedef struct
     //    to which the system is clipped.
     uint32_t            frequency_ceiling_khz;
 
+    // Control to allow for WOF dimension disablement
+    // Bit definition:
+    //   0: VDD
+    //   1: VCS
+    //   2: IO
+    //   3: Ambient condition
+    //   4: Vratio
+    //   5: Reserved
+    //   6: Reserved
+    //   7: Reserved
+    uint8_t             wof_dimension_disable_vector;
+
     // Pad to make the structure an even 1KB
-    uint8_t             pad[36];
+    uint8_t             pad[35];
 
 } OCCPstateParmBlock_t ;
 

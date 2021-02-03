@@ -136,8 +136,9 @@ typedef struct
     uint8_t attr_pmcr_most_recent_enable;
     uint8_t attr_phantom_halt_enable;
     uint8_t attr_pgpe_hcode_function_enable;
-    uint8_t attr_system_wof_throttle_control_loop_disable;
     uint8_t attr_system_pitch_enable;
+    uint8_t attr_system_wof_disable_dimension[5];
+    uint8_t attr_system_wof_throttle_control_loop_disable;
     uint8_t attr_system_wof_throttle_control_loop_mode;
     uint8_t attr_dds_trip_mode;
     uint8_t attr_dds_trip_interpolation_control;
@@ -718,6 +719,11 @@ class PlatPmPPB
         uint8_t                   iv_dds_enabled;
         uint8_t                   iv_rvrm_enabled;
         uint8_t                   iv_wof_enabled;
+        uint8_t                   iv_wof_disable_vdd;
+        uint8_t                   iv_wof_disable_vcs;
+        uint8_t                   iv_wof_disable_io;
+        uint8_t                   iv_wof_disable_amb;
+        uint8_t                   iv_wof_disable_vratio;
         uint32_t                  iv_safe_voltage;    // System safe voltage
         uint32_t                  iv_safe_frequency;  // System safe frequency
         uint32_t                  iv_reference_frequency_mhz;  //System reference frequency

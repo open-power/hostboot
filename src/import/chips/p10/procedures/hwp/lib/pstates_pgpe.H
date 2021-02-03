@@ -159,7 +159,8 @@ enum PGPE_FLAGS_IDX
     PGPE_FLAG_STATIC_VOLTAGE_ENABLE         = 17,
     PGPE_FLAG_WOF_THROTTLE_ENABLE           = 18,
     PGPE_FLAG_WOF_THROTTLE_CONTROL_MODE     = 19,
-    PGPE_FLAG_MAX_DEFINED                   = 20
+    PGPE_FLAG_WOF_DISABLE_VRATIO            = 20,
+    PGPE_FLAG_MAX_DEFINED                   = 21
 };
 
 //WOF Vratio vdd attribute indices
@@ -203,6 +204,11 @@ typedef union
         uint8_t overv_enabled;
         uint8_t throttle_control_enabled;
         uint8_t rvrm_enabled;
+        uint8_t wof_disable_vdd;
+        uint8_t wof_disable_vcs;
+        uint8_t wof_disable_io;
+        uint8_t wof_disable_amb;
+        uint8_t wof_disable_vratio;
     } fields;
 } Attributes_t;
 
