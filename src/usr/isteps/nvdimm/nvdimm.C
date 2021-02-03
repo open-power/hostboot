@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3736,10 +3736,10 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                 case SEND_NV_STATUS:
                     // no action, just send status
                     break;
-                case SBE_ACTIVE
+                case SBE_ACTIVE:
                     l_armed_state.sbe_active = 1;
                     break;
-                case SBE_INACTIVE
+                case SBE_INACTIVE:
                     l_armed_state.sbe_active = 0;
                     break;
             }

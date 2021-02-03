@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,7 +100,7 @@ uint16_t SeqId_t::getCurrentSeqId()
  *  @platform FSP
  **/
 void sbeActiveNotification( void * i_data,
-                            const TARGETING::Target *i_target)
+                            TARGETING::Target *i_target)
 {
     // data is one byte - 1 = SBE active, 0 = SBE not active
     uint8_t * l_active = reinterpret_cast<uint8_t*>(i_data);
