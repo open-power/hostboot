@@ -2033,6 +2033,50 @@ void nvdimm_init(Target *i_nvdimm)
             break;
         }
 
+        // try a reset to change to slot 1
+        if (l_data == 0)
+        {
+            TRACFCOMP(g_trac_nvdimm, "nvdimm_init() nvdimm[%X], attempting recovery from running on slot0",
+                      get_huid(i_nvdimm));
+
+            // select slot1 to come up on
+            TRACUCOMP(g_trac_nvdimm, "nvdimm_init() nvdimm[%X], select slot1 by writing 0x01 to FW_SLOT_INFO(0x%08X)",
+                      get_huid(i_nvdimm), FW_SLOT_INFO);
+            l_err = nvdimmWriteReg(i_nvdimm, FW_SLOT_INFO, 0x01);
+            if (l_err)
+            {
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], failed to set slot info to 1",
+                      get_huid(i_nvdimm));
+                break;
+            }
+
+            TRACUCOMP(g_trac_nvdimm, "nvdimm_init() nvdimm[%X], reset controller now",
+                      get_huid(i_nvdimm));
+            l_err = nvdimmResetController(i_nvdimm);
+            if (l_err)
+            {
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], failed reset for slot change",
+                      get_huid(i_nvdimm));
+                break;
+            }
+
+            // re-read the firmware slot
+            TRACUCOMP(g_trac_nvdimm, "nvdimm_init() nvdimm[%X], re-read slot info",
+                      get_huid(i_nvdimm));
+            l_err = nvdimmGetRunningSlot(i_nvdimm, l_data);
+            if (l_err)
+            {
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], failed to re-read slot info",
+                          get_huid(i_nvdimm));
+                break;
+            }
+        }
+        TRACFCOMP(g_trac_nvdimm, "nvdimm_init() nvdimm[%X], current slot running %d",
+                  get_huid(i_nvdimm), l_data);
+
         if (l_data == 0)
         {
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
