@@ -825,6 +825,16 @@ void* host_discover_targets( void *io_pArgs )
     }
 #endif // CONFIG_PLDM
 
+    // Send AttrRP notification that we have completed host_discover_targets
+    // (which completes presence detection).
+    //
+    // We can now OPEN the attribute sync window to allow RECONFIG loops to
+    // sync attributes down to the SP.
+    //
+    // This prevents performing an attribute sync which may possibly have
+    // CLEARED EECACHE.  This may inappropriately identify the primary PROC
+    // as -NOT- functional which would inhibit forward progression.
+
     l_err = TARGETING::AttrRP::notifyResourceReady(
               TARGETING::AttrRP::RESOURCE::SYNC_WINDOW_OPEN);
     if (l_err)
