@@ -134,10 +134,6 @@
         <default>GODEL</default>
     </attribute>
     <attribute>
-        <id>SBE_UPDATE_DISABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>PROC_EPS_TABLE_TYPE</id>
         <default>EPS_TYPE_LE</default>
     </attribute>
