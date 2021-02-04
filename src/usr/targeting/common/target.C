@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -635,6 +635,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_PNOR):
                 case(TYPE_APSS):
                 case(TYPE_DPSS):
+                case(TYPE_TPM):
                 {
                     // Element was a CHIP, instance is the position value for the chip
                     // ex. /sys-0/node-1/proc-2/.../
@@ -695,7 +696,6 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_PORE):
                 case(TYPE_PCIESWITCH):
                 case(TYPE_MFREFCLKENDPT):
-                case(TYPE_TPM):
                 case(TYPE_SP):
                 case(TYPE_UART):
                 case(TYPE_PS):
