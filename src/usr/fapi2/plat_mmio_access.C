@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -305,7 +305,8 @@ bool useI2cInsteadOfMmio( const TARGETING::Target * i_ocmb,
         }
         else
         {
-           FAPI_INF("0x%08X OCMB address 0x%.8X is outside of SRAM range so using mmio",
+            // NOTE: This should only be seen for the config space 
+            FAPI_DBG("0x%08X OCMB address 0x%.8X is outside of SRAM range so using mmio",
               TARGETING::get_huid(i_ocmb), i_mmioAddress);
         }
     }
