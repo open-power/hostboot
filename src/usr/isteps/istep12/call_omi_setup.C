@@ -228,7 +228,7 @@ void* call_omi_setup (void *io_pArgs)
     errlHndl_t l_err = nullptr;
     TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_omi_setup " );
     Util::ThreadPool<IStepWorkItem> threadpool;
-    constexpr size_t MAX_OMIC_THREADS = 2;
+    constexpr size_t MAX_OMIC_THREADS = 32;
     uint32_t l_numThreads = 0;
 
     do
