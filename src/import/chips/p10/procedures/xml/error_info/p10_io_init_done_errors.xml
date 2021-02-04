@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,6 +34,16 @@
         <target>TARGET</target>
         <priority>HIGH</priority>
     </callout>
+    <ffdc>THREAD</ffdc>
+    <ffdc>EXT_CMD_REQ</ffdc>
+    <ffdc>EXT_CMD_DONE</ffdc>
+    <ffdc>EXT_CMD_LANES_00_15</ffdc>
+    <ffdc>EXT_CMD_LANES_16_31</ffdc>
+    <ffdc>DEBUG_STATE</ffdc>
+    <ffdc>ERROR_STATE</ffdc>
+    <ffdc>ERROR_VALID</ffdc>
+    <ffdc>ERROR_THREAD</ffdc>
+    <ffdc>ERROR_LANE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 

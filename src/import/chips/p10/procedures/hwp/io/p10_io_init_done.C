@@ -51,6 +51,9 @@ class p10_io_done : public p10_io_ppe_cache_proc
             const int& i_thread,
             bool& o_done);
 
+        fapi2::ReturnCode p10_io_init_done_check_fails(
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
 };
 ///
 /// @brief Check done status for reg_init, dccal, lane power on, and fifo init for a thread
@@ -179,6 +182,158 @@ fapi2::ReturnCode p10_io_done::p10_io_init_done_poff_check_thread_done(
 fapi_try_exit:
     return fapi2::current_err;
 }
+///
+/// @brief Add fail information for any links that did not finish init
+///
+/// @param[in] i_target Chip target to start
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_done::p10_io_init_done_check_fails(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    bool l_done = false;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+
+    for (auto l_pauc_target : l_pauc_targets)
+    {
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_pauc_num;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_pauc_target, l_pauc_num),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+        FAPI_DBG("Getting DCCAL status for PAUC: %d", l_pauc_num);
+
+        auto l_iohs_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+        auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
+
+
+        for (auto l_iohs_target : l_iohs_targets)
+        {
+            int l_thread = 0;
+            fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_num;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_iohs_num),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+            FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
+
+            FAPI_TRY(p10_io_init_done_pon_check_thread_done(l_pauc_target, l_thread, l_done));
+
+
+            if (!l_done)
+            {
+                char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
+                fapi2::toString(l_iohs_target, l_tgt_str, sizeof(l_tgt_str));
+
+                char l_pauc_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
+                fapi2::toString(l_pauc_target, l_pauc_tgt_str, sizeof(l_pauc_tgt_str));
+
+
+                fapi2::buffer<uint64_t> l_ffdc_thread = l_thread;
+                fapi2::buffer<uint64_t> l_ext_cmd_req = 0;
+                fapi2::buffer<uint64_t> l_ext_cmd_done = 0;
+                fapi2::buffer<uint64_t> l_ext_cmd_lanes_00_15 = 0;
+                fapi2::buffer<uint64_t> l_ext_cmd_lanes_16_31 = 0;
+                fapi2::buffer<uint64_t> l_debug_state = 0;
+                fapi2::buffer<uint64_t> l_error_state = 0;
+                fapi2::buffer<uint64_t> l_error_valid = 0;
+                fapi2::buffer<uint64_t> l_error_thread = 0;
+                fapi2::buffer<uint64_t> l_error_lane = 0;
+                FAPI_TRY(p10_io_ppe_ext_cmd_req[l_thread].getData(l_pauc_target, l_ext_cmd_req, true));
+                FAPI_TRY(p10_io_ppe_ext_cmd_done[l_thread].getData(l_pauc_target, l_ext_cmd_done, true));
+                FAPI_TRY(p10_io_ppe_ext_cmd_lanes_00_15[l_thread].getData(l_pauc_target, l_ext_cmd_lanes_00_15, true));
+                FAPI_TRY(p10_io_ppe_ext_cmd_lanes_16_31[l_thread].getData(l_pauc_target, l_ext_cmd_lanes_16_31, true));
+                FAPI_TRY(p10_io_ppe_ppe_debug_state[l_thread].getData(l_pauc_target, l_debug_state, true));
+
+                FAPI_TRY(p10_io_ppe_ppe_error_state.getData(l_pauc_target, l_error_state, true));
+                FAPI_TRY(p10_io_ppe_ppe_error_valid.getData(l_pauc_target, l_error_valid, true));
+                FAPI_TRY(p10_io_ppe_ppe_error_thread.getData(l_pauc_target, l_error_thread, true));
+                FAPI_TRY(p10_io_ppe_ppe_error_lane.getData(l_pauc_target, l_error_lane, true));
+
+                FAPI_ASSERT(false,
+                            fapi2::P10_IO_INIT_DONE_TIMEOUT_ERROR()
+                            .set_TARGET(l_iohs_target)
+                            .set_THREAD(l_ffdc_thread)
+                            .set_EXT_CMD_REQ(l_ext_cmd_req)
+                            .set_EXT_CMD_DONE(l_ext_cmd_done)
+                            .set_EXT_CMD_LANES_00_15(l_ext_cmd_lanes_00_15)
+                            .set_EXT_CMD_LANES_16_31(l_ext_cmd_lanes_16_31)
+                            .set_DEBUG_STATE(l_debug_state)
+                            .set_ERROR_STATE(l_error_state)
+                            .set_ERROR_VALID(l_error_valid)
+                            .set_ERROR_THREAD(l_error_thread)
+                            .set_ERROR_LANE(l_error_lane),
+                            "Timeout waiting for I/O init to complete on %s(%s:thread(%d))",
+                            l_tgt_str, l_pauc_tgt_str, l_thread);
+                l_rc = fapi2::current_err;
+            }
+        }
+
+        for (auto l_omic_target : l_omic_targets)
+        {
+            int l_thread = 0;
+            fapi2::ATTR_CHIP_UNIT_POS_Type l_omic_num;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_omic_target, l_omic_num),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+            FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
+
+            FAPI_TRY(p10_io_init_done_pon_check_thread_done(l_pauc_target, l_thread, l_done));
+
+            if (!l_done)
+            {
+                char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
+                fapi2::toString(l_omic_target, l_tgt_str, sizeof(l_tgt_str));
+
+                char l_pauc_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
+                fapi2::toString(l_pauc_target, l_pauc_tgt_str, sizeof(l_pauc_tgt_str));
+
+                fapi2::buffer<uint64_t> l_ffdc_thread = l_thread;
+                fapi2::buffer<uint64_t> l_ext_cmd_req = 0;
+                fapi2::buffer<uint64_t> l_ext_cmd_done = 0;
+                fapi2::buffer<uint64_t> l_ext_cmd_lanes_00_15 = 0;
+                fapi2::buffer<uint64_t> l_ext_cmd_lanes_16_31 = 0;
+                fapi2::buffer<uint64_t> l_debug_state = 0;
+                fapi2::buffer<uint64_t> l_error_state = 0;
+                fapi2::buffer<uint64_t> l_error_valid = 0;
+                fapi2::buffer<uint64_t> l_error_thread = 0;
+                fapi2::buffer<uint64_t> l_error_lane = 0;
+                FAPI_TRY(p10_io_ppe_ext_cmd_req[l_thread].getData(l_pauc_target, l_ext_cmd_req, true));
+                FAPI_TRY(p10_io_ppe_ext_cmd_done[l_thread].getData(l_pauc_target, l_ext_cmd_done, true));
+                FAPI_TRY(p10_io_ppe_ext_cmd_lanes_00_15[l_thread].getData(l_pauc_target, l_ext_cmd_lanes_00_15, true));
+                FAPI_TRY(p10_io_ppe_ext_cmd_lanes_16_31[l_thread].getData(l_pauc_target, l_ext_cmd_lanes_16_31, true));
+                FAPI_TRY(p10_io_ppe_ppe_debug_state[l_thread].getData(l_pauc_target, l_debug_state, true));
+
+                FAPI_TRY(p10_io_ppe_ppe_error_state.getData(l_pauc_target, l_error_state, true));
+                FAPI_TRY(p10_io_ppe_ppe_error_valid.getData(l_pauc_target, l_error_valid, true));
+                FAPI_TRY(p10_io_ppe_ppe_error_thread.getData(l_pauc_target, l_error_thread, true));
+                FAPI_TRY(p10_io_ppe_ppe_error_lane.getData(l_pauc_target, l_error_lane, true));
+
+                FAPI_ASSERT(false,
+                            fapi2::P10_IO_INIT_DONE_TIMEOUT_ERROR()
+                            .set_TARGET(l_omic_target)
+                            .set_THREAD(l_ffdc_thread)
+                            .set_EXT_CMD_REQ(l_ext_cmd_req)
+                            .set_EXT_CMD_DONE(l_ext_cmd_done)
+                            .set_EXT_CMD_LANES_00_15(l_ext_cmd_lanes_00_15)
+                            .set_EXT_CMD_LANES_16_31(l_ext_cmd_lanes_16_31)
+                            .set_DEBUG_STATE(l_debug_state)
+                            .set_ERROR_STATE(l_error_state)
+                            .set_ERROR_VALID(l_error_valid)
+                            .set_ERROR_THREAD(l_error_thread)
+                            .set_ERROR_LANE(l_error_lane),
+                            "Timeout waiting for I/O init to complete on %s(%s:thread(%d))",
+                            l_tgt_str, l_pauc_tgt_str, l_thread);
+                l_rc = fapi2::current_err;
+            }
+        }
+    }
+
+    if (l_rc)
+    {
+        fapi2::current_err = l_rc;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Wait for dccal done and power-up all configured links/lanes
@@ -192,6 +347,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     const uint32_t IO_INIT_DONE_CYCLES   = 10000000;
     bool l_done = false;
     p10_io_done l_proc;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
 
     //Poll for done
@@ -233,12 +389,10 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                 FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
 
                 FAPI_TRY(l_proc.p10_io_init_done_pon_check_thread_done(l_pauc_target, l_thread, l_done));
-
             }
 
             for (auto l_omic_target : l_omic_targets)
             {
-                std::vector<int> l_lanes;
                 int l_thread = 0;
                 fapi2::ATTR_CHIP_UNIT_POS_Type l_omic_num;
                 FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_omic_target, l_omic_num),
@@ -257,13 +411,12 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     if( !l_done && (l_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS) )
     {
         FAPI_INF("p10_io_init_done> Skipping timeout in Simics");
-        l_done = true;
+    }
+    else if (!l_done)
+    {
+        FAPI_TRY(l_proc.p10_io_init_done_check_fails(i_target))
     }
 
-    FAPI_ASSERT(l_done,
-                fapi2::P10_IO_INIT_DONE_TIMEOUT_ERROR()
-                .set_TARGET(i_target),
-                "Timeout waiting on io init to complete");
 fapi_try_exit:
     return fapi2::current_err;
 }
