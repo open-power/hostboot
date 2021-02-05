@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,14 +74,6 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
     errlHndl_t  l_errl = nullptr;
     IStepError l_StepError;
-
-    //@FIXME-CQ:SW500250
-    if( !Util::isSimicsRunning() )
-    {
-        TRACFCOMP(g_trac_isteps_trace,
-                  "Waiting 20 seconds before polling Explorers");
-        nanosleep(20, 0);
-    }
 
     TargetHandleList functionalProcChipList;
 
