@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 
 // Istep framework
 #include <istepHelperFuncs.H>
+#include    <hwpThread.H>
 
 // Generated files
 #include  <config.h>
@@ -59,57 +60,63 @@ using namespace TARGETING;
 namespace ISTEP_13
 {
 
+class WorkItem_exp_draminit: public ISTEP::HwpWorkItem
+{
+  public:
+    WorkItem_exp_draminit( IStepError& i_stepError,
+                           const Target& i_ocmb )
+    : HwpWorkItem( i_stepError, i_ocmb, "exp_draminit" ) {}
+
+    virtual errlHndl_t run_hwp( void )
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+        FAPI_INVOKE_HWP(l_err, exp_draminit, l_fapi_target);
+        return l_err;
+    }
+};
+
 void* call_mss_draminit (void *io_pArgs)
 {
     IStepError l_stepError;
 
     TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_mss_draminit" );
 
-    errlHndl_t l_err = NULL;
+    Util::ThreadPool<HwpWorkItem> threadpool;
 
     // Get all functional OCMB targets
     TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-    for ( const auto & l_ocmb : l_ocmbTargetList )
+    for (const auto & l_ocmb_target : l_ocmbTargetList)
     {
-        fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb);
-
         // check EXPLORER first as this is most likely the configuration
-        uint32_t chipId = l_ocmb->getAttr< ATTR_CHIP_ID>();
+        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
         if (chipId == POWER_CHIPID::EXPLORER_16)
         {
-            TRACFCOMP( g_trac_isteps_trace,
-                "Running exp_draminit HWP on target HUID 0x%.8X",
-                get_huid(l_ocmb) );
-            FAPI_INVOKE_HWP(l_err, exp_draminit, l_fapi_ocmb_target);
+            //  Create a new workitem from this OCMB and feed it to the
+            //  thread pool for processing.  Thread pool handles workitem
+            //  cleanup.
+            threadpool.insert(new WorkItem_exp_draminit(l_stepError,
+                                                        *l_ocmb_target));
         }
         else
         {
             TRACFCOMP( g_trac_isteps_trace,
                 "Skipping exp_draminit HWP on target HUID 0x%.8X, chipId 0x%.4X",
-                get_huid(l_ocmb), chipId );
+                get_huid(l_ocmb_target), chipId );
             continue;
         }
+    }
 
-        //  process return code.
-        if ( l_err )
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      "ERROR : exp_draminit target 0x%.8X"
-                      TRACE_ERR_FMT,
-                      get_huid(l_ocmb),
-                      TRACE_ERR_ARGS(l_err));
-            // capture error and commit it
-            captureError(l_err, l_stepError, HWPF_COMP_ID, l_ocmb);
-        }
-        else
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                "SUCCESS running exp_draminit HWP on target HUID 0x%.8X",
-                get_huid(l_ocmb) );
-        }
-    } // end of OCMB loop
+    // Start the threads and wait for completion
+    if( ISTEP::HwpWorkItem::start_threads( threadpool,
+                                           l_stepError,
+                                           l_ocmbTargetList.size() ) )
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                  ERR_MRK"call_mss_draminit: start_threads returned an error for exp_draminit" );
+    }
 
     TRACFCOMP( g_trac_isteps_trace, EXIT_MRK"call_mss_draminit" );
 
