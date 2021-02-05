@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -231,27 +231,6 @@ class SPnorRP
     errlHndl_t keyTransitionCheck(const uint8_t *i_vaddr) const;
 
     /**
-     *  @brief Apply lab override policy to the attribute model
-     *
-     *  @par Detailed Description:
-     *      Reads the lab override flag from the input flag set, inverts it, and
-     *      writes it to the ATTR_HB_SECURITY_MODE attribute (which directly
-     *      maps to FAPI attribute ATTR_SECURITY_MODE).  Later, SBE update
-     *      will customize that FAPI attribute into the SBEs.  If the policy is
-     *      set (attribute clear), the SBE will watch mailbox scratch register 3
-     *      bit 6 to be set.  In that case, SBE will disable security for the
-     *      processor, otherwise (policy clear/attribute set) it will not change
-     *      the security settings.
-     *
-     *  @param[in] i_flags Various flags read from the secure header
-     *
-     *  @return errlHndl_t Error log handle; nullptr if success, pointer to
-     *      valid error log otherwise.
-     */
-    errlHndl_t processLabOverride(
-        const sb_flags_t& i_flags) const;
-
-    /**
      *  @brief Apply firmware key indicator policies for the given section
      *
      *  @par Detailed Description:
@@ -267,5 +246,6 @@ class SPnorRP
     errlHndl_t processFwKeyIndicators(
         const SECUREBOOT::ContainerHeader& i_header,
         const PNOR::SectionId              i_sectionId) const;
+
 };
 #endif

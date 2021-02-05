@@ -75,9 +75,9 @@ namespace SECUREBOOT
 
 /*
  * HB specific secureboot setting which is aliased to the FAPI attribute
- * ATTR_SECURITY_MODE and customized into the SBE image.  If 0b0, SBE
- * will disable proc security (via SAB bit) if mailbox scratch register 3
- * bit 6 is set.  Otherwise, if 0b1, SBE will not override proc security.
+ * ATTR_SECURITY_MODE and customized into the SBE image.  If 0b0, requesting
+ * SBE to disable proc security (via SAB bit);  Otherwise, if 0b1, requesting
+ * SBE to enable proc security.
  */
 uint8_t g_sbeSecurityMode = 1;
 

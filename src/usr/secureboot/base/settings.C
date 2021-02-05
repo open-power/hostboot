@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,19 @@ namespace SECUREBOOT
         printk("SECUREBOOT::enabled() state:%i (minimum secure version=0x%.02X)\n",
                iv_enabled, l_min_secure_version);
 
+        // Set SECURITY_MODE based on SAB.
+        // If SAB is 0, then request SBE to disable security for other processors;
+        // If SAB is 1, then request SBE to enable security for other processors.
+        // This happens based on fapi2::ATTR_SECURITY_MODE looking at the global
+        // set by setSbeSecurityMode().
+        l_errl = setSbeSecurityMode(iv_enabled);
+        if (NULL != l_errl)
+        {
+            // Shouldn't necessarily halt the IPL so commit error log and
+            // attempt to keep going
+            errlCommit(l_errl, SECURE_COMP_ID);
+        }
+
         // Report if secure boot is disabled
         #ifdef CONFIG_SECUREBOOT
         if (!iv_enabled)
@@ -105,6 +118,7 @@ namespace SECUREBOOT
                 "Security Switch Register (0x10005) = 0x%016llX.",
                 cbsValue, securitySwitchValue);
         }
+        // Report if secure boot is enabled
         else
         {
             #ifdef CONFIG_CONSOLE

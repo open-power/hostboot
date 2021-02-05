@@ -399,8 +399,8 @@ namespace SECUREBOOT
      *  @brief Gets the current SBE security mode value from the secureboot
      *         subsystem
      *
-     *  @return uint8_t returns 0 if SBE should check for security disable
-     *                  requests, 1 if not
+     *  @return uint8_t returns 0 if requesting SBE to disable security;
+     *                  returns 1 if requesting SBE to enable security
      */
     uint8_t getSbeSecurityMode();
 
@@ -409,9 +409,10 @@ namespace SECUREBOOT
      *         subsystem
      *
      *  @param[in] uint8_t The value to set the security mode to. Will accept a
-     *                     a value of 0 if SBE should check for security disable
-     *                     requests and 1 if not. All other values are not
-     *                     allowed and will be rejected via an assert.
+     *                     a value of 0 to request the SBE to disable security;
+     *                     will accept a value of 1 to request the SBE to enable
+     *                     security.  All other values are not allowed and will
+     *                     fail and return an error log.
      *
      *  @return errlHndl_t Error log handle; nullptr if success, pointer to
      *      valid error log otherwise.

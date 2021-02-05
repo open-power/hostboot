@@ -6609,17 +6609,6 @@ errlHndl_t secureKeyTransition()
             break;
         }
 
-        bool l_hw_lab_override_flag = l_nestedConHdr.sb_flags()->hw_lab_override;
-        TRACFCOMP(g_trac_sbe, "Overriding the Lab Security Backdoor Bit due to"
-                  " key transition; new Security Backdoor Enabled bit is %d",
-                  l_nestedConHdr.sb_flags()->hw_lab_override);
-        l_errl = SECUREBOOT::setSbeSecurityMode(!l_hw_lab_override_flag);
-        if(l_errl)
-        {
-            TRACFCOMP(g_trac_sbe, ERR_MRK"secureKeyTransition() - could not"
-                      " set SBE security mode.");
-            break;
-        }
     }
     if(l_loaded)
     {

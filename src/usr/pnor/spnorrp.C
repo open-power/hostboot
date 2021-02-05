@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1434,30 +1434,6 @@ errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
     return loadUnloadSecureSection(i_section, PNOR::MSG_UNLOAD_SECTION);
 }
 
-errlHndl_t SPnorRP::processLabOverride(
-    const sb_flags_t& i_flags) const
-{
-    errlHndl_t l_errl = nullptr;
-
-    do{
-    // Secure boot sbe security mode values are inverted with respect to the
-    // lab override flag for the same logical meaning
-    uint8_t securityMode =
-        !(i_flags.hw_lab_override);
-    l_errl = SECUREBOOT::setSbeSecurityMode(securityMode);
-    if(l_errl)
-    {
-        TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::processLabOverride - lab security override policy failed");
-        break;
-    }
-
-    TRACFCOMP(g_trac_pnor,INFO_MRK "Set lab security override policy to \"%s\"",
-        securityMode ? "*NO* override" : "override if requested");
-    } while(0);
-
-    return l_errl;
-}
-
 errlHndl_t SPnorRP::processFwKeyIndicators(
     const SECUREBOOT::ContainerHeader& i_header,
     const PNOR::SectionId              i_sectionId) const
@@ -1465,15 +1441,9 @@ errlHndl_t SPnorRP::processFwKeyIndicators(
     errlHndl_t pError = nullptr;
 
     do {
-    if(i_sectionId == PNOR::SBE_IPL)
-    {
-        auto const * const headerFlags = i_header.sb_flags();
-        pError = processLabOverride(*headerFlags);
-        if (pError)
-        {
-            break;
-        }
-    }
+
+    // Place holder functiion for now
+
     } while(0);
 
     return pError;
