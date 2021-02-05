@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,7 +75,7 @@ struct fields
     static constexpr mss::field_t<mss::endian::BIG> CMD_ID{0, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> STATUS_CODE{1, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> BOOT_STAGE{2, 6, 2};
-    static constexpr mss::field_t<mss::endian::BIG> DL_LAYER_BOOT_MODE_SUPPORT{2, 5, 1};
+    static constexpr mss::field_t<mss::endian::BIG> FW_API_VERSION{2, 1, 5};
 
     // Part of EXP_FW_TWI_FFE_SETTINGS
     static constexpr mss::field_t<mss::endian::BIG> FFE_POST_CURSOR_BYTE0{0, 0, 8};
@@ -251,17 +251,17 @@ struct fieldTraits<fields::BOOT_STAGE>
 };
 
 ///
-/// @class fieldTraits - DL_LAYER_BOOT_MODE_SUPPORT specialization
+/// @class fieldTraits - FW_API_VERSION specialization
 /// @brief Traits assoiated with the Explorer I2C commands
 ///
 template<>
-struct fieldTraits<fields::DL_LAYER_BOOT_MODE_SUPPORT>
+struct fieldTraits<fields::FW_API_VERSION>
 {
-    static constexpr uint8_t COMPARISON_VAL = 0x01;
-    static constexpr const char* FIELD_STR = "DL Layer Boot Mode Support";
+    static constexpr uint8_t COMPARISON_VAL = 0x00;
+    static constexpr const char* FIELD_STR = "Firmware API Version";
 
     template <typename T>
-    using COMPARISON_OP = std::less_equal<T>;
+    using COMPARISON_OP = std::greater_equal<T>;
 };
 
 ///
@@ -791,17 +791,17 @@ inline fapi2::ReturnCode get_boot_stage(const fapi2::Target<fapi2::TARGET_TYPE_O
 }
 
 ///
-/// @brief DL_LAYER_BOOT_MODE_SUPPORT getter
+/// @brief FW_API_VERSION getter
 /// @param[in] i_target the OCMB target
 /// @param[in] i_data the buffer as a reference to a vector
 /// @param[out] o_setting
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-inline fapi2::ReturnCode get_dl_layer_boot_mode_support(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+inline fapi2::ReturnCode get_fw_api_version(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::vector<uint8_t>& i_data,
         uint8_t& o_setting)
 {
-    return get_field<fields::DL_LAYER_BOOT_MODE_SUPPORT>(i_target, i_data, o_setting);
+    return get_field<fields::FW_API_VERSION>(i_target, i_data, o_setting);
 }
 
 ///

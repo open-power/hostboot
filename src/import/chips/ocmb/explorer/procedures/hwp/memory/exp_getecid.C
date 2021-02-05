@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <mss_explorer_attribute_setters.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/plug_rules/exp_plug_rules.H>
+#include <lib/i2c/exp_i2c.H>
 
 extern "C"
 {
@@ -53,6 +54,12 @@ extern "C"
     fapi2::ReturnCode exp_getecid(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_getecid");
+
+        std::vector<uint8_t> l_fw_status_data;
+
+        // Save off the FW API version into our attribute
+        FAPI_TRY(mss::exp::i2c::get_fw_status(i_target, l_fw_status_data));
+        FAPI_TRY(mss::exp::i2c::save_fw_api_version(i_target, l_fw_status_data));
 
         {
             bool l_enterprise_fuse = false;

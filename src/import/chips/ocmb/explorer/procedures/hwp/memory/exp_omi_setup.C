@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,8 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
+#include <mss_generic_system_attribute_getters.H>
+#include <lib/i2c/exp_i2c_fields.H>
 #include <p9a_io_omi_prbs.H>
 
 extern "C"
@@ -60,10 +62,11 @@ extern "C"
     fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_omi_setup");
+
         fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-        uint8_t l_is_apollo = 0;
         uint8_t l_gem_menterp_workaround = 0;
         uint8_t l_enable_ffe_settings = 0;
+        uint8_t l_is_apollo = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
@@ -86,7 +89,9 @@ extern "C"
         {
             FAPI_TRY(mss::exp::omi::ffe_setup(i_target, l_ffe_setup_data));
             FAPI_TRY(mss::exp::i2c::send_ffe_settings(i_target, l_ffe_setup_data));
-            FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+            FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_fw_status_data));
+            FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_TWI_FFE_SETTINGS, l_ffe_setup_data,
+                     l_fw_status_data));
         }
 
         // Gets the data setup
@@ -95,15 +100,15 @@ extern "C"
         // Set up dl_layer_boot_mode according to FW and HW support
         // Need to run original sequence (0b00) on Apollo and on legacy FW
         FAPI_TRY(mss::exp::i2c::get_fw_status(i_target, l_fw_status_data));
-        FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_fw_status_data,
-                 l_boot_config_data));
+        FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_boot_config_data));
 
         // Issues the command and checks for completion
         // Note: This does not kick off OMI training
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
         // Check FW status for success
-        l_rc = mss::exp::i2c::fw_status(i_target, 2 * mss::DELAY_1MS, 5000);
+        FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, 2 * mss::DELAY_1MS, 100000, l_fw_status_data));
+        l_rc = mss::exp::i2c::check::boot_config(i_target, l_boot_config_data, l_fw_status_data);
 
         // Note: It's still under discussion whether FIRs will be lit if BOOT_CONFIG_0 fails, and if
         // the registers will be clocked so we can read them. Disabling FIR checking until this

@@ -412,7 +412,7 @@
       Unexpected Explorer status code returned during OMI link training pattern handshake.
       Expected FW_BUSY, but received STATUS_CODE in FFDC data
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <ffdc>STATUS_CODE</ffdc>
     <ffdc>CMD_ID</ffdc>
     <ffdc>STATUS_DATA</ffdc>
@@ -421,11 +421,11 @@
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
     </deconfigure>
   </hwpError>
 
@@ -433,21 +433,46 @@
     <rc>RC_MSS_EXP_I2C_FW_STATUS_BUSY</rc>
     <description>
       Received FW_BUSY status after polling timeout for
-      command ID EXP_FW_STATUS
+      command ID EXP_FW_STATUS. See CMD_ID for the failing command id.
     </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>STATUS_CODE</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>CMD_ID</ffdc>
+    <ffdc>COMMAND</ffdc>
     <ffdc>STATUS_DATA</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_I2C_CMD_FAIL</rc>
+    <description>
+      Received non-SUCCESS status for command ID EXP_FW_STATUS.
+      See CMD_ID for the failing command id.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>CMD_ID</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>STATUS</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
     </deconfigure>
   </hwpError>
 
@@ -457,7 +482,7 @@
       Received incorrect boot stage from
       command ID EXP_FW_STATUS
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <ffdc>BOOT_STAGE</ffdc>
     <ffdc>EXPECTED_BOOT_STAGE</ffdc>
     <ffdc>STATUS_DATA</ffdc>
@@ -466,30 +491,49 @@
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
     </deconfigure>
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_EXP_I2C_POLLING_TIMEOUT</rc>
+    <rc>RC_MSS_EXP_I2C_POLLING_TIMEOUT_RESET</rc>
     <description>
-      Polling the explorer I2C slave interface for an ACK
-      timed out.
+      Polling the explorer I2C interface for an ACK
+      timed out when explorer was coming out of reset.
     </description>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_I2C_POLLING_TIMEOUT_BOOT_ROM</rc>
+    <description>
+      Polling the explorer I2C interface for an ACK
+      timed out during explorer boot ROM to runtime FW transition
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
     </deconfigure>
   </hwpError>
 
@@ -498,7 +542,7 @@
     <description>
       Received incorrect EXP_FW_STATUS data size
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <ffdc>STATUS_CODE_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -569,6 +613,129 @@
     <deconfigure>
       <target>TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_INVALID_CMD</rc>
+    <description>
+      BOOT_CONFIG command was invalid.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_LOOPBACK_FAIL</rc>
+    <description>
+      BOOT_CONFIG command encountered an OMI loopback test failure.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_SERDES_INIT_FAIL</rc>
+    <description>
+      BOOT_CONFIG command encountered an OMI SerDes initialization
+      failure.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_DLX_CONFIG_FAIL</rc>
+    <description>
+      BOOT_CONFIG command encountered an OMI DL config or training
+      failure.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_LANE_INV_FAIL</rc>
+    <description>
+      BOOT_CONFIG command encountered an OMI lane inversion
+      failure.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_PARITY_UECC_ERROR</rc>
+    <description>
+      BOOT_CONFIG command encountered OMI parity or UECC errors.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>

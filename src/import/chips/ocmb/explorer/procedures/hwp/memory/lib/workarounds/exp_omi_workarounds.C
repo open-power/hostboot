@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <lib/shared/exp_consts.H>
 #include <lib/omi/exp_omi_utils.H>
 #include <lib/i2c/exp_i2c_fields.H>
+#include <mss_explorer_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <lib/inband/exp_inband.H>
@@ -201,14 +202,12 @@ fapi_try_exit:
 ///
 /// @param[in] i_target OCMB_CHIP target
 /// @param[in] i_is_apollo value of ATTR_IS_APOLLO
-/// @param[in] i_fw_status_data value from FW_STATUS command
 /// @param[in,out] io_boot_config_data BOOT_CONFIG0 data
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 fapi2::ReturnCode select_dl_layer_boot_mode(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const uint8_t i_is_apollo,
-    const std::vector<uint8_t>& i_fw_status_data,
     std::vector<uint8_t>& io_boot_config_data)
 {
     constexpr uint8_t BOOT_MODE_VERSION1 = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
@@ -216,7 +215,7 @@ fapi2::ReturnCode select_dl_layer_boot_mode(
         fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING_VERSION2;
     constexpr uint8_t VERSION2_SUPPORTED = 0x01;
 
-    uint8_t l_supported = 0;
+    uint8_t l_version = 0;
 
     if (i_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_TRUE)
     {
@@ -227,9 +226,9 @@ fapi2::ReturnCode select_dl_layer_boot_mode(
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY(mss::exp::i2c::status::get_dl_layer_boot_mode_support(i_target, i_fw_status_data, l_supported));
+    FAPI_TRY(mss::attr::get_exp_fw_api_version(i_target, l_version));
 
-    if (l_supported == VERSION2_SUPPORTED)
+    if (l_version >= VERSION2_SUPPORTED)
     {
         FAPI_DBG("%s Selecting dl_layer_boot_mode = 0b01", mss::c_str(i_target));
         FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target,

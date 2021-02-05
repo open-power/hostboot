@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -143,7 +143,7 @@
         <description>
             Must be in BOOT_ROM or FW_UPGRADE boot stage to issue FW_DOWNLOAD command
         </description>
-        <ffdc>TARGET</ffdc>
+        <ffdc>OCMB_TARGET</ffdc>
         <ffdc>BOOT_STAGE</ffdc>
         <ffdc>STATUS_DATA</ffdc>
         <callout>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/i2c/exp_i2c.H>
+#include <i2c_access.H>
 
 // P9 cross-includes
 #include <p9_io_scom.H>
@@ -387,22 +388,34 @@ fapi2::ReturnCode poll_abort(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     FAPI_INF("%s OMI training did not complete by end of polling loop. Sending TWI_POLL_ABORT command",
              mss::c_str(i_target));
 
-    // Send TWI_POLL_ABORT
-    std::vector<uint8_t> l_data;
-    l_data.push_back(mss::exp::i2c::FW_TWI_POLL_ABORT);
+    std::vector<uint8_t> l_cmd_data;
+    std::vector<uint8_t> l_rsp_data;
+    uint8_t l_status = 0;
+    uint64_t l_fw_status_data = 0;
 
-    FAPI_TRY(fapi2::putI2c(i_target, l_data),
+    // Send TWI_POLL_ABORT
+    l_cmd_data.push_back(mss::exp::i2c::FW_TWI_POLL_ABORT);
+
+    FAPI_TRY(fapi2::putI2c(i_target, l_cmd_data),
              "%s i2c failure sending POLL_ABORT command",
              mss::c_str(i_target));
 
     // Now poll again until BUSY state goes away
     // note the assertion parameters mean assert if we remain in the BUSY state after polling
     // and don't assert if we get a non-success status (which is ok since we're purposely aborting the command)
-    return mss::exp::i2c::fw_status(i_target,
-                                    mss::common_timings::DELAY_1MS,
-                                    100,
-                                    mss::exp::i2c::ASSERT_IF_BUSY_FW_STATUS,
-                                    mss::exp::i2c::NO_ASSERT_IF_BAD_FW_STATUS);
+    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::common_timings::DELAY_1MS, 100, l_rsp_data));
+
+    // Check that Explorer is not still in FW_BUSY state
+    FAPI_TRY(mss::exp::i2c::capture_status(i_target, l_rsp_data, l_fw_status_data));
+    FAPI_TRY(mss::exp::i2c::status::get_status_code(i_target, l_rsp_data, l_status));
+    FAPI_ASSERT( (l_status != mss::exp::i2c::status_codes::FW_BUSY),
+                 fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
+                 set_OCMB_TARGET(i_target).
+                 set_CMD_ID(mss::exp::i2c::FW_TWI_POLL_ABORT).
+                 set_COMMAND(l_cmd_data).
+                 set_STATUS_DATA(l_fw_status_data),
+                 "Polling timeout on FW_STATUS command (still FW_BUSY) after POLL_ABORT for %s",
+                 mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;

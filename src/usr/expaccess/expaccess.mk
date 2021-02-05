@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/i2c
 
 # Need to build exp_inband to use EKB's getMMIO/putMMIO/getCMD/getRSP
 OBJS += exp_inband.o
@@ -42,3 +43,4 @@ OBJS += mmioscomdd.o
 OBJS += exp_fw_log.o
 OBJS += exp_fw_log_data.o
 OBJS += errlud_expscom.o
+OBJS += exp_i2c.o
