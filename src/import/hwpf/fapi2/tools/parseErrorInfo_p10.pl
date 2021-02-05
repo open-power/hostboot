@@ -708,9 +708,10 @@ foreach my $argnum ( 0 .. $#ARGV )
         {
             if ( $count == 0 )
             {
-                #this rc wont be used, except to indicate the FFDC collection failed
-                $collectFfdcStr = "\tfapi2::ReturnCode l_rc; \\\n";
-                $collectFfdcStr .= "\tfapi2::ReturnCode tempRc = RC; \\\n";
+                # this rc wont be used, except to indicate the FFDC collection failed. It needs to be named something
+                # programmers aren't likely to use to avoid variable shadowing.
+                $collectFfdcStr = "\tfapi2::ReturnCode macro_local_$err->{rc}; \\\n";
+                $collectFfdcStr .= "\tfapi2::ReturnCode tempRc = RC;\\\n";
             }
             $count++;
 
@@ -760,7 +761,7 @@ foreach my $argnum ( 0 .. $#ARGV )
             # at the end.
             $collectFfdc .= "tempRc";
 
-            $collectFfdcStr .= "\tFAPI_EXEC_HWP(l_rc, $collectFfdc); \\\n";
+            $collectFfdcStr .= "\tFAPI_EXEC_HWP(macro_local_$err->{rc}, $collectFfdc); \\\n";
 
             # assign the tempRc with newly added ffdc back to the passed in RC
             $collectFfdcStr .= "\tRC = tempRc; \\\n";
@@ -913,7 +914,7 @@ foreach my $argnum ( 0 .. $#ARGV )
 
             if ( $crffdcCount > 0 )
             {
-                print EIFILE "    RC.addErrorInfo(ffdc); \\\n}\n";
+                print EIFILE "    RC.addErrorInfo(ffdc);\\\n}\n";
             }
 
         }
@@ -1628,14 +1629,15 @@ foreach my $argnum ( 0 .. $#ARGV )
             {
                 print ECFILE "        {\n";
 
-                # Need to create a temporary RC if using current_err,
-                # since FAPI_SET_HWP_ERROR can call a HWP that changes
-                # fapi2::current_err
+                # Need to create a temporary RC if using current_err, since FAPI_SET_HWP_ERROR and
+                # FAPI_ADD_INFO_TO_HWP_ERROR can call a HWP that changes fapi2::current_err. It should be named
+                # something programmers aren't likely to choose to avoid variable shadowing with the various macros
+                # and inline functions that eventually replace FAPI_SET_HWP_ERROR and FAPI_ADD_INFO_TO_HWP_ERROR.
                 print ECFILE "            if (iv_rc == fapi2::current_err)\n";
                 print ECFILE "            {\n";
-                print ECFILE "                fapi2::ReturnCode l_rc = iv_rc;\n";
-                print ECFILE "                FAPI_SET_HWP_ERROR(l_rc,$err->{rc});\n";
-                print ECFILE "                iv_rc = l_rc;\n";
+                print ECFILE "                fapi2::ReturnCode func_local_$err->{rc} = iv_rc;\n";
+                print ECFILE "                FAPI_SET_HWP_ERROR(func_local_$err->{rc},$err->{rc});\n";
+                print ECFILE "                iv_rc = func_local_$err->{rc};\n";
                 print ECFILE "            }\n";
                 print ECFILE "            else\n";
                 print ECFILE "            {\n";
