@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,41 +71,48 @@ PRDF_PLUGIN_DEFINE( p10_eq, PostAnalysis );
 int32_t coreUcsSummary( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    int32_t o_rc = SUCCESS;
-
     // Check the EQ_CHIPLET_UCS_FIR for which core has a UCS
-    SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister("EQ_CHIPLET_UCS_FIR");
+    auto fir = i_chip->getRegister("EQ_CHIPLET_UCS_FIR");
+    auto msk = i_chip->getRegister("EQ_CHIPLET_UCS_FIR_MASK");
 
-    if ( SUCCESS == fir->Read() )
+    if ( SUCCESS == (fir->Read() | msk->Read()) )
     {
-        // Bits 5:8 correspond to cores 0:3 respectively.
+        // NOTE: If analysis fails on one core, check the other cores.
+
         // Bit 5 = Core 0
-        if ( fir->IsBitSet(5) )
+        if ( fir->IsBitSet(5) && !msk->IsBitSet(5) )
         {
             ExtensibleChip * core = getConnectedChild( i_chip, TYPE_CORE, 0 );
-            o_rc = core->Analyze( io_sc, UNIT_CS );
+            if (SUCCESS == core->Analyze(io_sc, UNIT_CS))
+                return SUCCESS;
         }
+
         // Bit 6 = Core 1
-        else if ( fir->IsBitSet(6) )
+        if ( fir->IsBitSet(6) && !msk->IsBitSet(6) )
         {
             ExtensibleChip * core = getConnectedChild( i_chip, TYPE_CORE, 1 );
-            o_rc = core->Analyze( io_sc, UNIT_CS );
+            if (SUCCESS == core->Analyze(io_sc, UNIT_CS))
+                return SUCCESS;
         }
+
         // Bit 7 = Core 2
-        else if ( fir->IsBitSet(7) )
+        if ( fir->IsBitSet(7) && !msk->IsBitSet(7) )
         {
             ExtensibleChip * core = getConnectedChild( i_chip, TYPE_CORE, 2 );
-            o_rc = core->Analyze( io_sc, UNIT_CS );
+            if (SUCCESS == core->Analyze(io_sc, UNIT_CS))
+                return SUCCESS;
         }
+
         // Bit 8 = Core 3
-        else if ( fir->IsBitSet(8) )
+        if ( fir->IsBitSet(8) && !msk->IsBitSet(8) )
         {
             ExtensibleChip * core = getConnectedChild( i_chip, TYPE_CORE, 3 );
-            o_rc = core->Analyze( io_sc, UNIT_CS );
+            if (SUCCESS == core->Analyze(io_sc, UNIT_CS))
+                return SUCCESS;
         }
     }
 
-    return o_rc;
+    return PRD_SCAN_COMM_REGISTER_ZERO; // default if nothing found
 }
 PRDF_PLUGIN_DEFINE( p10_eq, coreUcsSummary );
 

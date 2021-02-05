@@ -1089,7 +1089,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[57]
      *  Other Core Chiplet core checkstop
      */
-    (rEQ_CORE_FIR, bit(57)) ? self_th_1;
+    (rEQ_CORE_FIR, bit(57)) ? analyzeNeighborCore;
 
     /** EQ_CORE_FIR[58]
      *  Other Core Chiplet system checkstop
