@@ -628,6 +628,7 @@
       The response_argument field of the host_fw_response_struct returned
       a FAILURE for enabling sensor cache
     </description>
+    <ffdc>OCMB_TARGET</ffdc>
     <ffdc>RSP_ID</ffdc>
     <ffdc>ERROR_CODE_1</ffdc>
     <ffdc>ERROR_CODE_2</ffdc>
@@ -636,11 +637,11 @@
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
     </deconfigure>
   </hwpError>
 
@@ -1165,9 +1166,12 @@
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>VALUE</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -528,9 +528,11 @@ fapi2::ReturnCode sensor_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     // Check if cmd was successful.
     // EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ has 2 error bytes
     // in response_argument[1] and [2], record and print both.
+    // TODO: Zenhub #832 Follow up needed with MCHP to add extended error codes
+    // New codes will enable behavior to be split based on specific sensors failing
     FAPI_ASSERT(i_rsp.response_argument[0] == mss::exp::omi::response_arg::RESPONSE_SUCCESS,
                 fapi2::MSS_EXP_SENSOR_CACHE_ENABLE_FAILED().
-                set_TARGET(i_target).
+                set_OCMB_TARGET(i_target).
                 set_RSP_ID(i_rsp.response_id).
                 set_ERROR_CODE_1(i_rsp.response_argument[1]).
                 set_ERROR_CODE_2(i_rsp.response_argument[2]),
