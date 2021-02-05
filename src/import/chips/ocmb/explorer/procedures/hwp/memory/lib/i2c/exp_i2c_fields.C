@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@ constexpr mss::field_t<mss::endian::BIG> fields::DL_LAYER_BOOT_MODE;
 constexpr mss::field_t<mss::endian::BIG> fields::CMD_ID;
 constexpr mss::field_t<mss::endian::BIG> fields::STATUS_CODE;
 constexpr mss::field_t<mss::endian::BIG> fields::BOOT_STAGE;
-constexpr mss::field_t<mss::endian::BIG> fields::DL_LAYER_BOOT_MODE_SUPPORT;
+constexpr mss::field_t<mss::endian::BIG> fields::FW_API_VERSION;
 
 namespace boot_cfg
 {

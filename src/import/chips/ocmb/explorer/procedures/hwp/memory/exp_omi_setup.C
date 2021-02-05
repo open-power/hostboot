@@ -114,9 +114,7 @@ extern "C"
 
         // Set up dl_layer_boot_mode according to FW and HW support
         // Need to run original sequence (0b00) on Apollo and on legacy FW
-        FAPI_TRY(mss::exp::i2c::get_fw_status(i_target, l_fw_status_data));
-        FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_fw_status_data,
-                 l_boot_config_data));
+        FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_boot_config_data));
 
         // Issues the command and checks for completion
         // Note: This does not kick off OMI training

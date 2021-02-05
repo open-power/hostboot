@@ -50,6 +50,7 @@
     #include <lib/i2c/exp_i2c_fields.H>
     #include <generic/memory/lib/utils/pos.H>
     #include <generic/memory/lib/utils/endian_utils.H>
+    #include <mss_explorer_attribute_setters.H>
     //Macro
     #define MSSTARGID mss::c_str(i_target)
 #endif
@@ -158,6 +159,29 @@ fapi2::ReturnCode get_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     FAPI_DBG( "status returned ( 5 bytes ) : 0x%.02X 0x%.02X 0x%.02X 0x%.02X 0x%.02X",
               o_data[0], o_data[1] , o_data[2], o_data[3], o_data[4]);
 #endif
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Save FW API version into attribute
+/// @param[in] i_target the OCMB target
+/// @param[in] i_data response data from FW_STATUS command
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode save_fw_api_version(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      const std::vector<uint8_t> i_data)
+{
+    uint8_t l_version = 0;
+
+    FAPI_TRY(status::get_fw_api_version(i_target, i_data, l_version));
+    FAPI_INF( TARGTIDFORMAT " Explorer I2C FW API version: %d",
+              MSSTARGID, l_version);
+
+#ifndef __PPE__
+    FAPI_TRY(mss::attr::set_exp_fw_api_version(i_target, l_version));
+#endif
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -492,6 +516,9 @@ fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_T
                  set_STATUS_DATA(l_fw_status_data),
                  "Polling timeout on FW_STATUS command (wrong boot stage: 0x%01x, expected 0x%01x) for " TARGTIDFORMAT,
                  l_boot_stage, boot_stages::RUNTIME_FW, MSSTARGID );
+
+    // Save off the FW API version into our attribute
+    FAPI_TRY(save_fw_api_version(i_target, l_data));
 
     return fapi2::FAPI2_RC_SUCCESS;
 

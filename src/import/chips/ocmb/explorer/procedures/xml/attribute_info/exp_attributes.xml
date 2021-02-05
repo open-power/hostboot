@@ -557,6 +557,20 @@
     </attribute>
 
   <attribute>
+    <id>ATTR_MSS_EXP_FW_API_VERSION</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      Explorer I2C firmware API version supported. Reflects bits 22:18
+      from FW_STATUS response.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <default>0</default>
+    <writeable/>
+    <mssAccessorName>exp_fw_api_version</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MSS_EXP_FW_VERSION_A</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
     <description>
