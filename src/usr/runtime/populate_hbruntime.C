@@ -2135,43 +2135,6 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
     // fill in the values for each Secure Boot TPM Instance Info in the array
     for (auto pTpm : tpmList)
     {
-        uint8_t poisonedFlag = 0;
-        #ifdef CONFIG_TPMDD
-        if (!TARGETING::UTIL::isCurrentMasterNode()) // if not master node TPM
-        {
-
-            auto l_tpmHwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
-            if (l_tpmHwasState.functional)
-            {
-
-                // poison the TPM's PCRs
-                l_elog = TRUSTEDBOOT::poisonTpm(pTpm);
-                if (l_elog)
-                {
-                    l_tpmHwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
-                    if (l_tpmHwasState.functional)
-                    {
-                        // The TPM was still functional, we have a software bug
-                        // on our hands. We need to break out of here and quit.
-                        break;
-                    }
-                    else
-                    {
-                        // There was a hardware problem with the TPM. It was
-                        // marked failed and deconfigured, so we commit the
-                        // error log and move on as though it were not
-                        // functional to begin with
-                        ERRORLOG::errlCommit(l_elog, RUNTIME_COMP_ID);
-                    }
-                }
-                else
-                {
-                    poisonedFlag = 1;
-                }
-            }
-        }
-        #endif // CONFIG_TPMDD
-
         auto l_tpmInstInfo = reinterpret_cast<HDAT::hdatSbTpmInstInfo_t*>
                                                     (l_baseAddr + l_currOffset);
 
@@ -2657,10 +2620,26 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
         auto hwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
+        // When building HDAT, it is safe to assume that all functional backup
+        // TPMs in the system have been poisoned by the SBE.  The poisoned flag
+        // is applicable only when a TPM is functional (otherwise, it defaults
+        // to 0 and should be ignored by any consumer of HDAT).
+        uint8_t poisonedFlag = 0;
+
         if (hwasState.functional && hwasState.present)
         {
             // present and functional
             l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmPresentAndFunctional;
+
+            const auto tpmRole = pTpm->getAttr<TARGETING::ATTR_TPM_ROLE>();
+            if(tpmRole == TARGETING::TPM_ROLE_TPM_PRIMARY)
+            {
+                poisonedFlag = pTpm->getAttr<TARGETING::ATTR_TPM_POISONED>();
+            }
+            else
+            {
+                poisonedFlag = true;
+            }
         }
         else if (hwasState.present)
         {
