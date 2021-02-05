@@ -423,6 +423,19 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( p10_core, CheckCoreCheckstop );
 
+/**
+ * @brief  This is a special plugin where we intentionally want to return
+ *         PRD_SCAN_COMM_REGISTER_ZERO back to the rule code.
+ * @param  i_chip A core chip.
+ * @param  io_sc  The step code data struct.
+ * @return PRD_SCAN_COMM_REGISTER_ZERO always.
+ */
+int32_t returnScomRegisterZero(ExtensibleChip*, STEP_CODE_DATA_STRUCT&)
+{
+    return PRD_SCAN_COMM_REGISTER_ZERO;
+}
+PRDF_PLUGIN_DEFINE(p10_core, returnScomRegisterZero);
+
 //##############################################################################
 //##                       Line Delete Functions
 //##############################################################################

@@ -99,3 +99,20 @@ actionclass analyzeEQ_L3_FIR
     capture(eq_l3_fir_ffdc);
     analyze(gEQ_L3_FIR);
 };
+
+# EQ_CORE_FIR[56:57] indicate an attention (RE or UCS) was raised on the other
+# core in the fused core pair. Some things to note:
+#  - These attentions should be masked when NOT in fused core mode.
+#  - These two bits should be the last bits in this FIR to be analyzed to ensure
+#    all bits in this FIR are analyzed before moving on to the other core.
+#  - If isolation needs to move on to the other core, the rule code will
+#    automatically clear this attention before moving on.
+#  - If there truly is an attention in the other core, it should be properly
+#    reported via the FIR hierarchy. Therefore, it is unnecessary to add extra
+#    plugin code to switch analysis to the other core. Instead, all we have to
+#    do is give a non-SUCCESS return code to tell the rule code to move onto the
+#    next active attention (which should be on the other core).
+actionclass analyzeNeighborCore
+{
+    funccall("returnScomRegisterZero");
+};
