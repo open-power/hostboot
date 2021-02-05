@@ -69,7 +69,9 @@ fapi2::ReturnCode p10_clock_test_check_error(
                 .set_RCS_CLOCK_TEST_IN(set_rcs_clock_test_in)
                 .set_CLOCK_A_OK(clockA_ok)
                 .set_CLOCK_B_OK(clockB_ok)
-// OH FFS       .set_CLOCK_POS(callout_clock)
+#ifndef __PPE__
+                .set_CLOCK_POS(callout_clock)
+#endif
                 .set_CLOCK_POS_FFDC(callout_clock),
                 "Bad reference clock: A functional/required: %d/%d  B functional/required: %d/%d",
                 clockA_functional, clockA_required, clockB_functional, clockB_required
