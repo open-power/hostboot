@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -40,6 +40,7 @@ prd_incpath += ${PRD_SRC_PATH}/plat/p10
 # plat/p10/ (non-rule plugin related)
 
 # plat/p10/ (rule plugin related)
+prd_rule_plugin += prdfP10Core.o
 prd_rule_plugin += prdfP10Iohs.o
 
 ################################################################################

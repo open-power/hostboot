@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10Core.C $             */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10Core_common.C $      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -57,111 +57,6 @@ int32_t Initialize( ExtensibleChip * i_coreChip )
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( p10_core, Initialize );
-
-#ifdef __HOSTBOOT_RUNTIME
-void maskIfCoreCs( ExtensibleChip * i_chip )
-{
-    int32_t l_rc = SUCCESS;
-
-    ExtensibleChip * eq = getConnectedParent( i_chip, TYPE_EQ );
-
-    do
-    {
-        // Get the EQ chiplet level mask registers.
-        SCAN_COMM_REGISTER_CLASS * eq_chiplet_cs_fir_mask =
-            eq->getRegister("EQ_CHIPLET_CS_FIR_MASK");
-
-        SCAN_COMM_REGISTER_CLASS * eq_chiplet_re_fir_mask =
-            eq->getRegister("EQ_CHIPLET_RE_FIR_MASK");
-
-        SCAN_COMM_REGISTER_CLASS * eq_chiplet_ucs_fir_mask =
-            eq->getRegister("EQ_CHIPLET_UCS_FIR_MASK");
-
-        // Read values.
-        l_rc  = eq_chiplet_cs_fir_mask->Read();
-        l_rc |= eq_chiplet_re_fir_mask->Read();
-        l_rc |= eq_chiplet_ucs_fir_mask->Read();
-
-        if ( SUCCESS != l_rc ) break;
-
-        uint8_t corePos = i_chip->getPos() % MAX_EC_PER_EQ; // 0-3
-
-        // Mask analysis to the EQ_CORE_FIR depending on the core position
-        eq_chiplet_cs_fir_mask->SetBit(5+corePos);
-        eq_chiplet_re_fir_mask->SetBit(5+corePos);
-        eq_chiplet_ucs_fir_mask->SetBit(5+corePos);
-
-        eq_chiplet_cs_fir_mask->Write();
-        eq_chiplet_re_fir_mask->Write();
-        eq_chiplet_ucs_fir_mask->Write();
-
-        // Clear the local checkstop summary bit on bit 2 of the RE chiplet FIR
-        SCAN_COMM_REGISTER_CLASS * eq_chiplet_re_fir =
-            eq->getRegister("EQ_CHIPLET_RE_FIR");
-        l_rc = eq_chiplet_re_fir->ForceRead();
-
-        if ( SUCCESS != l_rc ) break;
-
-        if ( eq_chiplet_re_fir->IsBitSet(2) )
-        {
-            eq_chiplet_re_fir->ClearBit(2);
-            eq_chiplet_re_fir->Write();
-        }
-    }while(0);
-}
-
-#endif
-
-/**
- * @brief  Plugin function called after analysis is complete but before PRD
- *         exits.
- * @param  i_chip    EC chip.
- * @param  io_sc     The step code data struct.
- * @note   This is especially useful for any analysis that still needs to be
- *         done after the framework clears the FIR bits that were at attention.
- * @return SUCCESS.
- */
-int32_t PostAnalysis( ExtensibleChip * i_chip,
-                      STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #ifdef __HOSTBOOT_RUNTIME
-    if ( io_sc.service_data->isProcCoreCS() )
-    {
-        ExtensibleChip * n_chip = getNeighborCore(i_chip);
-        maskIfCoreCs(i_chip);
-        if (n_chip != nullptr)
-        {
-            maskIfCoreCs(n_chip);
-        }
-
-        // NOTE: We no longer need to do a runtime deconfig of the core here as
-        // in P10 there is now support for non-fatal unit checkstops at runtime.
-        // We want to avoid runtime deconfiguring of the core to avoid problems
-        // that it can potentially cause for MPIPL and HWPs.
-    }
-    else
-    {
-        int32_t l_rc = restartTraceArray(i_chip->getTrgt());
-        if (SUCCESS != l_rc)
-        {
-            PRDF_ERR( "[EC PostAnalysis HUID: 0x%08x RestartTraceArray failed",
-                      i_chip->GetId());
-        }
-
-    }
-    #endif
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE( p10_core, PostAnalysis );
-
-int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
-                     bool & o_analyzed )
-{
-    o_analyzed = false;
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE( p10_core, PreAnalysis );
 
 void checkCoreRePresent( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc )
