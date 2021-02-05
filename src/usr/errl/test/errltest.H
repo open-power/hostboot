@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <errl/errlreasoncodes.H>
 #include <trace/trace.H>
 #include <hbotcompid.H>
+#include <vector>
 
 #include <errl/errludtarget.H>
 #include <targeting/common/target.H>
@@ -65,6 +66,9 @@
 #define TEST_USR_64BIT_1    0x8000000000000001
 #define TEST_USR_64BIT_2    0x9000000000000003
 
+using namespace HWAS;
+using namespace TARGETING;
+using namespace std;
 
 namespace ERRORLOG
 {
@@ -1276,6 +1280,574 @@ public:
         l_err = NULL;
     }
 
+    /**
+     *  @brief Lookup a processor, ocmb, and dimm target and return them to
+     *  the caller via out paramters. Return true if error occurred.
+     *
+     *  @param[out]  o_proc Pointer will be assigned the processor target handle found
+     *  @param[out]  o_ocmb Pointer will be assigned the ocmb target handle found
+     *  @param[out]  o_dimm Pointer will be assigned the dimm target handle found
+     *
+     *  @note all o_ parameters will not be modified if error is found
+     *
+     *  @return bool true if error occurred
+     */
+    bool getTestTargets(Target * &o_proc,
+                        Target * &o_ocmb,
+                        Target * &o_dimm)
+    {
+        bool fail_occurred = false;
+
+        // find a proc target
+        PredicateCTM procChipFilter(CLASS_CHIP,TYPE_PROC);
+        TargetRangeFilter pProc(
+            targetService().begin(), targetService().end(),
+            &procChipFilter);
+        // find a OCMB target
+        PredicateCTM ocmbChipFilter(CLASS_CHIP,TYPE_OCMB_CHIP);
+        TargetRangeFilter pOcmb(
+            targetService().begin(), targetService().end(),
+            &ocmbChipFilter);
+        // find a dimm target
+        PredicateCTM dimmChipFilter(CLASS_NA,TYPE_DIMM);
+        TargetRangeFilter pDimm(
+            targetService().begin(), targetService().end(),
+            &dimmChipFilter);
+        do{
+            if(!*pProc)
+            {
+                TS_FAIL("getTestTargets failed! Unable to find a valid processor target.");
+                fail_occurred = true;
+                break;
+            }
+            if(!*pOcmb)
+            {
+                TS_FAIL("getTestTargets failed! Unable to find a valid ocmb target.");
+                fail_occurred = true;
+                break;
+            }
+            if(!*pDimm)
+            {
+                TS_FAIL("getTestTargets failed! Unable to find a valid dimm target.");
+                fail_occurred = true;
+                break;
+            }
+        }while(0);
+
+        if(!fail_occurred)
+        {
+            o_proc = *pProc;
+            o_ocmb = *pOcmb;
+            o_dimm = *pDimm;
+        }
+
+        return fail_occurred;
+    }
+
+    // common data used to fill in hw, clock, and part callouts
+    struct callout_data
+    {
+        Target *        target;
+        callOutPriority priority;
+        DeconfigEnum    deconfig_state;
+        GARD_ErrorType  gard_type;
+    };
+
+    // plain-text consts used in code below for readability
+    const bool EXPECT_DECONFIG    = true,  EXPECT_GARD    = true,
+               EXPECT_NO_DECONFIG = false, EXPECT_NO_GARD = false;
+
+    // Strict order vectors containing expectation_data
+    enum expectation_enum
+    {
+      PROC_EXPECT  = 0,
+      OCMB_EXPECT  = 1,
+      DIMM_EXPECT  = 2,
+      EXPECT_COUNT = 3,
+    };
+
+    struct expectation_data
+    {
+        Target * target;  // The target who associated callouts will be checked
+        bool     expect_deconfig; // do we expect the target callout to have deconfig?
+        bool     expect_gard; // do we expect the target callout to have gard?
+    };
+
+    /**
+     *  @brief Call queryCallouts on i_errl and check the return value against what
+     *  what we expect it to be. TS_FAIL if it is not what we expect.
+     *
+     *  @param[in]  i_errl  The error log we want to query callouts on
+     *  @param[in]  i_target  The target we want to find matching callouts for
+     *  @param[in]  i_expect_deconfig  boolean describing if we expect a deconfig callout
+     *  @param[in]  i_expect_gard  boolean describing if we expect a gard callout
+     *
+     *  @return void
+     */
+    void query_and_check_results(ErrlEntry * const i_errl,
+                                 Target * const i_target,
+                                 bool i_expect_deconfig,
+                                 bool i_expect_gard)
+    {
+        auto query_results = i_errl->queryCallouts(i_target);
+        if((query_results & ErrlEntry::TARGET_MATCH) != ErrlEntry::TARGET_MATCH)
+        {
+            TS_FAIL("Unable to find target match for 0x%08X.",
+                    get_huid(i_target));
+        }
+        if(i_expect_deconfig && (query_results & ErrlEntry::DECONFIG_FOUND) != ErrlEntry::DECONFIG_FOUND)
+        {
+            TS_FAIL("No deconfig found associated with the target 0x%08X when it was expected.",
+                    get_huid(i_target));
+        }
+        if(i_expect_gard && (query_results & ErrlEntry::GARD_FOUND) != ErrlEntry::GARD_FOUND)
+        {
+            TS_FAIL("No gard found associated with the target 0x%08x when it was expected.",
+                    get_huid(i_target));
+        }
+    };
+
+    /**
+     *  @brief Loop through a vector of expectation_data and perform query_and_check_results
+     *  on each expectation
+     *
+     *  @param[in]  i_expectations  Vector of expectation_data structs
+     *                              that describe if we expect for find
+     *                              callouts matching target,gard, and deconfig
+     *                              search criteria.
+     *  @param[in]  i_errl          The error log we want to query callouts on
+     *
+     *  @return void
+     */
+    void checkExpectations (const vector<expectation_data> &i_expectations,
+                            ErrlEntry * const i_errl)
+    {
+        for(auto expectation : i_expectations)
+        {
+            query_and_check_results(i_errl,
+                                    expectation.target,
+                                    expectation.expect_deconfig,
+                                    expectation.expect_gard);
+        }
+    };
+
+    /**
+     *  @brief Reset a vector of exception_data with size 3 back to the initial
+     *  expected results of querying callouts after applying the callouts
+     *  described by the callout_data in the vector returned by makeCalloutVector
+     *
+     *  @param[in,out]  io_expectations  Vector of expectation_data structs
+     *                                   that describe what we expect to see
+     *                                   when we run query_and_check_results.
+     *  @param[in]  i_proc The proc target we will use for the proc callouts
+     *  @param[in]  i_ocmb The ocmb target we will use for the ocmb callout
+     *  @param[in]  i_dimm The dimm target we will use for the dimm callout
+     *
+     *  @return void
+     */
+    void resetExpectations (vector<expectation_data> &io_expectations,
+                            Target * const i_proc,
+                            Target * const i_ocmb,
+                            Target * const i_dimm)
+    {
+        assert(io_expectations.size() == EXPECT_COUNT,
+               "invalid expectation size, crash likely to occur if we continue so asserting here");
+        io_expectations[PROC_EXPECT].target = i_proc;
+        io_expectations[PROC_EXPECT].expect_deconfig = EXPECT_DECONFIG;
+        io_expectations[PROC_EXPECT].expect_gard = EXPECT_GARD;
+        io_expectations[OCMB_EXPECT].target = i_ocmb;
+        io_expectations[OCMB_EXPECT].expect_deconfig = EXPECT_NO_DECONFIG;
+        io_expectations[OCMB_EXPECT].expect_gard = EXPECT_GARD;
+        io_expectations[DIMM_EXPECT].target = i_dimm;
+        io_expectations[DIMM_EXPECT].expect_deconfig = EXPECT_DECONFIG;
+        io_expectations[DIMM_EXPECT].expect_gard = EXPECT_NO_GARD;
+    };
+
+    /**
+     *  @brief Delete the old error log if it exists and create a new one
+     *  for unit test purposes. This error log should never be committed.
+     *
+     *  @param[in,out]  io_errl error log we wish to reset
+     *
+     *  @return void
+     */
+    void resetError(ErrlEntry *& io_errl)
+    {
+        if(io_errl)
+        {
+            delete io_errl;
+            io_errl = nullptr;
+        }
+        io_errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                ERRL_TEST_MOD_ID,
+                                ERRL_TEST_REASON_CODE,
+                                0x1234567890,
+                                0x9876543210 );
+    };
+
+    /**
+     *  @brief Build a vector of callout_data structs that can be used
+     *  to create add consistent callouts to an errorlog for test purposes
+     *
+     *  @param[in]  i_proc The proc target we will use for the proc callouts
+     *  @param[in]  i_ocmb The ocmb target we will use for the ocmb callout
+     *  @param[in]  i_dimm The dimm target we will use for the dimm callout
+     *
+     *  @return a vector of size 4 containing callout_data to be used for unit tests
+     */
+    std::vector<callout_data> makeCalloutVector(Target * const i_proc,
+                                                Target * const i_ocmb,
+                                                Target * const i_dimm)
+    {
+        vector<callout_data> callouts = {
+            {i_proc, SRCI_PRIORITY_HIGH, NO_DECONFIG, GARD_NULL},
+            {i_proc, SRCI_PRIORITY_LOW, DELAYED_DECONFIG, GARD_Fatal},
+            {i_ocmb, SRCI_PRIORITY_MED, NO_DECONFIG, GARD_Fatal},
+            {i_dimm, SRCI_PRIORITY_MED, DECONFIG, GARD_NULL}
+        };
+        return callouts;
+    };
+
+    // Note that errlUserDetailsTarget is tested in the targeting unit test
+    void testQueryCallouts(void)
+    {
+        TS_TRACE("testQueryCallouts enter");
+        do{
+          Target *proc = nullptr, *ocmb = nullptr, *dimm = nullptr;
+          ErrlEntry *errl = nullptr;
+
+          // Get a proc, ocmb, and dimm target to test with
+          if(getTestTargets(proc,ocmb, dimm))
+          {
+              TS_INFO("Failed to find test targets! See previous TS_FAIL traces");
+              break;
+          }
+
+        vector<callout_data> callouts = makeCalloutVector(proc, ocmb, dimm);
+        vector<expectation_data> expectations(EXPECT_COUNT);
+
+        // Start fresh
+        resetError(errl);
+        resetExpectations(expectations, proc, ocmb, dimm);
+
+        // add the list of callouts as hw callouts
+        for(auto callout : callouts)
+        {
+            errl->addHwCallout(callout.target,
+                               callout.priority,
+                               callout.deconfig_state,
+                               callout.gard_type);
+        }
+
+        // check ensure queryCallouts gets correct results
+        // and reset the error log (and its callouts)
+        checkExpectations(expectations, errl);
+        resetError(errl);
+
+        // add the list of callouts as part callouts
+        for(auto callout : callouts)
+        {
+            errl->addPartCallout(callout.target,
+                                 NO_PART_TYPE,
+                                 callout.priority,
+                                 callout.deconfig_state,
+                                 callout.gard_type);
+        }
+
+        // check ensure queryCallouts gets correct results
+        // and reset the error log (and its callouts)
+        checkExpectations(expectations, errl);
+        resetError(errl);
+
+        // add the list of callouts as clock callouts
+        for(auto callout : callouts)
+        {
+            errl->addClockCallout(callout.target,
+                                  TODCLK_TYPE,
+                                  callout.priority,
+                                  callout.deconfig_state,
+                                  callout.gard_type);
+        }
+
+        // check ensure queryCallouts gets correct results
+        checkExpectations(expectations, errl);
+
+        // now we will test with a mix, add some HW callouts
+        // while leaving the clock callouts we previously added
+        for(auto callout : callouts)
+        {
+            errl->addHwCallout(callout.target,
+                               callout.priority,
+                               callout.deconfig_state,
+                               callout.gard_type);
+        }
+
+        // check ensure queryCallouts gets correct results
+        checkExpectations(expectations, errl);
+
+        // cleanup the error log
+        delete errl;
+        errl = nullptr;
+
+        }while(0);
+    }
+
+    void testSetGardType(void)
+    {
+        do{
+            Target *proc = nullptr, *ocmb = nullptr, *dimm = nullptr;
+            ErrlEntry* errl = nullptr;
+
+            // Get a proc, ocmb, and dimm target to test with
+            if(getTestTargets(proc, dimm, ocmb))
+            {
+                TS_INFO("Failed to find test targets! See previous TS_FAIL traces");
+                break;
+            }
+
+            vector<callout_data> callouts = makeCalloutVector(proc, ocmb, dimm);
+            vector<expectation_data> expectations(EXPECT_COUNT);
+
+            // Start fresh
+            resetError(errl);
+            resetExpectations(expectations, proc, ocmb, dimm);
+
+            // For reference, this is what the "reset expectations" are:
+            // expectations[PROC_EXPECT] = {proc, EXPECT_DECONFIG, EXPECT_GARD};
+            // expectations[OCMB_EXPECT] = {ocmb, EXPECT_NO_DECONFIG, EXPECT_GARD};
+            // expectations[DIMM_EXPECT] = {dimm, EXPECT_DECONFIG, EXPECT_NO_GARD};
+
+            // Add HW callouts for all callouts in the list
+            for(auto callout : callouts)
+            {
+                errl->addHwCallout(callout.target,
+                                   callout.priority,
+                                   callout.deconfig_state,
+                                   callout.gard_type);
+            }
+
+            // Set callouts associated with this processor to have GARD_NULL
+            errl->setGardType(proc, GARD_NULL);
+            expectations[PROC_EXPECT].expect_gard = false;
+            checkExpectations(expectations, errl);
+
+            // Set callouts associated with this processor to have GARD_Fatal
+            errl->setGardType(proc, GARD_Fatal);
+            expectations[PROC_EXPECT].expect_gard = true;
+            checkExpectations(expectations, errl);
+
+            // Reset the error log's callouts and our expectations
+            resetError(errl);
+            resetExpectations(expectations, proc, ocmb, dimm);
+
+            // Add clock callouts for all callouts in the list
+            for(auto callout : callouts)
+            {
+                errl->addClockCallout(callout.target,
+                                      TODCLK_TYPE,
+                                      callout.priority,
+                                      callout.deconfig_state,
+                                      callout.gard_type);
+            }
+
+            // Set callouts associated with this ocmb to have GARD_NULL
+            errl->setGardType(ocmb, GARD_NULL);
+            expectations[OCMB_EXPECT].expect_gard = false;
+            checkExpectations(expectations, errl);
+
+            // Set callouts associated with this ocmb to have GARD_Predictive
+            errl->setGardType(ocmb, GARD_Predictive);
+            expectations[OCMB_EXPECT].expect_gard = true;
+            checkExpectations(expectations, errl);
+
+            // Reset the error log's callouts and our expectations
+            resetError(errl);
+            resetExpectations(expectations, proc, ocmb, dimm);
+
+            // Add part callouts for all callouts in the list
+            for(auto callout : callouts)
+            {
+                errl->addPartCallout(callout.target,
+                                    NO_PART_TYPE,
+                                    callout.priority,
+                                    callout.deconfig_state,
+                                    callout.gard_type);
+            }
+
+            // Set callouts associated with this dimm to have GARD_Fatal
+            errl->setGardType(dimm, GARD_Fatal);
+            expectations[DIMM_EXPECT].expect_gard = true;
+            checkExpectations(expectations, errl);
+
+            // Set callouts associated with this dimm to have GARD_NULL
+            errl->setGardType(dimm, GARD_NULL);
+            expectations[DIMM_EXPECT].expect_gard = false;
+            checkExpectations(expectations, errl);
+
+            // Now we will test a combination of callouts. Without resetting
+            // the error log, add part callouts for all callouts in the list
+            for(auto callout : callouts)
+            {
+                errl->addClockCallout(callout.target,
+                                      TODCLK_TYPE,
+                                      callout.priority,
+                                      callout.deconfig_state,
+                                      callout.gard_type);
+            }
+            // expectations should not change
+            checkExpectations(expectations, errl);
+
+            // Set all gards to null ( dimm is already null)
+            // and check our expectations
+            errl->setGardType(proc, GARD_NULL);
+            errl->setGardType(ocmb, GARD_NULL);
+            expectations[PROC_EXPECT].expect_gard = false;
+            expectations[OCMB_EXPECT].expect_gard = false;
+            checkExpectations(expectations, errl);
+
+            // Set all gards to fatal
+            // and check our expectations
+            errl->setGardType(proc, GARD_Fatal);
+            errl->setGardType(ocmb, GARD_Fatal);
+            errl->setGardType(dimm, GARD_Fatal);
+            expectations[PROC_EXPECT].expect_gard = true;
+            expectations[OCMB_EXPECT].expect_gard = true;
+            expectations[DIMM_EXPECT].expect_gard = true;
+            checkExpectations(expectations, errl);
+
+            delete errl;
+            errl = nullptr;
+        }while(0);
+    }
+
+    void testSetDeconfigState(void)
+    {
+        do{
+            Target *proc = nullptr, *ocmb = nullptr, *dimm = nullptr;
+            ErrlEntry* errl = nullptr;
+
+            if(getTestTargets(proc, ocmb, dimm))
+            {
+                TS_FAIL("Failed to find test targets! See previous TS_INFO traces");
+                break;
+            }
+
+            vector<callout_data> callouts = makeCalloutVector(proc, ocmb, dimm);
+            vector<expectation_data> expectations(EXPECT_COUNT);
+
+            // Start fresh
+            resetError(errl);
+            resetExpectations(expectations, proc, ocmb, dimm);
+
+            // For reference, this is what the "reset expectations" are:
+            // expectations[PROC_EXPECT] = {proc, EXPECT_DECONFIG, EXPECT_GARD};
+            // expectations[OCMB_EXPECT] = {ocmb, EXPECT_NO_DECONFIG, EXPECT_GARD};
+            // expectations[DIMM_EXPECT] = {dimm, EXPECT_DECONFIG, EXPECT_NO_GARD};
+
+            // Add HW callouts for all callouts in the list
+            for(auto callout : callouts)
+            {
+                errl->addHwCallout(callout.target,
+                                   callout.priority,
+                                   callout.deconfig_state,
+                                   callout.gard_type);
+            }
+
+            // Set callouts associated with this processor to have NO_DECONFIG
+            errl->setDeconfigState(proc, NO_DECONFIG);
+            expectations[PROC_EXPECT].expect_deconfig = false;
+            checkExpectations(expectations, errl);
+
+            // Set callouts associated with this processor to have DELAYED_DECONFIG
+            errl->setDeconfigState(proc, DELAYED_DECONFIG);
+            expectations[PROC_EXPECT].expect_deconfig = true;
+            checkExpectations(expectations, errl);
+
+            // Reset the error log's callouts and our expectations
+            resetError(errl);
+            resetExpectations(expectations, proc, ocmb, dimm);
+
+            // Add clock callouts for all callouts in the list
+            for(auto callout : callouts)
+            {
+                errl->addClockCallout(callout.target,
+                                      TODCLK_TYPE,
+                                      callout.priority,
+                                      callout.deconfig_state,
+                                      callout.gard_type);
+            }
+
+            // Set callouts associated with this ocmb to have DELAYED_DECONFIG
+            errl->setDeconfigState(ocmb, DELAYED_DECONFIG);
+            expectations[OCMB_EXPECT].expect_deconfig = true;
+            checkExpectations(expectations, errl);
+
+            // Set callouts associated with this ocmb to have NO_DECONFIG
+            errl->setDeconfigState(ocmb, NO_DECONFIG);
+            expectations[OCMB_EXPECT].expect_deconfig = false;
+            checkExpectations(expectations, errl);
+
+            // Reset the error log's callouts and our expectations
+            resetError(errl);
+            resetExpectations(expectations, proc, ocmb, dimm);
+
+            // Add part callouts for all callouts in the list
+            for(auto callout : callouts)
+            {
+                errl->addPartCallout(callout.target,
+                                    NO_PART_TYPE,
+                                    callout.priority,
+                                    callout.deconfig_state,
+                                    callout.gard_type);
+            }
+
+            // Set callouts associated with this dimm to have NO_DECONFIG
+            errl->setDeconfigState(dimm, NO_DECONFIG);
+            expectations[DIMM_EXPECT].expect_deconfig = false;
+            checkExpectations(expectations, errl);
+
+            // Set callouts associated with this dimm to have DELAYED_DECONFIG
+            errl->setDeconfigState(dimm, DELAYED_DECONFIG);
+            expectations[DIMM_EXPECT].expect_deconfig = true;
+            checkExpectations(expectations, errl);
+
+            // Now we will test a combination of callouts. Without resetting
+            // the error log, add part callouts for all callouts in the list
+            for(auto callout : callouts)
+            {
+                errl->addClockCallout(callout.target,
+                                      TODCLK_TYPE,
+                                      callout.priority,
+                                      callout.deconfig_state,
+                                      callout.gard_type);
+            }
+            // expectations should not change
+            checkExpectations(expectations, errl);
+
+            // Set all deconfigs to NO_DECONFIG
+            // and check our expectations
+            errl->setDeconfigState(proc, NO_DECONFIG);
+            errl->setDeconfigState(ocmb, NO_DECONFIG);
+            errl->setDeconfigState(dimm, NO_DECONFIG);
+            expectations[PROC_EXPECT].expect_deconfig = false;
+            expectations[OCMB_EXPECT].expect_deconfig = false;
+            expectations[DIMM_EXPECT].expect_deconfig = false;
+            checkExpectations(expectations, errl);
+
+            // Set all deconfigs to DECONFIG
+            // and check our expectations
+            errl->setDeconfigState(proc, DECONFIG);
+            errl->setDeconfigState(ocmb, DECONFIG);
+            errl->setDeconfigState(dimm, DECONFIG);
+            expectations[PROC_EXPECT].expect_deconfig = true;
+            expectations[OCMB_EXPECT].expect_deconfig = true;
+            expectations[DIMM_EXPECT].expect_deconfig = true;
+            checkExpectations(expectations, errl);
+
+            delete errl;
+            errl = nullptr;
+      }while(0);
+  };
 
 
 };
