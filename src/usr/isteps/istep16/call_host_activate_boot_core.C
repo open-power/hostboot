@@ -431,15 +431,6 @@ void* call_host_activate_boot_core(void* const io_pArgs)
             }
         }
 
-        // Take new checkstop values and insert them into the homer image
-        l_errl = HBPM::core_checkstop_helper_homer();
-
-        if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "core_checkstop_helper_homer ERROR: returning.");
-            break;
-        }
     } while (0);
 
     //In case we take an error prior to resuming the MBOX in the normal flow

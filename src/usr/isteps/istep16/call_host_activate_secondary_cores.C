@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #include <p10_query_core_stop_state.H>
 #include <p10_core_special_wakeup.H>
 
+#include <pm/pm_common.H>
 #include <scom/scomif.H>
 #include <errl/errludprintk.H>
 #include <intr/intr_reasoncodes.H>
@@ -282,6 +283,24 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
 
                 break;
             }
+
+            // Save off original checkstop values and override them
+            // to disable core xstops and enable sys xstops.
+            l_errl = HBPM::core_checkstop_helper_hwp(l_core, true);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "core_checkstop_helper_hwp on master ERROR: returning.");
+                l_stepError.addErrorDetails(l_errl);
+                errlCommit(l_errl, HWPF_COMP_ID);
+                break;
+            }
+        }
+
+        // Break out if we've already hit an error
+        if ( !l_stepError.isNull() )
+        {
+            break;
         }
 
         // Disable Special Wakeup in MPIPL (allows stop states to work)
@@ -320,6 +339,19 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
                 }
             }
         }
+
+        // Take new checkstop values and insert them into the homer image
+        l_errl = HBPM::core_checkstop_helper_homer();
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_activate_secondary_cores ERROR: returning.");
+            l_stepError.addErrorDetails(l_errl);
+            errlCommit(l_errl, HWPF_COMP_ID);
+            break;
+        }
+
     } while (0);
 
     //Set SKIP_WAKEUP to false after all cores are powered on (16.2)
