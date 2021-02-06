@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,6 +156,7 @@ fapi2::ReturnCode p10_setup_sbe_config(
         fapi2::ATTR_FUSED_CORE_MODE_Type l_attr_fused_core_mode;
         fapi2::ATTR_CORE_LPAR_MODE_POLICY_Type l_attr_core_lpar_mode_policy;
         fapi2::ATTR_CORE_LPAR_MODE_Type l_attr_core_lpar_mode;
+        fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
         fapi2::buffer<uint64_t> l_perv_ctrl0;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_LPAR_MODE_POLICY, FAPI_SYSTEM, l_attr_core_lpar_mode_policy),
@@ -164,9 +165,13 @@ fapi2::ReturnCode p10_setup_sbe_config(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE, FAPI_SYSTEM, l_attr_fused_core_mode),
                  "Error from FAPI_ATTR_GET (ATTR_FUSED_CORE_MODE)");
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE, FAPI_SYSTEM, l_attr_contained_ipl_type),
+                 "Error from FAPI_ATTR_GET (ATTR_CONTAINED_IPL_TYPE)");
+
         if (l_attr_core_lpar_mode_policy == fapi2::ENUM_ATTR_CORE_LPAR_MODE_POLICY_FOLLOW_FUSED_STATE)
         {
-            if (l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED)
+            if ((l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED) &&
+                (l_attr_contained_ipl_type != fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CACHE))
             {
                 l_attr_core_lpar_mode = fapi2::ENUM_ATTR_CORE_LPAR_MODE_LPAR_PER_CORE;
             }
