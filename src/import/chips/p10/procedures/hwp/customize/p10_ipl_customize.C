@@ -97,12 +97,12 @@ using namespace fapi2;
                  #ID); \
     }
 
-#define MBOX_ATTR_CLEAR_VECTOR(ID,TARGET,IMAGE,SIZE)    \
+#define MBOX_ATTR_INIT_VECTOR(ID,TARGET,IMAGE,SIZE,VAL)    \
     { \
         fapi2::ID##_Type ID##_attrVal; \
         for (auto idx = 0; idx < SIZE; idx++) \
         { \
-            ID##_attrVal[idx] = 0; \
+            ID##_attrVal[idx] = VAL; \
             FAPI_TRY(p9_xip_set_element(IMAGE,#ID,idx,ID##_attrVal[idx]),    \
                      "MBOX_ATTR_CLEAR_VECTOR: Error writing attr %s to seeprom image",\
                      #ID); \
@@ -173,7 +173,8 @@ fapi2::ReturnCode writeMboxRegs (
     MBOX_ATTR_WRITE(ATTR_PROC_FABRIC_BROADCAST_MODE,            FAPI_SYSTEM,  i_image);
     MBOX_ATTR_SET(ATTR_PROC_SBE_MASTER_CHIP,                    i_procTarget, i_image);
     MBOX_ATTR_CLEAR(ATTR_PROC_FABRIC_TOPOLOGY_ID,               i_procTarget, i_image);
-    MBOX_ATTR_CLEAR_VECTOR(ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE,  i_procTarget, i_image, 32);
+    // SW517001 -- invalid entry encoded as 0xFF, not 0x00
+    MBOX_ATTR_INIT_VECTOR(ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE,   i_procTarget, i_image, 32, 0xFF);
 
     // mailbox 7
     if (l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CHIP)

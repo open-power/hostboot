@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -151,6 +151,22 @@ fapi2::ReturnCode get_topology_table_scoms(
 ///
 fapi2::ReturnCode set_topology_id_tables(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+///
+/// @brief Applies topology ID table attribute values to all PEC unit scom registers
+/// @param[in]  i_target        Reference to processor chip target
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error.
+///
+fapi2::ReturnCode set_topology_id_tables_pec(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+///
+/// @brief Applies topology ID table attribute values to all cache unit scom registers
+/// @param[in]  i_target        Reference to processor chip target
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error.
+///
+fapi2::ReturnCode set_topology_id_tables_cache(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target);
 
 }; // namespace topo
 

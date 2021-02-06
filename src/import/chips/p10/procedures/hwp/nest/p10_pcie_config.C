@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,7 +97,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
     fapi2::buffer<uint64_t> l_scom_data;
     fapi2::buffer<uint64_t> l_data_zeroes;
     fapi2::buffer<uint64_t> l_data_ones;
-    std::vector<uint64_t> l_topo_table_scom_values;
     l_data_zeroes.flush<0>();
     l_data_ones.flush<1>();
     uint64_t l_base_addr_nm0;
@@ -212,21 +211,8 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
                  "Error from PUT_PB_PBAIB_REGS_PBAIBHWCFG_REG");
 
         //Set topology id table
-        FAPI_TRY(topo::get_topology_table_scoms(i_target, l_topo_table_scom_values),
-                 "Error forming topology ID table scom data");
-
-        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0(l_pec_chiplet));
-        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0(l_pec_chiplet, l_topo_table_scom_values[0]));
-
-        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1(l_pec_chiplet));
-        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1(l_pec_chiplet, l_topo_table_scom_values[1]));
-
-        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2(l_pec_chiplet));
-        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2(l_pec_chiplet, l_topo_table_scom_values[2]));
-
-        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3(l_pec_chiplet));
-        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3(l_pec_chiplet, l_topo_table_scom_values[3]));
-
+        FAPI_TRY(topo::set_topology_id_tables_pec(i_target),
+                 "Error from topo::set_topology_id_tables_pec");
     }
 
     // initialize functional PHB chiplets

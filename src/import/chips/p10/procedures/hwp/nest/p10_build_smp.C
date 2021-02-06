@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <p10_scom_iohs_2.H>
 #include <p10_scom_iohs_6.H>
 #include <p10_scom_iohs_9.H>
+#include <p10_scom_eq.H>
 
 //------------------------------------------------------------------------------
 // Constants
@@ -714,13 +715,16 @@ fapi_try_exit:
 /// @brief Update topology ID tables to represent all chips
 ///
 /// @param[in] i_smp            Fully specified structure encapsulating SMP
+/// @param[in] i_op             Enumerated type representing SMP build phase (HB or FSP)
 ///
 /// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p10_build_smp_topo_tables(
-    p10_build_smp_system& i_smp)
+    p10_build_smp_system& i_smp,
+    const p10_build_smp_operation i_op)
 {
     FAPI_DBG("Start");
+    using namespace scomt::eq;
 
     // update topology ID table entry in attribute for each chip
     for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
@@ -737,8 +741,66 @@ fapi2::ReturnCode p10_build_smp_topo_tables(
     {
         for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
         {
+            // ADU, NX, VAS, INT, NMMU
+            // update on both build SMP calls
             FAPI_TRY(topo::set_topology_id_tables(*(p_iter->second.target)),
                      "Error from topo::set_topology_id_tables");
+
+            // PCIE: HB drawer scoped values updated in p10_pcie_config (after first build SMP call)
+            //       CEC scoped values can be updated here in second build SMP call
+            if (i_op == SMP_ACTIVATE_PHASE2)
+            {
+                FAPI_TRY(topo::set_topology_id_tables_pec(*(p_iter->second.target)),
+                         "Error from topo::set_topology_id_tables_pec");
+            }
+
+#ifdef __HOSTBOOT_MODULE
+            // L2/L3/NCU: update only for Hostboot execution
+            {
+                // build set of cores to update depending on build SMP call
+                std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>> l_cores_to_update;
+
+                for (const auto& c : (*(p_iter->second.target)).getChildren<fapi2::TARGET_TYPE_CORE>())
+                {
+                    fapi2::ATTR_CHIP_UNIT_POS_Type l_attr_chip_unit_pos;
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, c, l_attr_chip_unit_pos));
+
+                    if ((i_op == SMP_ACTIVATE_PHASE1) &&
+                        (p_iter->second.master_chip_group_next))
+                    {
+                        // limit update to set of active cores/backing caches on primary chip, which
+                        // should all be accessible... active/backing attributes do not currently get pushed
+                        // up from SBE -> HB so we need to determine empirically from HW
+                        // (code here looks at EQ clock region state)
+                        fapi2::Target<fapi2::TARGET_TYPE_EQ> l_eq = c.getParent<fapi2::TARGET_TYPE_EQ>();
+                        fapi2::buffer<uint64_t> l_eq_clock_status;
+                        FAPI_TRY(fapi2::getScom(l_eq, CLOCK_STAT_SL, l_eq_clock_status));
+
+                        // unit5 = l30
+                        // unit6 = l31
+                        // unit7 = l32
+                        // unit8 = l33
+                        // value of 0b0 indicates clocks are running
+                        if (!l_eq_clock_status.getBit(CLOCK_STAT_SL_UNIT5_SL + (l_attr_chip_unit_pos % 4)))
+                        {
+                            l_cores_to_update.push_back(c);
+                        }
+                    }
+                    else if (i_op == SMP_ACTIVATE_PHASE2)
+                    {
+                        // update all cores
+                        l_cores_to_update.push_back(c);
+                    }
+                }
+
+                // perform live update via SCOM
+                for (const auto& c : l_cores_to_update)
+                {
+                    FAPI_TRY(topo::set_topology_id_tables_cache(c),
+                             "Error from topo::set_topology_id_tables_cache");
+                }
+            }
+#endif
         }
     }
 
@@ -1212,7 +1274,7 @@ fapi2::ReturnCode p10_build_smp(
              "Error from p10_build_smp_check_topology");
 
     // update topology id tables prior to activating new config
-    FAPI_TRY(p10_build_smp_topo_tables(l_smp),
+    FAPI_TRY(p10_build_smp_topo_tables(l_smp, i_op),
              "Error from p10_build_smp_topo_tables");
 
     // update link topology id tables prior to activating new config

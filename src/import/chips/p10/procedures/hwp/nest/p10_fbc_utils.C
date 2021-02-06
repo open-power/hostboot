@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <p10_scom_pau_5.H>
 #include <p10_scom_pau_d.H>
 #include <p10_scom_pau_a.H>
+#include <p10_scom_pec.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -68,6 +69,10 @@ const uint64_t PAU_SM0_TOPO_TABLE_ADDR    = scomt::pau::CS_SM0_SNP_MISC_TOPOLOGY
 const uint64_t PAU_SM1_TOPO_TABLE_ADDR    = scomt::pau::CS_SM1_SNP_MISC_TOPOLOGY_TABLE0;
 const uint64_t PAU_SM2_TOPO_TABLE_ADDR    = scomt::pau::CS_SM2_SNP_MISC_TOPOLOGY_TABLE0;
 const uint64_t PAU_SM3_TOPO_TABLE_ADDR    = scomt::pau::CS_SM3_SNP_MISC_TOPOLOGY_TABLE0;
+const uint64_t PEC_TOPO_TABLE_ADDR        = scomt::pec::PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0;
+const uint64_t L2_TOPO_TABLE_ADDR         = scomt::c::L2_L2MISC_L2CERRS_TOPOTABLE0;
+const uint64_t NCU_TOPO_TABLE_ADDR        = scomt::c::NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG0;
+const uint64_t L3_TOPO_TABLE_ADDR         = scomt::c::L3_MISC_L3CERRS_TOPOLOGY_TBL0_SCOM_RD;
 
 // The register layout is common but the SCOM headers to access them are not.
 // To simplify programming, shove function pointers to each SET_* field function
@@ -303,7 +308,7 @@ fapi2::ReturnCode set_topology_id_tables(
 
     // Topology ID tables excluded from this function:
     //   L2/L3/NCU/QME Topology ID tables are configured by hcode
-    //   PCIe Topology ID tables configured in p10_pcie_scominit (register access requires iovalid)
+    //   PCIe Topology ID tables configured in p10_pcie_config (register access requires iovalid)
 
     FAPI_DBG("Configuring adu topology id table");
 
@@ -363,6 +368,58 @@ fapi_try_exit:
     FAPI_DBG("exit");
     return fapi2::current_err;
 }
+
+fapi2::ReturnCode set_topology_id_tables_pec(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("start");
+
+    std::vector<uint64_t> l_topo_table_scom_values;
+    FAPI_TRY(get_topology_table_scoms(i_target, l_topo_table_scom_values),
+             "Error forming topology ID table scom data");
+
+#ifndef __PPE__
+
+    for (auto& l_pec : i_target.getChildren<fapi2::TARGET_TYPE_PEC>())
+    {
+        for (uint8_t i = 0; i < topo::NUM_TOPO_SCOMS; i++)
+        {
+            FAPI_TRY(putScom(l_pec, PEC_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+        }
+    }
+
+#endif // !__PPE__
+
+fapi_try_exit:
+    FAPI_DBG("exit");
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode set_topology_id_tables_cache(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
+{
+    FAPI_DBG("start");
+
+    std::vector<uint64_t> l_topo_table_scom_values;
+    FAPI_TRY(get_topology_table_scoms(i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>(), l_topo_table_scom_values),
+             "Error forming topology ID table scom data");
+
+#ifndef __PPE__
+
+    for (uint8_t i = 0; i < topo::NUM_TOPO_SCOMS; i++)
+    {
+        FAPI_TRY(putScom(i_target, L2_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+        FAPI_TRY(putScom(i_target, NCU_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+        FAPI_TRY(putScom(i_target, L3_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+    }
+
+#endif // !__PPE__
+
+fapi_try_exit:
+    FAPI_DBG("exit");
+    return fapi2::current_err;
+}
+
 #endif // !__PPE_QME
 }; // namespace topo
 
