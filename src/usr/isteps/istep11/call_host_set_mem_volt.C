@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,8 @@
 #include <platform_vddr.H>              // platform_enable_vddr
 
 #include <targeting/targplatutil.H>     // assertGetToplevelTarget
+#include <hwpThread.H>
+
 
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
@@ -62,6 +64,23 @@ using namespace TARGETING;
 
 namespace ISTEP_11
 {
+
+class WorkItem_pmic_enable: public ISTEP::HwpWorkItem
+{
+  public:
+    WorkItem_pmic_enable( IStepError& i_stepError,
+                           const Target& i_ocmb )
+    : HwpWorkItem( i_stepError, i_ocmb, "pmic_enable" ) {}
+
+    virtual errlHndl_t run_hwp( void )
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+        FAPI_INVOKE_HWP(l_err, pmic_enable, l_fapi_target);
+        return l_err;
+    }
+};
+
 
 void* call_host_set_mem_volt (void *io_pArgs)
 {
@@ -99,42 +118,38 @@ void* call_host_set_mem_volt (void *io_pArgs)
         }
     }
 
+
+    Util::ThreadPool<ISTEP::HwpWorkItem> threadpool;
+
     // Create a vector of Target pointers
-    TargetHandleList l_chipList;
+    TargetHandleList l_ocmbTargetList;
 
     // Get a list of all of the functioning ocmb chips
-    getAllChips(l_chipList, TYPE_OCMB_CHIP, true);
+    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP, true);
 
-    for (const auto & l_ocmb: l_chipList)
+    for (const auto & l_ocmb_target: l_ocmbTargetList)
     {
         // PMICs are not present on Gemini, so skip this enable call
         // check EXPLORER first as this is most likely the configuration
-        uint32_t chipId = l_ocmb->getAttr<ATTR_CHIP_ID>();
+        uint32_t chipId = l_ocmb_target->getAttr<ATTR_CHIP_ID>();
         if (chipId == POWER_CHIPID::EXPLORER_16)
         {
-            TRACFCOMP( g_trac_isteps_trace,
-                       "call_host_set_mem_volt: "
-                       "calling pmic_enable on OCMB 0x%.8X",
-                       get_huid(l_ocmb) );
-
-            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi2_target(l_ocmb);
-
-            // Invoke procedure
-            FAPI_INVOKE_HWP(l_errl, pmic_enable, l_fapi2_target);
+            //  Create a new workitem from this membuf and feed it to the
+            //  thread pool for processing.  Thread pool handles workitem
+            //  cleanup.
+            threadpool.insert(new WorkItem_pmic_enable(l_StepError,
+                                                       *l_ocmb_target));
         }
+    }
 
-        if (l_errl)
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      "ERROR : call_host_set_mem_volt HWP(): "
-                      "pmic_enable failed on target 0x%08X."
-                      TRACE_ERR_FMT,
-                      get_huid(l_ocmb),
-                      TRACE_ERR_ARGS(l_errl));
-
-            // Capture error and continue to next OCMB
-            captureError(l_errl, l_StepError, ISTEP_COMP_ID, l_ocmb);
-        }
+    // Start the threads and wait for completion
+    if( ISTEP::HwpWorkItem::start_threads( threadpool,
+                                           l_StepError,
+                                           l_ocmbTargetList.size() ) )
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                  ERR_MRK"call_host_set_mem_volt: start_threads returned an error for pmic_enable" );
+        break;
     }
 
     } while(0);
