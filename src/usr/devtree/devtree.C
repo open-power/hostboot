@@ -289,6 +289,82 @@ void debugReadCmpData(const void* i_fdt,
 //-----------------------------------------------------------------------------
 #endif
 
+namespace
+{
+
+// @brief A structure to associate Target pointers with their devtree nodes.
+struct devtree_cache_pair
+{
+    Target* target = nullptr;
+    int devtree_node_offset = 0;
+};
+
+/* @brief Less-than comparison operator for devtree_cache_pair
+ */
+bool operator<(const devtree_cache_pair& lhs, const devtree_cache_pair& rhs)
+{
+    return lhs.target < rhs.target;
+}
+
+/**
+ * @brief Build a cache mapping Target pointers to devtree nodes.
+ *
+ * @param[in] i_fdt  Device tree handle
+ * @return           Cache, sorted by target pointer.
+ */
+std::vector<devtree_cache_pair> devtree_cache_targets(void* const i_fdt)
+{
+    std::vector<devtree_cache_pair> cache;
+    int node_offset = fdt_next_node(i_fdt, DTREE_START_OFFSET, NULL);
+
+    while (node_offset >= 0)
+    {
+        int attr_len = 0;
+        const void* const attr_value = fdt_getprop(i_fdt, node_offset, PHYS_BIN_PROPERTY, &attr_len);
+
+        if (attr_value && attr_len == sizeof(EntityPath))
+        {
+            const auto entity_path = static_cast<const EntityPath*>(attr_value);
+
+            Target* const target = targetService().toTarget(*entity_path);
+
+            if (target)
+            {
+                cache.push_back({ target, node_offset });
+            }
+        }
+
+        node_offset = fdt_next_node(i_fdt, node_offset, NULL);
+    }
+
+    std::sort(begin(cache), end(cache));
+
+    return cache;
+}
+
+/**
+ * @brief Look up an item in the given device tree Target/node cache.
+ *
+ * @param[in] i_cache   The cache
+ * @param[in] i_target  The target to look up
+ * @return              The device tree node, if found, or -FDT_ERR_NOTFOUND otherwise.
+ */
+int devtree_cache_lookup(const std::vector<devtree_cache_pair>& i_cache,
+                         Target* const i_target)
+{
+    const auto it = std::lower_bound(begin(i_cache), end(i_cache), devtree_cache_pair { i_target });
+
+    int node_offset = -FDT_ERR_NOTFOUND;
+
+    if (it != end(i_cache) && it->target == i_target)
+    {
+        node_offset = it->devtree_node_offset;
+    }
+
+    return node_offset;
+}
+
+} // anonymous namespace
 
 /**
  * @brief Function to sync targeting attributes to devtree
@@ -332,26 +408,18 @@ bool devtreeSyncAttrs( void )
         // Add sys target to the list
         l_targetList.push_back(l_sys);
 
+        const auto devtree_target_cache = devtree_cache_targets(l_fdt);
 
         // Loop on every attribute of every target
         for (const auto l_target: l_targetList)
         {
             const uint32_t l_targetHuid = get_huid(l_target);
 
-            // Target PHYS_PATH used as key to find associated node in devtree
-            EntityPath l_physPath =
-                            l_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
-            EntityPath* l_pPhysPath = &l_physPath;
-
             // Get the devtree node offset, if < 0 indicates an error and the
             // returned value is the error code, handle and go to next target
-            int l_dtreeNodeOffset =
-                    fdt_node_offset_by_prop_value(
-                                        l_fdt,
-                                        DTREE_START_OFFSET,
-                                        PHYS_BIN_PROPERTY,
-                                        static_cast<const void*>(l_pPhysPath),
-                                        sizeof(*l_pPhysPath));
+            int l_dtreeNodeOffset = devtree_cache_lookup(devtree_target_cache,
+                                                         l_target);
+
             if (l_dtreeNodeOffset < 0)
             {
                 handleDtreeError(l_dtreeNodeOffset,
