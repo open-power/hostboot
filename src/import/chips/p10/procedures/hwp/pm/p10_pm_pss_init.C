@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,34 @@
 // -----------------------------------------------------------------------------
 #include <p10_pm_pss_init.H>
 #include <p10_scom_proc.H>
+#include <p10_scom_proc_3.H>
+
+// ----------------------------------------------------------------------
+// Constant Definitions
+// ----------------------------------------------------------------------
+enum
+{
+    //WOF_CNTRL_SETUP break up
+    //Bit0 OCB_OCI_WOFICCTRL_INTERCHIP_LINK_ENABLE:
+    //Transmit and receive of FSM enabled
+
+    //Bit4:13 OCB_OCI_WOFICCTRL_INTERCHIP_CLOCK_DIVIDER:
+    //Interchip clock speed divider to divide the tpconst_gckn/4 mesh clock
+
+    //Bit16: OCB_OCI_WOFICCTRL_INTERCHIP_INTERFACE_ENABLE_NORTH: Enable the
+    //tx pins on the north interface. This also selects the north rx
+    //interface for receiving data.
+
+    //Bit17: OCB_OCI_WOFICCTRL_INTERCHIP_INTERFACE_ENABLE_SOUTH:
+    //Enable the tx pins on the south interface. This also selects the south rx
+    //interface for receiving data
+
+    //Bit20: OCB_OCI_WOFICCTRL_INTERCHIP_ECC_GEN_EN:
+    //Enable ECC generation. This will produce an 8b ECC of an assumed 64b
+    //payload using 64/72 SEC/DED encoding.
+
+    WOF_CNTRL_SETUP   =    0x8024E8,
+};
 
 // -----------------------------------------------------------------------------
 // Function prototypes
@@ -285,6 +313,15 @@ fapi2::ReturnCode pm_pss_start(
         l_data64.insertFromRight<0, 32>(l_spipss_100ns_value);
         FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_P2S_100NS, l_data64),
                  "Error: Failed to set 100ns clear SPI PSS P2S WDATA");
+
+        //  ******************************************************************
+        //  - Enable WOFCNTL Setup
+        //  ******************************************************************
+        FAPI_TRY( fapi2::getScom( i_target, TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL, l_data64 ),
+                  "Error: Failed To Read WOF Cntrl Setup" );
+        l_data64.insertFromRight <0, 23>( WOF_CNTRL_SETUP );
+        FAPI_TRY( fapi2::putScom( i_target, TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL, l_data64 ),
+                  "Error: Failed To Init WOF Cntrl Setup" );
 
     } // END: using namespace scomt::eq
 

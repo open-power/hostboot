@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -626,6 +626,28 @@ static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_ERROR_PTR_REGISTER_DMA_ERROR_PTR_
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_ERROR_PTR_REGISTER_DMA_ERROR_PTR_REG_LEN = 32;
 //<< [TP_TPVSB_FSI_W_SHIFT_DMA_ERROR_PTR_REGISTER]
 // proc/reg00019.H
+
+//>> [TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL]
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL = 0x0006c780ull;
+
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_LINK_ENABLE = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_LINK_RESET = 1;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_CPOL = 2;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_CPHA = 3;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_CLOCK_DIVIDER = 4;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_CLOCK_DIVIDER_LEN = 10;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_RESERVED_14 = 14;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_WRAP_ENABLE = 15;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_INTERFACE_ENABLE_NORTH = 16;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_INTERFACE_ENABLE_SOUTH = 17;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_SYNC_EN = 18;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_RESERVED_19 = 19;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_ECC_GEN_EN = 20;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_ECC_CHECK_EN = 21;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_RX_FSM_FREEZE_ON_UE = 22;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL_INTERCHIP_RESET_ECC_ERR = 23;
+//<< [TP_TPCHIP_OCC_OCI_OCB_WOFICCTRL]
+// proc/reg00018.H
 
 //>>THE END<<
 
