@@ -30,11 +30,16 @@ actionclass self_level2_th_5perHour
     threshold5phour;
 };
 
-actionclass l3_cache_ce
+actionclass l3_cache_read_ce_dd20
 {
     calloutSelfMed;
     threshold( field(128 / day), mfg_file(ATTR_MNFG_TH_L3_CACHE_CES) );
     funccall("L3CE");
+};
+
+actionclass l3_cache_read_ce
+{
+    try(funccall("ignoreDD10"), l3_cache_read_ce_dd20);
 };
 
 actionclass l3_cache_ue_UERE
@@ -44,17 +49,32 @@ actionclass l3_cache_ue_UERE
     funccall("L3UE");
 };
 
-actionclass l3_dir_ce
+actionclass l3_dir_read_ce_dd20
 {
     calloutSelfMed;
     threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_L3_DIR_CES) );
 };
 
-actionclass l2_cache_ce
+actionclass l3_dir_read_ce
+{
+    try(funccall("ignoreDD10"), l3_dir_read_ce_dd20);
+};
+
+actionclass l3_cache_write_ce
+{
+    try(funccall("ignoreDD10"), self_th_32perDay);
+};
+
+actionclass l2_cache_read_ce_dd20
 {
     calloutSelfMed;
     threshold( field(128 / day), mfg_file(ATTR_MNFG_TH_L2_CACHE_CES) );
     funccall("L2CE");
+};
+
+actionclass l2_cache_read_ce
+{
+    try(funccall("ignoreDD10"), l2_cache_read_ce_dd20);
 };
 
 actionclass l2_cache_ue_UERE
@@ -64,10 +84,15 @@ actionclass l2_cache_ue_UERE
     funccall("L2UE");
 };
 
-actionclass l2_dir_ce
+actionclass l2_dir_read_ce_dd20
 {
     calloutSelfMed;
     threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_L2_DIR_CES) );
+};
+
+actionclass l2_dir_read_ce
+{
+    try(funccall("ignoreDD10"), l2_dir_read_ce_dd20);
 };
 
 actionclass l2_power_bus_ce

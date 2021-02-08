@@ -643,5 +643,35 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE( p10_core, L3CE );
 
+/**
+ * @brief  For P10 DD1.0, generate information log and mask attention.
+ * @param  i_chip A core chip.
+ * @param  io_sc  The step code data struct
+ * @return SUCCESS for P10 DD1.0, PRD_SCAN_COMM_REGISTER_ZERO for P10 DD2.0+.
+ */
+int32_t ignoreDD10(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
+{
+    if (0x10 == getChipLevel(i_chip->getTrgt()))
+    {
+        // Add level 2 support and this core to the callout list (just in case).
+        io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_MED);
+        io_sc.service_data->SetCallout(i_chip->getTrgt(), MRU_LOW, NO_GARD);
+
+        // Set the threshold flag so that rule code will mask this attention.
+        io_sc.service_data->setFlag(ServiceDataCollector::AT_THRESHOLD);
+
+        // Clear the service call flag (informational only).
+        if (CHECK_STOP != io_sc.service_data->getPrimaryAttnType())
+        {
+            io_sc.service_data->clearServiceCall();
+        }
+
+        return SUCCESS;
+    }
+
+    return PRD_SCAN_COMM_REGISTER_ZERO; // So try statement will continue.
+}
+PRDF_PLUGIN_DEFINE(p10_core, ignoreDD10);
+
 } // end namespace p10_core
 } // end namespace PRDF
