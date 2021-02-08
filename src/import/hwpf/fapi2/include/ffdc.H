@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,22 +129,6 @@ class FirstFailureData
         /// @return void *. Pointer to error info data. If NULL then no data
         ///
         void* getData(void) const;
-
-        ///
-        /// @brief Get a pointer to any error info and release ownership from
-        ///      FirstFailureData. The caller is responsible for deletion.
-        ///
-        /// This is called by PLAT. The expected use-case is to retrieve a
-        /// platform error log.
-        ///
-        /// @return void*. Pointer to any Error data. If NULL then no data
-        ///
-        inline void* releaseData(void)
-        {
-            void* l_pData = iv_info;
-            iv_info = nullptr;
-            return l_pData;
-        }
 
         ///
         /// @brief Add ErrorInfo
