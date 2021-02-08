@@ -277,15 +277,6 @@ int32_t getCfam( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
-
-TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
-                            i_procTarget,
-                            TARGETING::TYPE i_connType)
-{
-    return nullptr;
-}
-
 //##############################################################################
 //##                        Fabric/Memory bus functions
 //##############################################################################

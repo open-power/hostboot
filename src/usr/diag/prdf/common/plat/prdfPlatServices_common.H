@@ -263,18 +263,6 @@ int32_t getCfam( ExtensibleChip * i_chip,
                  uint32_t & o_data);
 
 /**
- * @brief   get sysref clk target for the given proc target.
- * @param   i_procTarget  proc target.
- * @param   i_peerType    Type of peer clock source
- * @param   i_oscPos      OSC position (0 or 1)
- * @return  Handle_t of systemref clock target.
- */
-TARGETING::TargetHandle_t getActiveRefClk(
-                            TARGETING::TargetHandle_t i_procTarget,
-                            TARGETING::TYPE i_connType);
-
-
-/**
  * @brief   Add callouts and FFDC for Deadman timer
  * @param   i_target      target for processor chip
  * @param   io_sc         service data structure
