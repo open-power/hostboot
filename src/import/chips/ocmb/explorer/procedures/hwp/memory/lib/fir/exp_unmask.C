@@ -510,9 +510,9 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
              .recoverable_error<EXPLR_RDF_FIR_MAINLINE_UE>()
              .checkstop<EXPLR_RDF_FIR_MAINLINE_IAUE>()
              .recoverable_error<EXPLR_RDF_FIR_MAINLINE_IUE>()
-             .checkstop<EXPLR_RDF_FIR_MAINTENANCE_AUE>()
-             .checkstop<EXPLR_RDF_FIR_MAINTENANCE_IAUE>()
-             .write(), "Failed to write RDF FIR mask for %s", mss::c_str(i_target));
+             .checkstop_nomask<EXPLR_RDF_FIR_MAINTENANCE_AUE>()
+             .checkstop_nomask<EXPLR_RDF_FIR_MAINTENANCE_IAUE>()
+             .write(), "Failed to write RDF FIR mask and action regs for %s", mss::c_str(i_target));
 
     // Write SRQ FIR mask per Explorer unmask spec
     FAPI_TRY(l_exp_srq_srqfirq_reg.checkstop<EXPLR_SRQ_SRQFIRQ_PORT_FAIL>().write());

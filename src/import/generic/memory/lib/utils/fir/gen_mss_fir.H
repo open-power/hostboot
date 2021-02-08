@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,7 +98,7 @@ class reg
 
         ///
         /// @brief Clear FIR bits
-        /// @tparam B the ordinial number of the bit in question
+        /// @tparam B the ordinal number of the bit in question
         /// @return FAPI2_RC_SUCCESS iff ok
         ///
         template< uint64_t B >
@@ -126,7 +126,7 @@ class reg
 
         ///
         /// @brief Setup Checkstop (0,0,0,0)
-        /// @tparam B the ordinial number of the bit in question
+        /// @tparam B the ordinal number of the bit in question
         /// @tparam C the bit count, defaults to 1
         /// @return fir::reg reference suitable for chaining
         ///
@@ -137,10 +137,22 @@ class reg
         }
 
         ///
-        /// @brief Setup Recoverable Error (0,1,0,0)
-        /// @tparam B the ordinial number of the bit in question
+        /// @brief Setup Checkstop_nomask (0,0,0,x) without unmasking given FIR bits
+        /// @tparam B the ordinal number of the bit in question
         /// @tparam C the bit count, defaults to 1
-        /// @return fir::reg reference sutable for chaining
+        /// @return fir::reg reference suitable for chaining
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fir::reg<R>& checkstop_nomask()
+        {
+            return action_helper_no_mask<B, C>(0, 0, 0);
+        }
+
+        ///
+        /// @brief Setup Recoverable Error (0,1,0,0)
+        /// @tparam B the ordinal number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return fir::reg reference suitable for chaining
         ///
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& recoverable_error()
@@ -150,9 +162,9 @@ class reg
 
         ///
         /// @brief Setup Attention (1,0,0,0)
-        /// @tparam B the ordinial number of the bit in question
+        /// @tparam B the ordinal number of the bit in question
         /// @tparam C the bit count, defaults to 1
-        /// @return fir::reg reference sutable for chaining
+        /// @return fir::reg reference suitable for chaining
         ///
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& attention()
@@ -162,9 +174,9 @@ class reg
 
         ///
         /// @brief Setup Local checkstop (1,1,0,0)
-        /// @tparam B the ordinial number of the bit in question
+        /// @tparam B the ordinal number of the bit in question
         /// @tparam C the bit count, defaults to 1
-        /// @return fir::reg reference sutable for chaining
+        /// @return fir::reg reference suitable for chaining
         ///
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& local_checkstop()
@@ -174,9 +186,9 @@ class reg
 
         ///
         /// @brief Setup Host Attention (0,0,1,0)
-        /// @tparam B the ordinial number of the bit in question
+        /// @tparam B the ordinal number of the bit in question
         /// @tparam C the bit count, defaults to 1
-        /// @return fir::reg reference sutable for chaining
+        /// @return fir::reg reference suitable for chaining
         ///
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& host_attention()
@@ -186,9 +198,9 @@ class reg
 
         ///
         /// @brief Setup Masked (x,x,x,1)
-        /// @tparam B the ordinial number of the bit in question
+        /// @tparam B the ordinal number of the bit in question
         /// @tparam C the bit count, defaults to 1
-        /// @return fir::reg reference sutable for chaining
+        /// @return fir::reg reference suitable for chaining
         ///
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& masked()
@@ -198,9 +210,9 @@ class reg
 
         ///
         /// @brief Setup Masked without touching action bits (x,x,x,1)
-        /// @tparam B the ordinial number of the bit in question
+        /// @tparam B the ordinal number of the bit in question
         /// @tparam C the bit count, defaults to 1
-        /// @return fir::reg reference sutable for chaining
+        /// @return fir::reg reference suitable for chaining
         ///
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& remask()
@@ -283,7 +295,7 @@ class reg
         fapi2::buffer<uint64_t> iv_action2;
 
         ///
-        /// @brief Register helper takes a setting of bits for action0, action1, action2, and mask and sets our internal state
+        /// @brief Register helper takes a setting of bits for action0, action1, action2, and optionally mask and sets our internal state
         /// @tparam B the fir bit ordinal number
         /// @tparam C the bit count, defaults to 1
         /// @param[in] i_act0 the setting for action0
@@ -299,12 +311,32 @@ class reg
                                           const uint64_t i_mask)
         {
             iv_mask.writeBit<B, C>(i_mask);
+
+            return this->action_helper_no_mask<B, C>(i_act0, i_act1, i_act2);
+        }
+
+        ///
+        /// @brief Register helper takes a setting of bits for action0, action1, action2, and sets our internal state
+        /// @tparam B the fir bit ordinal number
+        /// @tparam C the bit count, defaults to 1
+        /// @param[in] i_act0 the setting for action0
+        /// @param[in] i_act1 the setting for action1
+        /// @param[in] i_act2 the setting for action2
+        /// @return reference to fir::reg, to be used for chaining
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fir::reg<R>& action_helper_no_mask(const uint64_t i_act0,
+                const uint64_t i_act1,
+                const uint64_t i_act2)
+        {
             iv_action0.writeBit<B, C>(i_act0);
             iv_action1.writeBit<B, C>(i_act1);
             iv_action2.writeBit<B, C>(i_act2);
 
             return *this;
         }
+
+
 };
 
 } // end ns fir
