@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 
 // Istep framework
 #include <istepHelperFuncs.H>
+#include    <hwpThread.H>
 
 // fapi2 HWP invoker
 #include    <fapi2.H>
@@ -57,6 +58,39 @@ using   namespace   TARGETING;
 
 namespace ISTEP_13
 {
+
+class WorkItem_exp_scominit: public ISTEP::HwpWorkItem
+{
+  public:
+    WorkItem_exp_scominit( IStepError& i_stepError,
+                           const Target& i_ocmb )
+    : HwpWorkItem( i_stepError, i_ocmb, "exp_scominit" ) {}
+
+    virtual errlHndl_t run_hwp( void )
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+        FAPI_INVOKE_HWP(l_err, exp_scominit, l_fapi_target);
+        return l_err;
+    }
+};
+
+
+class WorkItem_p10_throttle_sync: public ISTEP::HwpWorkItem
+{
+  public:
+    WorkItem_p10_throttle_sync( IStepError& i_stepError,
+                                const Target& i_proc )
+    : HwpWorkItem( i_stepError, i_proc, "p10_throttle_sync" ) {}
+
+    virtual errlHndl_t run_hwp( void )
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_target(iv_pTarget);
+        FAPI_INVOKE_HWP(l_err, p10_throttle_sync, l_fapi_target);
+        return l_err;
+    }
+};
 
 
 /**
@@ -112,11 +146,12 @@ void* call_mss_scominit (void *io_pArgs)
 
 void run_exp_scominit(IStepError & io_iStepError)
 {
-    errlHndl_t l_err(nullptr);
+    Util::ThreadPool<ISTEP::HwpWorkItem> threadpool;
 
     // Get all functional OCMB targets
     TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+    size_t l_numWorkitems = 0;
 
     for (const auto & l_ocmb : l_ocmbTargetList)
     {
@@ -124,16 +159,12 @@ void run_exp_scominit(IStepError & io_iStepError)
         uint32_t chipId = l_ocmb->getAttr< ATTR_CHIP_ID>();
         if (chipId == POWER_CHIPID::EXPLORER_16)
         {
-            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-                (l_ocmb);
-
-            // Dump current run on target
-            TRACFCOMP( g_trac_isteps_trace,
-                "Running exp_scominit HWP on target HUID 0x%.8X",
-                get_huid(l_ocmb) );
-
-            //  call the HWP with each fapi2::Target
-            FAPI_INVOKE_HWP(l_err, exp_scominit, l_fapi_ocmb_target);
+            //  Create a new workitem from this OCMB and feed it to the
+            //  thread pool for processing.  Thread pool handles workitem
+            //  cleanup.
+            threadpool.insert(new WorkItem_exp_scominit(io_iStepError,
+                                                        *l_ocmb));
+            l_numWorkitems++;
         }
         else
         {
@@ -143,24 +174,15 @@ void run_exp_scominit(IStepError & io_iStepError)
                 get_huid(l_ocmb), chipId );
             continue;
         }
+    }
 
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      "ERROR : exp_scominit target 0x%.8X"
-                      TRACE_ERR_FMT,
-                      get_huid(l_ocmb),
-                      TRACE_ERR_ARGS(l_err));
-            // capture error and commit it
-            captureError(l_err, io_iStepError, HWPF_COMP_ID, l_ocmb);
-            break;
-        }
-        else
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                  "SUCCESS running exp_scominit HWP on "
-                  "target HUID 0x%.8X", get_huid(l_ocmb));
-        }
+    // Start the threads and wait for completion
+    if( ISTEP::HwpWorkItem::start_threads( threadpool,
+                                           io_iStepError,
+                                           l_numWorkitems ) )
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                  ERR_MRK"call_mss_scominit: start_threads returned an error for exp_scominit" );
     }
 }
 
@@ -170,7 +192,7 @@ void run_exp_scominit(IStepError & io_iStepError)
  */
 void run_proc_throttle_sync_13(IStepError & io_iStepError)
 {
-    errlHndl_t  l_err(nullptr);
+    Util::ThreadPool<ISTEP::HwpWorkItem> threadpool;
 
     // Get a list of all processors to run Throttle Synchronization on
     TARGETING::TargetHandleList l_procChips;
@@ -178,41 +200,20 @@ void run_proc_throttle_sync_13(IStepError & io_iStepError)
 
     for (const auto & l_procChip: l_procChips)
     {
-        // Convert the TARGETING::Target into a fapi2::Target by passing
-        // l_procChip into the fapi2::Target constructor
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                           l_fapiProcTarget(l_procChip);
+        //  Create a new workitem from this OCMB and feed it to the
+        //  thread pool for processing.  Thread pool handles workitem
+        //  cleanup.
+        threadpool.insert(new WorkItem_p10_throttle_sync(io_iStepError,
+                                                         *l_procChip));
+    }
 
-        // Calling p10_throttle_sync HWP on PROC chip, trace out stating so
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                   "Running p10_throttle_sync HWP on PROC target HUID 0x%.8X",
-                   TARGETING::get_huid(l_procChip) );
-
-        // Call the HWP p10_throttle_sync call on each fapi2::Target
-        FAPI_INVOKE_HWP( l_err, p10_throttle_sync, l_fapiProcTarget );
-
-        if (l_err)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                       "ERROR: p10_throttle_sync HWP call on PROC target "
-                       "HUID 0x%08x failed."
-                       TRACE_ERR_FMT,
-                       get_huid(l_procChip),
-                       TRACE_ERR_ARGS(l_err) );
-
-            // Capture error, commit and continue, do not break out here.
-            // Continue here and consolidate all the errors that might
-            // occur in a batch before bailing. This will facilitate in the
-            // efficiency of the reconfig loop.
-            captureError(l_err, io_iStepError, HWPF_COMP_ID, l_procChip);
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                       "SUCCESS : p10_throttle_sync HWP call on "
-                       "PROC target HUID 0x%08x",
-                       TARGETING::get_huid(l_procChip) );
-        }
+    // Start the threads and wait for completion
+    if( ISTEP::HwpWorkItem::start_threads( threadpool,
+                                           io_iStepError,
+                                           l_procChips.size() ) )
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                  ERR_MRK"call_mss_scominit: start_threads returned an error for p10_throttle_sync" );
     }
 } // run_proc_throttle_sync
 
