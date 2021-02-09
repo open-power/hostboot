@@ -79,11 +79,11 @@ void HwpWorkItem::operator()()
 
 /**
  * @brief Return an upper bound for the number of threads
- *        to spawn based on how much memory we have available
+ *        to spawn based on system constraints
  */
 size_t HwpWorkItem::getMaxThreads( void )
 {
-    // Default to no real artificial limit
+    // Default to no artificial limit
     size_t l_maxThreads = 128;
 
     // This is where we could put any kind of limitations based on
