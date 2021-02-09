@@ -114,7 +114,8 @@ void* host_gard( void *io_pArgs )
         }
 
         // Put out some helpful messages that show which targets are usable
-        std::map<TYPE,uint64_t> l_funcData;
+        typedef struct { uint64_t x[4]; } posbits_t; //256 bits
+        std::map<TARGETING::TYPE,posbits_t> l_funcData;
         for (auto target : targetService())
         {
             if (!(target->getAttr<ATTR_HWAS_STATE>().functional))
@@ -122,17 +123,25 @@ void* host_gard( void *io_pArgs )
                 continue;
             }
             TYPE l_type =target->getAttr<ATTR_TYPE>();
-            ATTR_FAPI_POS_type l_pos = 0;
-            if( target->tryGetAttr<ATTR_FAPI_POS>(l_pos) )
+            ATTR_ORDINAL_ID_type l_pos = 0;
+            if( target->tryGetAttr<ATTR_ORDINAL_ID>(l_pos) )
             {
-                l_funcData[l_type] |= (0x8000000000000000 >> l_pos);
+                if( l_funcData.find(l_type) == l_funcData.end() )
+                {
+                    posbits_t newentry = {};
+                    l_funcData[l_type] = newentry;
+                }
+                if( l_pos < 255 )
+                {
+                    l_funcData[l_type].x[l_pos/64] |= (0x8000000000000000 >> (l_pos%64));
+                }
             }
         }
         EntityPath l_epath;
         for( auto l_data : l_funcData)
         {
             auto l_type = l_data.first;
-            uint64_t l_val = l_data.second;
+            auto l_val = l_data.second;
             //Only want to display procs, dimms, and cores
             if((l_type != TYPE_DIMM) &&
                (l_type != TYPE_PROC) &&
@@ -141,17 +150,18 @@ void* host_gard( void *io_pArgs )
                 continue;
             }
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "FUNCTIONAL> %s[%.2X]=%.8X%.8X",
+                      "FUNCTIONAL> %s[%.2X]=%.16llX%.16llX%.16llX%.16llX",
                       l_epath.pathElementTypeAsString(l_type),
                       l_type,
-                      l_val>>32, l_val&0xFFFFFFFF);
+                      l_val.x[0],l_val.x[1],l_val.x[2],l_val.x[3]);
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "FUNCTIONAL> %s[%.2X]=%.8X%.8X",
-                              l_epath.pathElementTypeAsString(l_type),
-                              l_type,
-                              l_val>>32,
-                              l_val&0xFFFFFFFF );
+            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "FUNCTIONAL> %s[%.2X]=%.16llX%.16llX",
+                l_epath.pathElementTypeAsString(l_data.first),
+                                                l_type,
+                                                l_val.x[0],l_val.x[1] );
+            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "                     %.16llX%.16llX",
+                                                l_val.x[2],l_val.x[3] );
 #endif
             }
 
