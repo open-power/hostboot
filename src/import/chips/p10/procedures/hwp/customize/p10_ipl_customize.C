@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,6 @@ fapi2::ReturnCode writeMboxRegs (
                            l_attr_contained_ipl_type));
 
     // customize only attributes
-    MBOX_ATTR_WRITE(ATTR_SECURITY_MODE,                         FAPI_SYSTEM,  i_image);
     MBOX_ATTR_WRITE(ATTR_SECTOR_BUFFER_STRENGTH,                FAPI_SYSTEM,  i_image);
     MBOX_ATTR_WRITE(ATTR_LPC_CONSOLE_CNFG,                      i_procTarget, i_image);
 
