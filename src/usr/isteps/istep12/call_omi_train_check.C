@@ -40,6 +40,7 @@
 
 #include    <initservice/isteps_trace.H>
 #include    <istepHelperFuncs.H>    // captureError
+#include    <hwpThread.H>
 
 #include    <util/misc.H>           // isSimicsRunning()
 
@@ -62,10 +63,86 @@ using   namespace   ISTEPS_TRACE;
 namespace ISTEP_12
 {
 
+class WorkItem_exp_omi_train_check: public ISTEP::HwpWorkItem
+{
+  public:
+    WorkItem_exp_omi_train_check( IStepError& i_stepError,
+                                  const Target& i_ocmb )
+    : HwpWorkItem( i_stepError, i_ocmb, "exp_omi_train_check" ) {}
+
+    virtual errlHndl_t run_hwp( void )
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+        FAPI_INVOKE_HWP(l_err, exp_omi_train_check, l_fapi_target);
+        return l_err;
+    }
+
+    /**
+     * @brief Executes if the HWP returns an error
+     *   Extended in order to check for missing OCMB FW updates
+     *
+     * @param[in] i_err  Error returned from FAPI_INVOKE_HWP
+     */
+    virtual void run_after_failure( errlHndl_t& i_err )
+    {
+        // Capture error if there is no update needed, otherwise mark
+        //  the part for an update
+        captureErrorOcmbUpdateCheck(i_err, *iv_pStepError,
+                                    HWPF_COMP_ID, iv_pTarget);
+        cv_encounteredHwpError = true;
+    };
+
+    // Remember that we hit a HWP failure.  We can't rely on IStepError because
+    //  logs might have been committed informational in the case where the OCMB
+    //  is downlevel.
+    static bool cv_encounteredHwpError;
+};
+bool WorkItem_exp_omi_train_check::cv_encounteredHwpError = false;
+
+
+class WorkItem_p10_omi_train_check: public ISTEP::HwpWorkItem
+{
+  public:
+    WorkItem_p10_omi_train_check( IStepError& i_stepError,
+                                  const Target& i_omi )
+    : HwpWorkItem( i_stepError, i_omi, "p10_omi_train_check" ) {}
+
+    virtual errlHndl_t run_hwp( void )
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OMI> l_fapi_target(iv_pTarget);
+        FAPI_INVOKE_HWP(l_err, p10_omi_train_check, l_fapi_target);
+        return l_err;
+    }
+
+    /**
+     * @brief Executes if the HWP returns an error
+     *   Extended in order to check for missing omi FW updates
+     *
+     * @param[in] i_err  Error returned from FAPI_INVOKE_HWP
+     */
+    virtual void run_after_failure( errlHndl_t& i_err )
+    {
+        // Capture error if there is no update needed, otherwise mark
+        //  the part for an update
+        captureErrorOcmbUpdateCheck(i_err, *iv_pStepError,
+                                    HWPF_COMP_ID, iv_pTarget);
+        cv_encounteredHwpError = true;
+    };
+
+    // Remember that we hit a HWP failure.  We can't rely on IStepError because
+    //  logs might have been committed informational in the case where the omi
+    //  is downlevel.
+    static bool cv_encounteredHwpError;
+};
+bool WorkItem_p10_omi_train_check::cv_encounteredHwpError = false;
+
+
 void* call_omi_train_check (void *io_pArgs)
 {
     IStepError l_StepError;
-    errlHndl_t l_err = nullptr;
+    Util::ThreadPool<ISTEP::HwpWorkItem> threadpool;
 
     TRACFCOMP( g_trac_isteps_trace, "call_omi_train_check entry");
 
@@ -75,39 +152,22 @@ void* call_omi_train_check (void *io_pArgs)
         //        - Check for training errors
 
         // Find functional ocmb targets
-        TargetHandleList l_chipList;
-        getAllChips(l_chipList, TYPE_OCMB_CHIP, true);
+        TargetHandleList l_OcmbChipList;
+        getAllChips(l_OcmbChipList, TYPE_OCMB_CHIP, true);
+        size_t l_numWorkitems = 0;
 
-        for (auto & l_ocmb: l_chipList)
+        for (auto & l_ocmb: l_OcmbChipList)
         {
             // Only run exp_omi_train_check on EXPLORER OCMB targets.
             uint32_t chipId = l_ocmb->getAttr<ATTR_CHIP_ID>();
             if (chipId == POWER_CHIPID::EXPLORER_16)
             {
-                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
-                    l_ocmb_target( l_ocmb );
-                FAPI_INVOKE_HWP(l_err, exp_omi_train_check, l_ocmb_target );
-
-                //  process return code.
-                if ( l_err )
-                {
-                    TRACFCOMP( g_trac_isteps_trace,
-                        "ERROR : call exp_omi_train_check HWP(): failed on "
-                        "target 0x%08X. "
-                        TRACE_ERR_FMT,
-                        get_huid(l_ocmb),
-                        TRACE_ERR_ARGS(l_err));
-
-                    // Capture error
-                    captureErrorOcmbUpdateCheck(l_err, l_StepError, HWPF_COMP_ID, l_ocmb);
-                }
-                else
-                {
-                    TRACFCOMP( g_trac_isteps_trace,
-                        "SUCCESS : exp_omi_train_check HWP on target "
-                        "HUID %.08x",
-                        get_huid(l_ocmb));
-                }
+                //  Create a new workitem from this ocmb and feed it to the
+                //  thread pool for processing.  Thread pool handles workitem
+                //  cleanup.
+                threadpool.insert(new WorkItem_exp_omi_train_check(l_StepError,
+                                                                   *l_ocmb));
+                l_numWorkitems++;
             }
             else
             {
@@ -119,14 +179,25 @@ void* call_omi_train_check (void *io_pArgs)
             }
         } // OCMB loop
 
-        // Do not continue if an error was encountered
-        if(!l_StepError.isNull())
+        // Start the threads and wait for completion
+        if( ISTEP::HwpWorkItem::start_threads( threadpool,
+                                               l_StepError,
+                                               l_numWorkitems ) )
         {
-            TRACFCOMP( g_trac_isteps_trace,
-                INFO_MRK "call_omi_train_check exited early because "
-                "exp_omi_train_check had failures" );
+            TRACFCOMP(g_trac_isteps_trace,
+                      ERR_MRK"call_omi_train_check: start_threads returned an error for exp_omi_train_check" );
             break;
         }
+
+        // Do not continue if an error was encountered
+        if(WorkItem_p10_omi_train_check::cv_encounteredHwpError)
+        {
+            TRACFCOMP( g_trac_isteps_trace,
+                INFO_MRK "call_omi_train_check exited early because p10_omi_train_check "
+                "had failures");
+            break;
+        }
+
 
         // 12.8.b p10_omi_train_check.C
         //        - Check for training errors
@@ -137,33 +208,22 @@ void* call_omi_train_check (void *io_pArgs)
 
         for (const auto & l_omi_target : l_omiTargetList)
         {
-            //  call the HWP with each OMI target
-            fapi2::Target<fapi2::TARGET_TYPE_OMI>
-                l_fapi_omi_target(l_omi_target);
-
-            FAPI_INVOKE_HWP(l_err, p10_omi_train_check, l_fapi_omi_target );
-
-            //  process return code.
-            if ( l_err )
-            {
-                TRACFCOMP( g_trac_isteps_trace,
-                    "ERROR : call p10_omi_train_check HWP(): failed on "
-                    "target 0x%08X. "
-                    TRACE_ERR_FMT,
-                    get_huid(l_omi_target),
-                    TRACE_ERR_ARGS(l_err));
-
-                // Capture error
-                captureErrorOcmbUpdateCheck(l_err, l_StepError, HWPF_COMP_ID,
-                    l_omi_target);
-            }
-            else
-            {
-                TRACFCOMP( g_trac_isteps_trace,
-                    "SUCCESS : p10_omi_train_check HWP on target HUID %.08x",
-                    get_huid(l_omi_target));
-            }
+            //  Create a new workitem from this ocmb and feed it to the
+            //  thread pool for processing.  Thread pool handles workitem
+            //  cleanup.
+            threadpool.insert(new WorkItem_p10_omi_train_check(l_StepError,
+                                                               *l_omi_target));
         } // OMI loop
+
+        // Start the threads and wait for completion
+        if( ISTEP::HwpWorkItem::start_threads( threadpool,
+                                               l_StepError,
+                                               l_omiTargetList.size() ) )
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      ERR_MRK"call_omi_train_check: start_threads returned an error for p10_omi_train_check" );
+            break;
+        }
     } while (0);
 
     // Beyond this point, scoms to the OCMBs should be working, so clear the
