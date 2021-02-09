@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -222,7 +222,8 @@ class MmioTest : public CxxTest::TestSuite
             {
                 TS_INFO("testExplrMMIO> "
                         "received expected failure on mmio write");
-                errlCommit(l_err, CXXTEST_COMP_ID);
+                delete l_err;
+                l_err = nullptr;
             }
 
             // Re-enable inband scoms after failure disables it
@@ -255,7 +256,8 @@ class MmioTest : public CxxTest::TestSuite
             {
                 TS_INFO("testExplrMMIO> "
                         "received expected failure on mmio read");
-                errlCommit(l_err, CXXTEST_COMP_ID);
+                delete l_err;
+                l_err = nullptr;
             }
 
         } while (0);
