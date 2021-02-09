@@ -967,6 +967,24 @@
   </attribute>  
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_THROTTLE_SYNC_HW550549</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Only set MCMODE0_DISABLE_MC_SYNC to 0 on primary MC on P10 DD1.0
+      during p10_throttle_sync.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
    <id>ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY</id>
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>

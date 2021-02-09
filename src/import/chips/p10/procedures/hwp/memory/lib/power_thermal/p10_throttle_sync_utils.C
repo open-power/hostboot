@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 #include <generic/memory/lib/utils/count_dimm.H>
+#include <lib/workarounds/p10_mc_workarounds.H>
 
 namespace mss
 {
@@ -117,12 +118,20 @@ fapi2::ReturnCode setup_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_targe
 {
     using namespace scomt::mc;
 
-    const mss::states l_sync_val = i_primary ? mss::states::OFF : mss::states::ON;
+    fapi2::ATTR_CHIP_EC_FEATURE_THROTTLE_SYNC_HW550549_Type l_ec_workaround = 0;
+    mss::states l_sync_val = mss::states::OFF;
     fapi2::buffer<uint64_t> l_scomData;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_THROTTLE_SYNC_HW550549,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                           l_ec_workaround),
+             "%s Failed to read ATTR_CHIP_EC_FEATURE_THROTTLE_SYNC_HW550549",
+             mss::c_str(i_target));
 
     // -------------------------------------------------------------------
     // 1. Setup MCMODE0 register
     // -------------------------------------------------------------------
+    l_sync_val = mss::workarounds::mc::get_mc_sync_value(i_primary, l_ec_workaround);
     FAPI_TRY(configure_sync_operations(i_target, l_sync_val));
 
     // -------------------------------------------------------------------
