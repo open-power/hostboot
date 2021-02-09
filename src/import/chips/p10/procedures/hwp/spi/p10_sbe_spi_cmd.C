@@ -1236,7 +1236,7 @@ spi_read_secure(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_lengt
         else
         {
             FAPI_ERR( "spi_read_secure: (ecc) Read length is greater than 40 bytes, which cannot be"
-                      " done in a secure write. i_length = %d", i_length);
+                      " done in a secure read. i_length = %d", i_length);
             return fapi2::FAPI2_RC_INVALID_PARAMETER;
         }
 
@@ -1265,7 +1265,7 @@ spi_read_secure(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_lengt
         else
         {
             FAPI_ERR( "spi_read_secure: Read length is greater than 40 bytes, which cannot be"
-                      " done in a secure write. i_length = %d", i_length);
+                      " done in a secure read. i_length = %d", i_length);
             return fapi2::FAPI2_RC_INVALID_PARAMETER;
         }
     }
@@ -1575,7 +1575,12 @@ spi_write(SpiControlHandle& i_handle, uint32_t i_address,
         return rc;
     }
 
-    // Secure writes can only be done at byte-length of SEEPROM_SECURE_DATA_LEN or less
+    // Secure writes can only be done at byte-length of SEEPROM_SECURE_DATA_LEN or less, therefore
+    // write length is determined either by:
+    // (1) number of bytes left to write
+    // (2) place in the current page of SEEPROM
+    // (3) SEEPROM_SECURE_DATA_LEN
+    // The smallest of these three is written
     do
     {
         // Min between remaining_len and SEEPROM_SECURE_DATA_LEN
