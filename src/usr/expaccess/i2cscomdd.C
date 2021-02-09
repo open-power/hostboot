@@ -124,6 +124,7 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
                     TRACFCOMP( g_trac_expscom, ERR_MRK "i2cScomPerformOp> "
                         "i2c_get_scom failed for HUID 0x%x Address 0x%lx ",
                         TARGETING::get_huid(i_target), l_scomAddr );
+                    //no break, want common handling below
                 }
                 else
                 {
@@ -146,6 +147,7 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
                     TRACFCOMP( g_trac_expscom, ERR_MRK "i2cScomPerformOp> "
                             "i2c_put_scom failed for HUID 0x%x Address 0x%lx ",
                             TARGETING::get_huid(i_target), l_scomAddr );
+                    //no break, want common handling below
                 }
             }
         }
@@ -167,6 +169,7 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
                     TRACFCOMP( g_trac_expscom, ERR_MRK "i2cScomPerformOp> "
                         "i2c_get_scom failed for HUID 0x%x Address 0x%lx ",
                         TARGETING::get_huid(i_target), l_scomAddr );
+                    //no break, want common handling below
                 }
                 else
                 {
@@ -193,11 +196,34 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
                     TRACFCOMP( g_trac_expscom, ERR_MRK "i2cScomPerformOp> "
                         "i2c_put_scom failed for HUID 0x%x Address 0x%lx ",
                         TARGETING::get_huid(i_target), l_scomAddr );
+                    //no break, want common handling below
                 }
             }
-
         }
-
+        // If we hit any errors during the scom access, deconfigure the explorer
+        if( l_err )
+        {
+            const auto search_results = l_err->queryCallouts(i_target);
+            using compare_enum = ERRORLOG::ErrlEntry::callout_search_criteria;
+            // Check if we found any callouts for this Explorer
+            if((search_results & compare_enum::TARGET_MATCH) == compare_enum::TARGET_MATCH)
+            {
+                // If we found a callout for this Explorer w/o a DECONFIG,
+                // edit the callout to include a deconfig
+                if((search_results & compare_enum::DECONFIG_FOUND) != compare_enum::DECONFIG_FOUND)
+                {
+                    l_err->setDeconfigState(i_target, HWAS::DELAYED_DECONFIG);
+                }
+            }
+            else
+            {
+                // Add HW callout for TPM with low priority
+                l_err->addHwCallout(i_target,
+                                    HWAS::SRCI_PRIORITY_LOW,
+                                    HWAS::DELAYED_DECONFIG,
+                                    HWAS::GARD_NULL);
+            }
+        }
     } while (0);
 
     recursive_mutex_unlock(mutex);
