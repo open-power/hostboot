@@ -55,15 +55,6 @@ TRAC_INIT(&g_trac_devtree, DEVTREE_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
 namespace DEVTREE
 {
 
-
-// The start offset in the libfdt code is incremented before it
-// is used, so -1 will actually start at offset 0 = sys level
-static constexpr int DTREE_START_OFFSET = -1;
-
-// Name of the property in devtree that matches hostboot PHYS_PATH attr
-static constexpr const char* const PHYS_BIN_PROPERTY = "ATTR_PHYS_BIN_PATH";
-
-
 /**
  * @brief Function to process libfdt errors
  *
@@ -289,28 +280,15 @@ void debugReadCmpData(const void* i_fdt,
 //-----------------------------------------------------------------------------
 #endif
 
-namespace
-{
-
-// @brief A structure to associate Target pointers with their devtree nodes.
-struct devtree_cache_pair
-{
-    Target* target = nullptr;
-    int devtree_node_offset = 0;
-};
-
 /* @brief Less-than comparison operator for devtree_cache_pair
  */
-bool operator<(const devtree_cache_pair& lhs, const devtree_cache_pair& rhs)
+static bool operator<(const devtree_cache_pair& lhs, const devtree_cache_pair& rhs)
 {
     return lhs.target < rhs.target;
 }
 
 /**
  * @brief Build a cache mapping Target pointers to devtree nodes.
- *
- * @param[in] i_fdt  Device tree handle
- * @return           Cache, sorted by target pointer.
  */
 std::vector<devtree_cache_pair> devtree_cache_targets(void* const i_fdt)
 {
@@ -344,10 +322,6 @@ std::vector<devtree_cache_pair> devtree_cache_targets(void* const i_fdt)
 
 /**
  * @brief Look up an item in the given device tree Target/node cache.
- *
- * @param[in] i_cache   The cache
- * @param[in] i_target  The target to look up
- * @return              The device tree node, if found, or -FDT_ERR_NOTFOUND otherwise.
  */
 int devtree_cache_lookup(const std::vector<devtree_cache_pair>& i_cache,
                          Target* const i_target)
@@ -363,8 +337,6 @@ int devtree_cache_lookup(const std::vector<devtree_cache_pair>& i_cache,
 
     return node_offset;
 }
-
-} // anonymous namespace
 
 /**
  * @brief Function to sync targeting attributes to devtree

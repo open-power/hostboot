@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2020
+# Contributors Listed Below - COPYRIGHT 2010,2021
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -262,6 +262,7 @@ TESTCASE_MODULES += testmbox
 TESTCASE_MODULES += testsbe
 TESTCASE_MODULES += testsbeio
 TESTCASE_MODULES += testerrl
+TESTCASE_MODULES += $(if $(CONFIG_DEVTREE),testdevtree)
 TESTCASE_MODULES += testhwas
 TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testsyslib

@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/devtree/makefile $
+# $Source: src/usr/devtree/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2021
+# Contributors Listed Below - COPYRIGHT 2021
 # [+] International Business Machines Corp.
 #
 #
@@ -23,24 +23,15 @@
 #
 # IBM_PROLOG_END_TAG
 
-ROOTPATH = ../../..
-MODULE = devtree
+ROOTPATH = ../../../..
 
-CC_OVERRIDE = 1
+MODULE = testdevtree
+TESTS = *.H
 
 EXTERN_PATH = ${ROOTPATH}/src/usr/devtree/extern
 
 EXTRAINCDIR += ${EXTERN_PATH}
 EXTRAINCDIR += ${EXTERN_PATH}/dtc/
 EXTRAINCDIR += ${EXTERN_PATH}/dtc/libfdt/
-
-# Include mk files
-include extern/dtc/libfdt/libfdt.mk
-
-OBJS += devtree.o
-
-VPATH += ${EXTERN_PATH}/dtc/libfdt/
-
-SUBDIRS += test.d
 
 include ${ROOTPATH}/config.mk
