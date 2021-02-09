@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,10 +74,6 @@ extern "C"
         // Set DFI init start requested from Stephen Powell
         FAPI_TRY( mss::change_dfi_init_start(i_target, mss::ON ), "%s Failed to change_dfi_init_start",
                   mss::c_str(i_target));
-
-        // Re-enable port fails.
-        FAPI_TRY( mss::change_port_fail_disable(i_target, mss::OFF ),
-                  "%s Failed to change_port_fail_disable", mss::c_str(i_target) );
 
         // Start the refresh engines by setting MBAREF0Q(0) = “1”. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.
