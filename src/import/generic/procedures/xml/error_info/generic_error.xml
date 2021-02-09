@@ -1717,4 +1717,25 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_MIXED_MDS_PLUG_ERROR</rc>
+    <description>
+        An invalid mixing of MDS and non-MDS dimms detected.
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>MCC_TARGET</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

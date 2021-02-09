@@ -65,6 +65,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
     mss::display_git_commit_info("p10_mss_eff_config");
 
     uint8_t l_spd_rev = 0;
+
     FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
 
     for(const auto& dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))

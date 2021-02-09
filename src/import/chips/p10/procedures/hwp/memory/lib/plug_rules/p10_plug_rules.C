@@ -33,7 +33,9 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
+#include <fapi2.H>
 #include <lib/shared/p10_consts.H>
+#include <lib/shared/p10_defaults.H>
 #include <algorithm>
 
 #include <generic/memory/lib/utils/find.H>
@@ -45,8 +47,8 @@
 #include <mss_explorer_attribute_getters.H>
 #include <lib/shared/p10_consts.H>
 
-#include <fapi2.H>
 #include <lib/plug_rules/p10_plug_rules.H>
+#include <lib/dimm/exp_kind.H>
 #include <lib/plug_rules/exp_spd_keys_supported_map.H>
 
 namespace mss
@@ -137,6 +139,74 @@ bool spd_lookup_key::operator!=(const spd_lookup_key& i_rhs) const
 }
 
 ///
+/// @brief Enforces that MDS dimms are not mixed with non-MDS dimms
+/// @param[in] i_target the MCC target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode check_mds(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_worst_rc = fapi2::FAPI2_RC_SUCCESS;
+
+
+
+    bool l_is_mds = false;
+    bool l_mds_dimm = false;
+
+    // Check if MCC contains MDS dimms
+    FAPI_TRY( mss::dimm::is_mds<mss::mc_type::EXPLORER>(i_target, l_is_mds) );
+
+    // If no MDS dimms are present, skip
+    if ( l_is_mds == false )
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Loop through omi targets to get OCMB targets
+    for(const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
+    {
+        // Check ocmb targets for mixed dimms
+        for(const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
+        {
+            // Check dimm targets for mixed dimms
+            for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
+            {
+                // Check if dimm is an MDS dimm
+                FAPI_TRY( mss::dimm::is_mds<mss::mc_type::EXPLORER>(l_dimm, l_mds_dimm) );
+
+                // If MCC contains MDS, ensure dimm is an MDS dimm
+                FAPI_ASSERT_NOEXIT( l_mds_dimm,
+                                    fapi2::MSS_PLUG_RULES_MIXED_MDS_PLUG_ERROR()
+                                    .set_DIMM_TARGET(l_dimm)
+                                    .set_OCMB_TARGET(l_ocmb)
+                                    .set_MCC_TARGET(i_target),
+                                    "%s is a non-MDS DIMM plugged mixed with MDS DIMMs",
+                                    mss::c_str(l_dimm) );
+
+                // Save off any failing errors
+                if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    // If there is a fail detected, log it
+                    if (l_worst_rc != fapi2::FAPI2_RC_SUCCESS)
+                    {
+                        fapi2::logError(l_worst_rc, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
+                    }
+
+                    // Save off the error and continue
+                    l_worst_rc = fapi2::current_err;
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                }
+            }
+        }
+    }
+
+    return l_worst_rc;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Enforce the plug-rules we can do before mss_freq
 /// @param[in] i_target FAPI2 target (proc chip)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
@@ -159,6 +229,12 @@ fapi2::ReturnCode enforce_pre_freq(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     {
         FAPI_INF("Attribute set to ignore plug rule checking");
         return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Check for MDS/non-MDS dimm mixing
+    for(const auto& l_mcc : i_target.getChildren<fapi2::TARGET_TYPE_MCC>() )
+    {
+        FAPI_TRY( mss::plug_rule::check_mds(l_mcc) );
     }
 
     // Check shared reset signal plugging dependencies
