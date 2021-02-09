@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2082,11 +2082,9 @@ fapi2::ReturnCode mss_mrs_load_ddr4(
                 {
                     l_out_drv_imp_cntl[i_port_number][l_dimm_number] = 0x00;
                 }
-                // Not currently supported
-                else if (l_out_drv_imp_cntl[i_port_number][l_dimm_number] == fapi2::ENUM_ATTR_CEN_VPD_DRAM_RON_OHM48) //not supported
+                else if (l_out_drv_imp_cntl[i_port_number][l_dimm_number] == fapi2::ENUM_ATTR_CEN_VPD_DRAM_RON_OHM48)
                 {
                     l_out_drv_imp_cntl[i_port_number][l_dimm_number] = 0x80;
-                    FAPI_INF("DRAM RON is configured for 48 OHM which is not supported.");
                 }
 
                 //For DDR4:
@@ -3283,8 +3281,7 @@ fapi2::ReturnCode mss_ddr4_modify_mrs_pda(const fapi2::Target<fapi2::TARGET_TYPE
             {
                 l_out_drv_imp_cntl = 0x00;
             }
-            // Not currently supported
-            else if (l_out_drv_imp_cntl == fapi2::ENUM_ATTR_CEN_VPD_DRAM_RON_OHM48) //not supported
+            else if (l_out_drv_imp_cntl == fapi2::ENUM_ATTR_CEN_VPD_DRAM_RON_OHM48)
             {
                 l_out_drv_imp_cntl = 0x80;
             }
@@ -4220,8 +4217,7 @@ fapi2::ReturnCode mss_ddr4_load_nominal_mrs_pda(const fapi2::Target<fapi2::TARGE
         {
             l_out_drv_imp_cntl[i_port_number][i_dimm_number] = 0x00;
         }
-        // Not currently supported
-        else if (l_out_drv_imp_cntl[i_port_number][i_dimm_number] == fapi2::ENUM_ATTR_CEN_VPD_DRAM_RON_OHM48) //not supported
+        else if (l_out_drv_imp_cntl[i_port_number][i_dimm_number] == fapi2::ENUM_ATTR_CEN_VPD_DRAM_RON_OHM48)
         {
             l_out_drv_imp_cntl[i_port_number][i_dimm_number] = 0x80;
         }

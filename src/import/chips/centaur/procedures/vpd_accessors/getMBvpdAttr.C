@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1283,6 +1283,7 @@ extern "C"
         const uint8_t VPD_DRAM_RON_INVALID = 0x00;
         const uint8_t VPD_DRAM_RON_OHM34 = 0x07;
         const uint8_t VPD_DRAM_RON_OHM40 = 0x03;
+        const uint8_t VPD_DRAM_RON_OHM48 = 0x01;
 
         switch (io_value)
         {
@@ -1296,6 +1297,10 @@ extern "C"
 
             case VPD_DRAM_RON_OHM40:
                 io_value = fapi2::ENUM_ATTR_CEN_VPD_DRAM_RON_OHM40;
+                break;
+
+            case VPD_DRAM_RON_OHM48:
+                io_value = fapi2::ENUM_ATTR_CEN_VPD_DRAM_RON_OHM48;
                 break;
 
             default:
