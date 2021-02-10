@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@ extern uint8_t g_attrOverrideFapiTank;
 //******************************************************************************
 void * platMonitorForFspMessages(void * i_pContext)
 {
+    task_detach();
     FAPI_IMP("Starting platMonitorForFspMessages");
     fapi2::theAttrOverrideSync().monitorForFspMessages();
     return NULL; // Execution should never reach here
