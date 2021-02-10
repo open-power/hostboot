@@ -2986,7 +2986,7 @@
 
   <targetType>
     <id>unit-abus-power10</id>
-    <parent>unit-obus-smpgroup</parent>
+    <parent>unit-smpgroup</parent>
   </targetType>
 
   <targetType>
@@ -4451,55 +4451,6 @@
   </targetType>
 
   <targetType>
-    <id>unit-obus-smpgroup</id>
-    <parent>unit</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>FABRIC</default>
-    </attribute>
-    <attribute>
-      <id>DECONFIG_GARDABLE</id>
-      <default>1</default>
-    </attribute>
-    <attribute>
-      <id>HUID</id>
-    </attribute>
-    <attribute>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-      <!-- GARD -->
-      <default>0x00000001</default>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PEER_PATH</id>
-      <default>physical:na</default>
-    </attribute>
-    <attribute>
-      <id>PEER_TARGET</id>
-    </attribute>
-    <attribute>
-      <id>TYPE</id>
-      <default>SMPGROUP</default>
-    </attribute>
-  </targetType>
-
-  <targetType>
     <id>unit-occ-axone</id>
     <parent>unit-occ-power9</parent>
     <attribute>
@@ -5340,6 +5291,53 @@
     <attribute>
       <default>SBE</default>
       <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-smpgroup</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>FABRIC</default>
+    </attribute>
+    <attribute>
+      <id>DECONFIG_GARDABLE</id>
+      <default>1</default>
+    </attribute>
+    <attribute>
+      <id>HUID</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <id>PEER_PATH</id>
+      <default>physical:na</default>
+    </attribute>
+    <attribute>
+      <id>PEER_TARGET</id>
+    </attribute>
+    <attribute>
+      <id>TYPE</id>
+      <default>SMPGROUP</default>
     </attribute>
   </targetType>
 
