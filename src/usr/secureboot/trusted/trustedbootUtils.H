@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,20 +85,6 @@ errlHndl_t tpmCreateErrorLog(
     uint64_t i_user2,
     bool     i_addSwCallout = ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-/**
- *  @brief Mark the TPM as non-functional and take required steps
- *
- *  @param[in] i_pTpm    - Handle to TPM target
- *
- *  @param[in] io_errLog - Handle to Error Log used to collect FFDC
- *                         -- This log will be COMMITED in this function
- *                            and the handle will be set to nullptr
- *                         -- Any additional fails in marking the TPM as
- *                            non-functional will be linked to this
- *                         -- If nullptr, then the above actions are no-ops
- */
-void tpmMarkFailed(TpmTarget * i_pTpm,
-                   errlHndl_t & io_errLog);
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT namespace

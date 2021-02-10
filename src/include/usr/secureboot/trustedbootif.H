@@ -219,8 +219,7 @@ namespace TRUSTEDBOOT
      * @param[in] i_logMsgSize The size of the log message in bytes
      * @param[in] i_sendAsync Perform extension asynchronously, default true
      * @param[in] i_pTpm A specific TPM to singly extend a measurement into,
-                  default is nullptr, which indicates all of the TPMs will be
-                  extended.
+                  default is nullptr, which indicates to use the primary TPM.
      * @param[in] i_mirrorToLog After extending the measurement, mirror to log.
      *            default is true. Typically, false is used to poison the TPM.
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
@@ -355,6 +354,14 @@ namespace TRUSTEDBOOT
      *                     to poison a TPM will result in deconfiguring the TPM.
      */
     errlHndl_t poisonTpm(TpmTarget* i_pTpm);
+
+    /**
+    * @brief If we can find a functional backup TPM, poison it using the poisonTpm
+    *        function.
+    *
+    * @return nullptr on success; non-nullptr on error
+    */
+    errlHndl_t poisonBackupTpm(void);
 
     /**
      * @brief Poison all functional TPMs on the node. Calls poisonTpm for
@@ -554,6 +561,20 @@ namespace TRUSTEDBOOT
      */
     errlHndl_t synchronizeTpmLog();
 
+    /**
+     *  @brief Mark the TPM as non-functional and take required steps
+     *
+     *  @param[in] i_pTpm    - Handle to TPM target
+     *
+     *  @param[in] io_errLog - Handle to Error Log used to collect FFDC
+     *                         -- This log will be COMMITED in this function
+     *                            and the handle will be set to nullptr
+     *                         -- Any additional fails in marking the TPM as
+     *                            non-functional will be linked to this
+     *                         -- If nullptr, then the above actions are no-ops
+     */
+    void tpmMarkFailed(TpmTarget * i_pTpm,
+                       errlHndl_t & io_errLog);
 
 } // end TRUSTEDBOOT namespace
 

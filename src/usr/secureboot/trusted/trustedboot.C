@@ -1341,25 +1341,55 @@ void doInitBackupTpm()
     {
         auto l_backupHwasState = l_backupTpm->getAttr<
                                                   TARGETING::ATTR_HWAS_STATE>();
-        // Presence-detect the secondary TPM
-        TARGETING::TargetHandleList l_targetList;
-
-        TARGETING::Target* pSysTarget = nullptr;
-        TARGETING::targetService().getTopLevelTarget(pSysTarget);
-        assert(pSysTarget, "doInitBackupTpm(): System target was nullptr");
-        const auto mpipl = pSysTarget->getAttr<
-                               TARGETING::ATTR_IS_MPIPL_HB>();
-        if(mpipl)
+        if(!l_backupHwasState.functional)
         {
-            // If previously determined not to be available, nothing to do
-            if(   (!l_backupHwasState.present)
-               || (!l_backupHwasState.functional) )
+            // Its possible this TPM was marked non-functional due to a gard
+            // record or a deconfig-by-association. In this case we will not
+            // attempt further action.
+            TRACFCOMP(g_trac_trustedboot, "doInitBackupTpm: Backup TPM was found to be non-functional, exiting init early!");
+            break;
+        }
+
+        // Make sure the SPI master is functional before continuing.
+        TPMDD::tpm_info_t tpmData;
+        l_errl = TPMDD::tpmReadAttributes(l_backupTpm,
+                                          tpmData,
+                                          TPMDD::TPM_LOCALITY_0);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_trustedboot, "doInitBackupTpm: tpmReadAttributes returned an error, marking TPM as failed and giving up on init");
+            tpmMarkFailed(l_backupTpm, l_errl);
+            break;
+        }
+
+        if(!tpmData.spiTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+        {
+            // If we find that the SPI master is not functional, mark
+            // this TPM as non-functional and stop attempting to initialize it.
+            // We will hit this path if the 2nd processor is not present.
+            TRACFCOMP(g_trac_trustedboot,
+                      "doInitBackupTpm: Backup TPM's SPI master was found to be non-functional."
+                      " Setting backup TPM to be non-functional and exiting init early!");
+            l_backupHwasState.functional = 0;
+            l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(l_backupHwasState);
+            break;
+        }
+
+        TARGETING::Target* pSysTarget = TARGETING::UTIL::assertGetToplevelTarget();
+        if(pSysTarget->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+        {
+            // If this TPM was found to be not present on the previous IPL
+            // then do not attempt any further action.
+            if(!l_backupHwasState.present)
             {
+                TRACFCOMP(g_trac_trustedboot, "doInitBackupTpm: Backup TPM was found not to be present on MPIPL, exiting init early!");
                 break;
             }
         }
         else
         {
+            // Presence-detect the secondary TPM
+            TARGETING::TargetHandleList l_targetList;
             l_targetList.push_back(l_backupTpm);
             l_errl = HWAS::platPresenceDetect(l_targetList);
             if(l_errl)
@@ -1396,25 +1426,6 @@ void doInitBackupTpm()
         }
         mutex_unlock(l_backupTpm->
                                 getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
-
-        TARGETING::Target* l_primaryTpm = nullptr;
-        getPrimaryTpm(l_primaryTpm);
-        if(l_primaryTpm)
-        {
-            auto l_primaryHwasState = l_primaryTpm->getAttr<
-                                                  TARGETING::ATTR_HWAS_STATE>();
-            if(l_primaryHwasState.functional && l_primaryHwasState.present)
-            {
-                tpmReplayLog(l_primaryTpm, l_backupTpm);
-            }
-        }
-
-        l_errl = TRUSTEDBOOT::testCmpPrimaryAndBackupTpm();
-        if(l_errl)
-        {
-            errlCommit(l_errl, SECURE_COMP_ID);
-            break;
-        }
     }
     else
     {
@@ -1618,35 +1629,32 @@ void* tpmDaemon(void* unused)
                   assert(tb_msg->iv_len == sizeof(TRUSTEDBOOT::PcrExtendMsgData)
                          && msgData != nullptr, "Invalid PCRExtend Message");
 
-                  TARGETING::TargetHandleList tpmList;
-                  // if null TPM was passed extend all TPMs.  Otherwise, extend
+                  TpmTarget* l_tpm = nullptr;
+                  // if null TPM was passed extend the primary TPM.  Otherwise, extend
                   // only the TPM that was passed
                   if (msgData->mSingleTpm == nullptr)
                   {
-                      getTPMs(tpmList);
+                      getPrimaryTpm(l_tpm);
                   }
                   else
                   {
-                      tpmList.push_back(const_cast<TpmTarget*>(
-                                                         msgData->mSingleTpm));
+                      l_tpm = const_cast<TpmTarget*>(msgData->mSingleTpm);
                   }
-                  for (auto tpm : tpmList)
-                  {
-                      // Add the event to this TPM,
-                      // if an error occurs the TPM will
-                      //  be marked as failed and the error log committed
-                      TRUSTEDBOOT::pcrExtendSingleTpm(
-                                   tpm,
-                                   msgData->mPcrIndex,
-                                   msgData->mEventType,
-                                   msgData->mAlgId,
-                                   msgData->mDigest,
-                                   msgData->mDigestSize,
-                                   msgData->mMirrorToLog? msgData->mLogMsg:
-                                                                      nullptr,
-                                   msgData->mMirrorToLog? msgData->mLogMsgSize:
-                                                                      0);
-                  }
+
+                  // Add the event to this TPM,
+                  // if an error occurs the TPM will
+                  //  be marked as failed and the error log committed
+                  TRUSTEDBOOT::pcrExtendSingleTpm(
+                                l_tpm,
+                                msgData->mPcrIndex,
+                                msgData->mEventType,
+                                msgData->mAlgId,
+                                msgData->mDigest,
+                                msgData->mDigestSize,
+                                msgData->mMirrorToLog? msgData->mLogMsg:
+                                                                  nullptr,
+                                msgData->mMirrorToLog? msgData->mLogMsgSize:
+                                                                  0);
 
                   // Lastly make sure we are in a state
                   //  where we have a functional TPM
@@ -2226,6 +2234,28 @@ errlHndl_t poisonTpm(TpmTarget* i_pTpm)
               l_errl? "Un":"", TARGETING::get_huid(i_pTpm));
 
 #endif
+    return l_errl;
+}
+
+errlHndl_t poisonBackupTpm(void)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    TARGETING::Target* l_backupTpm = nullptr;
+    TRUSTEDBOOT::getBackupTpm(l_backupTpm);
+    do {
+    if(l_backupTpm && l_backupTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+    {
+        l_errl = poisonTpm(l_backupTpm);
+    }
+    else
+    {
+        // Do nothing if no functional backup TPM if found
+        TRACFCOMP(g_trac_trustedboot, "poisonBackupTpm: No functional backup TPM found.");
+    }
+    }while(0);
+#endif
+
     return l_errl;
 }
 

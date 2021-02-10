@@ -67,13 +67,31 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     ISTEP_ERROR::IStepError l_istepError;
 #ifndef CONFIG_VPO_COMPILE
     errlHndl_t l_err = nullptr;
-#endif
-
-//    @TODO RTC-264774: Backup TPM init is busted for 1 socket scenario. Despite the Proc parent being not XSCOM-able
-//                      and SPI Controller non-functional, the TPM is marked UNUSABLE. This shouldn't be happening.
-//    TRUSTEDBOOT::initBackupTpm();
 
     do {
+
+    // Attempt to initialize the backup TPM.
+    TRUSTEDBOOT::initBackupTpm();
+
+    // Always poison the backup TPM because we want to ensure
+    // it varies from the primary.
+    l_err = TRUSTEDBOOT::poisonBackupTpm();
+
+    if(l_err)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_secureboot_lockdown: poisonBackupTpm returned an error"
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(l_err));
+        l_istepError.addErrorDetails(l_err);
+        TARGETING::Target * backup_tpm = nullptr;
+        TRUSTEDBOOT::getBackupTpm(backup_tpm);
+        assert(backup_tpm != nullptr, "call_host_secureboot_lockdown: poisonBackupTpm returned an error when no backup tpm available");
+        // tpmMarkFailed will ensure there is at minimum a deconfig callout for the backup
+        // TPM and also set the deconfig bit to force fencing if security is enabled
+        TRUSTEDBOOT::tpmMarkFailed(backup_tpm, l_err);
+    }
+
 #ifdef CONFIG_SECUREBOOT
 
     if(SECUREBOOT::enabled())
@@ -158,6 +176,8 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     }
 #endif
     }while(0);
+
+#endif // CONFIG_VPO_COMPILE
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 EXIT_MRK"call_host_secureboot_lockdown");
