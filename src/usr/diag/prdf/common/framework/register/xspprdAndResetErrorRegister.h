@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@ class AndResetErrorRegister: public ErrorRegisterMask
   Constructor
   <ul>
   <br><b>Parameter:   </b> Scan comm register to read from
-  <br><b>Parameter:   </b> Resolution map (see iipResolutionMap.h)
+  <br><b>Parameter:   </b> Resolution map (see prdfResolutionMap.H)
   <br><b>Paramteer:   </b> Scan comm register to write to (for reset)
   <br><b>Parameter:   </b> Ptr to filter class (optional)
   <br><b>Parameter:   </b> Scan comm register id(optional)
@@ -90,7 +90,7 @@ class AndResetErrorRegister: public ErrorRegisterMask
   Constructor
   <ul>
   <br><b>Parameter:   </b> Scan comm register to read from
-  <br><b>Parameter:   </b> Resolution map (see iipResolutionMap.h)
+  <br><b>Parameter:   </b> Resolution map (see prdfResolutionMap.H)
   <br><b>Parameter:   </b> Scan comm register to Write to Reset the error
   <br><b>Parameter:   </b> Scan Comm Register id
   <br><b>Parameter:   </b> Scan comm Register of hardware mask (optional)

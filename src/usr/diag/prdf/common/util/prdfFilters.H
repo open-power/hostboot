@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,7 +169,7 @@ specified.
   const char * const BIT_LIST_STRING_31_26 = "\x20\x1B"; // priority bits
   PrioritySingleBitFilter psbFilter(BIT_LIST_STRING_31_26);
   ScanCommRegisterChip scr(...);  // see iipScanCommRegisterChip.h
-  ResolutionMap resMap(...);      // see iipResolutionMap.h
+  ResolutionMap resMap(...);      // see prdfResolutionMap.H
 
   // when the error register is read, the resulting list of bits on
   // is passed to psbFilter. the result is used to look up a resolution

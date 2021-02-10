@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,17 +38,13 @@
 #include <CcAutoDeletePointer.h>
 #include <iipSystem.h>
 #include <prdfGlobal.H>
-//#include <iipCalloutMap.h>
 #include <iipstep.h>
 #include <iipCaptureData.h>
 #include <iipServiceDataCollector.h>
 #include <iipErrorRegister.h>
 #include <iipEregResolution.h>
 #include <iipsdbug.h>
-#include <iipResolutionList.h>
 #include <iipCallAttnResolution.h>
-#include <iipTerminateResolution.h>
-#include <iipAnalyzeChipResolution.h>
 #include <xspprdTryResolution.h>
 #include <iipchip.h>
 #include <prdfCalloutGard.H>
@@ -140,25 +136,6 @@ int32_t CalloutGardResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
 }
 
 //--------------------------------------------------------------------
-// ResolutionList Member Functions
-//--------------------------------------------------------------------
-
-int32_t ResolutionList::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
-                                 bool i_default )
-{
-    int32_t rc = SUCCESS;
-    for(std::vector<void *>::iterator iter = resolutionList.begin();
-        iter != resolutionList.end();
-        ++iter)
-    {
-        Resolution * r = (Resolution *) *iter;
-        rc = r->Resolve( io_serviceData );
-        if( rc != SUCCESS ) break;
-    }
-    return(rc);
-}
-
-//--------------------------------------------------------------------
 // Call all chips raising attention as reported by sp sysdebug area
 //--------------------------------------------------------------------
 int32_t CallAttnResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
@@ -177,25 +154,6 @@ int32_t CallAttnResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
     signature->setErrCode((uint16_t)NO_PRD_ANALYSIS);
 
     return(rc);
-}
-
-// ********************************************************************
-
-int32_t TerminateResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
-                                      bool i_default )
-{
-    io_serviceData.service_data->SetTerminate();
-    return(SUCCESS);
-}
-
-// ********************************************************************
-
-int32_t AnalyzeChipResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
-                                        bool i_default )
-{
-    // mk442956 a
-    return xChip.Analyze( io_serviceData,
-                          io_serviceData.service_data->getSecondaryAttnType() );
 }
 
 // ********************************************************************

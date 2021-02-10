@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,14 +85,6 @@ void ServiceDataCollector::SetThresholdMaskId(uint32_t mask_id)
 inline
 uint32_t ServiceDataCollector::GetThresholdMaskId(void) const
 { return maskId; }
-
-// ---------------------------------------------------------------
-
-inline void ServiceDataCollector::SetTerminate(void)
-{
-    setFlag( TERMINATE    );
-    setFlag( SERVICE_CALL );
-}
 
 // ---------------------------------------------------------------
 

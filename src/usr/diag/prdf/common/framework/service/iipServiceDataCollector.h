@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -771,19 +771,7 @@ public:
 #endif
 
 private:  // functions
-  friend class TerminateResolution;
 
-  /**
-   Indicate that the machine should be taken down for this error
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> None.
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> Terminate() == true, IsServiceCall() == true
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  void SetTerminate(void);
   int32_t getxMRUListSizeinMem(void)const ;
 
 private:  // Data

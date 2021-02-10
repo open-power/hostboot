@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,7 +72,7 @@ class SCAN_COMM_REGISTER_CLASS;
       // ...
     }
  @endcode
- @see iipResolutionMap.h
+ @see prdfResolutionMap.H
 */
 class CaptureResolution : public Resolution
 {
