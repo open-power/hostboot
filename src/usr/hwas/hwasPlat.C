@@ -38,6 +38,7 @@
 #include <devicefw/driverif.H>
 #include <initservice/taskargs.H>
 #include <initservice/mboxRegs.H>
+#include <initservice/istepdispatcherif.H>
 #include <vpd/mvpdenums.H>
 #include <stdio.h>
 #include <sys/mm.h>
@@ -1095,7 +1096,12 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             // erase this target, and 'increment' to next
             pTarget_it = io_targets.erase(pTarget_it);
         }
+
 #if defined(CONFIG_SUPPORT_EEPROM_CACHING) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)
+        // pulling the data from the eeprom can be very slow so be sure to
+        //  indicate we're still making progress
+        INITSERVICE::sendProgressCode();
+
         EEPROM::cacheEepromVpd(pTarget, present);
 
         // Validate the ECC data of the VPD cache if target is a PROC and is present
@@ -1109,6 +1115,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         }
 
 #endif
+
         // FSP normally sets PN/SN so if FSP isn't present, do it here
         //(after VPD has been cached if caching is enabled)
         if ((present == true) &&
