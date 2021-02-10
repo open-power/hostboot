@@ -324,6 +324,9 @@
       <id>OCC_COMMON_AREA_PHYS_ADDR</id>
     </attribute>
     <attribute>
+      <id>OVERRIDES_ATTEMPTED_FLAG</id>
+    </attribute>
+    <attribute>
       <id>PDA_CAPTURED_THREAD_REG_ARRAY_ADDR</id>
     </attribute>
     <attribute>
