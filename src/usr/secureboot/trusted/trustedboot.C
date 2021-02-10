@@ -1860,13 +1860,16 @@ void* tpmDaemon(void* unused)
                       break;
                   }
 
+                  mutex_lock(l_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
                   err = validateTpmHandle(l_pTpm);
                   if (err)
                   {
+                      mutex_unlock(l_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
                       tb_msg->iv_errl = err;
                       err = nullptr;
                       break;
                   }
+
                   uint8_t dataBuf[sizeof(TPM2_GetRandomOut)] = {0};
                   size_t dataSize = sizeof(dataBuf);
                   auto cmd = reinterpret_cast<TPM2_GetRandomIn*>(dataBuf);
@@ -1910,6 +1913,7 @@ void* tpmDaemon(void* unused)
                              resp->randomBytes.buffer,
                              l_randNumSize);
                   }
+                  mutex_unlock(l_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
               }
               break;
           case TRUSTEDBOOT::MSG_TYPE_FLUSH:

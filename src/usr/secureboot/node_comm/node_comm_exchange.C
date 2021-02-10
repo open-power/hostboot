@@ -63,12 +63,6 @@
 
 #include <tracinterface.H>
 
-// ----------------------------------------------
-// Defines
-// ----------------------------------------------
-// Use if there is an issue getting random number from a functional TPM
-#define NODE_COMM_DEFAULT_NONCE 0xFFFFFFFFFFFFFFFF
-
 using   namespace   TARGETING;
 
 namespace SECUREBOOT
@@ -85,39 +79,6 @@ struct master_proc_info_t
     TARGETING::Target* tgt = nullptr;
     uint8_t     procInstance = 0;
     uint8_t     nodeInstance = 0;
-};
-
-
-/*
- * Struct used to hold data about iohs instances
- */
-struct iohs_instances_t
-{
-    TARGETING::Target* myIohsTarget = nullptr;
-    uint8_t  myIohsInstance = 0;
-    uint8_t  myIohsRelLink  = 0;
-
-    // Expect data to be received on the PEER_PATH instances
-    uint8_t  peerNodeInstance = 0;
-    uint8_t  peerProcInstance = 0;
-    uint8_t  peerIohsInstance = 0;
-};
-
-/*
- * Union used to hold the 3-tuple of information passed between the nodes -
- *       master node to every sibling node, and all those sibling nodes
- *       back to the master node
- */
-union msg_format_t
-{
-    uint64_t value;
-    struct
-    {
-        uint64_t origin_linkId   : 4;  // relative to the originator
-        uint64_t receiver_linkId : 4;  // relative to the receiver
-        uint64_t nonce           : 56; // a cryptographically strong random
-                                       // nummber requested from the TPM
-    } PACKED;
 };
 
 /**

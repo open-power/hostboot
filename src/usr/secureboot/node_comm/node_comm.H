@@ -45,11 +45,47 @@ extern trace_desc_t* g_trac_nc;
 // Switch from TRACDCOMP to TRACFCOMP to enable unit test tracing
 #define TRACUTCOMP(args...) TRACDCOMP(args)
 
+// Use if there is an issue getting random number from a functional TPM
+#define NODE_COMM_DEFAULT_NONCE 0xFFFFFFFFFFFFFFFF
+
 namespace SECUREBOOT
 {
 
 namespace NODECOMM
 {
+
+/*
+ * Struct used to hold data about iohs instances
+ */
+struct iohs_instances_t
+{
+    TARGETING::Target* myIohsTarget = nullptr;
+    uint8_t  myIohsInstance = 0;
+    uint8_t  myIohsRelLink  = 0;
+    uint8_t  myNodeInstance = 0;
+
+    // Expect data to be received on the PEER_PATH instances
+    uint8_t  peerNodeInstance = 0;
+    uint8_t  peerProcInstance = 0;
+    uint8_t  peerIohsInstance = 0;
+};
+
+/*
+ * Union used to hold the 3-tuple of information passed between the nodes -
+ *       master node to every sibling node, and all those sibling nodes
+ *       back to the master node
+ */
+union msg_format_t
+{
+    uint64_t value;
+    struct
+    {
+        uint64_t origin_linkId   : 4;  // relative to the originator
+        uint64_t receiver_linkId : 4;  // relative to the receiver
+        uint64_t nonce           : 56; // a cryptographically strong random
+                                       // nummber requested from the TPM
+    } PACKED;
+};
 
 /*
  * @brief Node Comm Registers - see above for description
@@ -268,6 +304,31 @@ void addNodeCommBusCallout(
     uint8_t i_linkId,
     errlHndl_t & io_log,
     HWAS::callOutPriority i_priority = HWAS::SRCI_PRIORITY_HIGH);
+
+/**
+ *  @brief This function logs a nonce to all available TPMs on the node by
+ *         extending it to a specific PCR.
+ *
+ *  @param[in]  i_nonce - The nonce to be logged/extended
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval nullptr Operation was successful
+ *  @retval !nullptr Operation failed with valid error log
+ */
+errlHndl_t nodeCommLogNonce(uint64_t & i_nonce);
+
+/**
+ *  @brief This function generates a nonce by calling GetRandom on an
+ *         available TPM.
+ *
+ *  @param[out] o_nonce - The nonce that is generated
+ *  @note       Nonce is only valid if the operation is successful
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval nullptr Operation was successful
+ *  @retval !nullptr Operation failed with valid error log
+ */
+errlHndl_t nodeCommGetRandom(uint64_t & o_nonce);
 
 } // end NODECOMM namespace
 

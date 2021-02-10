@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2020
+# Contributors Listed Below - COPYRIGHT 2018,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,7 @@ OBJS += node_comm_test.o
 OBJS += node_comm.o
 OBJS += node_comm_exchange.o
 OBJS += node_comm_transfer.o
+OBJS += node_comm_exchange_helper.o
 
 VPATH += $(ROOTPATH)/src/usr/targeting/common
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr

@@ -61,6 +61,7 @@ enum node_comm_transfer_types_t : uint8_t
     NCT_TRANSFER_SBID              =  0x10,
     NCT_TRANSFER_QUOTE_REQUEST     =  0x11,
     NCT_TRANSFER_QUOTE_RESPONSE    =  0x12,
+    NCT_NODE_SYNC                  =  0x13,
 };
 
 /**
@@ -90,8 +91,10 @@ union node_comm_msg_format_t
 const std::map<node_comm_transfer_types_t, size_t>
     TransferSizeMap = {{NCT_TRANSFER_SBID,
                             sizeof(uint64_t)},
-                         {NCT_TRANSFER_QUOTE_REQUEST,
-                            sizeof(MasterQuoteRequestBlob)}};
+                        {NCT_TRANSFER_QUOTE_REQUEST,
+                            sizeof(MasterQuoteRequestBlob)},
+                        {NCT_NODE_SYNC,
+                            0}};
 
 
 /**
