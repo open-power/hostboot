@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -422,7 +422,7 @@ errlHndl_t check_proc0_memory_config()
 
     // Get all procs
     TargetHandleList l_procsList;
-    getAllChips(l_procsList, TYPE_PROC);
+    getAllChips(l_procsList, TYPE_PROC, false);
 
     // sort based on topology ID in order to deterministically
     // pick the processor with memory. This will also help guarantee
@@ -519,7 +519,7 @@ errlHndl_t check_proc0_memory_config()
             // If proc does not have memory, then continue
             if(l_dimms.empty())
             {
-                TRACDCOMP(g_trac_targeting,
+                TRACFCOMP(g_trac_targeting,
                         "check_proc0_memory_config: Proc %.8X has no  "
                         "functional dimms behind it",
                         get_huid(l_procIds[i].proc) );
