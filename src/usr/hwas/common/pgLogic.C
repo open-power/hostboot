@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -380,7 +380,7 @@ namespace PARTIAL_GOOD
     //    that is applicable to the chip unit and model) must ALL succeed for
     //    the target to be considered functional (i.e. the rules form a logical
     //    conjunction for that target type).
-    static constexpr std::array<PartialGoodRule, 28> pgRules_map
+    static constexpr std::array<PartialGoodRule, 29> pgRules_map
     {
         // SYS: This target doesn't have any PG checking logic. It is considered
         //      functional if its children (and parent, if a target has a
@@ -485,6 +485,7 @@ namespace PARTIAL_GOOD
           NO_SPECIAL_RULE
         },
 
+        { TARGETING::TYPE_SMPGROUP },
         { TARGETING::TYPE_OMI },
         { TARGETING::TYPE_MCC },
         { TARGETING::TYPE_OMIC },
