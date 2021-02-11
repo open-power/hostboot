@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,7 +104,7 @@ namespace TRUSTEDBOOT
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *       error log.
      */
-    errlHndl_t TpmLogMgr_initialize(TpmLogMgr * io_logMgr);
+    void TpmLogMgr_initialize(TpmLogMgr * io_logMgr);
 #endif
 
     /**

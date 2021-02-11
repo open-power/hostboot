@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,9 +60,9 @@ namespace TRUSTEDBOOT
     }
 
 #ifdef __HOSTBOOT_MODULE
-    errlHndl_t TpmLogMgr_initialize(TpmLogMgr* i_val)
+    void TpmLogMgr_initialize(TpmLogMgr* i_val)
     {
-        errlHndl_t err = TB_SUCCESS;
+        assert(i_val != nullptr, "TpmLogMgr_initialize was passed a nullptr");
         const char vendorInfo[] = "IBM";
         const char eventSignature[] = "Spec ID Event03";
         TCG_EfiSpecIdEventStruct* eventData = NULL;
@@ -71,80 +71,55 @@ namespace TRUSTEDBOOT
 
         TRACUCOMP( g_trac_trustedboot, ">>initialize()");
 
-        if (NULL == i_val)
-        {
-            TRACFCOMP( g_trac_trustedboot,
-                       "TPM LOG INIT FAIL");
+        memset(i_val, 0, sizeof(TpmLogMgr));
+        i_val->logMaxSize = TPMLOG_BUFFER_SIZE;
 
-                /*@
-                 * @errortype
-                 * @reasoncode     RC_TPMLOGMGR_INIT_FAIL
-                 * @severity       ERRL_SEV_UNRECOVERABLE
-                 * @moduleid       MOD_TPMLOGMGR_INITIALIZE
-                 * @userdata1      0
-                 * @userdata2      0
-                 * @devdesc        TPM log buffer init failure.
-                 * @custdesc       TPM log buffer init failure.
-                 */
-                err = tpmCreateErrorLog( MOD_TPMLOGMGR_INITIALIZE,
-                                         RC_TPMLOGMGR_INIT_FAIL, 0, 0);
+        mutex_init( &i_val->logMutex );
+        mutex_lock( &i_val->logMutex );
 
-        }
-        else
-        {
+        // Assign our new event pointer to the start
+        i_val->newEventPtr = i_val->eventLog;
+        memset(i_val->eventLog, 0, TPMLOG_BUFFER_SIZE);
 
-            memset(i_val, 0, sizeof(TpmLogMgr));
-            i_val->logMaxSize = TPMLOG_BUFFER_SIZE;
+        memset(&eventLogEntry, 0, sizeof(eventLogEntry));
+        eventData = (TCG_EfiSpecIdEventStruct*) eventLogEntry.event;
 
-            mutex_init( &i_val->logMutex );
-            mutex_lock( &i_val->logMutex );
+        // Add the header event log
+        // Values here come from the PC ClientSpecificPlatformProfile spec
+        eventLogEntry.eventType = EV_NO_ACTION;
+        eventLogEntry.pcrIndex = 0;
+        eventLogEntry.eventSize = sizeof(TCG_EfiSpecIdEventStruct) +
+            sizeof(vendorInfo);
 
-            // Assign our new event pointer to the start
-            i_val->newEventPtr = i_val->eventLog;
-            memset(i_val->eventLog, 0, TPMLOG_BUFFER_SIZE);
+        memcpy(eventData->signature, eventSignature,
+                sizeof(eventSignature));
+        eventData->platformClass = htole32(TPM_PLATFORM_SERVER);
+        eventData->specVersionMinor = TPM_SPEC_MINOR;
+        eventData->specVersionMajor = TPM_SPEC_MAJOR;
+        eventData->specErrata = TPM_SPEC_ERRATA;
+        eventData->uintnSize = 1;
+        eventData->numberOfAlgorithms = htole32(HASH_COUNT);
+        eventData->digestSizes[0].algorithmId = htole16(TPM_ALG_SHA256);
+        eventData->digestSizes[0].digestSize = htole16(TPM_ALG_SHA256_SIZE);
+        eventData->digestSizes[1].algorithmId = htole16(TPM_ALG_SHA1);
+        eventData->digestSizes[1].digestSize = htole16(TPM_ALG_SHA1_SIZE);
+        eventData->vendorInfoSize = sizeof(vendorInfo);
+        memcpy(eventData->vendorInfo, vendorInfo, sizeof(vendorInfo));
+        i_val->newEventPtr = TCG_PCR_EVENT_logMarshal(&eventLogEntry,
+                                                      i_val->newEventPtr);
 
-            memset(&eventLogEntry, 0, sizeof(eventLogEntry));
-            eventData = (TCG_EfiSpecIdEventStruct*) eventLogEntry.event;
+        // Done, move our pointers
+        i_val->logSize += TCG_PCR_EVENT_marshalSize(&eventLogEntry);
 
-            // Add the header event log
-            // Values here come from the PC ClientSpecificPlatformProfile spec
-            eventLogEntry.eventType = EV_NO_ACTION;
-            eventLogEntry.pcrIndex = 0;
-            eventLogEntry.eventSize = sizeof(TCG_EfiSpecIdEventStruct) +
-                sizeof(vendorInfo);
+        mutex_unlock( &i_val->logMutex );
 
-            memcpy(eventData->signature, eventSignature,
-                   sizeof(eventSignature));
-            eventData->platformClass = htole32(TPM_PLATFORM_SERVER);
-            eventData->specVersionMinor = TPM_SPEC_MINOR;
-            eventData->specVersionMajor = TPM_SPEC_MAJOR;
-            eventData->specErrata = TPM_SPEC_ERRATA;
-            eventData->uintnSize = 1;
-            eventData->numberOfAlgorithms = htole32(HASH_COUNT);
-            eventData->digestSizes[0].algorithmId = htole16(TPM_ALG_SHA256);
-            eventData->digestSizes[0].digestSize = htole16(TPM_ALG_SHA256_SIZE);
-            eventData->digestSizes[1].algorithmId = htole16(TPM_ALG_SHA1);
-            eventData->digestSizes[1].digestSize = htole16(TPM_ALG_SHA1_SIZE);
-            eventData->vendorInfoSize = sizeof(vendorInfo);
-            memcpy(eventData->vendorInfo, vendorInfo, sizeof(vendorInfo));
-            i_val->newEventPtr = TCG_PCR_EVENT_logMarshal(&eventLogEntry,
-                                                          i_val->newEventPtr);
+        // Debug display of raw data
+        TRACUBIN(g_trac_trustedboot, "tpmInitialize: Header Entry",
+                  i_val->eventLog, i_val->logSize);
 
-            // Done, move our pointers
-            i_val->logSize += TCG_PCR_EVENT_marshalSize(&eventLogEntry);
-
-            mutex_unlock( &i_val->logMutex );
-
-            // Debug display of raw data
-            TRACUBIN(g_trac_trustedboot, "tpmInitialize: Header Entry",
-                     i_val->eventLog, i_val->logSize);
-
-            TRACUCOMP( g_trac_trustedboot,
-                       "<<initialize() LS:%d - %s",
-                       i_val->logSize,
-                       ((TB_SUCCESS == err) ? "No Error" : "With Error") );
-        }
-        return err;
+        TRACUCOMP( g_trac_trustedboot,
+                    "<<initialize() Log Size:%d",
+                    i_val->logSize);
     }
 #endif
 

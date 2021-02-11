@@ -342,16 +342,7 @@ void* host_update_primary_tpm( void *io_pArgs )
             {
                 pTpmLogMgr = new TpmLogMgr;
                 setTpmLogMgr(pPrimaryTpm,pTpmLogMgr);
-                err = TpmLogMgr_initialize(pTpmLogMgr);
-                if (nullptr != err)
-                {
-                    hwasState = pPrimaryTpm->getAttr<
-                        TARGETING::ATTR_HWAS_STATE>();
-                    hwasState.functional = false;
-                    pPrimaryTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(
-                        hwasState);
-                    break;
-                }
+                TpmLogMgr_initialize(pTpmLogMgr);
             }
         }
         else
@@ -1459,17 +1450,7 @@ void doInitBackupTpm()
         {
             l_tpmLogMgr = new TpmLogMgr;
             setTpmLogMgr(l_backupTpm, l_tpmLogMgr);
-            l_errl = TpmLogMgr_initialize(l_tpmLogMgr);
-            if(l_errl)
-            {
-                l_backupHwasState.functional = false;
-                l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>
-                                                            (l_backupHwasState);
-                errlCommit(l_errl, SECURE_COMP_ID);
-                mutex_unlock(l_backupTpm->
-                                getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
-                break;
-            }
+            TpmLogMgr_initialize(l_tpmLogMgr);
         }
         mutex_unlock(l_backupTpm->
                                 getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
