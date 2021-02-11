@@ -1759,7 +1759,7 @@
         RESERVED6           = 6,
         RESERVED7           = 7
     </enum>
-    <default>700, 100, 0, 200, 0, 0, 0, 0</default>
+    <default>800, 150, 5, 0, 0, 0, 0, 0</default>
     <overrideOnly/>
     <group>wof</group>
   </attribute>
