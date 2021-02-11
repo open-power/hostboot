@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1118,8 +1118,8 @@ void SpiTpmOp::addCallouts(errlHndl_t& io_errl)
         // Callout TPM HW
         io_errl->addHwCallout(iv_tpmTarget,
                               HWAS::SRCI_PRIORITY_HIGH,
-                              HWAS::NO_DECONFIG,
-                              HWAS::GARD_NULL);
+                              HWAS::DECONFIG,
+                              HWAS::GARD_Fatal);
 
         // Add the lower level SPI callouts
         SpiOp::addCallouts(io_errl);

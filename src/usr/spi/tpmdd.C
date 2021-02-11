@@ -508,10 +508,18 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
 
     if(pError)
     {
-        // If a TPM is required to boot the system, then escalate TPM
-        // presence failure as an unrecoverable error log, and link its PLID to
-        // a new log explicitly indicating the TPM was not detected properly.
-        if(tpmRequired)
+        // We cannot rely on ATTR_TPM_ROLE to be set correctly at the time
+        // of presence detection so match the spiTarget
+        TARGETING::Target* l_pMasterProcTarget = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+        assert(l_pMasterProcTarget != nullptr,
+              "masterProcChipTargetHandle returned nullptr when targeting service should be available");
+        // If this is the primary TPM and a TPM is required to boot the system,
+        // then escalate TPM presence failure as an unrecoverable error log, and
+        // link its PLID to a new log explicitly indicating the TPM was not
+        // detected properly.
+        if(tpmInfo.spiTarget == l_pMasterProcTarget &&
+           tpmRequired)
         {
             pError->collectTrace(TPMDD_COMP_NAME);
             pError->collectTrace(SECURE_COMP_NAME);
@@ -523,6 +531,10 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
             const auto original_eid  = pError->eid();
             const auto original_plid = pError->plid();
             pError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            // We never want to gard a TPM for failing presence detection
+            // so remove any gard elemets of the error log associated with
+            // this TPM prior to commiting
+            pError->setGardType(i_pTpm, HWAS::GARD_NULL);
             errlCommit(pError,TPMDD_COMP_ID);
 
             /*@
@@ -563,7 +575,7 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
             // just in case.
             pError->addHwCallout(i_pTpm,
                                  HWAS::SRCI_PRIORITY_HIGH,
-                                 HWAS::NO_DECONFIG,
+                                 HWAS::DECONFIG,
                                  HWAS::GARD_NULL);
 
             pError->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,

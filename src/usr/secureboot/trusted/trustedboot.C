@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -375,10 +375,6 @@ void* host_update_primary_tpm( void *io_pArgs )
                 !primaryHwasState.present)
             {
                 primaryTpmAvail = false;
-                if(isTpmRequired())
-                {
-                    markTpmUnusable(pPrimaryTpm);
-                }
             }
         }
 
@@ -1039,6 +1035,31 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
     return;
 }
 
+void forceTpmDeconfigCallout(TpmTarget* const i_pTpm,
+                             errlHndl_t& i_err)
+{
+    const auto search_results = i_err->queryCallouts(i_pTpm);
+    using compare_enum = ERRORLOG::ErrlEntry::callout_search_criteria;
+    // Check if we found any callouts for this TPM
+    if((search_results & compare_enum::TARGET_MATCH) == compare_enum::TARGET_MATCH)
+    {
+        // If we found a callout for this TPM w/o a DECONFIG,
+        // edit the callout to include a deconfig
+        if((search_results & compare_enum::DECONFIG_FOUND) != compare_enum::DECONFIG_FOUND)
+        {
+            i_err->setDeconfigState(i_pTpm, HWAS::DELAYED_DECONFIG);
+        }
+    }
+    else
+    {
+        // Add HW callout for TPM with low priority
+        i_err->addHwCallout(i_pTpm,
+                            HWAS::SRCI_PRIORITY_LOW,
+                            HWAS::DELAYED_DECONFIG,
+                            HWAS::GARD_NULL);
+    }
+}
+
 void tpmMarkFailed(TpmTarget* const i_pTpm,
                    errlHndl_t& io_err)
 {
@@ -1052,18 +1073,6 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
                "tgt=0x%08X; io_err rc=0x%04X, plid=0x%08X",
                TARGETING::get_huid(i_pTpm), ERRL_GETRC_SAFE(io_err),
                ERRL_GETPLID_SAFE(io_err));
-
-    auto hwasState = i_pTpm->getAttr<
-        TARGETING::ATTR_HWAS_STATE>();
-    hwasState.functional = false;
-    i_pTpm->setAttr<
-        TARGETING::ATTR_HWAS_STATE>(hwasState);
-
-    if(isTpmRequired())
-    {
-        // Mark the TPM as unusable so that FSP can perform alignment check
-        markTpmUnusable(i_pTpm, io_err);
-    }
 
     #ifdef CONFIG_SECUREBOOT
     TARGETING::Target* l_tpm = i_pTpm;
@@ -1089,7 +1098,7 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
         auto l_physPath = it->getAttr<TARGETING::ATTR_PHYS_PATH>();
         if (l_tpmInfo.spiMasterPath == l_physPath)
         {
-            // found processor to deconfigure
+            // found processor acting as SPI master for this TPM
             l_proc = it;
             break;
         }
@@ -1105,10 +1114,13 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
     l_proc->setAttr<TARGETING::ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM>(
         l_protectTpm);
 
-    // do not deconfigure the processor if it already deconfigured
+    // There is no way to fence off a TPM when its SPI master
+    // processor is not functional. If the SPI master is not scommable
+    // the scom accesses below will fail so we must defer them to when the
+    // processor is up.
     TARGETING::PredicateHwas isNonFunctional;
     isNonFunctional.functional(false);
-    if (isNonFunctional(l_proc))
+    if (isNonFunctional(l_proc) || !l_proc->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom)
     {
         // Note: at this point l_err is nullptr so
         // no error log is created on break
@@ -1124,7 +1136,7 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
         break;
     }
     // if the SBE lock bit is not set, it means that istep 10.3 hasn't executed
-    // yet, so we will let istep 10.3 call p9_update_security_control HWP
+    // yet, so we will let istep 10.3 call p10_update_security_control HWP
     // if the SBE lock bit is set, then we will call the HWP here
     if (!(l_regValue & static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SULBit)))
     {
@@ -1138,7 +1150,7 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
     if (l_err)
     {
         TRACFCOMP(g_trac_trustedboot,
-            ERR_MRK"tpmMarkFailed - call to p9_update_security_ctrl failed ");
+            ERR_MRK"tpmMarkFailed - call to p10_update_security_ctrl failed ");
     }
 
     } while(0);
@@ -1233,6 +1245,9 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
        TRACFCOMP(g_trac_trustedboot,
             ERR_MRK "Committing io_err rc=0x%04X plid=0x%08X, eid=0x%08X",
             io_err->reasonCode(), io_err->plid(), io_err->eid());
+        // ensure there is, at minimum, a low priority hw callout for the TPM
+        // that has a deconfigure action associated with it.
+        forceTpmDeconfigCallout(i_pTpm,io_err);
 
         io_err->collectTrace(SECURE_COMP_NAME);
         io_err->collectTrace(TRBOOT_COMP_NAME);
@@ -1477,20 +1492,10 @@ void doInitBackupTpm()
 
     } while(0);
 
-    // Init was attempted even if it didn't succeed
+    // Always mark that the init was attempted even if it didn't succeed
     if(l_backupTpm)
     {
         l_backupTpm->setAttr<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(true);
-        if(isTpmRequired())
-        {
-            auto l_backupHwasState = l_backupTpm->getAttr<
-                                                  TARGETING::ATTR_HWAS_STATE>();
-
-            if(!l_backupHwasState.present || !l_backupHwasState.functional)
-            {
-                markTpmUnusable(l_backupTpm);
-            }
-        }
     }
 }
 
