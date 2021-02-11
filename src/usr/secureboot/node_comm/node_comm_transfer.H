@@ -91,11 +91,10 @@ union node_comm_msg_format_t
 const std::map<node_comm_transfer_types_t, size_t>
     TransferSizeMap = {{NCT_TRANSFER_SBID,
                             sizeof(uint64_t)},
-                        {NCT_TRANSFER_QUOTE_REQUEST,
+                       {NCT_TRANSFER_QUOTE_REQUEST,
                             sizeof(MasterQuoteRequestBlob)},
-                        {NCT_NODE_SYNC,
+                       {NCT_NODE_SYNC,
                             0}};
-
 
 /**
  *  @brief This function sends multiple messages with data from

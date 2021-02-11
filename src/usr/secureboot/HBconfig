@@ -30,3 +30,10 @@ config KEY_CLEAR
     help
         Support various 'key clear requests' to remove specific security
         keys, certificates, etc on the system
+
+config NODE_COMM_V1
+    default n
+    help
+        Whether to use the first (single-threaded) node comm version or
+        the second (multi-threaded). When set to "y", the first version
+        is used.

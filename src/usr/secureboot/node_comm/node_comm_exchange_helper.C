@@ -245,6 +245,7 @@ void NodeCommExchangeNonces::operator()()
         nanosleep(0, 100*NS_PER_MSEC);
 
         l_errl = receiveNonceFromPeer(iv_iohsInstance, l_peerNonce.value);
+
         if(l_errl)
         {
             TRACFCOMP(g_trac_nc, ERR_MRK"NodeCommExchangeNonces: Could not receive nonce from peer node %d"
@@ -275,6 +276,8 @@ void NodeCommExchangeNonces::operator()()
         // new exchange.
         nanosleep(0, 100*NS_PER_MSEC);
 
+        TRACFCOMP(g_trac_nc, INFO_MRK"NodeCommExchangeNonces This node (%d) will now send nonce 0x%x to node %d",
+                  iv_iohsInstance.myNodeInstance, l_myNonce.value, iv_iohsInstance.peerNodeInstance);
         l_errl = sendNonceToPeer(iv_iohsInstance, l_myNonce.value);
         if(l_errl)
         {

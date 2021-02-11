@@ -51,9 +51,11 @@
 #include <targeting/targplatutil.H>
 #include <sys/internode.h>
 #include <util/misc.H>
+#include <util/threadpool.H>
 
 #include "node_comm.H"
 #include "node_comm_transfer.H"
+#include "node_comm_exchange_helper.H"
 
 #include <secureboot/service.H>
 #include <securerom/contrib/sha512.H>
@@ -1344,6 +1346,171 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
 
 } // end of nodeCommExchangeSlave
 
+/**
+ * @brief Helper function to send a sync message to a node or to receive
+ *        a sync message from a node.
+ *
+ * @param[in] i_sendMessage whether to send or receive the sync message
+ * @param[in] i_iohsInstance IOHS information used to send/receive message
+ *            to/from the other node
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t sendRecvNodeSyncMessage(const bool i_sendMessage,
+                                   const iohs_instances_t& i_iohsInstance)
+{
+    errlHndl_t l_errl = nullptr;
+
+    uint8_t l_myLinkId = 0;
+    uint8_t l_myMboxId = 0;
+    uint8_t l_peerLinkId = 0;
+    uint8_t l_peerMboxId = 0;
+
+    getLinkMboxFromIohsInstance(i_iohsInstance.myIohsInstance,
+                                i_iohsInstance.myIohsRelLink,
+                                l_myLinkId,
+                                l_myMboxId);
+
+    getLinkMboxFromIohsInstance(i_iohsInstance.peerIohsInstance,
+                                // same relative link for peer path:
+                                i_iohsInstance.myIohsRelLink,
+                                l_peerLinkId,
+                                l_peerMboxId);
+
+    TRACFCOMP(g_trac_nc,INFO_MRK"sendRecvNodeSyncMessage: %s message; "
+              "my: linkId=%d, mboxId=%d, IohsInstance=%d. "
+              "expected peer: n%d linkId=%d, mboxId=%d, IohsInstance=%d",
+              i_sendMessage ? "sending" : "receiving",
+              l_myLinkId, l_myMboxId, i_iohsInstance.myIohsInstance,
+              i_iohsInstance.peerNodeInstance, l_peerLinkId,
+              l_peerMboxId, i_iohsInstance.peerIohsInstance);
+
+    // The node comm control and data regs live on PAUC parents of IOHS
+    TARGETING::Target* l_paucParent =
+           TARGETING::getImmediateParentByAffinity(i_iohsInstance.myIohsTarget);
+    uint8_t* l_buffer = nullptr;
+    size_t l_size = 0;
+
+    if(i_sendMessage)
+    {
+        l_errl = nodeCommTransferSend(l_paucParent,
+                                      l_myLinkId,
+                                      l_myMboxId,
+                                      i_iohsInstance.peerNodeInstance,
+                                      NCT_NODE_SYNC,
+                                      l_buffer,
+                                      l_size);
+    }
+    else
+    {
+        l_errl = nodeCommTransferRecv(l_paucParent,
+                                      l_myLinkId,
+                                      l_myMboxId,
+                                      i_iohsInstance.peerNodeInstance,
+                                      NCT_NODE_SYNC,
+                                      l_buffer,
+                                      l_size);
+    }
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"sendRecvNodeSyncMessage: Could not %s sync message to/from node %d"
+                  TRACE_ERR_FMT, i_sendMessage ? "send" : "receive", i_iohsInstance.peerNodeInstance,
+                  TRACE_ERR_ARGS(l_errl));
+    }
+
+    return l_errl;
+}
+
+/**
+ * @brief Performs a sync with all other nodes on the system. A sync message is an empty message
+ *        whose purpose is to indicate that the node is currently not in the middle of other
+ *        multinode transactions. Primary node will send this message to all other nodes, and
+ *        secondary nodes will wait for this message from the primary node.
+ *
+ * @param[in] i_iohsInstances the array of IOHS target information used to communicate with other
+ *            nodes.
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t syncWithAllNodes(const std::vector<iohs_instances_t>& i_iohsInstances)
+{
+    errlHndl_t l_errl = nullptr;
+    const bool SEND_MESSAGE = true;
+    const bool RECEIVE_MESSAGE = false;
+
+    // Primary node will send the sync message to all secondary nodes
+    if(TARGETING::UTIL::isCurrentMasterNode())
+    {
+        // Send a sync message to all secondary nodes
+        for(const auto& l_iohsInstance : i_iohsInstances)
+        {
+            l_errl = sendRecvNodeSyncMessage(SEND_MESSAGE, l_iohsInstance);
+            if(l_errl)
+            {
+                break;
+            }
+        }
+        TRACFCOMP(g_trac_nc,INFO_MRK"syncWithAllNodes: Primary node completed sync with other nodes");
+    }
+    else
+    {
+        TRACFCOMP(g_trac_nc,INFO_MRK"syncWithAllNodes: Receiving the sync message from primary node");
+        // The array of IOHS targes is sorted by node ID, so the first IOHS target
+        // is connected to node 0. Look for a message from the links associated with
+        // that target.
+        l_errl = sendRecvNodeSyncMessage(RECEIVE_MESSAGE, i_iohsInstances[0]);
+    }
+
+    return l_errl;
+}
+
+
+/**
+ * @brief Performs a multithreaded nonce exchange between all nodes in the system. Each node
+ *        sends its nonce (56-bit random number and 8-bit link info) to every other node.
+ *        Each node generates a unique nonce per each other node it needs to communicate with.
+ *
+ * @param[in] i_iohsInstances the array of IOHS target information used to communicate with other
+ *            nodes.
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_iohsInstances)
+{
+    Util::ThreadPool<NodeCommExchangeNonces> l_threadpool;
+
+    for(const auto& l_iohsInstance: i_iohsInstances)
+    {
+        l_threadpool.insert(new NodeCommExchangeNonces(l_iohsInstance));
+    }
+
+    // Get the number of nodes on the machine (each thread will service a
+    // different node)
+    auto l_hbImages = TARGETING::UTIL::assertGetToplevelTarget()->
+                        getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+    const int l_nodeCnt = __builtin_popcount(l_hbImages);
+    // A thread per each node OTHER than this one (so, total nodes - 1)
+    Util::ThreadPoolManager::setThreadCount(l_nodeCnt - 1);
+
+    // Start all threads
+    l_threadpool.start();
+
+    // Wait for the threads to finish running
+    errlHndl_t l_errl = l_threadpool.shutdown();
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"exchangeNoncesMultithreaded: Error returned from thread pool"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+    }
+    else
+    {
+        // Sync with all nodes
+        l_errl = syncWithAllNodes(i_iohsInstances);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"exchangeNoncesMultithreaded: Could not sync the nodes"
+                      TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        }
+    }
+    return l_errl;
+}
 
 /**
  *  @brief Runs the procedure for the drawers/nodes to exchange messages
@@ -1370,7 +1537,7 @@ errlHndl_t nodeCommExchange(void)
 
     do
     {
-    Target* sys = TARGETING::UTIL::assertGetToplevelTarget();;
+    Target* sys = TARGETING::UTIL::assertGetToplevelTarget();
 
     // Get some info about the nodes in the system
     auto hb_images = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
@@ -1600,6 +1767,7 @@ errlHndl_t nodeCommExchange(void)
         l_iohsInstance.peerNodeInstance = l_peNode.instance;
         l_iohsInstance.myIohsInstance = l_iohsTgt->getAttr<ATTR_REL_POS>();
         l_iohsInstance.myIohsTarget = l_iohsTgt;
+        l_iohsInstance.myNodeInstance = my_nodeid;
 
         // Before adding to list check that on a 2-node system that we ignore
         // redundant connections to the same node
@@ -1700,6 +1868,7 @@ errlHndl_t nodeCommExchange(void)
         break;
     }
 
+#ifdef CONFIG_NODE_COMM_V1
     if (TARGETING::UTIL::isCurrentMasterNode())
     {
         err = nodeCommExchangeMaster(mProcInfo,iohs_instances);
@@ -1722,6 +1891,13 @@ errlHndl_t nodeCommExchange(void)
            break;
         }
     }
+#else
+    err = exchangeNoncesMultithreaded(iohs_instances);
+    if(err)
+    {
+        break;
+    }
+#endif
 
     if(err)
     {
