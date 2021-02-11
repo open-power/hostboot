@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -153,10 +153,8 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                 {
                     {0x20018605, PROC_STOP_SECTION_CACHE},//EQ_L3_FIR_MASK_OR
                     {0x20018645, PROC_STOP_SECTION_CACHE},//EQ_NCU_FIR_MASK_OR
-                    {0x20028005, PROC_STOP_SECTION_CACHE},//EQ_L2_FIR_MASK_OR
+                    {0x20028005, PROC_STOP_SECTION_CORE },//EQ_L2_FIR_MASK_OR
                     {0x20028445, PROC_STOP_SECTION_CORE },//EQ_CORE_FIR_MASK_OR
-                    {0x20040105, PROC_STOP_SECTION_CACHE},//EQ_LOCAL_FIR_MASK_OR
-                    {0x200E0006, PROC_STOP_SECTION_CACHE},//EQ_QME_FIR_MASK_OR
                 };
 
                 // If this register updated the mask on a cache or core FIR,
