@@ -43,6 +43,7 @@
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <mss_pmic_attribute_accessors_manual.H>
+#include <lib/utils/pmic_enable_4u_settings.H>
 
 namespace mss
 {
@@ -366,29 +367,129 @@ fapi_try_exit:
 ///
 /// @brief Calculate target voltage for PMIC from attribute settings
 ///
-/// @param[in] i_ocmb_target OCMB parent target of pmic of PMIC (holds the attributes)
-/// @param[in] i_id ID of pmic (0,1)
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_id relative ID of PMIC (0/1)
 /// @param[in] i_rail RAIL to calculate voltage for
 /// @param[out] o_volt_bitmap output bitmap
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode calculate_voltage_bitmap_from_attr(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const mss::pmic::id i_id,
     const uint8_t i_rail,
     uint8_t& o_volt_bitmap)
 {
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target);
+
     uint8_t l_volt = 0;
     int8_t l_volt_offset = 0;
     int8_t l_efd_volt_offset = 0;
 
     // Get the attributes corresponding to the rail and PMIC indices
-    FAPI_TRY(mss::attr::get_volt_setting[i_rail][i_id](i_ocmb_target, l_volt));
-    FAPI_TRY(mss::attr::get_volt_offset[i_rail][i_id](i_ocmb_target, l_volt_offset));
-    FAPI_TRY(mss::attr::get_efd_volt_offset[i_rail][i_id](i_ocmb_target, l_efd_volt_offset));
+    FAPI_TRY(mss::attr::get_volt_setting[i_rail][i_id](l_ocmb, l_volt));
+    FAPI_TRY(mss::attr::get_volt_offset[i_rail][i_id](l_ocmb, l_volt_offset));
+    FAPI_TRY(mss::attr::get_efd_volt_offset[i_rail][i_id](l_ocmb, l_efd_volt_offset));
 
     // Set output buffer
     o_volt_bitmap = l_volt + l_volt_offset + l_efd_volt_offset;
+
+    FAPI_ASSERT((o_volt_bitmap <= CONSTS::MAX_VOLT_BITMAP),
+                fapi2::PMIC_VOLTAGE_OUT_OF_RANGE()
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_VOLTAGE_BITMAP(o_volt_bitmap)
+                .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[i_rail])
+                .set_BASE_VOLTAGE(l_volt)
+                .set_SPD_OFFSET(l_volt_offset)
+                .set_EFD_OFFSET(l_efd_volt_offset),
+#ifndef __PPE__
+                "Voltage bitmap 0x%02X out of range as determined by SPD voltage +/- offset for %s of %s"
+                " SPD_VOLT: %u SPD_OFFSET: %d EFD_OFFSET: %d",
+                o_volt_bitmap, PMIC_RAIL_NAMES[i_rail], mss::c_str(i_pmic_target),
+                l_volt, l_volt_offset, l_efd_volt_offset);
+
+// PPE has a cap string format specifiers
+#else
+                "Voltage bitmap 0x%02X out of range as determined by SPD voltage +/- offset for %s of %s"
+                o_volt_bitmap, PMIC_RAIL_NAMES[i_rail], mss::c_str(i_pmic_target));
+#endif
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Calculate nominal rail voltages
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_id ID of pmic, will be normalized to 0 or 1
+/// @param[in] i_rail SWA through SWD mapped as 0 to 3
+/// @param[out] o_nominal_voltage calculated nominal voltage, shifted in place for register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode calculate_4u_nominal_voltage(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint8_t i_id,
+    const uint8_t i_rail,
+    uint8_t& o_nominal_voltage)
+{
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target);
+    uint8_t l_relative_id = (i_id % CONSTS::NUM_PRIMARY_PMICS);
+
+    uint8_t l_volt = 0;
+    int8_t l_volt_offset = 0;
+    int8_t l_efd_volt_offset = 0;
+    uint8_t l_nominal_voltage = 0;
+
+    // Mod divided by two will leave either PMIC0 or PMIC1
+    if (l_relative_id == mss::pmic::id::PMIC0)
+    {
+        l_volt = PMIC0_NOMINALS[i_rail];
+    }
+    else
+    {
+        l_volt = PMIC1_NOMINALS[i_rail];
+    }
+
+    // The actual voltage setting is shifted to the left by 1 bit in the regsiter,
+    // so to apply the offsets, let's right adjust it
+    l_volt >>= CONSTS::SHIFT_VOLTAGE_FOR_REG;
+
+    FAPI_TRY(mss::attr::get_volt_offset[i_rail][l_relative_id](l_ocmb, l_volt_offset));
+    FAPI_TRY(mss::attr::get_efd_volt_offset[i_rail][l_relative_id](l_ocmb, l_efd_volt_offset));
+
+    l_nominal_voltage = l_volt + l_volt_offset + l_efd_volt_offset;
+
+    // Since l_volt was really 7 bits, and the offsets are also a maximum of 7 bits,
+    // even the max bitmaps for each - 0b01111111 added together would not exceed the uint8_t bounds,
+    // so for both an overflow or underflow of the max 7 bits, we are guaranteed to see that reflected
+    // in the MSB. So, we have over or underflowed if and only if the resulting bitmap is less than 0x80
+
+    // If we were to underflow, we are guaranteed to see it wrapped around in the MSB
+    FAPI_ASSERT(l_nominal_voltage <= CONSTS::MAX_VOLT_BITMAP,
+                fapi2::PMIC_VOLTAGE_OUT_OF_RANGE()
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_VOLTAGE_BITMAP(l_nominal_voltage)
+                .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[i_rail])
+                .set_BASE_VOLTAGE(l_volt)
+                .set_SPD_OFFSET(l_volt_offset)
+                .set_EFD_OFFSET(l_efd_volt_offset),
+                "Voltage bitmap 0x%02X out of range as determined by base voltage +/- offset for %s of %s"
+
+// PPE only supports a few fields per printout, so we will do the 3 most important for PPE,
+// and then 3 additional for FW
+#ifndef __PPE__
+                // Space is intentional here as this is concatenated on the previous string
+                " BASE_VOLT: %u SPD_OFFSET: %d EFD_OFFSET: %d"
+#endif
+                , l_nominal_voltage, PMIC_RAIL_NAMES[i_rail], mss::c_str(i_pmic_target)
+
+#ifndef __PPE__
+                , l_volt, l_volt_offset, l_efd_volt_offset
+#endif
+               );
+
+    // Shift over a bit for the voltage setting register
+    o_nominal_voltage = l_nominal_voltage << CONSTS::SHIFT_VOLTAGE_FOR_REG;
 
 fapi_try_exit:
     return fapi2::current_err;

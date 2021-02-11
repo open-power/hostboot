@@ -585,16 +585,8 @@ inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::IDT>(
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
         uint8_t l_volt_bitmap;
-        FAPI_TRY(calculate_voltage_bitmap_from_attr(i_ocmb_target, i_id, l_rail_index, l_volt_bitmap));
+        FAPI_TRY(calculate_voltage_bitmap_from_attr(i_pmic_target, i_id, l_rail_index, l_volt_bitmap));
 
-        // Since we have unsigned integers, this should check both underflow and overflow
-        FAPI_ASSERT(l_volt_bitmap <= CONSTS::MAX_VOLT_BITMAP,
-                    fapi2::PMIC_VOLTAGE_OUT_OF_RANGE()
-                    .set_TARGET(i_pmic_target)
-                    .set_VOLTAGE_BITMAP(l_volt_bitmap)
-                    .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index]),
-                    "Voltage out of range as determined by SPD voltage +/- offset for %s of %s",
-                    PMIC_RAIL_NAMES[l_rail_index], mss::c_str(i_pmic_target) );
         {
             fapi2::buffer<uint8_t> l_volt_buffer = l_volt_bitmap << CONSTS::SHIFT_VOLTAGE_FOR_REG;
             FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_volt_buffer),
@@ -630,9 +622,7 @@ inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
         uint8_t l_volt_bitmap;
-        FAPI_TRY(calculate_voltage_bitmap_from_attr(i_ocmb_target, i_id, l_rail_index, l_volt_bitmap));
-
-        bool l_overflow = false;
+        FAPI_TRY(calculate_voltage_bitmap_from_attr(i_pmic_target, i_id, l_rail_index, l_volt_bitmap));
 
         uint8_t l_volt_range_select = 0;
         FAPI_TRY(mss::attr::get_volt_range_select[l_rail_index][i_id](i_ocmb_target, l_volt_range_select));
@@ -666,23 +656,18 @@ inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
                 l_volt_bitmap = l_volt_bitmap - CONSTS::CONVERT_RANGE1_TO_RANGE0;
 
                 // Check for overflow (the old voltage should be larger unless we rolled over)
-                if (l_old_voltage < l_volt_bitmap)
-                {
-                    // Not using an extra xml error for this as overflow implies PMIC_VOLTAGE_OUT_OF_RANGE anyway.
-                    FAPI_ERR("Overflow ocurred when converting SPD Range 1 voltage to TI Range 0");
-                    l_overflow = true;
-                }
+                FAPI_ASSERT(l_volt_bitmap < l_old_voltage ,
+                            fapi2::PMIC_RANGE_CONVERSION_OVERFLOW()
+                            .set_PMIC_TARGET(i_pmic_target)
+                            .set_RANGE_0_VOLT(l_volt_bitmap)
+                            .set_RANGE_1_VOLT(l_old_voltage)
+                            .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index]),
+                            "Voltage appeared overflowed during conversion from range 1 to 0 on rail %s of %s "
+                            "RANGE_1_VOLT: 0x%02X RANGE_0_VOLT: 0x%02X",
+                            PMIC_RAIL_NAMES[l_rail_index], mss::c_str(i_pmic_target), l_old_voltage, l_volt_bitmap);
             }
         }
 
-        // Check for overflow due to range conversion (SWA-C), but also due to overflow due to offset attributes
-        FAPI_ASSERT( (!l_overflow) && (l_volt_bitmap <= CONSTS::MAX_VOLT_BITMAP),
-                     fapi2::PMIC_VOLTAGE_OUT_OF_RANGE()
-                     .set_TARGET(i_pmic_target)
-                     .set_VOLTAGE_BITMAP(l_volt_bitmap)
-                     .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index]),
-                     "Voltage out of range as determined by SPD voltage +/- offset for %s of %s",
-                     PMIC_RAIL_NAMES[l_rail_index], mss::c_str(i_pmic_target) );
         {
             fapi2::buffer<uint8_t> l_volt_buffer = l_volt_bitmap << CONSTS::SHIFT_VOLTAGE_FOR_REG;
             FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_volt_buffer),
@@ -902,17 +887,24 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
 fapi2::ReturnCode redundancy_gpio_efuse_setup(const target_info_redundancy& i_target_info);
 
 ///
+/// @brief Set the 4U PMIC to pre-determined settings
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_pmic_id PMIC ID (0-3)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode set_4u_settings(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, const uint8_t i_pmic_id);
+
+///
 /// @brief Kick off VR_ENABLE's for a redundancy PMIC config in the provided mode
 ///
 /// @param[in] i_target_info target info struct
 /// @param[in] i_enable_loop_fields Parameters/fields to iterate over
-/// @param[in] i_mode enable-mode MANUAL/SPD
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
 ///
 fapi2::ReturnCode redundancy_vr_enable_kickoff(
     const target_info_redundancy& i_target_info,
-    const mss::pmic::enable_loop_fields_t& i_enable_loop_fields,
-    const mss::pmic::enable_mode i_mode);
+    const mss::pmic::enable_loop_fields_t& i_enable_loop_fields);
 
 ///
 /// @brief Check the statuses of all PMICs present on the given OCMB chip
@@ -927,12 +919,10 @@ fapi2::ReturnCode redundancy_check_all_pmics(const target_info_redundancy& i_tar
 /// @brief Set the up GPIOs, ADCs, PMICs for a redundancy configuration / 4U
 ///
 /// @param[in] i_ocmb_target OCMB target
-/// @param[in] i_mode manual/SPD enable mode
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
 ///
 fapi2::ReturnCode enable_with_redundancy(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::enable_mode i_mode);
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
 
 ///
 /// @brief Log recoverable errors for each PMIC that declared N-mode

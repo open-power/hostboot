@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,7 +74,7 @@ extern "C"
         if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
         {
             FAPI_INF("Enabling PMICs on %s with Redundancy/4U Mode", mss::c_str(i_ocmb_target));
-            FAPI_TRY(mss::pmic::enable_with_redundancy(i_ocmb_target, i_mode));
+            FAPI_TRY(mss::pmic::enable_with_redundancy(i_ocmb_target));
         }
         else
         {

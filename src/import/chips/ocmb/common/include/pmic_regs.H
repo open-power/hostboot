@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,10 +53,10 @@ struct pmicRegs;
 template<>
 struct pmicRegs<mss::pmic::product::TPS5383X>
 {
-    static constexpr uint8_t R94_SOFT_START_CFG_SWA = 0x94;
-    static constexpr uint8_t R95_SOFT_START_CFG_SWB = 0x95;
-    static constexpr uint8_t R96_SOFT_START_CFG_SWC = 0x96;
-    static constexpr uint8_t R97_SOFT_START_CFG_SWD = 0x97;
+    static constexpr uint8_t R94_SOFT_STOP_CFG_SWA = 0x94;
+    static constexpr uint8_t R95_SOFT_STOP_CFG_SWB = 0x95;
+    static constexpr uint8_t R96_SOFT_STOP_CFG_SWC = 0x96;
+    static constexpr uint8_t R97_SOFT_STOP_CFG_SWD = 0x97;
 
     static constexpr uint8_t R9C_ON_OFF_CONFIG_GLOBAL = 0x9C;
 };
