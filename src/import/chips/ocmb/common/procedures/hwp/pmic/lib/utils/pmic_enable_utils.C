@@ -47,6 +47,7 @@
 #include <mss_pmic_attribute_accessors_manual.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/poll.H>
+#include <lib/utils/pmic_enable_4u_settings.H>
 
 namespace mss
 {
@@ -242,10 +243,10 @@ fapi2::ReturnCode set_soft_stop_time(const fapi2::Target<fapi2::TargetType::TARG
 
     static constexpr std::array<uint8_t, NUM_REGS> TPS_SOFT_STOP_CFG_REGS =
     {
-        TPS_REGS::R94_SOFT_START_CFG_SWA,
-        TPS_REGS::R95_SOFT_START_CFG_SWB,
-        TPS_REGS::R96_SOFT_START_CFG_SWC,
-        TPS_REGS::R97_SOFT_START_CFG_SWD
+        TPS_REGS::R94_SOFT_STOP_CFG_SWA,
+        TPS_REGS::R95_SOFT_STOP_CFG_SWB,
+        TPS_REGS::R96_SOFT_STOP_CFG_SWC,
+        TPS_REGS::R97_SOFT_STOP_CFG_SWD
     };
 
     // First we will set the host region registers. This will be a fallback in case
@@ -1625,41 +1626,78 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set the 4U PMIC to pre-determined settings
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_pmic_id PMIC ID (0-3)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode set_4u_settings(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, const uint8_t i_pmic_id)
+{
+    // This function should be provided a relative ID (0 or 1),
+    // but it doesn't hurt to recalculate it anyway
+    const uint8_t l_relative_id = (i_pmic_id % CONSTS::NUM_PRIMARY_PMICS);
+
+    fapi2::buffer<uint8_t> l_reg_contents;
+    std::vector<std::pair<uint8_t, uint8_t>> l_fields;
+
+    for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
+    {
+        uint8_t l_volt_bitmap = 0;
+
+        // Calculate 4U nominal voltages from default values + SPD/EFD offsets
+        FAPI_TRY(calculate_4u_nominal_voltage(
+                     i_pmic_target,
+                     l_relative_id,
+                     l_rail_index,
+                     l_volt_bitmap));
+
+        l_reg_contents = l_volt_bitmap;
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, mss::pmic::VOLT_SETTING_ACTIVE_REGS[l_rail_index], l_reg_contents));
+    }
+
+    // Grab the fields for either PMIC0 or PMIC1
+    l_fields = (l_relative_id == mss::pmic::id::PMIC0) ? PMIC0_SETTINGS : PMIC1_SETTINGS;
+
+    // Loop through and apply all the pmic settings as defined in the 4U settings file
+    for (const auto& l_field : l_fields)
+    {
+        const auto REG = l_field.first;
+        const auto VAL = l_field.second;
+
+        l_reg_contents.flush<0>();
+        l_reg_contents = VAL;
+
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REG, l_reg_contents));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Kick off VR_ENABLE's for a redundancy PMIC config in the provided mode
 ///
 /// @param[in] i_target_info target info struct
 /// @param[in] i_enable_loop_fields Parameters/fields to iterate over
-/// @param[in] i_mode enable-mode MANUAL/SPD
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
 ///
 fapi2::ReturnCode redundancy_vr_enable_kickoff(
     const target_info_redundancy& i_target_info,
-    const mss::pmic::enable_loop_fields_t& i_enable_loop_fields,
-    const mss::pmic::enable_mode i_mode)
+    const mss::pmic::enable_loop_fields_t& i_enable_loop_fields)
 {
-    static constexpr uint16_t l_vendor_id = static_cast<uint16_t>(mss::pmic::vendor::TI);
-
     for (const auto& l_enable_fields : i_enable_loop_fields)
     {
         // No trace for these so HB does not try to shove the entirety of the lambda into an error trace.
         // The internal function calls have descriptive error ouptuts that should be sufficient in the
         // case of an error
         FAPI_TRY_NO_TRACE(run_if_present(i_target_info.iv_pmic_map, l_enable_fields.iv_pmic_id,
-                                         [&i_target_info, &l_enable_fields, i_mode]
+                                         [&i_target_info, &l_enable_fields]
                                          (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
-            // Set soft-start time to maximum to avoid ramp-down time voltage spike
-            FAPI_TRY_LAMBDA(mss::pmic::set_soft_stop_time(i_pmic));
-
-            // Check if we are manual or SPD, and perform the matching enable
-            if (i_mode == mss::pmic::enable_mode::MANUAL)
-            {
-                FAPI_TRY_LAMBDA(mss::pmic::start_vr_enable(i_pmic));
-            }
-            else
-            {
-                FAPI_TRY_LAMBDA(mss::pmic::enable_spd(i_pmic, i_target_info.iv_ocmb, l_vendor_id));
-            }
+            // Perform VR Enable steps
+            FAPI_TRY_LAMBDA(mss::pmic::set_4u_settings(i_pmic, l_enable_fields.iv_pmic_id));
+            FAPI_TRY_LAMBDA(mss::pmic::start_vr_enable(i_pmic));
 
             // Poll for the GPIO bit corresponding to the provided PMIC target, ensure polls good
             FAPI_TRY_LAMBDA(mss::gpio::poll_input_port_ready(
@@ -1750,12 +1788,9 @@ fapi_try_exit:
 /// @brief Set the up GPIOs, ADCs, PMICs for a redundancy configuration / 4U
 ///
 /// @param[in] i_ocmb_target OCMB target
-/// @param[in] i_mode manual/SPD enable mode
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
 ///
-fapi2::ReturnCode enable_with_redundancy(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::enable_mode i_mode)
+fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
     FAPI_INF("Enabling PMICs on %s with 4U/redundancy mode", mss::c_str(i_ocmb_target));
 
@@ -1789,7 +1824,7 @@ fapi2::ReturnCode enable_with_redundancy(
 
         // Now, perform any needed workarounds, kick off VR_ENABLEs, and check GPIO input port bits,
         // declaring N-Mode wherever necessary.
-        FAPI_TRY(mss::pmic::redundancy_vr_enable_kickoff(l_target_info, l_enable_loop_fields, i_mode));
+        FAPI_TRY(mss::pmic::redundancy_vr_enable_kickoff(l_target_info, l_enable_loop_fields));
 
         // Now, check that the PMICs were enabled properly. If any don't report on that are expected
         // to be on, declare N-mode there too.

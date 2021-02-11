@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,19 +273,34 @@ fapi2::ReturnCode pmic_is_ti(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmi
 
 
 ///
-/// @brief Calcuate target voltage for PMIC from attribute settings
+/// @brief Calculate target voltage for PMIC from attribute settings
 ///
-/// @param[in] i_ocmb_target OCMB parent target of pmic of PMIC (holds the attributes)
-/// @param[in] i_id ID of pmic (0,1)
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_id relative ID of PMIC (0/1)
 /// @param[in] i_rail RAIL to calculate voltage for
 /// @param[out] o_volt_bitmap output bitmap
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode calculate_voltage_bitmap_from_attr(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const mss::pmic::id i_id,
     const uint8_t i_rail,
     uint8_t& o_volt_bitmap);
+
+///
+/// @brief Calculate nominal rail voltages
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_id ID of pmic (0,1)
+/// @param[in] i_rail SWA through SWD mapped as 0 to 3
+/// @param[out] o_nominal_voltage calculated nominal voltage, shifted in place for register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode calculate_4u_nominal_voltage(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint8_t i_id,
+    const uint8_t i_rail,
+    uint8_t& o_nominal_voltage);
 
 ///
 /// @brief Get PMIC position/ID under OCMB target. There could be 4 pmics, but we care about whether its PMIC0(2) or PMIC1(3)

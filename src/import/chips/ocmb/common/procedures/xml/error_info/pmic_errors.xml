@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -66,15 +66,29 @@
     <description>
        The voltage from the SPD and offset combination or bias operation was out of range for the PMIC.
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
     <ffdc>VOLTAGE_BITMAP</ffdc>
     <ffdc>RAIL</ffdc>
+    <ffdc>BASE_VOLTAGE</ffdc>
+    <ffdc>SPD_OFFSET</ffdc>
+    <ffdc>EFD_OFFSET</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_RANGE_CONVERSION_OVERFLOW</rc>
+    <description>
+       Converting voltage between PMIC switch node range 1 to 0 caused an overflow
+    </description>
+    <ffdc>PMIC_TARGET</ffdc>
+    <ffdc>RANGE_0_VOLT</ffdc>
+    <ffdc>RANGE_1_VOLT</ffdc>
+    <ffdc>RAIL</ffdc>
     <callout>
-      <target>TARGET</target>
+      <target>PMIC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
