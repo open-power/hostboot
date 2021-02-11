@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -48,6 +48,7 @@ import subprocess
 import re
 import random
 import struct
+import time
 
 # @class DebugFrameworkIPCMessage
 # @brief Wrapper class for constructing a properly formed IPC message for the
@@ -78,8 +79,8 @@ class DebugFrameworkIPCMessage:
         pattern = re.compile("\[ \"([^\"]+)\", \"([0-9a-f]*)\" ]")
         match = pattern.search(string)
         if  match is None:
-            print   "error: empty message >%s< received from perl"%(string)
-            print   "       Check for print's in your perl script!!!"
+            print(  "error: empty message >%s< received from perl"%(string))
+            print(  "       Check for print's in your perl script!!!")
         else:
             self.msgtype = match.group(1)
             self.msg = match.group(2).decode("hex")
@@ -145,9 +146,11 @@ class DebugFrameworkProcess:
         if (self.outputToString):
             self.result += data
         else:
-            print data,
+            sys.stdout.write(data)
+            sys.stdout.flush()
+
             if self.outputFile:
-                print >>self.outputFile,data,
+                self.outputFile.write(data)
 
     # Read data from memory.
     #    This message has data of the format "0dADDRESS,0dSIZE".
@@ -202,7 +205,7 @@ class DebugFrameworkProcess:
             ## print ">> %s"%(syscmd)
             ( rc, out )  =   quiet_run_command( syscmd, output_modes.regular )
             if ( rc ):
-                print "simics ERROR running %s: %d "%( syscmd, rc )
+                print("simics ERROR running %s: %d "%( syscmd, rc ))
 
     def ready_for_instr(self,data):
         self.sendMsg("data-response", "0" if SIM_simics_is_running() else "1")
@@ -249,7 +252,7 @@ class DebugFrameworkProcess:
         ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
         ## DEBUG print ">> %s : "%(runStr) + " 0x%16.16x"%(result) + " : " + out
         if ( result ):
-            print "simics ERROR running %s: %d "%( syscmd, result )
+            print("simics ERROR running %s: %d "%( syscmd, result ))
 
     # Read HRMOR from processors.
     #    This message has no input data
@@ -264,7 +267,7 @@ class DebugFrameworkProcess:
         syscmd = "shell hb_decoderc %x"%(rc)
         (r, out) = quiet_run_command(syscmd, output_modes.regular)
         if(r):
-            print "simics ERROR running %s"%(syscmd)
+            print("simics ERROR running %s"%(syscmd))
 
 
 # @fn run_hb_debug_framework
@@ -346,7 +349,7 @@ def register_hb_debug_framework_tools():
                     type = ["hostboot-commands"],
                     short = "Runs the debug framework for tool " + tool,
                     doc = usage)
-        print "Hostboot Debug Framework: Registered tool:", "hb-" + tool
+        print("Hostboot Debug Framework: Registered tool:", "hb-" + tool)
 
     # Do a quick file write test to make sure we can write files and set a
     # simics variable to let us know if we need to avoid file writes.
@@ -518,18 +521,18 @@ def magic_instruction_callback(user_arg, cpu, arg):
     # Disable our handler if someone tells us to
     if( os.environ.has_key('HB_DISABLE_MAGIC')
         and (os.environ['HB_DISABLE_MAGIC'] == '1') ):
-        print 'Skipping HB magic (disabled)', arg
+        print('Skipping HB magic (disabled)', arg)
         return
 
     # HRMOR should match the l3 base that was set on the primary processor as
     # part of either hostboot or the SBE's startup.simics script
     if( (cpu.hrmor) & 0x00000000FFFFFFFF != getL3Base() ):
-        print 'Skipping HB magic (outside of HB): magic=', arg, ', hrmor=', cpu.hrmor, ', pir=', cpu.pir
+        print('Skipping HB magic (outside of HB): magic=%s, hrmor=%s, pir=%s' % (arg, cpu.hrmor, cpu.pir))
         return
 
     if arg == 7006:   # MAGIC_SHUTDOWN
         # KernelMisc::shutdown()
-        print "KernelMisc::shutdown() called."
+        print("KernelMisc::shutdown() called.")
 
     if arg == 7007:   # MAGIC_BREAK
         # Stop the simulation, much like a hard-coded breakpoint
@@ -543,7 +546,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
     if arg == 7011: #MAGIC_SIMICS_CHECK
         cpu.r3 = 1
-        print "TimeManager::cv_isSimicsRunning = true"
+        print("TimeManager::cv_isSimicsRunning = true")
 
     if arg == 7012:  # MAGIC_LOAD_PAYLOAD
         #For P9 the Payload load is much faster due to PNOR
@@ -554,12 +557,12 @@ def magic_instruction_callback(user_arg, cpu, arg):
         #print 'loading payload from', flash_file, 'to 0x%x' % load_addr
         #cmd = 'shell "fcp --force -o0 -R %s:PAYLOAD simicsPayload.ecc; ecc --remove --p8 simicsPayload.ecc simicsPayload"; load-file simicsPayload 0x%x' % (flash_file, load_addr)
         #SIM_run_alone( run_command, cmd )
-      print "MAGIC_LOAD_PAYLOAD not implemented\n";
+      print("MAGIC_LOAD_PAYLOAD not implemented\n")
 
     if arg == 7013: # MAGIC_IS_QME_ENABLED
         qmeEnabled = 0 if cpu.pcr_dev == None else 1
         cpu.r3 = qmeEnabled
-        print "SIMICS QME model enabled = %d" % (qmeEnabled)
+        print("SIMICS QME model enabled = %d" % (qmeEnabled))
 
     if arg == 7014:   # MAGIC_HB_DUMP
         # Collect a hostboot dump
@@ -567,7 +570,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
         # Make sure we only do 1 dump even though every thread will TI
         if( not os.environ.has_key('HB_DUMP_COMPLETE') ):
-            print "Generating Hostboot Dump for TI"
+            print("Generating Hostboot Dump for TI")
             os.environ['HB_DUMP_COMPLETE']="1"
             cmd1 = "hb-Dump quiet"
             SIM_run_alone(run_command, cmd1 )
@@ -583,13 +586,13 @@ def magic_instruction_callback(user_arg, cpu, arg):
         rc = cpu.r5
         # generate the traces
         cmd1 = "sbe-trace %d"%(proc_num)
-        print "cmd1", cmd1
+        print("cmd1", cmd1)
         # copy the file somewhere safe
         # Ignore any issues with generating tracMERG via || true on cat, best to
         # continue running and gather other FFDC to debug why SBE tracMERG can not be
         # retrieved then cause SIMICS to fail with a "file not found" exception
         cmd2 = "shell \"echo '==HB Collecting Traces (iar=%X,rc=%X,sbe=%d)==' >> sbetrace.hb.txt; ( cat sbe_%d_tracMERG || true ) >> sbetrace.hb.txt\""%(cpu.iar,rc,proc_num,proc_num)
-        print "cmd2", cmd2
+        print("cmd2", cmd2)
 
         saveCommand = "%s; %s"%(cmd1,cmd2)
         SIM_run_alone(run_command, saveCommand )
@@ -598,9 +601,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # Print current istep out to simics console
         major_istep = cpu.r4
         minor_istep = cpu.r5
-        percent_s = "%s"
-        dateCommand = "shell \" date +'%s > ISTEP %d.%d' \""%(percent_s,major_istep,minor_istep)
-        SIM_run_alone(run_command, dateCommand )
+        print("%d > ISTEP %d.%d" % (int(time.time()), major_istep, minor_istep))
 
     if arg == 7021:  # MAGIC_PRINT_TWO_REGS
         first_num = cpu.r4
@@ -610,7 +611,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         SIM_run_alone(run_command, dateCommand )
 
     if arg == 7025:  # MAGIC_SETUP_THREADS
-        print "Setting up urmor for all PIRs"
+        print("Setting up urmor for all PIRs")
         # Hook to update SMF MSR bit if needed
         smfEnabled = cpu.r4
 
@@ -671,7 +672,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
                 setLvlCommand = "%s"%(comp_str)+".log-level %d"%(log_level)
                 SIM_run_alone(run_command, setLvlCommand )
             else :
-                print "Unable to find valid object on this system type, neither %s nor %s were found"%(D1Proc0String, P9Proc0String)
+                print("Unable to find valid object on this system type, neither %s nor %s were found"%(D1Proc0String, P9Proc0String))
 
     if arg == 7023:  # MAGIC_TOGGLE_OUTPUT
         if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
@@ -749,7 +750,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
                         #break
 
         if mem_object == None:
-            print "Could not find entry for hrmor %d" % (hb_hrmor)
+            print("Could not find entry for hrmor %d" % (hb_hrmor))
             SIM_break_simulation( "No memory for trace" )
             return
 
@@ -801,9 +802,9 @@ def magic_instruction_callback(user_arg, cpu, arg):
             if (simenv.fileSystemOk == 1):
                 SIM_run_alone(run_command, saveCommand )
             else:
-                print "WARNING: Unable to write Hostboot traces, maybe check your credentials, but continuing"
+                print("WARNING: Unable to write Hostboot traces, maybe check your credentials, but continuing")
         except Exception as e:
-            print "WARNING: Problem running saveCommand for Hostboot traces, maybe check your credentials, but continuing... {}".format(e)
+            print("WARNING: Problem running saveCommand for Hostboot traces, maybe check your credentials, but continuing... {}".format(e))
 
         #file = open("hb_trace_debug.dat", "a")
         #file.write("%s\n" % (saveCommand))
@@ -831,21 +832,21 @@ def magic_instruction_callback(user_arg, cpu, arg):
         if feature == 1:  #MAGIC_FEATURE__MULTIPROC
             value = 1 if simenv.hb_multiproc == 1 else 0
             if value != 0:
-                print "HB> MAGIC_FEATURE__MULTIPROC = %d" % (value)
+                print("HB> MAGIC_FEATURE__MULTIPROC = %d" % (value))
         elif feature == 2:  #MAGIC_FEATURE__IGNORESMPFAIL
             value = 1 if simenv.hb_ignoresmpfail == 1 else 0
             if value != 0:
-                print "HB> MAGIC_FEATURE__IGNORESMPFAIL = %d" % (value)
+                print("HB> MAGIC_FEATURE__IGNORESMPFAIL = %d" % (value))
         elif feature == 3:  #MAGIC_FEATURE__IGNORETODFAIL
             value = 1 if simenv.hb_ignoretodfail == 1 else 0
             if value != 0:
-                print "HB> MAGIC_FEATURE__IGNORETODFAIL = %d" % (value)
+                print("HB> MAGIC_FEATURE__IGNORETODFAIL = %d" % (value))
         elif feature == 5:  #MAGIC_FEATURE__SKIPOCC
             value = 1 if simenv.hb_skipocc  == 1 else 0
             if value != 0:
-                print "HB> MAGIC_FEATURE__SKIPOCC = %d" % (value)
+                print("HB> MAGIC_FEATURE__SKIPOCC = %d" % (value))
         else:
-            print "MAGIC_CHECK_FEATURE> Unknown feature %d requested for" % (feature)
+            print("MAGIC_CHECK_FEATURE> Unknown feature %d requested for" % (feature))
         cpu.r3 = value
 
 
