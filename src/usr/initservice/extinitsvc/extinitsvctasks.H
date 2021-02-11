@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -83,6 +83,17 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 #endif
+        /**
+         * @brief   targeting task,
+         */
+        {
+            "libtargeting.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+            }
+        },
 #if defined(CONFIG_PLDM) || defined(CONFIG_PLDM_TESTCASES)
         /**
          * @brief   PLDM Extended
@@ -97,18 +108,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 #endif
-        /**
-         * @brief   targeting task,
-         */
-        {
-            "libtargeting.so" ,                         // taskname
-            NULL,                                       // no pointer to fn
-            {
-                START_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-            }
-        },
-
         /**
          * @brief   HWAS,
          * need the hwas module for errl dependency gard / deconfig

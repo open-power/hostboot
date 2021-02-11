@@ -63,6 +63,9 @@
 #include <pldm/responses/pldm_monitor_control_responders.H>
 #include <pldm/responses/pldm_fru_data_responders.H>
 
+// Hostboot utils
+#include <util/misc.H>
+
 /* PLDM message handler lookup tables */
 
 using namespace PLDM;
@@ -341,6 +344,35 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const siz
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  MOD_HANDLE_INBOUND_REQ,
                                  RC_INVALID_COMMAND,
+                                 pldm_command,
+                                 category,
+                                 ErrlEntry::NO_SW_CALLOUT);
+
+            addBmcErrorCallouts(errl);
+            break;
+        }
+
+        if(!Util::isTargetingLoaded())
+        {
+            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_NOT_READY);
+            PLDM_INF("Received a PLDM request of category %d message type %d but targeting"
+                     " has yet to be loaded. This usually indicates the message is left over"
+                     " from a previous boot and was actually intended for PHYP at runtime."
+                     " Hostboot should ignore it but log an informational error just in case.",
+                     category, pldm_command);
+            /*@
+             * @errortype  ERRL_SEV_INFORMATIONAL
+             * @moduleid   MOD_HANDLE_INBOUND_REQ
+             * @reasoncode RC_NOT_READY
+             * @userdata1  Unrecognized PLDM command
+             * @userdata2  PLDM message category
+             * @devdesc    Software problem, Hostboot got a PLDM request
+             *             before we were ready to handle it.
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                 MOD_HANDLE_INBOUND_REQ,
+                                 RC_NOT_READY,
                                  pldm_command,
                                  category,
                                  ErrlEntry::NO_SW_CALLOUT);

@@ -132,6 +132,7 @@ namespace PLDM
         RC_NO_ATTRIBUTE_MATCH       = PLDM_COMP_ID | 0x22,
         RC_OUT_OF_RANGE             = PLDM_COMP_ID | 0x23,
         RC_NO_MATCH_IN_TABLE        = PLDM_COMP_ID | 0x24,
+        RC_NOT_READY                = PLDM_COMP_ID | 0x25,
     };
 }
 #endif
