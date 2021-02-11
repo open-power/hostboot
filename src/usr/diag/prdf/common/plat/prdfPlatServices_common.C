@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #ifdef __HOSTBOOT_MODULE
 #include <prdfParserUtils.H>
 #include <dimmBadDqBitmapFuncs.H>
+#include <exp_maint_cmds.H>
 #endif
 
 using namespace TARGETING;
@@ -308,23 +309,22 @@ template<>
 int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
                                         const MemRank & i_rank,
                                         MemSymbol & o_port0Spare,
-                                        MemSymbol & o_port1Spare,
-                                        MemSymbol & o_eccSpare )
+                                        MemSymbol & o_port1Spare )
 {
     int32_t o_rc = SUCCESS;
 
-    /* TODO RTC 199032 - sparing support
 
     // called by FSP code so can't just move to hostboot side
 #ifdef __HOSTBOOT_MODULE
     errlHndl_t errl = nullptr;
 
-    uint8_t port0Spare, port1Spare, eccSpare;
+    uint8_t port0Spare, port1Spare;
 
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiPort(i_ocmb);
-//p10cleanup
-//    FAPI_INVOKE_HWP( errl, mss_check_steering, fapiPort,
-//            i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
+    TargetHandle_t memport = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
+    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(memport);
+
+    FAPI_INVOKE_HWP( errl, mss::exp::steer::check_steering, fapiPort,
+                     i_rank.getMaster(), port0Spare, port1Spare );
 
     if ( nullptr != errl )
     {
@@ -338,10 +338,8 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     {
         o_port0Spare = MemSymbol::fromSymbol( i_ocmb, i_rank, port0Spare );
         o_port1Spare = MemSymbol::fromSymbol( i_ocmb, i_rank, port1Spare );
-        o_eccSpare   = MemSymbol::fromSymbol( i_ocmb, i_rank, eccSpare   );
     }
 #endif
-    */
 
     return o_rc;
 }
@@ -349,39 +347,36 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 //------------------------------------------------------------------------------
 
 template<>
-int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
-    const MemRank & i_rank, const MemSymbol & i_symbol, bool i_x4EccSpare )
+int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
+    const MemRank & i_rank, const MemSymbol & i_symbol )
 {
     int32_t o_rc = SUCCESS;
 
-    /* TODO RTC 199032 - sparing support
-
 #ifdef __HOSTBOOT_MODULE
     errlHndl_t errl = nullptr;
-    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memPort);
 
-    TargetHandle_t dimm = getConnectedDimm( i_memPort, i_rank,
+    TargetHandle_t memport = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
+    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(memport);
+
+    TargetHandle_t dimm = getConnectedDimm( i_ocmb, i_rank,
                                             i_symbol.getPortSlct() );
     uint8_t l_dramSymbol = PARSERUTILS::dram2Symbol<TYPE_OCMB_CHIP>(
                                                      i_symbol.getDram(),
                                                      isDramWidthX4(dimm) );
 
-//p10cleanup
-//    FAPI_INVOKE_HWP( errl, mss_do_steering, fapiPort,
-//                     i_rank.getMaster(), l_dramSymbol,
-//                     i_x4EccSpare );
+    FAPI_INVOKE_HWP( errl, mss::exp::steer::do_steering, fapiPort,
+                     i_rank.getMaster(), l_dramSymbol );
 
     if ( nullptr != errl )
     {
         PRDF_ERR( "[PlatServices::mssSetSteerMux] mss_do_steering "
                   "failed. HUID: 0x%08x rank: %d symbol: %d eccSpare: %c",
-                  getHuid(i_memPort), i_rank.getMaster(), l_dramSymbol,
-                  i_x4EccSpare ? 'T' : 'F' );
+                  getHuid(i_ocmb), i_rank.getMaster(), l_dramSymbol );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
 #endif
-    */
+
     return o_rc;
 }
 
@@ -545,12 +540,11 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
         if ( TYPE_MEM_PORT == T )
         {
             steerTrgt = getConnectedParent( i_trgt, TYPE_OCMB_CHIP );
-            o_rc = mssGetSteerMux<TYPE_OCMB_CHIP>( steerTrgt, i_rank, sp0, sp1,
-                                                   ecc );
+            o_rc = mssGetSteerMux<TYPE_OCMB_CHIP>(steerTrgt, i_rank, sp0, sp1);
         }
         else
         {
-            o_rc = mssGetSteerMux<T>( steerTrgt, i_rank, sp0, sp1, ecc );
+            o_rc = mssGetSteerMux<T>( steerTrgt, i_rank, sp0, sp1 );
         }
         if ( SUCCESS != o_rc )
         {

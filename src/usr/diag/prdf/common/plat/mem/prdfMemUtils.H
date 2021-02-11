@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,6 +99,19 @@ template<TARGETING::TYPE T>
 int32_t collectCeStats( ExtensibleChip * i_chip, const MemRank & i_rank,
                         MaintSymbols & o_maintStats, MemSymbol & o_chipMark,
                         uint8_t i_thr = 1 );
+
+
+/**
+ * @brief  Queries the per symbol MCE counters and returns a count of how many
+ *         chip-marked symbols are 'bad' where a 'bad' symbol is defined as a
+ *         symbol that has a count >= than the inputted threshold.
+ * @param  i_chip Target OCMB chip
+ * @param  i_thr The threshold of how many MCEs defines a 'bad' symbol.
+ *               Defaults to 2.
+ * @return Count of the number of 'bad' chip-marked symbols
+ */
+template<TARGETING::TYPE T>
+uint8_t collectMceBadSyms( ExtensibleChip * i_chip, uint8_t i_thr = 2 );
 
 /**
  * @brief  Gets DRAM size for an OCMB or MEM_PORT.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -236,124 +236,6 @@ template<>
 uint32_t cleanupSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmbChip )
 {
     return SUCCESS; // Not needed for MCBIST commands.
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-        const MemRank & i_rank, AddrRangeType i_rangeType,
-        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> i_stopCond )
-{
-    #define PRDF_FUNC "[PlatServices::startTdSteerCleanup<TYPE_OCMB_CHIP>] "
-
-    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    // Default speed is to run as fast as possible.
-    //mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::FAST_MAX_BW_IMPACT;
-
-    // Set stop-on-AUE for all target scrubs. See explanation in startBgScrub()
-    // for the reasons why.
-    i_stopCond.set_pause_on_aue(mss::ON);
-
-    do
-    {
-        // Get the address range of the given rank.
-        mss::mcbist::address saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr, eaddr,
-                                                i_rangeType );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
-            break;
-        }
-
-        // Clear all of the counters and maintenance ECC attentions.
-        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // TODO RTC 199032 - sparing support
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
-        const MemRank & i_rank, AddrRangeType i_rangeType,
-        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> i_stopCond)
-{
-    #define PRDF_FUNC "[PlatServices::startTdSfRead<TYPE_OCMB_CHIP>] "
-
-    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    // Set stop-on-AUE for all target scrubs. See explanation in startBgScrub()
-    // for the reasons why.
-    i_stopCond.set_pause_on_aue(mss::ON);
-
-    do
-    {
-        // Get the address range of the given rank.
-        mss::mcbist::address saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr, eaddr,
-                                                i_rangeType );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
-            break;
-        }
-
-        // Clear all of the counters and maintenance ECC attentions.
-        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // Get the OCMB fapi target.
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
-            fapiTrgt( i_chip->getTrgt() );
-
-        // Start the super fast read command.
-        errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, exp_sf_read, fapiTrgt, i_stopCond, saddr );
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "exp_sf_read(0x%08x,%d) failed",
-                      i_chip->getHuid(), i_rank.getMaster() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------

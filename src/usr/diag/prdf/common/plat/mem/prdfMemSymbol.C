@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -330,7 +330,7 @@ uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
         MemSymbol sp0, sp1, ecc;
         o_rc = mssGetSteerMux<TYPE_OCMB_CHIP>( i_chip->getTrgt(), i_rank,
-                                               sp0, sp1, ecc );
+                                               sp0, sp1 );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,8 +157,7 @@ class DsdEvent : public TdEntry
                 // hardware steer mux.
                 o_rc = PlatServices::mssSetSteerMux<T>(iv_chip->getTrgt(),
                                                        iv_rank,
-                                                       iv_mark.getSymbol(),
-                                                       iv_eccSpare );
+                                                       iv_mark.getSymbol());
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "mssSetSteerMux(0x%08x,0x%2x) failed",

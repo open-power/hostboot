@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,55 +110,6 @@ uint32_t startSfRead( ExtensibleChip * i_chip, const MemRank & i_rank );
  */
 template<TARGETING::TYPE T>
 uint32_t cleanupSfRead( ExtensibleChip * i_chip );
-
-/**
- * @brief  Starts a super fast read command on the target rank.
- * @param  i_chip      MBA chip.
- * @param  i_rank      Target rank.
- * @param  i_rangeType See enum AddrRangeType.
- * @param  i_stopCond  The stop conditions for the targeted scrub.
- * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
- */
-template<TARGETING::TYPE TT, typename VT>
-uint32_t startTdSfRead( ExtensibleChip * i_chip, const MemRank & i_rank,
-                        AddrRangeType i_rangeType, VT i_stopCond );
-
-/**
- * @brief  Resumes TD super fast read after it has paused on error.
- * @param  i_chip      MBA chip.
- * @param  i_rangeType See enum AddrRangeType.
- * @param  i_stopCond  The stop conditions for the targeted scrub.
- * @param  i_incRow    True if we need the command to start on the next row
- *                     instead of the next address.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T, typename SCT>
-uint32_t resumeTdSfRead( ExtensibleChip * i_chip, AddrRangeType i_rangeType,
-                         SCT i_stopCond, bool i_incRow = false );
-
-/**
- * @brief  Starts a steer cleanup scrub command on the target rank.
- * @param  i_chip      MBA chip.
- * @param  i_rank      Target rank.
- * @param  i_rangeType See enum AddrRangeType.
- * @param  i_stopCond  The stop conditions for the targeted scrub.
- * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
- */
-template<TARGETING::TYPE TT, typename VT>
-uint32_t startTdSteerCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
-                              AddrRangeType i_rangeType, VT i_stopCond );
-
-/**
- * @brief  Resumes TD steer cleanup after it has paused on error.
- * @param  i_chip      MBA chip.
- * @param  i_rangeType See enum AddrRangeType.
- * @param  i_stopCond  The stop conditions for the targeted scrub.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T, typename SCT>
-uint32_t resumeTdSteerCleanup( ExtensibleChip * i_chip,
-                               AddrRangeType i_rangeType,
-                               SCT i_stopCond );
 
 } // end namespace PlatServices
 

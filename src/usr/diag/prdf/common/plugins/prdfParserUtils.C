@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -195,6 +195,17 @@ uint8_t symbol2Byte<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
     return (SYMBOLS_PER_RANK > i_symbol)
             ? (symbol2Nibble<TARGETING::TYPE_OCMB_CHIP>(i_symbol)/2)
             : MEM_BYTES_PER_RANK;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t dram2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_dram,
+                                                bool i_isX4Dram )
+{
+    return (true == i_isX4Dram) ?
+        nibble2Symbol<TARGETING::TYPE_OCMB_CHIP>(i_dram) :
+        byte2Symbol<TARGETING::TYPE_OCMB_CHIP>(i_dram);
 }
 
 //------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -171,6 +171,19 @@ uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
  */
 template<TARGETING::TYPE T>
 uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank );
+
+
+/**
+ * @brief  Checks whether it is safe to remove the chip mark or not depending
+ *         on the data in the per-symbol CE and MCE counters. Used to check
+ *         before clearing a chip mark after applying a DRAM spare. Note that
+ *         scrub needs to be configured to set the per-symbol counters.
+ * @param  i_chip OCMB chip.
+ * @param  i_rank Target rank.
+ * @return True if it is safe to remove the chip mark, false otherwise.
+ */
+template<TARGETING::TYPE T>
+bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 #ifdef __HOSTBOOT_MODULE // Not supported on FSP.
 

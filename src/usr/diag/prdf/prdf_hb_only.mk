@@ -91,6 +91,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ecc/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mc/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/

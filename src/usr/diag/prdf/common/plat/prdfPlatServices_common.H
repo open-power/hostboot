@@ -173,27 +173,24 @@ uint32_t clearBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
  * @param  i_rank       Target rank.
  * @param  o_port0Spare A symbol associated with the spare on port 0.
  * @param  o_port1Spare A symbol associated with the spare on port 1.
- * @param  o_eccSpare   A symbol associated with the ECC spare (x4 mode only).
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_trgt,
                         const MemRank & i_rank, MemSymbol & o_port0Spare,
-                        MemSymbol & o_port1Spare, MemSymbol & o_eccSpare );
+                        MemSymbol & o_port1Spare );
 
 /**
  * @brief  Invokes the set steer mux hardware procedure.
  * @param  i_trgt       Target OCMB
  * @param  i_rank       Target rank.
  * @param  i_symbol     A symbol associated with the DRAM to be spared.
- * @param  i_x4EccSpare If true, will set ECC spare instead (x4 mode only).
  * @note   The procedure will be able to derive the port from the given symbol.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_trgt,
-                        const MemRank & i_rank, const MemSymbol & i_symbol,
-                        bool i_x4EccSpare );
+                        const MemRank & i_rank, const MemSymbol & i_symbol );
 
 /**
  * @brief   Get spare DRAM information on a DIMM.

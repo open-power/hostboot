@@ -213,6 +213,34 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
+uint8_t collectMceBadSyms<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                           uint8_t i_thr )
+{
+    uint8_t o_badSymCount = 0;
+
+    // The MBSMSEC register contains four 8-bit counts that increment on MCE
+    // when their respective symbols (0:3) under chip mark take an error.
+    SCAN_COMM_REGISTER_CLASS * mbsmsec = i_chip->getRegister("MBSMSEC");
+    if ( SUCCESS == mbsmsec->Read() )
+    {
+        const uint8_t mceSymNum = 4;
+        for ( uint8_t n = 0; n < mceSymNum; n++ )
+        {
+            // Get each symbol count (0:3)
+            uint8_t symCount = mbsmsec->GetBitFieldJustified( 8*n, 8 );
+            if ( symCount >= i_thr )
+            {
+                o_badSymCount++;
+            }
+        }
+    }
+
+    return o_badSymCount;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint8_t getDramSize<TYPE_MEM_PORT>( TargetHandle_t i_trgt, uint8_t i_dimmSlct )
 {
     #define PRDF_FUNC "[MemUtils::getDramSize] "

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -418,7 +418,7 @@ void deployDramSpares<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
     {
         MemSymbol sym = MemSymbol::fromSymbol( i_trgt, rank, 71 );
 
-        int32_t l_rc = mssSetSteerMux<TYPE_OCMB_CHIP>(i_trgt, rank, sym, false);
+        int32_t l_rc = mssSetSteerMux<TYPE_OCMB_CHIP>(i_trgt, rank, sym);
         if ( SUCCESS != l_rc )
         {
             // mssSetSteerMux() will print a trace and commit the error log,

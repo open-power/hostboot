@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -197,7 +197,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 
             // Get DRAM spares
             MemSymbol sp0, sp1, ecc;
-            rc = mssGetSteerMux<T>( i_trgt, rank, sp0, sp1, ecc );
+            rc = mssGetSteerMux<T>( i_trgt, rank, sp0, sp1 );
             if ( SUCCESS != rc )
             {
                 PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed");

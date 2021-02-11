@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 #include <prdfMemDbUtils.H>
+#include <prdfMemUtils.H>
 
 #include <stdio.h>
 
@@ -358,6 +359,40 @@ template
 uint32_t clearSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank );
 
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank )
+{
+    bool o_safeToRemoveCm = false;
+
+    // Check the per-symbol CE and MCE counters to determine whether it
+    // is safe to remove the chip mark (bad symbol == symbol has a count of
+    // more than one).
+    MemUtils::MaintSymbols badNonCmSyms;
+    MemSymbol junk;
+
+    if ( SUCCESS == MemUtils::collectCeStats<T>(i_chip, i_rank, badNonCmSyms,
+                                                junk, 2) )
+    {
+        uint8_t badCmSyms = MemUtils::collectMceBadSyms<T>( i_chip );
+
+        // If there are 2 or more bad chip-marked symbols and 1 or more
+        // non-chip marked symbols then there is a UE risk if we remove the
+        // chip mark so it is not safe to do so.
+        if ( badCmSyms < 2 || badNonCmSyms.size() < 1 )
+        {
+            o_safeToRemoveCm = true;
+        }
+    }
+
+    return o_safeToRemoveCm;
+}
+
+template
+bool isSafeToRemoveChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                             const MemRank & i_rank );
+
 //##############################################################################
 //          Utilities to cleanup markstore after a chip mark is verified
 //##############################################################################
@@ -463,9 +498,8 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         {
             // Sparing is enabled. Get the current spares in hardware.
             MemSymbol sp0, sp1, ecc;
-            o_rc = mssGetSteerMux<TARGETING::TYPE_OCMB_CHIP>( i_chip->getTrgt(),
-                                                              i_rank, sp0, sp1,
-                                                              ecc );
+            o_rc = mssGetSteerMux<TARGETING::TYPE_OCMB_CHIP>(i_chip->getTrgt(),
+                                                             i_rank, sp0, sp1);
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "mssGetSteerMux(0x%08x,0x%02x) failed",
@@ -630,14 +664,6 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
         // We want to try to avoid garding NVDIMMs, so clear gard for them now.
         io_sc.service_data->clearNvdimmMruListGard();
 
-        #ifdef __HOSTBOOT_RUNTIME
-        // Only ban TPS for Centaur
-        if ( TYPE_MBA == T )
-        {
-            // No more repairs left so no point doing any more TPS procedures.
-            MemDbUtils::banTps<T>( i_chip, i_rank );
-        }
-        #endif
     }
 
     return o_rc;

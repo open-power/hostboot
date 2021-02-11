@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -42,6 +42,7 @@ prd_incpath += ${ROOTPATH}/src/import/generic/memory
 prd_obj += prdfMemScrubUtils.o
 prd_obj += prdfMemTdCtlr.o
 prd_obj += prdfMemVcm.o
+prd_obj += prdfMemDsd.o
 
 ################################################################################
 # Hostboot only object files (IPL only)
@@ -51,7 +52,6 @@ ifneq (${HOSTBOOT_RUNTIME},1)
 
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemTdCtlr_ipl.o
-prd_obj += prdfMemDsd_ipl.o
 prd_obj += prdfMemTps_ipl.o
 prd_obj += prdfMemVcm_ipl.o
 prd_obj += prdfMemIplCeStats.o
@@ -67,7 +67,6 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemTdCtlr_rt.o
-prd_obj += prdfMemDsd_rt.o
 prd_obj += prdfMemTps_rt.o
 prd_obj += prdfMemVcm_rt.o
 prd_obj += prdfMemDynDealloc.o
