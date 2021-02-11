@@ -1368,5 +1368,19 @@
       <writeable/>
       <mssAccessorName>exp_i2c_fw_log_dump_disable</mssAccessorName>
     </attribute>
+    
+    <attribute>
+      <id>ATTR_MSS_EXP_SERIAL_NUMBER</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          IBM serial number for this DDIMM
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <enum>PART_NUMBER = 3, PART_NUMBER_LEN = 7, RAW_CARD = 10, RAW_CARD_LEN = 4, SERIAL_NUMBER = 14, SERIAL_NUMBER_LEN = 12</enum>
+      <writeable/>
+      <array> 26 </array>
+      <mssAccessorName>exp_serial_number</mssAccessorName>
+    </attribute>
 
 </attributes>
