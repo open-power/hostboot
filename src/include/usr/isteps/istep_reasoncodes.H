@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,6 +83,7 @@ namespace ISTEP
         MOD_SCOPED_HOMER_MAPPER_UNMAP                     = 0x34,
         MOD_GET_RUNTIME_PM_ADDRESSES                      = 0x35,
         MOD_ENABLE_MEMORY_ENCRYPTION                      = 0x36,
+        MOD_SECUREBOOT_LOCKDOWN                           = 0x37,
     };
 
     /**
@@ -175,6 +176,7 @@ namespace ISTEP
         RC_RNG_FAILED                            = ISTEP_COMP_ID | 0x60,
         RC_MEMORY_ENCRYPTION_ENABLED             = ISTEP_COMP_ID | 0x61,
         RC_INVALID_PAYLOAD_KIND                  = ISTEP_COMP_ID | 0x62,
+        RC_SBE_REPORTED_FFDC                     = ISTEP_COMP_ID | 0x63,
     };
 
 };

@@ -26,7 +26,7 @@
    @file call_host_secureboot_lockdown.C
  *
  *  Support file for IStep: host_secureboot_lockdown
- *    This istep will do these things:
+ *    This istep will do these things (not necessarily in this order):
  *      1) Check for TPM policies are valid
  *      2) Check for secureboot consistency between procs
  *      3) Set the SUL security bit so that SBE image cannot be updated
@@ -35,6 +35,7 @@
  *         to prevent attack vector
  *      6) Check for a reason, such as a Key Clear Request, to re-IPL the
  *         system so the system owner can assert physical presence
+ *      7) Check Scratch Regiser 11 (0x50182) to see if SBE is reporting a previous fail.
  *
  */
 
@@ -42,9 +43,12 @@
 #include <isteps/hwpisteperror.H>
 #include <isteps/istep_reasoncodes.H>
 #include <initservice/initserviceif.H>
+#include <initservice/mboxRegs.H>
 #include <istepHelperFuncs.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludlogregister.H>
+#include <targeting/common/targetservice.H>
 
 // For Secureboot, Trustedboot support
 #include <secureboot/service.H>
@@ -106,6 +110,21 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
         getAllChips(l_procList,TARGETING::TYPE_PROC);
         getAllChips(l_tpmList,TARGETING::TYPE_TPM,false);
 
+        TARGETING::Target* boot_proc = nullptr;
+        l_err = TARGETING::targetService().queryMasterProcChipTargetHandle(boot_proc);
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_secureboot_lockdown: FAIL getting boot proc"
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
+
+            captureError(l_err, l_istepError, HWPF_COMP_ID);
+
+            // If targeting can't get the boot proc, then it's broke, so break here
+            break;
+        }
+
         for(const auto& l_proc : l_procList)
         {
 
@@ -133,6 +152,94 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                                                                     >(l_protectTpm);
             }
 
+            // Check that the SBE did not use Scratch Register 11 (0x50182) to pass FFDC
+            // on a secureboot validation error up to hostboot to log an error
+            uint64_t scomData = 0x0;
+            size_t op_size = sizeof(scomData);
+
+            // For boot proc read from attribute that was saved off at the start of the IPL
+            if (l_proc == boot_proc)
+            {
+                const auto l_scratchRegs = TARGETING::UTIL::assertGetToplevelTarget()->
+                                             getAttrAsStdArr<TARGETING::ATTR_MASTER_MBOX_SCRATCH>();
+
+                // Write to uint64_t scomData even though MboxScratch11_t::REG_IDX is a uint32_t
+                // This will preserve the scomData != 0 check below for all processors
+                scomData = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch11_t::REG_IDX];
+
+            }
+            // For non-boot procs read Scratch Register 11 (0x50182) directly from HW
+            else
+            {
+                l_err = deviceRead(
+                            l_proc,
+                            &scomData,
+                            op_size,
+                            DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR));
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "call_host_secureboot_lockdown: SCOM Read of MAILBOX_SCRATCH_REG_11 "
+                              "(0x%X) failed for Proc HUID 0x%08x "
+                              TRACE_ERR_FMT,
+                              INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR,
+                              TARGETING::get_huid(l_proc),
+                              TRACE_ERR_ARGS(l_err));
+
+                    // Among other things, this will add the proc target to the log
+                    captureError(l_err, l_istepError, HWPF_COMP_ID, l_proc);
+
+                    // Try to run the HWP on all procs regardless of error.
+                    continue;
+                }
+            }
+
+            if (scomData != 0x0)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_secureboot_lockdown: SBE reported FFDC Data in Scratch Reg 11 "
+                          "(addr=0x%X) for Proc HUID 0x%08X: data = 0x%.16llX "
+                          TRACE_ERR_FMT,
+                          INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR,
+                          TARGETING::get_huid(l_proc), scomData,
+                          TRACE_ERR_ARGS(l_err));
+
+               /*@
+                 * @errortype
+                 * @moduleid    ISTEP::MOD_SECUREBOOT_LOCKDOWN
+                 * @reasoncode  ISTEP::RC_SBE_REPORTED_FFDC
+                 * @userdata1   HUID of Processor Target target
+                 * @userdata2   Scom Data
+                 * @devdesc     SBE put FFDC data into Scratch Register 11
+                 * @custdesc    A problem occurred during the IPL of the
+                 *              system and the system will reboot.
+                 */
+                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                ISTEP::MOD_SECUREBOOT_LOCKDOWN,
+                                ISTEP::RC_SBE_REPORTED_FFDC,
+                                TARGETING::get_huid(l_proc),
+                                scomData);
+
+                l_err->addHwCallout( l_proc,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DELAYED_DECONFIG,
+                                     HWAS::GARD_NULL );
+
+                // Add the register to the log
+                ERRORLOG::ErrlUserDetailsLogRegister(l_proc,
+                              &scomData,
+                              op_size,
+                              DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR))
+                                  .addToLog(l_err);
+
+                // Among other things, this will add the proc target to the log
+                captureError(l_err, l_istepError, HWPF_COMP_ID, l_proc);
+
+                // Try to run the HWP on all procs regardless of error.
+                continue;
+            }
+
+
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
             const bool DO_NOT_FORCE_SECURITY = false; // No need to force security
             const bool DO_NOT_LOCK_ABUS_MAILBOXES = false; // Do not lock abus mailboxes
@@ -151,8 +258,8 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
                 // Try to run the HWP on all procs regardless of error.
             }
-        }
-    }
+        } // end of loop on procs
+    } // end of SECUREBOOT::enabled() check
     if(l_istepError.getErrorHandle())
     {
         break;

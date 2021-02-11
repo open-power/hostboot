@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -632,7 +632,8 @@ namespace SPLESS
     // CFAM address: 0x0182
     struct MboxScratch11_t : MboxScratch_t<11>
     {
-        // Placeholder
+        // For P10 SBE will use this scratch register to pass FFDC on a secureboot validation
+        // error up to hostboot to log an error
         uint32_t value;
     };
 

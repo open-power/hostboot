@@ -128,7 +128,7 @@ errlHndl_t checkTdpBit(
              * @severity         ERRL_SEV_UNRECOVERABLE
              * @userdata1        Processor Target Driving SPI To The TPM
              * @userdata2        TPM Target
-             * @devdesc          Input Procesor Target cannot use XSCOMs yet
+             * @devdesc          Input Processor Target cannot use XSCOMs yet
              *                   so the TPM is unreachable
              * @custdesc         Platform security problem detected
              */
