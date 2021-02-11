@@ -2012,6 +2012,12 @@ void nvdimm_init(Target *i_nvdimm)
             errlCommit(l_err, NVDIMM_COMP_ID);
         }
 
+        // If we got this far, we know that the SBEs are running
+        ATTR_NVDIMM_ARMED_type l_armed_state =
+          i_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
+        l_armed_state.sbe_active = 1;
+        i_nvdimm->setAttr<ATTR_NVDIMM_ARMED>(l_armed_state);
+
         // Check if the nvdimm ready status
         l_err = nvdimmReady(i_nvdimm);
 
