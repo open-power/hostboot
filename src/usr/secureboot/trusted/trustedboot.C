@@ -981,7 +981,7 @@ void forceTpmDeconfigCallout(TpmTarget* const i_pTpm,
         // edit the callout to include a deconfig
         if((search_results & compare_enum::DECONFIG_FOUND) != compare_enum::DECONFIG_FOUND)
         {
-            i_err->setDeconfigState(i_pTpm, HWAS::DELAYED_DECONFIG);
+            i_err->setDeconfigState(i_pTpm, HWAS::DECONFIG);
         }
     }
     else
@@ -989,7 +989,7 @@ void forceTpmDeconfigCallout(TpmTarget* const i_pTpm,
         // Add HW callout for TPM with low priority
         i_err->addHwCallout(i_pTpm,
                             HWAS::SRCI_PRIORITY_LOW,
-                            HWAS::DELAYED_DECONFIG,
+                            HWAS::DECONFIG,
                             HWAS::GARD_NULL);
     }
 }
