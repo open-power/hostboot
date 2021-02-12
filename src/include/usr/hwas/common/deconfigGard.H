@@ -673,11 +673,32 @@ private:
     /**
      * @brief Maximum number of endpoints. Used to initialize ProcInfo structs.
      */
-    // @TODO RTC-256842: Need to account for Everest's half-links
-    // Max number of IOHS links that connect procs outside a particular fabric group
-    static const uint8_t NUM_OUT_GROUP_BUSES = 5;
-    // Max number of IOHS links that connect procs within the same fabric group
-    static const uint8_t NUM_IN_GROUP_BUSES = 7;
+
+    // NUM_OUT_GROUP_BUSES is the max number of bus links that connect procs
+    // outside a particular fabric group. For SCM-based systems, "in-group"
+    // means within the same drawer, while for DCM-based systems, each processor
+    // is in its own group.
+    //
+    // On a single-node system with 4 DCMs/8 processors: each processor can have
+    // a maximum of 5 IOHSes that link to other processors, and each IOHS can
+    // have two SMPGROUP children. For a given IOHS, either the IOHS itself will
+    // be processed by _deconfigureAssocProc, or else its two SMPGROUP children
+    // will be processed, but not both. Therefore there can be a maximum of 5*2
+    // = 10 out-group buses.
+    static const uint8_t NUM_OUT_GROUP_BUSES = 10;
+
+    // NUM_IN_GROUP_BUSES is the max number of bus links that connect procs
+    // within the same fabric group. For SCM-based systems, "in-group" means
+    // within the same drawer, while for DCM-based systems, each processor is in
+    // its own group.
+    //
+    // On a multi-node system with 4 SCMs per node: each processor has a
+    // maximum of 3 in-group (intra-node) IOHS-SMPX connections and 5 out-group
+    // (inter-node) IOHS-SMPA connections. However, SMP-wrap mode on multi-node
+    // system turns all the out-group/SMPA connections into in-group/SMPX
+    // connections, so there will be a maximum of 2*(3 + 5) = 16 in-group
+    // buses.
+    static const uint8_t NUM_IN_GROUP_BUSES = 16;
 
     /**
      * @brief  Struct representing a particular processor.  Used by

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -382,6 +382,11 @@ namespace std
                 __attribute__ ((always_inline))
                 reference operator[](size_type n)
                 {
+#ifdef BOOTLOADER
+                    kassert(n < size());
+#else
+                    assert(n < size());
+#endif
                     return(*(iv_start + n));
                 }
 

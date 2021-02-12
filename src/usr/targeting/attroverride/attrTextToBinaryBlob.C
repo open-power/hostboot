@@ -136,6 +136,7 @@ TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
     {"mcc"      , fapi2::TARGET_TYPE_MCC        , TARGETING::TYPE_MCC},
     {"mp"       , fapi2::TARGET_TYPE_MEM_PORT   , TARGETING::TYPE_MEM_PORT},
     {"iohs"     , fapi2::TARGET_TYPE_IOHS       , TARGETING::TYPE_IOHS},
+    {"iolink"   , fapi2::TARGET_TYPE_IOLINK     , TARGETING::TYPE_SMPGROUP},
     {"LAST"     , 0                             , 0}
 };
 
@@ -2443,4 +2444,3 @@ int main(int argc, char *argv[])
 
     return (err ? -1 : 0);
 }
-

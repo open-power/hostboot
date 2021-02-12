@@ -4347,6 +4347,186 @@ public:
     }
 
     /**
+     * @brief Make a target functional or non-functional.
+     */
+    static void setFunctional(Target* const i_target, const bool i_functional)
+    {
+        auto hwasState = i_target->getAttr<ATTR_HWAS_STATE>();
+        hwasState.functional = i_functional;
+        i_target->setAttr<ATTR_HWAS_STATE>(hwasState);
+    }
+
+    /**
+     * @brief Tests the HWAS function _invokeDeconfigureAssocProc
+     */
+    void testInvokeDeconfigureAssocProc()
+    {
+        TS_INFO(ENTER_MRK"testInvokeDeconfigureAssocProc");
+
+        // We are going to modify target states so we need to restore them at
+        // the end.
+        saveSystemState();
+
+        do
+        {
+            TargetHandleList procList;
+            getAllChips(procList, TYPE_PROC);
+
+            if (procList.size() != 2)
+            {
+                TS_FAIL("Expected two functional processors in standalone configuration, update test");
+                break;
+            }
+
+            /* Collect a list of all IOHS and SMPGROUP targets. We will
+             * deconfigure these and make sure that it has the expected effect
+             * on the processors.
+             */
+
+            TargetHandleList peerlist;
+
+            {
+                TargetHandleList targetlist;
+
+                for (const auto proc : procList)
+                {
+                    TARGETING::getChildAffinityTargetsByState(targetlist,
+                                                              proc,
+                                                              CLASS_NA,
+                                                              TYPE_IOHS,
+                                                              UTIL_FILTER_PRESENT);
+
+                    peerlist.insert(end(peerlist), begin(targetlist), end(targetlist));
+
+                    TARGETING::getChildAffinityTargetsByState(targetlist,
+                                                              proc,
+                                                              CLASS_NA,
+                                                              TYPE_SMPGROUP,
+                                                              UTIL_FILTER_PRESENT);
+
+                    peerlist.insert(end(peerlist), begin(targetlist), end(targetlist));
+                }
+            }
+
+            // Make all the bus targets functional
+            for (const auto target : peerlist)
+            {
+                setFunctional(target, true);
+            }
+
+            /* First, test that when no IOHSes or SMPGROUPs are deconfigured,
+             * neither processor is deconfigured. */
+
+            errlHndl_t errl = nullptr;
+            bool fail = false;
+
+            // Force _invokeDeconfigureAssocProc to evaluate whether procs
+            // should be deconfigured based on bus functionality
+            theDeconfigGard().setXAOBusEndpointDeconfigured(true);
+
+            errl = theDeconfigGard()._invokeDeconfigureAssocProc();
+
+            if (errl)
+            {
+                TS_FAIL("_invokeDeconfigureAssocProc() failed: "
+                        TRACE_ERR_FMT,
+                        TRACE_ERR_ARGS(errl));
+                errlCommit(errl, CXXTEST_COMP_ID);
+                break;
+            }
+
+            for (const auto proc : procList)
+            {
+                if (!proc->getAttr<ATTR_HWAS_STATE>().functional)
+                {
+                    TS_FAIL("testInvokeDeconfigureAssocProc: "
+                            "Proc 0x%08x is not functional after _invokeDeconfigureAssocProc",
+                            get_huid(proc));
+                    fail = true;
+                }
+            }
+
+            if (fail)
+            {
+                break;
+            }
+
+            /* Now, deconfigure one bus at a time and make sure it either does
+             * nothing (when it doesn't have a PEER_TARGET), or deconfigures one
+             * of the PROCs, but not both (when it does have a PEER_TARGET). */
+
+            for (const auto peer : peerlist)
+            {
+                // Reset the system state for this test iteration.
+                restoreSystemState();
+
+                // Make sure that all the SMPGROUPs and IOHSes are functional so
+                // that we don't get a false positive.
+                for (const auto target : peerlist)
+                {
+                    setFunctional(target, true);
+                }
+
+                errl = theDeconfigGard().deconfigureTarget(*peer, 1);
+
+                if (errl)
+                {
+                    TS_FAIL("testInvokeDeconfigureAssocProc: Failed to gard target 0x%08x (1/2)", get_huid(peer));
+                }
+
+                // Force _invokeDeconfigureAssocProc to evaluate whether procs
+                // should be deconfigured based on bus functionality
+                theDeconfigGard().setXAOBusEndpointDeconfigured(true);
+
+                errl = theDeconfigGard()._invokeDeconfigureAssocProc();
+
+                if (errl)
+                {
+                    TS_FAIL("testInvokeDeconfigureAssocProc: _invokeDeconfigureAssocProc() failed: "
+                            TRACE_ERR_FMT,
+                            TRACE_ERR_ARGS(errl));
+                    errlCommit(errl, CXXTEST_COMP_ID);
+                    break;
+                }
+
+                if (peer->getAttr<ATTR_PEER_TARGET>())
+                {
+                    if (procList[0]->getAttr<ATTR_HWAS_STATE>().functional
+                        == procList[1]->getAttr<ATTR_HWAS_STATE>().functional)
+                    {
+                        TS_FAIL("testInvokeDeconfigureAssocProc: Deconfiguring %s 0x%08x caused test to fail; "
+                                "Proc 0x%08x functional: %d, proc 0x%08x functional: %d (expected them to differ)",
+                                attrToString<ATTR_TYPE>(peer->getAttr<ATTR_TYPE>()),
+                                get_huid(peer),
+                                get_huid(procList[0]),
+                                procList[0]->getAttr<ATTR_HWAS_STATE>().functional,
+                                get_huid(procList[1]),
+                                procList[1]->getAttr<ATTR_HWAS_STATE>().functional);
+                    }
+                }
+                else
+                {
+                    for (const auto proc : procList)
+                    {
+                        if (!proc->getAttr<ATTR_HWAS_STATE>().functional)
+                        {
+                            TS_FAIL("testInvokeDeconfigureAssocProc: Deconfiguring %s 0x%08x caused test to fail; "
+                                    "Proc 0x%08x functional: 0, expected 1",
+                                    attrToString<ATTR_TYPE>(peer->getAttr<ATTR_TYPE>()),
+                                    get_huid(peer),
+                                    get_huid(proc));
+                        }
+                    }
+                }
+            }
+        } while (0);
+
+        restoreSystemState();
+
+        TS_INFO(EXIT_MRK"testInvokeDeconfigureAssocProc");
+    }
+
+    /**
      *  @brief Test Deconfigure Associated Proc1
      */
     void testDeconfigureAssocProc1()

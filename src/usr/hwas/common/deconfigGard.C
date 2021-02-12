@@ -282,9 +282,12 @@ void DeconfigGard::_deconfigureTarget(
             }
 
             // Do any necessary Deconfigure Actions
-            _doDeconfigureActions(i_target); /*no effect*/ // to quiet BEAM
+            _doDeconfigureActions(i_target);
+
+            const ATTR_TYPE_type target_type = i_target.getAttr<ATTR_TYPE>();
+
             // If target being deconfigured is an x/a/o bus endpoint
-            if (TYPE_IOHS == i_target.getAttr<ATTR_TYPE>())
+            if (TYPE_IOHS == target_type || TYPE_SMPGROUP == target_type)
             {
                 // Set flag indicating x/a/o bus endpoint deconfiguration
                 iv_XAOBusEndpointDeconfigured = true;
@@ -495,10 +498,10 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
         // Allow affinity deconfig of FC and CORE targets,
         // regardless of the runtime status
 
-        // Handles bus endpoint (TYPE_IOHS, TYPE_PSI) and
+        // Handles bus endpoint (TYPE_IOHS, TYPE_SMPGROUP, TYPE_PSI) and
         // memory (TYPE_MEMBUF, TYPE_MBA, TYPE_DIMM)
         // chip  (TYPE_FC, TYPE_CORE)
-        // obus specific (TYPE_OBUS, TYPE_NPU, TYPE_SMPGROUP, TYPE_OBUS_BRICK)
+        // obus specific (TYPE_OBUS, TYPE_NPU, TYPE_OBUS_BRICK)
         // deconfigureByAssociation rules
         switch (l_targetType)
         {
@@ -609,6 +612,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
             } // TYPE_DIMM
 
             // If the target is a bus endpoint, deconfigure its peer
+            case TYPE_SMPGROUP:
             case TYPE_IOHS:
             {
                 // Get peer endpoint target
@@ -625,8 +629,14 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                                        NULL,
                                        i_deconfigRule);
                 }
+
+                if (l_targetType == TYPE_SMPGROUP)
+                { // If this is an SMPGROUP target, deconfigure the IOHS parent if necessary
+                    _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
+                }
+
                 break;
-            } // IOHS
+            } // IOHS, SMPGROUP
 
             case TYPE_OMI:
             {
@@ -947,8 +957,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandl
     errlHndl_t l_pErr = NULL;
 
     // Define vector of ProcInfo structs to be used by
-    // _deconfigAssocProc algorithm. Declared here so
-    // "delete" can be used outside of do {...} while(0)
+    // _deconfigAssocProc algorithm.
     ProcInfoVector l_procInfo;
 
     do
@@ -1064,35 +1073,77 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandl
              ++l_currentProcInfoIt)
         {
             // Populate vector of bus endpoints associated with this proc
-            TargetHandleList l_busChiplets;
-            targetService().getAssociated(l_busChiplets,
+            TargetHandleList l_busTargets;
+            targetService().getAssociated(l_busTargets,
                                          (*l_currentProcInfoIt).iv_pThisProc,
                                          TargetService::CHILD,
                                          TargetService::ALL,
                                          &busses);
 
             // Remove irrelevant IOHS types from the vector.
-            l_busChiplets.erase(std::remove_if(l_busChiplets.begin(), l_busChiplets.end(),
+            l_busTargets.erase(std::remove_if(l_busTargets.begin(), l_busTargets.end(),
                                               [](const TargetHandle_t& i)
                                               {
                                                  auto l_iohsConfigMode = i->getAttr<ATTR_IOHS_CONFIG_MODE>();
                                                  // Only want all SMPX and SMPA IOHS targets.
                                                  return !((l_iohsConfigMode == IOHS_CONFIG_MODE_SMPX)
                                                         || (l_iohsConfigMode == IOHS_CONFIG_MODE_SMPA));
-                                              }), l_busChiplets.end());
+                                              }), l_busTargets.end());
 
+            { // Get the SMPGROUP children of all the SMPA/X IOHSes that we just
+              // collected.
+              //
+              // @TODO RTC 269529: Remove IOHS backwards-compatibility:
+              // For backward-compatibility with the old MRWs that doesn't have
+              // SMPGROUPs, if an IOHS does not have any SMPGROUP children then
+              // we don't remove it from the list (i.e. we use the IOHS instead
+              // of the SMPGROUPs as the link). We have to remove it if it does
+              // have SMPGROUP children so that we don't double-count links in
+              // the deconfig bus counter in _deconfigureAssocProc.
+
+                TargetHandleList l_realLinkTargets;
+
+                TargetHandleList l_smpgroups;
+
+                PredicateCTM predSmpgroup(CLASS_NA, TYPE_SMPGROUP);
+                PredicateAttrVal<ATTR_PEER_TARGET> predPeerTarget(nullptr, true /* invert search */);
+                PredicatePostfixExpr smpgroupWithPeerTarget;
+                smpgroupWithPeerTarget.push(&predSmpgroup).push(&predPeerTarget).And();
+
+                for (const auto l_iohs : l_busTargets)
+                {
+                    targetService().getAssociated(l_smpgroups,
+                                                  l_iohs,
+                                                  TargetService::CHILD,
+                                                  TargetService::ALL,
+                                                  &smpgroupWithPeerTarget);
+
+                    // @TODO RTC 269529: Remove IOHS backwards-compatibility
+                    if (l_smpgroups.empty())
+                    {
+                        l_realLinkTargets.push_back(l_iohs);
+                    }
+                    else
+                    {
+                        l_realLinkTargets.insert(end(l_realLinkTargets), begin(l_smpgroups), end(l_smpgroups));
+                    }
+                }
+
+                // Overwrite the IOHS list with the list of real links
+                l_busTargets = move(l_realLinkTargets);
+            }
 
             // Sort by HUID
-            std::sort(l_busChiplets.begin(),
-                      l_busChiplets.end(), compareTargetHuid);
+            std::sort(l_busTargets.begin(),
+                      l_busTargets.end(), compareTargetHuid);
 
             uint8_t inGroupBusIndex = 0;
             uint8_t outGroupBusIndex = 0;
 
             // Iterate through bus endpoint chiplets
             for (TargetHandleList::const_iterator
-                 l_busIter = l_busChiplets.begin();
-                 l_busIter != l_busChiplets.end();
+                 l_busIter = l_busTargets.begin();
+                 l_busIter != l_busTargets.end();
                  ++l_busIter)
             {
                 // Declare current endpoint target
@@ -1150,7 +1201,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandl
                             // HWAS state
                             l_currentProcInfoIt->iv_InGroupLinkDeconfigured[inGroupBusIndex] =
                                 !(isFunctional(l_currentEndpointTarget));
-                            HWAS_INF("PROC 0x%.8X add %.8X IOHS Deconfig=%d; in-group bus[%d]> PROC %.8X: "
+                            HWAS_INF("PROC 0x%.8X add %.8X Bus Deconfig=%d; in-group bus[%d]> PROC %.8X: "
                                      "Group=%d, Chip=%d, Deconfigured=%d, Master=%d",
                                      l_currentProcInfoIt->procHUID,
                                      l_currentEndpointTarget->getAttr<ATTR_HUID>(),
@@ -1173,7 +1224,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandl
                             // HWAS state
                             l_currentProcInfoIt->iv_OutGroupLinkDeconfigured[outGroupBusIndex] =
                                 !(isFunctional(l_currentEndpointTarget));
-                            HWAS_INF("PROC 0x%.8X add %.8X IOHS Deconfig=%d; out-group bus[%d]> %.8X : Group=%d, Chip=%d, Deconfigured=%d, Master=%d",
+                            HWAS_INF("PROC 0x%.8X add %.8X Bus Deconfig=%d; out-group bus[%d]> %.8X : Group=%d, Chip=%d, Deconfigured=%d, Master=%d",
                                      l_currentProcInfoIt->procHUID,
                                      l_currentEndpointTarget->getAttr<ATTR_HUID>(),
                                      l_currentProcInfoIt->iv_OutGroupLinkDeconfigured[outGroupBusIndex],
@@ -1258,7 +1309,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                     {
                         HWAS_INF("deconfigureAssocProc marked proc: "
                                  "%.8X for deconfiguration "
-                                 "due to deconfigured IOHS[out-group] endpoint "
+                                 "due to deconfigured Bus[out-group] endpoint "
                                  "on master proc.",
                                  (*l_procInfoIter).iv_pOutGroupProcInfos[i]->procHUID);
                         (*l_procInfoIter).iv_pOutGroupProcInfos[i]->iv_deconfigured = true;
@@ -1270,7 +1321,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                     {
                         HWAS_INF("deconfigureAssocProc marked proc: "
                                  "%.8X for deconfiguration "
-                                 "due to deconfigured IOHS[in-group] endpoint "
+                                 "due to deconfigured Bus[in-group] endpoint "
                                  "on master proc.",
                                  (*l_procInfoIter).iv_pInGroupProcInfos[i]->procHUID);
                         (*l_procInfoIter).iv_pInGroupProcInfos[i]->iv_deconfigured = true;
@@ -1365,7 +1416,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
         // both of which are in the master-containing logical group,
         // mark proc with higher HUID to be deconfigured.
 
-        // Iterate through procs and check IOHS[in-group] chiplets
+        // Iterate through procs and check Bus[in-group] chiplets
         for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
@@ -1385,7 +1436,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
             if (l_pMasterProcInfo->procFabricGroup ==
                 (*l_procInfoIter).procFabricGroup)
             {
-                // Check IOHS[in-group] endpoints
+                // Check Bus[in-group] endpoints
                 for (uint8_t i = 0; i < NUM_IN_GROUP_BUSES; i++)
                 {
                     // If endpoint deconfigured and endpoint peer proc is
@@ -1431,7 +1482,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
         // group otherwise, mark the proc with the higher HUID.
 
         // Iterate through procs and, if in non-master
-        // logical group, check IOHS[in-group] chiplets
+        // logical group, check Bus[in-group] chiplets
         for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
@@ -1448,7 +1499,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
             {
                 continue;
             }
-            // Check IOHS "In Group" because they connect procs which
+            // Check Bus "In Group" because they connect procs which
             // are in the same logical group
             for (uint8_t i = 0; i < NUM_IN_GROUP_BUSES; i++)
             {
@@ -1489,7 +1540,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                                 break;
                             }
                             // If master logical group proc deconfigured with
-                            // same FABRIC_CHIP_ID as current proc's IOHS[in-group] peer
+                            // same FABRIC_CHIP_ID as current proc's Bus[in-group] peer
                             // proc
                             else if (((*l_mGroupProcInfoIter).
                                         iv_deconfigured) &&
@@ -1547,11 +1598,11 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
 
         // STEP 5:
         // If a deconfigured bus connects two procs on different logical groups,
-        // and neither proc is the master proc: If current proc's IOHS[in-group] peer
+        // and neither proc is the master proc: If current proc's Bus[in-group] peer
         // proc is marked as deconfigured, mark current proc. Else, mark
-        // IOHS[out-group] peer proc.
+        // Bus[out-group] peer proc.
 
-        // Iterate through procs and check for deconfigured IOHS[out-group] endpoints
+        // Iterate through procs and check for deconfigured Bus[out-group] endpoints
         for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
@@ -1567,7 +1618,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
             {
                 continue;
             }
-            // Check IOHS "Out Group" buses because they connect procs which are in
+            // Check Bus "Out Group" buses because they connect procs which are in
             // different logical groups
             for (uint8_t i = 0; i < NUM_OUT_GROUP_BUSES; i++)
             {
@@ -1583,15 +1634,15 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                         // If peer proc exists
                         if ((*l_procInfoIter).iv_pInGroupProcInfos[j])
                         {
-                            // If IOHS[in-group] peer proc deconfigured
+                            // If Bus[in-group] peer proc deconfigured
                             if ((*l_procInfoIter).iv_pInGroupProcInfos[j]->
                                                     iv_deconfigured)
                             {
-                                // Set IOHS[in-group]PeerProcDeconfigured and deconfigure
+                                // Set Bus[in-group]PeerProcDeconfigured and deconfigure
                                 // current proc
                                  HWAS_INF("deconfigureAssocProc marked proc:"
                                  " %.8X for deconfiguration "
-                                 "due to deconfigured IOHS[in-group] peer proc.",
+                                 "due to deconfigured Bus[in-group] peer proc.",
                                  (*l_procInfoIter).procHUID);
                                 l_inGroupBusPeerProcDeconfigured = true;
                                 (*l_procInfoIter).iv_deconfigured = true;
@@ -1600,12 +1651,12 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                         }
                     }
                     // If previous step did not result in marking a proc
-                    // mark IOHS[out-group] peer proc
+                    // mark Bus[out-group] peer proc
                     if (!(l_inGroupBusPeerProcDeconfigured))
                     {
                         HWAS_INF("deconfigureAssocProc marked "
                              "remote proc: %.8X for deconfiguration "
-                             "due to functional IOHS[in-group] peer proc.",
+                             "due to functional Bus[in-group] peer proc.",
                              (*l_procInfoIter).iv_pOutGroupProcInfos[i]->procHUID);
                         (*l_procInfoIter).iv_pOutGroupProcInfos[i]->
                                           iv_deconfigured = true;
@@ -1712,7 +1763,7 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
         // If a deconfigured proc is found on a non-master-containing group
         // and has the same position (FABRIC_CHIP_ID) as a functional
         // non-master chip on the master logical group,
-        // mark its IOHS[in-group] peer proc(s) for deconfiguration
+        // mark its Bus[in-group] peer proc(s) for deconfiguration
 
         // Iterate through procs, if marked deconfigured, compare chip
         // position to functional chip on master group.
@@ -1740,15 +1791,15 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
                         ((*l_mGroupProcInfoIter).procFabricChip ==
                                 (*l_procInfoIter).procFabricChip))
                     {
-                        // Find IOHS[in-group] peer proc to mark deconfigured
+                        // Find Bus[in-group] peer proc to mark deconfigured
                         for (uint8_t i = 0; i < NUM_IN_GROUP_BUSES; i++)
                         {
-                            // If IOHS[in-group] peer proc exists, mark it
+                            // If Bus[in-group] peer proc exists, mark it
                             if ((*l_procInfoIter).iv_pInGroupProcInfos[i])
                             {
                                 HWAS_INF( "procs> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_procInfoIter).procHUID, (*l_procInfoIter).procFabricGroup, (*l_procInfoIter).procFabricChip, (*l_procInfoIter).iv_deconfigured, (*l_procInfoIter).iv_masterCapable );
                                 HWAS_INF( "mGroup> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_mGroupProcInfoIter).procHUID, (*l_mGroupProcInfoIter).procFabricGroup, (*l_mGroupProcInfoIter).procFabricChip, (*l_mGroupProcInfoIter).iv_deconfigured, (*l_mGroupProcInfoIter).iv_masterCapable );
-                                HWAS_INF( "IOHS[in-group]%d> %.8X : G=%d, C=%d, D=%d, M=%d", i,  (*l_procInfoIter).iv_pInGroupProcInfos[i]->procHUID, (*l_procInfoIter).iv_pInGroupProcInfos[i]->procFabricGroup, (*l_procInfoIter).iv_pInGroupProcInfos[i]->procFabricChip, (*l_procInfoIter).iv_pInGroupProcInfos[i]->iv_deconfigured, (*l_procInfoIter).iv_pInGroupProcInfos[i]->iv_masterCapable );
+                                HWAS_INF( "Bus[in-group]%d> %.8X : G=%d, C=%d, D=%d, M=%d", i,  (*l_procInfoIter).iv_pInGroupProcInfos[i]->procHUID, (*l_procInfoIter).iv_pInGroupProcInfos[i]->procFabricGroup, (*l_procInfoIter).iv_pInGroupProcInfos[i]->procFabricChip, (*l_procInfoIter).iv_pInGroupProcInfos[i]->iv_deconfigured, (*l_procInfoIter).iv_pInGroupProcInfos[i]->iv_masterCapable );
 
                                 // If the chip we found is the master then do NOT
                                 //  deconfigure it
