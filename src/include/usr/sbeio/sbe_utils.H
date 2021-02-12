@@ -44,6 +44,10 @@ namespace SBEIO
     static constexpr uint8_t SBE_CAPABILITY_VERSION_1_2_SIZE = 24;
     static constexpr uint8_t SBE_MAX_CAPABILITIES = SBE_CAPABILITY_VERSION_1_2_SIZE;
 
+    // access values into capabilities array
+    static constexpr uint8_t  SBE_CAPABILITY_HALT_OFFSET = 22;
+    static constexpr uint32_t SBE_CMD_HALT_SUPPORTED = 0xAB000001;
+
     struct sbeCapabilities_t
     {
         uint16_t majorVersion;

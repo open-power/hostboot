@@ -420,6 +420,16 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
         TRACDBIN(g_trac_sbeio,"SBE capabilities array",
                 pSbeCapabilities->capabilities,
                 (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size));
+
+        // Fill in ATTR_SBE_FIFO_CAPABILITIES for this processor's SBE
+        // verify attribute size large enough for all capabilites array
+        static_assert(
+             sizeof(ATTR_SBE_FIFO_CAPABILITIES_type) >= sizeof(pSbeCapabilities->capabilities),
+            "ATTR_SBE_FIFO_CAPABILITIES size out of sync with sbeCapabilities_t capabilities field size" );
+        TARGETING::ATTR_SBE_FIFO_CAPABILITIES_type l_fifo_capabilities = {};
+        memcpy(l_fifo_capabilities, pSbeCapabilities->capabilities, (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size));
+        i_target->setAttr<TARGETING::ATTR_SBE_FIFO_CAPABILITIES>(l_fifo_capabilities);
+
     }
     while(0);
 

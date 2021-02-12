@@ -5683,7 +5683,7 @@
 
   <attribute>
     <id>PCIE_CAPABILITES</id>
-    <description>Denotes the capabilites of this pcie slot</description>
+    <description>Denotes the capabilities of this pcie slot</description>
     <simpleType>
       <uint8_t/>
     </simpleType>
@@ -7341,6 +7341,28 @@
     </description>
     <simpleType>
       <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>SBE_FIFO_CAPABILITIES</id>
+    <description>
+        SBE capabilities based on Host_SBE_Interface_Specification
+        (Allows for more capabilities than currently supported)
+    </description>
+    <simpleType>
+      <array>40</array>
+      <uint32_t>
+        <default>
+          0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0
+        </default>
+      </uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

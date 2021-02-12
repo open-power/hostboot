@@ -804,6 +804,9 @@
       <id>SBE_COMMIT_ID</id>
     </attribute>
     <attribute>
+      <id>SBE_FIFO_CAPABILITIES</id>
+    </attribute>
+    <attribute>
       <id>SBE_RELEASE_TAG</id>
     </attribute>
     <attribute>
