@@ -338,6 +338,10 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
             l_scratch, l_attr_disable_hbbl_vectors);
     }
 
+    // If coverage is compiled in, Hostboot's EX policy will never match with
+    // what SBE puts in the scratch register (since coverage runs force it to
+    // the max config), so just disable the check in that case.
+#ifdef HOSTBOOT_PROFILE
     // Compare 4:6 to ATTR_SBE_SELECT_EX_POLICY
     l_scratch = l_scratch5.hwpCtlFlags.sbeSelectExPolicy;
     const auto l_attr_sbe_select_ex =
@@ -350,6 +354,7 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
             "scratch5 sbeSelectExPolicy 0x%X ATTR_SBE_SELECT_EX_POLICY 0x%X",
             l_scratch, l_attr_sbe_select_ex);
     }
+#endif
 
     // ----------------------------------------------------------------------
     // Scratch6 (CFAM 283D, SCOM 0x5003D) – Master/Slave, node/chip selection

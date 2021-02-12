@@ -278,3 +278,7 @@ IpVpdFacade(MVPD::mvpdRecords,
 
 }
 
+MvpdFacade& MvpdFacade::getInstance()
+{
+    return Singleton<MvpdFacade>::instance();
+}

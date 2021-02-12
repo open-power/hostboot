@@ -386,7 +386,7 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
         loop_timeout=250
     else
         # Increase timeout for code coverage
-        loop_timeout=500
+        loop_timeout=600
     fi
 
     if [ "$loopcount" -ge "$loop_timeout" ];   then

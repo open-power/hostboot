@@ -48,7 +48,11 @@
 #define IOHS_PER_PAUC        2
 #define IOLINK_PER_IOHS      2
 
+#ifdef PROFILE_CODE
+#define SIMULATED_GOOD_CORES 8
+#else
 #define SIMULATED_GOOD_CORES 4
+#endif
 
 // non-core and non-cache chiplet ids
 #define START_PERV_CHIPLET_NUM        0x02

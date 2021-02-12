@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -162,6 +162,13 @@ class MvpdFacade: public IpVpdFacade
      * @brief Constructor
      */
     MvpdFacade( );
+
+    /**
+     *  @brief Return the MvpdFacade singleton
+     *
+     *  @return MvpdFacade& Reference to the MvpdFacade singleton
+     */
+    static MvpdFacade& getInstance();
 
 };
 

@@ -31,30 +31,38 @@ echo "Master PNOR is: "+$hb_pnor
 ###################################
 #EEPROM Cache
 ###################################
-# Look for a custom pre-built copy first
-$found_custom_eecache = 0
-try {
-    $eccPreload = (lookup-file "custom_eecache.bin")
-    $found_custom_eecache = 1
-} except {
-    $found_custom_eecache = 0
-}
 
-if( $vpo_compile == "1" ) {
-    echo "    - Skipping EECACHE preload (VPO Mode)"
-} else {
-    if( $found_custom_eecache == 1 ) {
-        echo "    - Using custom eecache found in custom_eecache.bin"
-    } else {
-        if ($standalone_test_dd1 == TRUE) {
-            $eccPreload = (lookup-file "eecache_prebuilt.bin.ecc")
-        } else {
-            $eccPreload = (lookup-file "eecache_prebuilt_dd2.bin.ecc")
-        }
+# Read initial EEPROM data directly from hardware when code coverage is active
+# to prevent mismatches between the SBE core scratch registers and what the
+# pre-canned EECACHE data reports
+@simenv.hostboot_profile = 'HOSTBOOT_PROFILE' in os.environ
+if ($hostboot_profile == FALSE) {
+
+    # Look for a custom pre-built copy first
+    $found_custom_eecache = 0
+    try {
+        $eccPreload = (lookup-file "custom_eecache.bin")
+        $found_custom_eecache = 1
+    } except {
+        $found_custom_eecache = 0
     }
-    # NOTE must change offset if PNOR layout changes EECACHE offsets
-    echo "    - Loading EECACHE "+$eccPreload+" at 0x2C000 in PNOR"
-    ($hb_pnor).load-file $eccPreload 0x2C000
+
+    if( $vpo_compile == "1" ) {
+        echo "    - Skipping EECACHE preload (VPO Mode)"
+    } else {
+        if( $found_custom_eecache == 1 ) {
+            echo "    - Using custom eecache found in custom_eecache.bin"
+        } else {
+            if ($standalone_test_dd1 == TRUE) {
+                $eccPreload = (lookup-file "eecache_prebuilt.bin.ecc")
+            } else {
+                $eccPreload = (lookup-file "eecache_prebuilt_dd2.bin.ecc")
+            }
+        }
+        # NOTE must change offset if PNOR layout changes EECACHE offsets
+        echo "    - Loading EECACHE "+$eccPreload+" at 0x2C000 in PNOR"
+        ($hb_pnor).load-file $eccPreload 0x2C000
+    }
 }
 ###################################
 
@@ -69,8 +77,6 @@ if( $vpo_compile == "1" ) {
 # 4. Update scratch reg 1
 # We only do this if code coverage is not enabled, because we rely on
 # being able to use more backing caches for code coverage data.
-
-@simenv.hostboot_profile = 'HOSTBOOT_PROFILE' in os.environ
 
 if ($hostboot_profile == FALSE) {
   # Standalone has 1 DCM
@@ -157,8 +163,10 @@ try {connect backplane0.cnt_hfsi_link[1] backplane0.cnt_fsi_slave[0][1][1]} exce
 
 # See src/include/usr/initservice/mboxRegs.H for scratch reg struct definitions
 
-# Scratch register 8:  Set valid bits for Regs 3/4/6/9/10 (Bits 2/3/5/8/9)
-$scratch8 = 0x34C00000
+# Scratch register 8:  Set valid bits for Regs 3/4/6/9/10 (Bits 2/3/5/8/9) via
+# a read/modify/write operation
+$scratch8 = ((get-master-procs)[0].cfam_cmp.lbus_map.read 0x2800 + 0x3F*4 4 -b)
+$scratch8 = ($scratch8 |0x34C00000)
 
 # If we're not doing code coverage, then we have set scratch register
 # 1 with PG-good cores

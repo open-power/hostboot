@@ -530,6 +530,12 @@ sub manipulateImages
                                    HCODE    => 1,
                                    OCMBFW   => 1,
                                    MEMD     => 1);
+
+    if($ENV{'HOSTBOOT_PROFILE'})
+    {
+        $hashPageTablePartitions{HBRT}=1;
+    }
+
     if($ENV{'RM_HASH_PAGE_TABLE'})
     {
         undef %hashPageTablePartitions;
@@ -580,7 +586,6 @@ sub manipulateImages
         # Sections that have secureboot support. Secureboot still must be
         # enabled for secureboot actions on these partitions to occur.
         my $isNormalSecure = ($eyeCatch eq "HBBL");
-        $isNormalSecure ||= ($eyeCatch eq "HBRT");
         $isNormalSecure ||= ($eyeCatch eq "PAYLOAD");
         $isNormalSecure ||= ($eyeCatch eq "OCC");
         $isNormalSecure ||= ($eyeCatch eq "CAPP");
@@ -600,6 +605,15 @@ sub manipulateImages
         $isSpecialSecure ||= ($eyeCatch eq "HCODE");
         $isSpecialSecure ||= ($eyeCatch eq "MEMD");
         $isSpecialSecure ||= ($eyeCatch eq "OCMBFW");
+
+        if($ENV{'HOSTBOOT_PROFILE'})
+        {
+            $isSpecialSecure ||= ($eyeCatch eq "HBRT");
+        }
+        else
+        {
+            $isNormalSecure ||= ($eyeCatch eq "HBRT");
+        }
 
         # Used to indicate security is supported in firmware
         my $secureSupported = $isNormalSecure || $isSpecialSecure;

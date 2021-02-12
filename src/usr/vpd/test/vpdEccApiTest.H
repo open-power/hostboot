@@ -37,6 +37,7 @@
 #include "mvpdtest.H"          // getFunctionalProcTarget
 #include <usr/vpd/mvpdenums.H> // MVPD::VWML, MVPD::pdI
 #include <usr/vpd/vpd_if.H>    // VPD::validateAllRecordEccData, VPD::updateRecordEccData
+#include "../mvpd.H"           // For MvpdFacade singleton
 #include <devicefw/userif.H>   // DEVICE_MVPD_ADDRESS, deviceRead, deviceWrite
 
 extern trace_desc_t* g_trac_vpd;
@@ -357,7 +358,7 @@ class vpdEccApiTest: public CxxTest::TestSuite
                 l_args.eepromSource = m_eepromSource;
 
                 // Write the random data to the keyword
-                Singleton<MvpdFacade>::instance().write(
+                l_err = MvpdFacade::getInstance().write(
                                   m_procTarget, l_buffer, m_bufferSize, l_args);
 
                 if (l_err)
@@ -377,7 +378,6 @@ class vpdEccApiTest: public CxxTest::TestSuite
 
             return retValue;
         } // modifyKeywordViaNonMvpdApi
-
 
     private: // private members
 

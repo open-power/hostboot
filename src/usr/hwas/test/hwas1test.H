@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1023,7 +1023,12 @@ public:
             getChildChiplets( l_funcCores, l_proc, TYPE_CORE, true );
 
             // Currently we have 4 ECs configured in the PG record
+#ifdef PROFILE_CODE
+            const size_t l_numCores = 8;
+#else
             const size_t l_numCores = 4;
+#endif
+
             if( l_funcCores.size() != l_numCores )
             {
                 TS_FAIL("testHWASrestrictECunits> Expected %d cores, but saw %d",

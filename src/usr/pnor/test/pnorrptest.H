@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #include "../pnorrp.H"
 #include "../pnor_common.H"
 #include "../ffs.h"
+#include <vmmconst.h>
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -150,9 +151,6 @@ class PnorRpTest : public CxxTest::TestSuite
         const size_t ECC_PAGESIZE = (PAGESIZE*9)/8;
         const uint64_t LOG_OFFSET = PAGESIZE/4; //force a page crossing
         const uint64_t PART_OFFSET = PAGESIZE*2 + LOG_OFFSET;
-        const uint64_t TEST_PHYS_OFFSET = 0x2415000 //see defaultPnorLayout.xml
-          + (ECC_PAGESIZE*2) //matches PART_OFFSET
-          + (LOG_OFFSET*9)/8;
 
         // use the TEST partition as scratch space
         PNOR::SectionInfo_t info;
@@ -164,6 +162,13 @@ class PnorRpTest : public CxxTest::TestSuite
             ERRORLOG::errlCommit(errhdl,PNOR_COMP_ID);
             return;
         }
+
+        // PNOR device addresses start at non-secure PNOR virtual address
+        // of 2GB, so subtract that virtual address offset out to get to the
+        // PNOR device address of the TEST partition
+        const uint64_t TEST_PHYS_OFFSET = (info.vaddr - VMM_VADDR_PNOR_RP)
+          + (ECC_PAGESIZE*2) //matches PART_OFFSET
+          + (LOG_OFFSET*9)/8;
 
         // Use the 3rd page of data
         uint64_t* dataptr = reinterpret_cast<uint64_t*>

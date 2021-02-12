@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -151,16 +151,16 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Runtime Services for Sapphire (8.0MB)</description>
+        <description>Hostboot Runtime Services for Sapphire (9.0MB)</description>
         <eyeCatch>HBRT</eyeCatch>
-        <physicalRegionSize>0x800000</physicalRegionSize>
+        <physicalRegionSize>0x900000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
     </section>
     <section>
-        <description>Payload (10.875MB)</description>
+        <description>Payload (9.875MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalRegionSize>0x0AE0000</physicalRegionSize>
+        <physicalRegionSize>0x09E0000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
