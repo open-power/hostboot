@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,18 +228,6 @@ void getTpmWithRoleOf(
  */
 bool getTpmRequiredSensorValue(
     bool& o_isTpmRequired);
-
-/**
- * @brief Marks the input TPM as UNUSABLE and creates an unrecoverable errorlog
- *        to notify the user of the system that a TPM has been marked UNUSABLE.
- *        The error log is committed internally.
- *
- * @param[in] i_tpm the TPM to mark UNUSABLE
- * @param[in] i_associatedErrl an error log that forced the TPM to be UNUSABLE;
- *            default - nullptr.
- */
-void markTpmUnusable(TARGETING::Target* i_tpm,
-                     const errlHndl_t i_associatedErrl = nullptr);
 
 } // end TRUSTEDBOOT namespace
 #endif
