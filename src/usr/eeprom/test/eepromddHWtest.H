@@ -212,4 +212,102 @@ class EEPROMHWTest: public CxxTest::TestSuite
 
             TS_INFO(EXIT_MRK"test_eepromSpiRead - End");
         }
+
+        /**
+        * @brief testing eepromPrepareI2cAddress()
+        */
+        void test_eepromPrepareI2cAddress( void )
+        {
+            errlHndl_t l_err = nullptr;
+            TS_INFO(ENTER_MRK"test_eepromPrepareI2cAddress - Start");
+
+            do
+            {
+                //Get a processor Target
+                TARGETING::Target* l_testTarget = nullptr;
+                l_err = TARGETING::targetService().queryMasterProcChipTargetHandle(l_testTarget);
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromPrepareI2cAddress - Failed to find master processor");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+
+                //Create dummy eeprom info w/ VPD_PRIMARY set
+                const EEPROM_ROLE l_eepromRole = EEPROM::VPD_PRIMARY;
+                eeprom_addr_t l_primaryVpdEeprom;
+                l_primaryVpdEeprom.eepromRole = l_eepromRole;
+
+                eepromRecordHeader l_recordHeader;
+                l_err = buildEepromRecordHeader(l_testTarget, l_primaryVpdEeprom, l_recordHeader);
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromPrepareI2cAddress - Failed building eeprom record header");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+
+                uint8_t l_buf[MAX_BYTE_ADDR] = {0};
+                size_t l_buflen = 0;
+                uint8_t l_desiredPage = 0;
+
+                //Set address offset to ZERO_BYTE_ADDR
+                l_primaryVpdEeprom.accessAddr.i2c_addr.addrSize = ZERO_BYTE_ADDR;
+                l_err = eepromPrepareI2cAddress(l_testTarget,
+                                                &l_buf,
+                                                l_buflen,
+                                                l_desiredPage,
+                                                l_primaryVpdEeprom);
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromPrepareI2cAddress - Error preparing address with "
+                            "addrSize = ZERO_BYTE_ADDR");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+                //Clear data buffer
+                memset(l_buf, 0x0, MAX_BYTE_ADDR);
+                l_buflen = 0;
+                l_desiredPage = 0;
+
+                //Set addrSize to ONE_BYTE_ADDR_PAGESELECT
+                l_primaryVpdEeprom.accessAddr.i2c_addr.addrSize = ONE_BYTE_ADDR_PAGESELECT;
+                //Set offset to EEPROM_PAGE_SIZE bytes to report page 1
+                l_primaryVpdEeprom.offset = EEPROM_PAGE_SIZE;
+                l_err = eepromPrepareI2cAddress(l_testTarget,
+                                                &l_buf,
+                                                l_buflen,
+                                                l_desiredPage,
+                                                l_primaryVpdEeprom);
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromPrepareI2cAddress - Error preparing address when "
+                            "addrSize = ONE_BYTE_ADDR_PAGESELECT with offset = EEPROM_PAGE_SIZE");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                }
+                //Clear data buffers
+                memset(l_buf, 0x0, MAX_BYTE_ADDR);
+                l_buflen = 0;
+                l_desiredPage = 0;
+
+                //Set addrSize to ONE_BYTE_ADDR
+                l_primaryVpdEeprom.accessAddr.i2c_addr.addrSize = ONE_BYTE_ADDR;
+                l_desiredPage = 0;
+                l_buflen = 0;
+                l_err = eepromPrepareI2cAddress(l_testTarget,
+                                                &l_buf,
+                                                l_buflen,
+                                                l_desiredPage,
+                                                l_primaryVpdEeprom);
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromPrepareI2cAddress - Error preparing address when "
+                            "addrSize = ONE_BYTE_ADDR with offset = EEPROM_PAGE_SIZE");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                }
+            }
+            while(0);
+
+            TS_INFO(EXIT_MRK"test_eepromPrepareI2cAddress - End");
+        }
 };
