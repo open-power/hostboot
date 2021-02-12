@@ -35,6 +35,7 @@
 #include <errl/errlentry.H>
 #include <spi/spireasoncodes.H>
 #include <devicefw/devfwreasoncodes.H>
+#include <i2c/i2creasoncodes.H>
 
 using namespace TARGETING;
 using namespace EEPROM;
@@ -485,5 +486,292 @@ class EEPROMHWTest: public CxxTest::TestSuite
             }
 
             TS_INFO(EXIT_MRK"test_eepromI2cPageOpError - End");
+        }
+
+        /**
+        * @brief testing eepromI2cRead() and eepromI2cWrite() by forcing errors
+        *        throughout the functions
+        */
+        void test_eepromI2cReadWrite( void )
+        {
+            errlHndl_t l_err = nullptr;
+            TS_INFO(ENTER_MRK"test_eepromI2cReadWrite - Start");
+
+            //Keep Target null to force error from eepromI2cPageOp()
+            TARGETING::Target* l_nullTestTarget = nullptr;
+
+            //Create dummy eeprom info w/ VPD_PRIMARY set
+            const EEPROM_ROLE l_eepromRole = EEPROM::VPD_PRIMARY;
+            eeprom_addr_t l_primaryVpdEeprom;
+            l_primaryVpdEeprom.eepromRole = l_eepromRole;
+
+            //Set addrSize = ONE_BYTE_ADDR_PAGESELECT to cause error in eepromI2cPageOp()
+            l_primaryVpdEeprom.accessAddr.i2c_addr.addrSize = ONE_BYTE_ADDR_PAGESELECT;
+            l_primaryVpdEeprom.offset = EEPROM_PAGE_SIZE - 1;
+            uint8_t l_buf[MAX_BYTE_ADDR] = {0};
+            size_t l_buflen = 0x1;
+
+            l_err = eepromI2cRead(l_nullTestTarget, l_buf, l_buflen, l_primaryVpdEeprom);
+            if (l_err)
+            {
+                if (l_err->reasonCode() == DeviceFW::DEVFW_RC_NULL_TARGET)
+                {
+                    TS_INFO("test_eepromI2cReadWrite - "
+                            "eepromI2cRead()::eepromI2cPageOp() Error created as expected");
+                    delete l_err;
+                    l_err = nullptr;
+                }
+                else
+                {
+                    TS_FAIL("test_eepromI2cReadWrite - eepromI2cRead()::eepromI2cPageOp() "
+                            "Unexpected error created rc=0x%04X", l_err->reasonCode());
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                }
+            }
+            else
+            {
+                TS_FAIL("test_eepromI2cReadWrite - "
+                        "eepromI2cRead()::eepromI2cPageOp() did not fail as expected");
+            }
+            //Clear data buffer
+            memset(l_buf, 0x0, MAX_BYTE_ADDR);
+            l_buflen = 0;
+
+            l_err = eepromI2cWrite(l_nullTestTarget, l_buf, l_buflen, l_primaryVpdEeprom);
+            if (l_err)
+            {
+                if (l_err->reasonCode() == DeviceFW::DEVFW_RC_NULL_TARGET)
+                {
+                    TS_INFO("test_eepromI2cReadWrite - "
+                            "eepromI2cWrite()::eepromI2cPageOp() Error created as expected");
+                    delete l_err;
+                    l_err = nullptr;
+                }
+                else
+                {
+                    TS_FAIL("test_eepromI2cReadWrite - eepromI2cWrite()::eepromI2cPageOp() "
+                            "Unexpected error created rc=0x%04X", l_err->reasonCode());
+                    errlCommit( l_err, CXXTEST_COMP_ID);
+                }
+            }
+            else
+            {
+                TS_FAIL("test_eepromI2cReadWrite - "
+                        "eepromI2cWrite()::eepromI2cPageOp() did not fail as expected");
+            }
+            //Clear data buffer
+            memset(l_buf, 0x0, MAX_BYTE_ADDR);
+            l_buflen = 0;
+
+            do
+            {
+                // Get a processor Target
+                TARGETING::Target* l_testTarget = nullptr;
+                l_err = TARGETING::targetService().queryMasterProcChipTargetHandle(l_testTarget);
+                if (l_err)
+                {
+                    TS_FAIL("test_dumpEepromData - failed to find master processor");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+
+                eepromRecordHeader l_recordHeader;
+                l_err = buildEepromRecordHeader(l_testTarget, l_primaryVpdEeprom, l_recordHeader);
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromPrepareI2cAddress - Failed building eeprom record header");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+
+                //set write page size to 0 to cause error in eepromI2cWrite()
+                l_primaryVpdEeprom.accessAddr.i2c_addr.writePageSize = 0;
+                l_err = eepromI2cWrite(l_testTarget, l_buf, l_buflen, l_primaryVpdEeprom);
+                if (l_err)
+                {
+                    if (l_err->reasonCode() == EEPROM_I2C_WRITE_PAGE_SIZE_ZERO)
+                    {
+                        TS_INFO("test_eepromI2cReadWrite - eepromI2cWrite() Error Created as "
+                                "expected with writePageSize = 0");
+                        delete l_err;
+                        l_err = nullptr;
+                    }
+                    else
+                    {
+                        TS_FAIL("test_eepromI2cReadWrite - eepromI2cWrite() Unexpected error "
+                                " created rc=0x%04X", l_err->reasonCode());
+                        errlCommit( l_err, CXXTEST_COMP_ID );
+                    }
+                }
+                else
+                {
+                    TS_FAIL("test_eepromI2cReadWrite - eepromI2cWrite() did not fail as expected");
+                }
+                //Clear data buffer
+                memset(l_buf, 0x0, MAX_BYTE_ADDR);
+
+                //Set to LAST_DEVICE_TYPE to cause error in eepromPrepareI2cAddress()
+                l_primaryVpdEeprom.accessAddr.i2c_addr.addrSize = LAST_DEVICE_TYPE;
+
+                l_buflen = 0x1;
+                l_err = eepromI2cRead(l_testTarget, l_buf, l_buflen, l_primaryVpdEeprom);
+                if (l_err)
+                {
+                    if (l_err->reasonCode() == EEPROM_INVALID_DEVICE_TYPE)
+                    {
+                        TS_INFO("test_eepromI2cReadWrite - eepromI2cRead()::eepromPrepareI2cAddress() "
+                                " Error created as expected");
+                        delete l_err;
+                        l_err = nullptr;
+                    }
+                    else
+                    {
+                        TS_FAIL("test_eepromI2cReadWrite - eepromI2cRead()::eepromPrepareI2cAddress() "
+                                "Unexpected error created rc=0x%04X", l_err->reasonCode());
+                        errlCommit( l_err, CXXTEST_COMP_ID );
+                    }
+                }
+                else
+                {
+                    TS_FAIL("test_eepromI2cReadWrite - eepromI2cRead()::eepromPrepareI2cAddress() "
+                            " did not fail as expected");
+                }
+                //Clear data buffer
+                memset(l_buf, 0x0, MAX_BYTE_ADDR);
+                l_buflen = 0;
+
+                l_err = eepromI2cWrite(l_testTarget, l_buf, l_buflen, l_primaryVpdEeprom);
+                if (l_err)
+                {
+                    if (l_err->reasonCode() == EEPROM_INVALID_DEVICE_TYPE)
+                    {
+                        TS_INFO("test_eepromI2cReadWrite - eepromI2cWrite()::eepromPrepareI2cAddress() "
+                                "Error created as expected");
+                        delete l_err;
+                        l_err = nullptr;
+                    }
+                    else
+                    {
+                        TS_FAIL("test_eepromI2cReadWrite - eepromI2cWrite()::eepromPrepareI2cAddress() "
+                                "Unexpected error created rc=0x%04X", l_err->reasonCode());
+                        errlCommit( l_err, CXXTEST_COMP_ID );
+                    }
+                }
+                else
+                {
+                    TS_FAIL("test_eepromI2cReadWrite - eepromI2cWrite()::eepromPrepareI2cAddress() "
+                            " did not fail as expected");
+                }
+
+            }
+            while(0);
+
+            TS_INFO(EXIT_MRK"test_eepromI2cReadWrite - End");
+        }
+
+        /**
+        * @brief testing eepromI2cReadData() and eepromI2cWriteData()
+        */
+        void test_eepromI2cReadWriteData( void )
+        {
+            errlHndl_t l_err = nullptr;
+            TS_INFO(ENTER_MRK"test_eepromI2cReadWriteData - Start");
+
+            do
+            {
+                //Get a processor Target
+                TARGETING::Target* l_testTarget = nullptr;
+                l_err = TARGETING::targetService().queryMasterProcChipTargetHandle(l_testTarget);
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromI2cReadWriteData - failed to find master processor");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+
+                //Create dummy eeprom info w/ VPD_PRIMARY set
+                const EEPROM_ROLE l_eepromRole = EEPROM::VPD_PRIMARY;
+                eeprom_addr_t l_primaryVpdEeprom;
+                l_primaryVpdEeprom.eepromRole = l_eepromRole;
+
+                eepromRecordHeader l_recordHeader;
+                l_err = buildEepromRecordHeader(l_testTarget, l_primaryVpdEeprom, l_recordHeader);
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromI2cReadWriteData - Failed building eeprom record header");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+
+                //Test Read Data
+                uint8_t l_byteAddr[MAX_BYTE_ADDR] = {0};
+                size_t l_byteAddrSize = 0x1;
+                uint8_t l_buffer[MAX_BYTE_ADDR] = {0};
+                size_t l_buflen = 0;
+                size_t l_readLenRemaining = l_buflen;
+                size_t l_readBuflen = 0;
+                l_err = eepromI2cReadData(l_testTarget,
+                                          &(reinterpret_cast<uint8_t*>(l_buffer)[l_buflen - l_readLenRemaining]),
+                                          l_readBuflen,
+                                          &l_byteAddr,
+                                          l_byteAddrSize,
+                                          l_primaryVpdEeprom );
+
+                if (l_err)
+                {
+                    if (l_err->reasonCode() == I2C::I2C_MUX_TARGET_NOT_FOUND)
+                    {
+                        TS_INFO("test_eepromI2cReadWriteData - eepromI2cReadData() - "
+                                "error created as expected");
+                        delete l_err;
+                        l_err = nullptr;
+                    }
+                    else
+                    {
+                        TS_FAIL("test_eepromI2cReadWriteData - eepromI2cReadData() - "
+                                "Unexpected error created rc=0x%04X", l_err->reasonCode());
+                        errlCommit( l_err, CXXTEST_COMP_ID );
+                    }
+                }
+                else
+                {
+                    TS_FAIL("test_eepromI2cReadWriteData - eepromI2cWriteData() - "
+                            "Did not fail as expected");
+                }
+
+                //Test Write Data
+                l_byteAddrSize = 0;
+                l_err = eepromI2cWriteData(l_testTarget,
+                                           &(reinterpret_cast<uint8_t*>(l_buffer)[l_buflen - l_readLenRemaining]),
+                                           l_readBuflen,
+                                           &l_byteAddr,
+                                           l_byteAddrSize,
+                                           l_primaryVpdEeprom);
+
+                if (l_err)
+                {
+                    if (l_err->reasonCode() == I2C::I2C_MUX_TARGET_NOT_FOUND)
+                    {
+                        TS_INFO("test_eepromI2cReadWriteData - eepromI2cWriteData() error "
+                                "created as expected");
+                        delete l_err;
+                        l_err = nullptr;
+                    }
+                    else
+                    {
+                        TS_FAIL("test_eepromI2cReadWriteData - eepromI2cWriteData() Unexpected "
+                                "error created rc=0x%04X", l_err->reasonCode());
+                    }
+                }
+                else
+                {
+                    TS_FAIL("test_eepromI2cReadWriteData - eepromI2cWriteData() Did not "
+                            "fail as expected");
+                }
+
+            }
+            while(0);
+
+            TS_INFO(EXIT_MRK"test_eepromI2cReadWriteData - End");
         }
 };
