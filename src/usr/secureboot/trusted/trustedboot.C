@@ -77,6 +77,134 @@ namespace TRUSTEDBOOT
 
 extern SystemData systemData;
 
+errlHndl_t checkTdpBit(
+    TpmTarget* const i_pTpm)
+{
+    assert(i_pTpm != nullptr,"checkTdpBit: BUG! i_pTpm was nullptr");
+
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "checkTdpBit: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
+    TRACUCOMP(g_trac_trustedboot,ENTER_MRK"checkTdpBit: i_pTpm=0x%.08X", get_huid(i_pTpm));
+
+    errlHndl_t err = nullptr;
+    tpm_info_t tpmInfo;
+
+    do {
+
+    err = tpmReadAttributes(i_pTpm,
+                            tpmInfo,
+                            TPM_LOCALITY_0);
+    if(err)
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK
+            "checkTdpBit: Bug! Failed in call to tpmReadAttributes() for "
+            "TPM with HUID=0x%08X. "
+            TRACE_ERR_FMT,
+            get_huid(i_pTpm),
+            TRACE_ERR_ARGS(err));
+        break;
+    }
+
+    if(tpmInfo.spiTarget->getAttr<TARGETING::ATTR_TYPE>()
+        == TARGETING::TYPE_PROC)
+    {
+        const auto scomSwitches = tpmInfo.spiTarget->getAttr<
+            TARGETING::ATTR_SCOM_SWITCHES>();
+        if(!scomSwitches.useXscom)
+        {
+            TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                "checkTdpBit: TPM with HUID=0x%08X is not "
+                "accessible, as the proc that drives it (HUID 0x%08X) "
+                "is not XSCOM accessible",
+                get_huid(i_pTpm),
+                get_huid(tpmInfo.spiTarget));
+
+            /*@
+             * @errortype
+             * @reasoncode       TRUSTEDBOOT::RC_UNREACHABLE_TPM
+             * @moduleid         TRUSTEDBOOT::MOD_TPM_CHECK_TDP_BIT
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @userdata1        Processor Target Driving SPI To The TPM
+             * @userdata2        TPM Target
+             * @devdesc          TPM Deconfig Protect bit was set in TPM's SPI
+             *                   Driver Processor's Security Switch Register
+             * @custdesc         Platform security problem detected
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        TRUSTEDBOOT::MOD_TPM_CHECK_TDP_BIT,
+                        TRUSTEDBOOT::RC_UNREACHABLE_TPM,
+                        TARGETING::get_huid(tpmInfo.spiTarget),
+                        TARGETING::get_huid(i_pTpm));
+            break;
+        }
+
+        // else, check the Security Switch Register and see if the SPI Driver's
+        // TPM Deconfig Protect bit is set.
+        else
+        {
+            uint64_t l_securitySwitchValue = 0;
+            err = SECUREBOOT::getSecuritySwitch(l_securitySwitchValue, tpmInfo.spiTarget);
+            if (err)
+            {
+                TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                          "checkTdpBit: Unable to read the Security Switch Register on "
+                          "procTarget HUID=0x%.08X, the SPI master of TPM with HUID=0x%.08X"
+                           TRACE_ERR_FMT,
+                           get_huid(tpmInfo.spiTarget),
+                           get_huid(i_pTpm),
+                           TRACE_ERR_ARGS(err));
+                break;
+            }
+            else
+            {
+                TRACDCOMP(g_trac_trustedboot,INFO_MRK
+                          "checkTdpBit: procTarget HUID=0x%.08X (SPI master of TPM with "
+                          "HUID=0x%.08X): security switch value = 0x%016lX",
+                          get_huid(tpmInfo.spiTarget),
+                          get_huid(i_pTpm),
+                          l_securitySwitchValue);
+
+                if ((l_securitySwitchValue &
+                     static_cast<uint64_t>(SECUREBOOT::ProcSecurity::TDPBit)) != 0)
+                {
+                    TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                              "checkTdpBit: TPM with HUID=0x%08X has the TDPBit set in its "
+                              "SPI master proc (HUID 0x%08X): Security Switch=0x%.16llX. ",
+                              get_huid(i_pTpm),
+                              get_huid(tpmInfo.spiTarget),
+                              l_securitySwitchValue);
+                    /*@
+                     * @errortype
+                     * @reasoncode       TRUSTEDBOOT::RC_TPM_TDP_BIT_IS_SET
+                     * @moduleid         TRUSTEDBOOT::MOD_TPM_CHECK_TDP_BIT
+                     * @severity         ERRL_SEV_UNRECOVERABLE
+                     * @userdata1[0:31]  Processor Target Driving SPI To The TPM
+                     * @userdata1[32:63] TPM Target
+                     * @userdata2        Security Switch Register Value
+                     * @devdesc          TPM Deconfig Protect bit was set in TPM's SPI
+                     *                   Driver Processor's Security Switch Register
+                     * @custdesc         Platform security problem detected
+                     */
+                    err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                TRUSTEDBOOT::MOD_TPM_CHECK_TDP_BIT,
+                                TRUSTEDBOOT::RC_TPM_TDP_BIT_IS_SET,
+                                TWO_UINT32_TO_UINT64(
+                                  TARGETING::get_huid(tpmInfo.spiTarget),
+                                  TARGETING::get_huid(i_pTpm)),
+                                l_securitySwitchValue);
+                    break;
+                }
+            } // end if check for err back from getSecuritySwitch
+        } // end of scomSwitches.useXscom if/else
+    } // end of if spiTarget is a proc
+    } while ( 0 );
+
+    TRACUCOMP(g_trac_trustedboot,EXIT_MRK"checkTdpBit");
+    return err;
+}
+
 errlHndl_t getTpmLogDevtreeInfo(
     const TpmTarget* const i_pTpm,
           uint64_t &       io_logAddr,
@@ -484,6 +612,18 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         i_pTpm->setAttr<
             TARGETING::ATTR_HWAS_STATE>(hwasState);
 
+        // Before accessing the TPM, make sure that TDP (TPM_DECONFIG_PROTECT) bit has not been
+        // set in the TPM's SPI Driver's Processor Security Switch Register
+        err = checkTdpBit(i_pTpm);
+        if (err)
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                      "tpmInitialize: Fail back from checkTdpBit: "
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(err));
+            break;
+        }
+
         // TPM_STARTUP
         err = tpmCmdStartup(i_pTpm);
         if (nullptr != err)
@@ -518,7 +658,7 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
     // If the TPM failed we will mark it not functional and commit err
     if (nullptr != err)
     {
-        // err will be committed and set to nullptr
+        // Mark TPM as not functional, commit err and set it to nullptr
         tpmMarkFailed(i_pTpm, err);
     }
 

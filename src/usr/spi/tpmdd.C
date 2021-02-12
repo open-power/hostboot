@@ -381,6 +381,52 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                   sp_presence == TARGETING::FOUND_PRESENT_BY_SP_FOUND ? true : false;
                 break;
             }
+            // else, check the Security Switch Register and see if the SPI Driver's
+            // TPM Deconfig Protect bit is set.
+            // If it is set, then use the presence value that the service processor found
+            else
+            {
+                uint64_t l_securitySwitchValue = 0;
+                pError = SECUREBOOT::getSecuritySwitch(l_securitySwitchValue, tpmInfo.spiTarget);
+                if (pError)
+                {
+                    TRACFCOMP(g_trac_tpmdd, ERR_MRK
+                              "tpmPresence: Unable to read the Security Switch Register on "
+                              "procTarget HUID=0x%.08X, the SPI master of TPM with HUID=0x%.08X"
+                              TRACE_ERR_FMT,
+                              get_huid(tpmInfo.spiTarget),
+                              get_huid(i_pTpm),
+                              TRACE_ERR_ARGS(pError));
+                    break;
+                }
+
+                TRACDCOMP(g_trac_tpmdd,INFO_MRK
+                              "tpmPresence: procTarget HUID=0x%.08X (SPI master of TPM with "
+                              "HUID=0x%.08X): security switch value = 0x%016lX",
+                              get_huid(tpmInfo.spiTarget),
+                              get_huid(i_pTpm),
+                              l_securitySwitchValue);
+
+                if ((l_securitySwitchValue &
+                     static_cast<uint64_t>(SECUREBOOT::ProcSecurity::TDPBit)) != 0)
+                {
+                    TRACFCOMP(g_trac_tpmdd,INFO_MRK
+                              "tpmPresence: TPM with HUID=0x%08X has the TDPBit set in its "
+                              "SPI master proc (HUID 0x%08X): Security Switch=0x%.16llX. "
+                              "Temporarily using presence value from service processor.",
+                              get_huid(i_pTpm),
+                              get_huid(tpmInfo.spiTarget),
+                              l_securitySwitchValue);
+
+                    // Will evaluate this situation later in the IPL.
+                    // For now use the presence value that the service processor found.
+                    const auto sp_presence =
+                      i_pTpm->getAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>();
+                    present =
+                      sp_presence == TARGETING::FOUND_PRESENT_BY_SP_FOUND ? true : false;
+                    break;
+                }
+            }
         }
 
         // Verify the TPM is supported by this driver by reading and
