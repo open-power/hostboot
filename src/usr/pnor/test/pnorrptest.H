@@ -71,6 +71,9 @@ class PnorRpTest : public CxxTest::TestSuite
             PNOR::TOC,            /**< Table of Contents */
             PNOR::HB_EXT_CODE,    /**< Hostboot Extended Image */
             PNOR::HB_DATA,        /**< Hostboot Data */
+            // Intentionally leaving HB_DATA_RW out of the tests
+            // since its conditionally produced
+            // PNOR::HB_DATA_RW,     /**< Hostboot Data RW */
             PNOR::MODULE_VPD,     /**< Module VPD */
             PNOR::RINGOVD,        /**< Ring override data */
             PNOR::WOFDATA,        /**< WOF data */

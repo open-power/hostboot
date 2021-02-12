@@ -78,6 +78,7 @@ enum SectionId
     BOOTKERNEL,     /**< Bootkernel -- HB uses for  PHYP */
 #endif
     HCODE_LID,      /**< HCODE_LID Reference image */
+    HB_DATA_RW,     /**< Hostboot Data RW */
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 

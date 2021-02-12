@@ -657,6 +657,18 @@ sub manipulateImage
         undef %hashPageTablePartitions;
     }
 
+    foreach my $section (keys %sectionHash)
+    {
+        my $eyeCatch = $sectionHash{$section}{eyeCatch};
+        # If the HBD_RW eye catch exists in PNOR Layout XML, then the
+        # HBD will be treated as RO and we can add the HPT to it
+        if ($eyeCatch eq "HBD_RW")
+        {
+            $hashPageTablePartitions{"HBD"} = 1;
+            last;
+        }
+    }
+
     foreach my $bin_file (@binFilesArray)
     {
         # @TODO RTC 182358
@@ -774,7 +786,7 @@ sub manipulateImage
 
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file > $tempImages{HDR_PHASE}");
                     }
-                    # Handle read-only protected payload
+                    # Handle COMBO RO and RW payload
                     elsif ($eyeCatch eq "HBD")
                     {
                         run_command("$CUR_OPEN_SIGN_REQUEST "
@@ -783,6 +795,16 @@ sub manipulateImage
                                     . "--out $tempImages{PROTECTED_PAYLOAD}");
 
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file.unprotected > $tempImages{HDR_PHASE}");
+                    }
+                    # Handle read-only protected payload
+                    elsif ($eyeCatch eq "HBD_RO")
+                    {
+                        run_command("$CUR_OPEN_SIGN_REQUEST "
+                                    . "--protectedPayload $bin_file.protected "
+                                    . "--contrHdrOut $final_header_file "
+                                    . "--out $tempImages{PROTECTED_PAYLOAD}");
+
+                        run_command("cat $tempImages{PROTECTED_PAYLOAD} > $tempImages{HDR_PHASE}");
                     }
                     else
                     {

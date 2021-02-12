@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -444,6 +444,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "BOOTKERNEL",  /**< PNOR::BOOTKERNEL     : OPAL == petitboot,PHYP == PowerVM */
 #endif
         "HCODE_LID",   /**< PNOR::HCODE_LID      : HCODE_LID Reference image */
+        "HBD_RW",      /**< PNOR::HB_DATA_RW     : Hostboot Data ReadWrite   */
 #endif
     };
 

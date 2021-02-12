@@ -1031,7 +1031,9 @@ namespace TARGETING
 
     errlHndl_t AttrRP::parseAttrSectHeader()
     {
-        errlHndl_t l_errl = NULL;
+        errlHndl_t l_errl = nullptr;
+        PNOR::SectionInfo_t l_pnorSectionInfo_RW;
+        bool hasHBD_HPT = false;
 
         do
         {
@@ -1052,6 +1054,25 @@ namespace TARGETING
             if(l_errl)
             {
                 break;
+            }
+
+            if (l_pnorSectionInfo.hasHashTable)
+            {
+                hasHBD_HPT = true;
+            }
+            TRACFCOMP(g_trac_targeting, INFO_MRK "parseAttrSectHeader: HBD hasHashTable=%d", hasHBD_HPT);
+
+            if (hasHBD_HPT)
+            {
+                // Locate RW attribute section in PNOR.
+                l_errl = PNOR::getSectionInfo(PNOR::HB_DATA_RW,
+                             l_pnorSectionInfo_RW);
+                if(l_errl)
+                {
+                    TRACFCOMP(g_trac_targeting, INFO_MRK "parseAttrSectHeader: Problem with finding the HB_DATA_RW,"
+                        " HBD hasHashTable=%d", hasHBD_HPT);
+                    break;
+                }
             }
 
             if(!iv_isMpipl)
@@ -1166,14 +1187,29 @@ namespace TARGETING
                 iv_sections[i].pnorAddress =
                     l_pnorSectionInfo.vaddr + l_section->sectionOffset;
 
+                if ((iv_sections[i].type == SECTION_TYPE_PNOR_RW) && hasHBD_HPT)
+                {
+                    iv_sections[i].pnorAddress =
+                        l_pnorSectionInfo_RW.vaddr;
+                }
+
                 #ifdef CONFIG_SECUREBOOT
                 // RW targeting section is part of the unprotected payload
                 // so use the normal PNOR virtual address space
                 if(   l_pnorSectionInfo.secure
                    && iv_sections[i].type == SECTION_TYPE_PNOR_RW)
                 {
-                    iv_sections[i].pnorAddress -=
-                        (VMM_VADDR_SPNOR_DELTA + VMM_VADDR_SPNOR_DELTA);
+                    // if the HBD is HPT enabled means we have the HBD_RW partition
+                    // HBD will always package the protected and unprotected HBD data
+                    // which is needed for the ultimate LID, this is a packaging statement
+                    //
+                    // if HBD -NOT- HPT enabled we need to use
+                    // the normal PNOR virtual address space
+                    if (!hasHBD_HPT)
+                    {
+                        iv_sections[i].pnorAddress -=
+                            (VMM_VADDR_SPNOR_DELTA + VMM_VADDR_SPNOR_DELTA);
+                    }
                 }
                 #endif
 
@@ -1189,8 +1225,8 @@ namespace TARGETING
                 //Increment our offset variable by the size of this section
                 l_realMemOffset += iv_sections[i].size;
 
-                TRACFCOMP(g_trac_targeting,
-                          "Decoded Attribute Section: %d, 0x%lx 0x%lx 0x%lx 0x%lx",
+                TRACFCOMP(g_trac_targeting, INFO_MRK
+                          "Decoded Attribute Section: Type %d, VMM 0x%lx PNOR 0x%lx Real 0x%lx Size 0x%lx",
                           iv_sections[i].type,
                           iv_sections[i].vmmAddress,
                           iv_sections[i].pnorAddress,
