@@ -34,6 +34,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <spi/spireasoncodes.H>
+#include <devicefw/devfwreasoncodes.H>
 
 using namespace TARGETING;
 using namespace EEPROM;
@@ -309,5 +310,180 @@ class EEPROMHWTest: public CxxTest::TestSuite
             while(0);
 
             TS_INFO(EXIT_MRK"test_eepromPrepareI2cAddress - End");
+        }
+
+        /**
+        * @brief testing eepromI2cPageOp() - locking and unlocking page
+        */
+        void test_eepromI2cPageOp( void )
+        {
+            errlHndl_t l_err = nullptr;
+            TS_INFO(ENTER_MRK"test_eepromI2cPageOp - Start");
+
+            do
+            {
+                //Get a processor Target to test locking and switching pages
+                TARGETING::Target* l_testTarget = nullptr;
+                l_err = TARGETING::targetService().queryMasterProcChipTargetHandle(l_testTarget);
+
+                //If unable to get Target, exit without executing tests
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromI2cPageOp - failed to find master processor "
+                            "- exiting without running tests");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+
+                //Create dummy eeprom info w/ VPD_PRIMARY set
+                const EEPROM_ROLE l_eepromRole = EEPROM::VPD_PRIMARY;
+                eeprom_addr_t l_primaryVpdEeprom;
+                l_primaryVpdEeprom.eepromRole = l_eepromRole;
+
+                eepromRecordHeader l_recordHeader;
+                l_err = buildEepromRecordHeader(l_testTarget, l_primaryVpdEeprom, l_recordHeader);
+
+                //if unable to build record header, exit without executing tests
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromSpiRead - Failed building eeprom record header "
+                            "- exiting without running tests");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+
+                l_primaryVpdEeprom.accessAddr.i2c_addr.addrSize = ONE_BYTE_ADDR_PAGESELECT;
+                bool l_lockMutex = true;
+                uint8_t l_desiredPage = 0;
+
+                //Set variables to lock and switch page
+                bool l_switchPage = true;
+                bool l_pageLocked = false;
+                l_err = eepromI2cPageOp(l_testTarget,
+                                        l_switchPage,
+                                        l_lockMutex,
+                                        l_pageLocked,
+                                        l_desiredPage,
+                                        l_primaryVpdEeprom);
+
+                //If unable to lock page, exit without executing test to unlock page
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromI2cPageOp - eepromI2cPageOp() Failed locking EEPROM page "
+                            "- exiting without running test to unlock page");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                    break;
+                }
+                if (l_pageLocked != true)
+                {
+                    TS_FAIL("test_eepromI2cPageOp - l_pageLocked should have been set to true"
+                            "- exiting without running test to unlock page");
+                    break;
+                }
+
+                //Set variables to only unlock page
+                l_switchPage = false;
+                l_pageLocked = true;
+                l_err = eepromI2cPageOp(l_testTarget,
+                                      l_switchPage,
+                                      l_lockMutex,
+                                      l_pageLocked,
+                                      l_desiredPage,
+                                      l_primaryVpdEeprom);
+                if (l_err)
+                {
+                    TS_FAIL("test_eepromI2cPageOp - eepromI2cPageOp() Failed unlocking EEPROM page");
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                }
+                if(l_pageLocked != false)
+                {
+                    TS_FAIL("test_eepromI2cPageOp - l_pageLocked should have been set to false");
+                }
+            }
+            while(0);
+
+            TS_INFO(EXIT_MRK"test_eepromI2cPageOp - End" );
+        }
+
+        /**
+        * @brief testing eepromI2cPageOp() - forcing an error when performing operations to
+        *                                    lock and unlock page
+        */
+        void test_eepromI2cPageOpError( void )
+        {
+            errlHndl_t l_err = nullptr;
+            TS_INFO(ENTER_MRK"test_eepromI2cPageOpError - Start");
+
+            //Leave Target Null to force error
+            TARGETING::Target* l_nullTestTarget = nullptr;
+
+            //Create dummy eeprom info w/ VPD_PRIMARY set
+            const EEPROM_ROLE l_eepromRole = EEPROM::VPD_PRIMARY;
+            eeprom_addr_t l_primaryVpdEeprom;
+            l_primaryVpdEeprom.eepromRole = l_eepromRole;
+
+            l_primaryVpdEeprom.accessAddr.i2c_addr.addrSize = ONE_BYTE_ADDR_PAGESELECT;
+            bool l_lockMutex = true;
+            uint8_t l_desiredPage = 0;
+
+            //Set variables for case to lock and switch page
+            bool l_switchPage = true;
+            bool l_pageLocked = false;
+            l_err = eepromI2cPageOp(l_nullTestTarget,
+                                    l_switchPage,
+                                    l_lockMutex,
+                                    l_pageLocked,
+                                    l_desiredPage,
+                                    l_primaryVpdEeprom);
+            if (l_err)
+            {
+                if (l_err->reasonCode() == DeviceFW::DEVFW_RC_NULL_TARGET)
+                {
+                    TS_INFO("test_eepromI2cPageOpError - Failed as expected (locking page)");
+                    delete l_err;
+                    l_err = nullptr;
+                }
+                else
+                {
+                    TS_FAIL("test_eepromI2cPageOpError - Unexpected error created "
+                            "rc=0x%04X", l_err->reasonCode());
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                }
+            }
+            else
+            {
+                TS_FAIL("test_eepromI2cPageOpError - Should have failed to lock page with null target");
+            }
+
+            //Set variables for case to only unlock page
+            l_switchPage = false;
+            l_pageLocked = true;
+            l_err = eepromI2cPageOp(l_nullTestTarget,
+                                    l_switchPage,
+                                    l_lockMutex,
+                                    l_pageLocked,
+                                    l_desiredPage,
+                                    l_primaryVpdEeprom);
+            if (l_err)
+            {
+                if (l_err->reasonCode() == DeviceFW::DEVFW_RC_NULL_TARGET)
+                {
+                    TS_INFO("test_eepromI2cPageOpError - Failed as expected (unlocking page)");
+                    delete l_err;
+                    l_err = nullptr;
+                }
+                else
+                {
+                    TS_FAIL("test_eepromI2cPageOpError - Unexpected error created "
+                            "rc=0x%04X", l_err->reasonCode());
+                    errlCommit( l_err, CXXTEST_COMP_ID );
+                }
+            }
+            else
+            {
+                TS_FAIL("test_eepromI2cPageOpError - Should have failed to unlock page with null target");
+            }
+
+            TS_INFO(EXIT_MRK"test_eepromI2cPageOpError - End");
         }
 };
