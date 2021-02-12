@@ -69,6 +69,7 @@
 #include <algorithm>
 #include <util/misc.H>
 #include <hwas/common/hwasCommon.H>
+#include <hwas/common/deconfigGard.H>
 #include <kernel/bltohbdatamgr.H>
 
 namespace TRUSTEDBOOT
@@ -1253,6 +1254,14 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
         io_err->collectTrace(TRBOOT_COMP_NAME);
 
         ERRORLOG::errlCommit(io_err, TRBOOT_COMP_ID);
+
+        // Flush the error logs and process all outstanding deconfigs
+        // prior to continuing as we will rely on the HWAS state to be
+        // set appropriately according to the gard/deconfig callouts tied
+        // to the error log that was just committed.
+        ERRORLOG::ErrlManager::callFlushErrorLogs();
+
+        HWAS::theDeconfigGard().processDeferredDeconfig();
     }
 
 }
