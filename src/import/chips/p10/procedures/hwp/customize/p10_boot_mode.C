@@ -377,6 +377,7 @@ fapi_try_exit:
 /// @param[in]  i_target_proc  Processor scope target for attribute query
 /// @param[in]  i_target_sys   System scope target for attribute query
 /// @param[in]  i_bvec         Bit vector filled to platform state/capabilities
+/// @param[in]  i_img_bvec     Bit vector representing image state/capabilities
 ///
 /// @returns fapi2::ReturnCode FAPI2_RC_SUCCESS if successful, else error
 ///
@@ -384,7 +385,8 @@ fapi2::ReturnCode
 add_plat_features_sbe(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_proc,
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
-    p10_dyninit_bitvec& i_bvec)
+    p10_dyninit_bitvec& i_bvec,
+    p10_dyninit_bitvec& i_img_bvec)
 {
     using namespace p10_dyninit_bitvec_utils;
 
@@ -577,6 +579,27 @@ add_plat_features_sbe(
         }
     }
 
+    // fabric configuration
+    {
+        fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_fbc_broadcast_mode;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE,
+                               i_target_sys,
+                               l_fbc_broadcast_mode));
+
+        if (l_fbc_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
+        {
+            if (test_bit_in_range(i_img_bvec, FBC_ONEHOP))
+            {
+                FAPI_TRY(set_bit(i_bvec, FBC_ONEHOP, "FBC_ONEHOP"));
+            }
+            else
+            {
+                FAPI_INF("Unable to set FBC_ONEHOP, feature unsupported by HW reference image");
+            }
+        }
+    }
+
     {
         fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
 
@@ -597,7 +620,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Add SBE phase dynamic init features (ontained)
+/// @brief Add SBE phase dynamic init features (contained)
 ///
 /// @param[in]  i_target_proc  Processor scope target for attribute query
 /// @param[in]  i_target_sys   System scope target for attribute query
@@ -732,6 +755,7 @@ fapi_try_exit:
 /// @param[in]  i_target_sys   System scope target for attribute query
 /// @param[in]  i_sys_phase    Customization phase {HB_SBE,RT_QME,HB_MEAS}
 /// @param[in]  i_bvec         Bit vector filled to platform state/capabilities
+/// @param[in]  i_img_bvec     Bit vector filled to image state/capabilities
 ///
 /// @returns fapi2::ReturnCode FAPI2_RC_SUCCESS if successful, else error
 ///
@@ -740,7 +764,8 @@ add_plat_features(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_proc,
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
     uint8_t i_sys_phase,
-    p10_dyninit_bitvec& i_bvec)
+    p10_dyninit_bitvec& i_bvec,
+    p10_dyninit_bitvec& i_img_bvec)
 {
     FAPI_DBG("Start");
 
@@ -756,7 +781,8 @@ add_plat_features(
     {
         FAPI_TRY(add_plat_features_sbe(i_target_proc,
                                        i_target_sys,
-                                       i_bvec));
+                                       i_bvec,
+                                       i_img_bvec));
     }
     // SBE phase (contained) inits
     else if (l_attr_system_ipl_phase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_CONTAINED_IPL)
@@ -932,7 +958,8 @@ p10_boot_mode(
     FAPI_TRY(add_plat_features(i_proc_target,
                                FAPI_SYSTEM,
                                i_sys_phase,
-                               l_plat_feature_bvec),
+                               l_plat_feature_bvec,
+                               l_hw_image_feature_bvec),
              "Error from add_plat_features");
 
     dump_bitvec(l_plat_feature_bvec);
