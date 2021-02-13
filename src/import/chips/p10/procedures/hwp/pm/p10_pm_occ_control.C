@@ -285,7 +285,7 @@ fapi2::ReturnCode pollOCCHearbeat(
 
     fapi2::buffer<uint64_t>  l_occhbr;
     uint32_t                 l_timeout_counter = TIMEOUT_COUNT;
-    uint32_t retry_cnt = 2;
+    uint32_t retry_cnt = 10;
 
     FAPI_DBG("OCC heartbeat polling...");
 

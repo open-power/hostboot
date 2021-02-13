@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -328,7 +328,14 @@
       <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OJTDO</scomRegister>
       <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_RW</scomRegister>
   </registerFfdc>
-  <!-- *********************************************************************** -->
+ <!-- *********************************************************************** -->
+   <registerFfdc>
+      <id>OCC_HB_FFDC_REGISTERS</id>
+      <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCHBR</scomRegister>
+      <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_RO</scomRegister>
+      <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_RW</scomRegister>
+  </registerFfdc>
+ <!-- *********************************************************************** -->
   <registerFfdc>
     <id>PM_FIR_REGISTERS</id>
     <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_RW</scomRegister>
