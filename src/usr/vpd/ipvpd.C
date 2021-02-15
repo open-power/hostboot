@@ -2645,6 +2645,62 @@ errlHndl_t IpVpdFacade::loadUnloadSecureSection( input_args_t i_args,
 #endif
 
 // ------------------------------------------------------------------
+// IpVpdFacade::updateRecordData
+// ------------------------------------------------------------------
+void
+IpVpdFacade::updateRecordData( errlHndl_t &io_vpdValidationError,
+                               const TARGETING::TargetHandle_t i_target,
+                               const char *i_recordName,
+                               uint8_t    *i_recordData,
+                               size_t      i_recordOffset,
+                               size_t      i_recordLength )
+{
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::updateRecordData(): "
+                "target 0x%.8X, record name %s, record length %d, record offset 0x%.4X",
+                TARGETING::get_huid(i_target), i_recordName, i_recordLength, i_recordOffset );
+
+    // Write the record data
+    errlHndl_t l_writeError = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                                  i_target,
+                                                  i_recordData,
+                                                  i_recordLength,
+                                                  DEVICE_EEPROM_ADDRESS(
+                                                      EEPROM::VPD_AUTO,
+                                                      i_recordOffset,
+                                                      EEPROM::AUTOSELECT) );
+    if (l_writeError)
+    {
+        // Failed to write the updated record
+        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::updateRecordData(): "
+                   "deviceOp write failed to update record %s on target 0x%.8X. "
+                   "Setting the deviceOp write error to informational and the "
+                   "VPD validation error to unrecoverable.",
+                   i_recordName, TARGETING::get_huid(i_target) );
+
+        // Set the failed write error as informational and commit.
+        l_writeError->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        errlCommit(l_writeError, VPD_COMP_ID);
+
+        // Set the original VPD validation error to unrecoverable and return it.
+        io_vpdValidationError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+    }
+    else
+    {
+        // Successfully updated the record to be in sync with the ECC data
+        TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::updateRecordData(): "
+                   "deviceOp write successfully updated record %s on target 0x%.8X. "
+                   "Setting the VPD validation error to informational.",
+                   i_recordName, TARGETING::get_huid(i_target) );
+
+        // Set original error to informational, commit and return as a nullptr.
+        io_vpdValidationError->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        errlCommit(io_vpdValidationError, VPD_COMP_ID);
+    } // if (l_writeError)
+
+    TRACSSCOMP( g_trac_vpd, EXIT_MRK"IpVpdFacade::updateRecordData()");
+} // updateRecordData
+
+// ------------------------------------------------------------------
 // IpVpdFacade::getVtocRecordMetaData
 // ------------------------------------------------------------------
 errlHndl_t
@@ -2655,7 +2711,7 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
 {
     errlHndl_t l_err(nullptr);
 
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getVtocRecordMetaData() "
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getVtocRecordMetaData():"
                 "for target 0x%.8X", TARGETING::get_huid(i_target) );
 
     // Clear the outgoing data
@@ -2696,14 +2752,14 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
                                      l_offset, 0, i_target, l_buffer, l_bufferSize, i_args );
             if (l_err)
             {
-                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData(): "
                            "Error with getting PT (Pointer to Record) keyword "
                            "from VHDR record for target 0x%.8X",
                            TARGETING::get_huid(i_target) );
                 break;
             }
 
-            TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::getVtocRecordMetaData: "
+            TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::getVtocRecordMetaData(): "
                         "Success with getting PT (Pointer to Record) keyword "
                         "from VHDR record for target 0x%.8X",
                         TARGETING::get_huid(i_target) );
@@ -2714,7 +2770,7 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
             // Verify that the returned buffer is large enough to contain the VTOC meta data
             if (l_bufferSize < sizeof(pt_entry))
             {
-                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData(): "
                            "The VPD Header (VHDR) record returned the VTOC meta data "
                            "of size %d, but expected size of %d or greater on "
                            "target 0x%.8X!", l_bufferSize, sizeof(pt_entry),
@@ -2764,7 +2820,7 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
                 uint32_t* l_recordName = reinterpret_cast<uint32_t*>(l_tocRecord->record_name);
                 const uint32_t* l_vtocRecord =
                           reinterpret_cast<const uint32_t*>(VPD_TABLE_OF_CONTENTS_RECORD_NAME);
-                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData: "
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getVtocRecordMetaData(): "
                            "The VPD Header (VHDR) record returned record name 0x%.8X, "
                            "but expected 0x%.8X (VTOC) for target 0x%.8X!",
                            l_recordName[0], l_vtocRecord[0], TARGETING::get_huid(i_target) );
@@ -2812,7 +2868,7 @@ IpVpdFacade::getVtocRecordMetaData ( TARGETING::Target*       i_target,
 
     if (!l_err)
     {
-        TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::getVtocRecordMetaData: "
+        TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::getVtocRecordMetaData(): "
                     "Successfully retrieved VTOC meta data: record name(%s), "
                     "record type(0x%.4X), record offset(0x%.4X), record length(%d) "
                     "ecc offset(0x%.4X) and ecc length(%d) for target 0x%.8X",
@@ -2998,7 +3054,7 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
         // Get a copy of the target huid, once, for tracing purposes
         auto l_targetHuid = TARGETING::get_huid(i_target);
 
-        TRACFCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateAllRecordEccData() "
+        TRACFCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateAllRecordEccData(): "
                                         "target 0x%.8X",  l_targetHuid );
 
         while (1)
@@ -3083,7 +3139,7 @@ IpVpdFacade::_validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targ
            "IpVpdFacade::_validateAllRecordEccData(): Target 0x%.8X is not a PROC",
            TARGETING::get_huid(i_target) );
 
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::_validateAllRecordEccData() "
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::_validateAllRecordEccData(): "
                                     "target 0x%.8X",  TARGETING::get_huid(i_target) );
 
     errlHndl_t l_err(nullptr);
@@ -3148,7 +3204,7 @@ IpVpdFacade::validateVhdrRecordEccData( const TARGETING::TargetHandle_t i_target
                                         const input_args_t              &i_args,
                                         vhdr_record                     &o_vhdrRecordData )
 {
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateVhdrRecordEccData() for "
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateVhdrRecordEccData(): for "
                 "record %s on target 0x%.8X; i_args = record(0x%.4X), keyword(0x%.4X), "
                 "location(0x%.4X), eepromSource(0x%.4X)",
                 VPD_HEADER_RECORD_NAME, TARGETING::get_huid(i_target),
@@ -3197,16 +3253,26 @@ IpVpdFacade::validateVhdrRecordEccData( const TARGETING::TargetHandle_t i_target
 
             if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
             {
-                // @TODO RTC:263440 Need to update the record in the cache with l_recordData:
-                //       This is a correctable error, which means the record data has been
-                //       updated and corrected.  The corrected/updated record data needs to
-                //       be written back.
-                // Reinstate below when able to update a record successfully
-                // errlCommit(l_err, VPD_COMP_ID);
-                // Remove below when able to update a record successfully.
-                l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                break;
-            }
+                // Attempt to update and correct the record to be in sync with the ECC data
+                TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVhdrRecordEccData(): "
+                           "Attempt to update and correct the record %s to be in sync with "
+                           "the ECC data on target 0x%.8X",
+                           VPD_HEADER_RECORD_NAME, TARGETING::get_huid(i_target) );
+
+                updateRecordData( l_err,        i_target,       VPD_HEADER_RECORD_NAME,
+                                  l_recordData, l_recordOffset, l_recordLength  );
+                if (l_err)
+                {
+                    TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVhdrRecordEccData(): "
+                               "updateRecordData failed to update record %s on target 0x%.8X",
+                               VPD_HEADER_RECORD_NAME, TARGETING::get_huid(i_target) );
+                    break;
+                }
+
+                TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVhdrRecordEccData(): "
+                           "updateRecordData successfully updated record %s on target 0x%.8X",
+                           VPD_HEADER_RECORD_NAME, TARGETING::get_huid(i_target) );
+           }
             else if (l_err)
             {
                 TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVhdrRecordEccData(): "
@@ -3235,7 +3301,7 @@ IpVpdFacade::getFullVhdrRecordData ( const TARGETING::TargetHandle_t i_target,
                                      const input_args_t             &i_args,
                                      vhdr_record                    &o_vhdrRecordData )
 {
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getFullVhdrRecordData() for "
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getFullVhdrRecordData(): for "
                 "record %s on target 0x%.8X; i_args = record(0x%.4X), keyword(0x%.4X), "
                 "location(0x%.4X), eepromSource(0x%.4X)",
                 VPD_HEADER_RECORD_NAME, TARGETING::get_huid(i_target),
@@ -3305,7 +3371,7 @@ IpVpdFacade::validateVtocRecordEccData(
                 const input_args_t              &i_args,
                 const vhdr_record               &i_vhdrRecordData )
 {
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateVtocRecordEccData() for "
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateVtocRecordEccData(): for "
                 "record %s on target 0x%.8X; i_args = record(0x%.4X), keyword(0x%.4X), "
                 "location(0x%.4X), eepromSource(0x%.4X)",
                 VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target),
@@ -3429,15 +3495,25 @@ IpVpdFacade::validateVtocRecordEccData(
 
             if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
             {
-                // @TODO RTC:263440 Need to update the record in the cache with l_recordData:
-                //       This is a correctable error, which means the record data has been
-                //       updated and corrected.  The corrected/updated record data needs to
-                //       be written back.
-                // Reinstate below when able to update a record successfully
-                // errlCommit(l_err, VPD_COMP_ID);
-                // Remove below when able to update a record successfully.
-                l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                break;
+                // Attempt to update and correct the record to be in sync with the ECC data
+                TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                           "Attempt to update and correct the record %s to be in sync with "
+                           "the ECC data on target 0x%.8X",
+                           VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
+
+                updateRecordData( l_err,        i_target,       VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                                  l_recordData, l_recordOffset, l_recordLength  );
+                if (l_err)
+                {
+                    TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                               "updateRecordData failed to update record %s on target 0x%.8X",
+                               VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
+                    break;
+                }
+
+                TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVtocRecordEccData(): "
+                           "updateRecordData successfully updated record %s on target 0x%.8X",
+                           VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
             }
             else if (l_err)
             {
@@ -3466,7 +3542,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
                 const input_args_t              &i_args,
                 const vhdr_record               &i_vhdrRecordData )
 {
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateAllOtherRecordEccData() "
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
                 "target(0x%.8X); i_args = record(0x%.4X), keyword(0x%.4X), "
                 "location(0x%.4X), eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
                 i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
@@ -3549,7 +3625,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
             }
 
             // Verify that the retrieved ECC data is as expected.
-            size_t l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
+            auto l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
                                                   l_eccData,    l_eccLength);
 
             // If the return code from the call to vpdeccCheckData is not VPD_ECC_OK, then an error occurred
@@ -3610,15 +3686,25 @@ IpVpdFacade::validateAllOtherRecordEccData(
 
                 if (l_err && (l_err->reasonCode() == VPD::VPD_ECC_DATA_CORRECTABLE_DATA) )
                 {
-                    // @TODO RTC:263440 Need to update the record in the cache with l_recordData:
-                    //       This is a correctable error, which means the record data has been
-                    //       updated and corrected.  The corrected/updated record data needs to
-                    //       be written back.
-                    // Reinstate below when able to update a record successfully
-                    // errlCommit(l_err, VPD_COMP_ID);
-                    // Remove below when able to update a record successfully.
-                    l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                    break;
+                    // Attempt to update and correct the record to be in sync with the ECC data
+                    TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                               "Attempt to update and correct the record %s to be in sync with "
+                               "the ECC data on target 0x%.8X",
+                               l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+
+                    updateRecordData( l_err,        i_target,       l_ptEntry.record_name,
+                                      l_recordData, l_recordOffset, l_recordLength  );
+                    if (l_err)
+                    {
+                        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                                   "updateRecordData failed to update record %s on target 0x%.8X",
+                                   l_ptEntry.record_name, TARGETING::get_huid(i_target) );
+                        break;
+                    }
+
+                    TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                               "updateRecordData successfully updated record %s on target 0x%.8X",
+                               l_ptEntry.record_name, TARGETING::get_huid(i_target) );
                 }
                 else if (l_err)
                 {
@@ -3648,7 +3734,7 @@ IpVpdFacade::getAllRecordMetaData (
                 std::list<pt_entry>             &o_recordMetaDataList,
                 const vhdr_record               &i_vhdrRecordData  )
 {
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getAllRecordMetaData() target(0x%.8X) "
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getAllRecordMetaData(): target(0x%.8X) "
                 "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
                 "eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
                 i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
@@ -3695,7 +3781,7 @@ IpVpdFacade::getRecordMetaData (
                 pt_entry                        &o_recordMetaData,
                 const char* const                i_recordName )
 {
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordMetaData() target(0x%.8X) "
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordMetaData(): target(0x%.8X) "
                 "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
                 "eepromSource(0x%.4X)", TARGETING::get_huid(i_target),
                 i_args.record, i_args.keyword, i_args.location, i_args.eepromSource);
@@ -3805,7 +3891,7 @@ IpVpdFacade::_getRecordMetaData (
                 std::list<pt_entry>             &o_recordMetaDataList,
                 const char* const                i_recordName )
 {
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::_getRecordMetaData() target(0x%.8X); "
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::_getRecordMetaData(): target(0x%.8X); "
                 "i_args = record(0x%.4X), keyword(0x%.4X), location(0x%.4X), "
                 "eepromSource(0x%.4X); %s %s", TARGETING::get_huid(i_target),
                 i_args.record, i_args.keyword, i_args.location, i_args.eepromSource,

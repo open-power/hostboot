@@ -872,6 +872,34 @@ class IpVpdFacade
     virtual errlHndl_t checkForRecordOverride( const char* i_record,
                                                TARGETING::Target* i_target,
                                                uint8_t*& o_ptr );
+    /**
+     * @brief Update the record data with the given data.
+     *
+     * @details This method will update the record data after a ECC data validation
+     *          has failed with a correctable error.
+     *              * If the update is successful, then the given validation error
+     *                log will have it's severity set to informational and committed.
+     *                The returned validation error log will be set to nullptr.
+     *              * If the update has failed, then given validation error log will
+     *                have it's severity set to unrecoverable and returned.
+     *
+     * @param[in/out] io_vpdValidationError:
+     *                  input  - The error log created when the record failed the
+     *                           ECC data validation check with a correctable error.
+     *                  output - nullptr if update successful, else returned with
+     *                           severity set to unrecoverable.
+     * @param[in] i_target - Pointer to the PROC target where the record is located.
+     * @param[in] i_recordName   - Name of the record having it's data updated.
+     * @param[in] i_recordData   - The data to update the record with.
+     * @param[in] i_recordOffset - Offset to the record's data.
+     * @param[in] i_recordLength - Length of the record's data.
+     */
+    void updateRecordData( errlHndl_t    &io_vpdValidationError,
+                           const TARGETING::TargetHandle_t i_target,
+                           const char *i_recordName,
+                           uint8_t    *i_recordData,
+                           size_t      i_recordOffset,
+                           size_t      i_recordLength );
 
     /**
      * @brief Retrieve the VTOC meta data - record name, record type, record offset,

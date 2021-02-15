@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,10 @@ using namespace EEPROM;
 //#define TS_DEBUG(args...) TS_INFO(args)
 
 extern trace_desc_t* g_trac_eeprom;
+
+// Global variable to determine if the ECC APIs are present and available.
+// Defined and set in file vpd_ecc_api.C.
+extern const bool g_vpd_ecc_api_present;
 
 class EEPROMTest: public CxxTest::TestSuite
 {
@@ -544,10 +548,8 @@ class EEPROMTest: public CxxTest::TestSuite
                                     i, NUM_CMDS);
                         }
 
-                        //@TODO-RTC:250100-Enable Enterprise VPD ECC
-                        // Writes to the actual SEEPROM are skipped until we have the
-                        //  ECC algorithm in place
-                        testData[i].cached = false;
+                        // Run the following test if the VPD ECC algorithm are in place
+                        testData[i].cached = g_vpd_ecc_api_present;
 
 #if ( !(defined(CONFIG_SUPPORT_EEPROM_CACHING) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)) )
                         // Skip this test if we don't have two data sources
