@@ -1844,6 +1844,9 @@ fapi2::ReturnCode enable_with_redundancy(
         FAPI_TRY(setup_adc1(l_target_info.iv_adc1));
         FAPI_TRY(setup_adc2(l_target_info.iv_adc2));
 
+        // Step 184: Delay 200ms - SKIPPED, as IPL duration should be sufficient
+        // Step 185: Telemetry Collection - SKIPPED, to be run at end of IPL
+
         // Finally, pocess the N-Mode results
         FAPI_TRY(mss::pmic::process_n_mode_results(l_target_info));
     }
