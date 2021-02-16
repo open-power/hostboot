@@ -101,11 +101,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Perform normal host FW phy init
+/// @brief Perform host FW phy init based upon the requested PHY initialization mode
 ///
 /// @param[in] i_target OCMB target
 /// @param[in] i_phy_info phy information of interest
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note In hostboot, this function will return SUCCESS upon taking a training fail
+/// where bad bits can be successfully logged. If we can log bad bits, then we want
+/// PRD and memdiags to attempt to run with the correct repairs
+/// In cronus mode, any RC's we take due to training is returned directly
 ///
 fapi2::ReturnCode host_fw_phy_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                    const uint8_t i_phy_init_mode)
@@ -125,7 +129,13 @@ fapi2::ReturnCode host_fw_phy_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     }
 
 fapi_try_exit:
+#ifdef __HOSTBOOT_MODULE
+    // In hostboot, we do not want to exit on a training fail, RC's will flow through
+    return handle_training_error(i_target, fapi2::current_err);
+#else
+    // In cronus, just return the RC
     return fapi2::current_err;
+#endif
 }
 
 ///
@@ -145,7 +155,11 @@ fapi2::ReturnCode host_fw_phy_normal_init(
 
     // Issue full boot mode cmd though EXP-FW REQ buffer
     FAPI_TRY(send_host_phy_init_cmd(i_target, i_phy_info, phy_init_mode::NORMAL, l_cmd));
-    FAPI_TRY(mss::exp::check::host_fw_response(i_target, l_cmd, mss::EXP_DRAMINIT, l_rsp_data));
+
+    // Note: don't FAPI_TRY here!
+    // We want to grab this error, then try to update the bad bits appropriately
+    // Logging of bad bits happens in read_and_display_normal_training_response
+    l_rc = mss::exp::check::host_fw_response(i_target, l_cmd, mss::EXP_DRAMINIT, l_rsp_data);
 
     FAPI_TRY(check_rsp_data_size(i_target, l_rsp_data.size(), phy_init_mode::NORMAL));
     FAPI_TRY(mss::exp::read_and_display_normal_training_response(i_target, l_rsp_data, l_rc));
@@ -298,6 +312,7 @@ fapi_try_exit:
 /// @param[in] i_response_2_rc response from check::host_fw_response from EYE_CAPTURE_STEP_2
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else an error from above as defined in the function algorithm
 /// @note return codes are passed by value, caller should not expect these to change
+/// @note processes the bad bits based upon the passed in ReturnCodes
 ///
 fapi2::ReturnCode process_eye_capture_return_codes(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const user_2d_eye_response_1_msdg& i_response_1,
@@ -313,8 +328,10 @@ fapi2::ReturnCode process_eye_capture_return_codes(const fapi2::Target<fapi2::TA
         FAPI_ERR("%s check_fw_host_response() for %s returned error code 0x%016llu",
                  mss::c_str(i_target), "EYE_CAPTURE_STEP_2", uint64_t(i_response_2_rc));
 
-        mss::exp::bad_bit_interface<user_2d_eye_response_2_msdg> l_interface_2(i_response_2);
-        FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface_2));
+        // So, why aren't we logging the bad bits here?
+        // Turns out, Microchip's firmware assumes that all bad bits are found in train_response1
+        // As such, they won't log any bad bits in train_response2, even if they they take a training fail
+        // No point to go through the effort if the data isn't there
 
         if (l_response_1_failed)
         {
@@ -333,10 +350,8 @@ fapi2::ReturnCode process_eye_capture_return_codes(const fapi2::Target<fapi2::TA
         FAPI_ERR("%s check_fw_host_response() for %s returned error code 0x%016llu",
                  mss::c_str(i_target), "EYE_CAPTURE_STEP_1", uint64_t(i_response_1_rc));
 
-        mss::exp::bad_bit_interface<user_2d_eye_response_1_msdg> l_interface_1(i_response_1);
-        FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface_1));
-
-        return i_response_1_rc;
+        // Handles the bad bit error processing
+        return bad_bit_processing(i_target, i_response_1, i_response_1_rc);
     }
 
     // Else, we did not see errors!
@@ -512,13 +527,14 @@ fapi_try_exit:
 ///
 /// @param[in] i_target OCMB target
 /// @param[in] i_resp_data RESP data
-/// @param[in] i_rc return code from checking response
+/// @param[in,out] io_rc return code from checking response
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
+/// @note processes the bad bits based upon the passed in ReturnCode
 ///
 fapi2::ReturnCode read_and_display_normal_training_response(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const std::vector<uint8_t> i_resp_data,
-    const fapi2::ReturnCode i_rc)
+    fapi2::ReturnCode& io_rc)
 {
     user_response_msdg l_train_response;
 
@@ -533,12 +549,8 @@ fapi2::ReturnCode read_and_display_normal_training_response(
     // Set RC response attributes
     FAPI_TRY(set_rc_resp_attrs(i_target, l_train_response.rc_resp));
 
-    if(i_rc != fapi2::FAPI2_RC_SUCCESS)
-    {
-        mss::exp::bad_bit_interface<user_response_msdg> l_interface(l_train_response);
-        FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
-        FAPI_TRY(i_rc, "mss::exp::check::response failed for %s", mss::c_str(i_target));
-    }
+    // Handles bad bit error processing
+    FAPI_TRY(bad_bit_processing(i_target, l_train_response, io_rc));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1060,6 +1072,43 @@ fapi2::ReturnCode init_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Checks if we should log the bad bits
+/// @param[in] i_training_rc the ReturnCode from conducting draminit training
+/// @return true if we need to log the bad bits based upon the passed in error, otherwise false
+///
+fapi2::ReturnCode is_bad_bits_logging_needed(const fapi2::ReturnCode& i_training_rc)
+{
+    // TODO: Zenhub #818: Training callout will need to be updated
+    //       Pending additional followup meetings with MCHP
+    return uint64_t(i_training_rc) == uint64_t(fapi2::RC_MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL);
+}
+
+///
+/// @brief Handles the training error
+/// @param[in] i_target the fapi2 target
+/// @param[in,out] io_training_rc the ReturnCode from conducting draminit training
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note will log the error as recovered if it is a training related error
+/// Otherwise, it will pass out the error as is
+/// This is a helper function and should only be called in hostboot (for cronus we want to always assert out)
+///
+fapi2::ReturnCode handle_training_error(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        fapi2::ReturnCode& io_training_rc)
+{
+    // If the error is a TRAINING_FAIL, then we want to log it as recovered and continue
+    if(is_bad_bits_logging_needed(io_training_rc))
+    {
+        fapi2::log_related_error(i_target, io_training_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        io_training_rc = fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Now, return the error
+    // If we logged a training fail? we've succeeded
+    // Otherwise, we're just passing in what the user had given us
+    return io_training_rc;
 }
 
 } // namespace exp

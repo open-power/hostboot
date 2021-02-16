@@ -219,6 +219,7 @@ fapi2::ReturnCode host_fw_phy_normal_init(const fapi2::Target<fapi2::TARGET_TYPE
 /// @param[in] i_response_2_rc response from check::host_fw_response from EYE_CAPTURE_STEP_2
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else an error from above as defined in the function algorithm
 /// @note return codes are passed by value, caller should not expect these to change
+/// @note processes the bad bits based upon the passed in ReturnCodes
 ///
 fapi2::ReturnCode process_eye_capture_return_codes(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const user_2d_eye_response_1_msdg& i_response_1,
@@ -278,13 +279,14 @@ fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 ///
 /// @param[in] i_target OCMB target
 /// @param[in] i_resp_data RESP data
-/// @param[in] i_rc return code from checking response
+/// @param[in,out] io_rc return code from checking response
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
+/// @note processes the bad bits based upon the passed in ReturnCode
 ///
 fapi2::ReturnCode read_and_display_normal_training_response(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const std::vector<uint8_t> i_resp_data,
-    const fapi2::ReturnCode i_rc);
+    fapi2::ReturnCode& io_rc);
 
 ///
 /// @brief Reads and displays the user 2d eye response 1
@@ -337,10 +339,15 @@ fapi2::ReturnCode set_rc_resp_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
                                     const user_2d_eye_response_2_msdg& i_response_2);
 
 ///
-/// @brief Perform normal host FW phy init
+/// @brief Perform host FW phy init based upon the requested PHY initialization mode
+///
 /// @param[in] i_target OCMB target
 /// @param[in] i_phy_info phy information of interest
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note In hostboot, this function will return SUCCESS upon taking a training fail
+/// where bad bits can be successfully logged. If we can log bad bits, then we want
+/// PRD and memdiags to attempt to run with the correct repairs
+/// In cronus mode, any RC's we take due to training is returned directly
 ///
 fapi2::ReturnCode host_fw_phy_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                    const uint8_t i_phy_init_mode);
@@ -1631,6 +1638,69 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 fapi2::ReturnCode print_phy_params(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const user_input_msdg& i_phy_params);
+
+///
+/// @brief Handles the training error
+/// @param[in] i_target the fapi2 target
+/// @param[in,out] io_training_rc the ReturnCode from conducting draminit training
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note will log the error as recovered if it is a training related error
+/// Otherwise, it will pass out the error as is
+/// This is a helper function and should only be called in hostboot (for cronus we want to always assert out)
+///
+fapi2::ReturnCode handle_training_error(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        fapi2::ReturnCode& io_training_rc);
+
+///
+/// @brief Checks if we should log the bad bits
+/// @param[in] i_training_rc the ReturnCode from conducting draminit training
+/// @return true if we need to log the bad bits based upon the passed in error, otherwise false
+///
+fapi2::ReturnCode is_bad_bits_logging_needed(const fapi2::ReturnCode& i_training_rc);
+
+///
+/// @brief Logs bad bits only if needed
+/// @tparam the training interface response to use
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_training_response the training response data returned from Microchip
+/// @param[in,out] io_training_rc the ReturnCode from conducting draminit training
+/// @return true if we need to log the bad bits based upon the passed in error, otherwise false
+///
+template<typename T>
+fapi2::ReturnCode bad_bit_processing(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                     const T& i_train_response,
+                                     fapi2::ReturnCode& io_training_rc)
+{
+    // Only log bad bits for appropriate errors
+    if(is_bad_bits_logging_needed(io_training_rc))
+    {
+        // Check to see if there is a FIR associated with this RC
+        // If so, do not log the bad bits
+        const auto l_rc = mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER,
+                   mss::check::firChecklist::DRAMINIT>(i_target, io_training_rc);
+
+        // Check the RC again (yes, again)
+        // If there were no bad bits, then the RC should be success due to the FIR's
+        // Just checking the RC for only what we're looking for incase the scom error during firchecking logic changes
+        if(is_bad_bits_logging_needed(l_rc))
+        {
+            mss::exp::bad_bit_interface<T> l_interface(i_train_response);
+            FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
+        }
+
+        // Try on our current RC and exit
+        FAPI_TRY(l_rc, "mss::exp::check::response failed for %s", mss::c_str(i_target));
+    }
+    else
+    {
+        FAPI_TRY(io_training_rc);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 }// exp
 }// mss
