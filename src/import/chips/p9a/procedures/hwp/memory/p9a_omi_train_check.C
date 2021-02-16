@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@
 #include <lib/mc/omi.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
+#include <explorer_scom_addresses.H>
+#include <mss_generic_system_attribute_getters.H>
 
 ///
 /// @brief Check the omi status in Axone side
@@ -68,9 +70,16 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
     fapi2::buffer<uint64_t> l_dl0_error_hold;
     fapi2::buffer<uint64_t> l_expected_dl0_error_hold;
     fapi2::buffer<uint64_t> l_dl0_config1;
+    fapi2::buffer<uint64_t> l_host_error_hold;
+    fapi2::buffer<uint64_t> l_host_edpl_max_count;
+    fapi2::buffer<uint64_t> l_exp_dl0_error_hold;
+    fapi2::buffer<uint64_t> l_exp_dl0_edpl_max_count;
+    fapi2::buffer<uint64_t> l_exp_dl0_status;
+    fapi2::buffer<uint64_t> l_exp_dl0_training_status;
     uint8_t l_state_machine_state = 0;
     uint8_t l_tries = 0;
     uint32_t l_omi_freq = 0;
+    uint8_t l_sim = 0;
 
     const auto& l_ocmbs = mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
@@ -81,7 +90,8 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmbs[0]);
+    const auto& l_ocmb = l_ocmbs[0];
+    const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmb);
     const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
 
     FAPI_TRY(mss::mc::omi_train_status(i_target, l_state_machine_state, l_omi_status));
@@ -99,9 +109,21 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
     while (l_tries < MAX_LOOP_COUNT && l_state_machine_state != STATE_MACHINE_SUCCESS);
 
     // Note: this is very useful debug information while trying to debug training during polling
-    FAPI_TRY(mss::getScom(i_target, P9A_MC_REG2_DL0_TRAINING_STATUS, l_omi_training_status));
+    FAPI_TRY(fapi2::getScom(i_target, P9A_MC_REG2_DL0_TRAINING_STATUS, l_omi_training_status));
     FAPI_TRY(fapi2::getScom(i_target, P9A_MC_REG2_DL0_CONFIG1, l_dl0_config1));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq));
+    FAPI_TRY(fapi2::getScom(i_target, P9A_MC_REG2_DL0_ERROR_HOLD, l_host_error_hold));
+    FAPI_TRY(fapi2::getScom(i_target, P9A_MC_REG2_DL0_EDPL_MAX_COUNT, l_host_edpl_max_count));
+
+    FAPI_TRY(mss::attr::get_is_simulation(l_sim));
+
+    if (!l_sim)
+    {
+        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_ERROR_HOLD, l_exp_dl0_error_hold));
+        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_EDPL_MAX_COUNT, l_exp_dl0_edpl_max_count));
+        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_STATUS, l_exp_dl0_status));
+        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_TRAINING_STATUS, l_exp_dl0_training_status));
+    }
 
     // Check errors in ERROR_HOLD until we get a proper FIR API setup
     FAPI_TRY(mss::getScom(i_target, P9A_MC_REG2_DL0_ERROR_HOLD, l_dl0_error_hold));
@@ -110,7 +132,7 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
                 fapi2::P9A_OMI_TRAIN_ERR()
                 .set_MC_TARGET(l_mc)
                 .set_OMI_TARGET(i_target)
-                .set_OCMB_TARGET(l_ocmbs[0])
+                .set_OCMB_TARGET(l_ocmb)
                 .set_EXPECTED_SM_STATE(STATE_MACHINE_SUCCESS)
                 .set_ACTUAL_SM_STATE(l_state_machine_state)
                 .set_DL0_STATUS(l_omi_status)
@@ -119,13 +141,22 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
                 .set_DL0_ERROR_HOLD(l_dl0_error_hold)
                 .set_OMI_FREQ(l_omi_freq),
                 "%s P9A OMI Training Failure, expected state:%d/actual state:%d, "
-                "DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx, DL0_ERROR_HOLD:0x%016llx",
+                "DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx, DL0_ERROR_HOLD:0x%016llx"
+                "HOST_DL0_ERROR_HOLD:0x%016llx HOST_DL0_EDPL_MAX_COUNT:0x%016llx"
+                "EXP_DL0_ERROR_HOLD:0x%016llx EXP_DL0_EDPL_MAX_COUNT:0x%016llx"
+                "EXP_DL0_STATUS:0x%016llx EXP_DL0_TRAINING_STATUS:0x%016llx",
                 mss::c_str(i_target),
                 STATE_MACHINE_SUCCESS,
                 l_state_machine_state,
                 l_omi_status,
                 l_omi_training_status,
-                l_dl0_error_hold
+                l_dl0_error_hold,
+                l_host_error_hold,
+                l_host_edpl_max_count,
+                l_exp_dl0_error_hold,
+                l_exp_dl0_edpl_max_count,
+                l_exp_dl0_status,
+                l_exp_dl0_training_status
                );
 
     // Training completion bit set
