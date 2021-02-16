@@ -438,10 +438,19 @@ enum regs
     GENERAL_CFG         = 0x01,
     OSR_CFG             = 0x03,
     OPMODE_CFG          = 0x04,
+    PIN_CFG             = 0x05,
+    GPIO_CFG            = 0x07,
+    GPO_DRIVE_CFG       = 0x09,
+    GPO_VALUE           = 0x0B,
     SEQUENCE_CFG        = 0x10,
     AUTO_SEQ_CH_SEL     = 0x12,
     ALERT_CH_SEL        = 0x14,
     ALERT_PIN_CFG       = 0x17,
+
+    HYSTERESIS_CH0      = 0x20,
+    HIGH_TH_CH0         = 0x21,
+    EVENT_COUNT_CH0     = 0x22,
+    LOW_TH_CH0          = 0x23,
 
     HYSTERESIS_CH1      = 0x24,
     HIGH_TH_CH1         = 0x25,
@@ -468,6 +477,11 @@ enum regs
     EVENT_COUNT_CH5     = 0x36,
     LOW_TH_CH5          = 0x37,
 
+    HYSTERESIS_CH6      = 0x38,
+    HIGH_TH_CH6         = 0x39,
+    EVENT_COUNT_CH6     = 0x3A,
+    LOW_TH_CH6          = 0x3B,
+
     HYSTERESIS_CH7      = 0x3C,
     HIGH_TH_CH7         = 0x3D,
     EVENT_COUNT_CH7     = 0x3E,
@@ -479,6 +493,10 @@ enum regs
 ///
 enum fields
 {
+    GPO_DRIVE_CFG_OPEN_DRAIN                            = 0x00,
+    GPO_VALUE_CH0_HIGH                                  = 0x01,
+    GPIO_CFG_CH0_DIGITAL_GP0                            = 0x01,
+    PIN_CFG_CH0_GPIO                                    = 0x01,
     GENERAL_CFG_EN_DIGITAL_WINDOW_COMPARATOR_AND_STATS  = 0x30,
     SEQUENCE_CFG_CHANNEL_SEQUENCING                     = 0x11,
     SEQUENCE_CFG_AUTO_SEQUENCE                          = 0x01,
@@ -490,9 +508,11 @@ enum fields
     OSR_CFG_8_SAMPLE_OVERSAMPLING                       = 0x07,
 
 
+    HYSTERESIS_UNUSED                                   = 0xF0,
     HYSTERESIS_UPPER_LIMIT_MAX_ENABLE                   = 0xF1,
     HIGH_TH_DEFAULT                                     = 0xFF,
 
+    EVENT_COUNT_UNUSED                                       = 0x00,
     EVENT_COUNT_ADC1_CH1_ALERT_4_CONSECUTIVE_READINGS        = 0x74,
     EVENT_COUNT_ADC1_CH2_ALERT_4_CONSECUTIVE_READINGS        = 0x24,
     EVENT_COUNT_ADC1_CH3_ALERT_4_CONSECUTIVE_READINGS        = 0xB4,
@@ -505,6 +525,7 @@ enum fields
     EVENT_COUNT_ADC2_CH5_ALERT_4_CONSECUTIVE_READINGS        = 0x64,
     EVENT_COUNT_ADC2_CH7_ALERT_4_CONSECUTIVE_READINGS        = 0x74,
 
+    LOW_TH_DEFAULT                                      = 0x00,
     LOW_TH_CH1_1AB_VLOC_LOW_THRESHOLD_643mv             = 0x42,
     LOW_TH_CH2_1C_VLOC_LOW_THRESHOLD_476mv              = 0x31,
     LOW_TH_CH3_1D_VLOC_LOW_THRESHOLD_733mv              = 0x4B,
