@@ -82,6 +82,9 @@ static constexpr uint8_t PMIC1_SWD_RANGE = 0;
 ///
 const std::vector<std::pair<uint8_t, uint8_t>> PMIC0_SETTINGS =
 {
+    // ADC Enable, VIN_BULK reading
+    {REGS::R30, 0xA8},
+
     // LSB - SWD voltage range max
     // Conveniently, the SWD range bit is the LSB, so we can or it with the constant
     {REGS::R2B, 0b01000100 | PMIC0_SWD_RANGE},
@@ -103,7 +106,7 @@ const std::vector<std::pair<uint8_t, uint8_t>> PMIC0_SETTINGS =
 
     // Soft start
     {REGS::R2C, CONSTS::R2C_R2D_4MS_ALL},
-    {REGS::R2C, CONSTS::R2C_R2D_4MS_ALL},
+    {REGS::R2D, CONSTS::R2C_R2D_4MS_ALL},
 
     // Host region soft start 4ms
     {REGS::R22, 0b01100011},
@@ -146,7 +149,7 @@ const std::vector<std::pair<uint8_t, uint8_t>> PMIC1_SETTINGS =
 
     // Soft start
     {REGS::R2C, CONSTS::R2C_R2D_4MS_ALL},
-    {REGS::R2C, CONSTS::R2C_R2D_4MS_ALL},
+    {REGS::R2D, CONSTS::R2C_R2D_4MS_ALL},
 
     // Host region soft start 4ms
     {REGS::R22, 0b01100011},

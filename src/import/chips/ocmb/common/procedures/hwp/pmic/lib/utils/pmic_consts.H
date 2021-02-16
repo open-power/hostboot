@@ -356,10 +356,35 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R30_SAMPLE_VIN_BULK_ENABLE_ADC = 0xA8;
 
     // R31
-    static constexpr uint8_t R31_VIN_BULK_EFUSE_OFF_HIGH  = 0x04;
+
+    // The high value for efuse being off is 0x90? Sounds awfully high, doesn't it?
+    // Yes! It is! The new efuse checks are checking for voltage drop when a fully
+    // enabled efuse (12V) is then turned off. It wouldn't fully drop to zero unless
+    // we waited 1 or 2 seconds. So, what we are checking is that we at least get
+    // underneath a minimum allowed voltage of 0x90 ~= 10V, which occurs quickly.
+    // This is sufficient to determine if the efuse has blown. In such a case, we
+    // wouldn't expect to see any drop.
+    static constexpr uint8_t R31_VIN_BULK_EFUSE_OFF_HIGH  = 0x90;
+
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_HIGH   = 0xBF;
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_LOW    = 0x9D;
 
+};
+
+///
+/// @brief 4U Initialization fields
+/// @note These are full register bytes and can be written whole
+///
+enum init_fields_4u
+{
+    // Step 65
+    CLEAR_VR_ENABLE = 0x00,
+
+    // Step 66
+    CLEAR_PMIC_STATUS4 = 0x01,
+
+    // Step 67
+    VR_ENABLE = 0x80,
 };
 
 namespace i2c
@@ -414,7 +439,10 @@ enum fields : uint8_t
     INPUT_PORT_REG_PMIC_PAIR0   = 2,
     INPUT_PORT_REG_PMIC_PAIR1   = 3,
 
-    EFUSE_OUTPUT_SETTING        = 0xFF,
+    EFUSE_OUTPUT_OFF            = 0xFC,
+    EFUSE_OUTPUT_P0             = 0xFE,
+    EFUSE_OUTPUT_P1             = 0xFD,
+    EFUSE_OUTPUT_ON             = 0xFF,
     EFUSE_POLARITY_SETTING      = 0x00,
 
     // 1's are inputs, 0's are outputs
