@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -741,5 +741,63 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
-  
+ <attribute>
+<id>ATTR_WOF_IO_START</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The starting power (in Watts) for the WOF I/O dimension.  This value will be
+    placed into the XGPE header for use in the WOF IO algorithm.
+
+    Producer: p10_pstate_parameter_block
+    Consumers: p10_hcode_image_build, XGPE Hcode
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
+<attribute>
+    <id>ATTR_WOF_IO_STEP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    This step of power (in Watts) for the WOF I/O dimension.  This value will be
+    placed into the XGPE header for use in the WOF IO algorithm.
+
+    Producer: p10_pstate_parameter_block
+    Consumers: p10_hcode_image_build, XGPE Hcode
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
+ <attribute>
+    <id>ATTR_WOF_IO_COUNT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The number of steps for the WOF I/O dimension.  This value will be placed
+    into the XGPE header for use in the WOF IO algorithm.
+ 
+    Producer: p10_pstate_parameter_block
+    Consumers: p10_hcode_image_build, XGPE Hcode
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
+<attribute>
+    <id>ATTR_VDN_VOLTAGE_MV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The VDN voltage (in mV).  Use as input into the WOF IO algorithm.
+
+    Producer: p10_pstate_parameter_block
+    Consumers: p10_hcode_image_build, XGPE Hcode
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
 </attributes>

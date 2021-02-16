@@ -3066,4 +3066,59 @@
   </attribute>
 
   <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_IO_GROUNDED_CONTROLLERS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description> It is a 16 bit vector which represents a list of controllers that
+     are grounded in either the module package or the board on which the module is
+     plugged. The bit definition are as follows:
+        00  NMMU
+        01  EMO01
+        02  EMO23
+        03  EMO45
+        04  EMO67
+        05  PAU0
+        06  Reserved
+        07  Reserved
+        08  PAU3
+        09  PAU4
+        10  PAU5
+        11  PAU6
+        12  PAU7
+        13  PCIE0
+        14  PCIE1
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <overrideOnly/>
+  </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_IO_GROUNDED_LINKS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description> It is a 64 bit vector. It represents the link that are grounded in either the
+     module package or the board on which the module is plugged. See Table 104 in PowMan Hcode
+     specification.
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <overrideOnly/>
+  </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_WOF_IO_POWER_MODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description> Value of attribute determines if DLR is done or a static computation is done with
+    updated dynamic configuration.
+    </description>
+    <valueType>uint8</valueType>
+     <enum>
+	STATIC  = 0,
+        DYNAMIC = 1
+     </enum>
+    <overrideOnly/>
+    <default>STATIC</default>
+    <platInit/>
+  </attribute>
+  <!-- *********************************************************************-->
 </attributes>

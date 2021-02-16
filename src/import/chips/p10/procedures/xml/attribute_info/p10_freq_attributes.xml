@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -97,26 +97,54 @@
   <id>ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    The system-wide minimum frequency of the core mesh clock, in MHz.
+    The computed system-wide minumum frequency of the core mesh clock, in MHz
     This is the lowest floor frequency across all chips in the system.
     Used for fabric epsilon calculations.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    The system-wide maximum frequency of the core mesh clock, in MHz.
+    The computed system-wide minumum frequency of the core mesh clock, in MHz
     This is the highest ceiling frequency across all chips in the system.
     Used for fabric epsilon calculations.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
   <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The system-wide minimum frequency override of the core mesh clock
+    This is the lowest floor frequency across all chips in the system.
+    Used for fabric epsilon calculations.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <overrideOnly/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The system-wide minimum frequency override of the core mesh clock
+    This is the highest ceiling frequency across all chips in the system.
+    Used for fabric epsilon calculations.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <overrideOnly/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
