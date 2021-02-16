@@ -38,8 +38,13 @@
     <ffdc>DL0_TRAINING_STATUS</ffdc>
     <ffdc>DL0_CONFIG1</ffdc>
     <ffdc>DL0_ERROR_HOLD</ffdc>
+    <ffdc>DL0_EDPL_MAX_COUNT</ffdc>
     <ffdc>OMI_FREQ</ffdc>
     <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <ffdc>HOST_DL0_TRAINING_STATUS</ffdc>
+    <ffdc>HOST_DL0_ERROR_HOLD</ffdc>
+    <ffdc>HOST_DL0_EDPL_MAX_COUNT</ffdc>
+    <ffdc>HOST_DL0_STATUS</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_EXP_OMI_TRAIN_ERR_INFO</id>
       <target>OCMB_TARGET</target>

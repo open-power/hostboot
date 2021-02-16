@@ -453,6 +453,33 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_EXP_POLL_ABORT_FW_STATUS_BUSY</rc>
+    <description>
+      Received FW_BUSY status after polling timeout for
+      command ID EXP_FW_STATUS after sending the POLL_ABORT command.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>CMD_ID</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <ffdc>HOST_DL0_TRAINING_STATUS</ffdc>
+    <ffdc>HOST_DL0_ERROR_HOLD</ffdc>
+    <ffdc>HOST_DL0_EDPL_MAX_COUNT</ffdc>
+    <ffdc>HOST_DL0_STATUS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_I2C_CMD_FAIL</rc>
     <description>
       Received non-SUCCESS status for command ID EXP_FW_STATUS.

@@ -44,6 +44,7 @@
 #include <p10_scom_omi_a.H>
 #include <lib/i2c/exp_i2c.H>
 #include <i2c_access.H>
+#include <p10_scom_omi.H>
 
 namespace mss
 {
@@ -325,10 +326,15 @@ fapi2::ReturnCode poll_abort(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     FAPI_INF("%s OMI training did not complete by end of polling loop. Sending TWI_POLL_ABORT command",
              mss::c_str(i_target));
 
+    const auto& l_omi = mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target);
     std::vector<uint8_t> l_cmd_data;
     std::vector<uint8_t> l_rsp_data;
     uint8_t l_status = 0;
     uint64_t l_fw_status_data = 0;
+    fapi2::buffer<uint64_t> l_host_training_status;
+    fapi2::buffer<uint64_t> l_host_error_hold;
+    fapi2::buffer<uint64_t> l_host_edpl_max_count;
+    fapi2::buffer<uint64_t> l_host_status;
 
     // Send TWI_POLL_ABORT
     l_cmd_data.push_back(mss::exp::i2c::FW_TWI_POLL_ABORT);
@@ -345,15 +351,31 @@ fapi2::ReturnCode poll_abort(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     // Check that Explorer is not still in FW_BUSY state
     FAPI_TRY(mss::exp::i2c::capture_status(i_target, l_rsp_data, l_fw_status_data));
     FAPI_TRY(mss::exp::i2c::status::get_status_code(i_target, l_rsp_data, l_status));
+
+    // Grabbing and logging host registers.
+    // Note: we cannot log the explorer regs due to the explorer's status
+    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::TRAINING_STATUS, l_host_training_status));
+    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::ERROR_HOLD, l_host_error_hold));
+    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::EDPL_MAX_COUNT, l_host_edpl_max_count));
+    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::STATUS, l_host_status));
     FAPI_ASSERT( (l_status != mss::exp::i2c::status_codes::FW_BUSY),
-                 fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
+                 fapi2::MSS_EXP_POLL_ABORT_FW_STATUS_BUSY().
                  set_OCMB_TARGET(i_target).
                  set_CMD_ID(mss::exp::i2c::FW_TWI_POLL_ABORT).
                  set_COMMAND(l_cmd_data).
-                 set_STATUS_DATA(l_fw_status_data),
-                 "Polling timeout on FW_STATUS command (still FW_BUSY) after POLL_ABORT for %s",
-                 mss::c_str(i_target) );
-
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_HOST_DL0_TRAINING_STATUS(l_host_training_status).
+                 set_HOST_DL0_ERROR_HOLD(l_host_error_hold).
+                 set_HOST_DL0_EDPL_MAX_COUNT(l_host_edpl_max_count).
+                 set_HOST_DL0_STATUS(l_host_status),
+                 "Polling timeout on FW_STATUS command (still FW_BUSY) after POLL_ABORT for %s"
+                 "HOST_DL0_TRAINING_STATUS:0x%016lx HOST_DL0_ERROR_HOLD:0x%016lx "
+                 "HOST_DL0_EDPL_MAX_COUNT:0x%016lx HOST_DL0_STATUS:0x%016lx",
+                 mss::c_str(i_target),
+                 l_host_training_status,
+                 l_host_error_hold,
+                 l_host_edpl_max_count,
+                 l_host_status );
 
 fapi_try_exit:
     return fapi2::current_err;
