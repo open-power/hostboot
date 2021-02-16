@@ -334,6 +334,22 @@ static const std::vector<std::pair<uint8_t, uint8_t>> ADC2_CH_INIT =
 };
 
 ///
+/// @brief Structure type to loop on when performing SPD or manual enable for 4U pmics
+///
+struct enable_fields_4u
+{
+    uint8_t iv_pmic_id;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_gpio;
+    uint8_t iv_input_port_bit;
+    uint8_t iv_efuse_output;
+};
+
+///
+/// @brief Fields to loop over when VR-enabling redundant PMICs
+///
+using enable_loop_fields_t = std::array<mss::pmic::enable_fields_4u, CONSTS::NUM_PMICS_4U>;
+
+///
 /// @brief Struct for PMIC / GPIO / ADC target info for redundant PMIC configs
 /// @note Requires a redundancy config, or else will try to grab null targets
 ///
@@ -407,23 +423,25 @@ struct target_info_redundancy
         o_rc = fapi2::current_err;
     }
 
-
+    ///
+    /// @brief Get the enable loop fields for this target config
+    /// @return enable_loop_fields_t array
+    ///
+    enable_loop_fields_t get_enable_loop_fields() const
+    {
+        const enable_loop_fields_t ENABLE_LOOP_FIELDS =
+        {
+            {
+                // 0,2,1,3 order is intentional to bring up a full redundant pair before the other
+                {mss::pmic::id::PMIC0, iv_gpio1, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0, mss::gpio::fields::EFUSE_OUTPUT_P0},
+                {mss::pmic::id::PMIC2, iv_gpio2, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0, mss::gpio::fields::EFUSE_OUTPUT_P0},
+                {mss::pmic::id::PMIC1, iv_gpio1, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1, mss::gpio::fields::EFUSE_OUTPUT_P1},
+                {mss::pmic::id::PMIC3, iv_gpio2, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1, mss::gpio::fields::EFUSE_OUTPUT_P1}
+            }
+        };
+        return ENABLE_LOOP_FIELDS;
+    }
 };
-
-///
-/// @brief Structure type to loop on when performing SPD or manual enable for 4U pmics
-///
-struct enable_fields_4u
-{
-    uint8_t iv_pmic_id;
-    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_gpio;
-    uint8_t iv_input_port_bit;
-};
-
-///
-/// @brief Fields to loop over when VR-enabling redundant PMICs
-///
-using enable_loop_fields_t = std::array<mss::pmic::enable_fields_4u, CONSTS::NUM_PMICS_4U>;
 
 //-----------------------------------
 // SPD Biasing functions
@@ -437,6 +455,18 @@ using enable_loop_fields_t = std::array<mss::pmic::enable_fields_4u, CONSTS::NUM
 ///
 fapi2::ReturnCode start_vr_enable(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Declare N-Mode and log fapi2::current_err as recoverable
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_pmic_id PMIC ID (0-3)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS
+/// @note expected to be called in a fapi_try_exit with bad current_err
+///
+fapi2::ReturnCode declare_n_mode(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    uint8_t i_pmic_id);
 
 ///
 /// @brief Set the up VIN latch bit for TPS pmics
@@ -825,14 +855,6 @@ fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSL
 fapi2::ReturnCode setup_adc2(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc);
 
 ///
-/// @brief Set the up PMIC ADC to read VIN_BULK
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
-///
-fapi2::ReturnCode setup_adc_vin_bulk_read(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
-
-///
 /// @brief Validate that the efuse appears off by measuring VIN of the given PMIC
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -841,42 +863,36 @@ fapi2::ReturnCode setup_adc_vin_bulk_read(const fapi2::Target<fapi2::TARGET_TYPE
 fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
-/// @brief Validate that the efuse appears on by measuring VIN of the given PMIC
+/// @brief Set the up gpio efuse
 ///
-/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_gpio GPIO expander target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode setup_gpio_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio);
+
+///
+/// @brief Clear all PMIC fault registers
+///
+/// @param[in] i_target_info target info struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
 ///
-fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+fapi2::ReturnCode clear_pmic_faults(const target_info_redundancy& i_target_info);
 
 ///
-/// @brief Enable EFUSE according to 4U Functional Specification
+/// @brief Set the pmic reg settings
 ///
-/// @param[in] i_pmic_map PMIC map object
-/// @param[in] i_gpio GPIO target
-/// @param[in] i_pmic_id_0 first PMIC ID (Either 0 or 2)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-/// @note Corresponds to steps (6,7,8) & (16,17,18) in 4U DDIMM Functional Spec
+/// @param[in] i_target_info target info struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
 ///
-fapi2::ReturnCode enable_efuse(
-    const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
-    const uint8_t i_pmic_id_0);
+fapi2::ReturnCode set_pmic_reg_settings(const target_info_redundancy& i_target_info);
 
 ///
-/// @brief Set the up PMIC pair and matching GPIO expander prior to PMIC enable
+/// @brief Validate the EFUSEs are functioning properly on the 4U dimm
 ///
-/// @param[in] i_pmic_map PMIC position to target map
-/// @param[in] i_pmic_id_0 ID for "pmic0" (0/2) connected to i_gpio
-/// @param[in] i_pmic_id_1 ID for "pmic1" (1/3) connected to i_gpio
-/// @param[in] i_gpio GPIO target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-/// @note the PMIC pair is NOT a redundant pair, this is the independent pair connected to one GPIO
+/// @param[in] i_target_info target info struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
 ///
-fapi2::ReturnCode setup_pmic_pair_and_gpio(
-    const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
-    const uint8_t i_pmic_id_0,
-    const uint8_t i_pmic_id_1,
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio);
+fapi2::ReturnCode efuse_validation(const target_info_redundancy& i_target_info);
 
 ///
 /// @brief Step 1 of enable_with_redundancy: set up the GPIO EFUSE's
@@ -899,12 +915,9 @@ fapi2::ReturnCode set_4u_settings(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& 
 /// @brief Kick off VR_ENABLE's for a redundancy PMIC config in the provided mode
 ///
 /// @param[in] i_target_info target info struct
-/// @param[in] i_enable_loop_fields Parameters/fields to iterate over
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
 ///
-fapi2::ReturnCode redundancy_vr_enable_kickoff(
-    const target_info_redundancy& i_target_info,
-    const mss::pmic::enable_loop_fields_t& i_enable_loop_fields);
+fapi2::ReturnCode redundancy_vr_enable_kickoff(const target_info_redundancy& i_target_info);
 
 ///
 /// @brief Check the statuses of all PMICs present on the given OCMB chip
