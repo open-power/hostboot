@@ -35,7 +35,8 @@
 /// Procedure Summary:
 ///   - Read VPD value of each proc and compute system pstate0 and nominal frequency.
 /// @endverbatim
-
+// EKB-Mirror-To: hostboot
+// EKB-Mirror-To: hwsv
 // *INDENT-OFF*
 //
 // ----------------------------------------------------------------------
@@ -43,23 +44,24 @@
 // ----------------------------------------------------------------------
 #include <fapi2.H>
 #include "p10_pm_set_system_freq.H"
+//#include "p10_pm_get_poundv_bucket.H"
 #include <p10_pm_utils.H>
-
+#include "p10_pstate_parameter_block_int_vpd.H"
 
 fapi2::ReturnCode pm_set_frequency(
-       const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_targ);
+       const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target);
 
 ///////////////////////////////////////////////////////////
-////////    p10_pm_set_system_freq 
+////////    p10_pm_set_system_freq
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode
-p10_pm_set_system_freq(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target)
+p10_pm_set_system_freq(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target)
 {
     FAPI_DBG("> p10_pm_set_system_freq");
 
     do
     {
-        FAPI_TRY(pm_set_frequency(i_target));
+        FAPI_TRY(pm_set_frequency(i_sys_target));
     }
     while(0);
 
@@ -70,24 +72,30 @@ fapi_try_exit:
 ////////  pm_set_frequency
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode pm_set_frequency(
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_targ)
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target)
 {
     FAPI_INF("pm_set_frequency >>>>>");
 
+    // Bring in data for local testing
+
     fapi2::voltageBucketData_t l_poundV_data;
-    uint16_t l_fmax_freq = 0;
-    uint16_t l_ut_freq = 0;
-    uint16_t l_psav_freq = 0;
-    uint16_t l_wofbase_freq = 0;
-    uint8_t l_sys_pdv_mode = 0;
+    uint32_t l_fmax_freq = 0;
+    uint32_t l_ut_freq =0;
+    uint32_t l_part_freq = 0;
+    uint32_t l_psav_freq = 0;
+    uint32_t l_wofbase_freq = 0;
+    uint8_t  l_sys_pdv_mode = 0;
     uint16_t l_tmp_psav_freq = 0;
-    uint16_t l_tmp_ceil_freq = 0;
+    uint16_t l_tmp_wofbase_freq = 0;
+    uint16_t l_part_running_freq = 0;
 
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz = 0;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE_Type l_sys_freq_core_floor_mhz_ovr;
     fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
     fapi2::ATTR_NOMINAL_FREQ_MHZ_Type l_sys_nominal_freq_mhz = 0;
     fapi2::ATTR_SYSTEM_FMAX_ENABLE_Type l_sys_fmax_enable = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_sys_freq_core_ceil_mhz = 0;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE_Type l_sys_freq_core_ceil_mhz_ovr;
     fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz = 0;
     fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_ceil_freq_mhz = 0;
 
@@ -97,120 +105,90 @@ fapi2::ReturnCode pm_set_frequency(
     do
     {
 
+        //We loop thru all the processors in the system and will figure out the
+        //max of PSAV, FMAX, and UT in that list.  We look for the min of the WOFBase
+        //values.  An attribute switch is used to specifically fail the WOFBase check.
+        // - Min value of FMAX will be initialized to ATTR_SYSTEM_PSTATE0_FREQ_MHZ
+        //   and same value will be initialized to ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ
+        // - Max value of PSAV will be initialized to ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ
+        // - Min value of Fixed Frequecny will be initialized to ATTR_NOMINAL_FREQ_MHZ
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ,
-                i_sys_targ,l_sys_freq_core_floor_mhz));
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
-                i_sys_targ,l_sys_pstate0_freq_mhz));
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_FMAX_ENABLE,
-                i_sys_targ,l_sys_fmax_enable));
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NOMINAL_FREQ_MHZ,
-                i_sys_targ,l_sys_nominal_freq_mhz));
+                i_sys_target, l_sys_freq_core_floor_mhz));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,
-                i_sys_targ,l_sys_freq_core_ceil_mhz));
+                i_sys_target, l_sys_freq_core_ceil_mhz));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE,
+                i_sys_target, l_sys_freq_core_floor_mhz_ovr));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE,
+                i_sys_target, l_sys_freq_core_ceil_mhz_ovr));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
-                i_sys_targ, l_sys_pdv_mode));
+                i_sys_target, l_sys_pdv_mode));
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_FMAX_ENABLE,
+                i_sys_target, l_sys_fmax_enable));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+                i_sys_target, l_sys_pstate0_freq_mhz));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NOMINAL_FREQ_MHZ,
+                i_sys_target, l_sys_nominal_freq_mhz));
 
         //If pstate0 freq is set means, we have already computed other
         //frequencies (floor and ceil) as well
         if (l_sys_pstate0_freq_mhz)
         {
-            FAPI_INF("FREQ is already set PSTAT0 %08X, CEIL FREQ %08X FLOOR FREQ %08X",
-             l_sys_pstate0_freq_mhz, l_sys_freq_core_ceil_mhz,l_sys_freq_core_floor_mhz);
+            FAPI_INF("PSTATE0 FREQ is already set %08X", l_sys_pstate0_freq_mhz);
             break;
         }
 
-        //We loop thru all the processor in the system and will figure out the
-        //max of PSAV, FMAX, and UT in that list.  We look for the min of the WOFBase
-        //values.  An attribute switch is used to specifically fail the WOFBase check.
-        // - Max value of FMAX will be initialized to ATTR_SYSTEM_PSTATE0_FREQ_MHZ
-        //   and same value will be initialized to ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ
-        // - Max value of PSAV will be initialized to ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ
-        // - Min value of WOFBae will be initialized to ATTR_NOMINAL_FREQ_MHZ
-
-        for (auto l_proc_target : i_sys_targ.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+        // Find Pstate 0 across the processor chips depending on the mode (FMax or UT)
+        for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
 
-            // Enforce the attribute derived ceiling
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY,
-                                    l_proc_target,l_limited_freq_mhz));
-            //This part of the code will enable later, because we are seeing CEIL and
-            //FLOOR frequency are set from the MRW to 2000MHZ, But for now we
-            //should force the ceil freq to 2400MHZ to make OCC happy
-            // Will comeback to this once we sort out, why and how MRW are
-            // gettting the ceil and floor values 
-#if 0
-            if (l_limited_freq_mhz)
+            fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE_Type l_poundv_static_data = 0;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
+                        i_sys_target,
+                        l_poundv_static_data),
+                    "Error from FAPI_ATTR_GET for attribute ATTR_POUND_V_STATIC_DATA_ENABLE");
+
+            if (l_poundv_static_data)
             {
-                if ((l_sys_freq_core_ceil_mhz) && 
-                    (l_sys_freq_core_ceil_mhz > l_forced_ceil_freq_mhz))
-                {
-                    l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
-                }
-                else if (!l_sys_freq_core_ceil_mhz)
-                {
-                    l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
-                }
-                FAPI_INF("Limited frequency DD level.  Capping to %04d MHz", l_sys_freq_core_ceil_mhz);
-            }
-#endif
-            if (l_limited_freq_mhz)
-            {
-                l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
-            }
+                FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is set");
+                FAPI_INF("&l_poundV_data %p;   &g_vpd_PVData %p sizeof(g_vpd_PVData) %d sizeof(l_poundV_data) %d",
+                          &l_poundV_data,&g_vpd_PVData,sizeof(g_vpd_PVData),sizeof(l_poundV_data));
 
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
-                l_proc_target,l_floor_freq_mhz));
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,
-                l_proc_target,l_ceil_freq_mhz));
-
-            //Read #V data from each proc
-            FAPI_TRY(p10_pm_get_poundv_bucket(l_proc_target, l_poundV_data));
-
-            l_fmax_freq     = revle16(l_poundV_data.other_info.VddFmxCoreFreq);
-            l_ut_freq       = revle16(l_poundV_data.other_info.VddUTCoreFreq);
-            l_psav_freq     = revle16(l_poundV_data.other_info.VddPsavCoreFreq);
-            l_wofbase_freq  = revle16(l_poundV_data.other_info.VddTdpWofCoreFreq);
-            FAPI_INF("VPD fmax_freq=%04d, ut_freq=%04d  psav_freq=%04d, psav_freq=%04d",
-                          l_fmax_freq, l_ut_freq, l_wofbase_freq, l_psav_freq);
-
-            //Compute floor freq
-            if (!l_tmp_psav_freq)
-            {
-                l_tmp_psav_freq = l_psav_freq;
+                memset(&l_poundV_data, 0, sizeof(g_vpd_PVData));
+                memcpy(&l_poundV_data, &g_vpd_PVData, sizeof(g_vpd_PVData));
             }
             else
             {
-                if (l_psav_freq >= l_tmp_psav_freq)
-                {
-                    l_tmp_psav_freq = l_psav_freq;
-                }
-                if ( l_floor_freq_mhz >= l_tmp_psav_freq)
-                {
-                    l_tmp_psav_freq = l_floor_freq_mhz;
-                }
+                FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is NOT set");
+
+                FAPI_INF("&l_poundV_data 1 %p; sizeof(l_poundV_data) %d",
+                         &l_poundV_data,sizeof(l_poundV_data));
+
+                //Read #V data from each proc
+                FAPI_TRY(p10_pm_get_poundv_bucket(l_proc_target, l_poundV_data));
+
+                FAPI_INF("&l_poundV_data 2 %p; sizeof(l_poundV_data) %d",
+                         &l_poundV_data,sizeof(l_poundV_data));
             }
 
-            //If the system core floor freq is greater then of psav(of all the
-            //procs) then need to update system core floor freq
-            FAPI_DBG("floor frequency check:   sys %04d ceil %04d",
-                        l_sys_freq_core_floor_mhz, l_floor_freq_mhz);
+            l_fmax_freq     = revle16(l_poundV_data.other_info.VddFmxCoreFreq);
+            l_ut_freq       = revle16(l_poundV_data.other_info.VddUTCoreFreq);
+            l_wofbase_freq  = revle16(l_poundV_data.other_info.VddTdpWofCoreFreq);
+            l_psav_freq     = revle16(l_poundV_data.other_info.VddPsavCoreFreq);
+            l_part_freq    = revle16(l_poundV_data.other_info.FxdFreqMdeCoreFreq);
+            FAPI_INF("VPD fmax_freq=%04d, ut_freq=%04d  wof_base=%04d",
+                   l_fmax_freq, l_ut_freq, l_wofbase_freq);
+            FAPI_INF("part_freq=%04d, psav_freq=%04d ",
+                   l_part_freq, l_psav_freq );
 
-            if ( l_sys_freq_core_floor_mhz > l_tmp_psav_freq)
-            {
-                l_tmp_psav_freq = l_sys_freq_core_floor_mhz;
-            }
-            else if (!l_sys_freq_core_floor_mhz)
-            {
-                l_sys_freq_core_floor_mhz = l_tmp_psav_freq;
-            }
 
             //Compute FMAX and Ceil freq
             if ( l_fmax_freq > l_sys_pstate0_freq_mhz && l_sys_fmax_enable == 1)
@@ -219,8 +197,7 @@ fapi2::ReturnCode pm_set_frequency(
             }
             else if ( l_fmax_freq == 0  || l_sys_fmax_enable == 0)
             {
-                if (l_ut_freq > l_sys_pstate0_freq_mhz ||
-                        l_sys_pstate0_freq_mhz == 0)
+                if (l_sys_pstate0_freq_mhz == 0)
                 {
                     l_sys_pstate0_freq_mhz = l_ut_freq;
                 }
@@ -239,7 +216,7 @@ fapi2::ReturnCode pm_set_frequency(
                         }
                         else if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN)
                         {
-                            FAPI_ERR("PSTATE0 freq %08x is not equal to UT Freq %08x",l_sys_pstate0_freq_mhz,l_ut_freq);
+                            FAPI_ERR("PSTATE0 freq %08x is not equal to UT Freq %08x", l_sys_pstate0_freq_mhz, l_ut_freq);
                         }
                         else if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
                         {
@@ -251,83 +228,199 @@ fapi2::ReturnCode pm_set_frequency(
                                     "Pstate Parameter Block WOF Biased #V CF6 error being logged");
                         }
                     }
+                    // Move to the lowest
+                    if (l_ut_freq < l_sys_pstate0_freq_mhz)
+                    {
+                        l_sys_pstate0_freq_mhz = l_ut_freq;
+                    }
+                }
+            }
+            FAPI_INF("PSTATE 0  Freq %08x",l_sys_pstate0_freq_mhz);
+            // Get processor scope attributes
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
+                        l_proc_target, l_floor_freq_mhz));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,
+                        l_proc_target, l_ceil_freq_mhz));
+
+
+            //Compute floor freq
+            if (!l_tmp_psav_freq)
+            {
+                l_tmp_psav_freq = l_psav_freq;
+            }
+            else
+            {
+                if (l_psav_freq >= l_tmp_psav_freq)
+                {
+                    l_tmp_psav_freq = l_psav_freq;
+                }
+                if ( l_tmp_psav_freq >= l_floor_freq_mhz)
+                {
+                    l_floor_freq_mhz = l_tmp_psav_freq;
                 }
             }
 
-            l_tmp_ceil_freq = l_ceil_freq_mhz;
-            if ( l_sys_pstate0_freq_mhz > l_ceil_freq_mhz)
-            {
-               l_tmp_ceil_freq = l_sys_pstate0_freq_mhz;
-            }
-            FAPI_DBG("temp ceiling %04d MHz (0x%X)", l_tmp_ceil_freq, l_tmp_ceil_freq );
 
-            //If the system core ceiling freq is less then of Pstate0 (of all the
-            //procs) then need to update system core ceiling freq
-            FAPI_DBG("ceiling frequency check:  sys %04d ceil %04d", l_sys_freq_core_ceil_mhz, l_tmp_ceil_freq);
-            if ( (l_sys_freq_core_ceil_mhz != 0) && l_sys_freq_core_ceil_mhz < l_tmp_ceil_freq)
+            // Processor overrides the ceiling below Pstate 0 clips it
+            if (l_ceil_freq_mhz != 0 && l_ceil_freq_mhz > l_floor_freq_mhz &&
+                 l_sys_pstate0_freq_mhz > l_ceil_freq_mhz)
             {
-                l_tmp_ceil_freq = l_sys_freq_core_ceil_mhz;
+                l_sys_pstate0_freq_mhz = l_ceil_freq_mhz;
+                FAPI_INF("Processor target override limiting Pstate 0. %04d MHz (0x%X)", l_ceil_freq_mhz, l_ceil_freq_mhz );
             }
 
-            //Compute WOFBase (minumim across chips)
-            if (l_wofbase_freq > l_sys_nominal_freq_mhz &&
-                        l_sys_nominal_freq_mhz == 0)
+            // Limit to DD specific values only if all the CEIL overrides are non-zero
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY,
+                                    l_proc_target, l_limited_freq_mhz));
+            if (l_limited_freq_mhz &&
+                !l_sys_freq_core_ceil_mhz_ovr && !l_sys_freq_core_ceil_mhz && !l_ceil_freq_mhz)
             {
-                l_sys_nominal_freq_mhz = l_wofbase_freq;
-             }
+                if (l_sys_pstate0_freq_mhz > l_forced_ceil_freq_mhz)
+                {
+                    l_sys_pstate0_freq_mhz = l_forced_ceil_freq_mhz;
+                }
+            }
+
+            if (l_limited_freq_mhz && l_sys_freq_core_ceil_mhz_ovr < 2400)
+            {
+                l_sys_freq_core_ceil_mhz_ovr = l_forced_ceil_freq_mhz;
+            }
+            if (l_limited_freq_mhz && l_sys_freq_core_ceil_mhz < 2400)
+            {
+                l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
+            }
+
+
+            // Compute WOFBase (minumim across chips)
+            if (l_wofbase_freq > l_tmp_wofbase_freq &&
+                    l_tmp_wofbase_freq == 0)
+            {
+                l_tmp_wofbase_freq = l_wofbase_freq;
+            }
             else
             {
-                if (l_wofbase_freq != l_sys_nominal_freq_mhz)
+                if (l_wofbase_freq != l_tmp_wofbase_freq)
                 {
                     FAPI_INF("Present System WOF Base freq %04d is not equal to this chip's WOF Base Freq %04d",
-                                revle32(l_sys_nominal_freq_mhz), l_wofbase_freq);
+                            l_tmp_wofbase_freq, l_wofbase_freq);
                     // This does not produce an error log as the system will operate ok
                     // for this case.
                 }
 
-                if ( l_wofbase_freq < l_sys_nominal_freq_mhz)
+                if ( l_wofbase_freq < l_tmp_wofbase_freq)
                 {
-                    l_sys_nominal_freq_mhz = l_wofbase_freq;
+                    l_tmp_wofbase_freq = l_wofbase_freq;
                 }
             }
 
-            FAPI_DBG("nominal_freq %04d (%04X)",
-                         l_sys_nominal_freq_mhz, l_sys_nominal_freq_mhz);
-
-            if (l_sys_freq_core_ceil_mhz < l_sys_nominal_freq_mhz)
+            //Compute Fixed Frequency (minumim across chips)
+            if (l_part_freq > l_part_running_freq &&
+                    l_part_running_freq == 0)
             {
-               l_sys_nominal_freq_mhz = l_sys_freq_core_ceil_mhz;
-               FAPI_INF("Clipping the nominal frequency to the ceiling frequency:  %04d ",
-                                l_sys_nominal_freq_mhz);
+                l_part_running_freq = l_part_freq;
+            }
+            else
+            {
+                if (l_part_freq != l_part_running_freq)
+                {
+                    FAPI_INF("Present System WOF Base freq %04d is not equal to this chip's WOF Base Freq %04d",
+                            l_part_running_freq, l_wofbase_freq);
+                    // This does not produce an error log as the system will operate ok
+                    // for this case.
+                }
+
+                if ( l_part_freq > l_part_running_freq)
+                {
+                    l_part_freq = l_part_running_freq;
+                }
             }
 
-            if (l_sys_freq_core_floor_mhz > l_sys_nominal_freq_mhz)
-            {
-               l_sys_nominal_freq_mhz = l_sys_freq_core_floor_mhz;
-               FAPI_INF("Raising the nominal frequency to the floor frequency:  %04d ",
-                                l_sys_nominal_freq_mhz);
-            }
+            FAPI_INF("Running Computed ceiling (PS0) frequency: %04d (0x%04x)", l_sys_pstate0_freq_mhz, l_sys_pstate0_freq_mhz);
+            FAPI_INF("Running Computed floor frequency:         %04d (0x%04x)", l_floor_freq_mhz, l_floor_freq_mhz);
+            FAPI_INF("Running Computed wofbase frequency:       %04d (0x%04x)", l_tmp_wofbase_freq, l_tmp_wofbase_freq);
+            FAPI_INF("Running Computed fixed frequency:         %04d (0x%04x)", l_part_running_freq, l_part_running_freq);
 
         } //end of proc list
 
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ, i_sys_targ,l_sys_pstate0_freq_mhz));
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_NOMINAL_FREQ_MHZ, i_sys_targ, l_sys_nominal_freq_mhz));
+        // Now clip things with system overrides
 
-        l_floor_freq_mhz = l_tmp_psav_freq;
-        l_ceil_freq_mhz = l_tmp_ceil_freq;
+        // ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ_OVERRIDE --> MRW
+        //  -->l_sys_freq_core_ceil_mhz_ovr
+        //
+        // ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ  -->calculated ceiling, can be
+        // overridden by user
+        //  -->l_sys_freq_core_ceil_mhz
+        //
 
-        FAPI_INF("Computed ceiling frequency: %04d (0x%04x)", l_ceil_freq_mhz, l_ceil_freq_mhz);
-        FAPI_INF("Computed floor frequency: %04d (0x%04x)", l_sys_freq_core_floor_mhz, l_sys_freq_core_floor_mhz);
-
-        //Update system ceil and floor freq
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ, i_sys_targ,l_ceil_freq_mhz));
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ, i_sys_targ,l_sys_freq_core_floor_mhz));
-
-        for (auto l_proc_target : i_sys_targ.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+        // Determine the minimum of the following to set the maximum frequency
+        //    - EC dependent limits if l_sys_freq_core_ceil_mhz_ovr is non-zero.
+        //    - l_sys_freq_core_ceil_mhz,
+        //    - l_sys_freq_core_ceil_mhz_ovr,
+        //    - the computed Pstate 0.
+        if (l_sys_freq_core_ceil_mhz &&
+            l_sys_freq_core_ceil_mhz < l_sys_pstate0_freq_mhz)
         {
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, l_proc_target,l_ceil_freq_mhz));
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, l_proc_target,l_floor_freq_mhz));
+            l_sys_pstate0_freq_mhz = l_sys_freq_core_ceil_mhz;
+            FAPI_INF("Lowering Pstate0 based on ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ:  %04d ",
+                    l_sys_freq_core_ceil_mhz);
         }
+
+        if (l_sys_freq_core_ceil_mhz_ovr &&
+            l_sys_freq_core_ceil_mhz_ovr < l_sys_pstate0_freq_mhz)
+        {
+            l_sys_pstate0_freq_mhz = l_sys_freq_core_ceil_mhz_ovr;
+            FAPI_INF("Lowering Pstate0 based on ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE:  %04d ",
+                    l_sys_freq_core_ceil_mhz_ovr);
+        }
+
+        // Determine the maximum of the following to set the minimum frequency
+        //    - l_sys_freq_core_floor_mhz,
+        //    - l_sys_freq_core_floor_mhz_ovr
+        //    - the computed floor.
+        if (l_sys_freq_core_floor_mhz > l_floor_freq_mhz)
+        {
+            l_floor_freq_mhz = l_sys_freq_core_floor_mhz;
+            FAPI_INF("Raising the floor based on ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ:  %04d ",
+                    l_sys_freq_core_floor_mhz);
+        }
+
+        if (l_sys_freq_core_floor_mhz_ovr > l_floor_freq_mhz)
+        {
+            l_floor_freq_mhz = l_sys_freq_core_floor_mhz_ovr;
+            FAPI_INF("Raising floor based on ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE:  %04d ",
+                    l_sys_freq_core_floor_mhz_ovr);
+        }
+
+        // Adjust the nominal to be between the ceiling and the floor
+        if (l_sys_pstate0_freq_mhz < l_part_freq)
+        {
+            l_part_freq = l_sys_pstate0_freq_mhz;
+            FAPI_INF("Clipping the nominal frequency to the ceiling frequency:  %04d ",
+                    l_part_freq);
+        }
+
+        if (l_floor_freq_mhz > l_part_freq)
+        {
+            l_part_freq  = l_floor_freq_mhz;
+            FAPI_INF("Raising the nominal frequency to the floor frequency:  %04d ",
+                    l_part_freq);
+        }
+
+        // Write out attributes with the results
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,     i_sys_target, l_sys_pstate0_freq_mhz));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_NOMINAL_FREQ_MHZ,            i_sys_target, l_part_freq));
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,i_sys_target, l_sys_pstate0_freq_mhz));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ,  i_sys_target, l_floor_freq_mhz));
+
+        for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,   l_proc_target, l_sys_pstate0_freq_mhz));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,     l_proc_target, l_floor_freq_mhz));
+        }
+
+        FAPI_INF("Final Pstate0 Frequency: %04d (0x%04x)", l_sys_pstate0_freq_mhz, l_sys_pstate0_freq_mhz);
+
     }
     while(0);
 fapi_try_exit:

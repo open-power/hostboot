@@ -22,13 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+// EKB-Mirror-To: hostboot
+// EKB-Mirror-To: hwsv
 #ifndef __P10_PM_SYSTEM_SET_FREQ_H__
 #define __P10_PM_SYSTEM_SET_FREQ_H__
 
 #include <fapi2.H>
-#include "p10_pm_get_poundv_bucket.H"
-
 
 /// @typedef p10_pm_set_system_freq_FP_t
 /// function pointer typedef definition for HWP call support
@@ -45,7 +44,7 @@ extern "C"
     /// -------------------------------------------------------------------
     fapi2::ReturnCode
     p10_pm_set_system_freq(
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_targ);
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target);
 
 } // extern C
 

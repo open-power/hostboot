@@ -44,6 +44,7 @@
 #include <fapi2.H>
 #include <p10_pstate_parameter_block.H>
 #include <p10_setup_evid.H>
+#include <p10_pm_set_system_freq.H>
 #include <p10_pm_utils.H>
 #include <mvpd_access_defs.H>
 
@@ -141,209 +142,9 @@ using namespace pm_pstate_parameter_block;
     if ( ((!a) || (!b) || (!c) || (!d) || (!e) || (!f) || (!g) || (!h) || (!i)))  \
     { state = 0; }
 
-#if 0
-// #V sample data
-const fapi2::voltageBucketData_t g_vpd_PVData =
-{
-    1,
-    {
-//      C-Freq  VDDVLT  IDDTAC  IDDTDC  IDDRAC  IDDRDC  VCSVLT  ICSTAC  ICSTDC  ICSRAC ICSRDC CFGSRT VDDVMN IVDDPP TCPPT
-        0x0960, 0x0320, 0x0163, 0x00BD, 0x0191, 0x044C, 0x00C4, 0x0191, 0x06A4, 0x0191,0x06A4,0x041A,0x02F7,0xFDF3,0x2C,0x00,0x00,0x00,0x00,0x00,0x00,   //Psav
-        0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF1
-        0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF2
-        0x0C1C, 0x0384, 0x0163, 0x00BD, 0x0191, 0x044C, 0x00C4, 0x0191, 0x06A4, 0x0191,0x06A4,0x041A,0x02F7,0xFDF3,0x2C,0x00,0x00,0x00,0x00,0x00,0x00,   //CF3
-        0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF4
-        0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF5
-        0x0FA0, 0x03e8, 0x0163, 0x00BD, 0x0191, 0x044C, 0x00C4, 0x0191, 0x06A4, 0x0191,0x06A4,0x041A,0x02F7,0xFDF3,0x2C,0x00,0x00,0x00,0x00,0x00,0x00,   //CF6
-        0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //Fmax
-    },
-    {
-//SR    VDNVLT  IDNTAC  IDNTDC  VIOVLT  IIOTAC  IIOTDC  VCIVLT  ICITAC  ICITDC
-        0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,
-    },
-    {
-//      PAUFRQ  SSPTAR  VDNPOW  VIOPOW  PCIPOW  SSPACT  IDDRLT VDDTWI  VCSTWI VIOTWI  AMBTWI  MDINPLT
-        0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,0x00,   0x00,  0x00,   0x00,   0x00,
-//      RDPSPT  TDPSPT  VDDTWCFRQ FFCFREQ  PSFREQ  UTFREQ  FMFREQ  MMATT   IOTT  FFPT
-        0x00,   0x00,   0x0DAC,   0x09C4,  0x07D0, 0x0EDA, 0x0FA0, 0x0000, 0x00, 0x00,
-    },
-
-};
-#endif
-
-// #V sample data
-/*const uint8_t g_vpd_PVData[] =
-{
-    1,
-//      C-Freq     VDDVLT     IDDTAC       IDDTDC     IDDRAC     IDDRDC     VCSVLT     ICSTAC     ICSTDC    ICSRAC    ICSRDC    CFGSRT    VDDVMN    IVDDPP   TCPPT
-        0x09,0x60, 0x03,0x20, 0x01,0x63, 0x00,0xBD, 0x01,0x91, 0x04,0x4C, 0x00,0xC4, 0x01,0x91, 0x06,0xA4, 0x01,0x91,0x06,0xA4,0x04,0x1A,0x02,0xF7,0xFD,0xF3,0x2C,0x00,0x00,0x00,0x00,0x00,0x00,   //Psav
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF1
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF2
-        0x0C,0x1C, 0x03,0x84, 0x01,0x63, 0x00,0xBD, 0x01,0x91, 0x04,0x4C, 0x00,0xC4, 0x01,0x91, 0x06,0xA4, 0x01,0x91,0x06,0xA4,0x04,0x1A,0x02,0xF7,0xFD,0xF3,0x2C,0x00,0x00,0x00,0x00,0x00,0x00,   //CF3
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF4
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF5
-        0x0F,0xA0, 0x03,0xE8, 0x01,0x63, 0x00,0xBD, 0x01,0x91, 0x04,0x4C, 0x00,0xC4, 0x01,0x91, 0x06,0xA4, 0x01,0x91,0x06,0xA4,0x04,0x1A,0x02,0xF7,0xFD,0xF3,0x2C,0x00,0x00,0x00,0x00,0x00,0x00,   //CF6
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //Fmax
-//SR      VDNVLT     IDNTAC     IDNTDC     VIOVLT    IIOTAC     IIOTDC     VCIVLT     ICITAC     ICITDC
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,
-//        PAUFRQ    SSPTAR     VDNPOW     VIOPOW     PCIPOW     SSPACT  IDDRLT  VDDTWI     VCSTWI VIOTWI  AMBTWI  MDINPLT
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,   0x00,  0x00,   0x00,   0x00,
-//      RDPSPT  TDPSPT  VDDTWCFRQ  FFRQMCFREQ
-        0x00,   0x00,   0x00,0x00,    0x00,0x00,    0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,
-
-};*/
-
-
-const uint8_t g_vpd_PVData[] =
-{
-    1,
-//      C-Freq     VDDVLT     IDDTAC       IDDTDC     IDDRAC     IDDRDC     VCSVLT     ICSTAC     ICSTDC    ICSRAC    ICSRDC    CFGSRT    VDDVMN    IVDDPP   TCPPT
-        0x07,0xd0, 0x03,0x84, 0x30,0xd8, 0x12,0xc4, 0x30,0xd8, 0x12,0xc4, 0x03,0x84, 0x01,0x8f, 0x02,0xc4, 0x01,0x8f,0x02,0xc4,0x08,0x20,0x03,0x24,0x43,0x9c,0xaa,0x01,0x7c,0x01,0x00,0x00,0x00,   //CF0
-        0x08,0x98, 0x03,0x93, 0x36,0xe5, 0x12,0xf6, 0x36,0xe5, 0x12,0xf6, 0x03,0x93, 0x01,0xc0, 0x02,0xc8, 0x01,0xc0,0x02,0xc8,0x08,0xf0,0x03,0x31,0x49,0xdb,0xaa,0x01,0xab,0x01,0x02,0x00,0x00,   //CF1
-        0x09,0x60, 0x03,0xa2, 0x3d,0x2a, 0x13,0x29, 0x3d,0x2a, 0x13,0x29, 0x03,0xa2, 0x01,0xf4, 0x02,0xcd, 0x01,0xf4,0x02,0xcd,0x09,0xc0,0x03,0x3e,0x50,0x53,0xaa,0x01,0xdb,0x01,0x05,0x00,0x00,   //CF2
-        0x0a,0x28, 0x03,0xb1, 0x43,0xa7, 0x13,0x5d, 0x43,0xa7, 0x13,0x5d, 0x03,0xb1, 0x02,0x29, 0x02,0xd2, 0x02,0x29,0x02,0xd2,0x0a,0x90,0x03,0x4c,0x57,0x04,0xaa,0x02,0x0e,0x01,0x08,0x00,0x00,   //CF3
-        0x0a,0xf0, 0x03,0xc0, 0x4a,0x5d, 0x13,0x91, 0x4a,0x5d, 0x13,0x91, 0x03,0xc0, 0x02,0x60, 0x02,0xd7, 0x02,0x60,0x02,0xd7,0x0b,0x60,0x03,0x59,0x5d,0xee,0xaa,0x02,0x42,0x01,0x0a,0x00,0x00,   //CF4
-        0x0b,0x54, 0x03,0xcf, 0x4e,0x97, 0x13,0xc5, 0x4e,0x97, 0x13,0xc5, 0x03,0xcf, 0x02,0x82, 0x02,0xdc, 0x02,0x82,0x02,0xdc,0x0b,0xc8,0x03,0x67,0x62,0x5c,0xaa,0x02,0x63,0x01,0x0d,0x00,0x00,   //CF5
-        0x0b,0xb8, 0x03,0xde, 0x52,0xee, 0x13,0xfa, 0x52,0xee, 0x13,0xfa, 0x03,0xde, 0x02,0xa5, 0x02,0xe1, 0x02,0xa5,0x02,0xe1,0x0c,0x30,0x03,0x74,0x66,0xe8,0xaa,0x02,0x84,0x01,0x10,0x00,0x00,   //CF6
-        0x0c,0x1c, 0x03,0xe8, 0x56,0xd2, 0x14,0x1e, 0x56,0xd2, 0x14,0x1e, 0x03,0xe8, 0x02,0xc5, 0x02,0xe4, 0x02,0xc5,0x02,0xe4,0x0c,0x98,0x03,0x7d,0x6a,0xf0,0xaa,0x02,0xa3,0x01,0x12,0x00,0x00,   //CF7
-//SR      VDNVLT     IDNTAC     IDNTDC     VIOVLT    IIOTAC     IIOTDC     VCIVLT     ICITAC     ICITDC
-        0x03,0x84, 0x03,0xd2, 0x00,0xF4, 0x03,0x84, 0x06,0xba, 0x06,0xba, 0x03,0x52, 0x02,0xfd, 0x02,0xfd, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,
-//        PAUFRQ    SSPTAR     VDNPOW     VIOPOW     PCIPOW     AVDD       SSPACT  IDDRLT       VDDTWI   VCSTWI VIOTWI  AMBTWI  MDINPLT
-        0x00,0x00, 0x07,0xd0, 0x01,0x5e, 0x00,0x0b, 0x00,0x1f, 0x00,0x0d, 0x0a,0xb2, 0x10,0x04,  0x0b,   0x02,   0x02,   0x03,  0x00,
-//      RDPSPT  TDPSPT  WOFBSCFRQ    FFCFREQ   VDDPsavCoreF VDDCF6CoreF VDDFmaxCF  MMATemp  IOTemp    FFMPT
-        0xAA,   0xAA,   0x0b,0x54, 0x07,0xd0, 0x07,0xD0,    0x0b,0xb8, 0x0c,0x1c, 0xbe,    0xa0,   0x07,0xd0,
-};
-
-
-/*
-const uint8_t g_vpd_PVData[] =
-{
-    1,
-//      C-Freq     VDDVLT     IDDTAC       IDDTDC     IDDRAC     IDDRDC     VCSVLT     ICSTAC     ICSTDC    ICSRAC    ICSRDC    CFGSRT    VDDVMN    IVDDPP   TCPPT
-        0x07,0xd0, 0x02,0xBB, 0x23,0x2a, 0x10,0x50, 0x23,0x2a, 0x10,0x50, 0x02,0xbc, 0x01,0x1f, 0x02,0x86, 0x01,0x1f,0x02,0x86,0x08,0x20,0x02,0x70,0x33,0x7b,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF0
-        0x08,0x98, 0x02,0xdb, 0x28,0xff, 0x10,0xaf, 0x28,0xff, 0x10,0xaf, 0x02,0xdb, 0x01,0x4e, 0x02,0x8f, 0x01,0x4e,0x02,0x8f,0x08,0xf0,0x02,0x8c,0x39,0xae,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF1
-        0x09,0x60, 0x02,0xfa, 0x2f,0x35, 0x11,0x0c, 0x2f,0x35, 0x11,0x0c, 0x02,0xfa, 0x01,0x81, 0x02,0x98, 0x01,0x81,0x02,0x98,0x09,0xc0,0x02,0xa8,0x40,0x41,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF2
-        0x0a,0x28, 0x03,0x20, 0x36,0x7b, 0x11,0x81, 0x36,0x7b, 0x11,0x81, 0x03,0x20, 0x01,0xbd, 0x02,0xa4, 0x01,0xbd,0x02,0xa4,0x0a,0x90,0x02,0xca,0x47,0xfc,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF3
-        0x0a,0xf0, 0x03,0x4e, 0x3f,0x18, 0x12,0x12, 0x3f,0x18, 0x12,0x12, 0x03,0x4e, 0x02,0x03, 0x02,0xb2, 0x02,0x03,0x02,0xb2,0x0b,0x60,0x02,0xf3,0x51,0x2b,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF4
-        0x0b,0x54, 0x03,0x6b, 0x44,0x46, 0x12,0x70, 0x44,0x46, 0x12,0x70, 0x03,0x6b, 0x02,0x2d, 0x02,0xbb, 0x02,0x2D,0x02,0xbb,0x0b,0xc8,0x03,0x0d,0x56,0xb7,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF5
-        0x0b,0xb8, 0x03,0x82, 0x49,0x0d, 0x12,0xbd, 0x49,0x0d, 0x12,0xbd, 0x03,0x82, 0x02,0x54, 0x02,0xc2, 0x02,0x54,0x02,0xc2,0x0c,0x30,0x03,0x21,0x5b,0xca,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF6
-        0x0c,0x1c, 0x03,0xab, 0x4f,0xff, 0x13,0x47, 0x4f,0xff, 0x13,0x47, 0x03,0xab, 0x02,0x8d, 0x02,0xD0, 0x02,0x8d,0x02,0xd0,0x0c,0x98,0x03,0x46,0x63,0x47,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF7
-//SR      VDNVLT     IDNTAC     IDNTDC     VIOVLT    IIOTAC     IIOTDC     VCIVLT     ICITAC     ICITDC
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,
-//        PAUFRQ    SSPTAR     VDNPOW     VIOPOW     PCIPOW     SSPACT  IDDRLT  VDDTWI     VCSTWI VIOTWI  AMBTWI  MDINPLT
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,   0x00,  0x00,   0x00,   0x00,
-//      RDPSPT  TDPSPT  WOFBSCFRQ    FFCFREQ   VDDPsavCoreF VDDCF6CoreF VDDFmaxCF  MMATemp  IOTemp    FFMPT
-        0x00,   0x00,   0x0D,0xAC, 0x0B,0xB8, 0x07,0xD0,    0x0E,0xD8, 0x0F,0xA0, 0x00,    0x00,   0x00,0x00,
-};
-
-
-const uint8_t g_vpd_PVData[] =
-{
-    1,
-//      C-Freq     VDDVLT     IDDTAC       IDDTDC     IDDRAC     IDDRDC     VCSVLT     ICSTAC     ICSTDC    ICSRAC    ICSRDC    CFGSRT    VDDVMN    IVDDPP   TCPPT
-        0x08,0x98, 0x02,0x71, 0x07,0x6c, 0x00,0xBD, 0x01,0x91, 0x04,0x4C, 0x03,0x39, 0x00,0x78, 0x06,0xA4, 0x01,0x2D,0x06,0xA4,0x04,0x1A,0x02,0xF7,0xFD,0xF3,0x2C,0x00,0x00,0x00,0x00,0x00,0x00,   //Psav
-        0x09,0x60, 0x02,0xA3, 0x08,0x34, 0x00,0xC1, 0x01,0x95, 0x04,0x53, 0x03,0x52, 0x00,0x80, 0x06,0xBD, 0x01,0x31,0x07,0x3A,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF1
-        0x0B,0x54, 0x02,0xEE, 0x09,0x92, 0x00,0xC5, 0x01,0x9F, 0x04,0x58, 0x03,0x6B, 0x00,0x87, 0x06,0xF9, 0x01,0x3B,0x07,0xD0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF2
-        0x0C,0xE4, 0x03,0x2F, 0x0A,0xE1, 0x00,0xCD, 0x01,0xA5, 0x04,0x5C, 0x03,0x84, 0x00,0x91, 0x07,0x2B, 0x01,0x41,0x08,0x1B,0x04,0x1A,0x02,0xF7,0xFD,0xF3,0x2C,0x00,0x00,0x00,0x00,0x00,0x00,   //CF3
-        0x0D,0xAC, 0x03,0x70, 0x0B,0xAE, 0x00,0xD3, 0x01,0xB1, 0x04,0x63, 0x03,0x9D, 0x00,0x9C, 0x07,0x67, 0x01,0x4D,0x08,0x66,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF4
-        0x0F,0x3C, 0x03,0xB1, 0x0C,0x76, 0x00,0xDA, 0x01,0xB9, 0x04,0x6A, 0x03,0xB6, 0x00,0xA5, 0x07,0xAD, 0x01,0x55,0x08,0xFC,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //CF5
-        0x10,0x04, 0x03,0xED, 0x0D,0x7A, 0x00,0xE4, 0x01,0xC7, 0x04,0x6F, 0x03,0xCF, 0x00,0xB2, 0x07,0xD0, 0x01,0x63,0x09,0x60,0x04,0x1A,0x02,0xF7,0xFD,0xF3,0x2C,0x00,0x00,0x00,0x00,0x00,0x00,   //CF6
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,   //Fmax
-//SR      VDNVLT     IDNTAC     IDNTDC     VIOVLT    IIOTAC     IIOTDC     VCIVLT     ICITAC     ICITDC
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,
-//        PAUFRQ    SSPTAR     VDNPOW     VIOPOW     PCIPOW     SSPACT  IDDRLT  VDDTWI     VCSTWI VIOTWI  AMBTWI  MDINPLT
-        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,   0x00,  0x00,   0x00,   0x00,
-//      RDPSPT  TDPSPT  WOFBSCFRQ    FFCFREQ   VDDPsavCoreF VDDCF6CoreF VDDFmaxCF  MMATemp  IOTemp    FFMPT
-        0x00,   0x00,   0x0D,0xAC, 0x0B,0xB8, 0x07,0xD0,    0x0E,0xD8, 0x0F,0xA0, 0x00,    0x00,   0x00,0x00,
-};
-*/
-
-//Sample data to verify functionality
-////
-//// WOF sample data
-const uint8_t g_wofData[] =
-{
-    0x57, 0x46, 0x54, 0x48  /*MAGIC CODE WFTH*/,
-    0x00, 0x00, 0x00, 0x01  /*version*/,
-    0x00, 0x10              /*VRT block size*/,
-    0x00, 0x04              /*VRT header size*/,
-    0x00, 0x01              /*VRT data size*/,
-    0x1                     /*OCS mode*/,
-    0x20                    /*core count*/,//16
-    0x0C, 0xE4              /*Vcs start*/,
-    0x0D, 0x05              /*Vcs step*/,
-    0x00, 0x04              /*Vcs size*/,
-    0x09, 0xC4              /*Vdd start*/,
-    0x01, 0xF4              /*Vdd step*/,
-    0x00, 0x1A              /*Vdd size*/,
-    0x0C, 0x35              /*Vratio start*/,
-    0x02, 0x71              /*Vratio step*/,//16
-    0x00, 0x0C              /*Vratio size*/,
-    0x13, 0x88              /*IO start*/,
-    0x13, 0x88              /*IO step*/,
-    0x00, 0x06              /*IO size*/,
-    0x00, 0x17              /*AC start*/,
-    0x00, 0x02              /*AC step*/,
-    0x00, 0x4               /*AC size*/,
-    0x00, 0x00              /*reserved*/, //16
-    0x00, 0x0               /*Socket Power*/,
-    0x00, 0x00              /*SPT Freq*/,
-    0x00, 0x00              /*RDP Curr*/,
-    0x00, 0x0               /*Boost Curr*/,
-    0x00, 0x00, 0x00, 0x00  /* table time stamp*/,
-    0x00, 0x0               /*table version*/,
-    0x00, 0x0               /*reserved*/, //16
-    0x0                     /*TDP VCS Ceff index*/,
-    0x0                     /*TDP VDD Ceff index*/,
-    0x0                     /*TDP IO Powr index*/,
-    0x0                     /*TDP Amb Cond index*/,
-    0x0                     /*IO full Wattage*/,
-    0x0                     /*IO Disabled wattage*/,
-    0x00,  0x00  /* reserved*/, //8
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /*package name*/,//16
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //16
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //16
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
-
-// These values are for dummy VPD having a 3100MHz UT frequency
-const uint8_t g_static_vrt[] =
-{
-            //Index
-    0x70,   //  0
-    0x6f,   //  1
-    0x6e,   //  2
-    0x6d,   //  3
-    0x6c,   //  4
-    0x6b,   //  5
-    0x58,   //  6
-    0x54,   //  7
-    0x50,   //  8
-    0x4C,   //  9
-    0x48,   //  10
-    0x44    //  11
-};
-
-
-// These values are for parts having a 4000MHz UT frequency
-const uint8_t g_static_vrt_hw[] =
-{
-            //Index
-    0xb4,   //  0
-    0xb4,   //  1
-    0xb4,   //  2
-    0xb4,   //  3
-    0xb4,   //  4
-    0xb2,   //  5
-    0xac,   //  6
-    0xa6,   //  7
-    0xa1,   //  8
-    0x9d,   //  9
-    0x98,   //  10
-    0x93    //  11
-};
-
-
+// Bring in data for local testing --- both #V and WOF Tables
+#define __WOF_INTERNAL_DATA__
+#include <p10_pstate_parameter_block_int_vpd.H>
 
 char const* vpdSetStr[] = VPD_PT_SET_STR;
 char const* ddsFieldStr[] = POUNDW_DDS_FIELDS_STR;
@@ -578,6 +379,9 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[0][i].frequency_mhz));
 
         HEX_DEC_STR(l_buffer,
                 revle32(i_gppb->operating_points_set[0][i].vdd_vmin));
@@ -1759,14 +1563,14 @@ FAPI_INF("%-54s[4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 
 #define DATABLOCK_GET_ATTR_8(attr_name, target, attr_assign) \
 FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-60s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
-FAPI_INF("%-60s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
-FAPI_INF("%-60s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
-FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);\
-FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[4], iv_attrs.attr_assign[4]);\
-FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[5], iv_attrs.attr_assign[5]);\
-FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[6], iv_attrs.attr_assign[6]);\
-FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.attr_assign[7]);
+FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
+FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
+FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
+FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);\
+FAPI_INF("%-54s[4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[4], iv_attrs.attr_assign[4]);\
+FAPI_INF("%-54s[5] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[5], iv_attrs.attr_assign[5]);\
+FAPI_INF("%-54s[6] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[6], iv_attrs.attr_assign[6]);\
+FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.attr_assign[7]);
 
     // Frequency attributes
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATE0_FREQ_MHZ, FAPI_SYSTEM, attr_pstate0_freq_mhz);
@@ -2241,10 +2045,6 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         FAPI_TRY(get_mvpd_poundV(),
                  "get_mvpd_poundV function failed to retrieve pound V data");
 
-        FAPI_IMP("Creating the stretched VPD structure for Hcode consumption");
-        FAPI_TRY(create_stretched_pts(),
-                "create_stretched_pts function failed");
-
         // Apply biased values if any
         FAPI_IMP("Apply Biasing to #V");
         FAPI_TRY(apply_biased_values(),
@@ -2271,8 +2071,6 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
 
-        FAPI_TRY(create_stretched_pts_poundW(),
-                "create_stretched_pts_poundW function failed");
         //Read #IQ data
 
         //if wof is disabled.. don't call IQ function
@@ -2544,6 +2342,19 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             iv_vddWofBaseFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddTdpWofCoreFreq));
             iv_vddUTFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddUTCoreFreq));
             iv_vddFmaxFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddFmxCoreFreq));
+
+            fapi2::ATTR_SOCKET_POWER_NOMINAL_Type l_powr_nom;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SOCKET_POWER_NOMINAL,
+                        iv_procChip, l_powr_nom));
+            uint16_t l_powr_watts = revle16(iv_poundV_raw_data.other_info.TSrtSocPowTgt);
+            //Update power nominal target
+            if (!l_powr_nom)
+            {
+                l_powr_nom = l_powr_watts;
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SOCKET_POWER_NOMINAL,
+                            iv_procChip, l_powr_nom));
+            }
+
 
             FAPI_INF("PSTATE %x %x %d PSAV %x WOF %x UT %x Fmax %x",l_vpd_max_freq,
                      iv_attr_mvpd_poundV_raw[i].frequency_mhz,iv_attr_mvpd_poundV_raw[i].pstate,
@@ -3648,9 +3459,9 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
         bool l_frequency_value_state = 1;
         FAPI_INF("iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct);
         FAPI_INF("iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct);
-        FAPI_INF(" iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct);
+        FAPI_INF("iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct);
         FAPI_INF("iv_poundW_data.other.dpll_settings.fields.S_N_return_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.S_N_return_3p125pct);
-        if ( iv_poundW_data.other.dds_calibration_version)
+        if (iv_poundW_data.other.dds_calibration_version)
         {
             VALIDATE_FREQUENCY_DROP_VALUES(iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct,
                     iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct,
@@ -4182,159 +3993,6 @@ void PlatPmPPB::interpolate_freq_pt(const uint32_t freq,
     ip->rt_tdp_ac_10ma = iv_attr_mvpd_poundV_raw_orig[region].rt_tdp_ac_10ma;
     ip->rt_tdp_dc_10ma = iv_attr_mvpd_poundV_raw_orig[region].rt_tdp_dc_10ma;
 }
-
-// point set use.
-//    VPD_PT_SET_RAW - MVPD as is
-//    VPD_PT_SET_STRETCHED - Stretched
-//    VPD_PT_SET_BIASED - Biased and stretched
-fapi2::ReturnCode PlatPmPPB::create_stretched_pts_poundW()
-{
-    FAPI_INF(">>>>>>>>>> create_stretched_points_poundW");
-
-    {
-        uint32_t        ur = find_freq_region(iv_attrs.attr_pstate0_freq_mhz);  // UT region
-        uint32_t        dr = NUM_PV_POINTS-1;                               // Destination point
-        uint32_t        sr = ur;                                            // Source region
-        uint32_t        stretch_freq;
-        PoundWEntry_t ip;
-
-        FAPI_INF("create_stretched_points_poundW ur %d %08x",ur,iv_attrs.attr_pstate0_freq_mhz);
-
-        // 2 cases: (possible with pointers into a common set of curve fit points)
-        // 1. f(UT) > f(CF6)
-        // 2. f(UT) = f(CF6) (eg region 6)
-
-
-        if ( iv_attrs.attr_pstate0_freq_mhz > iv_attr_mvpd_poundV_raw_orig[ur].frequency_mhz)
-        {
-            //UT freq put in gCF7
-            interpolate_pw_pt(iv_attrs.attr_pstate0_freq_mhz, ur, dr,&ip);
-            --dr;
-        }
-        else // f(UT) = f(CF6) (eg region 6)
-        {
-            for (auto core = 0; core < MAXIMUM_CORES; core++)
-            {
-                iv_poundW_data.entry[dr].entry[core].ddsc.value =
-                    iv_poundW_data.entry[ur].entry[core].ddsc.value;
-            }
-            --dr; --sr;
-
-            compute_stretched_freq_pt(sr, &stretch_freq);
-
-            interpolate_pw_pt(stretch_freq, sr, dr,&ip);
-        }
-    }
-
-    FAPI_INF("<<<<<<<<<< create_stretched_points_poundW");
-    return fapi2::current_err;
-}
-
-// point set use.
-//    VPD_PT_SET_RAW - MVPD as is
-//    VPD_PT_SET_STRETCHED - Stretched
-//    VPD_PT_SET_BIASED - Biased and stretched
-fapi2::ReturnCode PlatPmPPB::create_stretched_pts()
-{
-    FAPI_INF(">>>>>>>>>> create_stretched_points");
-
-    // COpy the raw data from the vpd
-    memcpy (iv_attr_mvpd_poundV_raw_orig,
-            iv_attr_mvpd_poundV_raw,
-            sizeof(iv_attr_mvpd_poundV_raw));
-
-    if (iv_attrs.attr_fmax_enable == 1)
-    {
-         FAPI_ASSERT(iv_attr_mvpd_poundV_raw[NUM_PV_POINTS-1].frequency_mhz != 0,
-            fapi2::PSTATE_PB_FMAX_ZERO_WHEN_ENABLED()
-            .set_CHIP_TARGET(iv_procChip),
-            "Fmax #V VPD frequency is 0 which FMax mode is enabled.");
-
-    }
-    else
-    {
-        uint32_t        ur = find_freq_region(iv_attrs.attr_pstate0_freq_mhz);  // UT region
-        uint32_t        dr = NUM_PV_POINTS-1;                               // Destination point
-        uint32_t        sr = ur;                                            // Source region
-        uint32_t        stretch_freq;
-        PoundVOpPoint_t ip;
-
-        FAPI_INF("ur %d %08x",ur,iv_attrs.attr_pstate0_freq_mhz);
-        FAPI_ASSERT(ur == NUM_PV_POINTS-2,   // (eg for 8 points having 7 regions (0:6) -> region 6)
-                fapi2::PSTATE_PB_UT_NOT_REGION6()
-                .set_CHIP_TARGET(iv_procChip)
-                .set_PSTATE0_FREQ(iv_attrs.attr_pstate0_freq_mhz*1000)
-                .set_UT_FREQ(iv_reference_frequency_khz),
-                "UltraTurbo must in Region 6");
-
-        // 2 cases: (possible with pointers into a common set of curve fit points)
-        // 1. f(UT) > f(CF6)
-        // 2. f(UT) = f(CF6) (eg region 6)
-
-
-        if ( iv_attrs.attr_pstate0_freq_mhz > iv_attr_mvpd_poundV_raw[ur].frequency_mhz)
-        {
-            FAPI_ASSERT(iv_attr_mvpd_poundV_raw[ur+1].frequency_mhz == 0,
-                    fapi2::PSTATE_PB_FMAX_ZERO_UT_INTERPOLATION()
-                    .set_CHIP_TARGET(iv_procChip)
-                    .set_UT_FREQ(iv_attrs.attr_pstate0_freq_mhz)
-                    .set_CF6_FREQ(iv_attr_mvpd_poundV_raw[ur].frequency_mhz),
-                    "Fmax #V VPD frequency is 0 and is needed for UltraTurbo interpolation.");
-
-            ip.pstate = (iv_attrs.attr_pstate0_freq_mhz -
-                    iv_attr_mvpd_poundV_raw[ur].frequency_mhz) * 1000 / (iv_frequency_step_khz);
-
-            ip.frequency_mhz = iv_attrs.attr_pstate0_freq_mhz;
-
-
-            //UT freq put in gCF7
-            interpolate_freq_pt(iv_attrs.attr_pstate0_freq_mhz, ur, &ip);  // TODO:  use Pstate interpolation?????
-
-            memcpy(&iv_attr_mvpd_poundV_raw[dr],
-                    &ip,
-                    sizeof(PoundVOpPoint_t));
-            --dr;
-
-        }
-        else // f(UT) = f(CF6) (eg region 6)
-        {
-            // Copy CF6 to gCF7
-            memcpy(&iv_attr_mvpd_poundV_raw[dr],
-                    &iv_attr_mvpd_poundV_raw[ur],
-                    sizeof(PoundVOpPoint_t));
-            --dr; --sr;
-
-            uint32_t needed_steps = 2;
-
-            FAPI_ASSERT(region_steps(sr) >= needed_steps,
-                    fapi2::PSTATE_PB_STRETCH_REGION_LACKS_STEPS()
-                    .set_CHIP_TARGET(iv_procChip)
-                    .set_UT_FREQ(iv_attrs.attr_pstate0_freq_mhz)
-                    .set_STRETCH_REGION(sr)
-                    .set_STRETCH_REGION_P1_FREQ(iv_attr_mvpd_poundV_raw[sr+1].frequency_mhz)
-                    .set_STRETCH_REGION_FREQ(iv_attr_mvpd_poundV_raw[sr].frequency_mhz),
-                    "Fmax #V VPD frequency is 0 and is needed for UltraTurbo interpolation.");
-
-            compute_stretched_freq_pt(sr, &stretch_freq);
-
-            ip.pstate = ((stretch_freq -
-                    iv_attr_mvpd_poundV_raw[sr].frequency_mhz) * 1000) / (iv_frequency_step_khz);
-            ip.frequency_mhz = stretch_freq;
-
-            interpolate_freq_pt(stretch_freq, sr, &ip);
-
-            memcpy(&iv_attr_mvpd_poundV_raw[dr],
-                    &ip,
-                    sizeof(PoundVOpPoint_t));
-        }
-    }
-
-fapi_try_exit:
-    FAPI_INF("<<<<<<<<<< create_stretched_points");
-    return fapi2::current_err;
-}
-
-
 ///////////////////////////////////////////////////////////
 ////////   compute_vpd_pts
 ///////////////////////////////////////////////////////////
@@ -6037,294 +5695,17 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
 {
     FAPI_INF("PlatPmPPB::pm_set_frequency >>>>>");
 
-    voltageBucketData_t l_poundV_data;
-    uint16_t l_fmax_freq;
-    uint16_t l_ut_freq;
-    uint16_t l_powr_watts;
-    uint16_t l_fixed_freq;
-    uint16_t l_psav_freq;
-    uint16_t l_wofbase_freq;
-    uint8_t l_sys_pdv_mode;
-    uint8_t l_cnt =0;
-    uint16_t l_tmp_psav_freq = 0;
-    uint16_t l_tmp_ceil_freq = 0;
-    fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz;
-    fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_sys_freq_core_ceil_mhz;
-    fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz;
-    fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_ceil_freq_mhz;
-    fapi2::ATTR_SOCKET_POWER_NOMINAL_Type l_powr_nom;
+    fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz;
 
-    fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY_Type l_limited_freq_mhz;
-    const fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_forced_ceil_freq_mhz = 2400;
+    auto sys_target = iv_procChip.getParent<fapi2::TARGET_TYPE_SYSTEM>();
 
-    do
-    {
-        auto sys_target = iv_procChip.getParent<fapi2::TARGET_TYPE_SYSTEM>();
+    FAPI_TRY(p10_pm_set_system_freq(sys_target));
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ,
-                sys_target,l_sys_freq_core_floor_mhz));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+             sys_target, l_sys_pstate0_freq_mhz));
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,
-                sys_target,l_sys_freq_core_ceil_mhz));
+    iv_attrs.attr_pstate0_freq_mhz = l_sys_pstate0_freq_mhz;
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
-                sys_target, l_sys_pdv_mode));
-
-        //If pstate0 freq is set means, we have already computed other
-        //frequencies (floor and ceil) as well
-        if (iv_attrs.attr_pstate0_freq_mhz)
-        {
-            FAPI_INF("PSTATE0 FREQ is already set %08X", iv_attrs.attr_pstate0_freq_mhz);
-            break;
-        }
-
-        //We loop thru all the processor in the system and will figure out the
-        //max of PSAV, FMAX, and UT in that list.  We look for the min of the WOFBase
-        //values.  An attribute switch is used to specifically fail the WOFBase check.
-        // - Max value of FMAX will be initialized to ATTR_SYSTEM_PSTATE0_FREQ_MHZ
-        //   and same value will be initialized to ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ
-        // - Max value of PSAV will be initialized to ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ
-        // - Min value of WOFBae will be initialized to ATTR_NOMINAL_FREQ_MHZ
-        iv_attrs.attr_pstate0_freq_mhz = 0;
-        for (auto l_proc_target : sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
-        {
-
-            // Enforce the attribute derived ceiling
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY,
-                        l_proc_target,l_limited_freq_mhz));
-            //This part of the code will enable later, because we are seeing CEIL and
-            //FLOOR frequency are set from the MRW to 2000MHZ, But for now we
-            //should force the ceil freq to 2400MHZ to make OCC happy
-            // Will comeback to this once we sort out, why and how MRW are
-            // gettting the ceil and floor values
-#if 0
-            if (l_limited_freq_mhz)
-            {
-                if ((l_sys_freq_core_ceil_mhz) &&
-                    (l_sys_freq_core_ceil_mhz > l_forced_ceil_freq_mhz))
-                {
-                    l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
-                }
-                else if (!l_sys_freq_core_ceil_mhz)
-                {
-                    l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
-                }
-                FAPI_INF("Limited frequency DD level.  Capping to %04d MHz", l_sys_freq_core_ceil_mhz);
-            }
-#endif
-            if (l_limited_freq_mhz && l_sys_freq_core_ceil_mhz < 2400)
-            {
-                l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
-            }
-
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SOCKET_POWER_NOMINAL,
-                        l_proc_target,l_powr_nom));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
-                        l_proc_target,l_floor_freq_mhz));
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,
-                        l_proc_target,l_ceil_freq_mhz));
-            uint8_t l_poundv_static_data = 0;
-            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
-                        FAPI_SYSTEM,
-                        l_poundv_static_data),
-                    "Error from FAPI_ATTR_GET for attribute ATTR_POUND_V_STATIC_DATA_ENABLE");
-
-            if (l_poundv_static_data)
-            {
-                FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is set");
-                memcpy(&l_poundV_data,&g_vpd_PVData,sizeof(g_vpd_PVData));
-            }
-            else
-            {
-                //Read #V data from each proc
-                FAPI_TRY(p10_pm_get_poundv_bucket(l_proc_target, l_poundV_data));
-            }
-
-            l_fmax_freq     = revle16(l_poundV_data.other_info.VddFmxCoreFreq);
-            l_ut_freq       = revle16(l_poundV_data.other_info.VddUTCoreFreq);
-            l_psav_freq     = revle16(l_poundV_data.other_info.VddPsavCoreFreq);
-            l_wofbase_freq  = revle16(l_poundV_data.other_info.VddTdpWofCoreFreq);
-            l_powr_watts    = revle16(l_poundV_data.other_info.TSrtSocPowTgt);
-            l_fixed_freq    = revle16(l_poundV_data.other_info.FxdFreqMdeCoreFreq);
-            FAPI_INF("VPD fmax_freq=%04d, ut_freq=%04d  psav_freq=%04d, psav_freq=%04d powr = %04d",
-                    l_fmax_freq, l_ut_freq, l_wofbase_freq, l_psav_freq, l_powr_watts);
-
-
-            //Update powr nominal target
-            if (!l_powr_nom)
-            {
-                l_powr_nom = l_powr_watts;
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SOCKET_POWER_NOMINAL,
-                            l_proc_target,l_powr_nom));
-            }
-
-            //Compute floor freq
-            if (!l_tmp_psav_freq)
-            {
-                l_tmp_psav_freq = l_psav_freq;
-            }
-            else
-            {
-                if (l_psav_freq >= l_tmp_psav_freq)
-                {
-                    l_tmp_psav_freq = l_psav_freq;
-                }
-                if ( l_floor_freq_mhz >= l_tmp_psav_freq)
-                {
-                    l_tmp_psav_freq = l_floor_freq_mhz;
-                }
-            }
-
-            //If the system core floor freq is greater then of psav(of all the
-            //procs) then need to update system core floor freq
-            FAPI_DBG("floor frequency check:   sys %04d ceil %04d",
-                    l_sys_freq_core_floor_mhz, l_floor_freq_mhz);
-
-            if ( l_sys_freq_core_floor_mhz > l_tmp_psav_freq)
-            {
-                l_tmp_psav_freq = l_sys_freq_core_floor_mhz;
-            }
-            else if (!l_sys_freq_core_floor_mhz)
-            {
-                l_sys_freq_core_floor_mhz = l_tmp_psav_freq;
-            }
-
-            //Compute FMAX and Ceil freq
-            if ( l_fmax_freq > iv_attrs.attr_pstate0_freq_mhz && iv_attrs.attr_fmax_enable == 1)
-            {
-                iv_attrs.attr_pstate0_freq_mhz = l_fmax_freq;
-            }
-            else if ( l_fmax_freq == 0  || iv_attrs.attr_fmax_enable == 0)
-            {
-                if (l_ut_freq > iv_attrs.attr_pstate0_freq_mhz ||
-                        iv_attrs.attr_pstate0_freq_mhz == 0)
-                {
-                    iv_attrs.attr_pstate0_freq_mhz = l_ut_freq;
-                }
-                else
-                {
-                    if (l_ut_freq != iv_attrs.attr_pstate0_freq_mhz)
-                    {
-                        if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
-                        {
-                            FAPI_ASSERT_NOEXIT(false,
-                                    fapi2::PSTATE_PB_UT_PSTATE0_FREQ_MISMATCH(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_UT_FREQ(l_ut_freq)
-                                    .set_PSTATE0_FREQ(iv_attrs.attr_pstate0_freq_mhz),
-                                    "Pstate Parameter Block WOF Biased #V CF6 error being logged");
-                        }
-                        else if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN)
-                        {
-                            FAPI_ERR("PSTATE0 freq %08x is not equal to UT Freq %08x",iv_attrs.attr_pstate0_freq_mhz,l_ut_freq);
-                        }
-                        else if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
-                        {
-                            FAPI_ASSERT(false,
-                                    fapi2::PSTATE_PB_UT_PSTATE0_FREQ_MISMATCH()
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_UT_FREQ(l_ut_freq)
-                                    .set_PSTATE0_FREQ(iv_attrs.attr_pstate0_freq_mhz),
-                                    "Pstate Parameter Block WOF Biased #V CF6 error being logged");
-                        }
-                    }
-                }
-            }
-
-            l_tmp_ceil_freq = l_ceil_freq_mhz;
-            if ( iv_attrs.attr_pstate0_freq_mhz > l_ceil_freq_mhz)
-            {
-                l_tmp_ceil_freq = iv_attrs.attr_pstate0_freq_mhz;
-            }
-            FAPI_DBG("temp ceiling %04d MHz (0x%X)", l_tmp_ceil_freq, l_tmp_ceil_freq );
-
-            //If the system core ceiling freq is less then of Pstate0 (of all the
-            //procs) then need to update system core ceiling freq
-            FAPI_DBG("ceiling frequency check:  sys %04d ceil %04d", l_sys_freq_core_ceil_mhz, l_tmp_ceil_freq);
-            if ( (l_sys_freq_core_ceil_mhz != 0) && l_sys_freq_core_ceil_mhz < l_tmp_ceil_freq)
-            {
-                l_tmp_ceil_freq = l_sys_freq_core_ceil_mhz;
-            }
-
-            //Compute WOFBase (minumim across chips)
-            if (l_wofbase_freq > iv_attrs.attr_nominal_freq_mhz &&
-                    iv_attrs.attr_nominal_freq_mhz == 0)
-            {
-                iv_attrs.attr_nominal_freq_mhz = l_wofbase_freq;
-            }
-            else
-            {
-                if (l_wofbase_freq != iv_attrs.attr_nominal_freq_mhz)
-                {
-                    FAPI_INF("Present System WOF Base freq %04d is not equal to this chip's WOF Base Freq %04d",
-                            revle32(iv_attrs.attr_nominal_freq_mhz), l_wofbase_freq);
-                    // This does not produce an error log as the system will operate ok
-                    // for this case.
-                }
-
-                if ( l_wofbase_freq < iv_attrs.attr_nominal_freq_mhz)
-                {
-                    iv_attrs.attr_nominal_freq_mhz = l_wofbase_freq;
-                }
-            }
-
-            FAPI_DBG("nominal_freq %04d (%04X)",
-                    iv_attrs.attr_nominal_freq_mhz, iv_attrs.attr_nominal_freq_mhz);
-
-            if (l_sys_freq_core_ceil_mhz < iv_attrs.attr_nominal_freq_mhz)
-            {
-                iv_attrs.attr_nominal_freq_mhz = l_sys_freq_core_ceil_mhz;
-                FAPI_INF("Clipping the nominal frequency to the ceiling frequency:  %04d ",
-                        iv_attrs.attr_nominal_freq_mhz);
-            }
-
-            if (l_sys_freq_core_floor_mhz > iv_attrs.attr_nominal_freq_mhz)
-            {
-                iv_attrs.attr_nominal_freq_mhz = l_sys_freq_core_floor_mhz;
-                FAPI_INF("Raising the nominal frequency to the floor frequency:  %04d ",
-                        iv_attrs.attr_nominal_freq_mhz);
-            }
-
-            //Temporary code
-            //This change is a placeholder for correcting the setting of
-            //ATTR_NOMINAL_FREQ_MHZ from the Fixed Frequency #V value until the
-            //new structures for the WOF Tables source of this is in place
-            if ( !l_cnt )
-            {
-                iv_attrs.attr_nominal_freq_mhz = l_fixed_freq;
-                l_cnt = 1;
-            }
-            if (iv_attrs.attr_nominal_freq_mhz < l_fixed_freq)
-            {
-                iv_attrs.attr_nominal_freq_mhz = l_fixed_freq;
-            }
-
-        } //end of proc list
-
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ, sys_target,iv_attrs.attr_pstate0_freq_mhz));
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_NOMINAL_FREQ_MHZ, sys_target, iv_attrs.attr_nominal_freq_mhz));
-
-        l_floor_freq_mhz = l_tmp_psav_freq;
-        l_ceil_freq_mhz = l_tmp_ceil_freq;
-
-        iv_attrs.attr_freq_core_ceiling_mhz = l_ceil_freq_mhz;
-        FAPI_INF("Computed ceiling frequency: %04d (0x%04x)", l_ceil_freq_mhz, l_ceil_freq_mhz);
-        FAPI_INF("Computed floor frequency: %04d (0x%04x)", l_sys_freq_core_floor_mhz, l_sys_freq_core_floor_mhz);
-
-        //Update system ceil and floor freq
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ, sys_target,l_ceil_freq_mhz));
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ, sys_target,l_sys_freq_core_floor_mhz));
-
-        for (auto l_proc_target : sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
-        {
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, l_proc_target,l_ceil_freq_mhz));
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, l_proc_target,l_floor_freq_mhz));
-        }
-    }
-    while(0);
 fapi_try_exit:
     FAPI_INF("PlatPmPPB::pm_set_frequency <<<<<<<");
     return fapi2::current_err;

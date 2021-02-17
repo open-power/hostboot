@@ -40,6 +40,7 @@
 #include <pstates_table.H>
 #include "p10_pm_get_poundv_bucket.H"
 #include "p10_pm_get_poundw_bucket.H"
+#include "p10_pm_set_system_freq.H"
 
 #define INVALID_BUS_NUM   0xFF
 
@@ -433,16 +434,6 @@ class PlatPmPPB
                                const uint32_t  region,
                                const uint32_t  d_region,
                                PoundWEntry_t* ip);
-
-        ///////////////////////////////////////////////////////////
-        ////////   create_stretched_points
-        ///////////////////////////////////////////////////////////
-        fapi2::ReturnCode create_stretched_pts();
-
-        ///////////////////////////////////////////////////////////
-        ////////   create_stretched_points
-        ///////////////////////////////////////////////////////////
-        fapi2::ReturnCode create_stretched_pts_poundW();
 
         /// -----------------------------------------------------------------------
         /// @brief Compute VPD points of different regions

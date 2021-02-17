@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,14 +119,7 @@ typedef struct __attribute__((__packed__))  voltageBucketData
     // bucket Id
     uint8_t bucketId;
 
-    //PowerSave
-    //Curve FIT1
-    //Curve FIT2
-    //WOF Base
-    //Curve FIT3
-    //Curve FIT4
-    //Ultra turbo
-    //Fmax
+    //Curve FIT0 - Curve FIT7
     poundV_entry_pts_t    operating_pts[NUM_OP_POINTS];
 
     //Static Rails

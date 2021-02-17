@@ -1990,9 +1990,7 @@
   </description>
     <simpleType>
       <uint32_t>
-        <!-- TODO RTC:260091 Revisit ATTR_FREQ_CORE_CEILING_MHZ
-             after HWP fix is available -->
-        <default>0x07D0</default>
+        <default>0x0</default>
       </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
