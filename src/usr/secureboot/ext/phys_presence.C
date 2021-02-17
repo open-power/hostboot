@@ -494,9 +494,9 @@ errlHndl_t handlePhysPresenceWindow(void)
         doAttrCrossOver = true;
 
         // Document special case if it's -ONLY- KEY_CLEAR_REQUEST_MFG
-        // or KEY_CLEAR_REQUEST_MFG_ALL
-        // NOTE: The check that this is an imprint driver was made in
-        // getKeyClearRequest()
+        // -OR- KEY_CLEAR_REQUEST_MFG_ALL
+        // NOTE: The check that this is an imprint driver or security is disabled
+        // was made in getKeyClearRequest()
         if ((keyClearRequests == KEY_CLEAR_REQUEST_MFG) ||
             (keyClearRequests == KEY_CLEAR_REQUEST_MFG_ALL))
         {

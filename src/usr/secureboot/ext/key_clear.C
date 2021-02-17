@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -221,15 +221,16 @@ void getKeyClearRequest(bool & o_requestPhysPres,
 #endif
 
     // First check if either the KEY_CLEAR_REQUEST_MFG bit or the
-    // KEY_CLEAR_REQUEST_MFG_ALL bit are set and we have a production driver;
-    // if so, clear these bits.
+    // KEY_CLEAR_REQUEST_MFG_ALL bit are set.
+    // If we have a production driver and security is set, we must clear these bits
     // Using the presence of a backdoor to assert we have an imprint/development
     // driver
     bool isImprintDriver = SECUREBOOT::getSbeSecurityBackdoor();
 
     if (((l_keyClearRequests & KEY_CLEAR_REQUEST_MFG) ||
          (l_keyClearRequests & KEY_CLEAR_REQUEST_MFG_ALL)) &&
-        (isImprintDriver == false))
+        ((isImprintDriver == false) &&
+          SECUREBOOT::enabled()))
     {
         // create a temporary variable and clear the bit
         uint16_t tmp = static_cast<uint16_t>(l_keyClearRequests);
@@ -237,9 +238,10 @@ void getKeyClearRequest(bool & o_requestPhysPres,
 
         SB_INF("getKeyClearRequest: Either/both KEY_CLEAR_REQUEST_MFG (0x%.04X)"
                " or KEY_CLEAR_REQUEST_MFG_ALL (0x%.04X) is set on a production "
-               "driver: 0x%.04X. Clearing these bits so new value is 0x%.04X",
-                KEY_CLEAR_REQUEST_MFG, KEY_CLEAR_REQUEST_MFG_ALL,
-                l_keyClearRequests, tmp);
+               "driver with security enabled: 0x%.04X. Clearing these bits so "
+               "new value is 0x%.04X",
+               KEY_CLEAR_REQUEST_MFG, KEY_CLEAR_REQUEST_MFG_ALL,
+               l_keyClearRequests, tmp);
 
         // set output parameter to updated temporary variable
         l_keyClearRequests = static_cast<TARGETING::KEY_CLEAR_REQUEST>(tmp);
@@ -252,20 +254,17 @@ void getKeyClearRequest(bool & o_requestPhysPres,
     // physical presence assertion (defaulted to false above)
     if (l_keyClearRequests != KEY_CLEAR_REQUEST_NONE)
     {
-        // If it's -ONLY- KEY_CLEAR_REQUEST_MFG or KEY_CLEAR_REQUEST_MFG_ALL
-        // and an imprint driver then there's no need to request physical
-        // presence assertion
-        if (((l_keyClearRequests == KEY_CLEAR_REQUEST_MFG) ||
-             (l_keyClearRequests == KEY_CLEAR_REQUEST_MFG_ALL)) &&
-            (isImprintDriver == true))
+        // If it's -ONLY- KEY_CLEAR_REQUEST_MFG --OR-- KEY_CLEAR_REQUEST_MFG_ALL
+        // then there's no need to request physical presence assertion
+        if ((l_keyClearRequests == KEY_CLEAR_REQUEST_MFG) ||
+            (l_keyClearRequests == KEY_CLEAR_REQUEST_MFG_ALL))
         {
             o_requestPhysPres = false;
             SB_INF("getKeyClearRequest: Only KEY_CLEAR_REQUEST_MFG (0x%.04X) "
-                   "or KEY_CLEAR_REQUEST_MFG_ALL (0x%.04X) is set on an "
-                   "imprint driver: 0x%.04X. No need to request physical "
-                   "presence assertion",
-                    KEY_CLEAR_REQUEST_MFG, KEY_CLEAR_REQUEST_MFG_ALL,
-                    l_keyClearRequests);
+                   "or KEY_CLEAR_REQUEST_MFG_ALL (0x%.04X) is set: 0x%.04X. "
+                   "No need to request physical presence assertion",
+                   KEY_CLEAR_REQUEST_MFG, KEY_CLEAR_REQUEST_MFG_ALL,
+                   l_keyClearRequests);
         }
         // Some bit(s) are set and therefore require physical presence assertion
         else
