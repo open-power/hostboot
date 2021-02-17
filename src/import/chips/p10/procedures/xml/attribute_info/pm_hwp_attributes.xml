@@ -812,6 +812,72 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_WOF_TABLE_OVERRIDE_UT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The UltraTurbo override value from the WOF Tables Header.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_WOF_TABLE_OVERRIDE_WB</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The PowerSave override value from the WOF Tables Header.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_WOF_TABLE_OVERRIDE_PS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The PowerSave override value from the WOF Tables Header.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_WOF_TABLE_OVERRIDE_FF</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The Fixed Frequency override value from the WOF Tables Header.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_WOF_TABLE_OVERRIDE_SP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The Socket Power override value from the WOF Tables Header.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_WOF_TABLE_OVERRIDE_RC</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The RDP Current override value from the WOF Tables Header.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
  <attribute>
 <id>ATTR_WOF_IO_START</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>

@@ -130,12 +130,9 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     // this will be executed in istep 10
     if(i_action == APPLY_VOLTAGE_SETTINGS)
     {
-        l_pmPPB.get_pstate_attrs(attrs);
+        FAPI_INF("> p10_setup_evid Apply");
 
-        //TODO nest dpll register is not working on awan model
-        //so for now this code will be commented.
-        //RTC:207137 will be used to enable this code.
-        //HW491247:to track nest dpll issue
+        l_pmPPB.get_pstate_attrs(attrs);
 
         // Read and compare DPLL and safe mode value
         FAPI_TRY (p10_read_dpll_value(i_target,
@@ -242,6 +239,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             }
         }
 
+        FAPI_INF("< p10_setup_evid Apply");
     }
 
 fapi_try_exit:
@@ -264,6 +262,8 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     uint32_t    l_present_voltage_mv;
     uint32_t    l_count;
     char        rail_str[8];
+
+    FAPI_INF("> p10_setup_evid_voltageRead");
 
     for (auto i_evid_value = 0; i_evid_value < MAX_VRM; ++i_evid_value)
     {
@@ -324,6 +324,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
         // initialize the AVS slave
+        FAPI_INF("   Sending AVSBus idle frame");
         FAPI_TRY(avsIdleFrame(i_target, i_bus_num[i_evid_value], BRIDGE_NUMBER));
 
         // Read the present voltage
@@ -358,6 +359,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     } //end of for
 
 fapi_try_exit:
+    FAPI_INF("< p10_setup_evid_voltageRead");
     return fapi2::current_err;
 }
 
@@ -605,6 +607,8 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
     do
     {
+        FAPI_INF("> p10_read_dpll_value");
+
         if (!l_attr_safe_mode_freq )
         {
 
@@ -637,8 +641,10 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         o_safe_mode_dpll_fmin_value = ((l_attr_safe_mode_freq * 1000) * i_proc_dpll_divider) /
                                       i_freq_proc_refclock_khz;
 
-        FAPI_INF("NEST DPLL fmult 0x%08X safe_mode_dpll_value 0x%08X (%d) safe_mode_dpll_fmin 0x%08X (%d)",
-                 o_fmult_data, o_safe_mode_dpll_value, o_safe_mode_dpll_value, o_safe_mode_dpll_fmin_value);
+        FAPI_INF("NEST DPLL fmult 0x%08X safe_mode_dpll_value 0x%04X (%d) safe_mode_dpll_fmin 0x%04X (%d)",
+                 o_fmult_data,
+                 o_safe_mode_dpll_value, o_safe_mode_dpll_value,
+                 o_safe_mode_dpll_fmin_value, o_safe_mode_dpll_fmin_value);
 
         if (o_fmult_data >= l_attr_safe_mode_freq)
         {
@@ -654,6 +660,7 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     while (0);
 
 fapi_try_exit:
+    FAPI_INF("< p10_read_dpll_value");
     return fapi2::current_err;
 }
 
@@ -769,6 +776,7 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
     while (0);
 
 fapi_try_exit:
+    FAPI_INF("< p10_update_dpll_value");
     return fapi2::current_err;
 }
 

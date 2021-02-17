@@ -65,7 +65,9 @@ typedef struct __attribute__((__packed__))
     uint16_t vdd_vmin;
     uint16_t ivdd_powr_cur_act;
     uint8_t  core_powr_temp;
-    uint8_t  spare[6];
+    uint16_t rt_tdp_ac_10ma;
+    uint16_t rt_tdp_dc_10ma;
+    uint8_t  spare[2];
 } poundV_entry_pts_t;
 
 
@@ -80,8 +82,13 @@ typedef struct __attribute__((__packed__))
     uint16_t SRVpciVltg;
     uint16_t SRIpciTdpAcCurr;
     uint16_t SRIpciTdpDcCurr;
+    uint16_t SRVAvddVltg;
+    uint16_t SRIAvddTdpAcCurr;
+    uint16_t SRIAvddTdpDcCurr;
     uint8_t  modelDataFlag;
-    uint8_t  SRRsvd[16];
+    uint16_t SRVDDVmax;
+    uint16_t SRVCSVmax;
+    uint8_t  SRRsvd[4];
 } poundV_static_rails_t;
 
 typedef struct __attribute__((__packed__))
@@ -91,6 +98,7 @@ typedef struct __attribute__((__packed__))
     uint16_t VdnSrtSocPow;
     uint16_t VIOSrtSocPow;
     uint16_t VPCISrtSocPow;
+    uint16_t AVDDSrtSocPow;
     uint16_t TSrtSocPowAct;
     uint16_t IDDRdpLmt;
     uint8_t  VddTdpWofIndx;
@@ -107,7 +115,7 @@ typedef struct __attribute__((__packed__))
     uint16_t VddFmxCoreFreq;
     uint8_t  MmaThrTemp;
     uint8_t  IOThrTemp;
-    uint16_t rsvd;
+    uint16_t FxFreqPowTgt;
 } poundV_other_info_t;
 //Represents the data contained within a single #V (version=1) bucket
 //Note: This structure should not be assumed to be binary identical

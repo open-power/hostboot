@@ -216,7 +216,7 @@
 
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_POUNDV_WOF_CF6_ERROR</rc>
+    <rc>RC_PSTATE_PB_POUNDV_WOF_UT_ERROR</rc>
     <description>WOF was intending to be enabled but could not due to #V validity
     checking issue of the UltraTurbo content.  The machine continues as
     functional but with WOF disabled.
@@ -245,7 +245,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_BIASED_POUNDV_WOF_CF6_ERROR</rc>
+    <rc>RC_PSTATE_PB_BIASED_POUNDV_WOF_UT_ERROR</rc>
     <description>WOF was intending to be enabled but could not due to #V validity
     checking issue of the biased UltraTurbo content.  The machine continues as
     functional but with WOF disabled.
@@ -297,6 +297,30 @@
     <ffdc>AMB_COND_START</ffdc>
     <ffdc>AMB_COND_STEP</ffdc>
     <ffdc>AMB_COND_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_WOF_OVERRIDE_INVALID</rc>
+    <description>WOF Header Override data is invalid.  The machine continues as
+    functional but with WOF disabled.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIP_PS</ffdc>
+    <ffdc>SYS_PS</ffdc>
+    <ffdc>CHIP_WB</ffdc>
+    <ffdc>SYS_WB</ffdc>
+    <ffdc>CHIP_UT</ffdc>
+    <ffdc>SYS_UT</ffdc>
+    <ffdc>CHIP_FF</ffdc>
+    <ffdc>SYS_FF</ffdc>
+    <ffdc>CHIP_SP</ffdc>
+    <ffdc>SYS_SP</ffdc>
+    <ffdc>CHIP_RC</ffdc>
+    <ffdc>SYS_RC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -518,7 +542,7 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_PB_CORE_FLOOR_FREQ_GT_CF6_FREQ</rc>
-    <description>The core floor frequency is greater than ultra turbo freq.
+    <description>The core floor frequency is greater than CF6 freq of the part.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>CORE_FLOOR_FREQ</ffdc>
@@ -543,9 +567,9 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_SAFE_FREQ_GT_CF6_FREQ</rc>
+    <rc>RC_PSTATE_PB_SAFE_FREQ_GT_PS0_FREQ</rc>
     <description>The calculated Save Mode frequency, after uplifting to
-    account for VDM droop events, is above the UltraTurbo frequency of
+    account for DDS droop events, is above the maximum frequency of
     the part.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -602,7 +626,7 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_MULTINODE_PSTATE0_MISMATCH</rc>
-    <description> THere is a mismatch in pstate0 value when we 
+    <description> THere is a mismatch in pstate0 value when we
     compared with different node pstate0 values
     </description>
     <ffdc>LOCAL_PSTATE0_FREQ</ffdc>

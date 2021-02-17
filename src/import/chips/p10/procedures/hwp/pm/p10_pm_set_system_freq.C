@@ -44,15 +44,16 @@
 // ----------------------------------------------------------------------
 #include <fapi2.H>
 #include "p10_pm_set_system_freq.H"
-//#include "p10_pm_get_poundv_bucket.H"
-#include <p10_pm_utils.H>
-#include "p10_pstate_parameter_block_int_vpd.H"
+#include "p10_pm_get_poundv_bucket.H"
+#include "p10_pm_utils.H"
+#include <endian.h>
 
 // Defined here so as not have to shadow pstates_common.H to HWSV
 #define CF7 7
 
 fapi2::ReturnCode pm_set_frequency(
        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target);
+
 
 ///////////////////////////////////////////////////////////
 ////////    p10_pm_set_system_freq
@@ -80,6 +81,8 @@ fapi2::ReturnCode pm_set_frequency(
     FAPI_INF("pm_set_frequency >>>>>");
 
     // Bring in data for local testing
+    #define __INTERNAL_POUNDV__
+    #include "p10_pstate_parameter_block_int_vpd.H"
 
     fapi2::voltageBucketData_t l_poundV_data;
     uint32_t l_fmax_freq = 0;
@@ -107,7 +110,6 @@ fapi2::ReturnCode pm_set_frequency(
 
     do
     {
-
         //We loop thru all the processors in the system and will figure out the
         //max of PSAV, FMAX, and UT in that list.  We look for the min of the WOFBase
         //values.  An attribute switch is used to specifically fail the WOFBase check.
@@ -137,19 +139,16 @@ fapi2::ReturnCode pm_set_frequency(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NOMINAL_FREQ_MHZ,
                 i_sys_target, l_sys_nominal_freq_mhz));
 
-        //If pstate0 freq is set means, we have already computed other
-        //frequencies (floor and ceil) as well
-        if (l_sys_pstate0_freq_mhz)
-        {
-            FAPI_INF("PSTATE0 FREQ is already set %08X", l_sys_pstate0_freq_mhz);
-            break;
-        }
-
         // Find Pstate 0 across the processor chips depending on the mode (FMax or UT)
         for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
+            static const uint32_t TGT_STRING_SIZE = 64;
+            char l_tgt_string[TGT_STRING_SIZE];
+            fapi2::toString(l_proc_target, l_tgt_string, TGT_STRING_SIZE);
+            FAPI_INF("Processing %s", l_tgt_string);
 
             fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE_Type l_poundv_static_data = 0;
+            fapi2::ATTR_FREQ_BIAS_Type attr_freq_bias_0p5pct = 0;
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
                         i_sys_target,
@@ -159,39 +158,46 @@ fapi2::ReturnCode pm_set_frequency(
             if (l_poundv_static_data)
             {
                 FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is set");
-                FAPI_INF("&l_poundV_data %p;   &g_vpd_PVData %p sizeof(g_vpd_PVData) %d sizeof(l_poundV_data) %d",
-                          &l_poundV_data,&g_vpd_PVData,sizeof(g_vpd_PVData),sizeof(l_poundV_data));
-
-                memset(&l_poundV_data, 0, sizeof(g_vpd_PVData));
                 memcpy(&l_poundV_data, &g_vpd_PVData, sizeof(g_vpd_PVData));
             }
             else
             {
                 FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is NOT set");
 
-                FAPI_INF("&l_poundV_data 1 %p; sizeof(l_poundV_data) %d",
-                         &l_poundV_data,sizeof(l_poundV_data));
 
                 //Read #V data from each proc
                 FAPI_TRY(p10_pm_get_poundv_bucket(l_proc_target, l_poundV_data));
-
-                FAPI_INF("&l_poundV_data 2 %p; sizeof(l_poundV_data) %d",
-                         &l_poundV_data,sizeof(l_poundV_data));
             }
 
-            l_pstate0_freq = revle16(l_poundV_data.operating_pts[CF7].core_frequency);
+#ifndef FIPSODE
+            fapi2::voltageBucketData_t* p_poundV_data = &l_poundV_data;
+            FAPI_TRY(wof_apply_overrides(l_proc_target, p_poundV_data));
+#endif
 
-            l_fmax_freq     = revle16(l_poundV_data.other_info.VddFmxCoreFreq);
-            l_ut_freq       = revle16(l_poundV_data.other_info.VddUTCoreFreq);
-            l_wofbase_freq  = revle16(l_poundV_data.other_info.VddTdpWofCoreFreq);
-            l_psav_freq     = revle16(l_poundV_data.other_info.VddPsavCoreFreq);
-            l_part_freq    = revle16(l_poundV_data.other_info.FxdFreqMdeCoreFreq);
-            FAPI_INF("VPD fmax_freq=%04d, ut_freq=%04d  wof_base=%04d",
-                   l_fmax_freq, l_ut_freq, l_wofbase_freq);
-            FAPI_INF("part_freq=%04d, psav_freq=%04d ",
-                   l_part_freq, l_psav_freq );
+            l_pstate0_freq = htobe16(l_poundV_data.operating_pts[CF7].core_frequency);
 
-            //Compute pstate0 freq using cF7
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_BIAS,
+                        i_sys_target,
+                        attr_freq_bias_0p5pct),
+                    "Error from FAPI_ATTR_GET for attribute ATTR_FREQ_BIAS");
+
+            l_fmax_freq     = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddFmxCoreFreq),
+                                              attr_freq_bias_0p5pct);
+
+            l_ut_freq       = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddUTCoreFreq),
+                                              attr_freq_bias_0p5pct);
+
+            l_wofbase_freq  = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddTdpWofCoreFreq),
+                                              attr_freq_bias_0p5pct);
+
+            l_psav_freq     = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddPsavCoreFreq),
+                                              attr_freq_bias_0p5pct);
+
+            l_part_freq    = bias_adjust_mhz(htobe16(l_poundV_data.other_info.FxdFreqMdeCoreFreq),
+                                              attr_freq_bias_0p5pct);
+
+            FAPI_INF("VPD fmax_freq=%04d, ut_freq=%04d  psav_freq=%04d, psav_freq=%04d ",
+                   l_fmax_freq, l_ut_freq, l_wofbase_freq, l_psav_freq);
 
             if (l_pstate0_freq > l_sys_pstate0_freq_mhz)
             {
@@ -287,7 +293,6 @@ fapi2::ReturnCode pm_set_frequency(
                     l_tmp_wofbase_freq = l_wofbase_freq;
                 }
             }
-
             //Compute Fixed Frequency (minumim across chips)
             if (l_part_freq > l_part_running_freq &&
                     l_part_running_freq == 0)
@@ -318,7 +323,6 @@ fapi2::ReturnCode pm_set_frequency(
         } //end of proc list
 
         // Now clip things with system overrides
-
         // ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ_OVERRIDE --> MRW
         //  -->l_sys_freq_core_ceil_mhz_ovr
         //

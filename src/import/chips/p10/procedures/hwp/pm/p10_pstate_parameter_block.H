@@ -143,8 +143,8 @@ typedef struct
     uint8_t attr_system_wof_throttle_control_loop_disable;
     uint8_t attr_system_wof_throttle_control_loop_mode;
     uint8_t attr_dds_trip_mode;
-    uint8_t attr_dds_dpll_slew_mode;
     uint8_t attr_dds_trip_interpolation_control;
+    uint8_t attr_dds_dpll_slew_mode;
     uint8_t attr_dds_bias_enable;
     // RTC: 269546:  remove the FMax Enable mode control
     uint8_t attr_fmax_enable;
@@ -275,6 +275,18 @@ class PlatPmPPB
             uint32_t& io_size);
 
         /// -----------------------------------------------------------------------
+        /// @brief Convert the WOF Tables from System version to the HOMER version
+        /// @param[in]     l_wof_table_data points to WOF data tables
+        /// @param[out]    o_buf points to WOF data in the output memory buffer
+        /// @param[inout]  io_size size of the wof  table
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode wof_convert_tables(
+            fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data,
+            uint8_t* o_buf,
+            uint32_t& io_size);
+
+        /// -----------------------------------------------------------------------
         /// @brief VRT data initialization from WOF data
         /// @param[in]     i_pBuffer WOF data buffer
         /// @param[inout]  o_vrt_data  vrt data
@@ -285,16 +297,17 @@ class PlatPmPPB
             VRT_t* o_vrt_data);
 
         /// -----------------------------------------------------------------------
+        /// @brief Set the WOF override flags in the class. Used for marking output
+        ///         traces with indicators.
+        /// @param[in]     pound V data
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        fapi2::ReturnCode set_wof_override_flags(voltageBucketData_t* i_poundV_data);
+
+        /// -----------------------------------------------------------------------
         /// @brief Initialize global pstate parameter block
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode gppb_init( GlobalPstateParmBlock_t* i_globalppb);
-
-        /// -----------------------------------------------------------------------
-        /// @brief Initialize local pstate parameter block
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
-        /// -----------------------------------------------------------------------
-//        fapi2::ReturnCode lppb_init(LocalPstateParmBlock* i_localppb);
 
         /// -----------------------------------------------------------------------
         /// @brief This will set the pstate feature attrbutes(DDS,RESCLK,VRM,WOF)
@@ -330,7 +343,6 @@ class PlatPmPPB
         fapi2::ReturnCode pm_set_frequency();
 
         /// -----------------------------------------------------------------------
-
         /// @brief Read #V data from module vpd
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
@@ -395,11 +407,19 @@ class PlatPmPPB
         /// @brief Converts frequency value to pstate number
         /// @param[in]     i_freq_khz input frequency
         /// @param[out]    o_pstate pstate output for a given inut frequency
-        /// @return        pstate value
+        /// @return        error statee
         /// -----------------------------------------------------------------------
         int freq2pState (const uint32_t freq_khz,
                          Pstate* o_pstate,
                          const FREQ2PSTATE_ROUNDING i_round = ROUND_SLOW);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Converts a pstate number to a frequenc
+        /// @param[in]     i_pstate pstate output for a given inut frequency
+        /// @param[out]    o_freq_khz input frequency
+        /// -----------------------------------------------------------------------
+        void pState2freq (const Pstate i_pstate,
+                          uint32_t* o_freq_khz);
 
         /// -----------------------------------------------------------------------
         /// @brief Safe mode frequency and voltage init
@@ -407,30 +427,40 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode safe_mode_init( void );
 
-        ///////////////////////////////////////////////////////////
-        ////////   find_freq_region
-        ///////////////////////////////////////////////////////////
+        /// -----------------------------------------------------------------------
+        /// @brief Determine the region number of a frequency within
+        ///        iv_attr_mvpd_poundV_raw_orig
+        /// @param[in]     freq_mhz     Frequency in MHz
+        /// @return                     Number of regions
+        /// -----------------------------------------------------------------------
         uint32_t find_freq_region(const uint32_t freq_mhz);
 
-        ///////////////////////////////////////////////////////////
-        ////////   region_steps
-        ///////////////////////////////////////////////////////////
+        /// -----------------------------------------------------------------------
+        /// @brief Determine the number if frequency steps in a
+        ///        iv_attr_mvpd_poundV_raw_orig region
+        /// @param[in]     region       region number
+        /// @return                     Number of steps
+        /// -----------------------------------------------------------------------
         uint32_t region_steps(const uint32_t region);
 
         ///////////////////////////////////////////////////////////
         ////////   interpolate_freq_point
         ///////////////////////////////////////////////////////////
         void interpolate_freq_pt(const uint32_t  freq,
-                                 const uint32_t  region,
                                  PoundVOpPoint_t* ip);
 
-        ///////////////////////////////////////////////////////////
-        ////////   interpolate_pw_point
-        ///////////////////////////////////////////////////////////
+        /// -----------------------------------------------------------------------
+        /// @brief Interpolate #W points
+        /// @param[in]     freq     Frequency to interpolate
+        /// @param[in]     region   region number
+        /// @param[in]     d_region #W Delay region
+        /// @param[in]     ip       #W Entry Pointer
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
         void interpolate_pw_pt(const uint32_t  freq,
                                const uint32_t  region,
                                const uint32_t  d_region,
-                               PoundWEntry_t* ip);
+                               PoundWEntry_t*  ip);
 
         /// -----------------------------------------------------------------------
         /// @brief Compute VPD points of different regions
@@ -543,17 +573,23 @@ class PlatPmPPB
         bool is_wof_throttle_enabled();
 
         /// -----------------------------------------------------------------------
+        /// @brief Get pstate attribute data
+        /// @param[out]    o_attr  populate attribute list data
+        /// @return        none
+        /// -----------------------------------------------------------------------
+        void get_pstate_attrs(AttributeList& o_attr);
+
+        /// -----------------------------------------------------------------------
         /// @brief Compute and apply biased values
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode apply_extint_bias();
 
         /// -----------------------------------------------------------------------
-        /// @brief Get pstate attribute data
-        /// @param[out]    o_attr  populate attribute list data
-        /// @return        none
+        /// @brief Update the Pstates withing the biased structure
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
-        void get_pstate_attrs(AttributeList& o_attr);
+        fapi2::ReturnCode update_biased_pstates();
 
         /// -----------------------------------------------------------------------
         /// @brief apply biased values for #V data
@@ -562,53 +598,18 @@ class PlatPmPPB
         fapi2::ReturnCode apply_biased_values();
 
         /// -----------------------------------------------------------------------
-        /// @brief Compute bias value for pre-defined percentage unit
-        /// @param[in]     i_value Biased value
-        /// @return bias value
+        /// @brief Get the raw #W data
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
-        double calc_bias(const int8_t i_value)
-        {
-            double temp = 1.0 + ((BIAS_PCT_UNIT / 100) * static_cast<double>(i_value));
-            FAPI_DBG("    calc_bias: input bias (in 1/2 percent) = %d; percent = %4.1f biased multiplier = %6.3f",
-                     i_value, (i_value * BIAS_PCT_UNIT), temp);
-            return temp;
-        }
-
-        /// -----------------------------------------------------------------------
-        /// @brief Compute smallest value for a given input
-        /// @param[in]     x value
-        /// @return smallest value
-        /// -----------------------------------------------------------------------
-        double internal_ceil(double x)
-        {
-            if ((x - static_cast<int>(x)) > 0)
-            {
-                return static_cast<int>(x) + 1;
-            }
-
-            return (static_cast<int>(x));
-        }
-
-        /// -----------------------------------------------------------------------
-        /// @brief Compute largest value for a given input
-        /// @param[in]     x value
-        /// @return largest value
-        /// -----------------------------------------------------------------------
-        double internal_floor(double x)
-        {
-            if(x >= 0)
-            {
-                return static_cast<int>(x);
-            }
-
-            return static_cast<int>(x - 0.9999999999999999);
-        }
-
         void get_poundV_data_raw(PoundVOpPoint_t* o_data)
         {
             memcpy(o_data, iv_attr_mvpd_poundV_raw, sizeof(iv_attr_mvpd_poundV_raw));
         }
 
+        /// -----------------------------------------------------------------------
+        /// @brief Get the biased #W data
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
         void get_poundV_data_biased(PoundVOpPoint_t* o_data)
         {
             memcpy(o_data, iv_attr_mvpd_poundV_biased, sizeof(iv_attr_mvpd_poundV_biased));
@@ -714,47 +715,6 @@ class PlatPmPPB
                    true : false);
         } //end of isPstateModeEnabled
 
-
-        /// -----------------------------------------------------------------------
-        /// @brief Adjust bias value for given frequency value
-        /// @param[in]     i_value  frequency value
-        /// @param[in]     i_bias_0p5pct  bias value
-        /// @return computed biase value
-        /// -----------------------------------------------------------------------
-        uint32_t bias_adjust_mhz(const uint32_t i_value,
-                                 const int32_t i_bias_0p5pct)
-        {
-            double l_mult = calc_bias(i_bias_0p5pct);
-            double l_biased_value = static_cast<double>(i_value) * l_mult;
-            FAPI_DBG("  bias_adjust_mhz: i_value=%d; mult=%5.3f; biased value=%3.0f",
-                     i_value,
-                     l_mult,
-                     l_biased_value);
-            return (static_cast<uint32_t>(internal_floor(l_biased_value)));
-        }
-
-        /// -----------------------------------------------------------------------
-        /// @brief Adjust bias value for given vdd/vcs voltage
-        /// @param[in]     i_value vdd/vcs value
-        /// @param[in]     i_bias_0p5pct  bias value
-        /// @return computed biase value
-        /// -----------------------------------------------------------------------
-        uint32_t bias_adjust_mv(const uint32_t i_value,
-                                const int8_t i_bias_0p5pct)
-        {
-            double l_mult = calc_bias(i_bias_0p5pct);
-            double l_biased_value = static_cast<double>(i_value) * l_mult;
-            double l_ceiling = internal_ceil(l_biased_value);
-            uint32_t l_result = static_cast<uint32_t>(l_ceiling);
-            FAPI_DBG("  bias_adjust_mv:  i_value=%d; mult=%5.3f; biased value=%3.0f ceiling = %3.0f result = %d",
-                     i_value,
-                     l_mult,
-                     l_biased_value,
-                     l_ceiling,
-                     l_result);
-            return (l_result);
-        }
-
         /// -----------------------------------------------------------------------
         /// @brief Get the DCCR value that might have overrides
         /// @return DCCR value to use
@@ -778,6 +738,8 @@ class PlatPmPPB
         /// @return DCCR value to use
         /// -----------------------------------------------------------------------
         void poison_mvpd_poundV();
+
+
 
     public:
         bool                      iv_init_error;
@@ -811,35 +773,29 @@ class PlatPmPPB
         uint16_t                  iv_array_vdn_mv;
         uint16_t                  iv_array_vdd_mv;
 
-        PoundVOpPoint_t           iv_raw_vpd_pts[NUM_PV_POINTS];
-        PoundVOpPoint_t           iv_biased_vpd_pts[NUM_PV_POINTS];
         PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];
-
-        PoundVBias_t              iv_bias;
-
-        voltageBucketData_t       iv_poundV_raw_data;
-
-        PoundVStaticRails_t       iv_attr_mvpd_poundV_static_rails;
-        PoundVOtherInfo_t         iv_attr_mvpd_poundV_other_info;
-
-        PoundW_t                  iv_poundW_data;
-        IddqTable_t               iv_iddqt;
-
         PoundVOpPoint_t           iv_attr_mvpd_poundV_raw[NUM_PV_POINTS];
         PoundVOpPoint_t           iv_attr_mvpd_poundV_biased[NUM_PV_POINTS];
         PoundVOpPoint_t           iv_attr_mvpd_poundV_raw_orig[NUM_PV_POINTS];
         PoundVOpPoint_t           iv_attr_mvpd_data[NUM_PV_POINTS];
         uint8_t                   iv_poundV_bucket_id;
 
+        PoundVBias_t              iv_bias;
+        voltageBucketData_t       iv_poundV_raw_data;
+        PoundVStaticRails_t       iv_attr_mvpd_poundV_static_rails;
+        PoundVOtherInfo_t         iv_attr_mvpd_poundV_other_info;
+        PoundW_t                  iv_poundW_data;
+        IddqTable_t               iv_iddqt;
+
         SysPowerDistParms_t       iv_vdd_sysparam;
         SysPowerDistParms_t       iv_vcs_sysparam;
         SysPowerDistParms_t       iv_vdn_sysparam;
         SysPowerDistParms_t       iv_vio_sysparam;
 
+        uint32_t                  iv_vddFmaxFreq;
         uint32_t                  iv_vddPsavFreq;
         uint32_t                  iv_vddWofBaseFreq;
         uint32_t                  iv_vddUTFreq;
-        uint32_t                  iv_vddFmaxFreq;
 
         uint64_t                  iv_dccr_value;
         uint64_t                  iv_flmr_value;

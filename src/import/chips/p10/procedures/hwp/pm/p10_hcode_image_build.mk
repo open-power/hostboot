@@ -45,6 +45,7 @@ lib$(PROCEDURE)_DEPLIBS += p10_pstate_parameter_block
 lib$(PROCEDURE)_DEPLIBS += p10_pm_utils
 lib$(PROCEDURE)_DEPLIBS += p10_pm_get_poundw_bucket
 lib$(PROCEDURE)_DEPLIBS += p10_pm_get_poundv_bucket
+lib$(PROCEDURE)_DEPLIBS += p10_pm_set_system_freq
 lib$(PROCEDURE)_DEPLIBS += p10_qme_customize
 lib$(PROCEDURE)_DEPLIBS += p10_qme_build_attributes
 lib$(PROCEDURE)_DEPLIBS	+= p10_scan_compression

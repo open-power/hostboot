@@ -49,7 +49,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_FREQ_BIAS</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Frequency Bias - % of bias (signed twos complement in 0.5 percent steps) in
     the frequency associated with a Pstate. Applies to all #V points,
@@ -81,14 +81,14 @@
         1: VCS
 
     [Point] ->9 entries-:
-        0: PowerSave;
+        0: CF0;
         1: CF1;
         2: CF2;
         3: CF3;
         4: CF4;
         5: CF5;
-        6: UltraTurbo;
-        7: Fmax;
+        6: CF6;
+        7: CF7;
         8: Enable
 
     Producer:Attribute Overrides by Lab/Mfg Characterization Team
@@ -546,14 +546,14 @@
     attibute overrides the
 
     Array of 9 entries-:
-        0: PowerSave;
+        0: CF0;
         1: CF1;
         2: CF2;
-        3: WOF Base;
-        4: CF3;
-        5: CF4;
-        6: UltraTurbo;
-        7: Fmax;
+        3: CF3;
+        4: CF4;
+        5: CF5;
+        6: CF6;
+        7: CF7;
         8: Enable
 
     If index 8 is non-zero, the other entries are considered valid.
@@ -605,7 +605,8 @@
     <id>ATTR_DDS_DPLL_SLEW_MODE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-    Indicates the response of the DPLL frequency upon DDS events if is not ON.
+    Indicates the response of the DPLL frequency upon DDS events if the DDS is
+    enabled.
 
     NONE -> DPLL Mode 2, JUMP_PROTECT -> DPLL Mode 3,  SLEW_MODE -> DPLL Mode 4
 
@@ -791,6 +792,28 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Enables pstate parameter block code to use the static #V data
+
+    Consumer: p10_pstate_parameter_block.C
+
+    Platform default:OFF
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <initToZero/>
+    <overrideOnly/>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_AW_STATIC_DATA_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enables pstate parameter block code to use the static AW data
 
     Consumer: p10_pstate_parameter_block.C
 
@@ -1463,10 +1486,10 @@
     <valueType>uint8</valueType>
     <platInit/>
     <enum>
-        FAIL= 0,
+        FAIL = 0,
         INFO = 1,
         WARN = 2,
-        OFF = 3
+        OFF  = 3
     </enum>
     <default>WARN</default>
     <overrideOnly/>
@@ -1493,10 +1516,10 @@
     <valueType>uint8</valueType>
     <platInit/>
     <enum>
-        FAIL= 0,
+        FAIL = 0,
         INFO = 1,
         WARN = 2,
-        OFF = 3
+        OFF  = 3
     </enum>
     <default>WARN</default>
     <overrideOnly/>
@@ -1520,10 +1543,10 @@
     <valueType>uint8</valueType>
     <platInit/>
     <enum>
-        FAIL= 0,
+        FAIL = 0,
         INFO = 1,
         WARN = 2,
-        OFF = 3
+        OFF  = 3
     </enum>
     <default>WARN</default>
     <overrideOnly/>
@@ -1547,10 +1570,10 @@
     <valueType>uint8</valueType>
     <platInit/>
     <enum>
-        FAIL= 0,
+        FAIL = 0,
         INFO = 1,
         WARN = 2,
-        OFF = 3
+        OFF  = 3
     </enum>
     <default>WARN</default>
     <overrideOnly/>

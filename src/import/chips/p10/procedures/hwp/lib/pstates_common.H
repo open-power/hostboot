@@ -490,7 +490,11 @@ typedef struct
     /// Date Timestamp of the table set as established by the generation process.
     uint32_t table_date_timestamp;
 
-    uint32_t reserved2;
+    /// Override Match Frequency (in MHz)
+    uint16_t override_match_freq_mhz;
+
+    /// Override Match Power (in Watts)
+    uint16_t override_match_power_w;
 
     ///  ---- Double word 9 and 10 ----
 
@@ -502,6 +506,12 @@ typedef struct
 
     /// Up to 16 ASCII characters as a Package designator
     char package_name[16];
+
+    /// Core Sort Power Save Frequency (in MHz) (eg Fmin @ Vmin)
+    uint16_t sort_power_save_freq_mhz;
+
+    /// Core Sort Fixed Frequency (in MHz)
+    uint16_t sort_fixed_freq_mhz;
 
     // Padding to 128B is left to the compiler via the following attribute.
 
