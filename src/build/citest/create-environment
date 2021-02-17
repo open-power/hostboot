@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2020
+# Contributors Listed Below - COPYRIGHT 2014,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -69,7 +69,6 @@ if [[ ! -z "${VPO_COMPILE}" ]]; then
 else
     # EECACHE to be used for other Standalone builds
     EECACHE_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt`
-    EECACHE_PREBUILT2=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_2proc_prebuilt`
 fi
 
 if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
@@ -99,8 +98,6 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         # EECACHE to be used for other Standalone builds
         echo cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc
         cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc
-        echo cp ${EECACHE_PREBUILT2} ${STANDALONE_SIMICS}/eecache_2proc_prebuilt.bin.ecc
-        cp ${EECACHE_PREBUILT2} ${STANDALONE_SIMICS}/eecache_2proc_prebuilt.bin.ecc
     fi
 
 else
@@ -124,8 +121,6 @@ else
         execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./INSTALL.sh" "ppc"
         echo "cp ${EECACHE_PREBUILT} ${SANDBOXBASE}/simics/eecache_prebuilt.bin.ecc"
         execute_in_sandbox "cp ${EECACHE_PREBUILT} ${SANDBOXBASE}/simics/eecache_prebuilt.bin.ecc" "ppc"
-        echo "cp ${EECACHE_PREBUILT2} ${SANDBOXBASE}/simics/eecache_2proc_prebuilt.bin.ecc"
-        execute_in_sandbox "cp ${EECACHE_PREBUILT2} ${SANDBOXBASE}/simics/eecache_2proc_prebuilt.bin.ecc" "ppc"
     else
         execute_in_sandbox "start_simics -no_start -machine $MACHINE -batch_mode" \
                           "ppc" || exit -1

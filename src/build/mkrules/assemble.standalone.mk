@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -53,7 +53,7 @@ FFSTOOLS := ${STANDALONEDIR}/ffs
 # Staging directory (items used to assemble PNOR)
 STAGINGDIR := ${STANDALONEDIR}/staging
 # Path to external pnor dependencies
-HB_SIM_DEPS_PATH := /gsa/ausgsa/projects/h/hostboot/simbuild/dependencies
+HB_SIM_DEPS_PATH := ${HOSTBOOT_ENVIRONMENT}/simbuild/dependencies
 # P10 PNOR image being assembled
 OUTPUTPNOR := ${PNOR_LAYOUT_SELECTED}.pnor
 PNOR_LAYOUT = ${BUILDPNOR}/pnorLayoutP10.xml
@@ -134,6 +134,7 @@ DEVTREE_FINAL_IMG := DEVTREE.bin
 
 # Input image artifacts location
 OCC_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/occ/${OCC_ARTIFACT_ID}/
+$(info    OCC_ARTIFACT_LOCATION is $(OCC_ARTIFACT_LOCATION))
 WOF_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/wof/${WOF_ARTIFACT_ID}/
 DEVTREE_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/devtree/${DEVTREE_ARTIFACT_ID}/
 
@@ -141,6 +142,7 @@ DEVTREE_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/devtree/${DEVTREE_ARTIFACT_ID}/
 HBD_IMG := ${BASEIMAGESDIR}/simics_P10_targeting.bin
 WOFDATA_IMG := ${call get_files_full_path, ${WOF_ARTIFACT_LOCATION}}
 OCC_IMG := ${call get_files_full_path, ${OCC_ARTIFACT_LOCATION}}
+$(info    OCC_IMG is $(OCC_IMG))
 DEVTREE_IMG := ${call get_files_full_path, ${DEVTREE_ARTIFACT_LOCATION}}
 
 # Allow for overriding the HCODE image with a user supplied image

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -459,11 +459,8 @@ hb_simsetup()
 
         # EECACHE to be used for $PNOR_LAYOUT_SELECTED set as "P10" or "STANDALONE"
         EECACHE_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt`
-        EECACHE_PREBUILT2=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_2proc_prebuilt`
         echo "cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc"
         cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc
-        echo "cp ${EECACHE_PREBUILT2} ${STANDALONE_SIMICS}/eecache_2proc_prebuilt.bin.ecc"
-        cp ${EECACHE_PREBUILT2} ${STANDALONE_SIMICS}/eecache_2proc_prebuilt.bin.ecc
 
         exit 0
 
@@ -753,7 +750,7 @@ hb_cachesync()
 {
     [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
-    rsync -av /gsa/ausgsa/projects/h/hostboot/.binary_cache/ \
+    rsync -av ${HOSTBOOT_ENVIRONMENT}/.binary_cache/ \
               ${PROJECT_ROOT}/.git/hb_cache
 
     failure=0
@@ -772,7 +769,7 @@ hb_cacheadd()
 {
     [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
-    CACHE_PATH=/gsa/ausgsa/projects/h/hostboot/.binary_cache/
+    CACHE_PATH=${HOSTBOOT_ENVIRONMENT}/.binary_cache/
     FILE=$1
     shift
 

@@ -39,8 +39,6 @@ if( $vpo_compile == "1" ) {
 } else {
     if( $found_custom_eecache == 1 ) {
         echo "    - Using custom eecache found in custom_eecache.bin"
-    } else if( $hb_multiproc == 1 )  {
-        $eccPreload = (lookup-file "%simics%/eecache_2proc_prebuilt.bin.ecc")
     } else {
         $eccPreload = (lookup-file "%simics%/eecache_prebuilt.bin.ecc")
     }

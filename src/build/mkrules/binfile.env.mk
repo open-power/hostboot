@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2021
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,5 +28,4 @@
 #     Configuration of the binary file-cache settings.
 
 BINFILE_CACHE_LOCALDIR = $(ROOTPATH)/.git/hb_cache/data/
-BINFILE_CACHE_REMOTEDIR = /gsa/ausgsa/projects/h/hostboot/.binary_cache/data/
-
+BINFILE_CACHE_REMOTEDIR = $(HOSTBOOT_ENVIRONMENT)/.binary_cache/data/

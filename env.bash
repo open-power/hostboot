@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2020
+# Contributors Listed Below - COPYRIGHT 2010,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,9 @@
 # IBM_PROLOG_END_TAG
 
 ROOTDIR=.
+
+# Set this based on HOSTNAME later
+export HOSTBOOT_ENVIRONMENT=/gsa/rchgsa/projects/h/hostboot_rch/
 
 if [ -e ./customrc ]; then
     . ./customrc

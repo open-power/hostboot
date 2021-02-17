@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2020
+# Contributors Listed Below - COPYRIGHT 2014,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -39,6 +39,9 @@ fi
 
 # Create img directory.
 mkdir -p $SANDBOXBASE/img || exit -1
+
+# Set this based on HOSTNAME later (should match env.bash)
+HOSTBOOT_ENVIRONMENT=/gsa/rchgsa/projects/h/hostboot_rch/
 
 # Copy files -- Only populate testcases if they are
 # intended to be ran
