@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3103,6 +3103,15 @@ class facade final
 
         fapi_try_exit:
             return fapi2::current_err;
+        }
+        ///
+        /// @brief Decodes the IBM 11S barcode
+        /// @param[out] o_serial_number 11S barcode information
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode ibm_serial_number(fapi2::ATTR_MSS_EXP_SERIAL_NUMBER_Type o_serial_number) const
+        {
+            return iv_dimm_module_decoder->ibm_serial_number(o_serial_number);
         }
 
 };

@@ -350,6 +350,38 @@ inline fapi2::ReturnCode update_data(const fapi2::Target<T>& i_target,
 
 ///
 /// @brief Helper function to update the structure that holds attr data
+/// @tparam IT Input data type
+/// @tparam OT Output data type
+/// @param[in] i_setting data to set
+/// @param[in] std::false_type - false for not an array
+/// @param[out] o_data output to set
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <typename IT,
+          typename OT>
+void assign_data(const IT& i_setting, std::false_type, OT& o_data)
+{
+    o_data = i_setting;
+}
+
+///
+/// @brief Helper function to update the structure that holds attr data
+/// @tparam IT Input data type
+/// @tparam OT Output data type
+/// @param[in] i_setting data to set
+/// @param[in] std::true_type - true for an array
+/// @param[out] o_data output to set
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <typename IT,
+          typename OT>
+void assign_data(const IT& i_setting, std::true_type, OT& o_data)
+{
+    memcpy(o_data, i_setting, sizeof(i_setting));
+}
+
+///
+/// @brief Helper function to update the structure that holds attr data
 /// @tparam DT the data type
 /// @tparam IT Input data type
 /// @tparam FFDC type
@@ -369,7 +401,7 @@ inline fapi2::ReturnCode update_data(const DT& i_data,
                                      const FFDC i_ffdc_code,
                                      OT& o_data)
 {
-    o_data = i_setting;
+    assign_data(i_setting, std::is_array<IT> {}, o_data);
     return fapi2::FAPI2_RC_SUCCESS;
 }
 

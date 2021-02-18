@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1758,6 +1758,38 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
                 FAPI_INF("%s. Register Manufacturer ID Code: 0x%04x",
                          spd::c_str(iv_target),
                          o_output);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes the IBM 11S barcode
+        /// @param[out] o_serial_number 11S barcode information
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode ibm_serial_number(fapi2::ATTR_MSS_EXP_SERIAL_NUMBER_Type o_serial_number) const override
+        {
+            // First up, check the last byte to ensure that we have enough space in the SPD data vector
+            uint8_t l_last_byte = 0;
+
+            for(uint16_t l_sn_pos = 0; l_sn_pos < fields_t::SERIAL_NUMBER_LEN; ++l_sn_pos)
+            {
+                o_serial_number[l_sn_pos] = 0;
+            }
+
+            FAPI_TRY( (mss::spd::reader<fields_t::SERIAL_NUMBER_LAST_BYTE, R>(iv_target, iv_data, l_last_byte)) );
+
+            // Note: we really just need ASCII encodings here
+            // We're not going to check for valid values as anything from 0x00 to 0xff is technically valid
+            // However, if someone has a bad serial number encoded in here, it might cause our code to skip the SPD version checking
+            // Even if we checked for valid values (numbers and capital letters only) there's no guarantee someone wouldn't mess up a partnumber
+            // As such, we're just going to copy the data directly
+            for(uint16_t l_sn_pos = 0; l_sn_pos < fields_t::SERIAL_NUMBER_LEN; ++l_sn_pos)
+            {
+                const auto l_spd_idx = l_sn_pos + fields_t::SERIAL_NUMBER_BYTE0;
+                o_serial_number[l_sn_pos] = iv_data[l_spd_idx];
             }
 
         fapi_try_exit:

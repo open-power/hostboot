@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -6078,6 +6078,25 @@ class readerTraits < fields<DDR4, DDIMM_MODULE>::MODULE_RCD, R >
 
         static constexpr size_t COMPARISON_VAL = 0x01;
         static constexpr const char* FIELD_STR = "Registered Clock Drivers (RCD)";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note IBM_SERIAL_NUMBER field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::SERIAL_NUMBER_LAST_BYTE, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xff;
+        static constexpr const char* FIELD_STR = "11S serial number";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;

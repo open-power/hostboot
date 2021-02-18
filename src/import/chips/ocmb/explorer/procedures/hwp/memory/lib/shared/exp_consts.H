@@ -139,8 +139,11 @@ enum class attr_eff_engine_fields
     THERM_SENSOR_1_LOCATION = 31,
     THERM_SENSOR_0_LOCATION = 32,
 
+
+    IBM_SERIAL_NUMBER = 33,
+
     // Dispatcher set to last enum value
-    DISPATCHER = THERM_SENSOR_0_LOCATION,
+    DISPATCHER = IBM_SERIAL_NUMBER,
 };
 
 ///

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 
 #include <fapi2.H>
 #include <lib/shared/exp_consts.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/data_engine/data_engine_traits_def.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <generic/memory/lib/spd/spd_facade.H>
@@ -2999,6 +3000,58 @@ struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_en
 
     fapi_try_exit:
         return fapi2::current_err;
+    }
+};
+
+//
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, IBM_SERIAL_NUMBER specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::IBM_SERIAL_NUMBER>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_SERIAL_NUMBER_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_SERIAL_NUMBER_TargetType;
+    static constexpr mss::generic_ffdc_codes FFDC_CODE = mss::generic_ffdc_codes::SET_SERIAL_NUMBER;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_serial_number(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_serial_number(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_type& o_setting)
+    {
+        return i_spd_data.ibm_serial_number(o_setting);
     }
 };
 

@@ -320,6 +320,9 @@ enum generic_ffdc_codes
     // gen_throttle functions
     SET_PWR_CNTRL_REG = 0x10AA,
     SET_STR_REG = 0x10AB,
+
+
+    SET_SERIAL_NUMBER = 0x10AC,
 };
 
 ///
