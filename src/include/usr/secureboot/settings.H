@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <targeting/common/targetservice.H>
 #include <cstdint>
 #include <vector>
+#include <secureboot/settings_common.H>
 
 namespace SECUREBOOT
 {
@@ -37,34 +38,6 @@ namespace SECUREBOOT
     {
         SECURITY_DEASSERTED = 0b0,
         SECURITY_ASSERTED = 0b1,
-    };
-
-    // these constants represent the scom addresses and masks we need
-    // to obtain secure boot settings from the system
-    enum class ProcSecurity : uint64_t
-    {
-        SabBit   = 0x8000000000000000ull, // Secure access (mirrored)
-        LLPBit   = 0x4000000000000000ull, // Late launch primary
-        LLSBit   = 0x2000000000000000ull, // Late launch secondary
-        LQABit   = 0x1000000000000000ull, // Local quiesce achieved
-        SULBit   = 0x0800000000000000ull, // Security update lock
-        L4ABit   = 0x0400000000000000ull, // Locality 4 access
-        SDBBit   = 0x0200000000000000ull, // Secure chip debug mode
-        CMFSIBit = 0x0100000000000000ull, // cMFSI access protection
-        ABUSBit  = 0x0080000000000000ull, // Abus mailbox protection
-        RNGBit   = 0x0040000000000000ull, // Random number generator lock
-        // Spare = 0x0020000000000000ull,
-        // Spare = 0x0010000000000000ull,
-        TDPBit   = 0x0008000000000000ull, // TPM deconfig protection
-        // Spare = 0x0004000000000000ull,
-        // Spare = 0x0002000000000000ull,
-        // Spare = 0x0001000000000000ull,
-        SKLBitW  = 0x0000200000000000ull, // Keystore SEEPROM write lock (Hostboot section)
-        SKLBitR  = 0x0000100000000000ull, // Keystore SEEPROM read lock (Hostboot section)
-        MELBit   = 0x0000000800000000ull, // Memory encryption lock
-
-        SwitchRegister = 0x00010005ull,
-        SwitchRegisterClear = 0x00010006ull,
     };
 
     enum class ProcCbsControl : uint64_t

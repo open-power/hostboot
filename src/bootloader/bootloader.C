@@ -38,6 +38,7 @@
 #include <bootloader/bl_pnorAccess.H>
 #include <bootloader/bootloaderif.H>
 #include <bootloader/bl_console.H>
+#include <bootloader/bl_xscom.H>
 
 #include <lpc_const.H>
 #include <pnor_utils.H>
@@ -54,6 +55,7 @@
 
 #include <securerom/ROM.H>
 #include <secureboot/secure_reasoncodes.H>
+#include <secureboot/settings_common.H>
 #include <p10_sbe_hb_structures.H>
 
 #include <pnor/pnorif.H>
@@ -394,6 +396,56 @@ namespace Bootloader{
 
 #ifndef CONFIG_VPO_COMPILE
     /**
+     * @brief Sets the TDP (TPM Deconfig Protect) bit in the secure register
+     */
+    void setTpmTdpBit()
+    {
+        uint64_t l_data = SECUREBOOT::ProcSecurity::TDPBit;
+        size_t l_buflen = sizeof(l_data);
+
+        // Set the TPM TDP bit in the secure reg
+        Bootloader::hbblReasonCode l_rc = XSCOM::xscomPerformOp(DeviceFW::WRITE,
+                                                                &l_data,
+                                                                l_buflen,
+                                                                SECUREBOOT::ProcSecurity::SwitchRegister);
+        if(l_rc)
+        {
+            bl_console::putString("Could not write to secure register. XSCOM RC: ");
+            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+            bl_console::putString("\r\n");
+        }
+    }
+
+    /**
+     * @brief Reads the secure register and returns the value of the TDP (TPM Deconfigure Protect) bit
+     *
+     * @return The value of the TDP bit
+     */
+    bool getTpmTdpBit()
+    {
+        bool l_bitSet = false;
+
+        uint64_t l_buffer = 0;
+        size_t l_buflen = sizeof(l_buffer);
+        Bootloader::hbblReasonCode l_rc = XSCOM::xscomPerformOp(DeviceFW::READ,
+                                                                &l_buffer,
+                                                                l_buflen,
+                                                                SECUREBOOT::ProcSecurity::SwitchRegister);
+        if(l_rc)
+        {
+            bl_console::putString("Could not read secure register. XSCOM RC: ");
+            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+            bl_console::putString("\r\n");
+        }
+        else
+        {
+            l_bitSet = l_buffer & SECUREBOOT::ProcSecurity::TDPBit;
+        }
+
+        return l_bitSet;
+    }
+
+    /**
      * @brief Initialize the TPM and extend the given hash to TPM PCR0
      *
      * @param[in] i_hash the hash to be extended to TPM PCR0. Needs to be at least
@@ -404,6 +456,14 @@ namespace Bootloader{
     {
         Bootloader::hbblReasonCode l_rc = RC_NO_ERROR;
         do {
+
+        // If the TDP bit is set, then SBE had detected a problem with the TPM and we shouldn't
+        // be attempting any TPM ops.
+        if(getTpmTdpBit())
+        {
+            bl_console::putString("TPM TDP Bit set; will not perform TPM ops\r\n");
+            break;
+        }
 
         // First, initialize the TPM SPI engine so we can communicate with TPM
         l_rc = tpm_init_spi_engine();
@@ -446,6 +506,15 @@ namespace Bootloader{
         }
 
         } while(0);
+
+        if(l_rc)
+        {
+            bl_console::putString("Setting the TPM TDP bit\r\n");
+            // Set the TPM TDP bit if any TPM op fails
+            setTpmTdpBit();
+            g_blData->blToHbData.tdpFlagSet = 1;
+        }
+
         return l_rc;
     }
 #endif

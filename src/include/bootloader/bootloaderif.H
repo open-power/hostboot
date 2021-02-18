@@ -152,7 +152,7 @@ struct BlToHbData
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), secBackdoorBit(0),
                    cacheSizeMb(0), numKeyAddrPair(0),
-                   min_secure_version(0)
+                   min_secure_version(0), tdpFlagSet(0)
     {
         memset(keyAddrStashData, 0, sizeof(keyAddrStashData));
     }
@@ -197,6 +197,8 @@ struct BlToHbData
     keyAddrPair_t keyAddrStashData[MAX_KEY_ADDR_PAIRS];
     // FW Minimum Secure Version
     uint8_t min_secure_version;
+    // Flag to indicate whether bootloader set the TPM TDP bit
+    uint8_t tdpFlagSet;
 
 } __attribute__((packed));
 

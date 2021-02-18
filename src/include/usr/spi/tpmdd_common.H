@@ -65,7 +65,7 @@ enum nuvo_20_defs_t
     TPM_REG_75x_TPM_HASH         = 0x4,
     TPM_REG_75x_WR_FIFO          = 0x24,
     TPM_REG_75x_RD_FIFO          = 0x24,
-    TPM_REG_75x_VENDOR_ID_OFFSET = 0xF00, // old i2c offset 0x48
+    TPM_REG_75x_VENDOR_ID_OFFSET = 0xF00,
     TPM_VENDORID_75x             = 0x5010FC00,
 
     // Common values

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,9 +59,9 @@ void hwpResetGlobals(void)
 /// @param[in] i_fixed unused
 ///
 /// @return Always returns success
-ReturnCode delay(uint64_t i_nanoSeconds,
-                 uint64_t i_simCycles,
-                 bool i_fixed)
+ReturnCode delay(const uint64_t i_nanoSeconds,
+                 const uint64_t i_simCycles,
+                 const bool i_fixed)
 {
     bl_nanosleep(0, i_nanoSeconds);
     return FAPI2_RC_SUCCESS;

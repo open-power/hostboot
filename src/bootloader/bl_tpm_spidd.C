@@ -93,7 +93,7 @@ Bootloader::hbblReasonCode tpm_read(const uint32_t i_offset, void* o_buffer, siz
     FAPI_CALL_HWP(l_fapi_rc,
                   spi_tpm_read_secure,
                   l_spi_handle,
-                  0, // iv_locality
+                  0, // locality
                   i_offset,
                   io_buflen,
                   reinterpret_cast<uint8_t*>(o_buffer));
@@ -127,7 +127,7 @@ Bootloader::hbblReasonCode tpm_write(const uint32_t i_offset, const void* i_buff
     FAPI_CALL_HWP(l_fapi_rc,
                   spi_tpm_write_with_wait,
                   l_spi_handle,
-                  0, // iv_locality
+                  0, // locality
                   i_offset,
                   io_buflen,
                   reinterpret_cast<const uint8_t*>(i_buffer));
@@ -211,7 +211,7 @@ static Bootloader::hbblReasonCode tpmIsCommandReady(bool& o_isReady)
  * @brief Helper function to check for the command ready status in a retry loop
  *        until the TPM signals that command is ready or there is a timeout.
  *
- * @param[out] o_stsReg the value of the TPM status reg
+ * @param[out] o_commandReady whether the TPM is ready for a command
  * @return 0 on success or error code on error
  */
 static Bootloader::hbblReasonCode tpmCheckCommandReadyStatus(bool& o_commandReady)
@@ -692,7 +692,7 @@ static Bootloader::hbblReasonCode tpmWriteFifo(const void* i_buffer, size_t i_bu
  * @brief Helper function to transmit a command to the TPM
  *
  * @param[in/out] io_buffer the buffer containing the TPM command/TPM response
- * @param[in/out] io_buflen the size of the buffer
+ * @param[in/out] io_buflen the size of the buffer/the size of TPM response
  * @param[in] i_commandlen the length of the TPM command
  * @return 0 on success or error code on error
  */
