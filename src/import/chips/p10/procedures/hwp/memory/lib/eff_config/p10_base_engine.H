@@ -2374,6 +2374,35 @@ class base_0_3
         }
 
         ///
+        /// @brief Set the revision field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_exp_serial_number(const std::vector<uint8_t>& i_spd) const
+        {
+            using DF = mss::spd::fields<DDR4, DDIMM_MODULE>;
+            uint8_t l_attr[DF::SERIAL_NUMBER_LEN] = {};
+
+            // Just check the last byte... if we pass there, then we have space to copy the data
+            FAPI_TRY(get_field_spd(iv_ocmb, DF::SERIAL_NUMBER_LAST_BYTE, i_spd, SET_SERIAL_NUMBER,
+                                   l_attr[DF::SERIAL_NUMBER_LEN - 1]));
+
+            // Note: we really just need ASCII encodings here
+            // We're not going to check for valid values as anything from 0x00 to 0xff is technically valid
+            // However, if someone has a bad serial number encoded in here, it might cause our code to skip the SPD version checking
+            // Even if we checked for valid values (numbers and capital letters only) there's no guarantee someone wouldn't mess up a partnumber
+            // As such, we're just going to copy the data directly
+            std::copy( i_spd.begin() + DF::SERIAL_NUMBER_BYTE0, i_spd.begin() + DF::SERIAL_NUMBER_BYTE0 + DF::SERIAL_NUMBER_LEN,
+                       std::begin(l_attr) );
+
+            FAPI_TRY(mss::attr::set_exp_serial_number(iv_ocmb, l_attr));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Process the fields for base rev 0.3
         ///
         /// @param[in] i_spd SPD binary
@@ -2414,6 +2443,9 @@ class base_0_3
             FAPI_TRY(set_module_mfg_id(i_spd));
             FAPI_TRY(set_dram_mfg_id(i_spd));
             FAPI_TRY(set_dram_cwl(i_spd));
+
+            // Miscellaneous fields
+            FAPI_TRY(set_exp_serial_number(i_spd));
 
             return fapi2::FAPI2_RC_SUCCESS;
 

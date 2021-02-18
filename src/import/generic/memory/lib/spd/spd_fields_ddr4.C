@@ -259,6 +259,7 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::THERM_SE
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::THERM_SENSOR_0_SECOND_LOCATION;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::THERM_SENSOR_1_LOCATION;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::THERM_SENSOR_0_LOCATION;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::SERIAL_NUMBER_LAST_BYTE;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::MODULE_MFG_ID_CODE_LSB;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::MODULE_MFG_ID_CODE_MSB;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::DRAM_MFR_ID_CODE_LSB;

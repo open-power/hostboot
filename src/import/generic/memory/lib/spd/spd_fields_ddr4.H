@@ -790,6 +790,12 @@ class fields<DDR4, LRDIMM_MODULE>
 template <>
 class fields<DDR4, DDIMM_MODULE>
 {
+    public:
+        // Note: these need to be used directly, so they need to be declared as public
+        static constexpr uint64_t SERIAL_NUMBER_LEN = 26;
+        static constexpr uint64_t SERIAL_NUMBER_BYTE0 = 416;
+        static constexpr uint64_t SERIAL_NUMBER_LAST_VALID_BYTE = SERIAL_NUMBER_BYTE0 + SERIAL_NUMBER_LEN - 1;
+
     private:
 
         enum
@@ -1265,6 +1271,10 @@ class fields<DDR4, DDIMM_MODULE>
             THERM_SENSOR_0_LOCATION_START = 6,
             THERM_SENSOR_0_LOCATION_LEN = 2,
 
+            // Byte 416-441
+            SERIAL_NUMBER_FIELD_START = 0,
+            SERIAL_NUMBER_FIELD_LEN = 8,
+
             // Byte 512-513
             MODULE_MFG_ID_CODE_LSB_BYTE = 512,
             MODULE_MFG_ID_CODE_MSB_BYTE = 513,
@@ -1281,7 +1291,6 @@ class fields<DDR4, DDIMM_MODULE>
     public:
         // Syntatic sugar to make member variable declaration easier
         using field_t = mss::field_t<mss::endian::LITTLE>;
-
         // First field - SPD byte
         // Second field - start bit
         // Third field - bit length
@@ -1561,6 +1570,7 @@ class fields<DDR4, DDIMM_MODULE>
         // MANF Section:
         // Section is not standardized across dimm types, so these fields will live in the
         // ddimm specific section
+        static constexpr field_t SERIAL_NUMBER_LAST_BYTE{SERIAL_NUMBER_LAST_VALID_BYTE, SERIAL_NUMBER_FIELD_START, SERIAL_NUMBER_FIELD_LEN};
 
         // Byte 512 and 513 Module MFG ID
         static constexpr field_t MODULE_MFG_ID_CODE_LSB{MODULE_MFG_ID_CODE_LSB_BYTE, MODULE_MFG_ID_CODE_START, MODULE_MFG_ID_CODE_LEN};

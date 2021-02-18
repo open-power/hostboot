@@ -364,6 +364,7 @@ enum generic_ffdc_codes : uint16_t
     SET_TREFC = 0x10D9,
     SET_TRRD_S = 0x10DA,
     SET_TRRD_L = 0x10DB,
+    SET_SERIAL_NUMBER = 0x10DC,
 
     // PHY_INIT_RESP functions
     EXP_SCOMINIT = 0x10DC,
