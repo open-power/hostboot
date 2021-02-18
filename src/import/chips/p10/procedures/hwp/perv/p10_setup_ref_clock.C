@@ -35,8 +35,10 @@
 
 #include "p10_setup_ref_clock.H"
 #include "p10_scom_perv_0.H"
+#include "p10_scom_perv_1.H"
 #include "p10_scom_perv_3.H"
 #include "p10_scom_perv_4.H"
+#include "p10_scom_perv_5.H"
 #include "p10_scom_perv_7.H"
 #include "p10_scom_perv_b.H"
 #include "p10_scom_perv_d.H"
@@ -65,6 +67,10 @@ fapi2::ReturnCode p10_setup_ref_clock(const
           l_attr_mux_dpll, l_attr_mux_omi_lcpll, l_attr_mux_input,
           l_attr_clock_pll_mux_tod;
     fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
+
+    fapi2::ATTR_SYS_CLK_NE_TERMINATION_SITE_Type l_ne_term_site;
+    fapi2::ATTR_SYS_CLK_NE_TERMINATION_STRENGTH_Type l_ne_term_strength;
+    fapi2::ATTR_CHIP_EC_FEATURE_NE_TERMINATION_Type l_ne_term_available;
 
     FAPI_INF("p10_setup_ref_clock: Entering ...");
 
@@ -98,6 +104,10 @@ fapi2::ReturnCode p10_setup_ref_clock(const
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0C_RCS_PLL)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0D_RCS_PLL_INPUT, i_target_chip, l_attr_mux0d_rcs_pll),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0D_RCS_PLL)");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_CLK_NE_TERMINATION_SITE, i_target_chip, l_ne_term_site));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_CLK_NE_TERMINATION_STRENGTH, i_target_chip, l_ne_term_strength));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_NE_TERMINATION, i_target_chip, l_ne_term_available));
 
     FAPI_DBG("Disable Write Protection for Root/Perv Control registers");
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_GPWRP_FSI,
@@ -145,6 +155,26 @@ fapi2::ReturnCode p10_setup_ref_clock(const
 
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL6_FSI, l_read_reg));
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL6_COPY_FSI, l_read_reg));
+
+    // -----------------------------------------------------------------------------------
+    // ROOT CONTROL 7 and its COPY
+    // -----------------------------------------------------------------------------------
+
+    FAPI_DBG("Set up transmit refclock termination");
+    l_read_reg.flush<0>();
+
+    if (l_ne_term_site == fapi2::ENUM_ATTR_SYS_CLK_NE_TERMINATION_SITE_PROC)
+    {
+        FAPI_ASSERT(l_ne_term_available,
+                    fapi2::SETUP_REF_CLOCK_NE_TERM_UNAVAILABLE().set_PROC_CHIP(i_target_chip),
+                    "System planar requires internal near-end refclock termination, "
+                    "but processor does not support this.");
+        l_read_reg.insert<24, 6>(l_ne_term_strength);
+        l_read_reg.setBit<30>();
+    }
+
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, l_read_reg));
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_FSI, l_read_reg));
 
     // -----------------------------------------------------------------------------------
     // ROOT CONTROL 4 and its COPY
