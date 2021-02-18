@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,6 @@ struct
     { FSXCOMP_FSXLOG_ROOT_CTRL1_FSI, FSXCOMP_FSXLOG_ROOT_CTRL1_COPY_FSI, 0x00180020},
     { FSXCOMP_FSXLOG_ROOT_CTRL2_FSI, FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI, 0x04000000},
     { FSXCOMP_FSXLOG_ROOT_CTRL3_FSI, FSXCOMP_FSXLOG_ROOT_CTRL3_COPY_FSI, 0xEFEEEEFF},
-    { FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_COPY_FSI, 0x00000000},
     { FSXCOMP_FSXLOG_ROOT_CTRL8_FSI, FSXCOMP_FSXLOG_ROOT_CTRL8_COPY_FSI, 0x00000000},
     { FSXCOMP_FSXLOG_PERV_CTRL0_FSI, FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI, 0x7C022020},
     { FSXCOMP_FSXLOG_PERV_CTRL1_FSI, FSXCOMP_FSXLOG_PERV_CTRL1_COPY_FSI, 0x60000000}

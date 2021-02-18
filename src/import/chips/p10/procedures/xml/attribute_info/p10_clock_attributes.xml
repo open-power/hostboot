@@ -74,6 +74,41 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_SYS_CLK_NE_TERMINATION_SITE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Determine whether planar or processor should take care of outgoing refclock near-end termination.
+  </description>
+  <enum>PLANAR = 0, PROC = 1</enum>
+  <valueType>uint8</valueType>
+  <default>PLANAR</default>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SYS_CLK_NE_TERMINATION_STRENGTH</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Per-region drive strength selection for near-end termination.
+    Drive strength can be selected between 20 mA and 40 mA for all
+    optics clocks as a group, and for almost each PCIe slot clock
+    individually (PCI1 slot B+C are grouped together).
+  </description>
+  <enum>
+    20MA        = 0,
+    OP_40MA     = 0x80,
+    PCI0A_40MA  = 0x40,
+    PCI0B_40MA  = 0x20,
+    PCI0C_40MA  = 0x10,
+    PCI1A_40MA  = 0x08,
+    PCI1BC_40MA = 0x04
+  </enum>
+  <valueType>uint8</valueType>
+  <default>20MA</default>
+  <platInit>mrw</platInit>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_CP_REFCLOCK_SELECT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>

@@ -1016,7 +1016,7 @@
        </ec>
      </chip>
    </chipEcFeature>
-  </attribute>  
+  </attribute>
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_THROTTLE_SYNC_HW550549</id>
@@ -1178,7 +1178,7 @@
    <id>ATTR_CHIP_EC_FEATURE_HW555009</id>
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>
-     Enable USTL Self Detect Dead Cycle to protect against Jazzy Rabbit DI    
+     Enable USTL Self Detect Dead Cycle to protect against Jazzy Rabbit DI
    </description>
    <chipEcFeature>
      <chip>
@@ -1303,6 +1303,24 @@
      due to missing logic relative to the core implementation
    </description>
    <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_NE_TERMINATION</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Chip is capable of internal near-end termination on outgoing refclocks.
+   </description>
+   <chipEcFeature>
+     <falseIfMatch/>
      <chip>
        <name>ENUM_ATTR_NAME_P10</name>
        <ec>
