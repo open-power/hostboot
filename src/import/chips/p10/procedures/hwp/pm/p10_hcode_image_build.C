@@ -800,7 +800,11 @@ fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
                                    ImageBuildRecord & i_xpmrBuildRecord )
 {
     ImgSectnSumm   l_sectn;
-    uint32_t attrVal = 0;
+    uint32_t attrVal    =  0;
+    uint16_t attrTemp16 =  0;
+    uint64_t attrTemp64 =  0;
+    uint8_t  attrTemp8  =  0;
+
     i_xpmrBuildRecord.getSection( "XGPE Hcode", l_sectn );
     XgpeHeader_t * pXgpeHeader   =
         ( XgpeHeader_t *) &i_pChipHomer->iv_xpmrRegion.iv_xgpeSramRegion[XGPE_INT_VECTOR_SIZE];
@@ -826,6 +830,49 @@ fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
         ( EXT_MEM_ADDR | ( HOMER_XPMR_REGION_NUM * ONE_MB ) |  l_sectn.iv_sectnOffset );
     pXgpeHeader->g_xgpe_xgpeDeepOpTraceLength    =   l_sectn.iv_sectnLength;
 
+    //Populating attribute area of XGPE Image header
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_IO_START,
+                i_procTgt,
+                attrTemp16),
+            "Error from FAPI_ATTR_GET for ATTR_WOF_IO_START" );
+
+    pXgpeHeader->g_xgpe_ioStart  =  attrTemp16;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_IO_STEP,
+                i_procTgt,
+                attrTemp16),
+            "Error from FAPI_ATTR_GET for ATTR_WOF_IO_STEP" );
+    pXgpeHeader->g_xgpe_ioStep   =  attrTemp16;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_IO_COUNT,
+                i_procTgt,
+                attrTemp16),
+            "Error from FAPI_ATTR_GET for ATTR_WOF_IO_SIZE" );
+    pXgpeHeader->g_xgpe_ioCount   =  attrTemp16;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDN_VOLTAGE_MV,
+                i_procTgt,
+                attrTemp16),
+            "Error from FAPI_ATTR_GET for ATTR_VDN_VOLTAGE_MV" );
+    pXgpeHeader->g_xgpe_vdnVoltage  =  attrTemp16;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_GROUNDED_CONTROLLERS,
+                i_procTgt,
+                attrTemp16),
+            "Error from FAPI_ATTR_GET for ATTR_IO_GROUNDED_CONTROLLERS" );
+    pXgpeHeader->g_xgpe_groundedCtrls  =  attrTemp16;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_GROUNDED_LINKS,
+                i_procTgt,
+                attrTemp64),
+            "Error from FAPI_ATTR_GET for ATTR_IO_GROUNDED_LINKS" );
+    pXgpeHeader->g_xgpe_groundedLinks  =  attrTemp64;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_IO_POWER_MODE,
+                i_procTgt,
+                attrTemp8),
+            "Error from FAPI_ATTR_GET for ATTR_WOF_IO_POWER_MODE" );
+    pXgpeHeader->g_xgpe_wofIoPowMode  =  attrTemp8;
+
 #ifndef __HOSTBOOT_MODULE
     pXgpeHeader->g_xgpe_hcodeLength         =    htobe32( pXgpeHeader->g_xgpe_hcodeLength );
     pXgpeHeader->g_xgpe_sysResetAddress     =    htobe32( pXgpeHeader->g_xgpe_sysResetAddress );
@@ -833,6 +880,12 @@ fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
     pXgpeHeader->g_xgpe_gpspbLength         =    htobe32( pXgpeHeader->g_xgpe_gpspbLength );
     pXgpeHeader->g_xgpe_xgpeDeepOpTraceMemAddr = htobe32( pXgpeHeader->g_xgpe_xgpeDeepOpTraceMemAddr );
     pXgpeHeader->g_xgpe_xgpeDeepOpTraceLength  = htobe32( pXgpeHeader->g_xgpe_xgpeDeepOpTraceLength );
+    pXgpeHeader->g_xgpe_ioStart             =  htobe16(pXgpeHeader->g_xgpe_ioStart);
+    pXgpeHeader->g_xgpe_ioStep              =  htobe16(pXgpeHeader->g_xgpe_ioStep);
+    pXgpeHeader->g_xgpe_ioCount              =  htobe16(pXgpeHeader->g_xgpe_ioCount);
+    pXgpeHeader->g_xgpe_vdnVoltage          =  htobe16(pXgpeHeader->g_xgpe_vdnVoltage);
+    pXgpeHeader->g_xgpe_groundedLinks       =  htobe64(pXgpeHeader->g_xgpe_groundedLinks);;
+    pXgpeHeader->g_xgpe_groundedCtrls       =  htobe16(pXgpeHeader->g_xgpe_groundedCtrls);
 
     FAPI_DBG( "====================== XGPE Header =======================" );
     FAPI_INF( "XGPE Hcode Length            0x%08x", htobe32( pXgpeHeader->g_xgpe_hcodeLength ) );
@@ -843,6 +896,13 @@ fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
     FAPI_INF( "XGPE Thr DeAssert Cnt        0x%08x", htobe32( pXgpeHeader->g_xgpe_coreThrottleDeAssertCnt ) );
     FAPI_INF( "XGPE Deep OpTrace Mem Addr   0x%08x", htobe32( pXgpeHeader->g_xgpe_xgpeDeepOpTraceMemAddr ));
     FAPI_INF( "XGPE Deep OpTrace Length     0x%08x", htobe32( pXgpeHeader->g_xgpe_xgpeDeepOpTraceLength ) );
+    FAPI_INF( "XGPE IO Start     	    0x%04x", htobe16( pXgpeHeader->g_xgpe_ioStart ) );
+    FAPI_INF( "XGPE IO Step     	    0x%04x", htobe16( pXgpeHeader->g_xgpe_ioStep ) );
+    FAPI_INF( "XGPE IO Count                0x%04x", htobe16( pXgpeHeader->g_xgpe_ioCount ) );
+    FAPI_INF( "XGPE VND Voltage             0x%04x", htobe16( pXgpeHeader->g_xgpe_vdnVoltage ) );
+    FAPI_INF( "XGPE Ground Links            0x%016lx", htobe64( pXgpeHeader->g_xgpe_groundedLinks ) );
+    FAPI_INF( "XGPE Ground Controller       0x%04x", htobe16( pXgpeHeader->g_xgpe_groundedCtrls ) );
+    FAPI_INF( "XGPE Power Mode       	    0x%02x", pXgpeHeader->g_xgpe_wofIoPowMode );
     FAPI_DBG( "==========================================================" );
 #endif
 
