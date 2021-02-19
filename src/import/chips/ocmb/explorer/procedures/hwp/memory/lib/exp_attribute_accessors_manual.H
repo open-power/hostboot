@@ -43,9 +43,38 @@
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/shared/exp_consts.H>
 
 namespace mss
 {
+namespace exp
+{
+///
+/// @brief Check if Explorer FW supports PHY_RESET and F1RCNx msdg parameters
+/// @param[in] i_fw_version FW version
+///
+inline bool is_new_fw_msdg_supported(const uint32_t i_fw_version)
+{
+    return ( (i_fw_version > fw_version::FW_VER_OLD) || (i_fw_version == fw_version::FW_VER_BOOTLEG) );
+}
+
+///
+/// @brief Check if Explorer FW supports internal DTM sensor
+/// @param[in] i_fw_version FW version
+/// @param[in] i_usage DTM usage
+///
+inline bool is_dtm_supported(const uint32_t i_fw_version,
+                             const uint8_t i_usage)
+{
+    if (i_usage != fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_MB_INT_DTM)
+    {
+        return true;
+    }
+
+    return ( (i_fw_version >= fw_version::FW_DTM_SUPPORTED) || (i_fw_version == fw_version::FW_VER_BOOTLEG) );
+}
+
+} // exp
 
 ///
 /// @brief Unit-testable half dimm mode helper function. Calculates half dimm mode based on input params

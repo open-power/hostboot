@@ -39,7 +39,6 @@
 #include <fapi2.H>
 #include <lib/shared/exp_defaults.H>
 #include <lib/dimm/exp_rank.H>
-#include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_kind.H>
 #include <exp_data_structs.H>
 #include <mss_generic_attribute_getters.H>
@@ -176,15 +175,6 @@ struct phy_param_info
     size_t iv_size;
     uint32_t iv_crc;
 };
-
-///
-/// @brief Helper to check bootleg version
-/// @param[in] i_fw_version FW version
-///
-inline bool is_new_fw_msdg_supported(const uint32_t i_fw_version)
-{
-    return ( (i_fw_version > fw_version::FW_VER_OLD) || (i_fw_version == fw_version::FW_VER_BOOTLEG) );
-}
 
 ///
 /// @brief Check that the rsp_data size returned from the PHY_INIT command matches the expected size
