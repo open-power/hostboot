@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @brief Write 0's to full address space for memory encryption initialization
 ///
 
-// *HWP HWP Owner: Adam Hale adam.samuel.hale@ibm.com
+// *HWP HWP Owner: Lilith Hale Lilith.Hale@ibm.com
 // *HWP FW Owner:
 // *HWP Consumed by: cronus
 

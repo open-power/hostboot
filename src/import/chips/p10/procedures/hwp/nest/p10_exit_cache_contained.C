@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -549,6 +549,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     fapi2::ATTR_SYS_DISABLE_HWFM_Type l_TGT1_ATTR_SYS_DISABLE_HWFM;
     fapi2::ATTR_CHIP_EC_FEATURE_HW548941_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941;
     fapi2::ATTR_CHIP_EC_FEATURE_HW555009_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW555009;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW555479_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW555479;
     uint64_t l_def_MC_EPSILON_CFG_T0;
     uint64_t l_def_MC_EPSILON_CFG_T1;
     uint64_t l_def_MC_EPSILON_CFG_T2;
@@ -564,6 +565,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW548941, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555009, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW555009));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555479, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW555479));
 
     l_def_MC_EPSILON_CFG_T0 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0 + 0x6) / 0x4);
     l_def_MC_EPSILON_CFG_T1 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1 + 0x6) / 0x4);
@@ -594,10 +596,27 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     l_scom_data |= (uint64_t) 0x10 << (64 - (25 + 5));
     l_scom_data |= (uint64_t) 0x00 << (64 - (30 + 5));
     l_scom_data |= (uint64_t)  0x4 << (64 - (43 + 4));
+
+    if (l_TGT2_ATTR_CHIP_EC_FEATURE_HW555479)
+    {
+        l_scom_data |= (uint64_t)    0x0 << (64 - (12 +  4)); //MCPERF0_Num_HA_Rsvd        = 0b0000
+        l_scom_data |= (uint64_t)    0x1 << (64 - (16 +  4)); //MCPERF0_Num_HTM_Rsvd       = 0b0001
+        l_scom_data |= (uint64_t)    0x0 << (64 - (58 +  2)); //MCPERF0_Num_HA_Rsvd_Sel    = 0b00
+        l_scom_data |= (uint64_t)    0x1 << (64 - (60 +  4)); //MCPERF0_Num_HTM_Wrbuf_Rsvd = 0b0001
+    }
+
     //mask
     l_scom_mask |= (uint64_t) 0x1F << (64 - (25 + 5));
     l_scom_mask |= (uint64_t) 0x1F << (64 - (30 + 5));
     l_scom_mask |= (uint64_t)  0xF << (64 - (43 + 4));
+
+    if (l_TGT2_ATTR_CHIP_EC_FEATURE_HW555479)
+    {
+        l_scom_mask |= (uint64_t)    0xF << (64 - (12 +  4)); //MCPERF0_Num_HA_Rsvd        = 0b0000
+        l_scom_mask |= (uint64_t)    0xF << (64 - (16 +  4)); //MCPERF0_Num_HTM_Rsvd       = 0b0001
+        l_scom_mask |= (uint64_t)    0x3 << (64 - (58 +  2)); //MCPERF0_Num_HA_Rsvd_Sel    = 0b00
+        l_scom_mask |= (uint64_t)    0xF << (64 - (60 +  4)); //MCPERF0_Num_HTM_Wrbuf_Rsvd = 0b0001
+    }
 
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,
@@ -613,10 +632,17 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     l_scom_mask = 0;
     //data
     l_scom_data |= (uint64_t)  0xA << (64 - (13 + 4));
+
+    if (l_TGT2_ATTR_CHIP_EC_FEATURE_HW555479)
+    {
+        l_scom_data |= (uint64_t)  0x1 << (64 - (19 + 1));
+    }
+
     l_scom_data |= (uint64_t)  0x2 << (64 - (40 + 2));
     l_scom_data |= (uint64_t)  0x2 << (64 - (42 + 2));
     //mask
     l_scom_mask |= (uint64_t)  0xF << (64 - (13 + 4));
+    l_scom_mask |= (uint64_t)  0x1 << (64 - (19 + 1));
     l_scom_mask |= (uint64_t)  0x3 << (64 - (40 + 2));
     l_scom_mask |= (uint64_t)  0x3 << (64 - (42 + 2));
 
@@ -935,6 +961,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_num;
     fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
     fapi2::ATTR_CHIP_EC_FEATURE_HW550549_Type l_hw550549;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW555479_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479;
 
 
     uint64_t l_scom_data = 0;
@@ -948,6 +975,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
              "Error from FAPI_ATTR_GET (ATTR_MSS_INTERLEAVE_GRANULARITY)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW550549, i_target, l_hw550549),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW550549)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555479, i_target, l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479));
 
 
     //MCPERF1
@@ -1054,7 +1082,12 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
         l_scom_data |= (uint64_t)    0x1 << (64 - (32 +  1)); //MCTO_ENABLE_NONMIRROR_HANG=ON
         l_scom_data |= (uint64_t)    0x1 << (64 - (33 +  1)); //MCTO_ENABLE_CHANNEL_HANG=ON
         l_scom_data |= (uint64_t)    0x1 << (64 - (34 +  1)); //MCTO_ENABLE_APO_HANG=ON
-        l_scom_data |= (uint64_t)    0x1 << (64 - (36 +  1)); //MCTO_DISABLE_HARDWARE_TRACE_MANAGER_HANG=ON
+
+        if (!l_TGT1_ATTR_CHIP_EC_FEATURE_HW555479) //Must be OFF for PAU Workaround
+        {
+            l_scom_data |= (uint64_t)    0x1 << (64 - (36 +  1)); //MCTO_DISABLE_HARDWARE_TRACE_MANAGER_HANG=ON
+        }
+
         l_scom_data |= (uint64_t)    0x2 << (64 - (37 +  3)); //MCTO_CHANNEL_TIMEOUT_VALUE=0x2
     }
 

@@ -1261,6 +1261,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_HW555479</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Enable MC PAU Workaround
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x20</value>
+         <test>GREATER_THAN_OR_EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
    <id>ATTR_CHIP_EC_FEATURE_HW548819</id>
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>
