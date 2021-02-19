@@ -272,10 +272,10 @@ UdNodeCommInfo::UdNodeCommInfo(const uint8_t i_opType,
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_1;
+    iv_Version = SECURE_UDT_VERSION_2;
     iv_SubSection = SECURE_UDT_NODECOMM_INFO;
 
-    //***** Node Comm SECURE_UDT_VERSION_1 Memory Layout *****
+    //***** Node Comm SECURE_UDT_VERSION_2 Memory Layout *****
     // 4 bytes  : Target HUID
     // 8 bytes  : Length of In/Out Buffer
     // 8 bytes  : Access Type (DeviceFW::AccessType)

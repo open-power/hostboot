@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -418,6 +418,14 @@ class UdParserNodeCommInfo : public ERRORLOG::ErrlUserDetailsParser
         // 1 byte   : LinkId
         // 1 byte   : MboxId
 
+        //***** Node Comm SECURE_UDT_VERSION_2 Memory Layout *****
+        // 4 bytes  : Target HUID
+        // 8 bytes  : Length of In/Out Buffer
+        // 8 bytes  : Access Type (DeviceFW::AccessType)
+        // 1 byte   : Op Type (DeviceFW::OperationType)
+        // 1 byte   : LinkId
+        // 1 byte   : MboxId
+
         char* l_databuf = static_cast<char*>(i_pBuffer);
 
         do
@@ -447,22 +455,25 @@ class UdParserNodeCommInfo : public ERRORLOG::ErrlUserDetailsParser
         i_parser.PrintNumber("Op Type Value 0x","%.2lX",TO_UINT8(l_databuf));
         l_databuf += sizeof(uint8_t);
 
-
-        op = TO_UINT8(l_databuf);
-        if( op == 0 )
+        // Mode was removed in SECURE_UDT_VERSION_2
+        if(i_version < SECURE_UDT_VERSION_2)
         {
-            i_parser.PrintHeading("Node Comm Mode: XBUS");
+            op = TO_UINT8(l_databuf);
+            if( op == 0 )
+            {
+                i_parser.PrintHeading("Node Comm Mode: XBUS");
+            }
+            else if( op == 1 )
+            {
+                i_parser.PrintHeading("Node Comm Mode: ABUS");
+            }
+            else
+            {
+                i_parser.PrintHeading("INVALID Node Comm Mode");
+            }
+            i_parser.PrintNumber("MODE 0x","%.2lX",TO_UINT8(l_databuf));
+            l_databuf += sizeof(uint8_t);
         }
-        else if( op == 1 )
-        {
-            i_parser.PrintHeading("Node Comm Mode: ABUS");
-        }
-        else
-        {
-            i_parser.PrintHeading("INVALID Node Comm Mode");
-        }
-        i_parser.PrintNumber("MODE 0x","%.2lX",TO_UINT8(l_databuf));
-        l_databuf += sizeof(uint8_t);
 
         i_parser.PrintNumber("LinkId 0x","%.2lX",TO_UINT8(l_databuf));
         l_databuf += sizeof(uint8_t);
