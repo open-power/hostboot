@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -752,6 +752,25 @@ PIB::PibError addMulticastFFDC(TARGETING::Target* i_chipTarg,
     {
         0x000F001E, // PCBMS.FIRST_ERR_REG
         0x000F001F, // PCBMS.ERROR_REG
+
+        // PIB Master 9 for XSCOM
+        0x000F0064, // PCBMS.REC_ERR_MST9_REG0
+        0x000F0065, // PCBMS.REC_ERR_MST9_REG1
+        0x000F0066, // PCBMS.REC_ERR_MST9_REG2
+        0x000F0067, // PCBMS.REC_ERR_MST9_REG3
+
+        // PIB Master 2 for FSI
+        0x000F0048, // PCBMS.REC_ERR_MST2_REG0
+        0x000F0049, // PCBMS.REC_ERR_MST2_REG1
+        0x000F004A, // PCBMS.REC_ERR_MST2_REG2
+        0x000F004B, // PCBMS.REC_ERR_MST2_REG3
+
+        // PIB Master E for SBE
+        0x000F0078, // PCBMS.REC_ERR_MST14_REG0
+        0x000F0079, // PCBMS.REC_ERR_MST14_REG1
+        0x000F007A, // PCBMS.REC_ERR_MST14_REG2
+        0x000F007B, // PCBMS.REC_ERR_MST14_REG3
+
     };
     for(size_t x = 0;
         x < (sizeof(ffdc_regs1)/sizeof(ffdc_regs1[0]));
@@ -760,6 +779,7 @@ PIB::PibError addMulticastFFDC(TARGETING::Target* i_chipTarg,
         o_scom_data.addData(DEVICE_SCOM_ADDRESS(ffdc_regs1[x]));
     }
 
+    // These should be shadows of the above for whichever master was last active
     uint64_t ffdc_regs2[] =
     {
         0x000F0011, // PCBMS.REC_ERR_REG0
