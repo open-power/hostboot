@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,15 +158,6 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
                       iv_chip->getHuid(), iv_rank.getKey() );
             break;
         }
-
-        // The cleanup() function is called by both verified() and falseAlarm().
-        // In either case, the error log should be predictive if there has been
-        // a least one false alarm on any DRAM on this rank other than this
-        // DRAM. This is required because of two symbol correction,
-        VcmFalseAlarm * faCntr =__getFalseAlarmCounter<TYPE_OCMB_CHIP>(iv_chip);
-        uint8_t dram = iv_mark.getSymbol().getDram();
-        if ( faCntr->queryDrams(iv_rank, dram, io_sc) )
-            io_sc.service_data->setServiceCall();
 
     } while (0);
 

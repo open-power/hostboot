@@ -512,14 +512,12 @@ uint32_t __getSpareInfo( TargetHandle_t i_trgt, MemRank i_rank,
 
 //------------------------------------------------------------------------------
 
-uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare,
-                                        bool & o_eccSpare )
+uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare )
 {
     #define PRDF_FUNC "[MemDqBitmap::isSpareAvailable] "
 
     uint32_t o_rc = SUCCESS;
     o_dramSpare = false;
-    o_eccSpare  = false;
 
     do
     {
@@ -545,7 +543,6 @@ uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare,
         if ( !spareSupported )
         {
             o_dramSpare = false;
-            o_eccSpare  = false;
             break;
         }
 
@@ -562,18 +559,6 @@ uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare,
             else if ( highNibble == spareConfig )
             {
                 o_dramSpare = ( 0 == ( spareDqBits & 0x0f ) );
-            }
-
-            // Check for ECC spare
-            // Note: ECC spares only exist when we have DIMM pairs. We don't
-            // want to check the iv_data map for data that won't exist
-            // if there is no DIMM on the ECC_SPARE_PORT, so we confirm
-            // that a paired DIMM exists here first.
-            if ( nullptr != getConnectedDimm(iv_trgt, iv_rank, ECC_SPARE_PORT) )
-            {
-                uint8_t eccDqBits =
-                    iv_data.at(ECC_SPARE_PORT).bitmap[ECC_SPARE_BYTE];
-                o_eccSpare = ( 0 == (eccDqBits & 0x0f) );
             }
         }
         else
@@ -639,47 +624,6 @@ uint32_t MemDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
         }
 
     } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-uint32_t MemDqBitmap::setEccSpare( uint8_t i_pins )
-{
-    #define PRDF_FUNC "[MemDqBitmap::setEccSpare] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Use __getSpareInfo just to check if spares are supported or not
-        uint8_t spareConfig, noSpare, lowNibble, highNibble;
-        bool spareSupported = true;
-        o_rc = __getSpareInfo( iv_trgt, iv_rank, 0, spareConfig,
-                               noSpare, lowNibble, highNibble, spareSupported );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "__getSpareInfo failed" );
-            break;
-        }
-
-        // Break out if spares are not supported
-        if ( !spareSupported ) break;
-
-        if ( !iv_x4Dram )
-        {
-            PRDF_ERR( PRDF_FUNC "0x%08x does not support x4 ECC spare",
-                      getHuid(iv_trgt) );
-            o_rc = FAIL; break;
-        }
-
-        i_pins &= 0xf; // limit to 4 bits
-        iv_data[ECC_SPARE_PORT].bitmap[ECC_SPARE_BYTE] |= i_pins;
-
-    } while( 0 );
 
     return o_rc;
 

@@ -480,10 +480,6 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         TargetHandle_t memPort = getConnectedChild( i_chip->getTrgt(),
                                                     TYPE_MEM_PORT, ps );
 
-        TargetHandle_t dimmTrgt = getConnectedDimm( memPort, i_rank, ps );
-
-        const bool isX4 = isDramWidthX4( dimmTrgt );
-
         // Determine if DRAM sparing is enabled.
         bool isEnabled = false;
         o_rc = isDramSparingEnabled<TYPE_MEM_PORT>( memPort, i_rank, ps,
@@ -494,6 +490,7 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             break;
         }
 
+        // Sparing supported
         if ( isEnabled )
         {
             // Sparing is enabled. Get the current spares in hardware.
@@ -523,35 +520,22 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 break;
             }
 
-            // If the chip mark is on a spare then the spare is bad and hardware
-            // can not steer it to another DRAM even if one is available (e.g.
-            // the ECC spare). In this this case, make error log predictive.
-            if ( ( (0 == ps) && sp0.isValid() && (dram == sp0.getDram()) ) ||
-                 ( (1 == ps) && sp1.isValid() && (dram == sp1.getDram()) ) ||
-                 ( isX4      && ecc.isValid() && (dram == ecc.getDram()) ) )
-            {
-                o_allRepairsUsed = true;
-                io_sc.service_data->setSignature( i_chip->getHuid(),
-                                                  PRDFSIG_VcmBadSpare );
-                break; // Nothing more to do.
-            }
-
             // Certain DIMMs may have had spares intentially made unavailable by
             // the manufacturer. Check the VPD for available spares.
-            bool spAvail, eccAvail;
+            bool spAvail;
             o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort, i_rank,
-                                                    ps, spAvail, eccAvail );
+                                                    ps, spAvail );
             if ( spAvail )
             {
+                // If spare0 is deployed and bad (has the chip mark), we want to
+                // undo spare0 and then deploy spare 1.
+                if ( sp0.isValid() && (dram == sp0.getDram()) )
+                {
+                    // TODO TMP_CNP - call to undo steering to spare0
+                }
                 // A spare DRAM is available.
                 o_dsdEvent = new DsdEvent<TYPE_OCMB_CHIP>{ i_chip, i_rank,
                                                            i_chipMark };
-            }
-            else if ( eccAvail )
-            {
-                // The ECC spare is available.
-                o_dsdEvent = new DsdEvent<TYPE_OCMB_CHIP>{ i_chip, i_rank,
-                                                           i_chipMark, true };
             }
             else
             {
@@ -561,13 +545,34 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                                   PRDFSIG_AllDramRepairs );
             }
         }
-        // There is no DRAM sparing so simply check if both the chip and symbol
-        // mark have been used.
-        else if ( i_chipMark.isValid() && i_symMark.isValid() )
+        // Sparing not supported
+        else
         {
-            o_allRepairsUsed = true;
-            io_sc.service_data->setSignature( i_chip->getHuid(),
-                                              PRDFSIG_AllDramRepairs );
+            // There is no DRAM sparing so simply check if both the chip and
+            // symbol mark have been used.
+            if ( i_chipMark.isValid() && i_symMark.isValid() )
+            {
+                o_allRepairsUsed = true;
+                io_sc.service_data->setSignature( i_chip->getHuid(),
+                                                  PRDFSIG_AllDramRepairs );
+            }
+
+            #ifdef __HOSTBOOT_RUNTIME
+            // The error log should be predictive if there has been
+            // a least one false alarm on any DRAM on this rank other than this
+            // DRAM. This is required because of two symbol correction,
+            VcmFalseAlarm * faCntr =
+                getOcmbDataBundle(i_chip)->getVcmFalseAlarmCounter();
+            if ( faCntr->queryDrams(i_rank, dram, io_sc) )
+            {
+                // setting o_allRepairsUsed will set the service call flag to
+                // make the log predictive
+                o_allRepairsUsed = true;
+                PRDF_TRAC( PRDF_FUNC "VCM false alarms found on other DRAMs "
+                           "besides the one currently chip marked." );
+            }
+            #endif
+
         }
 
     } while (0);
@@ -612,6 +617,33 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
 
         // Add the chip mark to the callout list.
         __addCallout( i_chip, i_rank, chipMark.getSymbol(), io_sc );
+
+        // Get the row repair
+        // TODO RTC 210072 - support for multiple ports
+        TargetHandle_t dimm = getConnectedDimm( i_chip->getTrgt(), i_rank );
+        MemRowRepair rowRepair;
+        o_rc = getRowRepairData<T>( dimm, i_rank, rowRepair );
+
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getRowRepair(0x%08x,0x%02x) failed",
+                      getHuid(dimm), i_rank.getKey() );
+            break;
+        }
+
+        // If the chip mark is on the DRAM with a row repair, clear the row
+        // repair from VPD.
+        if ( rowRepair.isValid() &&
+             (chipMark.getSymbol().getDram() == rowRepair.getRowRepairDram()) )
+        {
+            o_rc = clearRowRepairData<T>( dimm, i_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "clearRowRepair(0x%08x,0x%02x) failed",
+                          getHuid(dimm), i_rank.getKey() );
+                break;
+            }
+        }
 
         // Get the symbol mark.
         MemMark symMark;
@@ -706,6 +738,19 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         // There is nothing else to do if there is no chip mark.
         if ( !chipMark.isValid() ) break;
 
+        // Set the chip mark in the DRAM Repairs VPD.
+        if ( !areDramRepairsDisabled() )
+        {
+            o_rc = setDramInVpd( i_chip->getTrgt(), i_rank,
+                                 chipMark.getSymbol() );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
+                          i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+        }
+
         // Apply all RAS policies.
         TdEntry * dsdEvent = nullptr;
         o_rc = applyRasPolicies<T>( i_chip, i_rank, io_sc, dsdEvent );
@@ -720,19 +765,6 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         if ( nullptr != dsdEvent )
         {
             MemDbUtils::pushToQueue<T>( i_chip, dsdEvent );
-        }
-
-        // Set the chip mark in the DRAM Repairs VPD.
-        if ( !areDramRepairsDisabled() )
-        {
-            o_rc = setDramInVpd( i_chip->getTrgt(), i_rank,
-                                 chipMark.getSymbol() );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
-                          i_chip->getHuid(), i_rank.getKey() );
-                break;
-            }
         }
 
     } while (0);

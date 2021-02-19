@@ -308,8 +308,8 @@ void getDimmDqAttr<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 template<>
 int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
                                         const MemRank & i_rank,
-                                        MemSymbol & o_port0Spare,
-                                        MemSymbol & o_port1Spare )
+                                        MemSymbol & o_spare0,
+                                        MemSymbol & o_spare1 )
 {
     int32_t o_rc = SUCCESS;
 
@@ -320,6 +320,7 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 
     uint8_t port0Spare, port1Spare;
 
+    // TODO RTC 210072 - Support for multiple ports per OCMB
     TargetHandle_t memport = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
     fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(memport);
 
@@ -336,8 +337,8 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     }
     else
     {
-        o_port0Spare = MemSymbol::fromSymbol( i_ocmb, i_rank, port0Spare );
-        o_port1Spare = MemSymbol::fromSymbol( i_ocmb, i_rank, port1Spare );
+        o_spare0 = MemSymbol::fromSymbol( i_ocmb, i_rank, port0Spare );
+        o_spare1 = MemSymbol::fromSymbol( i_ocmb, i_rank, port1Spare );
     }
 #endif
 
@@ -355,6 +356,7 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 #ifdef __HOSTBOOT_MODULE
     errlHndl_t errl = nullptr;
 
+    // TODO RTC 210072 - Support for multiple ports per OCMB
     TargetHandle_t memport = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
     fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(memport);
 
@@ -511,14 +513,13 @@ uint32_t isDramSparingEnabled<TYPE_OCMB_CHIP>( TARGETING::TargetHandle_t i_trgt,
 
 template<TARGETING::TYPE T>
 uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
-                           uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail )
+                           uint8_t i_ps, bool & o_spAvail )
 {
     #define PRDF_FUNC "[PlatServices::isSpareAvailable] "
 
     uint32_t o_rc = SUCCESS;
 
     o_spAvail = false;
-    o_eccAvail = false;
 
     do
     {
@@ -536,7 +537,7 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
         // Get the current spares in hardware
         TargetHandle_t steerTrgt = i_trgt;
-        MemSymbol sp0, sp1, ecc;
+        MemSymbol sp0, sp1;
         if ( TYPE_MEM_PORT == T )
         {
             steerTrgt = getConnectedParent( i_trgt, TYPE_OCMB_CHIP );
@@ -554,7 +555,6 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
         }
 
         bool dramSparePossible = false;
-        bool eccSparePossible  = false;
 
         // Get the bad dq data
         MemDqBitmap dqBitmap;
@@ -565,21 +565,16 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
             break;
         }
 
-        o_rc = dqBitmap.isSpareAvailable( i_ps, dramSparePossible,
-                                          eccSparePossible );
+        o_rc = dqBitmap.isSpareAvailable( i_ps, dramSparePossible );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "isSpareAvailable() failed" );
             break;
         }
 
-        if (dramSparePossible && (0 == i_ps ? !sp0.isValid() : !sp1.isValid()))
+        if (dramSparePossible && (!sp0.isValid() || !sp1.isValid()))
         {
             o_spAvail = true;
-        }
-        if ( eccSparePossible && !ecc.isValid() )
-        {
-            o_eccAvail = true;
         }
 
     }while(0);
@@ -592,7 +587,7 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
 template
 uint32_t isSpareAvailable<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
-    MemRank i_rank, uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
+    MemRank i_rank, uint8_t i_ps, bool & o_spAvail );
 
 } // end namespace PlatServices
 

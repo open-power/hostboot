@@ -169,16 +169,16 @@ uint32_t clearBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Invokes the get steer mux hardware procedure.
- * @param  i_trgt       Target OCMB
- * @param  i_rank       Target rank.
- * @param  o_port0Spare A symbol associated with the spare on port 0.
- * @param  o_port1Spare A symbol associated with the spare on port 1.
+ * @param  i_trgt   Target OCMB
+ * @param  i_rank   Target rank.
+ * @param  o_spare0 A symbol associated with spare 0.
+ * @param  o_spare1 A symbol associated with spare 1.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_trgt,
-                        const MemRank & i_rank, MemSymbol & o_port0Spare,
-                        MemSymbol & o_port1Spare );
+                        const MemRank & i_rank, MemSymbol & o_spare0,
+                        MemSymbol & o_spare1 );
 
 /**
  * @brief  Invokes the set steer mux hardware procedure.
@@ -225,12 +225,11 @@ uint32_t isDramSparingEnabled( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
  * @param i_rank     Target rank
  * @param i_ps       Port select
  * @param o_spAvail  If the spare on inputted port select is available
- * @param o_eccAvail If the ecc spare is available
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
-                           uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
+                           uint8_t i_ps, bool & o_spAvail );
 
 /**
  * @brief   get DIMM DQ map from FAPI routines

@@ -133,7 +133,7 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
         // has been applied successfully.
         if ( MarkStore::isSafeToRemoveChipMark<T>( iv_chip, iv_rank ) )
         {
-            PRDF_TRAC( "[DsdEvent] DRAM spare applied successfully: "
+            PRDF_TRAC( PRDF_FUNC "DRAM spare applied successfully: "
                        "0x%08x,0x%02x", iv_chip->getHuid(), getKey() );
 
             io_sc.service_data->setSignature( iv_chip->getHuid(),
@@ -150,13 +150,20 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
         // Else if it is not safe to remove the chip mark, the DRAM spare is bad
         else
         {
-            PRDF_TRAC( "[DsdEvent] DRAM spare is bad: 0x%08x,0x%02x",
+            PRDF_TRAC( PRDF_FUNC "DRAM spare is bad: 0x%08x,0x%02x",
                        iv_chip->getHuid(), getKey() );
 
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_DsdBadSpare );
 
-            // TODO TMP_CNP follow steps in Once VCM Verified
+            // Take actions to cleanup the chip mark
+            o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_TRAC( PRDF_FUNC "chipMarkCleanup(0x%08x, 0x%02x) failed",
+                           iv_chip->getHuid(), getKey() );
+                break;
+            }
         }
 
     } while (0);
