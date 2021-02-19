@@ -715,7 +715,7 @@ errlHndl_t sendSetStateEffecterStatesRequest(
     return errl;
 }
 
-errlHndl_t sendGracefulRebootRequest( const char* i_reason )
+errlHndl_t sendGracefulRebootRequest()
 {
     // TODO RTC: 259581 Dynamically fetch this effecter from BMC instead of
     // assuming its value.
@@ -724,12 +724,6 @@ errlHndl_t sendGracefulRebootRequest( const char* i_reason )
     constexpr uint8_t graceful_reboot =
             pldm_effecter_state_fields::PLDM_GRACEFUL_REBOOT;
     fields_to_set.push_back({set_request::PLDM_REQUEST_SET, graceful_reboot});
-
-    if(i_reason)
-    {
-        CONSOLE::displayf(CONSOLE::DEFAULT, nullptr,
-                          "Triggering graceful reboot for %s", i_reason);
-    }
 
     return sendSetStateEffecterStatesRequest(SOFTWARE_TERMINATION_STATUS_EFFECTER_ID,
                                              fields_to_set);

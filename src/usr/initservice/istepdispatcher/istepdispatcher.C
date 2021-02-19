@@ -1863,8 +1863,18 @@ void IStepDispatcher::requestReboot(const char* i_reason)
     const auto l_istepMode = TARGETING::UTIL::assertGetToplevelTarget()->
                                 getAttr<TARGETING::ATTR_ISTEP_MODE>();
 
+#ifdef CONFIG_CONSOLE
+    if(i_reason)
+    {
+        CONSOLE::displayf(CONSOLE::VUART1, NULL, "Triggering graceful reboot for %s", i_reason);
+    }
+#endif
+
     if(l_istepMode)
     {
+#ifdef CONFIG_CONSOLE
+        CONSOLE::displayf(CONSOLE::VUART1, NULL, "Reboot prevented in istep mode. Shutting down instead");
+#endif
         // Do not issue a reboot - just shut HB down
         shutdownDuringIpl();
     }
@@ -1875,7 +1885,7 @@ void IStepDispatcher::requestReboot(const char* i_reason)
 
 #ifdef CONFIG_PLDM
         // Issue a PLDM request for a reboot
-        errlHndl_t l_errl = PLDM::sendGracefulRebootRequest(i_reason);
+        errlHndl_t l_errl = PLDM::sendGracefulRebootRequest();
         if(l_errl)
         {
             TRACFCOMP(g_trac_initsvc, ERR_MRK"IStepDispatcher::requestReboot(): Could not request PLDM reboot");
