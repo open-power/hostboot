@@ -50,6 +50,7 @@ fapi2::ReturnCode p10_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_
     uint8_t l_sim = 0;
     FAPI_INF("%s Start p10_omi_train", mss::c_str(i_target));
     mss::display_git_commit_info("p10_omi_train");
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
@@ -65,17 +66,35 @@ fapi2::ReturnCode p10_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_
     {
         // Poll that P10 is done with its PHY training
         // NOTE: need to do this here to not break parallelization of p10_omi_setup
-        FAPI_TRY(p10_io_omi_poll_init_done(l_omi));
+        fapi2::current_err = p10_io_omi_poll_init_done(l_omi);
 
-        // One OCMB per OMI
-        // We only need to set up host side registers if there is an OCMB on the other side,
-        // otherwise, there's no need to train the link. So with no OCMB, we just skip
-        // the below step
-        for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
+        if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
         {
-            // Helper to perform upstream PRBS sequence if needed, and kick off ENABLE_AUTO_TRAINING
-            FAPI_TRY(mss::omi::p10_omi_train_prbs_helper(l_omi, l_ocmb));
+            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
+            }
+
+            l_rc = fapi2::current_err;
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
+        else
+        {
+            // One OCMB per OMI
+            // We only need to set up host side registers if there is an OCMB on the other side,
+            // otherwise, there's no need to train the link. So with no OCMB, we just skip
+            // the below step
+            for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
+            {
+                // Helper to perform upstream PRBS sequence if needed, and kick off ENABLE_AUTO_TRAINING
+                FAPI_TRY(mss::omi::p10_omi_train_prbs_helper(l_omi, l_ocmb));
+            }
+        }
+    }
+
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        return l_rc;
     }
 
 fapi_try_exit:
