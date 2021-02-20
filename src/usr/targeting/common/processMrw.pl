@@ -3848,22 +3848,19 @@ sub setCommonBusConfigAttributes
     chop($busSrcPath);
     chop($busDestPath);
 
-    # Save off abus level for use later
-    my $busSrcCopy = $busSrcPath;
-    my $busDestCopy = $busDestPath;
     my $type = $targetObj->getType($target);
     my $abusSrc = 0;
     my $abusDest = 0;
     if ($type eq "SMPGROUP")
     {
-        if ($busSrcCopy !~ s/([ax]bus.*)//g)
+        if ($busSrcPath !~ /([ax]bus.*)/)
         {
             select()->flush(); # flush buffer before spewing out error message
             die "MRW is not as expected when finding ABUS or XBUS src: $busSrcPath";
         }
         $abusSrc = $1;
 
-        if ($busDestCopy !~ s/([ax]bus.*)//g)
+        if ($busDestPath !~ /([ax]bus.*)/g)
         {
             select()->flush(); # flush buffer before spawning out error message
             die "MRW is not as expected when finding ABUS or XBUS dest: $busDestPath";
@@ -3905,17 +3902,11 @@ sub setCommonBusConfigAttributes
         # Set up paths for smpgroup
         if ($type eq "SMPGROUP")
         {
-            # Append smpgroup to the bus target by extracting out groupA/groupB
-            my $targetCopy = $target;
-            if ($targetCopy !~ s/(group.*)//g)
-            {
-                select()->flush(); # flush buffer before spewing out error message
-                die "MRW is not as expected when finding ABUS or XBUS $target";
-            }
-            my $smpgroup = $1;
+            my $srcSmpgroup = $busConnection->{source_target};
+            my $destSmpgroup = $busConnection->{dest_target};
 
-            $busSrcTargetCopy .= "/$abusSrc/$smpgroup";
-            $busDestTargetCopy .= "/$abusDest/$smpgroup";
+            $busSrcTargetCopy .= "/$abusSrc/$srcSmpgroup";
+            $busDestTargetCopy .= "/$abusDest/$destSmpgroup";
 
             my $busSrcHuid = $targetObj->getAttribute($busSrcTargetCopy, "HUID");
             my $busSrcPhysicalPath = $targetObj->getAttribute($busSrcTargetCopy, "PHYS_PATH");
