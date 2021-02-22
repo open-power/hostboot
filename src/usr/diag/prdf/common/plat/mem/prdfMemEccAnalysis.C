@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1046,12 +1046,46 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         // Increment the count and check threshold.
         if ( db->getImpeThresholdCounter()->inc(rank, dram, io_sc) )
         {
-            // Make the error log predictive if DRAM Repairs are disabled or if
-            // the number of DRAMs on this rank with IMPEs has reached threshold
-            if ( areDramRepairsDisabled() ||
-                 db->getImpeThresholdCounter()->queryDrams(rank, dram, io_sc) )
+            // Check if a DRAM spare is available
+            uint8_t ps = symbol.getPortSlct();
+            TargetHandle_t memPort = getConnectedChild( i_chip->getTrgt(),
+                                                        TYPE_MEM_PORT, ps );
+            bool spareAvailable = false;
+            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort, rank, ps,
+                                                    spareAvailable );
+            if ( SUCCESS != o_rc )
             {
+                PRDF_ERR( PRDF_FUNC "isSpareAvailable(0x%08x, 0x%02x, %d) "
+                          "failed", getHuid(memPort), rank.getKey(), ps );
+                break;
+            }
+
+            // Make the error log predictive if DRAM Repairs are disabled.
+            if ( areDramRepairsDisabled() )
+            {
+                PRDF_TRAC( PRDF_FUNC "Dram repairs disabled, making log "
+                           "predictive" );
                 io_sc.service_data->setServiceCall();
+            }
+            // Make the error log predictive and ban TPS on this rank if IMPEs
+            // are found for this rank from more than one DRAM and there is no
+            // spare available to deploy.
+            else if ( db->getImpeThresholdCounter()->queryDrams(rank,dram,io_sc)
+                      && !spareAvailable )
+            {
+                PRDF_TRAC( PRDF_FUNC "IMPEs found for this rank from more than "
+                           "one DRAM. Making log predictive and banning TPS on "
+                           "target 0x%08x, rank 0x%02x", i_chip->getHuid(),
+                           rank.getKey() );
+                io_sc.service_data->setServiceCall();
+
+                #ifdef __HOSTBOOT_RUNTIME
+
+                // Also ban TPS on this rank since we don't want TPS making
+                // things worse by placing a chip mark later.
+                MemDbUtils::banTps<TYPE_OCMB_CHIP>( i_chip, rank );
+
+                #endif // __HOSTBOOT_RUNTIME
             }
             else // Otherwise, place a chip mark on the failing DRAM.
             {
