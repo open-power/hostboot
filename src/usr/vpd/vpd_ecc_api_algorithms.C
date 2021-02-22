@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/vpd/vpd_ecc_api.C $                                   */
+/* $Source: src/usr/vpd/vpd_ecc_api_algorithms.C $                        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -27,11 +27,13 @@
 // Includes
 // ------------------------------------------------------------------
 #include "ipvpd.H"   // vpdeccCreateEcc, vpdeccCheckData
+#include "vpdecc.h"  // vpd_create_ecc, vpdecc_check_data
 
 // ------------------------------------------------------------------
 // Global variable to determine if the ECC APIs are present and available.
+// This is the algorithms version, therefore set to true
 // ------------------------------------------------------------------
-const bool g_vpd_ecc_api_present(false);
+const bool g_vpd_ecc_api_present(true);
 
 // ------------------------------------------------------------------
 // IpVpdFacade::vpdeccCreateEcc
@@ -40,7 +42,7 @@ int IpVpdFacade::vpdeccCreateEcc(
                 const unsigned char* i_recordData, size_t  i_recordLength,
                 unsigned char*       o_eccData,    size_t* io_eccLength)
 {
-    return 0;
+    return ::vpdecc_create_ecc(i_recordData, i_recordLength, o_eccData, io_eccLength);
 } // vpdeccCreateEcc
 
 // ------------------------------------------------------------------
@@ -50,6 +52,6 @@ int IpVpdFacade::vpdeccCheckData(
                 unsigned char*       io_recordData, size_t i_recordLength,
                 const unsigned char* i_eccData,     size_t i_eccLength)
 {
-    return 0;
+    return ::vpdecc_check_data(io_recordData, i_recordLength, i_eccData, i_eccLength);
 } // vpdeccCheckData
 

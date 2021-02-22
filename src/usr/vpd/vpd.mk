@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -30,9 +30,16 @@ EXTRAINCDIR += ${ROOTPATH}/src/import
 # common objects with runtime
 OBJS += vpd_common.o
 OBJS += ipvpd.o
-OBJS += vpd_ecc_api.o
 OBJS += mvpd.o
 OBJS += pvpd.o
 OBJS += spd.o
 OBJS += ocmb_spd.o
 OBJS += errlud_vpd.o
+
+# Compile the VPD ECC update/validate algorithms if flag CONFIG_COMPILE_VPD_ECC_ALGORITHMS
+# is set to 'y' as found in local file HBconfig.  If flag set to 'n' then compile the no-op code.
+OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpd_ecc_api_algorithms.o, vpd_ecc_api_no_op.o)
+OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpdecc.o)
+OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpdecc_support.o)
+
+

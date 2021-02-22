@@ -1,0 +1,5 @@
+# Ignore these untracked files when pulled into the VPD directory
+vpdecc.h
+vpdecc.c
+vpdecc_support.h
+vpdecc_support.c
