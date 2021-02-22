@@ -24,6 +24,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
+  <!-- Base type to use for chips that fall outside of the normal CEC types -->
   <targetType>
     <id>asic</id>
     <parent>base</parent>
@@ -103,6 +104,7 @@
   </targetType>
 
   <targetType>
+    <!-- Standard chip -->
     <id>chip</id>
     <parent>base</parent>
     <attribute>
@@ -304,173 +306,7 @@
   </targetType>
 
   <targetType>
-    <id>chip-membuf-centaur</id>
-    <parent>chip</parent>
-    <attribute>
-      <id>AVDD_ID</id>
-    </attribute>
-    <attribute>
-      <default>MEM</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>0xFF</default>
-      <id>CENTAUR_ECID_FRU_ID</id>
-    </attribute>
-    <attribute>
-      <id>CEN_MSS_VOLT_AVDD_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>CEN_MSS_VOLT_AVDD_OFFSET_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>CEN_MSS_VOLT_VCS_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>CEN_MSS_VOLT_VCS_OFFSET_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>CEN_MSS_VOLT_VDDR_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>CEN_MSS_VOLT_VDDR_OFFSET_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>CEN_MSS_VOLT_VDD_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>CEN_MSS_VOLT_VDD_OFFSET_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>CEN_MSS_VOLT_VPP_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <id>FRU_ID</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>0,0,0,0,0,400,0,400,400,0,0,0,0,0,0,0</default>
-      <id>I2C_BUS_SPEED_ARRAY</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>reserved</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>useFsiI2C</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>useHostI2C</id>
-          <value>0</value>
-        </field>
-      </default>
-      <id>I2C_SWITCHES</id>
-    </attribute>
-    <attribute>
-      <default>CENTAUR</default>
-      <id>MODEL</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>reserved</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>supportsFsiScom</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>supportsInbandScom</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>supportsXscom</id>
-          <value>0</value>
-        </field>
-      </default>
-      <id>PRIMARY_CAPABILITIES</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>reserved</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>useFsiScom</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>useI2cScom</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>useInbandScom</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>useSbeScom</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>useXscom</id>
-          <value>0</value>
-        </field>
-      </default>
-      <id>SCOM_SWITCHES</id>
-    </attribute>
-    <attribute>
-      <default>MEMBUF</default>
-      <id>TYPE</id>
-    </attribute>
-    <attribute>
-      <id>VCS_ID</id>
-    </attribute>
-    <attribute>
-      <id>VDDR_ID</id>
-    </attribute>
-    <attribute>
-      <id>VDD_ID</id>
-    </attribute>
-    <attribute>
-      <id>VPD_REC_NUM</id>
-    </attribute>
-    <attribute>
-      <id>VPP_ID</id>
-    </attribute>
-  </targetType>
-
-  <!-- Generic OCMB, used for Explorer, Gemini, etc -->
-  <targetType>
+    <!-- OMI-attached Memory Buffer -->
     <id>chip-ocmb</id>
     <parent>chip</parent>
     <attribute>
@@ -646,6 +482,7 @@
   </targetType>
 
   <targetType>
+    <!-- Processor Chip -->
     <id>chip-processor</id>
     <parent>chip</parent>
     <attribute>
@@ -883,33 +720,6 @@
     </attribute>
     <attribute>
       <id>XSCOM_VIRTUAL_ADDR</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>chip-processor-axone</id>
-    <parent>chip-processor-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>chip-processor-cumulus</id>
-    <parent>chip-processor-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>chip-processor-nimbus</id>
-    <parent>chip-processor-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
     </attribute>
   </targetType>
 
@@ -1420,182 +1230,7 @@
   </targetType>
 
   <targetType>
-    <id>chip-processor-power9</id>
-    <parent>chip-processor</parent>
-    <attribute>
-      <default>FABRIC</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>0x0000001D</default>
-      <id>CPU_ATTR</id>
-    </attribute>
-    <attribute>
-      <default>128</default>
-      <id>DATA_CACHE_LINE_SIZE</id>
-    </attribute>
-    <attribute>
-      <default>32</default>
-      <id>DATA_CACHE_SIZE</id>
-    </attribute>
-    <attribute>
-      <default>8</default>
-      <id>DCACHE_ASSOC_SETS</id>
-    </attribute>
-    <attribute>
-      <default>128</default>
-      <id>DCACHE_LINE_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>DUMMY_HEAP_ZERO_DEFAULT</id>
-    </attribute>
-    <attribute>
-      <id>EEPROM_SBE_BACKUP_INFO</id>
-    </attribute>
-    <attribute>
-      <id>EEPROM_SBE_PRIMARY_INFO</id>
-    </attribute>
-    <attribute>
-      <id>FSP_BAR_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>FSP_BASE_ADDR</id>
-    </attribute>
-    <attribute>
-      <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
-      <id>I2C_BUS_SPEED_ARRAY</id>
-    </attribute>
-    <attribute>
-      <default>8</default>
-      <id>ICACHE_ASSOC_SETS</id>
-    </attribute>
-    <attribute>
-      <default>128</default>
-      <id>ICACHE_BLOCK_SIZE</id>
-    </attribute>
-    <attribute>
-      <default>128</default>
-      <id>ICACHE_LINE_SIZE</id>
-    </attribute>
-    <attribute>
-      <default>32</default>
-      <id>ICACHE_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>ISTEP_MODE</id>
-    </attribute>
-    <attribute>
-      <default>8</default>
-      <id>L2_CACHE_ASSOC_SETS</id>
-    </attribute>
-    <attribute>
-      <default>128</default>
-      <id>L2_CACHE_LINE_SIZE</id>
-    </attribute>
-    <attribute>
-      <default>512</default>
-      <id>L2_CACHE_SIZE</id>
-    </attribute>
-    <attribute>
-      <default>128</default>
-      <id>L3_CACHE_LINE_SIZE</id>
-    </attribute>
-    <attribute>
-      <default>10240</default>
-      <id>L3_CACHE_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>LPC_BUS_ADDR</id>
-    </attribute>
-    <attribute>
-      <id>NEST_VCS_ID</id>
-    </attribute>
-    <attribute>
-      <id>NEST_VDDR_ID</id>
-    </attribute>
-    <attribute>
-      <id>NEST_VDD_ID</id>
-    </attribute>
-    <attribute>
-      <id>NEST_VDN_ID</id>
-    </attribute>
-    <attribute>
-      <id>NEST_VIO_ID</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PHB_BASE_ADDRS</id>
-    </attribute>
-    <attribute>
-      <id>PROC_DCM_INSTALLED</id>
-    </attribute>
-    <attribute>
-      <id>PSI_BRIDGE_BASE_ADDR</id>
-    </attribute>
-    <attribute>
-      <id>PSI_HB_ESB_ADDR</id>
-    </attribute>
-    <attribute>
-      <id>RNG_BAR_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>SBE_IS_STARTED</id>
-    </attribute>
-    <attribute>
-      <id>SECUREBOOT_PROTECT_DECONFIGURED_TPM</id>
-    </attribute>
-    <attribute>
-      <id>TIME_BASE</id>
-      <default>0x800000</default>
-    </attribute>
-    <attribute>
-      <default>4</default>
-      <id>TLB_DATA_ASSOC_SETS</id>
-    </attribute>
-    <attribute>
-      <default>1024</default>
-      <id>TLB_DATA_ENTRIES</id>
-    </attribute>
-    <attribute>
-      <default>0</default>
-      <id>TLB_INSTR_ASSOC_SETS</id>
-    </attribute>
-    <attribute>
-      <default>0</default>
-      <id>TLB_INSTR_ENTRIES</id>
-    </attribute>
-    <attribute>
-      <default>128</default>
-      <id>TLB_RESERVE_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>TOD_CPU_DATA</id>
-    </attribute>
-    <attribute>
-      <id>XIVE_CONTROLLER_BAR_ADDR</id>
-    </attribute>
-    <attribute>
-      <id>XSCOM_BASE_ADDRESS</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
+    <!-- Trusted Platform Module -->
     <id>chip-tpm-cectpm</id>
     <parent>chip</parent>
     <attribute>
@@ -1817,175 +1452,6 @@
       <default>NODE</default>
       <id>TYPE</id>
     </attribute>
-    <attribute>
-      <id>VPD_REC_NUM</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>enc-node-power9</id>
-    <parent>base</parent>
-    <attribute>
-      <default>0xFFFFFFFFFFFFFFFF</default>
-      <id>ATTN_AREA_1_ADDR</id>
-    </attribute>
-    <attribute>
-      <default>0xFFFFFFFFFFFFFFFF</default>
-      <id>ATTN_AREA_2_ADDR</id>
-    </attribute>
-    <attribute>
-      <default>NODE</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>ENC</default>
-      <id>CLASS</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <value>0xFF</value>
-          <id>byteAddrOffset</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>chipCount</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>devAddr</id>
-        </field>
-        <field>
-          <!--Since enum values cannot be used as default values in
-                  a complexType, this is a workaround to set the value to the
-                  corresponding enum value.-->
-          <!--value>IBM_FRUVPD</value-->
-          <value>0x2</value>
-          <id>eepromContentType</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>engine</id>
-        </field>
-        <field>
-          <value>physical:sys-0</value>
-          <id>i2cMasterPath</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>i2cMuxBusSelector</id>
-        </field>
-        <field>
-          <value>physical:sys-0</value>
-          <id>i2cMuxPath</id>
-        </field>
-        <field>
-          <value>0xFFFFFFFFFFFFFFFF</value>
-          <id>maxMemorySizeKB</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>port</id>
-        </field>
-        <field>
-          <value>0xFFFFFFFFFFFFFFFF</value>
-          <id>writeCycleTime</id>
-        </field>
-        <field>
-          <value>0xFFFFFFFFFFFFFFFF</value>
-          <id>writePageSize</id>
-        </field>
-      </default>
-      <id>EEPROM_VPD_PRIMARY_INFO</id>
-    </attribute>
-    <attribute>
-      <id>FIELD_CORE_OVERRIDE</id>
-    </attribute>
-    <attribute>
-      <id>FRU_ID</id>
-    </attribute>
-    <attribute>
-      <id>HDAT_HBRT_NUM_SECTIONS</id>
-    </attribute>
-    <attribute>
-      <id>HDAT_HBRT_SECTION_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>HDAT_RSV_MEM_NUM_SECTIONS</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, HOSTSVC_HBEL, GARD -->
-      <default>0x00000039</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <id>KEY_TRANSITION_STATE</id>
-    </attribute>
-    <attribute>
-      <default>POWER9</default>
-      <id>MODEL</id>
-    </attribute>
-    <attribute>
-      <id>MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG</id>
-    </attribute>
-    <attribute>
-      <id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN</id>
-    </attribute>
-    <attribute>
-      <id>TCE_START_TOKEN_FOR_HDAT</id>
-    </attribute>
-    <attribute>
-      <id>TCE_START_TOKEN_FOR_PAYLOAD</id>
-    </attribute>
-    <attribute>
-      <default>NODE</default>
-      <id>TYPE</id>
-    </attribute>
-    <attribute>
-      <id>VPD_REC_NUM</id>
-    </attribute>
   </targetType>
 
   <targetType>
@@ -2049,6 +1515,8 @@
   </targetType>
 
   <targetType>
+    <!-- Generic I2C Device : Used to represent small components that require
+         i2c access, but very little other support -->
     <id>generic_i2c_device</id>
     <parent>asic</parent>
     <attribute>
@@ -2142,6 +1610,9 @@
   </targetType>
 
   <targetType>
+    <!-- Represents the logical DRAM on any kind of DIMM.  Note that this
+         does not represent the physical DIMM, but it does model access to
+         the SPD. -->
     <id>lcard-dimm</id>
     <parent>card</parent>
     <attribute>
@@ -2283,15 +1754,7 @@
   </targetType>
 
   <targetType>
-    <id>lcard-dimm-cdimm</id>
-    <parent>lcard-dimm</parent>
-    <attribute>
-      <default>CDIMM</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
+    <!-- Logical DDIMM -->
     <id>lcard-dimm-ddimm</id>
     <parent>lcard-dimm</parent>
     <attribute>
@@ -2354,6 +1817,7 @@
   </targetType>
 
   <targetType>
+    <!-- Special target to decode the 4U DDIMM from the MRW -->
     <id>lcard-dimm-ddimm4u</id>
     <parent>lcard-dimm-ddimm</parent>
   </targetType>
@@ -2364,6 +1828,7 @@
   </targetType>
 
   <targetType>
+    <!-- Standard JEDEC-compliant ISDIMM -->
     <id>lcard-dimm-jedec</id>
     <parent>lcard-dimm</parent>
     <attribute>
@@ -2373,8 +1838,9 @@
   </targetType>
 
   <targetType>
+    <!-- OnChip Controller that manages thermal/performance -->
     <id>occ</id>
-    <parent>unit</parent>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <id>FRU_ID</id>
     </attribute>
@@ -2434,6 +1900,8 @@
   </targetType>
 
   <targetType>
+    <!-- Power Management Integrated Circuit : Provides voltage regulation
+         on the DDIMM -->
     <id>pmic</id>
     <parent>asic</parent>
     <attribute>
@@ -2506,6 +1974,25 @@
   </targetType>
 
   <targetType>
+    <!-- Base type for any logical unit inside a POWERXX processor chip -->
+    <id>powerxx-chipunit</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>CHIPLET_ID</id>
+    </attribute>
+    <attribute>
+      <!-- Ideally this shouldn't be required, but legacy code exists that
+           assumes MODEL is set on all of the subunits instead of going up
+           to the parent chip -->
+      <id>MODEL</id>
+      <default>POWER10</default>
+    </attribute>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>sp</id>
     <parent>base</parent>
     <attribute>
@@ -2523,6 +2010,7 @@
   </targetType>
 
   <targetType>
+    <!-- Top-level system target -->
     <id>sys</id>
     <parent>base</parent>
     <attribute>
@@ -2961,9 +2449,6 @@
     <id>unit</id>
     <parent>base</parent>
     <attribute>
-      <id>CHIPLET_ID</id>
-    </attribute>
-    <attribute>
       <id>CHIP_UNIT</id>
     </attribute>
     <attribute>
@@ -2991,98 +2476,19 @@
   </targetType>
 
   <targetType>
+    <!-- Extra layer required for MRW processing -->
     <id>unit-abus-power10</id>
-    <parent>unit-smpgroup</parent>
+    <parent>unit-smpgroup-power10</parent>
   </targetType>
 
   <targetType>
-    <id>unit-capp-axone</id>
-    <parent>unit-capp-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-capp-cumulus</id>
-    <parent>unit-capp-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-capp-nimbus</id>
-    <parent>unit-capp-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <!-- CAPP
-     Nimbus : 2 per chip
-     Cumulus: 2  -->
-  <targetType>
-    <id>unit-capp-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>FABRIC</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
-      <default>0x00000031</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>CAPP</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
+    <!-- Processor Core : Represents smallest core for this model -->
     <id>unit-core</id>
-    <parent>unit</parent>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <default>CPU</default>
       <id>CDM_DOMAIN</id>
     </attribute>
-    <attribute>
-      <default>CORE</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-core-power10</id>
-    <parent>unit-core</parent>
     <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
@@ -3113,107 +2519,42 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-  </targetType>
-
-  <!-- CORE: Use same CORE target for both Nimbus and Cumulus
-     A collection of 4 threads -->
-  <targetType>
-    <id>unit-core-power9</id>
-    <parent>unit-core</parent>
-    <attribute>
-      <default>CPU</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
-      <default>0x00000031</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-dmi-cumulus</id>
-    <parent>unit-dmi-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <!-- DMI
-     Nimbus : None
-     Cumulus: 2 per MI (total of 8 per chip) -->
-  <targetType>
-    <id>unit-dmi-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>MEM</default>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>DMI</default>
+      <default>CORE</default>
       <id>TYPE</id>
     </attribute>
   </targetType>
 
   <targetType>
+    <!-- Processor Core : Represents a single SMT4 core -->
+    <id>unit-core-power10</id>
+    <parent>unit-core</parent>
+  </targetType>
+
+  <targetType>
+    <!-- Processor Quad : Represents a set of 4 SMT4 cores -->
     <id>unit-eq</id>
-    <parent>unit</parent>
+    <parent>powerxx-chipunit</parent>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
     <attribute>
       <default>EQ</default>
       <id>TYPE</id>
@@ -3227,118 +2568,12 @@
       <default>CPU</default>
       <id>CDM_DOMAIN</id>
     </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-  </targetType>
-
-  <!-- EQ chiplet: Use same EQ target for Nimbus and Cumulus
-     6 EQs on Nimbus
-     Quad: 2 ex's and one ep -->
-  <targetType>
-    <id>unit-eq-power9</id>
-    <parent>unit-eq</parent>
-    <attribute>
-      <default>CPU</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
-      <default>0x00000031</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-  </targetType>
-
-  <!-- EX: Use same EX target for both Nimbus and Cumulus
-     2 EXs per EQ
-     EX (L2/L3, 2x Core) -->
-  <targetType>
-    <id>unit-ex-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>CPU</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
-      <default>0x00000031</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <default>EX</default>
-      <id>TYPE</id>
-    </attribute>
   </targetType>
 
   <targetType>
-    <id>unit-fc-power10</id>
-    <parent>unit</parent>
+    <!-- Fused Core : SMT8 logical core, contains 2xSMT4 cores -->
+    <id>unit-fc</id>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <default>CPU</default>
       <id>CDM_DOMAIN</id>
@@ -3379,8 +2614,14 @@
   </targetType>
 
   <targetType>
-    <id>unit-iohs-power10</id>
-    <parent>unit</parent>
+    <id>unit-fc-power10</id>
+    <parent>unit-fc</parent>
+  </targetType>
+
+  <targetType>
+    <!-- I/O High Speed : Responsible for SMP and OpenCAPI interface -->
+    <id>unit-iohs</id>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <default>FABRIC</default>
       <id>CDM_DOMAIN</id>
@@ -3407,9 +2648,6 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
       <id>PEER_PATH</id>
     </attribute>
     <attribute>
@@ -3422,21 +2660,32 @@
   </targetType>
 
   <targetType>
-    <id>unit-l4-centaur</id>
-    <parent>unit-l4-power9</parent>
+    <id>unit-iohs-power10</id>
+    <parent>unit-iohs</parent>
+  </targetType>
+
+  <targetType>
+    <!-- Memory Controller : Highest level of memory logic -->
+    <id>unit-mc</id>
+    <parent>powerxx-chipunit</parent>
     <attribute>
-      <id>CDM_DOMAIN</id>
       <default>MEM</default>
+      <id>CDM_DOMAIN</id>
     </attribute>
     <attribute>
-      <default>CENTAUR</default>
-      <id>MODEL</id>
+      <id>DECONFIG_GARDABLE</id>
+      <default>1</default>
+    </attribute>
+    <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
+      <default>0x00000033</default>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>
-          <value>0</value>
+          <value>1</value>
         </field>
         <field>
           <id>deconfigureParent</id>
@@ -3449,330 +2698,51 @@
       </default>
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-l4-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>MEM</default>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-    </attribute>
-    <attribute>
-      <default>L4</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <!-- Centaur MBA -->
-  <targetType>
-    <id>unit-mba-centaur</id>
-    <parent>unit</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>MEM</default>
-    </attribute>
-    <attribute>
-      <id>DECONFIG_GARDABLE</id>
-      <default>1</default>
-    </attribute>
-    <attribute>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
     <attribute>
       <id>TYPE</id>
-      <default>MBA</default>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-mc-axone</id>
-    <parent>unit-mc-power9</parent>
-    <attribute>
-      <id>MODEL</id>
-      <default>AXONE</default>
-    </attribute>
-    <attribute>
-      <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-mc-cumulus</id>
-    <parent>unit-mc-power9</parent>
-    <attribute>
-      <id>MODEL</id>
-      <default>CUMULUS</default>
+      <default>MC</default>
     </attribute>
   </targetType>
 
   <targetType>
     <id>unit-mc-power10</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>MEM</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <id>DECONFIG_GARDABLE</id>
-      <default>1</default>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <id>TYPE</id>
-      <default>MC</default>
-    </attribute>
-  </targetType>
-
-  <!-- MC
-     Nimbus : None
-     Cumulus: 2 per chip
-     Axone  : 2 per chip -->
-  <targetType>
-    <id>unit-mc-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>MEM</default>
-    </attribute>
-    <attribute>
-      <id>DECONFIG_GARDABLE</id>
-      <default>1</default>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <id>TYPE</id>
-      <default>MC</default>
-    </attribute>
+    <parent>unit-mc</parent>
   </targetType>
 
   <targetType>
-    <id>unit-mca-nimbus</id>
-    <parent>unit-mca-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <!-- MCA
-     Nimbus : 2 MCAs under each MCS (total of 8 per chip)
-     Cumulus: No MCA
-     Tied 1-1 to a DDR port -->
-  <targetType>
-    <id>unit-mca-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>MEM</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>MCA</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-mcbist-nimbus</id>
-    <parent>unit-mcbist-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <!-- MCBIST
-     Nimbus : 1 per MCU (total of 2 per chip)
-     Cumulus: None  -->
-  <targetType>
-    <id>unit-mcbist-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <id>AVDD_ID</id>
-    </attribute>
-    <attribute>
-      <default>MEM</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_AVDD_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_AVDD_OFFSET_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_VCS_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_VCS_OFFSET_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_VDDR_OFFSET_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_VDD_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_VDD_OFFSET_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <id>MSS_VOLT_VPP_OFFSET_MILLIVOLTS</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>MCBIST</default>
-      <id>TYPE</id>
-    </attribute>
-    <attribute>
-      <id>VCS_ID</id>
-    </attribute>
-    <attribute>
-      <id>VDDR_ID</id>
-    </attribute>
-    <attribute>
-      <id>VDD_ID</id>
-    </attribute>
-    <attribute>
-      <id>VPP_ID</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
+    <!-- Memory Controller : Covers MCU channel specific logic -->
     <id>unit-mcc</id>
-    <parent>unit</parent>
+    <parent>powerxx-chipunit</parent>
+    <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
+      <default>0x00000033</default>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
     <attribute>
       <id>TYPE</id>
       <default>MCC</default>
@@ -3780,215 +2750,13 @@
   </targetType>
 
   <targetType>
-    <id>unit-mcc-axone</id>
-    <parent>unit-mcc-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
     <id>unit-mcc-power10</id>
     <parent>unit-mcc</parent>
-    <attribute>
-      <default>MEM</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-  </targetType>
-
-  <!-- MCC
-     Nimbus : None
-     Cumulus: None
-     Axone  : 8 total per chip (2 per MI) -->
-  <targetType>
-    <id>unit-mcc-power9</id>
-    <parent>unit-mcc</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>MEM</default>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-mcs-nimbus</id>
-    <parent>unit-mcs-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <!-- MCS
-     Nimbus : 4 MCS under each chip
-              (MCUnit left has two, MCUnit right has two)
-     Cumulus: None  -->
-  <targetType>
-    <id>unit-mcs-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>MEM</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <value>0xFF</value>
-          <id>byteAddrOffset</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>chipCount</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>devAddr</id>
-        </field>
-        <field>
-          <!--Since enum values cannot be used as default values in
-                  a complexType, this is a workaround to set the value to the
-                  corresponding enum value.-->
-          <!--value>IBM_FRUVPD</value-->
-          <value>0x2</value>
-          <id>eepromContentType</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>engine</id>
-        </field>
-        <field>
-          <value>physical:sys-0</value>
-          <id>i2cMasterPath</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>i2cMuxBusSelector</id>
-        </field>
-        <field>
-          <value>physical:sys-0</value>
-          <id>i2cMuxPath</id>
-        </field>
-        <field>
-          <value>0xFFFFFFFFFFFFFFFF</value>
-          <id>maxMemorySizeKB</id>
-        </field>
-        <field>
-          <value>0xFF</value>
-          <id>port</id>
-        </field>
-        <field>
-          <value>0xFFFFFFFFFFFFFFFF</value>
-          <id>writeCycleTime</id>
-        </field>
-        <field>
-          <value>0xFFFFFFFFFFFFFFFF</value>
-          <id>writePageSize</id>
-        </field>
-      </default>
-      <id>EEPROM_VPD_PRIMARY_INFO</id>
-    </attribute>
-    <!--fsp requirement-->
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <id>IBSCOM_MCS_BASE_ADDR</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>MCS</default>
-      <id>TYPE</id>
-    </attribute>
-    <attribute>
-      <id>VPD_REC_NUM</id>
-    </attribute>
   </targetType>
 
   <!-- mem_port -->
   <targetType>
+    <!-- DDR Memory Port -->
     <id>unit-mem_port</id>
     <parent>unit</parent>
     <attribute>
@@ -4028,15 +2796,25 @@
   </targetType>
 
   <targetType>
+    <!-- Memory Interface logic -->
     <id>unit-mi</id>
-    <parent>unit</parent>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <id>CDM_DOMAIN</id>
       <default>MEM</default>
     </attribute>
     <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>IO</default>
+    </attribute>
+    <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
+      <default>0x00000033</default>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
       <default>
@@ -4062,73 +2840,14 @@
   </targetType>
 
   <targetType>
-    <id>unit-mi-axone</id>
-    <parent>unit-mi-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-mi-cumulus</id>
-    <parent>unit-mi-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
     <id>unit-mi-power10</id>
     <parent>unit-mi</parent>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-  </targetType>
-
-  <!-- MI
-     Nimbus : None
-     Cumulus: 4 total per chip (2 per MC)
-     Axone  : 4 total per chip (2 per MC)-->
-  <targetType>
-    <id>unit-mi-power9</id>
-    <parent>unit-mi</parent>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
   </targetType>
 
   <targetType>
-    <id>unit-nmmu-power10</id>
-    <parent>unit</parent>
+    <!-- Nest Memory Management Unit -->
+    <id>unit-nmmu</id>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <default>FABRIC</default>
       <id>CDM_DOMAIN</id>
@@ -4153,9 +2872,6 @@
         </field>
       </default>
       <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
       <default>NMMU</default>
@@ -4164,46 +2880,21 @@
   </targetType>
 
   <targetType>
-    <id>unit-npu-axone</id>
-    <parent>unit-npu-power9</parent>
-    <attribute>
-      <id>MODEL</id>
-      <default>AXONE</default>
-    </attribute>
+    <id>unit-nmmu-power10</id>
+    <parent>unit-nmmu</parent>
   </targetType>
 
   <targetType>
-    <id>unit-npu-cumulus</id>
-    <parent>unit-npu-power9</parent>
+    <!-- NX Accelerator Logic -->
+    <id>unit-nx</id>
+    <parent>powerxx-chipunit</parent>
     <attribute>
-      <id>MODEL</id>
-      <default>CUMULUS</default>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-npu-nimbus</id>
-    <parent>unit-npu-power9</parent>
-    <attribute>
-      <id>MODEL</id>
-      <default>NIMBUS</default>
-    </attribute>
-  </targetType>
-
-  <!-- One NPU per proc -->
-  <targetType>
-    <id>unit-npu-power9</id>
-    <parent>unit</parent>
-    <attribute>
+      <default>FABRIC</default>
       <id>CDM_DOMAIN</id>
-      <default>CPU</default>
     </attribute>
     <attribute>
       <id>DECONFIG_GARDABLE</id>
       <default>1</default>
-    </attribute>
-    <attribute>
-      <id>HUID</id>
     </attribute>
     <attribute>
       <default>
@@ -4223,272 +2914,14 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
+      <default>NX</default>
       <id>TYPE</id>
-      <default>NPU</default>
     </attribute>
   </targetType>
 
   <targetType>
     <id>unit-nx-power10</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>FABRIC</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <id>DECONFIG_GARDABLE</id>
-      <default>1</default>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <default>NX</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-nx-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>FABRIC</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
-      <default>0x00000031</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <default>NX</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-obus-axone</id>
-    <parent>unit-obus-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-obus-brick-axone</id>
-    <parent>unit-obus-brick-power9</parent>
-    <attribute>
-      <id>MODEL</id>
-      <default>AXONE</default>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-obus-brick-cumulus</id>
-    <parent>unit-obus-brick-power9</parent>
-    <attribute>
-      <id>MODEL</id>
-      <default>CUMULUS</default>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-obus-brick-nimbus</id>
-    <parent>unit-obus-brick-power9</parent>
-    <attribute>
-      <id>MODEL</id>
-      <default>NIMBUS</default>
-    </attribute>
-  </targetType>
-
-  <!-- OBUS Brick
-     Nimbus : 3 per OBUS
-     Cumulus: 3 per OBUS -->
-  <targetType>
-    <id>unit-obus-brick-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>FABRIC</default>
-    </attribute>
-    <attribute>
-      <id>DECONFIG_GARDABLE</id>
-      <default>1</default>
-    </attribute>
-    <attribute>
-      <id>HUID</id>
-    </attribute>
-    <attribute>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-      <!-- GARD -->
-      <default>0x00000001</default>
-    </attribute>
-    <attribute>
-      <id>OBUS_BRICK_LANE_MASK</id>
-    </attribute>
-    <attribute>
-      <id>OBUS_SLOT_INDEX</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <id>TYPE</id>
-      <default>OBUS_BRICK</default>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-obus-cumulus</id>
-    <parent>unit-obus-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-obus-nimbus</id>
-    <parent>unit-obus-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <!-- OBUS
-     Nimbus : 2 per chip (OB0 and OB3)
-     Cumulus: 4 per chip (OB0, OB1, OB2, and OB3)  -->
-  <targetType>
-    <id>unit-obus-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>FABRIC</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
-      <default>0x00000031</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <id>PEER_PATH</id>
-      <default>physical:na</default>
-    </attribute>
-    <attribute>
-      <id>PEER_TARGET</id>
-    </attribute>
-    <attribute>
-      <default>OBUS</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-occ-axone</id>
-    <parent>unit-occ-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-occ-cumulus</id>
-    <parent>unit-occ-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-occ-nimbus</id>
-    <parent>unit-occ-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
+    <parent>unit-nx</parent>
   </targetType>
 
   <targetType>
@@ -4500,18 +2933,22 @@
     </attribute>
   </targetType>
 
-  <!-- OCC
-     Nimbus : 1 per chip
-     Cumulus: 1  -->
   <targetType>
-    <id>unit-occ-power9</id>
-    <parent>unit</parent>
+    <!-- OpenCAPI Memory Interface -->
+    <id>unit-omi</id>
+    <parent>powerxx-chipunit</parent>
     <attribute>
-      <default>POWER9</default>
-      <id>MODEL</id>
+      <id>CDM_DOMAIN</id>
+      <default>MEM</default>
     </attribute>
     <attribute>
-      <id>OCC_MASTER_CAPABLE</id>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
+      <default>0x00000033</default>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
       <default>
@@ -4521,7 +2958,7 @@
         </field>
         <field>
           <id>deconfigureParent</id>
-          <value>0</value>
+          <value>1</value>
         </field>
         <field>
           <id>valid</id>
@@ -4530,15 +2967,6 @@
       </default>
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
-    <attribute>
-      <default>OCC</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-omi</id>
-    <parent>unit</parent>
     <attribute>
       <default>OMI</default>
       <id>TYPE</id>
@@ -4546,120 +2974,20 @@
   </targetType>
 
   <targetType>
-    <id>unit-omi-axone</id>
-    <parent>unit-omi-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-    <attribute>
-      <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
     <id>unit-omi-power10</id>
     <parent>unit-omi</parent>
     <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>MEM</default>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
       <id>OMIC_PARENT</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-  </targetType>
-
-  <!-- OMI (Special has two parents)
-     Nimbus : None
-     Cumulus: None
-     Axone: 4 per MI (total of 16 per chip)
-             3 on OMIC0,1,3,4
-             2 on OMIC2,5     (still total 16) -->
-  <targetType>
-    <id>unit-omi-power9</id>
-    <parent>unit-omi</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>MEM</default>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <id>OMIC_PARENT</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
     </attribute>
   </targetType>
 
   <targetType>
+    <!-- OMI Controller Logic -->
     <id>unit-omic</id>
-    <parent>unit</parent>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <default>OMIC</default>
       <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-omic-axone</id>
-    <parent>unit-omic-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
     </attribute>
   </targetType>
 
@@ -4697,58 +3025,14 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
       <id>PAUC_PARENT</id>
     </attribute>
   </targetType>
 
-  <!-- OMIC
-     Nimbus : None
-     Cumulus: None
-     Axone  : 6 total per chip (3 per MC)-->
   <targetType>
-    <id>unit-omic-power9</id>
-    <parent>unit-omic</parent>
-    <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>MEM</default>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
-      <default>0x00000033</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-pau-power10</id>
-    <parent>unit</parent>
+    <!-- POWER Accelerator Unit -->
+    <id>unit-pau</id>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <id>CDM_DOMAIN</id>
       <default>IO</default>
@@ -4773,9 +3057,6 @@
         </field>
       </default>
       <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
       <default>PAU</default>
@@ -4784,8 +3065,14 @@
   </targetType>
 
   <targetType>
-    <id>unit-pauc-power10</id>
-    <parent>unit</parent>
+    <id>unit-pau-power10</id>
+    <parent>unit-pau</parent>
+  </targetType>
+
+  <targetType>
+    <!-- POWER Accelerator Unit Controller -->
+    <id>unit-pauc</id>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <id>CDM_DOMAIN</id>
       <default>IO</default>
@@ -4793,9 +3080,6 @@
     <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <id>HB_NODE_COMM_MUTEX</id>
     </attribute>
     <attribute>
       <default>
@@ -4815,17 +3099,48 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
       <default>PAUC</default>
       <id>TYPE</id>
     </attribute>
   </targetType>
 
   <targetType>
+    <id>unit-pauc-power10</id>
+    <parent>unit-pauc</parent>
+    <attribute>
+      <id>HB_NODE_COMM_MUTEX</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <!-- PCIE Chiplet : Covers stack logic in both nest/pci domain -->
     <id>unit-pec</id>
-    <parent>unit</parent>
+    <parent>powerxx-chipunit</parent>
+    <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>IO</default>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
     <attribute>
       <default>PEC</default>
       <id>TYPE</id>
@@ -4836,34 +3151,6 @@
     <id>unit-pec-power10</id>
     <parent>unit-pec</parent>
     <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>IO</default>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
       <id>PROC_PCIE_LANE_REVERSAL_BASE</id>
     </attribute>
     <attribute>
@@ -4871,30 +3158,16 @@
     </attribute>
   </targetType>
 
-  <!-- PEC corresponds to IOP. Use same PEC target for Nimbus and Cumulus
-     Nimbus : 3 per chip
-     Cumulus: 3 per chip  -->
   <targetType>
-    <id>unit-pec-power9</id>
-    <parent>unit-pec</parent>
-    <attribute>
-      <default>IO</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
-      <default>0x00000031</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
+    <!-- Pervasive Unit : Represents the pervasive logic that is part of
+         every chiplet -->
+    <id>unit-perv</id>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>
-          <value>1</value>
+          <value>0</value>
         </field>
         <field>
           <id>deconfigureParent</id>
@@ -4907,71 +3180,6 @@
       </default>
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <id>PEC_IS_BIFURCATABLE</id>
-    </attribute>
-    <attribute>
-      <id>PEC_PCIE_HX_KEYWORD_DATA</id>
-    </attribute>
-    <attribute>
-      <id>PEC_PCIE_IOP_REVERSAL</id>
-    </attribute>
-    <attribute>
-      <id>PEC_PCIE_IOP_REVERSAL_BIFURCATED</id>
-    </attribute>
-    <attribute>
-      <id>PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED</id>
-    </attribute>
-    <attribute>
-      <id>PEC_PCIE_IOP_SWAP_BIFURCATED</id>
-    </attribute>
-    <attribute>
-      <id>PEC_PCIE_IOP_SWAP_NON_BIFURCATED</id>
-    </attribute>
-    <attribute>
-      <id>PEC_PCIE_LANE_MASK_BIFURCATED</id>
-    </attribute>
-    <attribute>
-      <id>PEC_PCIE_LANE_MASK_NON_BIFURCATED</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_IOP_CONFIG</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_IOVALID_ENABLE</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_LANE_MASK</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_PCS_RX_SIGDET_CNTL</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_PCS_SYSTEM_CNTL</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_REFCLOCK_ENABLE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-perv</id>
-    <parent>unit</parent>
     <attribute>
       <default>PERV</default>
       <id>TYPE</id>
@@ -4979,132 +3187,17 @@
   </targetType>
 
   <targetType>
-    <id>unit-perv-axone</id>
-    <parent>unit-perv-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-perv-cumulus</id>
-    <parent>unit-perv-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-perv-nimbus</id>
-    <parent>unit-perv-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
     <id>unit-perv-power10</id>
     <parent>unit-perv</parent>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
     <attribute>
       <id>PG_SAVED</id>
     </attribute>
   </targetType>
 
-  <!-- PERV
-     Nimbus : 43 (1 per chiplet)
-     Cumulus: 1 per chiplet -->
   <targetType>
-    <id>unit-perv-power9</id>
-    <parent>unit-perv</parent>
-    <attribute>
-      <default>0</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <default>5</default>
-      <id>PG</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
+    <!-- PCI Host Bridge : Covers PHB pipe logic in both nest/pci domains -->
     <id>unit-phb</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>PHB</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-phb-axone</id>
-    <parent>unit-phb-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-    <attribute>
-      <id>ORDINAL_ID</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-phb-cumulus</id>
-    <parent>unit-phb-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-phb-nimbus</id>
-    <parent>unit-phb-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-phb-power10</id>
-    <parent>unit-phb</parent>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <id>CDM_DOMAIN</id>
       <default>IO</default>
@@ -5131,8 +3224,14 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
-      <id>PARENT_PERVASIVE</id>
+      <default>PHB</default>
+      <id>TYPE</id>
     </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-phb-power10</id>
+    <parent>unit-phb</parent>
     <attribute>
       <id>PROC_PCIE_LANE_EQUALIZATION_GEN3</id>
     </attribute>
@@ -5144,177 +3243,10 @@
     </attribute>
   </targetType>
 
-  <!-- PHB
-     Nimbus : 6 per PEC (total of 18 per chip)
-     Cumulus: 6 per PEC -->
   <targetType>
-    <id>unit-phb-power9</id>
-    <parent>unit-phb</parent>
-    <attribute>
-      <default>IO</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
-      <default>0x00000031</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_LANE_EQUALIZATION_GEN3</id>
-    </attribute>
-    <attribute>
-      <id>PROC_PCIE_LANE_EQUALIZATION_GEN4</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-ppe-axone</id>
-    <parent>unit-ppe-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-ppe-cumulus</id>
-    <parent>unit-ppe-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-ppe-nimbus</id>
-    <parent>unit-ppe-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <!-- PPE
-     Nimbus : 21, including the SBE (1 SBE, 1 Powerbus/Fabric PPE,
-              4 GPEs, 12 CMEs, and 3 IO PPEs.
-     Cumulus: 23 (2 additional IO-PPE instances) -->
-  <targetType>
-    <id>unit-ppe-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>0</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <default>PPE</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-sbe-axone</id>
-    <parent>unit-sbe-power9</parent>
-    <attribute>
-      <default>AXONE</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-sbe-cumulus</id>
-    <parent>unit-sbe-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-sbe-nimbus</id>
-    <parent>unit-sbe-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <!-- SBE
-     Nimbus : 1 per chip
-     Cumulus: 1 -->
-  <targetType>
-    <id>unit-sbe-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>0</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <default>SBE</default>
-      <id>TYPE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
+    <!-- Represents a single physical SMP link -->
     <id>unit-smpgroup</id>
-    <parent>unit</parent>
+    <parent>powerxx-chipunit</parent>
     <attribute>
       <id>CDM_DOMAIN</id>
       <default>FABRIC</default>
@@ -5327,6 +3259,11 @@
       <id>HUID</id>
     </attribute>
     <attribute>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD -->
+      <default>0x00000001</default>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>
@@ -5342,9 +3279,6 @@
         </field>
       </default>
       <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
       <id>PEER_PATH</id>
@@ -5360,82 +3294,9 @@
   </targetType>
 
   <targetType>
-    <id>unit-xbus-axone</id>
-    <parent>unit-xbus-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-xbus-cumulus</id>
-    <parent>unit-xbus-power9</parent>
-    <attribute>
-      <default>CUMULUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
-    <id>unit-xbus-nimbus</id>
-    <parent>unit-xbus-power9</parent>
-    <attribute>
-      <default>NIMBUS</default>
-      <id>MODEL</id>
-    </attribute>
-  </targetType>
-
-  <!-- XBUS
-     Nimbus : 1 per chip
-     Cumulus: 7  -->
-  <targetType>
-    <id>unit-xbus-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>FABRIC</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
-      <default>0x00000031</default>
-      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <default>
-        <field>
-          <id>childRollupAllowed</id>
-          <value>1</value>
-        </field>
-        <field>
-          <id>deconfigureParent</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>valid</id>
-          <value>1</value>
-        </field>
-      </default>
-      <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <id>PEER_PATH</id>
-      <default>physical:na</default>
-    </attribute>
-    <attribute>
-      <id>PEER_TARGET</id>
-    </attribute>
-    <attribute>
-      <default>XBUS</default>
-      <id>TYPE</id>
-    </attribute>
+    <!-- For P10, this is a x9 link -->
+    <id>unit-smpgroup-power10</id>
+    <parent>unit-smpgroup</parent>
   </targetType>
 
   <targetType>
