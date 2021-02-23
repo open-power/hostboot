@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@ enum sbeioModuleId
     SBEIO_SEND_PSU_QUIESCE_SBE          = 0x0F,
     SBEIO_DEAD_MAN_TIMER                = 0x10,
     SBEIO_PSU_GET_HW_REG                = 0x11,
+    SBEIO_GET_FIFO_SBE_CAPABILITIES     = 0x12,
 };
 
 /**
@@ -100,6 +101,9 @@ enum sbeioReasonCode
     //   loop to recover the SBE
     //termination_rc
     SBEIO_DEAD_SBE                     = SBEIO_COMP_ID | 0x1B,
+
+    // SBE FIFO error codes (continued...)
+    SBEIO_UNSUPPORTED_CAPABILITIES_VERSION = SBEIO_COMP_ID | 0x1C,
 
     // SBEIO Runtime error codes
     SBEIO_RT_INVALID_COMMAND           = SBEIO_COMP_ID | 0x30,
@@ -142,6 +146,7 @@ enum sbeioReasonCode
     SBEIO_START_DMT_CALLED_TWICE       = SBEIO_COMP_ID | 0x63,
     SBEIO_NO_PARENT_PROC               = SBEIO_COMP_ID | 0x64,
     SBEIO_COMMAND_NOT_SUPPORTED        = SBEIO_COMP_ID | 0x65,
+
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
     SBEIO_HWSV_COLLECT_SBE_RC          = SBEIO_COMP_ID | 0xFF,

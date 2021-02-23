@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,9 @@ namespace SBEIO
     * Complies with document Host_SBE_Interface_Specification_v0.9e.pdf
     */
     static constexpr uint8_t SBE_RELEASE_TAG_MAX_CHARS = 20;
-    static constexpr uint8_t SBE_MAX_CAPABILITIES = 20;
+    static constexpr uint8_t SBE_CAPABILITY_VERSION_1_1_SIZE = 20;
+    static constexpr uint8_t SBE_CAPABILITY_VERSION_1_2_SIZE = 24;
+    static constexpr uint8_t SBE_MAX_CAPABILITIES = SBE_CAPABILITY_VERSION_1_2_SIZE;
 
     struct sbeCapabilities_t
     {

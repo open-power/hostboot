@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -265,7 +265,7 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
 {
     errlHndl_t l_errl(nullptr);
 
-    TRACDCOMP(g_trac_sbeio, ENTER_MRK "getFifoSbeCapabilities");
+    TRACDCOMP(g_trac_sbeio, ENTER_MRK "getFifoSbeCapabilities on 0x%08X target", get_huid(i_target));
 
     do
     {
@@ -274,14 +274,17 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
         SbeFifo::fifoGetCapabilitiesRequest l_fifoRequest;
 
         // Create a FIFO response message.  No need to iniitilaize
-        SbeFifo::fifoGetCapabilitiesResponse l_fifoResponse;
+        SbeFifo::fifoGetCapabilitiesResponseEnd * l_fifoResponseEnd;
+
+        // create a large buffer for MAX response
+        uint8_t l_fifoResponseBuffer[sizeof(SBEIO::sbeCapabilities_t) + sizeof(*l_fifoResponseEnd)] = {0};
 
         // Make the call to perform the FIFO Chip Operation
         l_errl = SbeFifo::getTheInstance().performFifoChipOp(
                         i_target,
                         reinterpret_cast<uint32_t *>(&l_fifoRequest),
-                        reinterpret_cast<uint32_t *>(&l_fifoResponse),
-                        sizeof(l_fifoResponse));
+                        reinterpret_cast<uint32_t *>(l_fifoResponseBuffer),
+                        sizeof(l_fifoResponseBuffer));
 
         if (l_errl)
         {
@@ -290,12 +293,80 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
             break;
         }
 
+        // Different versions change capabilites size
+        SBEIO::sbeCapabilities_t * pSbeCapabilities =
+            reinterpret_cast<SBEIO::sbeCapabilities_t *>(l_fifoResponseBuffer);
+
+        // offset into l_fifoResponseBuffer for start of l_fifoResponseEnd
+        uint32_t rspEndOffset = 0;
+
+        // update this based on version
+        uint8_t capabilities_array_size = SBEIO::SBE_MAX_CAPABILITIES;
+
+        if ((pSbeCapabilities->majorVersion == 1) &&
+            (pSbeCapabilities->minorVersion == 1))
+        {
+            capabilities_array_size = SBEIO::SBE_CAPABILITY_VERSION_1_1_SIZE;
+        }
+        else if ((pSbeCapabilities->majorVersion == 1) &&
+                 (pSbeCapabilities->minorVersion == 2))
+        {
+            capabilities_array_size = SBEIO::SBE_CAPABILITY_VERSION_1_2_SIZE;
+        }
+        else
+        {
+            // unknown/unsupported capabilities version
+            TRACFCOMP(g_trac_sbeio, ERR_MRK
+                "getFifoSbeCapabilities: Unsupported capabilities version "
+                "%04X:%04X",
+                pSbeCapabilities->majorVersion,
+                pSbeCapabilities->minorVersion);
+            /*@
+             * @errortype
+             * @moduleid          SBEIO_GET_FIFO_SBE_CAPABILITIES
+             * @reasoncode        SBEIO_UNSUPPORTED_CAPABILITIES_VERSION
+             * @userdata1         Target HUID
+             * @userdata2[0:15]   Major version
+             * @userdata2[16:31]  Minor version
+             * @userdata2[32:47]  Latest major version supported
+             * @userdata2[48:63]  Latest minor version supported
+             * @devdesc           SBE FIFO getCapabilities response has
+             *                    an unsupported version.
+             * @custdesc          A problem occurred during the IPL
+             */
+            l_errl = new ErrlEntry(
+                ERRL_SEV_INFORMATIONAL,
+                SBEIO_GET_FIFO_SBE_CAPABILITIES,
+                SBEIO_UNSUPPORTED_CAPABILITIES_VERSION,
+                get_huid(i_target),
+                TWO_UINT32_TO_UINT64(
+                  TWO_UINT16_TO_UINT32(pSbeCapabilities->majorVersion,
+                                       pSbeCapabilities->minorVersion),
+                  TWO_UINT16_TO_UINT32(1,
+                                       2)),
+                 ErrlEntry::ADD_SW_CALLOUT );
+
+            l_errl->collectTrace(SBEIO_COMP_NAME, 256);
+
+            break;
+        }
+
+        // update response end pointer to after sbeCapabilities size
+        rspEndOffset = sizeof(pSbeCapabilities->majorVersion) +
+                       sizeof(pSbeCapabilities->minorVersion) +
+                           sizeof(pSbeCapabilities->commitId) +
+                         sizeof(pSbeCapabilities->releaseTag) +
+                   (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size);
+
+        l_fifoResponseEnd = reinterpret_cast<SbeFifo::fifoGetCapabilitiesResponseEnd *>
+                                (l_fifoResponseBuffer + rspEndOffset);
+
         // Sanity check - are HW and HB communications in sync?
-        if ((SbeFifo::FIFO_STATUS_MAGIC != l_fifoResponse.status.magic)  ||
+        if ((SbeFifo::FIFO_STATUS_MAGIC != l_fifoResponseEnd->status.magic)  ||
             (SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE !=
-                                      l_fifoResponse.status.commandClass) ||
+                                      l_fifoResponseEnd->status.commandClass) ||
             (SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES !=
-                                      l_fifoResponse.status.command))
+                                      l_fifoResponseEnd->status.command))
         {
             TRACFCOMP(g_trac_sbeio,
                       "Call to performFifoChipOp returned an unexpected "
@@ -306,11 +377,11 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
                       "expected command class:0x%X, "
                       "command returned:0x%X, "
                       "expected command:0x%X",
-                      l_fifoResponse.status.magic,
+                      l_fifoResponseEnd->status.magic,
                       SbeFifo::FIFO_STATUS_MAGIC,
-                      l_fifoResponse.status.commandClass,
+                      l_fifoResponseEnd->status.commandClass,
                       SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
-                      l_fifoResponse.status.command,
+                      l_fifoResponseEnd->status.command,
                       SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES);
 
             /*@
@@ -333,15 +404,22 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
                 TWO_UINT32_TO_UINT64(
                   TWO_UINT16_TO_UINT32(SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
                                        SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES),
-                  TWO_UINT16_TO_UINT32(l_fifoResponse.status.commandClass,
-                                       l_fifoResponse.status.command) ));
+                  TWO_UINT16_TO_UINT32(l_fifoResponseEnd->status.commandClass,
+                                       l_fifoResponseEnd->status.command) ));
 
             l_errl->collectTrace(SBEIO_COMP_NAME, 256);
 
             break;
         }
 
-        applySbeCapabilities(i_target, l_fifoResponse.capabilities);
+        applySbeCapabilities(i_target, *pSbeCapabilities);
+
+        TRACDCOMP(g_trac_sbeio, "getFifoSbeCapabilities version %d.%d found for 0x%08X target (capabilities array size: %d)",
+                pSbeCapabilities->majorVersion,pSbeCapabilities->minorVersion,
+                get_huid(i_target), capabilities_array_size);
+        TRACDBIN(g_trac_sbeio,"SBE capabilities array",
+                pSbeCapabilities->capabilities,
+                (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size));
     }
     while(0);
 

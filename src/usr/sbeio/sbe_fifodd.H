@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -483,25 +483,21 @@ class SbeFifo
 
 
         /**
-        * @brief Struct for FIFO Get Capabilities response
+        * @brief Struct for FIFO Get Capabilities response end
+        *        A variation of sbeCapabilities_t comes before this
+        *        struct in the getCapabilities command response
         *
         * The actual number of returned words varies based on whether there was
         * an error.
         *
         * Complies with document FipS_SBE_Interface_Specification_v1.5b-1.pdf
         */
-        struct fifoGetCapabilitiesResponse
+        struct fifoGetCapabilitiesResponseEnd
         {
-            SBEIO::sbeCapabilities_t capabilities;
             statusHeader status;
             struct       fapi2::ffdc_struct ffdc;  // ffdc data
             uint32_t     status_distance; // distance to status
-            fifoGetCapabilitiesResponse() :
-                  capabilities()
-                , status{ 0 }
-                , status_distance(0)
-             {
-             }
+            fifoGetCapabilitiesResponseEnd() {}
         } PACKED;
 
         /**
