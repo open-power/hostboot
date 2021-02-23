@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,17 +61,6 @@ enum
     MEM_SYMBOLS_PER_NIBBLE = SYMBOLS_PER_RANK / MEM_NIBBLES_PER_RANK,
 
     MEM_DQS_PER_SYMBOL     = DQS_PER_BYTE / MEM_SYMBOLS_PER_BYTE,
-
-    // MBA only
-    MBA_DIMMS_PER_RANK     = 2,
-
-    MBA_BYTES_PER_RANK     = BYTES_PER_DIMM   * MBA_DIMMS_PER_RANK,
-    MBA_NIBBLES_PER_RANK   = NIBBLES_PER_DIMM * MBA_DIMMS_PER_RANK,
-
-    MBA_SYMBOLS_PER_BYTE   = SYMBOLS_PER_RANK / MBA_BYTES_PER_RANK,
-    MBA_SYMBOLS_PER_NIBBLE = SYMBOLS_PER_RANK / MBA_NIBBLES_PER_RANK,
-
-    MBA_DQS_PER_SYMBOL     = DQS_PER_BYTE / MBA_SYMBOLS_PER_BYTE,
 };
 
 } // end namespace PRDF
