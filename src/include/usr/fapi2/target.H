@@ -732,10 +732,11 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
 
     // Only supporting these relationships:
     //  IOHS <-> IOHS
+    //  IOLINK <-> IOLINK
 
     static_assert( T_SELF==T, "both ends must be of same fapi2::TARGET_TYPE");
-    static_assert ( (T_SELF==fapi2::TARGET_TYPE_IOHS),
-                    "Only types of type IOHS are supported");
+    static_assert ( (T_SELF==fapi2::TARGET_TYPE_IOHS) || (T_SELF==fapi2::TARGET_TYPE_IOLINK),
+                    "Only targets of type IOHS or IOLINK are supported");
 
     // for the supported types above, only one option supported
     targetClass = TARGETING::CLASS_UNIT;
