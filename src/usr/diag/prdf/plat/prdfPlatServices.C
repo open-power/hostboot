@@ -754,10 +754,6 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 int32_t restartTraceArray(TargetHandle_t i_tgt)
 {
     int32_t o_rc = SUCCESS;
-
-    PRDF_TRAC( "restartTraceArray currently disabled because of problems "
-               "with the p10_proc_gettracearray procedure" );
-    /* TODO p10_proc_gettracearray currently not working
     errlHndl_t err = nullptr;
     TYPE tgtType = getTargetType(i_tgt);
     proc_gettracearray_args taArgs;
@@ -816,7 +812,6 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-    */
 
     return o_rc;
 }

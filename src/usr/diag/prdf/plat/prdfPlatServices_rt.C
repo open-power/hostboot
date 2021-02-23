@@ -228,12 +228,8 @@ int32_t extractL3Err( TargetHandle_t i_coreTgt, bool i_ce,
                       p10_l3err_extract_err_data &o_errorAddr)
 {
     int32_t o_rc = SUCCESS;
-    PRDF_TRAC( "extractL3Err currently disabled because of problems with "
-               "the p10_proc_gettracearray procedure" );
-    /* TODO p10_proc_gettracearray currently not working, disabling for now
     errlHndl_t err = nullptr;
     bool errFound = false;
-
 
     fapi2::variable_buffer ta_data( P10_TRACEARRAY_NUM_ROWS *
                                     P10_TRACEARRAY_BITS_PER_ROW);
@@ -283,7 +279,6 @@ int32_t extractL3Err( TargetHandle_t i_coreTgt, bool i_ce,
                   getHuid(i_coreTgt));
         o_rc = FAIL;
     }
-    */
 
     return o_rc;
 }
@@ -337,16 +332,10 @@ int32_t l3LineDelete(TargetHandle_t i_coreTgt,
 int32_t extractL2Err( TargetHandle_t i_coreTgt, bool i_ce,
                       p10_l2err_extract_err_data &o_errorAddr)
 {
-    PRDF_TRAC( "extractL3Err currently disabled because of problems with "
-               "the p10_proc_gettracearray procedure" );
-
-    /* TODO p10_proc_gettracearray currently not working, disabling for now
     errlHndl_t err = nullptr;
     bool errFound = false;
     fapi2::variable_buffer ta_data( P10_TRACEARRAY_NUM_ROWS *
                                     P10_TRACEARRAY_BITS_PER_ROW);
-
-
     proc_gettracearray_args args;
 
     args.trace_bus = PROC_TB_L20;
@@ -393,7 +382,6 @@ int32_t extractL2Err( TargetHandle_t i_coreTgt, bool i_ce,
                   getHuid(i_coreTgt));
         return FAIL;
     }
-    */
 
     return SUCCESS;
 }
