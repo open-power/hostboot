@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,6 @@ enum DefaultThresholds
     RCD_PARITY_NON_MNFG_TH     = 32, ///< Non-MNFG RCD parity error TH
     IMPE_NON_MNFG_TH           = 32, ///< Non-MNFG IMPE TH
     IUE_NON_MNFG_TH            = 8,  ///< Non-MNFG IUE TH
-    MBA_RCE_NON_MNFG_TH        = 8,  ///< Non-MNFG RCE TH
 };
 
 //------------------------------------------------------------------------------
@@ -112,24 +111,6 @@ ThresholdResolution::ThresholdPolicy getImpeTh()
 }
 
 #endif
-
-//------------------------------------------------------------------------------
-
-ThresholdResolution::ThresholdPolicy getRceThreshold()
-{
-    uint32_t th = MBA_RCE_NON_MNFG_TH;
-
-    if ( mfgMode() )
-    {
-        th = MfgThresholdMgr::getInstance()->
-                           getThreshold( ATTR_MNFG_TH_MEMORY_RT_RCE_PER_RANK );
-
-        if( th > MBA_RCE_NON_MNFG_TH ) th = MBA_RCE_NON_MNFG_TH;
-    }
-
-    return ThresholdResolution::ThresholdPolicy( th,
-                                                 ThresholdResolution::ONE_DAY );
-}
 
 //------------------------------------------------------------------------------
 
