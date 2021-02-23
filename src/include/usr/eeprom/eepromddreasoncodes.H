@@ -125,6 +125,7 @@ enum eepromReasonCode
     EEPROM_DUP_EECACHE_UPDATE               = EEPROM_COMP_ID | 0x20,   // Attempt to add an already existing EECACHE entry
     EEPROM_UNEXPECTED_CACHE_ADDR            = EEPROM_COMP_ID | 0x21,   // Unexpected cache address
     EEPROM_PNOR_CACHE_SYNC                  = EEPROM_COMP_ID | 0x22,   // Problem with PNOR and cache sync
+    EEPROM_ENTRY_MARKED_INVALID             = EEPROM_COMP_ID | 0x23,   // Attempting to read/write an entry whose header states its invalid
 };
 
 enum UserDetailsTypes

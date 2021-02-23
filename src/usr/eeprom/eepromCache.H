@@ -413,6 +413,24 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader,
                                const uint8_t i_instance);
 
 /**
+ *
+ * @brief Perform a lookup on the global map g_cachedEeproms to get a
+ *        virtual address for a given EEPROM entry in the EECACHE table of contents
+ *
+ * @param[in] i_eepromRecordHeader
+ *
+ * @param[in] i_instance  Node ID that this eeprom is on
+ *
+ * @pre  It is expected that i_eepromRecordHeader has valid information for
+ *       the uniqueID (i2cm_huid, port, engine, devAddr, mux_select)
+ *
+ * @return uint64_t virtual address pointing to the cached eeprom data in pnor
+ *
+ */
+uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader,
+                                const uint8_t i_instance);
+
+/**
 *
 * @brief Walk through g_cachedEeproms map and print information about
 *        the cached eeproms found

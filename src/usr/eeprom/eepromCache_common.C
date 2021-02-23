@@ -208,135 +208,14 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
 
 #ifndef __HOSTBOOT_RUNTIME
         uint64_t l_eepromCacheVaddr = lookupEepromCacheAddr(l_eepromRecordHeader);
+        uint64_t l_eepromHeaderVaddr = lookupEepromHeaderAddr(l_eepromRecordHeader);
 #else
         uint8_t l_instance = TARGETING::AttrRP::getNodeId(i_target);
         uint64_t l_eepromCacheVaddr = lookupEepromCacheAddr(l_eepromRecordHeader, l_instance);
+        uint64_t l_eepromHeaderVaddr = lookupEepromHeaderAddr(l_eepromRecordHeader, l_instance);
 #endif
 
-        // Ensure that a copy of the eeprom exists in our map of cached eeproms
-        if(l_eepromCacheVaddr)
-        {
-            // First check if io_buffer is a nullptr, if so then assume user is
-            // requesting size back in io_bufferlen
-            if(io_buffer == nullptr)
-            {
-                io_buflen = l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE;
-                TRACSSCOMP( g_trac_eeprom, "eepromPerformOpCache() "
-                            "io_buffer == nullptr , returning io_buflen as 0x%lx",
-                            io_buflen);
-                break;
-            }
-
-            TRACSSCOMP( g_trac_eeprom, "eepromPerformOpCache() "
-                    "Performing %s on target 0x%.08X offset 0x%lx   length 0x%x     vaddr 0x%lx",
-                    (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
-                    TARGETING::get_huid(i_target),
-                    i_eepromInfo.offset, io_buflen, l_eepromCacheVaddr);
-
-            // Make sure that offset + buflen are less than the total size of the eeprom
-            if(i_eepromInfo.offset + io_buflen >
-              (l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE))
-            {
-                TRACFCOMP(g_trac_eeprom,
-                          ERR_MRK"eepromPerformOpCache: %s at offset (0x%X) + "
-                          "io_buflen (0x%X) is greater than size of eeprom "
-                          "(0x%x KB = 0x%X)",
-                          (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
-                          i_eepromInfo.offset, io_buflen,
-                          l_eepromRecordHeader.completeRecord.cache_copy_size,
-                          l_eepromRecordHeader.completeRecord.cache_copy_size *
-                          KILOBYTE );
-                /*@
-                * @errortype
-                * @moduleid     EEPROM_CACHE_PERFORM_OP
-                * @reasoncode   EEPROM_OVERFLOW_ERROR
-                * @userdata1    Length of Operation
-                * @userdata2    Offset we are attempting to read/write
-                * @custdesc     Soft error in Firmware
-                * @devdesc      cacheEeprom invalid op type
-                */
-                l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                EEPROM_CACHE_PERFORM_OP,
-                                EEPROM_OVERFLOW_ERROR,
-                                TO_UINT64(io_buflen),
-                                TO_UINT64(i_eepromInfo.offset),
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
-                l_errl->collectTrace( EEPROM_COMP_NAME );
-
-                break;
-            }
-
-            if(i_opType == DeviceFW::READ)
-            {
-                memcpy(io_buffer,
-                       reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
-                       io_buflen);
-            }
-            else if(i_opType == DeviceFW::WRITE)
-            {
-                memcpy(reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
-                       io_buffer,
-                       io_buflen);
-
-#ifndef __HOSTBOOT_RUNTIME
-                // Perform flush to ensure pnor is updated
-                int rc = mm_remove_pages( FLUSH,
-                                          reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
-                                          io_buflen );
-                if( rc )
-                {
-                    TRACFCOMP(g_trac_eeprom,
-                              ERR_MRK"eepromPerformOpCache:  Error from mm_remove_pages trying for flush contents write to pnor! rc=%d",
-                              rc);
-                    /*@
-                    * @errortype
-                    * @moduleid     EEPROM_CACHE_PERFORM_OP
-                    * @reasoncode   EEPROM_FAILED_TO_FLUSH_CONTENTS
-                    * @userdata1    Requested Address
-                    * @userdata2    rc from mm_remove_pages
-                    * @devdesc      cacheEeprom mm_remove_pages FLUSH failed
-                    */
-                    l_errl = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    EEPROM_CACHE_PERFORM_OP,
-                                    EEPROM_FAILED_TO_FLUSH_CONTENTS,
-                                    (l_eepromCacheVaddr + i_eepromInfo.offset),
-                                    TO_UINT64(rc),
-                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                    l_errl->collectTrace( EEPROM_COMP_NAME );
-                }
-#endif
-            }
-            else
-            {
-                TRACFCOMP(g_trac_eeprom,
-                          ERR_MRK"eepromPerformOpCache: Invalid OP_TYPE passed to function, i_opType=%d",
-                          i_opType);
-                /*@
-                * @errortype
-                * @moduleid     EEPROM_CACHE_PERFORM_OP
-                * @reasoncode   EEPROM_INVALID_OPERATION
-                * @userdata1[0:31]  Op Type that was invalid
-                * @userdata1[32:63] Eeprom Role
-                * @userdata2    Offset we are attempting to perfrom op on
-                * @custdesc     Soft error in Firmware
-                * @devdesc      cacheEeprom invalid op type
-                */
-                l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                EEPROM_CACHE_PERFORM_OP,
-                                EEPROM_INVALID_OPERATION,
-                                TWO_UINT32_TO_UINT64(i_opType,
-                                                     i_eepromInfo.eepromRole),
-                                TO_UINT64(i_eepromInfo.offset),
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
-                l_errl->collectTrace( EEPROM_COMP_NAME );
-            }
-        }
-        else
+        if(l_eepromHeaderVaddr == 0 || l_eepromCacheVaddr == 0)
         {
             TRACFCOMP( g_trac_eeprom,"eepromPerformOpCache: Failed to find entry in cache for 0x%.08X, %s failed",
                        TARGETING::get_huid(i_target),
@@ -361,6 +240,165 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
             l_errl->collectTrace( EEPROM_COMP_NAME );
+            break;
+        }
+
+        if(!reinterpret_cast<const eepromRecordHeader *>(l_eepromHeaderVaddr)->completeRecord.cached_copy_valid)
+        {
+            // If we hit this path it is likely this is an ancillary role that we failed to
+            // read HW for but the primary entry associated with it was successful. Typically
+            // ancillary roles are less critical. Return an error and let the caller decide
+            // what to do with the error.
+            TRACFCOMP( g_trac_eeprom,"eepromPerformOpCache: Attempted to %s target 0x%.08X entry of role %d and the entry is marked invalid",
+                       (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
+                       TARGETING::get_huid(i_target),
+                       i_eepromInfo.eepromRole);
+            /*@
+            * @errortype
+            * @moduleid     EEPROM_CACHE_PERFORM_OP
+            * @reasoncode   EEPROM_ENTRY_MARKED_INVALID
+            * @userdata1[0:31]  Op Type
+            * @userdata1[32:63] Eeprom Role
+            * @userdata2    Offset we are attempting to read/write
+            * @custdesc     An error occuring during system boot.
+            * @devdesc      Attempted operation on entry marked invalid
+            */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            EEPROM_CACHE_PERFORM_OP,
+                            EEPROM_ENTRY_MARKED_INVALID,
+                            TWO_UINT32_TO_UINT64(i_opType,
+                                                 i_eepromInfo.eepromRole),
+                            TO_UINT64(i_eepromInfo.offset),
+                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+            // There is likely a previous error indicating that we failed
+            // to update the cache entry.
+            l_errl->addProcedureCallout(HWAS::EPUB_PRC_SUE_PREVERROR,
+                                        HWAS::SRCI_PRIORITY_HIGH);
+            l_errl->collectTrace( EEPROM_COMP_NAME );
+            break;
+        }
+
+        // First check if io_buffer is a nullptr, if so then assume user is
+        // requesting size back in io_bufferlen
+        if(io_buffer == nullptr)
+        {
+            io_buflen = l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE;
+            TRACSSCOMP( g_trac_eeprom, "eepromPerformOpCache() "
+                        "io_buffer == nullptr , returning io_buflen as 0x%lx",
+                        io_buflen);
+            break;
+        }
+
+        TRACSSCOMP( g_trac_eeprom, "eepromPerformOpCache() "
+                "Performing %s on target 0x%.08X offset 0x%lx   length 0x%x     vaddr 0x%lx",
+                (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
+                TARGETING::get_huid(i_target),
+                i_eepromInfo.offset, io_buflen, l_eepromCacheVaddr);
+
+        // Make sure that offset + buflen are less than the total size of the eeprom
+        if(i_eepromInfo.offset + io_buflen >
+          (l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE))
+        {
+            TRACFCOMP(g_trac_eeprom,
+                      ERR_MRK"eepromPerformOpCache: %s at offset (0x%X) + "
+                      "io_buflen (0x%X) is greater than size of eeprom "
+                      "(0x%x KB = 0x%X)",
+                      (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
+                      i_eepromInfo.offset, io_buflen,
+                      l_eepromRecordHeader.completeRecord.cache_copy_size,
+                      l_eepromRecordHeader.completeRecord.cache_copy_size *
+                      KILOBYTE );
+            /*@
+            * @errortype
+            * @moduleid     EEPROM_CACHE_PERFORM_OP
+            * @reasoncode   EEPROM_OVERFLOW_ERROR
+            * @userdata1    Length of Operation
+            * @userdata2    Offset we are attempting to read/write
+            * @custdesc     Soft error in Firmware
+            * @devdesc      cacheEeprom invalid op type
+            */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            EEPROM_CACHE_PERFORM_OP,
+                            EEPROM_OVERFLOW_ERROR,
+                            TO_UINT64(io_buflen),
+                            TO_UINT64(i_eepromInfo.offset),
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+            l_errl->collectTrace( EEPROM_COMP_NAME );
+            break;
+        }
+
+        if(i_opType == DeviceFW::READ)
+        {
+            memcpy(io_buffer,
+                   reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
+                   io_buflen);
+        }
+        else if(i_opType == DeviceFW::WRITE)
+        {
+            memcpy(reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
+                   io_buffer,
+                   io_buflen);
+
+#ifndef __HOSTBOOT_RUNTIME
+            // Perform flush to ensure pnor is updated
+            int rc = mm_remove_pages( FLUSH,
+                                      reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
+                                      io_buflen );
+            if( rc )
+            {
+                TRACFCOMP(g_trac_eeprom,
+                          ERR_MRK"eepromPerformOpCache:  Error from mm_remove_pages trying for flush contents write to pnor! rc=%d",
+                          rc);
+                /*@
+                * @errortype
+                * @moduleid     EEPROM_CACHE_PERFORM_OP
+                * @reasoncode   EEPROM_FAILED_TO_FLUSH_CONTENTS
+                * @userdata1    Requested Address
+                * @userdata2    rc from mm_remove_pages
+                * @devdesc      cacheEeprom mm_remove_pages FLUSH failed
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                EEPROM_CACHE_PERFORM_OP,
+                                EEPROM_FAILED_TO_FLUSH_CONTENTS,
+                                (l_eepromCacheVaddr + i_eepromInfo.offset),
+                                TO_UINT64(rc),
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_errl->collectTrace( EEPROM_COMP_NAME );
+                break;
+            }
+#endif
+        }
+        else
+        {
+            TRACFCOMP(g_trac_eeprom,
+                      ERR_MRK"eepromPerformOpCache: Invalid OP_TYPE passed to function, i_opType=%d",
+                      i_opType);
+            /*@
+            * @errortype
+            * @moduleid     EEPROM_CACHE_PERFORM_OP
+            * @reasoncode   EEPROM_INVALID_OPERATION
+            * @userdata1[0:31]  Op Type that was invalid
+            * @userdata1[32:63] Eeprom Role
+            * @userdata2    Offset we are attempting to perfrom op on
+            * @custdesc     Soft error in Firmware
+            * @devdesc      cacheEeprom invalid op type
+            */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            EEPROM_CACHE_PERFORM_OP,
+                            EEPROM_INVALID_OPERATION,
+                            TWO_UINT32_TO_UINT64(i_opType,
+                                                 i_eepromInfo.eepromRole),
+                            TO_UINT64(i_eepromInfo.offset),
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+            l_errl->collectTrace( EEPROM_COMP_NAME );
+            break;
         }
 
         TRACSSCOMP( g_trac_eeprom, EXIT_MRK"eepromPerformOpCache() "

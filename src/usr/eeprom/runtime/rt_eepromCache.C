@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -257,6 +257,33 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader,
     if(l_it != g_cachedEeproms[i_instance].end())
     {
         l_vaddr = l_it->second.cache_entry_address;
+    }
+    mutex_unlock(&g_eecacheMutex);
+
+    return l_vaddr;
+}
+
+uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader,
+                                const uint8_t i_instance)
+{
+    uint64_t l_vaddr = 0;
+    std::map<eepromRecordHeader, EepromEntryMetaData_t>::iterator l_it;
+
+    if (MAX_NODES_PER_SYS < i_instance)
+    {
+        TRACFCOMP( g_trac_eeprom, "lookupEepromHeaderAddr() called with instance"
+                   " %d, which is greater than max cached eeproms %d",
+                   i_instance, MAX_NODES_PER_SYS );
+        return 0;
+    }
+
+    // Wrap lookup in mutex because reads are not thread safe
+    mutex_lock(&g_eecacheMutex);
+    l_it = g_cachedEeproms[i_instance].find(i_eepromRecordHeader);
+
+    if(l_it != g_cachedEeproms[i_instance].end())
+    {
+        l_vaddr = l_it->second.header_entry_address;
     }
     mutex_unlock(&g_eecacheMutex);
 
