@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,9 +42,6 @@
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <mss_generic_system_attribute_getters.H>
-#include <mss_generic_attribute_getters.H>
-#include <mss_p10_attribute_getters.H>
 
 namespace mss
 {
@@ -99,6 +96,29 @@ fapi2::ReturnCode setup_mc_cya_bits(const fapi2::Target<fapi2::TARGET_TYPE_OMI>&
 ///
 fapi2::ReturnCode setup_mc_error_action(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target);
 
+///
+/// @brief Function to setup CONFIG1_EDPL_TIME for MFG screen test
+/// @param[in] i_target the TARGET_TYPE_OMI to operate on
+/// @param[in] i_edpl_disable value from ATTR_MSS_OMI_EDPL_DISABLE
+/// @param[in] i_mnfg_screen_test value from check_omi_mfg_screen_edpl_setting
+/// @param[in,out] io_data the register data to work on
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+void setup_mfg_test_edpl_time(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
+                              const uint8_t i_edpl_disable,
+                              const bool i_mnfg_screen_test,
+                              fapi2::buffer<uint64_t>& io_data);
+
+///
+/// @brief Function to set up PMU CRC counters for MNFG OMI screening
+/// @param[in] i_target the TARGET_TYPE_OMIC to operate on
+/// @param[in] i_mnfg_screen_test value from check_omi_mfg_screen_edpl_setting
+/// @param[in,out] io_data CMN_CONFIG register data
+///
+void mfg_override_pmu_crc_counters(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+    const bool i_mnfg_screen_test,
+    fapi2::buffer<uint64_t>& io_data);
 
 ///
 /// @brief P10 OMI setup helper function, to perform PRBS workarounds if needed

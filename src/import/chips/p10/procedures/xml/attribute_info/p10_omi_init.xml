@@ -267,4 +267,32 @@
   <mssAccessorName>omi_channel_fail_action</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_MFG_SCREEN_OMI_CRC_ALLOWED</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Threshold value of number of OMI CRC fails allowed in MFG screen per channel.
+      Checked against PMU value when MFG policy 'CRC/EDPL screening' enabled.
+  </description>
+  <valueType>uint16</valueType>
+  <platInit/>
+  <overrideOnly/>
+  <initToZero/>
+  <mssAccessorName>mfg_screen_omi_crc_allowed</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_MFG_SCREEN_OMI_EDPL_ALLOWED</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Threshold value of number of OMI EDPL fails allowed in MFG screen per channel.
+      Checked against PMU value when MFG policy 'CRC/EDPL screening' enabled.
+  </description>
+  <valueType>uint16</valueType>
+  <platInit/>
+  <overrideOnly/>
+  <initToZero/>
+  <mssAccessorName>mfg_screen_omi_edpl_allowed</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>

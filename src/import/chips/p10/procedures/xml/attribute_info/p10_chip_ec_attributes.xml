@@ -897,6 +897,46 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Mask OMI CRC FIRs for DD1.
+     For DD2+ leave them as RECOVERABLE. Affects the following FIRs:
+     MC_OMI_FIR_REG_DL0_CRC_ERROR
+     MC_OMI_FIR_REG_DL1_CRC_ERROR
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Mask OMI EDPL FIRs for DD1.
+     For DD2+ leave them as RECOVERABLE. Affects the following FIRs:
+     MC_OMI_FIR_REG_DL0_EDPL
+     MC_OMI_FIR_REG_DL1_EDPL
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
   <id>ATTR_CHIP_EC_FEATURE_FILTER_PLL_HW540133</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>

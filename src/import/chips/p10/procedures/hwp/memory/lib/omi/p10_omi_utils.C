@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,10 @@
 #include <p10_scom_omic.H>
 #include <lib/workarounds/p10_omi_workarounds.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/p10_attribute_accessors_manual.H>
+#include <mss_generic_system_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
+#include <mss_p10_attribute_getters.H>
 
 namespace mss
 {
@@ -53,10 +57,13 @@ fapi2::ReturnCode setup_mc_cmn_config(const fapi2::Target<fapi2::TARGET_TYPE_OMI
 {
     // Expected resulting register value: 0x000364008874630F
     fapi2::buffer<uint64_t> l_val;
+    bool l_mnfg_screen_test = false;
 
     // Number of cycles in 1us. Number correct for 25.6, but will also be valid for 21.3
     constexpr uint64_t CFG_CMN_1US_TMR = 1600;
     constexpr uint8_t CFG_CMN_PORT_SEL = 0;
+
+    FAPI_TRY(mss::check_omi_mfg_screen_crc_setting(l_mnfg_screen_test));
 
     FAPI_TRY(scomt::omic::PREP_CMN_CONFIG(i_target));
 
@@ -95,14 +102,14 @@ fapi2::ReturnCode setup_mc_cmn_config(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     // CFG_CMN_PORT_SEL: PMU port select - select which of the 8 groups of inputs will be used by the PMU.
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_PORT_SEL(CFG_CMN_PORT_SEL, l_val);
 
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR3_PS(mss::omi::cntrl_pair_selector::SEL_EVEN, l_val);
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR3_ES(mss::omi::cntrl_event_selector::SIG_1_0, l_val);
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR2_PS(mss::omi::cntrl_pair_selector::SEL_EVEN, l_val);
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR2_ES(mss::omi::cntrl_event_selector::SIG_7_6, l_val);
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR1_PS(mss::omi::cntrl_pair_selector::SEL_EVEN, l_val);
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR1_ES(mss::omi::cntrl_event_selector::SIG_3_2, l_val);
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR0_PS(mss::omi::cntrl_pair_selector::SEL_ODD, l_val);
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR0_ES(mss::omi::cntrl_event_selector::SIG_1_0, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR3_PS(mss::omi::cntrl_pair_selector::SEL_ODD, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR3_ES(mss::omi::cntrl_event_selector::SIG_6_7, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR2_PS(mss::omi::cntrl_pair_selector::SEL_ODD, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR2_ES(mss::omi::cntrl_event_selector::SIG_0_1, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR1_PS(mss::omi::cntrl_pair_selector::SEL_ODD, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR1_ES(mss::omi::cntrl_event_selector::SIG_4_5, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR0_PS(mss::omi::cntrl_pair_selector::SEL_EVEN, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR0_ES(mss::omi::cntrl_event_selector::SIG_6_7, l_val);
 
     // CFG_CMN_CNTRx_PE: PMU cntrx positive edge select
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR3_PE(mss::states::OFF, l_val);
@@ -115,6 +122,9 @@ fapi2::ReturnCode setup_mc_cmn_config(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR2_EN(mss::states::ON, l_val);
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR1_EN(mss::states::ON, l_val);
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR0_EN(mss::states::ON, l_val);
+
+    // Override PM counters if MFG OMI screen test is set
+    mfg_override_pmu_crc_counters(i_target, l_mnfg_screen_test, l_val);
 
     FAPI_TRY(scomt::omic::PUT_CMN_CONFIG(i_target, l_val));
 
@@ -266,8 +276,10 @@ fapi2::ReturnCode setup_mc_config1(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& 
 
     uint8_t l_sim = 0;
     uint8_t l_edpl_disable = 0;
+    bool l_mnfg_screen_test = false;
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
     FAPI_TRY(mss::attr::get_mss_omi_edpl_disable(l_edpl_disable));
+    FAPI_TRY(mss::check_omi_mfg_screen_edpl_setting(l_mnfg_screen_test));
 
     FAPI_TRY(scomt::omi::PREP_CONFIG1(i_target));
 
@@ -336,7 +348,10 @@ fapi2::ReturnCode setup_mc_config1(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& 
     // CFG_DL0_INJECT_CRC_ERROR: dl0 inject crc error enable
     scomt::omi::SET_CONFIG1_INJECT_CRC_ERROR(mss::states::OFF, l_val);
 
+    // CFG_DL0_EDPL_TIME: dl0 edpl time window
     scomt::omi::SET_CONFIG1_EDPL_TIME(mss::omi::edpl_time_win::EDPL_TIME_WIN_16MS, l_val);
+    setup_mfg_test_edpl_time(i_target, l_edpl_disable, l_mnfg_screen_test, l_val);
+
     scomt::omi::SET_CONFIG1_EDPL_THRESHOLD(mss::omi::edpl_err_thres::EDPL_ERR_THRES_16, l_val);
 
     // CFG_DL0_EDPL_ENA: dl0 error detection per lane "edpl" enable
@@ -385,6 +400,76 @@ fapi2::ReturnCode setup_mc_error_action(const fapi2::Target<fapi2::TARGET_TYPE_O
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Function to setup CONFIG1_EDPL_TIME for MFG screen test
+/// @param[in] i_target the TARGET_TYPE_OMI to operate on
+/// @param[in] i_edpl_disable value from ATTR_MSS_OMI_EDPL_DISABLE
+/// @param[in] i_mnfg_screen_test value from check_omi_mfg_screen_edpl_setting
+/// @param[in,out] io_data the register data to work on
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+void setup_mfg_test_edpl_time(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
+                              const uint8_t i_edpl_disable,
+                              const bool i_mnfg_screen_test,
+                              fapi2::buffer<uint64_t>& io_data)
+{
+    // CFG_DL0_EDPL_TIME: set EDPL for 'no time window', so the counters will keep accumulating
+    // (until max 0xff) and can be compared to attribute 'EDPL allowed' at end of mnfg run
+    if (!i_edpl_disable && i_mnfg_screen_test)
+    {
+        FAPI_DBG("%s Setting CONFIG1_EDPL_TIME to 'no time window' for MFG test", mss::c_str(i_target));
+        scomt::omi::SET_CONFIG1_EDPL_TIME(mss::omi::edpl_time_win::EDPL_TIME_WIN_NO, io_data);
+    }
+}
+
+///
+/// @brief Function to set up PMU CRC counters for MNFG OMI screening
+/// @param[in] i_target the TARGET_TYPE_OMIC to operate on
+/// @param[in] i_mnfg_screen_test value from check_omi_mfg_screen_edpl_setting
+/// @param[in,out] io_data CMN_CONFIG register data
+///
+void mfg_override_pmu_crc_counters(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+    const bool i_mnfg_screen_test,
+    fapi2::buffer<uint64_t>& io_data)
+{
+    if (!i_mnfg_screen_test)
+    {
+        // if the mnfg policy is not set, or we're not allowing any CRCs, don't override PMU counters
+        return;
+    }
+
+    FAPI_DBG("%s Setting up PMU CRC counters in CMN_CONFIG for MFG test", mss::c_str(i_target));
+    // set CMN_CONFIG[32:63] = 0xFC73620F
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_RD_RST(mss::states::ON, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_PRE_SCALAR(pmu_prescalar::NO_PRESCALAR, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_FREEZE(mss::states::ON, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_PORT_SEL(0b100, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR3_PS(cntrl_pair_selector::SEL_ODD, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR3_ES(cntrl_event_selector::SIG_6_7, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR2_PS(cntrl_pair_selector::SEL_EVEN, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR2_ES(cntrl_event_selector::SIG_6_7, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR1_PS(cntrl_pair_selector::SEL_ODD, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR1_ES(cntrl_event_selector::SIG_4_5, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR0_PS(cntrl_pair_selector::SEL_EVEN, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR0_ES(cntrl_event_selector::SIG_4_5, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR3_PE(mss::states::OFF, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR2_PE(mss::states::OFF, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR1_PE(mss::states::OFF, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR0_PE(mss::states::OFF, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR3_EN(mss::states::ON, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR2_EN(mss::states::ON, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR1_EN(mss::states::ON, io_data);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_CNTR0_EN(mss::states::ON, io_data);
+
+    // The above settings yield the following config:
+    // DLME.REG0.PMU_CNTR
+    // [0:15]: accumulated DL1 NACKs    (downstream CRCs)
+    // [16:31]: accumulated DL1 CRCs    (upstream CRCs)
+    // [32:47]: accumulated DL0 NACKs   (downstream CRCs)
+    // [48:63]: accumulated DL0 CRCs    (upstream CRCs)
 }
 
 ///

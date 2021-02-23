@@ -71,6 +71,7 @@ extern "C"
         uint8_t l_enable_ffe_settings = 0;
         uint32_t l_omi_freq = 0;
         uint8_t l_is_apollo = 0;
+        bool l_mnfg_screen_test = false;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
@@ -90,6 +91,7 @@ extern "C"
         }
 
         FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+        FAPI_TRY(mss::exp::check_omi_mfg_screen_edpl_setting(l_mnfg_screen_test));
 
         // Send downstream PRBS pattern from host
         if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
@@ -220,6 +222,7 @@ extern "C"
             // Set the EDPL according the attribute
             FAPI_TRY(mss::exp::omi::read_dlx_config1(i_target, l_dlx_config1_data));
             mss::exp::omi::set_edpl_enable_bit(l_dlx_config1_data, !l_edpl_disable);
+            mss::exp::omi::setup_edpl_time_window(l_dlx_config1_data, !l_edpl_disable, l_mnfg_screen_test);
             FAPI_TRY(mss::exp::omi::write_dlx_config1(i_target, l_dlx_config1_data));
             FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
         }

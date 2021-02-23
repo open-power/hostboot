@@ -38,6 +38,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <lib/mss_p10_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <lib/p10_attribute_accessors_manual.H>
 
 namespace scomt
 {
@@ -680,10 +681,30 @@ fapi_try_exit:
 ///
 inline fapi2::ReturnCode after_p10_omi_init_omi_fir_helper(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target)
 {
+    fapi2::ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS_Type l_omi_crc_dd1_mask = false;
+    fapi2::ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS_Type l_omi_edpl_dd1_mask = false;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_reg_data;
     bool l_subchannel_a_config = false;
     bool l_subchannel_b_config = false;
+    bool l_mnfg_screen_test_crc = false;
+    bool l_mnfg_screen_test_edpl = false;
+
+    // check chip EC attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                           l_omi_crc_dd1_mask),
+             "%s Failed to read ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS",
+             mss::c_str(i_target));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                           l_omi_edpl_dd1_mask),
+             "%s Failed to read ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS",
+             mss::c_str(i_target));
+
+    // check for mnfg OMI screen settings
+    FAPI_TRY(mss::check_omi_mfg_screen_crc_setting(l_mnfg_screen_test_crc));
+    FAPI_TRY(mss::check_omi_mfg_screen_edpl_setting(l_mnfg_screen_test_edpl));
 
     for (const auto& l_omic : mss::find_targets<fapi2::TARGET_TYPE_OMIC>(i_target))
     {
@@ -693,17 +714,31 @@ inline fapi2::ReturnCode after_p10_omi_init_omi_fir_helper(const fapi2::Target<f
         l_mc_omi_fir_reg.recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL0_FLIT_CE>()
         .recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL1_FLIT_CE>();
 
+        // Set up MNFG OMI screen or DD1 workaround settings for CRC and EDPL FIRs
+        mss::workarounds::fir::omi_crc_after_omi_init(l_omic,
+                l_omi_crc_dd1_mask,
+                l_mnfg_screen_test_crc,
+                l_mc_omi_fir_reg);
+        mss::workarounds::fir::omi_edpl_after_omi_init(l_omic,
+                l_omi_edpl_dd1_mask,
+                l_mnfg_screen_test_edpl,
+                l_mc_omi_fir_reg);
+
         // Re-mask any subchannel FIRs that are on non-configured OMI channels
         subchannel_config(l_omic, l_subchannel_a_config, l_subchannel_b_config);
 
         if (!l_subchannel_a_config)
         {
-            l_mc_omi_fir_reg.remask<scomt::omic::MC_OMI_FIR_REG_DL0_FLIT_CE>();
+            l_mc_omi_fir_reg.remask<scomt::omic::MC_OMI_FIR_REG_DL0_FLIT_CE>()
+            .remask<scomt::omic::MC_OMI_FIR_REG_DL0_CRC_ERROR>()
+            .remask<scomt::omic::MC_OMI_FIR_REG_DL0_EDPL>();
         }
 
         if (!l_subchannel_b_config)
         {
-            l_mc_omi_fir_reg.remask<scomt::omic::MC_OMI_FIR_REG_DL1_FLIT_CE>();
+            l_mc_omi_fir_reg.remask<scomt::omic::MC_OMI_FIR_REG_DL1_FLIT_CE>()
+            .remask<scomt::omic::MC_OMI_FIR_REG_DL1_CRC_ERROR>()
+            .remask<scomt::omic::MC_OMI_FIR_REG_DL1_EDPL>();
         }
 
         // Write MC_OMI_FIR registers now that they've been set up in the loop above

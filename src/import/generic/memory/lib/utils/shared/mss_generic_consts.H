@@ -839,6 +839,7 @@ enum pmu_prescalar
     PRESCALAR_16BIT = 0b000,
     PRESCALAR_8BIT  = 0b001,
     PRESCALAR_20BIT = 0b100,
+    NO_PRESCALAR    = 0b111,
 };
 
 
@@ -847,8 +848,8 @@ enum pmu_prescalar
 ///
 enum cntrl_pair_selector
 {
-    SEL_ODD      = 0b00,
-    SEL_EVEN     = 0b01,
+    SEL_EVEN     = 0b00,
+    SEL_ODD      = 0b01,
     SEL_BOTH_AND = 0b10,
     SEL_BOTH_XOR = 0b11,
 };
@@ -858,10 +859,10 @@ enum cntrl_pair_selector
 ///
 enum cntrl_event_selector
 {
-    SIG_7_6 = 0b00,
-    SIG_5_4 = 0b01,
-    SIG_3_2 = 0b10,
-    SIG_1_0 = 0b11,
+    SIG_0_1 = 0b00,
+    SIG_2_3 = 0b01,
+    SIG_4_5 = 0b10,
+    SIG_6_7 = 0b11,
 };
 
 ///

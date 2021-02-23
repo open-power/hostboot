@@ -39,6 +39,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <p10_io_lib.H>
+#include <mss_generic_system_attribute_getters.H>
 
 ///
 /// @brief Start DL link training on the selected OMIC

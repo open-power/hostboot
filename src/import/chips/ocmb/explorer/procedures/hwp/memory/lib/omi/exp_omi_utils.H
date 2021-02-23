@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 static constexpr uint8_t OPTIMAL_NUM_TL_CREDITS = 18;
 static constexpr uint8_t STATE_MACHINE_SUCCESS = 0b111; // This value is from Lonny Lambrecht
@@ -125,6 +126,25 @@ inline bool get_edpl_enable_bit( const fapi2::buffer<uint64_t>& i_data )
 inline void set_edpl_enable_bit( fapi2::buffer<uint64_t>& io_data, const bool i_enable )
 {
     io_data.writeBit<EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_ENA>(i_enable);
+}
+
+///
+/// @brief Setup edpl time window for mnfg test
+/// @param[in,out] io_data the register data
+/// @param[in] i_enable true if edpl is enabled
+/// @param[in] i_mnfg_screen_test true if OMI mfg screen is enabled
+///
+inline void setup_edpl_time_window( fapi2::buffer<uint64_t>& io_data,
+                                    const bool i_enable,
+                                    const bool i_mnfg_screen_test )
+{
+    if (i_enable && i_mnfg_screen_test)
+    {
+        // set EDPL for 'no time window', so the counters will keep accumulating (until max 0xff)
+        // and can be compared to attribute at end of mnfg run
+        io_data.insertFromRight<EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_TIME,
+                                EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_TIME_LEN>(mss::omi::edpl_time_win::EDPL_TIME_WIN_NO);
+    }
 }
 
 ///

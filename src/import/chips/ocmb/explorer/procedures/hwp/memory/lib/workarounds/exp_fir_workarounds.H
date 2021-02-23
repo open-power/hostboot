@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,30 @@ void override_x4_degrade_fir( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
 void override_omi_crc_firs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                             const uint8_t i_omi_crc_debug,
                             mss::fir::reg<EXPLR_DLX_MC_OMI_FIR_REG>& io_exp_mc_omi_fir_reg );
+
+///
+/// @brief Function handling the MC_OMI_FIR CRC FIR settings
+/// @param[in] i_target the OCMB_CHIP target of the MC_OMI fir
+/// @param[in] i_omi_crc_dd1_wkrnd value from ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS
+/// @param[in] i_omi_mfg_screen_crc value from check_omi_mfg_screen_crc_setting
+/// @param[in,out] io_exp_dlx_omi_fir_reg the MC_OMI_FIR register instance
+///
+void omi_crc_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                             const bool i_omi_crc_dd1_wkrnd,
+                             const bool i_omi_mfg_screen_crc,
+                             mss::fir::reg<EXPLR_DLX_MC_OMI_FIR_REG>& io_exp_dlx_omi_fir_reg );
+
+///
+/// @brief Function handling the MC_OMI_FIR EDPL FIR settings
+/// @param[in] i_target the OCMB_CHIP target of the MC_OMI fir
+/// @param[in] i_omi_edpl_dd1_wkrnd value from ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS
+/// @param[in] i_omi_mfg_screen_edpl value from check_omi_mfg_screen_edpl_setting
+/// @param[in,out] io_exp_dlx_omi_fir_reg the MC_OMI_FIR register instance
+///
+void omi_edpl_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                              const bool i_omi_edpl_dd1_wkrnd,
+                              const bool i_omi_mfg_screen_edpl,
+                              mss::fir::reg<EXPLR_DLX_MC_OMI_FIR_REG>& io_exp_dlx_omi_fir_reg );
 
 } // fir
 } // workarounds

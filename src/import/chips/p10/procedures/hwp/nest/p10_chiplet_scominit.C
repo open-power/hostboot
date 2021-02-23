@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,7 +178,6 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
         }
     }
 
-    // unmask MCC/OMIC/OMI FIRs
     for (const auto& l_mc_target : i_target.getChildren<fapi2::TARGET_TYPE_MC>())
     {
         fapi2::toString(l_mc_target, l_tgt_str, sizeof(l_tgt_str));

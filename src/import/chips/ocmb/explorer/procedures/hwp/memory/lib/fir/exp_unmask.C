@@ -47,6 +47,7 @@
 #include <lib/workarounds/exp_fir_workarounds.H>
 #include <lib/phy/exp_phy_utils.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
+#include <lib/exp_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -169,12 +170,16 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
 {
     constexpr uint8_t EXPLR_TLXT_TLX_ERR1_REPORTQ_TLXT_INTRP_REQ_FAILED = 38;
 
+    fapi2::ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS_Type l_omi_crc_dd1_mask = false;
+    fapi2::ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS_Type l_omi_edpl_dd1_mask = false;
     fapi2::ATTR_MSS_EXP_INTR_MASK_DISABLE_Type l_intr_mask_disable = 0;
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc4 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_reg_data;
+    bool l_mnfg_screen_test_crc = false;
+    bool l_mnfg_screen_test_edpl = false;
 
     mss::fir::reg<EXPLR_MMIO_MFIR> l_exp_mmio_mfir_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_TLXT_TLXFIRQ> l_exp_tlxt_fir_reg(i_target, l_rc2);
@@ -189,6 +194,22 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
              mss::c_str(i_target), EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR);
     FAPI_TRY(l_rc4, "for target %s unable to create fir::reg for EXPLR_DLX_MC_OMI_FIR_REG 0x%0x",
              mss::c_str(i_target), EXPLR_DLX_MC_OMI_FIR_REG);
+
+    // check chip EC attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                           l_omi_crc_dd1_mask),
+             "%s Failed to read ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS",
+             mss::c_str(i_target));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                           l_omi_edpl_dd1_mask),
+             "%s Failed to read ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS",
+             mss::c_str(i_target));
+
+    // check for mnfg OMI screen settings
+    FAPI_TRY(mss::exp::check_omi_mfg_screen_crc_setting(l_mnfg_screen_test_crc));
+    FAPI_TRY(mss::exp::check_omi_mfg_screen_edpl_setting(l_mnfg_screen_test_edpl));
 
     FAPI_TRY(mss::attr::get_exp_intr_mask_disable(i_target, l_intr_mask_disable));
 
@@ -235,6 +256,16 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
              .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_IN8>()
              .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_IN63>()
              .write(), "Failed to write LOCAL FIR unmasks for %s", mss::c_str(i_target));
+
+    // Set up MNFG OMI screen or DD1 workaround settings for CRC and EDPL FIRs
+    exp::workarounds::fir::omi_crc_after_omi_init(i_target,
+            l_omi_crc_dd1_mask,
+            l_mnfg_screen_test_crc,
+            l_exp_dlx_omi_fir_reg);
+    exp::workarounds::fir::omi_edpl_after_omi_init(i_target,
+            l_omi_edpl_dd1_mask,
+            l_mnfg_screen_test_edpl,
+            l_exp_dlx_omi_fir_reg);
 
     // Setup MC OMI FIR unmasks per spec
     FAPI_TRY(l_exp_dlx_omi_fir_reg.recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_FLIT_CE>()

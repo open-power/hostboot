@@ -40,6 +40,8 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <p10_io_omi_prbs.H>
+#include <mss_generic_system_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 
 ///
 /// @brief Setup OMI for P10
