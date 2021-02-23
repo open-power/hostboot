@@ -117,63 +117,10 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
     }
 
     TRACFCOMP( g_trac_cxxtest,
-               "Now executing Serial Test Cases!");
-
-    for(std::vector<const char *>::const_iterator i = serial_module_list.begin();
-        i != serial_module_list.end(); ++i)
-    {
-        __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
-
-        CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
-                          "Load test %s", *i);
-
-        // load module and call _init()
-        l_errl = VFS::module_load( *i );
-        if ( l_errl )
-        {
-            // vfs could not load a module and returned an errorlog.
-            //  commit the errorlog, mark the test failed, and
-            //  move on.
-            TS_FAIL( "ERROR: Task %s could not be loaded, committing errorlog",
-                    *i );
-            errlCommit( l_errl, CXXTEST_COMP_ID );
-            continue;
-        }
-
-        //First run all serial testcases
-        tidrc = task_exec( *i, NULL );
-        TRACFCOMP( g_trac_cxxtest, "Launched serial task: %s tidrc=%d",
-                   *i, tidrc );
-        int status = 0;
-        task_wait_tid(tidrc, &status, NULL);
-
-        if (status != TASK_STATUS_EXITED_CLEAN)
-        {
-            TRACFCOMP( g_trac_cxxtest, "Task %d crashed with status %d.",
-                       tidrc, status );
-            if(CxxTest::g_FailedTests < CxxTest::CXXTEST_FAIL_LIST_SIZE)
-            {
-                CxxTest::CxxTestFailedEntry *l_failedEntry =
-                    &CxxTest::g_FailedTestList[CxxTest::g_FailedTests];
-                sprintf(l_failedEntry->failTestFile,
-                        "%s crashed",
-                        *i);
-                l_failedEntry->failTestData = tidrc;
-            }
-            __sync_add_and_fetch(&CxxTest::g_FailedTests, 1);
-        }
-        else
-        {
-            TRACFCOMP( g_trac_cxxtest, "Task %d finished.", tidrc );
-        }
-        CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
-                          "Stop test %s : status=%d", *i, status);
-    }
-
-    TRACFCOMP( g_trac_cxxtest,
                "Now executing Parallel Test Cases!");
 
-    //Then run all parallel testcases
+    // First, run all parallel testcases. These shouldn't have adverse effects on each other.
+    // The serial testcases can effect these so they are run afterward.
     for(std::vector<const char *>::const_iterator i = parallel_module_list.begin();
         i != parallel_module_list.end(); ++i)
     {
@@ -241,6 +188,61 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
 
         CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
                           "Stop test %s : status=%d", t->module, status);
+    }
+
+    TRACFCOMP( g_trac_cxxtest,
+               "Now executing Serial Test Cases!");
+
+    // Now, run all serial testcases. These can have adverse effects on the parallel tests and should be run
+    // after they finish.
+    for(std::vector<const char *>::const_iterator i = serial_module_list.begin();
+        i != serial_module_list.end(); ++i)
+    {
+        __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
+
+        CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
+                          "Load test %s", *i);
+
+        // load module and call _init()
+        l_errl = VFS::module_load( *i );
+        if ( l_errl )
+        {
+            // vfs could not load a module and returned an errorlog.
+            //  commit the errorlog, mark the test failed, and
+            //  move on.
+            TS_FAIL( "ERROR: Task %s could not be loaded, committing errorlog",
+                    *i );
+            errlCommit( l_errl, CXXTEST_COMP_ID );
+            continue;
+        }
+
+        tidrc = task_exec( *i, NULL );
+        TRACFCOMP( g_trac_cxxtest, "Launched serial task: %s tidrc=%d",
+                   *i, tidrc );
+        int status = 0;
+        task_wait_tid(tidrc, &status, NULL);
+
+        if (status != TASK_STATUS_EXITED_CLEAN)
+        {
+            TRACFCOMP( g_trac_cxxtest, "Task %d crashed with status %d.",
+                       tidrc, status );
+            if(CxxTest::g_FailedTests < CxxTest::CXXTEST_FAIL_LIST_SIZE)
+            {
+                CxxTest::CxxTestFailedEntry *l_failedEntry =
+                    &CxxTest::g_FailedTestList[CxxTest::g_FailedTests];
+                sprintf(l_failedEntry->failTestFile,
+                        "%s crashed",
+                        *i);
+                l_failedEntry->failTestData = tidrc;
+            }
+            __sync_add_and_fetch(&CxxTest::g_FailedTests, 1);
+        }
+        else
+        {
+            TRACFCOMP( g_trac_cxxtest, "Task %d finished.", tidrc );
+        }
+        CONSOLE::displayf(CONSOLE::DEFAULT, CXXTEST_COMP_NAME,
+                          "Stop test %s : status=%d", *i, status);
     }
 
     __sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);
