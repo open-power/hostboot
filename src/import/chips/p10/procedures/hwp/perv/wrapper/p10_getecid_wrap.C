@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,7 +168,7 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
         }
     }
 
-    sprintf( ecidString, "%s_%02d_%02d", wafer.c_str(), Xloc, Yloc );
+    sprintf( ecidString, "ECID: %s_%02d_%02d", wafer.c_str(), Xloc, Yloc );
     sprintf( DDlevelstring, "EC level: %s", DD.c_str() );
 
     return rc;
@@ -415,6 +415,7 @@ int main(int argc,
             uint64_t ecid1 = o_fuseString.get<uint64_t>(1);
             uint64_t ecid2 = o_fuseString.get<uint64_t>(2);
 
+            printf("\n%s\n", ecmdWriteTarget(target).c_str());
             printf("ecid0=%#lx\n", ecid0);
             printf("ecid1=%#lx\n", ecid1);
             printf("ecid2=%#lx\n", ecid2);
