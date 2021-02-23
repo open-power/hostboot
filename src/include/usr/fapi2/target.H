@@ -1078,7 +1078,8 @@ Target<K, M, V>::reduceType(Target<T, M, V>& o_target) const
         return FAPI2_RC_INVALID_PARAMETER;
     }
 
-    o_target = Target < T, M, V > ();
+    // seed the target to complete the transformation
+    o_target = Target < T, M, V > (this->get());
     return FAPI2_RC_SUCCESS;
 }
 
