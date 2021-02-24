@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -199,6 +199,21 @@ int32_t queryPllErrTypes(ExtensibleChip* i_chip, PllErrTypes& o_errTypes)
         {
             if (sense->IsBitSet(12)) o_errTypes.set(PllErrTypes::PLL_UNLOCK_0);
             if (sense->IsBitSet(13)) o_errTypes.set(PllErrTypes::PLL_UNLOCK_1);
+
+            // BEGIN WORKAROUND
+            // Defect SW517936 found an issue where RCS_SENSE_1 returned
+            // all 0's, which should never happen in the hardware, but for some
+            // reason it did. This made PRD analysis fly off into the weeds and
+            // got stuck in an infinite loop. To circumvent the issue, we'll say
+            // both clocks failed since we can't isolate to one.
+            if (!o_errTypes.query(PllErrTypes::PLL_UNLOCK_0) &&
+                !o_errTypes.query(PllErrTypes::PLL_UNLOCK_1))
+            {
+                PRDF_ERR("Invalid config in RCS_SENSE_1 register");
+                o_errTypes.set(PllErrTypes::PLL_UNLOCK_0);
+                o_errTypes.set(PllErrTypes::PLL_UNLOCK_1);
+            }
+            // END WORKAROUND
         }
 
         // An RCS unlock detect on clock 0 is only valid if on the non-primary
