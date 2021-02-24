@@ -257,25 +257,9 @@ errlHndl_t nodeCommLogNonce(uint64_t & i_nonce)
 
 } // end of nodeCommLogNonce
 
-/**
- * @brief A function to create the slave node quote response that consists of
- *        eye catcher, slave node ID, quote and signature data (represented by
- *        the QuoteDataOut structure), the contents of PCRs 0-7, the
- *        Attestation Key Certificate returned from TPM, the size
- *        and the contents of the TPM log
- * @param[in] i_request the master node request structure
- * @param[out] o_size the size of the slave quote
- * @param[out] o_resp the slave quote in binary format
- * @note Assuming CONFIG_TPMDD is compiled in, o_resp is always allocated
- *       dynamically in this function, and it is the responsibility of the
- *       calller to delete it after the function returns. If an error occurs
- *       within the function, the o_resp will only have an eye catcher
- *       indicating that the slave quote is bad.
- * @return nullptr on success; non-nullptr on error
- */
 errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_request,
                                          size_t& o_size,
-                                         uint8_t*& o_resp)
+                                         std::unique_ptr<uint8_t>& o_resp)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
@@ -285,6 +269,8 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
 
     TRUSTEDBOOT::QuoteDataOut l_quoteData;
     uint32_t l_nodeId = TARGETING::UTIL::getCurrentNodePhysId();
+    uint8_t* l_quotePtr = nullptr;
+
     do {
 
     o_resp = nullptr;
@@ -515,25 +501,25 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
              l_logSize;
 
     // Allocate the output
-    o_resp = new uint8_t[o_size] {};
+    l_quotePtr = new uint8_t[o_size] {};
     // Now populate the output
     size_t l_currentOffset = 0;
 
     // First the good eye catcher
-    memcpy(o_resp, &l_goodEyeCatch, sizeof(l_goodEyeCatch));
+    memcpy(l_quotePtr, &l_goodEyeCatch, sizeof(l_goodEyeCatch));
     l_currentOffset += sizeof(l_goodEyeCatch);
     // Now the node ID
-    memcpy(o_resp + l_currentOffset, &l_nodeId, sizeof(l_nodeId));
+    memcpy(l_quotePtr + l_currentOffset, &l_nodeId, sizeof(l_nodeId));
     l_currentOffset += sizeof(l_nodeId);
     // The size of the quote and signature structures
-    memcpy(o_resp + l_currentOffset,&l_quoteData.size,sizeof(l_quoteData.size));
+    memcpy(l_quotePtr + l_currentOffset,&l_quoteData.size,sizeof(l_quoteData.size));
     l_currentOffset += sizeof(l_quoteData.size);
     // The TPM quote & signature information (both are included in the TPM
     // quote blob)
-    memcpy(o_resp + l_currentOffset, l_quoteData.data, l_quoteData.size);
+    memcpy(l_quotePtr + l_currentOffset, l_quoteData.data, l_quoteData.size);
     l_currentOffset += l_quoteData.size;
     // The number of PCRs read
-    memcpy(o_resp + l_currentOffset, &l_pcrCount, sizeof(l_pcrCount));
+    memcpy(l_quotePtr + l_currentOffset, &l_pcrCount, sizeof(l_pcrCount));
     l_currentOffset += sizeof(l_pcrCount);
     // PCR contents
     for(const auto l_pcr : l_pcrRegs)
@@ -541,28 +527,28 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
         if(l_pcrDigests[l_pcr].size != 0)
         {
             // Copy the size of the PCR
-            memcpy(o_resp + l_currentOffset,
+            memcpy(l_quotePtr + l_currentOffset,
                    &l_pcrDigests[l_pcr].size,
                    sizeof(l_pcrDigests[l_pcr].size));
             l_currentOffset += sizeof(l_pcrDigests[l_pcr].size);
             // Now the actual data
-            memcpy(o_resp + l_currentOffset,
+            memcpy(l_quotePtr + l_currentOffset,
                    l_pcrDigests[l_pcr].buffer,
                    l_pcrDigests[l_pcr].size);
             l_currentOffset += l_pcrDigests[l_pcr].size;
         }
     }
     // AK certificate size
-    memcpy(o_resp + l_currentOffset, &l_AKCert.size, sizeof(l_AKCert.size));
+    memcpy(l_quotePtr + l_currentOffset, &l_AKCert.size, sizeof(l_AKCert.size));
     l_currentOffset += sizeof(l_AKCert.size);
     // Actual AK certificate
-    memcpy(o_resp + l_currentOffset, l_AKCert.buffer, l_AKCert.size);
+    memcpy(l_quotePtr + l_currentOffset, l_AKCert.buffer, l_AKCert.size);
     l_currentOffset += l_AKCert.size;
     // The length of the TPM log
-    memcpy(o_resp + l_currentOffset, &l_logSize, sizeof(l_logSize));
+    memcpy(l_quotePtr + l_currentOffset, &l_logSize, sizeof(l_logSize));
     l_currentOffset += sizeof(l_logSize);
     // The actual TPM log
-    memcpy(o_resp + l_currentOffset, l_logPtr, l_logSize);
+    memcpy(l_quotePtr + l_currentOffset, l_logPtr, l_logSize);
 
     } while(0);
 
@@ -581,9 +567,10 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
                  "back Master Node after poisoning all TPMs on this node");
 
         NCEyeCatcher_t l_badEyeCatcher = NDNOTPM_;
-        o_resp = new uint8_t[sizeof(l_badEyeCatcher) + sizeof(l_nodeId)]{};
-        memcpy(o_resp, &l_badEyeCatcher, sizeof(l_badEyeCatcher));
-        memcpy(o_resp + sizeof(l_badEyeCatcher), &l_nodeId, sizeof(l_nodeId));
+        delete[] l_quotePtr;
+        l_quotePtr = new uint8_t[sizeof(l_badEyeCatcher) + sizeof(l_nodeId)]{};
+        memcpy(l_quotePtr, &l_badEyeCatcher, sizeof(l_badEyeCatcher));
+        memcpy(l_quotePtr + sizeof(l_badEyeCatcher), &l_nodeId, sizeof(l_nodeId));
         o_size = sizeof(l_badEyeCatcher) + sizeof(l_nodeId);
 
         errlHndl_t l_poisonTpmErr = TRUSTEDBOOT::poisonAllTpms();
@@ -609,19 +596,13 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
         }
     }
 
+    o_resp.reset(l_quotePtr);
+
     TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenSlaveQuoteResponse: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
 #endif
     return l_errl;
 } //nodeCommGenSlaveQuoteResponse
 
-/**
- * @brief A function to generate a master quote request blob that will be sent
- *        to the slave node(s) as part of the node communication protocol. The
- *        master request consists of an eye catcher, 32-byte TPM-generated
- *        random number, and a PCR selection structure.
- * @param[out] o_request the output master quote request data structure
- * @return nullptr on success; non-nullptr on error
- */
 errlHndl_t nodeCommGenMasterQuoteRequest(MasterQuoteRequestBlob* const o_request)
 {
     errlHndl_t l_errl = nullptr;
@@ -1298,10 +1279,12 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
         }
         data_size = 0;
 
+        std::unique_ptr<uint8_t>l_quotePtr = nullptr;
+
         // Generate the Quote Response
         err = nodeCommGenSlaveQuoteResponse(&quote_request,
                                             data_size,
-                                            data_buffer);
+                                            l_quotePtr);
 
         if (err)
         {
@@ -1317,7 +1300,7 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
                                    my_mboxId,
                                    i_iohs_instance.peerNodeInstance,
                                    NCT_TRANSFER_QUOTE_RESPONSE,
-                                   data_buffer,
+                                   l_quotePtr.get(),
                                    data_size);
 
         if (err)

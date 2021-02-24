@@ -71,6 +71,7 @@ namespace SECUREBOOT
         MOD_NC_PROCESS_SLAVE_QUOTE          = 0x2D,
         MOD_NCT_SEND                        = 0x2E,
         MOD_NCT_RECEIVE                     = 0x2F,
+        MOD_NCT_REQUEST_QUOTE               = 0x30,
 
         // Use 0x40-0x4F range for Physical Presence Detection and Key Clear
         // Requests

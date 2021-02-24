@@ -35,6 +35,7 @@
 #include "../trusted/trustedboot.H"
 #include <secureboot/trustedbootif.H>
 #include "../trusted/trustedTypes.H"
+#include <util/impl/unique_ptr.H>
 
 // ----------------------------------------------
 // Defines
@@ -329,6 +330,33 @@ errlHndl_t nodeCommLogNonce(uint64_t & i_nonce);
  *  @retval !nullptr Operation failed with valid error log
  */
 errlHndl_t nodeCommGetRandom(uint64_t & o_nonce);
+
+/**
+ * @brief A function to generate a master quote request blob that will be sent
+ *        to the slave node(s) as part of the node communication protocol. The
+ *        master request consists of an eye catcher, 32-byte TPM-generated
+ *        random number, and a PCR selection structure.
+ * @param[out] o_request the output master quote request data structure
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t nodeCommGenMasterQuoteRequest(MasterQuoteRequestBlob* o_request);
+
+/**
+ * @brief A function to create the slave node quote response that consists of
+ *        eye catcher, slave node ID, quote and signature data (represented by
+ *        the QuoteDataOut structure), the contents of PCRs 0-7, the
+ *        Attestation Key Certificate returned from TPM, the size
+ *        and the contents of the TPM log
+ * @param[in] i_request the master node request structure
+ * @param[out] o_size the size of the slave quote
+ * @param[out] o_resp the slave quote in binary format
+ * @note If an error occurs within the function, the o_resp will only have
+ *       an eye catcher indicating that the slave quote is bad.
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_request,
+                                         size_t& o_size,
+                                         std::unique_ptr<uint8_t>& o_resp);
 
 } // end NODECOMM namespace
 

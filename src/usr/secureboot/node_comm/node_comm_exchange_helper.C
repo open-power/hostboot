@@ -30,6 +30,7 @@
 
 #include "node_comm_exchange_helper.H"
 #include "node_comm_transfer.H"
+#include <secureboot/secure_reasoncodes.H>
 #include <sys/time.h>
 
 namespace SECUREBOOT
@@ -37,6 +38,8 @@ namespace SECUREBOOT
 
 namespace NODECOMM
 {
+
+mutex_t NodeCommExchangeQuotes::iv_quoteMutex = MUTEX_INITIALIZER;
 
 /**
  * @brief Helper function to get the link and mailbox IDs for this node
@@ -308,6 +311,278 @@ void NodeCommExchangeNonces::operator()()
                   iv_iohsInstance.peerNodeInstance);
         errlCommit(l_errl, SECURE_COMP_ID);
     }
+}
+
+/**
+ * @brief Helper function to generate a quote request from the peer node, send the quote request to
+ *        that node, and receive a quote from the node.
+ *
+ * @param[in] i_iohsInstance the IOHS information of the peer node
+ * @param[out] o_quote the node quote in binary format (received from the peer node)
+ * @param[out] o_quoteSize the size of the node quote in bytes
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t requestQuote(const iohs_instances_t& i_iohsInstance, uint8_t*& o_quote, size_t& o_quoteSize)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    // Generate quote request
+    MasterQuoteRequestBlob l_quoteRequest{};
+    l_errl = nodeCommGenMasterQuoteRequest(&l_quoteRequest);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc, ERR_MRK"requestQuote: Could not generate quote request"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Send the quote request
+    // The node comm control and data regs live on PAUC parents of IOHS
+    TARGETING::Target* l_paucParent =
+            TARGETING::getImmediateParentByAffinity(i_iohsInstance.myIohsTarget);
+    uint8_t l_myLinkId = 0;
+    uint8_t l_myMboxId = 0;
+
+    getLinkMboxFromIohsInstance(i_iohsInstance.myIohsInstance,
+                                i_iohsInstance.myIohsRelLink,
+                                l_myLinkId,
+                                l_myMboxId);
+
+    size_t l_quoteRequestSize = sizeof(l_quoteRequest);
+    l_errl = nodeCommTransferSend(l_paucParent,
+                                  l_myLinkId,
+                                  l_myMboxId,
+                                  i_iohsInstance.peerNodeInstance,
+                                  NCT_TRANSFER_QUOTE_REQUEST,
+                                  reinterpret_cast<uint8_t*>(&l_quoteRequest),
+                                  l_quoteRequestSize);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc, ERR_MRK"requestQuote: Could not send quote to peer node %d"
+                  TRACE_ERR_FMT, i_iohsInstance.peerNodeInstance, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Get the response (quote) from the other node
+    l_errl = nodeCommTransferRecv(l_paucParent,
+                                  l_myLinkId,
+                                  l_myMboxId,
+                                  i_iohsInstance.peerNodeInstance,
+                                  NCT_TRANSFER_QUOTE_RESPONSE,
+                                  o_quote,
+                                  o_quoteSize);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc, ERR_MRK"requestQuote: Cound not receive response from node %d"
+                  TRACE_ERR_FMT, i_iohsInstance.peerNodeInstance, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    assert(o_quote, "requestQuote: Response buffer is nullptr!");
+
+    NCEyeCatcher_t* l_eyeCatcher =
+        reinterpret_cast<NCEyeCatcher_t*>(o_quote);
+    uint32_t* l_peerNodeId = reinterpret_cast<uint32_t*>(o_quote + sizeof(*l_eyeCatcher));
+
+    // Check if the peer node had any TPM issues
+    if(*l_eyeCatcher == NDNOTPM_)
+    {
+        bool l_tpmRequired = TRUSTEDBOOT::isTpmRequired();
+        /*@
+         * @errortype
+         * @reasoncode RC_NC_BAD_SLAVE_QUOTE
+         * @moduleid   MOD_NCT_REQUEST_QUOTE
+         * @userdata1  Peer node ID
+         * @devdesc    Peer node indicated that it encountered an issue during
+         *             secure node comm.
+         * @custdesc   trustedboot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_NCT_REQUEST_QUOTE,
+                                         RC_NC_BAD_SLAVE_QUOTE,
+                                         *l_peerNodeId,
+                                         0,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+        l_errl->collectTrace(NODECOMM_TRACE_NAME);
+        if(!l_tpmRequired)
+        {
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, SECURE_COMP_ID);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    }while(0);
+    return l_errl;
+}
+
+/**
+ * @brief A helper function to look for a quote request from the peer node, generate the
+ *        node quote, and send the quote to the peer node.
+ *
+ * @param[in] i_iohsInstance IOHS information of the peer node.
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t sendQuote(const iohs_instances_t& i_iohsInstance)
+{
+    errlHndl_t l_errl = nullptr;
+    uint8_t* l_dataBuffer = nullptr;
+    size_t l_dataSize = 0;
+
+    do {
+    uint8_t l_myLinkId = 0;
+    uint8_t l_myMboxId = 0;
+    getLinkMboxFromIohsInstance(i_iohsInstance.myIohsInstance,
+                                i_iohsInstance.myIohsRelLink,
+                                l_myLinkId,
+                                l_myMboxId);
+    // The node comm control and data regs live on PAUC parents of IOHS
+    TARGETING::Target* l_paucParent =
+           TARGETING::getImmediateParentByAffinity(i_iohsInstance.myIohsTarget);
+
+    // Wait for a request from peer
+    l_errl = nodeCommTransferRecv(l_paucParent,
+                                  l_myLinkId,
+                                  l_myMboxId,
+                                  i_iohsInstance.peerNodeInstance,
+                                  NCT_TRANSFER_QUOTE_REQUEST,
+                                  l_dataBuffer,
+                                  l_dataSize);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc, ERR_MRK"sendQuote: Could not receive quote request from peer node %d"
+                  TRACE_ERR_FMT, i_iohsInstance.peerNodeInstance, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Make a quote request out of the received data
+    MasterQuoteRequestBlob l_quoteRequest{};
+    memcpy(&l_quoteRequest, l_dataBuffer, l_dataSize);
+
+    // Re-use the data buffer for the response quote
+    free(l_dataBuffer);
+    l_dataBuffer = nullptr;
+
+    std::unique_ptr<uint8_t>l_quotePtr = nullptr;
+
+    // Generate a response
+    l_errl = nodeCommGenSlaveQuoteResponse(&l_quoteRequest,
+                                           l_dataSize,
+                                           l_quotePtr);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc, ERR_MRK"sendQuote: Could not generate quote to respond to node %d"
+                  TRACE_ERR_FMT, i_iohsInstance.peerNodeInstance, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Send the quote to the peer node
+    l_errl = nodeCommTransferSend(l_paucParent,
+                                  l_myLinkId,
+                                  l_myMboxId,
+                                  i_iohsInstance.peerNodeInstance,
+                                  NCT_TRANSFER_QUOTE_RESPONSE,
+                                  l_quotePtr.get(),
+                                  l_dataSize);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc, ERR_MRK"sendQuote: Could not send the quote to peer node %d"
+                  TRACE_ERR_FMT, i_iohsInstance.peerNodeInstance, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    }while(0);
+
+    return l_errl;
+}
+
+/**
+ * @brief Perform quote exchange between the nodes on the system. Each node, when communicating with
+ *        other node, will act as a requestor once and as a responder once, so in any given system,
+ *        each node will send its quote to every other node and will receive quotes from every other
+ *        node. If the current node is a lower node ID, it will request the quote first, and then
+ *        send its quote to the peer. Otherwise, the opposite happens.
+ */
+void NodeCommExchangeQuotes::operator()()
+{
+    errlHndl_t l_errl = nullptr;
+    uint8_t* l_data = nullptr;
+    size_t l_dataSize = 0;
+
+    do {
+
+    // Node with lower position requests the quote first and then waits for quote request
+    // from the peer node, while node with higher position does the procedure in reverse.
+    if(iv_iohsInstance.myNodeInstance < iv_iohsInstance.peerNodeInstance)
+    {
+        TRACFCOMP(g_trac_nc, INFO_MRK"NodeCommExchangeQuotes: This node will request the quote first from node %d",
+                  iv_iohsInstance.peerNodeInstance);
+        // Request a quote from the peer node
+        l_errl = requestQuote(iv_iohsInstance, l_data, l_dataSize);
+        if(l_errl)
+        {
+            break;
+        }
+
+        // Wait 10ms before sending the quote to make sure the communication protocol
+        // has a chance to catch up.
+        nanosleep(0, 10*NS_PER_MSEC);
+
+        TRACFCOMP(g_trac_nc, INFO_MRK"NodeCommExchangeQuotes: This node will now wait for a request from node %d",
+                  iv_iohsInstance.peerNodeInstance);
+        // Wait for a quote request from the peer node
+        l_errl = sendQuote(iv_iohsInstance);
+        if(l_errl)
+        {
+            break;
+        }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_nc, INFO_MRK"NodeCommExchangeQuotes: This node will first wait for a request from node %d",
+                  iv_iohsInstance.peerNodeInstance);
+        // Look for a request from the peer node
+        l_errl = sendQuote(iv_iohsInstance);
+        if(l_errl)
+        {
+            break;
+        }
+
+        // Wait 10ms before sending the quote to make sure the communication protocol
+        // has a chance to catch up.
+        nanosleep(0, 10*NS_PER_MSEC);
+
+        // Now request a quote from the peer node
+        TRACFCOMP(g_trac_nc, INFO_MRK"NodeCommExchangeQuotes: This node will now request the quote from node %d",
+                  iv_iohsInstance.peerNodeInstance);
+        l_errl = requestQuote(iv_iohsInstance, l_data, l_dataSize);
+        if(l_errl)
+        {
+            break;
+        }
+    }
+
+    // Grab the quote mutex
+    mutex_lock(&iv_quoteMutex);
+    // Add the recieved quote to the list
+    quoteInfo_t l_quoteInfo {};
+    l_quoteInfo.quoteData = new uint8_t[l_dataSize];
+    l_quoteInfo.quoteSize = l_dataSize;
+    memcpy(l_quoteInfo.quoteData, l_data, l_dataSize);
+    iv_quotes->push_back(l_quoteInfo);
+    mutex_unlock(&iv_quoteMutex);
+
+    TRACDBIN(g_trac_nc, "Quote received:", l_data, l_dataSize);
+    } while(0);
+
+    free(l_data);
+    l_data = nullptr;
 }
 
 } // namespace NODECOMM

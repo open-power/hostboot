@@ -40,6 +40,17 @@ namespace NODECOMM
 {
 
 /**
+ * @brief Structure to hold the node quote information. quoteData
+ *        is the node quote in binary form; quoteSize is the size
+ *        of the quote in bytes.
+ */
+typedef struct
+{
+    uint8_t* quoteData = nullptr;
+    size_t quoteSize = 0;
+} quoteInfo_t;
+
+/**
  * @brief Performs the Phase 1 of multinode comm, where nodes exchange 8-byte
  *        random number (nonce) with their specific link information encoded
  *        into the first byte of the number.
@@ -66,6 +77,43 @@ class NodeCommExchangeNonces
         NodeCommExchangeNonces& operator=(const NodeCommExchangeNonces&) = delete;
 
 }; // class NodeCommExchangeNonces
+
+/**
+ * @brief Performs the Phase 2 of multinode comm, where nodes exchange binary
+ *        blobs containing secureboot information (TPM PCR contents, TPM attestation
+ *        keys, TPM logs, etc.).
+ */
+class NodeCommExchangeQuotes
+{
+    protected:
+        // @brief The information about this node's IOHS position and peer
+        //        node's instance and its IOHS position.
+        iohs_instances_t iv_iohsInstance;
+
+        // @brief A vector of quotes received from the other nodes. All quotes
+        // in this vector are extended to TPM at the end of multinode exchange.
+        std::vector<quoteInfo_t>* iv_quotes;
+
+        // @brief A mutex to protect multithreaded additions to the quote vector.
+        static mutex_t iv_quoteMutex;
+
+    public:
+        // @brief ThreadPool uses this function to do the actual work
+        void operator()();
+
+        // A constructor that takes an IOHS info structure
+        NodeCommExchangeQuotes(const iohs_instances_t& i_iohsInfo,
+                               std::vector<quoteInfo_t>* i_quoteVector):
+            iv_iohsInstance(i_iohsInfo), iv_quotes(i_quoteVector)
+        {
+            iv_quotes->clear();
+        }
+
+        // Delete copy constructor and assignment operator
+        NodeCommExchangeQuotes(const NodeCommExchangeQuotes&) = delete;
+        NodeCommExchangeQuotes& operator=(const NodeCommExchangeQuotes&) = delete;
+
+}; // class NodeCommExchangeQuotes
 
 } // namespace NODECOMM
 
