@@ -71,8 +71,11 @@
 #include <lpc/lpcif.H>
 #include <istep18/establish_system_smp.H>
 #include <arch/magic.H>
+
+#ifdef CONFIG_PLDM
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/base/hb_bios_attrs.H>
+#endif
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer

@@ -53,6 +53,7 @@ namespace PLDM {
 // Attributes
 const char PLDM_BIOS_HB_HYP_SWITCH_STRING[] = "hb_hyp_switch";
 const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[] = "hb_debug_console";
+const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[] = "hb_number_huge_pages";
 
 // Possible Values
 constexpr char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
@@ -258,7 +259,7 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
       PLDM_ERR("Could not find %s in the in the attr_table provided by the BMC",
                i_attr_string);
       /*@
-        * @errortype  ERRL_SEV_UNRECOVERABLE
+        * @errortype  ERRL_SEV_PREDICTIVE
         * @moduleid   MOD_GET_CURRENT_VALUE
         * @reasoncode RC_NO_ATTRIBUTE_MATCH
         * @userdata1  String handle we found in string table
@@ -266,7 +267,7 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
         * @devdesc    Software problem, PLDM transaction failed
         * @custdesc   A software error occurred during system boot
         */
-      errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+      errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                             MOD_GET_CURRENT_VALUE,
                             RC_NO_ATTRIBUTE_MATCH,
                             string_handle,
@@ -288,7 +289,7 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
                 i_attr_string);
       /*@
         * @errortype
-        * @severity   ERRL_SEV_UNRECOVERABLE
+        * @severity   ERRL_SEV_PREDICTIVE
         * @moduleid   MOD_GET_CURRENT_VALUE
         * @reasoncode RC_UNSUPPORTED_TYPE
         * @userdata1  Actual type returned
@@ -296,7 +297,7 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
         * @devdesc    Software problem, incorrect data from BMC
         * @custdesc   A software error occurred during system boot
         */
-      errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+      errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                             MOD_GET_CURRENT_VALUE,
                             RC_UNSUPPORTED_TYPE,
                             attr_type_found,
@@ -736,5 +737,89 @@ errlHndl_t getHypervisorMode(std::vector<uint8_t>& io_string_table,
 
     return errl;
 }
+
+/** @brief Given the string representing a PLDM BIOS attribute of type integer,
+ *         get the integer value of this attribute from the BMC
+ *
+ * @param[in,out] io_string_table
+ *       See file brief in hb_bios_attrs.H.
+ * @param[in,out] io_attr_table
+ *       See file brief in hb_bios_attrs.H.
+ * @param[in] i_attr_string
+ *       String representing the attribute we are looking up on the BMC.
+ * @param[out] o_attr_val
+ *       Integer value found in the BMC's return data.
+ *
+ * @return Error if any, otherwise nullptr.
+ */
+errlHndl_t systemIntAttrLookup(
+        std::vector<uint8_t>& io_string_table,
+        std::vector<uint8_t>& io_attr_table,
+        const char *i_attr_string,
+        uint64_t& o_attr_val)
+{
+    errlHndl_t errl = nullptr;
+
+    do{
+
+    // Init the output value
+    o_attr_val = 0;
+
+    // Get the bios attribute info from the attr table
+    const pldm_bios_attribute_type expected_type = PLDM_BIOS_INTEGER;
+    const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
+    std::vector<uint8_t> attr_value;
+
+    errl = getCurrentAttrValue(i_attr_string,
+                               expected_type,
+                               io_string_table,
+                               io_attr_table,
+                               attr_entry_ptr,
+                               attr_value);
+    if(errl)
+    {
+        PLDM_ERR("An error occurred while requesting the value of %s from the BMC",
+                 i_attr_string)
+        break;
+    }
+
+    // pldm functions are little endian
+    // convert to big endian before returning
+    o_attr_val = *reinterpret_cast<uint64_t*>(attr_value.data());
+    o_attr_val = le64toh(o_attr_val);
+
+    } while(0);
+
+    return errl;
+}
+
+errlHndl_t getHugePageCount(
+        std::vector<uint8_t>& io_string_table,
+        std::vector<uint8_t>& io_attr_table,
+        TARGETING::ATTR_HUGE_PAGE_COUNT_type &o_hugePageCount)
+{
+    errlHndl_t errl = nullptr;
+
+    do{
+
+        uint64_t l_attr_val = 0;
+        errl = systemIntAttrLookup(io_string_table,
+                                   io_attr_table,
+                                   PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING,
+                                   l_attr_val);
+        if(errl)
+        {
+            PLDM_ERR("getHugePageCount() Failed to lookup value for %s",
+                     PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING);
+            break;
+        }
+
+        o_hugePageCount = l_attr_val;
+
+    } while(0);
+
+    return errl;
+}
+
 
 }

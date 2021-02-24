@@ -50,62 +50,87 @@ using namespace ISTEP;
 namespace ISTEP_06
 {
 #ifdef CONFIG_PLDM
-errlHndl_t getAndSetPLDMBiosAttrs(void)
+errlHndl_t getAndSetPLDMBiosAttrs()
 {
-      errlHndl_t errl = nullptr;
-      do {
-      std::vector<uint8_t> bios_string_table;
-      std::vector<uint8_t> bios_attr_table;
-      const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+    errlHndl_t errl = nullptr;
 
-      ATTR_PAYLOAD_KIND_type payload_kind = PAYLOAD_KIND_UNKNOWN;
-      const auto DEFAULT_PAYLOAD_KIND = PAYLOAD_KIND_PHYP;
+    do {
+    std::vector<uint8_t> bios_string_table;
+    std::vector<uint8_t> bios_attr_table;
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
 
-      errl = PLDM::getHypervisorMode(bios_string_table,
-                                     bios_attr_table,
-                                     payload_kind);
-      if(errl)
-      {
-          TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "getAndSetPLDMBiosAttrs: An error occurred getting Hypervisor Mode from the BMC, using default (PHYP) 0x%X",
-                     DEFAULT_PAYLOAD_KIND );
+    // HUGE_PAGE_COUNT
+    ATTR_HUGE_PAGE_COUNT_type huge_page_count = 0;
+    const size_t DEFAULT_HUGE_PAGE_COUNT = 0;
 
-          // Set payload_kind to default, commit the error and continue
-          payload_kind = DEFAULT_PAYLOAD_KIND;
-          errlCommit( errl, ISTEP_COMP_ID );
-      }
+    errl = PLDM::getHugePageCount(bios_string_table,
+                                  bios_attr_table,
+                                  huge_page_count);
+    if(errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "getAndSetPLDMBiosAttrs: An error occurred getting Huge Page Count from the BMC, using default 0x%X",
+                   DEFAULT_HUGE_PAGE_COUNT );
 
-      // If we are returned a payload_kind
-      // that is not PHYP or SAPPHIRE then we do not know
-      // what payload to pick.
-      if(payload_kind != PAYLOAD_KIND_PHYP &&
-         payload_kind != PAYLOAD_KIND_SAPPHIRE)
-      {
-         /*@
-          * @errortype
-          * @severity   ERRL_SEV_UNRECOVERABLE
-          * @moduleid   MOD_SET_IPL_PARMS
-          * @reasoncode RC_INVALID_PAYLOAD_KIND
-          * @userdata1  Payload Kind that BMC returned
-          * @userdata2  unused
-          * @devdesc    Software problem, bad data from BMC
-          * @custdesc   A software error occurred during system boot
-          */
-          errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                               MOD_SET_IPL_PARMS,
-                               RC_INVALID_PAYLOAD_KIND,
-                               payload_kind,
-                               0,
-                               ErrlEntry::NO_SW_CALLOUT);
-          PLDM::addBmcErrorCallouts(errl);
-          break;
-      }
+        // Set size to default, commit the error and continue
+        huge_page_count = DEFAULT_HUGE_PAGE_COUNT;
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
 
-      sys->setAttr<ATTR_PAYLOAD_KIND>(payload_kind);
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "getAndSetPLDMBiosAttrs: Set ATTR_HUGE_PAGE_COUNT = 0x%X",
+               huge_page_count );
+    sys->setAttr<ATTR_HUGE_PAGE_COUNT>(huge_page_count);
 
-      }while(0);
 
-      return errl;
+    // PAYLOAD_KIND
+    ATTR_PAYLOAD_KIND_type payload_kind = PAYLOAD_KIND_UNKNOWN;
+
+    errl = PLDM::getHypervisorMode(bios_string_table,
+                                    bios_attr_table,
+                                    payload_kind);
+
+    // If we get an error, or are returned a payload_kind
+    // that is not PHYP or SAPPHIRE then we do not know
+    // what payload to pick. We cannot assume the payload
+    // kind as booting for the incorrect hypervisor could
+    // result in loss of data in NVRAM that was generated
+    // by the hypervisor on previous boots.
+    if(errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "getAndSetPLDMBiosAttrs: An error occurred getting Hypervisor Mode from the BMC" );
+        break;
+    }
+
+    if(payload_kind != PAYLOAD_KIND_PHYP &&
+        payload_kind != PAYLOAD_KIND_SAPPHIRE)
+    {
+        /*@
+        * @errortype
+        * @severity   ERRL_SEV_UNRECOVERABLE
+        * @moduleid   MOD_SET_IPL_PARMS
+        * @reasoncode RC_INVALID_PAYLOAD_KIND
+        * @userdata1  Payload Kind that BMC returned
+        * @userdata2  unused
+        * @devdesc    Software problem, bad data from BMC
+        * @custdesc   A software error occurred during system boot
+        */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                            MOD_SET_IPL_PARMS,
+                            RC_INVALID_PAYLOAD_KIND,
+                            payload_kind,
+                            0,
+                            ErrlEntry::NO_SW_CALLOUT);
+        PLDM::addBmcErrorCallouts(errl);
+        break;
+    }
+
+    sys->setAttr<ATTR_PAYLOAD_KIND>(payload_kind);
+
+    }while(0);
+
+    return errl;
 }
 #endif
 

@@ -187,6 +187,7 @@ namespace ISTEP
         RC_SBE_COMPROMISED                       = ISTEP_COMP_ID | 0x66,
         RC_WAIT_ATTN_TIMEOUT                     = ISTEP_COMP_ID | 0x67,
         RC_SAB_MISMATCH_DETECTED                 = ISTEP_COMP_ID | 0x68,
+        RC_ERROR_READING_HUGE_PAGE_COUNT         = ISTEP_COMP_ID | 0x69,
     };
 
 };
