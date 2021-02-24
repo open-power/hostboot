@@ -84,6 +84,45 @@ struct master_proc_info_t
 };
 
 /**
+ * @brief Helper function to send a flush context command to the primary TPM.
+ *        This command flushes out all of the secure info that was generated on
+ *        the TPM. The command needs to be run after we've collected ALL of the
+ *        information for all of the nodes.
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t flushTpmContext()
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    do {
+
+    TARGETING::Target* l_primaryTpm = nullptr;
+    TRUSTEDBOOT::getPrimaryTpm(l_primaryTpm);
+
+    l_errl = TRUSTEDBOOT::validateTpmHandle(l_primaryTpm);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"flushTpmContext: Invalid TPM handle"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Flush the AK from the TPM
+    l_errl = TRUSTEDBOOT::flushContext(l_primaryTpm);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"flushTpmContext: could not flush TPM context"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+    }while(0);
+#endif
+
+    return l_errl;
+}
+
+/**
  *  @brief This function generates a nonce by calling GetRandom on an
  *         available TPM.
  *
@@ -257,6 +296,92 @@ errlHndl_t nodeCommLogNonce(uint64_t & i_nonce)
 
 } // end of nodeCommLogNonce
 
+// Global authentication key certificate that can be shared between threads
+// and different node comm exchange algorithms
+TRUSTEDBOOT::TPM2B_MAX_NV_BUFFER g_nodeAK {};
+
+/**
+ * @brief Generates and reads out the Attestation Key Certificate from primary
+ *        TPM. The certificate is stored in the shared global variable. The hash
+ *        of the cert is extended into TPM PCR1 and the full cert is logged
+ *        into the TPM log.
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t generateAKCertificate()
+{
+    TRACFCOMP(g_trac_nc,ENTER_MRK"generateAKCertificate");
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    do {
+    TARGETING::Target* l_primaryTpm = nullptr;
+    TRUSTEDBOOT::getPrimaryTpm(l_primaryTpm);
+
+    l_errl = TRUSTEDBOOT::validateTpmHandle(l_primaryTpm);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"generateAKCertificate: Invalid TPM handle"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Generate the AK Certificate
+    l_errl = TRUSTEDBOOT::createAttestationKeys(l_primaryTpm);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"generateAKCertificate: could not create attestation keys"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Read the AK Certificate
+    l_errl = TRUSTEDBOOT::readAKCertificate(l_primaryTpm, &g_nodeAK);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"generateAKCertificate: could not read AK certificate"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Hash the AK Certificate and extend the hash into PCR1
+    SHA512_t l_AKCertHash = {0};
+    hashBlob(g_nodeAK.buffer,
+             g_nodeAK.size,
+             l_AKCertHash);
+
+    l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
+                                    TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS,
+                                    l_AKCertHash,
+                                    sizeof(SHA512_t),
+                                    g_nodeAK.buffer,
+                                    g_nodeAK.size);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"generateAKCertificate: could not extend AK Certificate hash to TPM"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    TRACFCOMP(g_trac_nc,EXIT_MRK"generateAKCertificate");
+
+    }while(0);
+#endif
+    return l_errl;
+}
+
+/**
+ * @brief A function to create the slave node quote response that consists of
+ *        eye catcher, slave node ID, quote and signature data (represented by
+ *        the QuoteDataOut structure), the contents of PCRs 0-7, the
+ *        Attestation Key Certificate returned from TPM, the size
+ *        and the contents of the TPM log
+ * @param[in] i_request the master node request structure
+ * @param[out] o_size the size of the slave quote
+ * @param[out] o_resp the slave quote in binary format
+ * @note If an error occurs within the function, the o_resp will only have an
+ *       eye catcher indicating that the slave quote is bad.
+ * @return nullptr on success; non-nullptr on error
+ */
 errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_request,
                                          size_t& o_size,
                                          std::unique_ptr<uint8_t>& o_resp)
@@ -354,44 +479,21 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
         break;
     }
 
-    // Step 1: Recreate node Attestation Key (AK)
-    l_errl = TRUSTEDBOOT::createAttestationKeys(l_primaryTpm);
-    if(l_errl)
+    // If the size of node Attestation Keys is 0, then they have not been generated yet, so generate
+    // them here
+    if(g_nodeAK.size == 0)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not create attestation keys");
-        break;
-    }
-
-    TRUSTEDBOOT::TPM2B_MAX_NV_BUFFER l_AKCert;
-    // Step 2: Read the AK Certificate
-    l_errl = TRUSTEDBOOT::readAKCertificate(l_primaryTpm, &l_AKCert);
-    if(l_errl)
-    {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not read AK certificate");
-        break;
-    }
-
-    // Hash the AK Certificate and extend the hash into PCR1
-    SHA512_t l_AKCertHash = {0};
-    hashBlob(l_AKCert.buffer,
-             sizeof(l_AKCert.buffer),
-             l_AKCertHash);
-
-    l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
-                                    TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS,
-                                    l_AKCertHash,
-                                    sizeof(l_AKCertHash),
-                                    l_AKCert.buffer,
-                                    sizeof(l_AKCert.buffer));
-    if(l_errl)
-    {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not extend AK Certificate hash to TPM");
-        break;
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommGenSlaveQuoteResponse: AK certificate is empty; generating AK certificate");
+        l_errl = generateAKCertificate();
+        if(l_errl)
+        {
+            break;
+        }
     }
 
     l_quoteData.data = new uint8_t[1 * KILOBYTE]{};// the actual data size will
                                                    // be smaller than 1KB
-    // Step 3: Generate quote and signature data (presented as binary data in
+    // Generate quote and signature data (presented as binary data in
     // the QuoteDataOut structure)
     l_errl = TRUSTEDBOOT::generateQuote(l_primaryTpm,
                                         &i_request->MasterNonce,
@@ -402,15 +504,7 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
         break;
     }
 
-    // Step 4: Flush the AK from the TPM
-    l_errl = TRUSTEDBOOT::flushContext(l_primaryTpm);
-    if(l_errl)
-    {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not flush TPM context");
-        break;
-    }
-
-    // Step 5: Read the selected PCRs
+    // Read the selected PCRs
     // Make sure there is only 1 algo selection
     assert(i_request->PcrSelect.count == 1, "nodeCommGenSlaveQuoteResponse: only 1 hash algo is supported for PCR read");
     uint32_t l_pcrCount = 0;
@@ -459,7 +553,7 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
         break;
     }
 
-    // Step 6: Read out the primary TPM's Log and copy it into the quote
+    // Read out the primary TPM's Log and copy it into the quote
     TRUSTEDBOOT::TpmLogMgr* l_primaryLogMgr =
                                         TRUSTEDBOOT::getTpmLogMgr(l_primaryTpm);
     if(!l_primaryLogMgr)
@@ -496,7 +590,7 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
              sizeof(l_pcrCount) +
              // Only include the read PCRs in the slave quote
              sizeof(TRUSTEDBOOT::TPM2B_DIGEST) * l_pcrCount +
-             sizeof(l_AKCert) +
+             sizeof(g_nodeAK) +
              sizeof(l_logSize) +
              l_logSize;
 
@@ -539,11 +633,11 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
         }
     }
     // AK certificate size
-    memcpy(l_quotePtr + l_currentOffset, &l_AKCert.size, sizeof(l_AKCert.size));
-    l_currentOffset += sizeof(l_AKCert.size);
+    memcpy(l_quotePtr + l_currentOffset, &g_nodeAK.size, sizeof(g_nodeAK.size));
+    l_currentOffset += sizeof(g_nodeAK.size);
     // Actual AK certificate
-    memcpy(l_quotePtr + l_currentOffset, l_AKCert.buffer, l_AKCert.size);
-    l_currentOffset += l_AKCert.size;
+    memcpy(l_quotePtr + l_currentOffset, g_nodeAK.buffer, g_nodeAK.size);
+    l_currentOffset += g_nodeAK.size;
     // The length of the TPM log
     memcpy(l_quotePtr + l_currentOffset, &l_logSize, sizeof(l_logSize));
     l_currentOffset += sizeof(l_logSize);
@@ -1294,6 +1388,14 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
            // Continuing to send the response to master
         }
 
+        err = flushTpmContext();
+        if(err)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSlave: Could not flush TPM context");
+            errlCommit(err, SECURE_COMP_ID);
+            // Continuing to send the response to master
+        }
+
         // Send the Quote Response
         err = nodeCommTransferSend(l_paucParent,
                                    my_linkId,
@@ -1492,6 +1594,154 @@ errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_io
                       TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
         }
     }
+    return l_errl;
+}
+
+/**
+ * @brief Helper function to extend hashes of all of the collected quotes from
+ *        other nodes into the TPM. The full quotes in binary form are copied
+ *        into the TPM log.
+ *         The function cleans up all dynamically-allocated memory.
+ *
+ * @param[in] i_quotes the vector of quotes to extend to the TPM
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t extendAllQuotes(std::vector<quoteInfo_t>& i_quotes)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    for(const auto& l_quoteInf : i_quotes)
+    {
+        // Extend the hash of the quote to PCR 1 and include the whole quote
+        // in binary form as the message in the TPM log
+        SHA512_t l_quoteHash = {};
+        hashBlob(l_quoteInf.quoteData, l_quoteInf.quoteSize, l_quoteHash);
+        l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
+                                        TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS,
+                                        l_quoteHash,
+                                        sizeof(SHA512_t),
+                                        l_quoteInf.quoteData,
+                                        l_quoteInf.quoteSize);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"extendAllQuotes: Could not extend quote");
+            break;
+        }
+    }
+#endif
+
+    // Free all quotes
+    for(auto& l_quoteInf : i_quotes)
+    {
+        delete[] l_quoteInf.quoteData;
+        l_quoteInf.quoteData = nullptr;
+    }
+    // Clear the quote vector
+    i_quotes.clear();
+
+    return l_errl;
+}
+
+/**
+ * @brief Perform quote exchange between the nodes on the system. Each node, when communicating with
+ *        other node, will act as a requestor once and as a responder once, so in any given system,
+ *        each node will send its quote to every other node and will receive quotes from every other
+ *        node. If the current node is a lower node ID, it will request the quote first, and then
+ *        send its quote to the peer. Otherwise, the opposite happens.
+ *
+ * @param[in] i_iohsInstances the array of IOHS information of all connected peer nodes.
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t exchangeQuotesMultithreaded(const std::vector<iohs_instances_t>& i_iohsInstances)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    // First, expand each TPM's log. The TPM's logs are created early in IPL,
+    // when we're still running out of the cache, so the sizes of the logs
+    // are quite small. We need to expand each log here so that it can fit
+    // all of the quotes from all of the nodes. It is safe to do so, since
+    // at this point we will have expanded into full memory.
+    TARGETING::TargetHandleList l_tpms;
+    TRUSTEDBOOT::getTPMs(l_tpms);
+    for(const auto& l_tpm : l_tpms)
+    {
+        l_errl = TRUSTEDBOOT::expandTpmLog(l_tpm);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: could not expand the TPM log for TPM HUID 0x%x"
+                      TRACE_ERR_FMT, TARGETING::get_huid(l_tpm), TRACE_ERR_ARGS(l_errl));
+            break;
+        }
+    }
+    if(l_errl)
+    {
+        break;
+    }
+
+    // Pre-generate attestation keys
+    l_errl = generateAKCertificate();
+    if(l_errl)
+    {
+        break;
+    }
+
+    Util::ThreadPool<NodeCommExchangeQuotes> l_threadpool;
+    std::vector<quoteInfo_t> l_quotes;
+
+    for(const auto& l_iohsInstance : i_iohsInstances)
+    {
+        l_threadpool.insert(new NodeCommExchangeQuotes(l_iohsInstance, &l_quotes));
+    }
+
+    // Get the number of nodes on the machine (each thread will service a
+    // different node)
+    auto l_hbImages = TARGETING::UTIL::assertGetToplevelTarget()->
+                        getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+    const int l_nodeCnt = __builtin_popcount(l_hbImages);
+    // A thread per each node OTHER than this one (so, total nodes - 1)
+    Util::ThreadPoolManager::setThreadCount(l_nodeCnt - 1);
+
+    // Start all threads
+    l_threadpool.start();
+
+    // Wait for the threads to finish running
+    l_errl = l_threadpool.shutdown();
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: Error returned from thread pool"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Ensure all nodes have completed their exchanges. The primary node will send out
+    // a sync message to all nodes.
+    l_errl = syncWithAllNodes(i_iohsInstances);
+    if(l_errl)
+    {
+       TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: Could not sync the nodes"
+                 TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Flush all secure info/certificates from the TPM
+    l_errl = flushTpmContext();
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: Could not flush TPM context"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        break;
+    }
+
+    // Extend all received quotes to TPM
+    l_errl = extendAllQuotes(l_quotes);
+    if(l_errl)
+    {
+        break;
+    }
+
+    }while(0);
+
     return l_errl;
 }
 
@@ -1875,7 +2125,16 @@ errlHndl_t nodeCommExchange(void)
         }
     }
 #else
+
+    // Exchange the nonces first
     err = exchangeNoncesMultithreaded(iohs_instances);
+    if(err)
+    {
+        break;
+    }
+
+    // Now exchange the quotes
+    err = exchangeQuotesMultithreaded(iohs_instances);
     if(err)
     {
         break;
