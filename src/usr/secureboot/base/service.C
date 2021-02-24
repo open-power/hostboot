@@ -98,14 +98,31 @@ errlHndl_t getSbeMeasurementRegisters(
 
     SecureRegisterValues l_regValue;
 
+    // Don't do the operation until i_pProc is verified
+    bool do_op = false;
+
     do {
 
-    // Check that i_pProc isn't nullptr and is of type proc
-    assert((i_pProc != nullptr) &&
-           (i_pProc->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC ),
-           "getSbeMeasurementRegisters: i_pProc either nullptr or !TYPE_PROC");
+    // Need to support MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+    if (i_pProc == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        do_op = true;
+    }
+    else if (Util::isTargetingLoaded())
+    {
+        // Check that i_pProc isn't nullptr and is of type proc
+        assert((i_pProc != nullptr) &&
+               (i_pProc->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC ),
+               "getSbeMeasurementRegisters: i_pProc either nullptr or !TYPE_PROC");
 
-    if (i_pProc->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
+        if (i_pProc->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
+        {
+            do_op = true;
+        }
+    }
+
+    // Do the operation if we have a valid target
+    if (do_op == true)
     {
         l_regValue.procTgt=i_pProc;
 
@@ -182,7 +199,7 @@ errlHndl_t getSbeMeasurementRegisters(
     }
     else
     {
-        // Fail since Since proc target is not scommable at this time
+        // Fail since proc target is not scommable at this time
         // NOTE: the master proc is always scommable
         SB_ERR("getSbeMeasurementRegisters: FAIL: Tgt=0x%.08X not set up to use Xscom at this time",
                TARGETING::get_huid(i_pProc));
