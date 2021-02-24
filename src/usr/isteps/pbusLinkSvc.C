@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,26 +75,75 @@ errlHndl_t PbusLinkSvc::getPbusConnections( TargetPairs_t & o_PbusConnections,
     return l_errl;
 }
 
+/**
+ * @brief If i_target is an IOHS or a child of an IOHS, return the
+ * IOHS_CONFIG_MODE attribute from that IOHS; otherwise return
+ * CONFIG_MODE_INVALID.
+ */
+static ATTR_IOHS_CONFIG_MODE_type getBusConfigMode(const Target* const i_target)
+{
+    ATTR_IOHS_CONFIG_MODE_type mode = IOHS_CONFIG_MODE_INVALID;
+
+    if (i_target->getAttr<ATTR_TYPE>() == TYPE_IOHS)
+    {
+        mode = i_target->getAttr<ATTR_IOHS_CONFIG_MODE>();
+    }
+    else
+    {
+        TargetHandleList iohsParent;
+        getParentAffinityTargets(iohsParent, i_target, CLASS_NA, TYPE_IOHS, false);
+
+        if (!iohsParent.empty())
+        {
+            mode = iohsParent.front()->getAttr<ATTR_IOHS_CONFIG_MODE>();
+        }
+    }
+
+    return mode;
+}
+
+/**
+ * @brief Given an IOHS and a (possibly empty) list of its children SMPGROUP
+ *        targets, return true if the PBUS algorithm should use the list of
+ *        SMPGROUP targets, or false if it should use the IOHS itself.
+ * @param[in] i_smpgroupList  The list of SMPGROUP children
+ * @return bool               Whether to use the SMPGROUPs or not.
+ */
+static bool useSmpgroups(const TARGETING::TargetHandleList& i_smpgroupList)
+{
+    bool use_smpgroups = false;
+
+    for (auto smpgroup : i_smpgroupList)
+    {
+        if (smpgroup->getAttr<ATTR_PEER_TARGET>())
+        {
+            use_smpgroups = true;
+            break;
+        }
+    }
+
+    return use_smpgroups;
+}
 
 errlHndl_t PbusLinkSvc::collectPbusConnections( const IOHS_CONFIG_MODE i_busType )
 {
     errlHndl_t l_errl = nullptr;
 
     // Get all functional IOHS chiplets
-    TARGETING::TargetHandleList l_busTargetList;
-    getAllChiplets(l_busTargetList, TYPE_IOHS);
+    TARGETING::TargetHandleList l_iohsList;
+    getAllChiplets(l_iohsList, TYPE_IOHS);
     TRACFCOMP( TARGETING::g_trac_targeting,
              "PbusLinkSvc::collectPbusConnections - getAllChiplets(TYPE_IOHS) "
-             "returned %d entries", l_busTargetList.size());
+             "returned %d entries", l_iohsList.size());
 
     // select the appropriate maps to work with
     TargetPairs_t* const l_pPbusConnections = &iv_busConnections[i_busType];
     TargetPairs_t* const l_pPbusUniqueConnections = &iv_uniqueBusConnections[i_busType];
 
     // Collect all functional IOHS connections
-    for (const auto & l_pTarget: l_busTargetList)
+    for (const auto l_iohs : l_iohsList)
     {
-        if (l_pTarget->getAttr<ATTR_IOHS_CONFIG_MODE>() != i_busType)
+        if (l_iohs->getAttr<ATTR_IOHS_CONFIG_MODE>() != i_busType)
         {
             continue; // Skip buses of types we're not requesting
         }
@@ -105,89 +154,99 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( const IOHS_CONFIG_MODE i_busType
             break;
         }
 
-        // get other endpoint target
-        TRACFCOMP( TARGETING::g_trac_targeting,
-                   "Get other endpoint target for target HUID %.8X",
-                   TARGETING::get_huid(l_pTarget) );
+        TargetHandleList l_busses;
 
-        const TARGETING::Target * l_dstTgt =
-            l_pTarget->getAttr<ATTR_PEER_TARGET>();
+        // If the IOHS has SMPGROUP children then look at those instead of the
+        // IOHS itself.
+        getChildAffinityTargets(l_busses, l_iohs, CLASS_NA, TYPE_SMPGROUP);
 
-        TRACFCOMP( TARGETING::g_trac_targeting,
-                   "Other endpoint target HUID %.8X",
-                   TARGETING::get_huid(l_dstTgt) );
-
-        // connection is existing, not to itself and is a real target
-        if ((l_dstTgt != nullptr) && (l_dstTgt != l_pTarget))
+        if (!useSmpgroups(l_busses))
         {
-            const auto l_dstType = l_dstTgt->getAttr<ATTR_IOHS_CONFIG_MODE>();
-            if (l_dstType != i_busType)
+            l_busses.push_back(l_iohs);
+        }
+
+        for (const auto l_bus : l_busses)
+        {
+            // get other endpoint target
+            TRACFCOMP( TARGETING::g_trac_targeting,
+                       "Get other endpoint target for target HUID %.8X",
+                       TARGETING::get_huid(l_bus) );
+
+            const TARGETING::Target * l_dstTgt =
+                l_bus->getAttr<ATTR_PEER_TARGET>();
+
+            TRACFCOMP( TARGETING::g_trac_targeting,
+                       "Other endpoint target HUID %.8X",
+                       TARGETING::get_huid(l_dstTgt) );
+
+            // connection is existing, not to itself and is a real target
+            if ((l_dstTgt != nullptr) && (l_dstTgt != l_bus))
             {
-                TRACFCOMP(TARGETING::g_trac_targeting,
-                          "Both endpoints' bus type mismatch; "
-                          "target HUID %.8X: dest HUID %.8X",
-                          TARGETING::get_huid(l_pTarget),
-                          TARGETING::get_huid(l_dstTgt));
+                const auto l_dstType = getBusConfigMode(l_dstTgt);
+                if (l_dstType != i_busType)
+                {
+                    TRACFCOMP(TARGETING::g_trac_targeting,
+                              "Both endpoints' bus type mismatch; "
+                              "target HUID %.8X: dest HUID %.8X",
+                              TARGETING::get_huid(l_bus),
+                              TARGETING::get_huid(l_dstTgt));
 
-                // Mixed bus type connection
-                /*@
-                 * @errortype    ERRL_SEV_UNRECOVERABLE
-                 * @moduleid     MOD_EDI_EI_IO_RUN_TRAINING
-                 * @reasoncode   RC_MIXED_PBUS_CONNECTION
-                 * @userdata1    Endpoint1 bus type
-                 * @userdata2    Endpoint2 bus type
-                 * @custdesc      Platform generated error. See User Data.
-                 * @devdesc      Mixed bus connection of two types
-                 */
-                l_errl = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    MOD_EDI_EI_IO_RUN_TRAINING,
-                    RC_MIXED_PBUS_CONNECTION,
-                    i_busType,
-                    l_dstType );
-                break;
-            }
+                    // Mixed bus type connection
+                    /*@
+                     * @errortype    ERRL_SEV_UNRECOVERABLE
+                     * @moduleid     MOD_EDI_EI_IO_RUN_TRAINING
+                     * @reasoncode   RC_MIXED_PBUS_CONNECTION
+                     * @userdata1    Endpoint1 bus type
+                     * @userdata2    Endpoint2 bus type
+                     * @custdesc      Platform generated error. See User Data.
+                     * @devdesc      Mixed bus connection of two types
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        MOD_EDI_EI_IO_RUN_TRAINING,
+                        RC_MIXED_PBUS_CONNECTION,
+                        i_busType,
+                        l_dstType );
+                    break;
+                }
 
-            // Get the chip parents of endpoints
-            const TARGETING::Target * l_endp1Parent = getParentChip(l_pTarget);
-            const TARGETING::Target * l_endp2Parent = getParentChip(l_dstTgt);
+                // Get the chip parents of endpoints
+                const TARGETING::Target * l_endp1Parent = getParentChip(l_bus);
+                const TARGETING::Target * l_endp2Parent = getParentChip(l_dstTgt);
 
-            if (l_endp1Parent == l_endp2Parent)
-            {
-                TRACFCOMP(TARGETING::g_trac_targeting,
-                          "Both endpoints from same chip; "
-                          "target HUID %.8X dest HUID %.8X",
-                          TARGETING::get_huid(l_pTarget),
-                          TARGETING::get_huid(l_dstTgt));
+                if (l_endp1Parent == l_endp2Parent)
+                {
+                    TRACFCOMP(TARGETING::g_trac_targeting,
+                              "Both endpoints from same chip; "
+                              "target HUID %.8X dest HUID %.8X",
+                              TARGETING::get_huid(l_bus),
+                              TARGETING::get_huid(l_dstTgt));
 
-                // connection of same chip
-                /*@
-                 * @errortype    ERRL_SEV_UNRECOVERABLE
-                 * @moduleid     MOD_EDI_EI_IO_RUN_TRAINING
-                 * @reasoncode   RC_SAME_CHIP_PBUS_CONNECTION
-                 * @custdesc     Platform generated error.
-                 * @devdesc      Both endpoint connections of same chip
-                 */
-                l_errl = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    MOD_EDI_EI_IO_RUN_TRAINING,
-                    RC_SAME_CHIP_PBUS_CONNECTION );
-                break;
-            }
+                    // connection of same chip
+                    /*@
+                     * @errortype    ERRL_SEV_UNRECOVERABLE
+                     * @moduleid     MOD_EDI_EI_IO_RUN_TRAINING
+                     * @reasoncode   RC_SAME_CHIP_PBUS_CONNECTION
+                     * @custdesc     Platform generated error.
+                     * @devdesc      Both endpoint connections of same chip
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        MOD_EDI_EI_IO_RUN_TRAINING,
+                        RC_SAME_CHIP_PBUS_CONNECTION );
+                    break;
+                }
 
-            for (const auto l_dstTarget: l_busTargetList)
-            {
-                // l_dstTgt is functional
-                if (l_dstTgt == l_dstTarget)
+                if (l_dstTgt->getAttr<ATTR_HWAS_STATE>().functional)
                 {
                     TRACFCOMP( TARGETING::g_trac_targeting,
                                "ADDING pair HUID %.8X,%.8X TYPE %d",
-                               TARGETING::get_huid(l_pTarget),
+                               TARGETING::get_huid(l_bus),
                                TARGETING::get_huid(l_dstTgt),
                                i_busType);
                     // save the pair if not yet done so
-                    (*l_pPbusConnections)[l_pTarget] = l_dstTgt;
-                    (*l_pPbusUniqueConnections)[l_pTarget] = l_dstTgt;
+                    (*l_pPbusConnections)[l_bus] = l_dstTgt;
+                    (*l_pPbusUniqueConnections)[l_bus] = l_dstTgt;
                     break;
                 }
             }

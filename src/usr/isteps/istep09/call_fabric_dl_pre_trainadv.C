@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,6 +110,8 @@ static void invoke_hwp(fapi2::Target<fapi2::TARGET_TYPE_IOHS> i_iohsA,
     }
 }
 
+#include "iterate_buses.H"
+
 //
 //  Wrapper function to call fabric_dl_pre_trainadv
 //
@@ -145,19 +147,9 @@ void* call_fabric_dl_pre_trainadv(void* const io_pArgs)
         }
     }
 
-    // Iterate over every unique pair of IOHS targets and call the HWP on them.
-    for (const auto l_pair : l_xbuses)
-    {
-        invoke_hwp({ l_pair.first }, { l_pair.second }, l_stepError);
-
-        // Continue even when an error occurs, so that we collect the errors and
-        // report them all at the end.
-    }
-
-    for (const auto l_pair : l_abuses)
-    {
-        invoke_hwp({ l_pair.first }, { l_pair.second }, l_stepError);
-    }
+    // Iterate over every unique pair of bus targets and call the HWP on them.
+    iterate_buses(l_xbuses, l_stepError);
+    iterate_buses(l_abuses, l_stepError);
 
     TRACFCOMP( g_trac_isteps_trace, "call_fabric_dl_pre_trainadv exit" );
 

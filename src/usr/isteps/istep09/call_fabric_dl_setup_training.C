@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,12 +135,30 @@ void* call_fabric_dl_setup_training(void* const io_pArgs)
         }
     }
 
-    // Iterate over every IOHS target and call the HWP on each. The pairs are
+    // For SMPGROUP targets, we train their parent IOHS. Use this map to keep
+    // track of which IOHSes have already been trained.
+    std::map<const Target*, bool> l_alreadyTrained;
+
+    // Iterate over every bus target and call the HWP on each. The pairs are
     // duplicated (i.e. we have map[A] = B and map[B] = A), so we just iterate
     // the keys and ignore the values, and that way we get all the targets.
     for (const auto l_pair : l_xbuses)
     {
-        invoke_hwp({ l_pair.first }, l_stepError);
+        const Target* l_train = l_pair.first;
+
+        if (l_train->getAttr<ATTR_TYPE>() == TYPE_SMPGROUP)
+        {
+            l_train = getImmediateParentByAffinity(l_train);
+        }
+
+        if (l_alreadyTrained.find(l_train) != end(l_alreadyTrained))
+        {
+            continue;
+        }
+
+        l_alreadyTrained[l_train] = true;
+
+        invoke_hwp({ l_train }, l_stepError);
 
         // Continue even when the HWP fails, so that we collect all the errors
         // and report them at the end all at once.
@@ -148,7 +166,21 @@ void* call_fabric_dl_setup_training(void* const io_pArgs)
 
     for (const auto l_pair : l_abuses)
     {
-        invoke_hwp({ l_pair.first }, l_stepError);
+        const Target* l_train = l_pair.first;
+
+        if (l_train->getAttr<ATTR_TYPE>() == TYPE_SMPGROUP)
+        {
+            l_train = getImmediateParentByAffinity(l_train);
+        }
+
+        if (l_alreadyTrained.find(l_train) != end(l_alreadyTrained))
+        {
+            continue;
+        }
+
+        l_alreadyTrained[l_train] = true;
+
+        invoke_hwp({ l_train }, l_stepError);
     }
 
     TRACFCOMP( g_trac_isteps_trace, "call_fabric_dl_setup_training exit" );
