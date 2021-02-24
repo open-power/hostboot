@@ -755,79 +755,21 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         SHA512_t l_hw_key_hash;
         SECUREBOOT::getHwKeyHash(l_hw_key_hash);
         uint8_t l_hwKeyHashLogMsg[] = "HW KEY HASH";
-        const TPM_Pcr l_pcrs2[] = {PCR_1,PCR_6};
-        for (size_t i = 0; i < (sizeof(l_pcrs2)/sizeof(TPM_Pcr)) ; ++i)
-        {
-            l_err = pcrExtend(l_pcrs2[i],
-                              EV_PLATFORM_CONFIG_FLAGS,
-                              l_hw_key_hash,
-                              sizeof(SHA512_t),
-                              l_hwKeyHashLogMsg,
-                              sizeof(l_hwKeyHashLogMsg));
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
-                          "Call to pcrExtend for HW Key Hash "
-                          "l_pcrs2[i=%d]: %d. "
-                          TRACE_ERR_FMT,
-                          i, l_pcrs2[i],
-                          TRACE_ERR_ARGS(l_err));
-                break;
-            }
-        }
-        if (l_err)
-        {
-            break;
-        }
 
-        // Put Security jumper state boolean into PCR_6
-        bool l_jumper_state = (l_securitySwitchValue &
-                               static_cast<uint64_t>(
-                                 SECUREBOOT::ProcCbsControl::JumperStateBit));
-
-        memset(l_digest, 0, sizeof(uint64_t));
-        l_digest[0] = static_cast<uint8_t>(l_jumper_state);
-        uint8_t l_jumperStateLogMsg[] = "Security Jumper State";
-        l_err = pcrExtend(PCR_6, EV_PLATFORM_CONFIG_FLAGS,
-                          l_digest, sizeof(l_jumper_state),
-                          l_jumperStateLogMsg,
-                          sizeof(l_jumperStateLogMsg));
+        l_err = pcrExtend(PCR_1,
+                          EV_PLATFORM_CONFIG_FLAGS,
+                          l_hw_key_hash,
+                          sizeof(SHA512_t),
+                          l_hwKeyHashLogMsg,
+                          sizeof(l_hwKeyHashLogMsg));
         if (l_err)
         {
             TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
-                      "Call to pcrExtend for Jumper State Bit Failed: "
+                      "Call to pcrExtend for HW Key Hash "
+                      "into PCR_1 failed. "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_err));
             break;
-        }
-
-        // Put truncated SHA512 hash of SBE secureboot validation code
-        // (aka SecureROM) into PCR_6
-        if (g_BlToHbDataManager.isValid())
-        {
-            // Get location and size of SecureROM and then hash it
-            const void * l_secureRomLocation = g_BlToHbDataManager.getSecureRom();
-            size_t l_secureRomSize = g_BlToHbDataManager.getSecureRomSize();
-
-            SHA512_t l_secure_rom_hash={0};
-            SECUREBOOT::hashBlob(l_secureRomLocation, l_secureRomSize, l_secure_rom_hash);
-
-            // Extend hash to PCR_6
-            uint8_t l_secureRomLogMsg[] = "SecureROM HASH";
-            l_err = pcrExtend(PCR_6,
-                              EV_PLATFORM_CONFIG_FLAGS,
-                              l_secure_rom_hash,
-                              sizeof(SHA512_t),
-                              l_secureRomLogMsg,
-                              sizeof(l_secureRomLogMsg));
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
-                          "Call to pcrExtend for SecureROM Hash Failed: "
-                          TRACE_ERR_FMT,
-                          TRACE_ERR_ARGS(l_err));
-                break;
-            }
         }
 
     } while(0);
