@@ -194,7 +194,7 @@ class ddimm_0_3
         ///
         virtual bool check_ddimm_compat(const uint8_t i_field) const
         {
-            return (i_field <= 0x0F);
+            return (i_field <= 0x1F);
         }
 
         ///
@@ -1010,7 +1010,8 @@ class ddimm_0_3
         ///
         virtual fapi2::ReturnCode set_mram_support(const std::vector<uint8_t>& i_spd) const
         {
-            constexpr auto MRAM_SUPPORT_BIT = 4; // From SPEC
+            constexpr auto MRAM_SUPPORT_BIT = 3; // From SPEC
+            constexpr auto MRAM_SUPPORT_LEN = 2;
             uint8_t l_field = 0;
             uint8_t l_mram_sup = 0;
 
@@ -1020,11 +1021,11 @@ class ddimm_0_3
                                   iv_ocmb,
                                   check_ddimm_compat(l_mram_sup),
                                   F::DDIMM_COMPAT.get_byte(i_spd),
-                                  l_field,
+                                  l_mram_sup,
                                   exp::SET_MRAM_SUPPORT,
                                   "DDIMM compatability"));
 
-            l_field = fapi2::buffer<uint8_t>(l_mram_sup).getBit<MRAM_SUPPORT_BIT>();
+            fapi2::buffer<uint8_t>(l_mram_sup).extractToRight<MRAM_SUPPORT_BIT, MRAM_SUPPORT_LEN>(l_field);
 
             FAPI_TRY(mss::attr::set_mram_support(iv_dimm, l_field));
 
@@ -1040,16 +1041,20 @@ class ddimm_0_3
         ///
         virtual fapi2::ReturnCode set_tsv_8h_support(const std::vector<uint8_t>& i_spd) const
         {
+            constexpr auto TSV_8H_BIT = 5; // From SPEC
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::DDIMM_COMPAT, i_spd, exp::SET_TSV_8H_SUPPORT, l_field));
+            uint8_t l_tsv_8h = 0;
+            FAPI_TRY(get_field_spd(iv_ocmb, F::DDIMM_COMPAT, i_spd, exp::SET_TSV_8H_SUPPORT, l_tsv_8h));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_ddimm_compat(l_field),
+                                  check_ddimm_compat(l_tsv_8h),
                                   F::DDIMM_COMPAT.get_byte(i_spd),
-                                  l_field,
+                                  l_tsv_8h,
                                   exp::SET_TSV_8H_SUPPORT,
                                   "DDIMM compatability"));
+
+            l_field = fapi2::buffer<uint8_t>(l_tsv_8h).getBit<TSV_8H_BIT>();
 
             FAPI_TRY(mss::attr::set_tsv_8h_support(iv_dimm, l_field));
 
