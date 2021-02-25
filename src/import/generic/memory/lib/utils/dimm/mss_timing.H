@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -543,49 +543,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-///
-/// @brief Return the minimum allowable tFAW in nck
-/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
-/// @param[in] i_target the fapi2 target
-/// @param[in] i_dram_width the page size
-/// @param[in] i_freq the DRAM frequency
-/// @param[out] o_tFAW timing in clocks (nck)
-/// @return FAPI2_RC_SUCCESS iff okay
-//
-template< fapi2::TargetType T >
-fapi2::ReturnCode tfaw( const fapi2::Target<T>& i_target,
-                        const uint8_t i_dram_width,
-                        const uint64_t i_freq,
-                        uint64_t& o_tFAW )
-{
-    switch(i_dram_width)
-    {
-        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4:
-            FAPI_TRY( tfaw_half_kb_page_helper(i_target, i_freq, o_tFAW) );
-            break;
-
-        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8:
-            FAPI_TRY( tfaw_1kb_page_helper(i_target, i_freq, o_tFAW) );
-            break;
-
-        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16:
-            FAPI_TRY( tfaw_2kb_page_helper(i_target, i_freq, o_tFAW) );
-            break;
-
-        default:
-            FAPI_ASSERT( false,
-                         fapi2::MSS_INVALID_DRAM_WIDTH()
-                         .set_DRAM_WIDTH(i_dram_width)
-                         .set_DIMM_TARGET(i_target),
-                         "Invalid DRAM width with %d for target %s",
-                         i_dram_width,
-                         mss::c_str(i_target));
-            break;
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief tFAW_dlr *in nck*

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -187,39 +187,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-///
-/// @brief Sets command space control word
-/// @tparam MC mss::mc_type memory controller type
-/// @tparam TT traits type defaults to mrsTraits<MC>
-/// @param[in] i_target the DIMM target
-/// @param[in] i_command command name
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
-/// @return FAPI2_RC_SUCCESS iff ok
-/// @note Sets buffer control word (BC06) setting
-///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
-fapi2::ReturnCode set_command_space( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const command i_command,
-                                     std::vector< ccs::instruction_t >& io_inst )
-{
-    constexpr uint64_t MAX_VALID_CMD = 4;
-
-    // User input programming error asserts program termination
-    if( i_command > MAX_VALID_CMD )
-    {
-        FAPI_ERR( "%s. Invalid command received: %d, largest valid command is %d",
-                  mss::c_str(i_target), i_command, MAX_VALID_CMD );
-        fapi2::Assert(false);
-    }
-
-    // From the DDR4DB02 Spec: BC06 - Command Space Control Word
-    // Waiting safe delay here as we've seen issues in the lab where the required tMRD_l2 isn't sufficient
-    cw_data l_data(TT::FUNC_SPACE_0, TT::CMD_SPACE_CW, i_command, TT::BCW_SAFE_DELAY);
-    FAPI_TRY( settings_boilerplate<BCW_4BIT>(i_target, l_data, io_inst) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Sets per buffer addressibility (PBA) mode

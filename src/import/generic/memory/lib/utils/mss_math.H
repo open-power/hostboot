@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,26 +50,6 @@ inline constexpr T inclusive_range( const T i_start, const T i_end )
     return (i_end - i_start) + 1;
 }
 
-///
-/// @brief Poor man's round half away from 0
-/// @param[in] i_input starting point
-/// @return rounded int64_t value
-/// @note HB doesn't have std::round, referenced from:
-/// https://stackoverflow.com/questions/4572556/concise-way-to-implement-round-in-c
-///
-inline int64_t round_half_away_from_zero( const double i_input )
-{
-    // Casting to avoid comparison of diff data types
-    // Explicitly casting INT64_MAX to avoid truncation of casting
-    // floating point to integer
-    if( i_input > static_cast<double>(INT64_MAX) )
-    {
-        FAPI_ERR("Invalid input greater than %d", INT64_MAX);
-        fapi2::Assert(false);
-    }
-
-    return ( i_input < 0.0 ? static_cast<int64_t>(i_input - 0.5) :  static_cast<int64_t>(i_input + 0.5) );
-}
 
 ///
 /// @brief Divide and round unsigned values
