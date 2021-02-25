@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -788,17 +788,17 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
     errlHndl_t l_errl = nullptr;
 
     // PCR 4 Message <Component ID>
-    uint8_t pcr4Msg[sizeof(ComponentID)+1];
+    char pcr4Msg[sizeof(ComponentID)+1];
     memset(pcr4Msg, 0, sizeof(pcr4Msg));
-    memcpy(pcr4Msg, &i_compId, sizeof(ComponentID));
+    strncpy(pcr4Msg,reinterpret_cast<const char*>(&i_compId),sizeof(ComponentID));
+    const auto pcr4Len = strlen(pcr4Msg)+1;
 
     // PCR 5 Message <Component ID FW KEY HASH>
-    uint8_t pcr5Msg[sizeof(ComponentID)+strlen(TRUSTEDBOOT::FW_KEY_HASH_EXT)+1];
+    char pcr5Msg[sizeof(ComponentID)+strlen(TRUSTEDBOOT::FW_KEY_HASH_EXT)+1];
     memset(pcr5Msg, 0, sizeof(pcr5Msg));
-    memcpy(pcr5Msg,pcr4Msg, sizeof(pcr4Msg));
-    memcpy(pcr5Msg+sizeof(pcr4Msg),
-           TRUSTEDBOOT::FW_KEY_HASH_EXT,
-           sizeof(TRUSTEDBOOT::FW_KEY_HASH_EXT));
+    strcat(pcr5Msg,pcr4Msg);
+    strcat(pcr5Msg,TRUSTEDBOOT::FW_KEY_HASH_EXT);
+    const auto pcr5Len = strlen(pcr5Msg)+1;
 
     do {
 
@@ -807,8 +807,8 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
               TRUSTEDBOOT::EV_COMPACT_HASH,
               reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
               sizeof(SHA512_t),
-              pcr4Msg,
-              sizeof(pcr4Msg));
+              reinterpret_cast<uint8_t*>(pcr4Msg),
+              pcr4Len);
     if (l_errl)
     {
         UTIL_FT(ERR_MRK "MasterContainerLidMgr::tpmExtend - pcrExtend() (payload text hash) failed for component %s",
@@ -821,8 +821,8 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
               TRUSTEDBOOT::EV_COMPACT_HASH,
               reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
               sizeof(SHA512_t),
-              pcr5Msg,
-              sizeof(pcr5Msg));
+              reinterpret_cast<uint8_t*>(pcr5Msg),
+              pcr5Len);
     if (l_errl)
     {
         UTIL_FT(ERR_MRK "MasterContainerLidMgr::tpmExtend - pcrExtend() (FW key hash) failed for component %s",
