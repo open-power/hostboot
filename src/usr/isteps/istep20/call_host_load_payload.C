@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,7 +132,7 @@ void* call_host_load_payload (void *io_pArgs)
             // built correctly.
             if(!INITSERVICE::spBaseServicesEnabled())
             {
-                l_err = RUNTIME::verifyAndMovePayload();
+                l_err = RUNTIME::verifyAndMovePayload(true);
                 if(l_err)
                 {
                      TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -446,9 +446,12 @@ inline uint64_t calcSpAttnAreaStart()
 /*
  * @brief Verify PAYLOAD and move PAYLOAD + HDAT to proper location
  *
+ * @param[in] i_payloadAlreadyVerified Whether the payload has already
+ *     been verified and measurement extended to TPM, or not.
+ *
  * @return nullptr on success; non-nullptr on error
  */
-errlHndl_t verifyAndMovePayload(void);
+errlHndl_t verifyAndMovePayload(bool i_payloadAlreadyVerified = false);
 
 /**
  * @brief Get the Logical Memory Block (LMB) size in megabytes.

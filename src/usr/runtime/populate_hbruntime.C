@@ -4428,7 +4428,7 @@ errlHndl_t getPayloadAttnAreaAddr(uint64_t& o_payloadTiAddr)
     return l_errl;
 }
 
-errlHndl_t verifyAndMovePayload(void)
+errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
 {
     TRACFCOMP( g_trac_runtime,
                ENTER_MRK"verifyAndMovePayload()" );
@@ -4530,34 +4530,42 @@ errlHndl_t verifyAndMovePayload(void)
     // If in Secure Mode Verify Payload at Temporary TCE-related Memory Location
     if (SECUREBOOT::enabled())
     {
-        TRACDCOMP( g_trac_runtime,"verifyAndMovePayload() "
-                   "Verifying PAYLOAD: physAddr=0x%.16llX, virtAddr=0x%.16llX",
-                   payload_tmp_phys_addr, payload_tmp_virt_addr );
-
-        // Verify Container
-        l_err = SECUREBOOT::verifyContainer(payload_tmp_virt_addr);
-        if (l_err)
+        if(i_payloadAlreadyVerified)
         {
-            TRACFCOMP( g_trac_runtime,
-                "verifyAndMovePayload(): failed verifyContainer");
-            l_err->collectTrace("",256);
-            SECUREBOOT::handleSecurebootFailure(l_err);
-            assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+            TRACFCOMP(g_trac_runtime,"verifyAndMovePayload(): "
+                      "Payload already verified, not verifying again");
         }
-
-        // Get PAYLOAD size from verified Header
-        payload_size = l_conHdr.payloadTextSize() + PAGESIZE;
-        assert(payload_size <= MCL_TMP_SIZE, "verifyAndMovePayload payload_size 0x%X must be <= MCL_TMP_SIZE (0x%X)", payload_size, MCL_TMP_SIZE );
-
-        // Verify ASCII Component Id in the Secure Header matches expected value
-        l_err = SECUREBOOT::verifyComponentId(l_conHdr, l_IdStr);
-        if (l_err)
+        else
         {
-            TRACFCOMP( g_trac_runtime,
-                       ERR_MRK"verifyAndMovePayload(): Fail to verify component"
-                       "Id %s in header at payload_tmp_virt_addr = 0x%.16llX",
-                       l_IdStr, payload_tmp_virt_addr);
-            break;
+            TRACDCOMP( g_trac_runtime,"verifyAndMovePayload() "
+                    "Verifying PAYLOAD: physAddr=0x%.16llX, virtAddr=0x%.16llX",
+                    payload_tmp_phys_addr, payload_tmp_virt_addr );
+
+            // Verify Container
+            l_err = SECUREBOOT::verifyContainer(payload_tmp_virt_addr);
+            if (l_err)
+            {
+                TRACFCOMP( g_trac_runtime,
+                    "verifyAndMovePayload(): failed verifyContainer");
+                l_err->collectTrace("",256);
+                SECUREBOOT::handleSecurebootFailure(l_err);
+                assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+            }
+
+            // Get PAYLOAD size from verified Header
+            payload_size = l_conHdr.payloadTextSize() + PAGESIZE;
+            assert(payload_size <= MCL_TMP_SIZE, "verifyAndMovePayload payload_size 0x%X must be <= MCL_TMP_SIZE (0x%X)", payload_size, MCL_TMP_SIZE );
+
+            // Verify ASCII Component Id in the Secure Header matches expected value
+            l_err = SECUREBOOT::verifyComponentId(l_conHdr, l_IdStr);
+            if (l_err)
+            {
+                TRACFCOMP( g_trac_runtime,
+                        ERR_MRK"verifyAndMovePayload(): Fail to verify component"
+                        "Id %s in header at payload_tmp_virt_addr = 0x%.16llX",
+                        l_IdStr, payload_tmp_virt_addr);
+                break;
+            }
         }
     }
 
