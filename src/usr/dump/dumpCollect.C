@@ -36,9 +36,15 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/mfgFlagAccessors.H>
+#include <targeting/attrrp.H>
 #include <runtime/runtime.H>
 #include <util/align.H>
+#include <util/utilrsvdmem.H>
 #include <sys/mm.h>
+#include <sys/misc.h>
+#include <sys/internode.h>
+#include <arch/memorymap.H>
+#include <usr/vmmconst.h>
 #include <dump/dumpif.H>
 #include <util/utiltce.H>
 #include <isteps/mem_utils.H>
@@ -53,6 +59,7 @@
 trace_desc_t* g_trac_dump = NULL;
 TRAC_INIT(&g_trac_dump, "DUMP", 4*KILOBYTE);
 
+#define IGNORE_HRMOR 0x8000000000000000
 #define SBE_FFDC_SIZE 128
 #define SIZE_TIMA_REG 8
 #define SPR_ID_TYPE_NAME 0
@@ -454,7 +461,6 @@ errlHndl_t copyArchitectedRegs(void)
         //   Node 1: 0x4000e6800000 etc
         auto srcAddr =
                   l_sys->getAttr<TARGETING::ATTR_SBE_ARCH_DUMP_ADDR>();
- 
         pSrcAddrBase = reinterpret_cast<void * const>(srcAddr);
         vMapSrcAddrBase = mm_block_map(pSrcAddrBase,
                                        VMM_ARCH_REG_DATA_SIZE_ALL_PROC);
@@ -845,6 +851,65 @@ errlHndl_t copyArchitectedRegs(void)
     return (l_err);
 }
 
+/**
+ *  @brief check dump destination address for valid ranges
+ *
+ *  @param[in] i_curDestTableAddr    destination table address to validate
+ *  @param[in] i_phys_attr_data_addr physical attribute data address
+ *  @param[in] i_attr_data_size      attribute data size
+ *
+ *  @return errlHndl_t error log handler
+ */
+errlHndl_t checkValidDumpDestinationAddresses(const uint64_t i_curDestTableAddr,
+                                              const uint64_t i_phys_attr_data_addr,
+                                              const uint64_t i_attr_data_size)
+{
+    errlHndl_t l_err = nullptr;
+
+    // Verify that the destination table does not contain
+    // both the reserved memory region and our memory footprint
+    for (uint64_t i = 0; i < MAX_NODES_PER_SYS; i++)
+    {
+        uint64_t lowerBound = cpu_spr_value(CPU_SPR_HRMOR) +
+            i * MEMMAP::NODE_OFFSET;
+        lowerBound |= IGNORE_HRMOR;
+        uint64_t upperBound = lowerBound + VMM_MEMORY_SIZE - 1;
+
+        // Skip attribute checks if getReservedMemoryRegion returned error
+        if ((i_curDestTableAddr >= lowerBound &&
+             i_curDestTableAddr <= upperBound) ||
+             (i_phys_attr_data_addr != 0 &&
+             i_attr_data_size != 0 &&
+             i_curDestTableAddr >= i_phys_attr_data_addr &&
+             i_curDestTableAddr <= i_phys_attr_data_addr + i_attr_data_size - 1))
+        {
+            // Cannot write to Hostboot memory region
+            TRACFCOMP(g_trac_dump, ERR_MRK"HBDumpCopySrcToDest: "
+                "Dump table is incorrectly writing its contents "
+                "within memory regions owned by Hostboot");
+           /*@
+            * @errortype
+            * @moduleid    DUMP::DUMP_COLLECT
+            * @reasoncode  DUMP::DUMP_MDDT_INVALID_REGION
+            * @userdata1   Address of destination table write
+            * @devdesc     MDDT table entry is inside hostboot region
+            * @custdesc    Error occurred during system boot
+            */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            DUMP_COLLECT,
+                                            DUMP_MDDT_INVALID_REGION,
+                                            i_curDestTableAddr);
+            l_err->addProcedureCallout(HWAS::EPUB_PRC_PHYP_CODE,
+                                       HWAS::SRCI_PRIORITY_HIGH);
+            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                       HWAS::SRCI_PRIORITY_MED);
+            break;
+        }
+    }
+
+    return l_err;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -857,7 +922,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
 {
     TRACFCOMP(g_trac_dump, "copySrcToDest - start ");
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     int rc = 0;
     bool invalidSrcSize = false;
     bool invalidDestSize = false;
@@ -965,6 +1030,36 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
 
         resultsTableEntry->dataSize = 0x0;
 
+        uint64_t l_phys_attr_data_addr = 0;
+        uint64_t l_attr_data_size = 0;
+        // Get reserved memory for later use
+        l_err = TARGETING::AttrRP::getReservedMemoryRegion(l_phys_attr_data_addr,
+                                                           l_attr_data_size);
+
+        if (l_err)
+        {
+            // Reset these back so checkValidDumpDestinationAddresses can use them
+            l_phys_attr_data_addr = 0;
+            l_attr_data_size = 0;
+            errlCommit(l_err, TARG_COMP_ID);
+        }
+
+        l_err = checkValidDumpDestinationAddresses(curDestTableAddr,
+                                                   l_phys_attr_data_addr,
+                                                   l_attr_data_size);
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_dump, "HBDumpCopySrcToDest: checkValidDumpDestinationAddresses"
+                " returned error, curDestTableAddr = 0x%.16llX, physAttrData = 0x%.16llX,"
+                " attrDataSize = %lld", curDestTableAddr, l_phys_attr_data_addr, l_attr_data_size);
+
+            errlCommit(l_err, TARG_COMP_ID);
+
+            // If destination is bad, set the remaining bytes to be 0
+            bytesLeftInDest = 0;
+        }
+
         while(1)
         {
             // If we have copied all the bytes in the src entry
@@ -983,6 +1078,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                      * @userdata1    VA address of the MDST to unmap
                      * @userdata2    rc value from unmap
                      * @devdesc      Cannot unmap the source table section
+                     * @custdesc     Error occurred during system boot
                      */
                     l_err = new ERRORLOG::ErrlEntry(
                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -994,9 +1090,6 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                     // commit the error and continue.
                     // Leave the devices unmapped for now.
                     errlCommit(l_err,DUMP_COMP_ID);
-
-                    l_err = NULL;
-
                 }
 
                 // increment to the next src entry
@@ -1050,31 +1143,34 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
             // If there is no more space in the destination area
             if (bytesLeftInDest == 0)
             {
-                // unmap the previous dest entry
-                rc =  mm_block_unmap(
-                            reinterpret_cast<void*>(vaMapDestTableAddr));
-                if (rc != 0)
+                if (vaMapDestTableAddr != nullptr)
                 {
-                    /*@
-                     * @errortype
-                     * @moduleid     DUMP::DUMP_COLLECT
-                     * @reasoncode   DUMP::DUMP_CANNOT_UNMAP_DEST
-                     * @userdata1    VA address of the MDDT to unmap
-                     * @userdata2    rc value from unmap
-                     * @devdesc      Cannot unmap the source table section
-                     */
-                    l_err = new ERRORLOG::ErrlEntry(
-                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          DUMP_COLLECT,
-                                          DUMP_CANNOT_UNMAP_DEST,
-                                          (uint64_t)vaMapDestTableAddr,
-                                          rc);
+                    // unmap the previous dest entry
+                    rc =  mm_block_unmap(
+                        reinterpret_cast<void*>(vaMapDestTableAddr));
+                    vaMapDestTableAddr = nullptr;
 
-                    // commit the error and continue.
-                    //  Leave the devices unmapped?
-                    errlCommit(l_err,DUMP_COMP_ID);
+                    if (rc != 0)
+                    {
+                        /*@
+                         * @errortype
+                         * @moduleid     DUMP::DUMP_COLLECT
+                         * @reasoncode   DUMP::DUMP_CANNOT_UNMAP_DEST
+                         * @userdata1    VA address of the MDDT to unmap
+                         * @userdata2    rc value from unmap
+                         * @devdesc      Cannot unmap the source table section
+                         * @custdesc     Error occurred during system boot
+                         */
+                        l_err = new ERRORLOG::ErrlEntry(
+                                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              DUMP_COLLECT,
+                                              DUMP_CANNOT_UNMAP_DEST,
+                                              (uint64_t)vaMapDestTableAddr,
+                                              rc);
 
-                    l_err = NULL;
+                        // commit the error and continue.
+                        errlCommit(l_err,DUMP_COMP_ID);
+                    }
                 }
 
                 // increment to the next dest entry
@@ -1107,8 +1203,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                                               bytesLeftInSrc,
                                               curSourceIndex);
 
-                        // do not commit this errorlog error as this is a
-                        // real problem.
+                        errlCommit(l_err, TARG_COMP_ID);
 
                         // TODO:  RTC: 64399
                         //  Need to add the src entries and sizes? that did
@@ -1154,7 +1249,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                     if (bytesLeftInSrc != 0)
                     {
                         // Write an error because we have more src entries
-                        // then destination space available.
+                        // than destination space available.
                         TRACFCOMP(g_trac_dump, "HBDumpCopySrcToDest: not enough"
                                   "Destination table space");
 
@@ -1196,6 +1291,23 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                     break;
                 }
 
+                l_err = checkValidDumpDestinationAddresses(curDestTableAddr,
+                                                           l_phys_attr_data_addr,
+                                                           l_attr_data_size);
+
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_dump, "HBDumpCopySrcToDest: checkValidDumpDestinationAddresses"
+                        " returned error, curDestTableAddr = 0x%.16llX, physAttrData = 0x%.16llX,"
+                        " attrDataSize = %lld", curDestTableAddr, l_phys_attr_data_addr, l_attr_data_size);
+
+                    errlCommit(l_err, TARG_COMP_ID);
+
+                    // If destination is bad, set the remaining bytes to 0
+                    bytesLeftInDest = 0;
+                    continue;
+                }
+
                 // map the MDDT to a VA addresss
                 vaMapDestTableAddr = (static_cast<uint64_t*>(mm_block_map(
                                        getPhysAddr(curDestTableAddr),
@@ -1226,6 +1338,7 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                   VmmManager::FORCE_PHYS_ADDR|curSrcTableAddr;
                 resultsTableEntry->destAddr =
                   VmmManager::FORCE_PHYS_ADDR|curDestTableAddr;
+
                 resultsTableEntry->dataSize = sizeToCopy;
                 // Size field in source/destination table is of 4 bytes.
                 // So result table size field will never cross 4 bytes.
@@ -1278,7 +1391,6 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
             vaSrcTableAddr += addrOffset;
             vaDestTableAddr += addrOffset;
         } // end of while loop
-
 
         if (invalidSrcSize)
         {

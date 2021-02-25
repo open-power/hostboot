@@ -238,6 +238,19 @@ class AttrRP
          */
         void getNodeId(const Target* i_pTarget,
                        NODE_ID& o_nodeId) const;
+        /**
+         *  @brief Setup physical TOC address and read the TOC to look
+         *  for the reserved memory region
+         *
+         *  @param[out] o_phys_attr_data_addr, Physical attribute data address
+         *  @param[out] o_attr_data_size_bytes, Attribute data size
+         *
+         *  @return errlHndl_t Error log handle
+         *  @retval nullptr Success, successfully got the reserved memory region
+         *  @retval !nullptr Failure, points to a valid error log
+         */
+        static errlHndl_t getReservedMemoryRegion(uint64_t& o_phys_attr_data_addr,
+                                                  uint64_t& o_attr_data_size_bytes);
 
 #ifdef __HOSTBOOT_RUNTIME
         /**

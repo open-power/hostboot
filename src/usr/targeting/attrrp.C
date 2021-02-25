@@ -900,6 +900,135 @@ namespace TARGETING
         return payload_addr;
     }
 
+    errlHndl_t AttrRP::getReservedMemoryRegion(uint64_t& o_phys_attr_data_addr,
+                                               uint64_t& o_attr_data_size)
+    {
+        errlHndl_t l_errl = nullptr;
+        Util::hbrtTableOfContents_t * l_toc_ptr = nullptr;
+        do
+        {
+        // Setup physical TOC address
+        o_phys_attr_data_addr = 0;
+        o_attr_data_size = 0;
+        uint64_t l_toc_addr = TARGETING::AttrRP::getHbDataTocAddr();
+
+        // Map the TOC to find the ATTR label address and size
+        l_toc_ptr =
+            reinterpret_cast<Util::hbrtTableOfContents_t *>(
+            mm_block_map(reinterpret_cast<void*>(l_toc_addr),
+            sizeof(Util::hbrtTableOfContents_t)));
+
+        if (l_toc_ptr != nullptr)
+        {
+            // read the TOC and look for ATTR data section
+            uint64_t l_attr_data_addr = Util::hb_find_rsvd_mem_label(
+                Util::HBRT_MEM_LABEL_ATTR,
+                l_toc_ptr,
+                o_attr_data_size);
+
+            // make sure we're not calculating a negative offset
+            if (reinterpret_cast<uint64_t>(l_toc_ptr) > l_attr_data_addr)
+            {
+                TRACFCOMP(g_trac_targeting,
+                    "getReservedMemoryRegion: hb_find_rsvd_mem_label found region "
+                    "below the table of contents region");
+                /*@
+                 *  @errortype      ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 *  @moduleid       TARG_PARSE_ATTR_SECT_HEADER
+                 *  @reasoncode     TARG_RC_RSVD_MEM_LABEL_FAIL
+                 *  @userdata1      attribute region address
+                 *  @userdata2      toc region
+                 *
+                 *  @devdesc   Attribute region found was below the table of
+                 *             contents region
+                 *  @custdesc  Error occurred during system boot
+                 */
+                l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                       TARG_PARSE_ATTR_SECT_HEADER,
+                                       TARG_RC_RSVD_MEM_LABEL_FAIL,
+                                       l_attr_data_addr,
+                                       reinterpret_cast<uint64_t>(l_toc_ptr),
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
+
+            // calculate the offset from the start of the TOC
+            uint64_t l_attr_offset = l_attr_data_addr -
+                reinterpret_cast<uint64_t>(l_toc_ptr);
+
+            // setup where the ATTR data can be found
+            o_phys_attr_data_addr = l_toc_addr + l_attr_offset;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_targeting,
+                      "Failed mapping Table of Contents section %p",
+                      reinterpret_cast<void*>(l_toc_ptr));
+            /*@
+             *  @errortype      ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             *  @moduleid       TARG_PARSE_ATTR_SECT_HEADER
+             *  @reasoncode     TARG_RC_TOC_MAPPING_FAIL
+             *  @userdata1      Table of Contents pointer
+             *
+             *  @devdesc        Mapping TOC section failed
+             *  @custdesc       Error occurred during system boot
+             */
+            l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                   TARG_PARSE_ATTR_SECT_HEADER,
+                                   TARG_RC_TOC_MAPPING_FAIL,
+                                   reinterpret_cast<uint64_t>(l_toc_ptr),
+                                   0,
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        } while(0);
+
+        if (l_toc_ptr != nullptr)
+        {
+            // clear the mapped memory for the TOC
+            int rc = mm_block_unmap(
+                reinterpret_cast<void*>(l_toc_ptr));
+            if (rc != 0)
+            {
+                TRACFCOMP(g_trac_targeting,
+                    "getReservedMemoryRegion fail to unmap virt addr %p, "
+                    "rc = %d",
+                    reinterpret_cast<void*>(l_toc_ptr), rc);
+               /*@
+                *  @errortype      ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                *  @moduleid       TARG_PARSE_ATTR_SECT_HEADER
+                *  @reasoncode     TARG_RC_MM_BLOCK_UNMAP_FAIL
+                *  @userdata1      return code
+                *  @userdata2      Unmap virtual address
+                *
+                *  @devdesc   While attempting to unmap a virtual
+                *             addr for our targeting information the
+                *             kernel returned an error
+                *  @custdesc  An internal firmware error occurred
+                */
+                auto l_unmap_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                                 TARG_PARSE_ATTR_SECT_HEADER,
+                                                 TARG_RC_MM_BLOCK_FAIL,
+                                                 rc,
+                                                 reinterpret_cast<uint64_t>(l_toc_ptr),
+                                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                if (l_errl)
+                {
+                    l_unmap_err->plid(l_errl->plid());
+                    errlCommit(l_unmap_err, IPC_COMP_ID);
+                }
+                else
+                {
+                    l_errl = l_unmap_err;
+                    l_unmap_err = nullptr;
+                }
+            }
+        }
+
+        return l_errl;
+    }
+
     errlHndl_t AttrRP::parseAttrSectHeader()
     {
         errlHndl_t l_errl = NULL;
@@ -940,110 +1069,17 @@ namespace TARGETING
                 //Account HRMOR (non 0 base addr)
                 uint64_t l_phys_attr_data_addr = 0;
                 uint64_t l_attr_data_size = 0;
-
-                // Setup physical TOC address
-                uint64_t l_toc_addr = AttrRP::getHbDataTocAddr();
-
-                // Now map the TOC to find the ATTR label address & size
-                Util::hbrtTableOfContents_t * l_toc_ptr =
-                reinterpret_cast<Util::hbrtTableOfContents_t *>(
-                mm_block_map(reinterpret_cast<void*>(l_toc_addr),
-                             sizeof(Util::hbrtTableOfContents_t)));
-
-                if (l_toc_ptr != 0)
+                l_errl = getReservedMemoryRegion(l_phys_attr_data_addr, l_attr_data_size);
+                if (l_errl)
                 {
-                    // read the TOC and look for ATTR data section
-                    uint64_t l_attr_data_addr = Util::hb_find_rsvd_mem_label(
-                                                    Util::HBRT_MEM_LABEL_ATTR,
-                                                    l_toc_ptr,
-                                                    l_attr_data_size);
-
-                    // calculate the offset from the start of the TOC
-                    uint64_t l_attr_offset = l_attr_data_addr -
-                                        reinterpret_cast<uint64_t>(l_toc_ptr);
-
-                    // Setup where the ATTR data can be found
-                    l_phys_attr_data_addr = l_toc_addr + l_attr_offset;
-
-                    // Clear the mapped memory for the TOC
-                    int l_rc = mm_block_unmap(
-                                    reinterpret_cast<void*>(l_toc_ptr));
-                    if(l_rc)
-                    {
-                        TRACFCOMP( g_trac_targeting,
-                           "parseAttrSectHeader. fail to unmap virt addr %p, "
-                           " rc = %d",
-                           reinterpret_cast<void*>(l_toc_ptr), l_rc);
-                        //Error mm_block_unmap returned non-zero
-                        /*@
-                        *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                        *   @moduleid          TARG_PARSE_ATTR_SECT_HEADER
-                        *   @reasoncode        TARG_RC_MM_BLOCK_UNMAP_FAIL
-                        *   @userdata1         return code
-                        *   @userdata2         Unmap virtual address
-                        *
-                        *   @devdesc   While attempting to unmap a virtual
-                        *              addr for our targeting information the
-                        *              kernel returned an error
-                        *   @custdesc  Kernel failed to unblock mapped memory
-                        */
-                        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                               TARG_PARSE_ATTR_SECT_HEADER,
-                                               TARG_RC_MM_BLOCK_FAIL,
-                                               l_rc,
-                                               reinterpret_cast<uint64_t>
-                                                (l_toc_ptr),
-                                               true);
-                        break;
-                    }
-
-                    // Now just map the ATTR data section
-                    l_header = reinterpret_cast<TargetingHeader*>(
-                        mm_block_map(
-                            reinterpret_cast<void*>(l_phys_attr_data_addr),
-                            l_attr_data_size));
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_targeting,
-                              "Failed mapping Table of Contents section");
-                    l_header = 0;
-                    l_phys_attr_data_addr = l_toc_addr;
-                    l_attr_data_size = sizeof(Util::hbrtTableOfContents_t);
-                }
-                ///////////////////////////////////////////////////////////////
-
-                if(l_header == 0)
-                {
-                    TRACFCOMP(g_trac_targeting,
-                              "Failed mapping phys addr: %p for %lx bytes",
-                              l_phys_attr_data_addr,
-                              l_attr_data_size);
-                    //Error mm_block_map returned invalid ptr
-                    /*@
-                    *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                    *   @moduleid          TARG_PARSE_ATTR_SECT_HEADER
-                    *   @reasoncode        TARG_RC_MM_BLOCK_MAP_FAIL
-                    *   @userdata1         physical address of target info
-                    *   @userdata2         size we tried to map
-                    *
-                    *   @devdesc   While attempting to map a phys addr to a virtual
-                    *              addr for our targeting information the kernel
-                    *              returned an error
-                    *   @custdesc  Kernel failed to block map memory
-                    */
-                    l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                           TARG_PARSE_ATTR_SECT_HEADER,
-                                           TARG_RC_MM_BLOCK_FAIL,
-                                           l_phys_attr_data_addr,
-                                           l_attr_data_size,
-                                           true);
                     break;
                 }
-                TRACFCOMP(g_trac_targeting,
-                          "Mapped phys addr: %p to virt addr: %p",
-                          reinterpret_cast<void*>(l_phys_attr_data_addr),
-                          l_header);
+
+                // Now just map the ATTR data section
+                l_header = reinterpret_cast<TargetingHeader*>(
+                    mm_block_map(
+                        reinterpret_cast<void*>(l_phys_attr_data_addr),
+                        l_attr_data_size));
             }
 
 
