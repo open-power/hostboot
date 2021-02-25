@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -50,23 +50,23 @@ chip p10_phb
     register PCI_NEST_FIR
     {
         name        "P10 chip PCI_NEST_FIR";
-        scomaddr    0x02011840;
-        reset       (&, 0x02011841);
-        mask        (|, 0x02011845);
+        scomaddr    0x03011840;
+        reset       (&, 0x03011841);
+        mask        (|, 0x03011845);
         capture     group default;
     };
 
     register PCI_NEST_FIR_MASK
     {
         name        "P10 chip PCI_NEST_FIR MASK";
-        scomaddr    0x02011843;
+        scomaddr    0x03011843;
         capture     group default;
     };
 
     register PCI_NEST_FIR_ACT0
     {
         name        "P10 chip PCI_NEST_FIR ACT0";
-        scomaddr    0x02011846;
+        scomaddr    0x03011846;
         capture     group default;
         capture     req nonzero("PCI_NEST_FIR");
     };
@@ -74,7 +74,7 @@ chip p10_phb
     register PCI_NEST_FIR_ACT1
     {
         name        "P10 chip PCI_NEST_FIR ACT1";
-        scomaddr    0x02011847;
+        scomaddr    0x03011847;
         capture     group default;
         capture     req nonzero("PCI_NEST_FIR");
     };

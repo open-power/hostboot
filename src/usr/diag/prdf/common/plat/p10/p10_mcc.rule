@@ -555,7 +555,7 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[25]
      *  WRT Data Syndrome not equal to 0 for input for wri
      */
-    (rMC_USTL_FIR, bit(25)) ? parent_proc_th_1;
+    (rMC_USTL_FIR, bit(25)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[26]
      *  No buffer error; Buffer manager parity error.
