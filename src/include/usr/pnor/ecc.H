@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,8 @@ namespace ECC
      *  @param[in]     i_dstSz - Size in bytes of destination ((srcSz / 9) * 8).
      *  @param[out]    o_accumulatedErrors - Optional; A pointer to an eccErrors_t to accumulate
      *                                       ECC errors as they occur so the caller can handle them.
+     *                                       NOTE: offsets will be in terms of ECCed io_src data. If caller wants
+     *                                       ECCless offsets then caller must covert the returned offsets.
      *
      *  @note i_dstSz must be a multiple of 8 bytes.
      */
