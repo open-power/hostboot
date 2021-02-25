@@ -40,7 +40,7 @@
 // The length of the TPM startup command
 #define TPM_STARTUP_CMD_LEN 0xC
 // The length of the PCR extend TPM command
-#define TPM_PCR_EXTEND_CMD_LEN 0x57
+#define TPM_PCR_EXTEND_CMD_LEN 0x41
 
 /**
  * @brief Base response from the TPM (used to get the RC)
@@ -795,23 +795,18 @@ Bootloader::hbblReasonCode tpmCmdStartup()
 Bootloader::hbblReasonCode tpmExtendHash(const uint8_t* const i_hash)
 {
     Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
-    uint32_t l_cmdData[] = { 0x80020000, 0x00570000, 0x01820000, 0x00000000,
-                             0x00094000, 0x00090000, 0x00000000, 0x00000200,
+    uint32_t l_cmdData[] = { 0x80020000, 0x00410000, 0x01820000, 0x00000000,
+                             0x00094000, 0x00090000, 0x00000000, 0x00000100,
                              0x0b000000, 0x00000000, 0x00000000, 0x00000000, // 32-byte hash starts right after 0x0b
                              0x00000000, 0x00000000, 0x00000000, 0x00000000, // 32-byte hash cont.
-                             0x00000400, 0x00000000, 0x00000000, 0x00000000, // 20-byte hash starts right after 0x04
-                             0x00000000, 0x00000000 };
+                             0x00000000 }; // Last 3 bytes of data is not transmitted
     const uint8_t HASH_OFFSET = 33; // The offset at which the 32-byte hash starts in the message
-    const uint8_t HASH_20B_OFFSET = 67; // The offset at which 20-byte hast starts
     const uint8_t TPM_FULL_HASH_SIZE = 32; // Sha256 algorithm's digest size is 32 bytes
-    const uint8_t TPM_SHORT_HASH_SIZE = 20; // Sha1 algorithm's digest is 20 bytes
     size_t l_cmdLen = TPM_PCR_EXTEND_CMD_LEN;
 
     // Populate the cmd with the input hash
     // Fist the 32-byte hash
     memcpy(reinterpret_cast<uint8_t*>(l_cmdData) + HASH_OFFSET, i_hash, TPM_FULL_HASH_SIZE);
-    // Now the smaller, 20-byte hash
-    memcpy(reinterpret_cast<uint8_t*>(l_cmdData) + HASH_20B_OFFSET, i_hash, TPM_SHORT_HASH_SIZE);
 
     // l_cmdData will be reused for the TPM response
     l_rc = tpmTransmit(l_cmdData,

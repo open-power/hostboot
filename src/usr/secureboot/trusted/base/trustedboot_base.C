@@ -721,10 +721,9 @@ errlHndl_t testCmpPrimaryAndBackupTpm()
 
     TPM_Pcr l_pcrRegs[8] = {PCR_0, PCR_1, PCR_2, PCR_3,
                             PCR_4, PCR_5, PCR_6, PCR_7};
-    TPM_Alg_Id l_algIds[2] = {TPM_ALG_SHA1, TPM_ALG_SHA256};
+    TPM_Alg_Id l_algIds[1] = {TPM_ALG_SHA256};
 
-    size_t l_sizeToAllocate = std::max(getDigestSize(TPM_ALG_SHA1),
-                                       getDigestSize(TPM_ALG_SHA256));
+    size_t l_sizeToAllocate = getDigestSize(TPM_ALG_SHA256);
 
     uint8_t* l_pDigest = new uint8_t[l_sizeToAllocate]();
     uint8_t* l_bDigest = new uint8_t[l_sizeToAllocate]();

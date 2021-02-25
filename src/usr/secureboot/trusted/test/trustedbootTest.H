@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -459,8 +459,13 @@ class TrustedBootTest: public CxxTest::TestSuite
                                   sizeof(uint32_t) - //auth size field
                                   sizeof(TPMT_HA)); // less second digest
 
+#if HASH_COUNT > 1
                 cmdPtr->digests.count = 2;
-                cmdPtr->digests.digests[1].algorithmId = TPM_ALG_SHA1;
+                // Replace with valid algorithm ID and algorithm size if hash
+                // count > 1 ever used.  Also update tpmLogMgr.C's code branches
+                // that rely on HASH_COUNT > 1
+                cmdPtr->digests.digests[1].algorithmId = TPM_ALG_INVALID_ID;
+                const uint16_t algSize = 0;
 
                 // Test with two hashes
                 runTpmMarshalTest(baseCmd,
@@ -473,9 +478,9 @@ class TrustedBootTest: public CxxTest::TestSuite
                                   sizeof(TPM2_ExtendIn) +
                                   sizeof(TPMS_AUTH_COMMAND) +
                                   sizeof(uint32_t) - //auth size field
-                                  (TPM_ALG_SHA256_SIZE - TPM_ALG_SHA1_SIZE)
+                                  (TPM_ALG_SHA256_SIZE - algSize)
                                   ); // less sha1 digest size
-
+#endif
 
                 // Invalid number of digests
                 memset(dataBufIn, 0, sizeof(dataBufIn));
@@ -489,7 +494,6 @@ class TrustedBootTest: public CxxTest::TestSuite
                                       "ExtendIn - invalid #digests",
                                       num_ops,
                                       fails);
-
             }
 
             // Test PcrReadIn
@@ -953,7 +957,7 @@ class TrustedBootTest: public CxxTest::TestSuite
         const TPM_Pcr l_pcrRegs[] = {PCR_0, PCR_1, PCR_2, PCR_3,
                                      PCR_4, PCR_5, PCR_6, PCR_7};
 
-        const TPM_Alg_Id l_algIds[] = {TPM_ALG_SHA1, TPM_ALG_SHA256};
+        const TPM_Alg_Id l_algIds[] = {TPM_ALG_SHA256};
 
         auto pcrReadFail = false;
         // loop through all the TPMs

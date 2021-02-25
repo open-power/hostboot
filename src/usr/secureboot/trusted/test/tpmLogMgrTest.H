@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -215,8 +215,8 @@ class TPMLogMgrTest: public CxxTest::TestSuite
             TCG_PCR_EVENT2 eventLog = TpmLogMgr_genLogEventPcrExtend(
                                         pcr, EV_NO_ACTION, algId,
                                         digest, digestSize,
-                                        TPM_ALG_SHA1, digest,
-                                        digestSize, i_logMsg,
+                                        TPM_ALG_INVALID_ID, nullptr,
+                                        0, i_logMsg,
                                         i_logMsgSize);
 
             // Add event to log

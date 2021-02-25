@@ -163,8 +163,7 @@ namespace TRUSTEDBOOT
     /// TPM Algorithm defines
     typedef enum
     {
-        TPM_ALG_SHA1      = 0x0004,   ///< SHA1 Id
-        TPM_ALG_SHA256    = 0x000B,   ///< SHA256 Id
+        TPM_ALG_SHA256    = 0x000B, ///< SHA256 Id
         TPM_ALG_INVALID_ID          ///< Used for error checking
     } TPM_Alg_Id;
 
@@ -343,7 +342,7 @@ namespace TRUSTEDBOOT
      *  @brief Poison a TPM. Poisoning a TPM's PCR means extending a random
      *         number measurement to the TPM, but not to the corresponding log
      *         entry. This includes extending random numbers to every bank/PCR
-     *         combo in use by the firmware (sha1/sha256 banks of PCR 0-7). The
+     *         combo in use by the firmware (sha256 banks of PCR 0-7). The
      *         random number along with the absent log entry makes remote
      *         attestation impossible with that TPM for that boot.
      *

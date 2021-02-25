@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,9 +98,6 @@ namespace TRUSTEDBOOT
         uint32_t ret = 0;
         switch (i_algId)
         {
-          case TPM_ALG_SHA1:
-            ret = TPM_ALG_SHA1_SIZE;
-            break;
           case TPM_ALG_SHA256:
             ret = TPM_ALG_SHA256_SIZE;
             break;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,6 @@ namespace TRUSTEDBOOT
 
     typedef enum
     {
-        TPM_ALG_SHA1_SIZE     = 20,      ///< SHA1 digest byte size
         TPM_ALG_SHA256_SIZE   = 32,      ///< SHA256 digest byte size
         TPM_ALG_INVALID_SIZE             ///< Used for error checking
     } TPM_Alg_Sizes;
@@ -73,7 +72,7 @@ namespace TRUSTEDBOOT
     {
         MAX_TPM_LOG_MSG = PAGESIZE * 2,  ///< Maximum log message size
 
-        HASH_COUNT            = 2,       ///< Maximum # of digests
+        HASH_COUNT            = 1,       ///< Maximum # of digests
 
         PCR_SELECT_MAX = (IMPLEMENTATION_PCR+7)/8, ///< PCR selection octet max
 
@@ -257,7 +256,6 @@ namespace TRUSTEDBOOT
     /// Digest union
     union _TPMU_HA
     {
-        uint8_t sha1[TPM_ALG_SHA1_SIZE];
         uint8_t sha256[TPM_ALG_SHA256_SIZE];
     } PACKED;
     typedef union _TPMU_HA TPMU_HA;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1091,6 +1091,9 @@ errlHndl_t tpmCmdPcrExtend2Hash(TpmTarget * io_target,
         memcpy(&(cmd->digests.digests[0].digest), i_digest_1,
                (i_digestSize_1 < fullDigestSize_1 ?
                 i_digestSize_1 : fullDigestSize_1) );
+
+// If only 1 hash algorithm is supported, this branch is not able to compile
+#if HASH_COUNT > 1
         if (NULL != i_digest_2)
         {
             cmd->digests.count = 2;
@@ -1099,6 +1102,7 @@ errlHndl_t tpmCmdPcrExtend2Hash(TpmTarget * io_target,
                    (i_digestSize_2 < fullDigestSize_2 ?
                     i_digestSize_2 : fullDigestSize_2));
         }
+#endif
 
         tpm_locality_t tpmLocality = TPM_LOCALITY_0;
 

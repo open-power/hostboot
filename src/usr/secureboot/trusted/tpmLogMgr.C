@@ -101,8 +101,13 @@ namespace TRUSTEDBOOT
         eventData->numberOfAlgorithms = htole32(HASH_COUNT);
         eventData->digestSizes[0].algorithmId = htole16(TPM_ALG_SHA256);
         eventData->digestSizes[0].digestSize = htole16(TPM_ALG_SHA256_SIZE);
-        eventData->digestSizes[1].algorithmId = htole16(TPM_ALG_SHA1);
-        eventData->digestSizes[1].digestSize = htole16(TPM_ALG_SHA1_SIZE);
+#if HASH_COUNT > 1
+        // Replace with valid algorithm ID and algorithm size if hash count > 1
+        // ever used, and update trustedbootTest.H's testcases that depend on
+        // HASH_COUNT > 1
+        eventData->digestSizes[1].algorithmId = htole16(TPM_ALG_INVALID_ID);
+        eventData->digestSizes[1].digestSize = htole16(0);
+#endif
         eventData->vendorInfoSize = sizeof(vendorInfo);
         memcpy(eventData->vendorInfo, vendorInfo, sizeof(vendorInfo));
         i_val->newEventPtr = TCG_PCR_EVENT_logMarshal(&eventLogEntry,
@@ -453,13 +458,8 @@ namespace TRUSTEDBOOT
     {
         TCG_PCR_EVENT2 eventLog;
         size_t fullDigestSize_1 = 0;
-        size_t fullDigestSize_2 = 0;
 
         fullDigestSize_1 = getDigestSize(i_algId_1);
-        if (NULL != i_digest_2)
-        {
-            fullDigestSize_2 = getDigestSize(i_algId_2);
-        }
 
         memset(&eventLog, 0, sizeof(eventLog));
         eventLog.pcrIndex = i_pcr;
@@ -473,8 +473,11 @@ namespace TRUSTEDBOOT
                (i_digestSize_1 < fullDigestSize_1 ?
                 i_digestSize_1 : fullDigestSize_1));
 
+// If only 1 hash algorithm is supported, this branch is not able to compile
+#if HASH_COUNT > 1
         if (NULL != i_digest_2)
         {
+            size_t fullDigestSize_2 = getDigestSize(i_algId_2);
             eventLog.digests.count = 2;
             eventLog.digests.digests[1].algorithmId = i_algId_2;
             memcpy(&(eventLog.digests.digests[1].digest),
@@ -482,6 +485,7 @@ namespace TRUSTEDBOOT
                    (i_digestSize_2 < fullDigestSize_2 ?
                     i_digestSize_2 : fullDigestSize_2));
         }
+#endif
         // Event field data
         eventLog.event.eventSize = i_logMsgSize;
         memset(eventLog.event.event, 0, sizeof(eventLog.event.event));

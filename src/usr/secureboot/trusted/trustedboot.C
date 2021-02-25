@@ -953,9 +953,9 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                 eventLog = TpmLogMgr_genLogEventPcrExtend(pcr, i_eventType,
                                                           i_algId, i_digest,
                                                           i_digestSize,
-                                                          TPM_ALG_SHA1,
-                                                          i_digest,
-                                                          i_digestSize,
+                                                          TPM_ALG_INVALID_ID,
+                                                          nullptr,
+                                                          0,
                                                           i_logMsg,
                                                           i_logMsgSize);
                 if(useStaticLog)
@@ -969,16 +969,15 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                 }
             }
 
-            // Perform the requested extension and also force into the
-            // SHA1 bank
+            // Perform the requested extension
             err = tpmCmdPcrExtend2Hash(i_pTpm,
                                        pcr,
                                        i_algId,
                                        i_digest,
                                        i_digestSize,
-                                       TPM_ALG_SHA1,
-                                       i_digest,
-                                       i_digestSize);
+                                       TPM_ALG_INVALID_ID,
+                                       nullptr,
+                                       0);
         }
     } while ( 0 );
 
@@ -1010,11 +1009,7 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
     bool unlock = false;
 
     // Separators are always the same values
-    // The digest is a sha1 hash of 0xFFFFFFFF
-    const uint8_t sha1_digest[] = {
-        0xd9, 0xbe, 0x65, 0x24, 0xa5, 0xf5, 0x04, 0x7d,
-        0xb5, 0x86, 0x68, 0x13, 0xac, 0xf3, 0x27, 0x78,
-        0x92, 0xa7, 0xa3, 0x0a};
+
     // The digest is a sha256 hash of 0xFFFFFFFF
     const uint8_t sha256_digest[] = {
         0xAD, 0x95, 0x13, 0x1B, 0xC0, 0xB7, 0x99, 0xC0,
@@ -1046,12 +1041,12 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
                 // Fill in TCG_PCR_EVENT2 and add to log
                 eventLog = TpmLogMgr_genLogEventPcrExtend(pcr,
                                                           EV_SEPARATOR,
-                                                          TPM_ALG_SHA1,
-                                                          sha1_digest,
-                                                          sizeof(sha1_digest),
                                                           TPM_ALG_SHA256,
                                                           sha256_digest,
                                                           sizeof(sha256_digest),
+                                                          TPM_ALG_INVALID_ID,
+                                                          nullptr,
+                                                          0,
                                                           logMsg,
                                                           sizeof(logMsg));
 
@@ -1068,12 +1063,12 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
                 // Perform the requested extension
                 err = tpmCmdPcrExtend2Hash(i_pTpm,
                                            pcr,
-                                           TPM_ALG_SHA1,
-                                           sha1_digest,
-                                           sizeof(sha1_digest),
                                            TPM_ALG_SHA256,
                                            sha256_digest,
-                                           sizeof(sha256_digest));
+                                           sizeof(sha256_digest),
+                                           TPM_ALG_INVALID_ID,
+                                           nullptr,
+                                           0);
                 if (nullptr != err)
                 {
                     break;
