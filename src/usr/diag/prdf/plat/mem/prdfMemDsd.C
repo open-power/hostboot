@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file prdfMemDsd_rt.C */
+/** @file prdfMemDsd.C */
 
 // Platform includes
 #include <prdfMemDsd.H>

@@ -121,12 +121,14 @@ template<>
 uint8_t nibble2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_x4Dram )
 {
     uint8_t symbol = SYMBOLS_PER_RANK;
+    static const uint8_t sp = SYMBOLS_PER_RANK; // Spare symbols
 
     static const uint8_t nibble2symbol[] =
     {
-        68, 36, 64, 32, 60, 28, // nibbles  0- 5
-        56, 24, 52, 20, 48, 16, // nibbles  6-11
-        44, 12, 40,  8,  4,  0, // nibbles 12-17
+        68, 36, 64, 32, 60, // nibbles 0-4
+        28, 56, 24,  4,  0, // nibbles 5-9
+        sp, sp, 52, 20, 48, // nibbles 10-14
+        16, 44, 12, 40,  8, // nibbles 15-19
     };
 
     if ( NIBBLES_PER_DIMM > i_x4Dram )
@@ -143,12 +145,12 @@ template<>
 uint8_t byte2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_x8Dram )
 {
     uint8_t symbol = SYMBOLS_PER_RANK;
+    static const uint8_t sp = SYMBOLS_PER_RANK; // Spare symbols
 
     static const uint8_t byte2symbol[] =
     {
-        36, 32, 28, // bytes 0-2
-        24, 20, 16, // bytes 3-5
-        12,  8,  0, // bytes 6-8
+        36, 32, 28, 24, 0, // bytes 0-4
+        sp, 20, 16, 12, 8, // bytes 5-9
     };
 
     if ( BYTES_PER_DIMM > i_x8Dram )

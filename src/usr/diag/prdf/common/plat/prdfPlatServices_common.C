@@ -588,6 +588,9 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 template
 uint32_t isSpareAvailable<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
     MemRank i_rank, uint8_t i_ps, bool & o_spAvail );
+template
+uint32_t isSpareAvailable<TYPE_OCMB_CHIP>( TARGETING::TargetHandle_t i_trgt,
+    MemRank i_rank, uint8_t i_ps, bool & o_spAvail );
 
 } // end namespace PlatServices
 

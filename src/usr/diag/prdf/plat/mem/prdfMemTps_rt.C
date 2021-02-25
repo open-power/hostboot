@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -490,6 +490,17 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             break;
         }
 
+        // Check if a spare is available to be used
+        bool spAvail = false;
+        o_rc = isSpareAvailable<T>( trgt, iv_rank,
+                i_badDqCount.symList[0].symbol.getPortSlct(), spAvail );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "isSpareAvailable(0x%08x, 0x%02x) failed",
+                    iv_chip->getHuid(), getKey() );
+            break;
+        }
+
         // If the bad DQ nibble count is 0 and the bad chip nibble count is 0.
         if ( 0 == i_badDqCount.count && 0 == i_badChipCount.count )
         {
@@ -501,111 +512,198 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         // If the bad DQ nibble count is 1 and the bad chip nibble count is 0.
         else if ( 1 == i_badDqCount.count && 0 == i_badChipCount.count )
         {
-            // If the symbol mark is available.
-            if ( !symMark.isValid() )
+            // Place a chip mark to deploy a spare if we can.
+            // Note: Placing a chip mark does not risk a UE if the sum greater
+            // than 1 nibble count is 0 or the sum greater than 1 nibble count
+            // is 1 and the single symbol nibble count is 1.
+
+            bool noSpareUeRisk = (i_sumAboveOneCount.count == 0 ||
+                (i_sumAboveOneCount.count == 1 && i_singleSymCount.count == 1));
+            // If we can place a spare
+            if ( spAvail && noSpareUeRisk )
+
             {
-                // If the sum above one nibble count is <= 1 or sum above one
-                // nibble count == 2 and single sym nibble count == 2
-                if ( (i_sumAboveOneCount.count <= 1) ||
-                     (i_sumAboveOneCount.count == 2 &&
-                      i_singleSymCount.count == 2) )
+                // Placing a chip mark to deploy a spare does not risk a UE
+                MemMark newCM(trgt, iv_rank, i_badChipCount.symList[0].symbol);
+                o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, newCM );
+                if ( SUCCESS != o_rc )
                 {
-                    // This means we have a potential future chip kill or
-                    // TCE. Both are still correctable after a symbol mark
-                    // is placed.
-                    // Place a symbol mark on this bad DQ.
-                    MemMark newSymMark( trgt, iv_rank,
-                                        i_badDqCount.symList[0].symbol );
-                    o_rc = MarkStore::writeSymbolMark<T>( iv_chip,
-                        iv_rank, newSymMark );
-                    if ( SUCCESS != o_rc )
+                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                              "failed", iv_chip->getHuid(), getKey() );
+                    break;
+                }
+            }
+            // Else we can't place a spare
+            else
+            {
+                // If the symbol mark is available.
+                if ( !symMark.isValid() )
+                {
+                    // If the sum above one nibble count is <= 1 or sum above
+                    // one nibble count == 2 and single sym nibble count == 2
+                    if ( (i_sumAboveOneCount.count <= 1) ||
+                            (i_sumAboveOneCount.count == 2 &&
+                             i_singleSymCount.count == 2) )
                     {
-                        PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x) "
-                                  "failed", iv_chip->getHuid(), getKey() );
-                        break;
+                        // This means we have a potential future chip kill or
+                        // TCE. Both are still correctable after a symbol mark
+                        // is placed.
+                        // Place a symbol mark on this bad DQ.
+                        MemSymbol symbol = i_badDqCount.symList[0].symbol;
+                        MemMark newSymMark( trgt, iv_rank, symbol );
+                        o_rc = MarkStore::writeSymbolMark<T>( iv_chip,
+                                iv_rank, newSymMark );
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x)"
+                                      " failed", iv_chip->getHuid(), getKey() );
+                            break;
+                        }
+
+                        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                PRDFSIG_TpsSymbolMark );
+
+                        // Update VPD with the symbol mark.
+                        o_rc = dqBitmap.setSymbol( symbol );
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "dqBitmap.setSymbol failed." );
+                            break;
+                        }
                     }
-
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_TpsSymbolMark );
-
-                    // Update VPD with the symbol mark.
-                    o_rc = dqBitmap.setSymbol( i_badDqCount.symList[0].symbol );
-                    if ( SUCCESS != o_rc )
+                    else
                     {
-                        PRDF_ERR( PRDF_FUNC "dqBitmap.setSymbol failed." );
-                        break;
+                        // Placing a symbol mark risks a UE.
+                        // For nibbles under threshold with a sum greater than
+                        // 1, update VPD with it's non-zero symbols.
+                        o_rc = __updateVpdSumAboveOne( i_sumAboveOneCount,
+                                                       dqBitmap );
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne() "
+                                      "failed." );
+                        }
+
+                        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                PRDFSIG_TpsSymUeRisk );
+
+                        // Make the error log predictive.
+                        io_sc.service_data->setServiceCall();
+
+                        // Permanently mask mainline NCEs and TCEs.
+                        __maskMainlineNceTces<T>( iv_chip );
                     }
                 }
                 else
                 {
-                    // Placing a symbol mark risks a UE.
-                    // For nibbles under threshold with a sum greater than 1,
-                    // update VPD with it's non-zero symbols.
-                    o_rc = __updateVpdSumAboveOne(i_sumAboveOneCount, dqBitmap);
-                    if ( SUCCESS != o_rc )
-                    {
-                        PRDF_ERR(PRDF_FUNC "__updateVpdSumAboveOne() failed.");
-                    }
-
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_TpsSymUeRisk );
-
-                    // Make the error log predictive.
-                    io_sc.service_data->setServiceCall();
-
-                    // Permanently mask mainline NCEs and TCEs.
-                    __maskMainlineNceTces<T>( iv_chip );
+                    // Otherwise assume the symbol mark is fixing this bad DQ.
+                    // Set the false alarm flag to true.
+                    tpsFalseAlarm = true;
                 }
-            }
-            else
-            {
-                // Otherwise assume the symbol mark is fixing this bad DQ.
-                // Set the false alarm flag to true.
-                tpsFalseAlarm = true;
             }
         }
         // Else if bad DQ nibble count is 2 and bad chip nibble count is 0.
         else if ( 2 == i_badDqCount.count && 0 == i_badChipCount.count )
         {
-            // Permanently mask mainline NCEs and TCEs.
-            __maskMainlineNceTces<T>( iv_chip );
+            // Place a chip mark to deploy a spare if we can
+            // Note: Placing a chip mark does not risk a UE if the sum greater
+            // than 1 nibble count is == 0.
+            bool noSpareUeRisk = (i_sumAboveOneCount.count == 0);
 
-            // If the symbol mark is available.
-            if ( !symMark.isValid() )
+            // If we can place a spare
+            if ( spAvail && noSpareUeRisk  )
             {
-                // If the sum above one nibble count is = 0 or sum above one
-                // nibble count = 1 and single sym nibble count = 1
-                if ( (i_sumAboveOneCount.count == 0) ||
-                     (i_sumAboveOneCount.count == 1 &&
-                      i_singleSymCount.count == 1) )
+                // Placing a chip mark to deploy a spare does not risk a UE
+                MemMark newCM(trgt, iv_rank, i_badChipCount.symList[0].symbol);
+                o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, newCM );
+                if ( SUCCESS != o_rc )
                 {
-                    // This means we have only one more potential bad DQ, which
-                    // is correctable after a symbol mark is placed.
-                    // Place a symbol mark on this bad DQ with the highest count
-                    MemUtils::SymbolData highSym;
-                    for ( auto sym : i_badDqCount.symList )
+                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                              "failed", iv_chip->getHuid(), getKey() );
+                    break;
+                }
+            }
+            // Else we can't place a spare
+            else
+            {
+                // Permanently mask mainline NCEs and TCEs.
+                __maskMainlineNceTces<T>( iv_chip );
+
+                // If the symbol mark is available.
+                if ( !symMark.isValid() )
+                {
+                    // If the sum above one nibble count is = 0 or sum above one
+                    // nibble count = 1 and single sym nibble count = 1
+                    if ( (i_sumAboveOneCount.count == 0) ||
+                            (i_sumAboveOneCount.count == 1 &&
+                             i_singleSymCount.count == 1) )
                     {
-                        if ( sym.count > highSym.count )
-                            highSym = sym;
+                        // This means we have only one more potential bad DQ,
+                        // which is correctable after a symbol mark is placed.
+                        // Place a symbol mark on the bad DQ with the highest
+                        // count
+                        MemUtils::SymbolData highSym;
+                        for ( auto sym : i_badDqCount.symList )
+                        {
+                            if ( sym.count > highSym.count )
+                                highSym = sym;
+                        }
+
+                        MemMark newSymMark( trgt, iv_rank, highSym.symbol );
+                        o_rc = MarkStore::writeSymbolMark<T>( iv_chip, iv_rank,
+                                                              newSymMark );
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x)"
+                                      " failed", iv_chip->getHuid(), getKey() );
+                            break;
+                        }
+
+                        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                PRDFSIG_TpsSymbolMark );
+
+                        // Update VPD with both symbols.
+                        for ( auto sym : i_badDqCount.symList )
+                        {
+                            o_rc = dqBitmap.setSymbol( sym.symbol );
+                            if ( SUCCESS != o_rc )
+                            {
+                                PRDF_ERR( PRDF_FUNC "dqBitmap.setSymbol "
+                                          "failed." );
+                                break;
+                            }
+                        }
+                        if ( SUCCESS != o_rc ) break;
+                    }
+                    else
+                    {
+                        // Placing a symbol mark risks a UE.
+                        // For nibbles under threshold with a sum greater than
+                        // 1, update VPD with it's non-zero symbols.
+                        o_rc = __updateVpdSumAboveOne( i_sumAboveOneCount,
+                                                       dqBitmap );
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne() "
+                                     "failed." );
+                        }
+
+                        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                PRDFSIG_TpsSymUeRisk );
+
+                        // Make the error log predictive.
+                        io_sc.service_data->setServiceCall();
                     }
 
-                    MemMark newSymMark( trgt, iv_rank,
-                                        highSym.symbol );
-                    o_rc = MarkStore::writeSymbolMark<T>( iv_chip,
-                        iv_rank, newSymMark );
-                    if ( SUCCESS != o_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x) "
-                                  "failed", iv_chip->getHuid(), getKey() );
-                        break;
-                    }
-
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_TpsSymbolMark );
-
-                    // Update VPD with both symbols.
+                }
+                else
+                {
+                    // Otherwise assume the symbol mark is fixing a bad DQ.
+                    // Update VPD with the unrepaired symbol.
                     for ( auto sym : i_badDqCount.symList )
                     {
+                        if ( sym.symbol == symMark.getSymbol() ) continue;
+
                         o_rc = dqBitmap.setSymbol( sym.symbol );
                         if ( SUCCESS != o_rc )
                         {
@@ -614,47 +712,11 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         }
                     }
                     if ( SUCCESS != o_rc ) break;
+
+                    // Set the false alarm flag to true.
+                    tpsFalseAlarm = true;
                 }
-                else
-                {
-                    // Placing a symbol mark risks a UE.
-                    // For nibbles under threshold with a sum greater than 1,
-                    // update VPD with it's non-zero symbols.
-                    o_rc = __updateVpdSumAboveOne(i_sumAboveOneCount, dqBitmap);
-                    if ( SUCCESS != o_rc )
-                    {
-                        PRDF_ERR(PRDF_FUNC "__updateVpdSumAboveOne() failed.");
-                    }
-
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_TpsSymUeRisk );
-
-                    // Make the error log predictive.
-                    io_sc.service_data->setServiceCall();
-                }
-
             }
-            else
-            {
-                // Otherwise assume the symbol mark is fixing a bad DQ.
-                // Update VPD with the unrepaired symbol.
-                for ( auto sym : i_badDqCount.symList )
-                {
-                    if ( sym.symbol == symMark.getSymbol() ) continue;
-
-                    o_rc = dqBitmap.setSymbol( sym.symbol );
-                    if ( SUCCESS != o_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC "dqBitmap.setSymbol failed." );
-                        break;
-                    }
-                }
-                if ( SUCCESS != o_rc ) break;
-
-                // Set the false alarm flag to true.
-                tpsFalseAlarm = true;
-            }
-
         }
         // Else if bad DQ nibble count is 0 and bad chip nibble count is 1
         else if ( 0 == i_badDqCount.count && 1 == i_badChipCount.count )
@@ -684,13 +746,11 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
                                                       PRDFSIG_TpsChipMark );
-                    // Update VPD with the chip mark.
-                    o_rc = dqBitmap.setDram( i_badChipCount.symList[0].symbol );
-                    if ( SUCCESS != o_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC "dqBitmap.setDram failed." );
-                        break;
-                    }
+
+                    // Trigger VCM to see if it's contained to a single row
+                    TdEntry * vcm = new VcmEvent<T>{ iv_chip, iv_rank,
+                                                     newChipMark };
+                    MemDbUtils::pushToQueue<T>( iv_chip, vcm );
                 }
                 else
                 {
@@ -783,16 +843,10 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
                                                       PRDFSIG_TpsChipMark );
 
-                    // Update VPD with the chip mark.
-                    o_rc = dqBitmap.setDram( i_badChipCount.symList[0].symbol );
-                    if ( SUCCESS != o_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC "dqBitmap.setDram failed." );
-                        break;
-                    }
-
-                    // Make the error log predictive.
-                    io_sc.service_data->setServiceCall();
+                    // Trigger VCM to see if it's contained to a single row
+                    TdEntry * vcm = new VcmEvent<T>{ iv_chip, iv_rank,
+                                                     newChipMark };
+                    MemDbUtils::pushToQueue<T>( iv_chip, vcm );
                 }
                 else
                 {
@@ -914,7 +968,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         }
 
         // We may have placed a chip mark so do any necessary cleanup. This must
-        // be called after writing the bad DQ bitmap because the this function
+        // be called after writing the bad DQ bitmap because this function
         // will also write it if necessary.
         o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, io_sc );
         if ( SUCCESS != o_rc )
