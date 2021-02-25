@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,7 +139,7 @@ class fields<DDR4, BASE_CNFG>
             SEC_PACKAGE_TYPE_START = 0,
             SEC_PACKAGE_TYPE_LEN = 1,
 
-            // Byte 11
+            // Byte 11: NOM_VOLT: Bits 0:5 are Reserved
             OPERABLE_START = 7,
             OPERABLE_LEN = 1,
 
@@ -174,8 +174,8 @@ class fields<DDR4, BASE_CNFG>
             THERM_SENSOR_LEN = 1,
 
             // Byte 15
-            EXT_MOD_TYPE_START = 5,
-            EXT_MOD_TYPE_LEN = 3,
+            EXT_MOD_TYPE_START = 4,
+            EXT_MOD_TYPE_LEN = 4,
 
             // Byte 16 - reserved
 
@@ -913,8 +913,8 @@ class fields<DDR4, DDIMM_MODULE>
 
             // Byte 214: Four Rank Mode - DDP Compatibility - TSV 8 High Support - MRAM Support
             DDIMM_COMPAT_BYTE = 214,
-            DDIMM_COMPAT_START = 4,
-            DDIMM_COMPAT_LEN = 4,
+            DDIMM_COMPAT_START = 3,
+            DDIMM_COMPAT_LEN = 5,
 
             // Byte 215: Number of P-States
             NUM_P_STATES_BYTE = 215,
@@ -966,8 +966,8 @@ class fields<DDR4, DDIMM_MODULE>
 
             // Byte 226: PMIC0 Sequence
             PMIC0_SEQUENCE_BYTE = 226,
-            PMIC0_SEQUENCE_START = 0,
-            PMIC0_SEQUENCE_LEN = 8,
+            PMIC0_SEQUENCE_START = 5,
+            PMIC0_SEQUENCE_LEN = 3,
 
             // Byte 227: PMIC0 Manfacture ID code 1st byte
             PMIC0_MFG_CODE1_BYTE = 227,
@@ -986,8 +986,8 @@ class fields<DDR4, DDIMM_MODULE>
 
             // Byte 230: PMIC1 Sequence
             PMIC1_SEQUENCE_BYTE = 230,
-            PMIC1_SEQUENCE_START = 0,
-            PMIC1_SEQUENCE_LEN = 8,
+            PMIC1_SEQUENCE_START = 5,
+            PMIC1_SEQUENCE_LEN = 3,
 
             // Byte 231: PMIC1 Manfacture ID code 1st byte
             PMIC1_MFG_CODE1_BYTE = 231,
@@ -1248,7 +1248,7 @@ class fields<DDR4, DDIMM_MODULE>
             THERM_SENSOR_1_SECOND_I2C_ADDRESS_LEN = 8,
 
             // Byte 276: Thermal Sensor Locations
-            THERM_SENSOR_LOCATIONS_BYTE = 274,
+            THERM_SENSOR_LOCATIONS_BYTE = 276,
             THERM_SENSOR_1_SECOND_LOCATION_START = 0,
             THERM_SENSOR_1_SECOND_LOCATION_LEN = 2,
             THERM_SENSOR_0_SECOND_LOCATION_START = 2,
