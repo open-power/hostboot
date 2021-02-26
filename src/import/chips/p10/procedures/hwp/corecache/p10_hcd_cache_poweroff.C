@@ -71,8 +71,6 @@ p10_hcd_cache_poweroff(
 {
     FAPI_INF(">>p10_hcd_cache_poweroff");
 
-    fapi2::buffer<buffer_t> l_mmioData = 0;
-
     FAPI_DBG("Drop sram_enable via CPMS_L3_PFETCNTL[63:SRAM_ENABLE]");
     FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_L3_PFETCNTL_WO_CLEAR, BIT64(63) ) );
 

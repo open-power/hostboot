@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -102,6 +102,7 @@
   </entry>
   <entry>
            <name>ATTR_PROC_NX_RNG_BAR_ENABLE</name>
+          <value>0x1</value>
   </entry>
   <entry>
            <name>ATTR_PROC_NX_RNG_BAR_BASE_ADDR_OFFSET</name>
