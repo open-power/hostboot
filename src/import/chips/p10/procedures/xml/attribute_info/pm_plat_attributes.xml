@@ -2296,6 +2296,7 @@
         ON=1
     </enum>
     <initToZero/>
+    <writeable/>
     <overrideOnly/>
     <group>mma</group>
   </attribute>
@@ -2326,6 +2327,7 @@
         ON=1
     </enum>
     <initToZero/>
+    <writeable/>
     <overrideOnly/>
     <group>mma</group>
   </attribute>
@@ -2339,13 +2341,13 @@
 
     Time = 1ms * 2**ATTR_SYSTEM_MMA_POWEROFF_DELAY_POWEROF2_MS.
 
-    Valid values of  0x00 - 0x17 to yield times from 1ms to 2.3 hours -:
+    Valid values of  0x00 - 0x1B to yield times from 1ms to 24 hours -:
         0x00 - 1ms
         ...
-        0x01 - 1 second (default)
+        0x0A - 1 second (default, 2^10)
         ...
-        0x17 - 1 day
-        0x18 - 0xFD - Reserved (maps as 0x17)
+        0x1B - 1 day (2^27)
+        0x1C - 0xFD - Reserved (maps as 0x1C)
         0xFE - every QME FIT timer interrupt (~250us)
         0xFF - no power off of MMA (QME Hcode still runs; different behavior
     ATTR_SYSTEM_MMA_POWEROFF_DISABLE)
@@ -2356,6 +2358,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <writeable/>
     <default>0xA</default>
     <group>mma</group>
   </attribute>
