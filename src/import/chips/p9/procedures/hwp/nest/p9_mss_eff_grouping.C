@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2098,6 +2098,40 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief Check if sub-channels group is possible for 2 ports
+///
+/// @param[in]  i_memInfo           Memory configuration information
+/// @param[in]  i_MC_A_Id           Port A's Id
+/// @param[in]  i_MC_B_Id           Port B's Id
+///
+/// @return True if the sub-channels error; false otherwise.
+bool subChanGroupable(const EffGroupingMemInfo& i_memInfo,
+                      const uint8_t i_MC_A_Id,
+                      const uint8_t i_MC_B_Id)
+
+{
+    bool l_groupable = true;
+
+    // Check sub-channels for Axone
+    if (i_memInfo.iv_omi)
+    {
+        FAPI_DBG("subChanGroupable - Checking groupable sub-channels for P9 Axone");
+
+        // Both channels need to have the same number of subchannels configured, if
+        // one has none it cannot be used
+        if ( ( (i_memInfo.iv_SubChannelsEnabled[i_MC_A_Id] == OMISubChannelConfig::BOTH) !=
+               (i_memInfo.iv_SubChannelsEnabled[i_MC_B_Id] == OMISubChannelConfig::BOTH) ) ||
+             (i_memInfo.iv_SubChannelsEnabled[i_MC_A_Id] == OMISubChannelConfig::NONE) ||
+             (i_memInfo.iv_SubChannelsEnabled[i_MC_B_Id] == OMISubChannelConfig::NONE) )
+        {
+            l_groupable = false;
+        }
+    }
+
+    FAPI_DBG("l_groupable = %d.", l_groupable);
+    return l_groupable;
+}
+
 ///
 /// @brief Attempts to group 8 ports per group
 ///
@@ -2134,7 +2168,9 @@ void grouping_group8PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
             if ( (i_memInfo.iv_portSize[0] != i_memInfo.iv_portSize[l_pos]) ||
                  (i_mirrorRequired && ((i_memInfo.iv_SubChannelsEnabled[0] == OMISubChannelConfig::BOTH) !=
                                        (i_memInfo.iv_SubChannelsEnabled[l_pos] == OMISubChannelConfig::BOTH))) ||
-                 (i_memInfo.iv_NVdimmType[0] != i_memInfo.iv_NVdimmType[l_pos]) )
+                 (i_memInfo.iv_NVdimmType[0] != i_memInfo.iv_NVdimmType[l_pos]) ||
+                 (!subChanGroupable(i_memInfo, 0, l_pos))
+               )
             {
                 // This port does not have the same memory size as port 0, or
                 // its DIMM type (NVDIMM/RDIMM) is different than port 0, so
@@ -2260,7 +2296,9 @@ void grouping_group6PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                  (i_mirrorRequired && ((i_memInfo.iv_SubChannelsEnabled[CFG_6MCPORT[ii][0]] == OMISubChannelConfig::BOTH) !=
                                        (i_memInfo.iv_SubChannelsEnabled[CFG_6MCPORT[ii][jj]] == OMISubChannelConfig::BOTH))) ||
                  (i_memInfo.iv_NVdimmType[CFG_6MCPORT[ii][0]] !=
-                  i_memInfo.iv_NVdimmType[CFG_6MCPORT[ii][jj]]) )
+                  i_memInfo.iv_NVdimmType[CFG_6MCPORT[ii][jj]]) ||
+                 (!subChanGroupable(i_memInfo, CFG_6MCPORT[ii][0], CFG_6MCPORT[ii][jj]))
+               )
             {
                 // This port is already grouped or does not have the same
                 // size/dimm type as first entry CFG_6MCPORT[ii][0]
@@ -2406,7 +2444,9 @@ void grouping_group4PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                  (i_mirrorRequired && ((i_memInfo.iv_SubChannelsEnabled[CFG_4MCPORT[ii][0]] == OMISubChannelConfig::BOTH) !=
                                        (i_memInfo.iv_SubChannelsEnabled[CFG_4MCPORT[ii][jj]] == OMISubChannelConfig::BOTH))) ||
                  (i_memInfo.iv_NVdimmType[CFG_4MCPORT[ii][0]] !=
-                  i_memInfo.iv_NVdimmType[CFG_4MCPORT[ii][jj]]) )
+                  i_memInfo.iv_NVdimmType[CFG_4MCPORT[ii][jj]]) ||
+                 (!subChanGroupable(i_memInfo, CFG_4MCPORT[ii][0], CFG_4MCPORT[ii][jj]))
+               )
             {
                 // This port is already grouped or does not have the same
                 // size/type as first entry CFG_4MCPORT[ii][0]
@@ -2654,7 +2694,9 @@ void grouping_group3PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                                        (i_memInfo.iv_SubChannelsEnabled[CFG_3MCPORT[ii][jj]] == OMISubChannelConfig::BOTH))
                  ) ||
                  (i_memInfo.iv_NVdimmType[CFG_3MCPORT[ii][0]] !=
-                  i_memInfo.iv_NVdimmType[CFG_3MCPORT[ii][jj]]) )
+                  i_memInfo.iv_NVdimmType[CFG_3MCPORT[ii][jj]]) ||
+                 (!subChanGroupable(i_memInfo, CFG_3MCPORT[ii][0], CFG_3MCPORT[ii][jj]))
+               )
             {
                 l_canNotGroup = 1;
                 break;
@@ -2729,7 +2771,7 @@ void grouping_group3PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
             g++;
 
             FAPI_INF("grouping_group3PortsPerGroup: Successfully grouped 3 "
-                     "MC ports. CFG_3MCPORT[%d] %u, %u, %u, %u", ii,
+                     "MC ports. CFG_3MCPORT[%d] %u, %u, %u", ii,
                      CFG_3MCPORT[ii][0], CFG_3MCPORT[ii][1],
                      CFG_3MCPORT[ii][2]);
         }
@@ -2783,7 +2825,9 @@ void grouping_2ports_same_MCS(const EffGroupingMemInfo& i_memInfo,
              (i_memInfo.iv_portSize[pos + 1] != i_memInfo.iv_portSize[pos]) ||
              (i_mirrorRequired && ((i_memInfo.iv_SubChannelsEnabled[pos + 1] == OMISubChannelConfig::BOTH) !=
                                    (i_memInfo.iv_SubChannelsEnabled[pos] == OMISubChannelConfig::BOTH))) ||
-             (i_memInfo.iv_NVdimmType[pos + 1] != i_memInfo.iv_NVdimmType[pos]) )
+             (i_memInfo.iv_NVdimmType[pos + 1] != i_memInfo.iv_NVdimmType[pos]) ||
+             (!subChanGroupable(i_memInfo, pos + 1, pos))
+           )
         {
             FAPI_DBG("Port %u already grouped or has different memory size/type, skip",
                      pos + 1);
@@ -2929,7 +2973,9 @@ void grouping_2groupsOf2_cross_MCS(const EffGroupingMemInfo& i_memInfo,
                  ((!i_mirrorRequired) || ((i_memInfo.iv_SubChannelsEnabled[mcs1pos0] == OMISubChannelConfig::BOTH) ==
                                           (i_memInfo.iv_SubChannelsEnabled[mcs2pos0] == OMISubChannelConfig::BOTH))) &&
                  (i_memInfo.iv_portSize[mcs1pos0 + 1] == i_memInfo.iv_portSize[mcs2pos0 + 1]) &&
-                 (i_memInfo.iv_NVdimmType[mcs1pos0 + 1] == i_memInfo.iv_NVdimmType[mcs2pos0 + 1]) )
+                 (i_memInfo.iv_NVdimmType[mcs1pos0 + 1] == i_memInfo.iv_NVdimmType[mcs2pos0 + 1]) &&
+                 (subChanGroupable(i_memInfo, mcs1pos0 + 1, mcs2pos0 + 1))
+               )
             {
                 l_groupSuccess = true;
                 l_twoGroupOf2[0][0] = mcs1pos0;
@@ -2942,7 +2988,9 @@ void grouping_2groupsOf2_cross_MCS(const EffGroupingMemInfo& i_memInfo,
                       ((!i_mirrorRequired) || ((i_memInfo.iv_SubChannelsEnabled[mcs1pos0] == OMISubChannelConfig::BOTH) ==
                                                (i_memInfo.iv_SubChannelsEnabled[mcs2pos0 + 1] == OMISubChannelConfig::BOTH))) &&
                       (i_memInfo.iv_portSize[mcs1pos0 + 1] == i_memInfo.iv_portSize[mcs2pos0]) &&
-                      (i_memInfo.iv_NVdimmType[mcs1pos0 + 1] == i_memInfo.iv_NVdimmType[mcs2pos0]) )
+                      (i_memInfo.iv_NVdimmType[mcs1pos0 + 1] == i_memInfo.iv_NVdimmType[mcs2pos0]) &&
+                      (subChanGroupable(i_memInfo, mcs1pos0 + 1, mcs2pos0))
+                    )
             {
                 l_groupSuccess = true;
                 l_twoGroupOf2[0][0] = mcs1pos0;
@@ -3104,13 +3152,15 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         {
             FAPI_DBG("Checking if base port %u can be grouped with port %u", pos, ii);
 
-            // Can not group if this port already grouped or has different memory size
+            // Can not group if this port already grouped, has different memory size, or ungroupable sub-channels
             if ( (o_groupData.iv_portGrouped[ii]) ||
                  (i_memInfo.iv_portSize[ii] != i_memInfo.iv_portSize[pos]) ||
                  (i_mirrorRequired && ((i_memInfo.iv_SubChannelsEnabled[ii] == OMISubChannelConfig::BOTH) !=
-                                       (i_memInfo.iv_SubChannelsEnabled[pos] == OMISubChannelConfig::BOTH)) ))
+                                       (i_memInfo.iv_SubChannelsEnabled[pos] == OMISubChannelConfig::BOTH)) ) ||
+                 (!subChanGroupable(i_memInfo, ii, pos))
+               )
             {
-                FAPI_DBG("Skip port %u, it's already grouped or memsize is not equal", ii);
+                FAPI_DBG("Skip port %u, it's already grouped, diff memsize, or ungroupable sub-chanels", ii);
                 continue;
             }
 
