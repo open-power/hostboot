@@ -75,12 +75,6 @@ p10_hcd_core_poweroff(
 
     FAPI_INF(">>p10_hcd_core_poweroff");
 
-    // MMA PFET Power On/Off sequence requires CL2 PFET[ON] + CL2 RegulationFinger[ON]
-    // Stop11: Set RF -> MMA PFET[OFF] -> Drop RF -> CL2 PFET[OFF]
-    // Exit11:                                       CL2 PFET[ON] -> Set RF -> MMA PFET[ON] (keep RF on)
-    FAPI_DBG("Assert VDD_PFET_REGULATION_FINGER_EN via CPMS_CL2_PFETCNTL[8]");
-    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CL2_PFETCNTL_WO_OR, BIT64(8) ) );
-
     // Only VDD for MMA
     FAPI_TRY( p10_hcd_mma_poweroff( i_target ) );
 

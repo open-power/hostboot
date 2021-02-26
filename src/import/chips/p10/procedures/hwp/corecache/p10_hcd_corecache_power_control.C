@@ -57,7 +57,7 @@
 
 enum P10_HCD_CORECACHE_POWER_CONTROL_CONSTANTS
 {
-    HCD_CORECACHE_POW_CTRL_POLL_TIMEOUT_HW_NS   = 100000,  // 10^5ns = 100us timeout
+    HCD_CORECACHE_POW_CTRL_POLL_TIMEOUT_HW_NS   = 10000000,// 10^5ns = 100us timeout
     HCD_CORECACHE_POW_CTRL_POLL_DELAY_HW_NS     = 500,     // 500ns poll loop delay
     HCD_CORECACHE_POW_CTRL_POLL_DELAY_SIM_CYCLE = 32000,   // 32k sim cycle delay
 };
@@ -210,14 +210,14 @@ p10_hcd_corecache_power_control(
             SCOM_GET32H(l_pfet_stat);
 
 
-#ifdef PFET_FINGER0_SENSE_POLL_ENABLE //DD2 Only
+#if defined(POWER10_DD_LEVEL) && POWER10_DD_LEVEL != 10
 
-            l_expected_mask = HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS];
+            l_expected_mask = l_isON ? HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] : 0;
 
-            FAPI_DBG("PFETSTAT %x expected_finger0_sense %x", l_pfet_stat, l_expected_mask);
+            FAPI_DBG("PFETSTAT %x finger0_sense_mask %x", l_pfet_stat, HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS]);
 
             if( ( !l_attr_runn_mode ) &&
-                ( ( l_pfet_stat & l_expected_mask ) == l_isON ) )
+                ( ( l_pfet_stat & HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] ) == l_expected_mask ) )
             {
                 break;
             }
@@ -226,7 +226,7 @@ p10_hcd_corecache_power_control(
 
             l_expected_mask = l_isON ? HCD_PFET_ACTUAL_MASKS[l_isVCS] : 0;
 
-            FAPI_DBG("PFETSTAT %x expected_actual %x", l_pfet_stat, l_expected_mask);
+            FAPI_DBG("PFETSTAT %x actual_mask %x", l_pfet_stat, HCD_PFET_ACTUAL_MASKS[l_isVCS]);
 
             if( ( !l_attr_runn_mode ) &&
                 ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == l_expected_mask ) )
@@ -246,12 +246,11 @@ p10_hcd_corecache_power_control(
         }
         while( (--l_timeout) != 0 );
 
-        // DD1 only
         if( l_isVCS == 0 || l_isL3 == 1 )
         {
             FAPI_ASSERT( ( l_attr_runn_mode ?
-#ifdef PFET_FINGER0_SENSE_POLL_ENABLE
-                           ( ( l_pfet_stat & l_expected_mask ) == l_isON ) : (l_timeout != 0) ),
+#if defined(POWER10_DD_LEVEL) && POWER10_DD_LEVEL != 10
+                           ( ( l_pfet_stat & HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] ) == l_expected_mask ) : (l_timeout != 0) ),
 #else
                            ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == l_expected_mask ) :  (l_timeout != 0) ),
 #endif

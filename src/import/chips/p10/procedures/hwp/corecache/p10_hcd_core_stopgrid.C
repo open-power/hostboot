@@ -47,6 +47,7 @@
 
 #include "p10_hcd_core_stopgrid.H"
 #include "p10_hcd_mma_stopclocks.H"
+#include "p10_hcd_mma_poweroff.H"
 #include "p10_hcd_common.H"
 
 #ifdef __PPE_QME
@@ -100,6 +101,10 @@ p10_hcd_core_stopgrid(
     // not part of core_stopclocks for its pure usage at p10_stopclocks
     // shared with both stop11 and stop3 path
     FAPI_TRY( p10_hcd_mma_stopclocks( i_target ) );
+
+    //also shutdown mma power here as for WOF benefit
+    //always turn off MMA if it becomes unavailable
+    FAPI_TRY( p10_hcd_mma_poweroff( i_target ) );
 
     FAPI_DBG("Disable ECL2 Skewadjust via CPMS_CGCSR_[1:CL2_CLK_SYNC_ENABLE]");
     FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CGCSR_WO_CLEAR, BIT64(1) ) );

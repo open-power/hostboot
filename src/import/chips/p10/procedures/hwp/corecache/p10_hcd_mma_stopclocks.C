@@ -84,6 +84,9 @@ p10_hcd_mma_stopclocks(
 
     FAPI_INF(">>p10_hcd_mma_stopclocks");
 
+    FAPI_DBG("Assert MMA_FUNC_RESET via CPMS_MMAR[1]");
+    FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_MMAR_WO_OR, BIT64(1) ) );
+
     FAPI_DBG("Drop MMA_AVAILABLE via CPMS_MMAR[0]");
     FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_MMAR_WO_CLEAR, BIT64(0) ) );
 
