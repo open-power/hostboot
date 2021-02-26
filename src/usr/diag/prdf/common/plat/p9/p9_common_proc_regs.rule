@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -625,5 +625,61 @@
         name        "INT VC Informational Error Group1 Register";
         scomaddr    0x0501327D;
         capture     group intcqfir_ffdc;
+    };
+
+    register PB_IOE_FM0123_ERR
+    {
+        name        "IOE Framer0123 Error Readout Register";
+        scomaddr    0x05013425;
+        capture     group default;
+    };
+
+    register PB_IOE_FM45_ERR
+    {
+        name        "IOE Framer45 Error Readout Register";
+        scomaddr    0x05013426;
+        capture     group default;
+    };
+
+    register PB_IOE_PR0123_ERR
+    {
+        name        "IOE Parser0123 Error Readout Register";
+        scomaddr    0x05013427;
+        capture     group default;
+    };
+
+    register PB_IOE_PR45_ERR
+    {
+        name        "IOE Parser45 Error Readout Register";
+        scomaddr    0x05013428;
+        capture     group default;
+    };
+
+    register PB_IOO_FM0123_ERR
+    {
+        name        "IOO Framer0123 Error Readout Register";
+        scomaddr    0x05013825;
+        capture     group default;
+    };
+
+    register PB_IOO_FM4567_ERR
+    {
+        name        "IOO Framer4567 Error Readout Register";
+        scomaddr    0x05013826;
+        capture     group default;
+    };
+
+    register PB_IOO_PR0123_ERR
+    {
+        name        "IOO Parser0123 Error Readout Register";
+        scomaddr    0x05013827;
+        capture     group default;
+    };
+
+    register PB_IOO_PR4567_ERR
+    {
+        name        "IOO Parser4567 Error Readout Register";
+        scomaddr    0x05013828;
+        capture     group default;
     };
 
