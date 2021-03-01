@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,9 +34,12 @@
 // ----------------------------------------
 #include <exp_fw_log_data.H>
 #include <fapi2.H>
+#include <i2c_access.H>
 #include <lib/inband/exp_inband.H>
 #include <lib/inband/exp_fw_log.H>
 #include <lib/shared/exp_consts.H>
+#include <lib/i2c/exp_i2c.H>
+#include <mss_explorer_attribute_getters.H>
 #include <exp_data_structs.H>
 #include <generic/memory/lib/utils/c_str.H>
 
@@ -242,4 +245,64 @@ extern "C"
     fapi_try_exit:
         return fapi2::current_err;
     }
+
+    ///
+    /// @brief Send FW_READ_ACTIVE_LOGS and return if we've reached the end
+    /// @param[in] i_ocmbTarget the controller
+    /// @param[out] o_log_complete true if we've read the last of the lag data
+    /// @param[in,out] io_data - where to put error log data
+    ///
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode send_i2c_read_active_logs(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
+        bool& o_log_complete,
+        std::vector<uint8_t>& io_data)
+    {
+        // Response size = 1 byte length + 1 byte log_continues + up to 256 bytes data
+        constexpr uint16_t FW_READ_ACTIVE_LOGS_SIZE = 258;
+        constexpr size_t LOG_CONTINUES_BYTE = 1;
+        constexpr size_t DATA_START_BYTE = 2;
+        std::vector<uint8_t> l_data_buf;
+        std::vector<uint8_t> l_cmd;
+        l_cmd.push_back(mss::exp::i2c::cmd_id::FW_READ_ACTIVE_LOGS);
+
+        FAPI_TRY(fapi2::getI2c(i_ocmbTarget, FW_READ_ACTIVE_LOGS_SIZE, l_cmd, l_data_buf),
+                 "getI2c returned error for FW_READ_ACTIVE_LOGS operation on %s",
+                 mss::c_str(i_ocmbTarget));
+
+        o_log_complete = (l_data_buf[LOG_CONTINUES_BYTE] == 0);
+        io_data.insert(io_data.end(), l_data_buf.begin() + DATA_START_BYTE, l_data_buf.end());
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    /// See header
+    fapi2::ReturnCode exp_active_log_i2c(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
+        std::vector<uint8_t>& o_data)
+    {
+        fapi2::ATTR_MSS_EXP_I2C_FW_LOG_DUMP_DISABLE_Type l_disable_dump = false;
+        bool l_log_complete = false;
+        constexpr uint32_t MAX_SEQUENCES = BUFFER_SIZE / DATA_PER_I2C_SEQUENCE + 1;
+        uint32_t l_sequence_count = 0;
+
+        FAPI_TRY(mss::attr::get_exp_i2c_fw_log_dump_disable(i_ocmbTarget, l_disable_dump));
+
+        if (l_disable_dump == fapi2::ENUM_ATTR_MSS_EXP_I2C_FW_LOG_DUMP_DISABLE_DISABLE)
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        while (!l_log_complete && (l_sequence_count < MAX_SEQUENCES))
+        {
+            FAPI_TRY(send_i2c_read_active_logs(i_ocmbTarget, l_log_complete, o_data));
+            l_sequence_count++;
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
 }

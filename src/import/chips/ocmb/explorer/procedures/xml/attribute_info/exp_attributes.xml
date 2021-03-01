@@ -1422,4 +1422,22 @@
       <mssAccessorName>exp_intr_mask_disable</mssAccessorName>
     </attribute>
 
+    <attribute>
+      <id>ATTR_MSS_EXP_I2C_FW_LOG_DUMP_DISABLE</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          This is a lab override attribute to disable dumping Explorer
+          firmware logs via i2c in FFDC handling. Dumping out logs using
+          this method is destructive, i.e. the logs get cleared, so they
+          will not be accessible via lab tool after the initial FFDC dump.
+          FFDC may not be able to store the entire log so setting this
+          could be necessary in a lab setting.
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <enum>ENABLE = 0, DISABLE = 1</enum>
+      <writeable/>
+      <mssAccessorName>exp_i2c_fw_log_dump_disable</mssAccessorName>
+    </attribute>
+
 </attributes>

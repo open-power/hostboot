@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,9 @@ constexpr uint32_t CL407134_BUFFER_START = 0x0101CDE0;
 // This is the size of the circular buffer in Explorer RAM
 constexpr uint32_t BUFFER_SIZE = 0x4C00;
 
+// This is the amount of log data we can get from a single FW_READ_ACTIVE_LOGS command
+constexpr uint32_t DATA_PER_I2C_SEQUENCE = 256;
+
 // These are the start and end addresses of Explorer's RAM space
 constexpr uint32_t EXP_RAM_START = 0x01000000;
 constexpr uint32_t EXP_RAM_END   = 0x010FFFFF;
@@ -74,7 +77,7 @@ extern "C"
 
     ///
     /// @brief Grab active log entries from Explorer RAM
-    /// @param[in] i_target the controller
+    /// @param[in] i_ocmbTarget the controller
     /// @param[out] o_data - where to put error log data
     ///
     /// @return FAPI2_RC_SUCCESS iff ok
@@ -87,7 +90,7 @@ extern "C"
     /// @brief Grab saved log entries from Explorer SPI flash
     /// @param[in] i_image - 0 = image A, 1 = image B
     /// @param[in] i_offset - offset in image to start grabbing data (0-0x0FFFFF)
-    /// @param[in] i_target the controller
+    /// @param[in] i_ocmbTarget the controller
     /// @param[in/out] io_data -
     ///               [in] size = amount of log data to gather (0-0x10000)
     ///               [out]where to put error log data
@@ -102,7 +105,7 @@ extern "C"
 
     ///
     /// @brief Grab active log entries from Explorer RAM via MMIO
-    /// @param[in] i_target the controller
+    /// @param[in] i_ocmbTarget the controller
     /// @param[in] i_start_addr - starting MMIO address to start grabbing data
     /// @param[out] o_data -
     ///               [in] size = amount of log data to gather (0-0x10000)
@@ -120,7 +123,7 @@ extern "C"
 
     ///
     /// @brief Clear active log entries from Explorer RAM
-    /// @param[in] i_target the controller
+    /// @param[in] i_ocmbTarget the controller
     ///
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
@@ -129,12 +132,23 @@ extern "C"
 
     ///
     /// @brief Clear saved log entries from Explorer SPI flash
-    /// @param[in] i_target the controller
+    /// @param[in] i_ocmbTarget the controller
     ///
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode exp_clear_saved_log(
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget );
+
+    ///
+    /// @brief Read active log entries from Explorer using I2C commands
+    /// @param[in] i_ocmbTarget the controller
+    /// @param[out] o_data - where to put error log data
+    ///
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_active_log_i2c(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
+        std::vector<uint8_t>& o_data);
 
 }// extern C
 #endif

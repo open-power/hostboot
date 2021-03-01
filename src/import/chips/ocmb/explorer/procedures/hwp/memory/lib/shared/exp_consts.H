@@ -342,6 +342,11 @@ enum cmd_id : uint8_t
     FW_PQM_FORCE_DELAY_LINE_UPDATE           = 0x22,
     FW_TWI_POLL_ABORT                        = 0x23,
     FW_TWI_FFE_SETTINGS                      = 0x24,
+    FW_CDR_OFFSET_FROM_CAL_SET               = 0x25,
+    FW_CDR_BANDWIDTH_SET                     = 0x26,
+    FW_PRBS_CAL_STATUS_READ                  = 0x27,
+    FW_CONT_SERDES_CAL_DISABLE               = 0x28,
+    FW_READ_ACTIVE_LOGS                      = 0x29,
 };
 
 ///
