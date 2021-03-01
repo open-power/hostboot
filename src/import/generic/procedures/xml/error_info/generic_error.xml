@@ -1462,8 +1462,8 @@
         the DIMM height, and the DIMM size.
     </description>
     <ffdc>MODULE_MFG_ID</ffdc>
-    <ffdc>DIMM_HEIGHT</ffdc>
-    <ffdc>DIMM_SIZE</ffdc>
+    <ffdc>PART_NUMBER</ffdc>
+    <ffdc>RAW_CARD</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
@@ -1510,6 +1510,9 @@
     </description>
     <ffdc>SPD_COMBINED_REVISION</ffdc>
     <ffdc>MINIMUM_FUNCTIONAL_SPD_COMBINED_REVISION</ffdc>
+    <ffdc>MODULE_MFG_ID</ffdc>
+    <ffdc>PART_NUMBER</ffdc>
+    <ffdc>RAW_CARD</ffdc>
     <callout>
       <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
@@ -1530,6 +1533,9 @@
     </description>
     <ffdc>SPD_COMBINED_REVISION</ffdc>
     <ffdc>LATEST_SPD_COMBINED_REVISION</ffdc>
+    <ffdc>MODULE_MFG_ID</ffdc>
+    <ffdc>PART_NUMBER</ffdc>
+    <ffdc>RAW_CARD</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
