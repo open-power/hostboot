@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -7936,6 +7936,47 @@ public:
             }
         }
         TS_INFO("testDeconfigureMask: Ended");
+    }
+
+    /**
+     *  @brief Test CDM_DOMAIN set
+     */
+    void testCdmDomainSet()
+    {
+        TS_INFO("testCdmDomainSet: Started");
+
+        ATTR_DECONFIG_GARDABLE_type l_gardable = 0;
+        ATTR_CDM_DOMAIN_type l_cdmDomain = CDM_DOMAIN_INVALID;
+        ATTR_TYPE_type l_type = TYPE_NA;
+
+        // Go through all targets to ensure CDM_DOMAIN is set correctly
+        for (TargetIterator t_iter = targetService().begin();
+             t_iter != targetService().end();
+             ++t_iter)
+        {
+            Target* l_pTarget = *t_iter;
+
+            if (l_pTarget->tryGetAttr<ATTR_DECONFIG_GARDABLE>(l_gardable))
+            {
+                // If DECONFIG_GARDABLE is set, then a valid CDM_DOMAIN is needed
+                if (l_gardable)
+                {
+                    l_type = l_pTarget->getAttr<ATTR_TYPE>();
+                    if (!l_pTarget->tryGetAttr<ATTR_CDM_DOMAIN>(l_cdmDomain))
+                    {
+                        TS_FAIL("testCdmDomainSet: Target 0x%08X of type %d needs CDM_DOMAIN",
+                            get_huid(l_pTarget), l_type);
+                    }
+                    else if ((l_cdmDomain == CDM_DOMAIN_INVALID) ||
+                             (l_cdmDomain == CDM_DOMAIN_NONE))
+                    {
+                        TS_FAIL("testCdmDomainSet: Invalid domain %d for target 0x%08X type %d",
+                            l_cdmDomain, get_huid(l_pTarget), l_type);
+                    }
+                }
+            }
+        } // for
+        TS_INFO("testCdmDomainSet: Ended");
     }
 };
 

@@ -3449,6 +3449,10 @@
     <id>unit-l4-power9</id>
     <parent>unit</parent>
     <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>MEM</default>
+    </attribute>
+    <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
     </attribute>
@@ -4185,6 +4189,10 @@
     <id>unit-npu-power9</id>
     <parent>unit</parent>
     <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>CPU</default>
+    </attribute>
+    <attribute>
       <id>DECONFIG_GARDABLE</id>
       <default>1</default>
     </attribute>
@@ -4735,6 +4743,10 @@
   <targetType>
     <id>unit-pau-power10</id>
     <parent>unit</parent>
+    <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>IO</default>
+    </attribute>
     <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
