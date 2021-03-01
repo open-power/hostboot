@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,6 @@
 #ifndef __EEPROM_CONST_H
 #define __EEPROM_CONST_H
 
-#include <devicefw/driverif.H>
 #include <targeting/common/entitypath.H>
 #include <string.h>
 

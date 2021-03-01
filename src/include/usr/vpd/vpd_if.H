@@ -27,6 +27,7 @@
 
 #include <pnor/pnorif.H>
 #include <map>
+#include <eeprom/eeprom_const.H>
 
 namespace VPD
 {
@@ -216,5 +217,38 @@ namespace SPD
      *
      */
     void setPartAndSerialNumberAttributes( TARGETING::Target * i_target );
+
+    /**
+     * @brief Mode parameter for checkCRC routine.
+     */
+    enum CRCMODE_t
+    {
+        CHECK, // Return error if SPD has bad CRC
+        FIX, // Rewrite any CRC that miscompares, commit info log for any miscompare
+        CHECK_AND_FIX // Rewrite any CRC that miscompares, also commit visible log
+    };
+
+    /**
+     * @brief Evaluate and/or correct all CRC entries for this DDIMM
+     * @param[in] i_target - Target to fetch SPD for
+     * @param[in] i_mode - Which operations to perform
+     *      CHECK : Return error if SPD has bad CRC
+     *      FIX : Rewrite any CRC that miscompares, commit info log for any miscompare
+     *      CHECK_AND_FIX : Rewrite any CRC that miscompares, also
+     *                      commit visible log
+     * @param[in] i_location - Read from cache or hardware
+     * @return Error log
+     */
+    errlHndl_t checkCRC( TARGETING::TargetHandle_t i_target,
+                         enum CRCMODE_t i_mode,
+                         EEPROM::EEPROM_SOURCE i_location = EEPROM::AUTOSELECT );
+
+    /**
+     * @brief Forcibly write our cached SPD data out to the hardware
+     * @param[in] i_target - Target to fetch SPD for
+     * @return Error log
+     */
+    errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target );
+
 }
 #endif

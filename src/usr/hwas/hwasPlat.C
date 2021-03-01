@@ -1102,6 +1102,8 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         //  indicate we're still making progress
         INITSERVICE::sendProgressCode();
 
+        // Now that we know if the part is present or not, we can
+        //  cache the EEPROM data.
         EEPROM::cacheEepromVpd(pTarget, present);
 
         // Validate the ECC data of the VPD cache if target is a PROC and is present
@@ -1111,6 +1113,43 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             if (errl)
             {
                 break;
+            }
+        }
+        // Validate the CRC data of the VPD cache if target is a OCMB and is present
+        else if ( (TYPE_OCMB_CHIP == l_attrType) && present )
+        {
+            //P10 DD1 Workaround
+            // There is a bug on P10 DD1 that can cause SPD corruption
+            // due to some floating i2c lines.  To help the lab we will
+            // write our previously cached data out to the hardware.
+            //TODO-RTC:269550 - add dd1 check
+            HWAS_DBG( "Call SPD::fixEEPROM on %.8X", TARGETING::get_huid(pTarget) );
+            errl = SPD::fixEEPROM( pTarget );
+            if (errl)
+            {
+                // commit the error but remove all deconfig/gard
+                errl->removeGardAndDeconfigure();
+                errlCommit(errl, HWAS_COMP_ID);
+            }
+            //End P10 DD1 Workaround
+
+            // Simics currently has bad CRC for the serial number portion
+            if(!Util::isSimicsRunning())
+            {
+                HWAS_DBG( "Call SPD::checkCRC on %.8X", TARGETING::get_huid(pTarget) );
+                errl = SPD::checkCRC( pTarget, SPD::CHECK );
+                if (errl)
+                {
+                    // commit the error but remove all deconfig/gard
+                    errl->removeGardAndDeconfigure();
+                    errlCommit(errl, HWAS_COMP_ID);
+                    // SPD is busted so mark the part as not present
+                    present = false;
+                }
+            }
+            else
+            {
+                HWAS_INF( "Ignoring CRC in Simics" );
             }
         }
 

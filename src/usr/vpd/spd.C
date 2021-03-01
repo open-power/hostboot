@@ -1117,9 +1117,6 @@ bool spdPresent ( TARGETING::Target * i_target )
 
                 if ( err )
                 {
-                    // err is returned as nullptr, no need to set
-                    errlCommit(err, VPD_COMP_ID );
-
                     // exit loop and return false
                     break;
                 }
@@ -1127,6 +1124,23 @@ bool spdPresent ( TARGETING::Target * i_target )
                 TRACDCOMP( g_trac_spd,
                            INFO_MRK"Mem Type: %04x",
                            memType );
+
+                if ( !isValidDimmType(memType) )
+                {
+                    TRACFCOMP( g_trac_spd, "spdPresent> Unexpected data found on %.8X, checking CRC",
+                               TARGETING::get_huid(i_target) );
+                    //TODO-RTC:269550 - check for p10 dd1 here
+                    errlHndl_t err2 = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
+                    if( err2 )
+                    {
+                        TRACFCOMP( g_trac_spd, "spdPresent> CRC error" );
+                        delete err2;
+                        err2 = nullptr;
+
+                        // we saw something so default it to DDR4
+                        memType = SPD_DDR4_TYPE;
+                    }
+                }
 
                 // Set the SPD size
                 err = spdSetSize( *i_target, memType );
@@ -2447,9 +2461,14 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
 {
     errlHndl_t err = nullptr;
 
-    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom()");
+    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom(%.8X)",TARGETING::get_huid(i_target));
 
+    // default to a mismatch to force a refresh from the eeprom
     o_match = false;
+
+    // note if we failed with unexpected data
+    bool unexpected_data = false;
+
     do
     {
         // Read the Basic Memory Type from the Eeprom Cache
@@ -2486,6 +2505,7 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
         {
             // Leave o_match == false and exit.
             TRACFCOMP(g_trac_spd, ERR_MRK"cmpEecacheToEeprom() Invalid DIMM type found in hw copy of eeprom");
+            unexpected_data = true;
             break;
         }
 
@@ -2556,12 +2576,37 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
         {
             // CACHE and HARDWARE don't match.
             // Leave o_match == false and exit.
+            unexpected_data = true;
             break;
         }
 
         o_match = true;
 
     } while(0);
+
+    //P10 DD1 Workaround
+    // There is a bug on P10 DD1 that can cause SPD corruption
+    // due to some floating i2c lines.  To help out the lab, we
+    // want to avoid rereading the data from the physical spd eeprom
+    // unless the part is completely new.  If we find a mismatch or
+    // other unexpected data we will do a CRC check.  If we find a
+    // miscompare we will assume corruption and return that the
+    // data is in sync.  Downstream code will then push the cached
+    // copy out to the hardware.
+    if( !err && unexpected_data )
+    {
+        TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on %.8X, checking CRC",
+           TARGETING::get_huid(i_target) );
+        //TODO - check for p10 dd1 here
+        err = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
+        if( err )
+        {
+            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in hardware" );
+            o_match = true;
+            delete err;
+            err = nullptr;
+        }
+    }
 
     TRACSSCOMP( g_trac_spd, EXIT_MRK"cmpEecacheToEeprom(): returning %s errors. o_match = 0x%X ",
                 (err ? "with" : "with no"), o_match );

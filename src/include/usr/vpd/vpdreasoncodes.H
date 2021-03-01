@@ -105,6 +105,8 @@ enum vpdModuleId
     // OCMB SPD
     VPD_OCMB_GET_SPD                        = 0x90,
     VPD_OCMB_SPD_PERFORM_OP                 = 0x91,
+    // 0x92, 0x93 used
+    VPD_OCMB_CHECK_CRC                      = 0x94,
 
     VPD_READ_FROM_EEPROM_SOURCE             = 0x92,
     VPD_GET_MEMTYPE                         = 0x93,
@@ -172,6 +174,7 @@ enum vpdReasonCode
     VPD_ECC_DATA_CORRECTABLE_DATA       = VPD_COMP_ID | 0x45,
     VPD_INCORRECT_RECORD_RETURNED       = VPD_COMP_ID | 0x46,
     VPD_WRITE_MVPD_UNSUPPORTED_HBRT     = VPD_COMP_ID | 0x47,
+    VPD_DDIMM_SPD_CRC_MISCOMPARE        = VPD_COMP_ID | 0x48,
 };
 
 

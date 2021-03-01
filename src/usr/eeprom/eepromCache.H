@@ -27,6 +27,7 @@
 
 #include <eeprom/eeprom_const.H>
 #include <errl/errlentry.H>
+#include <devicefw/driverif.H>
 
 namespace EEPROM
 {

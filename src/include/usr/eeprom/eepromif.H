@@ -32,6 +32,8 @@
 
 #include <list>
 #include <eeprom/eeprom_const.H>
+#include <errl/errlentry.H>
+#include <targeting/common/attributes.H>
 
 namespace EEPROM
 {

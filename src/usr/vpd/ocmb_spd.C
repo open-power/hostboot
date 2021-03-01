@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,9 @@
 #include <eeprom/eeprom_const.H>
 #include <errl/errlentry.H>
 #include <vpd/vpdreasoncodes.H>
+#include <endian.h>
+#include <errl/errlmanager.H>
+#include <util/misc.H>
 
 #include "ocmb_spd.H"
 #include "spd.H"
@@ -380,5 +383,320 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
 
 }
 
+/**
+ * @brief Generates a 16 bit CRC in CCITT XModem mode
+ * @param[in] i_ptr - pointer to the data to compute CRC of
+ * @param[in] i_count - number of bytes in i_data for the CRC calculation
+ * @return Computed CRC value
+ *
+ * Reference code taken from JEDEC Standard No. 21-C
+ *  Page 4.1.2.12.3 ?? 44
+ */
+uint16_t jedec_Crc16( const uint8_t *i_ptr, size_t i_count )
+{
+    TRACDCOMP( g_trac_spd, "jedec_Crc16(%p,%d)", i_ptr, i_count );
+    uint16_t crc = 0;
+    for( size_t c=0; c<i_count; c++ )
+    {
+        crc = crc ^ (static_cast<uint16_t>(*(i_ptr++)) << 8);
+        for (size_t i = 0; i < 8; ++i)
+        {
+            if (crc & 0x8000)
+            {
+                crc = (crc << 1) ^ 0x1021;
+            }
+            else
+            {
+                crc = crc << 1;
+            }
+        }
+    }
+    return crc;
+}
+
+
+/**
+ * @brief Evaluate and/or correct all CRC entries for this DDIMM
+ */
+errlHndl_t checkCRC( T::TargetHandle_t i_target,
+                     enum CRCMODE_t i_mode,
+                     EEPROM::EEPROM_SOURCE i_location )
+{
+    errlHndl_t l_errl = nullptr;
+    TRACDCOMP( g_trac_spd, "Start checkCRC on %.8X", T::get_huid(i_target) );
+
+    // Define a range to compute CRC for
+    struct crc_section_t {
+        size_t start; //starting byte to check
+        size_t numbytes; //number of bytes to check plus 2 bytes for CRC itself
+
+        // store CRC values for later logging
+        uint16_t crcSPD;
+        uint16_t crcActual;
+    };
+
+    // SPD data that has CRC (per DDIMM spec)
+    crc_section_t l_sections[] = {
+        {    0,  128 }, //0:125+126:127
+        {  192,  256 }, //192:445+446:447
+        { 1024,  128 }, //1024:1149+1150:1151
+        { 1152,  128 }, //1152:1277+1278:1279
+        { 1280,  128 }, //1280:1405+1406:1407
+        { 3456,  128 }  //3456:3581+3582:3583
+    };
+
+    // Remember if we found a miscompare and if we repaired it
+    bool l_foundMiscompare = false;
+    bool l_repairedMiscompare = false;
+
+    // Compute/correct CRC for every defined section
+    for( auto l_section : l_sections )
+    {
+        uint8_t l_spddata[l_section.numbytes] = {};
+
+        l_errl = DeviceFW::deviceOp(DeviceFW::READ,
+                                    i_target,
+                                    l_spddata,
+                                    l_section.numbytes,
+                                    DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                      l_section.start,
+                                      i_location) );
+        if( l_errl )
+        {
+            TRACFCOMP( g_trac_spd,
+                      "Error fetching SPD for CRC verification" );
+            break;
+        }
+
+        // Pull the CRC from the last 2 bytes, it is stored little-endian
+        TRACDCOMP( g_trac_spd, "crcSPD=%.4X",
+                   ((reinterpret_cast<uint16_t*>(l_spddata))
+                   [(l_section.numbytes-2)/2]) );
+        l_section.crcSPD = htole16((reinterpret_cast<uint16_t*>(l_spddata))
+                                   [(l_section.numbytes-2)/2]);
+        TRACDCOMP( g_trac_spd, "crcSPD=%.4X (swap)", l_section.crcSPD );
+        TRACDBIN( g_trac_spd, "SPD Data", l_spddata, l_section.numbytes );
+
+        // Compute the CRC from the current data
+        l_section.crcActual = jedec_Crc16( l_spddata, l_section.numbytes-2 );
+        TRACDCOMP( g_trac_spd, "crcActual=%.4X", l_section.crcActual );
+
+        // Take some actions if there is a miscompare
+        if( l_section.crcSPD != l_section.crcActual )
+        {
+            TRACFCOMP( g_trac_spd,
+                   "CRC Miscompare found on %.8X for range %d, SPD=0x%.4X, Computed=0x%.4X (loc=%d)",
+                   T::get_huid(i_target), l_section.start,
+                   l_section.crcSPD, l_section.crcActual,
+                   i_location );
+            TRACFBIN( g_trac_spd, "SPD Data", l_spddata, l_section.numbytes );
+            l_foundMiscompare = true;
+
+            // Write the new CRC out to the SPD if asked
+            if( (FIX == i_mode) || (CHECK_AND_FIX == i_mode) )
+            {
+                TRACFCOMP( g_trac_spd, "Fixing CRC on %.8X", T::get_huid(i_target) );
+                l_repairedMiscompare = true;
+
+                // byteswap the data before writing it back
+                uint16_t l_swapped = htole16(l_section.crcActual);
+
+                // Write out the updated value.
+                size_t l_crcBytes = 2;
+                l_errl = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                             i_target,
+                                             &l_swapped,
+                                             l_crcBytes,
+                                             DEVICE_EEPROM_ADDRESS(
+                                                  EEPROM::VPD_PRIMARY,
+                                                  l_section.start+l_section.numbytes-2,
+                                                  i_location) );
+                if( l_errl )
+                {
+                    // commit the attempt to fix and keep going
+                    //  so that we find all errors
+                    ERRORLOG::errlCommit(l_errl, VPD_COMP_ID );
+
+                    // change the mode to CHECK to force a visible
+                    //  error below since we couldn't actually fix
+                    //  the problem
+                    i_mode = CHECK;
+                }
+            }
+        }
+    }
+
+    // Create some errors as requested if we find an error
+    if( l_foundMiscompare )
+    {
+        TRACFCOMP( g_trac_spd, "Found at least 1 miscompare, create an error" );
+        uint16_t l_failedRanges[6] = {};
+        size_t l_next = 0;
+        for( auto l_section : l_sections )
+        {
+            if( l_section.crcSPD != l_section.crcActual )
+            {
+                l_failedRanges[l_next++] = l_section.start;
+            }
+        }
+
+        /*@
+         * @errortype
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_OCMB_CHECK_CRC
+         * @reasoncode       VPD::VPD_DDIMM_SPD_CRC_MISCOMPARE
+         * @userdata1[00:31] Associated Target
+         * @userdata1[32:47] First failing range
+         * @userdata1[48:63] Second failing range
+         * @userdata2[00:63] 3rd,4th,5th,6th failing range
+         * @devdesc          CRC Miscompare in the SPD
+         * @custdesc         There is a problem with the vital product
+         *                   data of a DIMM.
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         VPD::VPD_OCMB_CHECK_CRC,
+                                         VPD::VPD_DDIMM_SPD_CRC_MISCOMPARE,
+                                TWO_UINT32_TO_UINT64(T::get_huid(i_target),
+                                    l_failedRanges[0]
+                                    | (l_failedRanges[1] >> 16)),
+                                FOUR_UINT16_TO_UINT64(l_failedRanges[2],
+                                    l_failedRanges[3],
+                                    l_failedRanges[4],
+                                    l_failedRanges[5]));
+
+        // Default to deconfiguring the part immediately.
+        // This should allow us to mark the target as present, but non-functional
+        HWAS::DeconfigEnum l_deconfig = HWAS::DECONFIG;
+        if( CHECK_AND_FIX == i_mode )
+        {
+            // Since we fixed the problem, do not deconfigure the part
+            l_deconfig = HWAS::NO_DECONFIG;
+        }
+
+        l_errl->addHwCallout(i_target,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             l_deconfig,
+                             HWAS::GARD_NULL);
+
+        l_errl->collectTrace( "SPD", 1*KILOBYTE );
+
+        // If we're explicitly trying to fix things, only make an info log
+        if( FIX == i_mode )
+        {
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            ERRORLOG::errlCommit(l_errl, VPD_COMP_ID );
+        }
+        // Commit the log inline and don't return the error if asked
+        else if( CHECK_AND_FIX == i_mode )
+        {
+            ERRORLOG::errlCommit(l_errl, VPD_COMP_ID );
+        }
+    }
+
+    // If we repaired something check to see if the repair worked
+    if( l_repairedMiscompare )
+    {
+        TRACFCOMP( g_trac_spd, "Rechecking repaired SPD" );
+        // Force a check of the raw hardware
+        errlHndl_t l_checkErrl = checkCRC( i_target,
+                                           CHECK,
+                                           EEPROM::HARDWARE );
+        if( l_checkErrl )
+        {
+            TRACFCOMP( g_trac_spd, "Recheck of repaired SPD still shows CRC errors" );
+            if( !l_errl )
+            {
+                l_errl = l_checkErrl;
+            }
+            else
+            {
+                l_checkErrl->plid(l_errl->plid());
+                ERRORLOG::errlCommit(l_checkErrl, VPD_COMP_ID );
+            }
+        }
+        else
+        {
+            TRACFCOMP( g_trac_spd, "All errors repaired" );
+        }
+    }
+
+    TRACDCOMP( g_trac_spd, "Finish checkCRC on %.8X", T::get_huid(i_target) );
+    return l_errl;
+}
+
+/**
+ * @brief Forcibly write our cached SPD data out to the hardware
+ */
+errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target )
+{
+    errlHndl_t l_errl = nullptr;
+    size_t l_spdSize = 4*KILOBYTE;
+    uint8_t l_spdData[l_spdSize] = {0};
+
+    do {
+        // Before doing anything, run a check against the EEPROM just
+        //  to see if the data was bad
+        l_errl = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
+        if( l_errl )
+        {
+            TRACFCOMP( g_trac_spd, "fixEEPROM> Errors found in precheck" );
+            //commit as informational
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            ERRORLOG::errlCommit(l_errl, VPD_COMP_ID );
+        }
+
+        // Read the data from the cache
+        l_errl = DeviceFW::deviceOp(DeviceFW::READ,
+                                    i_target,
+                                    l_spdData,
+                                    l_spdSize,
+                                    DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                                          0,
+                                                          EEPROM::CACHE) );
+        if( l_errl )
+        {
+            TRACFCOMP( g_trac_spd, "Error reading SPD from cache on %.8X", T::get_huid(i_target) );
+            break;
+        }
+
+        // Before pushing our cache out to hardware, make sure it isn't also corrupted
+        l_errl = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::CACHE );
+        if( l_errl )
+        {
+            TRACFCOMP( g_trac_spd, "fixEEPROM> Errors found in cache!" );
+            l_errl->collectTrace( "SPD", 1*KILOBYTE );
+
+            // Simics currently has bad CRC for the serial number portion
+            if(Util::isSimicsRunning())
+            {
+                TRACFCOMP( g_trac_spd, "fixEEPROM> Ignoring error in Simics" );
+                delete l_errl;
+                l_errl = nullptr;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        TRACFCOMP( g_trac_spd,
+                   "fixEEPROM> Pushing cached SPD out to EEPROM on %.8X",
+                   T::get_huid(i_target) );
+        l_errl = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                     i_target,
+                                     l_spdData,
+                                     l_spdSize,
+                                     DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                     0,
+                                     EEPROM::HARDWARE) );
+        if( l_errl )
+        {
+            TRACFCOMP( g_trac_spd, "Error writing SPD on %.8X", T::get_huid(i_target) );
+            break;
+        }
+    } while(0);
+
+    return l_errl;
+}
 
 } // End of SPD namespace

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -545,8 +545,10 @@ static void printHex(char *i_buf, const size_t i_size)
     size_t pos = 0;
     // Limit dump to first 32 bytes.
     for ( size_t i = 0; i < std::min( i_size, 32ul ); ++i )
+    {
         pos += sprintf( byte_str + pos, "%s%02X", (i % 4) == 0 ? " " : "",
                         i_buf[i] );
+    }
     CONSOLE::displayf(CONSOLE::DEFAULT,  NULL, "    %s", byte_str );
 }
 #endif

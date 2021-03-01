@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -61,6 +61,7 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     START_SIMICS_CMD+=" sbe_script_to_run=${SBE_SCRIPT_TO_RUN}"
     START_SIMICS_CMD+=" sbe_scripts_path=${SBE_SCRIPTS_PATH}"
     START_SIMICS_CMD+=" enable_lpc_console=TRUE"
+    START_SIMICS_CMD+=" dimm_type=4U"
     START_SIMICS_CMD+=" fused_core=TRUE"
     START_SIMICS_CMD+=" xive_gen=2"
     START_SIMICS_CMD+=" bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE"
