@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -225,22 +225,6 @@ static const uint32_t L3_MISC_L3CERRS_MODE_REG1_CINJ_LCO_DIS_CFG = 38;
 //<< [L3_MISC_L3CERRS_MODE_REG1]
 // c/reg00003.H
 
-//>> [QME_CDBA]
-static const uint64_t QME_CDBA = 0x200e0800ull;
-
-static const uint32_t QME_CDBA_MESSAGE_NUMBER = 0;
-static const uint32_t QME_CDBA_MESSAGE_NUMBER_LEN = 8;
-//<< [QME_CDBA]
-// c/reg00003.H
-
-//>> [QME_CSIR]
-static const uint64_t QME_CSIR = 0x200e087cull;
-
-static const uint32_t QME_CSIR_PMSR_INSTR_DATA = 36;
-static const uint32_t QME_CSIR_PMSR_INSTR_DATA_LEN = 22;
-//<< [QME_CSIR]
-// c/reg00003.H
-
 //>> [NC_NCCHTM_NCCHTSC_HTM_CTRL]
 static const uint64_t NC_NCCHTM_NCCHTSC_HTM_CTRL = 0x20010685ull;
 
@@ -261,6 +245,22 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP = 13;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415 = 14;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415_LEN = 2;
 //<< [NC_NCCHTM_NCCHTSC_HTM_CTRL]
+// c/reg00003.H
+
+//>> [QME_CDBA]
+static const uint64_t QME_CDBA = 0x200e0800ull;
+
+static const uint32_t QME_CDBA_MESSAGE_NUMBER = 0;
+static const uint32_t QME_CDBA_MESSAGE_NUMBER_LEN = 8;
+//<< [QME_CDBA]
+// c/reg00003.H
+
+//>> [QME_CSIR]
+static const uint64_t QME_CSIR = 0x200e087cull;
+
+static const uint32_t QME_CSIR_PMSR_INSTR_DATA = 36;
+static const uint32_t QME_CSIR_PMSR_INSTR_DATA_LEN = 22;
+//<< [QME_CSIR]
 // c/reg00003.H
 
 //>>THE END<<

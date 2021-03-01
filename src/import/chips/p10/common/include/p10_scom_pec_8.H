@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -166,14 +166,6 @@ static const uint32_t OPCG_REG0_RUNN_HLD_DLY_EN = 15;
 static const uint32_t OPCG_REG0_LOOP_COUNT = 21;
 static const uint32_t OPCG_REG0_LOOP_COUNT_LEN = 43;
 //<< [OPCG_REG0]
-// pec/reg00008.H
-
-//>> [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3]
-static const uint64_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3 = 0x0301180full;
-
-static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3_PE_TOPOLOGY_ID_REG3 = 0;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3_PE_TOPOLOGY_ID_REG3_LEN = 40;
-//<< [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3]
 // pec/reg00008.H
 
 //>> [SCAN_REGION_TYPE]

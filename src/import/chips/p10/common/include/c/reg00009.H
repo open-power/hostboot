@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3706,6 +3706,111 @@ fapi_try_exit:
 }
 //<< GET_[NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_COUNT]
 
+//>> PREP_[NC_NCCHTM_NCCHTSC_HTM_LAST]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_NC_NCCHTM_NCCHTSC_HTM_LAST(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = NC_NCCHTM_NCCHTSC_HTM_LAST;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[NC_NCCHTM_NCCHTSC_HTM_LAST]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_LAST]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_NC_NCCHTM_NCCHTSC_HTM_LAST(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = NC_NCCHTM_NCCHTSC_HTM_LAST;
+#endif
+    return fapi2::getScom(i_target, NC_NCCHTM_NCCHTSC_HTM_LAST, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_LAST]
+
+//>> PUT_[NC_NCCHTM_NCCHTSC_HTM_LAST]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_NC_NCCHTM_NCCHTSC_HTM_LAST(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_LAST));
+#endif
+    return fapi2::putScom(i_target, NC_NCCHTM_NCCHTSC_HTM_LAST, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[NC_NCCHTM_NCCHTSC_HTM_LAST]
+
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_LAST));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS,
+           NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_LAST));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS,
+           NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_LAST));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS,
+           NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
+
 //>> PREP_[QME_CDBB]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_QME_CDBB(const fapi2::Target<K, M, V>& i_target)
@@ -3812,111 +3917,6 @@ fapi_try_exit:
 }
 //<< GET_[QME_CDBB_MESSAGE_NUMBER]
 
-
-//>> PREP_[NC_NCCHTM_NCCHTSC_HTM_LAST]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_NC_NCCHTM_NCCHTSC_HTM_LAST(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NC_NCCHTM_NCCHTSC_HTM_LAST;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PREP_[NC_NCCHTM_NCCHTSC_HTM_LAST]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_LAST]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_NC_NCCHTM_NCCHTSC_HTM_LAST(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NC_NCCHTM_NCCHTSC_HTM_LAST;
-#endif
-    return fapi2::getScom(i_target, NC_NCCHTM_NCCHTSC_HTM_LAST, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_LAST]
-
-//>> PUT_[NC_NCCHTM_NCCHTSC_HTM_LAST]
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_NC_NCCHTM_NCCHTSC_HTM_LAST(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_LAST));
-#endif
-    return fapi2::putScom(i_target, NC_NCCHTM_NCCHTSC_HTM_LAST, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-//<< PUT_[NC_NCCHTM_NCCHTSC_HTM_LAST]
-
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_LAST));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS,
-           NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
-
-//>> SET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
-static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_LAST));
-#endif
-    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS,
-           NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-//<< SET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
-
-//>> GET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
-static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_LAST));
-#endif
-    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS,
-           NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-//<< GET_[NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS]
 
 //>>THE END<<
 

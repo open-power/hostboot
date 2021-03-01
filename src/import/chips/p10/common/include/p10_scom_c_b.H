@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,6 +188,23 @@ static const uint64_t EC_PC_SCR0 = 0x20020486ull;
 //<< [EC_PC_SCR0]
 // c/reg00011.H
 
+//>> [NC_NCCHTM_NCCHTSC_HTM_MEM]
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_MEM = 0x20010681ull;
+
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_ALLOC = 0;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SCOPE = 1;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SCOPE_LEN = 3;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_PRIORITY = 4;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE_SMALL = 5;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SPARE = 6;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SPARE_LEN = 6;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_BASE = 12;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_BASE_LEN = 28;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE = 40;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE_LEN = 9;
+//<< [NC_NCCHTM_NCCHTSC_HTM_MEM]
+// c/reg00011.H
+
 //>> [NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG1]
 static const uint64_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG1 = 0x20010655ull;
 
@@ -242,23 +259,6 @@ static const uint32_t QME_PSCRS1_RL_LEN = 4;
 static const uint32_t QME_PSCRS1_PLS = 24;
 static const uint32_t QME_PSCRS1_PLS_LEN = 4;
 //<< [QME_PSCRS1]
-// c/reg00011.H
-
-//>> [NC_NCCHTM_NCCHTSC_HTM_MEM]
-static const uint64_t NC_NCCHTM_NCCHTSC_HTM_MEM = 0x20010681ull;
-
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_ALLOC = 0;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SCOPE = 1;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SCOPE_LEN = 3;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_PRIORITY = 4;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE_SMALL = 5;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SPARE = 6;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SPARE_LEN = 6;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_BASE = 12;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_BASE_LEN = 28;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE = 40;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE_LEN = 9;
-//<< [NC_NCCHTM_NCCHTSC_HTM_MEM]
 // c/reg00011.H
 
 //>>THE END<<

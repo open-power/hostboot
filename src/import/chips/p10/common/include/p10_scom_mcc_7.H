@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,6 +124,14 @@ static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A_LEN = 64;
 //<< [CRYPTO_ENCRYPT_CRYPTOKEY1A]
 // mcc/reg00007.H
 
+//>> [USTL_USTLCFG2]
+static const uint64_t USTL_USTLCFG2 = 0x0c010e17ull;
+
+static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH = 0;
+static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH_LEN = 6;
+//<< [USTL_USTLCFG2]
+// mcc/reg00007.H
+
 //>> [WRITE_READCFG]
 static const uint64_t WRITE_READCFG = 0x0c010f4dull;
 
@@ -160,14 +168,6 @@ static const uint32_t WRITE_READCFG_READCFG_RESERVED_38_39_LEN = 2;
 static const uint32_t P10_20_WRITE_READCFG_CFG_DD2_OVERCOMMIT_CREDITS = 38; // p10:20,
 static const uint32_t P10_20_WRITE_READCFG_CFG_DD2_OVERCOMMIT_CREDITS_LEN = 2;
 //<< [WRITE_READCFG]
-// mcc/reg00007.H
-
-//>> [USTL_USTLCFG2]
-static const uint64_t USTL_USTLCFG2 = 0x0c010e17ull;
-
-static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH = 0;
-static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH_LEN = 6;
-//<< [USTL_USTLCFG2]
 // mcc/reg00007.H
 
 //>>THE END<<

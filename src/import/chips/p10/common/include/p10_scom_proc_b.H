@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -232,8 +232,11 @@ static const uint64_t TP_TPBR_AD_XSCOM_BASE_REG = 0x00090010ull;
 static const uint32_t TP_TPBR_AD_XSCOM_BASE_REG_BASE = 8;
 static const uint32_t TP_TPBR_AD_XSCOM_BASE_REG_BASE_LEN = 22;
 static const uint32_t TP_TPBR_AD_XSCOM_BASE_REG_RESET = 61;
+static const uint32_t P10_20_TP_TPBR_AD_XSCOM_BASE_REG_DISABLE_LOCAL_SHORTCUT = 61; // p10:20,
 static const uint32_t TP_TPBR_AD_XSCOM_BASE_REG_DISABLE = 62;
+static const uint32_t P10_20_TP_TPBR_AD_XSCOM_BASE_REG_RESET = 62; // p10:20,
 static const uint32_t TP_TPBR_AD_XSCOM_BASE_REG_DISABLE_LOCAL_SHORTCUT = 63;
+static const uint32_t P10_20_TP_TPBR_AD_XSCOM_BASE_REG_DISABLE = 63; // p10:20,
 //<< [TP_TPBR_AD_XSCOM_BASE_REG]
 // proc/reg00056.H
 

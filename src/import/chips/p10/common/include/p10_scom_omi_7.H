@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,8 +49,15 @@ static const uint32_t CYA_BITS_BITS0_RSVD0_LEN = 22;
 static const uint32_t CYA_BITS_BITS1_RSVD0 = 1;
 static const uint32_t CYA_BITS_BITS1_RSVD0_LEN = 22;
 static const uint32_t P10_20_CYA_BITS_BITS0_RSVD0 = 1; // p10:20,
-static const uint32_t P10_20_CYA_BITS_BITS0_RSVD0_LEN = 21;
-static const uint32_t P10_20_CYA_BITS_CS_STS_REG_UPDATE = 22; // p10:20,
+static const uint32_t P10_20_CYA_BITS_BITS0_RSVD0_LEN = 19;
+static const uint32_t P10_20_CYA_BITS_BITS1_RSVD0 = 1; // p10:20,
+static const uint32_t P10_20_CYA_BITS_BITS1_RSVD0_LEN = 19;
+static const uint32_t P10_20_CYA_BITS_CS_DEAD_CYCLE0 = 20; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_DEAD_CYCLE1 = 20; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_ALL_INIT_DONES0 = 21; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_ALL_INIT_DONES1 = 21; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_STS_REG_UPDATE0 = 22; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_STS_REG_UPDATE1 = 22; // p10:20,
 static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE_SELECT0 = 23;
 static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE_SELECT1 = 23;
 static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE0 = 24;
@@ -62,10 +69,19 @@ static const uint32_t CYA_BITS_BITS0_RSVD1_LEN = 12;
 static const uint32_t CYA_BITS_BITS1_RSVD1 = 32;
 static const uint32_t CYA_BITS_BITS1_RSVD1_LEN = 12;
 static const uint32_t P10_20_CYA_BITS_BITS0_RSVD1 = 32; // p10:20,
-static const uint32_t P10_20_CYA_BITS_BITS0_RSVD1_LEN = 9;
-static const uint32_t P10_20_CYA_BITS_CS_EDPL = 41; // p10:20,
-static const uint32_t P10_20_CYA_BITS_RPB_READ_EN = 42; // p10:20,
-static const uint32_t P10_20_CYA_BITS_EARLY_RL_DETECT = 43; // p10:20,
+static const uint32_t P10_20_CYA_BITS_BITS0_RSVD1_LEN = 7;
+static const uint32_t P10_20_CYA_BITS_BITS1_RSVD1 = 32; // p10:20,
+static const uint32_t P10_20_CYA_BITS_BITS1_RSVD1_LEN = 7;
+static const uint32_t P10_20_CYA_BITS_CS_HW554143_0 = 39; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_HW554143_1 = 39; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_HW551927_0 = 40; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_HW551927_1 = 40; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_EDPL0 = 41; // p10:20,
+static const uint32_t P10_20_CYA_BITS_CS_EDPL1 = 41; // p10:20,
+static const uint32_t P10_20_CYA_BITS_RPB_READ_EN0 = 42; // p10:20,
+static const uint32_t P10_20_CYA_BITS_RPB_READ_EN1 = 42; // p10:20,
+static const uint32_t P10_20_CYA_BITS_EARLY_RL_DETECT0 = 43; // p10:20,
+static const uint32_t P10_20_CYA_BITS_EARLY_RL_DETECT1 = 43; // p10:20,
 static const uint32_t CYA_BITS_TX_PSAVE_DELAY_TIMER0 = 44;
 static const uint32_t CYA_BITS_TX_PSAVE_DELAY_TIMER0_LEN = 3;
 static const uint32_t CYA_BITS_TX_PSAVE_DELAY_TIMER1 = 44;

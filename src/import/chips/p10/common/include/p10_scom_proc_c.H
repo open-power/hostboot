@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -507,7 +507,7 @@ static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_PIB_SND_BUFFER1_REGISTER_FSI_BYTE
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_PIB_SND_BUFFER1_REGISTER_DMA_PIB_SND_BUF1_REG_DATA0 = 0;
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_PIB_SND_BUFFER1_REGISTER_DMA_PIB_SND_BUF1_REG_DATA0_LEN = 32;
 //<< [TP_TPVSB_FSI_W_SHIFT_DMA_PIB_SND_BUFFER1_REGISTER]
-// proc/reg00064.H
+// proc/reg00063.H
 
 //>>THE END<<
 

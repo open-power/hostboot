@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,6 +185,43 @@ static const uint32_t TP_TPBR_PSI_WRAP_TX_ERROR_REG_3_PSIRFACC_TDL_FSM_PCK = 25;
 static const uint32_t TP_TPBR_PSI_WRAP_TX_ERROR_REG_4_PSIRFACC_TXSC_PCK = 26;
 static const uint32_t TP_TPBR_PSI_WRAP_TX_ERROR_REG_3_PSIRFACC_TDL_RETRY_ERR = 27;
 //<< [TP_TPBR_PSI_WRAP_TX_ERROR_REG]
+// proc/reg00042.H
+
+//>> [TP_TPCHIP_NET_PCBSLPERV_ERROR_REG]
+static const uint64_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG = 0x010f001full;
+
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_CE_ERROR = 0;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_CHIPLET_ERRORS = 1;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_CHIPLET_ERRORS_LEN = 3;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_PARITY_ERROR = 4;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_DATA_BUFFER_ERROR = 5;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_ADDR_BUFFER_ERROR = 6;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_PCB_FSM_ERROR = 7;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_CL_FSM_ERROR = 8;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_INT_RX_FSM_ERROR = 9;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_INT_TX_FSM_ERROR = 10;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_INT_TYPE_ERROR = 11;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_CL_DATA_ERROR = 12;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_INFO_ERROR = 13;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_SEQ_ERROR = 14;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_CHIPLET_ATOMIC_LOCK_ERROR = 15;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_PCB_INTERFACE_ERROR = 16;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_CHIPLET_OFFLINE = 17;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_EDRAM_SEQUENCE_ERR = 18;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_CTRL_REG_PARITY_ERROR = 19;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_ADDRESS_REG_PARITY_ERROR = 20;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_TIMEOUT_REG_PARITY_ERROR = 21;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_CONFIG_REG_PARITY_ERROR = 22;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_DIV_REG_PARITY_ERROR = 23;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_PLL_UNLOCK_ERROR = 24;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_PLL_UNLOCK_ERROR_LEN = 8;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_QME_INTERFACE_PARITY_ERROR = 32;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_QME_DATA_PARITY_ERROR = 33;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_QME_ADDR_PARITY_ERROR = 34;
+static const uint32_t TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_QME_FSM_ERROR = 35;
+static const uint32_t P10_20_TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_QME_RISING_EDGE_DETECTED_ON_QUIESCE = 36; // p10:20,
+static const uint32_t P10_20_TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE = 37; // p10:20,
+//<< [TP_TPCHIP_NET_PCBSLPERV_ERROR_REG]
 // proc/reg00042.H
 
 //>> [TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIDBGPRO]

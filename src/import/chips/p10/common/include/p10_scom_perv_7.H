@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,6 +145,8 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_RW = 0x00050016ull;
 
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_SYS0_RX_REFCLK_TERM = 0;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_SYS0_RX_REFCLK_TERM_LEN = 2;
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_0_3 = 0; // p10:20,
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_0_3_LEN = 4;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_SYS1_RX_REFCLK_TERM = 2;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_SYS1_RX_REFCLK_TERM_LEN = 2;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_PCI0_RX_REFCLK_TERM = 4;
@@ -153,6 +155,15 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_PCI1_RX_REFCLK_TERM = 6;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_PCI1_RX_REFCLK_TERM_LEN = 2;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_8_31 = 8;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_8_31_LEN = 24;
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_CHKSW_DD1_HW547515_RCS_EVENTLOG = 8; // p10:20,
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_9_15 = 9; // p10:20,
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_ROOT_CTRL6_9_15_LEN = 7;
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_DESKEW_SEL_A = 16; // p10:20,
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_DESKEW_SEL_A_LEN = 4;
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_DESKEW_SEL_B = 20; // p10:20,
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_DESKEW_SEL_B_LEN = 4;
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_RCS_CONTROL_7_0 = 24; // p10:20,
+static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_RCS_CONTROL_7_0_LEN = 8;
 //<< [FSXCOMP_FSXLOG_ROOT_CTRL6]
 // perv/reg00014.H
 

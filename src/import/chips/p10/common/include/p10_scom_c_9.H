@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,20 +133,20 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_COUNT_LEN = 4;
 //<< [NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS]
 // c/reg00009.H
 
-//>> [QME_CDBB]
-static const uint64_t QME_CDBB = 0x200e0804ull;
-
-static const uint32_t QME_CDBB_MESSAGE_NUMBER = 0;
-static const uint32_t QME_CDBB_MESSAGE_NUMBER_LEN = 8;
-//<< [QME_CDBB]
-// c/reg00009.H
-
 //>> [NC_NCCHTM_NCCHTSC_HTM_LAST]
 static const uint64_t NC_NCCHTM_NCCHTSC_HTM_LAST = 0x20010683ull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS = 12;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN = 45;
 //<< [NC_NCCHTM_NCCHTSC_HTM_LAST]
+// c/reg00009.H
+
+//>> [QME_CDBB]
+static const uint64_t QME_CDBB = 0x200e0804ull;
+
+static const uint32_t QME_CDBB_MESSAGE_NUMBER = 0;
+static const uint32_t QME_CDBB_MESSAGE_NUMBER_LEN = 8;
+//<< [QME_CDBB]
 // c/reg00009.H
 
 //>>THE END<<

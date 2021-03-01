@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -16999,6 +16999,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_DESKE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI_BYTE,
                            FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_WO_CLEAR));
 #endif
@@ -17018,6 +17019,7 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_DESKE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI_BYTE,
                            FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_WO_CLEAR));
 #endif
@@ -17037,6 +17039,7 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_DESKE
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
     FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI_BYTE,
                            FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_WO_CLEAR));
 #endif
@@ -17050,6 +17053,69 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_DESKEW]
+
+//>> SET_[P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8,
+           P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8]
+
+//>> SET_[P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_WO_CLEAR));
+#endif
+    return o_data.insertFromRight<P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8,
+           P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8]
+
+//>> GET_[P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI, FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_WO_CLEAR));
+#endif
+    return i_data.extractToRight<P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8,
+           P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_RCS_CONTROL_10_8]
 
 //>> SET_[FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FILT]
 static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FILT(fapi2::buffer<uint64_t>& i_data,

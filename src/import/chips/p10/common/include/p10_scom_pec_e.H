@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -194,14 +194,6 @@ static const uint32_t PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_DISABLE_CQ_TCE_ARBITRATI
 static const uint32_t PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_DISABLE_MC_PREFETCH = 62;
 static const uint32_t PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_IGNORE_SFSTAT = 63;
 //<< [PB_PBCQ_PEPBREGS_PBCQHWCFG_REG]
-// pec/reg00014.H
-
-//>> [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2]
-static const uint64_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2 = 0x0301180eull;
-
-static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2_PE_TOPOLOGY_ID_REG2 = 0;
-static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2_PE_TOPOLOGY_ID_REG2_LEN = 40;
-//<< [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2]
 // pec/reg00014.H
 
 //>> [SLAVE_CONFIG_REG]

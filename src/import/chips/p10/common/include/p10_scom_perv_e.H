@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -404,7 +404,7 @@ static const uint32_t TOD_SEC_PORT_1_CTRL_REG_SEC_X7_PORT_1_TX_ENABLE = 27;
 static const uint32_t TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31 = 28;
 static const uint32_t TOD_SEC_PORT_1_CTRL_REG_REG_0X04_SPARE_28_31_LEN = 4;
 //<< [TOD_SEC_PORT_1_CTRL_REG]
-// perv/reg00029.H
+// perv/reg00028.H
 
 //>> [TOD_S_PATH_CTRL_REG]
 static const uint64_t TOD_S_PATH_CTRL_REG = 0x00040005ull;
@@ -436,7 +436,7 @@ static const uint32_t TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION
 static const uint32_t TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX = 32;
 static const uint32_t TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_MISS_COUNT_MAX_LEN = 8;
 //<< [TOD_S_PATH_CTRL_REG]
-// perv/reg00029.H
+// perv/reg00028.H
 
 //>> [TOD_TX_TTYPE_CTRL_REG]
 static const uint64_t TOD_TX_TTYPE_CTRL_REG = 0x00040027ull;

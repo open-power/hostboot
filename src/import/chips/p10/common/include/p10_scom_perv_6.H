@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -184,7 +184,7 @@ static const uint32_t LOCAL_XSTOP_MASK_13 = 13;
 static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
 static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
 //<< [LOCAL_XSTOP_MASK]
-// perv/reg00013.H
+// perv/reg00012.H
 
 //>> [REC_ERR_MST14_REG2]
 static const uint64_t REC_ERR_MST14_REG2 = 0x000f007aull;
@@ -238,7 +238,7 @@ static const uint32_t REC_ERR_MST14_REG2_47_MST14_RESPONSE_BIT = 60;
 static const uint32_t REC_ERR_MST14_REG2_47_MST14_ERROR_CODE = 61;
 static const uint32_t REC_ERR_MST14_REG2_47_MST14_ERROR_CODE_LEN = 3;
 //<< [REC_ERR_MST14_REG2]
-// perv/reg00013.H
+// perv/reg00012.H
 
 //>> [TOD_M_PATH_0_STEP_STEER_REG]
 static const uint64_t TOD_M_PATH_0_STEP_STEER_REG = 0x0004000eull;
