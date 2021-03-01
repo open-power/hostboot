@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -105,12 +105,13 @@
         AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.
       </description>
       <ffdc>TARGET</ffdc>
+      <ffdc>BACKPLANE</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
       <ffdc>ROOT_CTRL1</ffdc>
-    <callout>
-      <target>VRM</target>
-      <priority>MEDIUM</priority>
+     <callout>
+      <target>SPIVID_SLAVE_PART</target>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>BACKPLANE</target>
@@ -128,12 +129,13 @@
         AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.
       </description>
       <ffdc>TARGET</ffdc>
+      <ffdc>BACKPLANE</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
       <ffdc>ROOT_CTRL1</ffdc>
-    <callout>
-      <target>VRM</target>
-      <priority>MEDIUM</priority>
+     <callout>
+      <target>SPIVID_SLAVE_PART</target>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>BACKPLANE</target>
@@ -151,10 +153,11 @@
         AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.
       </description>
       <ffdc>TARGET</ffdc>
+      <ffdc>BACKPLANE</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
-    <callout>
-      <target>VRM</target>
+     <callout>
+      <target>SPIVID_SLAVE_PART</target>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -177,10 +180,11 @@
         AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.
       </description>
       <ffdc>TARGET</ffdc>
+      <ffdc>BACKPLANE</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
-    <callout>
-      <target>VRM</target>
+     <callout>
+      <target>SPIVID_SLAVE_PART</target>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -203,10 +207,11 @@
         AVS command failed. Valid data sent but no action is taken due to unavailable resource.
       </description>
       <ffdc>TARGET</ffdc>
+      <ffdc>BACKPLANE</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
-    <callout>
-      <target>VRM</target>
+     <callout>
+      <target>SPIVID_SLAVE_PART</target>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -239,9 +244,9 @@
       <target>TARGET</target>
       <priority>LOW</priority>
     </callout>
-    <callout>
-      <target>VRM</target>
-      <priority>MEDIUM</priority>
+     <callout>
+      <target>SPIVID_SLAVE_PART</target>
+      <priority>HIGH</priority>
     </callout>
     </hwpError>
     <!-- ******************************************************************** -->

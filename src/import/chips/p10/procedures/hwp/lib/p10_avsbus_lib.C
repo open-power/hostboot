@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -477,6 +477,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
     uint32_t l_rsp_computed_crc;
     o_goodResponse = false;
+    auto sys_target = i_target.getParent<fapi2::TARGET_TYPE_SYSTEM>();
 
     // Read the data response register
     FAPI_DBG("Reading the OS2SRD register to check status");
@@ -527,8 +528,8 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_ZERO_RESP_ERROR()
                         .set_TARGET(i_target)
+                        .set_BACKPLANE(sys_target)
                         .set_BUS(i_avsBusNum)
-                        .set_ROOT_CTRL1(l_data64)
                         .set_BRIDGE(i_o2sBridgeNum)
                         .set_ROOT_CTRL1(l_data64),
                         "ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
@@ -539,6 +540,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_NO_RESP_ERROR()
                         .set_TARGET(i_target)
+                        .set_BACKPLANE(sys_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum)
                         .set_ROOT_CTRL1(l_data64),
@@ -550,6 +552,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR()
                         .set_TARGET(i_target)
+                        .set_BACKPLANE(sys_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.");
@@ -560,6 +563,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR()
                         .set_TARGET(i_target)
+                        .set_BACKPLANE(sys_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
@@ -570,6 +574,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR()
                         .set_TARGET(i_target)
+                        .set_BACKPLANE(sys_target)
                         .set_BUS(i_avsBusNum)
                         .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Valid data sent but no action is taken due to unavailable resource.");
