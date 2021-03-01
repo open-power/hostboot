@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,7 +228,7 @@ TargetHandleList getMemTargetsForQueryOrClear(TargetHandle_t i_trgt)
 
     } while(0);
 
-    MDIA_DBG(FUNC "i_trgt HUID: %x, size: %d",
+    MDIA_DBG(FUNC "i_trgt HUID: 0x%08x, size: %d",
              get_huid(i_trgt), o_list.size());
 
     return o_list;
@@ -249,13 +249,12 @@ bool isHWStateChanged(TargetHandle_t i_trgt)
     for(TargetHandleList::iterator target = targetList.begin();
         target != targetList.end(); ++target )
     {
-        hwChangeFlag =
-            (*target)->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+        hwChangeFlag = (*target)->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
 
         if(HWAS_CHANGED_BIT_MEMDIAG & hwChangeFlag)
         {
-            MDIA_DBG("isHWStateChanged: set for target: %x",
-                     get_huid(*target));
+            MDIA_FAST("isHWStateChanged: set for target: 0x%08x",
+                      get_huid(*target));
             hwChanged = true;
             break;
         }

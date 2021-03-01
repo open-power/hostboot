@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -805,7 +805,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
                 FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
                                  mss::mcbist::PATTERN_RANDOM );
-                MDIA_FAST( "sm: random init %p on: %x", fapiOcmb,
+                MDIA_FAST( "sm: random init %p on: 0x%08x", fapiOcmb,
                            get_huid(target) );
                 break;
 
@@ -825,7 +825,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
                 FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb,
                                  stopCond );
-                MDIA_FAST( "sm: scrub %p on: %x", fapiOcmb,
+                MDIA_FAST( "sm: scrub %p on: 0x%08x", fapiOcmb,
                            get_huid(target) );
                 break;
 
@@ -840,12 +840,12 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
                 FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
                                  workItem );
-                MDIA_FAST( "sm: init %p on: %x", fapiOcmb,
+                MDIA_FAST( "sm: init %p on: 0x%08x", fapiOcmb,
                            get_huid(target) );
                 break;
 
             default:
-                MDIA_ERR( "unrecognized work item type %d on: %x",
+                MDIA_ERR( "unrecognized work item type %d on: 0x%08x",
                           workItem, get_huid(target) );
                 break;
         }
@@ -918,8 +918,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
     if(wit == iv_workFlowProperties.end())
     {
-        MDIA_ERR("sm: did not find target: %x",
-                get_huid(i_event.target));
+        MDIA_ERR("sm: did not find target: 0x%08x",
+                 get_huid(i_event.target));
     }
 
     // if a command finishes (just) after the
@@ -939,8 +939,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
         target = getTarget(**wit);
 
-        MDIA_FAST("sm: processing event for: %x, target: %x, type: %x",
-                get_huid(getTarget(wfp)), get_huid(target), i_event.type);
+        MDIA_FAST("sm: processing event for: 0x%08x, target: 0x%08x, type: %x",
+                  get_huid(getTarget(wfp)), get_huid(target), i_event.type);
 
         MaintCommandEventType eventType = i_event.type;
 
