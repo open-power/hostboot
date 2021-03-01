@@ -42,6 +42,8 @@
 #include <generic/memory/lib/utils/num.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <mss_explorer_attribute_getters.H>
+#include <lib/shared/p10_consts.H>
 
 #include <fapi2.H>
 #include <lib/plug_rules/p10_plug_rules.H>
@@ -61,29 +63,46 @@ namespace plug_rule
 ///
 spd_lookup_key::spd_lookup_key(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc)
 {
-    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+    o_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    iv_module_mfg_id = 0;
+    iv_part_number = 0;
+    iv_card_rev = 0;
+
+    const auto& l_exp = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    fapi2::ATTR_MSS_EXP_SERIAL_NUMBER_Type l_serial_number = {};
+    FAPI_TRY(mss::attr::get_exp_serial_number(l_exp, l_serial_number));
+
+    // Assembles iv_part_number
+    {
+        constexpr uint64_t START = mss::p10::SERIAL_PART_NUMBER;
+        constexpr uint64_t END = START + mss::p10::SERIAL_PART_NUMBER_LEN;
+
+        for(uint8_t l_index = START; l_index < END; ++l_index)
+        {
+            iv_part_number <<= BITS_PER_BYTE;
+            iv_part_number |= l_serial_number[l_index];
+        }
+    }
+
+    // Assembles iv_card_rev
+    {
+        constexpr uint64_t START = mss::p10::SERIAL_RAW_CARD;
+        constexpr uint64_t END = START + mss::p10::SERIAL_RAW_CARD_LEN;
+
+        for(uint8_t l_index = START; l_index < END; ++l_index)
+        {
+            iv_card_rev <<= BITS_PER_BYTE;
+            iv_card_rev |= l_serial_number[l_index];
+        }
+    }
+
     FAPI_TRY( mss::attr::get_module_mfg_id(i_target, iv_module_mfg_id) );
-    FAPI_TRY( mss::attr::get_dram_module_height(l_ocmb, iv_dimm_height) );
-    FAPI_TRY( mss::attr::get_dimm_size(i_target, iv_dimm_size) );
 
 fapi_try_exit:
     o_rc = fapi2::current_err;
 }
-
-///
-/// @brief Target based constructor
-/// @param[in] i_module_mfg_id the module manufacturing ID
-/// @param[in] i_dimm_height the DIMM height (1U, 2U, 4U)
-/// @param[in] i_dimm_size the DIMM size in question (16GB, 32GB, etc)
-/// @note Used to create the lookup table
-///
-spd_lookup_key::spd_lookup_key(const uint16_t i_module_mfg_id,
-                               const uint8_t i_dimm_height,
-                               const uint32_t i_dimm_size) :
-    iv_module_mfg_id(i_module_mfg_id),
-    iv_dimm_height(i_dimm_height),
-    iv_dimm_size(i_dimm_size)
-{}
 
 ///
 /// @brief Less than comparison operator
@@ -97,12 +116,12 @@ bool spd_lookup_key::operator<(const spd_lookup_key& i_rhs) const
         return iv_module_mfg_id < i_rhs.iv_module_mfg_id;
     }
 
-    if(iv_dimm_height != i_rhs.iv_dimm_height)
+    if(iv_part_number != i_rhs.iv_part_number)
     {
-        return iv_dimm_height < i_rhs.iv_dimm_height;
+        return iv_part_number < i_rhs.iv_part_number;
     }
 
-    return iv_dimm_size < i_rhs.iv_dimm_size;
+    return iv_card_rev < i_rhs.iv_card_rev;
 }
 
 ///
@@ -113,8 +132,8 @@ bool spd_lookup_key::operator<(const spd_lookup_key& i_rhs) const
 bool spd_lookup_key::operator!=(const spd_lookup_key& i_rhs) const
 {
     return iv_module_mfg_id != i_rhs.iv_module_mfg_id ||
-           iv_dimm_height != i_rhs.iv_dimm_height ||
-           iv_dimm_size != i_rhs.iv_dimm_size;
+           iv_part_number != i_rhs.iv_part_number ||
+           iv_card_rev != i_rhs.iv_card_rev;
 }
 
 ///
@@ -202,19 +221,19 @@ fapi2::ReturnCode spd_revision_key(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                  fapi2::MSS_UNKNOWN_DIMM_SPD_KEY()
                  .set_DIMM_TARGET(i_target)
                  .set_MODULE_MFG_ID(i_key.iv_module_mfg_id)
-                 .set_DIMM_HEIGHT(i_key.iv_dimm_height)
-                 .set_DIMM_SIZE(i_key.iv_dimm_size),
-                 "%s DDIMM has unrecognized key MFG_ID:0x%04X Height:%u Size:%u for minimum SPD rev",
-                 mss::c_str(i_target), i_key.iv_module_mfg_id, i_key.iv_dimm_height, i_key.iv_dimm_size );
+                 .set_PART_NUMBER(i_key.iv_part_number)
+                 .set_RAW_CARD(i_key.iv_card_rev),
+                 "%s DDIMM has unrecognized key MFG_ID:0x%04X PN:0x%014lx RC:0x%08x for minimum SPD rev",
+                 mss::c_str(i_target), i_key.iv_module_mfg_id, i_key.iv_part_number, i_key.iv_card_rev );
 
     FAPI_ASSERT( mss::find_value_from_key(LATEST_SPD_KEY_COMBINED_REV, i_key, o_latest_combined_rev),
                  fapi2::MSS_UNKNOWN_DIMM_SPD_KEY()
                  .set_DIMM_TARGET(i_target)
                  .set_MODULE_MFG_ID(i_key.iv_module_mfg_id)
-                 .set_DIMM_HEIGHT(i_key.iv_dimm_height)
-                 .set_DIMM_SIZE(i_key.iv_dimm_size),
-                 "%s DDIMM has unrecognized key MFG_ID:0x%04X Height:%u Size:%u for latest SPD rev",
-                 mss::c_str(i_target), i_key.iv_module_mfg_id, i_key.iv_dimm_height, i_key.iv_dimm_size );
+                 .set_PART_NUMBER(i_key.iv_part_number)
+                 .set_RAW_CARD(i_key.iv_card_rev),
+                 "%s DDIMM has unrecognized key MFG_ID:0x%04X PN:0x%014lx RC:0x%08x for latest SPD rev",
+                 mss::c_str(i_target), i_key.iv_module_mfg_id, i_key.iv_part_number, i_key.iv_card_rev );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -247,11 +266,11 @@ fapi2::ReturnCode spd_minimum_combined_revision(const fapi2::Target<fapi2::TARGE
                  .set_SPD_COMBINED_REVISION(i_spd_combined_rev)
                  .set_MINIMUM_FUNCTIONAL_SPD_COMBINED_REVISION(i_min_combined_rev)
                  .set_MODULE_MFG_ID(i_key.iv_module_mfg_id)
-                 .set_DIMM_HEIGHT(i_key.iv_dimm_height)
-                 .set_DIMM_SIZE(i_key.iv_dimm_size),
-                 "%s DDIMM has an unsupported SPD combined revision and needs to be updated (0x%04X < 0x%04X) MFG ID:0x%04x DIMM height:%u DIMM size:%u",
-                 mss::c_str(i_target), i_spd_combined_rev, i_min_combined_rev, i_key.iv_module_mfg_id, i_key.iv_dimm_height,
-                 i_key.iv_dimm_size );
+                 .set_PART_NUMBER(i_key.iv_part_number)
+                 .set_RAW_CARD(i_key.iv_card_rev),
+                 "%s DDIMM has an unsupported SPD combined revision and needs to be updated (0x%04X < 0x%04X) MFG ID:0x%04x DIMM PN:0x%014lx DIMM RC:0x%08x",
+                 mss::c_str(i_target), i_spd_combined_rev, i_min_combined_rev, i_key.iv_module_mfg_id, i_key.iv_part_number,
+                 i_key.iv_card_rev );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -293,11 +312,11 @@ fapi2::ReturnCode spd_latest_combined_revision(const fapi2::Target<fapi2::TARGET
                      .set_SPD_COMBINED_REVISION(i_spd_combined_rev)
                      .set_LATEST_SPD_COMBINED_REVISION(i_latest_combined_rev)
                      .set_MODULE_MFG_ID(i_key.iv_module_mfg_id)
-                     .set_DIMM_HEIGHT(i_key.iv_dimm_height)
-                     .set_DIMM_SIZE(i_key.iv_dimm_size),
-                     "%s DDIMM has non-current SPD combined revision and could be updated (0x%04X < 0x%04X) MFG ID:0x%04x DIMM height:%u DIMM size:%u",
-                     mss::c_str(i_target), i_spd_combined_rev, i_latest_combined_rev, i_key.iv_module_mfg_id, i_key.iv_dimm_height,
-                     i_key.iv_dimm_size );
+                     .set_PART_NUMBER(i_key.iv_part_number)
+                     .set_RAW_CARD(i_key.iv_card_rev),
+                     "%s DDIMM has non-current SPD combined revision and could be updated (0x%04X < 0x%04X) MFG ID:0x%04x DIMM PN:0x%014lx DIMM RC:0x%08x",
+                     mss::c_str(i_target), i_spd_combined_rev, i_latest_combined_rev, i_key.iv_module_mfg_id, i_key.iv_part_number,
+                     i_key.iv_card_rev );
 #endif
     }
     else
@@ -471,8 +490,8 @@ fapi2::ReturnCode ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
 
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
         {
-            FAPI_INF("Skipping SPD revision plug rule check on %s because it has an unrecognized SPD key MFG_ID:0x%04X Height:%u Size:%u",
-                     mss::c_str(i_target), l_key.iv_module_mfg_id, l_key.iv_dimm_height, l_key.iv_dimm_size);
+            FAPI_INF("Skipping SPD revision plug rule check on %s because it has an unrecognized SPD key MFG_ID:0x%04X PN:0x%014lx RC:0x%08x",
+                     mss::c_str(i_target), l_key.iv_module_mfg_id, l_key.iv_part_number, l_key.iv_card_rev);
             continue;
         }
 
@@ -488,8 +507,8 @@ fapi2::ReturnCode ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
             // The DIMM target should be called out in the combined revision code
             // We do want to callout the key here, so we know what type of DIMM failed
             FAPI_TRY( check::spd_minimum_combined_revision(l_dimm, l_key, l_spd_combined_revision, l_min_combined_rev),
-                      "SPD min rev check failed key MFG_ID:0x%04X Height:%u Size:%u",
-                      l_key.iv_module_mfg_id, l_key.iv_dimm_height, l_key.iv_dimm_size );
+                      "SPD min rev check failed key MFG_ID:0x%04X PN:0x%014lx RC:0x%08x",
+                      l_key.iv_module_mfg_id, l_key.iv_part_number, l_key.iv_card_rev );
 
             // Finally check the latest SPD combined revision
             // Don't bother checking the return code here because this check only produces informational logs

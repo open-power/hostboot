@@ -51,8 +51,8 @@ namespace plug_rule
 struct spd_lookup_key
 {
     uint16_t iv_module_mfg_id;
-    uint8_t iv_dimm_height;
-    uint32_t iv_dimm_size;
+    uint64_t iv_part_number;
+    uint32_t iv_card_rev;
 
     ///
     /// @brief Target based constructor
@@ -65,14 +65,17 @@ struct spd_lookup_key
     ///
     /// @brief Target based constructor
     /// @param[in] i_module_mfg_id the module manufacturing ID
-    /// @param[in] i_dimm_height the DIMM height (1U, 2U, 4U)
-    /// @param[in] i_dimm_size the DIMM size in question (16GB, 32GB, etc)
+    /// @param[in] i_part_number the DIMM partnumber converted from ASCII
+    /// @param[in] i_card_rev the DIMM rawcard version converted from ASCII
     /// @note Used to create the lookup table
     ///
     spd_lookup_key(const uint16_t i_module_mfg_id = 0,
-                   const uint8_t i_dimm_height = 0,
-                   const uint32_t i_dimm_size = 0);
-
+                   const uint64_t i_part_number = 0,
+                   const uint32_t i_card_rev = 0) :
+        iv_module_mfg_id(i_module_mfg_id),
+        iv_part_number(i_part_number),
+        iv_card_rev(i_card_rev)
+    {}
     ///
     /// @brief Less than comparison operator
     /// @param[in] i_rhs the value to compare against
