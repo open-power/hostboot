@@ -850,12 +850,13 @@ class fields<DDR4, DDIMM_MODULE>
 
             // Byte 201: DIMM Module Oranization
             DIMM_ORG_BYTE_BYTE = 201,
-            RANK_MIX_START = 1,
-            RANK_MIX_LEN = 1,
-            PACKAGE_RANK_START = 2,
-            PACKAGE_RANK_LEN = 3,
-            DATA_WIDTH_START = 5,
-            DATA_WIDTH_LEN = 3,
+            NUM_PACKAGE_RANKS_CHAN1_START = 0,
+            NUM_PACKAGE_RANKS_CHAN1_LEN = 3,
+            NUM_PACKAGE_RANKS_CHAN0_START = 3,
+            NUM_PACKAGE_RANKS_CHAN0_LEN = 3,
+            SDRAM_DATA_WID_CHAN_START = 6,
+            SDRAM_DATA_WID_CHAN_LEN = 2,
+
 
             // Byte 202: Memory Channel Bus Width
             BUS_WIDTH_BYTE = 202,
@@ -1317,9 +1318,9 @@ class fields<DDR4, DDIMM_MODULE>
         static constexpr field_t DMB_REV{DMB_REV_BYTE, DMB_REV_START, DMB_REV_LEN};
 
         // Byte 201: DIMM Module Oranization
-        static constexpr field_t RANK_MIX{DIMM_ORG_BYTE_BYTE, RANK_MIX_START, RANK_MIX_LEN};
-        static constexpr field_t PACKAGE_RANK{DIMM_ORG_BYTE_BYTE, PACKAGE_RANK_START, PACKAGE_RANK_LEN};
-        static constexpr field_t DATA_WIDTH{DIMM_ORG_BYTE_BYTE, DATA_WIDTH_START, DATA_WIDTH_LEN};
+        static constexpr field_t NUM_PACKAGE_RANKS_CHAN1{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_CHAN1_START, NUM_PACKAGE_RANKS_CHAN1_LEN};
+        static constexpr field_t NUM_PACKAGE_RANKS_CHAN0{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_CHAN0_START, NUM_PACKAGE_RANKS_CHAN0_LEN};
+        static constexpr field_t DATA_WIDTH{DIMM_ORG_BYTE_BYTE, SDRAM_DATA_WID_CHAN_START, SDRAM_DATA_WID_CHAN_LEN};
 
         // Byte 202: Memory Channel Bus Width
         static constexpr field_t NUM_DIMM_CHANNELS{BUS_WIDTH_BYTE, NUM_DIMM_CHANNELS_START, NUM_DIMM_CHANNELS_LEN};

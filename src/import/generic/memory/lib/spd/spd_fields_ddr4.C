@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,8 +148,8 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::HEAT_SPR
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::CONTINUATION_CODE;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::LAST_NON_ZERO;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::DMB_REV;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::RANK_MIX;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::PACKAGE_RANK;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::NUM_PACKAGE_RANKS_CHAN1;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::NUM_PACKAGE_RANKS_CHAN0;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::DATA_WIDTH;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::NUM_DIMM_CHANNELS;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR4, DDIMM_MODULE>::BUS_WIDTH_EXT;

@@ -750,16 +750,6 @@ class ddimm_0_3
             return true;
         }
 
-        virtual bool check_rank_mix(const uint8_t i_field) const
-        {
-            return (i_field <= 0x01);
-        }
-
-        virtual bool check_package_rank(const uint8_t i_field) const
-        {
-            return (i_field <= 0x07);
-        }
-
         virtual bool check_data_width(const uint8_t i_field) const
         {
             return (i_field <= 0x03);
@@ -3362,22 +3352,6 @@ class ddimm_0_3
             FAPI_TRY(get_field_spd(iv_ocmb, F::DMB_REV, i_spd, l_field));
 
             FAPI_TRY(mss::attr::set_dmb_rev(iv_ocmb, l_field));
-        }
-
-        virtual fapi2::ReturnCode set_rank_mix(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::RANK_MIX, i_spd, l_field));
-
-            FAPI_TRY(mss::attr::set_rank_mix(iv_ocmb, l_field));
-        }
-
-        virtual fapi2::ReturnCode set_package_rank(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PACKAGE_RANK, i_spd, l_field));
-
-            FAPI_TRY(mss::attr::set_package_rank(iv_ocmb, l_field));
         }
 
         virtual fapi2::ReturnCode set_data_width(const std::vector<uint8_t>& i_spd) const
