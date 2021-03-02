@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -271,8 +271,8 @@ void disableInbandScomsOcmb(const TargetHandle_t i_ocmbTarget)
                get_huid(i_ocmbTarget));
 
     //don't mess with attributes without the mutex (just to be safe)
-    l_mutex = i_ocmbTarget->getHbMutexAttr<ATTR_IBSCOM_MUTEX>();
-    mutex_lock(l_mutex);
+    l_mutex = i_ocmbTarget->getHbMutexAttr<ATTR_SCOM_ACCESS_MUTEX>();
+    recursive_mutex_lock(l_mutex);
 
     ScomSwitches l_switches = i_ocmbTarget->getAttr<ATTR_SCOM_SWITCHES>();
     l_switches.useInbandScom = 0;
@@ -280,7 +280,7 @@ void disableInbandScomsOcmb(const TargetHandle_t i_ocmbTarget)
 
     // Modify attribute
     i_ocmbTarget->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
-    mutex_unlock(l_mutex);
+    recursive_mutex_unlock(l_mutex);
 }
 
 /*******************************************************************************

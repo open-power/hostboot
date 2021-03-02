@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,8 +90,8 @@ namespace exptest
                    TARGETING::get_huid(i_ocmbTarget));
 
         //don't mess with attributes without the mutex (just to be safe)
-        l_mutex = i_ocmbTarget->getHbMutexAttr<TARGETING::ATTR_IBSCOM_MUTEX>();
-        mutex_lock(l_mutex);
+        l_mutex = i_ocmbTarget->getHbMutexAttr<TARGETING::ATTR_SCOM_ACCESS_MUTEX>();
+        recursive_mutex_lock(l_mutex);
 
         TARGETING::ScomSwitches l_switches =
             i_ocmbTarget->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
@@ -100,7 +100,7 @@ namespace exptest
 
         // Modify attribute
         i_ocmbTarget->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
-        mutex_unlock(l_mutex);
+        recursive_mutex_unlock(l_mutex);
     };
 
     void disableInbandScomsOcmb(const TARGETING::TargetHandle_t i_ocmbTarget)
@@ -120,8 +120,8 @@ namespace exptest
                    TARGETING::get_huid(i_ocmbTarget));
 
         //don't mess with attributes without the mutex (just to be safe)
-        l_mutex = i_ocmbTarget->getHbMutexAttr<TARGETING::ATTR_IBSCOM_MUTEX>();
-        mutex_lock(l_mutex);
+        l_mutex = i_ocmbTarget->getHbMutexAttr<TARGETING::ATTR_SCOM_ACCESS_MUTEX>();
+        recursive_mutex_lock(l_mutex);
 
         TARGETING::ScomSwitches l_switches =
             i_ocmbTarget->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
@@ -130,7 +130,7 @@ namespace exptest
 
         // Modify attribute
         i_ocmbTarget->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
-        mutex_unlock(l_mutex);
+        recursive_mutex_unlock(l_mutex);
     };
 
 }

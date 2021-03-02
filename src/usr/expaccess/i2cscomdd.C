@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,9 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
                 TARGETING::get_huid(i_target),
                 i_opType == DeviceFW::READ ? "READ" : "WRITE",
                 l_fapi2Buffer64(), l_fapi2Buffer32() , l_scomAddr );
+
+    auto mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SCOM_ACCESS_MUTEX>();
+    recursive_mutex_lock(mutex);
 
     do
     {
@@ -196,6 +199,8 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
         }
 
     } while (0);
+
+    recursive_mutex_unlock(mutex);
     return l_err;
 }
 }

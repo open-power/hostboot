@@ -254,8 +254,8 @@ void enableInbandScomsOCMB( TargetHandleList i_ocmbTargetList )
     for ( const auto & l_ocmb : i_ocmbTargetList )
     {
         //don't mess with attributes without the mutex (just to be safe)
-        l_mutex = l_ocmb->getHbMutexAttr<ATTR_IBSCOM_MUTEX>();
-        mutex_lock(l_mutex);
+        l_mutex = l_ocmb->getHbMutexAttr<ATTR_SCOM_ACCESS_MUTEX>();
+        recursive_mutex_lock(l_mutex);
 
         ScomSwitches l_switches = l_ocmb->getAttr<ATTR_SCOM_SWITCHES>();
         l_switches.useI2cScom = 0;
@@ -263,7 +263,7 @@ void enableInbandScomsOCMB( TargetHandleList i_ocmbTargetList )
 
         // Modify attribute
         l_ocmb->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
-        mutex_unlock(l_mutex);
+        recursive_mutex_unlock(l_mutex);
     }
 }
 

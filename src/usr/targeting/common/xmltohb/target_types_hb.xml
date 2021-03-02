@@ -35,14 +35,14 @@
       <id>FRU_CCIN</id>
     </attribute>
     <attribute>
-      <id>IBSCOM_MUTEX</id>
-    </attribute>
-    <attribute>
       <default>0</default>
       <id>MMIO_VM_ADDR</id>
     </attribute>
     <attribute>
       <id>PART_NUMBER</id>
+    </attribute>
+    <attribute>
+      <id>SCOM_ACCESS_MUTEX</id>
     </attribute>
     <attribute>
       <id>SERIAL_NUMBER</id>

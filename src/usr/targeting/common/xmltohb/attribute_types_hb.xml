@@ -792,18 +792,6 @@
   </attribute>
 
   <attribute>
-    <id>IBSCOM_MUTEX</id>
-    <description>Mutex for Inband SCOM Operations</description>
-    <simpleType>
-      <hbmutex/>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-  </attribute>
-
-  <attribute>
     <id>IBSCOM_VIRTUAL_ADDR</id>
     <description>Cached Virtual Address of Inband Scom memory space for this Chip</description>
     <simpleType>
@@ -1367,6 +1355,18 @@
       <hbmutex>
         <default>0</default>
       </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SCOM_ACCESS_MUTEX</id>
+    <description>Mutex for SCOM Operations on a givent target</description>
+    <simpleType>
+      <hbrecursivemutex/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

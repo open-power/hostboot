@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,6 +80,9 @@ errlHndl_t mmioScomPerformOp(DeviceFW::OperationType i_opType,
                l_expAddr,
                i_opType == DeviceFW::READ ? "to" : "from",
                io_buffer );
+
+    auto mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SCOM_ACCESS_MUTEX>();
+    recursive_mutex_lock(mutex);
 
     do
     {
@@ -213,6 +216,8 @@ errlHndl_t mmioScomPerformOp(DeviceFW::OperationType i_opType,
         }
 
     } while (0);
+
+    recursive_mutex_unlock(mutex);
 
     return l_err;
 }
