@@ -113,6 +113,44 @@ PRDF_PLUGIN_DEFINE_NS(p10_omic, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(explorer_ocmb, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
 /**
+ * @brief   Common plugin to check if the EC level is DD1.0
+ * @param   i_chip
+ * @param   io_sc   Step code data struct
+ * @returns PRD_SCAN_COMM_REGISTER_ZERO for DD1.0, SUCCESS for DD2.0+
+ */
+int32_t IsDD1( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    int32_t o_rc = SUCCESS;
+
+    if ( 0x10 == getChipLevel(i_chip->getTrgt()) )
+    {
+        o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+    }
+
+    return o_rc;
+}
+PRDF_PLUGIN_DEFINE_NS(p10_omic, CommonPlugins, IsDD1);
+
+/**
+ * @brief   Common plugin to check if the EC level is DD2.0+
+ * @param   i_chip
+ * @param   io_sc   Step code data struct
+ * @returns PRD_SCAN_COMM_REGISTER_ZERO for DD2.0+, SUCCESS for DD1.0
+ */
+int32_t IsNotDD1( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    int32_t o_rc = SUCCESS;
+
+    if ( getChipLevel(i_chip->getTrgt()) > 0x10 )
+    {
+        o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+    }
+
+    return o_rc;
+}
+PRDF_PLUGIN_DEFINE_NS(p10_omic, CommonPlugins, IsNotDD1);
+
+/**
  * @brief   P10 DD1 workaround to clear the service call flag for OMI degrade
  * @param   i_chip OMIC or OCMB
  * @param   io_sc   Step code data struct

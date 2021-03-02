@@ -155,7 +155,8 @@ actionclass dl0_omi_bus_th_32perDay_CRC
 actionclass threshold_and_mask_dl0_omi_bus_CRC
 {
     try( funccall("CrcSideEffect_0"), dl0_omi_bus );
-    threshold_and_mask_th32;
+    threshold32pday;
+    try( funccall("IsNotDD1"), funccall("ClearServiceCallFlag") );
 };
 
 actionclass dl1_omi_bus_th_1_CRC
@@ -174,5 +175,6 @@ actionclass dl1_omi_bus_th_32perDay_CRC
 actionclass threshold_and_mask_dl1_omi_bus_CRC
 {
     try( funccall("CrcSideEffect_1"), dl1_omi_bus );
-    threshold_and_mask_th32;
+    threshold32pday;
+    try( funccall("IsNotDD1"), funccall("ClearServiceCallFlag") );
 };
