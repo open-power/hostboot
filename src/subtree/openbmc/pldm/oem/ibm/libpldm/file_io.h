@@ -576,6 +576,11 @@ struct pldm_read_write_file_by_type_req {
 	uint32_t length;      //!< Bytes to be read
 } __attribute__((packed));
 
+struct pldm_write_file_by_type_req {
+        struct pldm_read_write_file_by_type_req common_req;
+        uint8_t write_data[1];
+} __attribute__((packed));
+
 /** @struct pldm_read_write_file_by_type_resp
  *
  *  Structure representing ReadFileByType and
@@ -621,7 +626,7 @@ int encode_rw_file_by_type_resp(uint8_t instance_id, uint8_t command,
 				struct pldm_msg *msg);
 
 /** @brief Encode ReadFileByType and WriteFileByType
- *         commands request data
+ *         commands common request data
  *
  *  @param[in] instance_id - Message's instance id
  *  @param[in] command - PLDM command
@@ -638,6 +643,25 @@ int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
 			       uint16_t file_type, uint32_t file_handle,
 			       uint32_t offset, uint32_t length,
 			       struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Encode WriteFileByType commands request data
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] command - PLDM command
+ *  @param[in] file_type - Type of the file
+ *  @param[in] file_handle - A handle to the file
+ *  @param[in] offset -  Offset to the file at which the write should begin
+ *  @param[in] length -  Number of bytes to be written
+ *  @param[in] write_file_data - Ptr to buffer with length equal to length param
+ *  @param[out] msg - Message will be written to this
+ *  @param[in] payload_length - The length of the request in bytes
+ *  @return pldm_completion_codes
+ */
+int encode_write_file_by_type_req(uint8_t instance_id, uint8_t command,
+				  uint16_t file_type, uint32_t file_handle,
+				  uint32_t offset, uint32_t length,
+				  const uint8_t * write_file_data,
+				  struct pldm_msg *msg, size_t payload_length);
 
 /** @brief Decode ReadFileByType and WriteFileByType
  *         commands response data

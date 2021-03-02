@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,15 @@
 #include <vector>
 
 namespace PLDM {
+
+// Currently the maximum transfer size for PLDM is defined as 180K; however,
+// we shoudn't be allocating that much memory on the heap in HB. It was
+// found experimentally that the optimal transfer size that doesn't make
+// HB crash is (127k + 1) bytes. That specific number will ask kernel for
+// 128k of memory, which will have enough space to accomodate PLDM headers
+// that are not part of the actual payload without fragmenting the memory
+// too much.
+const uint32_t MAX_TRANSFER_SIZE_BYTES = 127 * KILOBYTE + 1;
 
 /**
  * @brief Requests a File Table containing the list of files available and
@@ -79,6 +88,24 @@ errlHndl_t getLidFileFromOffset(uint32_t i_fileHandle,
                                 uint32_t i_offset,
                                 uint32_t& io_numBytesToRead,
                                 uint8_t* o_file);
+
+/**
+ * @brief Requests to write to a lid file starting with the specified offset
+ *        on the BMC.
+ *
+ * @param[in] i_fileHandle the lid id (lid number) of the file
+ * @param[in] i_offset the offset at which to start writing the lid file
+ * @param[in/out] io_writeSizeBytes the number of bytes to write to the file.
+ *                When the function returns, this will contain the number of
+ *                bytes that were actually written.
+ * @param[in] i_writeBuffer the pointer to a buffer of data to be written to the file.
+ *                          Must be at least the initial size of io_writeSizeBytes.
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
+                                 const uint32_t i_offset,
+                                 uint32_t& io_writeSizeBytes,
+                                 const uint8_t* const i_writeBuffer);
 
 } // namespace PLDM
 

@@ -92,6 +92,9 @@ namespace PLDM
 
         // systemEnumAttrLookup
         MOD_SYSTEM_ENUM_ATTR_LOOKUP = 0x20,
+
+        // writeLidFrileFromOffset
+        MOD_WRITE_LID_FILE              = 0x21,
     };
 
     enum PLDMReasonCode

@@ -171,7 +171,6 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
                                              l_responseHeader);
             addBmcErrorCallouts(l_errl);
             break;
-
         }
 
         if(l_fileTableSize && (l_outputBuffer == nullptr))
@@ -217,17 +216,10 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
                                 uint32_t& io_numBytesToRead,
                                 uint8_t* o_file)
 {
-    PLDM_ENTER("getLidFileFromOffset: File handle 0x%08x, Input size 0x%08x, Offset 0x%08x",
+    PLDM_DBG("getLidFileFromOffset: File handle 0x%08x, Input size 0x%08x, Offset 0x%08x",
                i_fileHandle, io_numBytesToRead, i_offset);
     errlHndl_t l_errl = nullptr;
-    // Currently the maximum transfer size for PLDM is defined as 180K; however,
-    // we shoudn't be allocating that much memory on the heap in HB. It was
-    // found experimentally that the optimal transfer size that doesn't make
-    // HB crash is (127k + 1) bytes. That specific number will ask kernel for
-    // 128k of memory, which will have enough space to accomodate PLDM headers
-    // that are not part of the actual payload without fragmenting the memory
-    // too much.
-    const uint32_t MAX_TRANSFER_SIZE = 127 * KILOBYTE + 1;
+
     size_t l_numTransfers = 1;
     uint32_t l_totalRead = 0;
     uint8_t* l_currPtr = o_file;
@@ -241,12 +233,12 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         .length = 0, // calculated later
     };
 
-    if(io_numBytesToRead > MAX_TRANSFER_SIZE)
+    if(io_numBytesToRead > MAX_TRANSFER_SIZE_BYTES)
     {
         // Round up
-        l_numTransfers = (io_numBytesToRead + MAX_TRANSFER_SIZE - 1) /
-                         MAX_TRANSFER_SIZE;
-        l_req.length = MAX_TRANSFER_SIZE;
+        l_numTransfers = (io_numBytesToRead + MAX_TRANSFER_SIZE_BYTES - 1) /
+                         MAX_TRANSFER_SIZE_BYTES;
+        l_req.length = MAX_TRANSFER_SIZE_BYTES;
     }
     else if (io_numBytesToRead == 0)
     {
@@ -254,7 +246,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         // read it until BMC indicates that the file ended (returned read
         // size is less than requested read size). Set the number of transfers
         // to a really large number.
-        l_req.length = MAX_TRANSFER_SIZE;
+        l_req.length = MAX_TRANSFER_SIZE_BYTES;
         l_numTransfers = 0xFFFFFFFF;
     }
     else
@@ -262,7 +254,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         l_req.length = io_numBytesToRead;
     }
 
-    PLDM_INF("getLidFileFromOffset: %d transfers to get 0x%08x of data",
+    PLDM_DBG("getLidFileFromOffset: %d transfers to get 0x%08x of data",
              l_numTransfers, io_numBytesToRead);
 
     std::vector<uint8_t>l_responseBytes;
@@ -276,7 +268,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
     do {
     for(size_t i = 0; i < l_numTransfers; ++i)
     {
-        l_req.offset = i_offset + (i * MAX_TRANSFER_SIZE);
+        l_req.offset = i_offset + (i * MAX_TRANSFER_SIZE_BYTES);
         l_errl = sendrecv_pldm_request<PLDM_RW_FILE_BY_TYPE_REQ_BYTES>(
                     l_responseBytes,
                     l_msgQ,
@@ -307,15 +299,15 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         }
 
         // PLDM_DATA_OUT_OF_RANGE is another signal for the end-of-file.
-        // If the file is an exact multiple of MAX_TRANSFER_SIZE, and
+        // If the file is an exact multiple of MAX_TRANSFER_SIZE_BYTES, and
         // if we read the last part of the file during the last read, we
         // will have advanced the file offset pointer past the end of the
         // file. If we make another request with the offset past the end
         // of the file, the BMC will respond with PLDM_DATA_OUT_OF_RANGE rc.
         // We need to stop reading the file and return (without error).
-        if(l_resp.completion_code == PLDM_DATA_OUT_OF_RANGE)
+        if(io_numBytesToRead == 0 && l_resp.completion_code == PLDM_DATA_OUT_OF_RANGE)
         {
-            PLDM_INF("getLidFileFromOffset: PLDM_DATA_OUT_OF_RANGE EOF condition encountered");
+            PLDM_DBG("getLidFileFromOffset: PLDM_DATA_OUT_OF_RANGE EOF condition encountered");
             if(l_errl)
             {
                 delete l_errl;
@@ -356,7 +348,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
 
         if(l_resp.length == 0)
         {
-            PLDM_INF("getLidFileFromOffset: BMC returned size 0 for file handle 0x%08x at offset 0x%08x",
+            PLDM_DBG("getLidFileFromOffset: BMC returned size 0 for file handle 0x%08x at offset 0x%08x",
                      i_fileHandle, l_req.offset);
             break;
         }
@@ -374,14 +366,14 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         }
         else if(l_resp.length != l_req.length)
         {
-            PLDM_INF("getLidFileFromOffset: BMC returned length 0x%08x of file read; requested length was 0x%08x. That indicates End Of File (total length: 0x%08x).",
+            PLDM_DBG("getLidFileFromOffset: BMC returned length 0x%08x of file read; requested length was 0x%08x. That indicates End Of File (total length: 0x%08x).",
                      l_resp.length, l_req.length, l_totalRead);
             break;
         }
-        else if((MAX_TRANSFER_SIZE > (io_numBytesToRead - l_totalRead)) &&
+        else if((MAX_TRANSFER_SIZE_BYTES > (io_numBytesToRead - l_totalRead)) &&
                 (io_numBytesToRead != 0))
         {
-            // We need to request a smaller chunk than MAX_TRANSFER_SIZE
+            // We need to request a smaller chunk than MAX_TRANSFER_SIZE_BYTES
             l_req.length = io_numBytesToRead - l_totalRead;
         }
 
@@ -401,8 +393,171 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
 
     }while(0);
 
-    PLDM_EXIT("getLidFileFromOffset");
+    PLDM_DBG("getLidFileFromOffset");
     return l_errl;
+}
+
+errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
+                                 const uint32_t i_offset,
+                                 uint32_t& io_writeSizeBytes,
+                                 const uint8_t* const i_writeBuffer)
+{
+    PLDM_DBG("writeLidFileFromOffset: File handle 0x%08x, Input size 0x%08x, Offset 0x%08x",
+               i_fileHandle, io_writeSizeBytes, i_offset);
+    errlHndl_t errl = nullptr;
+    size_t num_transfers = 1;
+    uint32_t bytes_written = 0;
+    auto current_ptr = const_cast<uint8_t* const >(i_writeBuffer);
+
+    struct pldm_read_write_file_by_type_req request
+    {
+        // Currently BMC is hardcoded to use the TEMP side
+        .file_type = PLDM_FILE_TYPE_LID_TEMP,
+        .file_handle = i_fileHandle,
+        .offset = i_offset,
+        .length = 0, // calculated later
+    };
+
+    if(io_writeSizeBytes > MAX_TRANSFER_SIZE_BYTES)
+    {
+        // Round up
+        num_transfers = (io_writeSizeBytes + MAX_TRANSFER_SIZE_BYTES - 1) /
+                         MAX_TRANSFER_SIZE_BYTES;
+        request.length = MAX_TRANSFER_SIZE_BYTES;
+    }
+    else
+    {
+        request.length = io_writeSizeBytes;
+    }
+
+    PLDM_DBG("writeLidFileFromOffset: %d transfers to get 0x%08x of data",
+             num_transfers, io_writeSizeBytes);
+
+    std::vector<uint8_t> response_bytes;
+#ifndef __HOSTBOOT_RUNTIME
+    const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
+    assert(msgQ, "writeLidFileFromOffset: message queue not found!");
+#else
+    const msg_q_t msgQ = nullptr;
+#endif
+
+    do {
+    for(size_t i = 0; i < num_transfers; ++i)
+    {
+        request.offset = i_offset + (i * MAX_TRANSFER_SIZE_BYTES);
+        errl = sendrecv_pldm_request<PLDM_RW_FILE_BY_TYPE_REQ_BYTES>(
+                    response_bytes,
+                    request.length,
+                    msgQ,
+                    encode_write_file_by_type_req,
+                    DEFAULT_INSTANCE_ID,
+                    PLDM_WRITE_FILE_BY_TYPE ,
+                    request.file_type,
+                    request.file_handle,
+                    request.offset,
+                    request.length,
+                    current_ptr);
+        if(errl)
+        {
+            PLDM_ERR("writeLidFileFromOffset: Could not send the PLDM request for fileio write");
+            break;
+        }
+
+        struct pldm_read_write_file_by_type_resp response {};
+
+        errl = decode_pldm_response(decode_rw_file_by_type_resp,
+                                    response_bytes,
+                                    &response.completion_code,
+                                    &response.length,
+                                    nullptr);
+        if(errl)
+        {
+            PLDM_ERR("writeLidFileFromOffset: Could not decode PLDM response");
+            break;
+        }
+
+        if(response.completion_code != PLDM_SUCCESS)
+        {
+            PLDM_ERR("writeLidFileFromOffset: PLDM op returned code %d",
+                     response.completion_code);
+            pldm_msg* const generic_response =
+                reinterpret_cast<pldm_msg*>(response_bytes.data());
+            const uint64_t generic_response_hdr =
+                pldmHdrToUint64(*generic_response);
+
+            /*@
+             * @errortype
+             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_WRITE_LID_FILE
+             * @reasoncode RC_BAD_COMPLETION_CODE
+             * @userdata1  Completion code
+             * @userdata2  Response header data
+             * @devdesc    File write request completed unsuccessfully
+             * @custdesc   A host failure occurred
+             */
+            errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            MOD_WRITE_LID_FILE,
+                            RC_BAD_COMPLETION_CODE,
+                            response.completion_code,
+                            generic_response_hdr);
+            addBmcErrorCallouts(errl);
+            break;
+        }
+
+        PLDM_DBG("writeLidFileFromOffset: Response %llu; the actual size of written is 0x%08x",
+                  i, response.length);
+
+        bytes_written += response.length;
+        current_ptr += response.length;
+        if(io_writeSizeBytes == bytes_written)
+        {
+            break;
+        }
+        else if(response.length != request.length)
+        {
+            PLDM_ERR("writeLidFileFromOffset: BMC returned length 0x%08x of file written; requested length was 0x%08x."
+                     " This indicates End Of File overrun (total bytes written: 0x%08x).",
+                     response.length, request.length, bytes_written);
+            pldm_msg* const generic_response =
+                reinterpret_cast<pldm_msg*>(response_bytes.data());
+            const uint64_t generic_response_hdr =
+                pldmHdrToUint64(*generic_response);
+
+            /*@
+             * @errortype
+             * @severity   ERRORLOG::ERRL_SEV_PREDICTIVE
+             * @moduleid   MOD_WRITE_LID_FILE
+             * @reasoncode RC_OUT_OF_RANGE
+             * @userdata1  Response header data
+             * @userdata2[0:31] Requested Write Length (bytes)
+             * @userdata2[32:63] Actual Length Written (bytes)
+             * @devdesc    File write request partial failure
+             * @custdesc   A host failure occurred
+             */
+            errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_PREDICTIVE,
+                            MOD_WRITE_LID_FILE,
+                            RC_OUT_OF_RANGE,
+                            generic_response_hdr,
+                            TWO_UINT32_TO_UINT64(
+                              request.length,
+                              response.length),
+                            ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+        else if((MAX_TRANSFER_SIZE_BYTES > (io_writeSizeBytes - bytes_written)) &&
+                (io_writeSizeBytes != 0))
+        {
+            // We need to request a smaller chunk than MAX_TRANSFER_SIZE_BYTES
+            request.length = io_writeSizeBytes - bytes_written;
+        }
+    }
+    io_writeSizeBytes = bytes_written;
+
+    }while(0);
+
+    return errl;
 }
 
 } // namespace PLDM

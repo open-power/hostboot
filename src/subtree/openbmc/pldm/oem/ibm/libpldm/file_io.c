@@ -716,6 +716,32 @@ int encode_rw_file_by_type_resp(uint8_t instance_id, uint8_t command,
 	return PLDM_SUCCESS;
 }
 
+int encode_write_file_by_type_req(uint8_t instance_id, uint8_t command,
+				  uint16_t file_type, uint32_t file_handle,
+				  uint32_t offset, uint32_t length,
+				  const uint8_t * write_file_data,
+				  struct pldm_msg *msg, size_t payload_length)
+{
+	if(write_file_data == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	int rc = encode_rw_file_by_type_req(instance_id, command,
+					    file_type, file_handle,
+					    offset, length,
+					    msg, payload_length);
+
+	if(rc != PLDM_SUCCESS){
+		return rc;
+	}
+
+	struct pldm_write_file_by_type_req *req =
+		(struct pldm_write_file_by_type_req *)msg->payload;
+
+	memcpy(req->write_data, write_file_data,length);
+	return rc;
+}
+
 int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
 			       uint16_t file_type, uint32_t file_handle,
 			       uint32_t offset, uint32_t length,
@@ -732,9 +758,9 @@ int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-        if(payload_length != PLDM_RW_FILE_BY_TYPE_REQ_BYTES) {
-            return PLDM_ERROR_INVALID_LENGTH;
-        }
+	if(payload_length < PLDM_RW_FILE_BY_TYPE_REQ_BYTES) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
 
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
@@ -773,10 +799,9 @@ int decode_rw_file_by_type_resp(const struct pldm_msg *msg,
 	if (*completion_code == PLDM_SUCCESS) {
 		*length = le32toh(response->length);
 	}
-	
-        if(file_data) {
-            memcpy(file_data, response->file_data, *length);
-        }
+	if(file_data) {
+	memcpy(file_data, response->file_data, *length);
+	}
 
 	return PLDM_SUCCESS;
 }
