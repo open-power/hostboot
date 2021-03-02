@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <map>
 
 extern "C"
@@ -60,29 +61,16 @@ extern "C"
     fapi2::ReturnCode exp_deploy_row_repairs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb)
     {
         // Consts and vars
-        fapi2::ATTR_MFG_FLAGS_Type l_mfg_array = {0};
-        uint8_t l_test_all_spares = 0;
-        uint8_t l_no_rbs = 0;
-        fapi2::buffer<uint32_t> l_mfg_flags;
-        constexpr uint32_t MNFG_TEST_ALL_SPARE_DRAM_ROWS_ARR_IDX = 0;
-        constexpr uint32_t MNFG_TEST_ALL_SPARE_DRAM_ROWS_BIT = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_TEST_ALL_SPARE_DRAM_ROWS % 32;
-        constexpr uint32_t MNFG_NO_RBS_ARR_IDX = 0;
-        constexpr uint32_t MNFG_NO_RBS_BIT = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_NO_RBS % 32;
+        bool l_test_all_spares = false;
+        bool l_no_rbs = false;
 
         // This table contains a row repair entry for each DIMM/mrank combination
         std::map< fapi2::Target<fapi2::TARGET_TYPE_DIMM>,
             std::vector<mss::row_repair::repair_entry<mss::mc_type::EXPLORER>> > l_row_repairs;
 
-        // Grab MFG settings
-        FAPI_TRY(mss::attr::get_mfg_flags(l_mfg_array));
-
-        // Grab MNFG_TEST_ALL_SPARE_DRAM_ROWS
-        l_mfg_flags = l_mfg_array[MNFG_TEST_ALL_SPARE_DRAM_ROWS_ARR_IDX];
-        l_test_all_spares = l_mfg_flags.getBit<MNFG_TEST_ALL_SPARE_DRAM_ROWS_BIT>();
-
-        // Grab MNFG_NO_RBS
-        l_mfg_flags = l_mfg_array[MNFG_NO_RBS_ARR_IDX];
-        l_no_rbs = l_mfg_flags.getBit<MNFG_NO_RBS_BIT>();
+        // Check MNFG flags
+        FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_TEST_ALL_SPARE_DRAM_ROWS, l_test_all_spares));
+        FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_NO_RBS, l_no_rbs));
 
         // If mfg flag is set to test all spare rows, we need to do row repair on all dimm/ranks/DRAMs
         if (l_test_all_spares)

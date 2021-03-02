@@ -47,6 +47,7 @@
 #include <generic/memory/lib/ecc/ecc.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <generic/memory/lib/utils/mss_rank.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -327,21 +328,15 @@ void set_tce_correction( fapi2::buffer<uint64_t>& io_data, const mss::states i_v
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode setup_tce_correction (const fapi2::Target<T>& i_target)
 {
-    constexpr uint64_t MNFG_REPAIRS_DISABLED_ARRAY_SLOT = 1;
-    constexpr uint64_t MNFG_REPAIRS_DISABLED_BIT_SLOT = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_DISABLE_MEMORY_eREPAIR - 32 *
-            MNFG_REPAIRS_DISABLED_ARRAY_SLOT;
     fapi2::buffer<uint64_t> l_data;
-    fapi2::ATTR_MFG_FLAGS_Type l_mfg_array = {0};
-    fapi2::buffer<uint32_t> l_mfg_flags;
+    bool l_erepairs_disabled = false;
     mss::states l_state = mss::OFF;
 
-    FAPI_TRY( mss::read_recr_register(i_target, l_data ), "%s: Failed read_recr_register", mss::c_str(i_target));
-
     // Check for manufacturing disable dram repair flag to disable TCE correction
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_array),
-              "%s: Failed mfg_flags check", mss::c_str(i_target) );
-    l_mfg_flags = l_mfg_array[MNFG_REPAIRS_DISABLED_ARRAY_SLOT];
-    l_state = ( l_mfg_flags.getBit<MNFG_REPAIRS_DISABLED_BIT_SLOT>() ) ? mss::OFF : mss::ON;
+    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_DISABLE_MEMORY_eREPAIR, l_erepairs_disabled));
+
+    FAPI_TRY(mss::read_recr_register(i_target, l_data ), "%s: Failed read_recr_register", mss::c_str(i_target));
+    l_state = l_erepairs_disabled ? mss::OFF : mss::ON;
     mss::set_tce_correction(l_data, l_state);
 
     FAPI_TRY( mss::write_recr_register(i_target, l_data), "%s: Failed write_recr_register", mss::c_str(i_target));
