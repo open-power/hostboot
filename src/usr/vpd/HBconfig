@@ -146,7 +146,7 @@ config DJVPD_WRITE
 
 config HAVE_PVPD
     default n
-    depends on if PVPD_READ_FROM_PNOR || PVPD_READ_FROM_HW  
+    depends on if PVPD_READ_FROM_PNOR || PVPD_READ_FROM_HW
     help
         Have Planar VPD, PNOR or HW
 
@@ -156,3 +156,10 @@ config UPDATE_SN_FROM_BMC
     help
         Read Planar serial number from BMC
         via IPMI FRU Record 0
+
+config COMPILE_VPD_ECC_ALGORITHMS
+    default n
+    help
+        Compile the VPD ECC algorithms that do the validation
+        and updating of ECC data
+

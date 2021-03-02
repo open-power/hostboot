@@ -42,4 +42,12 @@ OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpd_ecc_api_algorithms.o, vpd
 OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpdecc.o)
 OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpdecc_support.o)
 
+# Fetch the VPD ECC algorithm APIs if compiling for VPD ECC algorithms
+vpdecc.h vpdecc.c vpdecc_support.h vpdecc_support.c :  $(ROOTPATH)/src/build/tools/fetchVpdAlgorithms.sh
+	$(ROOTPATH)/src/build/tools/fetchVpdAlgorithms.sh
+
+# Remove the VPD ECC algorithm files when user calls 'make clean' or 'make clobber'
+.PHONY: CLEAN_PASS
+CLEAN_PASS:
+	@-rm -rf vpdecc.h vpdecc.c vpdecc_support.h vpdecc_support.c
 
