@@ -373,6 +373,10 @@ enum generic_ffdc_codes : uint16_t
     // gen_throttle functions
     SET_PWR_CNTRL_REG = 0x10DE,
     SET_STR_REG = 0x10DF,
+
+    // Spare Device SPD field
+    SET_DIMM_SPARE = 0x10E0,
+
 };
 
 ///

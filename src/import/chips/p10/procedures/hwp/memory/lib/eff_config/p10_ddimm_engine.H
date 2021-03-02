@@ -209,14 +209,16 @@ class ddimm_0_3
         }
 
         ///
-        /// @brief Traits spare device LSB0
+        /// @brief Traits for spare device LSB0
         ///
         /// @param[in] i_field field value
         /// @return true/false in specified range
         ///
         virtual bool check_spare_device_lsb0(const uint8_t i_field) const
         {
-            return true;
+            // Mask to ensure all bits except 4:5 in SPD spec (2:3 here) are not set for x4 device spare mapping
+            constexpr uint8_t SPARE_DEVICE_REVERSE_MASK = 0xCF;
+            return ((i_field & SPARE_DEVICE_REVERSE_MASK) == 0);
         }
 
         ///
@@ -1130,6 +1132,48 @@ class ddimm_0_3
                                   "Number of P-States"));
 
             FAPI_TRY(mss::attr::set_pstates(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the spare device mapping field
+        ///
+        /// @param[in] i_spd spd binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dimm_spare(const std::vector<uint8_t>& i_spd) const
+        {
+            // Get the data
+            uint8_t l_field[mss::exp::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_value = 0;
+            uint8_t l_master_ranks_per_dimm = 0;
+            uint8_t l_attr_enum_val = 0;
+            const uint8_t CHAN0_NIBBLE_4 = 4;
+
+            // Update the values
+            FAPI_TRY(get_field_spd(iv_ocmb, F::SPARE_DEVICE_LSB0, i_spd, SET_DIMM_SPARE, l_value));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_spare_device_lsb0(l_value),
+                                  F::SPARE_DEVICE_LSB0.get_byte(i_spd),
+                                  l_value,
+                                  SET_DIMM_SPARE,
+                                  "Spare Device Mapping Byte 0"));
+
+            // Convert to attribute enum value
+            l_attr_enum_val = (l_value >> CHAN0_NIBBLE_4);
+            FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(iv_dimm, l_master_ranks_per_dimm));
+
+            for (uint8_t l_dimm_rank = 0; l_dimm_rank < l_master_ranks_per_dimm; ++l_dimm_rank)
+            {
+                l_field[l_dimm_rank] = l_attr_enum_val;
+            }
+
+            // Set the attribute
+            FAPI_TRY(mss::attr::set_dimm_spare(iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -3403,30 +3447,6 @@ class ddimm_0_3
             FAPI_TRY(mss::attr::set_speed_supported_lsb(iv_ocmb, l_field));
         }
 
-        virtual fapi2::ReturnCode set_spare_device_lsb0(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::SPARE_DEVICE_LSB0, i_spd, l_field));
-
-            FAPI_TRY(mss::attr::set_spare_device_lsb0(iv_ocmb, l_field));
-        }
-
-        virtual fapi2::ReturnCode set_spare_device_msb0(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::SPARE_DEVICE_MSB0, i_spd, l_field));
-
-            FAPI_TRY(mss::attr::set_spare_device_msb0(iv_ocmb, l_field));
-        }
-
-        virtual fapi2::ReturnCode set_spare_device_lsb1(const std::vector<uint8_t>& i_spd) const
-        {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::SPARE_DEVICE_LSB1, i_spd, l_field));
-
-            FAPI_TRY(mss::attr::set_spare_device_lsb1(iv_ocmb, l_field));
-        }
-
         virtual fapi2::ReturnCode set_hi_ddr_speed_ratio(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
@@ -3506,6 +3526,7 @@ class ddimm_0_3
             FAPI_TRY(set_ddp_compatibility(i_spd));
             FAPI_TRY(set_four_rank_mode(i_spd));
             FAPI_TRY(set_num_p_states(i_spd));
+            FAPI_TRY(set_dimm_spare(i_spd));
             FAPI_TRY(set_spd_content_revision(i_spd));
             FAPI_TRY(set_pmic0_sequence(i_spd));
             FAPI_TRY(set_pmic0_mfg_id(i_spd));
