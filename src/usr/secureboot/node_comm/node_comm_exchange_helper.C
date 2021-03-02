@@ -32,6 +32,7 @@
 #include "node_comm_transfer.H"
 #include <secureboot/secure_reasoncodes.H>
 #include <sys/time.h>
+#include <isteps/istepHelperFuncs.H>
 
 namespace SECUREBOOT
 {
@@ -40,6 +41,25 @@ namespace NODECOMM
 {
 
 mutex_t NodeCommExchangeQuotes::iv_quoteMutex = MUTEX_INITIALIZER;
+mutex_t NodeCommExchange::iv_errorMutex = MUTEX_INITIALIZER;
+
+/**
+ * @brief Helper function to capture an error safely
+ *
+ * @param[in] i_errl the error to capture
+ */
+void NodeCommExchange::handleError(errlHndl_t i_errl)
+{
+    mutex_lock(&iv_errorMutex);
+    if(!TRUSTEDBOOT::isTpmRequired())
+    {
+        TRACFCOMP(g_trac_nc,INFO_MRK"NodeCommExchange::handleError(): TPM is not required; changing the severity of error 0x%x to INFORMATIONAL",
+                  i_errl->eid());
+        i_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+    }
+    captureError(i_errl, *iv_istepError, SECURE_COMP_ID);
+    mutex_unlock(&iv_errorMutex);
+}
 
 /**
  * @brief Helper function to get the link and mailbox IDs for this node
@@ -206,7 +226,7 @@ void NodeCommExchangeNonces::operator()()
     {
         TRACFCOMP(g_trac_nc, ERR_MRK"NodeCommExchangeNonces: could not get nonce from the TPM");
         // Commit error and continue to prevent deadlocks
-        errlCommit(l_errl, SECURE_COMP_ID);
+        handleError(l_errl);
         l_myNonce.value = NODE_COMM_DEFAULT_NONCE;
     }
     else
@@ -239,7 +259,7 @@ void NodeCommExchangeNonces::operator()()
                       TRACE_ERR_ARGS(l_errl));
             // Commit the error so that we can continue the exchange and prevent
             // deadlocks.
-            errlCommit(l_errl, SECURE_COMP_ID);
+            handleError(l_errl);
         }
 
         // Wait 100ms to make sure that the other node had a chance to proces
@@ -256,7 +276,7 @@ void NodeCommExchangeNonces::operator()()
                       TRACE_ERR_ARGS(l_errl));
             // Commit the error so that we can continue the exchange and prevent
             // deadlocks.
-            errlCommit(l_errl, SECURE_COMP_ID);
+            handleError(l_errl);
         }
     }
     else
@@ -271,7 +291,7 @@ void NodeCommExchangeNonces::operator()()
                       TRACE_ERR_ARGS(l_errl));
             // Commit the error so that we can continue the exchange and prevent
             // deadlocks.
-            errlCommit(l_errl, SECURE_COMP_ID);
+            handleError(l_errl);
         }
 
         // Wait 100ms to make sure that the other node had a chance to proces
@@ -289,7 +309,7 @@ void NodeCommExchangeNonces::operator()()
                       TRACE_ERR_ARGS(l_errl));
             // Commit the error so that we can continue the exchange and prevent
             // deadlocks.
-            errlCommit(l_errl, SECURE_COMP_ID);
+            handleError(l_errl);
         }
     }
 
@@ -301,7 +321,7 @@ void NodeCommExchangeNonces::operator()()
     if(l_errl)
     {
         TRACFCOMP(g_trac_nc, ERR_MRK"NodeCommExchangeNonces: Could not extend this node's nonce into TPM");
-        errlCommit(l_errl, SECURE_COMP_ID);
+        handleError(l_errl);
     }
 
     l_errl = nodeCommLogNonce(l_peerNonce.value);
@@ -309,7 +329,7 @@ void NodeCommExchangeNonces::operator()()
     {
         TRACFCOMP(g_trac_nc, ERR_MRK"NodeCommExchangeNonces: Could not extend node %d nonce into TPM",
                   iv_iohsInstance.peerNodeInstance);
-        errlCommit(l_errl, SECURE_COMP_ID);
+        handleError(l_errl);
     }
 }
 
@@ -388,7 +408,6 @@ errlHndl_t requestQuote(const iohs_instances_t& i_iohsInstance, uint8_t*& o_quot
     // Check if the peer node had any TPM issues
     if(*l_eyeCatcher == NDNOTPM_)
     {
-        bool l_tpmRequired = TRUSTEDBOOT::isTpmRequired();
         /*@
          * @errortype
          * @reasoncode RC_NC_BAD_SLAVE_QUOTE
@@ -407,15 +426,7 @@ errlHndl_t requestQuote(const iohs_instances_t& i_iohsInstance, uint8_t*& o_quot
         l_errl->collectTrace(SECURE_COMP_NAME);
         l_errl->collectTrace(TRBOOT_COMP_NAME);
         l_errl->collectTrace(NODECOMM_TRACE_NAME);
-        if(!l_tpmRequired)
-        {
-            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            errlCommit(l_errl, SECURE_COMP_ID);
-        }
-        else
-        {
-            break;
-        }
+        break;
     }
 
     }while(0);
@@ -527,7 +538,8 @@ void NodeCommExchangeQuotes::operator()()
         l_errl = requestQuote(iv_iohsInstance, l_data, l_dataSize);
         if(l_errl)
         {
-            break;
+            // Capture and continue communicating
+            handleError(l_errl);
         }
 
         // Wait 10ms before sending the quote to make sure the communication protocol
@@ -540,7 +552,8 @@ void NodeCommExchangeQuotes::operator()()
         l_errl = sendQuote(iv_iohsInstance);
         if(l_errl)
         {
-            break;
+            // Capture and continue communicating
+            handleError(l_errl);
         }
     }
     else
@@ -551,7 +564,8 @@ void NodeCommExchangeQuotes::operator()()
         l_errl = sendQuote(iv_iohsInstance);
         if(l_errl)
         {
-            break;
+            // Capture and continue communicating
+            handleError(l_errl);
         }
 
         // Wait 10ms before sending the quote to make sure the communication protocol
@@ -564,7 +578,8 @@ void NodeCommExchangeQuotes::operator()()
         l_errl = requestQuote(iv_iohsInstance, l_data, l_dataSize);
         if(l_errl)
         {
-            break;
+            // Capture and continue communicating
+            handleError(l_errl);
         }
     }
 

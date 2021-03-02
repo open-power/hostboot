@@ -36,6 +36,7 @@ OBJS += node_comm_exchange_helper.o
 
 VPATH += $(ROOTPATH)/src/usr/targeting/common
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr
+EXTRAINCDIR += $(ROOTPATH)/src/usr
 
 CFLAGS += -iquote ../
 

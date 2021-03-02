@@ -32,6 +32,8 @@
  */
 
 #include "node_comm.H"
+#include <isteps/hwpisteperror.H>
+#include <sys/sync.h>
 
 namespace SECUREBOOT
 {
@@ -51,24 +53,65 @@ typedef struct
 } quoteInfo_t;
 
 /**
- * @brief Performs the Phase 1 of multinode comm, where nodes exchange 8-byte
- *        random number (nonce) with their specific link information encoded
- *        into the first byte of the number.
+ * @brief Virtual base class for multithreaded node comm exchange.
  */
-class NodeCommExchangeNonces
+class NodeCommExchange
 {
     protected:
+        // @brief Mutex to protect istep error from being accessed by different
+        //        threads at the same time
+        static mutex_t iv_errorMutex;
+
         // @brief The information about this node's IOHS position and peer
         //        node's instance and its IOHS position.
         iohs_instances_t iv_iohsInstance;
 
+        // @brief Istep error to report back if the exchange fails
+        ISTEP_ERROR::IStepError* iv_istepError;
+
+        // @brief Handle the input error safely
+        //
+        // @param[in] i_errl error to handle
+        void handleError(errlHndl_t i_errl);
+
+    public:
+        // @brief ThreadPool uses this function to do the actual work
+        virtual void operator()() = 0;
+
+        // @brief default destructor
+        virtual ~NodeCommExchange()
+        {
+        }
+
+        // A constructor that takes an IOHS info structure and an istep
+        // error structure
+        NodeCommExchange(const iohs_instances_t& i_iohsInfo,
+                         ISTEP_ERROR::IStepError& i_istepError) :
+            iv_iohsInstance(i_iohsInfo), iv_istepError(&i_istepError)
+        {
+        }
+
+        // Delete copy constructor and assignment operator
+        NodeCommExchange(const NodeCommExchange&) = delete;
+        NodeCommExchange& operator=(const NodeCommExchange&) = delete;
+};
+
+/**
+ * @brief Performs the Phase 1 of multinode comm, where nodes exchange 8-byte
+ *        random number (nonce) with their specific link information encoded
+ *        into the first byte of the number.
+ */
+class NodeCommExchangeNonces : public NodeCommExchange
+{
     public:
         // @brief ThreadPool uses this function to do the actual work
         void operator()();
 
-        // A constructor that takes an IOHS info structure
-        NodeCommExchangeNonces(const iohs_instances_t& i_iohsInfo) :
-            iv_iohsInstance(i_iohsInfo)
+        // A constructor that takes an IOHS info structure and an istep
+        // error structure
+        NodeCommExchangeNonces(const iohs_instances_t& i_iohsInfo,
+                               ISTEP_ERROR::IStepError& i_istepError) :
+            NodeCommExchange(i_iohsInfo, i_istepError)
         {
         }
 
@@ -83,13 +126,9 @@ class NodeCommExchangeNonces
  *        blobs containing secureboot information (TPM PCR contents, TPM attestation
  *        keys, TPM logs, etc.).
  */
-class NodeCommExchangeQuotes
+class NodeCommExchangeQuotes : public NodeCommExchange
 {
     protected:
-        // @brief The information about this node's IOHS position and peer
-        //        node's instance and its IOHS position.
-        iohs_instances_t iv_iohsInstance;
-
         // @brief A vector of quotes received from the other nodes. All quotes
         // in this vector are extended to TPM at the end of multinode exchange.
         std::vector<quoteInfo_t>* iv_quotes;
@@ -101,10 +140,12 @@ class NodeCommExchangeQuotes
         // @brief ThreadPool uses this function to do the actual work
         void operator()();
 
-        // A constructor that takes an IOHS info structure
+        // A constructor that takes an IOHS info structure, a pointer to a
+        // vector of quotes from all of the nodes, and an istep error structure
         NodeCommExchangeQuotes(const iohs_instances_t& i_iohsInfo,
-                               std::vector<quoteInfo_t>* i_quoteVector):
-            iv_iohsInstance(i_iohsInfo), iv_quotes(i_quoteVector)
+                               std::vector<quoteInfo_t>* i_quoteVector,
+                               ISTEP_ERROR::IStepError& i_istepError) :
+            NodeCommExchange(i_iohsInfo, i_istepError), iv_quotes(i_quoteVector)
         {
             iv_quotes->clear();
         }

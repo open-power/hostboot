@@ -52,6 +52,7 @@
 #include <sys/internode.h>
 #include <util/misc.H>
 #include <util/threadpool.H>
+#include <isteps/istepHelperFuncs.H>
 
 #include "node_comm.H"
 #include "node_comm_transfer.H"
@@ -1560,10 +1561,11 @@ errlHndl_t syncWithAllNodes(const std::vector<iohs_instances_t>& i_iohsInstances
 errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_iohsInstances)
 {
     Util::ThreadPool<NodeCommExchangeNonces> l_threadpool;
+    ISTEP_ERROR::IStepError l_istepError;
 
     for(const auto& l_iohsInstance: i_iohsInstances)
     {
-        l_threadpool.insert(new NodeCommExchangeNonces(l_iohsInstance));
+        l_threadpool.insert(new NodeCommExchangeNonces(l_iohsInstance, l_istepError));
     }
 
     // Get the number of nodes on the machine (each thread will service a
@@ -1594,7 +1596,13 @@ errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_io
                       TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
         }
     }
-    return l_errl;
+
+    if(l_errl)
+    {
+        captureError(l_errl, l_istepError, SECURE_COMP_ID);
+    }
+
+    return l_istepError.getErrorHandle();
 }
 
 /**
@@ -1655,6 +1663,7 @@ errlHndl_t extendAllQuotes(std::vector<quoteInfo_t>& i_quotes)
 errlHndl_t exchangeQuotesMultithreaded(const std::vector<iohs_instances_t>& i_iohsInstances)
 {
     errlHndl_t l_errl = nullptr;
+    ISTEP_ERROR::IStepError l_istepError;
 
     do {
     // First, expand each TPM's log. The TPM's logs are created early in IPL,
@@ -1691,7 +1700,7 @@ errlHndl_t exchangeQuotesMultithreaded(const std::vector<iohs_instances_t>& i_io
 
     for(const auto& l_iohsInstance : i_iohsInstances)
     {
-        l_threadpool.insert(new NodeCommExchangeQuotes(l_iohsInstance, &l_quotes));
+        l_threadpool.insert(new NodeCommExchangeQuotes(l_iohsInstance, &l_quotes, l_istepError));
     }
 
     // Get the number of nodes on the machine (each thread will service a
@@ -1742,7 +1751,12 @@ errlHndl_t exchangeQuotesMultithreaded(const std::vector<iohs_instances_t>& i_io
 
     }while(0);
 
-    return l_errl;
+    if(l_errl)
+    {
+        captureError(l_errl, l_istepError, SECURE_COMP_ID);
+    }
+
+    return l_istepError.getErrorHandle();
 }
 
 /**
@@ -2140,11 +2154,6 @@ errlHndl_t nodeCommExchange(void)
         break;
     }
 #endif
-
-    if(err)
-    {
-        break;
-    }
 
     } while( 0 );
 
