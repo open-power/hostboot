@@ -618,6 +618,7 @@ typedef struct
     //WOV-OCS Current Threshold
     uint16_t wov_idd_thresh;
 
+    uint8_t wov_dirty_undercurr_control[NUM_WOV_DIRTY_UC_CTRL];
 // __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_t;
 
@@ -736,6 +737,9 @@ typedef struct
 
     //WOV-OCS Current Threshold
     uint16_t wov_idd_thresh;
+
+    uint8_t wov_dirty_undercurr_control[NUM_WOV_DIRTY_UC_CTRL];
+
 } GlobalPstateParmBlockWOV_t;
 
 enum GPPB_OFFSET_IDX

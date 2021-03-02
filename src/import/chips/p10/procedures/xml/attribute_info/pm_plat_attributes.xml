@@ -2044,6 +2044,47 @@
     <group>wov</group>
   </attribute>
 
+    <!-- ********************************************************************* -->
+    <attribute>
+        <id>ATTR_WOV_DIRTY_UNCURRENT_CONTROL</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+        The dirty value sent to OCC upon PGPE detecting a DDS based droop.  The 
+        encoding represent the following:
+        b0x(0,1):  not dirty, NA
+        b10(  2):  dirty, no OCC Ceff reaction expected
+        b11(  3):  dirty, OCC Ceff reaction expected
+        [Index]->2 entries-:
+        0: LIGHT
+        1: HEAVY      
+        </description>
+        <valueType>uint8</valueType>
+        <array>2</array>
+        <default>0x0, 0x3</default>
+        <overrideOnly/>
+        <group>wov</group>
+    </attribute>
+    
+    <!-- ********************************************************************* -->
+    <attribute>
+        <id>ATTR_OCS_WITH_DDS_DISABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+        Allows the OCS function to operate without real DDS enablement for unit
+        testing purposes.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+        OFF=0,
+        ON=1
+        </enum>    
+        <platInit/>
+        <initToZero/>
+        <overrideOnly/>
+        <group>wov</group>
+    </attribute>
+
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_DDS_DPLL_FMAX_FAST_DISABLE</id>

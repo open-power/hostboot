@@ -1170,6 +1170,11 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
             FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov_underv_vmin_mv));
             FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
         }
+
+        for(uint32_t i = 0; i < NUM_WOV_DIRTY_UC_CTRL; i++) {
+            io_globalppb->wov_dirty_undercurr_control[i] = iv_attrs.attr_wov_dirty_uncurrent_ctrl[i];
+            FAPI_INF("WOV_DIRTY_UNDERCURR_CTRL[%u]=%u",i,io_globalppb->wov_dirty_undercurr_control[i]);
+        }
         io_globalppb->wov_idd_thresh                  =  revle16(iv_attr_mvpd_poundV_other_info.idd_rdp_limit_0p1A);
 
         io_globalppb->attr.fields.pstates_enabled     = iv_pstates_enabled;
@@ -1838,6 +1843,8 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_STEP_DECR_10THPCT,    iv_procChip,attr_wov_overv_step_decr_pct);
     DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,          iv_procChip,attr_wov_overv_max_pct);
 
+    DATABLOCK_GET_ATTR_2(ATTR_WOV_DIRTY_UNCURRENT_CONTROL,  FAPI_SYSTEM, attr_wov_dirty_uncurrent_ctrl);
+
     //VCS attributes
     DATABLOCK_GET_ATTR(ATTR_VCS_FLOOR_MV,                   iv_procChip,attr_vcs_floor_mv);
     DATABLOCK_GET_ATTR(ATTR_VCS_VDD_OFFSET_MV,              iv_procChip,attr_vcs_vdd_offset_mv);
@@ -1922,7 +1929,6 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.a
     SET_DEFAULT(attr_wov_underv_step_decr_pct, 5);
     SET_DEFAULT(attr_wov_underv_max_pct, 100);
     SET_DEFAULT(attr_wov_underv_perf_loss_thresh_pct, 5);
-
 
     //Ensure that the ranges for WOV attributes are honored
     if (iv_attrs.attr_wov_sample_125us < 2) {
@@ -3359,9 +3365,12 @@ bool PlatPmPPB::is_ocs_enabled()
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_OCS_DISABLE, FAPI_SYSTEM, attr_system_ocs_disable);
 
+    fapi2::ATTR_SYSTEM_OCS_DISABLE_Type attr_system_ocs_with_dds_disable = false;
+    FAPI_ATTR_GET(fapi2::ATTR_OCS_WITH_DDS_DISABLE, FAPI_SYSTEM, attr_system_ocs_with_dds_disable);
+
     return
         (!(attr_system_ocs_disable) &&
-         iv_ocs_enabled)
+         (iv_ocs_enabled || (attr_system_ocs_with_dds_disable)))
         ? true : false;
 } //end of is_ocs_enabled
 

@@ -200,6 +200,7 @@ typedef struct
     uint8_t attr_wov_overv_step_incr_pct;
     uint8_t attr_wov_overv_step_decr_pct;
     uint8_t attr_wov_overv_max_pct;
+    uint8_t attr_wov_dirty_uncurrent_ctrl[NUM_WOV_DIRTY_UC_CTRL];
     uint32_t attr_sram_write_assist_mv;
     uint32_t attr_array_write_assist_set;
     uint8_t  attr_rvrm_deadzone_mv;

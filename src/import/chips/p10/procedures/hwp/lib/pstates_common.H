@@ -181,6 +181,9 @@ typedef enum
 
 //WOF_VRATIO Attribute Index
 #define NUM_WOF_VRATIO_PCT      8
+#define NUM_WOV_DIRTY_UC_CTRL       2
+#define WOV_DIRTY_UC_CTRL_LIGHT_DROOP  0
+#define WOV_DIRTY_UC_CTRL_HEAVY_DROOP  1
 
 #ifndef __ASSEMBLER__
 #ifdef __cplusplus
