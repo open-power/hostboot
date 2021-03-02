@@ -43,6 +43,12 @@ namespace TARGETING
 class Target;
 }
 
+// Forward Declaration of HDAT SPI Device Info Structure
+namespace HDAT
+{
+    struct hdatSpiDevData_t;
+};
+
 namespace SPI
 {
 
@@ -195,6 +201,41 @@ struct spiSlaveDevice
     };
 
     deviceDescription_t description;
+};
+
+// A functor that compares two spi devices to determine if they are the same device.
+class CompareSlaveDevice
+{
+private:
+    // Internal tracking for device to compare against. Useful when passing functor to std::find_if, etc.
+    spiSlaveDevice iv_device;
+
+public:
+
+    // @brief Constructor that extracts required info from HDAT representation of SPI Slave Device Info
+    CompareSlaveDevice(const HDAT::hdatSpiDevData_t*& i_hdatSpiDevInfo);
+
+    // @brief Constructor that stores passed spiSlaveDevice as device to compare others against
+    CompareSlaveDevice(spiSlaveDevice i_spiDevInfo);
+
+    // @brief Used to compare the given SPI device to the internally held one.
+    //
+    // @param[in]  i_spiDevice    A spiSlaveDevice to be compared to internal member.
+    //
+    // @return   bool             TRUE: If spi devices are the same. That is to say, many unique fields between
+    //                                  the two devices are the same.
+    //                            FALSE: Not enough uniquely indentifiable info matches.
+    bool operator()(spiSlaveDevice i_spiDevice);
+
+    // @brief Used to compare one SPI device to another to see if they are the same
+    //
+    // @param[in]  i_spiDevice1   A spiSlaveDevice
+    // @param[in]  i_spiDevice2   Another spiSlaveDevice to be compared to first.
+    //
+    // @return   bool             TRUE: If spi devices are the same. That is to say, many unique fields between
+    //                                  the two devices are the same.
+    //                            FALSE: Not enough uniquely indentifiable info matches.
+    bool operator()(spiSlaveDevice i_spiDevice1, spiSlaveDevice i_spiDevice2);
 };
 
 /**

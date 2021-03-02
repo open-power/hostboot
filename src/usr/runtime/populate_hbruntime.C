@@ -2122,6 +2122,19 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
     // A collection of PCRD Instance Headers to be populated and used later
     std::vector<HDAT::hdatSpPcrd_t const *> l_pcrdInstances;
+    std::vector<SPI::spiSlaveDevice> l_allTpmsDevInfo;
+    // Populate the list of all TPMs from the MRW so that we can detect if there is a mismatch between what's listed
+    // in the PCRD versus the MRW.
+    //
+    // Despite the tpmList only collecting ALL_FUNCTIONAL tpms, this list will be more complete than just a single TPM
+    // in the loop to fill in the instance info below. Historically, tpmList would collect ALL_IN_BLUEPRINT which would
+    // be all the TPMs specified by the MRW. However, due to some limitations on FSP side and descrepancies in the HDAT
+    // spec suggesting that non-installed procs should have their data undefined the change to ALL_FUNCTIONAL became
+    // necessary.
+    for (auto pTpm : tpmList)
+    {
+        SPI::getSpiDeviceInfo(l_allTpmsDevInfo, pTpm);
+    }
 
     // fill in the values for each Secure Boot TPM Instance Info in the array
     for (auto pTpm : tpmList)
@@ -2172,13 +2185,13 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         std::vector<HDAT::spiDeviceId_t> l_PcrdSpiDeviceIds;
 
         // Gather a list of SPI devices for this chip.
-        std::vector<SPI::spiSlaveDevice> l_spiDevices;
-        SPI::getSpiDeviceInfo(l_spiDevices,
+        std::vector<SPI::spiSlaveDevice> l_tpmSpiDevice;
+        SPI::getSpiDeviceInfo(l_tpmSpiDevice,
                               pTpm);
 
-        assert(l_spiDevices.size() == 1,
+        assert(l_tpmSpiDevice.size() == 1,
               "Duplicate entries for this TPM in MRW: %d",
-              l_spiDevices.size());
+              l_tpmSpiDevice.size());
 
         uint64_t l_pcrdAddr = 0;
         uint64_t l_pcrdSizeMax = 0;
@@ -2189,11 +2202,11 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
                                   "Searching PCRD instances for TPM SPI Device with ID=0x%.8X, "
                                   "E=0x%X, P=0x%X, DevType=0x%X, DevPurp=0x%X",
-                                  l_spiDevices[0].deviceId.word,
-                                  l_spiDevices[0].masterEngine,
-                                  l_spiDevices[0].masterPort,
-                                  l_spiDevices[0].deviceType,
-                                  l_spiDevices[0].devicePurpose);
+                                  l_tpmSpiDevice[0].deviceId.word,
+                                  l_tpmSpiDevice[0].masterEngine,
+                                  l_tpmSpiDevice[0].masterPort,
+                                  l_tpmSpiDevice[0].deviceType,
+                                  l_tpmSpiDevice[0].devicePurpose);
 
         // Iterate through each Processor Chip Related Data (PCRD) instance to find this TPM in it.
         // There is additional processing to cache all the pointers for each PCRD instance to avoid
@@ -2374,25 +2387,14 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                     continue;
                 }
 
-                // now make sure we have a match in the mrw
-                auto itr = std::find_if(l_spiDevices.begin(),
-                                        l_spiDevices.end(),
-                                        [&l_pcrdSpiDevice](const SPI::spiSlaveDevice & i_spiDevMrw)
-                                        {
-                                            // Shift off "unique id" portion of SPI Device Id as it is not guaranteed to
-                                            // match between PCRD and MRW
-                                            uint32_t shift_amt = 16;
-                                            return ((l_pcrdSpiDevice->hdatSpiDevId >> shift_amt)
-                                                        == (i_spiDevMrw.deviceId.word >> shift_amt)) &&
-                                                   (l_pcrdSpiDevice->hdatSpiMasterEngine == i_spiDevMrw.masterEngine) &&
-                                                   (l_pcrdSpiDevice->hdatSpiMasterPort == i_spiDevMrw.masterPort) &&
-                                                   (l_pcrdSpiDevice->hdatSpiSlaveDevType
-                                                        == static_cast<uint8_t>(i_spiDevMrw.deviceType)) &&
-                                                   (l_pcrdSpiDevice->hdatSpiDevPurp
-                                                        == static_cast<uint8_t>(i_spiDevMrw.devicePurpose));
-                                        });
+                // Now make sure we have a match in the mrw.
+                // l_tpmSpiDevice only holds the current TPM not all TPMs so use the full list l_allTpmsDevInfo.
+                SPI::CompareSlaveDevice isSame(l_pcrdSpiDevice);
+                auto itr = std::find_if(l_allTpmsDevInfo.begin(),
+                                        l_allTpmsDevInfo.end(),
+                                        isSame);
 
-                if (itr == l_spiDevices.end())
+                if (itr == l_allTpmsDevInfo.end())
                 {
                     // Couldn't find a match
                     TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
@@ -2432,6 +2434,14 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                 }
                 else
                 {
+                    // A matching TPM was found in the PCRD, check if its the one we're trying to fill the info in for.
+                    if (l_tpmSpiDevice.empty() || !isSame(l_tpmSpiDevice[0]))
+                    {
+                        // This is not the SPI device we are looking for, move along.
+                        continue;
+                    }
+
+                    // Make sure the TPM we're matched against hasn't already been filled in.
                     if (l_tpmInstInfo->hdatSpiDeviceId != HDAT::SPI_DEVICE_ID::INVALID_SPI_DEVICE_ID)
                     {
                         // Found a duplicate SPI Device ID match indicating that there was an error in the model
@@ -2479,7 +2489,10 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                             (l_pcrdSpiDevice->hdatSpiMasterPort == SPI_CONTROLLER_SELECT))
                         {
                             l_tpmInstInfo->hdatSpiDeviceId = l_pcrdSpiDevice->hdatSpiDevId;
-                            l_spiDevices.erase(itr);
+                            // Only holds the current TPM entry which was just found. Erase it so we don't erroneously
+                            // think we found a duplicate later when checking if the other MRW TPM is presesnt in the
+                            // PCRD.
+                            l_tpmSpiDevice.clear();
                             TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
                                                       "PCRD TPM SPI Device has a match in the MRW: "
                                                       "E=0x%X, P=0x%X, DevType=0x%X, DevPurp=0x%X",
@@ -2540,10 +2553,10 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
             break;
         }
 
-        if (!l_spiDevices.empty())
+        if (!l_tpmSpiDevice.empty())
         {
             size_t i = 0;
-            for (const auto& spiDev : l_spiDevices)
+            for (const auto& spiDev : l_tpmSpiDevice)
             {
                 TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
                           "A SPI device in the MRW was not found in the PCRD. "
@@ -2583,7 +2596,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                                                  0,
                                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 l_elog->collectTrace(RUNTIME_COMP_NAME);
-                if (++i >= l_spiDevices.size())
+                if (++i >= l_tpmSpiDevice.size())
                 {
                     // This error will be returned
                     break;

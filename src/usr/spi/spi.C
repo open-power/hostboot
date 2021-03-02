@@ -72,6 +72,9 @@
 // SCOM addresses/bitfields
 #include <p10_scom_perv_8.H>
 
+// HDAT SPI related structures
+#include "../hdat/hdatutil.H"
+
 using namespace TARGETING;
 using namespace SPI;
 using namespace UTIL;
@@ -483,7 +486,7 @@ void assignUniqueIds(std::vector<spiSlaveDevice>& io_devices)
     }
 }
 
-}
+} // end of unnamed namespace
 
 namespace SPI {
 
@@ -869,4 +872,40 @@ errlHndl_t spiPresence(TARGETING::Target* i_target,
 
 }
 
+CompareSlaveDevice::CompareSlaveDevice(const HDAT::hdatSpiDevData_t*& i_hdatSpiDevice)
+{
+    iv_device.deviceId.word = i_hdatSpiDevice->hdatSpiDevId;
+    iv_device.masterEngine = i_hdatSpiDevice->hdatSpiMasterEngine;
+    iv_device.masterPort = i_hdatSpiDevice->hdatSpiMasterPort;
+    iv_device.deviceType = static_cast<spiSlaveDevice::slaveDeviceType_t>(i_hdatSpiDevice->hdatSpiSlaveDevType);
+    iv_device.devicePurpose = static_cast<spiSlaveDevice::slaveDevicePurpose_t>(i_hdatSpiDevice->hdatSpiDevPurp);
 }
+
+CompareSlaveDevice::CompareSlaveDevice(spiSlaveDevice i_spiDevice)
+{
+    iv_device.deviceId.word = i_spiDevice.deviceId.word;
+    iv_device.masterEngine = i_spiDevice.masterEngine;
+    iv_device.masterPort = i_spiDevice.masterPort;
+    iv_device.deviceType = i_spiDevice.deviceType;
+    iv_device.devicePurpose = i_spiDevice.devicePurpose;
+}
+
+bool CompareSlaveDevice::operator()(const spiSlaveDevice i_spiDevice)
+{
+    return (*this)(iv_device, i_spiDevice);
+}
+
+bool CompareSlaveDevice::operator()(const spiSlaveDevice i_device1, const spiSlaveDevice i_device2)
+{
+   // Shift off "unique id" portion of SPI Device Id as it is not guaranteed to
+   // match.
+   const uint32_t shift_amt = 16;
+   return ((i_device1.deviceId.word >> shift_amt)
+                   == (i_device2.deviceId.word >> shift_amt)) &&
+           (i_device1.masterEngine == i_device2.masterEngine) &&
+           (i_device1.masterPort == i_device2.masterPort) &&
+           (i_device1.deviceType == i_device2.deviceType) &&
+           (i_device1.devicePurpose == i_device2.devicePurpose);
+}
+
+} // end of namespace SPI
