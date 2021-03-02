@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -41,6 +41,6 @@ echo "SETENV PROC_EC                22" >> $sb/simu/configs/P9_NIMBUS.config
 
 # TODO RTC:215621
 # remove when simics gets dimmspd.dat updated
-mkdir -p $sb/../simics/import/vpd/
-cp /gsa/ausgsa/projects/h/hostboot/.binary_cache/data/f6f5b778c406883e1b392b311350a1e83583e15a $sb/../simics/import/vpd/dimmspd.dat
+#mkdir -p $sb/../simics/import/vpd/
+#cp /gsa/ausgsa/projects/h/hostboot/.binary_cache/data/f6f5b778c406883e1b392b311350a1e83583e15a $sb/../simics/import/vpd/dimmspd.dat
 

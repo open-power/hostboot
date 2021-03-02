@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -557,7 +557,7 @@ hb_cachesync()
 {
     [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
-    rsync -av /gsa/ausgsa/projects/h/hostboot/.binary_cache/ \
+    rsync -av ${HOSTBOOT_ENVIRONMENT}/.binary_cache/ \
               ${PROJECT_ROOT}/.git/hb_cache
 
     failure=0
@@ -576,7 +576,7 @@ hb_cacheadd()
 {
     [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
-    CACHE_PATH=/gsa/ausgsa/projects/h/hostboot/.binary_cache/
+    CACHE_PATH=${HOSTBOOT_ENVIRONMENT}/.binary_cache/
     FILE=$1
     shift
 

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -37,7 +37,6 @@
 
 ##########################################################################
 mkdir -p  $sb/simu/data
-
 
 ###############################################################################
 ### NOTE - if you need to sbex a simicsInfo track it needs to be done BEFORE

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -158,7 +158,7 @@ echo "$timestamp Starting autosample test..."
 hindsight_license=$(echo "hindsight_usage-"`date +%Y`-`date +%B`".log")
 # show last 4 hours. Gives alittle insight to license usage trends.
 #This log file is added to every twenty minutes. There are spaces between each line. 4x2x3=24 lines
-tail -n 24 /gsa/ausgsa/projects/s/simics_test/license_logs/$hindsight_license
+#tail -n 24 /gsa/ausgsa/projects/s/simics_test/license_logs/$hindsight_license
 
 # Run set up in current shell
 echo    "run autosimsetup.."
