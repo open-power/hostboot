@@ -2084,6 +2084,26 @@
         <group>wov</group>
     </attribute>
 
+    <!-- ********************************************************************* -->
+    <attribute>
+        <id>ATTR_WOV_OVERV_WITH_DDS_DISABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+        Allows the WOV Overvolting function to operate without real DDS enablement for unit
+        testing purposes.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+        OFF=0,
+        ON=1
+        </enum>    
+        <platInit/>
+        <initToZero/>
+        <overrideOnly/>
+        <group>wov</group>
+    </attribute>
+
+
 
   <!-- ********************************************************************* -->
   <attribute>

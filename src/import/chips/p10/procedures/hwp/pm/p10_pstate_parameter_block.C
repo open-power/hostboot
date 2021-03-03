@@ -1120,8 +1120,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = !is_ocs_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_ENABLE] = iv_wof_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_DISABLE_VRATIO] = iv_attrs.attr_system_wof_disable_dimension[4];
-        io_globalppb->pgpe_flags[PGPE_FLAG_WOV_UNDERVOLT_ENABLE] = iv_wov_underv_enabled;
-        io_globalppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE] = iv_wov_overv_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_WOV_UNDERVOLT_ENABLE] = is_wov_underv_enabled();
+        io_globalppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE] = is_wov_overv_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_DDS_COARSE_THROTTLE_ENABLE] = iv_attrs.attr_dds_coarse_thr_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_PMCR_MOST_RECENT_ENABLE] = iv_attrs.attr_pmcr_most_recent_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_DDS_ENABLE] = is_dds_enabled();
@@ -3700,8 +3700,12 @@ bool PlatPmPPB::is_wov_underv_enabled()
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_wov_overv_enabled()
 {
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_WOV_OVERV_WITH_DDS_DISABLE_Type attr_system_wov_overv_with_dds_disable = false;
+    FAPI_ATTR_GET(fapi2::ATTR_WOV_OVERV_WITH_DDS_DISABLE, FAPI_SYSTEM,attr_system_wov_overv_with_dds_disable);
+
     return (!(iv_attrs.attr_wov_overv_disable) &&
-         iv_wov_overv_enabled)
+         (iv_wov_overv_enabled || attr_system_wov_overv_with_dds_disable))
          ? true : false;
 }
 
