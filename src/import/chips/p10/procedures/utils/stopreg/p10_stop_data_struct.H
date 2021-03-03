@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -144,10 +144,11 @@ enum
     SCOM_ADDR_MASK          =   0x000FFFFF,
     SCOM_ADDR_CHIPLET_MASK  =   0x000FFFFF,
     SCOM_ENTRY_VER          =   0x10000000, //Ver 1.0
-    CORE_SECTION_ID_CODE    =   0x00000000, //Core Section Id 0
-    L3_SECTION_ID_CODE      =   0x01000000, //L3 Section Id 3 b4
+    CORE_SECTION_ID_CODE    =   0x00000000, //b4: Core Section Id 0
+    L3_SECTION_ID_CODE      =   0x08000000, //b4: L3 Section Id 1
     MAX_SCOM_ENTRY_POS      =   0x10,
     MIN_SUPERCHIPLET_ID     =   0x20,
+    MAX_SECTN_ENTRY_SHIFT   =   20,
 
 };
 

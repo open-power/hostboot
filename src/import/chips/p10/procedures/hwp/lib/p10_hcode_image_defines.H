@@ -463,7 +463,6 @@ typedef struct
     CPMRLayout_t iv_cpmrRegion;
     uint8_t      iv_cpmrReserve[ONE_MB - sizeof( CPMRLayout_t )];
     PPMRLayout_t iv_ppmrRegion;
-    uint8_t      iv_ppmrReserve[ONE_MB - sizeof( PPMRLayout_t )];
 } Homerlayout_t;
 
 #ifdef __cplusplus

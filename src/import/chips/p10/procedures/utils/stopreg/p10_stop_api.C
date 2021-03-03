@@ -947,7 +947,7 @@ STATIC StopReturnCode_t lookUpScomRestoreEntry( void * i_pImage, const ScomSecti
         if( l_pScom->iv_scomAddress & SWIZZLE_4_BYTE(LAST_SCOM_ENTRY) )
         {
             o_pScomDat->iv_lastEntryOffset   =   l_entry;
-            MY_INF( "SCOM Restore Entry Limit 0x%08x",
+            MY_INF( "SCOM Restore Last Entry Slot 0x%08x",
                     o_pScomDat->iv_lastEntryOffset );
             break;
         }
@@ -1076,10 +1076,12 @@ STATIC StopReturnCode_t updateScomEntry( void * i_pImage, uint32_t i_scomAddr,
                     l_pScom->iv_scomAddress    |=   L3_SECTION_ID_CODE;
                 }
 
+                l_pScom->iv_scomAddress    |=   ( i_pScomDat->iv_entryLimit << MAX_SECTN_ENTRY_SHIFT );
                 l_pScom->iv_scomAddress     =   SWIZZLE_4_BYTE(l_pScom->iv_scomAddress);
                 l_pScom->iv_scomData        =   SWIZZLE_8_BYTE(i_scomData);
-
-                MY_INF( "SCOM Address 0x%08x", SWIZZLE_4_BYTE(l_pScom->iv_scomAddress) );
+                MY_INF( "SCOM Address 0x%08x SCOM Data 0x%016lx Offset Wrt Base 0x%08x",
+                        SWIZZLE_4_BYTE(l_pScom->iv_scomAddress), SWIZZLE_8_BYTE(l_pScom->iv_scomData),
+                        (uint32_t)((uint8_t *) l_pScom - (uint8_t *) i_pImage) );
             }
             else
             {
@@ -1777,6 +1779,7 @@ StopReturnCode_t proc_stop_init_self_save(  void* const i_pImage, const uint32_t
                 l_pSaveStart++;
             }
 
+
         }// for thread = 0;
 
         if( l_rc )
@@ -1849,6 +1852,7 @@ StopReturnCode_t proc_stop_auto_wakeup( void  *i_pImage,  const uint64_t  i_pir,
         if( !i_pImage )
         {
             l_rc    =   STOP_AUTO_WAKEUP_BAD_IMG;
+            break;
         }
 
         l_rc    =   getCoreAndThread( i_pImage, i_pir, &l_coreId, &l_threadId );
