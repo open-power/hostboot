@@ -319,20 +319,15 @@ void  HdatIplParms::hdatGetIplParmsData()
     this->iv_hdatIPLParams->iv_iplParms.hdatKeyLockPosition =
                                                      HDAT_KEYLOCK_MANUAL;
 
-    //@TODO: RTC 142465 missing attribute
-    //@TODO RTC 245661 to get from pldm bios
-    /*TARGETING::ATTR_LMB_SIZE_type l_lmbSize;
+    TARGETING::ATTR_LMB_SIZE_type l_lmbSize;
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_LMB_SIZE>(l_lmbSize))
     {
-        this->iv_hdatIPLParams->iv_iplParms.hdatLMBSize = 4;
+        this->iv_hdatIPLParams->iv_iplParms.hdatLMBSize = l_lmbSize;
     }
     else
     {
         HDAT_ERR("Error in getting LMB_SIZE attribute");
-    }*/
-
-    //attribute LMB_SIZE not defined
-    this->iv_hdatIPLParams->iv_iplParms.hdatLMBSize = 4;
+    }
 
     TARGETING::ATTR_MAX_HSL_OPTICONNECT_CONNECTIONS_type l_hslConnections;
     if(l_pSysTarget->tryGetAttr
@@ -630,7 +625,7 @@ void HdatIplParms::hdatGetSystemParamters()
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
           l_pSysTarget->getAttr<ATTR_IS_MPIPL_SUPPORTED>() ? HDAT_MPIPL_SUPPORTED : 0 ;
 
-    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |= 
+    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
                                                            HDAT_MPIPL_SUPPORTED;
 
     this->iv_hdatIPLParams->iv_sysParms.hdatMemoryScrubbing = 0;
@@ -754,7 +749,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting SYSTEM_FAMILY");
     }
-     
+
     HDAT_DBG("SYSTEM_FAMILY:%s",
         this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily);
 
@@ -769,7 +764,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting SYSTEM_TYPE");
     }
-     
+
     HDAT_DBG("SYSTEM_TYPE:%s",
         this->iv_hdatIPLParams->iv_sysParms.hdatSystemType);
     HDAT_EXIT();

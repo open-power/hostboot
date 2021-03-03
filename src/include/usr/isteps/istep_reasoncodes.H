@@ -188,6 +188,7 @@ namespace ISTEP
         RC_WAIT_ATTN_TIMEOUT                     = ISTEP_COMP_ID | 0x67,
         RC_SAB_MISMATCH_DETECTED                 = ISTEP_COMP_ID | 0x68,
         RC_ERROR_READING_HUGE_PAGE_COUNT         = ISTEP_COMP_ID | 0x69,
+        RC_ERROR_READING_LMB_SIZE                = ISTEP_COMP_ID | 0x6A,
     };
 
 };

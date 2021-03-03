@@ -83,6 +83,30 @@ errlHndl_t getAndSetPLDMBiosAttrs()
     sys->setAttr<ATTR_HUGE_PAGE_COUNT>(huge_page_count);
 
 
+    // LMB_SIZE
+    ATTR_LMB_SIZE_type lmb_size = 0;
+    const size_t DEFAULT_LMB_SIZE = 0x4; // 256MB
+
+    errl = PLDM::getLmbSize(bios_string_table,
+                            bios_attr_table,
+                            lmb_size);
+    if(errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "getAndSetPLDMBiosAttrs: An error occurred getting LMB Size from the BMC, using default 0x%X",
+                   DEFAULT_LMB_SIZE );
+
+        // Set size to default, commit the error and continue
+        lmb_size = DEFAULT_LMB_SIZE;
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "getAndSetPLDMBiosAttrs: Set ATTR_LMB_SIZE = 0x%X",
+               lmb_size );
+    sys->setAttr<ATTR_LMB_SIZE>(lmb_size);
+
+
     // PAYLOAD_KIND
     ATTR_PAYLOAD_KIND_type payload_kind = PAYLOAD_KIND_UNKNOWN;
 

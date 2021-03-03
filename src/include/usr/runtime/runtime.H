@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <builtins.h>
+#include <math.h>
 #include <errl/errlentry.H>
 #include <targeting/common/targetservice.H>
 #include <hdat/hdat.H>
@@ -458,7 +459,7 @@ inline uint64_t calcSpAttnAreaStart()
     return  (getHbBaseAddrWithNodeOffset() + PHYP_ATTN_AREA_OFFSET) | VmmManager::FORCE_PHYS_ADDR;
 }
 
-/*
+/**
  * @brief Verify PAYLOAD and move PAYLOAD + HDAT to proper location
  *
  * @param[in] i_payloadAlreadyVerified Whether the payload has already
@@ -475,10 +476,22 @@ errlHndl_t verifyAndMovePayload(bool i_payloadAlreadyVerified = false);
  */
 inline uint64_t getLMBSizeInMB()
 {
-    //@TODO: RTC 142465 missing attribute ATTR_LMB_SIZE
-    //@TODO RTC 245661 to get from pldm bios
-    // We hardcode this to 256 right now (see hdatGetIplParmsData)
-    return 256;
+    // Default to 256 MB for non-pldm system
+    uint64_t ret = 256;
+
+#ifdef CONFIG_PLDM
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+    const auto lmb_size = sys->getAttr<TARGETING::ATTR_LMB_SIZE>();
+
+    // Attribute is encoded size (0-4)
+    // 0 -> 16MB, 1 -> 32MB, 2 -> 64MB, 3 -> 128MB, 4 -> 256MB
+    // Decode the attribute into MB
+    // ex: 2^^4 = 16, 16 *16 = 256
+    ret = pow(2, lmb_size) * 16;
+
+#endif // CONFIG_PLDM
+
+    return ret;
 }
 
 } // namespace RUNTIME
