@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -588,18 +588,19 @@ errlHndl_t HWASDiscovery::discoverTargets()
              * @severity        ERRL_SEV_INFORMATIONAL
              * @moduleid        MOD_DISCOVER_TARGETS
              * @reasoncode      RC_PARTIAL_GOOD_INFORMATION
-             * @devdesc         Partial Good (PG) issues are present within the
-             *                  system and this error log contains information
+             * @devdesc         Informational log that contains information
              *                  about which targets, procs, and entries in the
-             *                  PG vector are problematic.
-             * @custdesc        An issue occured during IPL of the system:
-             *                  Internal Firmware Error
-             * @userdata1       None
+             *                  processor module vpd PG vector are marked as
+             *                  nonfunctional.  This is NOT an indication of
+             *                  a problem in this part.
+             * @custdesc        An informational event
+             * @userdata1       Processor HUID
              * @userdata2       None
              */
             errlHndl_t infoErrl = hwasError(ERRL_SEV_INFORMATIONAL,
                                             MOD_DISCOVER_TARGETS,
-                                            RC_PARTIAL_GOOD_INFORMATION);
+                                            RC_PARTIAL_GOOD_INFORMATION,
+                                            get_huid(pTarget));
 
             if(   (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
                && (l_targetType != TYPE_TPM)
