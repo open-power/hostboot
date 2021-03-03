@@ -119,6 +119,19 @@ fapi2::ReturnCode p10_io_iohs_put_pl_regs(const fapi2::Target<fapi2::TARGET_TYPE
         const uint64_t i_fld_data);
 
 ///
+/// @brief Write IOHS Per-Lane Hardware Data, only writes 1 lane, not multiple lanes
+///
+/// @param[in] i_target IOHS target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_iohs_put_pl_regs_single(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+        const uint64_t i_reg_base_addr,
+        const uint32_t i_reg_start,
+        const uint32_t i_reg_len,
+        const uint64_t i_lane,
+        const uint64_t i_fld_data);
+
+///
 /// @brief Write OMI Per-Lane Hardware Data
 ///
 /// @param[in] i_target OMI target

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/common/include/p10_scom_omic_8.H $       */
+/* $Source: src/import/chips/p10/procedures/hwp/io/p10_io_tdr.H $         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,46 +22,45 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
+///
+/// @file p10_io_tdr.H
+/// @brief TDR Functions
+///-----------------------------------------------------------------------------
+/// *HW HW Maintainer: Chris Steffen <cwsteffen@us.ibm.com>
+/// *HW FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
+/// *HW Consumed by  : HB
+///-----------------------------------------------------------------------------
 
-#ifndef __PPE_HCODE__
-    #include "proc_scomt.H"
-#endif
+#include <fapi2.H>
 
-#ifndef __p10_scom_omic_8_H_
-#define __p10_scom_omic_8_H_
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
 
+/// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_io_tdr_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>&,
+    const std::vector<uint32_t>&,
+    std::vector<uint32_t>&,
+    std::vector<uint32_t>&);
 
-#ifndef __PPE_HCODE__
-namespace scomt
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+
+extern "C"
 {
-namespace omic
-{
-#endif
+/// @brief Use TDR to check for net opens and shorts
+/// @param[in] i_iolink_target      IOLINK target to get thread id for
+/// @param[in] i_lanes              Lanes to run TDR on
+/// @param[out] o_status            Status of the net (Open, Short, Good)
+/// @param[out] o_length_inches     Length from TX to open
+/// @return FAPI_RC_SUCCESS if arguments are valid
+    fapi2::ReturnCode p10_io_tdr(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_iolink_target,
+        const std::vector<uint32_t>& i_lanes,
+        std::vector<uint32_t>& o_status,
+        std::vector<uint32_t>& o_length_inches);
 
-
-//>> [CTL_REGS_TX_MODE1_PG]
-static const uint64_t CTL_REGS_TX_MODE1_PG = 0x800c0c4010012c3full;
-
-static const uint32_t CTL_REGS_TX_MODE1_PG_CLKDIST_PDWN = 48;
-static const uint32_t CTL_REGS_TX_MODE1_PG_RCTRL = 49;
-static const uint32_t CTL_REGS_TX_MODE1_PG_16TO1 = 50;
-static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_DCC_EN = 54;
-static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_LS_EN = 55;
-static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_HS_EN = 56;
-static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_CLOCK_DAC = 57;
-static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_CLOCK_DAC_LEN = 3;
-static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_VSET_DAC = 60;
-static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_VSET_DAC_LEN = 2;
-static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_BYPASS = 62;
-static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_PDWN_B = 63;
-//<< [CTL_REGS_TX_MODE1_PG]
-// omic/reg00008.H
-
-//>>THE END<<
-
-#ifndef __PPE_HCODE__
-}
-}
-#include "omic/reg00008.H"
-#endif
-#endif
+} // extern "C"

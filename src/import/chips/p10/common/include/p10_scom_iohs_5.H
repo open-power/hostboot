@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,6 +113,19 @@ static const uint32_t NET_CTRL1_PCB_ACCESS = 24;
 static const uint32_t NET_CTRL1_PCB_ACCESS_LEN = 8;
 //<< [NET_CTRL1]
 // iohs/reg00024.H
+
+//>> [IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL]
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL = 0x8004440010012c3full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL_TDR_ENABLE = 48;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL_PATTERN_ENABLE = 49;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_ENABLE = 50;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_CLEAR = 51;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL_RXDET_ENABLE = 52;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL_RXDET_PULSE = 53;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL_EOL_MODE_DISABLE = 54;
+//<< [IOO_TX0_0_DD_TX_BIT_REGS_CNTL3_PL]
+// iohs/reg00023.H
 
 //>>THE END<<
 

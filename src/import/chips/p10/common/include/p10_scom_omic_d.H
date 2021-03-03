@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,14 @@ static const uint32_t CMN_CONFIG_CFG_CMN_CNTR2_EN = 61;
 static const uint32_t CMN_CONFIG_CFG_CMN_CNTR1_EN = 62;
 static const uint32_t CMN_CONFIG_CFG_CMN_CNTR0_EN = 63;
 //<< [CMN_CONFIG]
+// omic/reg00013.H
+
+//>> [CTL_REGS_TX_CNTL6_PG]
+static const uint64_t CTL_REGS_TX_CNTL6_PG = 0x800c6c4010012c3full;
+
+static const uint32_t CTL_REGS_TX_CNTL6_PG_TX_TDR_PULSE_WIDTH = 48;
+static const uint32_t CTL_REGS_TX_CNTL6_PG_TX_TDR_PULSE_WIDTH_LEN = 9;
+//<< [CTL_REGS_TX_CNTL6_PG]
 // omic/reg00013.H
 
 //>>THE END<<

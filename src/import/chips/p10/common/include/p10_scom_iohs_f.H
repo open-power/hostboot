@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,6 +167,14 @@ static const uint64_t TIMEOUT_REG = 0x180f0010ull;
 static const uint32_t TIMEOUT_REG_INT_TIMEOUT = 0;
 static const uint32_t TIMEOUT_REG_INT_TIMEOUT_LEN = 2;
 //<< [TIMEOUT_REG]
+// iohs/reg00070.H
+
+//>> [IOO_TX0_TXCTL_CTL_REGS_TX_CNTL5_PG]
+static const uint64_t IOO_TX0_TXCTL_CTL_REGS_TX_CNTL5_PG = 0x800c640010012c3full;
+
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_CNTL5_PG_TX_TDR_PULSE_OFFSET = 48;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_CNTL5_PG_TX_TDR_PULSE_OFFSET_LEN = 15;
+//<< [IOO_TX0_TXCTL_CTL_REGS_TX_CNTL5_PG]
 // iohs/reg00070.H
 
 //>>THE END<<

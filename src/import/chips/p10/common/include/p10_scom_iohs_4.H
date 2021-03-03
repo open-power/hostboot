@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,24 @@ namespace iohs
 {
 #endif
 
+
+//>> [IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG]
+static const uint64_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG = 0x800c0c0010012c3full;
+
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_CLKDIST_PDWN = 48;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_RCTRL = 49;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_16TO1 = 50;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_BIST_DCC_EN = 54;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_BIST_LS_EN = 55;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_BIST_HS_EN = 56;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_IREF_CLOCK_DAC = 57;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_IREF_CLOCK_DAC_LEN = 3;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_IREF_VSET_DAC = 60;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_IREF_VSET_DAC_LEN = 2;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_IREF_BYPASS = 62;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG_IREF_PDWN_B = 63;
+//<< [IOO_TX0_TXCTL_CTL_REGS_TX_MODE1_PG]
+// iohs/reg00019.H
 
 //>>THE END<<
 

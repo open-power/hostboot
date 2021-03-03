@@ -236,7 +236,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Write IOHS Per-Lane Hardware Data
+/// @brief Write IOHS Per-Lane Hardware Data, writes ALL lanes
 ///
 /// @param[in] i_target IOHS target
 ///
@@ -258,12 +258,41 @@ fapi2::ReturnCode p10_io_iohs_put_pl_regs(const fapi2::Target<fapi2::TARGET_TYPE
     {
         l_addr = i_reg_base_addr | ((l_lane << SCOM_LANE_SHIFT) & SCOM_LANE_MASK);
         FAPI_TRY(fapi2::getScom(i_target, l_addr, l_data));
-        l_data.insertFromRight(i_fld_data, i_reg_start, i_reg_len);
+        FAPI_TRY(l_data.insertFromRight(i_fld_data, i_reg_start, i_reg_len));
         FAPI_TRY(fapi2::putScom(i_target, l_addr, l_data));
     }
 
 fapi_try_exit:
     FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write IOLINK Per-Lane Hardware Data, only writes 1 lane, not multiple lanes
+///
+/// @param[in] i_target IOHS target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_iohs_put_pl_regs_single(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+        const uint64_t i_reg_base_addr,
+        const uint32_t i_reg_start,
+        const uint32_t i_reg_len,
+        const uint64_t i_lane,
+        const uint64_t i_fld_data)
+{
+    const uint64_t SCOM_LANE_SHIFT = 32;
+    const uint64_t SCOM_LANE_MASK  = 0x0000001F00000000;
+    FAPI_DBG("Begin single lane scom...");
+    fapi2::buffer<uint64_t> l_data = 0;
+    uint64_t l_addr = 0x0;
+
+    l_addr = i_reg_base_addr | ((i_lane << SCOM_LANE_SHIFT) & SCOM_LANE_MASK);
+    FAPI_TRY(fapi2::getScom(i_target, l_addr, l_data));
+    FAPI_TRY(l_data.insertFromRight(i_fld_data, i_reg_start, i_reg_len));
+    FAPI_TRY(fapi2::putScom(i_target, l_addr, l_data));
+
+fapi_try_exit:
+    FAPI_DBG("End single lane scom...");
     return fapi2::current_err;
 }
 
@@ -290,7 +319,7 @@ fapi2::ReturnCode p10_io_omi_put_pl_regs(const fapi2::Target<fapi2::TARGET_TYPE_
     {
         l_addr = i_reg_base_addr | ((l_lane << SCOM_LANE_SHIFT) & SCOM_LANE_MASK);
         FAPI_TRY(fapi2::getScom(i_target, l_addr, l_data));
-        l_data.insertFromRight(i_fld_data, i_reg_start, i_reg_len);
+        FAPI_TRY(l_data.insertFromRight(i_fld_data, i_reg_start, i_reg_len));
         FAPI_TRY(fapi2::putScom(i_target, l_addr, l_data));
     }
 

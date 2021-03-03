@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,14 @@ static const uint32_t MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK = 40;
 static const uint32_t MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK_LEN = 20;
 static const uint32_t MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK = 60;
 //<< [MC_OMI_FIR_MASK_REG]
+// omic/reg00003.H
+
+//>> [CTL_REGS_TX_CNTL5_PG]
+static const uint64_t CTL_REGS_TX_CNTL5_PG = 0x800c644010012c3full;
+
+static const uint32_t CTL_REGS_TX_CNTL5_PG_TX_TDR_PULSE_OFFSET = 48;
+static const uint32_t CTL_REGS_TX_CNTL5_PG_TX_TDR_PULSE_OFFSET_LEN = 15;
+//<< [CTL_REGS_TX_CNTL5_PG]
 // omic/reg00003.H
 
 //>>THE END<<

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,299 @@ namespace omic
 {
 #endif
 
+
+//>> PREP_[CTL_REGS_TX_CNTL4_PG]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CTL_REGS_TX_CNTL4_PG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CTL_REGS_TX_CNTL4_PG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[CTL_REGS_TX_CNTL4_PG]
+
+//>> GET_[CTL_REGS_TX_CNTL4_PG]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CTL_REGS_TX_CNTL4_PG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CTL_REGS_TX_CNTL4_PG;
+#endif
+    return fapi2::getScom(i_target, CTL_REGS_TX_CNTL4_PG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[CTL_REGS_TX_CNTL4_PG]
+
+//>> PUT_[CTL_REGS_TX_CNTL4_PG]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CTL_REGS_TX_CNTL4_PG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return fapi2::putScom(i_target, CTL_REGS_TX_CNTL4_PG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[CTL_REGS_TX_CNTL4_PG]
+
+
+//>> SET_[CTL_REGS_TX_CNTL4_PG_DAC_CNTL]
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_TX_CNTL4_PG_DAC_CNTL(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_TX_CNTL4_PG_DAC_CNTL,
+           CTL_REGS_TX_CNTL4_PG_DAC_CNTL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_DAC_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CTL_REGS_TX_CNTL4_PG_DAC_CNTL]
+
+//>> SET_[CTL_REGS_TX_CNTL4_PG_DAC_CNTL]
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_TX_CNTL4_PG_DAC_CNTL(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_TX_CNTL4_PG_DAC_CNTL,
+           CTL_REGS_TX_CNTL4_PG_DAC_CNTL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_DAC_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CTL_REGS_TX_CNTL4_PG_DAC_CNTL]
+
+//>> GET_[CTL_REGS_TX_CNTL4_PG_DAC_CNTL]
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_TX_CNTL4_PG_DAC_CNTL(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_TX_CNTL4_PG_DAC_CNTL,
+           CTL_REGS_TX_CNTL4_PG_DAC_CNTL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_DAC_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CTL_REGS_TX_CNTL4_PG_DAC_CNTL]
+
+//>> SET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+
+//>> SET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+
+//>> SET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.setBit<CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+
+//>> CLEAR_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+static inline fapi2::buffer<uint64_t>& CLEAR_CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.clearBit<CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+
+//>> GET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+
+//>> GET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+static inline bool GET_CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return i_data.getBit<CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE]
+
+//>> SET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_TX_CNTL4_PG_PHASE_SEL(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_TX_CNTL4_PG_PHASE_SEL,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_PHASE_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+
+//>> SET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_TX_CNTL4_PG_PHASE_SEL(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_TX_CNTL4_PG_PHASE_SEL,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_PHASE_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+
+//>> SET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_TX_CNTL4_PG_PHASE_SEL(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.setBit<CTL_REGS_TX_CNTL4_PG_PHASE_SEL>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_PHASE_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+
+//>> CLEAR_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+static inline fapi2::buffer<uint64_t>& CLEAR_CTL_REGS_TX_CNTL4_PG_PHASE_SEL(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return o_data.clearBit<CTL_REGS_TX_CNTL4_PG_PHASE_SEL>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_PHASE_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+
+//>> GET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_TX_CNTL4_PG_PHASE_SEL(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_TX_CNTL4_PG_PHASE_SEL,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_PHASE_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+
+//>> GET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
+static inline bool GET_CTL_REGS_TX_CNTL4_PG_PHASE_SEL(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_TX_CNTL4_PG));
+#endif
+    return i_data.getBit<CTL_REGS_TX_CNTL4_PG_PHASE_SEL>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_omic Invalid dial access CTL_REGS_TX_CNTL4_PG_PHASE_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CTL_REGS_TX_CNTL4_PG_PHASE_SEL]
 
 //>>THE END<<
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,16 @@ namespace omic
 {
 #endif
 
+
+//>> [CTL_REGS_TX_CNTL4_PG]
+static const uint64_t CTL_REGS_TX_CNTL4_PG = 0x800c5c4010012c3full;
+
+static const uint32_t CTL_REGS_TX_CNTL4_PG_DAC_CNTL = 48;
+static const uint32_t CTL_REGS_TX_CNTL4_PG_DAC_CNTL_LEN = 8;
+static const uint32_t CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE = 56;
+static const uint32_t CTL_REGS_TX_CNTL4_PG_PHASE_SEL = 57;
+//<< [CTL_REGS_TX_CNTL4_PG]
+// omic/reg00006.H
 
 //>>THE END<<
 

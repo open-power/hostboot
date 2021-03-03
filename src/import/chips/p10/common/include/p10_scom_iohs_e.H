@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,6 +178,17 @@ static const uint32_t P10_20_SLAVE_CONFIG_REG_MASK_QME_RISING_EDGE_DETECTED_ON_Q
 static const uint32_t P10_20_SLAVE_CONFIG_REG_MASK_QME_INTR_RISING_EDGE_DETECTED_ON_QUIESCE = 23; // p10:20,
 //<< [SLAVE_CONFIG_REG]
 // iohs/reg00066.H
+
+//>> [IOO_TX0_0_DD_TX_BIT_REGS_STAT1_PL]
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_STAT1_PL = 0x8005240010012c3full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_STAT1_PL_BIST_PRBS_ERR_DET_RO_SIGNAL = 48;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_STAT1_PL_BIST_PRBS_ACTIVITY_DET_RO_SIGNAL = 49;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_STAT1_PL_SEG_TEST_STATUS_RO_SIGNAL = 50;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_STAT1_PL_SEG_TEST_STATUS_RO_SIGNAL_LEN = 2;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_STAT1_PL_TDR_CAPT_VAL_RO_SIGNAL = 63;
+//<< [IOO_TX0_0_DD_TX_BIT_REGS_STAT1_PL]
+// iohs/reg00065.H
 
 //>>THE END<<
 
