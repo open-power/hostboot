@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -207,6 +207,9 @@
     </attribute>
     <attribute>
       <id>IPL_ATTRIBUTES</id>
+    </attribute>
+    <attribute>
+      <id>LMB_SIZE</id>
     </attribute>
     <attribute>
       <id>MAX_HSL_OPTICONNECT_CONNECTIONS</id>
