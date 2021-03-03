@@ -73,14 +73,6 @@ fapi2::ReturnCode process_inst(const mss::rank::info<MC>& i_rank_info,
                                mss::ccs::instruction_t& io_instruction,
                                std::vector< mss::ccs::instruction_t >& io_inst)
 {
-    const auto l_port_rank = i_rank_info.get_port_rank();
-    const auto l_dimm_target = i_rank_info.get_dimm_target();
-
-    // Perform Address Mirroring if necessary
-    FAPI_TRY( mss::address_mirror<MC>(l_dimm_target, l_port_rank, io_instruction),
-              "Failed mirroring rank %d on %s",
-              l_port_rank, mss::c_str(l_dimm_target) );
-
     // Insert the delay into arr1 (conroll reg)
     io_instruction.arr1.template insertFromRight < TT::ARR1_IDLES,
                                  TT::ARR1_IDLES_LEN>(i_delay_in_cycles);
@@ -89,9 +81,6 @@ fapi2::ReturnCode process_inst(const mss::rank::info<MC>& i_rank_info,
     io_inst.push_back(io_instruction);
 
     return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
 }
 
 ///
@@ -147,9 +136,12 @@ void set_bank_group_addr( const fapi2::buffer<uint64_t>& i_bank_addr,
                           const fapi2::buffer<uint64_t>& i_bank_group_addr,
                           mss::ccs::instruction_t& io_inst)
 {
+    // The row repair attribute includes BA2, which doesn't exist for DDR4
+    // We want to grab BA0 and BA1
+    constexpr uint64_t BA0 = 61;
     // Set Bank Bits
-    io_inst.arr0.template insertFromRight<TT::ARR0_DDR_BANK_0_1,
-                          TT::ARR0_DDR_BANK_0_1_LEN>(i_bank_addr);
+    io_inst.arr0.template insert<TT::ARR0_DDR_BANK_0_1,
+                          TT::ARR0_DDR_BANK_0_1_LEN, BA0>(i_bank_addr);
 
     // Bank Group bits aren't contiguous
     constexpr uint64_t BG0_BIT = 62;
@@ -264,7 +256,7 @@ mss::ccs::instruction_t pre_load( const mss::rank::info<MC>& i_rank_info,
                                   const uint64_t i_delay_in_cycles)
 {
     // Create Precharge command
-    mss::ccs::instruction_t l_inst = precharge_all_command(i_rank_info.get_port_rank());
+    mss::ccs::instruction_t l_inst = precharge_all_command(i_rank_info.get_port_rank(), i_delay_in_cycles);
 
     // Set Bank address
     set_bank_group_addr<MC>( i_bank_addr, i_bank_group_addr, l_inst );
@@ -285,6 +277,12 @@ namespace row_repair
 /// @brief A row repair entry
 /// @tparam MC the memory controller type which executes the CCS instruction
 /// @note contains repair data from the attribute
+/// Bit formats for the internal variables follow the attribute and how they were logged from the hardware
+/// Format: field (start_bit:end_bit) - bits are right justified in the fields
+/// iv_srank (0:2)
+/// iv_bg    (0:1)
+/// iv_ba    (0:2)
+/// iv_row   (0:17)
 template< mss::mc_type MC >
 struct repair_entry
 {

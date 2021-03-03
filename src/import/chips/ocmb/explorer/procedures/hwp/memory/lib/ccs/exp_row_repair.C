@@ -424,6 +424,7 @@ fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
     // Declare timings
     const uint64_t tMOD = TT::mrs_tmod( l_port_target );
     uint8_t tRCD = 0;
+    uint8_t tWR = 255;
 
     // Use rank to determine dimm rank and target
     const auto l_dimm_target = i_rank_info.get_dimm_target();
@@ -496,10 +497,12 @@ fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
     l_repeat = 4;
     l_inst = mss::ccs::odt_command(l_odt_bits);
     mss::ccs::set_wr_repeats<mss::mc_type::EXPLORER>(l_repeat, l_inst);
-    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, NO_DELAY, l_inst, l_program.iv_instructions) );
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, l_program.iv_instructions) );
 
     // 7. PRE to Bank (and wait at least 20ns to register)
+    // Currently waiting tWR for debug
     l_inst = mss::ccs::pre_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, l_delay);
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, l_program.iv_instructions) );
 
     // 8. Set MR4 bit "A5=0" to exit sPPR
     l_data4.iv_soft_ppr = 0;

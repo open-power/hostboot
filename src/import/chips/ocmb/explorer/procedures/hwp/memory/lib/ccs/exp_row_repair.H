@@ -159,7 +159,7 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
 ///
 fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
                               const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
-                              const uint64_t i_dram_bitmap);
+                              const fapi2::buffer<uint64_t>& i_dram_bitmap);
 ///
 /// @brief Deploy enough PPR row repairs to test all spare rows
 /// @param[in] i_target_ocmb ocmb target
