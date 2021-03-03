@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -187,6 +187,7 @@ void banTps<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     getOcmbDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
     // Permanently mask mainline NCEs and TCEs because of the TPS ban.
     getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
+    getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns();
 }
 
 #endif // Hostboot Runtime only

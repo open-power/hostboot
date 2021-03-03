@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -552,10 +552,10 @@ uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::maskEccAttns()
+template<TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::maskEccAttns()
 {
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::maskEccAttns] "
+    #define PRDF_FUNC "[MemTdCtlr<T>::maskEccAttns] "
 
     uint32_t o_rc = SUCCESS;
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,6 +155,13 @@ class MemTdCtlr
      */
     uint32_t handleRrFo();
 
+    /**
+     * @brief  Masks NCE and TCE ECC attentions.
+     * @note   Only intended to be used just before starting a new TD procedure.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t maskEccAttns();
+
     #endif
 
   private:
@@ -273,13 +280,6 @@ class MemTdCtlr
         std::pair<ExtensibleChip *, MemRank> e = std::make_pair(i_chip, i_rank);
         return ( iv_tpsBans.end() != iv_tpsBans.find(e) );
     }
-
-    /**
-     * @brief  Masks NCE and TCE ECC attentions.
-     * @note   Only intended to be used just before starting a new TD procedure.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    uint32_t maskEccAttns();
 
     /**
      * @brief  Clears and unmasks NCE and TCE ECC attentions.
