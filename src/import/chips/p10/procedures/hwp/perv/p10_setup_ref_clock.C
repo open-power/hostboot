@@ -264,6 +264,10 @@ fapi2::ReturnCode p10_setup_ref_clock(const
     l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_NEST_DIV2_ASYNC_RESET_DC>();
     l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_PLL_FORCE_OUT_EN_DC>();
 
+    // Set bit 31 to make sure mux3 is initially in reset on DD2
+    // Doesn't do anything on DD1 so no need for an EC level check
+    l_read_reg.setBit<31>();
+
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL4_FSI, l_read_reg));
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL4_COPY_FSI, l_read_reg));
 
