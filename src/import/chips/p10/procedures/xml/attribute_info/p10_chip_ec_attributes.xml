@@ -1438,7 +1438,7 @@
     <id>ATTR_CHIP_EC_FEATURE_HW556830</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Two genid_syncs can both be considered the "biggest". This results in or-ing the 
+      Two genid_syncs can both be considered the "biggest". This results in or-ing the
       ttags/tickets which causes the genid logic to never go idle.
     </description>
     <chipEcFeature>
@@ -1453,12 +1453,12 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-  <id>ATTR_CHIP_EC_FEATURE_DD2_HW529136</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
+   <id>ATTR_CHIP_EC_FEATURE_DD2_HW529136</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
     HW529136 - DD2 Link underflow in CR tok mgr added 2 fir bits
-  </description>
-  <chipEcFeature>
+   </description>
+   <chipEcFeature>
     <chip>
      <name>ENUM_ATTR_NAME_P10</name>
      <ec>
@@ -1467,6 +1467,23 @@
      </ec>
     </chip>
   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW560078</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Correct XTS_CONFIG3 parity. Parity was incorrect due to new scanflush value and existing scaninit
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
 </attributes>
