@@ -110,9 +110,6 @@ fapi2::ReturnCode assertElogEntry (
     uint32_t* o_perv_chiplet_id,
     uint32_t* o_sram_addr )
 {
-    FAPI_DBG (">> assertElogEntry: Entry 0x%08x%08x Local %d",
-              (uint32_t)i_elog_entry, (uint32_t)(i_elog_entry >> 32) , i_local);
-
     PPE_TYPES ppeType = PPE_TYPE_IO;
     uint32_t ppeInstance = 0;
     uint8_t idx = 0;
@@ -120,6 +117,10 @@ fapi2::ReturnCode assertElogEntry (
     hcode_elog_entry_t elogEntry;
     elogEntry.dw0.value = i_elog_entry;
     *o_perv_chiplet_id = 0;
+
+    FAPI_DBG (">> assertElogEntry: Entry 0x%08x%08x Src 0x%02X Local %d",
+              elogEntry.dw0.words.high_order, elogEntry.dw0.words.low_order,
+              elogEntry.dw0.fields.errlog_src, i_local);
 
     switch (elogEntry.dw0.fields.errlog_src)
     {
@@ -156,11 +157,15 @@ fapi2::ReturnCode assertElogEntry (
                   &elogTbl,
                   o_sram_addr ));
 
-    elogTbl.dw0.value = htobe64 (elogTbl.dw0.value);
-
     for (idx = 0; idx < elogTbl.dw0.fields.total_log_slots; ++idx)
     {
-        if (htobe64(elogTbl.elog[idx].dw0.value) == elogEntry.dw0.value)
+        FAPI_DBG ("From SRAM 0x%08X%08X vs I/P 0x%08X%08X",
+                  elogTbl.elog[idx].dw0.words.high_order,
+                  elogTbl.elog[idx].dw0.words.low_order,
+                  elogEntry.dw0.words.high_order,
+                  elogEntry.dw0.words.low_order);
+
+        if (elogTbl.elog[idx].dw0.value == elogEntry.dw0.value)
         {
             if (o_sram_addr != NULL)
             {
@@ -333,20 +338,16 @@ fapi2::ReturnCode p10_pm_elog_list (
 
         if (o_elog_tbl->elog[idx].dw0.value != 0)
         {
-            o_elog_tbl->elog[idx].dw0.words.high_order =
-                htobe32 (o_elog_tbl->elog[idx].dw0.words.high_order);
-            o_elog_tbl->elog[idx].dw0.words.low_order =
-                htobe32 (o_elog_tbl->elog[idx].dw0.words.low_order);
 
             FAPI_DBG ("Entry#%d: 0x%08X_%08X", idx,
-                      o_elog_tbl->elog[idx].dw0.words.high_order,
-                      o_elog_tbl->elog[idx].dw0.words.low_order);
+                      htobe32(o_elog_tbl->elog[idx].dw0.words.high_order),
+                      htobe32(o_elog_tbl->elog[idx].dw0.words.low_order));
 
             FAPI_DBG ("EID 0x%02X SRC 0x%02X LEN %d ADDR 0x%08X",
                       o_elog_tbl->elog[idx].dw0.fields.errlog_id,
                       o_elog_tbl->elog[idx].dw0.fields.errlog_src,
-                      o_elog_tbl->elog[idx].dw0.fields.errlog_len,
-                      o_elog_tbl->elog[idx].dw0.fields.errlog_addr);
+                      htobe16(o_elog_tbl->elog[idx].dw0.fields.errlog_len),
+                      htobe32(o_elog_tbl->elog[idx].dw0.fields.errlog_addr));
 
             // there is a pending entry to report
             if ((i_ppe_type == PPE_TYPE_MAX) ||
@@ -435,7 +436,7 @@ fapi2::ReturnCode p10_pm_elog_read (
     uint8_t mode = 0x60; // OCC Normal Read, OCB Channel 3
 
     FAPI_DBG (">> p10_pm_elog_read: Entry 0x%08x%08x Offset %d Len %d Local %d",
-              (uint32_t)i_elog_entry, (uint32_t)(i_elog_entry >> 32),
+              (uint32_t)(i_elog_entry >> 32), (uint32_t)i_elog_entry,
               i_offset, i_len, i_local);
 
     FAPI_TRY ( assertElogEntry(
@@ -496,7 +497,7 @@ fapi2::ReturnCode p10_pm_elog_purge (
     uint8_t data[bytes] = {0};
 
     FAPI_DBG (">> p10_pm_elog_purge Entry: 0x%08x%08x Local: %d",
-              (uint32_t)i_elog_entry, (uint32_t)(i_elog_entry >> 32),  i_local);
+              (uint32_t)(i_elog_entry >> 32), (uint32_t)i_elog_entry, i_local);
     FAPI_TRY ( assertElogEntry(
                    i_target,
                    i_elog_entry,
@@ -506,7 +507,7 @@ fapi2::ReturnCode p10_pm_elog_purge (
 
     // Found elog entry in table
     FAPI_DBG ("Purging entry 0x%08X%08X - perv 0x%08X addr: 0x%08X bytes: %d",
-              (uint32_t) i_elog_entry, (uint32_t)(i_elog_entry >> 32),
+              (uint32_t)(i_elog_entry >> 32), (uint32_t) i_elog_entry,
               pervChipletId, addr, bytes);
 
     // Clear the error log entry from the table
