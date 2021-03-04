@@ -174,6 +174,7 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 prd_obj_no_sim += p10_proc_gettracearray.o
 prd_obj_no_sim += p10_sbe_tracearray.o
 
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mc/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/phy/
@@ -184,6 +185,7 @@ prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/li
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ecc/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/ddr4/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/workarounds/
 prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/
 prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
@@ -201,6 +203,15 @@ prd_obj_no_sim += exp_kind.o
 prd_obj_no_sim += exp_fir_workarounds.o
 prd_obj_no_sim += exp_phy_utils.o
 prd_obj_no_sim += exp_maint_cmds.o
+
+# Needed for the exp_deploy_row_repairs procedure
+prd_obj_no_sim += exp_deploy_row_repairs.o
+prd_obj_no_sim += exp_row_repair.o
+prd_obj_no_sim += ccs_explorer.o
+prd_obj_no_sim += exp_mrs04.o
+prd_obj_no_sim += exp_bad_dq_bitmap_funcs.o
+prd_obj_no_sim += exp_fir.o
+prd_obj_no_sim += mrs_load_ddr4_explorer.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the

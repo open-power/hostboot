@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,6 +158,15 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip,
  */
 template<TARGETING::TYPE T>
 bool isRowRepairEnabled( ExtensibleChip * i_chip, const MemRank & i_rank );
+
+/**
+ * @brief  Calls the hardware procedure to deploy the row repair
+ * @param  i_chip An OCMB.
+ * @param  i_rank Any rank on the target DIMMs.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
+ */
+template<TARGETING::TYPE T>
+uint32_t deployRowRepair( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 #ifdef CONFIG_NVDIMM
 /**

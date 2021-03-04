@@ -63,6 +63,7 @@
 #include <exp_rank.H>
 #include <kind.H>
 #include <hwp_wrappers.H>
+#include <exp_deploy_row_repairs.H>
 
 #ifdef CONFIG_NVDIMM
 #include <nvdimm.H>
@@ -437,37 +438,35 @@ bool isRowRepairEnabled<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
-    bool o_isEnabled = false;
+    // Row repair is supported for OCMBs
+    return true;
 
-    /* TODO RTC 199035
-    do
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t deployRowRepair<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::deployRowRepair<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+    errlHndl_t errl = nullptr;
+
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb( i_chip->getTrgt() );
+    FAPI_INVOKE_HWP( errl, exp_deploy_row_repairs, fapiOcmb );
+    if ( nullptr != errl )
     {
-        // Don't do row repair if DRAM repairs is disabled.
-        if ( areDramRepairsDisabled() ) break;
+        PRDF_ERR( PRDF_FUNC "exp_deploy_row_repairs(0x%08x) failed",
+                  i_chip->getHuid() );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
 
-        // The HWP will check both DIMMs on rank pair. So we could can use
-        // either one.
-        TargetHandleList list = getConnectedDimms( i_chip->getTrgt(), i_rank );
-        PRDF_ASSERT( !list.empty() );
-
-        TargetHandle_t dimm = list.front();
-
-        errlHndl_t errl = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_DIMM> fapiDimm(dimm);
-        FAPI_INVOKE_HWP( errl, is_sPPR_supported, fapiDimm, o_isEnabled );
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "is_sPPR_supported(0x%08x) failed",
-                      getHuid(dimm) );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_isEnabled = false; // just in case
-            break;
-        }
-
-    }while(0);
-    */
-
-    return o_isEnabled;
+    return o_rc;
 
     #undef PRDF_FUNC
 }

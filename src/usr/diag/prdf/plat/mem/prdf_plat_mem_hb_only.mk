@@ -43,6 +43,7 @@ prd_obj += prdfMemScrubUtils.o
 prd_obj += prdfMemTdCtlr.o
 prd_obj += prdfMemVcm.o
 prd_obj += prdfMemDsd.o
+prd_obj += prdfMemRrd.o
 
 ################################################################################
 # Hostboot only object files (IPL only)
