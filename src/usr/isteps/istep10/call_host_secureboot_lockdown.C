@@ -60,6 +60,9 @@
 #include <plat_hwp_invoker.H>
 #include <p10_update_security_ctrl.H>
 
+// PHyp/OPAL loads
+#include <targeting/common/mfgFlagAccessors.H>
+
 namespace ISTEP_10
 {
 
@@ -254,6 +257,44 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
                 // Try to run the HWP on all procs regardless of error.
             }
+            // Lock OPAL keystore if in PHyp boot
+            if (TARGETING::is_phyp_load())
+            {
+                l_err = SECUREBOOT::setSecuritySwitchBits({ SECUREBOOT::ProcSecurity::KsOpalBank0WrLock,
+                    SECUREBOOT::ProcSecurity::KsOpalBank0RdLock,
+                    SECUREBOOT::ProcSecurity::KsOpalBank1WrLock,
+                    SECUREBOOT::ProcSecurity::KsOpalBank1RdLock,
+                    SECUREBOOT::ProcSecurity::KsOpalQueueWrLock,
+                    SECUREBOOT::ProcSecurity::KsOpalQueueRdLock },
+                    l_proc);
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_host_secureboot_lockdown: "
+                        "Cannot lock OPAL keystore on PROC 0x%08x ",
+                        TRACE_ERR_FMT, TARGETING::get_huid(l_proc),
+                        TRACE_ERR_ARGS(l_err));
+                    l_istepError.addErrorDetails(l_err);
+                    ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+                }
+            }
+            else
+            {
+                // Lock Phyp keystore if in OPAL boot
+                l_err = SECUREBOOT::setSecuritySwitchBits({ SECUREBOOT::ProcSecurity::KsPhypWrLock,
+                    SECUREBOOT::ProcSecurity::KsPhypRdLock },
+                    l_proc);
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_host_secureboot_lockdown: "
+                        "Cannot lock PHyp keystore on PROC 0x%08x ",
+                        TRACE_ERR_FMT, TARGETING::get_huid(l_proc),
+                        TRACE_ERR_ARGS(l_err));
+                    l_istepError.addErrorDetails(l_err);
+                    ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+                }
+            }
         } // end of loop on procs
     } // end of SECUREBOOT::enabled() check
     if(l_istepError.getErrorHandle())
@@ -262,7 +303,6 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     }
 
     SECUREBOOT::validateSecuritySettings();
-
 #endif
 
 #ifdef CONFIG_PHYS_PRES_PWR_BUTTON
