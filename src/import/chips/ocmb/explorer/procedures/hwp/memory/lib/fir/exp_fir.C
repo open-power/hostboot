@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,7 +107,7 @@ static const std::vector<std::pair<uint64_t, uint64_t>> MCC_OMI_INIT_FIR_REGS =
 /// @param[in] i_target - the target on which to operate
 /// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
-/// @param[in] i_checklist - the list of vectour reg/mask pairs to search
+/// @param[in] i_checklist - the list of vector reg/mask pairs to search
 /// @note i_checklist is last since optional parameter w/ default needs to be end of list
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
@@ -140,27 +140,31 @@ fapi_try_exit:
 ///
 /// @brief Helper for bad_fir_bits to check a fir register/mask pair against a desired mask value
 /// @param[in] i_target - the target on which to operate
-/// @param[in] i_reg_addr - the address of the register address to compare against mask
+/// @param[in] i_fir_reg - the register/mask pair to compare against mask
 /// @param[in] i_mask - the 64-bit mask that we want to compare the reg against
 /// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode bad_fir_bits_helper_with_mask(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const uint64_t i_reg_addr,
+        const std::pair<uint64_t, uint64_t>& i_fir_reg,
         const fapi2::buffer<uint64_t>& i_mask,
         fapi2::ReturnCode& io_rc,
         bool& o_fir_error)
 {
+    fapi2::buffer<uint64_t> l_mask_data;
     fapi2::buffer<uint64_t> l_reg_data;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_reg_addr, l_reg_data));
+    FAPI_TRY(fapi2::getScom(i_target, i_fir_reg.first, l_reg_data));
+    FAPI_TRY(fapi2::getScom(i_target, i_fir_reg.second, l_mask_data));
 
-    o_fir_error = fir_with_mask_helper(l_reg_data, i_mask);
+    // AND together the input mask with the mask register value so we aren't checking any FIRs
+    // that are currently masked in hardware
+    o_fir_error = fir_with_mask_helper(l_reg_data, (i_mask & l_mask_data));
 
     FAPI_INF("%s %s on reg 0x%016lx value 0x%016lx and mask value 0x%016lx", mss::c_str(i_target),
              o_fir_error ? "has FIR's set" : "has no FIR's set",
-             i_reg_addr, l_reg_data, i_mask);
+             i_fir_reg.first, l_reg_data, (i_mask & l_mask_data));
 
     // Log the error if need be
     log_fir_helper(i_target, o_fir_error, io_rc);
@@ -252,8 +256,8 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::DRAMINIT>(
 {
     // For draminit case, we want to check SRQFIR[4] and LOCAL_FIR[20,36] only, so unmask checkbits
     // NOTE: if you change DRAMINIT_FIR_REGS, you need to update these indices
-    const uint64_t l_srqfir_reg_addr = EXPLORER_DRAMINIT_FIR_REGS.at(0).first;
-    const uint64_t l_localfir_reg_addr = EXPLORER_DRAMINIT_FIR_REGS.at(1).first;
+    const auto l_srqfir = EXPLORER_DRAMINIT_FIR_REGS.at(0);
+    const auto l_localfir = EXPLORER_DRAMINIT_FIR_REGS.at(1);
     fapi2::buffer<uint64_t> l_check_mask(0xFFFFFFFFFFFFFFFF);
 
     // Start by assuming we do not have a FIR; if true at any point, skip other checks to preserve error
@@ -261,7 +265,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::DRAMINIT>(
 
     // Unmask bit 4
     l_check_mask.clearBit<EXPLR_SRQ_SRQFIRQ_RCD_PARITY_ERROR>();
-    FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_srqfir_reg_addr, l_check_mask, io_rc, o_fir_error));
+    FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_srqfir, l_check_mask, io_rc, o_fir_error));
 
     // Mask all, then unmask bits 20,36
     if (o_fir_error != true)
@@ -269,7 +273,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::DRAMINIT>(
         l_check_mask.flush<1>().clearBit<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_106>()
         .clearBit<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_DDR4_PHY__FATAL>();
 
-        FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_localfir_reg_addr, l_check_mask, io_rc, o_fir_error));
+        FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_localfir, l_check_mask, io_rc, o_fir_error));
     }
 
 fapi_try_exit:
@@ -292,8 +296,8 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::CCS>(
 {
     // For draminit_mc case, we want to check SRQFIR[4] and MBISTFIR[2,3] only, so unmask checkbits
     // NOTE: if you change DRAMINIT_MC_FIR_REGS, you need to update these indices
-    const uint64_t l_srqfir_reg_addr = EXPLORER_CCS_FIR_REGS.at(0).first;
-    const uint64_t l_mcbistfir_reg_addr = EXPLORER_CCS_FIR_REGS.at(1).first;
+    const auto l_srqfir = EXPLORER_CCS_FIR_REGS.at(0);
+    const auto l_mcbistfir = EXPLORER_CCS_FIR_REGS.at(1);
     fapi2::buffer<uint64_t> l_check_mask(0xFFFFFFFFFFFFFFFF);
 
     // Start by assuming we do not have a FIR; if true at any point, skip other checks to preserve error
@@ -301,7 +305,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::CCS>(
 
     // Unmask bit 4
     l_check_mask.clearBit<EXPLR_SRQ_SRQFIRQ_RCD_PARITY_ERROR>();
-    FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_srqfir_reg_addr, l_check_mask, io_rc, o_fir_error));
+    FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_srqfir, l_check_mask, io_rc, o_fir_error));
 
     // Mask all, then unmask bits 2,3
     if (o_fir_error != true)
@@ -309,7 +313,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::CCS>(
         l_check_mask.flush<1>().clearBit<EXPLR_MCBIST_MCBISTFIRQ_INTERNAL_FSM_ERROR>()
         .clearBit<EXPLR_MCBIST_MCBISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>();
 
-        FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_mcbistfir_reg_addr, l_check_mask, io_rc, o_fir_error));
+        FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_mcbistfir, l_check_mask, io_rc, o_fir_error));
     }
 
 fapi_try_exit:
