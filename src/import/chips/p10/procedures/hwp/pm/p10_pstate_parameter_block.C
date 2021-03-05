@@ -1236,12 +1236,12 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
 
         i_occppb->attr.fields.pstates_enabled     = iv_pstates_enabled;
         i_occppb->attr.fields.resclk_enabled      = iv_resclk_enabled;
-        i_occppb->attr.fields.wof_enabled         = iv_wof_enabled;
-        i_occppb->attr.fields.dds_enabled         = iv_dds_enabled;
-        i_occppb->attr.fields.ocs_enabled         = iv_ocs_enabled;
+        i_occppb->attr.fields.wof_enabled         = is_wof_enabled();
+        i_occppb->attr.fields.dds_enabled         = is_dds_enabled();
+        i_occppb->attr.fields.ocs_enabled         = is_ocs_enabled();
         i_occppb->attr.fields.underv_enabled      = iv_wov_underv_enabled;
         i_occppb->attr.fields.overv_enabled       = iv_wov_overv_enabled;
-        i_occppb->attr.fields.rvrm_enabled        = iv_rvrm_enabled;
+        i_occppb->attr.fields.rvrm_enabled        = is_rvrm_enabled();
         i_occppb->attr.fields.wof_disable_vdd     = iv_attrs.attr_system_wof_disable_dimension[0];
         i_occppb->attr.fields.wof_disable_vcs     = iv_attrs.attr_system_wof_disable_dimension[1];
         i_occppb->attr.fields.wof_disable_io      = iv_attrs.attr_system_wof_disable_dimension[2];
@@ -1356,6 +1356,14 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         i_occppb->fixed_freq_mode_frequency_mhz =
             revle32(iv_attr_mvpd_poundV_other_info.fixed_freq_mhz);
 
+        //ultra_turbo_frequency_mhz
+        i_occppb->ultraturbo_freq_mhz =
+            revle32(iv_attr_mvpd_poundV_other_info.ultraturbo_freq_mhz);
+
+        //fixed_freq_mode_frequency_mhz
+        i_occppb->fmax_freq_mhz =
+            revle32(iv_attr_mvpd_poundV_other_info.fmax_freq_mhz);
+
         //pstate_max_throttle
         i_occppb->pstate_max_throttle =  revle32(pstate_min + iv_attrs.attr_throttle_pstate_number_limit);
 
@@ -1454,7 +1462,7 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
 
     FAPI_INF("System Parameters:                          VDD           VCS           VDN");
     strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-26s :", "Load line (uOhm)");
+    sprintf(l_temp_buffer, "  %-32s :", "Load line (uOhm)");
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
@@ -1474,7 +1482,7 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     FAPI_INF("%s", l_buffer);
 
     strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-26s :", "Dist Loss (uOhm)");
+    sprintf(l_temp_buffer, "  %-32s :", "Dist Loss (uOhm)");
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
@@ -1494,7 +1502,7 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     FAPI_INF("%s", l_buffer);
 
     strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-26s :", "Offset (uV)");
+    sprintf(l_temp_buffer, "  %-32s :", "Offset (uV)");
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
@@ -1513,91 +1521,101 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     strcat(l_buffer, l_temp_buffer);
     FAPI_INF("%s", l_buffer);
 
-    FAPI_INF("  %-26s : 0x%04X (%3d)",
+    FAPI_INF("  %-32s : 0x%04X (%3d)",
              "Frequency Minumum (kHz)",
              revle32(i_oppb->frequency_min_khz),
              revle32(i_oppb->frequency_min_khz));
 
-    FAPI_INF("  %-26s : 0x%04X (%3d)",
-             "Frequency Maximum (kHz)",
+    FAPI_INF("  %-32s : 0x%04X (%3d)",
+             "Frequency Maximum (system) (kHz)",
              revle32(i_oppb->frequency_max_khz),
              revle32(i_oppb->frequency_max_khz));
 
-    FAPI_INF("  %-26s : 0x%04X (%3d)",
+    FAPI_INF("  %-32s : 0x%04X (%3d)",
              "Frequency Ceiling (kHz)",
              revle32(i_oppb->frequency_ceiling_khz),
              revle32(i_oppb->frequency_ceiling_khz));
 
-     FAPI_INF("  %-26s : 0x%04X (%3d)",
+     FAPI_INF("  %-32s : 0x%04X (%3d)",
              "Frequency Step (kHz)",
              revle32(i_oppb->frequency_step_khz),
              revle32(i_oppb->frequency_step_khz));
 
-    FAPI_INF("  %-26s : 0x%04X (%3d)",
+    FAPI_INF("  %-32s : 0x%04X (%3d)",
              "Frequency Minimum (Pstate)",
              revle32(i_oppb->pstate_min),
              revle32(i_oppb->pstate_min));
 
-    FAPI_INF("  %-26s : 0x%04X (%3d)",
+    FAPI_INF("  %-32s : 0x%04X (%3d)",
              "Frequency OCC Complex (MHz)",
              revle32(i_oppb->occ_complex_frequency_mhz),
              revle32(i_oppb->occ_complex_frequency_mhz));
 
+   FAPI_INF("  %-32s : 0x%04X (%3d)",
+             "Frequency UltraTurbo (MHz)",
+             revle32(i_oppb->ultraturbo_freq_mhz),
+             revle32(i_oppb->ultraturbo_freq_mhz));
+
+    FAPI_INF("  %-32s : 0x%04X (%3d)",
+             "Frequency Fmax (this part) (MHz)",
+             revle32(i_oppb->fmax_freq_mhz),
+             revle32(i_oppb->fmax_freq_mhz));
+
     FAPI_INF("Attributes:");
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "pstates_enabled",
              i_oppb->attr.fields.pstates_enabled);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "resclk_enabled",
              i_oppb->attr.fields.resclk_enabled);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "wof_enabled",
              i_oppb->attr.fields.wof_enabled);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "wof_disable_vdd",
              i_oppb->attr.fields.wof_disable_vdd);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "wof_disable_vcs",
              i_oppb->attr.fields.wof_disable_vcs);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "wof_disable_io",
              i_oppb->attr.fields.wof_disable_io);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "wof_disable_amb",
              i_oppb->attr.fields.wof_disable_amb);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "wof_disable_vratio",
              i_oppb->attr.fields.wof_disable_vratio);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "dds_enabled",
              i_oppb->attr.fields.dds_enabled);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "ocs_enabled",
              i_oppb->attr.fields.ocs_enabled);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "underv_enabled",
              i_oppb->attr.fields.underv_enabled);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "overv_enabled",
              i_oppb->attr.fields.overv_enabled);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "throttle_control_enabled",
              i_oppb->attr.fields.throttle_control_enabled);
 
-    FAPI_INF("  %-26s : %1d",
+    FAPI_INF("  %-32s : %1d",
              "rvrm_enabled",
              i_oppb->attr.fields.rvrm_enabled);
 
@@ -1790,7 +1808,6 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_FREQ_PAU_MHZ,           FAPI_SYSTEM, attr_pau_frequency_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ,  iv_procChip, attr_freq_core_ceiling_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ,    iv_procChip, attr_freq_core_floor_mhz);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_FMAX_ENABLE,     FAPI_SYSTEM, attr_fmax_enable);
     DATABLOCK_GET_ATTR(ATTR_HW543384_WAR_MODE,      FAPI_SYSTEM, attr_war_mode);
 
     // Loadline, Distribution loss and Distribution offset attributes
@@ -3815,10 +3832,6 @@ void iddq_print(IddqTable_t* i_iddqt)
     char            l_buffer_str[1024];   // Temporary formatting string buffer
     char            l_line_str[1024];     // Formatted output line string
 
-//    static const uint32_t IDDQ_DESC_SIZE = 50;
-//    static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
-//                                            strlen("Quad X:");
-
     FAPI_INF("IDDQ");
 
     // Put out the endian-corrected scalars
@@ -3826,14 +3839,14 @@ void iddq_print(IddqTable_t* i_iddqt)
     // get IQ version and advance pointer 1-byte
     FAPI_INF("  IDDQ Version Number = %u", i_iddqt->iddq_version);
     FAPI_INF("  Sort Info:");
-    FAPI_INF("    %-24s : %02d", "Good Cores",             i_iddqt->good_normal_cores_per_sort);
-    FAPI_INF("    %-24s : %02d", "Good cores per Cache01", i_iddqt->good_normal_cores_per_EQs[0]);
-    FAPI_INF("    %-24s : %02d", "Good cores per Cache23", i_iddqt->good_normal_cores_per_EQs[1]);
-    FAPI_INF("    %-24s : %02d", "Good cores per Cache45", i_iddqt->good_normal_cores_per_EQs[2]);
-    FAPI_INF("    %-24s : %02d", "Good cores per Cache67", i_iddqt->good_normal_cores_per_EQs[3]);
+    FAPI_INF("    %-30s : %02d", "Good Cores",             i_iddqt->good_normal_cores_per_sort);
+    FAPI_INF("    %-30s : %02d", "Good cores per Cache01", i_iddqt->good_normal_cores_per_EQs[0]);
+    FAPI_INF("    %-30s : %02d", "Good cores per Cache23", i_iddqt->good_normal_cores_per_EQs[1]);
+    FAPI_INF("    %-30s : %02d", "Good cores per Cache45", i_iddqt->good_normal_cores_per_EQs[2]);
+    FAPI_INF("    %-30s : %02d", "Good cores per Cache67", i_iddqt->good_normal_cores_per_EQs[3]);
 
-    FAPI_INF("  %-27s : %d", "MMA state", i_iddqt->mma_not_active);
-    FAPI_INF("  %-27s : %d", "MMA leakage percent", i_iddqt->mma_off_leakage_pct);
+    FAPI_INF("  %-32s : %d", "MMA state", i_iddqt->mma_not_active);
+    FAPI_INF("  %-32s : %d", "MMA leakage percent", i_iddqt->mma_off_leakage_pct);
 
     // All IQ IDDQ measurements are at 5mA resolution. The OCC wants to
     // consume these at 1mA values.  thus, all values are multiplied by
@@ -3843,15 +3856,15 @@ void iddq_print(IddqTable_t* i_iddqt)
 
 #define IDDQ_TRACE(string) \
         strcpy(l_line_str, string); \
-        sprintf(l_buffer_str, "%-50s", l_line_str);\
+        sprintf(l_buffer_str, "%-43s", l_line_str);\
         strcpy(l_line_str, l_buffer_str); \
-        strcpy(l_buffer_str, "");
+        strcat(l_line_str, " :       ");
 
 #define IDDQ_TRACE_QUAD(string) \
         strcpy(l_line_str, string); \
         sprintf(l_buffer_str, "%-43s", l_line_str);\
         strcpy(l_line_str, l_buffer_str); \
-        strcpy(l_buffer_str, "");
+        strcat(l_line_str, " : ");
 
     // Put out the measurement voltages to the trace.
     IDDQ_TRACE ("  Measurement voltages:");
@@ -3877,7 +3890,7 @@ void iddq_print(IddqTable_t* i_iddqt)
         strcat(l_line_str, l_buffer_str);
 
     // get IVDDQ measurements with all good cores ON
-    IDDQ_TRACE ("  IDDQ all good cores ON:");
+    IDDQ_TRACE ("  IDDQ all good cores ON");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3887,7 +3900,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get IVDDQ measurements with all cores and caches OFF
-    IDDQ_TRACE ("  IVDDQ all cores, caches OFF:");
+    IDDQ_TRACE ("  IVDDQ all cores, caches OFF");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3897,7 +3910,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);;
 
     // get IVDDQ measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  IVDDQ all good cores OFF, caches ON:");
+    IDDQ_TRACE ("  IVDDQ all good cores OFF, caches ON");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3909,8 +3922,8 @@ void iddq_print(IddqTable_t* i_iddqt)
     // get IVDDQ measurements with all good cores in each quad
     for (i = 0; i < MAXIMUM_EQ_SETS; i++)
     {
-        IDDQ_TRACE ("  IVDDQ all good cores ON, caches ON:");
-        sprintf(l_buffer_str, "Quad %d:", i);
+        IDDQ_TRACE_QUAD ("  IVDDQ all good cores ON, caches ON");
+        sprintf(l_buffer_str, "Quad %d", i);
         strcat(l_line_str, l_buffer_str);
 
         for (j = 0; j < IDDQ_MEASUREMENTS; j++)
@@ -3922,7 +3935,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     }
 
     // get ICSQ measurements with all good cores ON
-    IDDQ_TRACE ("  ICSQ all good cores ON:");
+    IDDQ_TRACE ("  ICSQ all good cores ON");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3932,7 +3945,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get ICSQ measurements with all cores and caches OFF
-    IDDQ_TRACE ("  ICSQ all cores, caches OFF:");
+    IDDQ_TRACE ("  ICSQ all cores, caches OFF");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3942,7 +3955,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);;
 
     // get ICSQ measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  ICSQ all good cores OFF, caches ON:");
+    IDDQ_TRACE ("  ICSQ all good cores OFF, caches ON");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3954,8 +3967,8 @@ void iddq_print(IddqTable_t* i_iddqt)
     // get ICSQ measurements with all good cores in each quad
     for (i = 0; i < MAXIMUM_EQ_SETS; i++)
     {
-        IDDQ_TRACE ("  ICSQ all good cores ON, caches ON");
-        sprintf(l_buffer_str, "Quad %d:", i);
+        IDDQ_TRACE_QUAD ("  ICSQ all good cores ON, caches ON");
+        sprintf(l_buffer_str, "Quad %d", i);
         strcat(l_line_str, l_buffer_str);
 
         for (j = 0; j < IDDQ_MEASUREMENTS; j++)
@@ -3967,7 +3980,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     }
 
     // get average temperature measurements with all good cores ON
-    IDDQ_TRACE ("  Avg temp all good cores ON:");
+    IDDQ_TRACE ("  Avg temp all good cores ON");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3977,7 +3990,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get average temperature measurements with all cores and caches OFF
-    IDDQ_TRACE ("  Avg temp all cores OFF, caches OFF:");
+    IDDQ_TRACE ("  Avg temp all cores OFF, caches OFF");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3987,7 +4000,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get average temperature measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  Avg temp all good cores OFF, caches ON:");
+    IDDQ_TRACE ("  Avg temp all good cores OFF, caches ON");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -4730,15 +4743,20 @@ fapi2::ReturnCode PlatPmPPB::compute_retention_vid()
     const uint32_t              RVRM_MAX_MV = 848;
 
     uint32_t                    l_psave_mv;
+    Pstate                      l_psave_ps;
     uint32_t                    l_ret_mv;
     fapi2::ATTR_RVRM_VID_Type   l_rvrm_rvid;
 
-
     FAPI_INF("> PlatPmPPB:compute_retention_voltage");
 
-    l_psave_mv = iv_attr_mvpd_poundV_biased[VPD_PV_PSAV].vdd_mv;
+    // Needs kHz
+    freq2pState (iv_vddPsavFreq * 1000,
+                 &l_psave_ps,
+                 ROUND_FAST);
 
-    FAPI_DBG("iv_attr_mvpd_poundV_biased[VPD_PV_PSAV].vdd_mv 0x%08x (%d)", l_psave_mv, l_psave_mv);
+    l_psave_mv = ps2v_mv(l_psave_ps, VDD);
+
+    FAPI_DBG("PowerSave vdd_mv 0x%08x (%d)", l_psave_mv, l_psave_mv);
 
     l_ret_mv = l_psave_mv;
     if (l_psave_mv < RVRM_MIN_MV)

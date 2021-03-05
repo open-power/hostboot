@@ -44,7 +44,6 @@
 
 #define NUM_OP_POINTS      8
 #define NUM_PV_POINTS      8
-#define VPD_PV_PSAV        0
 #define VPD_PV_CF0         0
 #define VPD_PV_CF1         1
 #define VPD_PV_CF2         2
@@ -53,8 +52,6 @@
 #define VPD_PV_CF5         5
 #define VPD_PV_CF6         6
 #define VPD_PV_CF7         7
-#define VPD_PV_UT          6
-#define VPD_PV_FMAX        7
 
 #define VPD_PV_STR { \
         "CF0", \
@@ -68,7 +65,6 @@
     }
 
 /// VPD #V Operating Points (eg Natural order)
-#define POWERSAVE   0
 #define CF0         0
 #define CF1         1
 #define CF2         2
@@ -77,8 +73,6 @@
 #define CF5         5
 #define CF6         6
 #define CF7         7
-#define ULTRA       6
-#define FMAX        7
 #define PV_OP {CF0, CF1, CF2, CF3, CF4, CF5, CF6, CF7}
 #define PV_OP_STR { \
         "CF0       ", \
@@ -117,7 +111,6 @@
 /// @todo Remove the systparm version?
 
 #define VPD_NUM_SLOPES_REGION       7
-#define REGION_POWERSAVE_CF1        0
 #define REGION_CF0_CF1              0
 #define REGION_CF1_CF2              1
 #define REGION_CF2_CF3              2
@@ -125,8 +118,7 @@
 #define REGION_CF4_CF5              4
 #define REGION_CF5_CF6              5
 #define REGION_CF6_CF7              6
-#define REGION_CF5_UT               5
-#define REGION_UT_FMAX              6
+
 #define VPD_OP_SLOPES_REGION_ORDER {REGION_CF0_CF1, REGION_CF1_CF2, REGION_CF2_CF3, REGION_CF3_CF4, REGION_CF4_CF5, REGION_CF5_CF6, REGION_CF6_CF7,}
 #define VPD_OP_SLOPES_REGION_ORDER_STR { \
         "CF0_CF1", \

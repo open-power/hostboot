@@ -143,7 +143,8 @@ typedef struct
     uint8_t attr_dds_trip_mode;
     uint8_t attr_dds_trip_interpolation_control;
     uint8_t attr_dds_bias_enable;
-    uint8_t attr_fmax_enable;
+    // RTC: V269546:  remove the FMax Enable mode control
+    uint8_t attr_fmax_enable = fapi2::ENUM_ATTR_SYSTEM_FMAX_ENABLE_ON;
     uint8_t attr_war_mode;
 
     uint8_t attr_dd_wof_not_supported;
@@ -387,7 +388,7 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         /// @brief Converts frequency value to pstate number
         /// @param[in]     i_freq_khz input frequency
-        /// @param[out]     o_pstate pstate output for a given inut frequency
+        /// @param[out]    o_pstate pstate output for a given inut frequency
         /// @return        pstate value
         /// -----------------------------------------------------------------------
         int freq2pState (const uint32_t freq_khz,
