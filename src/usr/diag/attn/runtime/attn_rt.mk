@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2020
+# Contributors Listed Below - COPYRIGHT 2012,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -26,14 +26,14 @@
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/io
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/io/
 
 ATTN_RT_OBJS += attn_rt.o
 ATTN_RT_OBJS += attnsvc.o
-# FIXME RTC:257492
-#ATTN_RT_OBJS += p9_io_obus_firmask_save_restore.o
+ATTN_RT_OBJS += p10_io_iohs_firmask_save_restore.o

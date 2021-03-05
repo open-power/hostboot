@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@
 
 #include <p10_fbc_eff_config_links.H>
 #include <p10_chiplet_fabric_scominit.H>
-
+#include <p10_io_iohs_firmask_save_restore.H>
 #include <fapi2/plat_hwp_invoker.H>
 
 namespace ISTEP
@@ -71,6 +71,7 @@ const char * hwpCallToString( HWP_CALL_TYPE i_hwpCall )
         { P10_CHIPLET_FABRIC_SCOMINIT, "p10_chiplet_fabric_scominit" },
         { P10_FBC_EFF_CONFIG_LINKS_ELECTRICAL, "p10_fbc_eff_config_links" },
         { P10_FBC_EFF_CONFIG_LINKS_OPTICAL, "p10_fbc_eff_config_links" },
+        { P10_IO_IOHS_FIRMASK_SAVE_RESTORE, "p10_io_iohs_firmask_save_restore" },
     };
 
     if (hwpCallToStringMap.count(i_hwpCall) > 0)
@@ -159,6 +160,12 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
                                     l_fapi2Target,
                                     l_train_intranode,
                                     l_train_internode);
+                }
+                else if (P10_IO_IOHS_FIRMASK_SAVE_RESTORE == i_hwpCall)
+                {
+                    FAPI_INVOKE_HWP(l_err,
+                                    p10_io_iohs_firmask_save_restore,
+                                    l_fapi2Target, p10iofirmasksaverestore::SAVE);
                 }
                 else
                 {

@@ -486,24 +486,20 @@ void* host_discover_targets( void *io_pArgs )
                 break;
             }
 
-            // Mask off the OBUS FIRs (normally part of proc_chiplet_scominit
-            // Make the FAPI call to p9_io_obus_firmask_save_restore
-
-            // @TODO RTC 213022: Fix this when we implement the HWP
-            bool l_success = true;
-            /*
-            bool l_success = ISTEP::fapiHWPCallWrapperHandler(
-                                 ISTEP::P9_OBUS_FIRMASK_SAVE_RESTORE,
+            // Mask off the IOHS/PAUC FIRs (normally part of
+            // p10_proc_chiplet_scominit.  Make the FAPI call to
+            // p10_io_iohs_firmask_save_restore
+            const bool l_success = ISTEP::fapiHWPCallWrapperHandler(
+                                 ISTEP::P10_IO_IOHS_FIRMASK_SAVE_RESTORE,
                                  l_stepError,
                                  ISTEP_COMP_ID,
                                  TARGETING::TYPE_PROC);
-            */
-
             if( !l_success )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"Error calling p9_io_obus_firmask_save_restore");
+                          ERR_MRK"Error calling p10_io_iohs_firmask_save_restore");
             }
+
         }while(0);
 
     }

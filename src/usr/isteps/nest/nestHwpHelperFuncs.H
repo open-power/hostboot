@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,7 @@ enum HWP_CALL_TYPE
     P10_CHIPLET_FABRIC_SCOMINIT, // Although it says chiplet, this uses proc chip
     P10_FBC_EFF_CONFIG_LINKS_ELECTRICAL, // process electrical
     P10_FBC_EFF_CONFIG_LINKS_OPTICAL, // process optical
+    P10_IO_IOHS_FIRMASK_SAVE_RESTORE, // Save IOHS/PAUC FIR masks
 };
 
 /**

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,13 +38,14 @@
 #include <errno.h>
 #include <prdf/common/prdfMain_common.H>
 
-// TODO RTC:257492
-//#include <p9_io_obus_firmask_save_restore.H>
+#include <p10_io_iohs_firmask_save_restore.H>
 #include <fapi2/target.H>              // fapi2::Target
 #include <fapi2/plat_hwp_invoker.H>    // FAPI_INVOKE_HWP
 
 using namespace std;
 using namespace TARGETING;
+namespace  TU = TARGETING::UTIL;
+namespace  T = TARGETING;
 using namespace ATTN;
 using namespace PRDF;
 extern trace_desc_t* g_trac_hbrt;
@@ -65,32 +66,37 @@ namespace ATTN_RT
 
         do
         {
-            // Get a list of all the processors in the system
-            TARGETING::TargetHandleList l_targetList;
-            getAllChips(l_targetList, TARGETING::TYPE_PROC);
-            // Loop through all processors chip targets
-            for (const auto & l_target: l_targetList)
+            // Restore FIR mask values that were stored in attributes during
+            // host_discover_targets in an MPIPL. Now that HBRT is active, IOHS
+            // peer targets are known so it is okay to re-enable the FIRs that
+            // Hostboot masked off earlier in an MPIPL.  This steps is not
+            // needed after a normal IPL since the FIRs are only unmasked after
+            // istep 18, and PRD is not watching for problems on the inter-node
+            // buses until after HBRT starts.
+            if(TU::assertGetToplevelTarget()->getAttr<T::ATTR_IS_MPIPL_HB>())
             {
-                (void)l_target;
-/* TODO RTC:257492
-                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2Target(l_target);
-                // Restore firmask values that were stored in attributes after chiplet_scominit.
-                // Now that we are in HBRT , OBUS peer targets are known so it is okay to
-                // re-enable the firs that we masked off during Hostboot IPL
-                FAPI_INVOKE_HWP(err,
-                                p9_io_obus_firmask_save_restore,
-                                l_fapi2Target, p9iofirmasksaverestore::RESTORE);
-*/
-                if(err)
+                // Get a list of all the functional processors in the system
+                T::TargetHandleList l_targetList;
+                getAllChips(l_targetList, T::TYPE_PROC);
+
+                // Loop through all processor chip targets
+                for (const auto & l_target: l_targetList)
                 {
-                    // Commit error but don't fail, we lose debug capabilties but this
-                    // should not fail the boot
-                    errlCommit(err, FAPI2_COMP_ID);
+                    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2Target(l_target);
+
+                    FAPI_INVOKE_HWP(err,
+                                    p10_io_iohs_firmask_save_restore,
+                                    l_fapi2Target, p10iofirmasksaverestore::RESTORE);
+                    if(err)
+                    {
+                        // Commit error but don't fail, we lose debug capabilities
+                        // but this should not fail the boot
+                        errlCommit(err, FAPI2_COMP_ID);
+                    }
                 }
             }
 
-            // TODO RTC:257492 re-enable PRD
-            //err = initialize();
+            err = initialize();
             if (err)
             {
                 ATTN_ERR( "ATTN_RT::enableAttns: Failed to initialize PRD" );
