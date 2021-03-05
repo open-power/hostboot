@@ -47,4 +47,18 @@
       <ffdc>SHIFTED_ERR_VAL</ffdc>
    </hwpError>
   <!-- ******************************************************************** -->
+   <hwpError>
+      <rc>RC_RCS_FPLL_DESKEW_ERR_A</rc>
+      <description> Error in caliberating the deskew for RCS FPLL A-Side</description>
+      <ffdc>READ_SNS1LTH</ffdc>
+      <ffdc>SHIFTED_ERR_VAL</ffdc>
+   </hwpError>
+  <!-- ******************************************************************** -->
+   <hwpError>
+      <rc>RC_RCS_FPLL_DESKEW_ERR_B</rc>
+      <description> Error in caliberating the deskew for RCS FPLL B-Side</description>
+      <ffdc>READ_SNS1LTH</ffdc>
+      <ffdc>SHIFTED_ERR_VAL</ffdc>
+   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
