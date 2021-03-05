@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2019
+# Contributors Listed Below - COPYRIGHT 2014,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -82,9 +82,6 @@ echo "SKIP_CR_CHECK  = ${SKIP_CR_CHECK}"
 echo "SKIP_CXX_TESTS  = ${SKIP_CXX_TESTS}"
 
 source "$PROJECT_ROOT/src/build/citest/setup-env"
-
-# Force simics into Secure Mode
-export SECURITY_HW_POLICY="1"
 
 if [ -z "$SKIP_CR_CHECK" ]; then
     # Check copyright.

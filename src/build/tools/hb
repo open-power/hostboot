@@ -481,14 +481,13 @@ hb_startsimics()
     # set mode accordingly
     if [[ -f ${PROJECT_ROOT}/obj/genfiles/config.h ]]; then
         if cat ${PROJECT_ROOT}/obj/genfiles/config.h | grep -q "CONFIG_SECUREBOOT 1"; then
-            echo "In secure mode"
-            if [ -z "${SECURITY_HW_POLICY}" ]; then
-                export SECURITY_HW_POLICY="1"
+            if [ ! -z "${DISABLE_SECUREBOOT}" ]; then
+                echo "Secureboot is disabled via DISABLE_SECUREBOOT env var"
+            else
+                echo "In secure mode"
             fi
         else
-            if [ -z "${SECURITY_HW_POLICY}" ]; then
-                export SECURITY_HW_POLICY="0"
-            fi
+            export DISABLE_SECUREBOOT="1"
             echo "In unsecure mode"
         fi
     else

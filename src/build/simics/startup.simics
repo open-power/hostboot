@@ -121,8 +121,10 @@ if defined bmc_files {
 
 
 # Determine security state
-$hw_security="0"
-@if 'SECURITY_HW_POLICY' in os.environ: simenv.hw_security = os.environ['SECURITY_HW_POLICY']
+$hw_security="1"
+@simenv.hw_security = "1"
+@if 'DISABLE_SECUREBOOT' in os.environ: simenv.hw_security = "0"
+@if 'DISABLE_SECUREBOOT' in os.environ: hw_security = "0"
 
 if(($hw_security != "1") and ($hw_security != "0")) {
     # Emit warning and assume default
