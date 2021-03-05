@@ -75,6 +75,10 @@ GEN_FAKE_HEADER_SCRIPT := ${BUILDPNOR}/genfakeheader.pl
 GEN_PNOR_IMAGE_SCRIPT := ${BUILDPNOR}/genPnorImages.pl
 UNPKGD_OCMBFW_IMG := ${STAGINGDIR}/ocmbfw.bin
 SBE_BUILD_SCRIPT := ${BUILDPNOR}/buildSbePart.pl
+# Needed to sign SBE Image (which will add .sb_settings section to it)
+SBE_SIGN_SCRIPT := ${PPE_DIR}/src/tools/scripts/signSbeImage
+SBE_SCRATCH_DIR := ${STANDALONEDIR}/sbeScratchDir
+SBE_TOOL        := ${PPE_DIR}/images/ipl_image_tool
 
 ## Variables and Files Setup
 
@@ -344,10 +348,14 @@ gen_default_images: copy_hb_bins
 #        --ecImg_10 ${S1_EC10_BIN}
 #################################################
 
+sign_sbe_img:
+	${SBE_SIGN_SCRIPT} -s ${SBE_SCRATCH_DIR} -t ${SBE_TOOL} \
+		-i $(shell basename ${SBE_SEEPROM_IMAGE_DD1})
+
 build_sbe_img: add_pnor_header
 	${SBE_BUILD_SCRIPT} --sbeOutBin ${SBE_IMG} --ecImg_10 ${SBE_SEEPROM_HDR_BIN_DD1}
 
-add_pnor_header:
+add_pnor_header: sign_sbe_img
 	echo -en VERSION\\0 > ${SBE_SEEPROM_HDR_SHA_DD1}
 	sha512sum ${SBE_SEEPROM_HDR_SHA_DD1} | awk '{print $1}' | xxd -pr -r >> ${SBE_SEEPROM_HDR_SHA_DD1}
 	dd if=${SBE_SEEPROM_HDR_SHA_DD1} of=${SBE_SEEPROM_HDR_BIN_DD1} ibs=4k conv=sync

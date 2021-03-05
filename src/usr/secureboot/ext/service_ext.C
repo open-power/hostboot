@@ -335,14 +335,6 @@ void validateSecuritySettings()
     // Enforce Synchronized Proc Security State
     do {
 
-    // @TODO RTC 208821 Once SBEs have "sb_settings" in them by default, this
-    // code block can be removed
-    if (Util::isSimicsRunning())
-    {
-        SB_INF("Running In Simics so skipping most of validateSecuritySettings()");
-        break;
-    }
-
     uint64_t l_mainCbs = 0;
 
     // we need to know if we're in manufacturing mode to do some logic later
