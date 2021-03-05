@@ -368,7 +368,20 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     {
         fapi2::buffer<uint64_t> l_interrupt_mask;
 
-        FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG, l_interrupt_mask));
+        // Special handling for this scom because it wasn't available in very old versions of Explorer FW
+        fapi2::ReturnCode l_rc_scom = fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG, l_interrupt_mask);
+
+        if (l_rc_scom != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::logError(l_rc_scom, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            FAPI_ASSERT(false,
+                        fapi2::MSS_EXP_SUM_MASK_REG_SCOM_FAIL().
+                        set_OCMB_TARGET(i_target).
+                        set_ADDRESS(EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG),
+                        "%s Scom fail for EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG. Possibly due to old Explorer FW version. Needs to be at least CL402648",
+                        mss::c_str(i_target) );
+        }
+
         l_interrupt_mask.setBit<EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG_SMASK_IN,
                                 EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG_SMASK_IN_LEN>();
         FAPI_TRY(fapi2::putScom(i_target, EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG, l_interrupt_mask));

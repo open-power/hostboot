@@ -1135,6 +1135,23 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_EXP_SUM_MASK_REG_SCOM_FAIL</rc>
+    <description>
+        A Scom fail occurred when attempting to access EXPLR_TP_MB_UNIT_TOP_SUM_MASK_REG at address
+        0x08040017. This is likely due to using an unsupported Explorer firmware version (prior to CL402648)
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_UNKNOWN_THERMAL_SENSOR</rc>
     <description>
       The thermal sensor type for the given port was not a known value
