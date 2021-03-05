@@ -8811,6 +8811,57 @@ fapi_try_exit:
 }
 //<< GET_[TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA]
 
+//>> PREP_[FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI]
+
+//>> GET_[FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI]
+
+//>> PUT_[FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
