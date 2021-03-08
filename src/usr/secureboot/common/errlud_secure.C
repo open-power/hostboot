@@ -145,7 +145,7 @@ UdSecuritySettings::UdSecuritySettings()
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_2;
+    iv_Version = SECURE_UDT_VERSION_3;
     iv_SubSection = SECURE_UDT_SECURITY_SETTINGS;
 
     char * l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(
@@ -162,10 +162,15 @@ UdSecuritySettings::UdSecuritySettings()
     // The following is appended onto VERSION_1 for VERSION_2:
     // 1 byte   : Minimum Secure Version
 
+    //***** Version SECURE_UDT_VERSION_3 Memory Layout *****
+    // The following is appended onto VERSION_2 for VERSION_3:
+    // 4 bytes  : Measurement Seeprom Version
+
     l_pDetailsLayout->secAccessBit = 0xFF;
     l_pDetailsLayout->secOverride = 0xFF;
     l_pDetailsLayout->allowAttrOverride = 0xFF;
     l_pDetailsLayout->minSecureVersion = 0xFF;
+    l_pDetailsLayout->measurementSeepromVersion = 0xFFFFFFFF;
 
 #ifndef __HOSTBOOT_RUNTIME
     // Only check BlToHbData if it is valid, otherwise fields defaulted to 0xFF
@@ -175,6 +180,8 @@ UdSecuritySettings::UdSecuritySettings()
         l_pDetailsLayout->secOverride = g_BlToHbDataManager.getSecurityOverride();
         l_pDetailsLayout->allowAttrOverride = g_BlToHbDataManager.getAllowAttrOverrides();
         l_pDetailsLayout->minSecureVersion = g_BlToHbDataManager.getMinimumSecureVersion();
+        l_pDetailsLayout->measurementSeepromVersion =
+            g_BlToHbDataManager.getMeasurementSeepromVersion();
     }
 #endif
 

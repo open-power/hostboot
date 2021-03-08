@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -549,7 +549,7 @@ void SecureRomManager::hashConcatBlobs(const blobPair_t &i_blobs,
 void SecureRomManager::getHwKeyHash()
 {
     iv_key_hash  = reinterpret_cast<const SHA512_t*>(
-                                           g_BlToHbDataManager.getHwKeysHash());
+                                           g_BlToHbDataManager.getHwKeysHashPtr());
 }
 
 /**

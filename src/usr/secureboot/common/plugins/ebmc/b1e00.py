@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -87,6 +87,9 @@ class errludP_secure:
         # **** Version 2 Memory Layout ****
         # Append this to the end of Version 1:
         # 1 byte   : Minimum FW Secure Version
+        # **** Version 3 Memory Layout ****
+        # Append this to the end of Version 2:
+        # 4 bytes  : Measurement Seeprom Version
 
         d = dict()
         subd = dict()
@@ -99,6 +102,9 @@ class errludP_secure:
 
         if ver >= 2:
             subd['Minimum FW Secure Version'], i= hexConcat(data, i, i+1)
+
+        if ver >= 3:
+            subd['Measurement Seeprom Version'], i= hexConcat(data, i, i+4)
 
         d['Security Settings']=subd
 

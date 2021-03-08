@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,7 +123,7 @@ class BlToHbDataManager
          *
          * @return void*      pointer to hwKeysHash
          */
-        const void* getHwKeysHash() const;
+        const void* getHwKeysHashPtr() const;
 
         /*
          * @brief Returns internal hwKeysHashSize
@@ -138,6 +138,13 @@ class BlToHbDataManager
          * @return uint8_t     min_secure_version
          */
         const uint8_t getMinimumSecureVersion() const;
+
+        /*
+         * @brief Returns Measurement Seeprom version
+         *
+         * @return uint32_t     measurement_seeprom_version
+         */
+        const uint32_t getMeasurementSeepromVersion() const;
 
         /*
          * @brief Returns internal pointer to hbbHeader

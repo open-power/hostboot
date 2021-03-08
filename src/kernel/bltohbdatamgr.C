@@ -58,12 +58,14 @@ void BlToHbDataManager::print() const
         printkd("-- version = 0x%lX\n", iv_data.version);
         printkd("-- branchtableOffset = 0x%lX\n", iv_data.branchtableOffset);
         printkd("-- SecureRom Addr = 0x%lX Size = 0x%lX\n", getSecureRomAddr(),
-               iv_data.secureRomSize);
+                iv_data.secureRomSize);
         printkd("-- HW keys' Hash Addr = 0x%lX Size = 0x%lX\n",
                 getHwKeysHashAddr(),
                 iv_data.hwKeysHashSize);
         printkd("-- Minimum FW Secure Version  = 0x%02X\n",
                 iv_data.min_secure_version);
+        printkd("-- Measurement Seeprom Version  = 0x%08X\n",
+                iv_data.measurement_seeprom_version);
         printkd("-- HBB header Addr = 0x%lX Size = 0x%lX\n", getHbbHeaderAddr(),
                iv_data.hbbHeaderSize);
         printkd("-- Reserved Size = 0x%lX\n", iv_preservedSize);
@@ -102,7 +104,7 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     kassert(i_data.version>0);
     kassert(i_data.branchtableOffset>0);
     kassert(i_data.secureRom!=nullptr);
-    kassert(i_data.hwKeysHash!=nullptr);
+    kassert(i_data.hwKeysHashPtr!=nullptr);
     kassert(i_data.hbbHeader!=nullptr);
     kassert(i_data.secureRomSize>0);
     kassert(i_data.hwKeysHashSize>0);
@@ -114,7 +116,7 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     iv_data.branchtableOffset = i_data.branchtableOffset;
     iv_data.secureRom = i_data.secureRom;
     iv_data.secureRomSize = i_data.secureRomSize;
-    iv_data.hwKeysHash = i_data.hwKeysHash;
+    iv_data.hwKeysHashPtr = i_data.hwKeysHashPtr;
     iv_data.hwKeysHashSize = i_data.hwKeysHashSize;
     iv_data.hbbHeader = i_data.hbbHeader;
     iv_data.hbbHeaderSize = i_data.hbbHeaderSize;
@@ -126,6 +128,14 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     iv_data.allowAttrOverrides = i_data.allowAttrOverrides;
     iv_data.secBackdoorBit = i_data.secBackdoorBit;
     iv_data.min_secure_version = i_data.min_secure_version;
+    if(iv_data.version >= Bootloader::BLTOHB_SB_SETTING)
+    {
+        iv_data.measurement_seeprom_version = i_data.measurement_seeprom_version;
+    }
+    else
+    {
+        iv_data.measurement_seeprom_version = 0;
+    }
 
     // Populate the MMIO members
     kassert(i_data.lpcBAR>0);
@@ -200,7 +210,7 @@ void BlToHbDataManager::relocatePreservedArea()
     }
     // Ensure the pointers were initialized
     kassert(iv_data.secureRom!=nullptr);
-    kassert(iv_data.hwKeysHash!=nullptr);
+    kassert(iv_data.hwKeysHashPtr!=nullptr);
     kassert(iv_data.hbbHeader!=nullptr);
 
     // Get destination location that will be preserved by the pagemgr
@@ -215,13 +225,23 @@ void BlToHbDataManager::relocatePreservedArea()
     l_pBltoHbDataStart += iv_data.secureRomSize;
 
     // Copy in HW keys' Hash
-    // @TODO RTC 208821 Temporarily defaulting the HW Key Hash to this imprint / development value
-    // Will remove once SBE code passes this value in via the BootloaderConfigData_t
-    memcpy(l_pBltoHbDataStart,
-           Bootloader::default_hw_key_hash,
-           iv_data.hwKeysHashSize);
+    // @TODO RTC 269616 - Remove if{} block and just use else{} block
+    if (iv_data.version == Bootloader::BLTOHB_INIT)
+    {
+        // Default the HW Key Hash to this imprint / development value
+        memcpy(l_pBltoHbDataStart,
+               Bootloader::default_hw_key_hash,
+               iv_data.hwKeysHashSize);
+    }
+    else
+    {
+        memcpy(l_pBltoHbDataStart,
+               iv_data.hwKeysHashPtr,
+               iv_data.hwKeysHashSize);
+    }
+
     // Change pointer to new location and increment
-    iv_data.hwKeysHash = l_pBltoHbDataStart;
+    iv_data.hwKeysHashPtr = l_pBltoHbDataStart;
     l_pBltoHbDataStart += iv_data.hwKeysHashSize;
 
     // Copy in HBB header
@@ -262,14 +282,14 @@ const size_t BlToHbDataManager::getSecureRomSize() const
     return iv_data.secureRomSize;
 }
 
-const void* BlToHbDataManager::getHwKeysHash() const
+const void* BlToHbDataManager::getHwKeysHashPtr() const
 {
     if(!iv_dataValid)
     {
         printk("E> BlToHbDataManager is invalid, cannot access HwKeysHash\n");
         crit_assert(iv_dataValid);
     }
-    return iv_data.hwKeysHash;
+    return iv_data.hwKeysHashPtr;
 }
 
 const uint64_t BlToHbDataManager::getHwKeysHashAddr() const
@@ -279,7 +299,7 @@ const uint64_t BlToHbDataManager::getHwKeysHashAddr() const
         printk("E> BlToHbDataManager is invalid, cannot access HwKeysHashAddr\n");
         crit_assert(iv_dataValid);
     }
-    return reinterpret_cast<uint64_t>(iv_data.hwKeysHash);
+    return reinterpret_cast<uint64_t>(iv_data.hwKeysHashPtr);
 }
 
 const size_t BlToHbDataManager::getHwKeysHashSize() const
@@ -295,6 +315,16 @@ const uint8_t BlToHbDataManager::getMinimumSecureVersion() const
         crit_assert(iv_dataValid);
     }
     return iv_data.min_secure_version;
+}
+
+const uint32_t BlToHbDataManager::getMeasurementSeepromVersion() const
+{
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access Measurement Seeprom Version\n");
+        crit_assert(iv_dataValid);
+    }
+    return iv_data.measurement_seeprom_version;
 }
 
 

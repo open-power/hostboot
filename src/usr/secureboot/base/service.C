@@ -653,8 +653,18 @@ errlHndl_t traceSecuritySettings(bool i_doConsoleTrace)
     do
     {
 
-    err = getAllSecurityRegisters(registerList);
+    // Trace Settings from SBE-to-HBBL
+    SB_INF("traceSecuritySettings(): SBE-to-HBBL Security Settings: "
+           "secAccessBit=0x%.2X, secOverride=0x%.2X, allowAttrOverride=0%.2X, "
+           "minSecureVersion=0x%.2X, measurementSeepromVersion=0x%.8X",
+           g_BlToHbDataManager.getSecureAccessBit(),
+           g_BlToHbDataManager.getSecurityOverride(),
+           g_BlToHbDataManager.getAllowAttrOverrides(),
+           g_BlToHbDataManager.getMinimumSecureVersion(),
+           g_BlToHbDataManager.getMeasurementSeepromVersion());
 
+    // Trace Security Regisgers
+    err = getAllSecurityRegisters(registerList);
     if (err)
     {
         SB_ERR("traceSecuritySettings: getAllSecurityRegisters returned error: "
@@ -821,12 +831,17 @@ void addSecureUserDetailsToErrlog(errlHndl_t & io_err,
 
 void logPlatformSecurityConfiguration(void)
 {
+    SHA512_t hash = {0};
+    getHwKeyHash(hash);
+
     /*@
      * @errortype
-     * @moduleid   SECUREBOOT::MOD_SECURE_LOG_PLAT_SECURITY_CONFIG
-     * @reasoncode SECUREBOOT::RC_SECURE_LOG_PLAT_SECURITY_CONFIG
-     * @userdata1  Minimum FW Secure Version
-     * @devdesc    Planar jumper configuration
+     * @moduleid          SECUREBOOT::MOD_SECURE_LOG_PLAT_SECURITY_CONFIG
+     * @reasoncode        SECUREBOOT::RC_SECURE_LOG_PLAT_SECURITY_CONFIG
+     * @userdata1         Minimum FW Secure Version
+     * @userdata2[0:31]   Measurement Seeprom Version
+     * @userdata2[32:63]  System HW Keys' Hash
+     * @devdesc    Planar jumper configuration and other security info
      * @custdesc   Planar jumper configuration
      */
     errlHndl_t pError = new ERRORLOG::ErrlEntry(
@@ -834,7 +849,9 @@ void logPlatformSecurityConfiguration(void)
         SECUREBOOT::MOD_SECURE_LOG_PLAT_SECURITY_CONFIG,
         SECUREBOOT::RC_SECURE_LOG_PLAT_SECURITY_CONFIG,
         getMinimumSecureVersion(),
-        0);
+        TWO_UINT32_TO_UINT64(
+            g_BlToHbDataManager.getMeasurementSeepromVersion(),
+            sha512_to_u32(hash)));
     (void)addSecureUserDetailsToErrlog(
         pError);
     ERRORLOG::errlCommit(pError,SECURE_COMP_ID);

@@ -2380,13 +2380,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                        "hbblPnorPtr=%p, hbblMaxSize=0x%08X (%d)",
                        hbblPnorPtr, MAX_HBBL_SIZE, MAX_HBBL_SIZE);
 
-            TRACDBIN(g_trac_sbe,
-                     "getSbeInfoState: end of HBBL - SV and HKH",
-                     reinterpret_cast<uint8_t*>(
-                                       reinterpret_cast<uint64_t>(hbblPnorPtr) +
-                                       HBBL_SECURE_VERSION_LOCATION),
-                     sizeof(SHA512_t)+sizeof(hbbl_secure_version));
-
             /*******************************************************/
             /*  Append HBBL Image from PNOR to SBE Image from PNOR */
             /*  - delete P9_XIP_SECTION_SBE_RINGS section first to */

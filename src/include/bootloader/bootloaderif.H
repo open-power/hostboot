@@ -37,19 +37,10 @@ namespace Bootloader{
 // Must be aligned CACHELINE_SIZE of 128 bytes
 #define MAX_HBBL_SIZE (32 * KILOBYTE)
 
-// Location of the HW Key Hash located at the end of the HBBL without ECC
-#define HBBL_HW_KEY_HASH_LOCATION  (MAX_HBBL_SIZE - sizeof(SHA512_t))
-
-// Location of Secure Version is the byte preceding HBBL_HW_KEY_HASH_LOCATION
-#define HBBL_SECURE_VERSION_LOCATION  (HBBL_HW_KEY_HASH_LOCATION - 1)
-
-// Location of Secure Version aligned down to the nearest uint64_t/8-byte
-// boundary for use in getting this information from locations that might already
-// have ECC applied
-#define HBBL_SECURE_VERSION_LOCATION_ALIGNED ALIGN_DOWN_8(HBBL_SECURE_VERSION_LOCATION)
-
-// @TODO RTC 208821 Temporarily defaulting the HW Key Hash to this imprint / development value
-// Will remove once SBE code passes this value in via the BootloaderConfigData_t
+// Need to default the HW Key Hash to this imprint / development value if Hostboot
+// code runs across an old SBE image without this value in the BootloaderConfigData_t's
+// sb_settings_t struct (which mirrors the .sb_settings SBE section)
+// @TODO RTC 269616 - Remove this
 const SHA512_t default_hw_key_hash =
 {
     0x40,0xd4,0x87,0xff,0x73,0x80,0xed,0x6a,
@@ -98,6 +89,7 @@ enum BlToHbDataVersion
 {
     // [release:4][version:4]
     BLTOHB_INIT             = 0x0000000A00000001,
+    BLTOHB_SB_SETTING       = 0x0000000A00000002,
 };
 
 enum
@@ -144,7 +136,7 @@ struct BlToHbData
 {
     BlToHbData() : eyeCatch(0), version(BLTOHB_INIT),
                    branchtableOffset(0), secureRom(nullptr),
-                   secureRomSize(0), hwKeysHash(nullptr),
+                   secureRomSize(0), hwKeysHashPtr(nullptr),
                    hwKeysHashSize(0), hbbHeader(nullptr),
                    hbbHeaderSize(0), secureAccessBit(0),
                    xscomBAR(MEMMAP::MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
@@ -152,7 +144,8 @@ struct BlToHbData
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), secBackdoorBit(0),
                    cacheSizeMb(0), numKeyAddrPair(0),
-                   min_secure_version(0), tdpFlagSet(0)
+                   min_secure_version(0), tdpFlagSet(0),
+                   measurement_seeprom_version(0)
     {
         memset(keyAddrStashData, 0, sizeof(keyAddrStashData));
     }
@@ -168,7 +161,7 @@ struct BlToHbData
     // size of entire secureROM
     size_t secureRomSize;
     // pointer to the hw keys hash used for verification
-    const void* hwKeysHash;
+    const void* hwKeysHashPtr;
     // size of key
     size_t hwKeysHashSize;
     // pointer to the saved off Hostboot base header for TPM extension
@@ -199,6 +192,8 @@ struct BlToHbData
     uint8_t min_secure_version;
     // Flag to indicate whether bootloader set the TPM TDP bit
     uint8_t tdpFlagSet;
+    // Version of the measurement seeprom
+    uint32_t measurement_seeprom_version;
 
 } __attribute__((packed));
 

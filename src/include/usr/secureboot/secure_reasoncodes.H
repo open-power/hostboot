@@ -153,6 +153,7 @@ namespace SECUREBOOT
         // Version(s)
         SECURE_UDT_VERSION_1          = 0x1,
         SECURE_UDT_VERSION_2          = 0x2,
+        SECURE_UDT_VERSION_3          = 0x3,
 
         // Formats/User Detail Sections
         SECURE_UDT_NO_FORMAT          = 0x0,

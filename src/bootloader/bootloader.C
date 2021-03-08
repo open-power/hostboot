@@ -85,9 +85,12 @@ namespace Bootloader{
      */
     void setSecureData(const void * i_pHbbSrc)
     {
+        // Create BlToHbData
+
         // Read SBE HB shared data.
-        const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
-                                                              SBE_HB_COMM_ADDR);
+        const BootloaderConfigData_t* l_blConfigData =
+            reinterpret_cast<BootloaderConfigData_t *>(SBE_HB_COMM_ADDR);
+
         // Set Secure Settings
         // Ensure SBE to Bootloader structure has the SAB member
         //   and other Secure Settings
@@ -110,7 +113,6 @@ namespace Bootloader{
         const uint8_t* l_pRomStart = reinterpret_cast<uint8_t *>(
                                         getHRMOR() + ALIGN_8(l_bootloaderSize));
 
-        // Create BlToHbData
         // Set Rom Size
         memcpy (&g_blData->blToHbData.secureRomSize,
                 l_pRomStart,
@@ -125,6 +127,11 @@ namespace Bootloader{
         switch(l_blConfigData->version)
         {
             // Add cases as additional versions are created
+            case SB_SETTING:
+                g_blData->blToHbData.version = BLTOHB_SB_SETTING;
+                break;
+
+            // @TODO RTC 269616 - Remove INIT and make SB_SETTING default
             case INIT:
             default:
                 g_blData->blToHbData.version = BLTOHB_INIT;
@@ -151,18 +158,35 @@ namespace Bootloader{
                                                l_pSecRomInfo->branchtableOffset;
             g_blData->blToHbData.secureRom = l_pRomStart;
 
-            // Set HW key hash pointer
-            // @TODO RTC 208821 Temporarily defaulting the HW Key Hash to this value
-            // Will remove once SBE code passes this value in via the BootloaderConfigData_t
-            g_blData->blToHbData.hwKeysHash = default_hw_key_hash;
-
-
+            // Set data size of HW key hash
             g_blData->blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;
 
-            // Set Minimum FW Secure Version
-            // @TODO RTC 208821 Temporarily defaulting this value to zero
-            // Will remove once SBE code passes this value in via the BootloaderConfigData_t
-            g_blData->blToHbData.min_secure_version = 0;
+            // @TODO RTC 269616 - Remove if{} section and keep else{} section
+            if (g_blData->blToHbData.version < BLTOHB_SB_SETTING)
+            {
+                // Use default imprint hash for versions withoout .sb_setting SBE section
+                g_blData->blToHbData.hwKeysHashPtr = default_hw_key_hash;
+
+                // Set Minimum FW Secure Version
+                // Use default of 0 for early version of SBE code
+                g_blData->blToHbData.min_secure_version = 0;
+
+                // Set Measurement Seeprom Version
+                // Use default of 0 for early version of SBE code
+                g_blData->blToHbData.measurement_seeprom_version = 0;
+            }
+            else
+            {
+                // Get HW Keys' Hash Ptr
+                g_blData->blToHbData.hwKeysHashPtr = &l_blConfigData->sbSettings.hwKeyHash[0];
+
+                // Get Minimum Secure Version
+                g_blData->blToHbData.min_secure_version = l_blConfigData->sbSettings.msv;
+
+                // Get Measurement Seeprom Version
+                g_blData->blToHbData.measurement_seeprom_version =
+                    l_blConfigData->mSeepromVersion;
+            }
 
             // Set HBB header and size
             g_blData->blToHbData.hbbHeader = i_pHbbSrc;
@@ -332,7 +356,7 @@ namespace Bootloader{
             for(uint8_t i = 0; i < sizeof(ROM_hw_params); p_hw_parms[i++] = 0){}
 
             // Use current hw hash key
-            memcpy (&l_hw_parms.hw_key_hash, g_blData->blToHbData.hwKeysHash,
+            memcpy (&l_hw_parms.hw_key_hash, g_blData->blToHbData.hwKeysHashPtr,
                     sizeof(SHA512_t));
 
             // Use current minimum FW secure version
@@ -354,7 +378,7 @@ namespace Bootloader{
 
                 // Get first 4 bytes of system's hw keys' hash
                 uint32_t l_beginHwKeysHash = 0;
-                memcpy(&l_beginHwKeysHash, g_blData->blToHbData.hwKeysHash,
+                memcpy(&l_beginHwKeysHash, g_blData->blToHbData.hwKeysHashPtr,
                        sizeof(l_beginHwKeysHash));
 
                 // Read SBE HB shared data.
