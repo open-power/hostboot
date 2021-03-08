@@ -138,53 +138,42 @@ uint8_t MemSymbol::getDram() const
 
 //------------------------------------------------------------------------------
 
-uint8_t MemSymbol::getDramRelCenDqs() const
+uint8_t MemSymbol::getDramSpareAdjusted() const
 {
-    // This function will return the DRAM position for this symbol relative
-    // to the Centaur DQs. Mainly this is needed for the DRAM position input
-    // of Row Repair.
-
-    const uint8_t X4_ECC_SPARE = 17;
-    const uint8_t X8_ECC_SPARE = 8;
-
-    const uint8_t X4_DRAM_SPARE_LOWER = 18;
-    const uint8_t X4_DRAM_SPARE_UPPER = 19;
-    const uint8_t X8_DRAM_SPARE = 9;
-
-    bool isX4 = true;
-    if ( TYPE_OCMB_CHIP == getTargetType(iv_trgt) )
-    {
-        TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
-        isX4 = isDramWidthX4( dimm );
-    }
-    else
-    {
-        isX4 = isDramWidthX4( iv_trgt );
-    }
-
-    uint8_t l_dramWidth = ( isX4 ) ? 4 : 8;
-    uint8_t l_dram = getDq() / l_dramWidth; // (x8: 0-9, x4: 0-19)
+    uint8_t dram = getDram();
 
     // Adjust for spares
     if ( isDramSpared() )
     {
-        if ( isX4 )
+        bool isX4 = true;
+        TYPE trgtType = getTargetType( iv_trgt );
+        if ( TYPE_OCMB_CHIP == trgtType )
         {
-            uint8_t l_bit  = getDq() % DQS_PER_BYTE;
-            l_dram = ( l_bit < 4 ) ? X4_DRAM_SPARE_LOWER : X4_DRAM_SPARE_UPPER;
+            TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank,
+                                                   getPortSlct());
+            isX4 = isDramWidthX4( dimm );
         }
         else
         {
-            l_dram = X8_DRAM_SPARE;
+            PRDF_ERR( "MemSymbol::getDramSpareAdjusted: Invalid target type" );
+            PRDF_ASSERT( false );
+        }
+
+        const uint8_t X4_DRAM_SPARE_LOWER = 10;
+        const uint8_t X4_DRAM_SPARE_UPPER = 11;
+        const uint8_t X8_DRAM_SPARE = 5;
+        if ( isX4 )
+        {
+            uint8_t l_bit  = getDq() % DQS_PER_BYTE;
+            dram = ( l_bit < 4 ) ? X4_DRAM_SPARE_LOWER : X4_DRAM_SPARE_UPPER;
+        }
+        else
+        {
+            dram = X8_DRAM_SPARE;
         }
     }
-    else if ( isEccSpared() )
-    {
-        l_dram = ( isX4 ) ? X4_ECC_SPARE : X8_ECC_SPARE;
-    }
 
-    return l_dram;
-
+    return dram;
 }
 
 //------------------------------------------------------------------------------
