@@ -2363,6 +2363,14 @@ errlHndl_t poisonTpm(TpmTarget* i_pTpm)
 
     }
 
+    // make sure the poisoning and any other queued data gets out to the TPM
+    l_errl = TRUSTEDBOOT::flushTpmQueue();
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"Unable to flushTpmQueue after poisoning TPM 0x%X",
+            TARGETING::get_huid(i_pTpm));
+    }
+
     } while (0);
 
     TRACFCOMP(g_trac_trustedboot, "%ssuccessfully poisoned TPM with huid 0x%X",
