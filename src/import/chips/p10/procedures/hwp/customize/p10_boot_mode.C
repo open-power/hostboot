@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -704,6 +704,12 @@ add_plat_features_rt(
         if (l_attr_mrw_convert_dcbz_to_rwitm == fapi2::ENUM_ATTR_MRW_CONVERT_DCBZ_TO_RWITM_TRUE)
         {
             FAPI_TRY(set_bit(i_bvec, CONVERT_DCBZ_TO_RWITM, "CONVERT_DCBZ_TO_RWITM"));
+        }
+
+        // by default, escalate core->system checkstop in Cronus
+        if (fapi2::is_platform<fapi2::PLAT_CRONUS>())
+        {
+            FAPI_TRY(set_bit(i_bvec, CRONUS_CORE_TO_SYS_XSTOP, "CRONUS_CORE_TO_SYS_XSTOP"));
         }
     }
 

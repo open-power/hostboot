@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
 static const uint64_t DYN_MAGIC_FEATURE = 0x44594e4645415453; //'DYNFEATS'
 static const uint64_t DYN_MAGIC_SERVICE = 0x44594e5345525653; //'DYNSERVS'
 
-#define MAX_DYN_FEATURES   40
+#define MAX_DYN_FEATURES   42
 #define NUM_OF_64_BITS_SET 1
 
 typedef struct
@@ -178,6 +178,8 @@ enum DYN_FEATURES
     REVERT_HW552564_SPIFFY_BEETLE                     = 37,
     REVERT_HW552845_SCANT_SCENT                       = 38,
     PERF_DD10_MISC                                    = 39,
+    CRONUS_CORE_TO_SYS_XSTOP                          = 40,
+    REVERT_DD1_SYS_XSTOP                              = 41,
 };
 
 enum DYN_SERVICES
