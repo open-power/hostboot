@@ -233,6 +233,7 @@ public:
         DECONFIGURED_BY_NO_PARENT_MEM_PORT,     // BASE | 0x27
         DECONFIGURED_BY_NO_PARENT_PAUC,         // BASE | 0x28
         DECONFIGURED_BY_NO_CHILD_PMIC,          // BASE | 0x29
+        DECONFIGURED_BY_NO_PEER_TARGET,         // BASE | 0x2A
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,

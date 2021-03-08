@@ -428,6 +428,35 @@ errlHndl_t discoverGenericI2cDeviceTargetsAndEnable(const Target &i_sysTarget)
     return l_err;
 }
 
+/* @brief Deconfigure all SMPGROUP targets that don't have a peer.
+ * attribute. Some hardware procedures expect busses without peers to
+ * be deconfigured.
+ */
+static void deconfigureBussesWithNullPeer()
+{
+    using namespace TARGETING;
+
+    const auto sys = UTIL::assertGetToplevelTarget();
+
+    TargetHandleList smpgroups;
+
+    getChildAffinityTargets(smpgroups,
+                            sys,
+                            CLASS_NA,
+                            TYPE_SMPGROUP);
+
+    for (const auto smpgroup : smpgroups)
+    {
+        const auto peer_path = smpgroup->getAttr<ATTR_PEER_PATH>();
+
+        if (peer_path.type() == TARGETING::EntityPath::PATH_NA)
+        {
+            theDeconfigGard().deconfigureTarget(*smpgroup,
+                                                HWAS::DeconfigGard::DECONFIGURED_BY_NO_PEER_TARGET);
+        }
+    }
+}
+
 errlHndl_t discoverTargets()
 {
     HWAS::HWASDiscovery l_HWASDiscovery;
@@ -859,6 +888,8 @@ errlHndl_t HWASDiscovery::discoverTargets()
                 }
             }
         }
+
+        deconfigureBussesWithNullPeer();
 
 #if( defined(CONFIG_SUPPORT_EEPROM_CACHING)  )
         // call this after all targets have cached their eeprom vpd
