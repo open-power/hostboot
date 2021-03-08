@@ -212,17 +212,6 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
 }
 
 //##############################################################################
-//##                       Processor specific functions
-//##############################################################################
-
-/* TODO RTC 136050
-void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget)
-{
-    // Do nothing for Hostboot
-}
-*/
-
-//##############################################################################
 //##                        util functions
 //##############################################################################
 

@@ -101,18 +101,6 @@ bool isSmpCoherent();
 bool isSpConfigFsp();
 
 //##############################################################################
-//##                       Processor specific functions
-//##############################################################################
-
-/**
- * @brief capture SBE image failure Registers for FFDC
- * @param i_procTarget Processor target
- */
-/* TODO RTC 136050
-void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget);
-*/
-
-//##############################################################################
 //##                        Fabric/Memory bus functions
 //##############################################################################
 
