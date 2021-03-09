@@ -334,6 +334,8 @@
       <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCHBR</scomRegister>
       <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_RO</scomRegister>
       <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_RW</scomRegister>
+      <scomRegister>0x6d200</scomRegister>
+      <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_PLBTO_OCB_PIB_OSTOESR</scomRegister>
   </registerFfdc>
  <!-- *********************************************************************** -->
   <registerFfdc>

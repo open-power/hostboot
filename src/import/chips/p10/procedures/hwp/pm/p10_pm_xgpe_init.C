@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,7 @@ static const uint32_t XGPE_POLLTIME_MS      = 20;
 static const uint32_t XGPE_POLLTIME_MCYCLES = 2;
 static const uint32_t TIMEOUT_COUNT = XGPE_TIMEOUT_MS / XGPE_POLLTIME_MS;
 
+
 #define HALT    2
 
 // -----------------------------------------------------------------------------
@@ -99,6 +100,9 @@ fapi2::ReturnCode xgpe_start(
                             i_target,
                             l_ivpr_offset),
               "Error getting ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET");
+
+    //Clear OCC Special Timeout Error status Register)
+    FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_PLBTO_OCB_PIB_OSTOESR, 0));
 
     // Program XGPE IVPR
     FAPI_INF("  ATTR IVPR with 0x%16llX", l_ivpr_offset);
