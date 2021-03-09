@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -44,4 +44,19 @@
         scomaddr    0x100F001F;
         capture     group pll_ffdc;
     };
+
+    register PB_FM0123_ERR
+    {
+        name        "PowerBus TL LINK Framer0123 Error Readout Register";
+        scomaddr    0x10011827;
+        capture     group default;
+    };
+
+    register PB_PR0123_ERR
+    {
+        name        "PowerBus TL LINK Parser0123 Error Readout Register";
+        scomaddr    0x10011829;
+        capture     group default;
+    };
+
 
