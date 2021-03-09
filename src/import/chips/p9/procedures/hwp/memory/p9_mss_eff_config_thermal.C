@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,12 +63,6 @@ extern "C"
         std::vector< uint64_t > l_intercept (TT::SIZE_OF_POWER_CURVES_ATTRS, 0);
         std::vector< uint64_t > l_thermal_power_limit (TT::SIZE_OF_THERMAL_ATTR, 0);
 
-        uint16_t l_vddr_slope     [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
-        uint16_t l_vddr_int       [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
-        uint16_t l_total_slope    [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
-        uint16_t l_total_int      [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
-        uint32_t l_thermal_power  [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
-
         FAPI_TRY( mss::mrw_pwr_slope (l_slope.data()), "Error in p9_mss_eff_config_thermal");
         FAPI_TRY( mss::mrw_pwr_intercept (l_intercept.data()), "Error in p9_mss_eff_config_thermal" );
         FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_thermal_power_limit.data()), "Error in p9_mss_eff_config_thermal" );
@@ -106,6 +100,12 @@ extern "C"
                 FAPI_INF("Skipping eff_config thermal because no dimms %s", mss::c_str(l_mcs));
                 continue;
             }
+
+            uint16_t l_vddr_slope     [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+            uint16_t l_vddr_int       [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+            uint16_t l_total_slope    [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+            uint16_t l_total_int      [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+            uint32_t l_thermal_power  [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
 
             FAPI_TRY( mss::power_thermal::get_power_attrs(l_mcs,
                       l_slope,
@@ -155,13 +155,11 @@ extern "C"
                 continue;
             }
 
-
-            //Zero out the arrays
-            memset(l_vddr_slope, 0, sizeof(l_vddr_slope));
-            memset(l_vddr_int, 0, sizeof(l_vddr_int));
-            memset(l_total_slope, 0, sizeof(l_total_slope));
-            memset(l_total_int, 0, sizeof(l_total_int));
-            memset(l_thermal_power, 0, sizeof(l_thermal_power));
+            uint16_t l_vddr_slope     [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+            uint16_t l_vddr_int       [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+            uint16_t l_total_slope    [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+            uint16_t l_total_int      [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+            uint32_t l_thermal_power  [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
 
             FAPI_TRY( mss::power_thermal::get_power_attrs(l_mcs,
                       l_slope,
