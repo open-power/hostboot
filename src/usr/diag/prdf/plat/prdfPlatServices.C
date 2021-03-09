@@ -600,8 +600,7 @@ bool isRowRepairEnabled<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     // Row repair is supported for OCMBs
-    // TODO - change back to true once the below hwp is enabled
-    return false;
+    return true;
 
     #undef PRDF_FUNC
 }
@@ -616,22 +615,19 @@ uint32_t deployRowRepair<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
-    //errlHndl_t errl = nullptr;
+    errlHndl_t errl = nullptr;
 
-    PRDF_TRAC( PRDF_FUNC "exp_deploy_row_repairs not yet enabled" );
-
-    /* TODO
-
+    PRDF_TRAC( PRDF_FUNC "Calling exp_deploy_dynamic_row_repairs(0x%08x)",
+               i_chip->getHuid() );
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb( i_chip->getTrgt() );
-    FAPI_INVOKE_HWP( errl, exp_deploy_row_repairs, fapiOcmb );
+    FAPI_INVOKE_HWP( errl, exp_deploy_dynamic_row_repairs, fapiOcmb );
     if ( nullptr != errl )
     {
-        PRDF_ERR( PRDF_FUNC "exp_deploy_row_repairs(0x%08x) failed",
+        PRDF_ERR( PRDF_FUNC "exp_deploy_dynamic_row_repairs(0x%08x) failed",
                   i_chip->getHuid() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-    */
 
     return o_rc;
 
