@@ -113,7 +113,9 @@ fapi2::ReturnCode p10_update_ec_state(
              SELECT_EX_MC_GROUPS),
              "Error from p10_perv_sbe_cmn_setup_multicast_groups");
 
+
     FAPI_TRY(verify_ec_hw_state(i_target));
+
 
 fapi_try_exit:
     FAPI_INF("< p10_update_ec_state");
