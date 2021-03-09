@@ -850,7 +850,7 @@ group gSRQFIR
     /** SRQFIR[25]
      *  Firmware initiated channel fail
      */
-    (rSRQFIR, bit(25)) ? threshold_and_mask_self_th1;
+    (rSRQFIR, bit(25)) ? threshold_and_mask_mnfgInfo_th1;
 
     /** SRQFIR[26]
      *  NCF logic error

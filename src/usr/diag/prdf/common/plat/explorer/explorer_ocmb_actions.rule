@@ -255,6 +255,12 @@ actionclass omiRunningInDegradedMode
     funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
 };
 
+actionclass threshold_and_mask_mnfgInfo_th1
+{
+    threshold1;
+    funccall("ClearServiceCallFlag_mnfgInfo"); # must be called after threshold
+};
+
 ################################################################################
 #                           Callouts with flags                                #
 ################################################################################
