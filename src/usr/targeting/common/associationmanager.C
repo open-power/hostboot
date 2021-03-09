@@ -206,6 +206,8 @@ errlHndl_t AssociationManager::reconnectSyAndNodeTargets()
          * @moduleid     TARG_MOD_RECONNECT_SYS_AND_NODE_TARGETS
          * @reasoncode   TARG_RC_TARGET_NOT_FOUND
          * @devdesc      Error: Failed to find master system target
+         * @custdesc     An issue occurred during IPL of the system:
+         *               Internal Firmware Error
          */
         UTIL::createTracingError(
             TARG_MOD_RECONNECT_SYS_AND_NODE_TARGETS,
@@ -315,6 +317,8 @@ errlHndl_t AssociationManager::_clearAssocsOfTypeFromSysOrNodeTarget(
          * @userdata3    Target's address
          * @devdesc      Error: Failed to translate common association address
          *     to platform address
+         * @custdesc     An issue occurred during IPL of the system:
+         *               Internal Firmware Error
          */
         UTIL::createTracingError(
             TARG_MOD_CLR_ASSOCS_FROM_SYS_OR_NODE_TARGET,
@@ -458,6 +462,8 @@ errlHndl_t AssociationManager::_addAssocToSysOrNodeTarget(
          * @userdata3    Target's address
          * @devdesc      Error: Failed to translate common association address
          *     to platform address
+         * @custdesc     An issue occurred during IPL of the system:
+         *               Internal Firmware Error
          */
         UTIL::createTracingError(
             TARG_MOD_ADD_ASSOC_TO_SYS_OR_NODE_TARGET,
@@ -493,6 +499,8 @@ errlHndl_t AssociationManager::_addAssocToSysOrNodeTarget(
          * @userdata3    Association type
          * @userdata4    HUID of target to modify
          * @devdesc      Error: No free association entry to set
+         * @custdesc     An issue occurred during IPL of the system:
+         *               Internal Firmware Error
          */
         UTIL::createTracingError(
             TARG_MOD_ADD_ASSOC_TO_SYS_OR_NODE_TARGET,

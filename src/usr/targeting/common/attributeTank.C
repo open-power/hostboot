@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -586,7 +586,7 @@ errlHndl_t AttributeTank::writePermAttributes()
                      * @userdata2    Attribute specified
                      * @devdesc      Failure applying given attribute override
                      *               on given target
-                     */
+                     * @custdesc     Error occurred during system boot                               */
                     UTIL::createTracingError(
                        TARG_WRITE_PERM_ATTR,
                        TARG_RC_WRITE_PERM_ATTR_FAIL,
@@ -611,6 +611,7 @@ errlHndl_t AttributeTank::writePermAttributes()
                      * @userdata2    Attribute specified
                      * @devdesc      Given target does not have given attribute
                      *               to apply override
+                     * @custdesc     Error occurred during system boot
                      */
                     UTIL::createTracingError(
                        TARG_WRITE_PERM_ATTR,

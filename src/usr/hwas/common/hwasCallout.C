@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -87,6 +87,7 @@ bool retrieveTarget(uint8_t * & io_uData,
              * @reasoncode   HWAS::RC_INVALID_TARGET
              * @devdesc      Invalid target encountered in
              *               processing of HW callout
+             * @custdesc     Error occurred during system boot
              * @userdata1    callout errlog PLID
              */
             errlHndl_t errl = hwasError(

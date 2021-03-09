@@ -1343,7 +1343,7 @@ errlHndl_t checkPartialGoodForDescendants(
                  *                  states kept by the PG checking
                  *                  algorithm. Therefore, it did not have
                  *                  PG checks run against it.
-                 * @custdesc        An issue occured during IPL of the
+                 * @custdesc        An issue occurred during IPL of the
                  *                  system: Internal Firmware Error
                  * @userdata1       huid of the target
                  */
@@ -2225,6 +2225,8 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
          * @moduleid          MOD_CHECK_MIN_HW
          * @reasoncode        RC_SYSAVAIL_INSUFFICIENT_HW
          * @devdesc           Insufficient hardware to continue.
+         * @custdesc          An issue occurred during IPL of the system:
+         *                    Internal Firmware Error
          */
         l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
                                 MOD_CHECK_MIN_HW,

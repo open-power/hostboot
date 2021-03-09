@@ -156,6 +156,8 @@ errlHndl_t DeconfigGard::deconfigureTarget(
              * @reasoncode        HWAS::RC_TARGET_NOT_DECONFIGURABLE
              * @devdesc           Attempt to deconfigure a target that is not
              *                    deconfigurable or not present.
+             * @custdesc          An issue occurred during IPL of the system:
+             *                    Internal Firmware Error
              * @userdata1[00:31]  HUID of input target
              * @userdata1[32:63]  GARD errlog EID
              * @userdata2[00:31]  ATTR_DECONFIG_GARDABLE

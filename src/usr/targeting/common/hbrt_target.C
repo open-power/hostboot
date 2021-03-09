@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,7 @@ errlHndl_t getRtTarget(
              * @userdata2   target's targeting type
              * @devdesc     Targeting target's type not supported by runtime
              *              code
+             * @custdesc    Error occurred during system boot
              */
             UTIL::createTracingError(TARGETING::TARG_RT_GET_RT_TARGET,
                                TARGETING::TARG_RT_TARGET_TYPE_NOT_SUPPORTED,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1002,6 +1002,7 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
          * @userData1  HUID of Target Passed
          * @devdesc    The caller passed an invalid node target to find the
          *             master proc handle.
+         * @custdesc   Error occurred during system boot
          */
         UTIL::createTracingError(
             TARG_MOD_QUERY_MASTER_PROC_CHIP,
@@ -1027,6 +1028,7 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
          * @userData1  HUID of Target Passed
          * @devdesc    The caller passed an invalid node target to find the
          *             master proc handle
+         * @custdesc   Error occurred during system boot
          */
         UTIL::createTracingError(
             TARG_MOD_QUERY_MASTER_PROC_CHIP,
@@ -1461,6 +1463,7 @@ errlHndl_t TargetService::setMasterNode(const Target* i_pTarget)
          * @reasoncode TARG_RC_INVALID_NODE
          * @userData1  HUID of Target Passed
          * @devdesc    The caller passed an invalid node target.
+         * @custdesc   Error occurred during system boot
          */
         UTIL::createTracingError(
                 TARG_MOD_SET_MASTER_NODE,
