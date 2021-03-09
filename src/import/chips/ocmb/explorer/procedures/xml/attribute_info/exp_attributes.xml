@@ -1437,6 +1437,7 @@
       <valueType>uint8</valueType>
       <enum>ENABLE = 0, DISABLE = 1</enum>
       <writeable/>
+      <overrideOnly/>
       <mssAccessorName>exp_i2c_fw_log_dump_disable</mssAccessorName>
     </attribute>
     
