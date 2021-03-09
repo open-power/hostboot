@@ -1537,31 +1537,36 @@ fapi_try_exit:
 /// @tparam T TargetType of the DIMM
 /// @param[in] i_target a DIMM target
 /// @param[in] i_rtt_wr an RTT_WR setting
-/// @param[out] o_rtt_nom equivalent RTT_NOM setting
+/// @param[in,out] io_rtt_nom equivalent RTT_NOM setting
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode rtt_wr_to_rtt_nom_helper(const fapi2::Target<T>& i_target,
         const uint8_t i_rtt_wr,
-        uint8_t& o_rtt_nom)
+        uint8_t& io_rtt_nom)
 {
     switch(i_rtt_wr)
     {
+        // Do nothing for this case
+        // RTT_WR being off means that we'd use some other form of termination
+        // As such, do not do a swap here
         case RTT_WR_DYNAMIC_ODT_OFF:
+            break;
+
         case RTT_WR_HIZ:
-            o_rtt_nom = RTT_NOM_DISABLE;
+            io_rtt_nom = RTT_NOM_DISABLE;
             break;
 
         case RTT_WR_RZQ_OVER_3:
-            o_rtt_nom = RTT_NOM_RZQ_OVER_3;
+            io_rtt_nom = RTT_NOM_RZQ_OVER_3;
             break;
 
         case RTT_WR_RZQ_OVER_2:
-            o_rtt_nom = RTT_NOM_RZQ_OVER_2;
+            io_rtt_nom = RTT_NOM_RZQ_OVER_2;
             break;
 
         case RTT_WR_RZQ_OVER_1:
-            o_rtt_nom = RTT_NOM_RZQ_OVER_1;
+            io_rtt_nom = RTT_NOM_RZQ_OVER_1;
             break;
 
         default:
@@ -1643,6 +1648,7 @@ fapi2::ReturnCode rtt_nom_override(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
 
     // Map RTT_WR settings to RTT_NOM
     FAPI_TRY( rtt_wr_attr_helper<MC>(i_target, l_rtt_wr_value));
+    FAPI_TRY( rtt_nom_attr_helper<MC>(i_target, l_rtt_nom_value));
     FAPI_TRY( rtt_wr_to_rtt_nom_helper(i_target, l_rtt_wr_value[l_rank_idx], l_rtt_nom_value[l_rank_idx]) );
 
     // Write the override values to RTT_NOM
