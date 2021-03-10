@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -262,7 +262,7 @@ group gPAU_FIR_0
     (rPAU_FIR_0, bit(8)) ? defaultMaskedError;
 
     /** PAU_FIR_0[9]
-     *  NTL PRI errors (errors returned by NDL Wrapper on 
+     *  NTL PRI errors (errors returned by NDL Wrapper on
      */
     (rPAU_FIR_0, bit(9)) ? defaultMaskedError;
 
@@ -312,7 +312,7 @@ group gPAU_FIR_0
     (rPAU_FIR_0, bit(18)) ? self_th_1;
 
     /** PAU_FIR_0[19]
-     *  CQ CTL/SM NVF  NVLink fatal (ex: rcv data resp to 
+     *  CQ CTL/SM NVF  NVLink fatal (ex: rcv data resp to
      */
     (rPAU_FIR_0, bit(19)) ? self_th_1;
 
@@ -362,7 +362,7 @@ group gPAU_FIR_0
     (rPAU_FIR_0, bit(28)) ? defaultMaskedError;
 
     /** PAU_FIR_0[29]
-     *  CQ DAT ECC UE on data/BE arrays. Relevant word is 
+     *  CQ DAT ECC UE on data/BE arrays. Relevant word is
      */
     (rPAU_FIR_0, bit(29)) ? self_th_1;
 

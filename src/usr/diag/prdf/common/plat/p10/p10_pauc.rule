@@ -688,7 +688,7 @@ group gPAU_PTL_FIR
     (rPAU_PTL_FIR, bit(15)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[16]
-     *  Odd PTL, outbound switch cmd/presp/cresp internal 
+     *  Odd PTL, outbound switch cmd/presp/cresp internal
      */
     (rPAU_PTL_FIR, bit(16)) ? parent_proc_th_1;
 

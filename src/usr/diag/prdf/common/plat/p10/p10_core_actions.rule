@@ -95,11 +95,6 @@ actionclass l2_dir_read_ce
     try(funccall("ignoreDD10"), l2_dir_read_ce_dd20);
 };
 
-actionclass l2_power_bus_ce
-{
-    TBDDefaultCallout;
-};
-
 actionclass analyzeEQ_CORE_FIR
 {
     funccall("CheckCoreCheckstop");

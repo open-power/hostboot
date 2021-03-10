@@ -2844,7 +2844,7 @@ group gOCC_FIR
     (rOCC_FIR, bit(1)) ? defaultMaskedError;
 
     /** OCC_FIR[2]
-     *  OCC_QME_ERROR_NOTIFY.  Set by XGPE code to indicat
+     *  OCC_QME_ERROR_NOTIFY. Set by XGPE code to indicate
      */
     (rOCC_FIR, bit(2)) ? defaultMaskedError;
 
@@ -2999,7 +2999,7 @@ group gOCC_FIR
     (rOCC_FIR, bit(32)) ? threshold_and_mask_self;
 
     /** OCC_FIR[33]
-     *  OCB PIB Address Parity Error - (PIB read or write 
+     *  OCB PIB Address Parity Error - (PIB read or write
      */
     (rOCC_FIR, bit(33)) ? threshold_and_mask_self;
 
@@ -3997,7 +3997,7 @@ group gINT_CQ_FIR
     (rINT_CQ_FIR, bit(35)) ? self_th_1;
 
     /** INT_CQ_FIR[36]
-     *  A Master Read machine received cResp of abort_trm 
+     *  A Master Read machine received cResp of abort_trm
      */
     (rINT_CQ_FIR, bit(36)) ? self_th_32perDay;
 
@@ -4792,7 +4792,7 @@ group gVAS_FIR
     (rVAS_FIR, bit(28)) ? self_th_1_SUE;
 
     /** VAS_FIR[29]
-     *  PowerBus link error detected on read operation in 
+     *  PowerBus link error detected on read operation in
      */
     (rVAS_FIR, bit(29)) ? defaultMaskedError;
 
@@ -4862,7 +4862,7 @@ group gVAS_FIR
     (rVAS_FIR, bit(42)) ? self_th_1;
 
     /** VAS_FIR[43]
-     *  Unused - Was Write monitor operation hit a window 
+     *  Unused - Was Write monitor operation hit a window
      */
     (rVAS_FIR, bit(43)) ? defaultMaskedError;
 
@@ -5691,7 +5691,7 @@ rule rPB_STATION_FIR_EQ_0
 
 group gPB_STATION_FIR_EQ_0
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EQ_0[0]
      *  protocol error
@@ -5721,7 +5721,7 @@ group gPB_STATION_FIR_EQ_0
     /** PB_STATION_FIR_EQ_0[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EQ_0, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EQ_0, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_0[6]
      *  cresp error
@@ -5819,7 +5819,7 @@ rule rPB_STATION_FIR_EQ_1
 
 group gPB_STATION_FIR_EQ_1
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EQ_1[0]
      *  protocol error
@@ -5849,7 +5849,7 @@ group gPB_STATION_FIR_EQ_1
     /** PB_STATION_FIR_EQ_1[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EQ_1, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EQ_1, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_1[6]
      *  cresp error
@@ -5947,7 +5947,7 @@ rule rPB_STATION_FIR_EQ_2
 
 group gPB_STATION_FIR_EQ_2
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EQ_2[0]
      *  protocol error
@@ -5977,7 +5977,7 @@ group gPB_STATION_FIR_EQ_2
     /** PB_STATION_FIR_EQ_2[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EQ_2, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EQ_2, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_2[6]
      *  cresp error
@@ -6075,7 +6075,7 @@ rule rPB_STATION_FIR_EQ_3
 
 group gPB_STATION_FIR_EQ_3
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EQ_3[0]
      *  protocol error
@@ -6105,7 +6105,7 @@ group gPB_STATION_FIR_EQ_3
     /** PB_STATION_FIR_EQ_3[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EQ_3, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EQ_3, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_3[6]
      *  cresp error
@@ -6203,7 +6203,7 @@ rule rPB_STATION_FIR_EQ_4
 
 group gPB_STATION_FIR_EQ_4
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EQ_4[0]
      *  protocol error
@@ -6233,7 +6233,7 @@ group gPB_STATION_FIR_EQ_4
     /** PB_STATION_FIR_EQ_4[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EQ_4, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EQ_4, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_4[6]
      *  cresp error
@@ -6331,7 +6331,7 @@ rule rPB_STATION_FIR_EQ_5
 
 group gPB_STATION_FIR_EQ_5
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EQ_5[0]
      *  protocol error
@@ -6361,7 +6361,7 @@ group gPB_STATION_FIR_EQ_5
     /** PB_STATION_FIR_EQ_5[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EQ_5, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EQ_5, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_5[6]
      *  cresp error
@@ -6459,7 +6459,7 @@ rule rPB_STATION_FIR_EQ_6
 
 group gPB_STATION_FIR_EQ_6
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EQ_6[0]
      *  protocol error
@@ -6489,7 +6489,7 @@ group gPB_STATION_FIR_EQ_6
     /** PB_STATION_FIR_EQ_6[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EQ_6, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EQ_6, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_6[6]
      *  cresp error
@@ -6587,7 +6587,7 @@ rule rPB_STATION_FIR_EQ_7
 
 group gPB_STATION_FIR_EQ_7
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EQ_7[0]
      *  protocol error
@@ -6617,7 +6617,7 @@ group gPB_STATION_FIR_EQ_7
     /** PB_STATION_FIR_EQ_7[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EQ_7, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EQ_7, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EQ_7[6]
      *  cresp error
@@ -6715,7 +6715,7 @@ rule rPB_STATION_FIR_EN1
 
 group gPB_STATION_FIR_EN1
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EN1[0]
      *  protocol error
@@ -6745,7 +6745,7 @@ group gPB_STATION_FIR_EN1
     /** PB_STATION_FIR_EN1[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EN1, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EN1, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN1[6]
      *  cresp error
@@ -6843,7 +6843,7 @@ rule rPB_STATION_FIR_EN2
 
 group gPB_STATION_FIR_EN2
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EN2[0]
      *  protocol error
@@ -6873,7 +6873,7 @@ group gPB_STATION_FIR_EN2
     /** PB_STATION_FIR_EN2[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EN2, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EN2, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN2[6]
      *  cresp error
@@ -6971,7 +6971,7 @@ rule rPB_STATION_FIR_EN3
 
 group gPB_STATION_FIR_EN3
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EN3[0]
      *  protocol error
@@ -7001,7 +7001,7 @@ group gPB_STATION_FIR_EN3
     /** PB_STATION_FIR_EN3[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EN3, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EN3, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN3[6]
      *  cresp error
@@ -7099,7 +7099,7 @@ rule rPB_STATION_FIR_EN4
 
 group gPB_STATION_FIR_EN4
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_EN4[0]
      *  protocol error
@@ -7129,7 +7129,7 @@ group gPB_STATION_FIR_EN4
     /** PB_STATION_FIR_EN4[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_EN4, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_EN4, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_EN4[6]
      *  cresp error
@@ -7227,7 +7227,7 @@ rule rPB_STATION_FIR_ES1
 
 group gPB_STATION_FIR_ES1
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_ES1[0]
      *  protocol error
@@ -7257,7 +7257,7 @@ group gPB_STATION_FIR_ES1
     /** PB_STATION_FIR_ES1[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_ES1, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_ES1, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES1[6]
      *  cresp error
@@ -7355,7 +7355,7 @@ rule rPB_STATION_FIR_ES2
 
 group gPB_STATION_FIR_ES2
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_ES2[0]
      *  protocol error
@@ -7385,7 +7385,7 @@ group gPB_STATION_FIR_ES2
     /** PB_STATION_FIR_ES2[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_ES2, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_ES2, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES2[6]
      *  cresp error
@@ -7483,7 +7483,7 @@ rule rPB_STATION_FIR_ES3
 
 group gPB_STATION_FIR_ES3
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_ES3[0]
      *  protocol error
@@ -7513,7 +7513,7 @@ group gPB_STATION_FIR_ES3
     /** PB_STATION_FIR_ES3[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_ES3, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_ES3, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES3[6]
      *  cresp error
@@ -7611,7 +7611,7 @@ rule rPB_STATION_FIR_ES4
 
 group gPB_STATION_FIR_ES4
     filter singlebit,
-           cs_root_cause(5)
+           cs_root_cause
 {
     /** PB_STATION_FIR_ES4[0]
      *  protocol error
@@ -7641,7 +7641,7 @@ group gPB_STATION_FIR_ES4
     /** PB_STATION_FIR_ES4[5]
      *  cresp addr error
      */
-    (rPB_STATION_FIR_ES4, bit(5)) ? self_M_level2_L_th_1;
+    (rPB_STATION_FIR_ES4, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_ES4[6]
      *  cresp error
@@ -8276,7 +8276,7 @@ group gLPC_FIR
            cs_root_cause
 {
     /** LPC_FIR[0]
-     *  OPB Master LS received transfer size unequal to 1 
+     *  OPB Master LS received transfer size unequal to 1
      */
     (rLPC_FIR, bit(0)) ? self_th_1;
 

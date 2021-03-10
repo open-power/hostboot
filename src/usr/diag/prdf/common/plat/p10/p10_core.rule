@@ -670,12 +670,12 @@ group gEQ_L2_FIR
     /** EQ_L2_FIR[19]
      *  RC incoming Power Bus data had a CE error.
      */
-    (rEQ_L2_FIR, bit(19)) ? l2_power_bus_ce;
+    (rEQ_L2_FIR, bit(19)) ? parent_proc_th_32perDay;
 
     /** EQ_L2_FIR[20]
      *  RC incoming Power Bus data had a UE error.
      */
-    (rEQ_L2_FIR, bit(20)) ? self_th_1_UERE;
+    (rEQ_L2_FIR, bit(20)) ? parent_proc_th_1_UERE;
 
     /** EQ_L2_FIR[21]
      *  RC incoming Power Bus data had a SUE error.
