@@ -36,10 +36,13 @@
 #include <sys/mmio.h>
 #include <console/consoleif.H>
 #include <initservice/initserviceif.H>
+
 #ifdef CONFIG_PLDM
 #include <pldm/base/hb_bios_attrs.H>
 #include <pldm/pldm_errl.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #endif
+
 #if (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
 #include <pnor/pnorif.H>
 #endif
@@ -55,6 +58,7 @@ errlHndl_t getAndSetPLDMBiosAttrs()
     errlHndl_t errl = nullptr;
 
     do {
+
     std::vector<uint8_t> bios_string_table;
     std::vector<uint8_t> bios_attr_table;
     const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
@@ -105,6 +109,29 @@ errlHndl_t getAndSetPLDMBiosAttrs()
                "getAndSetPLDMBiosAttrs: Set ATTR_LMB_SIZE = 0x%X",
                lmb_size );
     sys->setAttr<ATTR_LMB_SIZE>(lmb_size);
+
+
+    // ATTR_MFG_FLAGS
+    ATTR_MFG_FLAGS_typeStdArr mfg_flags = {0};
+    const ATTR_MFG_FLAGS_typeStdArr DEFAULT_MFG_FLAGS = {0};
+
+    errl = PLDM::getMfgFlags(bios_string_table,
+                             bios_attr_table,
+                             mfg_flags);
+    if(errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "getAndSetPLDMBiosAttrs: An error occurred getting Mfg Flags from the BMC, using default 0" );
+
+        // Set flags to default, commit the error and continue
+        mfg_flags = DEFAULT_MFG_FLAGS;
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "getAndSetPLDMBiosAttrs: Set ATTR_MFG_FLAGS = 0x%X 0x%X 0x%X 0x%X",
+               mfg_flags[0], mfg_flags[1], mfg_flags[2], mfg_flags[3] );
+    TARGETING::setAllMfgFlags(mfg_flags);
 
 
     // PAYLOAD_KIND

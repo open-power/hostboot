@@ -31,6 +31,7 @@
 
 #include <util/comptime_util.H>
 #include <algorithm>
+#include <stdlib.h>
 
 // pldm /include/ headers
 #include <pldm/requests/pldm_bios_attr_requests.H>
@@ -55,6 +56,7 @@ const char PLDM_BIOS_HB_HYP_SWITCH_STRING[] = "hb_hyp_switch";
 const char PLDM_BIOS_HB_DEBUG_CONSOLE_STRING[] = "hb_debug_console";
 const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[] = "hb_number_huge_pages";
 const char PLDM_BIOS_HB_LMB_SIZE_STRING[] = "hb_memory_region_size";
+const char PLDM_BIOS_HB_MFG_FLAGS_STRING[] = "hb_mfg_flags";
 
 // Possible Values
 constexpr char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
@@ -69,6 +71,10 @@ constexpr const char* POSSIBLE_HYP_VALUE_STRINGS[] =
 constexpr const char* POSSIBLE_HB_DEBUG_CONSOLE_STRINGS[] =
                       { PLDM_BIOS_ENABLED_STRING,
                         PLDM_BIOS_DISABLED_STRING };
+
+constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
+constexpr size_t MFG_FLAGS_CONVERT_STRING_SIZE = 8;
+constexpr size_t STRTOUL_BASE_VALUE_HEX = 16;
 
 
 /** @brief Given a size_t s, and a string ptr c,
@@ -846,6 +852,211 @@ errlHndl_t getLmbSize(
     o_lmbSize = l_attr_val;
 
     } while(0);
+
+    return errl;
+}
+
+
+/** @brief Given the string representing a PLDM BIOS attribute of type string,
+ *         get string entry returned as the value of this attribute by the BMC
+ *
+ * @param[in,out] io_string_table
+ *       See file brief in hb_bios_attrs.H.
+ * @param[in,out] io_attr_table
+ *       See file brief in hb_bios_attrs.H.
+ * @param[in] i_attr_string
+ *       String representing the attribute we are looking up on the BMC.
+ * @param[out] o_string_type
+ *       Type of string returned: ASCII / Hex / UTF
+ * @param[out] o_attr_val_string
+ *       Vector containing string value of requested attribute
+ *
+ * @return Error if any, otherwise nullptr.
+ */
+errlHndl_t systemStringAttrLookup(std::vector<uint8_t>& io_string_table,
+                                  std::vector<uint8_t>& io_attr_table,
+                                  const char *i_attr_string,
+                                  uint8_t& o_string_type,
+                                  std::vector<char>& o_attr_val_string)
+{
+    errlHndl_t errl = nullptr;
+
+    do{
+
+    // Get the attribute info from the attr table
+    const pldm_bios_attribute_type expected_type = PLDM_BIOS_STRING;
+    const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
+    std::vector<uint8_t> attr_value;
+
+    errl = getCurrentAttrValue(i_attr_string,
+                                expected_type,
+                                io_string_table,
+                                io_attr_table,
+                                attr_entry_ptr,
+                                attr_value);
+    if(errl)
+    {
+        PLDM_ERR(
+            "An error occurred while requesting the value of %s from the BMC",
+            i_attr_string)
+        break;
+    }
+
+    // Get the type of string data in the bios attribute
+    // Unknown=0x00, ASCII=0x01, Hex=0x02, UTF-8=0x03,
+    // UTF-16LE=0x04, UTF-16BE=0x05, Vendor Specific=0xFF
+    o_string_type =
+        pldm_bios_table_attr_entry_string_decode_string_type(
+            attr_entry_ptr);
+
+    // Size is the first 2 bytes of the data
+    uint16_t stringLength = (attr_value[0] << 8) | attr_value[1];
+    bool useDefault = false;
+
+    // If string is not set get the default
+    if (stringLength == 0)
+    {
+        // Get the default string length of the bios attribute
+        stringLength =
+            pldm_bios_table_attr_entry_string_decode_def_string_length(
+                attr_entry_ptr);
+        useDefault = true;
+    }
+
+    // If the input vector is not large enough then resize it
+    // Input vector includes null terminator so add 1
+    if (o_attr_val_string.size() < size_t(stringLength + 1))
+    {
+        PLDM_INF("systemStringAttrLookup: resizing input vector from %d to %d",
+                 o_attr_val_string.size(), stringLength);
+        o_attr_val_string.resize(stringLength + 1);
+    }
+
+    if (useDefault)
+    {
+        // Get the default string of the bios attribute
+        pldm_bios_table_attr_entry_string_decode_def_string(
+            attr_entry_ptr,
+            o_attr_val_string.data(),
+            o_attr_val_string.size());
+    }
+    else
+    {
+        // Copy the string, first two bytes are the size
+        // so string data starts at byte 2
+        strncpy(o_attr_val_string.data(),
+                reinterpret_cast<const char*>(attr_value.data()+2),
+                stringLength);
+    }
+
+    }while(0);
+
+    return errl;
+}
+
+errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
+                       std::vector<uint8_t>& io_attr_table,
+                       TARGETING::ATTR_MFG_FLAGS_typeStdArr &o_mfgFlags)
+{
+    errlHndl_t errl = nullptr;
+
+    do{
+
+    size_t array_size = o_mfgFlags.size();
+    size_t bios_string_size = 0;
+    uint8_t bios_string_type = 0;
+    std::vector<char> mfg_flags_string;
+
+    // Set the size of the vector to store the BMC mfg flags
+    // 8 Hex string characters represents 4 bytes of data
+    // Times 4 entries in the array
+    // Equals 32 characters / 16 bytes / 128 bits of mfg flag attribute data
+    // Add a byte for the null terminator
+    bios_string_size = MFG_FLAGS_CONVERT_STRING_SIZE * array_size + 1;
+    mfg_flags_string.resize(bios_string_size);
+
+    // Get the hex string value from the BMC
+    errl = systemStringAttrLookup(io_string_table,
+                                    io_attr_table,
+                                    PLDM_BIOS_HB_MFG_FLAGS_STRING,
+                                    bios_string_type,
+                                    mfg_flags_string);
+    if(errl)
+    {
+        PLDM_ERR("Failed to lookup value for %s",
+                    PLDM_BIOS_HB_MFG_FLAGS_STRING);
+        break;
+    }
+
+    // Check for string type == 0x02 Hex
+    if (bios_string_type != PLDM_BIOS_STRING_TYPE_HEX)
+    {
+        PLDM_ERR("Unexpected string type 0x%X for %s, mfg flags string %s",
+                 bios_string_type, PLDM_BIOS_HB_MFG_FLAGS_STRING,
+                 reinterpret_cast<const char*>(mfg_flags_string.data()));
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_PREDICTIVE
+          * @moduleid   MOD_GET_MFG_FLAGS
+          * @reasoncode RC_UNSUPPORTED_STRING_TYPE
+          * @userdata1  Expected String Type
+          * @userdata2  Returned String Type
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                             MOD_GET_MFG_FLAGS,
+                             RC_UNSUPPORTED_STRING_TYPE,
+                             PLDM_BIOS_STRING_TYPE_HEX,
+                             bios_string_type,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_MFG_FLAGS_STRING).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+    // Check the string size against original, it may have been resized
+    if (mfg_flags_string.size() != bios_string_size)
+    {
+        PLDM_ERR("BMC attr size %d does not match HB attr size %d, mfg flags string %s",
+                 mfg_flags_string.size(), bios_string_size,
+                 reinterpret_cast<const char*>(mfg_flags_string.data()));
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_PREDICTIVE
+          * @moduleid   MOD_GET_MFG_FLAGS
+          * @reasoncode RC_UNEXPECTED_STRING_SIZE
+          * @userdata1  Expected string size
+          * @userdata2  Returned string size
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                             MOD_GET_MFG_FLAGS,
+                             RC_UNEXPECTED_STRING_SIZE,
+                             bios_string_size,
+                             mfg_flags_string.size(),
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_MFG_FLAGS_STRING).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+    // Convert the hex string to regular hex data
+    // Full string is 32 characters, representing 16 bytes
+    // strtoul can convert up to 8 bytes at a time (uint64_t)
+    // Convert 4 bytes at a time, add 1 for null terminator
+    char tmp_str[MFG_FLAGS_CONVERT_STRING_SIZE+1] = {};
+
+    for(uint32_t idx=0; idx<array_size; idx++)
+    {
+        strncpy(tmp_str,
+                &mfg_flags_string[idx * MFG_FLAGS_CONVERT_STRING_SIZE],
+                MFG_FLAGS_CONVERT_STRING_SIZE);
+        o_mfgFlags[idx] = strtoul(tmp_str, nullptr, STRTOUL_BASE_VALUE_HEX);
+    }
+
+    }while(0);
 
     return errl;
 }

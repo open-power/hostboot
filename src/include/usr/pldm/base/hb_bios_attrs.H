@@ -99,6 +99,22 @@ namespace PLDM
                           std::vector<uint8_t>& io_attr_table,
                           TARGETING::ATTR_LMB_SIZE_type &o_lmbSize);
 
+    /** @brief Retrieve the current value of the hb_mfg_flags
+    *          PLDM bios attribute from the BMC and return the value
+    *          converted to a ATTR_MFG_FLAGS array attribute type.
+    *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
+    * @param[out]    o_mfgFlags       If no error occurs will contain the value
+    *                                 we found for hb_mfg_flags translated to
+    *                                 terms of ATTR_MFG_FLAGS_typeStdArr.
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
+                           std::vector<uint8_t>& io_attr_table,
+                           TARGETING::ATTR_MFG_FLAGS_typeStdArr &o_mfgFlags);
+
     /** @brief Retrieve the current value of the hb_debug_console
     *          PLDM bios attribute, convert it to a boolean value.
     *

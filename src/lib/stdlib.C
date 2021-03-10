@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,6 +161,9 @@ void* calloc(size_t num, size_t size)
     return mem;
 }
 
+/**
+ * Note: endptr is not currently supported
+ */
 uint64_t strtoul(const char *nptr, char **endptr, int base)
 {
     uint64_t l_data = 0;

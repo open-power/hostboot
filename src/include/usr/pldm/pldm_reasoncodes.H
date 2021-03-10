@@ -95,6 +95,9 @@ namespace PLDM
 
         // writeLidFrileFromOffset
         MOD_WRITE_LID_FILE              = 0x21,
+
+        // getMfgFlags
+        MOD_GET_MFG_FLAGS = 0x22,
     };
 
     enum PLDMReasonCode
@@ -136,6 +139,8 @@ namespace PLDM
         RC_OUT_OF_RANGE             = PLDM_COMP_ID | 0x23,
         RC_NO_MATCH_IN_TABLE        = PLDM_COMP_ID | 0x24,
         RC_NOT_READY                = PLDM_COMP_ID | 0x25,
+        RC_UNSUPPORTED_STRING_TYPE  = PLDM_COMP_ID | 0x26,
+        RC_UNEXPECTED_STRING_SIZE   = PLDM_COMP_ID | 0x27,
     };
 }
 #endif
