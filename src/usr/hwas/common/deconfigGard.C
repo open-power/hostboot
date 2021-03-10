@@ -631,8 +631,16 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 }
 
                 if (l_targetType == TYPE_SMPGROUP)
-                { // If this is an SMPGROUP target, deconfigure the IOHS parent if necessary
-                    _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
+                { // If this is an SMPGROUP target, deconfigure the IOHS parent
+                  // if it's in SMP mode and it has no other child SMPGROUPs
+                    const auto parent_config_mode
+                        = getImmediateParentByAffinity(&i_target)->getAttr<ATTR_IOHS_CONFIG_MODE>();
+
+                    if ((parent_config_mode == IOHS_CONFIG_MODE_SMPA)
+                        || (parent_config_mode == IOHS_CONFIG_MODE_SMPX))
+                    {
+                        _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
+                    }
                 }
 
                 break;
