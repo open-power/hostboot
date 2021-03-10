@@ -210,11 +210,13 @@ fapi2::ReturnCode init_topology_id_table(
     FAPI_DBG("start");
 
     uint8_t l_topo_idx;
+    uint8_t l_hb_topo_idx;
     fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_Type l_topo_tbl;
     fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type l_topo_id;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     FAPI_TRY(get_topology_idx(i_target, EFF_TOPOLOGY_ID, l_topo_idx));
+    FAPI_TRY(get_topology_idx(i_target, HB_BOOT_ID, l_hb_topo_idx));
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, i_target, l_topo_id));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, FAPI_SYSTEM, l_topo_tbl));
@@ -222,6 +224,13 @@ fapi2::ReturnCode init_topology_id_table(
     l_topo_tbl[l_topo_idx] = l_topo_id;
 
     FAPI_DBG("Set topology id table[%zu]=%02x", l_topo_idx, l_topo_id);
+
+    if (fapi2::is_platform<fapi2::PLAT_SBE>())
+    {
+        l_topo_tbl[l_hb_topo_idx] = l_topo_id;
+
+        FAPI_DBG("Set topology id table[%zu]=%02x", l_hb_topo_idx, l_topo_id);
+    }
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, FAPI_SYSTEM, l_topo_tbl));
 

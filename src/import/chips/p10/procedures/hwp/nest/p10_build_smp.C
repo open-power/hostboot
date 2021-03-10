@@ -759,6 +759,8 @@ fapi2::ReturnCode p10_build_smp_topo_tables(
             {
                 // build set of cores to update depending on build SMP call
                 std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>> l_cores_to_update;
+                fapi2::ATTR_PROC_SBE_MASTER_CHIP_Type l_sbe_master_chip;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, *(p_iter->second.target), l_sbe_master_chip));
 
                 for (const auto& c : (*(p_iter->second.target)).getChildren<fapi2::TARGET_TYPE_CORE>())
                 {
@@ -766,7 +768,7 @@ fapi2::ReturnCode p10_build_smp_topo_tables(
                     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, c, l_attr_chip_unit_pos));
 
                     if ((i_op == SMP_ACTIVATE_PHASE1) &&
-                        (p_iter->second.master_chip_group_next))
+                        (l_sbe_master_chip == fapi2::ENUM_ATTR_PROC_SBE_MASTER_CHIP_TRUE))
                     {
                         // limit update to set of active cores/backing caches on primary chip, which
                         // should all be accessible... active/backing attributes do not currently get pushed
