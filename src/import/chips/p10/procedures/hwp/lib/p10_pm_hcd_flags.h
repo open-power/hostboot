@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,14 +72,16 @@ enum PM_GPE_OCCFLG2_DEFS
     PGPE_DEBUG_TRAP_ENABLE                  = 4,
     PGPE_DEBUG_HALT_ENABLE                  = 5,
     PGPE_HCODE_ERROR_INJECT                 = 6,
-    PGPE_HCODE_FIT_ERROR_INJECT             = 7,
+    PGPE_HCODE_ERROR_INJECT_LEN             = 2,
     PGPE_OP_TRACE_DISABLE                   = 8,
     PGPE_OP_TRACE_MEM_MODE                  = 9,
-    PGPE_OP_TRACE_MEM_MODE_LEN          = 2,
+    PGPE_OP_TRACE_MEM_MODE_LEN              = 2,
+    PGPE_HW_ERROR_INJECT                    = 11,
     PGPE_ACTIVE                             = 16,
     PGPE_PSTATE_PROTOCOL_ACTIVE             = 17,
     PGPE_SAFE_MODE_ACTIVE                   = 18,
-    PGPE_SAFE_MODE_ERROR                    = 21,
+    PGPE_HCODE_FAULT_STATE                  = 19,
+    PGPE_SAFE_MODE_ERROR                    = 20,
     PGPE_CEFFOVR_CONTROL_LOOP               = 22,
     PGPE_WOF_VALUE_ATOMIC_FLAG              = 28,
     PGPE_EX_RATIOS_ATOMIC_FLAG              = 29,
@@ -92,15 +94,16 @@ enum PM_GPE_OCCFLG3_DEFS
 {
     XGPE_IODLR_ENABLE                       = 0,
     AUX_THREAD_ACTIVATE                     = 1,
+    XGPE_HW_ERROR_INJECT                    = 2,
     XGPE_PM_COMPLEX_SUSPEND                 = 3,
     PM_COMPLEX_SUSPEND                      = 3,  // Leaving a generic for use in p10_pm_suspend.
     XGPE_DEBUG_TRAP_ENABLE                  = 4,
     XGPE_DEBUG_HALT_ENABLE                  = 5,
     XGPE_HCODE_ERROR_INJECT                 = 6,
-    XGPE_HCODE_FIT_ERROR_INJECT             = 7,
+    XGPE_HCODE_ERROR_INJECT_LEN             = 2,
     XGPE_OP_TRACE_DISABLE                   = 8,
     XGPE_OP_TRACE_MEM_MODE                  = 9,
-    XGPE_OP_TRACE_MEM_MODE_LEN          = 2,
+    XGPE_OP_TRACE_MEM_MODE_LEN              = 2,
     XGPE_IGNORE_STOP_CONTROL                = 11,
     XGPE_IGNORE_STOP_ACTION                 = 12,
     XGPE_IGNORE_STOP_EXITS                  = 13,
@@ -111,6 +114,8 @@ enum PM_GPE_OCCFLG3_DEFS
     AUX_THREAD_ACTIVE                       = 18,
     XGPE_PM_COMPLEX_SUSPENDED               = 19,
     PM_COMPLEX_SUSPENDED                    = 19,  // Leaving a generic for use in p10_pm_suspend.
+    XGPE_ZERO_CORE_CHIP                     = 20,
+    XGPE_HCODE_FAULT_STATE                  = 21,
     CORE_THROT_INJECT_RESP                  = 27,
     CORE_THROT_INJECT_RESP_LEN              = 2,
     CORE_THROT_CONTIN_CHANGE_ENABLE         = 29,
