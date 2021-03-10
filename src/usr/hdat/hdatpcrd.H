@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,14 @@ const char HDAT_PCRD_STRUCT_NAME[7] = "SPPCRD";
 #define HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS 0x3C
 
 //Max number of I2c devices for any given proc
-#define HDAT_PCRD_MAX_I2C_DEV  128
+#ifndef CONFIG_FSP_BUILD
+#define HDAT_PCRD_MAX_I2C_DEV  std::size(TARGETING::ATTR_HDAT_I2C_ADDR_type{})
+#else
+//TODO RTC Story 269932 : Re-assess this value in non-bmc based systems
+#define HDAT_PCRD_MAX_I2C_DEV  192
+#endif
+
+
 #define HDAT_PCRD_MAX_SMP_LINK 12
 #define HDAT_PCRD_MAX_SPI_DEV  8
 #define HDAT_PCRD_MAX_EEPROM_PART 24
