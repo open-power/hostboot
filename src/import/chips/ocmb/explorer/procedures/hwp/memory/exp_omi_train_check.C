@@ -43,6 +43,7 @@
 #include <lib/omi/exp_omi_utils.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <p10_scom_omi.H>
 
@@ -80,11 +81,13 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     constexpr uint8_t NUM_LANES = 8;
     std::vector<uint8_t> l_cmd_data;
     std::vector<uint8_t> l_fw_status_data;
+    uint8_t l_is_apollo = 0;
 
     uint8_t l_sim = 0;
     uint8_t l_simics = 0;
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
     FAPI_TRY(mss::attr::get_is_simics(l_simics));
+    FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
 
     // Skip this in sim, check via I2C is not supported
     if (l_sim)
@@ -132,10 +135,15 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 
     // Check for errors in ERROR_HOLD until we get a proper FIR API setup
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_ERROR_HOLD, l_dl0_error_hold));
-    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::TRAINING_STATUS, l_host_training_status));
-    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::ERROR_HOLD, l_host_error_hold));
-    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::EDPL_MAX_COUNT, l_host_edpl_max_count));
-    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::STATUS, l_host_status));
+
+    if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+    {
+        FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::TRAINING_STATUS, l_host_training_status));
+        FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::ERROR_HOLD, l_host_error_hold));
+        FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::EDPL_MAX_COUNT, l_host_edpl_max_count));
+        FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::STATUS, l_host_status));
+    }
+
     FAPI_ASSERT(l_state_machine_state == STATE_MACHINE_SUCCESS,
                 fapi2::EXP_OMI_TRAIN_ERR()
                 .set_OCMB_TARGET(i_target)
