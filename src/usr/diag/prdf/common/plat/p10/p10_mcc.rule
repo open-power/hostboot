@@ -198,7 +198,7 @@ rule rMC_DSTL_FIR
 # why we will make sure to prioritize bits 16 and 17 here.
 group gMC_DSTL_FIR
     filter priority(16,17),
-           cs_root_cause(0,4,12,13,16,17,22,23,35,36)
+           cs_root_cause(0,1,4,5,12,13,16,17,22,23,35,36)
 {
     /** MC_DSTL_FIR[0]
      *  AFU initiated Checkstop on Subchannel A
