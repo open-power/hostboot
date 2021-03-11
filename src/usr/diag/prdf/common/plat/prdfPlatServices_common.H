@@ -181,6 +181,18 @@ int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_trgt,
                         const MemRank & i_rank, const MemSymbol & i_symbol );
 
 /**
+ * @brief  Invokes the undo steer mux hardware procedure.
+ * @param  i_trgt       Target OCMB
+ * @param  i_rank       Target rank.
+ * @param  i_spare      spare number (0 or 1)
+ * @note   The procedure will be able to derive the port from the given symbol.
+ * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+int32_t mssUndoSteerMux( TARGETING::TargetHandle_t i_trgt,
+                         const MemRank & i_rank, const size_t i_spare );
+
+/**
  * @brief   Get spare DRAM information on a DIMM.
  * @param   i_trgt MEM_PORT/OCMB target.
  * @param   i_rank Rank.

@@ -44,6 +44,11 @@
 #include <prdfParserUtils.H>
 #include <dimmBadDqBitmapFuncs.H>
 #include <exp_maint_cmds.H>
+
+#include <exp_defaults.H>
+#include <exp_rank.H>
+#include <kind.H>
+#include <hwp_wrappers.H>
 #endif
 
 using namespace TARGETING;
@@ -329,9 +334,9 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( "[PlatServices::mssGetSteerMux] mss_check_steering() "
+        PRDF_ERR( "[PlatServices::mssGetSteerMux] check_steering() "
                   "failed. HUID: 0x%08x rank: %d",
-                  getHuid(i_ocmb), i_rank.getMaster() );
+                  getHuid(memport), i_rank.getMaster() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
@@ -371,9 +376,40 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( "[PlatServices::mssSetSteerMux] mss_do_steering "
-                  "failed. HUID: 0x%08x rank: %d symbol: %d",
-                  getHuid(i_ocmb), i_rank.getMaster(), l_dramSymbol );
+        PRDF_ERR( "[PlatServices::mssSetSteerMux] do_steering() "
+                  "failed. HUID: 0x%08x, rank: %d, symbol: %d",
+                  getHuid(memport), i_rank.getMaster(), l_dramSymbol );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+#endif
+
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+int32_t mssUndoSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
+    const MemRank & i_rank, const size_t i_spare )
+{
+    int32_t o_rc = SUCCESS;
+
+#ifdef __HOSTBOOT_MODULE
+    errlHndl_t errl = nullptr;
+
+    // TODO RTC 210072 - Support for multiple ports per OCMB
+    TargetHandle_t memport = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
+    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(memport);
+
+    FAPI_INVOKE_HWP( errl, exp_unspare, fapiPort,
+                     i_rank.getMaster(), i_spare );
+
+    if ( nullptr != errl )
+    {
+        PRDF_ERR( "[PlatServices::mssUndoSteerMux] exp_unspare() "
+                  "failed. HUID: 0x%08x, rank: %d, spare: %d",
+                  getHuid(memport), i_rank.getMaster(), i_spare );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }

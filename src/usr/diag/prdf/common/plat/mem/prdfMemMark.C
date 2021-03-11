@@ -531,7 +531,14 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 // undo spare0 and then deploy spare 1.
                 if ( sp0.isValid() && (dram == sp0.getDram()) )
                 {
-                    // TODO TMP_CNP - call to undo steering to spare0
+                    o_rc = mssUndoSteerMux<TYPE_OCMB_CHIP>( i_chip->getTrgt(),
+                                                            i_rank, 0 );
+                    if ( SUCCESS != o_rc )
+                    {
+                        PRDF_ERR(PRDF_FUNC "mssUndoSteerMux(0x%08x,0x%02x) "
+                                 "failed", i_chip->getHuid(), i_rank.getKey());
+                        break;
+                    }
                 }
                 // A spare DRAM is available.
                 o_dsdEvent = new DsdEvent<TYPE_OCMB_CHIP>{ i_chip, i_rank,
