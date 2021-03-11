@@ -157,12 +157,12 @@ const mss::states exp_is_broadcast_capable(const std::vector<mss::dimm::kind<>>&
 ///
 /// @brief Undeploy the specified spare on the provided rank for Explorer
 /// @param[in] i_target MEM PORT target
-/// @param[in] i_rank Rank we want to undo the steer mux for.
+/// @param[in] i_port_rank Port rank we want to undo the steer mux for.
 /// @param[in] i_spare spare number (0 or 1 for explorer)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode exp_unspare(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                              const uint8_t i_rank,
+                              const uint8_t i_port_rank,
                               const size_t i_spare);
 
 #endif
