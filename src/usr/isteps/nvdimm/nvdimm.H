@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -381,6 +381,7 @@ enum i2c_out_values : uint8_t
     SAVE_ERROR                  = 0x02,
     ERASE_ERROR                 = 0x02,
     CLEAR_ALL_STATUS            = 0x3C, //Clears CAVE, RESTORE, ERASE, and ARM status regs
+    CSAVE_FAIL_NOT_ENOUGH_ENERGY_FOR_CSAVE = 0x01, // bit in CSAVE_FAIL_INFO1
 };
 
 // Timeout-related enum

@@ -2222,6 +2222,56 @@ void nvdimm_init(Target *i_nvdimm)
         {
             break;
         }
+
+        // Check for CSAVE error related to not enough energy
+        if ((l_failinfo1 & CSAVE_FAIL_NOT_ENOUGH_ENERGY_FOR_CSAVE) ==
+            CSAVE_FAIL_NOT_ENOUGH_ENERGY_FOR_CSAVE)
+        {
+            /*@
+             *@errortype
+             *@reasoncode       NVDIMM_NOT_ENOUGH_ENERGY_FOR_CSAVE
+             *@severity         ERRORLOG_SEV_PREDICTIVE
+             *@moduleid         NVDIMM_CHECK_CSAVE
+             *@userdata1[0:31]  CSAVE_FAIL_INFO1 (bit0 = insufficient energy)
+             *@userdata1[32:63] Target Huid
+             *@userdata2        <UNUSED>
+             *@devdesc          Encountered error saving during catastrophic save
+             *                  on NVDIMM due to insufficient energy for csave
+             *@custdesc         NVDIMM error during Catastrophic Save
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                             NVDIMM_CHECK_CSAVE,
+                                             NVDIMM_NOT_ENOUGH_ENERGY_FOR_CSAVE,
+                                             NVDIMM_SET_USER_DATA_1(l_failinfo1,
+                                                             get_huid(i_nvdimm)),
+                                             0x0,
+                                             ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace( NVDIMM_COMP_NAME );
+
+            // Collect register data for FFDC Traces
+            nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
+            nvdimmAddPage4Regs(i_nvdimm,l_err);
+            nvdimmAddVendorLog(i_nvdimm, l_err);
+
+            // Add reg traces to the error log
+            NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
+
+            // callout BPM high, cable high, NVDIMM high
+            l_err->addPartCallout( i_nvdimm,
+                                   HWAS::BPM_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+            l_err->addPartCallout( i_nvdimm,
+                                   HWAS::BPM_CABLE_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+            l_err->addHwCallout( i_nvdimm,
+                                 HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::DECONFIG,
+                                 HWAS::GARD_Fatal);
+            break;
+        }
+
+
         // Apply mask for relevant 1:6 bits to failinfo1
         l_failinfo1 &= CSAVE_FAIL_BITS_MASK;
 
