@@ -348,8 +348,8 @@ errlHndl_t requestQuote(const iohs_instances_t& i_iohsInstance, uint8_t*& o_quot
 
     do {
     // Generate quote request
-    MasterQuoteRequestBlob l_quoteRequest{};
-    l_errl = nodeCommGenMasterQuoteRequest(&l_quoteRequest);
+    QuoteRequestBlob l_quoteRequest{};
+    l_errl = nodeCommGenQuoteRequest(&l_quoteRequest);
     if(l_errl)
     {
         TRACFCOMP(g_trac_nc, ERR_MRK"requestQuote: Could not generate quote request"
@@ -410,7 +410,7 @@ errlHndl_t requestQuote(const iohs_instances_t& i_iohsInstance, uint8_t*& o_quot
     {
         /*@
          * @errortype
-         * @reasoncode RC_NC_BAD_SLAVE_QUOTE
+         * @reasoncode RC_NC_BAD_QUOTE
          * @moduleid   MOD_NCT_REQUEST_QUOTE
          * @userdata1  Peer node ID
          * @devdesc    Peer node indicated that it encountered an issue during
@@ -419,7 +419,7 @@ errlHndl_t requestQuote(const iohs_instances_t& i_iohsInstance, uint8_t*& o_quot
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_NCT_REQUEST_QUOTE,
-                                         RC_NC_BAD_SLAVE_QUOTE,
+                                         RC_NC_BAD_QUOTE,
                                          *l_peerNodeId,
                                          0,
                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -473,7 +473,7 @@ errlHndl_t sendQuote(const iohs_instances_t& i_iohsInstance)
     }
 
     // Make a quote request out of the received data
-    MasterQuoteRequestBlob l_quoteRequest{};
+    QuoteRequestBlob l_quoteRequest{};
     memcpy(&l_quoteRequest, l_dataBuffer, l_dataSize);
 
     // Re-use the data buffer for the response quote
@@ -483,7 +483,7 @@ errlHndl_t sendQuote(const iohs_instances_t& i_iohsInstance)
     std::unique_ptr<uint8_t>l_quotePtr = nullptr;
 
     // Generate a response
-    l_errl = nodeCommGenSlaveQuoteResponse(&l_quoteRequest,
+    l_errl = nodeCommGenQuoteResponse(&l_quoteRequest,
                                            l_dataSize,
                                            l_quotePtr);
     if(l_errl)

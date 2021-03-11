@@ -986,14 +986,14 @@ errlHndl_t readAKCertificate(TpmTarget* i_target, TPM2B_MAX_NV_BUFFER* o_data)
 }
 
 errlHndl_t generateQuote(TpmTarget* i_target,
-                         const MasterTpmNonce_t* const i_masterNonce,
+                         const TpmNonce_t* const i_nonce,
                          QuoteDataOut* o_data)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
     Message* l_msg = nullptr;
 
-    GenQuoteData* l_data = new GenQuoteData{i_target, i_masterNonce, o_data};
+    GenQuoteData* l_data = new GenQuoteData{i_target, i_nonce, o_data};
 
     l_msg = Message::factory(MSG_TYPE_GEN_QUOTE,
                              sizeof(*l_data),

@@ -1446,7 +1446,7 @@ errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target, TPM2B_MAX_NV_BUFFER* o_d
 }
 
 errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
-                               const MasterTpmNonce_t* const i_masterNonce,
+                               const TpmNonce_t* const i_nonce,
                                QuoteDataOut* o_data)
 {
     TRACFCOMP(g_trac_trustedboot, ENTER_MRK"tpmCmdGenerateQuote()");
@@ -1469,8 +1469,8 @@ errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
 
     memcpy(l_cmd->quoteData.tpmiDhObject,l_tpmiDhObject,sizeof(l_tpmiDhObject));
 
-    memcpy(l_cmd->quoteData.masterNonce,
-           *i_masterNonce,
+    memcpy(l_cmd->quoteData.Nonce,
+           *i_nonce,
            TPM_NONCE_SIZE_BYTES);
 
     l_cmd->quoteData.data = l_data;

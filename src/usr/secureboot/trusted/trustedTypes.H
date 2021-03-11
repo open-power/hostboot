@@ -577,7 +577,7 @@ namespace TRUSTEDBOOT
     struct _TPM2_QuoteData
     {
         uint8_t tpmiDhObject[19];
-        MasterTpmNonce_t masterNonce;
+        TpmNonce_t Nonce;
         uint16_t data;
         uint16_t inScheme;
         TPML_PCR_SELECTION pcrSelection;

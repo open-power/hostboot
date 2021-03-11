@@ -78,7 +78,7 @@ namespace TRUSTEDBOOT
 
     // The structure that defines the size of the master node nonce
     // (in bytes)
-    typedef uint8_t MasterTpmNonce_t[TPM_NONCE_SIZE_BYTES];
+    typedef uint8_t TpmNonce_t[TPM_NONCE_SIZE_BYTES];
 
     /**
      *  @brief Enum used for the getTPMs API to specify scope of TPMs to return
@@ -470,13 +470,13 @@ namespace TRUSTEDBOOT
      * @brief Send the command to the given TPM to generate the quote
      *
      * @param[in] i_target the pointer to the TPM target to send the command to
-     * @param[in] i_masterNonce the 32-byte nonce from the master node
+     * @param[in] i_nonce the 32-byte nonce from the master node
      * @param[out] o_data a pointer to the  data structure containing the size
      *             of the quote data from the TPM and the actual data
      * @return nullptr if success; non-nullptr on error
      */
     errlHndl_t generateQuote(TpmTarget* i_target,
-                             const MasterTpmNonce_t* i_masterNonce,
+                             const TpmNonce_t* i_nonce,
                              QuoteDataOut* o_data);
 
     /**

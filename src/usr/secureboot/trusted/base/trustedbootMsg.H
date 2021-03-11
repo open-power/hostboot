@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,13 +117,13 @@ namespace TRUSTEDBOOT
     struct GenQuoteData
     {
         TpmTarget* tpm;
-        const MasterTpmNonce_t* const masterNonce; // 32-byte nonce value
+        const TpmNonce_t* const Nonce; // 32-byte nonce value
         QuoteDataOut* data; // Output - the quote and signature fields
         GenQuoteData(TpmTarget* i_tpm,
-                     const MasterTpmNonce_t* const i_masterNonce,
+                     const TpmNonce_t* const i_nonce,
                      QuoteDataOut* o_data) :
                      tpm(i_tpm),
-                     masterNonce(i_masterNonce),
+                     Nonce(i_nonce),
                      data(o_data)
         {
         }

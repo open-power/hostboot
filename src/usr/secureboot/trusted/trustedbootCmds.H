@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -197,13 +197,13 @@ errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target,
  * @brief Send the TPM_CC_Quote command to the given TPM to generate quote
  *        and signature information (returned in o_data)
  * @param[in] i_target the TPM target (must not be nullptr)
- * @param[in] i_masterNonce the 32-byte master nonce
+ * @param[in] i_nonce the 32-byte nonce
  * @param[out] o_data a pointer to the  data structure containing the size of
  *             the quote data from the TPM and the actual data
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
-                               const MasterTpmNonce_t* i_masterNonce,
+                               const TpmNonce_t* i_nonce,
                                QuoteDataOut* o_data);
 
 /**

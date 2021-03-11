@@ -75,9 +75,9 @@ namespace NODECOMM
 {
 
 /*
- * Struct used to collect data about current node's master proc and other info
+ * Struct used to collect data about current node's primary proc and other info
  */
-struct master_proc_info_t
+struct primary_proc_info_t
 {
     TARGETING::Target* tgt = nullptr;
     uint8_t     procInstance = 0;
@@ -370,26 +370,13 @@ errlHndl_t generateAKCertificate()
     return l_errl;
 }
 
-/**
- * @brief A function to create the slave node quote response that consists of
- *        eye catcher, slave node ID, quote and signature data (represented by
- *        the QuoteDataOut structure), the contents of PCRs 0-7, the
- *        Attestation Key Certificate returned from TPM, the size
- *        and the contents of the TPM log
- * @param[in] i_request the master node request structure
- * @param[out] o_size the size of the slave quote
- * @param[out] o_resp the slave quote in binary format
- * @note If an error occurs within the function, the o_resp will only have an
- *       eye catcher indicating that the slave quote is bad.
- * @return nullptr on success; non-nullptr on error
- */
-errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_request,
-                                         size_t& o_size,
-                                         std::unique_ptr<uint8_t>& o_resp)
+errlHndl_t nodeCommGenQuoteResponse(const QuoteRequestBlob* const i_request,
+                                    size_t& o_size,
+                                    std::unique_ptr<uint8_t>& o_resp)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
-    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommGenSlaveQuoteResponse");
+    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommGenQuoteResponse");
     bool l_tpmRequired = TRUSTEDBOOT::isTpmRequired();
     bool l_errorOccurred = false;
 
@@ -407,39 +394,38 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
        !l_primaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().functional ||
        !l_primaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: primary TPM not found or not functional");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteResponse: primary TPM not found or not functional");
         l_errorOccurred = true;
         break;
     }
 
 
-    // If Master indicated that there is an issue with its TPM: Case 1: If the
+    // If other node indicated that there is an issue with its TPM: Case 1: If the
     // TPM Required policy is on, terminate the boot; Case 2: If TPM required
     // policy is off, send back a token indicating that no nodecomm TPM commands
-    // have been performed (remote attestation is not possible with bad master
-    // TPM); do not fail the boot.
-    if(i_request->EyeCatcher == MSTNOTPM)
+    // have been performed; do not fail the boot.
+    if(i_request->EyeCatcher == REQNOTPM)
     {
         l_errorOccurred = true;
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: Master indicated an issue with secure nodecomm (master eye catcher is MSTNOTPM)");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteResponse: Requesting node indicated an issue with secure nodecomm (its eye catcher is REQNOTPM)");
         // Case 1
         if(l_tpmRequired)
         {
             /* @
              * @errortype
-             * @reasoncode RC_NC_BAD_MASTER_TPM
-             * @moduleid   MOD_NC_GEN_SLAVE_RESPONSE
+             * @reasoncode RC_NC_BAD_REQUESTER_TPM
+             * @moduleid   MOD_NC_GEN_QUOTE_RESPONSE
              * @userdata1  <unused>
              * @userdata2  <unused>
              * @devdesc    The system policy is set to not allow boot without a
-             *             functioning TPM, but the system's master node
-             *             indicated that its TPM is compromised. This slave
+             *             functioning TPM, but the system's primary node
+             *             indicated that its TPM is compromised. This secondary
              *             node must terminate the boot process.
              * @custdesc   Trustedboot failure
              */
              l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                              MOD_NC_GEN_SLAVE_RESPONSE,
-                                              RC_NC_BAD_MASTER_TPM);
+                                              MOD_NC_GEN_QUOTE_RESPONSE,
+                                              RC_NC_BAD_REQUESTER_TPM);
             // It is unlikely that there is an issue with this node, but collect
             // the logs anyway for ease of debug.
             l_errl->collectTrace(SECURE_COMP_NAME);
@@ -453,23 +439,23 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
         // The error condition will be handled below in the if branch that
         // checks l_errorOccurred
     }
-    else if(i_request->EyeCatcher != MASTERQ_)
+    else if(i_request->EyeCatcher != REQUEST_)
     {
         l_errorOccurred = true;
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: Invalid master eye catcher received: 0x%x", i_request->EyeCatcher);
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteResponse: Invalid requesting node eye catcher received: 0x%x", i_request->EyeCatcher);
         if(l_tpmRequired)
         {
             /* @
              * @errortype
-             * @reasoncode RC_NC_BAD_MASTER_EYE_CATCH
-             * @moduleid   MOD_NC_GEN_SLAVE_RESPONSE
-             * @userdata1  Eye catcher received from master
-             * @devdesc    Master node sent an unrecognized eye catcher
+             * @reasoncode RC_NC_BAD_REQUESTER_EYE_CATCH
+             * @moduleid   MOD_NC_GEN_QUOTE_RESPONSE
+             * @userdata1  Eye catcher received from requesting node
+             * @devdesc    Requesting node sent an unrecognized eye catcher
              * @custdesc   Trustedboot failure
              */
              l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                              MOD_NC_GEN_SLAVE_RESPONSE,
-                                              RC_NC_BAD_MASTER_EYE_CATCH,
+                                              MOD_NC_GEN_QUOTE_RESPONSE,
+                                              RC_NC_BAD_REQUESTER_EYE_CATCH,
                                               i_request->EyeCatcher);
             // It is unlikely that there is an issue with this node, but collect
             // the logs anyway for ease of debug.
@@ -484,7 +470,7 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
     // them here
     if(g_nodeAK.size == 0)
     {
-        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommGenSlaveQuoteResponse: AK certificate is empty; generating AK certificate");
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommGenQuoteResponse: AK certificate is empty; generating AK certificate");
         l_errl = generateAKCertificate();
         if(l_errl)
         {
@@ -497,17 +483,17 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
     // Generate quote and signature data (presented as binary data in
     // the QuoteDataOut structure)
     l_errl = TRUSTEDBOOT::generateQuote(l_primaryTpm,
-                                        &i_request->MasterNonce,
+                                        &i_request->Nonce,
                                         &l_quoteData);
     if(l_errl)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not generate TPM quote");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteResponse: could not generate TPM quote");
         break;
     }
 
     // Read the selected PCRs
     // Make sure there is only 1 algo selection
-    assert(i_request->PcrSelect.count == 1, "nodeCommGenSlaveQuoteResponse: only 1 hash algo is supported for PCR read");
+    assert(i_request->PcrSelect.count == 1, "nodeCommGenQuoteResponse: only 1 hash algo is supported for PCR read");
     uint32_t l_pcrCount = 0;
     TRUSTEDBOOT::TPM_Pcr l_pcrRegs[TRUSTEDBOOT::FW_USED_PCR_COUNT] = {
                                                   TRUSTEDBOOT::PCR_0,
@@ -544,7 +530,7 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
                                       l_pcrDigests[l_pcr].buffer);
             if(l_errl)
             {
-                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not read PCR%d", l_pcr);
+                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteResponse: could not read PCR%d", l_pcr);
                 break;
             }
         }
@@ -559,17 +545,17 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
                                         TRUSTEDBOOT::getTpmLogMgr(l_primaryTpm);
     if(!l_primaryLogMgr)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not fetch primary TPM's log");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteResponse: could not fetch primary TPM's log");
         /*@
          * @errortype
          * @reasoncode RC_NC_NO_PRIMARY_TPM_LOG
-         * @moduleid   MOD_NC_GEN_SLAVE_RESPONSE
+         * @moduleid   MOD_NC_GEN_QUOTE_RESPONSE
          * @userdata1  Primary TPM HUID
          * @devdesc    Could not fetch primary TPM's Log
          * @custdes    Trustedboot failure
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         MOD_NC_GEN_SLAVE_RESPONSE,
+                                         MOD_NC_GEN_QUOTE_RESPONSE,
                                          RC_NC_NO_PRIMARY_TPM_LOG,
                                          get_huid(l_primaryTpm));
         l_errl->collectTrace(NODECOMM_TRACE_NAME);
@@ -583,13 +569,13 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
 
     NCEyeCatcher_t l_goodEyeCatch = NODEQUOT;
 
-    // Figure out the size of the slave quote
+    // Figure out the size of the quote
     o_size = sizeof(l_goodEyeCatch) +
              sizeof(l_nodeId) +
              sizeof(l_quoteData.size) +
              l_quoteData.size +
              sizeof(l_pcrCount) +
-             // Only include the read PCRs in the slave quote
+             // Only include the read PCRs in the quote
              sizeof(TRUSTEDBOOT::TPM2B_DIGEST) * l_pcrCount +
              sizeof(g_nodeAK) +
              sizeof(l_logSize) +
@@ -657,9 +643,9 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
     {
         // There was some error; allocate the output buffer just big enough
         // for an eye catcher and node ID
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: An error "
-                 "occurred during slave quote composition. Sending NDNOTPM_ "
-                 "back Master Node after poisoning all TPMs on this node");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteResponse: An error "
+                 "occurred during quote composition. Sending NDNOTPM_ "
+                 "back to requesting node");
 
         NCEyeCatcher_t l_badEyeCatcher = NDNOTPM_;
         delete[] l_quotePtr;
@@ -671,16 +657,16 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
 
     o_resp.reset(l_quotePtr);
 
-    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenSlaveQuoteResponse: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenQuoteResponse: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
 #endif
     return l_errl;
-} //nodeCommGenSlaveQuoteResponse
+} //nodeCommGenQuoteResponse
 
-errlHndl_t nodeCommGenMasterQuoteRequest(MasterQuoteRequestBlob* const o_request)
+errlHndl_t nodeCommGenQuoteRequest(QuoteRequestBlob* const o_request)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
-    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommGenMasterQuoteRequest");
+    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommGenQuoteRequest");
     do {
     TARGETING::Target* l_primaryTpm = nullptr;
     TRUSTEDBOOT::getPrimaryTpm(l_primaryTpm);
@@ -688,30 +674,30 @@ errlHndl_t nodeCommGenMasterQuoteRequest(MasterQuoteRequestBlob* const o_request
        !l_primaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().functional ||
        !l_primaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenMasterQuoteRequest: primary TPM not found or is not functional");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteRequest: primary TPM not found or is not functional");
 
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         MOD_NC_GEN_MASTER_REQUEST,
-                                         RC_NC_BAD_MASTER_TPM);
+                                         MOD_NC_GEN_QUOTE_REQUEST,
+                                         RC_NC_BAD_REQUESTER_TPM);
         l_errl->collectTrace(SECURE_COMP_NAME);
         l_errl->collectTrace(TRBOOT_COMP_NAME);
         l_errl->collectTrace(NODECOMM_TRACE_NAME);
         break;
     }
 
-    o_request->EyeCatcher = MASTERQ_;
+    o_request->EyeCatcher = REQUEST_;
 
-    // Generate the 32-byte nonce for master request
+    // Generate the 32-byte nonce for primary request
     l_errl = TRUSTEDBOOT::GetRandom(l_primaryTpm,
-                                    sizeof(o_request->MasterNonce),
-                                    o_request->MasterNonce);
+                                    sizeof(o_request->Nonce),
+                                    o_request->Nonce);
     if(l_errl)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenMasterQuoteRequest: GetRandom failed");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteRequest: GetRandom failed");
         break;
     }
 
-    // Select PCRs (PCR0-7) to include in slave quote response
+    // Select PCRs (PCR0-7) to include in secondary node quote response
     o_request->PcrSelect.count = 1; // One algorithm
     o_request->PcrSelect.pcrSelections[0].algorithmId =
                                                     TRUSTEDBOOT::TPM_ALG_SHA256;
@@ -741,56 +727,55 @@ errlHndl_t nodeCommGenMasterQuoteRequest(MasterQuoteRequestBlob* const o_request
 
     if(l_errl)
     {
-        // Error occurred. Tell the slave that the master TPM is unavailable and
-        // poison the TPMs on master node.
-        o_request->EyeCatcher = MSTNOTPM;
+        // Error occurred. Tell the secondary node that the primary node's TPM is unavailable
+        o_request->EyeCatcher = REQNOTPM;
     }
 
-    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenMasterQuoteRequest: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenQuoteRequest: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
 #endif
     return l_errl;
-} // nodeCommGenMasterQuoteRequest
+} // nodeCommGenQuoteRequest
 
 /**
- * @brief A function to process the response of one of the slave nodes
- * @param[in] i_slaveQuote the quote received from a slave node in binary format
- * @param[in] i_slaveQuoteSize the size of the slave quote (in bytes)
+ * @brief A function to process the response of one of the secondary nodes
+ * @param[in] i_quote the quote received from a secondary node in binary format
+ * @param[in] i_quoteSize the size of the quote (in bytes)
  * @return nullptr on success; non-nullptr on error
  */
-errlHndl_t nodeCommProcessSlaveQuote(uint8_t* const i_slaveQuote,
-                                     const size_t i_slaveQuoteSize)
+errlHndl_t nodeCommProcessQuote(uint8_t* const i_quote,
+                                const size_t i_quoteSize)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
-    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommProcessSlaveQuote: size=0x%016llX",i_slaveQuoteSize);
+    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommProcessQuote: size=0x%016llX",i_quoteSize);
     bool l_tpmRequired = TRUSTEDBOOT::isTpmRequired();
 
     do {
     NCEyeCatcher_t* l_eyeCatcher =
-                                reinterpret_cast<NCEyeCatcher_t*>(i_slaveQuote);
-    uint32_t* l_slaveNodeId = reinterpret_cast<uint32_t*>(i_slaveQuote +
+                                reinterpret_cast<NCEyeCatcher_t*>(i_quote);
+    uint32_t* l_secondaryNodeId = reinterpret_cast<uint32_t*>(i_quote +
                                                           sizeof(l_eyeCatcher));
     if(*l_eyeCatcher == NDNOTPM_)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommProcessSlaveQuote: Slave node %d indicated that it could not complete the slave quote generation process", *l_slaveNodeId);
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommProcessQuote: Node %d indicated that it could not complete the quote generation process", *l_secondaryNodeId);
         if(l_tpmRequired)
         {
-            // Slave sent bad data and TPM is required - return an error and
+            // Secondary node sent bad data and TPM is required - return an error and
             // the IPL should be terminated
 
             /* @
              * @errortype
-             * @reasoncode RC_NC_BAD_SLAVE_QUOTE
-             * @moduleid   MOD_NC_PROCESS_SLAVE_QUOTE
-             * @userdata1  Slave node where the quote came from
-             * @devdesc    One of the slave nodes indicated that there was
+             * @reasoncode RC_NC_BAD_QUOTE
+             * @moduleid   MOD_NC_PROCESS_QUOTE
+             * @userdata1  Node where the quote came from
+             * @devdesc    One of the secondary nodes indicated that there was
              *             an issue with its TPM or quote generation process
              * @custdesc   trustedboot failure
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             MOD_NC_PROCESS_SLAVE_QUOTE,
-                                             RC_NC_BAD_SLAVE_QUOTE,
-                                             *l_slaveNodeId,
+                                             MOD_NC_PROCESS_QUOTE,
+                                             RC_NC_BAD_QUOTE,
+                                             *l_secondaryNodeId,
                                              0);
             l_errl->collectTrace(SECURE_COMP_NAME);
             l_errl->collectTrace(TRBOOT_COMP_NAME);
@@ -799,50 +784,48 @@ errlHndl_t nodeCommProcessSlaveQuote(uint8_t* const i_slaveQuote,
         break;
     }
 
-    // Extend the hash of the slave quote to PCR 1, and include the whole quote
+    // Extend the hash of the quote to PCR 1, and include the whole quote
     // in binary form as the message in the TPM log
     SHA512_t l_quoteHash = {0};
-    hashBlob(i_slaveQuote, i_slaveQuoteSize, l_quoteHash);
+    hashBlob(i_quote, i_quoteSize, l_quoteHash);
     l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
                                     TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS,
                                     l_quoteHash,
                                     sizeof(l_quoteHash),
-                                    i_slaveQuote,
-                                    i_slaveQuoteSize);
+                                    i_quote,
+                                    i_quoteSize);
     if(l_errl)
     {
-        TRACFCOMP(g_trac_nc, ERR_MRK"nodeCommProcessSlaveQuote: could not extend slave response to PCR 1");
+        TRACFCOMP(g_trac_nc, ERR_MRK"nodeCommProcessQuote: could not extend quote hash to PCR 1");
         break;
     }
 
     } while(0);
 
-    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommProcessSlaveQuote: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommProcessQuote: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
 #endif
     return l_errl;
-} // nodeCommProcessSlaveQuote
+} // nodeCommProcessQuote
 
 /**
- *  @brief This function runs the procedure for the master processor on the
- *         master node to send and receive messages to the master processors
- *         on the slave nodes
+ *  @brief This function runs the procedure for the primary node to send and
+ *         receive messages from secondary nodes
  *
- *  @param[in] i_mProcInfo - Information about Master Proc
+ *  @param[in] i_mProcInfo - Information about Primary Proc
  *  @param[in] i_iohs_instances - Vector containing all of the connections
- *                                that the Master Proc on the Master Node needs
- *                                to send and received messages across
+ *                                that the Primary Node needs to send and
+ *                                received messages
  *
  *  @return errlHndl_t Error log handle
  *  @retval nullptr Operation was successful
  *  @retval !nullptr Operation failed with valid error log
  */
-errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
-                                      const std::vector<iohs_instances_t> &
-                                        i_iohs_instances)
+errlHndl_t nodeCommExchangePrimary(const primary_proc_info_t & i_mProcInfo,
+                                   const std::vector<iohs_instances_t> &i_iohs_instances)
 {
     errlHndl_t err = nullptr;
 
-    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommExchangeMaster: mProc=0x%.08X "
+    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommExchangePrimary: mProc=0x%.08X "
               "to communicate through %d IOHS connection(s)",
               get_huid(i_mProcInfo.tgt), i_iohs_instances.size());
 
@@ -852,9 +835,9 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
     do
     {
 
-    // The slave quote that is returned by the slave nodes as part of the node
+    // The quote that is returned by the secondary nodes as part of the node
     // comm protocol is too big to be placed in the TPM's log without moving the
-    // log to a new memory location, so before processing the slave quote, we
+    // log to a new memory location, so before processing the quote, we
     // need to send a message to the TPM queue to expand the log. We need to
     // expand logs on all TPMs, since logging and PCR extends are mirrorred into
     // all TPMs/logs on the node.
@@ -865,7 +848,7 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = TRUSTEDBOOT::expandTpmLog(l_tpm);
         if(err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeMaster: could not expand the TPM log for TPM HUID 0x%x", TARGETING::get_huid(l_tpm));
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangePrimary: could not expand the TPM log for TPM HUID 0x%x", TARGETING::get_huid(l_tpm));
             break;
         }
     }
@@ -875,7 +858,7 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         break;
     }
 
-    // Loop 1: Exchange SBID/nonces between Master and each of the Slave Nodes
+    // Loop 1: Exchange SBID/nonces between Primary and each of the Secondary Nodes
     for ( auto const l_iohs : i_iohs_instances)
     {
         uint8_t my_linkId = 0;
@@ -893,7 +876,7 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
                                     expected_peer_linkId,
                                     expected_peer_mboxId);
 
-        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeMaster: Loop 1: "
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangePrimary: Loop 1: "
                   "my: linkId=%d, mboxId=%d, IohsInstance=%d. "
                   "expected peer: n%d linkId=%d, mboxId=%d, IohsInstance=%d",
                   my_linkId, my_mboxId, l_iohs.myIohsInstance,
@@ -907,7 +890,7 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommGetRandom(msg_data.value);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeMaster: Loop 1: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangePrimary: Loop 1: "
                       "Error Back From nodeCommGetRandom: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
@@ -922,7 +905,7 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         TARGETING::Target* l_paucParent =
                 TARGETING::getImmediateParentByAffinity(l_iohs.myIohsTarget);
 
-        // Send a message to a slave
+        // Send a message to the secondary node
         size_t tmp_size = sizeof(msg_data.value);
         err = nodeCommTransferSend(l_paucParent,
                                    my_linkId,
@@ -935,7 +918,7 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
 
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeMaster: Loop 1: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangePrimary: Loop 1: "
                       "nodeCommTransferSend returned an error");
             break;
         }
@@ -944,14 +927,14 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommLogNonce(msg_data.value);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeMaster: Loop 1: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangePrimary: Loop 1: "
                       "Error Back From nodeCommLogNonce: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
             break;
         }
 
-        // Look for Return Message From The Slave
+        // Look for Return Message From The Secondary node
         size_t data_rcv_size = 0;
         if (data_rcv_buffer != nullptr)
         {
@@ -967,19 +950,19 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
                                    data_rcv_size);
         if (err)
         {
-           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeMaster: Loop 1: "
+           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangePrimary: Loop 1: "
                       "nodeCommTransferRecv returned an error");
            break;
         }
         // If no err is returned, data_rcv_buffer should be valid, but do a
         // sanity check here to be certain
-        assert(data_rcv_buffer!=nullptr,"nodeCommExchangeMaster: Loop 1: data_rcv_buffer returned as nullptr");
+        assert(data_rcv_buffer!=nullptr,"nodeCommExchangePrimary: Loop 1: data_rcv_buffer returned as nullptr");
 
         // Add receiver Link Id to the message data
         // here and in other places where SBID is handled
         memcpy(&(msg_data.value), data_rcv_buffer, data_rcv_size);
         msg_data.receiver_linkId = my_linkId;
-        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeMaster: Msg received, "
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangePrimary: Msg received, "
                   "after adding recv link (%d), 0x%.16llX will be "
                   "stored in the TPM",
                   my_linkId, msg_data.value);
@@ -988,7 +971,7 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommLogNonce(msg_data.value);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeMaster: Loop 1: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangePrimary: Loop 1: "
                       "Error Back From nodeCommLogNonce: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
@@ -1002,9 +985,9 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         break;
     }
 
-    // Loop 2: Master Node will request quotes from each Slave Node by first
+    // Loop 2: Primary Node will request quotes from each Secondary Node by first
     // sending a Quote Request and then waiting to receive a Quote Response
-    for ( auto const l_iohs : i_iohs_instances)
+    for (auto const l_iohs : i_iohs_instances)
     {
         uint8_t my_linkId = 0;
         uint8_t my_mboxId = 0;
@@ -1021,20 +1004,20 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
                                     expected_peer_linkId,
                                     expected_peer_mboxId);
 
-        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeMaster: Loop 2: "
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangePrimary: Loop 2: "
                   "my: linkId=%d, mboxId=%d, IohsInstance=%d. "
-                  "expected peer: linkId=%d, mboxId=%d, ObusInstance=%d.",
+                  "expected peer: linkId=%d, mboxId=%d, IohsInstance=%d.",
                   my_linkId, my_mboxId, l_iohs.myIohsInstance,
                   expected_peer_linkId, expected_peer_mboxId,
                   l_iohs.peerIohsInstance);
 
-        // Generate Master Quote Request
-        MasterQuoteRequestBlob quote_request{};
-        err = nodeCommGenMasterQuoteRequest(&quote_request);
+        // Generate Quote Request Blob
+        QuoteRequestBlob quote_request{};
+        err = nodeCommGenQuoteRequest(&quote_request);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeMaster: Loop 2: "
-                      "Error Back From nodeCommGenMasterQuoteRequest: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangePrimary: Loop 2: "
+                      "Error Back From nodeCommGenQuoteRequest: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
             break;
@@ -1044,7 +1027,7 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         TARGETING::Target* l_paucParent =
                 TARGETING::getImmediateParentByAffinity(l_iohs.myIohsTarget);
 
-        // Send Quote Request to a slave
+        // Send Quote Request to the secondary node
         size_t tmp_size = sizeof(quote_request);
         err = nodeCommTransferSend(l_paucParent,
                                    my_linkId,
@@ -1057,12 +1040,12 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
 
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeMaster: Loop 2: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangePrimary: Loop 2: "
                       "nodeCommTransferSend returned an error");
             break;
         }
 
-        // Look for Quote Response from the slave node
+        // Look for Quote Response from the secondary node
         size_t data_rcv_size = 0;
         if (data_rcv_buffer != nullptr)
         {
@@ -1079,26 +1062,26 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
                                    data_rcv_size);
         if (err)
         {
-           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeMaster: Loop 2: "
+           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangePrimary: Loop 2: "
                       "nodeCommTransferRecv returned an error");
            break;
         }
         // If no err is returned, data_rcv_buffer should be valid, but do a
         // sanity check here to be certain
-        assert(data_rcv_buffer!=nullptr,"nodeCommExchangeMaster: Loop 2: data_rcv_buffer returned as nullptr");
+        assert(data_rcv_buffer!=nullptr,"nodeCommExchangePrimary: Loop 2: data_rcv_buffer returned as nullptr");
 
-        // Process the Quote Response that was returned from the slave node
-        err = nodeCommProcessSlaveQuote(data_rcv_buffer, data_rcv_size);
+        // Process the Quote Response that was returned from the secondary node
+        err = nodeCommProcessQuote(data_rcv_buffer, data_rcv_size);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeMaster: Loop 2: "
-                      "Error Back nodeCommProcessSlaveQuote: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangePrimary: Loop 2: "
+                      "Error Back nodeCommProcessQuote: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
             break;
         }
 
-    } // end of Loop-2 (Quotes) on i_obus_instances
+    } // end of Loop-2 (Quotes) on i_iohs_instances
 
     if (err)
     {
@@ -1112,36 +1095,35 @@ errlHndl_t nodeCommExchangeMaster(const master_proc_info_t & i_mProcInfo,
         data_rcv_buffer = nullptr;
     }
 
-    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommExchangeMaster: "
+    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommExchangePrimary: "
               TRACE_ERR_FMT,
               TRACE_ERR_ARGS(err));
 
     return err;
 
-} // end of nodeCommExchangeMaster
+} // end of nodeCommExchangePrimary
 
 
 /**
- *  @brief This function runs the procedure for the master processor on the
- *         slave nodes to receive and send messages to the master processor on
- *         the master node
+ *  @brief This function runs the procedure for the secondary nodes to receive
+ *         and send messages to the primary node
  *
- *  @param[in] i_mProcInfo - Information about Master Proc
+ *  @param[in] i_mProcInfo - Information about Primary Proc
  *  @param[in] i_iohs_instance - connection that should pertain to the
- *                               Master Proc on the master node that will send
- *                               a message to Master Proc of this slave node
+ *                               primary node that will send a message to this
+ *                               secondary node
  *
  *  @return errlHndl_t Error log handle
  *  @retval nullptr Operation was successful
  *  @retval !nullptr Operation failed with valid error log
  */
-errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
+errlHndl_t nodeCommExchangeSecondary(const primary_proc_info_t & i_mProcInfo,
                                      const iohs_instances_t & i_iohs_instance)
 {
     errlHndl_t err = nullptr;
 
-    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommExchangeSlave: mProc=0x%.08X "
-              "Looking for message from master node via iohs connection "
+    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommExchangeSecondary: mProc=0x%.08X "
+              "Looking for message from primary node via iohs connection "
               "n%d/p%d/iohs%d",
               get_huid(i_mProcInfo.tgt),
               i_iohs_instance.peerNodeInstance,
@@ -1154,7 +1136,7 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
 
     do
     {
-        // Used for check that right node indicated itself as master
+        // Used for check that right node indicated itself as primary
         uint8_t my_linkId = 0;
         uint8_t my_mboxId = 0;
         getLinkMboxFromIohsInstance(i_iohs_instance.myIohsInstance,
@@ -1163,7 +1145,7 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
                                     my_mboxId);
 
 
-        // First Wait for Message From Master
+        // First Wait for Message From Primary
         if (data_buffer != nullptr)
         {
             free(data_buffer);
@@ -1182,13 +1164,13 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
                                    data_size);
         if (err)
         {
-           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeSlave: "
+           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeSecondary: "
                       "nodeCommTransferRecv returned an error");
            break;
         }
         // If no err is returned, data_buffer should be valid, but do a
         // sanity check here to be certain
-        assert(data_buffer!=nullptr,"nodeCommExchangeSlave: data_buffer returned as nullptr");
+        assert(data_buffer!=nullptr,"nodeCommExchangeSecondary: data_buffer returned as nullptr");
 
 
         // Add receiver Link Id to the message data
@@ -1196,7 +1178,7 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
         memcpy(&(msg_data.value), data_buffer, data_size);
         msg_data.receiver_linkId = my_linkId;
 
-        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeSlave: Msg received, "
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeSecondary: Msg received, "
                   "after adding recv Link Id (%d), 0x%.16llX will "
                   "be stored in the TPM",
                   my_linkId, msg_data.value);
@@ -1205,14 +1187,14 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
         err = nodeCommLogNonce(msg_data.value);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSlave: Error Back "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSecondary: Error Back "
                       "From nodeCommLogNonce: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
             break;
         }
 
-        // Send a message back to the master node
+        // Send a message back to the primary node
         // Pass in expected peer linkId for nonce logging/extending purposes
         uint8_t peer_linkId = 0;
         uint8_t peer_mboxId = 0;
@@ -1227,7 +1209,7 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
         err = nodeCommGetRandom(msg_data.value);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSlave: Error Back "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSecondary: Error Back "
                       "From nodeCommGetRandom: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
@@ -1238,7 +1220,7 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
         msg_data.origin_linkId = my_linkId;
         msg_data.receiver_linkId = my_linkId;
 
-        // Send a message to a slave
+        // Send a message to the secondary
         size_t tmp_size = sizeof(msg_data.value);
         err = nodeCommTransferSend(l_paucParent,
                                    my_linkId,
@@ -1251,7 +1233,7 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
 
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSlave: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSecondary: "
                       "nodeCommAbusTransferSend returned an error");
             break;
         }
@@ -1260,14 +1242,14 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
         err = nodeCommLogNonce(msg_data.value);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSlave: Error Back From "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSecondary: Error Back From "
                       "nodeCommLogNonce: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
             break;
         }
 
-        // Wait for Quote Request from Master Node
+        // Wait for Quote Request from Primary Node
         if (data_buffer != nullptr)
         {
             free(data_buffer);
@@ -1283,16 +1265,16 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
                                    data_size);
         if (err)
         {
-           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeSlave: "
+           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeSecondary: "
                       "nodeCommTransferRecv returned an error");
            break;
         }
         // If no err is returned, data_buffer should be valid, but do a
         // sanity check here to be certain
-        assert(data_buffer!=nullptr,"nodeCommExchangeSlave: data_buffer returned as nullptr");
+        assert(data_buffer!=nullptr,"nodeCommExchangeSecondary: data_buffer returned as nullptr");
 
-        // Cast the data received into a MasterQuoteRequestBlob
-        MasterQuoteRequestBlob quote_request{};
+        // Cast the data received into a QuoteRequestBlob
+        QuoteRequestBlob quote_request{};
         memcpy(&quote_request, data_buffer, data_size);
 
         // re-use data_buffer and data_size for the Quote Response
@@ -1306,24 +1288,24 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
         std::unique_ptr<uint8_t>l_quotePtr = nullptr;
 
         // Generate the Quote Response
-        err = nodeCommGenSlaveQuoteResponse(&quote_request,
-                                            data_size,
-                                            l_quotePtr);
+        err = nodeCommGenQuoteResponse(&quote_request,
+                                       data_size,
+                                       l_quotePtr);
 
         if (err)
         {
-           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeSlave: "
-                      "nodeCommGenSlaveQuoteResponse returned an error");
+           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchangeSecondary: "
+                      "nodeCommGenQuoteResponse returned an error");
            errlCommit(err, SECURE_COMP_ID);
-           // Continuing to send the response to master
+           // Continuing to send the response to primary
         }
 
         err = flushTpmContext();
         if(err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSlave: Could not flush TPM context");
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSecondary: Could not flush TPM context");
             errlCommit(err, SECURE_COMP_ID);
-            // Continuing to send the response to master
+            // Continuing to send the response to primary
         }
 
         // Send the Quote Response
@@ -1337,12 +1319,12 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
 
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSlave: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchangeSecondary: "
                       "nodeCommTransferSend returned an error");
             break;
         }
 
-        // Nothing left for slave node to do
+        // Nothing left for secondary node to do
 
     } while( 0 );
 
@@ -1353,13 +1335,13 @@ errlHndl_t nodeCommExchangeSlave(const master_proc_info_t & i_mProcInfo,
     }
 
 
-    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommExchangeSlave: "
+    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommExchangeSecondary: "
               TRACE_ERR_FMT,
               TRACE_ERR_ARGS(err));
 
     return err;
 
-} // end of nodeCommExchangeSlave
+} // end of nodeCommExchangeSecondary
 
 /**
  * @brief Helper function to send a sync message to a node or to receive
@@ -1538,7 +1520,7 @@ errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_io
  * @brief Helper function to extend hashes of all of the collected quotes from
  *        other nodes into the TPM. The full quotes in binary form are copied
  *        into the TPM log.
- *         The function cleans up all dynamically-allocated memory.
+ *        The function cleans up all dynamically-allocated memory.
  *
  * @param[in] i_quotes the vector of quotes to extend to the TPM
  * @return nullptr on success; non-nullptr on error
@@ -1704,7 +1686,7 @@ errlHndl_t nodeCommExchange(void)
 #else
 
 
-    master_proc_info_t mProcInfo;
+    primary_proc_info_t mProcInfo;
     std::vector<iohs_instances_t> iohs_instances;
     char * l_phys_path_str = nullptr;
     char * l_peer_path_str = nullptr;
@@ -1744,7 +1726,7 @@ errlHndl_t nodeCommExchange(void)
         }
     }
 
-    // Get master proc for this node
+    // Get primary proc for this node
     err = targetService().queryMasterProcChipTargetHandle(mProcInfo.tgt);
     if (err)
     {
@@ -1755,19 +1737,19 @@ errlHndl_t nodeCommExchange(void)
         break;
     }
 
-    // Extract info from the master proc of this node
+    // Extract info from the primary proc of this node
     EntityPath l_PHYS_PATH = mProcInfo.tgt->getAttr<ATTR_PHYS_PATH>();
-    EntityPath::PathElement l_peMasterNode =
+    EntityPath::PathElement l_pePrimaryNode =
                               l_PHYS_PATH.pathElementOfType(TYPE_NODE);
-    EntityPath::PathElement l_peMasterProc =
+    EntityPath::PathElement l_pePrimaryProc =
                               l_PHYS_PATH.pathElementOfType(TYPE_PROC);
     l_phys_path_str = l_PHYS_PATH.toString();
 
-    if((l_peMasterNode.type == TYPE_NA) ||
-       (l_peMasterProc.type == TYPE_NA))
+    if((l_pePrimaryNode.type == TYPE_NA) ||
+       (l_pePrimaryProc.type == TYPE_NA))
     {
         TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommExchange: "
-                  "ERR: Cannot find NODE or PROC in masterProc 0x%.08X "
+                  "ERR: Cannot find NODE or PROC in primaryProc 0x%.08X "
                   "PHYS_PATH %s",
                   get_huid(mProcInfo.tgt),
                   l_phys_path_str);
@@ -1775,9 +1757,9 @@ errlHndl_t nodeCommExchange(void)
          * @errortype
          * @reasoncode       RC_NCEX_INVALID_PHYS_PATH
          * @moduleid         MOD_NCEX_MAIN
-         * @userdata1        Master Proc Target HUID
+         * @userdata1        Primary Proc Target HUID
          * @userdata2        <Unused>
-         * @devdesc          Master Proc's ATTR_PHYS_PATH is invalid as it
+         * @devdesc          Primary Proc's ATTR_PHYS_PATH is invalid as it
          *                   doesn't have either a NODE or PROC elemenent
          * @custdesc         Trusted Boot failure
          */
@@ -1794,17 +1776,17 @@ errlHndl_t nodeCommExchange(void)
 
         break;
     }
-    mProcInfo.nodeInstance = l_peMasterNode.instance;
-    mProcInfo.procInstance = l_peMasterProc.instance;
+    mProcInfo.nodeInstance = l_pePrimaryNode.instance;
+    mProcInfo.procInstance = l_pePrimaryProc.instance;
     TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-              "Master Proc 0x%.08X: PHYS_PATH=%s: "
+              "Primary Proc 0x%.08X: PHYS_PATH=%s: "
               "nodeInstance=%d, procInstance=%d",
               get_huid(mProcInfo.tgt),
               l_phys_path_str,
               mProcInfo.nodeInstance,
               mProcInfo.procInstance);
 
-    // Walk Through IOHS Chiplets on the Master Proc
+    // Walk Through IOHS Chiplets on the Primary Proc
     TargetHandleList l_iohsTargetList;
     getChildChiplets(l_iohsTargetList, mProcInfo.tgt, TYPE_IOHS);
 
@@ -1835,7 +1817,7 @@ errlHndl_t nodeCommExchange(void)
         if(l_peProc.type == TYPE_NA)
         {
             TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-                      "Skipping masterProc 0x%.08X "
+                      "Skipping primaryProc 0x%.08X "
                       "IOHS HUID 0x%.08X's PEER_PATH %s because "
                       "cannot find PROC in PEER_PATH",
                       get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
@@ -1843,13 +1825,13 @@ errlHndl_t nodeCommExchange(void)
             continue;
         }
 
-        // check that proc has same position as our master
+        // check that proc has same position as our primary
         if (l_peProc.instance != mProcInfo.procInstance)
         {
            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-                      "Skipping masterProc 0x%.08X "
+                      "Skipping primaryProc 0x%.08X "
                       "IOHS HUID 0x%.08X's PEER_PATH %s because PROC "
-                      "Instance=%d does not match masterProc Instance=%d",
+                      "Instance=%d does not match primaryProc Instance=%d",
                       get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
                       l_peer_path_str, l_peProc.instance,
                       mProcInfo.procInstance);
@@ -1861,7 +1843,7 @@ errlHndl_t nodeCommExchange(void)
         if(l_peNode.type == TYPE_NA)
         {
             TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-                      "Skipping masterProc 0x%.08X "
+                      "Skipping primaryProc 0x%.08X "
                       "IOHS HUID 0x%.08X's PEER_PATH %s because "
                       "cannot find NODE in PEER_PATH",
                       get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
@@ -1874,7 +1856,7 @@ errlHndl_t nodeCommExchange(void)
              (l_peNode.instance == my_nodeid))
         {
            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-                      "Skipping masterProc 0x%.08X "
+                      "Skipping primaryProc 0x%.08X "
                       "IOHS HUID 0x%.08X's PEER_PATH %s because either "
                       "Node=%d is not configured or is this node (%d)",
                       get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
@@ -1889,7 +1871,7 @@ errlHndl_t nodeCommExchange(void)
         if(l_peIohs.type == TYPE_NA)
         {
             TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-                      "Skipping masterProc 0x%.08X "
+                      "Skipping primaryProc 0x%.08X "
                       "IOHS HUID 0x%.08X's PEER_PATH %s because "
                       "cannot find OBUS in PEER_PATH",
                       get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
@@ -1908,7 +1890,7 @@ errlHndl_t nodeCommExchange(void)
         {
             TRACFCOMP(g_trac_nc, ERR_MRK"nodeCommExchange: "
                       "getIohsTrainedLinks returned error so "
-                      "Skipping masterProc 0x%.08X IOHS HUID 0x%.08X. "
+                      "Skipping primaryProc 0x%.08X IOHS HUID 0x%.08X. "
                       TRACE_ERR_FMT,
                       get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
                       TRACE_ERR_ARGS(err));
@@ -1927,7 +1909,7 @@ errlHndl_t nodeCommExchange(void)
             if (l_iohsInstance.myIohsRelLink == NCDD_INVALID_LINK_MBOX)
             {
                TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-                         "Skipping masterProc 0x%.08X "
+                         "Skipping primaryProc 0x%.08X "
                          "IOHS HUID 0x%.08X's because neither link has been "
                          "trained: link0=%d, link1=%d (fir_data=0x%.16llX)",
                          get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
@@ -1956,9 +1938,9 @@ errlHndl_t nodeCommExchange(void)
                     l_iohsInstance.peerNodeInstance)
                 {
                     TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-                      "Skipping masterProc 0x%.08X IOHS HUID 0x%.08X's "
+                      "Skipping primaryProc 0x%.08X IOHS HUID 0x%.08X's "
                       "PEER_PATH %s because already have saved connection to "
-                      "that node: myObusInstance=%d, peerInstance:n%d/p%d/obus%d",
+                      "that node: myIohsInstance=%d, peerInstance:n%d/p%d/obus%d",
                       get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
                       l_peer_path_str,
                       l_saved_instance.myIohsInstance,
@@ -1978,7 +1960,7 @@ errlHndl_t nodeCommExchange(void)
         }
 
         iohs_instances.push_back(l_iohsInstance);
-        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: Using masterProc 0x%.08X "
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: Using primaryProc 0x%.08X "
                   "IOHS HUID 0x%.08X's peer path %s with iohs_instance "
                   "myIohsInstance=%d, peer=n%d/p%d/obus%d (vector size=%d)",
                   get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
@@ -2002,7 +1984,7 @@ errlHndl_t nodeCommExchange(void)
          * @errortype
          * @reasoncode       RC_NCEX_INVALID_INSTANCE_COUNT
          * @moduleid         MOD_NCEX_MAIN
-         * @userdata1        Master Proc Target HUID
+         * @userdata1        Primary Proc Target HUID
          * @userdata2[0:31]  Number of Valid IOHS Instances
          * @userdata2[32:63] Total Number Of Nodes
          * @devdesc          When processing the IOHS Peer paths, the wrong
@@ -2022,10 +2004,10 @@ errlHndl_t nodeCommExchange(void)
     }
 
 
-    // Master node should have lowest node number in vector of instance info.
+    // Primary node should have lowest node number in vector of instance info.
     // So sort here by node number and then only pass first instance to
-    // nodeCommExchangeSlave() below.  Then when message is received it
-    // will be checked against the expected master instance.
+    // nodeCommExchangeSecondary() below.  Then when message is received it
+    // will be checked against the expected primary instance.
     std::sort(iohs_instances.begin(),
               iohs_instances.end(),
               [](iohs_instances_t & lhs,
@@ -2047,23 +2029,23 @@ errlHndl_t nodeCommExchange(void)
 #ifdef CONFIG_NODE_COMM_V1
     if (TARGETING::UTIL::isCurrentMasterNode())
     {
-        err = nodeCommExchangeMaster(mProcInfo,iohs_instances);
+        err = nodeCommExchangePrimary(mProcInfo,iohs_instances);
         if (err)
         {
            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-                      "nodeCommExchangeMaster returned an error");
+                      "nodeCommExchangePrimary returned an error");
            break;
         }
     }
     else
     {
-        // Only pass first instance, which should be master instance
-        err = nodeCommExchangeSlave(mProcInfo,
+        // Only pass first instance, which should be primary instance
+        err = nodeCommExchangeSecondary(mProcInfo,
                                         iohs_instances[0]);
         if (err)
         {
            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: "
-                      "nodeCommExchangeSlave returned an error");
+                      "nodeCommExchangeSecondary returned an error");
            break;
         }
     }

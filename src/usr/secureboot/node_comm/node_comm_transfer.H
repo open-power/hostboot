@@ -92,7 +92,7 @@ const std::map<node_comm_transfer_types_t, size_t>
     TransferSizeMap = {{NCT_TRANSFER_SBID,
                             sizeof(uint64_t)},
                        {NCT_TRANSFER_QUOTE_REQUEST,
-                            sizeof(MasterQuoteRequestBlob)},
+                            sizeof(QuoteRequestBlob)},
                        {NCT_NODE_SYNC,
                             0}};
 

@@ -1616,7 +1616,7 @@ errlHndl_t doReadAKCert(TpmTarget* i_tpm, TPM2B_MAX_NV_BUFFER* o_data)
 }
 
 errlHndl_t doGenQuote(TpmTarget* i_tpm,
-                      const MasterTpmNonce_t* const i_masterNonce,
+                      const TpmNonce_t* const i_nonce,
                       QuoteDataOut* o_data)
 {
     errlHndl_t l_errl = nullptr;
@@ -1628,7 +1628,7 @@ errlHndl_t doGenQuote(TpmTarget* i_tpm,
         break;
     }
 
-    l_errl = tpmCmdGenerateQuote(i_tpm, i_masterNonce, o_data);
+    l_errl = tpmCmdGenerateQuote(i_tpm, i_nonce, o_data);
     if(l_errl)
     {
         break;
@@ -1946,7 +1946,7 @@ void* tpmDaemon(void* unused)
                   GenQuoteData* l_data =
                                reinterpret_cast<GenQuoteData*>(tb_msg->iv_data);
                   tb_msg->iv_errl = doGenQuote(l_data->tpm,
-                                               l_data->masterNonce,
+                                               l_data->Nonce,
                                                l_data->data);
               }
               break;

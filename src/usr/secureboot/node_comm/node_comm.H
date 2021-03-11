@@ -73,8 +73,8 @@ struct iohs_instances_t
 
 /*
  * Union used to hold the 3-tuple of information passed between the nodes -
- *       master node to every sibling node, and all those sibling nodes
- *       back to the master node
+ *       primary node to every sibling node, and all those sibling nodes
+ *       back to the primary node
  */
 union msg_format_t
 {
@@ -84,7 +84,7 @@ union msg_format_t
         uint64_t origin_linkId   : 4;  // relative to the originator
         uint64_t receiver_linkId : 4;  // relative to the receiver
         uint64_t nonce           : 56; // a cryptographically strong random
-                                       // nummber requested from the TPM
+                                       // number requested from the TPM
     } PACKED;
 };
 
@@ -118,21 +118,21 @@ enum node_comm_registers_t : uint64_t
 // corresponding to the name given below.
 typedef enum : uint64_t
 {
-    MSTNOTPM = 0x4d53544e4f54504d,
+    REQNOTPM = 0x5245514e4f54504d,
     NDNOTPM_ = 0x4e444e4f54504d5f,
-    MASTERQ_ = 0x4d4153545245515f,
+    REQUEST_ = 0x524551554553545f,
     NODEQUOT = 0x4e4f444551554f54,
     INVALID_ = 0x494e56414c49445f,
 } NCEyeCatcher_t;
 
-// Enhanced multinode comm master node request blob
-struct _MasterQuoteRequestBlob
+// Enhanced multinode comm node request blob
+struct _QuoteRequestBlob
 {
-    SECUREBOOT::NODECOMM::NCEyeCatcher_t EyeCatcher; // master node eye catcher
-    TRUSTEDBOOT::MasterTpmNonce_t MasterNonce; //32-byte nonce
+    SECUREBOOT::NODECOMM::NCEyeCatcher_t EyeCatcher; // requesting node eye catcher
+    TRUSTEDBOOT::TpmNonce_t Nonce; //32-byte nonce
     TRUSTEDBOOT::TPML_PCR_SELECTION PcrSelect; // PCRs to read
 } PACKED;
-typedef struct _MasterQuoteRequestBlob MasterQuoteRequestBlob;
+typedef struct _QuoteRequestBlob QuoteRequestBlob;
 
 /**
  *  @brief Calculate Link Mailbox Base Register based on linkId and mboxId
@@ -332,31 +332,31 @@ errlHndl_t nodeCommLogNonce(uint64_t & i_nonce);
 errlHndl_t nodeCommGetRandom(uint64_t & o_nonce);
 
 /**
- * @brief A function to generate a master quote request blob that will be sent
- *        to the slave node(s) as part of the node communication protocol. The
- *        master request consists of an eye catcher, 32-byte TPM-generated
+ * @brief A function to generate a quote request blob that will be sent
+ *        to the other node(s) as part of the node communication protocol. The
+ *        request consists of an eye catcher, 32-byte TPM-generated
  *        random number, and a PCR selection structure.
- * @param[out] o_request the output master quote request data structure
+ * @param[out] o_request the output quote request data structure
  * @return nullptr on success; non-nullptr on error
  */
-errlHndl_t nodeCommGenMasterQuoteRequest(MasterQuoteRequestBlob* o_request);
+errlHndl_t nodeCommGenQuoteRequest(QuoteRequestBlob* o_request);
 
 /**
- * @brief A function to create the slave node quote response that consists of
- *        eye catcher, slave node ID, quote and signature data (represented by
+ * @brief A function to create the secondary node quote response that consists of
+ *        eye catcher, secondary node ID, quote and signature data (represented by
  *        the QuoteDataOut structure), the contents of PCRs 0-7, the
  *        Attestation Key Certificate returned from TPM, the size
  *        and the contents of the TPM log
- * @param[in] i_request the master node request structure
- * @param[out] o_size the size of the slave quote
- * @param[out] o_resp the slave quote in binary format
- * @note If an error occurs within the function, the o_resp will only have
- *       an eye catcher indicating that the slave quote is bad.
+ * @param[in] i_request the primary node request structure
+ * @param[out] o_size the size of the secondary node quote
+ * @param[out] o_resp the secondary node quote in binary format
+ * @note If an error occurs within the function, the o_resp will only have an
+ *       eye catcher indicating that the secondary node quote is bad.
  * @return nullptr on success; non-nullptr on error
  */
-errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_request,
-                                         size_t& o_size,
-                                         std::unique_ptr<uint8_t>& o_resp);
+errlHndl_t nodeCommGenQuoteResponse(const QuoteRequestBlob* const i_request,
+                                    size_t& o_size,
+                                    std::unique_ptr<uint8_t>& o_resp);
 
 } // end NODECOMM namespace
 
