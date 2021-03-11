@@ -1731,23 +1731,13 @@ errlHndl_t populate_hbSecurebootData ( void )
         // populate secure setting for trusted boot
         bool trusted = false;
 #ifdef CONFIG_TPMDD
-        trusted = TRUSTEDBOOT::functionalPrimaryTpmExists();
-
-        if(trusted)
+        l_elog = TRUSTEDBOOT::anyFunctionalPrimaryTpmExists(trusted);
+        if (l_elog)
         {
-            // Check if the primary TPM has been poisoned. If it has,
-            // trustedboot state cannot be guaranteed on the system.
-            TARGETING::Target* l_primaryTpm = nullptr;
-            TRUSTEDBOOT::getPrimaryTpm(l_primaryTpm);
-            if(!l_primaryTpm ||
-                l_primaryTpm->getAttr<TARGETING::ATTR_TPM_POISONED>())
-            {
-                // Primary TPM doesn't exist or is poisoned -
-                // turn off trustedboot
-                trusted = false;
-            }
+            TRACFCOMP(g_trac_runtime, ERR_MRK"populate_hbSecurebootData: "
+                "anyFunctionalPrimaryTpmExists returned error");
+            break;
         }
-
 #endif
         l_sysSecSets->trustedboot = trusted? 1: 0;
 
@@ -2627,12 +2617,12 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         // to 0 and should be ignored by any consumer of HDAT).
         uint8_t poisonedFlag = 0;
 
+        const auto tpmRole = pTpm->getAttr<TARGETING::ATTR_TPM_ROLE>();
         if (hwasState.functional && hwasState.present)
         {
             // present and functional
             l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmPresentAndFunctional;
 
-            const auto tpmRole = pTpm->getAttr<TARGETING::ATTR_TPM_ROLE>();
             if(tpmRole == TARGETING::TPM_ROLE_TPM_PRIMARY)
             {
                 poisonedFlag = pTpm->getAttr<TARGETING::ATTR_TPM_POISONED>();
@@ -2655,6 +2645,11 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
         // Set TPM configuration flag
         l_tpmInstInfo->hdatTpmConfigFlags.pcrPoisonedFlag = poisonedFlag;
+
+        // Set TPM role flag
+        l_tpmInstInfo->hdatTpmConfigFlags.tpmRole =
+            tpmRole == TARGETING::TPM_ROLE_TPM_PRIMARY ?
+            HDAT::HDAT_PRIMARY_TPM : HDAT::HDAT_BACKUP_TPM;
 
         // advance the current offset to account for this tpm instance info
         l_currOffset += sizeof(*l_tpmInstInfo);

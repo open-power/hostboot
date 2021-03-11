@@ -417,6 +417,15 @@ namespace TRUSTEDBOOT
     errlHndl_t validateTpmHandle(const TpmTarget* i_pTpm);
 
     /**
+     * @brief Checks whether any node has a present, functional, and
+     *        un-poisoned primary TPM
+     *
+     * @parm[in] o_exists Whether or not functional, primary, un-poisoned  TPM exists
+     * @retval errlHndl_t nullptr if valid or error log otherwise.
+     */
+    errlHndl_t anyFunctionalPrimaryTpmExists(bool &o_exists);
+
+    /**
      * @brief Checks whether the node has a present and functioning primary TPM.
      * @retval true if a present and functional primary TPM is available;
      *         false otherwise

@@ -45,6 +45,9 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/mfgFlagAccessors.H>
+#include <runtime/runtime.H>
+#include "../hdat/hdattpmdata.H"
+#include "../runtime/hdatstructs.H"
 #include <secureboot/service.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
@@ -559,6 +562,79 @@ void getBackupTpm(TARGETING::Target*& o_pBackupTpm)
 {
     getTpmWithRoleOf(TARGETING::TPM_ROLE_TPM_BACKUP,
         o_pBackupTpm);
+}
+
+errlHndl_t anyFunctionalPrimaryTpmExists(bool &o_exists)
+{
+    o_exists = false;
+    errlHndl_t l_errl = nullptr;
+    do
+    {
+        uint64_t l_dataSizeMax = 0;
+        uint32_t l_instance = 0;
+        uint64_t l_hdatBaseAddr = 0;
+        uint64_t l_hdatInstanceCount = 0;
+
+        l_errl = RUNTIME::get_instance_count(RUNTIME::NODE_TPM_RELATED,
+            l_hdatInstanceCount);
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                "anyFunctionalPrimaryTpmExists failed to get instance count");
+            break;
+        }
+
+        for (l_instance = 0; l_instance < l_hdatInstanceCount; ++l_instance)
+        {
+            if (o_exists)
+            {
+                break;
+            }
+
+            l_errl = RUNTIME::get_host_data_section(RUNTIME::NODE_TPM_RELATED,
+                l_instance,
+                l_hdatBaseAddr,
+                l_dataSizeMax);
+
+            if (l_errl)
+            {
+                TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                    "anyFunctionalPrimaryTpmExists failed to get host data"
+                    " section with instance: %d", l_instance);
+                break;
+            }
+
+            auto const l_hdatTpmData = reinterpret_cast<HDAT::hdatTpmData_t*>
+                (l_hdatBaseAddr);
+
+            auto l_hdatTpmInfo = reinterpret_cast<const HDAT::hdatHDIFDataArray_t*>
+                (reinterpret_cast<const uint8_t*>(l_hdatTpmData) +
+                l_hdatTpmData->hdatSbTpmInfo.hdatOffset);
+
+            auto l_hdatTpmInstInfo = reinterpret_cast<const HDAT::hdatSbTpmInstInfo_t*>
+                (reinterpret_cast<const uint8_t*>(l_hdatTpmInfo) +
+                l_hdatTpmInfo->hdatOffset);
+
+            for (uint32_t l_hdatCount = 0; l_hdatCount < l_hdatTpmInfo->hdatArrayCnt;
+                l_hdatCount++)
+            {
+                // Check for any functional, un-poisoned, primary TPM
+                if ((!l_hdatTpmInstInfo->hdatTpmConfigFlags.pcrPoisonedFlag) &&
+                    ((l_hdatTpmInstInfo->hdatFunctionalStatus & HDAT::TpmPresentAndFunctional) ==
+                        HDAT::TpmPresentAndFunctional) &&
+                    (l_hdatTpmInstInfo->hdatTpmConfigFlags.tpmRole == HDAT::HDAT_PRIMARY_TPM))
+                {
+                    o_exists = true;
+                    break;
+                }
+                // Increment the TPM pointer
+                l_hdatTpmInstInfo = reinterpret_cast<const HDAT::hdatSbTpmInstInfo_t*>
+                    (reinterpret_cast<const uint8_t*>(l_hdatTpmInstInfo) +
+                    l_hdatTpmInfo->hdatAllocSize);
+            }
+        }
+    } while(0);
+    return l_errl;
 }
 
 bool functionalPrimaryTpmExists()

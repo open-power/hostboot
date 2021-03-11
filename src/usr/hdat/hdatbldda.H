@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,9 +42,9 @@
 #include "hdatvpd.H"
 #include <errl/errlentry.H>       // ErrlEntry class definition
 #include <hdat/hdat_reasoncodes.H>
-#include <../vpd/mvpd.H>
-#include <../vpd/ipvpd.H>
-#include <../vpd/pvpd.H>
+#include "../vpd/mvpd.H"
+#include "../vpd/ipvpd.H"
+#include "../vpd/pvpd.H"
 using namespace MVPD;
 using namespace PVPD;
 using namespace IPVPD;

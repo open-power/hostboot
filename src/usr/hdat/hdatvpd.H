@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,9 +46,9 @@
 #include <errl/errlentry.H>
 #include <vpd/vpd_if.H>
 //#include "hdatutil.H"
-#include <../vpd/mvpd.H>
-#include <../vpd/ipvpd.H>
-#include <../vpd/pvpd.H>
+#include "../vpd/mvpd.H"
+#include "../vpd/ipvpd.H"
+#include "../vpd/pvpd.H"
 #include <util/utilfile.H>
 using namespace MVPD;
 using namespace PVPD;

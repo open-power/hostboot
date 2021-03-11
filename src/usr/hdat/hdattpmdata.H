@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,14 @@ enum TpmState {
 };
 
 /**
+ * @brief Enumeration definition for the TPM roles
+ */
+enum TpmRole {
+    HDAT_PRIMARY_TPM = 0x0,
+    HDAT_BACKUP_TPM = 0x1,
+};
+
+/**
  * @brief Structure definition for HDAT Tpm Node Data Header
  */
 struct hdatTpmData_t
@@ -93,7 +101,8 @@ struct hdatTpmConfigFlags_t
 {
     uint8_t pcrPoisonedFlag : 1; // Intentionally break remote attestation
                                  // of this TPM
-    uint8_t reserved : 7;
+    uint8_t tpmRole : 1; // 0b1 = backup, 0b0 = primary
+    uint8_t reserved : 6;
 } __attribute__ ((packed));
 
 /**

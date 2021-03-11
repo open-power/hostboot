@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -292,21 +292,21 @@ void* call_host_runtime_setup (void *io_pArgs)
         // Fill in Hostboot runtime data if there is a PAYLOAD
         if( !(TARGETING::is_no_load()) )
         {
-            // API call to fix up the secureboot fields
-            l_err = RUNTIME::populate_hbSecurebootData();
-            if ( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "Failed hbSecurebootData setup" );
-                break;
-            }
-
             // API call to populate the TPM Info fields
             l_err = RUNTIME::populate_hbTpmInfo();
             if ( l_err )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                             "Failed hbTpmInfo setup" );
+                break;
+            }
+
+            // API call to fix up the secureboot fields
+            l_err = RUNTIME::populate_hbSecurebootData();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Failed hbSecurebootData setup" );
                 break;
             }
         }

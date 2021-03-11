@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,14 +46,14 @@
 #include <hdat/hdat.H>
 #include "hdatvpd.H"
 #include "hdatbldda.H"
-#include<vpd/mvpdenums.H>
-#include<vpd/pvpdenums.H>
-#include<vpd/spdenums.H>
+#include <vpd/mvpdenums.H>
+#include <vpd/pvpdenums.H>
+#include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicatectm.H>
-#include <../vpd/mvpd.H>
-#include <../vpd/ipvpd.H>
-#include <../vpd/pvpd.H>
+#include "../vpd/mvpd.H"
+#include "../vpd/ipvpd.H"
+#include "../vpd/pvpd.H"
 #include <i2c/i2cif.H>
 #include <targeting/common/hbrt_target.H>
 #include <spi/spi.H>
