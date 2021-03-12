@@ -59,12 +59,14 @@ void lockAbusSecMailboxes()
     auto l_pProc = l_procs.begin();
     while(l_pProc != l_procs.end())
     {
+        const bool DO_NOT_FORCE_SECURITY = false;
+        const bool DO_LOCK_ABUS_MAILBOXES = true;
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(*l_pProc);
         FAPI_INVOKE_HWP(l_errl,
                         p10_update_security_ctrl,
                         l_fapiProc,
-                        false, // do not force security
-                        true); // lock down Abus mailboxes
+                        DO_NOT_FORCE_SECURITY,
+                        DO_LOCK_ABUS_MAILBOXES);
 
         if(l_errl)
         {

@@ -235,11 +235,8 @@ void* host_sys_fab_iovalid_processing(void* io_ptr )
                 errlCommit(l_err, SECURE_COMP_ID);
            }
 
-// TODO RTC: 244858 figure out whether we need to do this and how exactly
-/*
             // Lock the secure ABUS Link Mailboxes now
             SECUREBOOT::lockAbusSecMailboxes();
-*/
         }
 #endif
     }  // end if (io_pMsg->extra_data)
