@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,6 +154,20 @@ errlHndl_t checkForIplAttentions()
             }
 
             // Create a new error log and link the PLID.
+            /*@
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   ATTN_CHK_IPL_ATTNS_MODULE
+             * @reasoncode ATTN_SEE_HW_ERROR
+             * @userdata1  HUID of target containing ATTR_PRD_HWP_PLID
+             * @userdata2  Value of ATTR_PRD_HWP_PLID
+             *
+             * @devdesc    A hardware procedure failed with the assumption that
+             *             there were active attentions. However, no attentions
+             *             were found. See the other log with matching PLID.
+             *
+             * @custdesc   A hardware procedure failed. See the other log with
+             *             matching PLID.
+             */
             l_plidElog = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
                                         ATTN_CHK_IPL_ATTNS_MODULE,
                                         ATTN_SEE_HW_ERROR,
