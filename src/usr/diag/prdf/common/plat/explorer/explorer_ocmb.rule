@@ -1433,22 +1433,22 @@ group gTLX_ERR1_REPORT
     /** TLX_ERR1_REPORT[37]
      *  TLXT FIFO CE
      */
-    (rTLXFIR, bit(37)) ? self_th_32perDay;
+    (rTLX_ERR1_REPORT, bit(37)) ? self_th_32perDay;
 
     /** TLX_ERR1_REPORT[39]
      *  Unexpected Interrupt Response
      */
-    (rTLXFIR, bit(39)) ? parent_proc_th_32perDay;
+    (rTLX_ERR1_REPORT, bit(39)) ? parent_proc_th_32perDay;
 
     /** TLX_ERR1_REPORT[40]
      *  BDI Poisoned
      */
-    (rTLXFIR, bit(40)) ? self_th_1;
+    (rTLX_ERR1_REPORT, bit(40)) ? self_th_1;
 
     /** TLX_ERR1_REPORT[41]
      *  TLXT Metadata UE
      */
-    (rTLXFIR, bit(41)) ? self_th_1;
+    (rTLX_ERR1_REPORT, bit(41)) ? self_th_1;
 };
 
 ################################################################################
