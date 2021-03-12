@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,6 +132,7 @@ class SbePsu
             SBE_PSU_MSG_STASH_KEY_ADDR       = 0x07,
             SBE_PSU_SECURITY_LIST_BIN_DUMP   = 0x08,
             SBE_PSU_OCMB_CONFIG              = 0x09,
+            SBE_PSU_TOPOLOGY_ID_TABLE        = 0x0A, //syncFabTopoIdTable
         };
 
         /**
@@ -306,7 +307,6 @@ class SbePsu
             SBE_OCMB_CONFIG_MAX_NUMBER_OF_PORTS = 16,
         };
 
-
         /**
         * @brief non reserved word enums
         *
@@ -420,6 +420,26 @@ class SbePsu
             SBE_SECURITY_LIST_BIN_DUMP_REQ_USED_REGS     = 0x03,
             SBE_SECURITY_LIST_BIN_DUMP_RSP_USED_REGS     = 0x01,
         };
+
+        /**
+        * @brief non reserved word enums
+        *
+        * Shows which of the request and response msg registers are
+        * not reserved. Reserved registers do not need to be written
+        * or read.
+        *
+        * This is a 4 bit field, each bit indicates as follows:
+        * 0x1 - Reg 0 is non-reserved (read or write this reg)
+        * 0x2 - Reg 1 is non-reserved (read or write this reg)
+        * 0x4 - Reg 2 is non-reserved (read or write this reg)
+        * 0x8 - Reg 3 is non-reserved (read or write this reg)
+        */
+        enum psuSyncFabTopoIdTable
+        {
+            SBE_TOPOLOGY_TABLE_REQ_USED_REGS     = 0x07,//reg0,1,2
+            SBE_TOPOLOGY_TABLE_RSP_USED_REGS     = 0x01,//reg0
+        };
+
 
         /**
          * @brief Struct for PSU command message format
@@ -672,6 +692,18 @@ class SbePsu
                 uint32_t cd7_sendOcmbConfig_Reserved2;     // Mbx Reg 3, Byte 4..7
             } PACKED;
 
+            struct //syncFabTopoIdTable D7/0A
+            {
+                uint16_t cd7_syncFabTopoIdTable_Reserved;
+                uint16_t cd7_syncFabTopoIdTable_ControlFlags;
+                uint16_t cd7_syncFabTopoIdTable_SeqID;
+                uint8_t  cd7_syncFabTopoIdTable_CommandClass;
+                uint8_t  cd7_syncFabTopoIdTable_Command;
+                uint64_t cd7_syncFabTopoIdTable_Address; // mbxReg1
+                uint8_t  cd7_syncFabTopoIdTable_Reserved1[6]; // mbxReg2
+                uint16_t cd7_syncFabTopoIdTable_Length; // mbxReg2
+                uint64_t cd7_syncFabTopoIdTable_Reserved2; // mbxReg3
+            } PACKED;
 
 
             psuCommand(uint16_t i_controlFlags, //Mbx Reg 0 input

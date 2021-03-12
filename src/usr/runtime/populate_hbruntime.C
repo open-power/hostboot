@@ -3760,6 +3760,13 @@ errlHndl_t sendSBESystemConfig( void )
                     break;
                 }
             }
+
+            // Push out the Topology ID Table
+            l_elog = SBEIO::psuSendTopologyIdTable();
+            if( l_elog )
+            {
+                break;
+            }
         }
 
     } while(0);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,15 +53,34 @@ namespace SBEIO
     /**
      * @brief The type returned by sbeMalloc and deallocated by sbeFree
      */
-    struct sbeAllocationHandle_t
+    class sbeAllocationHandle_t
     {
-        void* data = nullptr;
+      public:
+        // Pointer to the beginning of allocated memory
+        void* bufPtr;
+
+        // Cacheline-aligned address (==dataPtr as non pointer type)
+        uint64_t aligned;
+
+        // Virtual address of cacheline-aligned data buffer
+        void* dataPtr;
+
+        // Physical address of cacheline-aligned data buffer
+        uint64_t physAddr;
+
+        sbeAllocationHandle_t( void* i_bufPtr = nullptr,
+                               uint64_t i_aligned = 0,
+                               void* i_dataPtr = nullptr,
+                               uint64_t i_physAddr = 0 )
+          : bufPtr(i_bufPtr), aligned(i_aligned),
+            dataPtr(i_dataPtr), physAddr(i_physAddr)
+        {};
 
         /* @brief Null test for data member.
          */
         operator bool() const
         {
-            return data;
+            return bufPtr;
         };
     };
 
@@ -79,6 +98,7 @@ namespace SBEIO
      *                               to deallocate the memory.
      */
     sbeAllocationHandle_t sbeMalloc(size_t i_bytes, void*& o_allocation);
+    sbeAllocationHandle_t sbeMalloc(size_t i_bytes);
 
     /**
      * @brief Frees an allocation previously allocated with sbeMalloc
@@ -87,8 +107,10 @@ namespace SBEIO
      */
     inline void sbeFree(sbeAllocationHandle_t& i_handle)
     {
-        free(i_handle.data);
-        i_handle.data = nullptr;
+        free(i_handle.bufPtr);
+        i_handle.bufPtr = nullptr;
+        i_handle.aligned = 0;
+        i_handle.physAddr = 0;
     }
 
     /**
@@ -455,6 +477,14 @@ namespace SBEIO
     errlHndl_t sendPsuGetHwRegRequest(TARGETING::Target * i_target,
                                      const uint64_t i_addr,
                                      uint64_t & o_value);
+
+    /**
+    * @brief Sends a PSU chipOp with the value of the Fabric Topology ID Table.
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t psuSendTopologyIdTable(void);
 
 } //end namespace SBEIO
 

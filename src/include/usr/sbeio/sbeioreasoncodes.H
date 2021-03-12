@@ -61,6 +61,7 @@ enum sbeioModuleId
     SBEIO_DEAD_MAN_TIMER                = 0x10,
     SBEIO_PSU_GET_HW_REG                = 0x11,
     SBEIO_GET_FIFO_SBE_CAPABILITIES     = 0x12,
+    SBEIO_PSUSYNCFABTOPOIDTABLE         = 0x13,
 };
 
 /**

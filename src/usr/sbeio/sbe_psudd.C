@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,27 +77,37 @@ using namespace ERRORLOG;
 namespace SBEIO
 {
 
-sbeAllocationHandle_t sbeMalloc(const size_t i_bytes, void*& o_allocation)
+sbeAllocationHandle_t sbeMalloc(const size_t i_bytes)
 {
     // The buffer must be a multiple of SBE_ALIGNMENT_SIZE_IN_BYTES
     // bytes in size, and it must be aligned to a
     // SBE_ALIGNMENT_SIZE_IN_BYTES byte boundary.
     const size_t l_totalAlignedSize =
-        (ALIGN_X(i_bytes, SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES)
-         + (SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES - 1));
+      (ALIGN_X(i_bytes, SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES)
+       + (SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES - 1));
 
     // Create buffer with enough size to be properly aligned
     void* const l_sbeBuffer = malloc(l_totalAlignedSize);
 
     // Align the buffer
     const uint64_t l_sbeBufferAligned =
-        ALIGN_X(reinterpret_cast<uint64_t>(l_sbeBuffer),
-                SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES);
+      ALIGN_X(reinterpret_cast<uint64_t>(l_sbeBuffer),
+              SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES);
 
-    o_allocation = reinterpret_cast<void*>(l_sbeBufferAligned);
+    // Return a handle so we can free() the buffer later
+    return {
+        l_sbeBuffer,
+        l_sbeBufferAligned,
+        reinterpret_cast<void*>(l_sbeBufferAligned),
+        mm_virt_to_phys(reinterpret_cast<void*>(l_sbeBufferAligned))
+    };
+}
 
-    // Return a pointer to the original buffer, so we can free() it later
-    return { l_sbeBuffer };
+sbeAllocationHandle_t sbeMalloc(const size_t i_bytes, void*& o_allocation)
+{
+    sbeAllocationHandle_t l_hndl = sbeMalloc(i_bytes);
+    o_allocation = reinterpret_cast<void*>(l_hndl.dataPtr);
+    return l_hndl;
 }
 
 SbePsu & SbePsu::getTheInstance()

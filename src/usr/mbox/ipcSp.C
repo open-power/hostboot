@@ -359,6 +359,22 @@ void IpcSp::msgHandler()
                                "Successfully sent all system configs to procs via SBE chip op !!");
                 }
 
+                TRACFCOMP( g_trac_ipc,
+                           "sending Topology Id Tables to SBEs");
+                err = SBEIO::psuSendTopologyIdTable();
+                if(err)
+                {
+                    TRACFCOMP( g_trac_ipc, "In ipcSp: SBEIO::psuSendTopologyIdTable errored - must shutdown now!!!");
+                    uint32_t l_errEid = err->eid();
+                    errlCommit(err, IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errEid, true);
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_ipc,
+                               "Successfully sent topology id tables via SBE chip op !!");
+                }
+
                 //Send response back to the master HB to indicate successful configuration down to SBE
                 err = MBOX::send(MBOX::HB_SBE_SYSCONFIG_MSGQ, msg, msg->data[1] );
                 if (err)

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -56,6 +56,7 @@ OBJS += p10_extract_sbe_rc.o
 OBJS += p10_ppe_utils.o
 OBJS += p10_ppe_common.o
 OBJS += sbe_psuSendOcmbConfig.o
+OBJS += sbe_psuSyncFabTopoIdTable.o
 
 # sbeio's sub directories
 SUBDIRS += test.d
