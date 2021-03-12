@@ -182,6 +182,25 @@
     <writeable/>
   </attribute>
 
+  <enumerationType>
+    <id>HYPERVISOR_IPL_SIDE</id>
+    <description>
+          A enumeration describing the potential values for the Hypervisor IPL side
+      </description>
+    <enumerator>
+      <name>UNKNOWN</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>PERM</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <name>TEMP</name>
+      <value>2</value>
+    </enumerator>
+  </enumerationType>
+
   <attribute>
     <id>HYP_DISPATCH_WHEEL</id>
     <description>

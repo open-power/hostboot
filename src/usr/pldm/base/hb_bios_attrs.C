@@ -64,6 +64,8 @@ const char PLDM_BIOS_HB_USB_SECURITY_STRING[] = "hb_usb_security";
 const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[] = "hb_power_limit_enable";
 const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[] = "hb_power_limit_in_watts";
 
+const char PLDM_BIOS_PVM_FW_BOOT_SIDE[] = "pvm_fw_boot_side";
+
 // Possible Values
 constexpr char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
 constexpr char PLDM_BIOS_HB_POWERVM_STRING[] = "PowerVM";
@@ -71,6 +73,8 @@ constexpr char PLDM_BIOS_ENABLED_STRING[] = "Enabled";
 constexpr char PLDM_BIOS_DISABLED_STRING[] = "Disabled";
 constexpr char PLDM_BIOS_128_MB_STRING[] = "128MB";
 constexpr char PLDM_BIOS_256_MB_STRING[] = "256MB";
+constexpr char PLDM_BIOS_PERM_STRING[] = "Perm";
+constexpr char PLDM_BIOS_TEMP_STRING[] = "Temp";
 
 constexpr const char* POSSIBLE_HYP_VALUE_STRINGS[] =
                       { PLDM_BIOS_HB_OPAL_STRING,
@@ -87,6 +91,9 @@ constexpr const char* POSSIBLE_HB_MEM_REGION_SIZE_STRINGS[] =
 constexpr const char* POSSIBLE_HB_POWER_LIMIT_STRINGS[] =
                       { PLDM_BIOS_ENABLED_STRING,
                         PLDM_BIOS_DISABLED_STRING };
+constexpr const char* POSSIBLE_PVM_FW_BOOT_SIDE_STRINGS[] =
+                      { PLDM_BIOS_PERM_STRING,
+                        PLDM_BIOS_TEMP_STRING };
 
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
 constexpr size_t MFG_FLAGS_CONVERT_STRING_SIZE = 8;
@@ -622,16 +629,17 @@ errlHndl_t systemEnumAttrLookup(std::vector<uint8_t>& io_string_table,
     return errl;
 }
 
-errlHndl_t getDebugConsoleEnabled(bool &o_debugConsoleEnabled)
+errlHndl_t getDebugConsoleEnabled(std::vector<uint8_t>& io_string_table,
+                                  std::vector<uint8_t>& io_attr_table,
+                                  bool &o_debugConsoleEnabled)
 {
     errlHndl_t errl = nullptr;
     o_debugConsoleEnabled = false;
     do{
     const pldm_bios_string_table_entry * cur_val_string_entry_ptr = nullptr;
-    std::vector<uint8_t> string_table, attr_table;
 
-    errl = systemEnumAttrLookup(string_table,
-                                attr_table,
+    errl = systemEnumAttrLookup(io_string_table,
+                                io_attr_table,
                                 PLDM_BIOS_HB_DEBUG_CONSOLE_STRING,
                                 cur_val_string_entry_ptr);
     if(errl)
@@ -752,7 +760,7 @@ errlHndl_t getHypervisorMode(std::vector<uint8_t>& io_string_table,
     else
     {
         // print the entire buffer
-        PLDM_INF_BIN("Unexpected string string : ",translated_string, max_possible_value_length);
+        PLDM_INF_BIN("Unexpected string : ",translated_string, max_possible_value_length);
         o_payloadType = TARGETING::PAYLOAD_KIND_INVALID;
     }
 
@@ -1130,6 +1138,66 @@ getFieldCoreOverride( std::vector<uint8_t>& io_string_table,
     return l_errl;
 } // getFieldCoreOverride
 
+errlHndl_t getBootside(std::vector<uint8_t>                     & io_string_table,
+                       std::vector<uint8_t>                     & io_attr_table,
+                       TARGETING::ATTR_HYPERVISOR_IPL_SIDE_type & o_bootside)
+{
+    errlHndl_t errl = nullptr;
+    do{
+    const pldm_bios_string_table_entry * cur_val_string_entry_ptr = nullptr;
+
+    errl = systemEnumAttrLookup(io_string_table,
+                                io_attr_table,
+                                PLDM_BIOS_PVM_FW_BOOT_SIDE,
+                                cur_val_string_entry_ptr);
+    if(errl)
+    {
+      PLDM_ERR("Failed to lookup value for %s", PLDM_BIOS_PVM_FW_BOOT_SIDE);
+      break;
+    }
+    // Find the longest string that we will accept as a
+    // possible value for the a given PLDM BIOS attribute
+    // so we can allocate a sufficiently sized buffer.
+    // Add 1 byte to buffer to account for null terminator
+    constexpr auto max_possible_value_length =
+         std::accumulate(std::begin(POSSIBLE_PVM_FW_BOOT_SIDE_STRINGS),
+                         std::end(POSSIBLE_PVM_FW_BOOT_SIDE_STRINGS),
+                         0ul,
+                         find_maxstrlen) + 1;
+
+    // Ensure max_possible_value_length is larger than the extra
+    // extra byte we added to account for the null terminator.
+    // This assert forces the constexpr to be evaluated at
+    // compile-time
+    static_assert(max_possible_value_length > 1);
+    char translated_string[max_possible_value_length] = {0};
+
+    pldm_bios_table_string_entry_decode_string(cur_val_string_entry_ptr,
+                                               translated_string,
+                                               max_possible_value_length);
+
+    if(strncmp(translated_string, PLDM_BIOS_PERM_STRING, max_possible_value_length) == 0)
+    {
+        PLDM_INF("Booting from %s side!", PLDM_BIOS_PERM_STRING);
+        o_bootside = TARGETING::HYPERVISOR_IPL_SIDE_PERM;
+    }
+    else if(strncmp(translated_string, PLDM_BIOS_TEMP_STRING, max_possible_value_length) == 0)
+    {
+        PLDM_INF("Booting from %s side!", PLDM_BIOS_TEMP_STRING);
+        o_bootside = TARGETING::HYPERVISOR_IPL_SIDE_TEMP;
+    }
+    else
+    {
+        // print the entire buffer
+        PLDM_INF_BIN("Unexpected string: ",translated_string, max_possible_value_length);
+        o_bootside = TARGETING::HYPERVISOR_IPL_SIDE_INVALID;
+    }
+
+    }while(0);
+
+    return errl;
+}
+
 errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
                        std::vector<uint8_t>& io_attr_table,
                        TARGETING::ATTR_MFG_FLAGS_typeStdArr &o_mfgFlags)
@@ -1366,4 +1434,4 @@ errlHndl_t getPowerLimit(bool &o_powerLimitEnable,
 }
 
 
-}
+} // end namespace PLDM

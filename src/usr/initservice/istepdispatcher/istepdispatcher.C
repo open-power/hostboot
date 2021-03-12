@@ -294,7 +294,8 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 #ifdef CONFIG_PLDM
         // first check if the BMC has told us the debug
         // console is enabled
-        errlHndl_t err_pldm = PLDM::getDebugConsoleEnabled(l_tlEnabled);
+        std::vector<uint8_t> string_table, attr_table;
+        errlHndl_t err_pldm = PLDM::getDebugConsoleEnabled(string_table, attr_table, l_tlEnabled);
         if(err_pldm)
         {
            TRACFCOMP(g_trac_initsvc,

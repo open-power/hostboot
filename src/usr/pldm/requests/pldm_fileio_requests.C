@@ -43,6 +43,7 @@
 #include <hwas/common/hwasCallout.H>
 #include <pldm/pldm_errl.H>
 #include <limits.h>
+#include <targeting/common/targetservice.H>
 
 namespace PLDM
 {
@@ -214,10 +215,22 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
     uint32_t l_totalRead = 0;
     uint8_t* l_currPtr = o_file;
 
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+    auto attr_bootside = sys->getAttr<TARGETING::ATTR_HYPERVISOR_IPL_SIDE>();
+
+    // Assume we're attempting to boot from the temp side.
+    auto bootside = PLDM_FILE_TYPE_LID_TEMP;
+
+    // Check which side we're actually booting from
+    if (attr_bootside == TARGETING::HYPERVISOR_IPL_SIDE_PERM)
+    {
+        bootside = PLDM_FILE_TYPE_LID_PERM;
+    }
+
     struct pldm_read_write_file_by_type_req l_req
     {
         // Currently BMC is hardcoded to use the TEMP side
-        .file_type = PLDM_FILE_TYPE_LID_TEMP,
+        .file_type = bootside,
         .file_handle = i_fileHandle,
         .offset = i_offset,
         .length = 0, // calculated later

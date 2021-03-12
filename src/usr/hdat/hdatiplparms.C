@@ -268,10 +268,18 @@ void  HdatIplParms::hdatGetIplParmsData()
     //IPL to hypervisor running
     this->iv_hdatIPLParams->iv_iplParms.hdatIPLDestination = 0x02;
 
-    //@TODO RTC 258465 HDAT: eBMC fetching the IPL side from
-    //BIOS (Boot) parameter of PLDM
-    this->iv_hdatIPLParams->iv_iplParms.hdatIPLSide =
-                                     HDAT_FIRMWARE_SIDE_TEMPORARY;
+    // Set the bootside
+    if (l_pSysTarget->getAttr<TARGETING::ATTR_HYPERVISOR_IPL_SIDE>() == TARGETING::HYPERVISOR_IPL_SIDE_PERM)
+    {
+        this->iv_hdatIPLParams->iv_iplParms.hdatIPLSide =
+                                         HDAT_FIRMWARE_SIDE_PERMANENT;
+    }
+    else
+    {
+        this->iv_hdatIPLParams->iv_iplParms.hdatIPLSide =
+                                         HDAT_FIRMWARE_SIDE_TEMPORARY;
+    }
+
     // Fast IPL Speed
     this->iv_hdatIPLParams->iv_iplParms.hdatIPLSpeed = 0xFF;
 

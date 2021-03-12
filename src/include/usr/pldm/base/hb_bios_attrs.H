@@ -43,6 +43,10 @@
  *                                request to the BMC. If it already has contents
  *                                no request will be made and vector will not
  *                                be modified.
+ *
+ * NOTE: These parameters are required for all functions since the caller can reuse them amongst multiple function calls
+ *       into this API to save on lookups which should be avoided as much as possible. By passing in the already filled
+ *       vectors the underlying code skips the lookups entirely. Otherwise, the code is forced to do the lookup.
  **/
 
 #include <openbmc/pldm/libpldm/bios_table.h>
@@ -187,12 +191,32 @@ namespace PLDM
     /** @brief Retrieve the current value of the hb_debug_console
     *          PLDM bios attribute, convert it to a boolean value.
     *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
     * @param[out] o_debugConsoleEnabled  Will return true if "Enabled" is
     *                                    returned as the value for PLDM attr
     *
     * @return Error if any, otherwise nullptr.
     */
-    errlHndl_t getDebugConsoleEnabled(bool &o_debugConsoleEnabled);
+    errlHndl_t getDebugConsoleEnabled(std::vector<uint8_t>& io_string_table,
+                                      std::vector<uint8_t>& io_attr_table,
+                                      bool &o_debugConsoleEnabled);
+
+#ifdef CONFIG_INCLUDE_XML_OPPOWERVM
+    /** @brief Retrieve the current value of the pvm_fw_boot_side PLDM bios attribute and convert to hostboot
+     *         ATTR_HYPERVISOR_IPL_SIDE enum.
+     *
+     * @param[in,out] io_string_table  See brief at the top of this file.
+     * @param[in,out] io_attr_table    See brief at the top of this file.
+     * @param[out]    o_bootside       If no error, then value for pvm_fw_boot_side translated to
+     *                                 ATTR_HYPERVISOR_IPL_SIDE_type.
+     *
+     * @return        errlHndl_t       errl if an error occurs. Otherwise, nullptr.
+     */
+    errlHndl_t getBootside(std::vector<uint8_t>                     & io_string_table,
+                           std::vector<uint8_t>                     & io_attr_table,
+                           TARGETING::ATTR_HYPERVISOR_IPL_SIDE_type & o_bootside);
+#endif
 }
 
 #endif

@@ -203,6 +203,9 @@
       <id>HUGE_PAGE_SIZE</id>
     </attribute>
     <attribute>
+      <id>HYPERVISOR_IPL_SIDE</id>
+    </attribute>
+    <attribute>
       <id>HYP_DISPATCH_WHEEL</id>
     </attribute>
     <attribute>
