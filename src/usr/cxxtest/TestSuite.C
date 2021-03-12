@@ -52,7 +52,8 @@ std::vector<const char *> CxxSerialTests{ "libtesthwas.so",
                                           "libtesteeprom.so",
                                           "libtestspiserial.so",
                                           "libtestfapi2serial.so",
-                                          "libtestvpd.so" };
+                                          "libtestvpd.so",
+                                          "libtestsbeio.so" };
 
 //
 // TestSuite members

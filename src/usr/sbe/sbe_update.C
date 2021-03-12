@@ -1686,12 +1686,12 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                TRACE_ERR_ARGS(err));
                     break;
                 }
-                TRACDBIN(g_trac_sbe, "MVPD:SB:r", &io_sb_keyword, vpdSize);
+                TRACFBIN(g_trac_sbe, "MVPD:SB:r", &io_sb_keyword, vpdSize);
 
             }
             else //write
             {
-                TRACDBIN(g_trac_sbe, "MVPD:SB:w", &io_sb_keyword, vpdSize);
+                TRACFBIN(g_trac_sbe, "MVPD:SB:w", &io_sb_keyword, vpdSize);
 
                 err = deviceWrite( i_target,
                                   reinterpret_cast<void*>( &io_sb_keyword ),
@@ -1878,6 +1878,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
         errlHndl_t err = nullptr;
         const uint32_t l_sbeBootSelectMask = SBE_BOOT_SELECT_MASK >> 32;
+        const uint32_t l_sbeMBootSelectMask = SBE_MBOOT_SELECT_MASK >> 32;
 
         size_t l_opSize = sizeof(uint32_t);
 
@@ -1902,7 +1903,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 break;
             }
 
-#ifdef CONFIG_SBE_UPDATE_SEQUENTIAL
             // Read version from MVPD for target proc
             mvpdSbKeyword_t l_mvpdSbKeyword;
             err =  getSetMVPDVersion(i_target,
@@ -1918,15 +1918,17 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 break;
             }
 
+            // Determine the Measurement Seeprom boot side
+            bool l_mbootSide0 = (REIPL_MSEEPROM_0_VALUE == (l_mvpdSbKeyword.flags & REIPL_MSEEPROM_MASK));
+
+#ifdef CONFIG_SBE_UPDATE_SEQUENTIAL
             // Determine Boot Side from flags in MVPD
             bool l_bootSide0 = (isIplFromReIplRequest())
                 ? (REIPL_SEEPROM_0_VALUE ==
                     (l_mvpdSbKeyword.flags & REIPL_SEEPROM_MASK))
                 : (SEEPROM_0_PERMANENT_VALUE ==
                     (l_mvpdSbKeyword.flags & PERMANENT_FLAG_MASK));
-
 #else
-
             // The slave will use the same side setting as the master
             sbeSeepromSide_t l_bootside = SBE_SEEPROM_INVALID;
             TARGETING::Target * l_masterTarget = nullptr;
@@ -1946,9 +1948,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             TRACFCOMP( g_trac_sbe,INFO_MRK"updateSbeBootSeeprom(): set SBE boot side %d for proc=%.8X",
                        !l_bootSide0,
                        TARGETING::get_huid(i_target) );
-
 #endif
-
             if(l_bootSide0)
             {
                 // Set Boot Side 0 by clearing bit for side 1
@@ -1968,6 +1968,29 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
                            "set SBE boot side 1 for proc=%.8llX",
+                           l_targetReg,
+                           TARGETING::get_huid(i_target) );
+            }
+
+            if(l_mbootSide0)
+            {
+                // Set Measurement Boot Side 0 by clearing bit for side 1
+                l_targetReg &= ~l_sbeMBootSelectMask;
+
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
+                           "set SBE Measurement boot side 0 for proc=%.8X",
+                           l_targetReg,
+                           TARGETING::get_huid(i_target) );
+            }
+            else
+            {
+                // Set Measurement Boot Side 1 by setting bit for side 1
+                l_targetReg |= l_sbeMBootSelectMask;
+
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
+                           "set SBE Measurement boot side 1 for proc=%.8X",
                            l_targetReg,
                            TARGETING::get_huid(i_target) );
             }

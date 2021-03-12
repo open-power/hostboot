@@ -61,6 +61,9 @@
 #include <../../usr/sbeio/sbe_fifo_buffer.H>
 #include <sbeio/sbe_ffdc_parser.H>
 #include <sbeio/sbeioreasoncodes.H>
+#include <sbe/sbe_common.H>
+#include <sbe/sbeif.H>
+#include <vpd/mvpdenums.H>
 #include <sbeio/sbe_retry_handler.H>
 #include <secureboot/service.H>
 
@@ -85,6 +88,7 @@ extern trace_desc_t* g_trac_sbeio;
 using namespace ERRORLOG;
 using namespace fapi2;
 using namespace scomt::perv;
+using namespace SBE;
 
 namespace SBEIO
 {
@@ -96,6 +100,9 @@ constexpr uint8_t MAX_SWITCH_SIDE_COUNT         = 1;
 
 //We only want to attempt to boot with the same side seeprom twice
 constexpr uint8_t MAX_SIDE_BOOT_ATTEMPTS        = 2;
+
+//How many times to attempt RESTART_SBE
+constexpr uint8_t MAX_RESTARTS                  = 2;
 
 // Currently we expect a maxiumum of 2 FFDC packets, the one
 // that is useful to HB is the HWP FFDC. It is possible there is
@@ -121,11 +128,17 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
 , iv_secureModeDisabled(false) //Per HW team this should always be 0
 , iv_masterErrorLogPLID(i_plid)
 , iv_switchSidesCount(0)
+, iv_switchSidesCount_mseeprom(0)
+, iv_switchSidesFlag(0)
+, iv_boot_restart_count(0)
+, iv_sbeTestMode_recommendations(0)
 , iv_currentAction(P10_EXTRACT_SBE_RC::ERROR_RECOVERED)
 , iv_currentSBEState(SBE_REG_RETURN::SBE_NOT_AT_RUNTIME)
 , iv_shutdownReturnCode(0)
 , iv_currentSideBootAttempts(1) // It is safe to assume that the current side has attempted to boot
+, iv_currentSideBootAttempts_mseeprom(1) // It is safe to assume that the current side has attempted to boot
 , iv_sbeMode(i_sbeMode)
+, iv_sbeTestMode(SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY)
 , iv_sbeRestartMethod(SBE_RESTART_METHOD::HRESET)
 , iv_initialPowerOn(false)
 {
@@ -168,6 +181,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
         // In this case we have been told by the caller that the sbe just powered on
         // so it is safe to assume that the currState value is legit and we can trust that
         // the sbe has booted successfully to runtime.
+
         if( this->iv_initialPowerOn && (this->iv_sbeRegister.currState == SBE_STATE_RUNTIME))
         {
             //We have successfully powered on the SBE
@@ -178,50 +192,6 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
         //////******************************************************************
         // If we have made it this far we can assume that something is wrong w/ the SBE
         //////******************************************************************
-
-        // If something is wrong w/ the SBE during IPL time on a FSP based system then
-        // we will always TI and let hwsv deal with the problem. This is a unique path
-        // so we will have it handled in a separate procedure
-#ifndef __HOSTBOOT_RUNTIME
-        if(INITSERVICE::spBaseServicesEnabled() && !i_sbeHalted)
-        {
-            if(iv_initialPowerOn)
-            {
-                // If this is the initial power on there will be no logs that point out this fail
-                // so we need to create one now
-                /*@
-                * @errortype  ERRL_SEV_UNRECOVERABLE
-                * @moduleid   SBEIO_EXTRACT_RC_HANDLER
-                * @reasoncode SBEIO_SLAVE_FAILED_TO_BOOT
-                * @userdata1  Bool to describe if FFDC data is found
-                * @userdata2  HUID of proc
-                * @devdesc    There was a problem attempting to boot SBE
-                *             on the slave processor
-                * @custdesc   Processor Error
-                */
-                l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            SBEIO_EXTRACT_RC_HANDLER,
-                            SBEIO_SLAVE_FAILED_TO_BOOT,
-                            this->iv_sbeRegister.asyncFFDC,
-                            TARGETING::get_huid(i_target));
-
-                l_errl->collectTrace( "ISTEPS_TRACE", 256);
-                l_errl->collectTrace( SBEIO_COMP_NAME, 256);
-                // Set the PLID of the error log to master PLID
-                // if the master PLID is set
-                updatePlids(l_errl);
-
-                errlCommit(l_errl, SBEIO_COMP_ID);
-            }
-            // This function will TI Hostboot so don't expect to return
-            handleFspIplTimeFail(i_target);
-            SBE_TRACF("main_sbe_handler(): We failed to TI the system when we should have, forcing an assert(0) call");
-            // We should never return from handleFspIplTimeFail
-            assert(0, "We have determined that there was an error with the SBE and should have TI'ed but for some reason we did not.");
-        }
-#endif
-
 
         // if the sbe is not booted at all extract_rc will fail so we only
         // will run extract RC if we know the sbe has at least tried to boot
@@ -261,6 +231,9 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
             // We need to handle the following values that currentAction could be,
             // it is possible that iv_currentAction can be any of these values except there
             // is currently no path that will set it to be ERROR_RECOVERED
+            //
+            // See src/import/chips/p10/procedures/hwp/perv/p10_extract_sbe_rc.H
+            //
             //        ERROR_RECOVERED    = 0,
             //           - We should never hit this, if we have recovered then
             //             curreState should be RUNTIME
@@ -272,20 +245,51 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
             //             regardless if currentAction = RESTART_SBE or RESTART_CBS
             //        REIPL_BKP_SEEPROM  = 3,
             //        REIPL_UPD_SEEPROM  = 4,
-            //            - We will switch the seeprom side (if we have not already)
+            //        REIPL_BKP_MSEEPROM  = 5,
+            //        REIPL_UPD_MSEEPROM  = 6,
+            //            - We will switch the seeprom side (or mseeprom), if we have not already
             //            - then attempt to restart the sbe w/ iv_sbeRestartMethod
-            //        NO_RECOVERY_ACTION = 5,
+            //        NO_RECOVERY_ACTION = 8,
             //            - we deconfigure the processor we are retrying and fail out
             //
             // Important things to remember, we only want to attempt a single side
             // a maxiumum of 2 times, and also we only want to switch sides once
 
             SBE_TRACF("main_sbe_handler(): iv_sbeRegister.currState: %d , "
+                        "iv_currentSBEState: 0x%X ,"
                         "iv_currentSideBootAttempts: %d , "
-                        "iv_currentAction: %d , ",
+                        "iv_currentAction: %d , "
+                        "iv_currentSideBootAttempts_mseeprom: %d",
                         this->iv_sbeRegister.currState,
+                        this->iv_currentSBEState,
                         this->iv_currentSideBootAttempts,
-                        this->iv_currentAction);
+                        this->iv_currentAction,
+                        this->iv_currentSideBootAttempts_mseeprom);
+
+            if (this->iv_sbeTestMode)
+            {
+                // if we are forcing the failure we will be iterating trying to recover
+                if (this->iv_sbeTestMode != TEST_SBE_FAILURE)
+                {
+                    // simple cases
+                    this->iv_currentAction = sbe_op_map[this->iv_sbeTestMode];
+                }
+                else
+                {
+                    // we want to take looping SBE extract rc recommendations
+                    if ((this->iv_sbeTestMode_recommendations) == 0)
+                    {
+                        this->iv_sbeTestMode_recommendations++;
+                        // first time logic kick the test off
+                        this->iv_currentAction = sbe_op_map[this->iv_sbeTestMode];
+                    }
+                    else
+                    {
+                        // loop iterations just keep a counter and go with extract rc
+                        this->iv_sbeTestMode_recommendations++;
+                    }
+                }
+            }
 
             if(this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
             {
@@ -323,13 +327,23 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
             }
 
             // if the bkp_seeprom or upd_seeprom, attempt to switch sides.
-            // This is also dependent on the iv_switchSideCount.
+            // This is also dependent on the iv_switchSideCount and
+            // iv_switchSideCount_mseeprom respectively.
+            //
             // Note: we do this for upd_seeprom because we don't support
             //       updating the seeprom during IPL time
+            // OPTION 1 - Check if we are DONE, we've switched sides MAX on seeprom or mseeprom
+            // We always flip sides on SEEPROM or MSEEPROM
+            // RESTART_SBE is the path that considers same side REIPL which is a special case
+            // on initialPowerOn and bestEffortCheck flows.
             if((this->iv_currentAction ==
                             P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM ||
                 this->iv_currentAction ==
-                            P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
+                            P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM ||
+                this->iv_currentAction ==
+                            P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM ||
+                this->iv_currentAction ==
+                            P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM))
             {
                 // We cannot switch sides and perform an hreset if the seeprom's
                 // versions do not match. If this happens, log an error and stop
@@ -373,14 +387,21 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                         break;
                     }
                 }
-                if(this->iv_switchSidesCount >= MAX_SWITCH_SIDE_COUNT)
+                if( ((this->iv_switchSidesCount >= MAX_SWITCH_SIDE_COUNT) &&
+                    ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
+                        (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM)) ) ||
+                    ((this->iv_switchSidesCount_mseeprom >= MAX_SWITCH_SIDE_COUNT) &&
+                    ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
+                        (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM)) ) )
                 {
                     /*@
                     * @errortype  ERRL_SEV_PREDICTIVE
                     * @moduleid   SBEIO_EXTRACT_RC_HANDLER
                     * @reasoncode SBEIO_EXCEED_MAX_SIDE_SWITCHES
-                    * @userdata1  Switch Sides Count
-                    * @userdata2  HUID of proc
+                    * @userdata1[00:31]  Switch Sides Count
+                    * @userdata1[32:63]  Switch Sides Count Mseeprom
+                    * @userdata2[00:31]  Current Action
+                    * @userdata2[32:63]  HUID of proc
                     * @devdesc    We have already flipped seeprom sides once
                     *             and we should not have attempted to flip again
                     * @custdesc   Processor Error
@@ -389,8 +410,8 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                                 ERRORLOG::ERRL_SEV_PREDICTIVE,
                                 SBEIO_EXTRACT_RC_HANDLER,
                                 SBEIO_EXCEED_MAX_SIDE_SWITCHES,
-                                this->iv_switchSidesCount,
-                                TARGETING::get_huid(i_target));
+                                TWO_UINT32_TO_UINT64(this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom),
+                                TWO_UINT32_TO_UINT64(this->iv_currentAction, TARGETING::get_huid(i_target)));
                     l_errl->collectTrace( SBEIO_COMP_NAME, 256);
 
                     // Set the PLID of the error log to master PLID
@@ -402,7 +423,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                     // up in a endless loop
                     break;
                 }
-                l_errl = this->switch_sbe_sides(i_target);
+                l_errl = this->switch_sbe_sides(i_target, this->iv_currentAction, false);
                 if(l_errl)
                 {
                     errlCommit(l_errl, SBEIO_COMP_ID);
@@ -416,10 +437,24 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                 // switching seeprom sides
             }
 
+            if (this->iv_sbeTestMode == TEST_MAX_LIMITS)
+            {
+                (this->iv_currentSideBootAttempts) = MAX_SIDE_BOOT_ATTEMPTS;
+                (this->iv_currentSideBootAttempts_mseeprom) = MAX_SIDE_BOOT_ATTEMPTS;
+                (this->iv_boot_restart_count) = MAX_RESTARTS;
+            }
+
             // Both of the retry methods require a FAPI2 version of the target because they
             // are fapi2 HWPs
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target (i_target);
-            if(this->iv_currentSideBootAttempts >= MAX_SIDE_BOOT_ATTEMPTS)
+            // OPTION 2 - Check if we are DONE on THIS SIDE BOOT ATTEMPTS for MAX on seeprom or mseeprom
+            // each cycle we are working on the SEEPROM or MSEEPROM, so each cycle a new object is instantiated
+            if( ((this->iv_currentSideBootAttempts >= MAX_SIDE_BOOT_ATTEMPTS) &&
+                ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
+                    (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM)) ) ||
+                ((this->iv_currentSideBootAttempts_mseeprom >= MAX_SIDE_BOOT_ATTEMPTS) &&
+                ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
+                    (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM)) ) )
             {
                /*@
                 * @errortype  ERRL_SEV_PREDICTIVE
@@ -453,31 +488,109 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
             // Look at the sbeRestartMethd instance variable to determine which method
             // we will use to attempt the restart. In general during IPL time we will
             // attempt CBS, during runtime we will want to use HRESET.
+            // OPTION 3 - ATTEMPT START_CBS on THIS SIDE
             else if(this->iv_sbeRestartMethod == SBE_RESTART_METHOD::START_CBS)
             {
                 //Increment attempt count for this side
-                this->iv_currentSideBootAttempts++;
+                //
+
+                if ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
+                    (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
+                {
+                    this->iv_currentSideBootAttempts++;
+                }
+                else if ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
+                    (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM))
+                {
+                    this->iv_currentSideBootAttempts_mseeprom++;
+                    // increment even though we may switch sides later
+                }
+                else
+                {
+                    this->iv_currentSideBootAttempts++;
+                    this->iv_currentSideBootAttempts_mseeprom++;
+                }
+
+                ++this->iv_boot_restart_count;
+                if (this->iv_boot_restart_count > MAX_RESTARTS)
+                {
+                    this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                    SBE_TRACF("main_sbe_handler(): SBE reports it was never booted and we reached MAX_RESTARTS. Setting next action to be NO_RECOVERY_ACTION");
+                }
+                // If we are RESTART_CBS we want to flip the MSEEPROM always
+                // If something is requiring a restart flip the MSEEPROM to aide the best results
+                l_errl = this->switch_sbe_sides(i_target, P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM, true);
+                if(l_errl)
+                {
+                    errlCommit(l_errl, SBEIO_COMP_ID);
+                    // If any error occurs while we are trying to switch sides
+                    // this indicates big problems so we want to break out of the
+                    // retry loop
+                    break;
+                }
+
+
+                if (this->iv_sbeTestMode == TEST_RESTART_CBS)
+                {
+                    break;
+                }
+
+#ifndef __HOSTBOOT_RUNTIME
+                    // If something is wrong w/ the SBE during IPL time on a FSP based system then
+                    // we will always TI and let hwsv deal with the problem.
+                    if(INITSERVICE::spBaseServicesEnabled())
+                    {
+                        // If this is the initial power on there will be no logs that point out this fail
+                        // so we need to create one now
+                        /*@
+                         * @errortype  ERRL_SEV_UNRECOVERABLE
+                         * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                         * @reasoncode SBEIO_SLAVE_FAILED_TO_BOOT
+                         * @userdata1  Bool to describe if FFDC data is found
+                         * @userdata2  HUID of proc
+                         * @devdesc    There was a problem attempting to boot SBE
+                         *             on the slave processor
+                         * @custdesc   Processor Error
+                         */
+                         l_errl = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      SBEIO_EXTRACT_RC_HANDLER,
+                                      SBEIO_SLAVE_FAILED_TO_BOOT,
+                                      this->iv_sbeRegister.asyncFFDC,
+                                      TARGETING::get_huid(i_target));
+
+                         l_errl->collectTrace( "ISTEPS_TRACE", 256);
+                         l_errl->collectTrace( SBEIO_COMP_NAME, 256);
+                         // Set the PLID of the error log to master PLID
+                         // if the master PLID is set
+                         updatePlids(l_errl);
+
+                         errlCommit(l_errl, SBEIO_COMP_ID);
+                         // This function will TI Hostboot so don't expect to return
+                         handleFspIplTimeFail(i_target);
+                         SBE_TRACF("main_sbe_handler(): We failed to TI the system when we should have, forcing an assert(0) call");
+                         // We should never return from handleFspIplTimeFail
+                         assert(0, "We have determined that there was an error with the SBE and should have TI'ed but for some reason we did not.");
+                    }
+#endif
 
                 SBE_TRACF("Invoking p10_start_cbs HWP on processor %.8X", get_huid(i_target));
-
-                // We cannot use FAPI_INVOKE in this case because it is possible
-                // we are handling a HWP fail. If we attempted to use FAPI_INVOKE
-                // while we are already inside a FAPI_INVOKE call then we can
-                // end up in an endless wait on the fapi mutex lock
-                fapi2::ReturnCode l_rc;
 
                 // For now we only use p10_start_cbs if we fail to boot the slave SBE
                 // on our initial attempt, the bool param is true we are telling the
                 // HWP that we are starting up the SBE which is true in this case
-                FAPI_EXEC_HWP(l_rc, p10_start_cbs,
+                FAPI_INVOKE_HWP(l_errl, p10_start_cbs,
                                 l_fapi2_proc_target, true);
-
-                l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
 
                 if(l_errl)
                 {
-                    SBE_TRACF("ERROR: call p10_start_cbs, PLID=0x%x",
-                                l_errl->plid() );
+                    // Flag the currentSBEState since something bad has happened
+                    // and the caller checks the currentSBEState as an indicator of success
+                    // This prevents infinite loop when we deconfig the proc
+                    // and caller checks only isSbeAtRuntime
+                    SBE_TRACF("ERROR: call p10_start_cbs iv_currentSBEState=%d PLID=0x%x",
+                                this->iv_currentSBEState, l_errl->plid() );
+                    this->iv_currentSBEState = SbeRetryHandler::SBE_REG_RETURN::SBE_NOT_AT_RUNTIME;
                     l_errl->collectTrace(SBEIO_COMP_NAME, 256 );
                     l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
                     l_errl->collectTrace(FAPI_TRACE_NAME, 384);
@@ -500,10 +613,33 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                 }
             }
             // The only other type of reset method is HRESET
+            // OPTION 4 - ATTEMPT HRESET on PRE-SET OR SAME SIDE
             else
             {
                 // Increment attempt count for this side
-                this->iv_currentSideBootAttempts++;
+                // Note - RESTART_SBE does -NOT- bump boot attempts
+                if ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
+                   (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
+                {
+                    this->iv_currentSideBootAttempts++;
+                }
+                else if ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
+                        (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM))
+                {
+                    this->iv_currentSideBootAttempts_mseeprom++;
+                }
+                else if (this->iv_currentAction == P10_EXTRACT_SBE_RC::RESTART_SBE)
+                {
+                    this->iv_currentSideBootAttempts++;
+                    this->iv_currentSideBootAttempts_mseeprom++;
+                    ++this->iv_boot_restart_count;
+                }
+
+                if (this->iv_boot_restart_count > MAX_RESTARTS)
+                {
+                    this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                    SBE_TRACF("main_sbe_handler(): OPTION 4 HRESET We reached MAX_RESTARTS. Setting next action to be NO_RECOVERY_ACTION");
+                }
 
                 SBE_TRACF("Invoking p10_sbe_hreset HWP on processor %.8X", get_huid(i_target));
 
@@ -554,10 +690,16 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                 break;
             }
 
+            if (this->iv_sbeTestMode == TEST_SBE_FAILURE)
+            {
+                (this->iv_sbeRegister).currState = SBE_STATE_FAILURE;
+                this->iv_currentSBEState = SbeRetryHandler::SBE_REG_RETURN::SBE_NOT_AT_RUNTIME;
+            }
+
             // If the currState of the SBE is not RUNTIME then we will assume
             // our attempt to boot the SBE has failed, so run extract rc again
-            // to determine why we have failed
-            if (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME)
+            // to determine why we have failed, if the sbeBooted is true
+            if ((this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) && (this->iv_sbeRegister.sbeBooted))
             {
                 this->sbe_run_extract_rc(i_target);
             }
@@ -566,21 +708,29 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
 
         // If we ended up switching sides we want to mark it down as
         // as informational log
-        if(this->iv_switchSidesCount)
+        //
+        // Depending on how many times we may loop, log the counters
+        // to help determine what path may have been taken
+        if (this->iv_switchSidesFlag)
         {
+            this->iv_switchSidesFlag = 0; // Clear for next time
             /*@
              * @errortype   ERRL_SEV_INFORMATIONAL
              * @moduleid    SBEIO_EXTRACT_RC_HANDLER
              * @reasoncode  SBEIO_BOOTED_UNEXPECTED_SIDE
-             * @userdata1   0
-             * @userdata2   HUID of working proc
+             * @userdata1[00:31] Switch Sides Count
+             * @userdata1[32:63] Switch Sides Count Mseeprom
+             * @userdata2[00:31] Current Action
+             * @userdata2[32:63] HUID of proc
              * @devdesc     SBE booted from unexpected side.
+             * @custdesc    Processor Error
              */
             l_errl = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
                         SBEIO_EXTRACT_RC_HANDLER,
                         SBEIO_BOOTED_UNEXPECTED_SIDE,
-                        0,TARGETING::get_huid(i_target));
+                        TWO_UINT32_TO_UINT64(this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom),
+                        TWO_UINT32_TO_UINT64(this->iv_currentAction, TARGETING::get_huid(i_target)));
             l_errl->collectTrace("ISTEPS_TRACE",256);
             l_errl->collectTrace(SBEIO_COMP_NAME,256);
 
@@ -593,7 +743,10 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
 
     }while(0);
 
-    SBE_TRACF(EXIT_MRK "main_sbe_handler()");
+    SBE_TRACF(EXIT_MRK"main_sbe_handler: iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
+                      "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx iv_boot_restart_count=%d",
+                      this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom,
+                      this->iv_currentSideBootAttempts, this->iv_currentSideBootAttempts_mseeprom, this->iv_boot_restart_count);
 }
 
 bool SbeRetryHandler::sbe_run_extract_msg_reg(TARGETING::Target * i_target)
@@ -685,7 +838,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
     //Sleep time should be 1 second on HW, 10 seconds on simics
     const uint64_t SBE_WAIT_SLEEP_SEC = (l_sbeTimeout/SBE_RETRY_NUM_LOOPS);
 
-    SBE_TRACF("Running p10_get_sbe_msg_register HWP on proc target %.8X",
+    SBE_TRACF("sbe_poll_status_reg Running p10_get_sbe_msg_register HWP on proc target %.8X",
                TARGETING::get_huid(i_target));
 
     for( uint64_t l_loops = 0; l_loops < SBE_RETRY_NUM_LOOPS; l_loops++ )
@@ -1018,8 +1171,6 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     errlHndl_t l_errl = nullptr;
     fapi2::ReturnCode l_rc;
 
-    SBE_TRACF("Inside sbe_run_extract_rc, calling p10_extract_sbe_rc HWP");
-
     // Setup for the HWP
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                         const_cast<TARGETING::Target*> (i_target));
@@ -1043,6 +1194,7 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     // associate w/ the caller's errlog via plid
     l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     this->iv_currentAction = l_ret;
+    SBE_TRACF("sbe_run_extract_rc p10_extract_sbe_rc returned iv_currentAction=%d", this->iv_currentAction);
 
     // This call will look at what p10_extact_sbe_rc had set the return action to
     // checks on how many times we have attempted to boot this side,
@@ -1060,7 +1212,7 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     if(l_errl)
     {
         SBE_TRACF("Error: sbe_boot_fail_handler : p10_extract_sbe_rc HWP "
-                  " returned action %d and errorlog PLID=0x%x, rc=0x%.4X",
+                  " returned action %d (from bestEffortCheck) and errorlog PLID=0x%x, rc=0x%.4X",
                   this->iv_currentAction, l_errl->plid(), l_errl->reasonCode());
 
         l_errl->collectTrace(SBEIO_COMP_NAME,256);
@@ -1084,14 +1236,21 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
 
 void SbeRetryHandler::bestEffortCheck()
 {
+    SBE_TRACF(ENTER_MRK"bestEffortCheck: iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
+                      "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx iv_boot_restart_count=%d",
+                      this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom,
+                      this->iv_currentSideBootAttempts, this->iv_currentSideBootAttempts_mseeprom, this->iv_boot_restart_count);
     // We don't want to accept that there is no recovery action just
     // because that is what extract_rc is telling us. We want to make
     // sure we have tried booting on this seeprom twice, and that we
     // have tried the other seeprom twice as well. If we have tried all of
     // those cases then we will fail out
+    //
+    // We have to check each flow separate to determine
     if(this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
     {
-        if (this->iv_currentSideBootAttempts < MAX_SIDE_BOOT_ATTEMPTS)
+        if ((this->iv_currentSideBootAttempts < MAX_SIDE_BOOT_ATTEMPTS) ||
+            (this->iv_currentSideBootAttempts_mseeprom < MAX_SIDE_BOOT_ATTEMPTS))
         {
             SBE_TRACF("bestEffortCheck(): suggested action was NO_RECOVERY_ACTION but we are trying RESTART_SBE");
             this->iv_currentAction = P10_EXTRACT_SBE_RC::RESTART_SBE;
@@ -1099,10 +1258,20 @@ void SbeRetryHandler::bestEffortCheck()
         else if (this->iv_switchSidesCount < MAX_SWITCH_SIDE_COUNT)
         {
             SBE_TRACF("bestEffortCheck(): suggested action was NO_RECOVERY_ACTION but we are trying REIPL_BKP_SEEPROM");
+            // Since we don't know to try SEEPROM or MSEEPROM, we will iterate on both if we continue to get NO_RECOVERY_ACTION
+            // and fall into this logic, until we exhaust the MAX
             this->iv_currentAction = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+        }
+        else if (this->iv_switchSidesCount_mseeprom < MAX_SWITCH_SIDE_COUNT)
+        {
+            SBE_TRACF("bestEffortCheck(): suggested action was NO_RECOVERY_ACTION but we are trying REIPL_BKP_MSEEPROM");
+            // Since we don't know to try SEEPROM or MSEEPROM, we will iterate on both if we continue to get NO_RECOVERY_ACTION
+            // and fall into this logic, until we exhaust the MAX
+            this->iv_currentAction = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
         }
         else
         {
+            SBE_TRACF("bestEffortCheck(): Exhausted max boot and max sides attempts, NO_RECOVERY_ACTION available, time to give up");
             // If we have attempted the max boot attempts on current side
             // and have already switched sides once, then we will accept
             // that we don't know how to recover and pass this status out
@@ -1120,17 +1289,28 @@ void SbeRetryHandler::bestEffortCheck()
             this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
         }
     }
+    else if(this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM ||
+        this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM )
+    {
+        if (this->iv_switchSidesCount_mseeprom >= MAX_SWITCH_SIDE_COUNT)
+        {
+            SBE_TRACF("bestEffortCheck(): suggested action was REIPL_BKP_MSEEPROM/REIPL_UPD_MSEEPROM but that is not possible so changing to NO_RECOVERY_ACTION");
+            this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+        }
+    }
     // If the extract sbe rc hwp tells us to restart, and we have already
     // done 2 retries on this side, then attempt to switch sides, if we can't
     // switch sides, set currentAction to NO_RECOVERY_ACTION
     else if(this->iv_currentAction == P10_EXTRACT_SBE_RC::RESTART_SBE ||
             this->iv_currentAction == P10_EXTRACT_SBE_RC::RESTART_CBS)
     {
+        // Each recovery cycle will have re-instantiated the object, so the counts related to the failures tell us
+        // which SEEPROM or MSEEPROM to attempt the action on
         if (this->iv_currentSideBootAttempts >= MAX_SIDE_BOOT_ATTEMPTS)
         {
             if (this->iv_switchSidesCount >= MAX_SWITCH_SIDE_COUNT)
             {
-                SBE_TRACF("bestEffortCheck(): suggested action was RESTART_SBE/RESTART_CBS but no actions possible so changing to NO_RECOVERY_ACTION");
+                SBE_TRACF("bestEffortCheck(): suggested action was RESTART_SBE/RESTART_CBS SEEPROM but no actions possible so changing to NO_RECOVERY_ACTION");
                 this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
             }
             else
@@ -1139,14 +1319,108 @@ void SbeRetryHandler::bestEffortCheck()
                 this->iv_currentAction = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
             }
         }
+        else if (this->iv_currentSideBootAttempts_mseeprom >= MAX_SIDE_BOOT_ATTEMPTS)
+        {
+            if (this->iv_switchSidesCount_mseeprom >= MAX_SWITCH_SIDE_COUNT)
+            {
+                SBE_TRACF("bestEffortCheck(): suggested action was RESTART_SBE/RESTART_CBS MSEEPROM but no actions possible so changing to NO_RECOVERY_ACTION");
+                this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+            }
+            else
+            {
+                SBE_TRACF("bestEffortCheck(): suggested action was RESTART_SBE/RESTART_CBS but max attempts tried already so changing to REIPL_BKP_MSEEPROM");
+                this->iv_currentAction = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
+            }
+        }
     }
+    SBE_TRACF(EXIT_MRK"bestEffortCheck: iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
+                      "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx iv_boot_restart_count=%d",
+                      this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom,
+                      this->iv_currentSideBootAttempts, this->iv_currentSideBootAttempts_mseeprom, this->iv_boot_restart_count);
 }
 
-errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
+errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target,
+                                             P10_EXTRACT_SBE_RC::RETURN_ACTION i_action,
+                                             bool i_updateMVPD)
 {
-    SBE_TRACF(ENTER_MRK "switch_sbe_sides()");
+    SBE_TRACF(ENTER_MRK "switch_sbe_sides: i_action=0x%X i_updateMVPD=%d iv_currentAction=0x%X "
+                        "iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
+                        "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx",
+                        i_action, i_updateMVPD, this->iv_currentAction,
+                        this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom,
+                        this->iv_currentSideBootAttempts, this->iv_currentSideBootAttempts_mseeprom);
 
+    // switch_sbe_sides works on one seeprom at a time in order to track counts
     errlHndl_t l_errl = nullptr;
+    SBE::mvpdSbKeyword_t l_mvpdSbKeyword = {0};
+
+#ifndef __HOSTBOOT_RUNTIME
+    if (i_updateMVPD)
+    {
+        l_errl = SBE::getSetMVPDVersion(i_target, SBE::MVPDOP_READ, l_mvpdSbKeyword);
+        SBE_TRACF("MVPDOP_READ flags READ l_mvpdSbKeyword.flags=0x%X", l_mvpdSbKeyword.flags);
+
+        if (l_errl)
+        {
+            // If we fail to READ we can later just WRITE a valid value
+            // so log a PREDICTIVE event
+            /*@
+             * @errortype  ERRL_SEV_PREDICTIVE
+             * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+             * @reasoncode SBEIO_MVPD_READ_FAILURE
+             * @userdata1  l_mvpdSbKeyword.flags
+             * @userdata2  HUID of proc
+             * @devdesc    We failed trying to READ the MVPD
+             * @custdesc   Processor Error
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_PREDICTIVE,
+                        SBEIO_EXTRACT_RC_HANDLER,
+                        SBEIO_MVPD_READ_FAILURE,
+                        l_mvpdSbKeyword.flags,
+                        TARGETING::get_huid(i_target));
+            l_errl->collectTrace( SBEIO_COMP_NAME, 256);
+
+            // Set the PLID of the error log to master PLID
+            // if the master PLID is set
+            updatePlids(l_errl);
+
+            errlCommit(l_errl, SBEIO_COMP_ID);
+
+            SBE_TRACF("ERROR MVPDOP_READ switch_sbe_sides: getSetMVPDVersion IPL time proc target = %.8X",
+                      TARGETING::get_huid(i_target),
+                       ERRL_GETRC_SAFE(l_errl),
+                       ERRL_GETPLID_SAFE(l_errl));
+        }
+    }
+#endif
+
+    // Default values are FAIL SAFE case in below logic
+    uint32_t l_sbeOperationMask = SBE::SBE_BOOT_SELECT_MASK >> 32; // PROC register bit 17 and bit 18 value handling
+    uint8_t l_sbe_mvpd_reipl_mask = REIPL_MSEEPROM_MASK; // MVPD masking flags on struct mvpdSbKeyword_t
+
+    if ((i_action == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
+        (i_action == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
+    {
+        l_sbeOperationMask = SBE::SBE_BOOT_SELECT_MASK >> 32;
+        // currently only setting MVPD for the MSEEPROM, so this is for future exploitation
+        // Should never hit this branch today, but for future
+        l_sbe_mvpd_reipl_mask = REIPL_SEEPROM_MASK;
+    }
+    else if ((i_action == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
+        (i_action == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM))
+    {
+        l_sbeOperationMask = SBE::SBE_MBOOT_SELECT_MASK >> 32;
+        // used for setting MVPD for MSEEPROM
+        l_sbe_mvpd_reipl_mask = REIPL_MSEEPROM_MASK;
+    }
+    else
+    {
+        SBE_TRACF("switch_sbe_sides: Working on FAIL SAFE case i_action=0x%X", i_action);
+    }
+    SBE_TRACF("switch_sbe_sides: i_action=0x%X l_sbeOperationMask=0x%X l_sbe_mvpd_reipl_mask=0x%X l_mvpdSbKeyword.flags=0x%X",
+              i_action, l_sbeOperationMask, l_sbe_mvpd_reipl_mask, l_mvpdSbKeyword.flags);
+
 
 #ifdef __HOSTBOOT_RUNTIME
     const bool l_isRuntime = true;
@@ -1158,7 +1432,6 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
 
         if(!l_isRuntime && !i_target->getAttr<TARGETING::ATTR_PROC_SBE_MASTER_CHIP>())
         {
-            const uint32_t l_sbeBootSelectMask = SBE::SBE_BOOT_SELECT_MASK >> 32;
             // Read FSXCOMP_FSXLOG_SB_CS_FSI_BYTE 0x2820 for target proc
             uint32_t l_read_reg = 0;
             size_t l_opSize = sizeof(uint32_t);
@@ -1182,22 +1455,32 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
             }
 
             // Determine how boot side is currently set
-            if(l_read_reg & l_sbeBootSelectMask) // Currently set for Boot Side 1
+            // Works on the previously set l_sbeOperationMask which is either the SEEPROM or MSEEPROM
+            // We check either bit 17 (SEEPROM) or bit 18 (MSEEPROM) based on the previous logic above
+            // Operations are done on single SEEPROM at a time
+            SBE_TRACF("switch_sbe_sides: HUID=0x%X FSI Currently l_read_reg=0x%X", TARGETING::get_huid(i_target), l_read_reg);
+            // Check if bit 17 or bit 18 currently set for Boot Side 1, mask set previously for which SEEPROM
+            if(l_read_reg & l_sbeOperationMask)
             {
-                // Set Boot Side 0 by clearing bit for side 1
-                SBE_TRACF( "switch_sbe_sides #%d: Set Boot Side 0 for HUID 0x%08X",
-                        iv_switchSidesCount,
+                // Set Boot Side 0
+                SBE_TRACF( "switch_sbe_sides: iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 0 for HUID 0x%08X",
+                        iv_switchSidesCount, iv_switchSidesCount_mseeprom,
                         TARGETING::get_huid(i_target));
-                l_read_reg &= ~l_sbeBootSelectMask;
+                l_read_reg &= ~l_sbeOperationMask; // clear bit 17 or bit 18 based on previously set mask for SEEPROM
+                l_mvpdSbKeyword.flags &= ~l_sbe_mvpd_reipl_mask;  // clear MVPD SEEPROM flag bit
+                // We are reading the PROC register as the authoritative source at this point in time
             }
-            else // Currently set for Boot Side 0
+            else // Opposite case for the mask previously set for SEEPROM
             {
-                // Set Boot Side 1 by setting bit for side 1
-                SBE_TRACF( "switch_sbe_sides #%d: Set Boot Side 1 for HUID 0x%08X",
-                        iv_switchSidesCount,
+                // Set Boot Side 1
+                SBE_TRACF( "switch_sbe_sides: iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 1 for HUID 0x%08X",
+                        iv_switchSidesCount, iv_switchSidesCount_mseeprom,
                         TARGETING::get_huid(i_target));
-                l_read_reg |= l_sbeBootSelectMask;
+                l_read_reg |= l_sbeOperationMask; // set bit 17 or bit 18 based on previously set mask for SEEPROM
+                l_mvpdSbKeyword.flags |= l_sbe_mvpd_reipl_mask;   // set MVPD SEEPROM flag bit
             }
+            SBE_TRACF("switch_sbe_sides: HUID=0x%X register to FSI WRITE l_read_reg=0x%X MVPDOP_WRITE l_mvpdSbKeyword.flags=0x%X",
+                      TARGETING::get_huid(i_target), l_read_reg, l_mvpdSbKeyword.flags);
 
             // Write updated FSXCOMP_FSXLOG_SB_CS_FSI 0x2820 back into target proc
             l_errl = DeviceFW::deviceOp(
@@ -1243,22 +1526,31 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
             }
 
             // Determine how boot side is currently set
-            if(l_read_reg & SBE::SBE_BOOT_SELECT_MASK) // Currently set for Boot Side 1
+            // Works on the previously set l_sbeOperationMask which is either the SEEPROM or MSEEPROM
+            // We check either bit 17 (SEEPROM) or bit 18 (MSEEPROM) based on the previous logic above
+            // Operations are done on single SEEPROM at a time
+            SBE_TRACF("switch_sbe_sides: HUID=0x%X SCOM Currently l_read_reg=0x%X", TARGETING::get_huid(i_target), l_read_reg);
+            // Check if bit 17 or bit 18 currently set for Boot Side 1, mask set previously for which SEEPROM
+            if(l_read_reg & l_sbeOperationMask)
             {
-                // Set Boot Side 0 by clearing bit for side 1
-                SBE_TRACF( "switch_sbe_sides #%d: Set Boot Side 0 for HUID 0x%08X",
-                        iv_switchSidesCount,
+                // Set Boot Side 0
+                SBE_TRACF( "switch_sbe_sides iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 0 for HUID 0x%08X",
+                        iv_switchSidesCount, iv_switchSidesCount_mseeprom,
                         TARGETING::get_huid(i_target));
-                l_read_reg &= ~SBE::SBE_BOOT_SELECT_MASK;
+                l_read_reg &= ~l_sbeOperationMask;  // clear bit 17 or bit 18 based on previously set mask for SEEPROM
+                l_mvpdSbKeyword.flags &= ~l_sbe_mvpd_reipl_mask;  // clear MVPD SEEPROM flag bit
             }
-            else // Currently set for Boot Side 0
+            else // Opposite case for the mask previously set for SEEPROM
             {
-                // Set Boot Side 1 by setting bit for side 1
-                SBE_TRACF( "switch_sbe_sides #%d: Set Boot Side 1 for HUID 0x%08X",
-                        iv_switchSidesCount,
+                // Set Boot Side 1
+                SBE_TRACF( "switch_sbe_sides iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 1 for HUID 0x%08X",
+                        iv_switchSidesCount, iv_switchSidesCount_mseeprom,
                         TARGETING::get_huid(i_target));
-                l_read_reg |= SBE::SBE_BOOT_SELECT_MASK;
+                l_read_reg |= l_sbeOperationMask;  // set bit 17 or bit 18 based on previously set mask for SEEPROM
+                l_mvpdSbKeyword.flags |= l_sbe_mvpd_reipl_mask;  // set MVPD SEEPROM flag bit
             }
+            SBE_TRACF("switch_sbe_sides: HUID=0x%X register to SCOM WRITE l_read_reg=0x%X MVPDOP_WRITE l_mvpdSbKeyword.flags=0x%X",
+                      TARGETING::get_huid(i_target), l_read_reg, l_mvpdSbKeyword.flags);
 
             // Write updated FSXCOMP_FSXLOG_SB_CS 0x50008 back into target proc
             l_errl = DeviceFW::deviceOp(
@@ -1280,15 +1572,67 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
             }
         }
 
+#ifndef __HOSTBOOT_RUNTIME
+        if (i_updateMVPD)
+        {
+            // we could have failed to read earlier, but we have zeroes so no harm in writing
+            SBE_TRACF("MVPDOP_WRITE flags to WRITE l_mvpdSbKeyword.flags=0x%X", l_mvpdSbKeyword.flags);
+            l_errl = SBE::getSetMVPDVersion(i_target, SBE::MVPDOP_WRITE, l_mvpdSbKeyword);
+
+            if (l_errl)
+            {
+                // If we fail to WRITE log a PREDICTIVE event
+                /*@
+                 * @errortype  ERRL_SEV_PREDICTIVE
+                 * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                 * @reasoncode SBEIO_MVPD_WRITE_FAILURE
+                 * @userdata1  l_mvpdSbKeyword.flags
+                 * @userdata2  HUID of proc
+                 * @devdesc    We failed trying to READ the MVPD
+                 * @custdesc   Processor Error
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_PREDICTIVE,
+                            SBEIO_EXTRACT_RC_HANDLER,
+                            SBEIO_MVPD_WRITE_FAILURE,
+                            l_mvpdSbKeyword.flags,
+                            TARGETING::get_huid(i_target));
+                l_errl->collectTrace( SBEIO_COMP_NAME, 256);
+
+                // Set the PLID of the error log to master PLID
+                // if the master PLID is set
+                updatePlids(l_errl);
+
+                errlCommit(l_errl, SBEIO_COMP_ID);
+                SBE_TRACF("ERROR MVPDOP_WRITE switch_sbe_sides: getSetMVPDVersion IPL time proc target = %.8X",
+                          TARGETING::get_huid(i_target),
+                           ERRL_GETRC_SAFE(l_errl),
+                           ERRL_GETPLID_SAFE(l_errl));
+            }
+        }
+#endif
+
         // Increment switch sides count
-        ++(this->iv_switchSidesCount);
-
-        SBE_TRACF("switch_sbe_sides(): iv_switchSidesCount has been incremented to %llx",
-                   iv_switchSidesCount);
-
-        // Since we just switched sides, and we havent attempted a boot yet,
-        // set the current attempts for this side to be 0
-        this->iv_currentSideBootAttempts = 0;
+        if (l_sbeOperationMask == SBE::SBE_BOOT_SELECT_MASK >> 32) // SEEPROM
+        {
+            ++(this->iv_switchSidesCount);
+            ++(this->iv_switchSidesFlag);
+            // Since we just switched sides, and we havent attempted a boot yet,
+            // set the current attempts for this side to be 0
+            this->iv_currentSideBootAttempts = 0;
+        }
+        else if (l_sbeOperationMask == SBE::SBE_MBOOT_SELECT_MASK >> 32) // MSEEPROM
+        {
+            ++(this->iv_switchSidesCount_mseeprom);
+            ++(this->iv_switchSidesFlag);
+            // Since we just switched sides, and we havent attempted a boot yet,
+            // set the current attempts for this side to be 0
+            this->iv_currentSideBootAttempts_mseeprom = 0;
+        }
+        SBE_TRACF("switch_sbe_sides: iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
+                      "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx iv_boot_restart_count=%d",
+                      this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom,
+                      this->iv_currentSideBootAttempts, this->iv_currentSideBootAttempts_mseeprom, this->iv_boot_restart_count);
     }while(0);
 
     if (l_errl)
@@ -1298,7 +1642,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
         updatePlids(l_errl);
     }
 
-    SBE_TRACF(EXIT_MRK "switch_sbe_sides()");
+    SBE_TRACF(EXIT_MRK "switch_sbe_sides");
     return l_errl;
 }
 

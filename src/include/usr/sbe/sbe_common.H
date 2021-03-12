@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,7 +91,9 @@ namespace SBE
 
     // Used to read SBE Boot Side from processor
     // (PERV_SB_CS_SCOM 0x00050008 or PERV_SB_CS_FSI 0x2808)
-    const uint64_t SBE_BOOT_SELECT_MASK = 0x0000400000000000;
+    // bit location identifies if boot side=0 or boot side=1
+    const uint64_t SBE_BOOT_SELECT_MASK = 0x0000400000000000;   // SBE SEEPROM bit 17
+    const uint64_t SBE_MBOOT_SELECT_MASK = 0x0000200000000000;  // Measurement SEEPROM bit 18
 
     // Hard coded value, pass in 2KB max
     const uint32_t RING_OVD_SIZE = 0x800;
@@ -129,6 +131,11 @@ namespace SBE
     const uint8_t SEEPROM_1_FORCE_UPDATE_MASK     = 0x10;
     const uint8_t SEEPROM_1_DO_NOT_FORCE_UPDATE   = 0x00;
     const uint8_t SEEPROM_1_FORCE_UPDATE          = 0x10;
+
+    // RE-IPL MSEEPROM DESIGNATION - bit 4: 0x0 -> indicates boot from MSEEPROM 0
+    const uint8_t REIPL_MSEEPROM_MASK              = 0x08;
+    const uint8_t REIPL_MSEEPROM_0_VALUE           = 0x00;
+    const uint8_t REIPL_MSEEPROM_1_VALUE           = 0x08;
 
 
     /******************************************/

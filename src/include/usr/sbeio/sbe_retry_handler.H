@@ -36,6 +36,7 @@
 #include <p10_get_sbe_msg_register.H>
 #include <p10_extract_sbe_rc.H>
 #include <sys/time.h>
+#include <sbe/sbe_update.H>
 
 namespace SBEIO
 {
@@ -61,6 +62,31 @@ class SbeRetryHandler
             ATTEMPT_REBOOT     = 1, // Full SBE run, attempt to restart
                                     // This will run all the steps and HWP's to attempt
                                     // an SBE restart on both sides.
+            // TEST variation values need to be greater than ATTEMPT_REBOOT
+            // so when we check greater than ATTEMPT_REBOOT we get the TEST_* values
+            TEST_BKP_SEEPROM   = 2,
+            TEST_UPD_SEEPROM   = 3,
+            TEST_BKP_MSEEPROM  = 4,
+            TEST_UPD_MSEEPROM  = 5,
+            TEST_RESTART_SBE   = 6,
+            TEST_RESTART_CBS   = 7,
+            TEST_MAX_LIMITS    = 8,
+            TEST_SBE_FAILURE   = 9,
+        };
+
+
+        std::map<SBE_MODE_OF_OPERATION, P10_EXTRACT_SBE_RC::RETURN_ACTION> sbe_op_map =
+        {
+            {INFORMATIONAL_ONLY, P10_EXTRACT_SBE_RC::ERROR_RECOVERED},
+            {ATTEMPT_REBOOT, P10_EXTRACT_SBE_RC::RESTART_SBE},
+            {TEST_BKP_SEEPROM, P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM},
+            {TEST_UPD_SEEPROM, P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM},
+            {TEST_BKP_MSEEPROM, P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM},
+            {TEST_UPD_MSEEPROM, P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM},
+            {TEST_RESTART_SBE, P10_EXTRACT_SBE_RC::RESTART_SBE},
+            {TEST_RESTART_CBS, P10_EXTRACT_SBE_RC::RESTART_CBS},
+            {TEST_MAX_LIMITS, P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM},
+            {TEST_SBE_FAILURE, P10_EXTRACT_SBE_RC::RESTART_SBE},
         };
 
         enum SBE_RESTART_METHOD
@@ -108,9 +134,29 @@ class SbeRetryHandler
             return iv_masterErrorLogPLID;
         }
 
-        inline uint8_t getSwitchCount()
+        inline uint8_t getSwitchCount() const
         {
             return iv_switchSidesCount;
+        }
+
+        inline uint8_t getSwitchCountMseeprom() const
+        {
+            return iv_switchSidesCount_mseeprom;
+        }
+
+        inline uint8_t getCurrentSideCount() const
+        {
+            return iv_currentSideBootAttempts;
+        }
+
+        inline uint8_t getCurrentSideCountMseeprom() const
+        {
+            return iv_currentSideBootAttempts_mseeprom;
+        }
+
+        inline uint8_t getBootRestartCount() const
+        {
+            return iv_boot_restart_count;
         }
 
         inline sbeMsgReg_t getSbeRegister()
@@ -141,9 +187,19 @@ class SbeRetryHandler
             return iv_sbeMode;
         }
 
+        inline SBE_MODE_OF_OPERATION getSBETestMode() const
+        {
+            return iv_sbeTestMode;
+        }
+
         inline void setSBEMode(SBE_MODE_OF_OPERATION i_sbeMode)
         {
             iv_sbeMode = i_sbeMode;
+        }
+
+        inline void setSBETestMode(SBE_MODE_OF_OPERATION i_sbeTestMode)
+        {
+            iv_sbeTestMode = i_sbeTestMode;
         }
 
         inline bool getUseSDB()
@@ -273,10 +329,14 @@ class SbeRetryHandler
          *         boot side on the SBE for a given proc
          *
          * @param[in] i_target - current proc target
+         * @param[in] i_action - extract rc action recommendation
+         * @param[in] i_updateMVPD - flag to indicate whether to update MVPD
          *
          * @return - error, NULL if no error
          */
-        errlHndl_t switch_sbe_sides(TARGETING::Target * i_target);
+        errlHndl_t switch_sbe_sides(TARGETING::Target * i_target,
+                                    P10_EXTRACT_SBE_RC::RETURN_ACTION i_action,
+                                    bool i_updateMVPD);
 
         /**
          * @brief This function handles the call to the p10_get_sbe_msg_handler.
@@ -326,6 +386,27 @@ class SbeRetryHandler
         uint8_t iv_switchSidesCount;
 
         /*
+         * @brief Number of times we switch SBE MSEEPROM sides. Max is defined by
+         *        MAX_SWITCH_SIDE_COUNT
+         */
+        uint8_t iv_switchSidesCount_mseeprom;
+
+        /*
+         * @brief Flag used to indicate if we performed a side flip, then we log a message
+         */
+        uint8_t iv_switchSidesFlag;
+
+        /*
+         * @brief Counter used to indicate how may times we attempt RESTART_SBE's
+         */
+        uint8_t iv_boot_restart_count;
+
+        /*
+         * @brief Counter used to drive test failure scenarios
+         */
+        uint8_t iv_sbeTestMode_recommendations;
+
+        /*
          * @brief The current sbe register
          */
         sbeMsgReg_t iv_sbeRegister;
@@ -361,11 +442,29 @@ class SbeRetryHandler
         uint8_t iv_currentSideBootAttempts;
 
         /*
+        * @brief This value will keep track of how many times we have attempted
+        *        to boot the current side of the SBE's mseeprom. In the ctor this
+        *        value should be 1, because if the retry handler has been called
+        *        that means that we have attempted to boot the current side at
+        *        least 1 time. When we switch mseeprom sides this value should
+        *        drop back to 0. It will be incremeted each time we attempt
+        *        to call start_cbs or hreset depending on iv_sbeRestartMethod
+        */
+        uint8_t iv_currentSideBootAttempts_mseeprom;
+
+        /*
          * @brief The mode of operation that needs to be run through the
          *        SbeRetryHandler.  The different modes are specified in the
          *        SBE_MODE_OF_OPERATION enum
          */
         SBE_MODE_OF_OPERATION iv_sbeMode;
+
+        /*
+         * @brief The test mode of operation that needs to be run through the
+         *        SbeRetryHandler.  The different modes are specified in the
+         *        SBE_MODE_OF_OPERATION enum
+         */
+        SBE_MODE_OF_OPERATION iv_sbeTestMode;
 
         /*
          * @brief This instance variable will instruct the main_sbe_handler

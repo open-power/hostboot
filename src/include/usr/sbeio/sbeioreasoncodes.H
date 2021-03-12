@@ -148,6 +148,8 @@ enum sbeioReasonCode
     SBEIO_START_DMT_CALLED_TWICE       = SBEIO_COMP_ID | 0x63,
     SBEIO_NO_PARENT_PROC               = SBEIO_COMP_ID | 0x64,
     SBEIO_COMMAND_NOT_SUPPORTED        = SBEIO_COMP_ID | 0x65,
+    SBEIO_MVPD_READ_FAILURE            = SBEIO_COMP_ID | 0x66,
+    SBEIO_MVPD_WRITE_FAILURE           = SBEIO_COMP_ID | 0x67,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
