@@ -644,6 +644,38 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 PRDF_PLUGIN_DEFINE( p10_core, L3CE );
 
 /**
+ * @brief  The PowerBus token manager has died. Callout the chip that was
+ *         responsible for generating the token.
+ * @param  i_chip A core chip.
+ * @param  io_sc  The step code data struct
+ * @return SUCCESS always.
+ */
+int32_t calloutPbTokenManager(ExtensibleChip* i_chip,
+                              STEP_CODE_DATA_STRUCT& io_sc)
+{
+    for (const auto& trgt : getFunctionalTargetList(TYPE_PROC))
+    {
+        auto chip = (ExtensibleChip*)systemPtr->GetChip(trgt);
+
+        chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
+                               Util::hashString("PbTokenManager"));
+
+        auto reg = chip->getRegister("PB_STATION_HP_MODE1_CURR");
+
+        if ((SUCCESS == reg->Read()) && reg->IsBitSet(1))
+        {
+            io_sc.service_data->SetCallout(trgt, MRU_HIGH);
+
+            // There should only be one. However, will continue to all of the
+            // processors to collect the FFDC, just in case.
+        }
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_core, calloutPbTokenManager);
+
+/**
  * @brief  For P10 DD1.0, generate information log and mask attention.
  * @param  i_chip A core chip.
  * @param  io_sc  The step code data struct

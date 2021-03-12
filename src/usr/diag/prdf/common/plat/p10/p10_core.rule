@@ -507,7 +507,7 @@ group gEQ_NCU_FIR
     /** EQ_NCU_FIR[13]
      *  TLBIE/sync machine received addr_err cresp.
      */
-    (rEQ_NCU_FIR, bit(13)) ? TBDDefaultCallout;
+    (rEQ_NCU_FIR, bit(13)) ? master_power_bus_chip_procedure;
 
     /** EQ_NCU_FIR[14]
      *  PMISC received address error cresp.

@@ -136,3 +136,9 @@ actionclass analyzeNeighborCore
 {
     funccall("returnScomRegisterZero");
 };
+
+actionclass master_power_bus_chip_procedure
+{
+    threshold1;
+    funccall("calloutPbTokenManager");
+};

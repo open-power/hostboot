@@ -64,6 +64,13 @@
     # Misc Registers
     ############################################################################
 
+    register PB_STATION_HP_MODE1_CURR
+    {
+        name        "PowerBus PB RaceTrack Station HP Mode1 Config register";
+        scomaddr    0x0301138C;
+        capture     group PbTokenManager;
+    };
+
     register PB_STATION_MODE_EQ0
     {
         name        "PowerBus PB RaceTrack Station Mode Config register";
