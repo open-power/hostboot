@@ -68,10 +68,10 @@ fapi2::ReturnCode calc_spd_time_in_nck(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
     const std::vector<uint8_t>& i_spd,
     const uint32_t i_timing_mtb,
-    const uint32_t i_timing_ftb,
+    const int32_t i_timing_ftb,
     const uint16_t i_function,
     const char* i_timing_name,
-    uint32_t& o_timing_in_nck);
+    int32_t& o_timing_in_nck);
 
 // Controller agnostic functions
 

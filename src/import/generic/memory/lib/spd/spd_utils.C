@@ -137,7 +137,8 @@ fapi2::ReturnCode get_tckmin(
     uint64_t& o_value)
 {
     using F = mss::spd::fields<mss::spd::device_type::DDR4, mss::spd::module_params::BASE_CNFG>;
-    uint8_t l_timing_ftb = 0;
+    uint8_t l_timing_ftb_unsigned = 0;
+    int8_t l_timing_ftb = 0;
     uint8_t l_timing_mtb = 0;
     uint8_t l_medium_timebase = 0;
     uint8_t l_fine_timebase = 0;
@@ -150,7 +151,9 @@ fapi2::ReturnCode get_tckmin(
               "%s. Failed get_timebases", spd::c_str(i_dimm) );
 
     FAPI_TRY(get_field_spd(l_ocmb, F::TCK_MIN, i_spd, GET_TCKMIN, l_timing_mtb));
-    FAPI_TRY(get_field_spd(l_ocmb, F::OFFSET_TCK_MIN, i_spd, GET_TCKMIN, l_timing_ftb));
+    FAPI_TRY(get_field_spd(l_ocmb, F::OFFSET_TCK_MIN, i_spd, GET_TCKMIN, l_timing_ftb_unsigned));
+
+    l_timing_ftb = static_cast<int8_t>(l_timing_ftb_unsigned);
 
     // Calculate timing value
     l_temp = spd::calc_timing_from_timebase(l_timing_mtb,
@@ -191,7 +194,8 @@ fapi2::ReturnCode get_tckmax(
     uint64_t& o_value)
 {
     using F = mss::spd::fields<mss::spd::device_type::DDR4, mss::spd::module_params::BASE_CNFG>;
-    uint8_t l_timing_ftb = 0;
+    uint8_t l_timing_ftb_unsigned = 0;
+    int8_t l_timing_ftb = 0;
     uint8_t l_timing_mtb = 0;
     uint8_t l_medium_timebase = 0;
     uint8_t l_fine_timebase = 0;
@@ -204,7 +208,9 @@ fapi2::ReturnCode get_tckmax(
               "%s. Failed get_timebases", spd::c_str(i_dimm) );
 
     FAPI_TRY(get_field_spd(l_ocmb, F::TCK_MAX, i_spd, GET_TCKMAX, l_timing_mtb));
-    FAPI_TRY(get_field_spd(l_ocmb, F::OFFSET_TCK_MAX, i_spd, GET_TCKMAX, l_timing_ftb));
+    FAPI_TRY(get_field_spd(l_ocmb, F::OFFSET_TCK_MAX, i_spd, GET_TCKMAX, l_timing_ftb_unsigned));
+
+    l_timing_ftb = static_cast<int8_t>(l_timing_ftb_unsigned);
 
     // Calculate timing value
     l_temp = spd::calc_timing_from_timebase(l_timing_mtb,

@@ -456,7 +456,7 @@ class base_0_3
         /// @param[in] i_field field value
         /// @return true/false in specified range
         ///
-        virtual bool check_offset_tccd_l_min(const uint8_t i_field) const
+        virtual bool check_offset_tccd_l_min(const int8_t i_field) const
         {
             return true;
         }
@@ -483,7 +483,7 @@ class base_0_3
         /// @param[in] i_field field value
         /// @return true/false in specified range
         ///
-        virtual bool check_offset_trp_min(const uint8_t i_field) const
+        virtual bool check_offset_trp_min(const int8_t i_field) const
         {
             return true;
         }
@@ -494,7 +494,7 @@ class base_0_3
         /// @param[in] i_field field value
         /// @return true/false in specified range
         ///
-        virtual bool check_offset_trcd_min(const uint8_t i_field) const
+        virtual bool check_offset_trcd_min(const int8_t i_field) const
         {
             return true;
         }
@@ -505,7 +505,7 @@ class base_0_3
         /// @param[in] i_field field value
         /// @return true/false in specified range
         ///
-        virtual bool check_offset_taa_min(const uint8_t i_field) const
+        virtual bool check_offset_taa_min(const int8_t i_field) const
         {
             return true;
         }
@@ -1413,13 +1413,16 @@ class base_0_3
         virtual fapi2::ReturnCode set_taa(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_timing_mtb = 0;
-            uint8_t l_timing_ftb = 0;
+            uint8_t l_timing_ftb_unsigned = 0;
+            int8_t l_timing_ftb = 0;
             uint8_t l_mtb = 0;
             uint8_t l_ftb = 0;
-            uint16_t l_field = 0;
+            int16_t l_field = 0;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::TAA_MIN, i_spd, exp::SET_TAA_MIN, l_timing_mtb));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TAA_MIN, i_spd, exp::SET_TAA_MIN, l_timing_ftb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TAA_MIN, i_spd, exp::SET_TAA_MIN, l_timing_ftb_unsigned));
+
+            l_timing_ftb = static_cast<int8_t>(l_timing_ftb_unsigned);
 
             // Range checks
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -1459,11 +1462,14 @@ class base_0_3
         virtual fapi2::ReturnCode set_trcd_min(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_timing_mtb = 0;
-            uint8_t l_timing_ftb = 0;
-            uint32_t l_field = 0;
+            uint8_t l_timing_ftb_unsigned = 0;
+            int8_t l_timing_ftb = 0;
+            int32_t l_field = 0;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::TRCD_MIN, i_spd, SET_DRAM_TRCD, l_timing_mtb));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRCD_MIN, i_spd, SET_DRAM_TRCD, l_timing_ftb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRCD_MIN, i_spd, SET_DRAM_TRCD, l_timing_ftb_unsigned));
+
+            l_timing_ftb = static_cast<int8_t>(l_timing_ftb_unsigned);
 
             // Range checks
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -1499,11 +1505,14 @@ class base_0_3
         virtual fapi2::ReturnCode set_trp_min(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_timing_mtb = 0;
-            uint8_t l_timing_ftb = 0;
-            uint32_t l_field = 0;
+            uint8_t l_timing_ftb_unsigned = 0;
+            int8_t l_timing_ftb = 0;
+            int32_t l_field = 0;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::TRP_MIN, i_spd, SET_DRAM_TRP, l_timing_mtb));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRP_MIN, i_spd, SET_DRAM_TRP, l_timing_ftb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TRP_MIN, i_spd, SET_DRAM_TRP, l_timing_ftb_unsigned));
+
+            l_timing_ftb = static_cast<int8_t>(l_timing_ftb_unsigned);
 
             // Range checks
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -1543,8 +1552,8 @@ class base_0_3
             uint32_t l_trasmin = 0;
 
             // There is no fine offset for this field, this will remain 0
-            uint32_t l_ftb = 0;
-            uint32_t l_field = 0;
+            int32_t l_ftb = 0;
+            int32_t l_field = 0;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::TRASMIN_MSN, i_spd, SET_DRAM_TRAS, l_trasmin_msn));
             FAPI_TRY(get_field_spd(iv_ocmb, F::TRASMIN_LSB, i_spd, SET_DRAM_TRAS, l_trasmin_lsb));
@@ -1829,8 +1838,8 @@ class base_0_3
             uint32_t l_tfawmin = 0;
 
             // There is no fine offset for this field, this will remain 0
-            uint32_t l_ftb = 0;
-            uint32_t l_field = 0;
+            int32_t l_ftb = 0;
+            int32_t l_field = 0;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::TFAWMIN_MSN, i_spd, SET_DRAM_TFAW, l_tfawmin_msn));
             FAPI_TRY(get_field_spd(iv_ocmb, F::TFAWMIN_LSB, i_spd, SET_DRAM_TFAW, l_tfawmin_lsb));
@@ -1911,11 +1920,14 @@ class base_0_3
         virtual fapi2::ReturnCode set_tccd_l(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_timing_mtb = 0;
-            uint8_t l_timing_ftb = 0;
-            uint32_t l_field = 0;
+            uint8_t l_timing_ftb_unsigned = 0;
+            int8_t l_timing_ftb = 0;
+            int32_t l_field = 0;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::TCCD_L_MIN, i_spd, SET_DRAM_TCCD_L, l_timing_mtb));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TCCD_L_MIN, i_spd, SET_DRAM_TCCD_L, l_timing_ftb));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::OFFSET_TCCD_L_MIN, i_spd, SET_DRAM_TCCD_L, l_timing_ftb_unsigned));
+
+            l_timing_ftb = static_cast<int8_t>(l_timing_ftb_unsigned);
 
             // Range checks
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -1967,8 +1979,8 @@ class base_0_3
             uint32_t l_twrmin = 0;
 
             // There is no fine offset for this field, this will remain 0
-            uint32_t l_ftb = 0;
-            uint32_t l_field = 0;
+            int32_t l_ftb = 0;
+            int32_t l_field = 0;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::TWRMIN_MSN, i_spd, SET_DRAM_TWR, l_twrmin_msn));
             FAPI_TRY(get_field_spd(iv_ocmb, F::TWRMIN_LSB, i_spd, SET_DRAM_TWR, l_twrmin_lsb));
@@ -2061,8 +2073,8 @@ class base_0_3
             uint32_t l_twtrmin_s = 0;
 
             // There is no fine offset for this field, this will remain 0
-            uint32_t l_ftb = 0;
-            uint32_t l_field = 0;
+            int32_t l_ftb = 0;
+            int32_t l_field = 0;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_S_MSN, i_spd, SET_DRAM_TWTR_S, l_twtrmin_s_msn));
             FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_S_LSB, i_spd, SET_DRAM_TWTR_S, l_twtrmin_s_lsb));
@@ -2116,8 +2128,8 @@ class base_0_3
             uint32_t l_twtrmin_l = 0;
 
             // There is no fine offset for this field, this will remain 0
-            uint32_t l_ftb = 0;
-            uint32_t l_field = 0;
+            int32_t l_ftb = 0;
+            int32_t l_field = 0;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_L_MSN, i_spd, SET_DRAM_TWTR_L, l_twtrmin_l_msn));
             FAPI_TRY(get_field_spd(iv_ocmb, F::TWTRMIN_L_LSB, i_spd, SET_DRAM_TWTR_L, l_twtrmin_l_lsb));
