@@ -52,15 +52,15 @@ namespace spd
 /// @param[in] i_ftb_multiplier SPD fine timebase
 /// @return the timing value in picoseconds
 ///
-inline uint32_t calc_timing_from_timebase(
-    const uint32_t i_timing_mtb,
-    const uint32_t i_mtb_multiplier,
-    const uint32_t i_timing_ftb,
-    const uint32_t i_ftb_multiplier)
+inline int32_t calc_timing_from_timebase(
+    const int32_t i_timing_mtb,
+    const int32_t i_mtb_multiplier,
+    const int32_t i_timing_ftb,
+    const int32_t i_ftb_multiplier)
 {
     // JEDEC algorithm
-    const uint32_t l_timing_val = i_timing_mtb * i_mtb_multiplier;
-    const uint32_t l_fine_offset = i_timing_ftb * i_ftb_multiplier;
+    const int32_t l_timing_val = i_timing_mtb * i_mtb_multiplier;
+    const int32_t l_fine_offset = i_timing_ftb * i_ftb_multiplier;
 
     return l_timing_val + l_fine_offset;
 }
