@@ -385,8 +385,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         uint32_t count    =  i_buffer[idx  ];                           // 8-bit
         // 5 spare bits                                                 // 5-bit
         uint32_t isSp     = (i_buffer[idx+1] >> 2) & 0x1;               // 1-bit
-        uint32_t isEcc    = (i_buffer[idx+1] >> 1) & 0x1;               // 1-bit
-        // 1 spare bit                                                  // 1-bit
+        // 2 spare bits                                                 // 2-bit
         uint32_t isHard   = (i_buffer[idx+2] >> 7) & 0x1;               // 1-bit
         uint32_t active   = (i_buffer[idx+2] >> 6) & 0x1;               // 1-bit
         uint32_t dram     =  i_buffer[idx+2]       & 0x3f;              // 6-bit
@@ -407,7 +406,6 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         char active_char = ( 1 == active ) ? 'Y':'N';
         char isHard_char = ( 1 == isHard ) ? 'Y':'N';
         char isSp_char   = ( 1 == isSp   ) ? 'Y':'N';
-        char isEcc_char  = ( 1 == isEcc  ) ? 'Y':'N';
 
         const char * cardName_str = "";
         const char * portSlct_str = " "; // intentionally an empty space.
@@ -421,9 +419,9 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         // Build the data string.
         char data[DATA_SIZE] = { '\0' };
         snprintf( data, DATA_SIZE,
-                  "m%ds%d %s 0x%02x 0x%05x  0x%03x   %2d 0x%02x %c %c %s",
+                  "m%ds%d %s 0x%02x 0x%05x  0x%03x   %2d 0x%02x %c %s",
                   mrnk, srnk, portSlct_str, bnk, row, col, dram, dramPins,
-                  isSp_char, isEcc_char, dramSite_str );
+                  isSp_char, dramSite_str );
 
         // Print the line.
         i_parser.PrintString( header, data );
@@ -515,14 +513,6 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
 
                 getDramRepairSymbolStr(rankEntry.port1Spare, symbolStr, 10);
                 snprintf(temp, 64, "%s Sp1: %s", data, symbolStr);
-                snprintf(data, 64, temp);
-            }
-
-            // Display ECC spare information for X4 DRAMs
-            if ( usrData.header.isEccSp )
-            {
-                getDramRepairSymbolStr( rankEntry.eccSpare, symbolStr, 10 );
-                snprintf(temp, 64, "%s EccSp: %s", data, symbolStr);
                 snprintf(data, 64, temp);
             }
 

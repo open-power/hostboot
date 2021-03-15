@@ -372,7 +372,7 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     if ( nullptr != errl )
     {
         PRDF_ERR( "[PlatServices::mssSetSteerMux] mss_do_steering "
-                  "failed. HUID: 0x%08x rank: %d symbol: %d eccSpare: %c",
+                  "failed. HUID: 0x%08x rank: %d symbol: %d",
                   getHuid(i_ocmb), i_rank.getMaster(), l_dramSymbol );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
@@ -469,15 +469,6 @@ uint32_t isDramSparingEnabled<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
 
     do
     {
-        TargetHandle_t dimm = getConnectedDimm( i_trgt, i_rank, i_ps );
-        const bool isX4 = isDramWidthX4( dimm );
-        if ( isX4 )
-        {
-            // Always an ECC spare in x4 mode.
-            o_spareEnable = true;
-            break;
-        }
-
         // Check for any DRAM spares.
         uint8_t cnfg = TARGETING::MEM_EFF_DIMM_SPARE_NO_SPARE;
         o_rc = getDimmSpareConfig<TYPE_MEM_PORT>( i_trgt, i_rank, i_ps, cnfg );

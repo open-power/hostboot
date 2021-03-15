@@ -51,9 +51,8 @@ class DsdEvent : public TdEntry
      * @param i_rank Rank reporting chip mark.
      */
     DsdEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,
-                 const MemMark & i_mark, bool i_eccSpare = false ) :
-        TdEntry(DSD_EVENT, i_chip, i_rank), iv_mark(i_mark),
-        iv_eccSpare(i_eccSpare)
+                 const MemMark & i_mark ) :
+        TdEntry(DSD_EVENT, i_chip, i_rank), iv_mark(i_mark)
     {
         PRDF_ASSERT( nullptr != i_chip );
         PRDF_ASSERT( T == i_chip->getType() );
@@ -232,8 +231,6 @@ class DsdEvent : public TdEntry
   private: // instance variables
 
     const MemMark iv_mark;  ///< The chip mark from hardware.
-    const bool iv_eccSpare; ///< True if the spare should be applied to the x4
-                            ///< DRAM ECC spare.
 };
 
 } // end namespace PRDF

@@ -194,7 +194,7 @@ bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank );
  * Function details:
  *  - Removes the symbol mark if it is on the same DRAM as the chip mark.
  *  - Adds the following to the callout list if they exist: chip mark, symbol
- *    mark, DRAM spares, and ECC spare.
+ *    mark, DRAM spares.
  *  - Makes the error log predictive and exits if DRAM repairs are disabled.
  *  - Makes the error log predictive and bans TPS on this rank if all available
  *    repairs have been used.

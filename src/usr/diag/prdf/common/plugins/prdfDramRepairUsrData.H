@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,10 +50,10 @@ namespace FSP
 struct DramRepairDataHdr
 {
     uint8_t rankCount   : 4; // Number of ranks with DRAM Repair data
-    uint8_t isEccSp     : 1; // Is ecc spare available for use.
+    uint8_t reserved1   : 1; // Future use
     uint8_t isSpareDram : 1; // Is spare DRAM supported on DIMMS attached
                              // to this MBA.
-    uint8_t reserved    : 2; // Future use
+    uint8_t reserved2   : 2; // Future use
     uint8_t wiringType;     // Future use. In case we need to display the DRAM
                             // site location instead symbols (TBD).
 
@@ -67,9 +67,9 @@ struct DramRepairDataHdr
                                    DramRepairDataHdr& i_right )
     {
         i_left << ( uint8_t )(i_right.rankCount << 4
-                   | i_right.isEccSp << 3
+                   | i_right.reserved1 << 3
                    | i_right.isSpareDram << 2
-                   | i_right.reserved )
+                   | i_right.reserved2 )
                << i_right.wiringType;
         return i_left;
     }
@@ -87,9 +87,9 @@ struct DramRepairDataHdr
         i_left >> temp >> i_right.wiringType;
 
         i_right.rankCount = temp >> 4;
-        i_right.isEccSp = temp >> 3;
+        i_right.reserved1 = temp >> 3;
         i_right.isSpareDram = temp >> 2;
-        i_right.reserved = temp;
+        i_right.reserved2 = temp;
 
         return i_left;
     }
@@ -105,7 +105,6 @@ struct DramRepairRankData
     uint8_t symbolMark;
     uint8_t port0Spare;
     uint8_t port1Spare;
-    uint8_t eccSpare;
 
     /**
      * @brief Check if object has some valid symbols
@@ -116,8 +115,7 @@ struct DramRepairRankData
         return ( ( SYMBOLS_PER_RANK > chipMark )
                   || ( SYMBOLS_PER_RANK > symbolMark )
                   || ( SYMBOLS_PER_RANK > port0Spare )
-                  || ( SYMBOLS_PER_RANK > port1Spare )
-                  || ( SYMBOLS_PER_RANK > eccSpare) );
+                  || ( SYMBOLS_PER_RANK > port1Spare ) );
     };
 
     /**
@@ -130,7 +128,7 @@ struct DramRepairRankData
                                    DramRepairRankData& i_right )
     {
         i_left << i_right.rank << i_right.chipMark << i_right.symbolMark
-               << i_right.port0Spare << i_right.port1Spare << i_right.eccSpare;
+               << i_right.port0Spare << i_right.port1Spare;
         return i_left;
     }
 
@@ -144,7 +142,7 @@ struct DramRepairRankData
                                    DramRepairRankData& i_right)
     {
         i_left >> i_right.rank >> i_right.chipMark >> i_right.symbolMark
-               >> i_right.port0Spare >> i_right.port1Spare >> i_right.eccSpare;
+               >> i_right.port0Spare >> i_right.port1Spare;
         return i_left;
     }
 };

@@ -539,6 +539,8 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             }
             else
             {
+                PRDF_TRAC( PRDF_FUNC "Dram sparing enabled but not possible. "
+                           "All repairs used." );
                 // Chip mark is in place and sparing is not possible.
                 o_allRepairsUsed = true;
                 io_sc.service_data->setSignature( i_chip->getHuid(),
@@ -552,6 +554,8 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // symbol mark have been used.
             if ( i_chipMark.isValid() && i_symMark.isValid() )
             {
+                PRDF_TRAC( PRDF_FUNC "Dram sparing not enabled. All repairs "
+                           "used." );
                 o_allRepairsUsed = true;
                 io_sc.service_data->setSignature( i_chip->getHuid(),
                                                   PRDFSIG_AllDramRepairs );

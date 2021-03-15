@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,10 +132,6 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
             {
                 PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
                 break;
-            }
-            if ( iv_eccSpare )
-            {
-                bitmap.setEccSpare();
             }
             else
             {

@@ -325,15 +325,6 @@ uint32_t MemDqBitmap::getPortByteBitIdx( const MemSymbol & i_symbol,
         {
             o_byteIdx = iv_spareByte;
         }
-        else if ( i_symbol.isEccSpared() )
-        {
-            o_portSlct = ECC_SPARE_PORT;
-            o_byteIdx  = ECC_SPARE_BYTE;
-
-            // x4 ECC spare is the second nibble of the byte.
-            o_bitIdx = (o_bitIdx % DQS_PER_NIBBLE) + DQS_PER_NIBBLE;
-        }
-
     } while (0);
 
     return o_rc;

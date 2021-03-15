@@ -141,14 +141,8 @@ class MemSymbol
     /** @return Marks this symbol as steered to a DRAM spare. */
     void setDramSpared() { iv_isDramSpared = true; }
 
-    /** @return Marks this symbol as steered to the ECC spare. */
-    void setEccSpared() { iv_isEccSpared = true; }
-
     /** @return TRUE this symbol is on a DRAM spare, FALSE otherwise. */
     bool isDramSpared() const { return iv_isDramSpared; }
-
-    /** @return TRUE this symbol is on the ECC spare, FALSE otherwise. */
-    bool isEccSpared() const { return iv_isEccSpared; }
 
     /**
      * @brief   Overrides the '<' operator.
@@ -180,16 +174,13 @@ class MemSymbol
     /**
      * @brief  Checks if the current symbol is on any of the spares
      *         Sets iv_isDramSpared if found on at least one of the valid spares
-     *         Sets iv_isEccSpared if found on valid i_ecc
      *         Usually call mssGetSteerMux to fill in associated symbols
      *
      * @param  i_sp0 A symbol associated with the spare on port 0.
      * @param  i_sp1 A symbol associated with the spare on port 1.
-     * @param  i_ecc A symbol associated with the ECC spare (x4 mode only).
      */
     void updateSpared(const MemSymbol & i_sp0,
-                      const MemSymbol & i_sp1,
-                      const MemSymbol & i_ecc);
+                      const MemSymbol & i_sp1);
 
 
   private: // instance variables
@@ -206,7 +197,6 @@ class MemSymbol
     uint8_t iv_pins = 0; ///< See enum DqMask.
 
     bool iv_isDramSpared = false; ///< TRUE if symbol resides on DRAM spare.
-    bool iv_isEccSpared  = false; ///< TRUE if symbol resides on ECC spare.
 };
 
 //------------------------------------------------------------------------------

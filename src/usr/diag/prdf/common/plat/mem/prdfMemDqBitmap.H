@@ -55,14 +55,6 @@ typedef std::map<uint8_t, data> BitmapData;
  */
 class MemDqBitmap
 {
-  private: // enums, constants
-
-    enum
-    {
-        ECC_SPARE_BYTE  = 8, // ECC spare is on second nibble of this byte.
-        ECC_SPARE_PORT  = 1, // Only on port 1.
-    };
-
   public: // constructors
 
     /** @brief Default constructor */
@@ -117,7 +109,7 @@ class MemDqBitmap
 
     /**
      * @brief  Sets the specified symbol.
-     * @note   Will adjust for DRAM or ECC spares, if applicable.
+     * @note   Will adjust for DRAM spares, if applicable.
      * @param  i_symbol The target symbol.
      * @param  i_pins   Optional 2-bit value of the symbol's pins. The default
      *                  is to set both pins.
@@ -127,7 +119,7 @@ class MemDqBitmap
 
     /**
      * @brief  Sets the specified DRAM.
-     * @note   Will adjust for DRAM or ECC spares, if applicable.
+     * @note   Will adjust for DRAM spares, if applicable.
      * @param  i_symbol A symbol on the target DRAM.
      * @param  i_pins   Optional 8-bit (x8 mode) or 4-bit (x4 mode) value of the
      *                  DRAM's pins. The default is to set all pins.
@@ -137,7 +129,7 @@ class MemDqBitmap
 
     /**
      * @brief  Clears the specified DRAM.
-     * @note   Will adjust for DRAM or ECC spares, if applicable.
+     * @note   Will adjust for DRAM spares, if applicable.
      * @param  i_symbol A symbol on the target DRAM.
      * @param  i_pins   Optional 8-bit (x8 mode) or 4-bit (x4 mode) value of the
      *                  DRAM's pins. The default is to clear all pins.
@@ -181,7 +173,7 @@ class MemDqBitmap
     /**
      * @brief  Support function to calculate the port select, byte index, and
      *         bit index based on the given symbol.
-     * @note   Will adjust the indexes for DRAM or ECC spares, if applicable.
+     * @note   Will adjust the indexes for DRAM spares, if applicable.
      * @param  i_symbol   The target symbol.
      * @param  o_portSlct The port select (0-1).
      * @param  o_byteIdx  The byte index of the symbol (0-9).
@@ -193,7 +185,7 @@ class MemDqBitmap
 
     /**
      * @brief  Checks if chip mark is present on specified DRAM.
-     * @note   Will adjust for DRAM or ECC spares, if applicable.
+     * @note   Will adjust for DRAM spares, if applicable.
      * @param  i_symbol A symbol on the target DRAM.
      * @param  o_cm     True if chip mark is present false otherwise.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.

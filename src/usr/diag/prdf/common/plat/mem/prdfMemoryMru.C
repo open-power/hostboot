@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,7 +131,6 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
         }
 
         if ( iv_memMruMeld.s.dramSpared ) iv_symbol.setDramSpared();
-        if ( iv_memMruMeld.s.eccSpared  ) iv_symbol.setEccSpared();
 
     }
 
@@ -159,7 +158,6 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_target,
     iv_memMruMeld.s.symbol     = iv_symbol.getSymbol();
     iv_memMruMeld.s.pins       = iv_symbol.getPins();
     iv_memMruMeld.s.dramSpared = iv_symbol.isDramSpared() ? 1 : 0;
-    iv_memMruMeld.s.eccSpared  = iv_symbol.isEccSpared()  ? 1 : 0;
 
     // If the code gets to this point the MemoryMru is valid.
     iv_memMruMeld.s.valid = 1;

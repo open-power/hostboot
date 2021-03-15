@@ -196,7 +196,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
             }
 
             // Get DRAM spares
-            MemSymbol sp0, sp1, ecc;
+            MemSymbol sp0, sp1;
             rc = mssGetSteerMux<T>( i_trgt, rank, sp0, sp1 );
             if ( SUCCESS != rc )
             {
@@ -209,8 +209,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
                                               cm.getSymbol().getSymbol(),
                                               sm.getSymbol().getSymbol(),
                                              sp0.getSymbol(),
-                                             sp1.getSymbol(),
-                                             ecc.getSymbol() };
+                                             sp1.getSymbol() };
             if ( rankData.valid() )
             {
                 data.rankDataList.push_back(rankData);
@@ -221,7 +220,6 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
         if ( data.rankDataList.size() > 0 )
         {
             data.header.rankCount = data.rankDataList.size();
-            data.header.isEccSp   = false;
 
             UtilMem dramStream;
             dramStream << data;

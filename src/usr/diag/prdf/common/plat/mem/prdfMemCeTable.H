@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,12 +137,11 @@ class MemCeTable
         uint8_t portSlct;            ///< The port select of the DRAM (MBA only)
         bool    isHard;              ///< TRUE if a hard CE was detected
         bool    isDramSpared;        ///< TRUE if on spare DRAM
-        bool    isEccSpared;         ///< TRUE if on ECC spare
 
         /** @brief Default constructor. */
         TableData() :
             active(false), count(0), addr(), dram(0), dramPins(0), portSlct(0),
-            isHard(false), isDramSpared(false), isEccSpared(false)
+            isHard(false), isDramSpared(false)
         {}
 
         /**
@@ -153,11 +152,10 @@ class MemCeTable
          * @param i_type     The wiring type (for DRAM site locations).
          */
         TableData( const MemAddr & i_addr, uint8_t i_dram, uint8_t i_dramPins,
-                   uint8_t i_portSlct, bool i_isHard, bool i_isDramSpared,
-                   bool i_isEccSpared ) :
+                   uint8_t i_portSlct, bool i_isHard, bool i_isDramSpared ) :
             active(true), count(1), addr(i_addr), dram(i_dram),
             dramPins(i_dramPins), portSlct(i_portSlct), isHard(i_isHard),
-            isDramSpared(i_isDramSpared), isEccSpared(i_isEccSpared)
+            isDramSpared(i_isDramSpared)
         {}
 
         /** An entry is equivalent if the address and DRAM match. */

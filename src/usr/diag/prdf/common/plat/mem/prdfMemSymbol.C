@@ -47,7 +47,7 @@ using namespace PARSERUTILS;
 MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
                       uint8_t i_symbol ) :
     iv_trgt(i_trgt), iv_rank(i_rank), iv_symbol(i_symbol),
-    iv_pins(0), iv_isDramSpared(false), iv_isEccSpared(false)
+    iv_pins(0), iv_isDramSpared(false)
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
@@ -251,8 +251,7 @@ uint8_t MemSymbol::getGalois() const
 //------------------------------------------------------------------------------
 
 void MemSymbol::updateSpared(const MemSymbol & i_sp0,
-                             const MemSymbol & i_sp1,
-                             const MemSymbol & i_ecc)
+                             const MemSymbol & i_sp1)
 {
     if (!iv_isDramSpared)
     {
@@ -261,12 +260,6 @@ void MemSymbol::updateSpared(const MemSymbol & i_sp0,
         {
             setDramSpared();
         }
-    }
-
-    if ( (!iv_isEccSpared) &&
-         ( i_ecc.isValid() && (i_ecc.getDram() == getDram())) )
-    {
-        setEccSpared();
     }
 }
 
@@ -317,7 +310,7 @@ uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         o_sym2 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank,
                                         tceGalois, tceMask );
 
-        MemSymbol sp0, sp1, ecc;
+        MemSymbol sp0, sp1;
         o_rc = mssGetSteerMux<TYPE_OCMB_CHIP>( i_chip->getTrgt(), i_rank,
                                                sp0, sp1 );
         if ( SUCCESS != o_rc )
@@ -326,8 +319,8 @@ uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                       "rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
             break;
         }
-        o_sym1.updateSpared(sp0, sp1, ecc);
-        o_sym2.updateSpared(sp0, sp1, ecc);
+        o_sym1.updateSpared(sp0, sp1);
+        o_sym2.updateSpared(sp0, sp1);
 
     } while (0);
 

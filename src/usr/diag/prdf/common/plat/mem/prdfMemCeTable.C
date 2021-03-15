@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,9 +50,8 @@ uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
 {
     uint32_t o_rc = NO_TH_REACHED;
 
-    TableData data ( i_addr, i_symbol.getDram(), i_symbol.getDramPins(),
-                     i_symbol.getPortSlct(), i_isHard, i_symbol.isDramSpared(),
-                     i_symbol.isEccSpared() );
+    TableData data (i_addr, i_symbol.getDram(), i_symbol.getDramPins(),
+                    i_symbol.getPortSlct(), i_isHard, i_symbol.isDramSpared());
 
     // First, check if the entry already exists. If so, increment its count and
     // move it to the end of the queue.
@@ -233,11 +232,10 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
         uint8_t active = entry.active ? 1 : 0;
         uint8_t isHard = entry.isHard ? 1 : 0;
         uint8_t isSp   = entry.isDramSpared ? 1 : 0;
-        uint8_t isEcc  = entry.isEccSpared  ? 1 : 0;
 
         data[sz_actData  ] = entry.count;
         data[sz_actData+1] = // 5 bits spare here.
-                             (isSp << 2) | (isEcc << 1); // 1 bit spare at end.
+                             (isSp << 2); // 2 bits spare at end.
         data[sz_actData+2] = (isHard << 7) | (active << 6) |
                              (entry.dram & 0x3f);
         data[sz_actData+3] = entry.dramPins;
