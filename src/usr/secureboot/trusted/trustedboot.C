@@ -886,27 +886,6 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
             break;
         }
 
-        // HW Key Hash
-        SHA512_t l_hw_key_hash;
-        SECUREBOOT::getHwKeyHash(l_hw_key_hash);
-        uint8_t l_hwKeyHashLogMsg[] = "HW KEY HASH";
-
-        l_err = pcrExtend(PCR_1,
-                          EV_PLATFORM_CONFIG_FLAGS,
-                          l_hw_key_hash,
-                          sizeof(SHA512_t),
-                          l_hwKeyHashLogMsg,
-                          sizeof(l_hwKeyHashLogMsg));
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
-                      "Call to pcrExtend for HW Key Hash "
-                      "into PCR_1 failed. "
-                      TRACE_ERR_FMT,
-                      TRACE_ERR_ARGS(l_err));
-            break;
-        }
-
     } while(0);
 
     TRACUCOMP(g_trac_trustedboot, EXIT_MRK"tpmLogConfigEntries()");
@@ -921,7 +900,9 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                         const uint8_t* i_digest,
                         size_t  i_digestSize,
                         const uint8_t* i_logMsg,
-                        const size_t i_logMsgSize)
+                        const size_t i_logMsgSize,
+                        const bool i_extendToTpm,
+                        const bool i_extendToSwLog)
 {
     assert(i_pTpm != nullptr,"pcrExtendSingleTpm: BUG! i_pTpm was nullptr");
     assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
@@ -947,7 +928,8 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
         if (hwasState.present &&
              hwasState.functional)
         {
-            if (i_logMsg != nullptr) // null log indicates we don't log
+            if ((i_logMsg != nullptr) // null log indicates we don't log
+                && (i_extendToSwLog == true))
             {
                 // Fill in TCG_PCR_EVENT2 and add to log
                 eventLog = TpmLogMgr_genLogEventPcrExtend(pcr, i_eventType,
@@ -969,15 +951,25 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                 }
             }
 
-            // Perform the requested extension
-            err = tpmCmdPcrExtend2Hash(i_pTpm,
-                                       pcr,
-                                       i_algId,
-                                       i_digest,
-                                       i_digestSize,
-                                       TPM_ALG_INVALID_ID,
-                                       nullptr,
-                                       0);
+            if (i_extendToTpm == true)
+            {
+                // Perform the requested extension
+                err = tpmCmdPcrExtend2Hash(i_pTpm,
+                                           pcr,
+                                           i_algId,
+                                           i_digest,
+                                           i_digestSize,
+                                           TPM_ALG_INVALID_ID,
+                                           nullptr,
+                                           0);
+            }
+            else
+            {
+                TRACUCOMP(g_trac_trustedboot, "pcrExtendSingleTpm: "
+                          "Purposely Skipped Extension for i_pcr=%d", i_pcr);
+                TRACUBIN(g_trac_trustedboot, "Skipped Extended Data Log msg",
+                         i_logMsg, i_logMsgSize);
+            }
         }
     } while ( 0 );
 
@@ -995,14 +987,18 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
     return;
 }
 
-void pcrExtendSeparator(TpmTarget* const i_pTpm)
+void pcrExtendSeparator(TpmTarget* const i_pTpm,
+                        bool const i_extendToTpm,
+                        bool const i_extendToSwLog)
 {
     assert(i_pTpm != nullptr,"pcrExtendSeparator: BUG! i_pTpm was nullptr");
     assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
            "pcrExtendSeparator: BUG! Expected target to be of TPM type, but "
            "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
 
-    TRACUCOMP(g_trac_trustedboot, ENTER_MRK"pcrExtendSeparator()");
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK"pcrExtendSeparator(): "
+              "i_pTpm=0x%.8X, i_extendToTpm=%d, i_extendToSwLog=%d",
+              TARGETING::get_huid(i_pTpm), i_extendToTpm, i_extendToSwLog);
 
     errlHndl_t err = nullptr;
     TCG_PCR_EVENT2 eventLog = {0};
@@ -1038,45 +1034,52 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
             if (hwasState.present &&
                 hwasState.functional)
             {
-                // Fill in TCG_PCR_EVENT2 and add to log
-                eventLog = TpmLogMgr_genLogEventPcrExtend(pcr,
-                                                          EV_SEPARATOR,
-                                                          TPM_ALG_SHA256,
-                                                          sha256_digest,
-                                                          sizeof(sha256_digest),
-                                                          TPM_ALG_INVALID_ID,
-                                                          nullptr,
-                                                          0,
-                                                          logMsg,
-                                                          sizeof(logMsg));
-
-                if(useStaticLog)
+                if (i_extendToSwLog == true)
                 {
-                    auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
-                    err = TpmLogMgr_addEvent(pTpmLogMgr,&eventLog);
+                    // Fill in TCG_PCR_EVENT2 and add to log
+                    eventLog = TpmLogMgr_genLogEventPcrExtend(pcr,
+                                                              EV_SEPARATOR,
+                                                              TPM_ALG_SHA256,
+                                                              sha256_digest,
+                                                              sizeof(sha256_digest),
+                                                              TPM_ALG_INVALID_ID,
+                                                              nullptr,
+                                                              0,
+                                                              logMsg,
+                                                              sizeof(logMsg));
+
+                    if(useStaticLog)
+                    {
+                        auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
+                        err = TpmLogMgr_addEvent(pTpmLogMgr,&eventLog);
+                        if (nullptr != err)
+                        {
+                            break;
+                        }
+                    }
+                } // end of i_extendToSwLog check
+
+                if (i_extendToTpm == true)
+                {
+                    // Perform the requested extension
+                    err = tpmCmdPcrExtend2Hash(i_pTpm,
+                                               pcr,
+                                               TPM_ALG_SHA256,
+                                               sha256_digest,
+                                               sizeof(sha256_digest),
+                                               TPM_ALG_INVALID_ID,
+                                               nullptr,
+                                               0);
+
                     if (nullptr != err)
                     {
                         break;
                     }
-                }
+                } // end of i_extendToTpm check
 
-                // Perform the requested extension
-                err = tpmCmdPcrExtend2Hash(i_pTpm,
-                                           pcr,
-                                           TPM_ALG_SHA256,
-                                           sha256_digest,
-                                           sizeof(sha256_digest),
-                                           TPM_ALG_INVALID_ID,
-                                           nullptr,
-                                           0);
-                if (nullptr != err)
-                {
-                    break;
-                }
+            } // end of hwasState.present and hwasState.functional check
 
-            }
-        }
-
+        } // end of pcr loop
     } while ( 0 );
 
     if (nullptr != err)
@@ -1781,10 +1784,12 @@ void* tpmDaemon(void* unused)
                                 msgData->mAlgId,
                                 msgData->mDigest,
                                 msgData->mDigestSize,
-                                msgData->mMirrorToLog? msgData->mLogMsg:
+                                msgData->mExtendToSwLog? msgData->mLogMsg:
                                                                   nullptr,
-                                msgData->mMirrorToLog? msgData->mLogMsgSize:
-                                                                  0);
+                                msgData->mExtendToSwLog? msgData->mLogMsgSize:
+                                                                  0,
+                                msgData->mExtendToTpm,
+                                msgData->mExtendToSwLog);
 
                   // Lastly make sure we are in a state
                   //  where we have a functional TPM
@@ -1796,6 +1801,10 @@ void* tpmDaemon(void* unused)
               {
                   tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
 
+                  TRUSTEDBOOT::SeparatorMsgData* msgData =
+                      reinterpret_cast<TRUSTEDBOOT::SeparatorMsgData*>
+                      (tb_msg->iv_data);
+
                   TARGETING::TargetHandleList tpmList;
                   getTPMs(tpmList);
                   for (auto tpm : tpmList)
@@ -1803,7 +1812,9 @@ void* tpmDaemon(void* unused)
                       // Add the separator to this TPM,
                       // if an error occurs the TPM will
                       //  be marked as failed and the error log committed
-                      TRUSTEDBOOT::pcrExtendSeparator(tpm);
+                      TRUSTEDBOOT::pcrExtendSeparator(tpm,
+                                                      msgData->mExtendToTpm,
+                                                      msgData->mExtendToSwLog);
                   }
 
                   // Lastly make sure we are in a state
@@ -1980,6 +1991,26 @@ void* tpmDaemon(void* unused)
                   tb_msg->iv_errl = doExpandTpmLog(l_data->tpm);
               }
               break;
+
+          case MSG_TYPE_SYNCHRONIZE_TPM_LOG:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+                  synchronizePrimaryTpmLogs();
+              }
+              break;
+
+          case MSG_TYPE_LOG_SBE_MEASUREMENT_REGS:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+                  LogSbeMeasurementRegs* l_data =
+                               reinterpret_cast<LogSbeMeasurementRegs*>(tb_msg->iv_data);
+                  tb_msg->iv_errl = logMeasurementRegs(l_data->tpm,
+                                                       l_data->proc,
+                                                       l_data->regs,
+                                                       l_data->extendToTpm);
+              }
+              break;
+
 
           default:
             assert(false, "Invalid msg command");
@@ -2354,6 +2385,7 @@ errlHndl_t poisonTpm(TpmTarget* i_pTpm)
                            0,       // log size is 0
                            false,   // call synchronously to daemon
                            i_pTpm,  // only extend to pcr banks for this TPM
+                           true,    // do extend to the TPM's PCR
                            false);  // don't add PCR measurement to the log
         if (l_errl)
         {
@@ -2421,6 +2453,202 @@ errlHndl_t poisonAllTpms()
     } while(0);
 #endif
     return l_errl;
+}
+
+errlHndl_t logMeasurementRegs(TpmTarget* i_tpm_target,
+                              TARGETING::Target*    i_proc_target,
+                              TPM_sbe_measurements_regs_grouped i_regs,
+                              bool i_extendToTpm)
+{
+    errlHndl_t err = nullptr;
+#ifdef CONFIG_TPMDD
+
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK "logMeasurementRegs(): "
+              "tpm=0x%.8X, proc=0x%.8X, i_extendToTpm=%d",
+              TARGETING::get_huid(i_tpm_target),
+              TARGETING::get_huid(i_proc_target),
+              i_extendToTpm);
+
+    do {
+
+    // PCRO, PCR6 : HW Keys' Hash
+    SHA512_t hw_keys_hash = {0};
+    SECUREBOOT::getHwKeyHash(hw_keys_hash);
+    uint8_t l_hwKeyHashLogMsg[] = "HW KEY HASH";
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_0,
+                       EV_PLATFORM_CONFIG_FLAGS,
+                       TPM_ALG_SHA256,
+                       hw_keys_hash,
+                       SHA512_DIGEST_LENGTH,
+                       l_hwKeyHashLogMsg,
+                       sizeof(l_hwKeyHashLogMsg),
+                       i_extendToTpm);
+
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_6,
+                       EV_COMPACT_HASH,
+                       TPM_ALG_SHA256,
+                       hw_keys_hash,
+                       SHA512_DIGEST_LENGTH,
+                       l_hwKeyHashLogMsg,
+                       sizeof(l_hwKeyHashLogMsg),
+                       i_extendToTpm);
+
+    // PCR 6 : Security state boolean
+    uint8_t l_sbeSecurityState[] = "SBE Security State";
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_6,
+                       EV_COMPACT_HASH,
+                       TPM_ALG_SHA256,
+                       &i_regs.sbe_measurement_regs_0_1[0],
+                       TPM_SBE_MEASUREMENT_REGS_0_1_SIZE,
+                       l_sbeSecurityState,
+                       sizeof(l_sbeSecurityState),
+                       i_extendToTpm);
+
+    // PCR 0 : Security state : (SSR)|IsPrimary(0,1)|MSMLock(0,1)|
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_0,
+                       EV_PLATFORM_CONFIG_FLAGS,
+                       TPM_ALG_SHA256,
+                       &i_regs.sbe_measurement_regs_2_3[0],
+                       TPM_SBE_MEASUREMENT_REGS_2_3_SIZE,
+                       l_sbeSecurityState,
+                       sizeof(l_sbeSecurityState),
+                       i_extendToTpm);
+
+    // PCR 0, PCR 6 : Hash of SBE secureboot validation code
+    uint8_t l_sbeSbValidationCode[] = "SBE Secure Boot Validation Code";
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_0,
+                       EV_S_CRTM_CONTENTS,
+                       TPM_ALG_SHA256,
+                       &i_regs.sbe_measurement_regs_4_7[0],
+                       TPM_SBE_MEASUREMENT_REGS_4_7_SIZE,
+                       l_sbeSbValidationCode,
+                       sizeof(l_sbeSbValidationCode),
+                       i_extendToTpm);
+
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_6,
+                       EV_COMPACT_HASH,
+                       TPM_ALG_SHA256,
+                       &i_regs.sbe_measurement_regs_4_7[0],
+                       TPM_SBE_MEASUREMENT_REGS_4_7_SIZE,
+                       l_sbeSbValidationCode,
+                       sizeof(l_sbeSbValidationCode),
+                       i_extendToTpm);
+
+    // PCR 0 : Hash of boot SEEProm L1/L2 boot loaders and boot SEEProm base
+    uint8_t l_bootLoadersAndBase[] = "SBE L1/L2 Boot Loaders and Base";
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_0,
+                       EV_S_CRTM_CONTENTS,
+                       TPM_ALG_SHA256,
+                       &i_regs.sbe_measurement_regs_8_11[0],
+                       TPM_SBE_MEASUREMENT_REGS_8_11_SIZE,
+                       l_bootLoadersAndBase,
+                       sizeof(l_bootLoadersAndBase),
+                       i_extendToTpm);
+
+    // PCR 0 : Hash of HBBL
+    uint8_t l_hashOfHbbl[] = "HBBL";
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_0,
+                       EV_S_CRTM_CONTENTS,
+                       TPM_ALG_SHA256,
+                       &i_regs.sbe_measurement_regs_12_15[0],
+                       TPM_SBE_MEASUREMENT_REGS_12_15_SIZE,
+                       l_hashOfHbbl,
+                       sizeof(l_hashOfHbbl),
+                       i_extendToTpm);
+
+    } while(0);
+
+    TRACUCOMP(g_trac_trustedboot, EXIT_MRK "logMeasurementRegs()");
+#endif
+    return err;
+
+
+}
+
+/**
+ * @brief Synchronizes the Primary TPM Logs to what has already been extended by
+ *         the SBE and Hostboot Bootloader code
+ *
+ * @warning No-op if trusted boot compiled out
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+void synchronizePrimaryTpmLogs()
+{
+    errlHndl_t err = nullptr;
+#ifdef CONFIG_TPMDD
+    TARGETING::Target* l_primaryTpm = nullptr;
+    TARGETING::Target* l_bootProc = nullptr;
+    TPM_sbe_measurements_regs_grouped l_sbe_measurement_regs;
+
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK "synchronizePrimaryTpmLogs()");
+
+    do {
+
+    // Get Primary TPM (no syncing to secondary TPM)
+    getPrimaryTpm(l_primaryTpm);
+    if(!l_primaryTpm)
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"synchronizePrimaryTpmLogs(): primary TPM not found");
+        break;
+    }
+
+    // Get boot processor
+    err = TARGETING::targetService().queryMasterProcChipTargetHandle(l_bootProc);
+    if (err)
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"synchronizePrimaryTpmLogs(): "
+                  ".queryMasterProcChipTargetHandle FAILED");
+        break;
+    }
+
+    TRACUCOMP(g_trac_trustedboot,"synchronizePrimaryTpmLogs(): "
+              "primary TPM: huid=0x%X, bootProc HUID=0x%.8X",
+              TARGETING::get_huid(l_primaryTpm),
+              TARGETING::get_huid(l_bootProc));
+
+    // Get SBE Measurement Values
+    err = groupSbeMeasurementRegs(l_bootProc,
+                                  l_sbe_measurement_regs);
+    if (err)
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"synchronizePrimaryTpmLogs(): groupSbeMeasurementRegs() FAILED");
+        break;
+    }
+
+    // Log - but do not extend - SBE Measurement Values
+    err = logMeasurementRegs(l_primaryTpm,
+                             l_bootProc,
+                             l_sbe_measurement_regs,
+                             false); // false: do not extend
+    if (err)
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"synchronizePrimaryTpmLogs(): logMeasurementRegs() FAILED");
+        break;
+    }
+
+
+    } while(0);
+
+    if (nullptr != err)
+    {
+        // We failed to extend to this TPM we can no longer use it
+        // Mark TPM as not functional, commit err and set it to nullptr
+        tpmMarkFailed(l_primaryTpm, err);
+    }
+
+    TRACUCOMP(g_trac_trustedboot, EXIT_MRK "synchronizePrimaryTpmLogs()");
+
+#endif
+    return;
 }
 
 } // end TRUSTEDBOOT

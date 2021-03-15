@@ -136,27 +136,39 @@ void setTpmLogMgr(
         TARGETING::ATTR_HB_TPM_LOG_MGR_PTR>(pLogMgrPtr);
 }
 
-errlHndl_t pcrExtendSeparator(bool i_sendAsync)
+errlHndl_t pcrExtendSeparator(bool i_sendAsync,
+                              bool i_extendToTpm,
+                              bool i_extendToSwLog)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 #ifdef CONFIG_TPMDD
     MessageMode mode = (i_sendAsync) ? MSG_MODE_ASYNC : MSG_MODE_SYNC;
 
-    TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"pcrExtendSeparator()");
+    TRACUCOMP( g_trac_trustedboot,ENTER_MRK
+               "pcrExtendSeparator(): i_sendAsync=%d, i_extendToTpm=%d, i_extendToSwLog=%d",
+               i_sendAsync, i_extendToTpm, i_extendToSwLog);
 
-    Message* msg = Message::factory(MSG_TYPE_SEPARATOR,
-                                    0,
-                                    NULL,
-                                    mode);
-    assert(msg !=NULL, "BUG! Message is NULL");
+
+    Message* msg = nullptr;
+
+    SeparatorMsgData* l_data = new SeparatorMsgData(i_extendToTpm,
+                                                    i_extendToSwLog);
+
+    msg = Message::factory(MSG_TYPE_SEPARATOR,
+                           sizeof(*l_data),
+                           reinterpret_cast<uint8_t*>(l_data),
+                           mode);
+
+    assert(msg != nullptr, "pcrExtendSeparator: msg is nullptr");
+    l_data = nullptr; //l_msg now owns l_data
+
     if (!i_sendAsync)
     {
         int rc = msg_sendrecv(systemData.msgQ, msg->iv_msg);
         if (0 == rc)
         {
             err = msg->iv_errl;
-            msg->iv_errl = NULL;
+            msg->iv_errl = nullptr;
         }
         // Sendrecv failure
         else
@@ -174,12 +186,12 @@ errlHndl_t pcrExtendSeparator(bool i_sendAsync)
                                           RC_SENDRECV_FAIL,
                                           rc,
                                           0,
-                                          true);
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             err->collectTrace(SECURE_COMP_NAME);
             err->collectTrace(TRBOOT_COMP_NAME);
         }
         delete msg;
-        msg = NULL;
+        msg = nullptr;
     }
     else
     {
@@ -199,7 +211,7 @@ errlHndl_t pcrExtendSeparator(bool i_sendAsync)
                                           RC_SEND_FAIL,
                                           rc,
                                           0,
-                                          true);
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             err->collectTrace(SECURE_COMP_NAME);
             err->collectTrace(TRBOOT_COMP_NAME);
         }
@@ -207,7 +219,7 @@ errlHndl_t pcrExtendSeparator(bool i_sendAsync)
 
     TRACUCOMP( g_trac_trustedboot,
                EXIT_MRK"pcrExtendSeparator() - %s",
-               ((NULL == err) ? "No Error" : "With Error") );
+               ((nullptr == err) ? "No Error" : "With Error") );
 
 #endif
     return err;
@@ -221,21 +233,21 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                      const size_t i_logMsgSize,
                      bool i_sendAsync,
                      const TpmTarget* i_pTpm,
-                     const bool i_mirrorToLog)
+                     const bool i_extendToTpm,
+                     const bool i_extendToSwLog)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 #ifdef CONFIG_TPMDD
     MessageMode mode = MSG_MODE_ASYNC;
 
     TRACDCOMP( g_trac_trustedboot, ENTER_MRK"pcrExtend()" );
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"pcrExtend() pcr=%d",
-               i_pcr);
+               ENTER_MRK"pcrExtend() pcr=%d, i_extendToTpm=%d, i_extendToSwLog=%d",
+               i_pcr, i_extendToTpm, i_extendToSwLog);
     if(i_logMsg)
     {
         TRACUBIN(g_trac_trustedboot, "TPM log msg", i_logMsg, i_logMsgSize);
     }
-
     TRACUBIN(g_trac_trustedboot, "pcrExtend() digest:", i_digest, i_digestSize);
 
     // msgData will be freed when message is freed
@@ -247,8 +259,8 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     msgData->mDigestSize = (i_digestSize < sizeof(msgData->mDigest) ?
                             i_digestSize : sizeof(msgData->mDigest));
     msgData->mSingleTpm = i_pTpm;
-    msgData->mMirrorToLog = i_mirrorToLog;
-
+    msgData->mExtendToTpm = i_extendToTpm;
+    msgData->mExtendToSwLog = i_extendToSwLog;
 
     // copy over the incoming digest and truncate to what we need
     memcpy(msgData->mDigest, i_digest, msgData->mDigestSize);
@@ -272,7 +284,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                                     reinterpret_cast<uint8_t*>(msgData),
                                     mode);
     // Message owns msgData now
-    msgData = NULL;
+    msgData = nullptr;
 
     if (!i_sendAsync)
     {
@@ -280,7 +292,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
         if (0 == rc)
         {
             err = msg->iv_errl;
-            msg->iv_errl = NULL;
+            msg->iv_errl = nullptr;
         }
         // Sendrecv failure
         else
@@ -298,12 +310,12 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                                           RC_SENDRECV_FAIL,
                                           rc,
                                           0,
-                                          true);
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             err->collectTrace(SECURE_COMP_NAME);
             err->collectTrace(TRBOOT_COMP_NAME);
         }
         delete msg;
-        msg = NULL;
+        msg = nullptr;
     }
     else
     {
@@ -323,7 +335,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                                           RC_SEND_FAIL,
                                           rc,
                                           0,
-                                          true);
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             err->collectTrace(SECURE_COMP_NAME);
             err->collectTrace(TRBOOT_COMP_NAME);
         }
@@ -331,7 +343,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
 
     TRACUCOMP( g_trac_trustedboot,
                EXIT_MRK"pcrExtend() - %s",
-               ((NULL == err) ? "No Error" : "With Error") );
+               ((nullptr == err) ? "No Error" : "With Error") );
 
 #endif
     return err;
@@ -386,6 +398,21 @@ errlHndl_t extendPnorSectionHash(
     // Extend swKeyHash to the next PCR after the hash extension PCR.
     const TPM_Pcr swKeyHashPcr = static_cast<TPM_Pcr>(pnorHashPcr + 1);
 
+    // By default, extend and log. But, only log for HBB since HBBL has already extended HBB
+    bool extendToTpm = true;
+    bool extendToSwLog = true;
+    if (i_sec == PNOR::HB_BASE_CODE)
+    {
+        extendToTpm = false;
+        TRACUCOMP(g_trac_trustedboot, ENTER_MRK " extendPnorSectionHash for "
+                  "section: %s: setting extendToTpm to %d (extendToSwLog=%d)",
+                  sectionInfo.name, extendToTpm, extendToSwLog);
+    }
+
+    // Set other default parameters to pick up extendToTpm and extendToSwLog input parameters
+    bool sendAsync = true;
+    const TpmTarget* pTpm = nullptr;
+
     if (SECUREBOOT::enabled())
     {
         // If secureboot is enabled, use protected hash in header
@@ -394,7 +421,11 @@ errlHndl_t extendPnorSectionHash(
               reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
               sizeof(SHA512_t),
               reinterpret_cast<const uint8_t*>(sectionInfo.name),
-              strlen(sectionInfo.name) + 1);
+              strlen(sectionInfo.name) + 1,
+              sendAsync,
+              pTpm,
+              extendToTpm,
+              extendToSwLog);
         if (pError)
         {
             TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
@@ -409,7 +440,12 @@ errlHndl_t extendPnorSectionHash(
                     reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
                     sizeof(SHA512_t),
                     reinterpret_cast<const uint8_t*>(swKeyMsg),
-                    strlen(swKeyMsg) + 1);
+                    strlen(swKeyMsg) + 1,
+                    sendAsync,
+                    pTpm,
+                    extendToTpm,
+                    extendToSwLog);
+
         if (pError)
         {
             TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
@@ -428,7 +464,12 @@ errlHndl_t extendPnorSectionHash(
                 hash,
                 sizeof(SHA512_t),
                 reinterpret_cast<const uint8_t*>(sectionInfo.name),
-                strlen(sectionInfo.name) + 1);
+                strlen(sectionInfo.name) + 1,
+                sendAsync,
+                pTpm,
+                extendToTpm,
+                extendToSwLog);
+
         if (pError)
         {
             TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
@@ -456,6 +497,15 @@ errlHndl_t extendBaseImage()
     TRACDCOMP(g_trac_trustedboot, ENTER_MRK " extendBaseImage()");
 
     do {
+
+    // Since this is the first HBB call to extend something, before doing anything else,
+    // sync the TPM Log with what the SBE and HBBL should have already extended
+    pError = synchronizeTpmLog();
+    if (pError)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"extendBaseImage(): synchronizeTpmLog() failed");
+        break;
+    }
 
     // Query the HBB header and code address
     const void* pHbbHeader = nullptr;
@@ -517,6 +567,17 @@ errlHndl_t extendBaseImage()
         break;
     }
 
+    pError = pcrExtendSeparator(true,  // true: sendAsync
+                                false, // false: don't extend to TPM
+                                true); // true: do add to SW Log
+    if(pError)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK "Failed in call to "
+            "pcrExtendSeparator() for after HBB section.");
+        break;
+    }
+
+
     } while(0);
 
     TRACDCOMP(g_trac_trustedboot, EXIT_MRK " extendBaseImage()");
@@ -562,7 +623,7 @@ void initBackupTpm()
                                              RC_SENDRECV_FAIL,
                                              l_rc,
                                              0,
-                                             true);
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             l_errl->collectTrace(SECURE_COMP_NAME);
             l_errl->collectTrace(TRBOOT_COMP_NAME);
         }
@@ -824,7 +885,7 @@ errlHndl_t testCmpPrimaryAndBackupTpm()
                                       RC_BACKUP_TPM_TEST_FAIL,
                                       l_rc,
                                       0,
-                                      true /*Add HB SW Callout*/);
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
         l_err->collectTrace(SECURE_COMP_NAME);
         l_err->collectTrace(TRBOOT_COMP_NAME);
@@ -863,7 +924,7 @@ errlHndl_t flushTpmQueue()
                                          RC_SENDRECV_FAIL,
                                          l_rc,
                                          0,
-                                         true);
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         l_errl->collectTrace(SECURE_COMP_NAME);
         l_errl->collectTrace(TRBOOT_COMP_NAME);
     }
@@ -1318,10 +1379,79 @@ errlHndl_t groupSbeMeasurementRegs(TARGETING::Target*    i_proc_target,
 errlHndl_t logSbeMeasurementRegs(TpmTarget* i_tpm_target,
                                  TARGETING::Target*    i_proc_target,
                                  const TPM_sbe_measurements_regs_grouped i_regs,
-                                 const bool i_extend)
+                                 const bool i_extendToTpm)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
+
+    assert(i_tpm_target != nullptr,"logSbeMeasurementRegs: BUG! i_tpm_target was nullptr");
+    assert(i_tpm_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "logSbeMeasurementRegs: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_tpm_target->getAttr<TARGETING::ATTR_TYPE>());
+
+    assert(i_proc_target != nullptr,"logSbeMeasurementRegs: BUG! i_proc_target was nullptr");
+    assert(i_proc_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC,
+           "logSbeMeasurementRegs: BUG! Expected target to be of PROC type, but "
+           "it was of type 0x%08X",i_proc_target->getAttr<TARGETING::ATTR_TYPE>());
+
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK "logSbeMeasurementRegs(): "
+              "tpm=0x%.8X, proc=0x%.8X, i_extendToTpm=%d",
+              TARGETING::get_huid(i_tpm_target),
+              TARGETING::get_huid(i_proc_target),
+              i_extendToTpm);
+
+    Message* l_msg = nullptr;
+
+    LogSbeMeasurementRegs* l_data = new LogSbeMeasurementRegs(i_tpm_target,
+                                                              i_proc_target,
+                                                              i_regs,
+                                                              i_extendToTpm);
+
+    l_msg = Message::factory(MSG_TYPE_LOG_SBE_MEASUREMENT_REGS,
+                             sizeof(*l_data),
+                             reinterpret_cast<uint8_t*>(l_data),
+                             MSG_MODE_SYNC);
+    assert(l_msg != nullptr, "logSbeMeasurementRegs: l_msg is nullptr");
+    l_data = nullptr; //l_msg now owns l_data
+
+    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+    if(l_rc)
+    {
+        /*@
+         * @errortype        ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_LOG_SBE_MEASUREMENT_REGS
+         * @reasoncode       RC_SENDRECV_FAIL
+         * @userdata1        rc from msg_sendrecv
+         * @userdata2[0:31]  TPM HUID
+         * @userdata2[32:63] Processor HUID
+         * @devdesc          msg_sendrecv failed for logSbeMeasurementRegs
+         * @custdesc         trustedboot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_LOG_SBE_MEASUREMENT_REGS,
+                                         RC_SENDRECV_FAIL,
+                                         l_rc,
+                                         TWO_UINT32_TO_UINT64(
+                                           TARGETING::get_huid(i_tpm_target),
+                                           TARGETING::get_huid(i_proc_target)),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+    }
+    else
+    {
+        l_errl = l_msg->iv_errl;
+        l_msg->iv_errl = nullptr;
+    }
+
+    if(l_msg)
+    {
+        delete l_msg;
+        l_msg = nullptr;
+    }
+
+    TRACUCOMP(g_trac_trustedboot, EXIT_MRK "logSbeMeasurementRegs()");
 
 #endif
     return l_errl;
@@ -1329,13 +1459,42 @@ errlHndl_t logSbeMeasurementRegs(TpmTarget* i_tpm_target,
 
 errlHndl_t synchronizeTpmLog()
 {
-    errlHndl_t l_errl = nullptr;
+    errlHndl_t err = nullptr;
 #ifdef CONFIG_TPMDD
-    do {
-/* TODO RTC 263474 */
-    } while(0);
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK "synchronizeTpmLog()");
+
+    Message* msg = Message::factory(MSG_TYPE_SYNCHRONIZE_TPM_LOG,
+                                    0,
+                                    nullptr,
+                                    MSG_MODE_ASYNC);
+    assert(msg !=nullptr, "BUG! Message is nullptr");
+
+    int rc = msg_send(systemData.msgQ, msg->iv_msg);
+    if (rc)
+    {
+        /*@
+         * @errortype       ERRL_SEV_UNRECOVERABLE
+         * @moduleid        MOD_SYNCHRONIZE_TPM_LOG
+         * @reasoncode      RC_SEND_FAIL
+         * @userdata1       rc from msq_send()
+         * @devdesc         msg_send() failed
+         * @custdesc        trustedboot failure
+         */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      MOD_SYNCHRONIZE_TPM_LOG,
+                                      RC_SEND_FAIL,
+                                      rc,
+                                      0,
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        err->collectTrace(SECURE_COMP_NAME);
+        err->collectTrace(TRBOOT_COMP_NAME);
+    }
+
+    TRACUCOMP(g_trac_trustedboot, EXIT_MRK "synchronizeTpmLog() - %s",
+              ((nullptr == err) ? "No Error" : "With Error") );
+
 #endif
-    return l_errl;
+    return err;
 }
 
 

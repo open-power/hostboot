@@ -218,9 +218,13 @@ namespace TRUSTEDBOOT
      * @param[in] i_logMsgSize The size of the log message in bytes
      * @param[in] i_sendAsync Perform extension asynchronously, default true
      * @param[in] i_pTpm A specific TPM to singly extend a measurement into,
-                  default is nullptr, which indicates to use the primary TPM.
-     * @param[in] i_mirrorToLog After extending the measurement, mirror to log.
-     *            default is true. Typically, false is used to poison the TPM.
+     *            default is nullptr, which indicates to use the primary TPM.
+     * @param[in] i_extendToTpm If true, extend the digest to the designated PCR on the TPM;
+     *            else, do not extend. Default is true. Depends on valid i_digest and
+     *            i_digestSize.
+     * @param[in] i_extendToSwLog If true, add the log message to the TPM's SW log; if false,
+     *            do not add to the TPM's SW log. Default is true. False is used to poison the tpm.
+     *            Depends on valid i_logMsg and i_logMsgSize.
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *      error log.
      * Digest will be right padded with zeros or truncated to match TPM digest
@@ -234,15 +238,22 @@ namespace TRUSTEDBOOT
                          size_t i_logMsgSize,
                          bool i_sendAsync = true,
                          const TpmTarget* i_pTpm = nullptr,
-                         bool i_mirrorToLog = true);
+                         bool i_extendToTpm = true,
+                         bool i_extendToSwLog = true);
 
     /**
      * @brief Extend a separator into the TPMs and log atomically
      * @param[in] i_sendAsync Perform extension asynchronously, default true
+     * @param[in] i_extendToTpm If true, extend the separator into the TPMs;
+     *            else, do not extend. Default is true.
+     * @param[in] i_extendToSwLog If true, add the separator message to the TPM's SW log;
+     *            if false, do not add to the TPM's SW log. Default is true.
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *      error log.
      */
-    errlHndl_t pcrExtendSeparator(bool i_sendAsync = true);
+    errlHndl_t pcrExtendSeparator(bool i_sendAsync = true,
+                                  bool i_extendToTpm = true,
+                                  bool i_extendToSwLog = true);
 
     /**
      * @brief Attempt to initialize the backup TPM by sending a synchronous
@@ -532,7 +543,7 @@ namespace TRUSTEDBOOT
                                        TPM_sbe_measurements_regs_grouped & o_regs);
 
     /**
-     * @brief Adds the SBE Measurement Registers from a Processor to the TPM Log.
+     * @brief Adds the SBE Measurement Registers from a Processor to the TPM's SW Log.
      *        Optionally can extend the registers to the TPM, as well.
      *        The registers are logged and optionally extended grouped together as
      *        defined in TPM_sbe_measurements_regs_grouped struct.
@@ -541,14 +552,14 @@ namespace TRUSTEDBOOT
      * @param[in] i_regs - structure containing grouped SBE Measurement registers
      *                     read from a processor.
      *                     This gets ignored if i_extend == false;
-     * @param[in] i_extend If true, extend values to PCR 0; false, do not extend values to PCR 0;
-     *                     Defaults to false
+     * @param[in] i_extendToTpm If true, extend values to PCRs; false, do not extend values to PCRs.
+     *                          Defaults to false;
      * @return nullptr on success; non-nullptr on error
      */
     errlHndl_t logSbeMeasurementRegs(TpmTarget* i_tpm_target,
-                                     TARGETING::Target*    i_proc_target,
+                                     TARGETING::Target* i_proc_target,
                                      TPM_sbe_measurements_regs_grouped i_regs,
-                                     bool i_extend = false);
+                                     bool i_extendToTpm = false);
 
     /**
      * @brief Synchronizes the TPM Log to what has already been extended by

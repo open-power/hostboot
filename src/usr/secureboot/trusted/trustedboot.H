@@ -153,6 +153,12 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* i_pTpm);
  *  @param[in] i_digest Digest value to write to PCR
  *  @param[in] i_digestSize Byte size of i_digest data
  *  @param[in] i_logMsg Null terminated log message
+ *  @param[in] i_extendToTpm If true, extend the digest to the designated PCR on the TPM;
+ *             else, do not extend. Default is true. Depends on valid i_digest and
+ *             i_digestSize.
+ *  @param[in] i_extendToSwLog If true, add the log message to the TPM's SW log; if false,
+ *             do not add to TPM's SW log. Default is true. False is used to poison the tpm.
+ *             Depends on valid i_logMsg.
  */
 void pcrExtendSingleTpm(TpmTarget* i_pTpm,
                         TPM_Pcr i_pcr,
@@ -161,7 +167,9 @@ void pcrExtendSingleTpm(TpmTarget* i_pTpm,
                         const uint8_t* i_digest,
                         size_t  i_digestSize,
                         const uint8_t* i_logMsg,
-                        size_t i_logMsgSize);
+                        size_t i_logMsgSize,
+                        bool i_extendtoTpm=true,
+                        bool i_extendToSwLog=true);
 
 /**
  *  @brief Extend a separator into a TPM and log
@@ -169,8 +177,14 @@ void pcrExtendSingleTpm(TpmTarget* i_pTpm,
  *  @param[in] i_pTpm TPM targeting target handle referring to TPM to log a
  *      extend a separator to.  Function will assert if value is nullptr or is
  *      not of TPM type.
+ *  @param[in] i_extendToTpm If true, extend the separator into the TPMs;
+ *             else, do not extend. Default is true.
+ *  @param[in] i_extendToSwLog If true, add the separator message to the TPM's SW log;
+ *             if false, do not add to the TPM's SW log. Default is true.
  */
-void pcrExtendSeparator(TpmTarget* i_pTpm);
+void pcrExtendSeparator(TpmTarget* i_pTpm,
+                        bool const i_extendToTpm = true,
+                        bool const i_extendToSwLog = true);
 
 /** Thread start routine for the TPM Daemon
  * @param[in] void*, unused
@@ -228,6 +242,34 @@ void getTpmWithRoleOf(
  */
 bool getTpmRequiredSensorValue(
     bool& o_isTpmRequired);
+
+/**
+ * @brief Adds the SBE Measurement Registers from a Processor to the TPM's SW Log.
+ *        Optionally can extend the registers to the TPM, as well.
+ *        The registers are logged and optionally extended grouped together as
+ *        defined in TPM_sbe_measurements_regs_grouped struct.
+ * @param[in] i_tpm_target the pointer to the TPM target; must not be nullptr
+ * @param[in] i_proc_target the pointer to the Processor target; must not be nullptr
+ * @param[in] i_regs - structure containing grouped SBE Measurement registers
+ *                     read from a processor.
+ * @param[in] i_extendToTpm If true, extend values to PCRs; false, do not extend values to PCRs.
+ * @return errlHndl_t nullptr if successful, otherwise pointer to error log
+ */
+errlHndl_t logMeasurementRegs(TpmTarget* i_tpm_target,
+                              TARGETING::Target*    i_proc_target,
+                              TPM_sbe_measurements_regs_grouped i_regs,
+                              bool i_extendToTpm);
+
+/**
+ * @brief Synchronizes the Primary TPM Logs to what has already been extended by
+ *         the SBE and Hostboot Bootloader code
+ *
+ * @warning No-op if trusted boot compiled out
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+void synchronizePrimaryTpmLogs();
+
 
 } // end TRUSTEDBOOT namespace
 #endif

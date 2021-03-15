@@ -64,8 +64,25 @@ namespace TRUSTEDBOOT
         MSG_TYPE_FLUSH_CONTEXT,
         MSG_TYPE_PCR_READ,
         MSG_TYPE_EXPAND_TPM_LOG,
-        MSG_TYPE_LAST = MSG_TYPE_EXPAND_TPM_LOG,
+        MSG_TYPE_SYNCHRONIZE_TPM_LOG,
+        MSG_TYPE_LOG_SBE_MEASUREMENT_REGS,
+        MSG_TYPE_LAST = MSG_TYPE_LOG_SBE_MEASUREMENT_REGS,
     };
+
+    /// SEPARATOR message data
+    struct SeparatorMsgData
+    {
+        bool             mExtendToTpm;
+        bool             mExtendToSwLog;
+        SeparatorMsgData(bool i_extendToTpm,
+                         bool i_extendToSwLog) :
+                         mExtendToTpm(i_extendToTpm),
+                         mExtendToSwLog(i_extendToSwLog)
+        {
+        }
+
+    };
+
 
     /// PCREXTEND message data
     struct PcrExtendMsgData
@@ -78,7 +95,8 @@ namespace TRUSTEDBOOT
         uint8_t          mLogMsg[MAX_TPM_LOG_MSG];
         size_t           mLogMsgSize;
         const TpmTarget* mSingleTpm;
-        bool             mMirrorToLog;
+        bool             mExtendToTpm;
+        bool             mExtendToSwLog;
     };
 
     struct GetRandomMsgData
@@ -147,6 +165,25 @@ namespace TRUSTEDBOOT
                     alg(i_alg),
                     digest(o_digest),
                     digestSize(i_digestSize)
+        {
+        }
+    };
+
+    // The struct used to log the SBE Measurement Regs
+    struct LogSbeMeasurementRegs
+    {
+        TpmTarget* tpm; // TPM target for the extend/log
+        TARGETING::Target* proc; // Processor target of the SBE
+        TPM_sbe_measurements_regs_grouped regs; // struct holding the data to extend/log
+        bool extendToTpm; // Whether or not to extend the data to the TPM
+        LogSbeMeasurementRegs(TpmTarget* i_tpm,
+                              TARGETING::Target* i_proc,
+                              TPM_sbe_measurements_regs_grouped i_regs,
+                              bool i_extendToTpm) :
+                              tpm(i_tpm),
+                              proc(i_proc),
+                              regs(i_regs),
+                              extendToTpm(i_extendToTpm)
         {
         }
     };

@@ -82,6 +82,8 @@ namespace TRUSTEDBOOT
         MOD_TPM_CMD_EXPAND_TPM_LOG          = 0x24,
         MOD_MARK_TPM_UNUSABLE               = 0x25,
         MOD_TPM_CHECK_TDP_BIT               = 0x26,
+        MOD_SYNCHRONIZE_TPM_LOG             = 0x27,
+        MOD_LOG_SBE_MEASUREMENT_REGS        = 0x28,
     };
 
     enum TRUSTEDReasonCode
