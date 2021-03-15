@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,16 +77,19 @@ extern errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
 /*****************************************************************************/
 
 
-HdatSpiraS::HdatSpiraS(const hdatMsAddr_t &i_msAddr)
-: iv_spirasSize(0), iv_spiras(NULL)
+HdatSpiraS::HdatSpiraS(const hdat5Tuple_t& i_spirasHostEntry)
+    : iv_spirasSize(0), iv_spiras(NULL)
 {
     HDAT_ENTER();
 
 
-    iv_spirasSize = sizeof(hdatSpiraS_t);
+    iv_spirasSize =
+        i_spirasHostEntry.hdatAllocSize * i_spirasHostEntry.hdatAllocCnt;
 
 
-    uint64_t l_base_addr = ((uint64_t) i_msAddr.hi << 32) | i_msAddr.lo;
+    uint64_t l_base_addr =
+        ((uint64_t) i_spirasHostEntry.hdatAbsAddr.hi << 32) |
+          i_spirasHostEntry.hdatAbsAddr.lo;
 
     HDAT_DBG("l_base_addr at SPIRA-S=0x%016llX",l_base_addr);
 
@@ -130,13 +133,27 @@ HdatSpiraS::HdatSpiraS(const hdatMsAddr_t &i_msAddr)
     l_virt_addr = reinterpret_cast<void *>(l_vaddr);
     HDAT_DBG("l_virt_addr=0x%016llX",l_virt_addr);
 
-
-
     iv_spiras = reinterpret_cast<hdatSpiraS_t *>(l_virt_addr);
 
     HDAT_DBG("constructor iv_spiras addr 0x%016llX virtual addr 0x%016llX,space"
              " allocated=0x%x",(uint64_t) this->iv_spiras,
              (uint64_t)l_virt_addr,iv_spirasSize);
+
+    // Clear HDAT area used by OPAL inorder to support memory encryption changes
+    if (sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>() ==
+        TARGETING::PAYLOAD_KIND_SAPPHIRE)
+    {
+        HDAT_DBG("i_spirasHostEntry.hdatAllocSize=%d,"
+            "i_spirasHostEntry.hdatAllocSize=%d",
+            i_spirasHostEntry.hdatAllocSize, i_spirasHostEntry.hdatAllocCnt);
+
+        memset(l_virt_addr, 0x00,
+            i_spirasHostEntry.hdatAllocSize * i_spirasHostEntry.hdatAllocCnt);
+
+        HDAT_DBG("i_spirasHostEntry.hdatAllocSize=%d,"
+            "i_spirasHostEntry.hdatAllocSize=%d",
+            i_spirasHostEntry.hdatAllocSize, i_spirasHostEntry.hdatAllocCnt);
+    }
 
     HDAT_DBG("creating SPIRA-S header");
     setSpiraSHdrs();

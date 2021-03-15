@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 using namespace TARGETING;
 
 #define LID_SPACE 128*MEGABYTE //Bounded lid space blocked for building hdat structs.
+
 namespace HDAT
 {
 extern trace_desc_t *g_trac_hdat;
@@ -208,7 +209,7 @@ void *  call_hdat_steps( void *io_pArgs )
         HDAT_DBG("l_spirasHostEntry.hdatAbsAddr.lo=0x%x",
                   l_spirasHostEntry.hdatAbsAddr.lo);
 
-        HdatSpiraS l_spiras (l_spirasHostEntry.hdatAbsAddr);
+        HdatSpiraS l_spiras (l_spirasHostEntry);
 
         uint32_t l_hostAreaCnt=0, l_hostAreaSize=0;
 

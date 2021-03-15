@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,8 +150,8 @@ public:
    *       values
    *
    *
-   * @param i_msAddr    - input parameter - The main memory address where the
-   *                      SPIRA-S is located
+   * @param  i_spirasHostEntry - input parameter - the spiras starting address
+   *                             entry fetched from spira-h
    *
    * @return A null error log handle if successful, else the return code
    *         pointed to by errlHndl_t contains one of:
@@ -159,7 +159,7 @@ public:
    * @retval HDAT_ALLOC_ERROR
    * @retval HDAT_FILE_ERROR
    */
-  HdatSpiraS(const hdatMsAddr_t& i_msAddr);
+  HdatSpiraS(const hdat5Tuple_t& i_spirasHostEntry);
 
 
   /**
