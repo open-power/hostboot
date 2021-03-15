@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,7 +93,8 @@
  * @brief Collect component trace
  */
 #define PRDF_COLLECT_TRACE(io_errl, i_max) \
-    io_errl->collectTrace(PRDF_COMP_NAME, i_max)
+    io_errl->collectTrace(PRDF_COMP_NAME, i_max); \
+    io_errl->collectTrace(ATTN_COMP_NAME, i_max)
 
 /**
  * @brief Add a procedure ( software ) callout

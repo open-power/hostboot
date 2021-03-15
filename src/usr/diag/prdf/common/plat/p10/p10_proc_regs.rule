@@ -61,6 +61,24 @@
     };
 
     ############################################################################
+    # IPOLL status
+    ############################################################################
+
+    register IPOLL_MASK_REG
+    {
+        name        "IPOLL mask register";
+        scomaddr    0x000f0033;
+        capture     group default;
+    };
+
+    register IPOLL_STATUS_REG
+    {
+        name        "IPOLL status register";
+        scomaddr    0x000f0034;
+        capture     group default;
+    };
+
+    ############################################################################
     # Misc Registers
     ############################################################################
 
