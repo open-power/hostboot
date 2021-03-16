@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,7 +173,7 @@ bool getCheckbits(
 
         {CHECK_STOP,  0xffffffffffffffffull},
         {RECOVERABLE, 0xffffffffffffffffull},
-        {SPECIAL,     0xffffffffffffffffull},
+        {SPECIAL,     0x0000000000000000ull},
         {UNIT_CS,     0xffffffffffffffffull},
         {HOST_ATTN,   0xffffffffffffffffull},
     };
