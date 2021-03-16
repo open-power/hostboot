@@ -57,6 +57,9 @@
 #endif
 #include <devicefw/driverif.H>
 #include <spi/tpmddif.H>
+#include <spi/tpmdd_common.H>
+#include <spi/tpmdd.H>
+#include <spi/spi.H>
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include "trustedbootCmds.H"
@@ -585,6 +588,54 @@ void* host_update_primary_tpm( void *io_pArgs )
     return err;
 }
 
+/**
+ * @brief Performs SPI init and sets the TPM locality to 0 for the given TPM.
+ *        This function is meant to be called on MPIPL, since in regular IPL
+ *        those actions are performed by presence detection logic.
+ *
+ * @param[in] i_pTpm the TPM target to re-initialize
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t tpmInitInMpipl(TRUSTEDBOOT::TpmTarget* const i_pTpm)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    tpm_info_t l_tpmInfo;
+    l_errl = tpmReadAttributes(i_pTpm,
+                               l_tpmInfo,
+                               TPM_LOCALITY_0);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"tpmInitInMpipl(): could not read attributes from TPM HUID 0x%x",
+                  TARGETING::get_huid(i_pTpm));
+        break;
+    }
+
+    l_errl = SPI::spiInitEngine(l_tpmInfo.spiTarget, l_tpmInfo.spiEngine);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"tpmInitInMpipl(): Could not re-init SPI engine in MPIPL");
+        break;
+    }
+
+    uint8_t l_localityData = TPMDD::TPM_ACCESS_REQUEST_LOCALITY_USE;
+    size_t l_dataSize = sizeof(l_localityData);
+    l_tpmInfo.offset = TPM_REG_75x_TPM_ACCESS;
+    l_errl = tpmWrite(&l_localityData,
+                      l_dataSize,
+                      l_tpmInfo);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"tpmInitInMpipl(): could not write TPM locality to TPM HUID 0x%x in MPIPL",
+                  TARGETING::get_huid(i_pTpm));
+        break;
+    }
+    } while(0);
+
+    return l_errl;
+}
+
 void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
 {
     assert(i_pTpm != nullptr,"tpmInitialize: BUG! i_pTpm was nullptr");
@@ -618,6 +669,17 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                        TRACE_ERR_FMT,
                        TRACE_ERR_ARGS(err));
             break;
+        }
+
+        if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+        {
+            // Since we bypass presence detection in MPIPL, we need to do SPI
+            // re-init and set the TPM locality here.
+            err = tpmInitInMpipl(i_pTpm);
+            if(err)
+            {
+                break;
+            }
         }
 
         // TPM_STARTUP

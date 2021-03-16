@@ -570,6 +570,18 @@ errlHndl_t spiInitEngine(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapiProc(i_pProc);
     SpiControlHandle spiHandle(fapiProc,i_engine,1,pibAccess);
 
+    FAPI_INVOKE_HWP(pError,p10_spi_clock_init,spiHandle);
+    if(pError != nullptr)
+    {
+        TRACFCOMP(g_trac_spi, ERR_MRK"spiInitEngine(): "
+                  "p10_spi_clock_init HWP call returned an error for "
+                  "proc HUID 0x%08X, engine %d, pibAccess %d. "
+                  TRACE_ERR_FMT,
+                  TARGETING::get_huid(i_pProc),i_engine,pibAccess,
+                  TRACE_ERR_ARGS(pError));
+        pError->collectTrace(SPI_COMP_NAME, KILOBYTE);
+        break;
+    }
 
     // Return SPI Controller to idle state
     FAPI_INVOKE_HWP(pError, spi_master_reset, spiHandle);
@@ -591,19 +603,6 @@ errlHndl_t spiInitEngine(
     {
         TRACFCOMP(g_trac_spi, ERR_MRK"spiInitEngine(): "
                   "p10_spi_clear_status_errors HWP call returned an error for "
-                  "proc HUID 0x%08X, engine %d, pibAccess %d. "
-                  TRACE_ERR_FMT,
-                  TARGETING::get_huid(i_pProc),i_engine,pibAccess,
-                  TRACE_ERR_ARGS(pError));
-        pError->collectTrace(SPI_COMP_NAME, KILOBYTE);
-        break;
-    }
-
-    FAPI_INVOKE_HWP(pError,p10_spi_clock_init,spiHandle);
-    if(pError != nullptr)
-    {
-        TRACFCOMP(g_trac_spi, ERR_MRK"spiInitEngine(): "
-                  "p10_spi_clock_init HWP call returned an error for "
                   "proc HUID 0x%08X, engine %d, pibAccess %d. "
                   TRACE_ERR_FMT,
                   TARGETING::get_huid(i_pProc),i_engine,pibAccess,

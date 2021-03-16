@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,8 @@ ROOTPATH = ../../../..
 MODULE = secureboot_trusted
 
 PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
+
+EXTRAINCDIR +=${ROOTPATH}/src/usr/
 
 #Hardware procedure includes
 EXTRAINCDIR += ${PERV_HWP_PATH}

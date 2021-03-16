@@ -74,9 +74,6 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
 
     do {
 
-    // @TODO RTC 269646: Re-enable backup TPM when there is higher confidence
-    // it will work
-    #if 0
     // Attempt to initialize the backup TPM.
     TRUSTEDBOOT::initBackupTpm();
 
@@ -98,7 +95,6 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
         // TPM and also set the deconfig bit to force fencing if security is enabled
         TRUSTEDBOOT::tpmMarkFailed(backup_tpm, l_err);
     }
-    #endif
 
 #ifdef CONFIG_SECUREBOOT
 
