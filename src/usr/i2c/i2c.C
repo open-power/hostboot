@@ -4302,8 +4302,9 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
             TARGETING::targetService().getTopLevelTarget(pSys);
             assert(pSys != nullptr, "System target was nullptr");
 
-            // PIB_CLK = ATTR_FREQ_PAU_MHZ
-            const uint64_t pib_clk = pSys->getAttr<TARGETING::ATTR_FREQ_PAU_MHZ>();
+            // PIB_CLK = ATTR_FREQ_PAU_MHZ / 4
+            const uint64_t pib_clk =
+              pSys->getAttr<TARGETING::ATTR_FREQ_PAU_MHZ>() / 4;
 
             // P10 has a by-2 internal divider to get from the PIB clock to the
             // local buz frequency
