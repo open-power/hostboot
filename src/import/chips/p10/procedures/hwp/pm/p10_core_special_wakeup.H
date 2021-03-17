@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,7 @@ static const uint32_t  SPWKUP_REQ_REG_HYP       =   scomt::c::QME_SPWU_HYP;
 static const uint32_t  SPWKUP_REQ_DONE_BIT      =   4;
 static const uint32_t  QME_FLAG_STOP_READY      =   16;
 static const uint32_t  SPECIAL_WAKE_UP_POLL_INTERVAL_NS  =  1000000;   //1ms
-static const uint32_t  SPECIAL_WAKEUP_TIMEOUT_NS         =  (100 * SPECIAL_WAKE_UP_POLL_INTERVAL_NS);     //100 ms
+static const uint32_t  SPECIAL_WAKEUP_TIMEOUT_NS         =  (300 * SPECIAL_WAKE_UP_POLL_INTERVAL_NS);     //100 ms
 
 /**
  * @brief enumerates all platforms which request special wakeup.
