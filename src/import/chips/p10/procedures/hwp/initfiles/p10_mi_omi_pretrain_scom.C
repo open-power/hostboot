@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,9 @@ constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_1 = 1;
+constexpr uint64_t literal_0xFFFF = 0xFFFF;
+constexpr uint64_t literal_112 = 112;
+constexpr uint64_t literal_0x7 = 0x7;
 
 fapi2::ReturnCode p10_mi_omi_pretrain_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
         const fapi2::Target<fapi2::TARGET_TYPE_OMI>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT2,
@@ -45,6 +48,8 @@ fapi2::ReturnCode p10_mi_omi_pretrain_scom(const fapi2::Target<fapi2::TARGET_TYP
         fapi2::ATTR_CHIP_UNIT_POS_Type l_TGT2_ATTR_CHIP_UNIT_POS;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT2, l_TGT2_ATTR_CHIP_UNIT_POS));
         uint64_t l_def_MCC_POSITION = (l_TGT2_ATTR_CHIP_UNIT_POS % literal_2);
+        fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS, TGT3, l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0xc010c13ull, l_scom_buffer ));
@@ -70,6 +75,67 @@ fapi2::ReturnCode p10_mi_omi_pretrain_scom(const fapi2::Target<fapi2::TARGET_TYP
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010c13ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010c1bull, l_scom_buffer ));
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_OFF );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCTO_SELECT_LOCAL_HANG_PULSE_ON = 0x1;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_SELECT_LOCAL_HANG_PULSE_ON );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCTO_DISABLE_HARDWARE_TRACE_MANAGER_HANG_ON = 0x1;
+                l_scom_buffer.insert<36, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_DISABLE_HARDWARE_TRACE_MANAGER_HANG_ON );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCTO_ENABLE_NONMIRROR_HANG_ON = 0x1;
+                l_scom_buffer.insert<32, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_ENABLE_NONMIRROR_HANG_ON );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCTO_ENABLE_CHANNEL_HANG_ON = 0x1;
+                l_scom_buffer.insert<33, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_ENABLE_CHANNEL_HANG_ON );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCTO_ENABLE_APO_HANG_ON = 0x1;
+                l_scom_buffer.insert<34, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_ENABLE_APO_HANG_ON );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                l_scom_buffer.insert<8, 16, 48, uint64_t>(literal_0xFFFF );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_112 );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                l_scom_buffer.insert<5, 3, 61, uint64_t>(literal_0x7 );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_2 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010c1bull, l_scom_buffer));
         }
 
     };
