@@ -886,8 +886,13 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BOOT_PAU_DPLL_BYPASS, i_target_chip, l_attr_boot_pau_dpll_bypass),
                  "Error from FAPI_ATTR_GET (ATTR_BOOT_PAU_DPLL_BYPASS");
-        l_scratch6_reg.writeBit<ATTR_BOOT_PAU_DPLL_BYPASS_BIT>(l_attr_boot_pau_dpll_bypass ==
-                fapi2::ENUM_ATTR_BOOT_PAU_DPLL_BYPASS_BYPASS);
+        // TODO - Workaround to fix the PAU DPLL to NO_BYPASS mode. this should ideally come
+        // as input from MRW via the attribute ATTR_BOOT_PAU_DPLL_BYPASS, but fixing this here
+        // to have a quicker turn-around. In the meantime, have informed the right team to fix this.
+        //l_scratch6_reg.writeBit<ATTR_BOOT_PAU_DPLL_BYPASS_BIT>(l_attr_boot_pau_dpll_bypass ==
+        //        fapi2::ENUM_ATTR_BOOT_PAU_DPLL_BYPASS_BYPASS);
+        FAPI_IMP("Hard-coding BOOT PAU DPLL in no-bypass mode");
+        l_scratch6_reg.writeBit<ATTR_BOOT_PAU_DPLL_BYPASS_BIT>(0);
 
         FAPI_DBG("Reading tank PLL bypass attributes");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_TANK_PLL_BYPASS, i_target_chip, l_attr_io_tank_pll_bypass));
