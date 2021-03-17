@@ -230,8 +230,7 @@ static void handleProcessorSecurityError(TARGETING::Target* i_pProc,
         }
 
         // Log as informational if secure boot is disabled
-        // TODO RTC: 263474 Remove the i_continue check to make errors unrecoverable
-        if (!SECUREBOOT::enabled() || i_continue)
+        if (!SECUREBOOT::enabled())
         {
             l_severity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
         }
@@ -774,10 +773,7 @@ void validateSecuritySettings()
             // circumstance
             if (l_mismatches.sabmis)
             {
-                // TODO RTC: 263474 Change the "true" back to "false" once the
-                // SBE levels (measurement seeprom) are updated to at least
-                // 11/20 on systems
-                l_continue = true;
+                l_continue = false;
             }
             // In secure mode, do not continue booting when SBE HW keys' hashes
             // or Secure Verions are mismatched
