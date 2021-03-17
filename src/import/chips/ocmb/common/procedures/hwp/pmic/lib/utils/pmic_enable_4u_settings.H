@@ -108,11 +108,11 @@ const std::vector<std::pair<uint8_t, uint8_t>> PMIC0_SETTINGS =
     {REGS::R2C, CONSTS::R2C_R2D_4MS_ALL},
     {REGS::R2D, CONSTS::R2C_R2D_4MS_ALL},
 
-    // Host region soft start 4ms
-    {REGS::R22, 0b01100011},
-    {REGS::R24, 0b01100011},
-    {REGS::R26, 0b01100011},
-    {REGS::R28, 0b01100011},
+    // Host region soft start 4ms, max undervoltage lockout tolerance
+    {REGS::R22, 0b01101111},
+    {REGS::R24, 0b01101111},
+    {REGS::R26, 0b01101111},
+    {REGS::R28, 0b01101111},
 
     // TPS region soft stop
     {TPS_REGS::R94_SOFT_STOP_CFG_SWA, TPS_CONSTS::MAX_SOFT_STOP_CFG},
@@ -151,11 +151,11 @@ const std::vector<std::pair<uint8_t, uint8_t>> PMIC1_SETTINGS =
     {REGS::R2C, CONSTS::R2C_R2D_4MS_ALL},
     {REGS::R2D, CONSTS::R2C_R2D_4MS_ALL},
 
-    // Host region soft start 4ms
-    {REGS::R22, 0b01100011},
-    {REGS::R24, 0b01100011},
-    {REGS::R26, 0b01100011},
-    {REGS::R28, 0b01100011},
+    // Host region soft start 4ms, max undervoltage lockout tolerance
+    {REGS::R22, 0b01101111},
+    {REGS::R24, 0b01101111},
+    {REGS::R26, 0b01101111},
+    {REGS::R28, 0b01101111},
 
     // TPS region soft stop
     {TPS_REGS::R94_SOFT_STOP_CFG_SWA, TPS_CONSTS::MAX_SOFT_STOP_CFG},
