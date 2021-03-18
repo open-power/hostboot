@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -246,12 +246,17 @@ group gIOHS_CHIPLET_CS_FIR attntype CHECK_STOP
 rule rIOHS_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    IOHS_CHIPLET_RE_FIR & ~IOHS_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+    IOHS_CHIPLET_RE_FIR & ~IOHS_CHIPLET_RE_FIR_MASK & `2fffffffffffffff`;
 };
 
 group gIOHS_CHIPLET_RE_FIR attntype RECOVERABLE
     filter singlebit
 {
+    /** IOHS_CHIPLET_RE_FIR[2]
+     *  Active UNIT_CS attention on the IOHS chiplet
+     */
+    (rIOHS_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
+
     /** IOHS_CHIPLET_RE_FIR[4]
      *  Attention from IOHS_LOCAL_FIR
      */

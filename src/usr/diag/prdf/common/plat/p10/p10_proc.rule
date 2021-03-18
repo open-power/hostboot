@@ -2412,12 +2412,17 @@ group gTP_CHIPLET_CS_FIR
 rule rTP_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    TP_CHIPLET_RE_FIR & ~TP_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+    TP_CHIPLET_RE_FIR & ~TP_CHIPLET_RE_FIR_MASK & `2fffffffffffffff`;
 };
 
 group gTP_CHIPLET_RE_FIR
     filter singlebit
 {
+    /** TP_CHIPLET_RE_FIR[2]
+     *  Active UNIT_CS attention on the TP chiplet
+     */
+    (rTP_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
+
     /** TP_CHIPLET_RE_FIR[4]
      *  Attention from TP_LOCAL_FIR
      */
@@ -3335,12 +3340,17 @@ group gN0_CHIPLET_CS_FIR
 rule rN0_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    N0_CHIPLET_RE_FIR & ~N0_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+    N0_CHIPLET_RE_FIR & ~N0_CHIPLET_RE_FIR_MASK & `2fffffffffffffff`;
 };
 
 group gN0_CHIPLET_RE_FIR
     filter singlebit
 {
+    /** N0_CHIPLET_RE_FIR[2]
+     *  Attention UNIT_CS attention on the N0 chiplet
+     */
+    (rN0_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
+
     /** N0_CHIPLET_RE_FIR[4]
      *  Attention from N0_LOCAL_FIR
      */
@@ -5069,12 +5079,17 @@ group gN1_CHIPLET_CS_FIR
 rule rN1_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    N1_CHIPLET_RE_FIR & ~N1_CHIPLET_RE_FIR_MASK & `0fffffffbfffffff`;
+    N1_CHIPLET_RE_FIR & ~N1_CHIPLET_RE_FIR_MASK & `2fffffffbfffffff`;
 };
 
 group gN1_CHIPLET_RE_FIR
     filter singlebit
 {
+    /** N1_CHIPLET_RE_FIR[2]
+     *  Active UNIT_CS attention on the N1 chiplet
+     */
+    (rN1_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
+
     /** N1_CHIPLET_RE_FIR[4]
      *  Attention from N1_LOCAL_FIR
      */
@@ -8384,12 +8399,17 @@ group gPAU0_CHIPLET_CS_FIR
 rule rPAU0_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    PAU0_CHIPLET_RE_FIR & ~PAU0_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+    PAU0_CHIPLET_RE_FIR & ~PAU0_CHIPLET_RE_FIR_MASK & `2fffffffffffffff`;
 };
 
 group gPAU0_CHIPLET_RE_FIR
     filter singlebit
 {
+    /** PAU0_CHIPLET_RE_FIR[2]
+     *  Active UNIT_CS attention on the PAU0 chiplet
+     */
+    (rPAU0_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
+
     /** PAU0_CHIPLET_RE_FIR[4]
      *  Attention from PAU_LOCAL_FIR 0
      */
@@ -8549,12 +8569,17 @@ group gPAU1_CHIPLET_CS_FIR
 rule rPAU1_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    PAU1_CHIPLET_RE_FIR & ~PAU1_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+    PAU1_CHIPLET_RE_FIR & ~PAU1_CHIPLET_RE_FIR_MASK & `2fffffffffffffff`;
 };
 
 group gPAU1_CHIPLET_RE_FIR
     filter singlebit
 {
+    /** PAU1_CHIPLET_RE_FIR[2]
+     *  Active UNIT_CS attention on the PAU1 chiplet
+     */
+    (rPAU1_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
+
     /** PAU1_CHIPLET_RE_FIR[4]
      *  Attention from PAU_LOCAL_FIR 1
      */
@@ -8729,12 +8754,17 @@ group gPAU2_CHIPLET_CS_FIR
 rule rPAU2_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    PAU2_CHIPLET_RE_FIR & ~PAU2_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+    PAU2_CHIPLET_RE_FIR & ~PAU2_CHIPLET_RE_FIR_MASK & `2fffffffffffffff`;
 };
 
 group gPAU2_CHIPLET_RE_FIR
     filter singlebit
 {
+    /** PAU2_CHIPLET_RE_FIR[2]
+     *  Active UNIT_CS attention on the PAU2 chiplet
+     */
+    (rPAU2_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
+
     /** PAU2_CHIPLET_RE_FIR[4]
      *  Attention from PAU_LOCAL_FIR 2
      */
@@ -8939,12 +8969,17 @@ group gPAU3_CHIPLET_CS_FIR
 rule rPAU3_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    PAU3_CHIPLET_RE_FIR & ~PAU3_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+    PAU3_CHIPLET_RE_FIR & ~PAU3_CHIPLET_RE_FIR_MASK & `2fffffffffffffff`;
 };
 
 group gPAU3_CHIPLET_RE_FIR
     filter singlebit
 {
+    /** PAU3_CHIPLET_RE_FIR[2]
+     *  Active UNIT_CS attention on the PAU3 chiplet
+     */
+    (rPAU3_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
+
     /** PAU3_CHIPLET_RE_FIR[4]
      *  Attention from PAU_LOCAL_FIR 3
      */

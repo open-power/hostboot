@@ -329,3 +329,5 @@ actionclass TBDDefaultCallout
     threshold( field(32 / day), mfg(32 / day) );
 };
 
+/** UNIT_CS reported on this target */
+actionclass analyzeUcs { funccall("analyzeUcs"); };

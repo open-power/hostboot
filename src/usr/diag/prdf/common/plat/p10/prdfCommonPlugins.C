@@ -202,7 +202,18 @@ int32_t analyzeUcs( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     return i_chip->Analyze( io_sc, UNIT_CS );
 }
-PRDF_PLUGIN_DEFINE_NS(p10_mc, CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_proc, CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_eq,   CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_core, CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_pec,  CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_phb,  CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_pauc, CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_pau,  CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_iohs, CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_nmmu, CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_mc,   CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_mcc,  CommonPlugins, analyzeUcs);
+PRDF_PLUGIN_DEFINE_NS(p10_omic, CommonPlugins, analyzeUcs);
 
 /**
  * @brief  Plugin for CRC related error side effect handling

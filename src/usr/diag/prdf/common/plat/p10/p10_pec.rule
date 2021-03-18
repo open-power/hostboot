@@ -314,12 +314,17 @@ group gPCI_CHIPLET_CS_FIR attntype CHECK_STOP
 rule rPCI_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    PCI_CHIPLET_RE_FIR & ~PCI_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+    PCI_CHIPLET_RE_FIR & ~PCI_CHIPLET_RE_FIR_MASK & `2fffffffffffffff`;
 };
 
 group gPCI_CHIPLET_RE_FIR attntype RECOVERABLE
     filter singlebit
 {
+    /** PCI_CHIPLET_RE_FIR[2]
+     *  Active UNIT_CS attention on the PCI chiplet
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
+
     /** PCI_CHIPLET_RE_FIR[4]
      *  Attention from PCI_LOCAL_FIR
      */

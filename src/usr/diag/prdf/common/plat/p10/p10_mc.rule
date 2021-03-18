@@ -339,7 +339,7 @@ group gMC_CHIPLET_RE_FIR attntype RECOVERABLE
     /** MC_CHIPLET_RE_FIR[2]
      *  Active UNIT_CS attention on this MC
      */
-    (rMC_CHIPLET_RE_FIR, bit(2)) ? analyzeMcUcs;
+    (rMC_CHIPLET_RE_FIR, bit(2)) ? analyzeUcs;
 
     /** MC_CHIPLET_RE_FIR[4]
      *  Attention from MC_LOCAL_FIR
