@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -660,10 +660,11 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
     uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_vaddr);
     //Align virtual address & size to page boundary
     /*The given virtual address will be 'rounded' down to the nearest page
-      boundary, along with the given size will be 'rounded' up to the
-      nearest divisible page size.*/
+      boundary, along with the given size will be 'rounded' up such that
+      the request range is removed, plus the remainder to access a full
+      page..*/
     uint64_t l_aligned_va = ALIGN_PAGE_DOWN(l_vaddr);
-    uint64_t l_aligned_size = ALIGN_PAGE(i_size);
+    uint64_t l_aligned_size = ALIGN_PAGE(i_size+(l_vaddr%PAGESIZE));
     //Find block containing virtual address
     if(!this->isContained(l_aligned_va))
     {
