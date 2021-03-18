@@ -172,18 +172,34 @@ namespace TRUSTEDBOOT
 
     // Details of SBE measurement registers results - from P10SecurityInitFlow document
     /*
-     * - 0-1   (x10010-x10011) : PCR 6   : Security state boolean : 0x(00,01)|MinSecFWVer(xx)|0...
-     * - 2-3   (x10012-x10013) : PCR 0   : Security state :
-     *                                     (SSR)|IsPrimary(0,1)|MSMLock(0,1)|MinSecFWVer(xx)|0..
-     * - 4-7   (x10014-x10017) : PCR 0/6 : Hash of SBE secureboot validation code
-     * - 8-11  (x10018-x1001B) : PCR 0   : Hash of boot SEEProm L1/L2 boot loaders and boot
-     *                                     SEEProm base
-     * - 12-15 (x1001C-x1001F) : PCR 0   : Hash of HBBL
+     * - 0     (0x10010)         : PCR 6   : "SBE Security State"
+     *                                       - 1B: Jumper State (x00, x01)
+     *                                       - 1B: MinSecFWVer(xx)
+     *                                       - 6B: unused/reserved
+     * - 1     (0x10011)         : N/A     : unused/reserved
+     * - 2     (0x10012)         : PCR 1   : "SBE Security State"
+     *                                       - 1B: Jumper State (x00, x01)
+     *                                       - 1B: IsPrimary (x00, x01) :
+     *                                       - 1B: MSMLock (x00, x01) : Measurement seeprom
+     *                                             write lock fuse, bit 12 in x10009
+     *                                       - 1B: Minimum Secure FW Version from seeprom (xx)
+     *                                       - 4B: Measurement image version/identifier
+     * - 3     (0x10013)         : PCR 1   : "Security Switches"
+     *                                       - 8B: SSR - Security Switch Register
+     * - 4-7   (0x10014-0x10017) : PCR 0/6 : "SBE Secureboot Validation Code"
+     *                                       - 32B: Hash of SBE secureboot validation code
+     * - 8-11  (0x10018-0x1001B) : PCR 0   : "SBE L1/L2 Boot loaders and Base"
+     *                                       - 32B: Hash of boot SEEProm L1/L2 boot loaders and
+     *                                              boot Seeprom base
+     * - 12-15 (0x1001C-0x1001F) : PCR 0   : "HBBL"
+     *                                       - 32B: Hash of HBBL
      */
     typedef enum
     {
-        TPM_SBE_MEASUREMENT_REGS_0_1_SIZE   = 0x10,
-        TPM_SBE_MEASUREMENT_REGS_2_3_SIZE   = 0x10,
+        TPM_SBE_MEASUREMENT_REGS_0_SIZE     = 0x08,
+        TPM_SBE_MEASUREMENT_REGS_1_SIZE     = 0x08,
+        TPM_SBE_MEASUREMENT_REGS_2_SIZE     = 0x08,
+        TPM_SBE_MEASUREMENT_REGS_3_SIZE     = 0x08,
         TPM_SBE_MEASUREMENT_REGS_4_7_SIZE   = 0x20,
         TPM_SBE_MEASUREMENT_REGS_8_11_SIZE  = 0x20,
         TPM_SBE_MEASUREMENT_REGS_12_15_SIZE = 0x20,
@@ -191,8 +207,10 @@ namespace TRUSTEDBOOT
 
     struct TPM_sbe_measurements_regs_grouped
     {
-        uint8_t sbe_measurement_regs_0_1[TPM_SBE_MEASUREMENT_REGS_0_1_SIZE]     = {0};
-        uint8_t sbe_measurement_regs_2_3[TPM_SBE_MEASUREMENT_REGS_2_3_SIZE]     = {0};
+        uint8_t sbe_measurement_regs_0[TPM_SBE_MEASUREMENT_REGS_0_SIZE]         = {0};
+        uint8_t sbe_measurement_regs_1[TPM_SBE_MEASUREMENT_REGS_1_SIZE]         = {0};
+        uint8_t sbe_measurement_regs_2[TPM_SBE_MEASUREMENT_REGS_2_SIZE]         = {0};
+        uint8_t sbe_measurement_regs_3[TPM_SBE_MEASUREMENT_REGS_3_SIZE]         = {0};
         uint8_t sbe_measurement_regs_4_7[TPM_SBE_MEASUREMENT_REGS_4_7_SIZE]     = {0};
         uint8_t sbe_measurement_regs_8_11[TPM_SBE_MEASUREMENT_REGS_8_11_SIZE]   = {0};
         uint8_t sbe_measurement_regs_12_15[TPM_SBE_MEASUREMENT_REGS_12_15_SIZE] = {0};

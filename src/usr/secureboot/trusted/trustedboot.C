@@ -40,6 +40,7 @@
 #include <errl/errludstring.H>
 #include <targeting/attrsync.H>
 #include <targeting/attrrp.H>
+#include <attributeenums.H>
 #include <targeting/targplatutil.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/commontargeting.H>
@@ -71,7 +72,7 @@
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/deconfigGard.H>
 #include <kernel/bltohbdatamgr.H>
-
+#include <sys/misc.h>
 namespace TRUSTEDBOOT
 {
 
@@ -872,7 +873,7 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         memset(l_digest, 0, sizeof(uint64_t));
         bool l_tpmRequired = isTpmRequired();
         l_digest[0] = static_cast<uint8_t>(l_tpmRequired);
-        uint8_t l_tpmRequiredLogMsg[] = "Tpm Required";
+        uint8_t l_tpmRequiredLogMsg[] = "TPM Required";
         l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
                           l_digest, sizeof(l_tpmRequired),
                           l_tpmRequiredLogMsg,
@@ -2455,6 +2456,41 @@ errlHndl_t poisonAllTpms()
     return l_errl;
 }
 
+#define LOG_REGS_MSG_MAX_CHARACTERS 40
+
+/**
+ * @brief Appends the chip position number onto a string used for TPM SW Log messages
+ *
+ * @param[in/out] io_log_msg_str - pointer to a pre-allocated array of characters with
+ *                  the size of LOG_REGS_MSG_MAX_CHARACTERS
+ * @param[in]     i_original_str - pointer to original string
+ * @param[in]     i_pos_str - pointer to position string to append onto original string
+ *
+ * @pre   io_log_msg_str must point to an array of characters that is large enough
+ *        to hold i_original_str appended with i_pos_str
+ */
+void appendPosToStr(char* io_log_msg_str,
+                    const char* i_original_str,
+                    const char* i_pos_str)
+{
+    TRACDCOMP(g_trac_trustedboot, ENTER_MRK "appendPosToStr(): "
+              "io_log_msg_str=%s (size=%d) (i_original_str=%s, i_pos_str=%s)",
+              io_log_msg_str, sizeof(io_log_msg_str), i_original_str, i_pos_str);
+
+    // Clear io_log_msg_str
+    memset(io_log_msg_str, 0, LOG_REGS_MSG_MAX_CHARACTERS);
+
+    // Start the string with i_original_str
+    strcat(io_log_msg_str, i_original_str);
+
+    // Append the position string
+    strcat(io_log_msg_str, i_pos_str);
+
+    TRACDCOMP(g_trac_trustedboot, EXIT_MRK "appendPosToStr(): "
+              "io_log_msg_str=%s (i_original_str=%s, i_pos_str=%s)",
+              io_log_msg_str, i_original_str, i_pos_str);
+}
+
 errlHndl_t logMeasurementRegs(TpmTarget* i_tpm_target,
                               TARGETING::Target*    i_proc_target,
                               TPM_sbe_measurements_regs_grouped i_regs,
@@ -2462,6 +2498,16 @@ errlHndl_t logMeasurementRegs(TpmTarget* i_tpm_target,
 {
     errlHndl_t err = nullptr;
 #ifdef CONFIG_TPMDD
+
+    assert(i_tpm_target != nullptr,"logMeasurementRegs: BUG! i_tpm_target was nullptr");
+    assert(i_tpm_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "logMeasurementRegs: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_tpm_target->getAttr<TARGETING::ATTR_TYPE>());
+
+    assert(i_proc_target != nullptr,"logMeasurementRegs: BUG! i_proc_target was nullptr");
+    assert(i_proc_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC,
+           "logMeasurementRegs: BUG! Expected target to be of PROC type, but "
+           "it was of type 0x%08X",i_proc_target->getAttr<TARGETING::ATTR_TYPE>());
 
     TRACUCOMP(g_trac_trustedboot, ENTER_MRK "logMeasurementRegs(): "
               "tpm=0x%.8X, proc=0x%.8X, i_extendToTpm=%d",
@@ -2471,98 +2517,183 @@ errlHndl_t logMeasurementRegs(TpmTarget* i_tpm_target,
 
     do {
 
-    // PCRO, PCR6 : HW Keys' Hash
+    // Check if i_proc_target is boot proc
+    TARGETING::Target* l_bootProc = nullptr;
+    err = TARGETING::targetService().queryMasterProcChipTargetHandle(l_bootProc);
+    if (err)
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"LogMeasurementRegs(): "
+                  ".queryMasterProcChipTargetHandle FAILED");
+        break;
+    }
+    const bool l_isBootProc = (l_bootProc == i_proc_target);
+
+    const auto l_proc_position = i_proc_target->getAttr<TARGETING::ATTR_POSITION>();
+
+    // System HW Keys' Hash
     SHA512_t hw_keys_hash = {0};
     SECUREBOOT::getHwKeyHash(hw_keys_hash);
-    uint8_t l_hwKeyHashLogMsg[] = "HW KEY HASH";
-    pcrExtendSingleTpm(i_tpm_target,
-                       PCR_0,
-                       EV_PLATFORM_CONFIG_FLAGS,
-                       TPM_ALG_SHA256,
-                       hw_keys_hash,
-                       SHA512_DIGEST_LENGTH,
-                       l_hwKeyHashLogMsg,
-                       sizeof(l_hwKeyHashLogMsg),
-                       i_extendToTpm);
 
-    pcrExtendSingleTpm(i_tpm_target,
-                       PCR_6,
-                       EV_COMPACT_HASH,
-                       TPM_ALG_SHA256,
-                       hw_keys_hash,
-                       SHA512_DIGEST_LENGTH,
-                       l_hwKeyHashLogMsg,
-                       sizeof(l_hwKeyHashLogMsg),
-                       i_extendToTpm);
+    // String setup
+    // - specific strings:
+    const char l_hash_str[] = "HW KEY HASH chip ";
+    const char l_sbeSecurityState_str[] = "SBE Security State chip ";
+    const char l_sbeSbValidationCode_str[] = "SBE Secure Boot Validation Code chip ";
+    const char l_bootLoadersAndBase_str[] = "SBE L1/L2 Boot loaders and Base chip ";
+    const char l_securitySwitches_str[] = "Security Switches chip ";
 
-    // PCR 6 : Security state boolean
-    uint8_t l_sbeSecurityState[] = "SBE Security State";
-    pcrExtendSingleTpm(i_tpm_target,
-                       PCR_6,
-                       EV_COMPACT_HASH,
-                       TPM_ALG_SHA256,
-                       &i_regs.sbe_measurement_regs_0_1[0],
-                       TPM_SBE_MEASUREMENT_REGS_0_1_SIZE,
-                       l_sbeSecurityState,
-                       sizeof(l_sbeSecurityState),
-                       i_extendToTpm);
+    // - common strings
+    char l_pos_str[2];
+    memset(l_pos_str, 0, 2);
+    sprintf(l_pos_str, "%.1d", l_proc_position);
+    static_assert(P10_MAX_PROCS<10, "Since P10_MAX_PROCS >= 10, need more proc position digits");
 
-    // PCR 0 : Security state : (SSR)|IsPrimary(0,1)|MSMLock(0,1)|
-    pcrExtendSingleTpm(i_tpm_target,
-                       PCR_0,
-                       EV_PLATFORM_CONFIG_FLAGS,
-                       TPM_ALG_SHA256,
-                       &i_regs.sbe_measurement_regs_2_3[0],
-                       TPM_SBE_MEASUREMENT_REGS_2_3_SIZE,
-                       l_sbeSecurityState,
-                       sizeof(l_sbeSecurityState),
-                       i_extendToTpm);
+    char l_log_msg_str[LOG_REGS_MSG_MAX_CHARACTERS];
+    memset(l_log_msg_str, 0, LOG_REGS_MSG_MAX_CHARACTERS);
 
-    // PCR 0, PCR 6 : Hash of SBE secureboot validation code
-    uint8_t l_sbeSbValidationCode[] = "SBE Secure Boot Validation Code";
+
+    // Static check to make sure l_log_msg_str is long enough to hold the specific strings
+    // with the position string appended to them
+    // NOTE: +1 for essentially inserting position value of one character before the
+    //       null-terminating character - see appendPosToStr() above
+    static_assert((sizeof(l_hash_str) + 1) <= LOG_REGS_MSG_MAX_CHARACTERS,
+                  "l_hash_str + 1 is longer than LOG_REGS_MSG_MAX_CHARACTERS");
+    static_assert((sizeof(l_sbeSecurityState_str) + 1) <= LOG_REGS_MSG_MAX_CHARACTERS,
+                  "l_sbeSecurityState_str + 1 is longer than LOG_REGS_MSG_MAX_CHARACTERS");
+    static_assert((sizeof(l_sbeSbValidationCode_str) + 1) <= LOG_REGS_MSG_MAX_CHARACTERS,
+                  "l_sbeSbValidationCode_str + 1 is longer than LOG_REGS_MSG_MAX_CHARACTERS");
+    static_assert((sizeof(l_bootLoadersAndBase_str) + 1) <= LOG_REGS_MSG_MAX_CHARACTERS,
+                  "l_bootLoadersAndBase_str + 1 is longer than LOG_REGS_MSG_MAX_CHARACTERS");
+    static_assert((sizeof(l_securitySwitches_str) + 1) <= LOG_REGS_MSG_MAX_CHARACTERS,
+                  "l_securitySwitches_str + 1 is longer than LOG_REGS_MSG_MAX_CHARACTERS");
+
+    /*********************/
+    /* PCR_0 Settings    */
+    /*********************/
+
+    // PCR 0 : Hash of SBE secureboot validation code
+    appendPosToStr(l_log_msg_str, l_sbeSbValidationCode_str, l_pos_str);
     pcrExtendSingleTpm(i_tpm_target,
                        PCR_0,
                        EV_S_CRTM_CONTENTS,
                        TPM_ALG_SHA256,
                        &i_regs.sbe_measurement_regs_4_7[0],
                        TPM_SBE_MEASUREMENT_REGS_4_7_SIZE,
-                       l_sbeSbValidationCode,
-                       sizeof(l_sbeSbValidationCode),
+                       reinterpret_cast<uint8_t*>(l_log_msg_str),
+                       strlen(l_log_msg_str) + 1,
                        i_extendToTpm);
 
-    pcrExtendSingleTpm(i_tpm_target,
-                       PCR_6,
-                       EV_COMPACT_HASH,
-                       TPM_ALG_SHA256,
-                       &i_regs.sbe_measurement_regs_4_7[0],
-                       TPM_SBE_MEASUREMENT_REGS_4_7_SIZE,
-                       l_sbeSbValidationCode,
-                       sizeof(l_sbeSbValidationCode),
-                       i_extendToTpm);
 
-    // PCR 0 : Hash of boot SEEProm L1/L2 boot loaders and boot SEEProm base
-    uint8_t l_bootLoadersAndBase[] = "SBE L1/L2 Boot Loaders and Base";
+    // PCR 0 : Hash of boot SEEProm L1/L2 Boot loaders and Base
+    appendPosToStr(l_log_msg_str, l_bootLoadersAndBase_str, l_pos_str);
     pcrExtendSingleTpm(i_tpm_target,
                        PCR_0,
                        EV_S_CRTM_CONTENTS,
                        TPM_ALG_SHA256,
                        &i_regs.sbe_measurement_regs_8_11[0],
                        TPM_SBE_MEASUREMENT_REGS_8_11_SIZE,
-                       l_bootLoadersAndBase,
-                       sizeof(l_bootLoadersAndBase),
+                       reinterpret_cast<uint8_t*>(l_log_msg_str),
+                       strlen(l_log_msg_str) + 1,
                        i_extendToTpm);
 
-    // PCR 0 : Hash of HBBL
-    uint8_t l_hashOfHbbl[] = "HBBL";
+    // PCR 0 : Hash of HBBL - Only Done On Boot Proc
+    if (l_isBootProc)
+    {
+        uint8_t l_hashOfHbbl_str[] = "HBBL";
+        pcrExtendSingleTpm(i_tpm_target,
+                           PCR_0,
+                           EV_S_CRTM_CONTENTS,
+                           TPM_ALG_SHA256,
+                           &i_regs.sbe_measurement_regs_12_15[0],
+                           TPM_SBE_MEASUREMENT_REGS_12_15_SIZE,
+                           l_hashOfHbbl_str,
+                           sizeof(l_hashOfHbbl_str),
+                           i_extendToTpm);
+    }
+
+    /*********************/
+    /* PCR_1 Settings    */
+    /*********************/
+    // PCR1 : HW Keys' Hash
+    appendPosToStr(l_log_msg_str, l_hash_str, l_pos_str);
     pcrExtendSingleTpm(i_tpm_target,
-                       PCR_0,
-                       EV_S_CRTM_CONTENTS,
+                       PCR_1,
+                       EV_PLATFORM_CONFIG_FLAGS,
                        TPM_ALG_SHA256,
-                       &i_regs.sbe_measurement_regs_12_15[0],
-                       TPM_SBE_MEASUREMENT_REGS_12_15_SIZE,
-                       l_hashOfHbbl,
-                       sizeof(l_hashOfHbbl),
+                       hw_keys_hash,
+                       SHA512_DIGEST_LENGTH,
+                       reinterpret_cast<uint8_t*>(l_log_msg_str),
+                       strlen(l_log_msg_str) + 1,
                        i_extendToTpm);
+
+    // PCR1 : SBE Security State
+    appendPosToStr(l_log_msg_str, l_sbeSecurityState_str, l_pos_str);
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_1,
+                       EV_PLATFORM_CONFIG_FLAGS,
+                       TPM_ALG_SHA256,
+                       &i_regs.sbe_measurement_regs_2[0],
+                       TPM_SBE_MEASUREMENT_REGS_2_SIZE,
+                       reinterpret_cast<uint8_t*>(l_log_msg_str),
+                       strlen(l_log_msg_str) + 1,
+                       i_extendToTpm);
+
+    // PCR1 : Security Switches
+    appendPosToStr(l_log_msg_str, l_securitySwitches_str, l_pos_str);
+    pcrExtendSingleTpm(i_tpm_target,
+                       PCR_1,
+                       EV_PLATFORM_CONFIG_FLAGS,
+                       TPM_ALG_SHA256,
+                       &i_regs.sbe_measurement_regs_3[0],
+                       TPM_SBE_MEASUREMENT_REGS_3_SIZE,
+                       reinterpret_cast<uint8_t*>(l_log_msg_str),
+                       strlen(l_log_msg_str) + 1,
+                       i_extendToTpm);
+
+
+    /******************************************************************/
+    /* PCR_6 Settings - all of these are only done on the boot proc   */
+    /******************************************************************/
+    if (l_isBootProc)
+    {
+        // PCR6 : HW Keys' Hash
+        uint8_t l_hwKeyHashLogMsg[] = "HW KEY HASH";
+        pcrExtendSingleTpm(i_tpm_target,
+                           PCR_6,
+                           EV_COMPACT_HASH,
+                           TPM_ALG_SHA256,
+                           hw_keys_hash,
+                           SHA512_DIGEST_LENGTH,
+                           l_hwKeyHashLogMsg,
+                           sizeof(l_hwKeyHashLogMsg),
+                           i_extendToTpm);
+
+
+        // PCR 6 : SBE Security State
+        uint8_t l_sbeSecurityState[] = "SBE Security State";
+        pcrExtendSingleTpm(i_tpm_target,
+                           PCR_6,
+                           EV_COMPACT_HASH,
+                           TPM_ALG_SHA256,
+                           &i_regs.sbe_measurement_regs_0[0],
+                           TPM_SBE_MEASUREMENT_REGS_0_SIZE,
+                           l_sbeSecurityState,
+                           sizeof(l_sbeSecurityState),
+                           i_extendToTpm);
+
+        // PCR 6 : Hash of SBE secureboot validation code
+        uint8_t l_sbeSbValidationCode[] = "SBE Secure Boot Validation Code";
+        pcrExtendSingleTpm(i_tpm_target,
+                           PCR_6,
+                           EV_COMPACT_HASH,
+                           TPM_ALG_SHA256,
+                           &i_regs.sbe_measurement_regs_4_7[0],
+                           TPM_SBE_MEASUREMENT_REGS_4_7_SIZE,
+                           l_sbeSbValidationCode,
+                           sizeof(l_sbeSbValidationCode),
+                           i_extendToTpm);
+
+    } // end of l_isBootProc check
 
     } while(0);
 
@@ -2644,6 +2775,12 @@ void synchronizePrimaryTpmLogs()
         // Mark TPM as not functional, commit err and set it to nullptr
         tpmMarkFailed(l_primaryTpm, err);
     }
+
+    // Do Separators For All PCRs on i_tpm_target.
+    pcrExtendSeparator(l_primaryTpm,
+                       false, // false: do NOT extend to TPM
+                       true); // true: do extend to SW Log
+
 
     TRACUCOMP(g_trac_trustedboot, EXIT_MRK "synchronizePrimaryTpmLogs()");
 

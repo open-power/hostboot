@@ -567,17 +567,6 @@ errlHndl_t extendBaseImage()
         break;
     }
 
-    pError = pcrExtendSeparator(true,  // true: sendAsync
-                                false, // false: don't extend to TPM
-                                true); // true: do add to SW Log
-    if(pError)
-    {
-        TRACFCOMP(g_trac_trustedboot, ERR_MRK "Failed in call to "
-            "pcrExtendSeparator() for after HBB section.");
-        break;
-    }
-
-
     } while(0);
 
     TRACDCOMP(g_trac_trustedboot, EXIT_MRK " extendBaseImage()");
@@ -1289,32 +1278,43 @@ errlHndl_t groupSbeMeasurementRegs(TARGETING::Target*    i_proc_target,
     memset(&o_regs, 0, sizeof(o_regs));
 
     //  Start grouping the registers into the output struct
-    // - 0-1   (x10010-x10011)
-    memcpy(&o_regs.sbe_measurement_regs_0_1[0],
+    // - 0 (0x10010)
+    memcpy(&o_regs.sbe_measurement_regs_0[0],
            &sbe_regs[0].data,
            sizeof(uint64_t));
 
-    memcpy(&o_regs.sbe_measurement_regs_0_1[0] + sizeof(uint64_t),
+    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _0",
+             &o_regs.sbe_measurement_regs_0,
+             TPM_SBE_MEASUREMENT_REGS_0_SIZE);
+
+    // - 1 (0x10011)
+    memcpy(&o_regs.sbe_measurement_regs_1[0],
            &sbe_regs[1].data,
            sizeof(uint64_t));
 
-    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _0_1",
-             &o_regs.sbe_measurement_regs_0_1,
-             TPM_SBE_MEASUREMENT_REGS_0_1_SIZE);
+    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _1",
+             &o_regs.sbe_measurement_regs_1,
+             TPM_SBE_MEASUREMENT_REGS_1_SIZE);
 
-    // 2-3   (x10012-x10013)
-    memcpy(&o_regs.sbe_measurement_regs_2_3[0],
+    // - 2 (0x10012)
+    memcpy(&o_regs.sbe_measurement_regs_2[0],
            &sbe_regs[2].data,
            sizeof(uint64_t));
-    memcpy(&o_regs.sbe_measurement_regs_2_3[0] + sizeof(uint64_t),
+
+    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _2",
+             &o_regs.sbe_measurement_regs_2[0],
+             TPM_SBE_MEASUREMENT_REGS_2_SIZE);
+
+    // - 3 (0x10013)
+    memcpy(&o_regs.sbe_measurement_regs_3[0],
            &sbe_regs[3].data,
            sizeof(uint64_t));
 
-    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _2_3",
-             &o_regs.sbe_measurement_regs_2_3[0],
-             TPM_SBE_MEASUREMENT_REGS_2_3_SIZE);
+    TRACDBIN(g_trac_trustedboot, "groupSbeMeasurementRegs - _3",
+             &o_regs.sbe_measurement_regs_3[0],
+             TPM_SBE_MEASUREMENT_REGS_3_SIZE);
 
-    // - 4-7   (x10014-x10017)
+    // - 4-7   (0x10014-0x10017)
     memcpy(&o_regs.sbe_measurement_regs_4_7[0],
            &sbe_regs[4].data,
            sizeof(uint64_t));
@@ -1332,7 +1332,7 @@ errlHndl_t groupSbeMeasurementRegs(TARGETING::Target*    i_proc_target,
              &o_regs.sbe_measurement_regs_4_7[0],
              TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
 
-    // - 8-11  (x10018-x1001B)
+    // - 8-11  (0x10018-0x1001B)
     memcpy(&o_regs.sbe_measurement_regs_8_11[0],
            &sbe_regs[8].data,
            sizeof(uint64_t));
@@ -1350,7 +1350,7 @@ errlHndl_t groupSbeMeasurementRegs(TARGETING::Target*    i_proc_target,
              &o_regs.sbe_measurement_regs_8_11[0],
              TPM_SBE_MEASUREMENT_REGS_8_11_SIZE);
 
-    // - 12-15 (x1001C-x1001F)
+    // - 12-15 (0x1001C-0x1001F)
     memcpy(&o_regs.sbe_measurement_regs_12_15[0],
            &sbe_regs[12].data,
            sizeof(uint64_t));
