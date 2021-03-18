@@ -1419,6 +1419,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_CONTAINED_QME_MMA_AVAIL</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Set MMA available via the QME in contained mode
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x20</value>
+         <test>GREATER_THAN_OR_EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
    <id>ATTR_CHIP_EC_FEATURE_CHTM_ENABLE</id>
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>
