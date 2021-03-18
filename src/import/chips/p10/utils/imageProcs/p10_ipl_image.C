@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2925,8 +2925,12 @@ p9_xip_append(void* io_image,
             if (final != i_sectionId)
             {
                 rc = TRACE_ERRORX(P9_XIP_SECTION_ERROR,
-                                  "Attempt to append to non-final section "
-                                  "%d\n", i_sectionId);
+                                  "The section(=%d) already exists. But since it's not the last "
+                                  "section in the image, we cannot append to it. If you attempted "
+                                  "to append a new section alltogether, rather than appending data "
+                                  "to the existing section, you must first delete the existing "
+                                  "section.\n",
+                                  i_sectionId);
                 break;
             }
 
