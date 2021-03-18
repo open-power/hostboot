@@ -128,6 +128,15 @@ fapi2::ReturnCode get_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                                 std::vector<uint8_t>& o_data);
 
 ///
+/// @brief Save FW API version into attribute
+/// @param[in] i_target the OCMB target
+/// @param[in] i_data response data from FW_STATUS command
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode save_fw_api_version(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      const std::vector<uint8_t> i_data);
+
+///
 /// @brief Helper function to check FW_STATUS loop termination, for unit testing
 /// @param[in] i_target the OCMB target
 /// @param[in] i_data response data from FW_STATUS command

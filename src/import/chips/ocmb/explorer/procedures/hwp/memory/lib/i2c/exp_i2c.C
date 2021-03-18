@@ -517,9 +517,6 @@ fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_T
                  "Polling timeout on FW_STATUS command (wrong boot stage: 0x%01x, expected 0x%01x) for " TARGTIDFORMAT,
                  l_boot_stage, boot_stages::RUNTIME_FW, MSSTARGID );
 
-    // Save off the FW API version into our attribute
-    FAPI_TRY(save_fw_api_version(i_target, l_data));
-
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
