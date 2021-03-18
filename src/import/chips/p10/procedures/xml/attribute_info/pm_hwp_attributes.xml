@@ -777,7 +777,7 @@
     <description>
     The number of steps for the WOF I/O dimension.  This value will be placed
     into the XGPE header for use in the WOF IO algorithm.
- 
+
     Producer: p10_pstate_parameter_block
     Consumers: p10_hcode_image_build, XGPE Hcode
     </description>

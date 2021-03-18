@@ -331,7 +331,7 @@
     </enum>
     <group>debug</group>
   </attribute>
-  
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_XGPE_PM_SUSPEND_DISABLE</id>
@@ -2049,14 +2049,14 @@
         <id>ATTR_WOV_DIRTY_UNCURRENT_CONTROL</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
-        The dirty value sent to OCC upon PGPE detecting a DDS based droop.  The 
+        The dirty value sent to OCC upon PGPE detecting a DDS based droop.  The
         encoding represent the following:
         b0x(0,1):  not dirty, NA
         b10(  2):  dirty, no OCC Ceff reaction expected
         b11(  3):  dirty, OCC Ceff reaction expected
         [Index]->2 entries-:
         0: LIGHT
-        1: HEAVY      
+        1: HEAVY
         </description>
         <valueType>uint8</valueType>
         <array>2</array>
@@ -2064,7 +2064,7 @@
         <overrideOnly/>
         <group>wov</group>
     </attribute>
-    
+
     <!-- ********************************************************************* -->
     <attribute>
         <id>ATTR_OCS_WITH_DDS_DISABLE</id>
@@ -2077,7 +2077,7 @@
         <enum>
         OFF=0,
         ON=1
-        </enum>    
+        </enum>
         <platInit/>
         <initToZero/>
         <overrideOnly/>
@@ -2096,7 +2096,7 @@
         <enum>
         OFF=0,
         ON=1
-        </enum>    
+        </enum>
         <platInit/>
         <initToZero/>
         <overrideOnly/>
@@ -3110,6 +3110,7 @@
     </description>
     <valueType>uint16</valueType>
     <platInit/>
+    <initToZero/>
     <overrideOnly/>
   </attribute>
   <!-- *********************************************************************-->
@@ -3122,6 +3123,7 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
+    <initToZero/>
     <overrideOnly/>
   </attribute>
   <!-- *********************************************************************-->
