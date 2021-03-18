@@ -36,18 +36,3 @@ OBJS += spd.o
 OBJS += ocmb_spd.o
 OBJS += errlud_vpd.o
 
-# Compile the VPD ECC update/validate algorithms if flag CONFIG_COMPILE_VPD_ECC_ALGORITHMS
-# is set to 'y' as found in local file HBconfig.  If flag set to 'n' then compile the no-op code.
-OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpd_ecc_api_algorithms.o, vpd_ecc_api_no_op.o)
-OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpdecc.o)
-OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpdecc_support.o)
-
-# Fetch the VPD ECC algorithm APIs if compiling for VPD ECC algorithms
-vpdecc.h vpdecc.c vpdecc_support.h vpdecc_support.c :  $(ROOTPATH)/src/build/tools/fetchVpdAlgorithms.sh
-	$(ROOTPATH)/src/build/tools/fetchVpdAlgorithms.sh
-
-# Remove the VPD ECC algorithm files when user calls 'make clean' or 'make clobber'
-.PHONY: CLEAN_PASS
-CLEAN_PASS:
-	@-rm -rf vpdecc.h vpdecc.c vpdecc_support.h vpdecc_support.c
-

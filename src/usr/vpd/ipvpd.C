@@ -3272,7 +3272,7 @@ IpVpdFacade::validateVhdrRecordEccData( const TARGETING::TargetHandle_t i_target
                 TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVhdrRecordEccData(): "
                            "updateRecordData successfully updated record %s on target 0x%.8X",
                            VPD_HEADER_RECORD_NAME, TARGETING::get_huid(i_target) );
-           }
+            }
             else if (l_err)
             {
                 TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVhdrRecordEccData(): "
@@ -3445,13 +3445,16 @@ IpVpdFacade::validateVtocRecordEccData(
                        "on target 0x%.8X", l_returnCode, VPD_TABLE_OF_CONTENTS_RECORD_NAME,
                        TARGETING::get_huid(i_target) );
 
-            // If the attribute override to force an ECC update is set, then attempt to update ECC data
+            // Get the 'force an ECC data update' flag
             auto l_forceEccUpdateFlag = TARGETING::UTIL::assertGetToplevelTarget()->
                  getAttr<TARGETING::ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR>();
-            if ( l_forceEccUpdateFlag )
+
+            // Update the ECC data if forcing an update and the error is not a correctable error.
+            // A correctable error is handled after this conditional.
+            if ( l_forceEccUpdateFlag && (VPD::VPD_ECC_DATA_CORRECTABLE_DATA != l_returnCode) )
             {
                 // Attempt to update the ECC data for record
-                TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
+                TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVtocRecordEccData(): "
                            "Will attempt to update the ECC data based on the "
                            "ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR flag %d for record %s "
                            "on target 0x%.8X", l_forceEccUpdateFlag,
@@ -3636,10 +3639,13 @@ IpVpdFacade::validateAllOtherRecordEccData(
                            "on target 0x%.8X", l_returnCode, l_ptEntry.record_name,
                            TARGETING::get_huid(i_target) );
 
-                // If the attribute override to force an ECC update is set, then attempt to update ECC data
+                // Get the 'force an ECC data update' flag
                 auto l_forceEccUpdateFlag = TARGETING::UTIL::assertGetToplevelTarget()->
                      getAttr<TARGETING::ATTR_FORCE_ECC_UPDATE_ON_VALIDATION_ERROR>();
-                if ( l_forceEccUpdateFlag )
+
+                // Update the ECC data if forcing an update and the error is not a correctable error.
+                // A correctable error is handled after this conditional.
+                if ( l_forceEccUpdateFlag && (VPD::VPD_ECC_DATA_CORRECTABLE_DATA != l_returnCode) )
                 {
                     // Attempt to update the ECC data for record
                     TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "

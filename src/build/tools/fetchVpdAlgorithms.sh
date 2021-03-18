@@ -71,9 +71,8 @@ do
 
     # If any of the files exist, the 'git apply' command below will error out.
     # This is not necessarily an issue, it is just erroring out because the files exist.
-    # Considering that there is no force option on the 'git apply' command, only an error,
-    # then at least give a warning to caller and not continue.  An error message may
-    # may be misleading.
+    # Considering that there is no force option on the 'git apply' command, will
+    # issue a warning to caller because an error message may be misleading.
     if [[  -f "${VPD_DIR}/vpdecc.c"         || -f "${VPD_DIR}/vpdecc.h"  ||
            -f "${VPD_DIR}/vpdecc_support.c" || -f "${VPD_DIR}/vpdecc_support.h" ]]; then
         echo -e "Warning: One, if not all, of these files vpdecc.c, vpdecc.h, vpdecc_support.c\n" \

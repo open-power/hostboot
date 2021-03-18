@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -23,5 +23,23 @@
 #
 # IBM_PROLOG_END_TAG
 
-# Currently a no-op, but do not delete file.
+# Compile the VPD ECC update/validate algorithms if flag CONFIG_COMPILE_VPD_ECC_ALGORITHMS
+# is defined/set.
+OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpd_ecc_api_algorithms.o, vpd_ecc_api_no_op.o)
+OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpdecc.o)
+OBJS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), vpdecc_support.o)
+
+# Force these files to be present before continuing.  A multi-threaded compile
+# can get ahead of itself and spew out bogus errors if these files are not present.
+.NOTPARALLEL: vpdecc.h vpdecc.c vpdecc_support.h vpdecc_support.c
+
+# Fetch the VPD ECC algorithm APIs if compiling for VPD ECC algorithms
+vpdecc.h vpdecc.c vpdecc_support.h vpdecc_support.c &:  $(ROOTPATH)/src/build/tools/fetchVpdAlgorithms.sh
+	$(ROOTPATH)/src/build/tools/fetchVpdAlgorithms.sh
+
+# Remove the VPD ECC algorithm files when user calls 'make clean' or 'make clobber'
+.PHONY: CLEAN_PASS
+CLEAN_PASS:
+	@-rm -rf vpdecc.h vpdecc.c vpdecc_support.h vpdecc_support.c
+
 
