@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,10 +45,10 @@
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <lib/inband/exp_fw_adapter_properties.H>
 #include <lib/phy/exp_phy_reset.H>
+#include <lib/mc/exp_port.H>
 
 extern "C"
 {
-
     ///
     /// @brief Scominit for Explorer
     /// @param[in] i_target the OCMB target to operate on
@@ -58,6 +58,7 @@ extern "C"
     {
         mss::display_git_commit_info("exp_scominit");
         uint8_t l_sim = 0;
+        bool l_has_rcd = false;
 
         if (mss::count_dimm(i_target) == 0)
         {
@@ -75,6 +76,12 @@ extern "C"
                            .getParent<fapi2::TARGET_TYPE_MC>();
 
         FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
+
+        // Check if DIMM has an RCD
+        FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+
+        // Configure clock stabilization time
+        FAPI_TRY(mss::configure_tstab(i_target, l_has_rcd));
 
         for(const auto& l_port : l_port_targets)
         {

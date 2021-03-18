@@ -410,5 +410,33 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Configure clock stabilization time field
+/// @param[in] i_target the OCMB target to operate on
+/// @param[in] i_has_rcd flag to signify existence of RCD on DIMM
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode configure_tstab(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  const bool i_has_rcd)
+{
+    fapi2::buffer<uint64_t> l_reg_data = 0;
+    // Clock stabilization time with an RCD on the DIMM is 5us
+    constexpr uint8_t tstab_val = 5;
+
+    FAPI_TRY(mss::getScom(i_target, EXPLR_SRQ_MBAREFAQ, l_reg_data));
+
+    // tSTAB should be 5us if RCD exists, otherwise default of 0
+    l_reg_data.insertFromRight<EXPLR_SRQ_MBAREFAQ_CFG_TSTAB,
+                               EXPLR_SRQ_MBAREFAQ_CFG_TSTAB_LEN>
+                               (i_has_rcd ? tstab_val : 0);
+
+    FAPI_TRY(mss::putScom(i_target, EXPLR_SRQ_MBAREFAQ, l_reg_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 }// namespace mss

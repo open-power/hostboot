@@ -246,6 +246,14 @@ fapi_try_exit:
 ///
 uint8_t symbol_rounder(const uint8_t i_symbol);
 
+///
+/// @brief Configure clock stabilization time field
+/// @param[in] i_target the OCMB target to operate on
+/// @param[in] i_has_rcd flag to signify existence of RCD on DIMM
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode configure_tstab(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target, const bool i_has_rcd);
+
 }// mss
 
 #endif
