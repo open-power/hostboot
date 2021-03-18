@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,11 +30,11 @@
 namespace SECUREBOOT
 {
     /*
-     * @brief Calls p10_update_security_ctrl HWP to lock down the Abus secure
+     * @brief Calls p10_update_security_ctrl HWP to lock down the secure
      *        mailboxes on all functional processors. All errors are committed
      *        internally.
      */
-    void lockAbusSecMailboxes();
+    void lockSecureMailboxes();
 
     /*
      * @brief Enforce synchronized processor security states

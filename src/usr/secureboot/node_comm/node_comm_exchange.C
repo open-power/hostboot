@@ -298,7 +298,7 @@ errlHndl_t nodeCommLogNonce(uint64_t & i_nonce)
 
 } // end of nodeCommLogNonce
 
-// Global authentication key certificate that can be shared between threads
+// Global attestation key certificate that can be shared between threads
 // and different node comm exchange algorithms
 TRUSTEDBOOT::TPM2B_MAX_NV_BUFFER g_nodeAK {};
 
@@ -401,7 +401,7 @@ errlHndl_t nodeCommGenQuoteResponse(const QuoteRequestBlob* const i_request,
     }
 
 
-    // If other node indicated that there is an issue with its TPM: Case 1: If the
+    // If the other node indicated that there is an issue with its TPM: Case 1: If the
     // TPM Required policy is on, terminate the boot; Case 2: If TPM required
     // policy is off, send back a token indicating that no nodecomm TPM commands
     // have been performed; do not fail the boot.
@@ -1452,7 +1452,7 @@ errlHndl_t syncWithAllNodes(const std::vector<iohs_instances_t>& i_iohsInstances
     {
         TRACFCOMP(g_trac_nc,INFO_MRK"syncWithAllNodes: Receiving the sync message from primary node");
         // The array of IOHS targes is sorted by node ID, so the first IOHS target
-        // is connected to node 0. Look for a message from the links associated with
+        // is connected to the primary node. Look for a message from the links associated with
         // that target.
         l_errl = sendRecvNodeSyncMessage(RECEIVE_MESSAGE, i_iohsInstances[0]);
     }
@@ -1526,14 +1526,14 @@ errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_io
  *        into the TPM log.
  *        The function cleans up all dynamically-allocated memory.
  *
- * @param[in] i_quotes the vector of quotes to extend to the TPM
+ * @param[in/out] io_quotes the vector of quotes to extend to the TPM
  * @return nullptr on success; non-nullptr on error
  */
-errlHndl_t extendAllQuotes(std::vector<quoteInfo_t>& i_quotes)
+errlHndl_t extendAllQuotes(std::vector<quoteInfo_t>& io_quotes)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
-    for(const auto& l_quoteInf : i_quotes)
+    for(const auto& l_quoteInf : io_quotes)
     {
         // Extend the hash of the quote to PCR 1 and include the whole quote
         // in binary form as the message in the TPM log
@@ -1554,13 +1554,13 @@ errlHndl_t extendAllQuotes(std::vector<quoteInfo_t>& i_quotes)
 #endif
 
     // Free all quotes
-    for(auto& l_quoteInf : i_quotes)
+    for(auto& l_quoteInf : io_quotes)
     {
         delete[] l_quoteInf.quoteData;
         l_quoteInf.quoteData = nullptr;
     }
     // Clear the quote vector
-    i_quotes.clear();
+    io_quotes.clear();
 
     return l_errl;
 }
@@ -1966,7 +1966,7 @@ errlHndl_t nodeCommExchange(void)
         iohs_instances.push_back(l_iohsInstance);
         TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommExchange: Using primaryProc 0x%.08X "
                   "IOHS HUID 0x%.08X's peer path %s with iohs_instance "
-                  "myIohsInstance=%d, peer=n%d/p%d/obus%d (vector size=%d)",
+                  "myIohsInstance=%d, peer=n%d/p%d/iohs%d (vector size=%d)",
                   get_huid(mProcInfo.tgt), get_huid(l_iohsTgt),
                   l_peer_path_str, l_iohsInstance.myIohsInstance,
                   l_iohsInstance.peerNodeInstance,

@@ -1469,7 +1469,7 @@ errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
 
     memcpy(l_cmd->quoteData.tpmiDhObject,l_tpmiDhObject,sizeof(l_tpmiDhObject));
 
-    memcpy(l_cmd->quoteData.Nonce,
+    memcpy(l_cmd->quoteData.nonce,
            *i_nonce,
            TPM_NONCE_SIZE_BYTES);
 

@@ -49,7 +49,7 @@
 namespace SECUREBOOT
 {
 
-void lockAbusSecMailboxes()
+void lockSecureMailboxes()
 {
 #ifdef CONFIG_TPMDD
     errlHndl_t l_errl = nullptr;
@@ -60,13 +60,13 @@ void lockAbusSecMailboxes()
     while(l_pProc != l_procs.end())
     {
         const bool DO_NOT_FORCE_SECURITY = false;
-        const bool DO_LOCK_ABUS_MAILBOXES = true;
+        const bool DO_LOCK_MAILBOXES = true;
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(*l_pProc);
         FAPI_INVOKE_HWP(l_errl,
                         p10_update_security_ctrl,
                         l_fapiProc,
                         DO_NOT_FORCE_SECURITY,
-                        DO_LOCK_ABUS_MAILBOXES);
+                        DO_LOCK_MAILBOXES);
 
         if(l_errl)
         {
@@ -82,14 +82,14 @@ void lockAbusSecMailboxes()
             /*@
              * @errortype
              * @reasoncode RC_LOCK_MAILBOXES_FAILED
-             * @moduleid   MOD_LOCK_ABUS_SEC_MAILBOXES
+             * @moduleid   MOD_LOCK_SECURE_MAILBOXES
              * @userdata1  Target HUID
-             * @devdesc    Failed to lock Abus secure mailboxes
+             * @devdesc    Failed to lock secure mailboxes
              *             on target processor.
              * @custdesc   Secure Boot failure
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            SECUREBOOT::MOD_LOCK_ABUS_SEC_MAILBOXES,
+                            SECUREBOOT::MOD_LOCK_SECURE_MAILBOXES,
                             SECUREBOOT::RC_LOCK_MAILBOXES_FAILED,
                             TARGETING::get_huid(*l_pProc),
                             0,

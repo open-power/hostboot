@@ -48,7 +48,7 @@ namespace SECUREBOOT
         MOD_SECURE_GET_ALL_SEC_REGS         = 0x0E,
         MOD_SECURE_LOAD_HEADER              = 0x0F,
         MOD_SECURE_VALIDATE_ECID_COUNT      = 0x10,
-        MOD_LOCK_ABUS_SEC_MAILBOXES         = 0x11,
+        MOD_LOCK_SECURE_MAILBOXES           = 0x11,
         MOD_SECURE_LOG_PLAT_SECURITY_CONFIG = 0x12,
         MOD_CHECK_RISK_LEVEL_FOR_SMF        = 0x13,
         MOD_SMF_SPLIT_SMF_MEM               = 0x14,

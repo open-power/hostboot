@@ -318,10 +318,6 @@ void NodeCommExchangeNonces::operator()()
         }
     }
 
-    // From the point of view of the peer node, its receiver link ID is our link
-    // ID.
-    l_peerNonce.receiver_linkId = l_myNonce.origin_linkId;
-
     l_errl = nodeCommLogNonce(l_myNonce.value);
     if(l_errl)
     {
@@ -489,8 +485,8 @@ errlHndl_t sendQuote(const iohs_instances_t& i_iohsInstance)
 
     // Generate a response
     l_errl = nodeCommGenQuoteResponse(&l_quoteRequest,
-                                           l_dataSize,
-                                           l_quotePtr);
+                                      l_dataSize,
+                                      l_quotePtr);
     if(l_errl)
     {
         TRACFCOMP(g_trac_nc, ERR_MRK"sendQuote: Could not generate quote to respond to node %d"
@@ -520,7 +516,7 @@ errlHndl_t sendQuote(const iohs_instances_t& i_iohsInstance)
 
 /**
  * @brief Perform quote exchange between the nodes on the system. Each node, when communicating with
- *        other node, will act as a requestor once and as a responder once, so in any given system,
+ *        another node, will act as a requestor once and as a responder once, so in any given system,
  *        each node will send its quote to every other node and will receive quotes from every other
  *        node. If the current node is a lower node ID, it will request the quote first, and then
  *        send its quote to the peer. Otherwise, the opposite happens.

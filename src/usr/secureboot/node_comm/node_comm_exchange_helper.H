@@ -97,7 +97,7 @@ class NodeCommExchange
 };
 
 /**
- * @brief Performs the Phase 1 of multinode comm, where nodes exchange 8-byte
+ * @brief Performs the Phase 1 of multinode comm, where nodes exchange an 8-byte
  *        random number (nonce) with their specific link information encoded
  *        into the first byte of the number.
  */
