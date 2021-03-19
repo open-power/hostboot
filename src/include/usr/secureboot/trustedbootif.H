@@ -586,16 +586,6 @@ namespace TRUSTEDBOOT
     void tpmMarkFailed(TpmTarget * i_pTpm,
                        errlHndl_t & io_errLog);
 
-    /**
-     * @brief Check the TPM Deconfig Protect bit in the secureboot register.
-     *        An error is returned if the bit is set.
-     *
-     * @param[in] i_pTpm the TPM for which to check the bit
-     * @return nullptr if operation is successful and TDP bit is not set or
-     *         error log on failure or if TDP bit is set
-     */
-    errlHndl_t checkTdpBit(TpmTarget* i_pTpm);
-
 } // end TRUSTEDBOOT namespace
 
 
