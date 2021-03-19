@@ -65,6 +65,7 @@
 #include "../trusted/tpmLogMgr.H"
 
 #include <tracinterface.H>
+#include <sys/time.h>
 
 using   namespace   TARGETING;
 
@@ -1499,6 +1500,9 @@ errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_io
     }
     else
     {
+        // Wait 100ms to let the nodes catch up
+        nanosleep(0, 100*NS_PER_MSEC);
+
         // Sync with all nodes
         l_errl = syncWithAllNodes(i_iohsInstances);
         if(l_errl)

@@ -56,8 +56,13 @@ void NodeCommExchange::handleError(errlHndl_t i_errl)
         TRACFCOMP(g_trac_nc,INFO_MRK"NodeCommExchange::handleError(): TPM is not required; changing the severity of error 0x%x to INFORMATIONAL",
                   i_errl->eid());
         i_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        // Don't propagate informational errors to istep
+        errlCommit(i_errl, SECURE_COMP_ID);
     }
-    captureError(i_errl, *iv_istepError, SECURE_COMP_ID);
+    else
+    {
+        captureError(i_errl, *iv_istepError, SECURE_COMP_ID);
+    }
     mutex_unlock(&iv_errorMutex);
 }
 
