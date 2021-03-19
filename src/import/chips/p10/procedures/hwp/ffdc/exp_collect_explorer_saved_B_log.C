@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/ffdc/ffdc_includes.H $    */
+/* $Source: src/import/chips/p10/procedures/hwp/ffdc/exp_collect_explorer_saved_B_log.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2021                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,24 +22,26 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/// @file  exp_collect_explorer_saved_B_log.C
 ///
-/// @file ffdc_includes.H
-/// @brief Main file used to export all include files for FFDC procedures
-///
+/// @brief Collects and adds Explorer SAVED log from image B side to rc
+//------------------------------------------------------------------------------
+// *HWP HW Owner        : Matt Derksen
+// *HWP HW Backup Owner :  <>
+// *HWP FW Owner        :  <>
+// *HWP Level           : 2
+// *HWP Consumed by     : SE:HB
+//------------------------------------------------------------------------------
 
-#ifndef __FFDC_INCLUDES_H
-#define __FFDC_INCLUDES_H
+#include <fapi2.H>
+#include "exp_collect_explorer_log.H"
+#include "exp_collect_explorer_saved_B_log.H"
 
-// Add any other FFDC procedures with #include
-
-// Don't do explorer log collection on FSP side
-#ifndef FIPSODE
-
-    // needed for collectFfdc to work for adding Explorer log data
-    #include <exp_collect_explorer_active_log.H>
-    #include <exp_collect_explorer_saved_A_log.H>
-    #include <exp_collect_explorer_saved_B_log.H>
-
-#endif
-
-#endif
+/// See header
+fapi2::ReturnCode exp_collect_explorer_saved_B_log(
+    const fapi2::ffdc_t& i_ocmb_chip,
+    const fapi2::ffdc_t& i_size,
+    fapi2::ReturnCode& o_rc )
+{
+    return exp_collect_explorer_logs(i_ocmb_chip, i_size, SAVED_LOG_B, o_rc);
+}

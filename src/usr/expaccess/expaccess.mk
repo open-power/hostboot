@@ -51,3 +51,6 @@ OBJS += c_str.o
 OBJS += exp_i2c.o
 OBJS += exp_fw_adapter_properties.o
 OBJS += exp_collect_explorer_log.o
+OBJS += exp_collect_explorer_active_log.o
+OBJS += exp_collect_explorer_saved_A_log.o
+OBJS += exp_collect_explorer_saved_B_log.o

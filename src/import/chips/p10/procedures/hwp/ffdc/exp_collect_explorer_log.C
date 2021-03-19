@@ -59,21 +59,6 @@ const size_t FIRST_PACKET_SIZE     = 0x100;
 // These aren't as important since they are older trace logs
 const size_t FOLLOWING_PACKET_SIZE = 0x200;
 
-/**
- * @brief Explorer Log type?
- *
- * The firmware maintains the log in a circular buffer in RAM (ACTIVE_LOG) and
- * in the event of a processor exception, firmware assert, or other critical
- * condition the firmware saves the data in RAM to SPI flash (SAVED_LOG).
- * Having the log stored in non-volatile memory allows post-analysis
- * of the log even if it requires a power-cycle to recover the system.
- */
-enum exp_log_type : uint8_t
-{
-    ACTIVE_LOG  = 1, // RAM error section
-    SAVED_LOG_A = 2, // SPI flash error section from image A
-    SAVED_LOG_B = 3  // SPI flash error section from image B
-};
 
 /**
  * @brief  Main procedure to grab log traces from Explorer chip
@@ -311,30 +296,4 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
     FAPI_INF("exp_collect_explorer_logs: Exiting ...");
 
     return l_rc;
-}
-
-/// See header
-fapi2::ReturnCode exp_collect_explorer_active_log(
-    const fapi2::ffdc_t& i_ocmb_chip,
-    const fapi2::ffdc_t& i_size,
-    fapi2::ReturnCode& o_rc )
-{
-    return exp_collect_explorer_logs(i_ocmb_chip, i_size, ACTIVE_LOG, o_rc);
-}
-
-/// See header
-fapi2::ReturnCode exp_collect_explorer_saved_A_log(
-    const fapi2::ffdc_t& i_ocmb_chip,
-    const fapi2::ffdc_t& i_size,
-    fapi2::ReturnCode& o_rc )
-{
-    return exp_collect_explorer_logs(i_ocmb_chip, i_size, SAVED_LOG_A, o_rc);
-}
-
-fapi2::ReturnCode exp_collect_explorer_saved_B_log(
-    const fapi2::ffdc_t& i_ocmb_chip,
-    const fapi2::ffdc_t& i_size,
-    fapi2::ReturnCode& o_rc )
-{
-    return exp_collect_explorer_logs(i_ocmb_chip, i_size, SAVED_LOG_B, o_rc);
 }

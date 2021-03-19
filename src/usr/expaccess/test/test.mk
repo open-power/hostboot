@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -41,6 +41,9 @@ VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
 OBJS += exptest_utils.o
 OBJS += exp_collect_explorer_log.o
+OBJS += exp_collect_explorer_active_log.o
+OBJS += exp_collect_explorer_saved_A_log.o
+OBJS += exp_collect_explorer_saved_B_log.o
 OBJS += rcExpLog.o
 
 include ${ROOTPATH}/config.mk
