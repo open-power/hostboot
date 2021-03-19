@@ -654,6 +654,28 @@ errlHndl_t nodeCommGenQuoteResponse(const QuoteRequestBlob* const i_request,
         memcpy(l_quotePtr, &l_badEyeCatcher, sizeof(l_badEyeCatcher));
         memcpy(l_quotePtr + sizeof(l_badEyeCatcher), &l_nodeId, sizeof(l_nodeId));
         o_size = sizeof(l_badEyeCatcher) + sizeof(l_nodeId);
+
+        errlHndl_t l_poisonTpmErr = TRUSTEDBOOT::poisonAllTpms();
+        if(l_poisonTpmErr)
+        {
+            if(l_errl)
+            {
+                l_poisonTpmErr->plid(l_errl->plid());
+            }
+            if(l_tpmRequired)
+            {
+                errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteResponse: "
+                          "Could not poison TPMs. Errl PLID: 0x%.08X "
+                          "Deleting the error log and continuing anyway.",
+                          l_poisonTpmErr->plid());
+                delete l_poisonTpmErr;
+                l_poisonTpmErr = nullptr;
+            }
+        }
     }
 
     o_resp.reset(l_quotePtr);
@@ -668,6 +690,7 @@ errlHndl_t nodeCommGenQuoteRequest(QuoteRequestBlob* const o_request)
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
     TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommGenQuoteRequest");
+    bool l_tpmRequired = TRUSTEDBOOT::isTpmRequired();
     do {
     TARGETING::Target* l_primaryTpm = nullptr;
     TRUSTEDBOOT::getPrimaryTpm(l_primaryTpm);
@@ -730,6 +753,27 @@ errlHndl_t nodeCommGenQuoteRequest(QuoteRequestBlob* const o_request)
     {
         // Error occurred. Tell the secondary node that the primary node's TPM is unavailable
         o_request->EyeCatcher = REQNOTPM;
+        errlHndl_t l_poisonTpmErr = TRUSTEDBOOT::poisonAllTpms();
+        if(l_poisonTpmErr)
+        {
+            if(l_errl)
+            {
+                l_poisonTpmErr->plid(l_errl->plid());
+            }
+            if(l_tpmRequired)
+            {
+                errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenQuoteRequest: "
+                          "Could not poison TPMs. Errl PLID: 0x%.08X. "
+                          "Deleting the error log and continuing anyway.",
+                          l_poisonTpmErr->plid());
+                delete l_poisonTpmErr;
+                l_poisonTpmErr = nullptr;
+            }
+        }
     }
 
     TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenQuoteRequest: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
@@ -750,6 +794,7 @@ errlHndl_t nodeCommProcessQuote(uint8_t* const i_quote,
 #ifdef CONFIG_TPMDD
     TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommProcessQuote: size=0x%016llX",i_quoteSize);
     bool l_tpmRequired = TRUSTEDBOOT::isTpmRequired();
+    bool l_errorOccurred = false;
 
     do {
     NCEyeCatcher_t* l_eyeCatcher =
@@ -759,6 +804,7 @@ errlHndl_t nodeCommProcessQuote(uint8_t* const i_quote,
     if(*l_eyeCatcher == NDNOTPM_)
     {
         TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommProcessQuote: Node %d indicated that it could not complete the quote generation process", *l_secondaryNodeId);
+        l_errorOccurred = true;
         if(l_tpmRequired)
         {
             // Secondary node sent bad data and TPM is required - return an error and
@@ -803,7 +849,33 @@ errlHndl_t nodeCommProcessQuote(uint8_t* const i_quote,
 
     } while(0);
 
+    if(l_errl || l_errorOccurred)
+    {
+        errlHndl_t l_poisonTpmErr = TRUSTEDBOOT::poisonAllTpms();
+        if(l_poisonTpmErr)
+        {
+            if(l_errl)
+            {
+                l_poisonTpmErr->plid(l_errl->plid());
+            }
+            if(TRUSTEDBOOT::isTpmRequired())
+            {
+                errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_nc, ERR_MRK"nodeCommProcessQuote: "
+                          "Could not poison TPMs. Errl PLID: 0x%.08X. "
+                          "Deleting the error log and continuing.",
+                          l_poisonTpmErr->plid());
+                delete l_poisonTpmErr;
+                l_poisonTpmErr = nullptr;
+            }
+        }
+    }
+
     TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommProcessQuote: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+
 #endif
     return l_errl;
 } // nodeCommProcessQuote
