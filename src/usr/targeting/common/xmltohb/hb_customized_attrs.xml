@@ -557,8 +557,11 @@
     </attribute>
 
     <attribute>
+          <!-- Control this value completely inside of Hostboot
+               to force max performance -->
           <id>ATTR_SBE_SELECT_EX_POLICY</id>
           <default>HB_MAX_FOOTPRINT</default>
+          <no_export/>
     </attribute>
 
     <attribute>
