@@ -184,6 +184,34 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_ALLOW_ATTR_OVERRIDES</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Allow attribute overrides in secure mode. A value of 1 allows
+               attribure overrde in secure mode. No-op on production-keyed
+               systems (attr override is always disabled).
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_NO_XSCOM_ENFORCEMENT</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Disable XSCOM read/write enforcement in secure mode. A value of 1
+               disables XSCOM security enforcement. No-op on production-keyed
+               systems (XSCOM enforcement is always enabled).
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <platInit/>
+  <initToZero/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_SECURITY_ENABLE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Holds the state of Security Access Bit (SAB)</description>
