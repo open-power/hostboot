@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,9 +237,10 @@ void gppb_print(FILE* stream, const GlobalPstateParmBlock_t* gppb, uint32_t  dum
     fprintf(stream, "Frequency_Step_Size:               %u Khz\n", frequency_step_khz);
     fprintf(stream, "OCC Complex_Frequency:             %u Mhz\n", occ_freq_mhz);
 
+
     for (s = 0 ; s < SAFE_VOLTAGE_SIZE; s++)
     {
-        fprintf(stream, "Safe_Voltage[%u]               %u mV\n", s, safe_voltage_mv[s]);
+        fprintf(stream, "Safe_Voltage[%u]                    %u mV\n", s, safe_voltage_mv[s]);
     }
 
     fprintf(stream, "Safe_Frequency                     %u Khz\n", safe_frequency_khz);
@@ -247,15 +248,15 @@ void gppb_print(FILE* stream, const GlobalPstateParmBlock_t* gppb, uint32_t  dum
     for (s = 0 ; s < NUM_VPD_PTS_SET; s++)
     {
         fprintf(stream, "\nVPD_Operating_Points(%s)\n", vpdOpSetStr[s]);
-        fprintf(stream, "\t%-10s %-8s %-9s %-7s %-7s %-7s %-15s %-15s %-15s %-15s %-15s %-15s %-15s %-15s\n",
-                "Point", " Pstate", "Freq(Mhz)", "Vdd(mV)",
+        fprintf(stream, "\t%-10s %-8s %-9s %-7s %-7s %-8s %-15s %-15s %-15s %-15s %-15s %-15s %-15s %-15s\n",
+                "Point", "Pstate", "Freq(Mhz)", "Vdd(mV)",
                 "Vcs(mV)", "Vmin(mV)",
                 "iddAcTDP(10mA)", "iddDcTDP(10mA)", "iddAcRDP(10mA)", "iddDcRDP(10mA)",
                 "icsAcTDP(10mA)", "icsDcTDP(10mA)", "icsAcRDP(10mA)", "icsDcRDP(10mA)");
 
         for (p = 0; p < NUM_PV_POINTS; p++)
         {
-            fprintf(stream, "\t%-10s %-8d %-9d %-7d %-7d %-7d %-15d %-15d %-15d %-15d %-15d %-15d %-15d %-15d\n",
+            fprintf(stream, "\t%-10s %-8d %-9d %-7d %-7d %-8d %-15d %-15d %-15d %-15d %-15d %-15d %-15d %-15d\n",
                     vpdPvStr[p],
                     gppb->operating_points_set[vpdOpSet[s]][vpdPv[p]].pstate,
                     revle32(gppb->operating_points_set[vpdOpSet[s]][vpdPv[p]].frequency_mhz),
@@ -737,25 +738,95 @@ void oppb_print(FILE* stream, OCCPstateParmBlock_t const* i_oppb)
     strcat(l_buffer, l_temp_buffer);
     fprintf(stream, "%s\n", l_buffer);
 
-    fprintf(stream, "Frequency_Minumum(kHz):      0x%04X (%3d)\n",
+    fprintf(stream, "Frequencies:\n");
+    fprintf(stream, "  %-28s : 0x%04X (%3d)\n",
+            "Frequency Minumum (kHz)",
             revle32(i_oppb->frequency_min_khz),
             revle32(i_oppb->frequency_min_khz));
 
-    fprintf(stream, "Frequency_Maximum(kHz):      0x%04X (%3d)\n",
+    fprintf(stream, "  %-28s : 0x%04X (%3d)\n",
+            "Frequency Maximum (kHz)",
             revle32(i_oppb->frequency_max_khz),
             revle32(i_oppb->frequency_max_khz));
 
-    fprintf(stream, "Frequency_Step(kHz):         0x%04X (%3d)\n",
+    fprintf(stream, "  %-28s : 0x%04X (%3d)\n",
+            "Frequency Ceiling (kHz)",
+            revle32(i_oppb->frequency_ceiling_khz),
+            revle32(i_oppb->frequency_ceiling_khz));
+
+    fprintf(stream, "  %-28s : 0x%04X (%3d)\n",
+            "Frequency Step (kHz)",
             revle32(i_oppb->frequency_step_khz),
             revle32(i_oppb->frequency_step_khz));
 
-    fprintf(stream, "Pstate_of_Minimum_Frequency: 0x%02X (%3d)\n",
+    fprintf(stream, "  %-28s : 0x%04X (%3d)\n",
+            "Frequency Minimum (Pstate)",
             revle32(i_oppb->pstate_min),
             revle32(i_oppb->pstate_min));
 
-    fprintf(stream, "Nest_Frequency(MHz):         0x%08X (%10d)\n",
+    fprintf(stream, "  %-28s : 0x%04X (%3d)\n",
+            "Frequency OCC Complex (MHz)",
             revle32(i_oppb->occ_complex_frequency_mhz),
             revle32(i_oppb->occ_complex_frequency_mhz));
+
+    fprintf(stream, "Attributes:\n");
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "pstates_enabled",
+            i_oppb->attr.fields.pstates_enabled);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "resclk_enabled",
+            i_oppb->attr.fields.resclk_enabled);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "wof_enabled",
+            i_oppb->attr.fields.wof_enabled);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "wof_disable_vdd",
+            i_oppb->attr.fields.wof_disable_vdd);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "wof_disable_vcs",
+            i_oppb->attr.fields.wof_disable_vcs);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "wof_disable_io",
+            i_oppb->attr.fields.wof_disable_io);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "wof_disable_amb",
+            i_oppb->attr.fields.wof_disable_amb);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "wof_disable_vratio",
+            i_oppb->attr.fields.wof_disable_vratio);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "dds_enabled",
+            i_oppb->attr.fields.dds_enabled);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "ocs_enabled",
+            i_oppb->attr.fields.ocs_enabled);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "underv_enabled",
+            i_oppb->attr.fields.underv_enabled);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "overv_enabled",
+            i_oppb->attr.fields.overv_enabled);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "throttle_control_enabled",
+            i_oppb->attr.fields.throttle_control_enabled);
+
+    fprintf(stream, "  %-28s : %1d\n",
+            "rvrm_enabled",
+            i_oppb->attr.fields.rvrm_enabled);
+
 
     fprintf(stream, "OCC PSTATE PARAMETER END@ %p\n", i_oppb);
     fprintf(stream, "\n");
@@ -1119,7 +1190,7 @@ iddq_print(const IddqTable_t* i_iddqt)
     for (i = 0; i < MAXIMUM_EQ_SETS; i++)
     {
         IDDQ_TRACE ("  IDDQ all good cores ON and good caches ON in EQ ", IDDQ_QUAD_SIZE);
-        sprintf(l_buffer_str, "EQ%d:", i);
+        sprintf(l_buffer_str, "EQ%d:  ", i);
         strcat(l_line_str, l_buffer_str);
 
         for (j = 0; j < IDDQ_MEASUREMENTS; j++)
@@ -1164,7 +1235,7 @@ iddq_print(const IddqTable_t* i_iddqt)
     for (i = 0; i < MAXIMUM_EQ_SETS; i++)
     {
         IDDQ_TRACE ("  ICSQ all good cores ON and good caches ON in EQ ", IDDQ_QUAD_SIZE);
-        sprintf(l_buffer_str, "EQ%d:", i);
+        sprintf(l_buffer_str, "EQ%d:  ", i);
         strcat(l_line_str, l_buffer_str);
 
         for (j = 0; j < IDDQ_MEASUREMENTS; j++)
