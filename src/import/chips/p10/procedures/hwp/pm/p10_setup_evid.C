@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -706,10 +706,24 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 
 {
     fapi2::buffer<uint64_t> l_data64;
+    uint8_t l_mask_restore = 0;
+    using namespace scomt::proc;
 
     // Only change the DPLL if the values are non-zero
     do
     {
+        // save original mask value, to be restored later
+        FAPI_TRY( fapi2::getScom( i_target, TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG, l_data64 ),
+                  "Failed To Write PERV_SLAVE_CONFIG_REG" );
+
+        l_data64.extractToRight < P10_20_TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
+                                P10_20_TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN > ( l_mask_restore );
+
+        l_data64.insertFromRight < P10_20_TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
+                                 P10_20_TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN > ( l_mask_restore | 0x01 );
+
+        FAPI_TRY( fapi2::putScom( i_target, TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG, l_data64 ),
+                  "Failed To Write PERV_SLAVE_CONFIG_REG" );
 
         FAPI_TRY(fapi2::getScom(i_target, NEST_DPLL_FREQ, l_data64),
                  "ERROR: Failed to read for EQ_QPPM_DPLL_FREQ");
@@ -734,6 +748,23 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 
         FAPI_TRY(fapi2::putScom(i_target, NEST_DPLL_FREQ, l_data64),
                  "ERROR: Failed to write for EQ_QPPM_DPLL_FREQ");
+
+        // clear sticky PLL unlock indicator before unmasking reporting
+        // register is WCLEAR
+        l_data64.flush<0>().insertFromRight< TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_PLL_UNLOCK_ERROR,
+                       TP_TPCHIP_NET_PCBSLPERV_ERROR_REG_PLL_UNLOCK_ERROR_LEN > ( 0x01 );
+        FAPI_TRY( fapi2::putScom( i_target, TP_TPCHIP_NET_PCBSLPERV_ERROR_REG, l_data64 ),
+                  "Failed to Write PERV_ERROR_REG");
+
+        // re-enable error reporting
+        FAPI_TRY( fapi2::getScom( i_target, TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG, l_data64 ),
+                  "Failed To Read PERV_SLAVE_CONFIG_REG" );
+
+        l_data64.insertFromRight< P10_20_TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS,
+                                  P10_20_TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG_CFG_MASK_PLL_ERRS_LEN > ( l_mask_restore );
+
+        FAPI_TRY( fapi2::putScom( i_target, TP_TPCHIP_NET_PCBSLPERV_SLAVE_CONFIG_REG, l_data64 ),
+                  "Failed To Write PERV_SLAVE_CONFIG_REG" );
     }
     while (0);
 
