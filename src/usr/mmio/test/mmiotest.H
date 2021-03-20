@@ -66,6 +66,7 @@ class MmioTest : public CxxTest::TestSuite
     {
         TS_INFO("testExplrMMIO> Start" );
 
+#if 0 // TODO: re-enable the test
         errlHndl_t l_err = nullptr;
         uint32_t regdata4 = 0;
         size_t op_size = 0;
@@ -270,6 +271,7 @@ class MmioTest : public CxxTest::TestSuite
 
         // << atomic section
         mutex_unlock(l_mutex);
+#endif
         TS_INFO("testExplrMMIO> Done");
     };
 };
