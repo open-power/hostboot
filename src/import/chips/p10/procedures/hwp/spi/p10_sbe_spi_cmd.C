@@ -104,15 +104,15 @@ fapi2::ReturnCode p10_spi_clock_init (
         // known to work.
         if (i_spiHandle.engine == SPI_ENGINE_TPM)
         {
-            // SCK_CLOCK_DIVIDER: 0x015
+            // SCK_CLOCK_DIVIDER: 0x00A
             //      PAU_freq = 0x0855 MHz in Denali MRW
             //      spi_clock_freq = 24 MHz
-            //      PIB_frequency = PAU_freq / 2
+            //      PIB_frequency = PAU_freq / 4
             //      divider = ( PIB_frequency / (spi_clock_freq * 2) ) - 1
             // SCK_RECEIVE_DELAY: 0x40
             // SCK_ECC_SPIMM_ADDR_CORR_DIS: 0x1  no_ecc_address_correction
             // SCK_ECC_CONTROL: 0x01  transparent_read
-            data64 = 0x0154000A00000000ULL;
+            data64 = 0x00A4000A00000000ULL;
             FAPI_TRY(putScom(i_spiHandle.target_chip, clockRegAddr, data64));
         }
     }
