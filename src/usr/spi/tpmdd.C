@@ -386,44 +386,17 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
             // If it is set, then use the presence value that the service processor found
             else
             {
-                uint64_t l_securitySwitchValue = 0;
-                pError = SECUREBOOT::getSecuritySwitch(l_securitySwitchValue, tpmInfo.spiTarget);
-                if (pError)
+                pError = TRUSTEDBOOT::checkTdpBit(i_pTpm);
+                if(pError)
                 {
-                    TRACFCOMP(g_trac_tpmdd, ERR_MRK
-                              "tpmPresence: Unable to read the Security Switch Register on "
-                              "procTarget HUID=0x%.08X, the SPI master of TPM with HUID=0x%.08X"
-                              TRACE_ERR_FMT,
-                              get_huid(tpmInfo.spiTarget),
-                              get_huid(i_pTpm),
-                              TRACE_ERR_ARGS(pError));
-                    break;
-                }
-
-                TRACDCOMP(g_trac_tpmdd,INFO_MRK
-                              "tpmPresence: procTarget HUID=0x%.08X (SPI master of TPM with "
-                              "HUID=0x%.08X): security switch value = 0x%016lX",
-                              get_huid(tpmInfo.spiTarget),
-                              get_huid(i_pTpm),
-                              l_securitySwitchValue);
-
-                if ((l_securitySwitchValue &
-                     static_cast<uint64_t>(SECUREBOOT::ProcSecurity::TDPBit)) != 0)
-                {
-                    TRACFCOMP(g_trac_tpmdd,INFO_MRK
-                              "tpmPresence: TPM with HUID=0x%08X has the TDPBit set in its "
-                              "SPI master proc (HUID 0x%08X): Security Switch=0x%.16llX. "
-                              "Temporarily using presence value from service processor.",
-                              get_huid(i_pTpm),
-                              get_huid(tpmInfo.spiTarget),
-                              l_securitySwitchValue);
-
                     // Will evaluate this situation later in the IPL.
                     // For now use the presence value that the service processor found.
                     const auto sp_presence =
                       i_pTpm->getAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>();
                     present =
                       sp_presence == TARGETING::FOUND_PRESENT_BY_SP_FOUND ? true : false;
+                    TRACFCOMP(g_trac_tpmdd,INFO_MRK"tpmPresence: TPM Deconfigure Protect (TDP) bit is set in the status register. Using the SP's TPM presence state (%s functional)",
+                              present ? "" : "not");
                     break;
                 }
             }
@@ -554,90 +527,104 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
 
     if(pError)
     {
-        // We cannot rely on ATTR_TPM_ROLE to be set correctly at the time
-        // of presence detection so match the spiTarget
-        TARGETING::Target* l_pMasterProcTarget = nullptr;
-        TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
-        assert(l_pMasterProcTarget != nullptr,
-              "masterProcChipTargetHandle returned nullptr when targeting service should be available");
-        // If this is the primary TPM and a TPM is required to boot the system,
-        // then escalate TPM presence failure as an unrecoverable error log, and
-        // link its PLID to a new log explicitly indicating the TPM was not
-        // detected properly.
-        if(tpmInfo.spiTarget == l_pMasterProcTarget &&
-           tpmRequired)
+        // There was an error of some kind, so TPM may not be present.
+        // If SP indicated that it didn't detect TPM, mark it not present and
+        // delete the error.
+        const auto l_spPresenceState = i_pTpm->getAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>();
+        if(l_spPresenceState != TARGETING::FOUND_PRESENT_BY_SP_FOUND)
         {
-            pError->collectTrace(TPMDD_COMP_NAME);
-            pError->collectTrace(SECURE_COMP_NAME);
-            pError->collectTrace(TRBOOT_COMP_NAME);
-            pError->collectTrace(SPI_COMP_NAME);
-
-            ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
-
-            const auto original_eid  = pError->eid();
-            const auto original_plid = pError->plid();
-            pError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-            // We never want to gard a TPM for failing presence detection
-            // so remove any gard elemets of the error log associated with
-            // this TPM prior to commiting
-            pError->setGardType(i_pTpm, HWAS::GARD_NULL);
-            errlCommit(pError,TPMDD_COMP_ID);
-
-            /*@
-             * @errortype
-             * @moduleid   TPMDD_TPMPRESENCE
-             * @reasoncode TPM_RC_TPM_NOT_DETECTED
-             * @userdata1  TPM HUID
-             * @devdesc    The system's "TPM Required" policy is set to
-             *     "TPM Required" and a TPM that was expected to be present was
-             *     not detected properly.  The TPM in question will eventually
-             *     be flagged as TPM_UNUSABLE for redundancy calculations,
-             *     Possible causes: (1) absent or improperly seated TPM,
-             *     (2) TPM hardware failure, (3) firmware bug, (4) incorrect TPM
-             *     part, (5) SPI failure, (6) processor failure,
-             *     See earlier error logs with same PLID for additional details.
-             * @custdesc   A trusted platform module (TPM) that was expected
-             *     to be present was not detected properly
-             */
-            pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                TPMDD_TPMPRESENCE,
-                TPM_RC_TPM_NOT_DETECTED,
-                get_huid(i_pTpm),
-                0,
-                ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-            pError->plid(original_plid);
-            ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
-
-            TRACFCOMP(g_trac_tpmdd, ERR_MRK
-                "tpmPresence: Due to Error eid=0x%.8X plid=0x%.8X involving "
-                "TPM with HUID=0x%08X, committing Unrecoverable Error "
-                "eid=0x%.8X with same plid=0x%.8X",
-                original_eid, original_plid, TARGETING::get_huid(i_pTpm),
-                pError->eid(), pError->plid());
-
-            // Hardware/Procedure callouts/trace should have been added to the
-            // original log but the main HW/SW callouts/traces are replicated here
-            // just in case.
-            pError->addHwCallout(i_pTpm,
-                                 HWAS::SRCI_PRIORITY_HIGH,
-                                 HWAS::DECONFIG,
-                                 HWAS::GARD_NULL);
-
-            pError->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                        HWAS::SRCI_PRIORITY_LOW);
-
-            pError->collectTrace(TPMDD_COMP_NAME);
-            pError->collectTrace(SECURE_COMP_NAME);
-            pError->collectTrace(TRBOOT_COMP_NAME);
-            pError->collectTrace(SPI_COMP_NAME);
-
-            errlCommit(pError,TPMDD_COMP_ID);
+            present = false;
+            delete pError;
+            pError = nullptr;
         }
         else
         {
-            delete pError;
-            pError = nullptr;
+            // SP did detect the TPM, so propagate the error if necessary.
+            // We cannot rely on ATTR_TPM_ROLE to be set correctly at the time
+            // of presence detection so match the spiTarget
+            TARGETING::Target* l_pMasterProcTarget = nullptr;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+            assert(l_pMasterProcTarget != nullptr,
+                   "masterProcChipTargetHandle returned nullptr when targeting service should be available");
+            // If this is the primary TPM and a TPM is required to boot the system,
+            // then escalate TPM presence failure as an unrecoverable error log, and
+            // link its PLID to a new log explicitly indicating the TPM was not
+            // detected properly.
+            if(tpmInfo.spiTarget == l_pMasterProcTarget &&
+               tpmRequired)
+            {
+                pError->collectTrace(TPMDD_COMP_NAME);
+                pError->collectTrace(SECURE_COMP_NAME);
+                pError->collectTrace(TRBOOT_COMP_NAME);
+                pError->collectTrace(SPI_COMP_NAME);
+
+                ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
+
+                const auto original_eid  = pError->eid();
+                const auto original_plid = pError->plid();
+                pError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                // We never want to gard a TPM for failing presence detection
+                // so remove any gard elemets of the error log associated with
+                // this TPM prior to commiting
+                pError->setGardType(i_pTpm, HWAS::GARD_NULL);
+                errlCommit(pError,TPMDD_COMP_ID);
+
+                /*@
+                 * @errortype
+                 * @moduleid   TPMDD_TPMPRESENCE
+                 * @reasoncode TPM_RC_TPM_NOT_DETECTED
+                 * @userdata1  TPM HUID
+                 * @devdesc    The system's "TPM Required" policy is set to
+                 *     "TPM Required" and a TPM that was expected to be present was
+                 *     not detected properly.  The TPM in question will eventually
+                 *     be flagged as TPM_UNUSABLE for redundancy calculations,
+                 *     Possible causes: (1) absent or improperly seated TPM,
+                 *     (2) TPM hardware failure, (3) firmware bug, (4) incorrect TPM
+                 *     part, (5) SPI failure, (6) processor failure,
+                 *     See earlier error logs with same PLID for additional details.
+                 * @custdesc   A trusted platform module (TPM) that was expected
+                 *     to be present was not detected properly
+                 */
+                pError = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    TPMDD_TPMPRESENCE,
+                    TPM_RC_TPM_NOT_DETECTED,
+                    get_huid(i_pTpm),
+                    0,
+                    ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                pError->plid(original_plid);
+                ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
+
+                TRACFCOMP(g_trac_tpmdd, ERR_MRK
+                    "tpmPresence: Due to Error eid=0x%.8X plid=0x%.8X involving "
+                    "TPM with HUID=0x%08X, committing Unrecoverable Error "
+                    "eid=0x%.8X with same plid=0x%.8X",
+                    original_eid, original_plid, TARGETING::get_huid(i_pTpm),
+                    pError->eid(), pError->plid());
+
+                // Hardware/Procedure callouts/trace should have been added to the
+                // original log but the main HW/SW callouts/traces are replicated here
+                // just in case.
+                pError->addHwCallout(i_pTpm,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DECONFIG,
+                                     HWAS::GARD_NULL);
+
+                pError->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                            HWAS::SRCI_PRIORITY_LOW);
+
+                pError->collectTrace(TPMDD_COMP_NAME);
+                pError->collectTrace(SECURE_COMP_NAME);
+                pError->collectTrace(TRBOOT_COMP_NAME);
+                pError->collectTrace(SPI_COMP_NAME);
+
+                errlCommit(pError,TPMDD_COMP_ID);
+            }
+            else
+            {
+                delete pError;
+                pError = nullptr;
+            }
         }
     }
 
