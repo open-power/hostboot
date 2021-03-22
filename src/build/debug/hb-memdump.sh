@@ -34,10 +34,12 @@ usage()
     echo "    STATE should be a two nibble hex value corresponding to the"
     echo "    MemSize enumeration in <kernel/memstate.H> or the ASCII strings"
     echo "    'discover', 'discovernotrace', or 'limit'. (defaults discover)"
-    echo "    Node # (0,1,2,3)  (defaults Node 0)"
+    echo "    Node # (0,1,2,3)  (defaults Node 0, if non-0 node is specified, must include STATE parameter as well) "
     echo "    Chunk Size is a decimal value representing the max getmempba size (defaults 1MB)"
     echo
-    echo "    Note: it is usually fastest to write output to /tmp/"
+    echo "    Notes:"
+    echo "       It is usually fastest to write output to /tmp/ on the BMC."
+    echo "       For FSPs the /tmp/ space is limited so use /maint/ if /nfs/ is not available."
     exit 0
 }
 
@@ -86,11 +88,10 @@ set_total_dump_size()
 
 set_hrmor()
 {
-    node=$1
     # HRMOR is stored in bits 4:51 of core scratch 1
     # See memstate.H for details.
     # Multicast to all good cores.
-    HRMOR=`getscom pu 4602F487 4 48 -p0 -n$node | grep 0x | sed 's/.*0x/0x/'`
+    HRMOR=`getscom pu 4602F487 4 48 -p0 -n${NODE} | grep 0x | sed 's/.*0x/0x/'`
 
     # if there was an error reading the hrmor it will
     # have multi-line output, set it to a default
@@ -104,7 +105,7 @@ set_hrmor()
       # see NODE_OFFSET in memorymap.H
       HB_BASE_HRMOR=`expr 64 \* 1024 \* 1024 \* 1024 \* 1024`
       # Calculate HRMOR (in decimal).
-      HRMOR=`expr ${HB_BASE_HRMOR} \* ${node} + ${HB_OFFSET}`
+      HRMOR=`expr ${HB_BASE_HRMOR} \* ${NODE} + ${HB_OFFSET}`
     else
       #convert string to a int
       HRMOR=$(( HRMOR ))
@@ -174,13 +175,13 @@ dump()
     seekcount=$((addr / blocksize))
 
     rm /tmp/memdumpoutput.tmp 2> /dev/null && touch /tmp/memdump.part
-    printf "${GETMEM_COMMAND}  ${memaddr_h} ${size} -fb /tmp/memdump.part \n\n" > ${LOG_LOCATION}
-    `${GETMEM_COMMAND} ${memaddr_h} ${size} -fb /tmp/memdump.part >> ${LOG_LOCATION} 2>&1`
+    printf "${GETMEM_COMMAND}  ${memaddr_h} ${size} -n${NODE} -fb /tmp/memdump.part \n\n" > ${LOG_LOCATION}
+    `${GETMEM_COMMAND} ${memaddr_h} ${size} -n ${NODE} -fb /tmp/memdump.part >> ${LOG_LOCATION} 2>&1`
     fs_mempba=`filesize "/tmp/memdump.part"`
 
     if [ ${fs_mempba} -eq 0 ]; then
         printf "\nERROR WITH FOLLOWING COMMAND : \n\n\t"
-        printf "${GETMEM_COMMAND} ${memadd_h} ${size} -fb /tmp/memdump.part"
+        printf "${GETMEM_COMMAND} ${memadd_h} ${size} -n${NODE} -fb /tmp/memdump.part"
         printf "\nSee failure output and memory output at ${LOG_LOCATION}"
         exit 1
     else
@@ -249,7 +250,7 @@ discover()
     descriptor_h=`printf "%08x" ${descriptor_addr}`
 
     # Extract descriptor base address.
-    state_base_h=`${GETMEM_COMMAND} ${descriptor_h} 8 -ox -quiet -n$NODE  | tail -n1`
+    state_base_h=`${GETMEM_COMMAND} ${descriptor_h} 8 -ox -quiet -n${NODE}  | tail -n1`
     state_base=`printf "%d" ${state_base_h}`
 
     # Calculate offset for the state variable within the descriptor.
@@ -259,7 +260,7 @@ discover()
 
     # Read state.
     #echo "READ STATE: getmempba ${state_addr_h} 1 -ox -quiet | tail -n1 | sed \"s/0x//\""
-    STATE=`${GETMEM_COMMAND} ${state_addr_h} 1 -ox -quiet | tail -n1 | sed "s/0x//"`
+    STATE=`${GETMEM_COMMAND} ${state_addr_h} 1 -ox -quiet -n${NODE} | tail -n1 | sed "s/0x//"`
 
 }
 
@@ -311,7 +312,7 @@ DISPLAY=1
 LOG_LOCATION="/tmp/memdumpoutput.tmp"
 
 # Set the HRMOR variable based on the NODE set above
-set_hrmor ${NODE}
+set_hrmor
 
 printf "\nDumping hostboot memory for NODE%d where HRMOR is 0x%X. " ${NODE} ${HRMOR}
 
