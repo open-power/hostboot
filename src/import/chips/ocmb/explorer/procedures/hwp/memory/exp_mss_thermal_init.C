@@ -67,7 +67,7 @@ extern "C"
         // Attribute is 0 == enabled, 1 == disabled (enabled by default (0), make sure the disable is not set)
         if ((l_interval_read_dis == fapi2::ENUM_ATTR_MSS_OCMB_DISABLE_THERM_INIT_READ_ENABLED))
         {
-            FAPI_TRY(mss::exp::sensor_interval_read(i_target),
+            FAPI_TRY(mss::exp::sensor_interval_read(i_target, mss::exp::thermal::sensor_selection_override::NO_OVERRIDE),
                      "Error performing EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ operation on %s", mss::c_str(i_target));
         }
 

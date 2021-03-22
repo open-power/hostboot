@@ -53,9 +53,12 @@ namespace exp
 ///
 /// @brief Setup & perform sensor interval read
 /// @param[in] i_target OCMB chip
+/// @param[in] i_override_sensor value of sensor selection override from procedure wrapper
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode sensor_interval_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode sensor_interval_read(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const thermal::sensor_selection_override i_override_sensor)
 {
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
@@ -74,7 +77,7 @@ fapi2::ReturnCode sensor_interval_read(const fapi2::Target<fapi2::TARGET_TYPE_OC
             std::vector<uint8_t> l_rsp_data;
 
             // Sets up EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ cmd params
-            FAPI_TRY(mss::exp::setup_sensor_interval_read_cmd_params(l_port, l_cmd_sensor));
+            FAPI_TRY(mss::exp::setup_sensor_interval_read_cmd_params(l_port, i_override_sensor, l_cmd_sensor));
 
             // Enable sensors
             FAPI_TRY( mss::exp::ib::putCMD(i_target, l_cmd_sensor),
@@ -95,11 +98,13 @@ fapi_try_exit:
 ///
 /// @brief host_fw_command_struct structure setup
 /// @param[in] i_port PORT target
+/// @param[in] i_override_sensor value of sensor selection override from procedure wrapper
 /// @param[out] o_cmd the command parameters to set
 /// @return FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode setup_sensor_interval_read_cmd_params(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+    const thermal::sensor_selection_override i_override_sensor,
     host_fw_command_struct& o_cmd)
 {
     memset(&o_cmd, 0, sizeof(host_fw_command_struct));
@@ -128,7 +133,7 @@ fapi2::ReturnCode setup_sensor_interval_read_cmd_params(
     o_cmd.cmd_work_area = 0;
 
     // o_cmd.command_argument
-    FAPI_TRY(thermal::setup_cmd_args(i_port, o_cmd));
+    FAPI_TRY(thermal::setup_cmd_args(i_port, i_override_sensor, o_cmd));
 
     // Print out relevant command information
     FAPI_DBG("%s cmd_id:     0x%02X", mss::c_str(i_port), o_cmd.cmd_id);
@@ -210,11 +215,13 @@ fapi_try_exit:
 ///
 /// @brief Set the up cmd args for EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ
 /// @param[in] i_port MEM_PORT target for attribute access
+/// @param[in] i_override_sensor value of sensor selection override from procedure wrapper
 /// @param[out] o_cmd host_fw_commmand_struct to setup command args for
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode setup_cmd_args(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> i_port,
+    const sensor_selection_override i_override_sensor,
     host_fw_command_struct& o_cmd)
 {
     // Sanity memset
@@ -257,7 +264,8 @@ fapi2::ReturnCode setup_cmd_args(
                                                 l_secondary_sensor_location,
                                                 l_primary_sensor_i2c_addr,
                                                 l_secondary_sensor_i2c_addr,
-                                                l_airflow_direction);
+                                                l_airflow_direction,
+                                                i_override_sensor);
 
         // Construct settings object
         FAPI_TRY(thermal::thermal_sensor_settings::get_settings(
@@ -297,7 +305,8 @@ fapi2::ReturnCode setup_cmd_args(
                                                 l_secondary_sensor_location,
                                                 l_primary_sensor_i2c_addr,
                                                 l_secondary_sensor_i2c_addr,
-                                                l_airflow_direction);
+                                                l_airflow_direction,
+                                                i_override_sensor);
 
         // Construct settings object
         FAPI_TRY(thermal::thermal_sensor_settings::get_settings(
@@ -405,6 +414,7 @@ fapi_try_exit:
 /// @param[in] i_primary_sensor_i2c_addr value of ATTR_MEM_EFF_THERM_SENSOR_X_I2C_ADDR
 /// @param[in] i_secondary_sensor_i2c_addr value of ATTR_MEM_EFF_THERM_SENSOR_X_SECOND_I2C_ADDR
 /// @param[in] i_airflow_direction value of ATTR_MSS_MRW_DIMM_SLOT_AIRFLOW
+/// @param[in] i_override_sensor value of sensor selection override from procedure wrapper
 /// @return I2C address of selected sensor
 ///
 uint8_t select_ext_sensor(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
@@ -413,13 +423,21 @@ uint8_t select_ext_sensor(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_ta
                           const uint8_t i_secondary_sensor_location,
                           const uint8_t i_primary_sensor_i2c_addr,
                           const uint8_t i_secondary_sensor_i2c_addr,
-                          const uint8_t i_airflow_direction)
+                          const uint8_t i_airflow_direction,
+                          const sensor_selection_override i_override_sensor)
 {
     if (i_secondary_sensor_avail == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_SECOND_AVAIL_NOT_AVAILABLE)
     {
         FAPI_DBG("%s Selecting primary sensor at address 0x%02X since no secondary sensor available",
                  mss::c_str(i_target), i_primary_sensor_i2c_addr);
         return i_primary_sensor_i2c_addr;
+    }
+
+    // Check override first
+    if (i_override_sensor != sensor_selection_override::NO_OVERRIDE)
+    {
+        return (i_override_sensor == sensor_selection_override::USE_PRIMARY_SENSOR) ?
+               i_primary_sensor_i2c_addr : i_secondary_sensor_i2c_addr;
     }
 
     // Note: Sensor location enums are encoded as follows so the math works out:
