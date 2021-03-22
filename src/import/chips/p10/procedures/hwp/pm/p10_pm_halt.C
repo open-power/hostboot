@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,9 +58,12 @@
 #include <p10_pm_hcd_flags.h>
 #include <p10_core_special_wakeup.H>
 #include <multicast_group_defs.H>
+#include <p10_pm_occ_firinit.H>
 
+#include <p10_scom_proc.H>
 #include <p10_scom_eq.H>
 using namespace scomt::eq;
+using namespace scomt::proc;
 // -----------------------------------------------------------------------------
 // Global variables
 // -----------------------------------------------------------------------------
@@ -82,6 +85,31 @@ fapi2::ReturnCode p10_pm_halt(
     FAPI_IMP(">> p10_pm_halt");
 
     fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::ATTR_PM_MALF_ALERT_ENABLE_Type l_malfEnabled =
+        fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_FALSE;
+    bool l_malfAlert = false;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_ALERT_ENABLE,
+                             FAPI_SYSTEM, l_malfEnabled));
+
+    if (l_malfEnabled == fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_TRUE)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_RW, l_data64),
+                 "Error reading TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_RW to check for Malf Alert");
+
+        if (l_data64.getBit<p10hcd::PM_CALLOUT_ACTIVE>())
+        {
+            l_malfAlert = true;
+            FAPI_IMP("OCC FLAG2 Bit 28 [PM_CALLOUT_ACTIVE] Set: In Malf Path");
+        }
+
+        l_data64.flush<0>().setBit<p10hcd::STOP_RECOVERY_TRIGGER_ENABLE>();
+        FAPI_TRY(fapi2::putScom(i_target,
+                                TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_CLEAR,
+                                l_data64));
+    }
 
     //  ************************************************************************
     //  Mask the OCC FIRs as errors can occur in what follows
@@ -173,6 +201,34 @@ fapi2::ReturnCode p10_pm_halt(
     FAPI_DBG("Executing p10_pm_pss_init to halt P2S and HWC logic");
     FAPI_EXEC_HWP(l_rc, p10_pm_pss_init, i_target, pm::PM_HALT);
     FAPI_TRY(l_rc, "ERROR: Failed to halt PSS & HWC");
+
+
+    //  ************************************************************************
+    //  Trigger OCC LFIR so that bad ec/ex/eq are updated for pm_init and prd
+    //  gets a chance to deconfig cores and callout hw and grab ffdc to logs
+    //  This should be the last phase in pm reset
+    //  ************************************************************************
+    if (l_malfAlert == true)
+    {
+        const uint32_t l_OCC_LFIR_BIT_STOP_RCV_NOTIFY_PRD = 3;
+
+        pmFIR::PMFir <pmFIR::FIRTYPE_OCC_LFIR, fapi2::TARGET_TYPE_PROC_CHIP> l_occFir(i_target);
+        FAPI_TRY(l_occFir.get(pmFIR::REG_ALL),
+                 "ERROR: Failed to get the OCC FIR values");
+        FAPI_TRY(l_occFir.setRecvAttn(l_OCC_LFIR_BIT_STOP_RCV_NOTIFY_PRD),
+                 FIR_REC_ATTN_ERROR);
+        // Not doing the restoreSavedMask, as this is a special case between reset->init
+        // and pm init handles it
+        FAPI_TRY(l_occFir.put(),
+                 "ERROR: Failed to write OCC LFIR setting for STOP_RCV_NOTIFY_PRD");
+
+        l_data64.flush<0>();
+        l_data64.setBit(l_OCC_LFIR_BIT_STOP_RCV_NOTIFY_PRD);
+
+        FAPI_IMP ("p10_pm_halt: Signalling PRD via OCCLFIR Bit 3 [STOP_RCV_NOTIFY_PRD]!");
+        FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_OR, l_data64),
+                 "ERROR: Failed to write to OCC Flag Register");
+    }
 
 fapi_try_exit:
 

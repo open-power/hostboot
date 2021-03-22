@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,8 +56,11 @@
 // Includes
 // -----------------------------------------------------------------------------
 #include <p10_pm_start.H>
+#include <p10_pm_hcd_flags.h>
 #include <p10_core_special_wakeup.H>
 #include <multicast_group_defs.H>
+#include <p10_scom_proc.H>
+using namespace scomt::proc;
 
 // Function prototypes
 // -----------------------------------------------------------------------------
@@ -75,7 +78,11 @@ fapi2::ReturnCode p10_pm_start(
     FAPI_INF(">>>>>>>>> p10_pm_start...");
 
     fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_data64;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
+    fapi2::ATTR_PM_MALF_ALERT_ENABLE_Type malfAlertEnable =
+        fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_FALSE;
     //  ************************************************************************
     //  Issue init to OCB
     //  ************************************************************************
@@ -184,9 +191,29 @@ fapi2::ReturnCode p10_pm_start(
     FAPI_TRY(l_rc, "ERROR: Failed to start OCC PPC405");
     FAPI_TRY(p10_pm_glob_fir_trace(i_target, "After OCC PPC405 init"));
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_MALF_ALERT_ENABLE,
+                           FAPI_SYSTEM,
+                           malfAlertEnable),
+             "Error from FAPI_ATTR_GET for attribute ATTR_PM_MALF_ALERT_ENABLE");
+    // Set the Malf Alert Enabled policy to OCCFLG2 reg bit 29
+    l_data64.flush<0>().setBit<p10hcd::STOP_RECOVERY_TRIGGER_ENABLE>();
+
+    if (malfAlertEnable ==
+        fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_TRUE)
+    {
+        FAPI_TRY(fapi2::putScom(i_target,
+                                TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_OR, l_data64));
+    }
+    else
+    {
+        FAPI_TRY(fapi2::putScom(i_target,
+                                TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_CLEAR,
+                                l_data64));
+    }
+
+    FAPI_IMP ("Malf Alert Policy Enabled: %d", malfAlertEnable);
 
 fapi_try_exit:
-
     return fapi2::current_err;
 }
 

@@ -116,6 +116,7 @@ enum PM_GPE_OCCFLG3_DEFS
     PM_COMPLEX_SUSPENDED                    = 19,  // Leaving a generic for use in p10_pm_suspend.
     XGPE_ZERO_CORE_CHIP                     = 20,
     XGPE_HCODE_FAULT_STATE                  = 21,
+    STOP_RECOVERY_TRIGGER_ENABLE            = 26,
     CORE_THROT_INJECT_RESP                  = 27,
     CORE_THROT_INJECT_RESP_LEN              = 2,
     CORE_THROT_CONTIN_CHANGE_ENABLE         = 29,
