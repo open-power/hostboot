@@ -209,16 +209,14 @@ class ddimm_0_3
         }
 
         ///
-        /// @brief Traits for spare device LSB0
+        /// @brief Traits spare device LSB0
         ///
         /// @param[in] i_field field value
         /// @return true/false in specified range
         ///
         virtual bool check_spare_device_lsb0(const uint8_t i_field) const
         {
-            // Mask to ensure all bits except 4:5 in SPD spec (2:3 here) are not set for x4 device spare mapping
-            constexpr uint8_t SPARE_DEVICE_REVERSE_MASK = 0xCF;
-            return ((i_field & SPARE_DEVICE_REVERSE_MASK) == 0);
+            return true;
         }
 
         ///
@@ -229,7 +227,10 @@ class ddimm_0_3
         ///
         virtual bool check_spare_device_msb0(const uint8_t i_field) const
         {
-            return true;
+            // Mask to ensure all bits except 4:5 (which is 2:3 in SPD) are not set for x4 device spare mapping
+            // Allows only nibbles 10 and 11 to be spares as per Explorer config
+            constexpr uint8_t SPARE_DEVICE_REVERSE_MASK = 0xF3;
+            return ((i_field & SPARE_DEVICE_REVERSE_MASK) == 0);
         }
 
         ///
@@ -1150,21 +1151,21 @@ class ddimm_0_3
             uint8_t l_value = 0;
             uint8_t l_master_ranks_per_dimm = 0;
             uint8_t l_attr_enum_val = 0;
-            const uint8_t CHAN0_NIBBLE_4 = 4;
+            const uint8_t CHAN0_NIBBLE_10 = 2;
 
             // Update the values
-            FAPI_TRY(get_field_spd(iv_ocmb, F::SPARE_DEVICE_LSB0, i_spd, SET_DIMM_SPARE, l_value));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::SPARE_DEVICE_MSB0, i_spd, SET_DIMM_SPARE, l_value));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_spare_device_lsb0(l_value),
-                                  F::SPARE_DEVICE_LSB0.get_byte(i_spd),
+                                  check_spare_device_msb0(l_value),
+                                  F::SPARE_DEVICE_MSB0.get_byte(i_spd),
                                   l_value,
                                   SET_DIMM_SPARE,
-                                  "Spare Device Mapping Byte 0"));
+                                  "Spare Device Mapping Byte 1"));
 
             // Convert to attribute enum value
-            l_attr_enum_val = (l_value >> CHAN0_NIBBLE_4);
+            l_attr_enum_val = (l_value >> CHAN0_NIBBLE_10);
             FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(iv_dimm, l_master_ranks_per_dimm));
 
             for (uint8_t l_dimm_rank = 0; l_dimm_rank < l_master_ranks_per_dimm; ++l_dimm_rank)
