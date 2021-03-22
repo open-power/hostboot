@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,7 +109,7 @@ TodProc::~TodProc()
         iv_tod_node_data = nullptr;
     }
 
-    iv_iohsTargetList.clear();
+    iv_smpgroupTargetList.clear();
 
     TOD_EXIT("TodProc destructor");
 }
@@ -179,23 +179,23 @@ void TodProc::init()
     }
     iv_tod_node_data->i_children.clear();
 
-    iv_iohsTargetList.clear();
+    iv_smpgroupTargetList.clear();
 
     //Make a list of outgoing bus targets for this processor
     TARGETING::PredicateCTM
-        l_iohsCTM(TARGETING::CLASS_UNIT,TARGETING::TYPE_IOHS);
+        l_smpgroupCTM(TARGETING::CLASS_UNIT,TARGETING::TYPE_SMPGROUP);
 
-    TARGETING::TargetHandleList l_iohsTargetList;
+    TARGETING::TargetHandleList l_smpgroupTargetList;
 
     TARGETING::PredicateIsFunctional l_func;
-    TARGETING::PredicatePostfixExpr l_funcAndIohsFilter;
-    l_funcAndIohsFilter.push(&l_iohsCTM).push(&l_func).And();
+    TARGETING::PredicatePostfixExpr l_funcAndSmpgroupFilter;
+    l_funcAndSmpgroupFilter.push(&l_smpgroupCTM).push(&l_func).And();
 
-    TARGETING::targetService().getAssociated(iv_iohsTargetList,
+    TARGETING::targetService().getAssociated(iv_smpgroupTargetList,
             iv_procTarget,
             TARGETING::TargetService::CHILD,
             TARGETING::TargetService::ALL,
-            &l_funcAndIohsFilter);
+            &l_funcAndSmpgroupFilter);
 
     TOD_EXIT("init");
 
@@ -232,9 +232,9 @@ errlHndl_t TodProc::connect(
 
         TARGETING::TargetHandleList* l_pBusList = nullptr;
 
-        if(TARGETING::TYPE_IOHS == i_busChipUnitType)
+        if(TARGETING::TYPE_SMPGROUP == i_busChipUnitType)
         {
-            l_pBusList = &iv_iohsTargetList;
+            l_pBusList = &iv_smpgroupTargetList;
         }
         else
         {
@@ -247,7 +247,7 @@ errlHndl_t TodProc::connect(
         //From this proc (iv_procTarget), find if destination(i_destination)
         //has a connection via the bus type i_busChipUnitType :
 
-        //Step 1: Sequentially pick buses from iv_iohsTargetList
+        //Step 1: Sequentially pick buses from iv_smpgroupTargetList
         //Step 2: Get the peer target of the bus target found in the previous
         //step.
         //For the parent processor of PEER target and the parent processor
@@ -313,7 +313,7 @@ errlHndl_t TodProc::connect(
                     busPeer->getAttr<TARGETING::ATTR_HUID>(),
                     i_busChipUnitType);
 
-                //Determine the bus type as per our format, for eg IOHS0
+                //Determine the bus type as per our format, for eg SMPGROUP0
                 //ATTR_CHIP_UNIT gives the instance number of
                 //the bus and it has direct correspondance to
                 //the port no.
@@ -417,6 +417,14 @@ errlHndl_t TodProc::getBusPort(
                     l_errHndl);
                 break;
         }
+    }
+    else if (i_busChipUnitType == TARGETING::TYPE_SMPGROUP)
+    {
+        l_errHndl = getBusPort(TARGETING::TYPE_IOHS,
+                               i_busPort / 2, // IOHS chip number is
+                                              // the SMPGROUP chip
+                                              // number divided by 2
+                               o_busPort);
     }
     else
     {

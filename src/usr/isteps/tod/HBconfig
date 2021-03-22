@@ -1,0 +1,5 @@
+
+config ENABLE_TOD_REDUNDANCY
+    default y
+    help
+        Whether to initialize the secondary TOD topology.

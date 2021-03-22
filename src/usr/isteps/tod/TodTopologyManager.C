@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -299,7 +299,7 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
                 l_targetItr != l_targetsList.end();)
             {
                 l_errHdl = (*l_sourceItr)->connect(*l_targetItr,
-                                                   TARGETING::TYPE_IOHS,
+                                                   TARGETING::TYPE_SMPGROUP,
                                                    l_connected);
                 if(l_errHdl)
                 {
@@ -459,7 +459,7 @@ errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
             ++l_itr)
         {
             l_errHdl = l_pMDMT->connect(*l_itr,
-                                        TARGETING::TYPE_IOHS,
+                                        TARGETING::TYPE_SMPGROUP,
                                         l_connected);
             if(l_errHdl)
             {
@@ -685,7 +685,7 @@ errlHndl_t TodTopologyManager::wireProcsInSmpWrapMode(
                 l_targetItr != io_targetsList.end();)
             {
                 l_errHdl = (*l_sourceItr)->connect(*l_targetItr,
-                                                   TARGETING::TYPE_IOHS,
+                                                   TARGETING::TYPE_SMPGROUP,
                                                    l_connected);
                 if(l_errHdl)
                 {

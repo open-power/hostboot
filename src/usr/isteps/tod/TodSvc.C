@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,6 +167,7 @@ errlHndl_t TodSvc::todSetup()
         //Primary successfully configured
         TOD::setConfigStatus(TOD_PRIMARY,true);
 
+#ifdef CONFIG_ENABLE_TOD_REDUNDANCY
         //Build datastructures for secondary topology
         l_errHdl = TOD::buildTodDrawers(TOD_SECONDARY);
         if(l_errHdl)
@@ -207,6 +208,7 @@ errlHndl_t TodSvc::todSetup()
 
         //Secondary successfully configured
         TOD::setConfigStatus(TOD_SECONDARY,true);
+#endif
 
         //Need to call this again if the secondary topology got set up,
         //that would have updated more regs.
