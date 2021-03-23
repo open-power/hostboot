@@ -172,8 +172,9 @@ write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x3d0 $scratc
 
 # Scratch9:
 #   Set iohs<bucket>PllBucket (0:15) 4 bits/bucket : FREQ_PAU_MHZ=2400=0x0960
-#   Set mc<bucket>PllBucket (16:27) 3 bits/bucket : FREQ_OMI_MHZ=25600->bucket0
-(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x180*4 0x09600000 4 -b
+#   Set mc<bucket>PllBucket (16:27) 3 bits/bucket : FREQ_OMI_MHZ=21330->bucket2
+#   (see p10_frequency_buckets.H for bucket values)
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x180*4 0x09604920 4 -b
 
 # Scratch10: Set iohs<bucket>PllBucket (0:31) 4 bits/bucket
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x181*4 0x33333333 4 -b
