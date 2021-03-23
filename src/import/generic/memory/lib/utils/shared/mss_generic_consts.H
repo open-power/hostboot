@@ -949,7 +949,7 @@ enum rev : uint8_t
     GEN_SEC_MAX = V1_1,
     RDIMM_MAX = V1_1,
     LRDIMM_MAX = V1_2,
-    DDIMM_MAX = V0_4,
+    DDIMM_MAX = V1_0,
 };
 
 ///
