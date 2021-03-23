@@ -615,11 +615,20 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
             case TYPE_SMPGROUP:
             case TYPE_IOHS:
             {
+                Target* iohs_target = (l_targetType == TYPE_IOHS
+                                       ? &i_target
+                                       : getImmediateParentByAffinity(&i_target));
+
+                const auto iohs_config_mode = iohs_target->getAttr<ATTR_IOHS_CONFIG_MODE>();
+
+                const bool is_smp_link = ((iohs_config_mode == IOHS_CONFIG_MODE_SMPA)
+                                          || (iohs_config_mode == IOHS_CONFIG_MODE_SMPX));
+
                 // Get peer endpoint target
                 const Target* l_pDstTarget = i_target.getAttr<ATTR_PEER_TARGET>();
 
                 // If the target is valid
-                if (l_pDstTarget)
+                if (l_pDstTarget && l_targetType == TYPE_SMPGROUP)
                 {
                     HWAS_INF("_deconfigParentAssoc BUS peer: 0x%.8X",
                              get_huid(l_pDstTarget));
@@ -633,11 +642,8 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 if (l_targetType == TYPE_SMPGROUP)
                 { // If this is an SMPGROUP target, deconfigure the IOHS parent
                   // if it's in SMP mode and it has no other child SMPGROUPs
-                    const auto parent_config_mode
-                        = getImmediateParentByAffinity(&i_target)->getAttr<ATTR_IOHS_CONFIG_MODE>();
 
-                    if ((parent_config_mode == IOHS_CONFIG_MODE_SMPA)
-                        || (parent_config_mode == IOHS_CONFIG_MODE_SMPX))
+                    if (is_smp_link)
                     {
                         _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
                     }
