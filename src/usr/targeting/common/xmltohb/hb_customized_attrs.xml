@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -158,6 +158,11 @@
 
     <attribute>
           <id>ATTR_IOHS_CONFIG_MODE</id>
+          <global/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_OMI_REFCLOCK_SWIZZLE</id>
           <global/>
     </attribute>
 
