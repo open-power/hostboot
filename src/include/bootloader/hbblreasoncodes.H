@@ -107,6 +107,8 @@ namespace Bootloader
         RC_TPM_INIT_FAIL           = HBBL_COMP_ID | 0x23,  /**< Failed to init the TPM */
         RC_SPI_CLK_INIT_FAIL       = HBBL_COMP_ID | 0x24,  /**< Failed to init SPI clock for TPM engine */
         RC_TPM_PCR_EXTEND_FAIL     = HBBL_COMP_ID | 0x25,  /**< TPM PCR extend failed */
+        RC_SPI_RESET_FAIL          = HBBL_COMP_ID | 0x26,  /**< Failed to reset SPI enging */
+        RC_SPI_CLR_ERR_FAIL        = HBBL_COMP_ID | 0x27,  /**< Failed to clear SPI status errors */
 
         RC_TPM_INITIALIZE          = 0x100, /**< Special TPM RC that signals if TPM's been initialized already */
 

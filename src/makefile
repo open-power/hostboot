@@ -76,6 +76,7 @@ BOOTLDR_OBJECTS += plat_utils.o
 BOOTLDR_OBJECTS += bl_xscom.o
 BOOTLDR_OBJECTS += bl_tpm_spidd.o
 BOOTLDR_OBJECTS += p10_sbe_spi_cmd.o
+BOOTLDR_OBJECTS += p10_spi_clear_status_errors.o
 
 SECUREROM_OBJECTS += ROM.o
 SECUREROM_OBJECTS += ecverify.o

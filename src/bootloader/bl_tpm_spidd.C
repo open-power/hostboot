@@ -25,6 +25,7 @@
 #include <bl_tpm_spidd.H>
 #include <plat_hwp_invoker.H>
 #include <p10_sbe_spi_cmd.H>
+#include <p10_spi_clear_status_errors.H>
 #include <bl_console.H>
 #include <endian.h>
 #include <sys/time.h>
@@ -65,6 +66,8 @@ Bootloader::hbblReasonCode tpm_init_spi_engine()
                                   1, // i_slave
                                   true); // i_pib_access
 
+    do {
+
     fapi2::ReturnCode l_fapi_rc = fapi2::FAPI2_RC_SUCCESS;
     FAPI_CALL_HWP(l_fapi_rc,
                   p10_spi_clock_init,
@@ -72,7 +75,28 @@ Bootloader::hbblReasonCode tpm_init_spi_engine()
     if(l_fapi_rc)
     {
         l_rc = Bootloader::RC_SPI_CLK_INIT_FAIL;
+        break;
     }
+
+    FAPI_CALL_HWP(l_fapi_rc,
+                  spi_master_reset,
+                  l_spi_handle);
+    if(l_fapi_rc)
+    {
+        l_rc = Bootloader::RC_SPI_RESET_FAIL;
+        break;
+    }
+
+    FAPI_CALL_HWP(l_fapi_rc,
+                  p10_spi_clear_status_errors,
+                  l_spi_handle);
+    if(l_fapi_rc)
+    {
+        l_rc = Bootloader::RC_SPI_CLR_ERR_FAIL;
+        break;
+    }
+
+    }while(0);
 
     return l_rc;
 }

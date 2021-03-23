@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -47,6 +47,8 @@ EXTRAINCDIR += ${HWP_PATH}/hwp/spi/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/bootloader/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
 SUBDIRS += fapi2.d
 
@@ -62,6 +64,7 @@ OBJS += bl_console.o
 OBJS += bl_xscom.o
 OBJS += bl_tpm_spidd.o
 OBJS += p10_sbe_spi_cmd.o
+OBJS += p10_spi_clear_status_errors.o
 
 OPT_LEVEL = -Os
 
