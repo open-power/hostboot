@@ -64,7 +64,7 @@
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3, DDIMM = 4, MDS_LRDIMM = 5, MDS = 6</enum>
+    <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3, DDIMM = 4</enum>
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_type</mssAccessorName>

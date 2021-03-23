@@ -76,8 +76,7 @@ enum msdg_dimm_types
     MSDG_UDIMM      = 0x0000,
     MSDG_RDIMM      = 0x0001,
     MSDG_LRDIMM     = 0x0002,
-    MSDG_MDS_LRDIMM = 0x0003,
-    MSDG_MDS        = 0x0004
+    MSDG_MDS        = 0x0003
 };
 
 ///
@@ -747,13 +746,23 @@ class phy_params
                     io_phy_params.iv_user_msdg_upto_ver397559.DimmType = MSDG_RDIMM;
                     break;
 
-                // DDIMM can either have an unregistered MC to DRAM interface (1U/2U) or RCD (4U)
                 case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM:
                     {
-                        bool l_has_rcd = false;
+                        // Check if we're MDS, in which case we just use MSDG_MDS
+                        bool l_is_mds = false;
+                        FAPI_TRY(mss::is_mds(iv_target, l_is_mds));
 
-                        FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(iv_target, l_has_rcd));
-                        io_phy_params.iv_user_msdg_upto_ver397559.DimmType = l_has_rcd ? MSDG_RDIMM : MSDG_UDIMM;
+                        if (l_is_mds)
+                        {
+                            io_phy_params.iv_user_msdg_upto_ver397559.DimmType = MSDG_MDS;
+                        }
+                        else
+                        {
+                            // DDIMM can either have an unregistered MC to DRAM interface (1U/2U) or RCD (4U)
+                            bool l_has_rcd = false;
+                            FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(iv_target, l_has_rcd));
+                            io_phy_params.iv_user_msdg_upto_ver397559.DimmType = l_has_rcd ? MSDG_RDIMM : MSDG_UDIMM;
+                        }
                     }
                     break;
 
@@ -763,14 +772,6 @@ class phy_params
 
                 case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM:
                     io_phy_params.iv_user_msdg_upto_ver397559.DimmType = MSDG_LRDIMM;
-                    break;
-
-                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_MDS_LRDIMM:
-                    io_phy_params.iv_user_msdg_upto_ver397559.DimmType = MSDG_MDS_LRDIMM;
-                    break;
-
-                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_MDS:
-                    io_phy_params.iv_user_msdg_upto_ver397559.DimmType = MSDG_MDS;
                     break;
 
                 default:
