@@ -41,6 +41,7 @@
 #include <mss_explorer_attribute_getters.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_kind.H>
+#include <lib/exp_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -144,21 +145,8 @@ template<>
 fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         bool& o_is_mds )
 {
-    // Assume its not MDS to start
-    o_is_mds = false;
-
-    uint8_t l_hybrid = 0;
-    uint8_t l_hybrid_media_type = 0;
-
-    FAPI_TRY(mss::attr::get_hybrid(i_target, l_hybrid));
-    FAPI_TRY(mss::attr::get_hybrid_memory_type(i_target, l_hybrid_media_type));
-
-    o_is_mds = (l_hybrid_media_type == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS &&
-                l_hybrid == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID);
-
-fapi_try_exit:
-
-    return fapi2::current_err;
+    // Call manual accessor for dimm
+    return mss::is_mds(i_target, o_is_mds);
 }
 
 ///
@@ -171,36 +159,8 @@ template<>
 fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         bool& o_is_mds )
 {
-    // Assume its not MDS to start
-    o_is_mds = false;
-
-    uint8_t l_hybrid[mss::exp::MAX_DIMM_PER_PORT] = {};
-    uint8_t l_hybrid_dimm = 0;
-    uint8_t l_hybrid_media_type[mss::exp::MAX_DIMM_PER_PORT] = {};
-    uint8_t l_hybrid_media_type_dimm = 0;
-
-    FAPI_TRY(mss::attr::get_hybrid(i_target, l_hybrid));
-    FAPI_TRY(mss::attr::get_hybrid_memory_type(i_target, l_hybrid_media_type));
-
-    // Loop over all DIMM's and determine if we have any MDS type DIMMs
-    for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
-    {
-        bool l_current_dimm_mds = false;
-
-        l_hybrid_dimm = l_hybrid[mss::index(l_dimm)];
-        l_hybrid_media_type_dimm = l_hybrid_media_type[mss::index(l_dimm)];
-
-        l_current_dimm_mds = ((l_hybrid_media_type_dimm == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS) &&
-                              (l_hybrid_dimm == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID));
-
-        o_is_mds |= l_current_dimm_mds;
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-
-    return fapi2::current_err;
+    // Call manual accessor for mem_port
+    return mss::is_mds(i_target, o_is_mds);
 }
 
 ///

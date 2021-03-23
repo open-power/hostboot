@@ -104,6 +104,56 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Check if this dimm is hybrid type MDS
+/// @param[in] i_target - DIMM target
+/// @param[out] o_is_mds - true iff DIMM is hybrid type MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode is_mds( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, bool& o_is_mds )
+{
+    // Assume its not MDS to start
+    o_is_mds = false;
+
+    uint8_t l_hybrid = 0;
+    uint8_t l_hybrid_media_type = 0;
+
+    FAPI_TRY(mss::attr::get_hybrid(i_target, l_hybrid));
+    FAPI_TRY(mss::attr::get_hybrid_memory_type(i_target, l_hybrid_media_type));
+
+    o_is_mds = (l_hybrid_media_type == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS &&
+                l_hybrid == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID);
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if any dimm is hybrid type MDS
+/// @param[in] i_target - MEM_PORT target
+/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode is_mds( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, bool& o_is_mds )
+{
+    // Assume its not MDS to start
+    o_is_mds = false;
+
+    // Loop over all DIMM's and determine if we have any MDS type DIMMs
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        bool l_current_mds = false;
+        FAPI_TRY(is_mds(l_dimm, l_current_mds));
+        o_is_mds |= l_current_mds;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace exp
 {
 
@@ -170,7 +220,6 @@ fapi2::ReturnCode check_omi_mfg_screen_edpl_setting(bool& o_is_set)
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-
 } // ns exp
+
 } // ns mss

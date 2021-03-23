@@ -287,6 +287,21 @@ fapi_try_exit:
 template<fapi2::TargetType T>
 fapi2::ReturnCode is_quad_encoded_cs(const fapi2::Target<T>& i_target,
                                      bool& o_is_quad_encoded_cs);
+///
+/// @brief Check if any dimm is hybrid type MDS
+/// @param[in] i_target - DIMM target
+/// @param[out] o_is_mds - true iff DIMM is hybrid type MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode is_mds( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, bool& o_is_mds );
+
+///
+/// @brief Check if any dimm is hybrid type MDS
+/// @param[in] i_target - MEM_PORT target
+/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode is_mds( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, bool& o_is_mds );
 
 namespace exp
 {
