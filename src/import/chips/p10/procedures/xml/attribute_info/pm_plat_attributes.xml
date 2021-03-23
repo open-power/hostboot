@@ -2995,7 +2995,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <default>20</default>
+    <default>0</default>
     <group>pstate</group>
   </attribute>
 
