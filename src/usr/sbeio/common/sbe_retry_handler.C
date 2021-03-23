@@ -800,6 +800,22 @@ void SbeRetryHandler::handleFspIplTimeFail(TARGETING::Target * i_target)
               "Shutting down w/ the error code %s" ,
               this->iv_sbeRegister.asyncFFDC ? "SBEIO_HWSV_COLLECT_SBE_RC" : "SBEIO_DEAD_SBE"  );
 
+    // Before triggering the shutdown, disable the automatic attribute sync
+    //  that we would normally do if the dead SBE is the boot proc.  This is
+    //  to prevent hangs on the FSP since they use the SBE to handle the
+    //  messages we send them.
+    TARGETING::Target* l_bootproc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle( l_bootproc );
+    if( l_bootproc == i_target )
+    {
+        errlHndl_t l_errhdl = TARGETING::AttrRP::disableAttributeSyncToSP();
+        if( l_errhdl )
+        {
+            SBE_TRACF("SbeRetryHandler::handleFspIplTimeFail> Error disabling shutdown");
+            errlCommit(l_errhdl, INITSVC_COMP_ID);        
+        }
+    }
+
     // On FSP systems if we failed to recover the SBE then we should shutdown w/ the
     // correct error so that HWSV will know what FFDC to collect
     INITSERVICE::doShutdownWithError(this->iv_shutdownReturnCode,

@@ -232,6 +232,21 @@ namespace TARGETING
         return pError;
     }
 
+    errlHndl_t AttrRP::disableAttributeSyncToSP()
+    {
+        return Singleton<AttrRP>::instance()._disableAttributeSyncToSP();
+    }
+
+    errlHndl_t AttrRP::_disableAttributeSyncToSP() const
+    {
+        TRACFCOMP(g_trac_targeting, ENTER_MRK
+                  "AttrRP::_disableAttributeSyncToSP");
+        auto pError = _sendAttrSyncMsg(MSG_ATTR_DO_NOT_SYNC_ON_SHUTDOWN, true);
+        TRACFCOMP(g_trac_targeting, EXIT_MRK
+                  "AttrRP::_disableAttributeSyncToSP");
+        return pError;
+    }
+
     errlHndl_t AttrRP::_sendAttrSyncMsg(
         const ATTRRP_MSG_TYPE i_msgType,
         const bool            i_sync) const
@@ -511,6 +526,14 @@ namespace TARGETING
                                 "AttrRP: attrSyncTask: "
                                 "Attribute Sync Window OPEN to synchronize "
                                 "attributes.");
+                        }
+                        break;
+                    case MSG_ATTR_DO_NOT_SYNC_ON_SHUTDOWN:
+                        {
+                            iv_attrSyncWindowOpen=false;
+                            TRACFCOMP(g_trac_targeting, INFO_MRK
+                                "AttrRP: attrSyncTask: "
+                                "Disabling Attribute Sync on shutdown.");
                         }
                         break;
                     default:

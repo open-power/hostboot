@@ -1784,6 +1784,19 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 {
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handleShutdownMsg");
 
+    // Before triggering the shutdown, disable the automatic attribute sync
+    //  that we would normally do.  This is to prevent hangs on the FSP if they
+    //  tried to shut us down due to some kind of SBE or MBOX issue.  In these
+    //  cases HB could get hung waiting for a response from the FSP that will
+    //  never come.
+    errlHndl_t l_errhdl = TARGETING::AttrRP::disableAttributeSyncToSP();
+    if( l_errhdl )
+    {
+        TRACFCOMP(g_trac_initsvc,
+                  "IStepDispatcher::handleShutdownMsg> Error disabling shutdown");
+        errlCommit(l_errhdl, INITSVC_COMP_ID);        
+    }
+
     // find the step/substep. The step is in the top 32bits, the substep is in
     // the bottom 32bits and is a byte
     uint8_t istep = ((io_pMsg->data[0] & 0x000000FF00000000) >> 32);

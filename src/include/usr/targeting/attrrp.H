@@ -357,6 +357,8 @@ class AttrRP
             MSG_ATTR_OVERRIDE_SYNC        = 0x00000006,
             // Attribute Sync presence detect completed
             MSG_ATTR_SYNC_WINDOW_OPEN  = 0x00000007,
+            // Explicitly disable the SP sync of attributes on shutdown
+            MSG_ATTR_DO_NOT_SYNC_ON_SHUTDOWN  = 0x00000008,
             // Sentinel value for when message type is not yet known
             MSG_INVALID                   = 0xFFFFFFFF,
         };
@@ -393,6 +395,13 @@ class AttrRP
          *  @see _sendAttrOverridesAndSyncs for documentation
          */
         static errlHndl_t sendAttrOverridesAndSyncs();
+
+        /**
+         *  @brief This is a static wrapper around _disableAttributeSyncToSP
+         *
+         *  @see _disableAttributeSyncToSP for documentation
+         */
+        static errlHndl_t disableAttributeSyncToSP();
 
         /**
         *  @brief Modifies the memory R/W permissions on VMM pages for a
@@ -670,6 +679,18 @@ class AttrRP
          *      references valid error log
          */
         errlHndl_t _sendAttrOverridesAndSyncs() const;
+
+        /**
+         *  @brief Disables the normal attribute sync process that happens
+         *    on all shutdowns.  This is useful if we're shutting down for
+         *    certain reasons, e.g. controlled powerdown.
+         *
+         *  @return errlHndl_t Error log handle
+         *  @retval nullptr  Disablement of attribute sync successful
+         *  @retval !nullptr Disablement of attribute sync  failed; handle
+         *      references valid error log
+         */
+        errlHndl_t _disableAttributeSyncToSP() const;
 
         /**
          *  @brief Sends message of the given type to the attribute resource
