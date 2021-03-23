@@ -165,6 +165,8 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         SET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_DISABLE_OOO_MODE(l_scom_data);
         SET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_CHANNEL_STREAMING_EN(l_scom_data);
         SET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE(PBCQ_HWCFG_CACHE_INJ_MODE, l_scom_data);
+        SET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_ENABLE_TCE_SKIP_GROUP(l_scom_data);
+        SET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_DISABLE_TCE_VG(l_scom_data);
 
         if ((l_attr_proc_pcie_phb_active[1] == fapi2::ENUM_ATTR_PROC_PCIE_PHB_ACTIVE_ENABLE)
             || (l_attr_proc_pcie_phb_active[2] == fapi2::ENUM_ATTR_PROC_PCIE_PHB_ACTIVE_ENABLE))
@@ -324,6 +326,7 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         FAPI_TRY(PREP_REGS_PE_CACHE_INJECT_CNTL_REG(l_phb_chiplet),
                  "Error from PREP_REGS_PE_CACHE_INJECT_CNTL_REG");
         SET_REGS_PE_CACHE_INJECT_CNTL_REG_ENABLE_PARTIAL_CACHE_INJECTION(l_scom_data);
+        SET_REGS_PE_CACHE_INJECT_CNTL_REG_SET_D_BIT_ON_PARTIAL_CACHE_INJECTION(l_scom_data);
         FAPI_DBG("PHB%i: %#lx - %#lx", l_phb_id, REGS_PE_CACHE_INJECT_CNTL_REG, l_scom_data());
         FAPI_TRY(PUT_REGS_PE_CACHE_INJECT_CNTL_REG(l_phb_chiplet, l_scom_data),
                  "Error from PUT_REGS_PE_CACHE_INJECT_CNTL_REG");
