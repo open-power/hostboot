@@ -827,7 +827,7 @@ extern "C"
                       "supported mask = 0x%.4X)",
                       io_vpdInfo.iv_omi_freq_mhz, l_freqMask, l_supportedSpeeds);
 
-            FAPI_TRY(fapi2::FAPI2_RC_FALSE);
+            FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
         // Point to the beginning of the EFD meta data, AKA EFD[0] meta data.
