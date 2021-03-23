@@ -1101,7 +1101,7 @@ fapi2::ReturnCode handle_training_error(const fapi2::Target<fapi2::TARGET_TYPE_O
     // If the error is a TRAINING_FAIL, then we want to log it as recovered and continue
     if(is_bad_bits_logging_needed(io_training_rc))
     {
-        fapi2::log_related_error(i_target, io_training_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::logError(io_training_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         io_training_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
