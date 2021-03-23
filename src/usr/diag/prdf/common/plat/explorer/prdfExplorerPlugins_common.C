@@ -123,6 +123,23 @@ int32_t CheckForUnitCs(ExtensibleChip * i_chip, bool & o_hasAttns)
 PRDF_PLUGIN_DEFINE(explorer_ocmb, CheckForUnitCs);
 
 /**
+ * @brief  Analysis code that is called before the main analyze() function.
+ * @param  i_chip     An OCMB chip.
+ * @param  io_sc      The step code data struct.
+ * @param  o_analyzed True if analysis is done on this chip, false otherwise.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
+                     bool & o_analyzed )
+{
+    // Check for a channel failure before analyzing this chip.
+    o_analyzed = MemUtils::analyzeChnlFail<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, PreAnalysis );
+
+/**
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
  * @param  i_chip An OCMB chip.
