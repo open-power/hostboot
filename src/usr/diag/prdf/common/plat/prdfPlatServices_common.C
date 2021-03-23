@@ -453,25 +453,6 @@ int32_t getDimmSpareConfig<TYPE_MEM_PORT>( TargetHandle_t i_memPort,
         }
         o_spareConfig = attr[i_rank.getDimmSlct()][i_rank.getRankSlct()];
 
-        // Check for valid values
-        // For X4 DRAM, we can not have full byte as spare config. Also for X8
-        // DRAM we can not have nibble as spare.
-
-        if( fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE == o_spareConfig) break;
-
-        bool isFullByte = ( ENUM_ATTR_MEM_EFF_DIMM_SPARE_FULL_BYTE ==
-                            o_spareConfig );
-
-        TargetHandle_t dimm = getConnectedDimm( i_memPort, i_rank, i_ps );
-        bool isX4Dram = isDramWidthX4(dimm);
-
-        if ( ( isX4Dram && isFullByte ) || ( !isX4Dram && !isFullByte ) )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid Configuration: o_spareConfig:%u",
-                      o_spareConfig );
-            o_rc = FAIL; break;
-        }
-
     }while(0);
 #endif
 

@@ -138,11 +138,20 @@ class MemSymbol
     /** @return The Galois field associated with this symbol. */
     uint8_t getGalois() const;
 
-    /** @return Marks this symbol as steered to a DRAM spare. */
-    void setDramSpared() { iv_isDramSpared = true; }
+    /** @return Marks this symbol as steered to DRAM spare 0. */
+    void setDramSpared0() { iv_isSpareDram0 = true; }
+
+    /** @return Marks this symbol as steered to DRAM spare 1. */
+    void setDramSpared1() { iv_isSpareDram1 = true; }
 
     /** @return TRUE this symbol is on a DRAM spare, FALSE otherwise. */
-    bool isDramSpared() const { return iv_isDramSpared; }
+    bool isDramSpared() const { return (iv_isSpareDram0 || iv_isSpareDram1 ); }
+
+    /** @return TRUE this symbol is on DRAM spare 0, FALSE otherwise. */
+    bool isDramSpared0() const { return iv_isSpareDram0; }
+
+    /** @return TRUE this symbol is on DRAM spare 1, FALSE otherwise. */
+    bool isDramSpared1() const { return iv_isSpareDram1; }
 
     /**
      * @brief   Overrides the '<' operator.
@@ -173,7 +182,8 @@ class MemSymbol
 
     /**
      * @brief  Checks if the current symbol is on any of the spares
-     *         Sets iv_isDramSpared if found on at least one of the valid spares
+     *         Sets iv_isSpareDram0 or iv_isSpareDram1 if found on at least
+     *         one of the valid spares
      *         Usually call mssGetSteerMux to fill in associated symbols
      *
      * @param  i_sp0 A symbol associated with the spare on port 0.
@@ -196,7 +206,8 @@ class MemSymbol
 
     uint8_t iv_pins = 0; ///< See enum DqMask.
 
-    bool iv_isDramSpared = false; ///< TRUE if symbol resides on DRAM spare.
+    bool iv_isSpareDram0 = false; ///< TRUE if symbol resides on DRAM spare 0.
+    bool iv_isSpareDram1 = false; ///< TRUE if symbol resides on DRAM spare 1.
 };
 
 //------------------------------------------------------------------------------

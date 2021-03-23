@@ -208,16 +208,6 @@ class MemDqBitmap
      */
     uint32_t isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare );
 
-    /**
-     * @brief  Sets the DRAM spare on the specified port.
-     * @param  i_portSlct The target port.
-     * @param  i_pins     Optional 8-bit (x8 mode) or 4-bit (x4 mode) value of
-     *                    the DRAM's pins. The default is to set all pins.
-     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
-     */
-    uint32_t setDramSpare( uint8_t i_portSlct, uint8_t i_pins = 0xff );
-
-
   private: // instance variables
 
     TARGETING::TargetHandle_t iv_trgt; ///< Target MEM_PORT/OCMB_CHIP

@@ -47,7 +47,7 @@ using namespace PARSERUTILS;
 MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
                       uint8_t i_symbol ) :
     iv_trgt(i_trgt), iv_rank(i_rank), iv_symbol(i_symbol),
-    iv_pins(0), iv_isDramSpared(false)
+    iv_pins(0), iv_isSpareDram0(false), iv_isSpareDram1(false)
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
@@ -253,12 +253,15 @@ uint8_t MemSymbol::getGalois() const
 void MemSymbol::updateSpared(const MemSymbol & i_sp0,
                              const MemSymbol & i_sp1)
 {
-    if (!iv_isDramSpared)
+    if (!isDramSpared())
     {
-        if ( ( i_sp0.isValid() && (i_sp0.getDram() == getDram()) ) ||
-             ( i_sp1.isValid() && (i_sp1.getDram() == getDram()) ) )
+        if ( i_sp0.isValid() && (i_sp0.getDram() == getDram()) )
         {
-            setDramSpared();
+            setDramSpared0();
+        }
+        else if ( i_sp1.isValid() && (i_sp1.getDram() == getDram()) )
+        {
+            setDramSpared1();
         }
     }
 }

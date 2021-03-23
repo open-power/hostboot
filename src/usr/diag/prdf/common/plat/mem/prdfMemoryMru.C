@@ -130,8 +130,27 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
             PRDF_ASSERT( false );
         }
 
-        if ( iv_memMruMeld.s.dramSpared ) iv_symbol.setDramSpared();
-
+        // If our target is OCMB
+        if ( 1 == iv_memMruMeld.s.isOcmb )
+        {
+            // If the symbol is on the spare, figure out which spare was used
+            if ( iv_memMruMeld.s.dramSpared )
+            {
+                MemSymbol sp0, sp1;
+                uint32_t rc = mssGetSteerMux<TYPE_OCMB_CHIP>(iv_target, iv_rank,
+                                                             sp0, sp1);
+                if ( SUCCESS == rc )
+                {
+                    iv_symbol.updateSpared( sp0, sp1 );
+                }
+                else
+                {
+                    PRDF_ERR( "MemoryMru: mssGetSteerMux() failed. HUID: "
+                              "0x%08x rank: 0x%02x", getHuid(iv_target),
+                              iv_rank.getKey() );
+                }
+            }
+        }
     }
 
     // If the code gets to this point the MemoryMru is valid.

@@ -196,6 +196,17 @@ uint32_t MemDqBitmap::setDram( const MemSymbol & i_symbol, uint8_t i_pins )
 
         if ( iv_x4Dram )
         {
+            // Adjust bit position depending on spare used
+            // Spare0 is on the lower nibble, Spare1 is on the higher nibble
+            if ( i_symbol.isDramSpared0() )
+            {
+                bitIdx = 0;
+            }
+            else if ( i_symbol.isDramSpared1() )
+            {
+                bitIdx = 7;
+            }
+
             i_pins &= 0xf; // limit to 4 bits
             uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
             shift = (shift / DQS_PER_NIBBLE) * DQS_PER_NIBBLE; // 0,4
@@ -234,6 +245,17 @@ uint32_t MemDqBitmap::clearDram( const MemSymbol & i_symbol, uint8_t i_pins )
 
         if ( iv_x4Dram )
         {
+            // Adjust bit position depending on spare used
+            // Spare0 is on the lower nibble, Spare1 is on the higher nibble
+            if ( i_symbol.isDramSpared0() )
+            {
+                bitIdx = 0;
+            }
+            else if ( i_symbol.isDramSpared1() )
+            {
+                bitIdx = 7;
+            }
+
             i_pins &= 0xf; // limit to 4 bits
             uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
             shift = (shift / DQS_PER_NIBBLE) * DQS_PER_NIBBLE; // 0,4
@@ -539,79 +561,11 @@ uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare )
 
         uint8_t spareDqBits = iv_data.at(i_portSlct).bitmap[iv_spareByte];
 
-        if ( iv_x4Dram )
+        // Check if either spare is available (lower or higher nibble)
+        if ( (0 == (spareDqBits & 0xf0)) ||
+             (0 == (spareDqBits & 0x0f)) )
         {
-            // Spare is on the lower nibble
-            if ( lowNibble == spareConfig )
-            {
-                o_dramSpare = ( 0 == ( spareDqBits & 0xf0 ) );
-            }
-            // Spare is on the higher nibble
-            else if ( highNibble == spareConfig )
-            {
-                o_dramSpare = ( 0 == ( spareDqBits & 0x0f ) );
-            }
-        }
-        else
-        {
-            o_dramSpare = ( 0 == spareDqBits );
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-uint32_t MemDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
-{
-    #define PRDF_FUNC "[MemDqBitmap::setDramSpare] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Check to make sure the portSlct is valid
-        size_t maxPorts = getNumPorts();
-        if ( maxPorts <= i_portSlct )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct);
-            o_rc = FAIL; break;
-        }
-
-        uint8_t spareConfig, noSpare, lowNibble, highNibble;
-        bool spareSupported = true;
-        o_rc = __getSpareInfo( iv_trgt, iv_rank, i_portSlct, spareConfig,
-                               noSpare, lowNibble, highNibble, spareSupported );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "__getSpareInfo failed" );
-            break;
-        }
-
-        if ( noSpare == spareConfig || !spareSupported )
-        {
-            PRDF_ERR( PRDF_FUNC "DRAM Spare is not available" );
-            o_rc = FAIL; break;
-        }
-
-        if ( iv_x4Dram )
-        {
-            i_pins &= 0xf; // limit to 4 bits
-
-            if ( lowNibble == spareConfig )
-            {
-                i_pins = i_pins << DQS_PER_NIBBLE;
-            }
-            iv_data[i_portSlct].bitmap[iv_spareByte] |= i_pins;
-        }
-        else
-        {
-            i_pins &= 0xff; // limit to 8 bits
-            iv_data[i_portSlct].bitmap[iv_spareByte] |= i_pins;
+            o_dramSpare = true;
         }
 
     } while (0);
