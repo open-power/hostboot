@@ -123,11 +123,6 @@ extern "C"
                 std::vector<uint64_t> l_current_curve_with_limit_v( std::begin(l_current_curve_with_limit),
                         std::end(l_current_curve_with_limit) );
 
-
-                uint16_t l_slope    [TT::DIMMS_PER_PORT] = {0};
-                uint16_t l_intercept[TT::DIMMS_PER_PORT] = {0};
-                uint32_t l_limit    [TT::DIMMS_PER_PORT] = {0};
-
                 for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb))
                 {
                     //Don't run if there are no dimms on the port
@@ -135,6 +130,10 @@ extern "C"
                     {
                         continue;
                     }
+
+                    uint16_t l_slope    [TT::DIMMS_PER_PORT] = {0};
+                    uint16_t l_intercept[TT::DIMMS_PER_PORT] = {0};
+                    uint32_t l_limit    [TT::DIMMS_PER_PORT] = {0};
 
                     // Set the thermal power throttle
                     //Set the PMIC current slope, intercept and limit
