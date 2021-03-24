@@ -96,11 +96,13 @@ extern "C"
 
             if (l_is_mds)
             {
+                FAPI_INF("Running explorer.mds.scom.initfile for %s", mss::c_str(l_port));
                 FAPI_EXEC_HWP(l_rc, explorer_mds_scom, i_target, l_port, FAPI_SYSTEM, l_mc);
                 FAPI_TRY(l_rc, "Error from explorer.mds.scom.initfile %s", mss::c_str(l_port));
             }
             else
             {
+                FAPI_INF("Running explorer.scom.initfile for %s", mss::c_str(l_port));
                 FAPI_EXEC_HWP(l_rc, explorer_scom, i_target, l_port, FAPI_SYSTEM, l_mc);
                 FAPI_TRY(l_rc, "Error from explorer.scom.initfile %s", mss::c_str(l_port));
             }

@@ -202,17 +202,17 @@ define def_disable_fast_act = 1; #Performance testing showed fast act yielded no
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRDM_DLY [when=S] {      # BL/2+rank_switch
   spyv;
-  11;
+  12;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRSMSR_DLY [when=S] {    # tccd_s
   spyv;
-  6;
+  8;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRSMDR_DLY [when=S] {    # tccd_s
   spyv;
-  6;
+  10;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RROP_DLY [when=S] {      # tccd_l
@@ -222,17 +222,17 @@ ispy  MB_SIM.SRQ.MBA_TMR0Q_RROP_DLY [when=S] {      # tccd_l
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WWDM_DLY [when=S] {      # BL/2+rank_switch
   spyv;
-  11;
+  12;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WWSMSR_DLY [when=S] {    # tccd_s
   spyv;
-  6;
+  8;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WWSMDR_DLY [when=S] {    # tccd_s
   spyv;
-  6;
+  10;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WWOP_DLY [when=S] {      # tccd_l
@@ -242,32 +242,32 @@ ispy  MB_SIM.SRQ.MBA_TMR0Q_WWOP_DLY [when=S] {      # tccd_l
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWDM_DLY [when=S] {      # (RL+BL/2+turn_around)-WL
   spyv;
-  17;
+  16;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMSR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
   spyv;
-  17;
+  16;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMDR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
   spyv;
-  17;
+  16;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WRDM_DLY [when=S] {      # (WL+BL/2+turn_around)-RL
   spyv;
-  5;
+  15;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WRSMSR_DLY [when=S] {    # WL+BL/2+(Twtr_s/clock period)
   spyv;
-  22;
+  27;
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WRSMDR_DLY [when=S] {    # WL+BL/2+Twtr_s
   spyv;
-  22;
+  27;
 }
 
 
@@ -346,7 +346,7 @@ ispy  MB_SIM.SRQ.MBA_TMR1Q_TRRD_SBG [when=S] {
 
 ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
   spyv;
-  14;
+  12;
 }
 
 #   TMR2 SCOM REGISTER   #
@@ -359,7 +359,7 @@ ispy  MB_SIM.SRQ.MBA_TMR2Q_CFG_WRITE_READ_SWITCH_DLY [when=S] {
 
 ispy  MB_SIM.SRQ.MBA_TMR2Q_CFG_READ_WRITE_SWITCH_DLY [when=S] {
   spyv;
-  190;
+  183;
 }
 
 #   DSM0 SCOM REGISTER   #
@@ -367,23 +367,39 @@ ispy  MB_SIM.SRQ.MBA_TMR2Q_CFG_READ_WRITE_SWITCH_DLY [when=S] {
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
   spyv;
-  197;
+  61;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY_MSB [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+  spyv;
+  2;
 }
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDDATA_EN_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
   spyv;
-  197;
+  21;
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB1Q_CFG_RDDATA_EN_DLY_MSB [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+  spyv;
+  5;
 }
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDCSLAT_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
   spyv;
-  197;
+  21;
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB1Q_CFG_RDCSLAT_DLY_MSB [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+  spyv;
+  5;
 }
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRDATA_DLY [when=S] {
   spyv;
   0;
 }
+
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRDATA_EN_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
   spyv;
   7;
@@ -406,7 +422,7 @@ ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RODT_START_DLY [when=S] {
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RODT_END_DLY [when=S] {
   spyv;
-  63;
+  0;
 }
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WODT_START_DLY [when=S] {
@@ -416,7 +432,7 @@ ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WODT_START_DLY [when=S] {
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WODT_END_DLY [when=S] {
   spyv;
-   5;
+   0;
 }
 
 #  FARB0 SCOM REGISTER   #
@@ -428,13 +444,19 @@ ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_PARITY_AFTER_CMD [when=S] {
 
 ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_CID2_AS_PAR_ENABLE [when=S] {
   spyv;
-  1;
+  0;
 }
 
 ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_QUAD_RANK_ENC_4DATA_CSN_ENABLE [when=S] {
   spyv;
   0;
 }
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_HYNIX_MDS_MODE [when=S] {
+  spyv;
+  1;
+}
+
 
 #  REF0 SCOM REGISTER    #
 
@@ -460,33 +482,33 @@ ispy  MB_SIM.SRQ.PC.MBAREF0Q_CFG_REFR_TSV_STACK [when=S] {
 
 ispy  MB_SIM.SRQ.PC.MBARPC0Q_CFG_PUP_PDN [when=S] {         # tCKE
   spyv;
-  7;
+  8;
 }
 
 ispy  MB_SIM.SRQ.PC.MBARPC0Q_CFG_PDN_PUP [when=S] {         # tPD
   spyv;
-  7;
+  8;
 }
 
 ispy  MB_SIM.SRQ.PC.MBARPC0Q_CFG_PUP_AVAIL [when=S] {       # tXP
   spyv;
-  8;
+  9;
 }
 
 #  STR0 SCOM REGISTER    #
 ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_TCKSRE [when=S] {
   spyv;
-  13;  
+  27;
 }
 
 ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_TCKSRX [when=S] {
   spyv;
-  13; 
+  13;
 }
 
 ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_TCKESR [when=S] {
   spyv;
-  8;
+  20;
 }
 
 ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_TXSDLL [when=S] {
@@ -573,132 +595,6 @@ ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S7_CID [when=S] {
   0b111;
 }
 
-# ODT RD
-# The resulting C code will only grab the right-most bit of each of these fields
-# Slot 0
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK0_RD_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_RD[0][0] >> 7; # A0
-  1, MP.ATTR_MEM_SI_ODT_RD[0][0] >> 6; # A1
-  2, ((MP.ATTR_MEM_SI_ODT_RD[0][0] >> 3 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][0] >> 7 & 0b1) && (def_cs_tied == 1)); # B0
-  3, ((MP.ATTR_MEM_SI_ODT_RD[0][0] >> 2 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][0] >> 6 & 0b1) && (def_cs_tied == 1)); # B1
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK1_RD_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_RD[0][1] >> 7; # A0
-  1, MP.ATTR_MEM_SI_ODT_RD[0][1] >> 6; # A1
-  2, ((MP.ATTR_MEM_SI_ODT_RD[0][1] >> 3 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][1] >> 7 & 0b1) && (def_cs_tied == 1)); # B0
-  3, ((MP.ATTR_MEM_SI_ODT_RD[0][1] >> 2 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][1] >> 6 & 0b1) && (def_cs_tied == 1)); # B1
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK2_RD_ODT [when=S] {
-  bits, spyv;
-  # in four_rank_mode these should already be populated and ready to go,
-  # otherwise they will just remain blank and unused
-  0, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 2;
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK3_RD_ODT [when=S] {
-  bits, spyv;
-  # in four_rank_mode these should already be populated and ready to go,
-  # otherwise they will just remain blank and unused
-  0, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 2;
-}
-# Slot 1
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK4_RD_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_RD[1][0] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_RD[1][0] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_RD[1][0] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_RD[1][0] >> 2;
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK5_RD_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_RD[1][1] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_RD[1][1] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_RD[1][1] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_RD[1][1] >> 2;
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK6_RD_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_RD[1][2] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_RD[1][2] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_RD[1][2] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_RD[1][2] >> 2;
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK7_RD_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_RD[1][3] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_RD[1][3] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_RD[1][3] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_RD[1][3] >> 2;
-}
-
-# ODT WR
-# The resulting C code will only grab the right-most bit of each of these fields
-# Slot 0
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK0_WR_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_WR[0][0] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_WR[0][0] >> 6;
-  2, ((MP.ATTR_MEM_SI_ODT_WR[0][0] >> 3 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][0] >> 7 & 0b1) && (def_cs_tied == 1));
-  3, ((MP.ATTR_MEM_SI_ODT_WR[0][0] >> 2 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][0] >> 6 & 0b1) && (def_cs_tied == 1));
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK1_WR_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_WR[0][1] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_WR[0][1] >> 6;
-  2, ((MP.ATTR_MEM_SI_ODT_WR[0][1] >> 3 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][1] >> 7 & 0b1) && (def_cs_tied == 1));
-  3, ((MP.ATTR_MEM_SI_ODT_WR[0][1] >> 2 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][1] >> 6 & 0b1) && (def_cs_tied == 1));
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK2_WR_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 2;
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK3_WR_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 2;
-}
-# Slot 1
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK4_WR_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_WR[1][0] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_WR[1][0] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_WR[1][0] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_WR[1][0] >> 2;
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK5_WR_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_WR[1][1] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_WR[1][1] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_WR[1][1] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_WR[1][1] >> 2;
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK6_WR_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_WR[1][2] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_WR[1][2] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_WR[1][2] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_WR[1][2] >> 2;
-}
-ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK7_WR_ODT [when=S] {
-  bits, spyv;
-  0, MP.ATTR_MEM_SI_ODT_WR[1][3] >> 7;
-  1, MP.ATTR_MEM_SI_ODT_WR[1][3] >> 6;
-  2, MP.ATTR_MEM_SI_ODT_WR[1][3] >> 3;
-  3, MP.ATTR_MEM_SI_ODT_WR[1][3] >> 2;
-}
-
 ispy MB_SIM.SRQ.PC.MBARPC0Q_CFG_QUAD_RANK_ENC [when=S] {
   spyv;
   0;
@@ -739,7 +635,7 @@ ispy MB_SIM.SRQ.MBA_FARB0Q_CFG_2N_ADDR [when=S] {
 
 ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_PLANAR_ADDR_MODE [when=S] {
   spyv;
-  TGT0.ATTR_MEM_MRW_IS_PLANAR;
+  0;
 }
 
 ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_ACT_SAME_RANK_HOLD_TIME [when=S] {
@@ -986,7 +882,7 @@ ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_M0_VALID [when=S] {
 
 ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_M1_VALID [when=S] {
   spyv;
-  1;
+  def_m1_val_0;
 }
 
 ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_M0_VALID [when=S] {
