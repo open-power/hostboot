@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,8 @@ struct PVR_t
      */
     enum DD_t : uint8_t
     {
-        DD1 = 0x10
+        DD10 = 0x10,
+        DD20 = 0x20
     };
 
     /**
@@ -106,10 +107,21 @@ struct PVR_t
      *
      * @return True if and only if the current DD level is DD1.0
      */
-    bool isP10DD1() const
+    bool isP10DD10() const
     {
         return (chipFamily == P10)
-            && (getDDLevel() == DD1);
+            && (getDDLevel() == DD10);
+    }
+
+    /**
+     * @brief Check whether the current DD level is DD2.0
+     *
+     * @return True if and only if the current DD level is DD2.0
+     */
+    bool isP10DD20() const
+    {
+        return (chipFamily == P10)
+            && (getDDLevel() == DD20);
     }
 };
 
