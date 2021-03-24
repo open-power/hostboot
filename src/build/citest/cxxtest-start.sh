@@ -69,6 +69,14 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     #@FIXME-RTC:254475-Remove once this works everywhere
     START_SIMICS_CMD+=" hb_ignoresmpfail=0"
 
+    # If CI job is for DD1 then send the proper simics commandline arg.
+    # NOTE: Only care that the variable is set in the environment. Doesn't matter if it's an empty string ""
+    #       or anything else. Existence of the var implies user wants DD1 simics. To revert back to default DD2
+    #       simics user must unset STANDALONE_TEST_DD1 in their environment.
+    if [ -n "${STANDALONE_TEST_DD1+set}" ]; then
+        START_SIMICS_CMD+=" dd_major_ver=1"
+    fi
+
     if [ "$HOSTBOOT_PROFILE" ] ; then
         export SIMICS_MORECACHE=1
     fi
