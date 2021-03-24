@@ -710,7 +710,7 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
     errlHndl_t l_errl = nullptr;
     o_didFindTable = false; // flag if did find WOF override table
 
-    /* Set Search Criteria: l_coreCount, l_nominalPowerWatts and l_nominalFreqMhz */
+    /* Set Search Criteria: l_coreCount, l_nominalPowerWatts and l_wofbaseFreqMhz */
 
     // Core count
     TARGETING::TargetHandleList l_coreTargetList;
@@ -721,12 +721,12 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
                                                TARGETING::UTIL_FILTER_PRESENT);
     const uint8_t l_coreCount = l_coreTargetList.size();
 
-    // Nominal power in Watts for Proc and Nominal Freq in Mhz for System
+    // Nominal power in Watts for Proc and WofBase Freq in Mhz for System
     const uint16_t l_nominalPowerWatts = i_procTarg->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
-    const uint16_t l_nominalFreqMhz = l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
+    const uint16_t l_wofbaseFreqMhz = l_sys->getAttr<TARGETING::ATTR_WOFBASE_FREQ_MHZ>();
 
     FAPI_INF("getOverrideWofTable: Override WOF table search criteria: core count %d nominal "
-             "power 0x%X nominal freq 0x%X", l_coreCount, l_nominalPowerWatts, l_nominalFreqMhz);
+             "power 0x%X wofbase freq 0x%X", l_coreCount, l_nominalPowerWatts, l_wofbaseFreqMhz);
 
     /* Set a pointer (l_pWofImage) to WOFDATA LID */
 
@@ -883,7 +883,7 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
             // Checking against search criteria
             if ( (l_overrideEntry[l_entryIdx].core_count          == l_coreCount        ) &&
                  (l_overrideEntry[l_entryIdx].socket_power_w      == l_nominalPowerWatts) &&
-                 (l_overrideEntry[l_entryIdx].sort_power_freq_mhz == l_nominalFreqMhz   ) )
+                 (l_overrideEntry[l_entryIdx].sort_power_freq_mhz == l_wofbaseFreqMhz   ) )
             {
                 FAPI_INF("getOverrideWofTable: WOF Override-set matching search criteria found "
                     "core_count: %d socket_power_w: 0x%X sort_power_freq_mhz: 0x%X ",
@@ -899,7 +899,7 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
                 // Simics runs with fewer cores, ignore the core_count if we don't find a complete match
                 if ( (Util::isSimicsRunning() && l_simicsEntry.didFind == false) &&
                           (l_overrideEntry[l_entryIdx].socket_power_w      == l_nominalPowerWatts) &&
-                          (l_overrideEntry[l_entryIdx].sort_power_freq_mhz == l_nominalFreqMhz   ) )
+                          (l_overrideEntry[l_entryIdx].sort_power_freq_mhz == l_wofbaseFreqMhz   ) )
                 {
                     FAPI_INF("getOverrideWofTable: WOF Override-set matching search criteria found for "
                         "Simics run socket_power_w: 0x%X sort_power_freq_mhz: 0x%X ",
@@ -938,7 +938,7 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
             * @userdata1[00:31]  Number of WOF override sets checked
             * @userdata1[32:63]  Core count
             * @userdata2[00:31]  Nominal power in watts
-            * @userdata2[32:63]  Nominal frequency in Mhz
+            * @userdata2[32:63]  WofBase frequency in Mhz
             * @devdesc           No override WOF table found
             * @custdesc          Firmware Error or unsupported part
             */
@@ -949,14 +949,14 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
                             TWO_UINT32_TO_UINT64(TO_UINT32(l_entryCount),
                                                  TO_UINT32(l_coreCount)),
                             TWO_UINT32_TO_UINT64(TO_UINT32(l_nominalPowerWatts),
-                                                 TO_UINT32(l_nominalFreqMhz)),
+                                                 TO_UINT32(l_wofbaseFreqMhz)),
                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             // Append info on entries that were searched:
             wofOverrideCompareData_t l_searchInfo;
             l_searchInfo.core_count = l_coreCount;
             l_searchInfo.socket_power_w = l_nominalPowerWatts;
-            l_searchInfo.sort_power_freq_mhz = l_nominalFreqMhz;
+            l_searchInfo.sort_power_freq_mhz = l_wofbaseFreqMhz;
             addWofOverrideSearchEntriesToErrl(l_errl, &l_searchInfo, l_searchedEntries);
 
             break;

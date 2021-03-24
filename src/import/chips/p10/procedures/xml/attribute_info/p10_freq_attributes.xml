@@ -372,6 +372,18 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     Frequecy (in MHz) that is considered "Nominal" for the system.  This comes from
+    the Fixed core frequency field in the #V record of VPD.
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_WOFBASE_FREQ_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Frequecy (in MHz) that is considered "WofBase" for the system.  This comes from
     the WOF Base frequency field in the #V record of VPD.
   </description>
   <valueType>uint32</valueType>

@@ -410,11 +410,11 @@ public:
 
         // Hard coded values of a WOF Image entry in WOFDATA known to exist
         const uint32_t l_testNominalPowerWatts = 0x190;
-        const uint32_t l_testNominalFreqMhz = 0x960;
+        const uint32_t l_testwofBaseFreqMhz = 0x960;
 
         // Store original values
         const uint32_t l_origNominalPowerWatts = l_masterProc->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
-        const uint32_t l_origNominalFreqMhz = l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
+        const uint32_t l_origwofBaseFreqMhz = l_sys->getAttr<TARGETING::ATTR_WOFBASE_FREQ_MHZ>();
 
         do
         {
@@ -423,10 +423,10 @@ break; // Temporary change to skip the test in rchgsa build environment
 
             // Set selection criteria to values that are purposefully incorrect
             l_masterProc->setAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>(0xFFFF); // uint_16
-            l_sys->setAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>(0xFFFFFFFF); // uint_16
+            l_sys->setAttr<TARGETING::ATTR_WOFBASE_FREQ_MHZ>(0xFFFFFFFF); // uint_16
             FAPI_INF("testGetOverrideWofCoverage: Testing code path of not finding an override match.")
             FAPI_INF("testGetOverrideWofCoverage: Set test values ATTR_SOCKET_POWER_NOMINAL = %d, "
-                "ATTR_NOMINAL_FREQ_MHZ = %d", 0xFFFF, 0xFFFFFFFF);
+                "ATTR_WOFBASE_FREQ_MHZ = %d", 0xFFFF, 0xFFFFFFFF);
 
             l_didFindTable = true; // this is expected to be set to false in function call below:
             l_errl = fapi2::platAttrSvc::getOverrideWofTable(l_masterProc, *l_wofTableData, l_didFindTable);
@@ -455,10 +455,10 @@ break; // Temporary change to skip the test in rchgsa build environment
 
             // Set selection criteria to values known to be in the WOFDATA Override image
             l_masterProc->setAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>(l_testNominalPowerWatts);
-            l_sys->setAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>(l_testNominalFreqMhz);
+            l_sys->setAttr<TARGETING::ATTR_WOFBASE_FREQ_MHZ>(l_testwofBaseFreqMhz);
             FAPI_INF("testGetOverrideWofCoverage: Testing success path of finding an override WOF Table.")
             FAPI_INF("testGetOverrideWofCoverage: Set test values ATTR_SOCKET_POWER_NOMINAL = %d, "
-                "ATTR_NOMINAL_FREQ_MHZ = %d", l_testNominalPowerWatts, l_testNominalFreqMhz);
+                "ATTR_WOFBASE_FREQ_MHZ = %d", l_testNominalPowerWatts, l_testwofBaseFreqMhz);
 
             // Try to get override WOF table
             l_didFindTable = false; // this is expected to be set to true in function call below:
@@ -479,7 +479,7 @@ break; // Temporary change to skip the test in rchgsa build environment
 
         // Place back original values
         l_masterProc->setAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>(l_origNominalPowerWatts);
-        l_sys->setAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>(l_origNominalFreqMhz);
+        l_sys->setAttr<TARGETING::ATTR_WOFBASE_FREQ_MHZ>(l_origwofBaseFreqMhz);
 
         // Clean up
         if (l_wofTableData)

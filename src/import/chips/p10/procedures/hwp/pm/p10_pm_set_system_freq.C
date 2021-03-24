@@ -320,15 +320,15 @@ fapi2::ReturnCode pm_set_frequency(
             {
                 if (l_part_freq != l_part_running_freq)
                 {
-                    FAPI_INF("Present System WOF Base freq %04d is not equal to this chip's WOF Base Freq %04d",
-                            l_part_running_freq, l_wofbase_freq);
+                    FAPI_INF("Present part  freq %04d is not equal to this chip's part Freq %04d",
+                            l_part_freq, l_part_running_freq);
                     // This does not produce an error log as the system will operate ok
                     // for this case.
                 }
 
-                if ( l_part_freq > l_part_running_freq)
+                if ( l_part_freq < l_part_running_freq)
                 {
-                    l_part_freq = l_part_running_freq;
+                    l_part_running_freq = l_part_freq;
                 }
             }
 
@@ -338,6 +338,9 @@ fapi2::ReturnCode pm_set_frequency(
             FAPI_INF("Running Computed fixed frequency:         %04d (0x%04x)", l_part_running_freq, l_part_running_freq);
 
         } //end of proc list
+        l_part_freq = l_part_running_freq;
+        l_wofbase_freq = l_tmp_wofbase_freq;
+
 
         // Now clip things with system overrides
         // ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ_OVERRIDE --> MRW
@@ -398,6 +401,7 @@ fapi2::ReturnCode pm_set_frequency(
         // Write out attributes with the results
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,     i_sys_target, l_sys_pstate0_freq_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_NOMINAL_FREQ_MHZ,            i_sys_target, l_part_freq));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOFBASE_FREQ_MHZ,            i_sys_target, l_wofbase_freq));
 
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,i_sys_target, l_sys_freq_core_ceil_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ,  i_sys_target, l_floor_freq_mhz));
