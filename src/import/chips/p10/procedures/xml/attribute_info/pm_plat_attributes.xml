@@ -1647,86 +1647,6 @@
 
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_WOF_VRATIO_VDD_COREON_OVERRIDE_10THPCT</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    DEPRECATED.
-    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VDD_10THPCT
-
-    </description>
-    <valueType>uint16</valueType>
-    <platInit/>
-    <default>800</default>
-    <overrideOnly/>
-    <group>wof</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_WOF_VRATIO_VDD_MMAON_OVERRIDE_10THPCT</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    DEPRECATED.
-    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VDD_10THPCT
-
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <default>100</default>
-    <overrideOnly/>
-    <group>wof</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_WOF_VRATIO_VDD_L3ON_OVERRIDE_10THPCT</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    DEPRECATED.
-    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VDD_10THPCT
-
-    </description>
-    <valueType>uint16</valueType>
-    <platInit/>
-    <default>800</default>
-    <overrideOnly/>
-    <group>wof</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_WOF_VRATIO_VCS_COREON_OVERRIDE_10THPCT</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    DEPRECATED.
-    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VCS_10THPCT
-
-    </description>
-    <valueType>uint16</valueType>
-    <platInit/>
-    <default>200</default>
-    <overrideOnly/>
-    <group>wof</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_WOF_VRATIO_VCS_L3ON_OVERRIDE_10THPCT</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    DEPRECATED.
-    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VCS_10THPCT
-
-    </description>
-    <valueType>uint16</valueType>
-    <platInit/>
-    <default>00</default>
-    <overrideOnly/>
-    <group>wof</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_WOF_VRATIO_VDD_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -1759,7 +1679,7 @@
         RESERVED6           = 6,
         RESERVED7           = 7
     </enum>
-    <default>800, 150, 5, 0, 0, 0, 0, 0</default>
+    <default>800, 150, 50, 0, 0, 0, 0, 0</default>
     <overrideOnly/>
     <group>wof</group>
   </attribute>
