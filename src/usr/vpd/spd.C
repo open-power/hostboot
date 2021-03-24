@@ -1129,13 +1129,14 @@ bool spdPresent ( TARGETING::Target * i_target )
                 {
                     TRACFCOMP( g_trac_spd, "spdPresent> Unexpected data found on %.8X, checking CRC",
                                TARGETING::get_huid(i_target) );
-                    //TODO-RTC:269550 - check for p10 dd1 here
                     errlHndl_t err2 = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
                     if( err2 )
                     {
                         TRACFCOMP( g_trac_spd, "spdPresent> CRC error" );
                         delete err2;
                         err2 = nullptr;
+                        // Note that we will check CRC again later so no
+                        //  need to commit the log here
 
                         // we saw something so default it to DDR4
                         memType = SPD_DDR4_TYPE;

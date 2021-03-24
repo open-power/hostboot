@@ -43,6 +43,8 @@
 #include <ipmi/ipmifruinv.H>
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <targeting/targplatutil.H>     // assertGetToplevelTarget
+#include <arch/pvrformat.H>
+#include <sys/mmio.h>
 
 // ----------------------------------------------
 // Trace - defined in vpd_common

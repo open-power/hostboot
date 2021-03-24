@@ -41,8 +41,9 @@
 #include <initservice/istepdispatcherif.H>
 #include <vpd/mvpdenums.H>
 #include <stdio.h>
-#include <sys/mm.h>
+#include <sys/mmio.h>
 #include <sys/misc.h>
+#include <arch/pvrformat.H>
 
 #include <pnor/pnorif.H>
 #include <fapiwrap/fapiWrapif.H>
@@ -1122,14 +1123,17 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             // There is a bug on P10 DD1 that can cause SPD corruption
             // due to some floating i2c lines.  To help the lab we will
             // write our previously cached data out to the hardware.
-            //TODO-RTC:269550 - add dd1 check
-            HWAS_DBG( "Call SPD::fixEEPROM on %.8X", TARGETING::get_huid(pTarget) );
-            errl = SPD::fixEEPROM( pTarget );
-            if (errl)
+            PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+            if( l_pvr.isP10DD10() )
             {
-                // commit the error but remove all deconfig/gard
-                errl->removeGardAndDeconfigure();
-                errlCommit(errl, HWAS_COMP_ID);
+                HWAS_DBG( "Call SPD::fixEEPROM on %.8X", TARGETING::get_huid(pTarget) );
+                errl = SPD::fixEEPROM( pTarget );
+                if (errl)
+                {
+                    // commit the error but remove all deconfig/gard
+                    errl->removeGardAndDeconfigure();
+                    errlCommit(errl, HWAS_COMP_ID);
+                }
             }
             //End P10 DD1 Workaround
 
@@ -1149,7 +1153,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             }
             else
             {
-                HWAS_INF( "Ignoring CRC in Simics" );
+                HWAS_DBG( "Ignoring CRC in Simics" );
             }
         }
 
