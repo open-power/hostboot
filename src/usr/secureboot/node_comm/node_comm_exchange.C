@@ -1586,7 +1586,19 @@ errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_io
 
     if(l_errl)
     {
-        captureError(l_errl, l_istepError, SECURE_COMP_ID);
+        // If TPM is required, propagate the error further
+        if(TRUSTEDBOOT::isTpmRequired())
+        {
+            captureError(l_errl, l_istepError, SECURE_COMP_ID);
+        }
+        else
+        {
+            // TPM is not required, mark the error as informational and commit
+            TRACFCOMP(g_trac_nc,INFO_MRK"exchangeNoncesMultithreaded: TPM is not required, changing EID 0x%x's severity to Informational and committing the error log.",                                                                                                                                          
+                      l_errl->eid());
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, SECURE_COMP_ID);
+        }
     }
 
     return l_istepError.getErrorHandle();
@@ -1740,7 +1752,19 @@ errlHndl_t exchangeQuotesMultithreaded(const std::vector<iohs_instances_t>& i_io
 
     if(l_errl)
     {
-        captureError(l_errl, l_istepError, SECURE_COMP_ID);
+        // If TPM is required, propagate the error further
+        if(TRUSTEDBOOT::isTpmRequired())
+        {
+            captureError(l_errl, l_istepError, SECURE_COMP_ID);
+        }
+        else
+        {
+            // TPM is not required, mark the error as informational and commit
+            TRACFCOMP(g_trac_nc,INFO_MRK"exchangeQuotesMultithreaded: TPM is not required, changing EID 0x%x's severity to Informational and committing the error log.",
+                      l_errl->eid());
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, SECURE_COMP_ID);
+        }
     }
 
     return l_istepError.getErrorHandle();

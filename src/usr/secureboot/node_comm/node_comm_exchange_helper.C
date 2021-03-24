@@ -33,6 +33,7 @@
 #include <secureboot/secure_reasoncodes.H>
 #include <sys/time.h>
 #include <isteps/istepHelperFuncs.H>
+#include <secureboot/trustedbootif.H>
 
 namespace SECUREBOOT
 {
@@ -50,6 +51,23 @@ mutex_t NodeCommExchange::iv_errorMutex = MUTEX_INITIALIZER;
  */
 void NodeCommExchange::handleError(errlHndl_t i_errl)
 {
+    errlHndl_t l_poisonTpmErr = TRUSTEDBOOT::poisonAllTpms();
+    if(l_poisonTpmErr)
+    {
+        if(i_errl)
+        {
+            l_poisonTpmErr->plid(i_errl->plid());
+        }
+        TRACFCOMP(g_trac_nc,ERR_MRK"NodeCommExchange::handleError(): Could not poison TPMs");
+        if(!TRUSTEDBOOT::isTpmRequired())
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"NodeCommExchange::handleError(): TPM is not required, setting errl EID 0x%x to Informational",
+                      l_poisonTpmErr->eid());
+            l_poisonTpmErr->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        }
+        errlCommit(l_poisonTpmErr, SECURE_COMP_ID);
+    }
+
     mutex_lock(&iv_errorMutex);
     if(!TRUSTEDBOOT::isTpmRequired())
     {
