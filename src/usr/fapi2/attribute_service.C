@@ -1076,67 +1076,6 @@ fapi_try_exit:
 }
 
 //******************************************************************************
-// fapi2::platAttrSvc::__badDqBitmapCheckForReconfigLoop function
-//******************************************************************************
-ReturnCode __badDqBitmapCheckForReconfigLoop(
-    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
-    uint8_t i_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT] )
-{
-    // If, when setting the bad dq bitmap, we find new bits are set, we will
-    // want to trigger a reconfig loop.
-    bool l_badDqSet = false;
-
-    // Read current BadDqBitmap into l_prev_data
-    uint8_t l_prev_data[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, i_fapiDimm,
-              l_prev_data) );
-
-    // Check if Bad DQ bit set
-    // Loop through all ranks
-    for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
-    {
-        // Loop through all DQs
-        for ( uint8_t j = 0; j < mss::BAD_DQ_BYTE_COUNT; j++ )
-        {
-            // Loop through all bits
-            for ( uint8_t k = 0; k < mss::BITS_PER_BYTE; k++ )
-            {
-                uint8_t prevBit = (l_prev_data[i][j] >> k) & 0x01;
-                uint8_t newBit  = (i_bitmap[i][j] >> k) & 0x01;
-                // Check for differences, and the bit was set, not cleared
-                if ( (prevBit != newBit) && (newBit != 0) )
-                {
-                    l_badDqSet = true;
-                    break;
-                }
-            }
-            if ( l_badDqSet ) break;
-        }
-        if ( l_badDqSet ) break;
-    }
-
-    // Set ATTR_RECONFIGURE_LOOP to indicate a bad DqBitMap was set
-    if ( l_badDqSet )
-    {
-        FAPI_INF( "__badDqBitmapCheckForReconfigLoop: Reconfigure needed, "
-                  "Bad DQ set" );
-
-        fapi2::ATTR_RECONFIGURE_LOOP_Type l_reconfigAttr = 0;
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_RECONFIGURE_LOOP,
-                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_reconfigAttr) );
-
-        // 'OR' values in case of multiple reasons for reconfigure
-        l_reconfigAttr |= fapi2::ENUM_ATTR_RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
-
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_RECONFIGURE_LOOP,
-                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_reconfigAttr) );
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-//******************************************************************************
 // fapi2::platAttrSvc::fapiAttrGetBadDqBitmap function
 //******************************************************************************
 ReturnCode fapiAttrGetBadDqBitmap(
@@ -1315,9 +1254,6 @@ ReturnCode fapiAttrSetBadDqBitmap(
 
         FAPI_TRY( __dimmUpdateDqBitmapEccByte(l_fapiDimm, l_tmpBitmap) );
         FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, l_tmpBitmap) );
-
-        // Check if we need to trigger a reconfig loop.
-        FAPI_TRY( __badDqBitmapCheckForReconfigLoop(l_fapiDimm, l_tmpBitmap) );
 
         // If system is in DISABLE_DRAM_REPAIRS mode
         if ( TARGETING::isDramRepairsDisabled() )
