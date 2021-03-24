@@ -165,8 +165,7 @@
     </attribute>
     <attribute>
         <id>MAX_ALLOWED_DIMM_FREQ</id>
-        <default>2666,2666,2666,2666,2666</default>
-        <!-- temp removal <default>3200,3200,3200,3200,3200</default> -->
+        <default>3200,3200,3200,3200,3200</default>
     </attribute>
     <attribute>
       <default>4</default>
