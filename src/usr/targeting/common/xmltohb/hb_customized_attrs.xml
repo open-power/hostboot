@@ -787,12 +787,6 @@
         <writeable/>
     </attribute>
 
-    <attribute>
-        <id>ATTR_PROC_FABRIC_PRESENT_GROUPS</id>
-        <writeable/>
-        <persistency>non-volatile</persistency><!-- needs to be nonvolatile as FSP is setting it -->
-    </attribute>
-
     <!-- Delete the redundant values from SW2 -->
     <attribute><id>MBA_PORT</id><no_export/></attribute>
     <attribute><id>MBA_DIMM</id><no_export/></attribute>
@@ -831,6 +825,41 @@
         <id>ATTR_PROC_PCIE_CACHE_INJ_THROTTLE</id>
         <writeable/>
     </attribute>
+
+    <!-- These are computed on the FSP so need to be non-volatile
+         for HB to consume them -->
+    <attribute>
+        <id>ATTR_PROC_FABRIC_PRESENT_GROUPS</id>
+        <writeable/>
+        <persistency>non-volatile</persistency>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
+        <persistency>non-volatile</persistency>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ</id>
+        <persistency>non-volatile</persistency>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_FREQ_CORE_CEILING_MHZ</id>
+        <persistency>non-volatile</persistency>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ</id>
+        <persistency>non-volatile</persistency>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
+        <persistency>non-volatile</persistency>
+    </attribute>
+
+    <!-- End FSP nonvolatile overrides -->
 
     <attribute>
        <id>ATTR_LPC_CONSOLE_CNFG</id>
@@ -876,10 +905,6 @@
     <attribute>
         <id>ATTR_PROC_FABRIC_TOPOLOGY_ID</id>
         <global/>
-    </attribute>
-    <attribute>
-        <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
-        <persistency>non-volatile</persistency><!-- needs to be nonvolatile as FSP is setting it -->
     </attribute>
     <attribute>
         <id>ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE</id>
