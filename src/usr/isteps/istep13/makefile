@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -59,6 +59,7 @@ include ${ROOTPATH}/procedure.rules.mk
 
 # EKB HWP
 OBJS += exp_scominit.o
+OBJS += explorer_mds_scom.o
 OBJS += explorer_scom.o
 OBJS += exp_draminit.o
 OBJS += exp_draminit_mc.o

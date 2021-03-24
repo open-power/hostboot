@@ -1,0 +1,1080 @@
+#-- *!***************************************************************************
+#-- *! (C) Copyright International Business Machines Corp. 2000-2018
+#-- *!           All Rights Reserved -- Property of IBM
+#-- *!                   *** IBM Confidential ***
+#-- *!***************************************************************************
+
+#  Joe's initfile reference page:
+#  https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/W9dc674bd1c19_432e_9f66_0e8b6ce7195f/page/P9%20Initfile%20Strategy%20%26%20Execution
+#  http://ausxgsatm2.austin.ibm.com/gsa/home/j/m/jmcgill/web/public/p8/initfiles/mba_def.initfile
+
+#--******************************************************************************
+#-- IMPORTANT SUPPORT NOTES AS OF 3/28/2017
+#--******************************************************************************
+# Here we assume WL = ATTR_MEM_DRAM_CWL (which is true if no Additive Latency / Posted CAS).
+#      So no support for Posted CAS / Additive latency
+# Only supports Burst Length 8 (CODE AND LOGIC STATEMENT)
+#      Initfile is hardcoded assuming BL=8 and BL/2=4
+#      Attribute does exist for Burst length. However, Nimbus logic does NOT support any other burst lengths
+#           If other burst lengths are to be supported, a logic change would be required
+# Only supports RDIMM with RDIMM and LRDIMM with LRDIMM, no mixing (CODE AND LOGIC STATEMENT)
+#      Logic would have to support different wr data delays to differen DIMMs. It does NOT.
+#
+#--******************************************************************************
+#-- FUTURE ENHANCEMENTS
+#--******************************************************************************
+# ATTR_MEM_EFF_TCCD_S attribute (hardcoded to 4 for now)
+
+
+#--******************************************************************************
+#-- REFERENCES FOR FILE (note: exact paths may move)
+#--******************************************************************************
+# Files used to check what target type attributes are
+#      ekb/chips/p9/procedures/xml/attribute_info/*.xml
+#      Example:
+#           <id>ATTR_MEM_NUM_RANKS_PER_DIMM</id>
+#           <targetType>TARGET_TYPE_MCS</targetType>
+# File used to see if attribute is 1D or 2D array
+#      ekb/output/gen/attribute_ids.H
+#      Example:
+#           typedef uint8_t ATTR_MEM_DIMM_TYPE_Type[2];
+# File for finding correct spydef name
+#      1st find the spydef file this ekb build is looking at by finding SPYDEF_FILE_LOCATION in file below
+#           ekb/tools/ifCompiler/scan_procedures.mk
+#      2nd open *.spydef in that dir and search for spy names
+#           /afs/awd/projects/eclipz/lab/p9/vbu_models/n10_e9067_tp058_ec163uXXa_soa_sq_u190_01/edc/*.spydef
+#      (File comes from actually building a vbu file and looking at the spydef)
+#      Example:
+#           idial MCP.PORT1.SRQ.PC.MBAREF0Q_CFG_TRFC {
+# Wrapper file calling this
+#      ekb/chips/p9/procedures/hwp/memory/p9_mss_scominit.C
+# Output file generated
+#      ekb/chips/p9/procedures/hwp/initfiles/p9_mca_scom.C
+#
+# COMMON DEBUG
+#      -debug5.16.i6.d
+#      If complaining unsupported attribute, try commenting out of attribute in attribute file
+#      If complaining memory fault, maybe wrong integer length in attribute file
+
+
+#--******************************************************************************
+#-- Required keywords/variables
+#--******************************************************************************
+
+SyntaxVersion = 3
+
+target_type 0 TARGET_TYPE_OCMB_CHIP;
+target_type 1 TARGET_TYPE_MEM_PORT;
+target_type 2 TARGET_TYPE_SYSTEM;
+target_type 3 TARGET_TYPE_MC;
+
+
+define OCMB = TGT0; # If referencing Attr from the OCMB, add "OCMB." in front
+define MP = TGT1; # If referencing Attr from the memory port, add "MP." in front
+define SYS = TGT2; # If referencing Attr from system, add "SYS." in front
+define MC = TGT3; # If referencing Attr from system, add "MC." in front
+
+#RDIMM_BUFFER_delay
+#Note: assuming that the DIMM type will be the same across the port
+#Checks for DIMM's w/ an RCD buffer (RDIMM or LRDIMM)
+define def_RDIMM_TYPE = (MP.ATTR_MEM_EFF_DIMM_TYPE[0] == 1 || MP.ATTR_MEM_EFF_DIMM_TYPE[0] == 3);
+define def_RDIMM_Add_latency = def_RDIMM_TYPE * MP.ATTR_MEM_RDIMM_BUFFER_DELAY;
+define def_IS_HW  = SYS.ATTR_IS_SIMULATION == 0;
+define def_IS_MICROSEMI_SIM = SYS.ATTR_IS_SIMULATION == 1;
+define def_IS_IBM_SIM = 0; # this is no longer needed, we left the associated formulas below for future proofing.
+
+#--******************************************************************************
+#-- Systems Config
+#--******************************************************************************
+
+#--******************************************************************************
+#-- Effective Attributes
+#--******************************************************************************
+
+# define frequency range for potential support of sync mode
+define def_MEM_EFF_FREQ_EQ_2666     =   (                              (MP.ATTR_MEM_EFF_FREQ<2668));
+define def_MEM_EFF_FREQ_EQ_2933     =   ((MP.ATTR_MEM_EFF_FREQ>=2668)  &&  (MP.ATTR_MEM_EFF_FREQ<2934));
+define def_MEM_EFF_FREQ_EQ_3200     =   ((MP.ATTR_MEM_EFF_FREQ>=2934)                                 );
+
+define def_NUM_RANKS            = (   MP.ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[0]
+                                    + MP.ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[1] );
+
+define def_NUM_MRANKS_0       =  (MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[0] == 0x0) | MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[0];
+define def_NUM_SRANKS_0       =  MP.ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[0]/def_NUM_MRANKS_0; # if result is 1 indicates no slave rank
+define def_NUM_MRANKS_1       =  (MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[1] == 0x0) | MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[1];
+define def_NUM_SRANKS_1       =  MP.ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[1]/def_NUM_MRANKS_1; # if result is 1 indicates no slave rank
+
+#Make sure we never have a divide by 0 case defined
+define def_NUM_RANKS_DENOMINATOR = (def_NUM_RANKS == 0x0) | def_NUM_RANKS;
+#define def_REFRESH_INTERVAL     =   ((MP.ATTR_MEM_EFF_DRAM_TREFI)/(8*def_NUM_RANKS_DENOMINATOR));
+define def_REFRESH_INTERVAL     =   81;  # if 512GB
+#define def_REFRESH_INTERVAL     =   162;  # if 256GB
+
+define def_RANK_SWITCH_TCK      =   4 + ((MP.ATTR_MEM_EFF_FREQ-1866)/266);         # 1866: 4  2133: 5  2400: 6  2666: 7  2933: 8  3200: 9
+define def_BUS_TURNAROUND_TCK   =   4 + ((MP.ATTR_MEM_EFF_FREQ-1866)/266);         # 1866: 4  2133: 5  2400: 6  2666: 7  2933: 8  3200: 9
+
+# Funky ... If the attribute is 0, then the value of the == operation will be 1 which bitwise-or'd with 0 gives us 1. If the attribute is != 0, then the
+# value of the == operation will be 0 which when bitwise-or'd with the attribute will give us the attribute value. Love, Prachi, Jenny, Shelton and Brian.
+define def_SLOT0_DENOMINATOR    = (MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[0] == 0x0) | MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[0];
+define def_SLOT1_DENOMINATOR    = (MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[1] == 0x0) | MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[1];
+
+define def_SLOT0_DRAM_STACK_HEIGHT = (   MP.ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[0]
+                                         / def_SLOT0_DENOMINATOR );
+define def_SLOT1_DRAM_STACK_HEIGHT = (   MP.ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[1]
+                                         / def_SLOT1_DENOMINATOR );
+
+# using 1.2 creates a floating point exception, so we use * 6 / 5 instead
+define def_REFR_CHECK_INTERVAL =   ( def_REFRESH_INTERVAL * def_NUM_RANKS * 6 ) / 5;
+
+#DIMM0 Row bit15,16,17 valid
+define def_row_bit15_val_0 = MP.ATTR_MEM_EFF_DRAM_ROW_BITS[0] >=16;
+define def_row_bit16_val_0 = MP.ATTR_MEM_EFF_DRAM_ROW_BITS[0] >=17;
+define def_row_bit17_val_0 = MP.ATTR_MEM_EFF_DRAM_ROW_BITS[0] >=18;
+
+#DIMM1 Row bit15,16,17 valid
+define def_row_bit15_val_1 = MP.ATTR_MEM_EFF_DRAM_ROW_BITS[1] >=16;
+define def_row_bit16_val_1 = MP.ATTR_MEM_EFF_DRAM_ROW_BITS[1] >=17;
+define def_row_bit17_val_1 = MP.ATTR_MEM_EFF_DRAM_ROW_BITS[1] >=18;
+
+#DIMM0 Master Rank bit0, bit1  and Slave Rank Bit0, Bit1, Bit 2 valid
+#i.e
+#m0m1   = 0b01 if Master Rank = 2
+#s0s1s2 = 0b010 if Slave Rank = 4
+define def_m0_val_0    = def_NUM_MRANKS_0 > 2;
+define def_m1_val_0    = def_NUM_MRANKS_0 >= 2;
+define def_s0_val_0    = def_NUM_SRANKS_0 > 4;
+define def_s1_val_0    = def_NUM_SRANKS_0 >= 4;
+define def_s2_val_0    = def_NUM_SRANKS_0 >= 2;
+
+#DIMM0 Master Rank bit0, bit1 and Slave Rank Bit0, Bit1, Bit 2 valid
+define def_m0_val_1    = def_NUM_MRANKS_1 > 2;
+define def_m1_val_1    = def_NUM_MRANKS_1 >= 2;
+define def_s0_val_1    = def_NUM_SRANKS_1 > 4;
+define def_s1_val_1    = def_NUM_SRANKS_1 >= 4;
+define def_s2_val_1    = def_NUM_SRANKS_1 >= 2;
+
+#Slot 0 is valid if there is at least one rank in DIMM[0]
+define def_slot_val_0  = MP.ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[0] > 0;
+#Slot 1 is valid if there is at least one rank in DIMM[1]
+define def_slot_val_1  = MP.ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[1] > 0;
+
+#count total number of bits that are valid for Row, Master Rank and Slave Rank
+#use this value to determine where to map the DIMM bit
+define def_num_of_bitvals_0  =  def_row_bit17_val_0 +
+                                def_row_bit16_val_0 +
+                                def_row_bit15_val_0 +
+                                def_m0_val_0 +
+                                def_m1_val_0 +
+                                def_s0_val_0 +
+                                def_s1_val_0 +
+                                def_s2_val_0 ;
+
+define def_num_of_bitvals_1  =  def_row_bit17_val_1 +
+                                def_row_bit16_val_1 +
+                                def_row_bit15_val_1 +
+                                def_m0_val_1 +
+                                def_m1_val_1 +
+                                def_s0_val_1 +
+                                def_s1_val_1 +
+                                def_s2_val_1 ;
+#Enterprise mode and Half dimm mode
+#value of half dimm mode is only valid under enterprise mode
+define def_enterprise_mode = (OCMB.ATTR_MSS_OCMB_ENTERPRISE_MODE == 1) && (OCMB.ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE == 1);
+define def_half_dimm_mode  = (def_enterprise_mode == 1) && ((OCMB.ATTR_MSS_OCMB_HALF_DIMM_MODE == 1) && (OCMB.ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE != 1) ||
+                                                            (OCMB.ATTR_MSS_OCMB_HALF_DIMM_MODE == 0) && (OCMB.ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE == 2));
+# For ODT RD/WR register setting
+define def_four_rank_mode = (MP.ATTR_MEM_EFF_FOUR_RANK_MODE[0] == 1);
+define def_encoded_quad_cs = def_RDIMM_TYPE && (MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[0] == 0x4); # For future use
+define def_dual_drop = ((MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[0] > 0) && (MP.ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[1] > 0));
+define def_cs_tied = (def_four_rank_mode == 0 && def_dual_drop == 0);
+
+
+#disable fast activate in half dimm mode or quad rank encoded mode
+#define def_disable_fast_act = ((def_NUM_SRANKS_0 > 1 || def_NUM_SRANKS_1 >1) && (def_NUM_MRANKS_0 == 4 || def_NUM_MRANKS_1 == 4)) || def_half_dimm_mode;
+define def_disable_fast_act = 1; #Performance testing showed fast act yielded no significant bandwidth / latency advantages
+
+#--******************************************************************************
+#-- Dial Assignments
+#--******************************************************************************
+
+#   TMR0 SCOM REGISTER   #
+# DRAM TIMING PARAMETERS #
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_RRDM_DLY [when=S] {      # BL/2+rank_switch
+  spyv;
+  11;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_RRSMSR_DLY [when=S] {    # tccd_s
+  spyv;
+  6;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_RRSMDR_DLY [when=S] {    # tccd_s
+  spyv;
+  6;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_RROP_DLY [when=S] {      # tccd_l
+  spyv;
+  8;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_WWDM_DLY [when=S] {      # BL/2+rank_switch
+  spyv;
+  11;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_WWSMSR_DLY [when=S] {    # tccd_s
+  spyv;
+  6;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_WWSMDR_DLY [when=S] {    # tccd_s
+  spyv;
+  6;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_WWOP_DLY [when=S] {      # tccd_l
+  spyv;
+  8;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_RWDM_DLY [when=S] {      # (RL+BL/2+turn_around)-WL
+  spyv;
+  17;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMSR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
+  spyv;
+  17;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMDR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
+  spyv;
+  17;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_WRDM_DLY [when=S] {      # (WL+BL/2+turn_around)-RL
+  spyv;
+  5;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_WRSMSR_DLY [when=S] {    # WL+BL/2+(Twtr_s/clock period)
+  spyv;
+  22;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR0Q_WRSMDR_DLY [when=S] {    # WL+BL/2+Twtr_s
+  spyv;
+  22;
+}
+
+
+#   TMR1 SCOM REGISTER   #
+# DRAM TIMING PARAMETERS #
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_RRSBG_DLY [when=S] {     # tCCDL
+  spyv;
+  8;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_WRSBG_DLY [when=S] {     # WL+BL/2+Twtr_l
+  spyv;
+  35;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_TFAW [when=S] {
+  spyv;
+  54;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_TRCD [when=S] {
+  spyv;
+  8;
+}
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_TRCD_MSB [when=S] {
+  spyv;
+  1;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_TRP [when=S] {
+  spyv;
+  2;
+}
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_TRP_MSB [when=S] {
+  spyv;
+  1;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_TRAS [when=S] {
+  spyv;
+  16;
+}
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_TRAS_MSB [when=S] {
+  spyv;
+  1;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_WR2PRE [when=S] {        # CWL+BL/2+Twr
+  spyv;
+  85;
+}
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_WR2PRE_MSB [when=S] {        # CWL+BL/2+Twr
+  spyv;
+  0;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_RD2PRE [when=S] {
+  spyv;
+  12;
+}
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_RD2PRE_MSB [when=S] {
+  spyv;
+  0;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_TRRD [when=S] {
+  spyv;
+  12;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_TRRD_SBG [when=S] {
+  spyv;
+  12;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
+  spyv;
+  14;
+}
+
+#   TMR2 SCOM REGISTER   #
+# DRAM TIMING PARAMETERS #
+
+ispy  MB_SIM.SRQ.MBA_TMR2Q_CFG_WRITE_READ_SWITCH_DLY [when=S] {
+  spyv;
+  27;
+}
+
+ispy  MB_SIM.SRQ.MBA_TMR2Q_CFG_READ_WRITE_SWITCH_DLY [when=S] {
+  spyv;
+  190;
+}
+
+#   DSM0 SCOM REGISTER   #
+# DRAM TIMING PARAMETERS #
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+  spyv;
+  197;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDDATA_EN_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+  spyv;
+  197;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDCSLAT_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+  spyv;
+  197;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRDATA_DLY [when=S] {
+  spyv;
+  0;
+}
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRDATA_EN_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+  spyv;
+  7;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRCSLAT_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+  spyv;
+  7;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRDONE_DLY [when=S] {
+  spyv;
+  24;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RODT_START_DLY [when=S] {
+  spyv;
+  63;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RODT_END_DLY [when=S] {
+  spyv;
+  63;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WODT_START_DLY [when=S] {
+  spyv;
+   0;
+}
+
+ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WODT_END_DLY [when=S] {
+  spyv;
+   5;
+}
+
+#  FARB0 SCOM REGISTER   #
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_PARITY_AFTER_CMD [when=S] {
+  spyv;
+  1;
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_CID2_AS_PAR_ENABLE [when=S] {
+  spyv;
+  1;
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_QUAD_RANK_ENC_4DATA_CSN_ENABLE [when=S] {
+  spyv;
+  0;
+}
+
+#  REF0 SCOM REGISTER    #
+
+#gdial std_size 4gbx4 (8GB rank)
+
+ispy  MB_SIM.SRQ.PC.MBAREF0Q_CFG_REFRESH_INTERVAL [when=S] {
+  spyv;
+  81;
+}
+
+ispy  MB_SIM.SRQ.PC.MBAREF0Q_CFG_TRFC [when=S] {
+  spyv;
+  734;
+}
+
+ispy  MB_SIM.SRQ.PC.MBAREF0Q_CFG_REFR_TSV_STACK [when=S] {
+  spyv;
+  247;
+}
+
+
+#  RPC0 SCOM REGISTER    #
+
+ispy  MB_SIM.SRQ.PC.MBARPC0Q_CFG_PUP_PDN [when=S] {         # tCKE
+  spyv;
+  7;
+}
+
+ispy  MB_SIM.SRQ.PC.MBARPC0Q_CFG_PDN_PUP [when=S] {         # tPD
+  spyv;
+  7;
+}
+
+ispy  MB_SIM.SRQ.PC.MBARPC0Q_CFG_PUP_AVAIL [when=S] {       # tXP
+  spyv;
+  8;
+}
+
+#  STR0 SCOM REGISTER    #
+ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_TCKSRE [when=S] {
+  spyv;
+  13;  
+}
+
+ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_TCKSRX [when=S] {
+  spyv;
+  13; 
+}
+
+ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_TCKESR [when=S] {
+  spyv;
+  8;
+}
+
+ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_TXSDLL [when=S] {
+  spyv;
+  854;
+}
+
+# Make Safe Refresh Match Refresh Interval
+ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_SAFE_REFRESH_INTERVAL [when=S] {
+  spyv;
+  81;
+}
+
+ispy  MB_SIM.SRQ.PC.MBASTR0Q_CFG_FORCE_STR [when=S] {
+  spyv;
+  1;
+}
+
+# CID
+# Slot 0
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT0_S0_CID [when=S] {
+  spyv;
+  0b000;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT0_S1_CID [when=S] {
+  spyv;
+  0b100;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT0_S2_CID [when=S] {
+  spyv;
+  0b010;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT0_S3_CID [when=S] {
+  spyv;
+  0b110;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT0_S4_CID [when=S] {
+  spyv;
+  0b001;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT0_S5_CID [when=S] {
+  spyv;
+  0b101;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT0_S6_CID [when=S] {
+  spyv;
+  0b011;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT0_S7_CID [when=S] {
+  spyv;
+  0b111;
+}
+# Slot 1
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S0_CID [when=S] {
+  spyv;
+  0b000;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S1_CID [when=S] {
+  spyv;
+  0b100;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S2_CID [when=S] {
+  spyv;
+  0b010;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S3_CID [when=S] {
+  spyv;
+  0b110;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S4_CID [when=S] {
+  spyv;
+  0b001;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S5_CID [when=S] {
+  spyv;
+  0b101;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S6_CID [when=S] {
+  spyv;
+  0b011;
+}
+ispy MB_SIM.SRQ.MBA_FARB1Q_CFG_SLOT1_S7_CID [when=S] {
+  spyv;
+  0b111;
+}
+
+# ODT RD
+# The resulting C code will only grab the right-most bit of each of these fields
+# Slot 0
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK0_RD_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_RD[0][0] >> 7; # A0
+  1, MP.ATTR_MEM_SI_ODT_RD[0][0] >> 6; # A1
+  2, ((MP.ATTR_MEM_SI_ODT_RD[0][0] >> 3 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][0] >> 7 & 0b1) && (def_cs_tied == 1)); # B0
+  3, ((MP.ATTR_MEM_SI_ODT_RD[0][0] >> 2 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][0] >> 6 & 0b1) && (def_cs_tied == 1)); # B1
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK1_RD_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_RD[0][1] >> 7; # A0
+  1, MP.ATTR_MEM_SI_ODT_RD[0][1] >> 6; # A1
+  2, ((MP.ATTR_MEM_SI_ODT_RD[0][1] >> 3 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][1] >> 7 & 0b1) && (def_cs_tied == 1)); # B0
+  3, ((MP.ATTR_MEM_SI_ODT_RD[0][1] >> 2 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_RD[0][1] >> 6 & 0b1) && (def_cs_tied == 1)); # B1
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK2_RD_ODT [when=S] {
+  bits, spyv;
+  # in four_rank_mode these should already be populated and ready to go,
+  # otherwise they will just remain blank and unused
+  0, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_RD[0][2] >> 2;
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK3_RD_ODT [when=S] {
+  bits, spyv;
+  # in four_rank_mode these should already be populated and ready to go,
+  # otherwise they will just remain blank and unused
+  0, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_RD[0][3] >> 2;
+}
+# Slot 1
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK4_RD_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_RD[1][0] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_RD[1][0] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_RD[1][0] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_RD[1][0] >> 2;
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK5_RD_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_RD[1][1] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_RD[1][1] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_RD[1][1] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_RD[1][1] >> 2;
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK6_RD_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_RD[1][2] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_RD[1][2] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_RD[1][2] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_RD[1][2] >> 2;
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK7_RD_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_RD[1][3] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_RD[1][3] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_RD[1][3] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_RD[1][3] >> 2;
+}
+
+# ODT WR
+# The resulting C code will only grab the right-most bit of each of these fields
+# Slot 0
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK0_WR_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_WR[0][0] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_WR[0][0] >> 6;
+  2, ((MP.ATTR_MEM_SI_ODT_WR[0][0] >> 3 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][0] >> 7 & 0b1) && (def_cs_tied == 1));
+  3, ((MP.ATTR_MEM_SI_ODT_WR[0][0] >> 2 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][0] >> 6 & 0b1) && (def_cs_tied == 1));
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK1_WR_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_WR[0][1] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_WR[0][1] >> 6;
+  2, ((MP.ATTR_MEM_SI_ODT_WR[0][1] >> 3 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][1] >> 7 & 0b1) && (def_cs_tied == 1));
+  3, ((MP.ATTR_MEM_SI_ODT_WR[0][1] >> 2 & 0b1) && (def_cs_tied == 0)) || ((MP.ATTR_MEM_SI_ODT_WR[0][1] >> 6 & 0b1) && (def_cs_tied == 1));
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK2_WR_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_WR[0][2] >> 2;
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK3_WR_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_WR[0][3] >> 2;
+}
+# Slot 1
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK4_WR_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_WR[1][0] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_WR[1][0] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_WR[1][0] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_WR[1][0] >> 2;
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK5_WR_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_WR[1][1] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_WR[1][1] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_WR[1][1] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_WR[1][1] >> 2;
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK6_WR_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_WR[1][2] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_WR[1][2] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_WR[1][2] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_WR[1][2] >> 2;
+}
+ispy MB_SIM.SRQ.MBA_FARB2Q_CFG_RANK7_WR_ODT [when=S] {
+  bits, spyv;
+  0, MP.ATTR_MEM_SI_ODT_WR[1][3] >> 7;
+  1, MP.ATTR_MEM_SI_ODT_WR[1][3] >> 6;
+  2, MP.ATTR_MEM_SI_ODT_WR[1][3] >> 3;
+  3, MP.ATTR_MEM_SI_ODT_WR[1][3] >> 2;
+}
+
+ispy MB_SIM.SRQ.PC.MBARPC0Q_CFG_QUAD_RANK_ENC [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.SRQ.PC.MBAREF0Q_CFG_REFRESH_PRIORITY_THRESHOLD [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.SRQ.PC.MBAREF0Q_CFG_REFR_CHECK_INTERVAL [when=S] {
+  spyv;
+  1560;
+}
+
+ispy MB_SIM.SRQ.MBA_WRQ0Q_CFG_WRQ_FIFO_MODE [when=S] {
+  spyv;
+  OCMB.ATTR_MEM_REORDER_QUEUE_SETTING;
+}
+
+ispy MB_SIM.SRQ.MBA_RRQ0Q_CFG_RRQ_FIFO_MODE [when=S] {
+  spyv;
+  OCMB.ATTR_MEM_REORDER_QUEUE_SETTING;
+}
+
+ispy MB_SIM.SRQ.MBA_RRQ0Q_CFG_DISABLE_FAST_ACT [when=S] {
+  spyv;
+  def_disable_fast_act;
+}
+
+ispy MB_SIM.SRQ.MBA_FARB0Q_CFG_2N_ADDR [when=S] {
+  spyv, expr;
+  0b1,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x02); # force 2n
+  0b0,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x01); # force 1n
+  0b1,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x00) && (OCMB.ATTR_MEM_2N_MODE==0x02); # use auto vpd val -> auto vpd val = 2n
+  0b0,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x00) && (OCMB.ATTR_MEM_2N_MODE==0x01); # use auto vpd val -> auto vpd val = 1n
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_PLANAR_ADDR_MODE [when=S] {
+  spyv;
+  TGT0.ATTR_MEM_MRW_IS_PLANAR;
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_ACT_SAME_RANK_HOLD_TIME [when=S] {
+  spyv;
+  8;
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_MAX_READS_IN_A_ROW [when=S] {
+  spyv;
+  64;
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_MAX_WRITES_IN_A_ROW [when=S] {
+  spyv;
+  32;
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_RCD_PROTECTION_TIME [when=S] {
+  spyv;
+  16;
+}
+
+ispy  MB_SIM.SRQ.MBA_FARB0Q_CFG_FINISH_WR_BEFORE_RD [when=S] {
+  spyv;
+   1;
+}
+
+#zq cal settings
+#enable bit is set via procedure
+#MB_SIM.SRQ.MBA_FARB9Q_cfg_zq_per_cal_enable
+ispy MB_SIM.SRQ.MBA_FARB9Q_CFG_ZQ_PER_CAL_INTERVAL_TB [when=S] {
+  spyv;
+  2;
+}
+
+ispy MB_SIM.SRQ.MBA_FARB9Q_CFG_ZQ_PER_CAL_INTERVAL [when=S] {
+  spyv;
+  511;
+}
+
+ispy MB_SIM.SRQ.MBA_FARB9Q_CFG_ZQ_PER_CAL_RUN_LENGTH [when=S] {
+  spyv;
+  132;
+}
+
+ispy MB_SIM.SRQ.MBA_FARB9Q_CFG_ZQ_PER_CAL_RUN_LENGTH_TB [when=S] {
+  spyv;
+  0;
+}
+
+#enable bit is set via procedure
+#MB_SIM.SRQ.MBA_FARB9Q_cfg_mc_per_cal_enable
+
+ispy MB_SIM.SRQ.MBA_FARB9Q_CFG_MC_PER_CAL_INTERVAL_TB [when=S] {
+  spyv;
+  2;
+}
+
+ispy MB_SIM.SRQ.MBA_FARB9Q_CFG_MC_PER_CAL_INTERVAL [when=S] {
+  spyv;
+  8;
+}
+
+ispy MB_SIM.SRQ.MBA_FARB9Q_CFG_MC_PER_CAL_FIXED_RUN_LENGTH_EN [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.SRQ.MBA_FARB9Q_CFG_MC_PER_CAL_CTRLUPD_MIN [when=S] {
+  spyv;
+  100;
+}
+
+ispy MB_SIM.SRQ.MBA_FARB5Q_CFG_DDR_RESETN [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.SRQ.MBA_FARB5Q_CFG_CCS_ADDR_MUX_SEL [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.SRQ.MBA_RRQ0Q_CFG_RRQ_ACT_NUM_READS_PENDING [when=S] {
+  spyv;
+  0b1000;  #decimal value is 8, Big endian format
+}
+
+ispy MB_SIM.SRQ.MBA_WRQ0Q_CFG_WRQ_ACT_NUM_WRITES_PENDING [when=S] {
+  spyv;
+  0b1000;
+}
+
+#addr xlate
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT1_COL3_BIT_MAP [when=S] {
+  spyv;
+  0b00001;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT2_BANK_GROUP1_BIT_MAP [when=S] {
+  spyv;
+  0b00010;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT2_BANK_GROUP0_BIT_MAP [when=S] {
+  spyv;
+  0b00011;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT2_BANK1_BIT_MAP [when=S] {
+  spyv;
+  0b00111;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT2_BANK0_BIT_MAP [when=S] {
+  spyv;
+  0b01000;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT1_S2_BIT_MAP [when=S] {
+  spyv;
+  0b00100;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT1_COL4_BIT_MAP [when=S] {
+  spyv;
+  0b01001;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT1_COL5_BIT_MAP [when=S] {
+  spyv;
+  0b01010;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT1_COL6_BIT_MAP [when=S] {
+  spyv;
+  0b01011;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT1_COL7_BIT_MAP [when=S] {
+  spyv;
+  0b01100;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT2_COL8_BIT_MAP [when=S] {
+  spyv;
+  0b01101;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT2_COL9_BIT_MAP [when=S] {
+  spyv;
+  0b01110;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_R15_BIT_MAP [when=S] {
+  spyv;
+  0b01111;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_R16_BIT_MAP [when=S] {
+  spyv;
+  0b10000;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_R17_BIT_MAP [when=S] {
+  spyv;
+  0b10001;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_S0_VALID [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_S1_VALID [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_S2_VALID [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_S0_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_S1_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_S2_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_ROW15_VALID [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_ROW15_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_ROW16_VALID [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_ROW16_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_ROW17_VALID [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_ROW17_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_VALID [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_M0_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_M1_VALID [when=S] {
+  spyv;
+  1;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_M0_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_M1_VALID [when=S] {
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT1_S1_BIT_MAP [when=S] {
+  spyv;
+  0b00101;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT1_S0_BIT_MAP [when=S] {
+  spyv;
+  0b00110;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_M1_BIT_MAP [when=S] {
+  spyv;
+  0b10010;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_M0_BIT_MAP [when=S] {
+  spyv;
+  0b00000;
+}
+
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_D_BIT_MAP [when=S] {
+  spyv;
+  0b00000;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT0_D_VALUE [when=S] {         ## slots 0 & 1
+  spyv;
+  0;
+}
+
+ispy MB_SIM.MCBIST.MBA_SCOMFIR.MBXLT0Q_SLOT1_D_VALUE [when=S] {         ## slots 0 & 1
+  spyv;
+  1;
+}
+
+#---------------------------------#
+#   Error/attention obj_handles   #
+#---------------------------------#
+
+ispy MB_SIM.TLXT.TLXT_REGS.TLXTINTHLD0_TLXT_INTHLD_0_REG [when=S] {
+  spyv;
+  SYS.ATTR_MSS_OCMB_CHECKSTOP_OBJ_HANDLE;
+}
+
+ispy MB_SIM.TLXT.TLXT_REGS.TLXTINTHLD1_TLXT_INTHLD_1_REG [when=S] {
+  spyv;
+  SYS.ATTR_MSS_OCMB_RECOV_OBJ_HANDLE;
+}
+
+ispy MB_SIM.TLXT.TLXT_REGS.TLXTINTHLD2_TLXT_INTHLD_2_REG [when=S] {
+  spyv;
+  SYS.ATTR_MSS_OCMB_SPECATTN_OBJ_HANDLE;
+}
+
+ispy MB_SIM.TLXT.TLXT_REGS.TLXTINTHLD3_TLXT_INTHLD_3_REG [when=S] {
+  spyv;
+  SYS.ATTR_MSS_OCMB_APPINTR_OBJ_HANDLE;
+}
+
+ispy MB_SIM.TLXT.TLXT_REGS.TLXCFG1_TLXT_INTRP_CMDFLAG_0 [when=S] {
+  spyv;
+  0b0001;
+}
+
+ispy MB_SIM.TLXT.TLXT_REGS.TLXCFG1_TLXT_INTRP_CMDFLAG_1 [when=S] {
+  spyv;
+  0b0001;
+}
+
+ispy MB_SIM.TLXT.TLXT_REGS.TLXCFG1_TLXT_INTRP_CMDFLAG_2 [when=S] {
+  spyv;
+  0b0001;
+}
+
+ispy MB_SIM.TLXT.TLXT_REGS.TLXCFG1_TLXT_INTRP_CMDFLAG_3 [when=S] {
+  spyv;
+  0b0001;
+}
