@@ -68,6 +68,7 @@ fapi2::ReturnCode setup_omi_dl0_config0(
     const uint8_t i_dl_x4_backoff_en)
 {
     fapi2::buffer<uint64_t> l_config0;
+    constexpr uint8_t X8_TRAINING_MODE_ONLY = 0x02;
 
     // Get the "reset" values so we can just overwrite with the changes
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_CONFIG0, l_config0),
@@ -76,10 +77,13 @@ fapi2::ReturnCode setup_omi_dl0_config0(
     // CFG_DL0_HALF_WIDTH_BACKOFF_ENABLE: dl0 x4 backoff enabled
     l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_HALF_WIDTH_BACKOFF_ENABLE>(i_dl_x4_backoff_en);
 
+    // CFG_DL0_SUPPORTED_MODES: dl0 training configured for x8 link width
+    l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_SUPPORTED_MODES,
+                              EXPLR_DLX_DL0_CONFIG0_CFG_SUPPORTED_MODES_LEN>(X8_TRAINING_MODE_ONLY);
+
     // CFG_DL0_CFG_TL_CREDITS: dl0 TL credits - Maximum number of credits that can be sent to the TL
     l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_CFG_TL_CREDITS, EXPLR_DLX_DL0_CONFIG0_CFG_CFG_TL_CREDITS_LEN>
     (OPTIMAL_NUM_TL_CREDITS);
-
 
     // CFG_DL0_TRAIN_MODE: dl0 train mode
     l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE,
