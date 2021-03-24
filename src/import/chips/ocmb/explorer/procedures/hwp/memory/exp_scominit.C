@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,8 @@
 #include <lib/shared/exp_defaults.H>
 #include <lib/power_thermal/exp_throttle.H>
 #include <explorer_scom.H>
+#include <explorer_mds_scom.H>
+#include <lib/dimm/exp_kind.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
@@ -57,6 +59,7 @@ extern "C"
     fapi2::ReturnCode exp_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_scominit");
+        bool l_is_mds = false;
 
         if (mss::count_dimm(i_target) == 0)
         {
@@ -77,9 +80,22 @@ extern "C"
         {
             fapi2::ReturnCode l_rc;
             FAPI_INF("phy scominit for %s", mss::c_str(l_port));
-            FAPI_EXEC_HWP(l_rc, explorer_scom, i_target, l_port, FAPI_SYSTEM, l_mc);
 
-            FAPI_TRY(l_rc, "Error from explorer.scom.initfile %s", mss::c_str(l_port));
+            // Check if mds and run appropriate initfile
+            FAPI_TRY( mss::dimm::is_mds<mss::mc_type::EXPLORER>(l_port, l_is_mds) );
+
+            if (l_is_mds)
+            {
+                FAPI_INF("Running explorer.mds.scom.initfile for %s", mss::c_str(l_port));
+                FAPI_EXEC_HWP(l_rc, explorer_mds_scom, i_target, l_port, FAPI_SYSTEM, l_mc);
+                FAPI_TRY(l_rc, "Error from explorer.mds.scom.initfile %s", mss::c_str(l_port));
+            }
+            else
+            {
+                FAPI_INF("Running explorer.scom.initfile for %s", mss::c_str(l_port));
+                FAPI_EXEC_HWP(l_rc, explorer_scom, i_target, l_port, FAPI_SYSTEM, l_mc);
+                FAPI_TRY(l_rc, "Error from explorer.scom.initfile %s", mss::c_str(l_port));
+            }
 
             // Write power controls and emergency throttle settings
             FAPI_TRY(mss::power_thermal::thermal_throttle_scominit<mss::mc_type::EXPLORER>(l_port));

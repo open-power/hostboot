@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -137,6 +137,7 @@ OBJS += $(if $(CONFIG_AXONE),explorer_scom.o,)
 OBJS += $(if $(CONFIG_AXONE),exp_draminit_mc.o,)
 OBJS += $(if $(CONFIG_AXONE),exp_draminit.o,)
 OBJS += $(if $(CONFIG_AXONE),gem_draminit.o,)
+OBJS += $(if $(CONFIG_AXONE),explorer_mds_scom.o,)
 
 include ${ROOTPATH}/config.mk
 
