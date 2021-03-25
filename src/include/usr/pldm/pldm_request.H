@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,14 +116,14 @@ struct mctp_pldm_msg<0>
     pldm_msg pldm_message { };
 } __attribute__((packed));
 
-/* @brief sendrecv_pldm_request_payload
+/* @brief sendrecv_pldm_request
  *
  *        Encode and send a PLDM request with a fixed-size payload section and a
  *        subsequent variable-size payload section to the BMC, and then receive
  *        a reply.
  *
  * @param[out] o_response_bytes  Array of bytes of the response from the BMC
- * @param[in] i_payload_bytes    Variable-length payload for the message
+ * @param[in] i_payload_size     Length of the variable length payload
  * @param[in] i_msgQ             Handle to the outgoing PLDM request message queue
  * @param[in] i_encoder          Message encoder function
  * @param[in] i_args...          Arguments to the encoder function, not including the
@@ -132,7 +132,7 @@ struct mctp_pldm_msg<0>
  */
 template<size_t MsgSize, typename Encoder, typename... Args>
 errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
-                                 const std::vector<uint8_t>& i_payload_bytes,
+                                 const size_t i_payload_size,
                                  const msg_q_t i_msgQ,
                                  const Encoder i_encoder,
                                  Args... i_args)
@@ -140,7 +140,7 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
     errlHndl_t errl = nullptr;
     o_response_bytes.clear();
 
-    std::vector<uint8_t> msgbuf_bytes(sizeof(mctp_pldm_msg<MsgSize>) + i_payload_bytes.size());
+    std::vector<uint8_t> msgbuf_bytes(sizeof(mctp_pldm_msg<MsgSize>) + i_payload_size);
 
     const auto msgbuf = reinterpret_cast<mctp_pldm_msg<MsgSize>*>(msgbuf_bytes.data());
 
@@ -153,7 +153,7 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
         {
             const int encoder_rc = i_encoder(i_args...,
                                              pldm_request,
-                                             MsgSize + i_payload_bytes.size());
+                                             MsgSize + i_payload_size);
 
             assert(encoder_rc == PLDM_SUCCESS,
                    "PLDM message encoder at address %p failed with code %d",
@@ -271,6 +271,34 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
     } while (false);
 
     return errl;
+}
+
+/* @brief sendrecv_pldm_request
+ *
+ *        Encode and send a PLDM request with a fixed-size payload section and a
+ *        subsequent variable-size payload section to the BMC, and then receive
+ *        a reply.
+ *
+ * @param[out] o_response_bytes  Array of bytes of the response from the BMC
+ * @param[in] i_payload_bytes    Variable-length payload for the message
+ * @param[in] i_msgQ             Handle to the outgoing PLDM request message queue
+ * @param[in] i_encoder          Message encoder function
+ * @param[in] i_args...          Arguments to the encoder function, not including the
+ *                               pldm_msg* and payload size.
+ * @return errlHndl_t            Error if any, otherwise nullptr.
+ */
+template<size_t MsgSize, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
+                                 const std::vector<uint8_t>& i_payload_bytes,
+                                 const msg_q_t i_msgQ,
+                                 const Encoder i_encoder,
+                                 Args... i_args)
+{
+    return sendrecv_pldm_request<MsgSize>(o_response_bytes,
+                                          i_payload_bytes.size(),
+                                          i_msgQ,
+                                          i_encoder,
+                                          i_args...);
 }
 
 /* @brief Makes a PLDM request with a fixed-size payload to the BMC, and returns
