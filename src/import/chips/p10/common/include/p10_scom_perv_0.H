@@ -711,6 +711,18 @@ static const uint32_t XSTOP_MASK_53 = 53;
 //<< [XSTOP_MASK]
 // perv/reg00001.H
 
+//>> [FSXCOMP_FSXLOG_SCRATCH_REGISTER_13]
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI = 0x00002984ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI_BYTE = 0x00002e10ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW = 0x00050184ull;
+
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_SR_SCRATCH_REGISTER_13 = 0;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_SR_SCRATCH_REGISTER_13_LEN = 32;
+//<< [FSXCOMP_FSXLOG_SCRATCH_REGISTER_13]
+// perv/reg00000.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

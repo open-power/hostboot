@@ -1032,6 +1032,23 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
         l_scratch8_reg.setBit<SCRATCH10_REG_VALID_BIT>();
     }
 
+    // set_scratch13_reg - TPM SPI settings
+    if (i_update_all || !l_scratch8_reg.getBit<SCRATCH13_REG_VALID_BIT>())
+    {
+        fapi2::buffer<uint32_t> l_scratch13_reg = 0;
+        fapi2::ATTR_SPI_BUS_DIV_REF_Type l_attr_tpm_spi_bus_div;
+
+        FAPI_DBG("Reading ATTR_TPM_SPI_BUS_DIV");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_TPM_SPI_BUS_DIV, i_target_chip, l_attr_tpm_spi_bus_div),
+                 "Error from FAPI_ATTR_GET (ATTR_TPM_SPI_BUS_DIV");
+        l_scratch13_reg.insertFromRight<ATTR_TPM_SPI_BUS_DIV_STARTBIT, ATTR_TPM_SPI_BUS_DIV_LENGTH>(l_attr_tpm_spi_bus_div);
+
+        FAPI_DBG("Setting up value of Scratch_reg13");
+        FAPI_TRY(p10_sbe_scratch_regs_put_scratch(i_target_chip, i_use_scom, SCRATCH_REGISTER13, l_scratch13_reg));
+
+        l_scratch8_reg.setBit<SCRATCH13_REG_VALID_BIT>();
+    }
+
     FAPI_DBG("Setting up value of Scratch_reg8 (valid)");
     FAPI_TRY(p10_sbe_scratch_regs_put_scratch(i_target_chip, i_use_scom, SCRATCH_REGISTER8, l_scratch8_reg));
 

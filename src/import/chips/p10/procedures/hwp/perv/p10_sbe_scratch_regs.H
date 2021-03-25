@@ -165,6 +165,12 @@ enum p10_sbe_scratch_regs
 
     ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC_STARTBIT = 0,
     ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC_LENGTH   = 32,
+
+    // Scratch_reg_13
+    SCRATCH13_REG_VALID_BIT                         = 12,
+
+    ATTR_TPM_SPI_BUS_DIV_STARTBIT                   = 0,
+    ATTR_TPM_SPI_BUS_DIV_LENGTH                     = 16,
 };
 
 struct p10_sbe_scratch_reg_id_t
@@ -184,6 +190,7 @@ static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER7  = {  7, scomt::perv::FS
 static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER8  = {  8, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI  };
 static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER9  = {  9, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_FSI  };
 static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER10 = { 10, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_RW, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_FSI };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER13 = { 13, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI };
 
 
 ///
