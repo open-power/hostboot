@@ -155,6 +155,7 @@ fapi2::ReturnCode
 spi_master_lock(SpiControlHandle& i_handle, uint64_t i_pib_master_id)
 {
     // The value written to the reg doesn't matter, only that bit zero is set
+    // If someone else is currently holding the lock this access will fail
     fapi2::buffer<uint64_t> data64 = 0x8000000000000000ULL;
 
     FAPI_TRY(putScom( i_handle.target_chip,
@@ -169,14 +170,16 @@ spi_master_unlock(SpiControlHandle& i_handle, uint64_t i_pib_master_id)
 {
     fapi2::buffer<uint64_t> data64 = 0;
 
-    // Figure out who owns it now so we can take it away
-    FAPI_TRY(getScom( i_handle.target_chip,
-                      i_handle.base_addr | SPIM_CONFIGREG1, data64));
+    if (!fapi2::is_platform<fapi2::PLAT_CRONUS>())
+    {
+        // Figure out who owns it now so we can take it away
+        FAPI_TRY(getScom( i_handle.target_chip,
+                          i_handle.base_addr | SPIM_CONFIGREG1, data64));
 
-    // Clear the lock bit
-    data64.clearBit(0);
+        // Clear the lock bit
+        data64.clearBit(0);
+    }
 
-    // Write it back
     FAPI_TRY(putScom( i_handle.target_chip,
                       i_handle.base_addr | SPIM_CONFIGREG1, data64) );
 
