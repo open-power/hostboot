@@ -312,6 +312,20 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_TPM_SPI_BUS_DIV</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    At-speed SPI bus divider for the TPM during measurement SEEPROM execution
+    bits  0:11 - clock divider; fSPI = fPAU / 8 / (divider + 1); minimum allowed value is 4
+    bits 12:15 - receiver delay in fPAU/4 cycles; allowed range 0..7
+  </description>
+  <valueType>uint16</valueType>
+  <platInit/>
+  <writeable/>
+  <default>0x00A7</default>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_MAX_ALLOWED_DIMM_FREQ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
