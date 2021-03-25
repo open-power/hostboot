@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -253,5 +253,45 @@
     <initToZero/>   <!-- Assumes all these rails are powered in the system by default   -->
     <overrideOnly/> <!-- Keeps it from being MRW visible until exposure is needed       -->
   </attribute>
-  <!-- ******************************************************************************** -->
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SAVED_PB_PTL_FIR_MASK</id>
+    <targetType>TARGET_TYPE_PAUC</targetType>
+    <description>
+        This attribute provides a place for Hostboot to save off the
+        PB_PTL_FIR_MASK register during MPIPL, so that it can temporarily mask
+        off FIR bits related to cross-node bus errors.  During runtime after
+        an MPIPL, HBRT restores the FIR mask from this attribute in order to let
+        PRD handle cross-node errors.
+
+        Hostboot will need to save the values in MPIPL during
+        host_discover_targets. Values will need to be restored after the
+        PEER_TARGET values have been updated in HBRT.
+    </description>
+    <valueType>uint64</valueType>
+    <initToZero/>
+    <writeable/>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SAVED_DLP_FIR_MASK</id>
+    <targetType>TARGET_TYPE_IOHS</targetType>
+    <description>
+        This attribute provides a place for Hostboot to save off the DL_FIR_MASK
+        register during MPIPL, so that it can temporarily mask off FIR bits
+        related to cross-node bus errors.  During runtime after an MPIPL, HBRT
+        restores the FIR mask from this attribute in order to let PRD handle
+        cross-node errors.
+
+        Hostboot will need to save the values in MPIPL during
+        host_discover_targets. Values will need to be restored after the
+        PEER_TARGET values have been updated in HBRT.
+    </description>
+    <valueType>uint64</valueType>
+    <initToZero/>
+    <writeable/>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
