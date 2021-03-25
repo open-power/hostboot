@@ -8383,7 +8383,7 @@ group gPAU0_CHIPLET_CS_FIR
     /** PAU0_CHIPLET_CS_FIR[14]
      *  Attention from PAU_DL_FIR 0
      */
-    (rPAU0_CHIPLET_CS_FIR, bit(14)) ? analyzeConnectedPAUC0;
+    (rPAU0_CHIPLET_CS_FIR, bit(14)) ? level2_th_1;
 
     /** PAU0_CHIPLET_CS_FIR[16]
      *  Attention from PAU_PTL_FIR 0
@@ -8438,7 +8438,7 @@ group gPAU0_CHIPLET_RE_FIR
     /** PAU0_CHIPLET_RE_FIR[14]
      *  Attention from PAU_DL_FIR 0
      */
-    (rPAU0_CHIPLET_RE_FIR, bit(14)) ? analyzeConnectedPAUC0;
+    (rPAU0_CHIPLET_RE_FIR, bit(14)) ? level2_th_1;
 
     /** PAU0_CHIPLET_RE_FIR[16]
      *  Attention from PAU_PTL_FIR 0
@@ -8488,7 +8488,7 @@ group gPAU0_CHIPLET_UCS_FIR
     /** PAU0_CHIPLET_UCS_FIR[14]
      *  Attention from PAU_DL_FIR 0
      */
-    (rPAU0_CHIPLET_UCS_FIR, bit(14)) ? analyzeConnectedPAUC0;
+    (rPAU0_CHIPLET_UCS_FIR, bit(14)) ? level2_th_1;
 
 };
 
@@ -8553,7 +8553,7 @@ group gPAU1_CHIPLET_CS_FIR
     /** PAU1_CHIPLET_CS_FIR[14]
      *  Attention from PAU_DL_FIR 1
      */
-    (rPAU1_CHIPLET_CS_FIR, bit(14)) ? analyzeConnectedPAUC1;
+    (rPAU1_CHIPLET_CS_FIR, bit(14)) ? level2_th_1;
 
     /** PAU1_CHIPLET_CS_FIR[16]
      *  Attention from PAU_PTL_FIR 1
@@ -8608,7 +8608,7 @@ group gPAU1_CHIPLET_RE_FIR
     /** PAU1_CHIPLET_RE_FIR[14]
      *  Attention from PAU_DL_FIR 1
      */
-    (rPAU1_CHIPLET_RE_FIR, bit(14)) ? analyzeConnectedPAUC1;
+    (rPAU1_CHIPLET_RE_FIR, bit(14)) ? level2_th_1;
 
     /** PAU1_CHIPLET_RE_FIR[16]
      *  Attention from PAU_PTL_FIR 1
@@ -8658,7 +8658,7 @@ group gPAU1_CHIPLET_UCS_FIR
     /** PAU1_CHIPLET_UCS_FIR[14]
      *  Attention from PAU_DL_FIR 1
      */
-    (rPAU1_CHIPLET_UCS_FIR, bit(14)) ? analyzeConnectedPAUC1;
+    (rPAU1_CHIPLET_UCS_FIR, bit(14)) ? level2_th_1;
 
 };
 
@@ -8738,7 +8738,7 @@ group gPAU2_CHIPLET_CS_FIR
     /** PAU2_CHIPLET_CS_FIR[14]
      *  Attention from PAU_DL_FIR 2
      */
-    (rPAU2_CHIPLET_CS_FIR, bit(14)) ? analyzeConnectedPAUC2;
+    (rPAU2_CHIPLET_CS_FIR, bit(14)) ? level2_th_1;
 
     /** PAU2_CHIPLET_CS_FIR[16]
      *  Attention from PAU_PTL_FIR 2
@@ -8808,7 +8808,7 @@ group gPAU2_CHIPLET_RE_FIR
     /** PAU2_CHIPLET_RE_FIR[14]
      *  Attention from PAU_DL_FIR 2
      */
-    (rPAU2_CHIPLET_RE_FIR, bit(14)) ? analyzeConnectedPAUC2;
+    (rPAU2_CHIPLET_RE_FIR, bit(14)) ? level2_th_1;
 
     /** PAU2_CHIPLET_RE_FIR[16]
      *  Attention from PAU_PTL_FIR 2
@@ -8873,7 +8873,7 @@ group gPAU2_CHIPLET_UCS_FIR
     /** PAU2_CHIPLET_UCS_FIR[14]
      *  Attention from PAU_DL_FIR 2
      */
-    (rPAU2_CHIPLET_UCS_FIR, bit(14)) ? analyzeConnectedPAUC2;
+    (rPAU2_CHIPLET_UCS_FIR, bit(14)) ? level2_th_1;
 
 };
 
@@ -8953,7 +8953,7 @@ group gPAU3_CHIPLET_CS_FIR
     /** PAU3_CHIPLET_CS_FIR[14]
      *  Attention from PAU_DL_FIR 3
      */
-    (rPAU3_CHIPLET_CS_FIR, bit(14)) ? analyzeConnectedPAUC3;
+    (rPAU3_CHIPLET_CS_FIR, bit(14)) ? level2_th_1;
 
     /** PAU3_CHIPLET_CS_FIR[16]
      *  Attention from PAU_PTL_FIR 3
@@ -9023,7 +9023,7 @@ group gPAU3_CHIPLET_RE_FIR
     /** PAU3_CHIPLET_RE_FIR[14]
      *  Attention from PAU_DL_FIR 3
      */
-    (rPAU3_CHIPLET_RE_FIR, bit(14)) ? analyzeConnectedPAUC3;
+    (rPAU3_CHIPLET_RE_FIR, bit(14)) ? level2_th_1;
 
     /** PAU3_CHIPLET_RE_FIR[16]
      *  Attention from PAU_PTL_FIR 3
@@ -9088,7 +9088,7 @@ group gPAU3_CHIPLET_UCS_FIR
     /** PAU3_CHIPLET_UCS_FIR[14]
      *  Attention from PAU_DL_FIR 3
      */
-    (rPAU3_CHIPLET_UCS_FIR, bit(14)) ? analyzeConnectedPAUC3;
+    (rPAU3_CHIPLET_UCS_FIR, bit(14)) ? level2_th_1;
 
 };
 

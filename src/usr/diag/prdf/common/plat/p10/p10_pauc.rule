@@ -160,42 +160,6 @@ chip p10_pauc
         capture     req nonzero("PAU_PHY_FIR");
     };
 
-    ############################################################################
-    # P10 chip PAU_DL_FIR
-    ############################################################################
-
-    register PAU_DL_FIR
-    {
-        name        "P10 chip PAU_DL_FIR";
-        scomaddr    0x10012c40;
-        reset       (&, 0x10012c41);
-        mask        (|, 0x10012c45);
-        capture     group default;
-    };
-
-    register PAU_DL_FIR_MASK
-    {
-        name        "P10 chip PAU_DL_FIR MASK";
-        scomaddr    0x10012c43;
-        capture     group default;
-    };
-
-    register PAU_DL_FIR_ACT0
-    {
-        name        "P10 chip PAU_DL_FIR ACT0";
-        scomaddr    0x10012c46;
-        capture     group default;
-        capture     req nonzero("PAU_DL_FIR");
-    };
-
-    register PAU_DL_FIR_ACT1
-    {
-        name        "P10 chip PAU_DL_FIR ACT1";
-        scomaddr    0x10012c47;
-        capture     group default;
-        capture     req nonzero("PAU_DL_FIR");
-    };
-
 # Include registers not defined by the xml
 .include "p10_pauc_regs.rule";
 
@@ -221,19 +185,16 @@ rule rPAUC
   CHECK_STOP:
     summary( 0, rPAU_LOCAL_FIR ) |
     summary( 1, rPAU_PTL_FIR ) |
-    summary( 2, rPAU_PHY_FIR ) |
-    summary( 3, rPAU_DL_FIR );
+    summary( 2, rPAU_PHY_FIR );
 
   RECOVERABLE:
     summary( 0, rPAU_LOCAL_FIR ) |
     summary( 1, rPAU_PTL_FIR ) |
-    summary( 2, rPAU_PHY_FIR ) |
-    summary( 3, rPAU_DL_FIR );
+    summary( 2, rPAU_PHY_FIR );
 
   UNIT_CS:
     summary( 0, rPAU_LOCAL_FIR ) |
-    summary( 2, rPAU_PHY_FIR ) |
-    summary( 3, rPAU_DL_FIR );
+    summary( 2, rPAU_PHY_FIR );
 
   HOST_ATTN:
     summary( 0, rPAU_LOCAL_FIR );
@@ -246,7 +207,6 @@ group gPAUC attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
     (rPAUC, bit(0)) ? analyze(gPAU_LOCAL_FIR);
     (rPAUC, bit(1)) ? analyze(gPAU_PTL_FIR);
     (rPAUC, bit(2)) ? analyze(gPAU_PHY_FIR);
-    (rPAUC, bit(3)) ? analyze(gPAU_DL_FIR);
 };
 
 ################################################################################
@@ -961,156 +921,6 @@ group gPAU_PHY_FIR
      *  A SCOM FSM or FIR register parity error has occurr
      */
     (rPAU_PHY_FIR, bit(26)) ? defaultMaskedError; # P10_20
-
-};
-
-################################################################################
-# P10 chip PAU_DL_FIR
-################################################################################
-
-rule rPAU_DL_FIR
-{
-  CHECK_STOP:
-    PAU_DL_FIR & ~PAU_DL_FIR_MASK & ~PAU_DL_FIR_ACT0 & ~PAU_DL_FIR_ACT1;
-  RECOVERABLE:
-    PAU_DL_FIR & ~PAU_DL_FIR_MASK & ~PAU_DL_FIR_ACT0 &  PAU_DL_FIR_ACT1;
-  UNIT_CS:
-    PAU_DL_FIR & ~PAU_DL_FIR_MASK &  PAU_DL_FIR_ACT0 &  PAU_DL_FIR_ACT1;
-};
-
-group gPAU_DL_FIR
-    filter singlebit,
-           cs_root_cause
-{
-    /** PAU_DL_FIR[0]
-     *  RX state machine parity or mode register parity er
-     */
-    (rPAU_DL_FIR, bit(0)) ? self_th_1;
-
-    /** PAU_DL_FIR[1]
-     *  RX state machine parity or mode register parity er
-     */
-    (rPAU_DL_FIR, bit(1)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[2]
-     *  RX state machine parity or mode register parity er
-     */
-    (rPAU_DL_FIR, bit(2)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[3]
-     *  RX state machine parity or mode register parity er
-     */
-    (rPAU_DL_FIR, bit(3)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[4]
-     *  TX state machine parity or mode register parity er
-     */
-    (rPAU_DL_FIR, bit(4)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[5]
-     *  TX state machine parity or mode register parity er
-     */
-    (rPAU_DL_FIR, bit(5)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[6]
-     *  TX state machine parity or mode register parity er
-     */
-    (rPAU_DL_FIR, bit(6)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[7]
-     *  TX state machine parity or mode register parity er
-     */
-    (rPAU_DL_FIR, bit(7)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[8]
-     *  TX ZCAL state machine parity or mode register pari
-     */
-    (rPAU_DL_FIR, bit(8)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[9]
-     *  PPE internal error has occurred.
-     */
-    (rPAU_DL_FIR, bit(9)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[10]
-     *  PPE external error has occurred.
-     */
-    (rPAU_DL_FIR, bit(10)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[11]
-     *  PPE Halt due to Watchdog or Interrupt has occurred
-     */
-    (rPAU_DL_FIR, bit(11)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[12]
-     *  PPE Halt due to Debug has occurred.
-     */
-    (rPAU_DL_FIR, bit(12)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[13]
-     *  FIR Register - PPE Halted.
-     */
-    (rPAU_DL_FIR, bit(13)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[14]
-     *  FIR Register - A PPE Watchdog Timeout has occurred
-     */
-    (rPAU_DL_FIR, bit(14)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[15]
-     *  FIR Register - A PPE Array Scrub was missed.
-     */
-    (rPAU_DL_FIR, bit(15)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[16]
-     *  FIR Register - A PPE Array uncorrectable error has
-     */
-    (rPAU_DL_FIR, bit(16)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[17]
-     *  FIR Register - A PPE Array correctable error has o
-     */
-    (rPAU_DL_FIR, bit(17)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[18]
-     *  FIR Register - A PPE Code Recal Abort has occurred
-     */
-    (rPAU_DL_FIR, bit(18)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[19]
-     *  FIR Register - A PPE Code Fatal Error has occurred
-     */
-    (rPAU_DL_FIR, bit(19)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[20]
-     *  FIR Register - A PPE Code Warning has occurred.
-     */
-    (rPAU_DL_FIR, bit(20)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[21]
-     *  FIR Register - A PPE Code DFT Error has occurred.
-     */
-    (rPAU_DL_FIR, bit(21)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[22]
-     *  FIR Register - A PPE Code Recal Not Run has occurr
-     */
-    (rPAU_DL_FIR, bit(22)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[23]
-     *  FIR Register - A PPE Code Thread Locked has occurr
-     */
-    (rPAU_DL_FIR, bit(23)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[24]
-     *  FIR Register - A PPE Code FIR 6 has occurred.
-     */
-    (rPAU_DL_FIR, bit(24)) ? defaultMaskedError;
-
-    /** PAU_DL_FIR[25]
-     *  FIR Register - A PPE Code FIR 7 has occurred.
-     */
-    (rPAU_DL_FIR, bit(25)) ? defaultMaskedError;
 
 };
 
