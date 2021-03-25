@@ -48,6 +48,9 @@
 #include <p10_pm_utils.H>
 #include "p10_pstate_parameter_block_int_vpd.H"
 
+// Defined here so as not have to shadow pstates_common.H to HWSV
+#define CF7 7
+
 fapi2::ReturnCode pm_set_frequency(
        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target);
 
@@ -84,6 +87,7 @@ fapi2::ReturnCode pm_set_frequency(
     uint32_t l_part_freq = 0;
     uint32_t l_psav_freq = 0;
     uint32_t l_wofbase_freq = 0;
+    uint32_t l_pstate0_freq = 0;
     uint8_t  l_sys_pdv_mode = 0;
     uint16_t l_tmp_psav_freq = 0;
     uint16_t l_tmp_wofbase_freq = 0;
@@ -93,7 +97,6 @@ fapi2::ReturnCode pm_set_frequency(
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE_Type l_sys_freq_core_floor_mhz_ovr;
     fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
     fapi2::ATTR_NOMINAL_FREQ_MHZ_Type l_sys_nominal_freq_mhz = 0;
-    fapi2::ATTR_SYSTEM_FMAX_ENABLE_Type l_sys_fmax_enable = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_sys_freq_core_ceil_mhz = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE_Type l_sys_freq_core_ceil_mhz_ovr;
     fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz = 0;
@@ -127,9 +130,6 @@ fapi2::ReturnCode pm_set_frequency(
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
                 i_sys_target, l_sys_pdv_mode));
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_FMAX_ENABLE,
-                i_sys_target, l_sys_fmax_enable));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
                 i_sys_target, l_sys_pstate0_freq_mhz));
@@ -179,6 +179,8 @@ fapi2::ReturnCode pm_set_frequency(
                          &l_poundV_data,sizeof(l_poundV_data));
             }
 
+            l_pstate0_freq = revle16(l_poundV_data.operating_pts[CF7].core_frequency);
+
             l_fmax_freq     = revle16(l_poundV_data.other_info.VddFmxCoreFreq);
             l_ut_freq       = revle16(l_poundV_data.other_info.VddUTCoreFreq);
             l_wofbase_freq  = revle16(l_poundV_data.other_info.VddTdpWofCoreFreq);
@@ -189,53 +191,26 @@ fapi2::ReturnCode pm_set_frequency(
             FAPI_INF("part_freq=%04d, psav_freq=%04d ",
                    l_part_freq, l_psav_freq );
 
+            //Compute pstate0 freq using cF7
+
+            if (l_pstate0_freq > l_sys_pstate0_freq_mhz)
+            {
+                l_sys_pstate0_freq_mhz = l_pstate0_freq;
+                FAPI_DBG("Setting Pstate 0 to Fmax of %04d (0x%04X)",
+                        l_sys_pstate0_freq_mhz,  l_sys_pstate0_freq_mhz);
+            }
 
             //Compute FMAX and Ceil freq
-            if ( l_fmax_freq > l_sys_pstate0_freq_mhz && l_sys_fmax_enable == 1)
+            if ( l_fmax_freq > l_sys_freq_core_ceil_mhz)
             {
-                l_sys_pstate0_freq_mhz = l_fmax_freq;
+                l_sys_freq_core_ceil_mhz = l_fmax_freq;
+                FAPI_DBG("Setting CEIL to Fmax of %04d (0x%04X)",
+                        l_sys_freq_core_ceil_mhz ,  l_sys_freq_core_ceil_mhz);
+
             }
-            else if ( l_fmax_freq == 0  || l_sys_fmax_enable == 0)
-            {
-                if (l_sys_pstate0_freq_mhz == 0)
-                {
-                    l_sys_pstate0_freq_mhz = l_ut_freq;
-                }
-                else
-                {
-                    if (l_ut_freq != l_sys_pstate0_freq_mhz)
-                    {
-                        if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
-                        {
-                            FAPI_ASSERT_NOEXIT(false,
-                                    fapi2::PSTATE_PB_UT_PSTATE0_FREQ_MISMATCH(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                    .set_CHIP_TARGET(l_proc_target)
-                                    .set_UT_FREQ(l_ut_freq)
-                                    .set_PSTATE0_FREQ(l_sys_pstate0_freq_mhz),
-                                    "Pstate Parameter Block WOF Biased #V CF6 error being logged");
-                        }
-                        else if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN)
-                        {
-                            FAPI_ERR("PSTATE0 freq %08x is not equal to UT Freq %08x", l_sys_pstate0_freq_mhz, l_ut_freq);
-                        }
-                        else if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
-                        {
-                            FAPI_ASSERT(false,
-                                    fapi2::PSTATE_PB_UT_PSTATE0_FREQ_MISMATCH()
-                                    .set_CHIP_TARGET(l_proc_target)
-                                    .set_UT_FREQ(l_ut_freq)
-                                    .set_PSTATE0_FREQ(l_sys_pstate0_freq_mhz),
-                                    "Pstate Parameter Block WOF Biased #V CF6 error being logged");
-                        }
-                    }
-                    // Move to the lowest
-                    if (l_ut_freq < l_sys_pstate0_freq_mhz)
-                    {
-                        l_sys_pstate0_freq_mhz = l_ut_freq;
-                    }
-                }
-            }
-            FAPI_INF("PSTATE 0  Freq %08x",l_sys_pstate0_freq_mhz);
+
+
+            FAPI_INF("PSTATE 0 Freq %04d (0x%04X)", l_sys_pstate0_freq_mhz, l_sys_pstate0_freq_mhz);
             // Get processor scope attributes
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
                         l_proc_target, l_floor_freq_mhz));
@@ -263,9 +238,9 @@ fapi2::ReturnCode pm_set_frequency(
 
             // Processor overrides the ceiling below Pstate 0 clips it
             if (l_ceil_freq_mhz != 0 && l_ceil_freq_mhz > l_floor_freq_mhz &&
-                 l_sys_pstate0_freq_mhz > l_ceil_freq_mhz)
+                 l_sys_freq_core_ceil_mhz > l_ceil_freq_mhz)
             {
-                l_sys_pstate0_freq_mhz = l_ceil_freq_mhz;
+                l_ceil_freq_mhz = l_sys_freq_core_ceil_mhz;
                 FAPI_INF("Processor target override limiting Pstate 0. %04d MHz (0x%X)", l_ceil_freq_mhz, l_ceil_freq_mhz );
             }
 
@@ -275,9 +250,9 @@ fapi2::ReturnCode pm_set_frequency(
             if (l_limited_freq_mhz &&
                 !l_sys_freq_core_ceil_mhz_ovr && !l_sys_freq_core_ceil_mhz && !l_ceil_freq_mhz)
             {
-                if (l_sys_pstate0_freq_mhz > l_forced_ceil_freq_mhz)
+                if (l_sys_freq_core_ceil_mhz > l_forced_ceil_freq_mhz)
                 {
-                    l_sys_pstate0_freq_mhz = l_forced_ceil_freq_mhz;
+                    l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
                 }
             }
 
@@ -335,7 +310,7 @@ fapi2::ReturnCode pm_set_frequency(
                 }
             }
 
-            FAPI_INF("Running Computed ceiling (PS0) frequency: %04d (0x%04x)", l_sys_pstate0_freq_mhz, l_sys_pstate0_freq_mhz);
+            FAPI_INF("Running Computed ceiling (PS0) frequency: %04d (0x%04x)", l_sys_freq_core_ceil_mhz, l_sys_freq_core_ceil_mhz);
             FAPI_INF("Running Computed floor frequency:         %04d (0x%04x)", l_floor_freq_mhz, l_floor_freq_mhz);
             FAPI_INF("Running Computed wofbase frequency:       %04d (0x%04x)", l_tmp_wofbase_freq, l_tmp_wofbase_freq);
             FAPI_INF("Running Computed fixed frequency:         %04d (0x%04x)", l_part_running_freq, l_part_running_freq);
@@ -357,18 +332,11 @@ fapi2::ReturnCode pm_set_frequency(
         //    - l_sys_freq_core_ceil_mhz,
         //    - l_sys_freq_core_ceil_mhz_ovr,
         //    - the computed Pstate 0.
-        if (l_sys_freq_core_ceil_mhz &&
-            l_sys_freq_core_ceil_mhz < l_sys_pstate0_freq_mhz)
-        {
-            l_sys_pstate0_freq_mhz = l_sys_freq_core_ceil_mhz;
-            FAPI_INF("Lowering Pstate0 based on ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ:  %04d ",
-                    l_sys_freq_core_ceil_mhz);
-        }
 
         if (l_sys_freq_core_ceil_mhz_ovr &&
-            l_sys_freq_core_ceil_mhz_ovr < l_sys_pstate0_freq_mhz)
+            l_sys_freq_core_ceil_mhz_ovr < l_sys_freq_core_ceil_mhz)
         {
-            l_sys_pstate0_freq_mhz = l_sys_freq_core_ceil_mhz_ovr;
+            l_sys_freq_core_ceil_mhz = l_sys_freq_core_ceil_mhz_ovr;
             FAPI_INF("Lowering Pstate0 based on ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE:  %04d ",
                     l_sys_freq_core_ceil_mhz_ovr);
         }
@@ -392,9 +360,9 @@ fapi2::ReturnCode pm_set_frequency(
         }
 
         // Adjust the nominal to be between the ceiling and the floor
-        if (l_sys_pstate0_freq_mhz < l_part_freq)
+        if (l_sys_freq_core_ceil_mhz < l_part_freq)
         {
-            l_part_freq = l_sys_pstate0_freq_mhz;
+            l_part_freq = l_sys_freq_core_ceil_mhz;
             FAPI_INF("Clipping the nominal frequency to the ceiling frequency:  %04d ",
                     l_part_freq);
         }
@@ -410,7 +378,7 @@ fapi2::ReturnCode pm_set_frequency(
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,     i_sys_target, l_sys_pstate0_freq_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_NOMINAL_FREQ_MHZ,            i_sys_target, l_part_freq));
 
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,i_sys_target, l_sys_pstate0_freq_mhz));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,i_sys_target, l_sys_freq_core_ceil_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ,  i_sys_target, l_floor_freq_mhz));
 
         for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())

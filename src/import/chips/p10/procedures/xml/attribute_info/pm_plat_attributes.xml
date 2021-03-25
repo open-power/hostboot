@@ -126,16 +126,69 @@
 
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_DROOP_COUNT_CONTROL</id>
+    <id>ATTR_WOF_DCCR_VALUE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Value to be written to the Droop Count Control Register (DCCR) that defines
-    the core throttle response to droop events. See P10 Power Management Hardware
-    Specification for the bit definition of this register.
+        Value to set into the Droop Count Control Register (DCCR) to establish the
+        light and heavy droop thresholds.
 
-    Consumer: p10_pm_qme_init
+        0:3   DTT_LARGE_OFFSET
+        Used for both DTT[01]_EVENT_SEL="100".This field is added to the
+        Large Droop Bin (FDCR[LARGE_DROOP_DETECT]+ FDCR[TRIP_OFFSET] +
+        FDCR[CAL_ADJ]) to select the target DDS_DATAbin location for "dirty"
+        timing margin.
 
-    TODO: get the default value from the core team
+        4:7   DTT0_THRESH_SCALE
+        Droop Throttle Threshold0 Scale Factor (4-bit) for use by the following field.
+
+        8:15  DTT0_THRESH_VALUE
+        Droop Throttle Threshold0 Compare Value (8-bit). When the 24-bit
+        DroopThrottle Count0 meets or exceeds this field times 2^(16-DTT0_THRESH_SCALE),
+        an encoded event corresponding toCUCR.QME_EVENTS_PENDING bit 60 is sent to QME
+        to set the TTSR.
+
+        16:19 DTT1_THRESH_SCALE
+        Droop Throttle Threshold1 Scale Factor (4-bit) for use by the following field.
+
+        20:17 DTT1_THRESH_VALUE
+        Droop Throttle Threshold1 Compare Value (8-bit). When the 24-bit
+        DroopThrottle Count1 meets or exceeds this field times 2^(16-DTT0_THRESH_SCALE),
+        an encoded event corresponding toCUCR.QME_EVENTS_PENDING bit 60 is sent to QME
+        to set the TTSR.
+
+        28:30 DTT1_EVENT_SEL
+        Chooses which event increments DMSR DROOP0_COUNT, when this field is:
+
+        000: DROOP_COUNT0 disabled
+
+        Single occurrence of a droop event leading to performance loss
+        selects what to compare with FTC Event Data(4:6)
+
+        001: "110" rising edge of a small throttle response
+        010: "111" rising edge of a large throttle response
+        011: "110" or "111" rising edge of a either throttle response
+
+        Raw timing margin from 0 to 15 bins above the Large detect point.
+
+        100: Cycles that the bin selected by LARGE_DROOP_DETECT plus
+        TRIP_OFFSET plus 4-bit DTT_LARGE_OFFSET was '0' (indicating loss of
+        timing margin).
+
+        How long actually throttling at a "full rate"including due to predicted
+        response (slope and adj and ddp) selects what to compare with
+        FTC Event Data(4:6)
+
+        101:"110" or ("01X" and NOT ("011" and Event Data(7))) meaning number of
+        cycles that small throttle was present and not in recovery phase
+        110: "111`" or 100" meaning number of cycles that large droop was
+        presentand not in either recovery phase
+        111: either small or large throttle present and not in recovery (OR
+        of the twoabove)
+
+        31:33 DTT1_EVENT_SEL
+        Chooses which event increments DMSR DROOP0_COUNT.  See DTT0_EVENT_SEL
+
+        Consumer: p10_pm_pgpe_init
     </description>
     <valueType>uint64</valueType>
     <platInit/>
@@ -1056,16 +1109,13 @@
     <description>
     Defines the mode of WOF checking in relationship to system reaction
 
-    FAIL - if not ATTR_SYSTEM_PSTATE_DISABLE, fails the IPL (product default).
+    FAIL - if not ATTR_SYSTEM_WOF_DISABLE, fails the IPL (product default).
            else act as OFF
-    INFO - if not ATTR_SYSTEM_PSTATE_DISABLE, Info error log; Pstates are disabled;
+    INFO - if not ATTR_SYSTEM_WOF_DISABLE, Info error log; WOF is disabled;
                 IPL continues.
-           else act as OFF
-    WARN - if not ATTR_SYSTEM_PSTATE_DISABLE, error messages to traces; no error
-                logs, Pstates are disabled (as #V is bad), IPL continues.
-           else act as OFF
-    OFF  - no checking performed; IPL continues.  Pstates are follow
-                ATTR_SYSTEM_PSTATE_DISABLE (user beware if not Disabled).
+    WARN - if not ATTR_SYSTEM_WOF_DISABLE, error messages to traces; no error
+                logs, WOF is disabled; IPL continues.
+    OFF  - no checking performed; IPL continues.  WOF is disabled;.
 
     Producer: Override
 
@@ -1091,16 +1141,11 @@
     <description>
     Defines the mode of #V checking in relationship to system reaction
 
-    FAIL - if not ATTR_SYSTEM_PSTATE_DISABLE, fails the IPL (product default).
-           else act as OFF
-    INFO - if not ATTR_SYSTEM_PSTATE_DISABLE, Info error log; Pstates are disabled;
-                IPL continues.
-           else act as OFF
-    WARN - if not ATTR_SYSTEM_PSTATE_DISABLE, error messages to traces; no error
-                logs, Pstates are disabled (as #V is bad), IPL continues.
-           else act as OFF
-    OFF  - no checking performed; IPL continues.  Pstates are follow
-                ATTR_SYSTEM_PSTATE_DISABLE (user beware if not Disabled).
+    FAIL - Fails the IPL (product default).
+    INFO - Info error log; Pstates are disabled; IPL continues.
+    WARN - Error messages to traces; no error logs, Pstates are disabled
+            (as #V is bad), IPL continues.
+    OFF  - no checking performed; IPL continues. Pstates are disabled.
 
     Producer: Override
 
@@ -1126,20 +1171,12 @@
     <description>
     Defines the mode of #W checking in relationship to system reaction
 
-    FAIL - if not ATTR_SYSTEM_WOF_DISABLE or not ATTR_SYSTEM_DDS_DISABLE,
-                fails the IPL (product default);
-           else act as OFF.
-    INFO - if not ATTR_SYSTEM_WOF_DISABLE or not ATTR_SYSTEM_DDS_DISABLE,
-                error messages to traces; Info error log; WOF AND DDS are
-                disabled; IPL continues.
-            else if act as OFF
-    WARN - if not ATTR_SYSTEM_WOF_DISABLE or not ATTR_SYSTEM_DDS_DISABLE,
-                error messages to traces; no error logs, WOF and DDS are
-                disabled, IPL continues.
-           else if act as OFF
-    OFF  - no checking performed; IPL continues.  WOF and DDS follow
-                ATTR_SYSTEM_WOF_DISABLE and ATTR_SYSTEM_DDS_DISABLE
-                (user beware if not Disabled).
+    FAIL - if not ATTR_SYSTEM_DDS_DISABLE, fails the IPL (product default);.
+    INFO - if not ATTR_SYSTEM_DDS_DISABLE, error messages to traces; Info
+            error log; DDSs are disabled; IPL continues.
+    WARN - if not ATTR_SYSTEM_DDS_DISABLE, error messages to traces; no error
+            logs, DDS are disabled, IPL continues.
+    OFF  - no checking performed; IPL continues. DDS are disabled.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1161,20 +1198,12 @@
     <description>
     Defines the mode of IQ checking in relationship to system reaction
 
-    FAIL - if not ATTR_SYSTEM_WOF_DISABLE or not ATTR_SYSTEM_DDS_DISABLE,
-                fails the IPL (product default);
-           else act as OFF.
-    INFO - if not ATTR_SYSTEM_WOF_DISABLE or not ATTR_SYSTEM_DDS_DISABLE,
-                error messages to traces; Info error log; WOF AND DDS are
-                disabled; IPL continues.
-           else if act as OFF
-    WARN - if not ATTR_SYSTEM_WOF_DISABLE or not ATTR_SYSTEM_DDS_DISABLE,
-                error messages to traces; no error logs, WOF and DDS are
-                disabled, IPL continues.
-           else if act as OFF
-    OFF - no checking performed; IPL continues.  WOF and DDS follow
-                ATTR_SYSTEM_WOF_DISABLE and ATTR_SYSTEM_DDS_DISABLE
-                (user beware if not Disabled).
+    FAIL - if not ATTR_SYSTEM_WOF_DISABLE, fails the IPL (product default);
+    INFO - if not ATTR_SYSTEM_WOF_DISABLE, error messages to traces; Info
+                error log; WOF is disabled; IPL continues.
+    WARN - if not ATTR_SYSTEM_WOF_DISABLE, error messages to traces; no error
+            logs, WOF is disabled, IPL continues.
+    OFF - no checking performed; IPL continues.  WOF is disabled..
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -2674,78 +2703,6 @@
 
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_WOF_DCCR_VALUE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-        Value to set into the Droop Count Control Register to establish the light
-        and heavy droop thresholds.
-
-        0:3   DTT_LARGE_OFFSET
-        Used for both DTT[01]_EVENT_SEL="100".This field is added to the
-        Large Droop Bin (FDCR[LARGE_DROOP_DETECT]+ FDCR[TRIP_OFFSET] +
-        FDCR[CAL_ADJ]) to select the target DDS_DATAbin location for "dirty"
-        timing margin.
-
-        4:7   DTT0_THRESH_SCALE
-        Droop Throttle Threshold0 Scale Factor (4-bit) for use by the following field.
-
-        8:15  DTT0_THRESH_VALUE
-        Droop Throttle Threshold0 Compare Value (8-bit). When the 24-bit
-        DroopThrottle Count0 meets or exceeds this field times 2^(16-DTT0_THRESH_SCALE),
-        an encoded event corresponding toCUCR.QME_EVENTS_PENDING bit 60 is sent to QME
-        to set the TTSR.
-
-        16:19 DTT1_THRESH_SCALE
-        Droop Throttle Threshold1 Scale Factor (4-bit) for use by the following field.
-
-        20:17 DTT1_THRESH_VALUE
-        Droop Throttle Threshold1 Compare Value (8-bit). When the 24-bit
-        DroopThrottle Count1 meets or exceeds this field times 2^(16-DTT0_THRESH_SCALE),
-        an encoded event corresponding toCUCR.QME_EVENTS_PENDING bit 60 is sent to QME
-        to set the TTSR.
-
-        28:30 DTT1_EVENT_SEL
-        Chooses which event increments DMSR DROOP0_COUNT, when this field is:
-
-        000: DROOP_COUNT0 disabled
-
-        Single occurrence of a droop event leading to performance loss
-        selects what to compare with FTC Event Data(4:6)
-
-        001: "110" rising edge of a small throttle response
-        010: "111" rising edge of a large throttle response
-        011: "110" or "111" rising edge of a either throttle response
-
-        Raw timing margin from 0 to 15 bins above the Large detect point.
-
-        100: Cycles that the bin selected by LARGE_DROOP_DETECT plus
-        TRIP_OFFSET plus 4-bit DTT_LARGE_OFFSET was '0' (indicating loss of
-        timing margin).
-
-        How long actually throttling at a "full rate"including due to predicted
-        response (slope and adj and ddp) selects what to compare with
-        FTC Event Data(4:6)
-
-        101:"110" or ("01X" and NOT ("011" and Event Data(7))) meaning number of
-        cycles that small throttle was present and not in recovery phase
-        110: "111`" or 100" meaning number of cycles that large droop was
-        presentand not in either recovery phase
-        111: either small or large throttle present and not in recovery (OR
-        of the twoabove)
-
-        31:33 DTT1_EVENT_SEL
-        Chooses which event increments DMSR DROOP0_COUNT.  See DTT0_EVENT_SEL
-
-        Consumer: p10_pm_pgpe_init
-    </description>
-    <valueType>uint64</valueType>
-    <platInit/>
-    <initToZero/>
-    <group>wof</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_DLR_LINKS_ENABLED</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -2972,6 +2929,9 @@
     Default: OFF
     Producer:  MRW
     Consumers: p10_pstate_parameter_block
+
+    RTC: 269546:  remove the FMax Enable mode control
+    Changing the default to ON until the RTC removes all support.
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -2979,7 +2939,7 @@
         ON=1
     </enum>
     <platInit/>
-    <default>OFF</default>
+    <default>ON</default>
     <group>pstate</group>
   </attribute>
 

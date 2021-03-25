@@ -38,6 +38,7 @@
 #include <pstates_occ.H>
 #include <pstates_pgpe.H>
 #include <pstates_table.H>
+#include <p10_pm_utils.H>
 #include "p10_pm_get_poundv_bucket.H"
 #include "p10_pm_get_poundw_bucket.H"
 #include "p10_pm_set_system_freq.H"
@@ -144,8 +145,8 @@ typedef struct
     uint8_t attr_dds_trip_mode;
     uint8_t attr_dds_trip_interpolation_control;
     uint8_t attr_dds_bias_enable;
-    // RTC: V269546:  remove the FMax Enable mode control
-    uint8_t attr_fmax_enable = fapi2::ENUM_ATTR_SYSTEM_FMAX_ENABLE_ON;
+    // RTC: 269546:  remove the FMax Enable mode control
+    uint8_t attr_fmax_enable;
     uint8_t attr_war_mode;
 
     uint8_t attr_dd_wof_not_supported;
@@ -212,6 +213,7 @@ typedef struct
     // Only 3 of the 8 are actually consumed
     uint8_t attr_current_scaling_factor[8];
 
+    uint64_t attr_wof_dccr_value;
 
 } AttributeList;
 
@@ -228,7 +230,6 @@ class PlatPmPPB
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
             iv_wof_throttle_enabled(0),
             iv_poundV_fmax_enable(true)
-
         {
             attr_init();
         }
@@ -413,14 +414,6 @@ class PlatPmPPB
         uint32_t region_steps(const uint32_t region);
 
         ///////////////////////////////////////////////////////////
-        ////////   compute_stretch_points
-        ///////////////////////////////////////////////////////////
-        // This method computes the new frequency points within a stretched region of the
-        // RAW #V.  These points are returned in the o_points vector.
-        void compute_stretched_freq_pt(const uint32_t region,
-                                       uint32_t* o_point_mhz);
-
-        ///////////////////////////////////////////////////////////
         ////////   interpolate_freq_point
         ///////////////////////////////////////////////////////////
         void interpolate_freq_pt(const uint32_t  freq,
@@ -448,37 +441,94 @@ class PlatPmPPB
         fapi2::ReturnCode get_mvpd_iddq( void );
 
         /// -----------------------------------------------------------------------
-        /// @brief State of WOF feature
+        /// @brief Disable Pstates and any dependent functions
+        /// -----------------------------------------------------------------------
+        void disable_pstates();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Disable Rssonant Clocking and any dependent functions
+        /// -----------------------------------------------------------------------
+        void disable_resclk();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Disable WOF and any dependent functions
+        /// -----------------------------------------------------------------------
+        void disable_wof();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Disable RVRM and any dependent functions
+        /// -----------------------------------------------------------------------
+        void disable_rvrm();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Disable DDS and any dependent functions
+        /// -----------------------------------------------------------------------
+        void disable_dds();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Disable OCS and any dependent functions
+        /// -----------------------------------------------------------------------
+        void disable_ocs();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Disable Undervolting and any dependent functions
+        /// -----------------------------------------------------------------------
+        void disable_underv();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Disable Overrvolting and any dependent functions
+        /// -----------------------------------------------------------------------
+        void disable_overv();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Disable WOF Throttling and any dependent functions
+        /// -----------------------------------------------------------------------
+        void disable_wof_throttle();
+
+        /// -----------------------------------------------------------------------
+        /// @brief State of Pstate enablement
+        /// @return enabled(true)/disabled (false)
+        /// -----------------------------------------------------------------------
+        bool is_pstates_enabled();
+
+        /// -----------------------------------------------------------------------
+        /// @brief State of Resonant Clock enablement
+        /// @return enabled(true)/disabled (false)
+        /// -----------------------------------------------------------------------
+        bool is_resclk_enabled();
+
+        /// -----------------------------------------------------------------------
+        /// @brief State of WOF enablement
         /// @return enabled(true)/disabled (false)
         /// -----------------------------------------------------------------------
         bool is_wof_enabled();
 
         /// -----------------------------------------------------------------------
-        /// @brief State of WOF feature
+        /// @brief State of RVRM enablement
         /// @return enabled(true)/disabled (false)
         /// -----------------------------------------------------------------------
         bool is_rvrm_enabled();
 
         /// -----------------------------------------------------------------------
-        /// @brief State of DDS feature
+        /// @brief State of DDS enablement
         /// @return enabled(true)/disabled (false)
         /// -----------------------------------------------------------------------
         bool is_dds_enabled();
 
         /// -----------------------------------------------------------------------
-        /// @brief State of OCS feature
+        /// @brief State of OCS enablement
         /// @return enabled(true)/disabled (false)
         /// -----------------------------------------------------------------------
         bool is_ocs_enabled();
 
         /// -----------------------------------------------------------------------
-        /// @brief State of WOF Undervolt
+        /// @brief State of Undervolt enablement
         /// @return enabled(true)/disabled (false)
         /// -----------------------------------------------------------------------
         bool is_wov_underv_enabled();
 
         /// -----------------------------------------------------------------------
-        /// @brief State of WOF Overvolt
+        /// @brief State of Overvolt enablement
         /// @return enabled(true)/disabled (false)
         /// -----------------------------------------------------------------------
         bool is_wov_overv_enabled();
@@ -701,6 +751,18 @@ class PlatPmPPB
             return (l_result);
         }
 
+        /// -----------------------------------------------------------------------
+        /// @brief Get the DCCR value that might have overrides
+        /// @return DCCR value to use
+        /// -----------------------------------------------------------------------
+        uint64_t dccr_value();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Test function to poison #V
+        /// @return DCCR value to use
+        /// -----------------------------------------------------------------------
+        void poison_mvpd_poundV();
+
     public:
         bool                      iv_init_error;
 
@@ -733,7 +795,6 @@ class PlatPmPPB
         uint16_t                  iv_array_vdn_mv;
         uint16_t                  iv_array_vdd_mv;
 
-
         PoundVOpPoint_t           iv_raw_vpd_pts[NUM_PV_POINTS];
         PoundVOpPoint_t           iv_biased_vpd_pts[NUM_PV_POINTS];
         PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];
@@ -758,12 +819,13 @@ class PlatPmPPB
         SysPowerDistParms_t       iv_vcs_sysparam;
         SysPowerDistParms_t       iv_vdn_sysparam;
         SysPowerDistParms_t       iv_vio_sysparam;
-        uint8_t                   iv_valid_pdv_points;
 
         uint32_t                  iv_vddPsavFreq;
         uint32_t                  iv_vddWofBaseFreq;
         uint32_t                  iv_vddUTFreq;
         uint32_t                  iv_vddFmaxFreq;
+
+        uint64_t                  iv_wof_dccr_value;
 };
 
 }

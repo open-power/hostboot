@@ -113,7 +113,7 @@ using namespace pm_pstate_parameter_block;
         ((w | x | y | z) == 0)) \
     { state = 0; }
 
-#define POUNDV_SLOPE_CHECK(x,y)   x > y ? " is GREATER (ERROR!) than " : " is less than "
+#define POUNDV_SLOPE_CHECK(x,y)   x > y ? "GREATER (ERROR!) than" : "less than"
 
 #define PRINT_LEAD1(_buffer, _format, _var1)                    \
     {                                                           \
@@ -137,6 +137,12 @@ using namespace pm_pstate_parameter_block;
        strcat(_buffer, _temp_buffer);                           \
    }
 
+#define HEX_STR_64(_buffer, _value)                             \
+   {                                                            \
+       char _temp_buffer[64];                                   \
+       sprintf(_temp_buffer, "0x%016lX  ", _value);             \
+       strcat(_buffer, _temp_buffer);                           \
+   }
 
 #define VALIDATE_WOF_HEADER_DATA(a, b, c, d, e, f, g, h, i, state)         \
     if ( ((!a) || (!b) || (!c) || (!d) || (!e) || (!f) || (!g) || (!h) || (!i)))  \
@@ -260,7 +266,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // ----------------
         FAPI_TRY(l_pmPPB->set_global_feature_attributes());
 
-
         // Put out the Parmater Blocks to the trace
         gppb_print((l_globalppb));
         oppb_print((&l_occppb));
@@ -321,6 +326,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
              revle32(i_gppb->occ_complex_frequency_mhz));
     FAPI_INF("%s", l_buffer);
 
+    // -------------------
     FAPI_INF("Operating Points:          Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
@@ -349,6 +355,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
         FAPI_INF("%s", l_buffer);
     }
 
+    // -------------------
     FAPI_INF("Operating Points:          Freq(MHz)         VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     IDRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
@@ -375,6 +382,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
         FAPI_INF("%s", l_buffer);
     }
 
+    // -------------------
     FAPI_INF("Operating Points:          Freq_GB(mHz)    VDD_vmin(mV)  IDD_POW(10mA) CORE_POWR_TEMP(0.5C)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
@@ -395,8 +403,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
         FAPI_INF("%s", l_buffer);
     }
 
-
-
+    // -------------------
     FAPI_INF("System Parameters:           VDD           VCS           VDN")
 
     PRINT_LEAD1(l_buffer, "  %-20s : ", "Load line (uOhm)");
@@ -428,6 +435,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
             revle32(i_gppb->vdn_sysparm.distoffset_uv));
     FAPI_INF("%s", l_buffer);
 
+    // -------------------
     FAPI_INF("Safe Parameters:");
 
     PRINT_LEAD1(l_buffer, "  %-20s : ", "Frequency (KHz)");
@@ -440,6 +448,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
              revle32(i_gppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
     FAPI_INF("%s", l_buffer);
 
+    // -------------------
     FAPI_INF("External VRM Parameters:");
     for (auto i=0; i < RUNTIME_RAILS; ++i)
     {
@@ -525,6 +534,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
         FAPI_INF(""); \
     }
 
+    // -------------------
     sprintf(l_buffer, "%-22s", "Pstate Slopes / Region");
     sprintf(l_temp_buffer, "%-10s", "");
     strcat(l_buffer, l_temp_buffer);
@@ -602,6 +612,46 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
         FAPI_INF("%s", l_buffer);
     }
 
+    // -------------------
+    sprintf(l_buffer, "DDS Controls (* indicates an override value)");
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "DDS Calibration Version");
+    HEX_STR(l_buffer,
+            i_gppb->dds_other.dds_calibration_version);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "Droop Freq Resp Reference");
+    HEX_STR(l_buffer,
+            revle16(i_gppb->dds_other.droop_freq_resp_reference_mhz));
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "Droop Count Control (DCCR)");
+    HEX_STR_64(l_buffer,
+            revle64(i_gppb->dds_other.droop_count_control));
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "FTC Large Droop Mde (FLMR)");
+    HEX_STR_64(l_buffer,
+            revle64(i_gppb->dds_other.ftc_large_droop_mode_reg_setting));
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "FTC Misc Droop Mode (FMMR)");
+    HEX_STR_64(l_buffer,
+            revle64(i_gppb->dds_other.ftc_misc_droop_mode_reg_setting));
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "DDS Calibration Bin");
+    HEX_STR(l_buffer,
+            i_gppb->dds_other.calibration_bin);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "DDS Mode Setting");
+    HEX_STR(l_buffer,
+            i_gppb->dds_other.mode_setting);
+    FAPI_INF("%s", l_buffer);
+
+    // -------------------
     sprintf(l_buffer, "AVS Bus topology:");
     FAPI_INF("%s", l_buffer);
 
@@ -645,6 +695,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
             i_gppb->avs_bus_topology.vio_avsbus_rail);
     FAPI_INF("%s", l_buffer);
 
+    // -------------------
     FAPI_INF("PGPE Flags:");
 
     FAPI_INF("  %-26s : %1d", "resclk_enable",
@@ -863,7 +914,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         }
         io_globalppb->dds_other.dds_calibration_version = iv_poundW_data.other.dds_calibration_version;
         io_globalppb->dds_other.droop_freq_resp_reference_mhz = revle16(iv_poundW_data.other.dds_calibration_version);
-        io_globalppb->dds_other.droop_count_control = revle64(iv_poundW_data.other.droop_count_control);
+        io_globalppb->dds_other.droop_count_control = revle64(dccr_value());
         io_globalppb->dds_other.ftc_large_droop_mode_reg_setting = revle64(iv_poundW_data.other.ftc_large_droop_mode_reg_setting);
         io_globalppb->dds_other.ftc_misc_droop_mode_reg_setting = revle64(iv_poundW_data.other.ftc_misc_droop_mode_reg_setting);
         io_globalppb->dds_other.calibration_bin = iv_poundW_data.other.calibration_bin;
@@ -887,9 +938,9 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         }
 #endif
 
-        FAPI_INF("DCCR=0x%016lx",iv_poundW_data.other.droop_count_control);
-        FAPI_INF("FLMR=0x%016lx",iv_poundW_data.other.ftc_large_droop_mode_reg_setting);
-        FAPI_INF("FMMR=0x%016lx",iv_poundW_data.other.ftc_misc_droop_mode_reg_setting);
+        FAPI_INF("DCCR=0x%016lx",revle64(io_globalppb->dds_other.droop_count_control));
+        FAPI_INF("FLMR=0x%016lx",revle64(io_globalppb->dds_other.ftc_large_droop_mode_reg_setting));
+        FAPI_INF("FMMR=0x%016lx",revle64(io_globalppb->dds_other.ftc_misc_droop_mode_reg_setting));
 
         //If ATTR_DDS_BIAS_ENABLE = ON, use the ALT_TRIP_OFFSET, ALT_CAL_ADJ,
         //ALT_DELAY values for each core instead of TRIP_OFFSET, CAL_ADJ, DELAY.
@@ -981,14 +1032,14 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         }
         io_globalppb->wov_idd_thresh                  =  revle16(iv_attr_mvpd_poundV_other_info.idd_rdp_limit_0p1A);
 
-        io_globalppb->attr.fields.pstates_enabled     = iv_pstates_enabled;
-        io_globalppb->attr.fields.resclk_enabled      = iv_resclk_enabled;
-        io_globalppb->attr.fields.wof_enabled         = iv_wof_enabled;
-        io_globalppb->attr.fields.dds_enabled         = iv_dds_enabled;
-        io_globalppb->attr.fields.ocs_enabled         = iv_ocs_enabled;
-        io_globalppb->attr.fields.underv_enabled      = iv_wov_underv_enabled;
-        io_globalppb->attr.fields.overv_enabled       = iv_wov_overv_enabled;
-        io_globalppb->attr.fields.rvrm_enabled        = iv_rvrm_enabled;
+        io_globalppb->attr.fields.pstates_enabled     = is_pstates_enabled();
+        io_globalppb->attr.fields.resclk_enabled      = is_resclk_enabled();
+        io_globalppb->attr.fields.wof_enabled         = is_wof_enabled();
+        io_globalppb->attr.fields.dds_enabled         = is_dds_enabled();
+        io_globalppb->attr.fields.ocs_enabled         = is_ocs_enabled();
+        io_globalppb->attr.fields.underv_enabled      = is_wov_underv_enabled();
+        io_globalppb->attr.fields.overv_enabled       = is_wov_overv_enabled();
+        io_globalppb->attr.fields.rvrm_enabled        = is_rvrm_enabled();
         io_globalppb->attr.fields.wof_disable_vdd     = iv_attrs.attr_system_wof_disable_dimension[0];
         io_globalppb->attr.fields.wof_disable_vcs     = iv_attrs.attr_system_wof_disable_dimension[1];
         io_globalppb->attr.fields.wof_disable_io      = iv_attrs.attr_system_wof_disable_dimension[2];
@@ -1038,13 +1089,13 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         i_occppb->vcs_sysparm     = iv_vcs_sysparam;
         i_occppb->vdn_sysparm     = iv_vdn_sysparam;
 
-        i_occppb->attr.fields.pstates_enabled     = iv_pstates_enabled;
-        i_occppb->attr.fields.resclk_enabled      = iv_resclk_enabled;
+        i_occppb->attr.fields.pstates_enabled     = is_pstates_enabled();
+        i_occppb->attr.fields.resclk_enabled      = is_resclk_enabled();
         i_occppb->attr.fields.wof_enabled         = is_wof_enabled();
         i_occppb->attr.fields.dds_enabled         = is_dds_enabled();
         i_occppb->attr.fields.ocs_enabled         = is_ocs_enabled();
-        i_occppb->attr.fields.underv_enabled      = iv_wov_underv_enabled;
-        i_occppb->attr.fields.overv_enabled       = iv_wov_overv_enabled;
+        i_occppb->attr.fields.underv_enabled      = is_wov_underv_enabled();
+        i_occppb->attr.fields.overv_enabled       = is_wov_overv_enabled();
         i_occppb->attr.fields.rvrm_enabled        = is_rvrm_enabled();
         i_occppb->attr.fields.wof_disable_vdd     = iv_attrs.attr_system_wof_disable_dimension[0];
         i_occppb->attr.fields.wof_disable_vcs     = iv_attrs.attr_system_wof_disable_dimension[1];
@@ -1541,6 +1592,10 @@ void PlatPmPPB::attr_init( void )
 FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
 FAPI_INF("%-54s    = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_assign);
 
+#define DATABLOCK_GET_ATTR_U64(attr_name, target, attr_assign) \
+FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
+FAPI_INF("%-54s    = 0x%016llx %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_assign);
+
 #define DATABLOCK_GET_ATTR_2(attr_name, target, attr_assign) \
 FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
 FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
@@ -1641,6 +1696,7 @@ FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,   FAPI_SYSTEM, attr_system_wof_altitude_temp_adjustment);
     DATABLOCK_GET_ATTR_8(ATTR_WOF_VRATIO_VDD_10THPCT,       iv_procChip, attr_vratio_vdd_10th_pct);
     DATABLOCK_GET_ATTR_8(ATTR_WOF_VRATIO_VCS_10THPCT,       iv_procChip, attr_vratio_vcs_10th_pct);
+    DATABLOCK_GET_ATTR_U64(ATTR_WOF_DCCR_VALUE,             iv_procChip, attr_wof_dccr_value);
 
     //TBD
     //DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
@@ -1819,14 +1875,6 @@ FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.a
     FAPI_INF("%-54s    = 0x%08x %d", #attr_name, attr_assign, attr_assign);
 
     //Set default values
-    SET_ATTR(fapi2::ATTR_PSTATES_ENABLED, iv_procChip, iv_pstates_enabled);
-    SET_ATTR(fapi2::ATTR_RESCLK_ENABLED,  iv_procChip, iv_resclk_enabled);
-    SET_ATTR(fapi2::ATTR_DDS_ENABLED,     iv_procChip, iv_dds_enabled);
-    SET_ATTR(fapi2::ATTR_RVRM_ENABLED,    iv_procChip, iv_rvrm_enabled);
-    SET_ATTR(fapi2::ATTR_WOF_ENABLED,     iv_procChip, iv_wof_enabled);
-    //SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, iv_procChip, iv_wov_underv_enabled);
-    //SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, iv_procChip, iv_wov_overv_enabled);
-
     iv_pstates_enabled = true;
     iv_resclk_enabled  = true;
     iv_dds_enabled     = true;
@@ -1834,8 +1882,8 @@ FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.a
     iv_wof_enabled     = true;
     iv_ocs_enabled     = true;
     iv_wof_throttle_enabled = true;
-    //iv_wov_underv_enabled = true;
-    //iv_wov_overv_enabled = true;
+    iv_wov_underv_enabled = true;
+    iv_wov_overv_enabled = true;
 
     //Calculate nest & frequency_step_khz
     iv_frequency_step_khz = (iv_attrs.attr_freq_proc_refclock_khz /
@@ -2056,10 +2104,10 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         //Read #W data
 
         // ----------------
-        // get VDM Parameters data
+        // get DDS Parameters data
         // ----------------
-        // Note:  the get_mvpd_poundW has the conditional checking for VDM
-        // and WOF enablement as #W has both VDM and WOF content
+        // Note:  the get_mvpd_poundW has the conditional checking for DDS
+        // enablement
         l_rc = get_mvpd_poundW();
         if (l_rc)
         {
@@ -2310,31 +2358,13 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         }
 
         iv_poundV_bucket_id = bucket_id;
+//        poison_mvpd_poundV();
         FAPI_TRY(chk_valid_poundv(false));
 
-        //update_vpd_pts_value();
-
-        uint32_t l_vpd_max_freq = 0;
-        uint32_t l_pd_pts = 0;
-        if ((iv_attr_mvpd_poundV_raw[CF7].frequency_mhz >
-            iv_attr_mvpd_poundV_raw[CF6].frequency_mhz) &&
-            iv_attrs.attr_fmax_enable)
-        {
-            l_vpd_max_freq = iv_attr_mvpd_poundV_raw[CF7].frequency_mhz;
-            l_pd_pts = NUM_PV_POINTS;
-        }
-        else
-        {
-            iv_attr_mvpd_poundV_raw[CF7].frequency_mhz = 0;
-            l_vpd_max_freq = iv_attr_mvpd_poundV_raw[CF6].frequency_mhz;
-            l_pd_pts = NUM_PV_POINTS - 1;
-        }
-
-
         //Update pstate for all points
-        for (uint32_t i = 0; i < l_pd_pts; i++)
+        for (uint32_t i = 0; i < NUM_PV_POINTS; i++)
         {
-            iv_attr_mvpd_poundV_raw[i].pstate = (l_vpd_max_freq -
+            iv_attr_mvpd_poundV_raw[i].pstate = (iv_attr_mvpd_poundV_raw[CF7].frequency_mhz -
             iv_attr_mvpd_poundV_raw[i].frequency_mhz) * 1000 / (iv_frequency_step_khz);
 
             iv_vddPsavFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddPsavCoreFreq));
@@ -2356,7 +2386,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             }
 
 
-            FAPI_INF("PSTATE %x %x %d PSAV %x WOF %x UT %x Fmax %x",l_vpd_max_freq,
+            FAPI_INF("PSTATE %x %x %d PSAV %x WOF %x UT %x Fmax %x",iv_attr_mvpd_poundV_raw[CF7].frequency_mhz,
                      iv_attr_mvpd_poundV_raw[i].frequency_mhz,iv_attr_mvpd_poundV_raw[i].pstate,
                      iv_vddPsavFreq, iv_vddWofBaseFreq,
                       iv_vddUTFreq, iv_vddFmaxFreq);
@@ -2591,7 +2621,7 @@ fapi_try_exit:
 
     if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
     {
-        iv_pstates_enabled = false;
+        disable_pstates();
     }
     free (l_buffer);
 
@@ -2607,11 +2637,9 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
 {
     const char*     pv_op_str[NUM_PV_POINTS] = VPD_PV_STR;
     uint8_t         i = 0;
-    bool            suspend_ut_check = false;
     uint8_t         l_chiplet_num = iv_procChip.getChipletNumber();
-    uint8_t attr_poundv_validate_ec_disable = 0;
 
-
+    FAPI_INF("> chk_valid_poundv" );
     //Biased
     if (i_biased_state)
     {
@@ -2622,28 +2650,25 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
         memcpy (iv_attr_mvpd_data,iv_attr_mvpd_poundV_raw,sizeof(iv_attr_mvpd_data));
     }
 
-    FAPI_DBG(">> chk_valid_poundv for %s values", (i_biased_state) ? "biased" : "non-biased" );
+    FAPI_INF(">> chk_valid_poundv for %s values", (i_biased_state) ? "biased" : "non-biased" );
+
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE_Type      attr_poundv_validity_halt_disable;
-//    fapi2::ATTR_CHIP_EC_FEATURE_POUNDV_VALIDATE_DISABLE_Type  attr_poundv_validate_ec_disable;
+    fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE_Type l_pdv_mode;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
+                FAPI_SYSTEM, l_pdv_mode));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE,
-                FAPI_SYSTEM,
-                attr_poundv_validity_halt_disable));
-
-  //  FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_POUNDV_VALIDATE_DISABLE,
-    //            iv_procChip,
-      //          attr_poundv_validate_ec_disable));
-
-    if (attr_poundv_validate_ec_disable)
+    do
     {
-        iv_pstates_enabled = false;
-        FAPI_INF("**** WARNING : #V zero value checking is not being performed on this chip EC level");
-        FAPI_INF("**** WARNING : Pstates are not enabled");
-    }
-    else
-    {
+        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_OFF)
+        {
+            disable_pstates();
+            FAPI_INF("**** WARNING : #V zero value checking is not being performed");
+            FAPI_INF("**** WARNING : Pstates are disabled");
+            disable_pstates();
+            break;
+        }
+
         // check for non-zero freq, voltage, or current in valid operating points
         for (i = 0; i <= NUM_PV_POINTS - 1; i++)
         {
@@ -2667,103 +2692,22 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                     iv_attr_mvpd_data[i].rt_tdp_dc_10ma
                     );
 
-            if (is_wof_enabled() &&
-                    (strcmp(pv_op_str[i], "CF6") == 0))
+
+            if (POUNDV_POINTS_CHECK(i))
             {
-                if (POUNDV_POINTS_CHECK(i))
+                disable_pstates();
+
+                if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN ||
+                    l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO   )
                 {
-                    if (!strcmp(pv_op_str[i], "CF1") ||
-                       (!strcmp(pv_op_str[i], "CF2")) ||
-                       (!strcmp(pv_op_str[i], "CF4")) ||
-                       (!strcmp(pv_op_str[i], "CF5")) ||
-                       (!strcmp(pv_op_str[i], "CF7") ))
-                    {
-                        if (!strcmp(pv_op_str[i], "CF7"))
-                        {
-                            iv_poundV_fmax_enable = false;
-                        }
-                        else
-                        {
-                            iv_optional_pdv_pts_value_zero = true;
-                        }
-                        FAPI_INF("Skip logging error for this operating point %s",pv_op_str[i]);
-                        continue;
-                    }
-                    //if we have hit here then,main poundV point itself is
-                    //invalid so no need to update the optional points
-                    iv_optional_pdv_pts_value_zero  = false;
+                    FAPI_INF("**** WARNING : Zero valued data found in #V (bucket id = %u  op point = %s)",
+                            iv_poundV_bucket_id, pv_op_str[i]);
+                    FAPI_INF("**** WARNING : Pstates (and all dependent functions) are disabled but continuing on anyway.");
+                    FAPI_INF("**** WARNING : Tracing due to ATTR_SYSTEM_PDV_VALIDATION_MODE = WARN or INFO");
 
-                    FAPI_INF("**** WARNING: WOF is enabled but zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
-                            l_chiplet_num, iv_poundV_bucket_id, pv_op_str[i]);
-                    FAPI_INF("**** WARNING: Disabling WOF and continuing");
-                    suspend_ut_check = true;
-
-                    // Set ATTR_WOF_ENABLED so the caller can set header flags
-                    iv_wof_enabled = false;
-
-                    // Take out an informational error log and then keep going.
-                    if (i_biased_state)
+                    // Log errors based on biased inputs or not
+                    if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
                     {
-                        FAPI_ASSERT_NOEXIT(false,
-                                fapi2::PSTATE_PB_BIASED_POUNDV_WOF_CF6_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                .set_CHIP_TARGET(iv_procChip)
-                                .set_CHIPLET_NUMBER(l_chiplet_num)
-                                .set_BUCKET(iv_poundV_bucket_id)
-                                POUNDV_POINTS_PRINT(i,A),
-                                "Pstate Parameter Block WOF Biased #V CF6 error being logged");
-                    }
-                    else
-                    {
-                        FAPI_ASSERT_NOEXIT(false,
-                                fapi2::PSTATE_PB_POUNDV_WOF_CF6_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                .set_CHIP_TARGET(iv_procChip)
-                                .set_CHIPLET_NUMBER(l_chiplet_num)
-                                .set_BUCKET(iv_poundV_bucket_id)
-                                POUNDV_POINTS_PRINT(i,A),
-                                "Pstate Parameter Block WOF #V CF6 error being logged");
-                    }
-                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-                }
-            }
-            else if ((!is_wof_enabled()) && (strcmp(pv_op_str[i], "CF6") == 0))
-            {
-                FAPI_INF("**** NOTE: WOF is disabled so the UltraTurbo VPD is not being checked");
-                suspend_ut_check = true;
-            }
-            else
-            {
-                if (POUNDV_POINTS_CHECK(i))
-                {
-                    if (!strcmp(pv_op_str[i], "CF1") ||
-                       (!strcmp(pv_op_str[i], "CF2")) ||
-                       (!strcmp(pv_op_str[i], "CF4")) ||
-                       (!strcmp(pv_op_str[i], "CF5")) ||
-                       (!strcmp(pv_op_str[i], "CF7") ))
-                    {
-                        if (!strcmp(pv_op_str[i], "CF7"))
-                        {
-                            iv_poundV_fmax_enable = false;
-                        }
-                        else
-                        {
-                            iv_optional_pdv_pts_value_zero = true;
-                        }
-                        FAPI_INF("Skip logging error for this operating point %s",pv_op_str[i]);
-                        continue;
-                    }
-                    //if we have hit here then,main poundV point itself is
-                    //invalid so no need to update the optional points
-                    iv_optional_pdv_pts_value_zero  = false;
-                    iv_pstates_enabled = false;
-
-                    if (attr_poundv_validity_halt_disable)
-                    {
-                        FAPI_IMP("**** WARNING : halt on #V validity checking has been disabled and errors were found");
-                        FAPI_IMP("**** WARNING : Zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
-                                l_chiplet_num, iv_poundV_bucket_id, pv_op_str[i]);
-                        FAPI_IMP("**** WARNING : Pstates are not enabled but continuing on.");
-
-                        // Log errors based on biased inputs or not
                         if (i_biased_state)
                         {
                             FAPI_ASSERT_NOEXIT(false,
@@ -2786,443 +2730,486 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                                     POUNDV_POINTS_PRINT(i,A),
                                     "Pstate Parameter Block #V Zero contents error being logged");
                         }
-                        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    }
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    break;
+                }
+
+                if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+                {
+                    FAPI_ERR("**** ERROR : Zero valued data found in #V (bucket id = %u  op point = %s)",
+                            iv_poundV_bucket_id, pv_op_str[i]);
+                    FAPI_ERR("**** ERROR : Halting due to ATTR_SYSTEM_PDV_VALIDATION_MODE = FAIL");
+
+                    // Error out has Pstate and all dependent functions are suspious.
+                    if (i_biased_state)
+                    {
+                        FAPI_ASSERT(false,
+                                fapi2::PSTATE_PB_BIASED_POUNDV_ZERO_ERROR()
+                                .set_CHIP_TARGET(iv_procChip)
+                                .set_CHIPLET_NUMBER(l_chiplet_num)
+                                .set_BUCKET(iv_poundV_bucket_id)
+                                .set_POINT(i)
+                                POUNDV_POINTS_PRINT(i,A),
+                                "Pstate Parameter Block Biased #V Zero contents error being logged");
                     }
                     else
                     {
-                        FAPI_ERR("**** ERROR : Zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
-                                l_chiplet_num, iv_poundV_bucket_id, pv_op_str[i]);
+                        FAPI_ASSERT(false,
+                                fapi2::PSTATE_PB_POUNDV_ZERO_ERROR()
+                                .set_CHIP_TARGET(iv_procChip)
+                                .set_CHIPLET_NUMBER(l_chiplet_num)
+                                .set_BUCKET(iv_poundV_bucket_id)
+                                .set_POINT(i)
+                                POUNDV_POINTS_PRINT(i,A),
+                                "Pstate Parameter Block #V Zero contents error being logged");
+                    }
+                }  // Halt disable
+            }  // #V point zero check
+        } // Operating point loop
 
-                        // Error out has Pstate and all dependent functions are suspious.
-                        if (i_biased_state)
-                        {
-                            FAPI_ASSERT(false,
-                                    fapi2::PSTATE_PB_BIASED_POUNDV_ZERO_ERROR()
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_CHIPLET_NUMBER(l_chiplet_num)
-                                    .set_BUCKET(iv_poundV_bucket_id)
-                                    .set_POINT(i)
-                                    POUNDV_POINTS_PRINT(i,A),
-                                    "Pstate Parameter Block Biased #V Zero contents error being logged");
-                        }
-                        else
-                        {
-                            FAPI_ASSERT(false,
-                                    fapi2::PSTATE_PB_POUNDV_ZERO_ERROR()
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_CHIPLET_NUMBER(l_chiplet_num)
-                                    .set_BUCKET(iv_poundV_bucket_id)
-                                    .set_POINT(i)
-                                    POUNDV_POINTS_PRINT(i,A),
-                                    "Pstate Parameter Block #V Zero contents error being logged");
-                        }
-                    }  // Halt disable
-                }  // #V point zero check
-            }  // WOF and CF6 conditions
-        } // Operating poing loop
-    } // validate #V EC
+        // Don't do slope checks if the 0 checks failed.
+        if (!is_pstates_enabled())
+        {
+            break;
+        }
 
-    // Adjust the valid operating point based on UltraTurbo presence
-    // and WOF enablement
-    iv_valid_pdv_points = NUM_PV_POINTS;
-
-    if (suspend_ut_check)
-    {
-        iv_valid_pdv_points--;
-    }
-
-    FAPI_DBG("iv_valid_pdv_points = %d", iv_valid_pdv_points);
-
-    if (attr_poundv_validate_ec_disable)
-    {
-        iv_pstates_enabled = false;
-        FAPI_INF("**** WARNING : #V relationship checking is not being performed on this chip EC level");
-        FAPI_INF("**** WARNING : Pstates are not enabled");
-    }
-    else
-    {
         // check valid operating points' values have this relationship (power save <= nominal <= turbo <= ultraturbo)
-        for (i = 1; i <= (iv_valid_pdv_points) - 1; i++)
+        for (i = 1; i <= (NUM_PV_POINTS) - 1; i++)
         {
             FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
                     pv_op_str[i - 1], pv_op_str[i]);
 
-            // Only skip checkinug for WOF not enabled and UltraTurbo.
-            if ( is_wof_enabled()    ||
-               (!( !is_wof_enabled() &&
-               (strcmp(pv_op_str[i], "CF6") == 0))))
+             if ((iv_attr_mvpd_data[i - 1].frequency_mhz >=
+                 iv_attr_mvpd_data[i].frequency_mhz) ||
+                (iv_attr_mvpd_data[i - 1].vdd_mv >
+                 iv_attr_mvpd_data[i].vdd_mv) ||
+                (iv_attr_mvpd_data[i - 1].idd_tdp_ac_10ma >
+                 iv_attr_mvpd_data[i].idd_tdp_ac_10ma) ||
+                (iv_attr_mvpd_data[i - 1].idd_tdp_dc_10ma >
+                iv_attr_mvpd_data[i].idd_tdp_dc_10ma) ||
+                (iv_attr_mvpd_data[i - 1].idd_rdp_ac_10ma >
+                iv_attr_mvpd_data[i].idd_rdp_ac_10ma) ||
+                (iv_attr_mvpd_data[i  -1].idd_rdp_dc_10ma >
+                iv_attr_mvpd_data[i].idd_rdp_dc_10ma) ||
+                (iv_attr_mvpd_data[i - 1].vcs_mv >
+                iv_attr_mvpd_data[i].vcs_mv) ||
+                (iv_attr_mvpd_data[i - 1].ics_tdp_ac_10ma >
+                iv_attr_mvpd_data[i].ics_tdp_ac_10ma) ||
+                (iv_attr_mvpd_data[i - 1].ics_tdp_dc_10ma >
+                iv_attr_mvpd_data[i].ics_tdp_dc_10ma) ||
+                (iv_attr_mvpd_data[i - 1].ics_rdp_ac_10ma >
+                iv_attr_mvpd_data[i].ics_rdp_ac_10ma) ||
+                (iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma >
+                iv_attr_mvpd_data[i].ics_rdp_dc_10ma) ||
+                (iv_attr_mvpd_data[i - 1].vdd_vmin >
+                iv_attr_mvpd_data[i].vdd_vmin) ||
+                (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
+                iv_attr_mvpd_data[i].rt_tdp_ac_10ma) ||
+                (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
+                iv_attr_mvpd_data[i].rt_tdp_ac_10ma))
             {
-                if (!strcmp(pv_op_str[i], "CF1") ||
-                    (!strcmp(pv_op_str[i], "CF2")) ||
-                    (!strcmp(pv_op_str[i], "CF4")) ||
-                    (!strcmp(pv_op_str[i], "CF5")) ||
-                    (!strcmp(pv_op_str[i], "CF7") ))
+                disable_pstates();
+
+                 FAPI_INF("%s Frequency value %u is %s %s Frequency value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].frequency_mhz,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].frequency_mhz,
+                            iv_attr_mvpd_data[i].frequency_mhz),pv_op_str[i], iv_attr_mvpd_data[i].frequency_mhz);
+                FAPI_INF("%s VDD voltage value %u is %s %s VDD voltage value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].vdd_mv,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].vdd_mv,
+                            iv_attr_mvpd_data[i].vdd_mv),pv_op_str[i], iv_attr_mvpd_data[i].vdd_mv);
+                FAPI_INF("%s IDD tdp ac value %u is %s %s IDD tdp ac value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].idd_tdp_ac_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].idd_tdp_ac_10ma,
+                            iv_attr_mvpd_data[i].idd_tdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].idd_tdp_ac_10ma);
+                FAPI_INF("%s IDD tdp dc value %u is %s %s IDD tdp dc value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].idd_tdp_dc_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].idd_tdp_dc_10ma,
+                            iv_attr_mvpd_data[i].idd_tdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].idd_tdp_dc_10ma);
+                FAPI_INF("%s IDD rdp ac value %u is %s %s IDD rdp ac value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].idd_rdp_ac_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].idd_rdp_ac_10ma,
+                            iv_attr_mvpd_data[i].idd_rdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].idd_rdp_ac_10ma);
+                FAPI_INF("%s IDD rdp dc value %u is %s %s IDD rdp dc value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].idd_rdp_dc_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].idd_rdp_dc_10ma,
+                            iv_attr_mvpd_data[i].idd_rdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].idd_rdp_dc_10ma);
+                FAPI_INF("%s VCS voltage value %u is %s %s VCS voltage value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].vcs_mv,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].vcs_mv,
+                            iv_attr_mvpd_data[i].vcs_mv),pv_op_str[i], iv_attr_mvpd_data[i].vcs_mv);
+                FAPI_INF("%s ICS tdp ac value %u is %s %s ICS tdp ac value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].ics_tdp_ac_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_tdp_ac_10ma,
+                            iv_attr_mvpd_data[i].ics_tdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_tdp_ac_10ma);
+                FAPI_INF("%s ICS tdp dc value %u is %s %s ICS tdp dc value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].ics_tdp_dc_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_tdp_dc_10ma,
+                            iv_attr_mvpd_data[i].ics_tdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_tdp_dc_10ma);
+                FAPI_INF("%s ICS rdp ac value %u is %s %s ICS rdp ac value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].ics_rdp_ac_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_rdp_ac_10ma,
+                            iv_attr_mvpd_data[i].ics_rdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_rdp_ac_10ma);
+                FAPI_INF("%s ICS rdp dc value %u is %s %s ICS rdp dc value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma,
+                            iv_attr_mvpd_data[i].ics_rdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_rdp_dc_10ma);
+
+                FAPI_INF("%s VDD vmin voltage value %u is %s %s VDD vmin voltage value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].vdd_vmin,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].vdd_vmin,
+                            iv_attr_mvpd_data[i].vdd_vmin),pv_op_str[i], iv_attr_mvpd_data[i].vdd_vmin);
+                FAPI_INF("%s TDP RT AC value %u is %s %s TDP RT AC value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma,
+                            iv_attr_mvpd_data[i].rt_tdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].rt_tdp_ac_10ma);
+                FAPI_INF("%s TDP RT DC value %u is %s %s TDP RT DC value %u",
+                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].rt_tdp_dc_10ma,
+                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].rt_tdp_dc_10ma,
+                            iv_attr_mvpd_data[i].rt_tdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].rt_tdp_dc_10ma);
+
+                if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN ||
+                    l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO   )
                 {
-                    FAPI_INF("Skip logging error for this operating point %s",pv_op_str[i]);
-                    continue;
+                    FAPI_INF("**** WARNING : halt on #V validity checking has been "
+                            "disabled due to ATTR_SYSTEM_PDV_VALIDATION_MODE = WARN | INFO");
+                    FAPI_INF("**** WARNING : Relationship error between #V operating point "
+                            "%s > %s  bucket id = %u  op point = %u",
+                            pv_op_str[i - 1], pv_op_str[i], iv_poundV_bucket_id, i);
+                    FAPI_INF("**** WARNING : Pstates have been disabled but continuing on.");
                 }
-                if ((iv_attr_mvpd_data[i - 1].frequency_mhz >
-                     iv_attr_mvpd_data[i].frequency_mhz) ||
-                    (iv_attr_mvpd_data[i - 1].vdd_mv >
-                     iv_attr_mvpd_data[i].vdd_mv) ||
-                    (iv_attr_mvpd_data[i - 1].idd_tdp_ac_10ma >
-                     iv_attr_mvpd_data[i].idd_tdp_ac_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].idd_tdp_dc_10ma >
-                    iv_attr_mvpd_data[i].idd_tdp_dc_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].idd_rdp_ac_10ma >
-                    iv_attr_mvpd_data[i].idd_rdp_ac_10ma) ||
-                    (iv_attr_mvpd_data[i  -1].idd_rdp_dc_10ma >
-                    iv_attr_mvpd_data[i].idd_rdp_dc_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].vcs_mv >
-                    iv_attr_mvpd_data[i].vcs_mv) ||
-                    (iv_attr_mvpd_data[i - 1].ics_tdp_ac_10ma >
-                    iv_attr_mvpd_data[i].ics_tdp_ac_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].ics_tdp_dc_10ma >
-                    iv_attr_mvpd_data[i].ics_tdp_dc_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].ics_rdp_ac_10ma >
-                    iv_attr_mvpd_data[i].ics_rdp_ac_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma >
-                    iv_attr_mvpd_data[i].ics_rdp_dc_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].vdd_vmin >
-                    iv_attr_mvpd_data[i].vdd_vmin) ||
-                    (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
-                    iv_attr_mvpd_data[i].rt_tdp_ac_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
-                    iv_attr_mvpd_data[i].rt_tdp_ac_10ma))
 
+                else // FAIL
                 {
-                    iv_pstates_enabled = false;
+                    FAPI_INF("**** ERROR : Relationship "
+                            "error between #V operating point %s > %s  bucket id = %u  op point = %u",
+                            pv_op_str[i - 1], pv_op_str[i], iv_poundV_bucket_id, i);
+                }
 
-                    if (attr_poundv_validity_halt_disable)
-                    {
-                        FAPI_IMP("**** WARNING : halt on #V validity checking has been "
-                                "disabled and relationship errors were found");
-                        FAPI_IMP("**** WARNING : Relationship error between #V operating point "
-                                "(%s > %s)(power save <= nominal <= turbo <= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
-                                pv_op_str[i - 1], pv_op_str[i], l_chiplet_num, iv_poundV_bucket_id, i);
-                        FAPI_IMP("**** WARNING : Pstates are not enabled but continuing on.");
-                    }
-                    else
-                    {
-                        FAPI_ERR("**** ERROR : Relationship "
-                                "error between #V operating point (%s > %s)(power save <= nominal <= turbo "
-                                "<= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
-                                pv_op_str[i - 1], pv_op_str[i], l_chiplet_num, iv_poundV_bucket_id,i);
-                    }
-
-                    FAPI_INF("%s Frequency value %u is %s %s Frequency value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].frequency_mhz,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].frequency_mhz,
-                                iv_attr_mvpd_data[i].frequency_mhz),pv_op_str[i], iv_attr_mvpd_data[i].frequency_mhz);
-                    FAPI_INF("%s VDD voltage value %u is %s %s VDD voltage value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].vdd_mv,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].vdd_mv,
-                                iv_attr_mvpd_data[i].vdd_mv),pv_op_str[i], iv_attr_mvpd_data[i].vdd_mv);
-                    FAPI_INF("%s IDD tdp ac value %u is %s %s IDD tdp ac value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].idd_tdp_ac_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].idd_tdp_ac_10ma,
-                                iv_attr_mvpd_data[i].idd_tdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].idd_tdp_ac_10ma);
-                    FAPI_INF("%s IDD tdp dc value %u is %s %s IDD tdp dc value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].idd_tdp_dc_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].idd_tdp_dc_10ma,
-                                iv_attr_mvpd_data[i].idd_tdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].idd_tdp_dc_10ma);
-                    FAPI_INF("%s IDD rdp ac value %u is %s %s IDD rdp ac value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].idd_rdp_ac_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].idd_rdp_ac_10ma,
-                                iv_attr_mvpd_data[i].idd_rdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].idd_rdp_ac_10ma);
-                    FAPI_INF("%s IDD rdp dc value %u is %s %s IDD rdp dc value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].idd_rdp_dc_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].idd_rdp_dc_10ma,
-                                iv_attr_mvpd_data[i].idd_rdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].idd_rdp_dc_10ma);
-                    FAPI_INF("%s VCS voltage value %u is %s %s VCS voltage value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].vcs_mv,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].vcs_mv,
-                                iv_attr_mvpd_data[i].vcs_mv),pv_op_str[i], iv_attr_mvpd_data[i].vcs_mv);
-                    FAPI_INF("%s ICS tdp ac value %u is %s %s ICS tdp ac value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].ics_tdp_ac_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_tdp_ac_10ma,
-                                iv_attr_mvpd_data[i].ics_tdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_tdp_ac_10ma);
-                    FAPI_INF("%s ICS tdp dc value %u is %s %s ICS tdp dc value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].ics_tdp_dc_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_tdp_dc_10ma,
-                                iv_attr_mvpd_data[i].ics_tdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_tdp_dc_10ma);
-                    FAPI_INF("%s ICS rdp ac value %u is %s %s ICS rdp ac value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].ics_rdp_ac_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_rdp_ac_10ma,
-                                iv_attr_mvpd_data[i].ics_rdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_rdp_ac_10ma);
-                    FAPI_INF("%s ICS rdp dc value %u is %s %s ICS rdp dc value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma,
-                                iv_attr_mvpd_data[i].ics_rdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_rdp_dc_10ma);
-
-                    FAPI_INF("%s VDD vmin voltage value %u is %s %s VDD vmin voltage value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].vdd_vmin,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].vdd_vmin,
-                                iv_attr_mvpd_data[i].vdd_vmin),pv_op_str[i], iv_attr_mvpd_data[i].vdd_vmin);
-                    FAPI_INF("%s TDP RT AC value %u is %s %s TDP RT AC value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma,
-                                iv_attr_mvpd_data[i].rt_tdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].rt_tdp_ac_10ma);
-                    FAPI_INF("%s TDP RT DC value %u is %s %s TDP RT DC value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].rt_tdp_dc_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].rt_tdp_dc_10ma,
-                                iv_attr_mvpd_data[i].rt_tdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].rt_tdp_dc_10ma);
+                if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
+                {
+                    // Log the error only.
                     if (i_biased_state)
                     {
-                        if (attr_poundv_validity_halt_disable)
-                        {
-                            // Log the error only.
-                            FAPI_ASSERT_NOEXIT(false,
-                                    fapi2::PSTATE_PB_BIASED_POUNDV_SLOPE_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_CHIPLET_NUMBER(l_chiplet_num)
-                                    .set_BUCKET(iv_poundV_bucket_id)
-                                    .set_POINT(i)
-                                    POUNDV_POINTS_PRINT(i-1,A)
-                                    POUNDV_POINTS_PRINT(i,B),
-                                    "Pstate Parameter Block Biased #V disorder contents error being logged");
 
-                            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                        FAPI_ASSERT_NOEXIT(false,
+                                fapi2::PSTATE_PB_BIASED_POUNDV_SLOPE_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                .set_CHIP_TARGET(iv_procChip)
+                                .set_CHIPLET_NUMBER(l_chiplet_num)
+                                .set_BUCKET(iv_poundV_bucket_id)
+                                .set_POINT(i)
+                                POUNDV_POINTS_PRINT(i-1,A)
+                                POUNDV_POINTS_PRINT(i,B),
+                                "Pstate Parameter Block Biased #V disorder contents error being logged");
 
-                        }
-                        else
-                        {
-                            // Error out has Pstate and all dependent functions are suspicious.
-                            FAPI_ASSERT(false,
-                                    fapi2::PSTATE_PB_BIASED_POUNDV_SLOPE_ERROR()
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_CHIPLET_NUMBER(l_chiplet_num)
-                                    .set_BUCKET(iv_poundV_bucket_id)
-                                    .set_POINT(i)
-                                    POUNDV_POINTS_PRINT(i-1,A)
-                                    POUNDV_POINTS_PRINT(i,B),
-                                    "Pstate Parameter Block Biased #V disorder contents error being logged");
-                        }
+                        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                        break;
                     }
                     else
                     {
-                        if (attr_poundv_validity_halt_disable)
-                        {
-                            // Log the error only.
-                            FAPI_ASSERT_NOEXIT(false,
-                                    fapi2::PSTATE_PB_POUNDV_SLOPE_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_CHIPLET_NUMBER(l_chiplet_num)
-                                    .set_BUCKET(iv_poundV_bucket_id)
-                                    .set_POINT(i)
-                                    POUNDV_POINTS_PRINT(i-1,A)
-                                    POUNDV_POINTS_PRINT(i,B),
-
-                                    "Pstate Parameter Block #V disorder contents error being logged");
-
-                            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-                        }
-                        else
-                        {
-                            // Error out has Pstate and all dependent functions are suspicious.
-                            FAPI_ASSERT(false,
-                                    fapi2::PSTATE_PB_POUNDV_SLOPE_ERROR()
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_CHIPLET_NUMBER(l_chiplet_num)
-                                    .set_BUCKET(iv_poundV_bucket_id)
-                                    .set_POINT(i)
-                                    POUNDV_POINTS_PRINT(i-1,A)
-                                    POUNDV_POINTS_PRINT(i,B),
-                                    "Pstate Parameter Block #V disorder contents error being logged");
-                        }
+                        FAPI_ASSERT_NOEXIT(false,
+                                fapi2::PSTATE_PB_POUNDV_SLOPE_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                .set_CHIP_TARGET(iv_procChip)
+                                .set_CHIPLET_NUMBER(l_chiplet_num)
+                                .set_BUCKET(iv_poundV_bucket_id)
+                                .set_POINT(i)
+                                POUNDV_POINTS_PRINT(i-1,A)
+                                POUNDV_POINTS_PRINT(i,B),
+                                "Pstate Parameter Block #V disorder contents error being logged");
+                        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                        break;
                     }
-                }  // validity failed
-            }  // Skip CF6 check
+                }
+
+                if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+                {
+                    // Error out has Pstate and all dependent functions are suspicious.
+                    if (i_biased_state)
+                    {
+                        FAPI_ASSERT(false,
+                                fapi2::PSTATE_PB_BIASED_POUNDV_SLOPE_ERROR()
+                                .set_CHIP_TARGET(iv_procChip)
+                                .set_CHIPLET_NUMBER(l_chiplet_num)
+                                .set_BUCKET(iv_poundV_bucket_id)
+                                .set_POINT(i)
+                                POUNDV_POINTS_PRINT(i-1,A)
+                                POUNDV_POINTS_PRINT(i,B),
+                                "Pstate Parameter Block Biased #V disorder contents error being logged");
+                    }
+                    else
+                    {
+                        FAPI_ASSERT(false,
+                                fapi2::PSTATE_PB_POUNDV_SLOPE_ERROR()
+                                .set_CHIP_TARGET(iv_procChip)
+                                .set_CHIPLET_NUMBER(l_chiplet_num)
+                                .set_BUCKET(iv_poundV_bucket_id)
+                                .set_POINT(i)
+                                POUNDV_POINTS_PRINT(i-1,A)
+                                POUNDV_POINTS_PRINT(i,B),
+                                "Pstate Parameter Block #V disorder contents error being logged");
+                    }
+                } // fail
+            }  // validity failed
         } // point loop
-    }  // validity disabled
+    } while(0);
 
 fapi_try_exit:
 
-    FAPI_DBG("<< chk_valid_poundv");
+    FAPI_INF("< chk_valid_poundv");
     return fapi2::current_err;
 }
-void PlatPmPPB::update_vpd_pts_value()
+
+
+///////////////////////////////////////////////////////////
+////////   disable_pstates
+///////////////////////////////////////////////////////////
+void PlatPmPPB::disable_pstates()
 {
-    uint8_t i = 0;
-    uint8_t l_ps_cf3_idx = 0;
-    uint8_t l_cf3_ut_idx = 0;
-    const char*     pv_op_str[NUM_PV_POINTS] = VPD_PV_STR;
-    //PSAV 0, CF1 1, CF2 2, CF3 3, CF4 4, CF5 5,CF6 6
-    for (i = 0; i < NUM_PV_POINTS - 1; ++i)
+    if (iv_pstates_enabled)
     {
-        if (iv_optional_pdv_pts_value_zero)
-        {
-            if ((strcmp(pv_op_str[i], "CF1") == 0) ||
-                    (strcmp(pv_op_str[i], "CF4") == 0))
-            {
-                l_ps_cf3_idx = i - 1;
-                l_cf3_ut_idx = i + 2;
-            }
-            else if (((strcmp(pv_op_str[i], "CF2") == 0) ||
-                        (strcmp(pv_op_str[i], "CF5") == 0)))
-            {
-                l_ps_cf3_idx = i - 2;
-                l_cf3_ut_idx = i + 1;
-            }
-            else
-            {
-                continue;
-            }
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].frequency_mhz,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].frequency_mhz,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].frequency_mhz,
-                        CF1_3_PERCENTAGE);
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].vdd_mv,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].vdd_mv,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].vdd_mv,
-                        CF1_3_PERCENTAGE);
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].idd_tdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].idd_tdp_ac_10ma,
-                        CF1_3_PERCENTAGE);
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].idd_tdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].idd_tdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].idd_tdp_dc_10ma,
-                        CF1_3_PERCENTAGE);
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].idd_rdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].idd_rdp_ac_10ma,
-                        CF1_3_PERCENTAGE);
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].idd_rdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].idd_rdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].idd_rdp_dc_10ma,
-                        CF1_3_PERCENTAGE);
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].vcs_mv,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].vcs_mv,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].vcs_mv,
-                        CF1_3_PERCENTAGE);
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].ics_tdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].ics_tdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].ics_tdp_ac_10ma,
-                        CF1_3_PERCENTAGE);
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].ics_tdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].ics_tdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].ics_tdp_dc_10ma,
-                        CF1_3_PERCENTAGE);
+     FAPI_INF(">>> Pstates being disabled.")
+     iv_pstates_enabled = false;
+    }
 
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].ics_rdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].ics_rdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].ics_rdp_ac_10ma,
-                        CF1_3_PERCENTAGE);
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].ics_rdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].ics_rdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].ics_rdp_dc_10ma,
-                        CF1_3_PERCENTAGE);
+    disable_resclk();
+    disable_ocs();
+    disable_dds();
+    disable_wof();
+    disable_underv();
+    disable_overv();
 
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].vdd_vmin,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].vdd_vmin,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].vdd_vmin,
-                        CF1_3_PERCENTAGE);
-
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].rt_tdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].rt_tdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].rt_tdp_ac_10ma,
-                        CF1_3_PERCENTAGE);
-
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].rt_tdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].rt_tdp_dc_10ma,
-                        CF1_3_PERCENTAGE);
-
-        } //end of if
-    }//end of for
 }
+
+///////////////////////////////////////////////////////////
+////////   disable_resclk
+///////////////////////////////////////////////////////////
+void PlatPmPPB::disable_resclk()
+{
+    if (iv_resclk_enabled)
+    {
+        FAPI_INF(">>> Resonant Clocks being disabled.")
+        iv_resclk_enabled = false;
+    }
+}
+
+//////////////////////////////////////////////////////////
+////////   disable_wof
+///////////////////////////////////////////////////////////
+void PlatPmPPB::disable_wof()
+{
+    if (iv_wof_enabled)
+    {
+        FAPI_INF(">>> WOF being disabled.")
+        iv_wof_enabled = false;
+    }
+}
+
+//////////////////////////////////////////////////////////
+////////   disable_rvrm
+///////////////////////////////////////////////////////////
+void PlatPmPPB::disable_rvrm()
+{
+    if (iv_rvrm_enabled)
+    {
+        FAPI_INF(">>> RVRM being disabled.")
+        iv_rvrm_enabled = false;
+    }
+}
+
+//////////////////////////////////////////////////////////
+////////   disable_dds
+///////////////////////////////////////////////////////////
+void PlatPmPPB::disable_dds()
+{
+    if (iv_dds_enabled)
+    {
+        FAPI_INF(">>> DDS being disabled.")
+        iv_dds_enabled = false;
+    }
+
+    disable_ocs();
+    disable_underv();
+    disable_overv();
+
+}
+
+//////////////////////////////////////////////////////////
+////////   disable_ocs
+///////////////////////////////////////////////////////////
+void PlatPmPPB::disable_ocs()
+{
+    if (iv_ocs_enabled)
+    {
+        FAPI_INF(">>> Over Current Sensor (OCS) being disabled.")
+        iv_ocs_enabled = false;
+    }
+
+    disable_underv();
+    disable_overv();
+
+// RTC 270130
+// Commented out to allow for indepenent WOF<>OCS testing
+// In the product, they are related depending on the OCS_MODE
+// in WOF table it set, then don't disable wof
+//    disable_wof();
+}
+
+//////////////////////////////////////////////////////////
+////////   disable_wov_underv
+///////////////////////////////////////////////////////////
+void PlatPmPPB::disable_underv()
+{
+    if (iv_wov_underv_enabled)
+    {
+        FAPI_INF(">>> Undervolting being disabled.")
+        iv_wov_underv_enabled = false;
+    }
+}
+
+///////////////////////////////////////////////////////////
+////////   disable_wov_overv
+///////////////////////////////////////////////////////////
+void PlatPmPPB::disable_overv()
+{
+    if (iv_wov_overv_enabled)
+    {
+        FAPI_INF(">>> Overvolting being disabled.")
+        iv_wov_overv_enabled = false;
+    }
+}
+
+//////////////////////////////////////////////////////////
+////////   disable_wof_throttle
+///////////////////////////////////////////////////////////
+void PlatPmPPB::disable_wof_throttle()
+{
+    if (iv_wov_underv_enabled)
+    {
+        FAPI_INF(">>> WOF throttling being disabled.")
+        iv_wof_throttle_enabled = false;
+    }
+}
+
+///////////////////////////////////////////////////////////
+////////   is_pstates_enabled
+///////////////////////////////////////////////////////////
+bool PlatPmPPB::is_pstates_enabled()
+{
+     return iv_pstates_enabled;
+}
+
+///////////////////////////////////////////////////////////
+////////   is_resclk_enabled
+///////////////////////////////////////////////////////////
+bool PlatPmPPB::is_resclk_enabled()
+{
+    if (iv_attrs.attr_resclk_disable && iv_resclk_enabled)
+    {
+        FAPI_DBG(">>> Reslck disabled due to system attribute control.")
+        iv_resclk_enabled = false;
+    }
+     return iv_resclk_enabled;
+}
+
 ///////////////////////////////////////////////////////////
 ////////   is_dds_enabled
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_dds_enabled()
 {
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-//    uint8_t attr_dd_ddsc_not_supported;
-    fapi2::ATTR_SYSTEM_DDS_DISABLE_Type attr_system_dds_disable = false;
+    if (iv_attrs.attr_system_dds_disable && iv_dds_enabled)
+    {
+        FAPI_DBG(">>> DDS disabled due to system attribute control.")
+        iv_dds_enabled = false;
+    }
 
-    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_DDS_DISABLE, FAPI_SYSTEM, attr_system_dds_disable);
-//    FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DDSC_NOT_SUPPORTED, iv_procChip, attr_dd_ddsc_not_supported);
-
-    return
-        (!(attr_system_dds_disable) &&
- //        !(attr_dd_vdm_not_supported) &&
-         iv_dds_enabled)
-         ? true : false;
-} // end of is_dds_enabled
+    return iv_dds_enabled;
+}
 
 ///////////////////////////////////////////////////////////
 ////////  is_wof_enabled
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_wof_enabled()
 {
-//    uint8_t attr_dd_wof_not_supported;
-    uint8_t attr_system_wof_disable = false;
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_DISABLE, FAPI_SYSTEM, attr_system_wof_disable);
-//    FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
+    if (iv_attrs.attr_system_wof_disable && iv_wof_enabled)
+    {
+        FAPI_DBG(">>> WOF disabled due to system attribute control.")
+        iv_wof_enabled = false;
+    }
 
-    return
-        (!(attr_system_wof_disable) &&
- //        !(attr_dd_wof_not_supported) &&
-         iv_wof_enabled)
-        ? true : false;
-} //end of is_wof_enabled
+    return iv_wof_enabled;
+}
 
 ///////////////////////////////////////////////////////////
 ////////  is_rvrm_enabled
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_rvrm_enabled()
 {
-    uint8_t attr_system_rvrm_disable = false;
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RVRM_DISABLE, FAPI_SYSTEM, attr_system_rvrm_disable);
+    if (iv_attrs.attr_system_rvrm_disable && iv_rvrm_enabled)
+    {
+        FAPI_DBG(">>> RVRM disabled due to system attribute control.")
+        iv_rvrm_enabled = false;
+    }
 
-    return
-        (!(attr_system_rvrm_disable) &&
-         iv_rvrm_enabled)
-        ? true : false;
-} //end of is_rvrm_enabled
+    return iv_rvrm_enabled;
+}
 
 ///////////////////////////////////////////////////////////
 ////////  is_ocs_enabled
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_ocs_enabled()
 {
-    fapi2::ATTR_SYSTEM_OCS_DISABLE_Type attr_system_ocs_disable = false;
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_OCS_DISABLE, FAPI_SYSTEM, attr_system_ocs_disable);
+    if (iv_attrs.attr_system_ocs_disable && iv_ocs_enabled)
+    {
+        FAPI_DBG(">>> OCS disabled due to system attribute control.")
+        iv_ocs_enabled = false;
+    }
 
-    fapi2::ATTR_SYSTEM_OCS_DISABLE_Type attr_system_ocs_with_dds_disable = false;
-    FAPI_ATTR_GET(fapi2::ATTR_OCS_WITH_DDS_DISABLE, FAPI_SYSTEM, attr_system_ocs_with_dds_disable);
+    return iv_ocs_enabled;
+}
 
-    return
-        (!(attr_system_ocs_disable) &&
-         (iv_ocs_enabled || (attr_system_ocs_with_dds_disable)))
-        ? true : false;
-} //end of is_ocs_enabled
+///////////////////////////////////////////////////////////
+////////  is_wov_underv_enabled
+///////////////////////////////////////////////////////////
+bool PlatPmPPB::is_wov_underv_enabled()
+{
+    if (iv_attrs.attr_wov_underv_disable && iv_wov_underv_enabled)
+    {
+        FAPI_DBG(">>> Undervolting disabled due to system attribute control.")
+        iv_wov_underv_enabled = false;
+    }
+
+    return iv_wov_underv_enabled;
+}
+
+///////////////////////////////////////////////////////////
+//////// is_wov_overv_enabled
+///////////////////////////////////////////////////////////
+bool PlatPmPPB::is_wov_overv_enabled()
+{
+    if (iv_attrs.attr_wov_overv_disable && iv_wov_overv_enabled)
+    {
+        FAPI_DBG(">>> Overrvolting disabled due to system attribute control.")
+        iv_wov_overv_enabled = false;
+    }
+
+    return iv_wov_overv_enabled;
+}
 
 ///////////////////////////////////////////////////////////
 ////////  is_wof_throttle_enabled
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_wof_throttle_enabled()
 {
-     fapi2::ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE_Type attr_system_wof_throttle_disable = false;
-     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-     FAPI_ATTR_GET(fapi2::ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE, FAPI_SYSTEM, attr_system_wof_throttle_disable);
+    if ( iv_attrs.attr_system_wof_throttle_control_loop_disable &&
+        !iv_attrs.attr_system_pitch_enable  &&
+        iv_wof_throttle_enabled                                   )
+    {
+        iv_wof_throttle_enabled = false;
+    }
 
-     fapi2::ATTR_WOF_PITCH_ENABLE_Type attr_system_wof_pitch_enable = false;
-     FAPI_ATTR_GET(fapi2::ATTR_WOF_PITCH_ENABLE, FAPI_SYSTEM, attr_system_wof_pitch_enable);
-
-
-     return
-         (!(attr_system_wof_throttle_disable) &&
-          !(attr_system_wof_pitch_enable) &&
-         iv_wof_throttle_enabled)
-         ? true : false;
-} //end of is_wof_throttle_enabled
-
-
+    return iv_wof_throttle_enabled;
+}
 
 ///////////////////////////////////////////////////////////
 ////////   apply_biased_values
@@ -3237,7 +3224,7 @@ fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
         // ---------------------------------------------
         // process external and internal bias attributes
         // ---------------------------------------------
-        FAPI_IMP("Apply Biasing to #V");
+        FAPI_IMP("Apply Biasing to #V to all CF points");
 
         // Copy to Bias array
         memcpy(iv_attr_mvpd_poundV_biased,iv_attr_mvpd_poundV_raw,sizeof(iv_attr_mvpd_poundV_raw));
@@ -3257,29 +3244,25 @@ fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
                  "Bias application function failed");
 
         //Validating Bias values
-        FAPI_INF("Validate Biasd Voltage and Frequency values");
+        FAPI_INF("Validate Biased Voltage and Frequency values");
 
         FAPI_TRY(chk_valid_poundv(BIASED));
 
         //Update pstate for all points
         for (int i = 0; i < NUM_PV_POINTS; i++)
         {
-            //TBD
-            if (i == VPD_PV_CF7)
-                continue;
-
             // TODO RTC: 211812
-            iv_attr_mvpd_poundV_biased[i].pstate = (iv_attr_mvpd_poundV_biased[CF6].frequency_mhz -
+            iv_attr_mvpd_poundV_biased[i].pstate = (iv_attr_mvpd_poundV_biased[CF7].frequency_mhz -
             iv_attr_mvpd_poundV_biased[i].frequency_mhz) * 1000 / (iv_frequency_step_khz);
 
-            FAPI_INF("PSTATE %x %x %d",iv_attr_mvpd_poundV_biased[CF6].frequency_mhz,
+            FAPI_INF("PSTATE %x %x %d",iv_attr_mvpd_poundV_biased[CF7].frequency_mhz,
                      iv_attr_mvpd_poundV_biased[i].frequency_mhz,iv_attr_mvpd_poundV_biased[i].pstate);
         }
 
 
         FAPI_DBG("Pstate Base Frequency - after bias %X (%d)",
-                 iv_attr_mvpd_poundV_biased[VPD_PV_CF6].frequency_mhz * 1000,
-                 iv_attr_mvpd_poundV_biased[VPD_PV_CF6].frequency_mhz * 1000);
+                 iv_attr_mvpd_poundV_biased[CF7].frequency_mhz * 1000,
+                 iv_attr_mvpd_poundV_biased[CF7].frequency_mhz * 1000);
     }while(0);
 
 fapi_try_exit:
@@ -3297,11 +3280,11 @@ fapi2::ReturnCode PlatPmPPB::apply_extint_bias( )
     double freq_bias[NUM_PV_POINTS];
     double voltage_ext_vdd_bias[NUM_PV_POINTS];
     double voltage_ext_vcs_bias[NUM_PV_POINTS];
-  //  double voltage_ext_vdn_bias;
+    // double voltage_ext_vdn_bias;
     uint8_t VDD = 0;
     uint8_t VCS = 1;
-   // uint8_t VDN = 2;
-  //  uint8_t VIO = 3;
+    // uint8_t VDN = 2;
+    // uint8_t VIO = 3;
 
     // Calculate the frequency multiplers and load the biases into the exported
     // structure
@@ -3316,7 +3299,7 @@ fapi2::ReturnCode PlatPmPPB::apply_extint_bias( )
         voltage_ext_vdd_bias[p]   = calc_bias(iv_bias.vdd_ext_0p5pct[p]);
         voltage_ext_vcs_bias[p]   = calc_bias(iv_bias.vcs_ext_0p5pct[p]);
 
-        FAPI_DBG("    Biases[%d](bias): Freq=%f (%f%%); VDD=%f (%f%%) VCS=%f (%f%%)",
+        FAPI_INF("    Biases[%d](bias): Freq=%f (%f%%); VDD=%f (%f%%) VCS=%f (%f%%)",
                 p,
                 freq_bias[p],            iv_bias.frequency_0p5pct/2,
                 voltage_ext_vdd_bias[p], iv_bias.vdd_ext_0p5pct[p]/2,
@@ -3325,7 +3308,7 @@ fapi2::ReturnCode PlatPmPPB::apply_extint_bias( )
 
 
     // VDN bias applied to all operating points
-//    voltage_ext_vdn_bias = calc_bias(iv_attrs.attr_voltage_ext_vdn_bias);
+    // voltage_ext_vdn_bias = calc_bias(iv_attrs.attr_voltage_ext_vdn_bias);
 
     // Change the VPD frequency, VDD and VCS values with the bias multiplers
     for (auto p = 0; p < NUM_PV_POINTS; p++)
@@ -3372,17 +3355,13 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
 
     do
     {
-        FAPI_DBG("get_mvpd_poundW: VDM enable = %d, WOF enable %d",
-                is_dds_enabled(), is_wof_enabled());
+        FAPI_DBG("get_mvpd_poundW: DDS enable = %d", is_dds_enabled());
 
-        // Exit if both DDS and WOF is disabled
-        if ((!is_dds_enabled() && !is_wof_enabled()))
+        // Exit if DDS is disabled
+        if (!is_dds_enabled())
         {
-            FAPI_INF("   get_mvpd_poundW: BOTH DDS and WOF are disabled.  Skipping remaining checks");
-            iv_dds_enabled = false;
-            iv_wof_enabled = false;
-            iv_wov_underv_enabled = false;
-            iv_wov_overv_enabled = false;
+            FAPI_INF("   get_mvpd_poundW: DDS is disabled.  Skipping futher #W processing");
+            disable_dds();   // this is to ensure the dependent functions are disabled.
             break;
         }
 
@@ -3455,6 +3434,12 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
 
         }
 
+
+        FAPI_INF("iv_poundW_data.other.droop_freq_resp_reference_mhz %x",iv_poundW_data.other.droop_freq_resp_reference_mhz);
+        FAPI_INF("iv_poundW_data.other.droop_count_control %x",iv_poundW_data.other.droop_count_control);
+        FAPI_INF("iv_poundW_data.other.ftc_large_droop_mode_reg_setting %x",iv_poundW_data.other.ftc_large_droop_mode_reg_setting);
+        FAPI_INF("iv_poundW_data.other.ftc_misc_droop_mode_reg_setting %x",iv_poundW_data.other.ftc_misc_droop_mode_reg_setting);
+
         // validate vid values
         bool l_frequency_value_state = 1;
         FAPI_INF("iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct);
@@ -3470,22 +3455,10 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
                     l_frequency_value_state);
         }
 
-
         if (!l_frequency_value_state)
         {
             FAPI_INF("l_frequency_value_state=0");
             //iv_dds_enabled = false; // \\todo determine if this check should disable/enable dds
-        }
-
-        //If we have reached this point, that means DDS is ok to be enabled. Only then we try to
-        //enable wov undervolting
-        if  (((iv_attrs.attr_wov_underv_force == 1))  &&
-                is_wov_underv_enabled() == 1) {
-            iv_wov_underv_enabled = true;
-            FAPI_INF("UNDERV_TESTED or UNDERV_FORCE set to 1");
-        } else{
-            iv_wov_underv_enabled = false;
-            FAPI_INF("UNDERV_TESTED and UNDERV_FORCE set to 0");
         }
     }
     while(0);
@@ -3493,31 +3466,6 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
 fapi_try_exit:
     delete l_ddscBuf;
     return fapi2::FAPI2_RC_SUCCESS;
-}
-
-///////////////////////////////////////////////////////////
-////////  is_wov_underv_enabled
-///////////////////////////////////////////////////////////
-bool PlatPmPPB::is_wov_underv_enabled()
-{
-    return(!(iv_attrs.attr_wov_underv_disable) &&
-         iv_wov_underv_enabled)
-         ? true : false;
-}
-
-///--------------------------------------
-///////////////////////////////////////////////////////////
-//////// is_wov_overv_enabled
-///////////////////////////////////////////////////////////
-bool PlatPmPPB::is_wov_overv_enabled()
-{
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::ATTR_WOV_OVERV_WITH_DDS_DISABLE_Type attr_system_wov_overv_with_dds_disable = false;
-    FAPI_ATTR_GET(fapi2::ATTR_WOV_OVERV_WITH_DDS_DISABLE, FAPI_SYSTEM,attr_system_wov_overv_with_dds_disable);
-
-    return (!(iv_attrs.attr_wov_overv_disable) &&
-         (iv_wov_overv_enabled || attr_system_wov_overv_with_dds_disable))
-         ? true : false;
 }
 
 ///////////////////////////////////////////////////////////
@@ -3563,18 +3511,20 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_iddq( void )
     memcpy(&iv_iddqt, (l_buffer_iq_c+1), l_bufferSize_iq);
 
     //Verify Payload header data.
-    if ( !(iv_iddqt.iddq_version) ||
-            !(iv_iddqt.good_normal_cores_per_sort))
+    if ( ( !(iv_iddqt.iddq_version) ||
+           !(iv_iddqt.good_normal_cores_per_sort)) &&
+           l_iq_mode != fapi2::ENUM_ATTR_SYSTEM_IQ_VALIDATION_MODE_OFF)
     {
-        if (l_iq_mode == fapi2::ENUM_ATTR_SYSTEM_IQ_VALIDATION_MODE_INFO)
+
+        if (l_iq_mode == fapi2::ENUM_ATTR_SYSTEM_IQ_VALIDATION_MODE_WARN)
         {
-            FAPI_INF("Pstate Parameter Block IQ Payload data error being logged");
+            FAPI_INF("Pstate Parameter Block IQ Payload data error:  version %u; good cores %u",
+                    iv_iddqt.iddq_version, iv_iddqt.good_normal_cores_per_sort);
         }
-        else
+        else if (l_iq_mode == fapi2::ENUM_ATTR_SYSTEM_IQ_VALIDATION_MODE_INFO)
         {
-
-
-            //iv_wof_enabled = false;//TBD for now commented for wof testing purpose
+            FAPI_INF("Pstate Parameter Block IQ Payload data error:  version %u; good cores %u",
+                    iv_iddqt.iddq_version, iv_iddqt.good_normal_cores_per_sort);
             //because IQ data was not valid
             FAPI_ASSERT_NOEXIT(false,
                     fapi2::PSTATE_PB_IQ_VPD_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
@@ -3583,6 +3533,18 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_iddq( void )
                     .set_GOOD_NORMAL_CORES_PER_SORT(iv_iddqt.good_normal_cores_per_sort),
                     "Pstate Parameter Block IQ Payload data error being logged");
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+        else if (l_iq_mode == fapi2::ENUM_ATTR_SYSTEM_IQ_VALIDATION_MODE_FAIL)
+        {
+            FAPI_INF("Pstate Parameter Block IQ Payload data error:  version %u; good cores %u",
+                    iv_iddqt.iddq_version, iv_iddqt.good_normal_cores_per_sort);
+            //because IQ data was not valid
+            FAPI_ASSERT(false,
+                    fapi2::PSTATE_PB_IQ_VPD_ERROR()
+                    .set_CHIP_TARGET(iv_procChip)
+                    .set_VERSION(iv_iddqt.iddq_version)
+                    .set_GOOD_NORMAL_CORES_PER_SORT(iv_iddqt.good_normal_cores_per_sort),
+                    "Pstate Parameter Block IQ Payload data error being logged");
         }
     }
 
@@ -3825,174 +3787,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 }
 
-/*
 
-int = interpolate
-str = stretch
-    Case
-     UT     d   A               B
-CF7         7   int CF7,CF6     CF6
-    <- A
-CF6 <- B    6   CF6             str CF6,CF5
-                                       2
-CF5         5   CF5             CF5 (s)
-
-CF4         4   CF4             CF4
-
-CF3         3   CF3             CF3
-
-CF2         2   CF2             CF2
-
-CF1         1   CF1             CF1
-
-CF0         0   CF0             CF0
-
-*/
-
-
-///////////////////////////////////////////////////////////
-////////   find_freq_region
-///////////////////////////////////////////////////////////
-uint32_t PlatPmPPB::find_freq_region(const uint32_t freq_mhz)
-{
-    for (uint8_t r = 0; r < NUM_PV_POINTS; ++r)
-    {
-        FAPI_INF("freq_mhz %08x NUM_PV_POINTS %d",freq_mhz,NUM_PV_POINTS);
-        FAPI_INF("%08X %08X %d",iv_attr_mvpd_poundV_raw_orig[r].frequency_mhz,
-        iv_attr_mvpd_poundV_raw_orig[r+1].frequency_mhz,r);
-        if ((freq_mhz >= iv_attr_mvpd_poundV_raw_orig[r].frequency_mhz &&
-             freq_mhz <  iv_attr_mvpd_poundV_raw_orig[r+1].frequency_mhz  )  ||
-            (freq_mhz >= iv_attr_mvpd_poundV_raw_orig[r].frequency_mhz &&
-             iv_attr_mvpd_poundV_raw_orig[r+1].frequency_mhz) == 0)
-        {
-            return r;
-        }
-    }
-    return 111;
-}
-
-///////////////////////////////////////////////////////////
-////////   region_steps
-///////////////////////////////////////////////////////////
-uint32_t PlatPmPPB::region_steps(const uint32_t region)
-{
-
-   if (iv_attr_mvpd_poundV_raw_orig[region+1].frequency_mhz == 0)
-   {
-      return 0;
-   }
-
-   return ((iv_attr_mvpd_poundV_raw_orig[region+1].frequency_mhz -
-            iv_attr_mvpd_poundV_raw_orig[region].frequency_mhz  ) * 1000 /
-            iv_frequency_step_khz );
-}
-
-
-///////////////////////////////////////////////////////////
-////////   compute_stretch_point
-///////////////////////////////////////////////////////////
-// This method computes the new frequency points within a stretched region of the
-// RAW #V.  These points are returned in the o_points vector.  (note: this can do
-// more that 2 points
-void PlatPmPPB::compute_stretched_freq_pt(const uint32_t region,
-                                          uint32_t *o_point_mhz)
-{
-    uint32_t region_start_mhz = iv_attr_mvpd_poundV_raw_orig[region].frequency_mhz;
-    uint32_t region_end_mhz = iv_attr_mvpd_poundV_raw_orig[region+1].frequency_mhz;
-
-    uint32_t step_size_mhz =
-        (uint32_t) internal_ceil(((float)region_end_mhz - (float)region_start_mhz) / 2);
-
-    step_size_mhz =(((uint16_t) (step_size_mhz * 1000 /16667)) * 16667)/1000;
-
-    *o_point_mhz = region_start_mhz + step_size_mhz;
-}
-
-#define INTERPOLATE_FREQ(m_FREQ, round, m_REGION, m_MEMBER, m_VALUE)  \
-    {\
-        uint16_t m = compute_slope_4_12(iv_attr_mvpd_poundV_raw_orig[m_REGION+1].m_MEMBER,         \
-                                        iv_attr_mvpd_poundV_raw_orig[m_REGION].m_MEMBER,           \
-                                        iv_attr_mvpd_poundV_raw_orig[m_REGION+1].frequency_mhz,    \
-                                        iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz     );\
-        uint32_t x = m_FREQ - iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz; \
-        uint32_t b = iv_attr_mvpd_poundV_raw_orig[m_REGION].m_MEMBER; \
-        if (round == ROUND_UP) \
-        {\
-            m_VALUE = (( m * x ) >> (VID_SLOPE_FP_SHIFT_12 - 1)) + (b << 1) + 1; \
-            m_VALUE = m_VALUE >> 1; \
-        } \
-        else if (round == ROUND_DOWN)\
-        { \
-            m_VALUE = (( m * x ) >> (VID_SLOPE_FP_SHIFT_12)) + b; \
-        }\
-    }
-
-#define INTERPOLATE_PW_PTS(m_FREQ, round, m_REGION, m_MEMBER, m_VALUE, c,dr)  \
-    {\
-       int16_t m;\
-       if(iv_poundW_data.entry[m_REGION+1].entry[c].ddsc.fields.insrtn_dely >=  \
-          iv_poundW_data.entry[m_REGION].entry[c].ddsc.fields.insrtn_dely) { \
-        m = compute_slope_4_12(iv_poundW_data.entry[m_REGION+1].entry[c].ddsc.fields.m_MEMBER,         \
-                                        iv_poundW_data.entry[m_REGION].entry[c].ddsc.fields.m_MEMBER,         \
-                                        iv_attr_mvpd_poundV_raw_orig[m_REGION+1].frequency_mhz,    \
-                                        iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz     );\
-       }\
-       else \
-        {\
-            m = compute_slope_4_12(iv_poundW_data.entry[m_REGION].entry[c].ddsc.fields.m_MEMBER,         \
-                    iv_poundW_data.entry[m_REGION+1].entry[c].ddsc.fields.m_MEMBER,         \
-                    iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz,    \
-                    iv_attr_mvpd_poundV_raw_orig[m_REGION+1].frequency_mhz     );\
-        }\
-         uint32_t x = m_FREQ - iv_attr_mvpd_poundV_raw_orig[m_REGION].frequency_mhz; \
-        uint32_t b = iv_poundW_data.entry[m_REGION].entry[c].ddsc.fields.m_MEMBER; \
-        if (round == ROUND_UP) \
-        {\
-            m = (( m * x ) >> (VID_SLOPE_FP_SHIFT_12 - 1)) + (b << 1) + 1; \
-            m_VALUE = m >> 1; \
-        } \
-        else if (round == ROUND_DOWN)\
-        { \
-            m_VALUE = (( m * x ) >> (VID_SLOPE_FP_SHIFT_12)) + b; \
-        }\
-       iv_poundW_data.entry[dr].entry[c].ddsc.fields.m_MEMBER = m_VALUE;\
-    }
-
-///////////////////////////////////////////////////////////
-////////   interpolate_pw_point
-///////////////////////////////////////////////////////////
-void PlatPmPPB::interpolate_pw_pt(const uint32_t freq,
-                                    const uint32_t region,
-                                    const uint32_t d_region,
-                                    PoundWEntry_t *ip)
-{
-    for (auto core = 0; core < MAXIMUM_CORES; core++)
-    {
-        INTERPOLATE_PW_PTS( freq, ROUND_UP,region, insrtn_dely,ip->ddsc.fields.insrtn_dely, core,d_region);
-    }
-}
-///////////////////////////////////////////////////////////
-////////   interpolate_freq_point_poundW
-///////////////////////////////////////////////////////////
-void PlatPmPPB::interpolate_freq_pt(const uint32_t freq,
-                                    const uint32_t region,
-                                    PoundVOpPoint_t *ip)
-{
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, vdd_mv,             ip->vdd_mv);
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, idd_tdp_ac_10ma,    ip->idd_tdp_ac_10ma);
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, idd_tdp_dc_10ma,    ip->idd_tdp_dc_10ma);
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, idd_rdp_ac_10ma,    ip->idd_rdp_ac_10ma);
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, idd_rdp_dc_10ma,    ip->idd_rdp_dc_10ma);
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, vcs_mv,             ip->vcs_mv);
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_tdp_ac_10ma,    ip->ics_tdp_ac_10ma);
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_tdp_dc_10ma,    ip->ics_tdp_dc_10ma);
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_rdp_ac_10ma,    ip->ics_rdp_ac_10ma);
-    INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_rdp_dc_10ma,    ip->ics_rdp_dc_10ma);
-
-    ip->vdd_vmin = iv_attr_mvpd_poundV_raw_orig[region].vdd_vmin;
-    ip->rt_tdp_ac_10ma = iv_attr_mvpd_poundV_raw_orig[region].rt_tdp_ac_10ma;
-    ip->rt_tdp_dc_10ma = iv_attr_mvpd_poundV_raw_orig[region].rt_tdp_dc_10ma;
-}
 ///////////////////////////////////////////////////////////
 ////////   compute_vpd_pts
 ///////////////////////////////////////////////////////////
@@ -4060,7 +3855,6 @@ void PlatPmPPB::compute_vpd_pts()
 
     // As this is memory to memory, Endianess correction is not necessary.
     iv_reference_frequency_khz = iv_attrs.attr_pstate0_freq_mhz * 1000;
-//        (iv_operating_points[VPD_PT_SET_BIASED][VPD_PV_CF6].frequency_mhz) * 1000;
 
     FAPI_DBG("Reference into GPPB: LE local Freq=%X (%d);  Freq=%X (%d)",
                 iv_reference_frequency_khz,
@@ -4072,7 +3866,7 @@ void PlatPmPPB::compute_vpd_pts()
     for (auto p = 0; p < NUM_PV_POINTS; p++)
     {
         iv_operating_points[VPD_PT_SET_BIASED][p].pstate =
-            ((((iv_attrs.attr_pstate0_freq_mhz)  -
+            ((((iv_operating_points[VPD_PT_SET_BIASED][CF7].frequency_mhz)  -
                (iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz)) * 1000) /
              (iv_frequency_step_khz));
 
@@ -4152,8 +3946,8 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_init( void )
     FAPI_INF(">>>>>>>>>> safe_mode_init");
 
     if (!iv_attrs.attr_pm_safe_voltage_mv[VDD] ||
-            !iv_attrs.attr_pm_safe_voltage_mv[VCS] ||
-            !iv_attrs.attr_pm_safe_frequency_mhz)
+        !iv_attrs.attr_pm_safe_voltage_mv[VCS] ||
+        !iv_attrs.attr_pm_safe_frequency_mhz)
     {
         //Compute safe mode values
         FAPI_TRY(safe_mode_computation (
@@ -4182,22 +3976,69 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     uint32_t                                 l_op_pt;
     Pstate                                   l_safe_mode_ps;
 
+    FAPI_INF(">>>>>>>>>> safe_mode_computation");
+
+    fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE_Type l_pdv_mode;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
+            FAPI_SYSTEM, l_pdv_mode));
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
                            iv_procChip,
                            l_core_floor_mhz));
+
+    if (!is_pstates_enabled())
+    {
+        FAPI_INF("Pstates are disabled which implies the #V is bad.  Skipping safe mode computation being skipped");
+        goto fapi_try_exit;
+    }
 
     // Core floor frequency should be less than ultra turbo freq..
     // if not log an error
     if ((l_core_floor_mhz*1000) > iv_reference_frequency_khz)
     {
-        FAPI_ERR("Core floor frequency %08x is greater than UltraTurbo frequency %08x",
-                  (l_core_floor_mhz*1000), iv_reference_frequency_khz);
-        FAPI_ASSERT(false,
-                    fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_CF6_FREQ()
-                    .set_CHIP_TARGET(iv_procChip)
-                    .set_CORE_FLOOR_FREQ(l_core_floor_mhz*1000)
-                    .set_UT_FREQ(iv_reference_frequency_khz),
-                    "Core floor freqency is greater than UltraTurbo frequency");
+
+        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN )
+        {
+
+            FAPI_INF("Core floor frequency %04x (%04d) is greater than Pstate0 frequency %04x (%04d)",
+                      (l_core_floor_mhz*1000),
+                      (l_core_floor_mhz*1000),
+                      iv_reference_frequency_khz,
+                      iv_reference_frequency_khz);
+            goto fapi_try_exit;
+        }
+
+        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO ||
+            l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+        {
+            FAPI_ERR("Core floor frequency %04x (%04d) is greater than Pstate0 frequency %04x (%04d)",
+                      (l_core_floor_mhz*1000),
+                      (l_core_floor_mhz*1000),
+                      iv_reference_frequency_khz,
+                      iv_reference_frequency_khz);
+        }
+
+        if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
+        {
+            FAPI_ASSERT_NOEXIT(false,
+                        fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_CF6_FREQ()
+                        .set_CHIP_TARGET(iv_procChip)
+                        .set_CORE_FLOOR_FREQ(l_core_floor_mhz*1000)
+                        .set_UT_FREQ(iv_reference_frequency_khz),
+                        "Core floor freqency is greater than UltraTurbo frequency");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            goto fapi_try_exit;
+        }
+
+        if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+        {
+            FAPI_ASSERT(false,
+                        fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_CF6_FREQ()
+                        .set_CHIP_TARGET(iv_procChip)
+                        .set_CORE_FLOOR_FREQ(l_core_floor_mhz*1000)
+                        .set_UT_FREQ(iv_reference_frequency_khz),
+                        "Core floor freqency is greater than UltraTurbo frequency");
+        }
     }
 
     FAPI_INF ("core_floor_mhz 0%08x (%d)",
@@ -4298,14 +4139,44 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     // if not log an error
     if ((l_safe_mode_freq_mhz*1000) > iv_reference_frequency_khz)
     {
-        FAPI_ERR("Safe mode frequency %08x is greater than UltraTurbo frequency %08x",
-                  (l_safe_mode_freq_mhz*1000), iv_reference_frequency_khz);
-        FAPI_ASSERT(false,
+        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN )
+        {
+
+            FAPI_INF("Safe mode frequency %08x (%d) is greater than UltraTurbo frequency %08x (%d)",
+                  l_safe_mode_freq_mhz*1000, l_safe_mode_freq_mhz*1000,
+                  iv_reference_frequency_khz, iv_reference_frequency_khz);
+            goto fapi_try_exit;
+        }
+
+        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO ||
+            l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+        {
+             FAPI_ERR("Safe mode frequency %08x (%d) is greater than UltraTurbo frequency %08x (%d)",
+                  l_safe_mode_freq_mhz*1000, l_safe_mode_freq_mhz*1000,
+                  iv_reference_frequency_khz, iv_reference_frequency_khz);
+        }
+
+        if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
+        {
+            FAPI_ASSERT_NOEXIT(false,
                     fapi2::PSTATE_PB_SAFE_FREQ_GT_CF6_FREQ()
                     .set_CHIP_TARGET(iv_procChip)
                     .set_SAFE_FREQ(l_safe_mode_freq_mhz*1000)
                     .set_UT_FREQ(iv_reference_frequency_khz),
                     "Safe mode freqency is greater than UltraTurbo frequency");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            goto fapi_try_exit;
+        }
+
+        if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+        {
+            FAPI_ASSERT(false,
+                    fapi2::PSTATE_PB_SAFE_FREQ_GT_CF6_FREQ()
+                    .set_CHIP_TARGET(iv_procChip)
+                    .set_SAFE_FREQ(l_safe_mode_freq_mhz*1000)
+                    .set_UT_FREQ(iv_reference_frequency_khz),
+                    "Safe mode freqency is greater than UltraTurbo frequency");
+        }
     }
 
     l_safe_mode_ps = ((float)(iv_reference_frequency_khz) -
@@ -4393,6 +4264,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 
 
 fapi_try_exit:
+    FAPI_INF("<<<<<<<<<< safe_mode_computation");
     return fapi2::current_err;
 }
 
@@ -4701,15 +4573,13 @@ void PlatPmPPB::compute_PStateV_I_slope(
 
     for(auto pt_set = 0; pt_set < NUM_VPD_PTS_SET; ++pt_set)
     {
-        // CF6 TURBO pstate check is required only if fmax is enabled, because
-        // fmax will be greater than CF6
         if (!(iv_operating_points[pt_set][CF0].pstate) ||
                 !(iv_operating_points[pt_set][CF1].pstate) ||
                 !(iv_operating_points[pt_set][CF2].pstate) ||
                 !(iv_operating_points[pt_set][CF3].pstate) ||
                 !(iv_operating_points[pt_set][CF4].pstate) ||
-                !(iv_operating_points[pt_set][CF5].pstate))
-//                (!(iv_operating_points[pt_set][CF6].pstate) && iv_poundV_fmax_enable)) //TBD
+                !(iv_operating_points[pt_set][CF5].pstate) ||
+                !(iv_operating_points[pt_set][CF6].pstate)    )
         {
             FAPI_ERR("Non-UltraTurbo PSTATE value shouldn't be zero for %s", vpdSetStr[pt_set]);
             return;
@@ -4726,7 +4596,6 @@ void PlatPmPPB::compute_PStateV_I_slope(
         PS_V_I = revle16( \
                   compute_slope_4_12( PSTATE_MIN, PSTATE_MAX, V_I_MAX, V_I_MIN) );\
     }
-
 
         for(auto region(REGION_CF0_CF1); region <= REGION_CF6_CF7; ++region)
         {
@@ -5179,8 +5048,28 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
 }
 
 ///////////////////////////////////////////////////////////
+////////  dccr_value
+///////////////////////////////////////////////////////////
+uint64_t  PlatPmPPB::dccr_value()
+{
+    uint64_t value;
+    if ( iv_attrs.attr_wof_dccr_value )
+    {
+        // Attributes are already Endianness corrected
+        value = iv_attrs.attr_wof_dccr_value;
+        FAPI_INF("Attribute DCCR value of %016llX used",  value);
+    }
+    else
+    {
+        value = iv_poundW_data.other.droop_count_control;
+        FAPI_INF("#W DCCR value of %016llX; used", revle64(value));
+    }
+    return value;
+}
+
+///////////////////////////////////////////////////////////
 ////////  wof_init
-/////////////////////////PlatPmPPB//////////////////////////////////
+///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::wof_init(
                              uint8_t* o_buf,
                              uint32_t& io_size)
@@ -5412,15 +5301,43 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
 
         if (!l_wof_header_data_state)
         {
-            iv_wof_enabled = false;
+            disable_wof();
             if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_WARN)
             {
-                FAPI_INF("WARNING: Pstate Parameter Block WOF Header validation failed");
+                FAPI_INF("Pstate Parameter Block WOF Header validation failed.  Zeros in required fields detected.");
             }
-            else
+
+            if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_INFO)
             {
                 FAPI_ASSERT_NOEXIT(false,
                         fapi2::PSTATE_PB_WOF_HEADER_DATA_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                        .set_CHIP_TARGET(FAPI_SYSTEM)
+                        .set_MAGIC_NUMBER(p_wfth->magic_number.value)
+                        .set_VERSION(p_wfth->header_version)
+                        .set_VRT_BLOCK_SIZE(p_wfth->vrt_block_size)
+                        .set_VRT_HEADER_SIZE(p_wfth->vrt_block_header_size)
+                        .set_VRT_DATA_SIZE(p_wfth->vrt_data_size)
+                        .set_CORE_COUNT(p_wfth->core_count)
+                        .set_VCS_START(p_wfth->vcs_start)
+                        .set_VCS_STEP(p_wfth->vcs_step)
+                        .set_VCS_SIZE(p_wfth->vcs_size)
+                        .set_VDD_START(p_wfth->vdd_start)
+                        .set_VDD_STEP(p_wfth->vdd_step)
+                        .set_VDD_SIZE(p_wfth->vdd_size)
+                        .set_IO_START(p_wfth->io_start)
+                        .set_IO_STEP(p_wfth->io_step)
+                        .set_IO_SIZE(p_wfth->io_size)
+                        .set_AMB_COND_START(p_wfth->amb_cond_start)
+                        .set_AMB_COND_STEP(p_wfth->amb_cond_step)
+                        .set_AMB_COND_SIZE(p_wfth->amb_cond_size),
+                    "Pstate Parameter Block WOF Header validation failed");
+                 break;
+            }
+
+            if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_FAIL)
+            {
+                FAPI_ASSERT(false,
+                        fapi2::PSTATE_PB_WOF_HEADER_DATA_INVALID()
                         .set_CHIP_TARGET(FAPI_SYSTEM)
                         .set_MAGIC_NUMBER(p_wfth->magic_number.value)
                         .set_VERSION(p_wfth->header_version)
@@ -5489,15 +5406,39 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
 
             if (l_vrt.vrtHeader.fields.marker != 0x56)
             {
-                FAPI_ERR("Marker: %X", l_vrt.vrtHeader.fields.marker);
-                iv_wof_enabled = false;
-                FAPI_ASSERT_NOEXIT(false,
+
+                disable_wof();
+
+
+                if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_WARN ||
+                    l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_INFO   )
+                {
+
+                    FAPI_INF("WARNING: VRT marker not detected:  Marker: %X.  WOF is being disabled.",
+                            l_vrt.vrtHeader.fields.marker);
+                }
+
+                if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_INFO)
+                {
+                    FAPI_ASSERT_NOEXIT(false,
+                        fapi2::PSTATE_PB_VRT_HEADER_DATA_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                        .set_CHIP_TARGET(FAPI_SYSTEM)
+                        .set_MAGIC_NUMBER(l_vrt.vrtHeader.fields.marker)
+                        .set_VRT_INDEX(vrt_index),
+                        "Pstate Parameter Block: Invalid VRT Magic word");
+                }
+                else if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_FAIL)
+                {
+                    FAPI_ERR("ERROR: VRT marker not detected:  Marker: %X.  WOF is being disabled.",
+                            l_vrt.vrtHeader.fields.marker);
+                    FAPI_ASSERT(false,
                         fapi2::PSTATE_PB_VRT_HEADER_DATA_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                         .set_CHIP_TARGET(FAPI_SYSTEM)
                         .set_MAGIC_NUMBER(l_vrt.vrtHeader.fields.marker)
                         .set_VRT_INDEX(vrt_index),
                         "Pstate Parameter Block: Invalid VRT Magic word");
                 break;
+                }
             }
             l_vrt.vrtHeader.value = revle32(l_vrt.vrtHeader.value);
             l_wof_table_index += sizeof (l_vrt);
@@ -5515,15 +5456,17 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
     // want to fail;  rather, we just disable WOF.
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    // Check the validity of some PoundW fields
-    FAPI_INF("Checking validity of #W.  DCC = 0x%016llX", revle64(iv_poundW_data.other.droop_count_control));
-    if (iv_poundW_data.other.droop_count_control == 0)
+    // Get the DCCR value from the combination of the MRW Attribute or #W
+    iv_wof_dccr_value = dccr_value();
+
+    FAPI_INF("Checking validity of DCCR.  DCCR = 0x%016llX", iv_wof_dccr_value);
+    if (iv_wof_dccr_value == 0)
     {
 
-        FAPI_INF("#W DCCR is 0. Disabling Over-Current Sensor, Undervolting and Overvolting");
-        iv_ocs_enabled = false;
-        iv_wov_underv_enabled = false;
-        iv_wov_overv_enabled = false;
+        FAPI_ERR("#W DCCR is 0. Disabling Over-Current Sensor, Undervolting and Overvolting");
+        disable_ocs();
+        disable_underv();
+        disable_overv();
 
         if (is_wof_enabled())
         {
@@ -5531,21 +5474,27 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         }
 
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE_Type l_sys_pdw_mode;
+        fapi2::ATTR_SYSTEM_PDW_VALIDATION_MODE_Type l_sys_pdw_mode;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDW_VALIDATION_MODE, FAPI_SYSTEM,l_sys_pdw_mode));
+
+        if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_WARN ||
+            l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_INFO   )
+        {
+            FAPI_INF("WARNING: #W DCCR has value of 0");
+        }
+
         if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_INFO)
         {
             FAPI_ASSERT_NOEXIT(false,
                     fapi2::PSTATE_PB_ZERO_DCCR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                     .set_CHIP_TARGET(iv_procChip),
                     "Pstate Parameter Block: #W DCCR has value of 0");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
-        else if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_WARN)
+
+        if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_FAIL)
         {
-            FAPI_INF("WARNING: #W DCCR has value of 0");
-        }
-        else if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_FAIL)
-        {
+            FAPI_ERR("ERROR: #W DCCR has value of 0");
             FAPI_ASSERT(false,
                     fapi2::PSTATE_PB_ZERO_DCCR()
                     .set_CHIP_TARGET(iv_procChip),
@@ -5556,15 +5505,16 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
     // FLMR
     if (iv_poundW_data.other.ftc_large_droop_mode_reg_setting == 0 || iv_poundW_data.other.dds_calibration_version == 0)
     {
-        iv_poundW_data.other.ftc_large_droop_mode_reg_setting = revle64(0x23E0404000000000ull);
+        // Setting with native Endianness as that is
+        iv_poundW_data.other.ftc_large_droop_mode_reg_setting = 0x23E0404000000000ull;
         FAPI_INF("Setting FLMR to internal default as #W value is 0.  FLMR = 0x%016llX",
-                revle64(iv_poundW_data.other.ftc_large_droop_mode_reg_setting));
+                iv_poundW_data.other.ftc_large_droop_mode_reg_setting);
     }
 
     // FMMR
     if (iv_poundW_data.other.ftc_misc_droop_mode_reg_setting == 0 || iv_poundW_data.other.dds_calibration_version == 0)
     {
-        iv_poundW_data.other.ftc_misc_droop_mode_reg_setting = revle64(0x000002D400000010ull);
+        iv_poundW_data.other.ftc_misc_droop_mode_reg_setting = 0x000002D400000010ull;
         FAPI_INF("Setting FMMR to internal default as #W value is 0.  FMMR = 0x%016llX",
                 revle64(iv_poundW_data.other.ftc_misc_droop_mode_reg_setting));
     }
@@ -5585,6 +5535,7 @@ fapi_try_exit:
 fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
 {
 
+    FAPI_INF("set_global_feature_attributes")
     fapi2::ATTR_PSTATES_ENABLED_Type l_ps_enabled =
         (fapi2::ATTR_PSTATES_ENABLED_Type)fapi2::ENUM_ATTR_PSTATES_ENABLED_FALSE;
 
@@ -5600,36 +5551,18 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
     fapi2::ATTR_RVRM_ENABLED_Type l_rvrm_enabled =
         (fapi2::ATTR_RVRM_ENABLED_Type)fapi2::ENUM_ATTR_RVRM_ENABLED_FALSE;
 
+    fapi2::ATTR_OCS_ENABLED_Type l_ocs_enabled =
+        (fapi2::ATTR_OCS_ENABLED_Type)fapi2::ENUM_ATTR_OCS_ENABLED_FALSE;
+
     fapi2::ATTR_WOF_THROTTLE_CONTROL_DISABLED_Type l_wof_throttle_disabled =
         (fapi2::ATTR_WOF_THROTTLE_CONTROL_DISABLED_Type)fapi2::ENUM_ATTR_WOF_THROTTLE_CONTROL_DISABLED_FALSE;
 
-// RTC 247962:need to revisit
-#if 0
     fapi2::ATTR_WOV_UNDERV_ENABLED_Type l_wov_underv_enabled =
         (fapi2::ATTR_WOV_UNDERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_UNDERV_ENABLED_FALSE;
 
     fapi2::ATTR_WOV_OVERV_ENABLED_Type l_wov_overv_enabled =
         (fapi2::ATTR_WOV_OVERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_OVERV_ENABLED_FALSE;
 
-
-      //Check whether to enable WOV Undervolting. WOV can
-      //only be enabled if DDSs are enabled
-      if (!is_wov_underv_enabled() ||
-          !is_dds_enabled())
-      {
-          FAPI_DBG("UNDERV_DISABLED")
-          iv_wov_underv_enabled = false;
-      }
-
-      //Check whether to enable WOV Overvolting. WOV can
-      //only be enabled if VDMs are enabled
-      if (!is_wov_overv_enabled() ||
-          !is_dds_enabled())
-      {
-          FAPI_DBG("OVERV_DISABLED")
-          iv_wov_overv_enabled = false;
-      }
-#endif
 
     if (iv_pstates_enabled)
     {
@@ -5656,12 +5589,16 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
         l_wof_enabled = (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_TRUE;
     }
 
+    if (iv_ocs_enabled)
+    {
+        l_ocs_enabled = (fapi2::ATTR_OCS_ENABLED_Type)fapi2::ENUM_ATTR_OCS_ENABLED_TRUE;
+    }
+
     if (iv_wof_throttle_enabled)
     {
         l_wof_throttle_disabled = (fapi2::ATTR_WOF_THROTTLE_CONTROL_DISABLED_Type)fapi2::ENUM_ATTR_WOF_THROTTLE_CONTROL_DISABLED_FALSE;
     }
 
-#if 0
     if (iv_wov_underv_enabled)
     {
         l_wov_underv_enabled = (fapi2::ATTR_WOV_UNDERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_UNDERV_ENABLED_TRUE;
@@ -5671,18 +5608,16 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
     {
         l_wov_overv_enabled = (fapi2::ATTR_WOV_OVERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_OVERV_ENABLED_TRUE;
     }
-#endif
-
-
 
     SET_ATTR(fapi2::ATTR_PSTATES_ENABLED, iv_procChip, l_ps_enabled);
     SET_ATTR(fapi2::ATTR_RESCLK_ENABLED, iv_procChip, l_resclk_enabled);
     SET_ATTR(fapi2::ATTR_DDS_ENABLED, iv_procChip, l_dds_enabled);
     SET_ATTR(fapi2::ATTR_RVRM_ENABLED, iv_procChip, l_rvrm_enabled);
     SET_ATTR(fapi2::ATTR_WOF_ENABLED, iv_procChip, l_wof_enabled);
+    SET_ATTR(fapi2::ATTR_OCS_ENABLED, iv_procChip, l_ocs_enabled);
     SET_ATTR(fapi2::ATTR_WOF_THROTTLE_CONTROL_DISABLED, iv_procChip, l_wof_throttle_disabled);
-//    SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, iv_procChip, l_wov_underv_enabled);
-  //  SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, iv_procChip, l_wov_overv_enabled);
+    SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, iv_procChip, l_wov_underv_enabled);
+    SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, iv_procChip, l_wov_overv_enabled);
 
 
 fapi_try_exit:
