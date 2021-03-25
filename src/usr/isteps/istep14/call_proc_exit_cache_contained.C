@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -491,8 +491,13 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS call_proc_exit_cache_contained:: p10_exit_cache_contained passed and we were able to resume the MBOX service" );
 
-    // Call the function to extend VMM to mainstore
+    // Call the function to extend VMM to mainstore, must be master
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+
     int rc = mm_extend();
+
+    task_affinity_unpin();
 
     if (rc!=0)
     {
