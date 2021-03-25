@@ -898,20 +898,6 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
             i_target->setAttr<TARGETING::ATTR_EECACHE_VPD_STATE>(TARGETING::EECACHE_VPD_STATE_VPD_GOOD);
         }
 
-        //P10 DD1 Workaround
-        // There is a bug on P10 DD1 that can cause SPD corruption
-        // due to some floating i2c lines.  To help out the lab, we
-        // will avoid rereading the data from the physical spd eeprom
-        // unless the part is completely new.
-        //TODO-RTC:269550 - check for p10 dd1 here
-        // Force no sync for DIMMs and OCMBs
-        TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
-        if( (TARGETING::TYPE_OCMB_CHIP == l_type)
-            || (TARGETING::TYPE_DIMM == l_type) )
-        {
-            o_isInSync = true;
-        }
-
         // If we did not match, we need to load HARDWARE VPD data into CACHE
         if (o_isInSync)
         {

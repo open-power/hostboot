@@ -548,7 +548,8 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
          * @userdata1[00:31] Associated Target
          * @userdata1[32:47] First failing range
          * @userdata1[48:63] Second failing range
-         * @userdata2[00:63] 3rd,4th,5th,6th failing range
+         * @userdata2[00:47] 3rd,4th,5th failing range
+         * @userdata2[48:63] EEPROM_SOURCE that failed: 1=CACHE, 2=HW
          * @devdesc          CRC Miscompare in the SPD
          * @custdesc         There is a problem with the vital product
          *                   data of a DIMM.
@@ -562,7 +563,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
                                 FOUR_UINT16_TO_UINT64(l_failedRanges[2],
                                     l_failedRanges[3],
                                     l_failedRanges[4],
-                                    l_failedRanges[5]));
+                                    i_location));
 
         // Default to deconfiguring the part immediately.
         // This should allow us to mark the target as present, but non-functional

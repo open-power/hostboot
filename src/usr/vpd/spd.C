@@ -2598,13 +2598,50 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
         TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on %.8X, checking CRC",
            TARGETING::get_huid(i_target) );
         //TODO - check for p10 dd1 here
-        err = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
-        if( err )
+        errlHndl_t errHW = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::HARDWARE );
+        if( errHW )
         {
             TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in hardware" );
-            o_match = true;
-            delete err;
-            err = nullptr;
+        }
+        errlHndl_t errCACHE = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::CACHE );
+        if( errCACHE )
+        {
+            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in cache" );
+        }
+        // If the cache is bad, force a resync
+        // Otherwise if the cache is okay and the HW is bad, assume a match so that
+        //  the cache gets pushed out to the HW
+        if( !errCACHE && !errHW )
+        {
+            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> No CRC errors found, must be new HW" );
+        }
+        else
+        {
+            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Found some CRC errors, forcing cache refresh" );
+            // errCACHE error
+            // cache is either missing or bad, we want to refresh from the hardware
+
+            // errHW error
+            // this could mean a bitflip in the SN/PN itself, or it can mean
+            //  we have a new part installed that had bad SPD to begin with
+            // To be safe and avoid whacking SPD with old cache, we will just
+            //  let this fail out and require repair
+
+            o_match = false;
+
+            // commit any logs we hit as informational, just in case
+            if( errCACHE )
+            {
+                errCACHE->collectTrace( "SPD", 256);
+                errCACHE->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                ERRORLOG::errlCommit(errCACHE, VPD_COMP_ID );
+            }
+            if( errHW )
+            {
+                errHW->collectTrace( "SPD", 256);
+                errHW->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                ERRORLOG::errlCommit(errHW, VPD_COMP_ID );
+            }
         }
     }
 
