@@ -170,7 +170,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode save_fw_api_version(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                      const std::vector<uint8_t> i_data)
+                                      const std::vector<uint8_t>& i_data)
 {
     uint8_t l_version = 0;
 
