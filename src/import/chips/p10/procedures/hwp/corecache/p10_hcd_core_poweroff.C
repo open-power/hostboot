@@ -94,10 +94,17 @@ p10_hcd_core_poweroff(
     // VCS off first, VDD off after
     FAPI_TRY( p10_hcd_corecache_power_control( i_target, HCD_POWER_CL2_OFF ) );
 
+    // Removing the regular wake-up filter applied to stop11 entry for the following cases:
+    //   1) this hwp called manually by mpipl or
+    //   2) any stop11 entry called manually for backing cache power down or
+    //   3) any stop11 entry with regular stop instruction
+    // This will keep the regular wakeup from not being filtered out, specially for msgsnd
+    //   so we can wakeup from stop11.
+    FAPI_DBG("Assert REG_WKUP_FILTER_DIS via QME_SCSR[14]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_OR, MMIO_LOAD32H( BIT32(14) ) ) );
+
 fapi_try_exit:
 
     FAPI_INF("<<p10_hcd_core_poweroff");
-
     return fapi2::current_err;
-
 }
