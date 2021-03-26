@@ -3005,6 +3005,7 @@ sub writeAttrErrlCFile {
          "PEC_PCIE_HX_KEYWORD_DATA",
          "ECID",
          "HUID",
+         "BOOT_PAU_DPLL_BYPASS",
     );
 
     # loop through every attribute to make the switch/case

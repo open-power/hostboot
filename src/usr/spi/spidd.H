@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -543,6 +543,16 @@ errlHndl_t spiEngineLockOp(TARGETING::Target* i_target,
                            uint8_t            i_engine,
                            bool&              io_unlock);
 
+/**
+ * @brief A helper function to add SPI status registers to the given error log
+ *
+ * @param[in] i_proc The proc on which the SPI registers live
+ * @param[in] i_spiEngine The SPI engine to use
+ * @param[in/out] io_errl The error log to attach the SPI register contents to
+ */
+void addSpiStatusRegsToErrl(TARGETING::Target* i_proc,
+                            uint8_t i_spiEngine,
+                            errlHndl_t& io_errl);
 
 
 }; // end namespace SPI

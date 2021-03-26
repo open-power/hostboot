@@ -96,7 +96,7 @@ namespace Bootloader{
         uint8_t bl_reserved5[(512 - sizeof(BlToHbData)) % 16];
         // BlToHbData is the bootloader -> hostboot communication area.
         // @DEP_ON_BL_TO_HB_SIZE all of the tags need to be kept in sync
-        static_assert( sizeof(BlToHbData) == 2420, "BlToHbData "
+        static_assert( sizeof(BlToHbData) == 2424, "BlToHbData "
                        "size changed.  Check bootloader_data.H alignment.  "
                        "Fix BlData.pm processing.");
     } blData_t __attribute__((aligned(128)));

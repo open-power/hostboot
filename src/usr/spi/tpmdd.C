@@ -397,6 +397,7 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                       sp_presence == TARGETING::FOUND_PRESENT_BY_SP_FOUND ? true : false;
                     TRACFCOMP(g_trac_tpmdd,INFO_MRK"tpmPresence: TPM Deconfigure Protect (TDP) bit is set in the status register. Using the SP's TPM presence state (%s functional)",
                               present ? "" : "not");
+                    TRUSTEDBOOT::addTpmFFDC(i_pTpm, pError);
                     break;
                 }
             }

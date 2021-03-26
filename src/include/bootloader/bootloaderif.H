@@ -90,6 +90,7 @@ enum BlToHbDataVersion
     // [release:4][version:4]
     BLTOHB_INIT             = 0x0000000A00000001,
     BLTOHB_SB_SETTING       = 0x0000000A00000002,
+    BLTOHB_TPM_FFDC         = 0x0000000A00000003,
 };
 
 enum
@@ -99,6 +100,15 @@ enum
     INITIAL_BLTOHB_PADDED_SIZE = 256
 };
 
+// Possible sources of the TPM Deconfig Protect bit. This bit could be set
+// by different entities. This enum indicates to Hostboot exactly who set
+// the TDP bit for debugging purposes.
+enum TdpBitSources : uint8_t
+{
+    TDP_BIT_UNSET    = 0,
+    TDP_BIT_SET_SBE  = 1,
+    TDP_BIT_SET_HBBL = 2
+};
 
 //-----------------------------------------------------------------------------------
 // Structure definitions
@@ -144,8 +154,8 @@ struct BlToHbData
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), secBackdoorBit(0),
                    cacheSizeMb(0), numKeyAddrPair(0),
-                   min_secure_version(0), tdpFlagSet(0),
-                   measurement_seeprom_version(0)
+                   min_secure_version(0), tdpSource(TDP_BIT_UNSET),
+                   measurement_seeprom_version(0), tpmRc(0)
     {
         memset(keyAddrStashData, 0, sizeof(keyAddrStashData));
     }
@@ -190,10 +200,12 @@ struct BlToHbData
     keyAddrPair_t keyAddrStashData[MAX_KEY_ADDR_PAIRS];
     // FW Minimum Secure Version
     uint8_t min_secure_version;
-    // Flag to indicate whether bootloader set the TPM TDP bit
-    uint8_t tdpFlagSet;
+    // Indicates who set the TDP bit
+    TdpBitSources tdpSource;
     // Version of the measurement seeprom
     uint32_t measurement_seeprom_version;
+    // The RC of the error that happened during TPM ops
+    uint32_t tpmRc;
 
 } __attribute__((packed));
 

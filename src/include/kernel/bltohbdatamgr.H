@@ -264,6 +264,28 @@ class BlToHbDataManager
          * @return The size of hostboot cache in bytes
          */
         const size_t getHbCacheSizeBytes() const;
+
+        /*
+         * @brief Returns the originator of TDP (TPM Deconfig Protect) flag
+         *
+         * @return The enum indicating the source of the TDP bit
+         */
+        const Bootloader::TdpBitSources getTdpSource() const;
+
+        /*
+         * @brief Returns the value of the return code of a TPM operation that
+         *        may have failed in HBBL
+         *
+         * @return The RC of the op that failed in HBBL
+         */
+        const uint32_t getTpmRc() const;
+
+        /*
+         * @brief Returns the current version of the HBBL->HB comm area
+         *
+         * @return The current version of the HBBL->HB comm area
+         */
+        const uint64_t getVersion() const;
 };
 
 // Extern global instance of the class

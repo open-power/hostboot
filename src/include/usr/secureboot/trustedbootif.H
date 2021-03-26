@@ -630,6 +630,16 @@ namespace TRUSTEDBOOT
      */
     errlHndl_t checkTdpBit(TpmTarget* i_pTpm);
 
+    /**
+     * @brief Adds TPM-related FFDC to the given error log. No-op if the
+     *        input log is nullptr.
+     *
+     * @param[in] i_pTpm the TPM target to add FFDC from
+     * @param[in/out] io_errl the error log to add FFDC to. No-op if nullptr
+     */
+    void addTpmFFDC(TpmTarget* i_pTpm,
+                    errlHndl_t& io_errl);
+
 } // end TRUSTEDBOOT namespace
 
 

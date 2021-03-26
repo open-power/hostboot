@@ -137,6 +137,17 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
         iv_data.measurement_seeprom_version = 0;
     }
 
+    if(iv_data.version >= Bootloader::BLTOHB_TPM_FFDC)
+    {
+        iv_data.tdpSource = i_data.tdpSource;
+        iv_data.tpmRc = i_data.tpmRc;
+    }
+    else
+    {
+        iv_data.tdpSource = Bootloader::TDP_BIT_UNSET;
+        iv_data.tpmRc = 0;
+    }
+
     // Populate the MMIO members
     kassert(i_data.lpcBAR>0);
     kassert(i_data.xscomBAR>0);
@@ -428,3 +439,17 @@ const size_t BlToHbDataManager::getHbCacheSizeBytes() const
     return iv_data.cacheSizeMb * MEGABYTE;
 }
 
+const Bootloader::TdpBitSources BlToHbDataManager::getTdpSource() const
+{
+    return iv_data.tdpSource;
+}
+
+const uint32_t BlToHbDataManager::getTpmRc() const
+{
+    return iv_data.tpmRc;
+}
+
+const uint64_t BlToHbDataManager::getVersion() const
+{
+    return iv_data.version;
+}

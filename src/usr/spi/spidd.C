@@ -483,6 +483,61 @@ errlHndl_t spiEngineLockOp(TARGETING::Target* i_target,
     return errl;
 }
 
+void addSpiStatusRegsToErrl(TARGETING::Target* i_proc,
+                            const uint8_t i_spiEngine,
+                            errlHndl_t& io_errl)
+{
+    do {
+    if (io_errl == nullptr)
+    {
+        // io_errl cannot be nullptr.
+        TRACFCOMP(g_trac_spi, ERR_MRK"addSpiStatusRegsToErrl: io_errl was nullptr. Skip adding additional FFDC");
+        break;
+    }
+
+    ERRORLOG::ErrlUserDetailsLogRegister l_registerUDSection(i_proc);
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(i_proc);
+    auto l_spiSwitch = i_proc->getAttr<TARGETING::ATTR_SPI_SWITCHES>();
+
+    // Calculates the base address for the SPI device we want to pull
+    // register contents from.
+    SpiControlHandle l_spiHandle =
+        SpiControlHandle(l_fapiProc, i_spiEngine, 1, l_spiSwitch.usePibSPI);
+
+    // List of registers to collect data from.
+    uint32_t l_registerList[] = {
+        (SPIM_COUNTERREG     | l_spiHandle.base_addr),
+        (SPIM_CONFIGREG1     | l_spiHandle.base_addr),
+        (SPIM_CLOCKCONFIGREG | l_spiHandle.base_addr),
+        (SPIM_MMSPISMREG     | l_spiHandle.base_addr),
+        (SPIM_TDR            | l_spiHandle.base_addr),
+        (SPIM_RDR            | l_spiHandle.base_addr),
+        (SPIM_SEQREG         | l_spiHandle.base_addr),
+        (SPIM_STATUSREG      | l_spiHandle.base_addr),
+    };
+
+    for (auto l_reg : l_registerList)
+    {
+        l_registerUDSection.addData(DEVICE_SCOM_ADDRESS(l_reg));
+    }
+
+    // Add Root Control Register as well in case the PIB bit was set
+    // improperly
+    if (l_spiSwitch.usePibSPI)
+    {
+        l_registerUDSection.addData(DEVICE_SCOM_ADDRESS(ROOT_CTRL_8_PIB));
+    }
+    else
+    {
+        l_registerUDSection.addData(DEVICE_FSI_ADDRESS(ROOT_CTRL_8_FSI));
+    }
+
+    l_registerUDSection.addToLog(io_errl);
+
+    } while(0);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // SpiOp
 ////////////////////////////////////////////////////////////////////////////////
@@ -497,55 +552,7 @@ SpiOp::SpiOp(TARGETING::Target* i_controller_target,
 
 void SpiOp::addStatusRegs(errlHndl_t& io_errl)
 {
-    do {
-        if (io_errl == nullptr)
-        {
-            // io_errl cannot be nullptr.
-            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::addStatusRegs(): "
-                      "io_errl was nullptr. Skip adding additional FFDC");
-            break;
-        }
-
-        ERRORLOG::ErrlUserDetailsLogRegister registerUDSection(iv_target);
-
-        // Calculates the base address for the SPI device we want to pull
-        // register contents from.
-        SpiControlHandle handle = getSpiHandle();
-
-        // List of registers to collect data from.
-        uint32_t registerList[] = {
-            (SPIM_COUNTERREG     | handle.base_addr),
-            (SPIM_CONFIGREG1     | handle.base_addr),
-            (SPIM_CLOCKCONFIGREG | handle.base_addr),
-            (SPIM_MMSPISMREG     | handle.base_addr),
-            (SPIM_TDR            | handle.base_addr),
-            (SPIM_RDR            | handle.base_addr),
-            (SPIM_SEQREG         | handle.base_addr),
-            (SPIM_STATUSREG      | handle.base_addr),
-        };
-
-        for (auto reg : registerList)
-        {
-            registerUDSection.addData(DEVICE_SCOM_ADDRESS(reg));
-        }
-
-        // Figure out if in FSI or PIB mode
-        auto spiSwitch = iv_target->getAttr<TARGETING::ATTR_SPI_SWITCHES>();
-
-        // Add Root Control Register as well in case the PIB bit was set
-        // improperly
-        if (spiSwitch.usePibSPI)
-        {
-            registerUDSection.addData(DEVICE_SCOM_ADDRESS(ROOT_CTRL_8_PIB));
-        }
-        else
-        {
-            registerUDSection.addData(DEVICE_FSI_ADDRESS(ROOT_CTRL_8_FSI));
-        }
-
-        registerUDSection.addToLog(io_errl);
-
-    } while(0);
+    addSpiStatusRegsToErrl(iv_target, iv_engine, io_errl);
 }
 
 void SpiOp::addCallouts(errlHndl_t& io_errl)

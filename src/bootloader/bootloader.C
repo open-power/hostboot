@@ -128,7 +128,7 @@ namespace Bootloader{
         {
             // Add cases as additional versions are created
             case SB_SETTING:
-                g_blData->blToHbData.version = BLTOHB_SB_SETTING;
+                g_blData->blToHbData.version = BLTOHB_TPM_FFDC;
                 break;
 
             // @TODO RTC 269616 - Remove INIT and make SB_SETTING default
@@ -486,6 +486,7 @@ namespace Bootloader{
         if(getTpmTdpBit())
         {
             bl_console::putString("TPM TDP Bit set; will not perform TPM ops\r\n");
+            g_blData->blToHbData.tdpSource = TDP_BIT_SET_SBE;
             break;
         }
 
@@ -536,7 +537,8 @@ namespace Bootloader{
             bl_console::putString("Setting the TPM TDP bit\r\n");
             // Set the TPM TDP bit if any TPM op fails
             setTpmTdpBit();
-            g_blData->blToHbData.tdpFlagSet = 1;
+            g_blData->blToHbData.tdpSource = TDP_BIT_SET_HBBL;
+            g_blData->blToHbData.tpmRc = l_rc;
         }
 
         return l_rc;
@@ -555,6 +557,7 @@ namespace Bootloader{
         // Initialization
         g_blData->bl_trace_index = 0;
         g_blData->bl_trace_index_saved = BOOTLOADER_TRACE_SIZE;
+        g_blData->blToHbData.version = BLTOHB_TPM_FFDC;
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_START);
 
         //Set core scratch 3 to say bootloader is active
@@ -581,6 +584,9 @@ namespace Bootloader{
             = ((l_blConfigData->lpcBAR & LPC_BAR_MASK) == 0)
             ? l_blConfigData->lpcBAR
             : MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+
+        g_blData->blToHbData.tpmRc = 0;
+        g_blData->blToHbData.tdpSource = TDP_BIT_UNSET;
 
 #ifndef CONFIG_VPO_COMPILE
         g_blData->blToHbData.cacheSizeMb = l_blConfigData->cacheSizeMB;
@@ -703,8 +709,6 @@ namespace Bootloader{
                 // Get Key-Addr Mapping from SBE HBBL communication area
                 setKeyAddrMapData(l_src_addr);
 
-                copyBlToHbtoHbLocation();
-
 #ifndef CONFIG_VPO_COMPILE // No secureboot in VPO - no need to verify
                 // ROM verification of HBB image
                 verifyContainer(l_src_addr);
@@ -730,6 +734,10 @@ namespace Bootloader{
                     l_rc = Bootloader::RC_NO_ERROR;
                 }
 #endif // CONFIG_TPMDD
+
+                // extendHashToTPM could change some vars in HBBL->HBB area, so
+                // now that the function has run, copy over the full comm area
+                copyBlToHbtoHbLocation();
 
                 // Increment past secure header
                 if (isEnforcedSecureSection(PNOR::HB_BASE_CODE))

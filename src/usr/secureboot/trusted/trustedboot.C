@@ -1051,7 +1051,6 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
 #endif
     } while ( 0 );
 
-
     // If the TPM failed we will mark it not functional and commit err
     if (nullptr != err)
     {
@@ -1551,11 +1550,6 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
 
     do {
 
-    if (!SECUREBOOT::enabled())
-    {
-        break;
-    }
-
     // for the given tpm target, find the processor target
     TARGETING::TargetHandleList l_procList;
     getAllChips(l_procList,TARGETING::TYPE_PROC,false);
@@ -1582,6 +1576,11 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
     uint8_t l_protectTpm = 1;
     l_proc->setAttr<TARGETING::ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM>(
         l_protectTpm);
+
+    // Add TPM-related FFDC to the log
+    // Note: the function uses the state of ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM
+    // to determine the source of TDP bit.
+    addTpmFFDC(i_pTpm, io_err);
 
     // There is no way to fence off a TPM when its SPI master
     // processor is not functional. If the SPI master is not scommable
