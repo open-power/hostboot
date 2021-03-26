@@ -679,7 +679,10 @@ public:
                 TS_FAIL("testDeconfigure2: Error from _getDeconfigureRecords");
                 break;
             }
-            if (l_records.size() > 1)
+
+            TS_INFO("testDeconfigure2: CHECK that exactly 1 deconfig record exists l_records.size=%d", l_records.size());
+
+            if (l_records.size() != 1)
             {
                 TS_FAIL("testDeconfigure2: %d records for target",
                         l_records.size());
@@ -693,6 +696,8 @@ public:
             theDeconfigGard().clearDeconfigureRecords(l_pTarget);
 
             // confirm that there aren't any deconfigure records - if so exit
+            l_records.clear();
+
             l_pErr = theDeconfigGard().
                         _getDeconfigureRecords(l_pTarget, l_records);
             if (l_pErr)
@@ -700,6 +705,11 @@ public:
                 errlCommit(l_pErr,CXXTEST_COMP_ID);
                 TS_FAIL("testDeconfigure2: Error from _getDeconfigureRecords");
                 break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testDeconfigure2: Failed confirming no deconfigure records left, we found %d", l_records.size());
             }
 
             TS_INFO("testDeconfigure2: Success");
@@ -2389,6 +2399,7 @@ public:
 
         saveSystemState();
         errlHndl_t l_pErr = nullptr;
+        DeconfigGard::GardRecords_t l_gard_records;
         do
         {
 
@@ -2526,6 +2537,33 @@ public:
                 TS_FAIL("testDeConfigEQ1BadFC: We should have some pEqList, but we are empty pEqList");
                 break;
             }
+
+            // Get All the GARD Records
+            l_gard_records.clear();
+
+            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_gard_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDeConfigEQ1BadFC: Error from getGardRecords with a nullptr");
+                break;
+            }
+
+            // cleanup for the next test
+            l_pErr = theDeconfigGard().clearGardRecords(nullptr);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDeConfigEQ1BadFC: Error from trying to cleanup clearGardRecords with a nullptr");
+                break;
+            }
+
+            if (l_gard_records.size() != 1)
+            {
+                TS_FAIL("testDeConfigEQ1BadFC: Expected exactly 1 gard record but we found %d", l_gard_records.size());
+                break;
+            }
+
             TS_INFO("testDeConfigEQ1BadFC: Success");
         }
         while (0);
@@ -2727,7 +2765,8 @@ public:
 #else
 
         errlHndl_t l_pErr = nullptr;
-        DeconfigGard::DeconfigureRecords_t l_records;
+        DeconfigGard::DeconfigureRecords_t l_deconfig_records;
+        DeconfigGard::GardRecords_t l_gard_records;
 
         saveSystemState();
         do
@@ -2751,16 +2790,34 @@ public:
             }
             TargetHandle_t l_pTarget = *pFcList.begin();
 
+
+            // Get All the GARD Records
+            l_gard_records.clear();
+            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_gard_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDefDeconfig1: Error from getGardRecords with a nullptr");
+                break;
+            }
+
+            if (l_gard_records.size() != 0)
+            {
+                TS_FAIL("testDefDeconfig1: PRE CHECKUP We have %d records but we expected 0",
+                        l_gard_records.size());
+                break;
+            }
+
             // Get any existing Deconfigure Record for the target
             l_pErr = theDeconfigGard().
-                    _getDeconfigureRecords(l_pTarget, l_records);
+                    _getDeconfigureRecords(l_pTarget, l_deconfig_records);
             if (l_pErr)
             {
                 TS_FAIL("testDefDeconfig1: Error from _getDeconfigureRecords");
                 break;
             }
 
-            if (l_records.size() != 0)
+            if (l_deconfig_records.size() != 0)
             {
                 TS_INFO("testDefDeconfig1: target has existing Deconfigure Record, SKIPPING test");
                 break;
@@ -2787,7 +2844,7 @@ public:
 
             // Try to get the Deconfigure Record for the target
             l_pErr = theDeconfigGard().
-                    _getDeconfigureRecords(l_pTarget, l_records);
+                    _getDeconfigureRecords(l_pTarget, l_deconfig_records);
 
             if (l_pErr)
             {
@@ -2795,15 +2852,39 @@ public:
                 break;
             }
 
-            if (l_records.size() != 0)
+            if (l_deconfig_records.size() != 0)
             {
-                TS_FAIL("testDefDeconfig1: %d records for target, expected 0",
-                        l_records.size());
+                TS_FAIL("testDefDeconfig1: We have %d deconfig records we expected 0",
+                        l_deconfig_records.size());
                 break;
             }
 
             // Reset the HWAS_STATE of the target
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
+
+            // Get All the GARD Records
+            l_gard_records.clear();
+
+            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_gard_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDefDeconfig1: Error from getGardRecords with a nullptr (2)");
+                break;
+            }
+
+            // cleanup for the next test
+            l_pErr = theDeconfigGard().clearGardRecords(nullptr);
+            if (l_pErr)
+            {
+                TS_FAIL("testDefDeconfig1: Error from trying to cleanup clearGardRecords with a nullptr");
+                break;
+            }
+            if (l_gard_records.size() != 0)
+            {
+                TS_FAIL("testDefDeconfig1: Expected exactly 0 gard records but we have %d", l_gard_records.size());
+                break;
+            }
 
             TS_INFO("testDefDeconfig1: Success");
         }
@@ -2824,6 +2905,8 @@ public:
     void testGard1()
     {
         TS_INFO("testGard1: Started");
+        do
+        {
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -2840,6 +2923,36 @@ public:
             TS_INFO("testGard1: Success typically zero records - %d records",
                      l_records.size());
         }
+
+        // Clear ALL the GARD Records
+        l_pErr = theDeconfigGard().clearGardRecords(nullptr);
+
+        if (l_pErr)
+        {
+            TS_FAIL("testGard1: Error from clearGardRecords");
+            break;
+        }
+
+        // Get All the GARD Records
+        l_records.clear();
+
+        l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
+
+        if (l_pErr)
+        {
+            TS_FAIL("testGard1: Error from getGardRecords with a nullptr (2)");
+            break;
+        }
+
+        if (l_records.size() != 0)
+        {
+            TS_FAIL("testGard1: %d records for target, expected 0",
+                    l_records.size());
+            break;
+        }
+    }
+    while (0);
+
     }
 
     /**

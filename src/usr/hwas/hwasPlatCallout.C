@@ -140,9 +140,14 @@ errlHndl_t platHandleHWCallout(
             }
             case (DELAYED_DECONFIG):
             {
-                // do nothing -- the deconfig information was already
-                // put on a queue and will be processed separately,
-                // when the time is right.
+#ifdef CONFIG_RECALL_DECONFIG_ON_RECONFIG
+                //Always force a gard record on deconfig.  If already
+                //garded, won't update/harm anything
+                errl = HWAS::theDeconfigGard()
+                  .platCreateGardRecord(i_pTarget,
+                                        io_errl->eid(),
+                                        GARD_Reconfig);
+#endif
                 break;
             }
         } // switch i_deconfigState
