@@ -64,6 +64,7 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     uint64_t l_state_machine_state = 0;
     uint8_t l_tries = 0;
     uint32_t l_omi_freq = 0;
+    uint8_t l_sim = 0;
 
     const auto& l_ocmbs = mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
     const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(i_target);
@@ -98,10 +99,16 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     FAPI_TRY(scomt::omi::GET_CONFIG1(i_target, l_config1));
     FAPI_TRY(scomt::omi::GET_ERROR_HOLD(i_target, l_host_error_hold));
     FAPI_TRY(scomt::omi::GET_EDPL_MAX_COUNT(i_target, l_host_edpl_max_count));
-    FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_ERROR_HOLD, l_exp_dl0_error_hold));
-    FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_EDPL_MAX_COUNT, l_exp_dl0_edpl_max_count));
-    FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_STATUS, l_exp_dl0_status));
-    FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_TRAINING_STATUS, l_exp_dl0_training_status));
+
+    FAPI_TRY(mss::attr::get_is_simulation(l_sim));
+
+    if (!l_sim)
+    {
+        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_ERROR_HOLD, l_exp_dl0_error_hold));
+        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_EDPL_MAX_COUNT, l_exp_dl0_edpl_max_count));
+        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_STATUS, l_exp_dl0_status));
+        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_TRAINING_STATUS, l_exp_dl0_training_status));
+    }
 
     FAPI_ASSERT(mss::omi::state_machine_success(l_state_machine_state),
                 fapi2::P10_OMI_TRAIN_ERR()
