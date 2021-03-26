@@ -111,7 +111,6 @@ errlHndl_t getAndSetPLDMBiosAttrs(void)
 void* host_set_ipl_parms( void *io_pArgs )
 {
     ISTEP_ERROR::IStepError l_stepError;
-    errlHndl_t l_err;
 
     do{
 
@@ -120,51 +119,45 @@ void* host_set_ipl_parms( void *io_pArgs )
     // only run on non-FSP systems
     if( !INITSERVICE::spBaseServicesEnabled() )
     {
-        //Read out the semi persistent area.
+        // Read the semi persistent area
         Util::semiPersistData_t l_semiData;
         Util::readSemiPersistData(l_semiData);
 
-        // If magic number set, then this is warm reboot:
-        //          1) increment boot count
+        // If magic number set, then this is re-IPL,
+        // so increment reboot count
         if(l_semiData.magic == Util::PERSIST_MAGIC)
         {
             l_semiData.reboot_cnt++;
         }
-        // else magic number is not set, then this is first, cold boot:
-        //          1) set magic num, boot count
-        //          2) clear all gard records of type GARD_Reconfig
+        // else magic number is not set, then this is a fresh IPL
         else
         {
             l_semiData.magic = Util::PERSIST_MAGIC;
             l_semiData.reboot_cnt = 0;
             //Intentionally don't change mfg_term_reboot
-
-            l_err = HWAS::clearGardByType(HWAS::GARD_Reconfig);
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: clearGardByType( )",
-                          l_err->reasonCode() );
-                // Create IStep error log and cross ref error that occurred
-                l_stepError.addErrorDetails( l_err );
-                errlCommit( l_err, ISTEP_COMP_ID );
-            }
         }
 
-        //Write update data back out
+        // Write updated data back out
         Util::writeSemiPersistData(l_semiData);
+
+        // Informational only
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms "
+            "l_semiData.magic=0x%X l_semiData.reboot_cnt=0x%X, l_semiData.mfg_term_reboot=0x%X",
+            l_semiData.magic, l_semiData.reboot_cnt, l_semiData.mfg_term_reboot);
+
 #ifdef CONFIG_PLDM
+        errlHndl_t l_pldm_err; // needed for scope compilation
         const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
         if(!sys->getAttr<ATTR_IS_MPIPL_HB>())
         {
-            l_err = getAndSetPLDMBiosAttrs();
-            if(l_err)
+            l_pldm_err = getAndSetPLDMBiosAttrs();
+            if(l_pldm_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "host_set_ipl_parms: error occurred getting/setting PLDM bios attrs");
-                l_err->collectTrace("ISTEPS_TRACE",256);
-                l_stepError.addErrorDetails( l_err );
-                errlCommit( l_err, ISTEP_COMP_ID );
+                l_pldm_err->collectTrace("ISTEPS_TRACE",256);
+                l_stepError.addErrorDetails( l_pldm_err );
+                errlCommit( l_pldm_err, ISTEP_COMP_ID );
                 break;
             }
         }
@@ -221,6 +214,7 @@ void* host_set_ipl_parms( void *io_pArgs )
 #if (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
     // Add a check to indicate the BMC does not support HIOMAP pnor-ipmi access
     // and the BMC firmware should be updated
+    errlHndl_t l_pnor_err; // needed for scope compilation
     PNOR::hiomapMode l_mode = PNOR::getPnorAccessMode();
     if( l_mode != PNOR::PNOR_IPMI )
     {
@@ -254,7 +248,7 @@ void* host_set_ipl_parms( void *io_pArgs )
          * @devdesc      PNOR-IPMI not enabled, BMC firmware needs to be updated
          * @custdesc     PNOR-IPMI not enabled, BMC firmware needs to be updated
          */
-        l_err = new ERRORLOG::ErrlEntry(
+        l_pnor_err = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_PREDICTIVE,
                                         ISTEP::MOD_SET_IPL_PARMS,
                                         ISTEP::RC_PNOR_IPMI_NOT_ENABLED,
@@ -263,15 +257,15 @@ void* host_set_ipl_parms( void *io_pArgs )
                                             l_IS_BMCMBOX,
                                             l_IS_IPMI));
 
-        l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+        l_pnor_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
                                    HWAS::SRCI_PRIORITY_HIGH);
 
-        l_err->collectTrace(PNOR_COMP_NAME);
-        l_err->collectTrace("ISTEPS_TRACE",256);
+        l_pnor_err->collectTrace(PNOR_COMP_NAME);
+        l_pnor_err->collectTrace("ISTEPS_TRACE",256);
 
         // Create IStep error log and cross ref error that occurred
-        l_stepError.addErrorDetails( l_err );
-        errlCommit( l_err, ISTEP_COMP_ID );
+        l_stepError.addErrorDetails( l_pnor_err );
+        errlCommit( l_pnor_err, ISTEP_COMP_ID );
     }
 #endif
 
