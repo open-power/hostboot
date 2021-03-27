@@ -456,6 +456,7 @@ static void initializeAttributes(TargetService& i_targetService,
         if(i_isMpipl)
         {
             l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(1);
+            l_pTopLevel->setAttr<ATTR_EXTEND_TPM_MEAS_TO_OTHER_NODES>(0);
 
             printk("Hostboot is performing a memory-preserving IPL (MPIPL).\n");
 

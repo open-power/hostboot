@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,7 +38,11 @@ namespace IPC
 
     enum IPCReasonCode
     {
-        RC_INVALID_MSG_TYPE     = IPC_COMP_ID | 0x01,
+        RC_INVALID_MSG_TYPE       = IPC_COMP_ID | 0x01,
+        RC_BAD_PHYS_ADDR          = IPC_COMP_ID | 0x02,
+        RC_BLOCK_MAP_FAIL         = IPC_COMP_ID | 0x03,
+        RC_BLOCK_UNMAP_FAIL       = IPC_COMP_ID | 0x04,
+        RC_INCORRECT_NODE_ROUTING = IPC_COMP_ID | 0x05,
     };
 
 };

@@ -76,10 +76,272 @@
 #include <hwas/common/deconfigGard.H>
 #include <kernel/bltohbdatamgr.H>
 #include <sys/misc.h>
+
+#include <sys/msg.h> // msg_q_t
+#include <stdlib.h> // calloc
+#include <util/utilmem.H> // UtilMem class
+#include <sys/mm.h> // mm_virt_to_phys
+#include <sys/internode.h> // MAX_NODES_PER_SYS
+#include <conversions.H> // BITS_PER_BYTE
+#include <errl/hberrltypes.H> // TWO_UINT32_TO_UINT64
+#include <errno.h> // EFAULT
+#include <mbox/ipc_msg_types.H> // IPC::IPC_EXTEND_PCR
+
+namespace  T = TARGETING;
+namespace  TU = TARGETING::UTIL;
+
 namespace TRUSTEDBOOT
 {
 
 extern SystemData systemData;
+
+errlHndl_t extendMeasurementToOtherNodes(
+    const TPM_Pcr    i_pcr,
+    const EventTypes i_eventType,
+    const uint8_t*   i_digest,
+    const size_t     i_digestSize,
+    const uint8_t*   i_logMsg,
+    const size_t     i_logMsgSize)
+{
+    const auto senderNode = TU::getCurrentNodePhysId();
+    static size_t transactionId = ( static_cast<size_t>(senderNode) << 56);
+    transactionId++;
+
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK
+              "extendMeasurementToOtherNodes(): Request to extend measurement "
+              "from node = %d to other nodes, transaction ID = 0x%016llX. "
+              "i_pcr = %d, i_eventType = 0x%02X, i_digestSize = %d, "
+              "i_logMsgSize = %d",
+              senderNode,transactionId,i_pcr,i_eventType,i_digestSize,
+              i_logMsgSize);
+
+    errlHndl_t pError = nullptr;
+    void* pRequest = nullptr;
+    msg_q_t msgQ = nullptr;
+    bool msgQRegistered = false;
+    uint64_t msgCount = 0;
+
+    do
+    {
+
+    const size_t reqSize = sizeof(transactionId) + sizeof(i_pcr)
+        + sizeof(i_eventType) + sizeof(i_digestSize) + i_digestSize
+        + sizeof(i_logMsgSize) + i_logMsgSize;
+    const size_t alignedReqSize = ALIGN_PAGE(reqSize);
+
+    // Force the allocation size to a page boundary, causing the allocator to
+    // align the allocation at the beginning of a page, making it easier to
+    // compute the allocation's physical address.  Zero out the whole buffer
+    // for good measure.  Assumes calloc puts the allocation on contiguous
+    // physical pages.
+    void* const pRequest = calloc(1,alignedReqSize);
+    assert(pRequest != nullptr,"calloc returned nullptr, which this "
+        "implementation doesn't support");
+
+    // Note, the UtilMem object does -NOT- own the buffer, it just simplifies
+    // serializing into it.
+    UtilMem req(pRequest,reqSize);
+    req << transactionId << i_pcr << i_eventType << i_digestSize;
+    req.write(i_digest,i_digestSize);
+    req << i_logMsgSize;
+    req.write(i_logMsg,i_logMsgSize);
+    pError=req.getLastError();
+    if(pError)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                  "extendMeasurementToOtherNodes(): failed serializing remote "
+                  "extend request into buffer. " TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(pError));
+        break;
+    }
+
+    const auto reqPhysAddr = mm_virt_to_phys(pRequest);
+    if(reqPhysAddr == static_cast<uint64_t>(-EFAULT))
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                  "extendMeasurementToOtherNodes(): Could not translate "
+                  "virtual address %p to physical address (-EFAULT).",
+                  pRequest);
+
+        /*@
+        * @errortype
+        * @severity   ERRL_SEV_UNRECOVERABLE
+        * @reasoncode TRUSTEDBOOT::RC_VIRT_TO_PHYS_FAIL
+        * @moduleid   TRUSTEDBOOT::MOD_EXTEND_MEAS_OTHER_NODES
+        * @userdata1  Virtual address to map
+        * @devdesc    Could not translate virtual address to physical address.
+        *             Likely a firmware bug.
+        * @custdesc   Internal firmware error with trusted boot implications
+        */
+        pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            TRUSTEDBOOT::MOD_EXTEND_MEAS_OTHER_NODES,
+            TRUSTEDBOOT::RC_VIRT_TO_PHYS_FAIL,
+            reinterpret_cast<uint64_t>(pRequest),
+            0,
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    const auto pSys = TU::assertGetToplevelTarget();
+    const auto hbImages = pSys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+    // This msgQ catches the node responses from the commands; it cannot fail.
+    msgQ = msg_q_create();
+    pError = MBOX::msgq_register(MBOX::HB_IPC_EXTEND_PCR_MSGQ,msgQ);
+    if(pError)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                  "extendMeasurementToOtherNodes(): MBOX::msgq_register "
+                  "failed. " TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(pError));
+        pError->collectTrace(MBOXMSG_TRACE_NAME);
+        pError->collectTrace(MBOX_TRACE_NAME);
+        break;
+    }
+    msgQRegistered=true;
+
+    // Loop through other nodes, sending a message to each
+    const decltype(hbImages) mask = 0x1 <<
+        (  (sizeof(hbImages) * CONVERSIONS::BITS_PER_BYTE) -1);
+
+    TRACFCOMP(g_trac_trustedboot, INFO_MRK
+              "extendMeasurementToOtherNodes(): HB_EXISTING_IMAGE (mask) = "
+              "0x%02X, (hbImages=0x%02X)",
+              mask, hbImages);
+
+    for (size_t destNode=0; (destNode < MAX_NODES_PER_SYS); ++destNode)
+    {
+        if (destNode == senderNode)
+        {
+            TRACFCOMP(g_trac_trustedboot, INFO_MRK
+                      "extendMeasurementToOtherNodes(): don't send "
+                      "IPC_PCR_EXTEND message to primary node %d",
+                      senderNode);
+            continue;
+        }
+
+        if( 0 != ((mask >> destNode) & hbImages ) )
+        {
+            TRACFCOMP(g_trac_trustedboot, INFO_MRK
+                      "extendMeasurementToOtherNodes(): send IPC_PCR_EXTEND "
+                      "message to node %d",
+                      destNode);
+
+            msg_t* msg = msg_allocate(); // Can't fail
+            msg->type = IPC::IPC_PCR_EXTEND;
+            msg->data[0] = TWO_UINT32_TO_UINT64(destNode,senderNode);
+            msg->data[1] = reqSize;
+            // Physical address in memory where the request data resides
+            msg->extra_data = reinterpret_cast<void*>(reqPhysAddr);
+
+            // Send the message to the other nodal Hostboot instance
+            pError = MBOX::send(MBOX::HB_IPC_MSGQ, msg, destNode);
+            if(pError)
+            {
+                TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                          "extendMeasurementToOtherNodes(): MBOX::send to node "
+                          "%d failed. " TRACE_ERR_FMT,
+                          destNode,TRACE_ERR_ARGS(pError));
+                pError->collectTrace(MBOXMSG_TRACE_NAME);
+                pError->collectTrace(MBOX_TRACE_NAME);
+                break;
+            }
+            ++msgCount;
+
+        } // End of node to process
+
+    } // End of for loop on nodes
+
+    // Wait for a response from all messages that were successfully sent,
+    // regardless of errors
+
+    // @TODO RTC 189356: Add timeout here?
+    while(msgCount)
+    {
+        msg_t* response = msg_wait(msgQ); // Can't fail
+        TRACFCOMP(g_trac_trustedboot, INFO_MRK
+                  "extendMeasurementToOtherNodes(): IPC_PCR_EXTEND : node %d "
+                  "completed",
+                  response->data[0] >> 32);
+        msg_free(response);
+        response = nullptr;
+        --msgCount;
+    }
+
+    } while(0);
+
+    // If we didn't receive all messages back, we can't predict if a remote node
+    // will attempt to use our memory later, so intentionally orphan the memory
+    // and write it off.
+    if(msgCount==0)
+    {
+        free(pRequest); // Ok to free if already nullptr
+        pRequest = nullptr;
+    }
+
+    if(msgQRegistered)
+    {
+        auto assocQ = MBOX::msgq_unregister(MBOX::HB_IPC_EXTEND_PCR_MSGQ);
+        if(assocQ != msgQ)
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                      "extendMeasurementToOtherNodes(): Unregistered "
+                      "MBOX::HB_IPC_EXTEND_PCR_MSGQ queue, but the queue that "
+                      "was unregistered (%p) was not the queue (%p) "
+                      "originally registered.",
+                      assocQ, msgQ);
+            /*@
+            * @errortype
+            * @severity   ERRL_SEV_UNRECOVERABLE
+            * @reasoncode TRUSTEDBOOT::RC_MBOX_QUEUE_MISMATCH
+            * @moduleid   TRUSTEDBOOT::MOD_EXTEND_MEAS_OTHER_NODES
+            * @userdata1  Queue that was registered
+            * @userdata2  Queue that was unregistered
+            * @devdesc    MBOX queue registered with
+            *             MBOX::HB_IPC_EXTEND_PCR_MSGQ handle was different
+            *             than expected when unregistering the handle.  Likely
+            *             a firmware bug.
+            * @custdesc   Internal firmware error with trusted boot
+            *             implications
+            */
+            auto pUnregisterErr = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                TRUSTEDBOOT::MOD_EXTEND_MEAS_OTHER_NODES,
+                TRUSTEDBOOT::RC_MBOX_QUEUE_MISMATCH,
+                reinterpret_cast<uint64_t>(msgQ),
+                reinterpret_cast<uint64_t>(assocQ),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            if(pError)
+            {
+                pUnregisterErr->plid(pError->plid());
+                errlCommit(pUnregisterErr,TRBOOT_COMP_ID);
+            }
+            else
+            {
+                pError=pUnregisterErr;
+                pUnregisterErr=nullptr;
+            }
+        }
+    }
+
+    if(msgQ)
+    {
+        msg_q_destroy(msgQ);
+        msgQ = nullptr;
+    }
+
+    if(pError)
+    {
+        pError->collectTrace(TRBOOT_COMP_NAME);
+    }
+
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK
+              "extendMeasurementToOtherNodes(): msgCount=%d. " TRACE_ERR_FMT,
+              msgCount,TRACE_ERR_ARGS(pError));
+
+    return pError;
+}
 
 errlHndl_t checkTdpBit(
     TpmTarget* const i_pTpm)
@@ -1853,6 +2115,49 @@ void* tpmDaemon(void* unused)
                                                                   0,
                                 msgData->mExtendToTpm,
                                 msgData->mExtendToSwLog);
+
+                    auto pSys = TARGETING::UTIL::assertGetToplevelTarget();
+                    // Need to stop the cycle; i.e. a mirrored extend
+                    // cannot lead to other nodes themselves mirroring
+                    // to other nodes
+                    if(pSys->getAttr<TARGETING::ATTR_EXTEND_TPM_MEAS_TO_OTHER_NODES>()
+                       && !msgData->mInhibitNodeMirroring)
+                    {
+                        TARGETING::Target* pPrimaryTpm = nullptr;
+                        getPrimaryTpm(pPrimaryTpm);
+
+                        // If directed towards primary TPM, and it's an extend
+                        // to both HW + SW log (i.e. not a poison op), then
+                        // mirror to other nodes.  Don't have to worry about
+                        // screening out separator extends here because that
+                        // runs through a separate API
+                        if(   (l_tpm == pPrimaryTpm)
+                           && (msgData->mExtendToTpm)
+                           && (msgData->mExtendToSwLog))
+                        {
+                            err =  extendMeasurementToOtherNodes(msgData->mPcrIndex,
+                                msgData->mEventType,msgData->mDigest,msgData->mDigestSize,
+                                msgData->mLogMsg,msgData->mLogMsgSize);
+                            if(err)
+                            {
+                                // Any failure in the API above is a severe
+                                // FW or infrastructure fail orthogonal to any
+                                // TPM fails on the other node.  Since this
+                                // path can be disconnected from the IPL, force
+                                // a firmware termination.
+                                TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                                    "Call to extendMeasurementToOtherNodes "
+                                    "failed, invoking shutdown. " TRACE_ERR_FMT,
+                                    TRACE_ERR_ARGS(err));
+                                err->collectTrace(TRBOOT_COMP_NAME);
+                                err->collectTrace(SECURE_COMP_NAME);
+                                const auto eid = err->eid();
+                                errlCommit(err, TRBOOT_COMP_ID);
+                                const bool inBackground = true;
+                                INITSERVICE::doShutdown(eid,inBackground);
+                            }
+                        }
+                    }
 
                   // Lastly make sure we are in a state
                   //  where we have a functional TPM

@@ -557,6 +557,13 @@ errlHndl_t verify_ipc_connection(ATTR_HB_EXISTING_IMAGE_type i_hbExistingImage)
 
         MBOX::msgq_unregister(MBOX::HB_COALESCE_MSGQ);
         msg_q_destroy(l_msgQ);
+
+        // Only set if multiple nodes are in play
+        l_sys->setAttr<TARGETING::ATTR_EXTEND_TPM_MEAS_TO_OTHER_NODES>(true);
+        TRACFCOMP(g_trac_isteps_trace, INFO_MRK
+                  "Enabling x-node TPM measurement mirroring for node %d",
+                  l_thisNode);
+
     } while (0);
     return l_err;
 } // verify_ipc_connection

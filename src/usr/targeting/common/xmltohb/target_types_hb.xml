@@ -257,6 +257,9 @@
   <targetTypeExtension>
     <id>sys</id>
     <attribute>
+      <id>EXTEND_TPM_MEAS_TO_OTHER_NODES</id>
+    </attribute>
+    <attribute>
       <id>FW_RELEASE_VERSION</id>
     </attribute>
     <attribute>

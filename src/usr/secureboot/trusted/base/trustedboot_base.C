@@ -234,7 +234,8 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                      bool i_sendAsync,
                      const TpmTarget* i_pTpm,
                      const bool i_extendToTpm,
-                     const bool i_extendToSwLog)
+                     const bool i_extendToSwLog,
+                     const bool i_inhibitNodeMirroring)
 {
     errlHndl_t err = nullptr;
 #ifdef CONFIG_TPMDD
@@ -242,8 +243,9 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
 
     TRACDCOMP( g_trac_trustedboot, ENTER_MRK"pcrExtend()" );
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"pcrExtend() pcr=%d, i_extendToTpm=%d, i_extendToSwLog=%d",
-               i_pcr, i_extendToTpm, i_extendToSwLog);
+               ENTER_MRK"pcrExtend() pcr=%d, i_extendToTpm=%d, "
+               "i_extendToSwLog=%d, i_inhibitNodeMirroring=%d",
+               i_pcr, i_extendToTpm, i_extendToSwLog,i_inhibitNodeMirroring);
     if(i_logMsg)
     {
         TRACUBIN(g_trac_trustedboot, "TPM log msg", i_logMsg, i_logMsgSize);
@@ -261,6 +263,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     msgData->mSingleTpm = i_pTpm;
     msgData->mExtendToTpm = i_extendToTpm;
     msgData->mExtendToSwLog = i_extendToSwLog;
+    msgData->mInhibitNodeMirroring = i_inhibitNodeMirroring;
 
     // copy over the incoming digest and truncate to what we need
     memcpy(msgData->mDigest, i_digest, msgData->mDigestSize);

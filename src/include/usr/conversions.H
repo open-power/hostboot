@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,12 @@ enum frequency : size_t
 enum bytesize : size_t
 {
     BYTES_PER_KB = 1024
+};
+
+// Enum indicating number of bits in certain quantities
+enum bitsize : size_t
+{
+    BITS_PER_BYTE = 8
 };
 
 }

@@ -270,6 +270,28 @@ errlHndl_t logMeasurementRegs(TpmTarget* i_tpm_target,
  */
 void synchronizePrimaryTpmLogs();
 
+/**
+* @brief Extend a measurement into the primary TPM of all other nodes.  Once
+*     the cross-node SMP is established, any measurement logged to a node's
+*     primary TPM must be replicated to the primary TPM of all other nodes.
+*
+* @param[in] i_pcr PCR to write to
+* @param[in] i_eventType Event type to log
+* @param[in] i_digest Digest value to write to PCR
+* @param[in] i_digestSize The size of the digest in bytes
+* @param[in] i_logMsg Log message in binary form
+* @param[in] i_logMsgSize The size of the log message in bytes
+*
+* @return errlHndl_t nullptr if successful, otherwise a pointer to a
+*      valid error log.
+*/
+errlHndl_t extendMeasurementToOtherNodes(
+    const TPM_Pcr    i_pcr,
+    const EventTypes i_eventType,
+    const uint8_t*   i_digest,
+    const size_t     i_digestSize,
+    const uint8_t*   i_logMsg,
+    const size_t     i_logMsgSize);
 
 } // end TRUSTEDBOOT namespace
 #endif

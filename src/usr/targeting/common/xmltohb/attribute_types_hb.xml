@@ -208,6 +208,34 @@
   </attribute>
 
   <attribute>
+    <description>
+      Whether, when a node attempts to extend a measurement to its primary TPM,
+      it must attempt to mirror the same HW and SW log measurement into the
+      primary TPM in every other node. This flag is only set when multiple nodes
+      are coalesced during IPL and MPIPL.  It is reset at the beginning of
+      Hostboot's IPL.
+
+      0x00 = Do not attempt to mirror an attempted primary TPM measurement to
+             the primary TPM in all other nodes.
+      0x01 = Attempt to mirror an attempted primary TPM measurement to the
+             primary TPM in all other nodes.
+    </description>
+    <id>EXTEND_TPM_MEAS_TO_OTHER_NODES</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <no_export/>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>FORCE_ECC_UPDATE_ON_VALIDATION_ERROR</id>
     <description>
         This is an attribute override, that when set to 1, will force an ECC

@@ -97,6 +97,7 @@ namespace TRUSTEDBOOT
         const TpmTarget* mSingleTpm;
         bool             mExtendToTpm;
         bool             mExtendToSwLog;
+        bool             mInhibitNodeMirroring;
     };
 
     struct GetRandomMsgData

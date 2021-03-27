@@ -50,10 +50,15 @@
 #include <errl/errludtarget.H>
 #include <initservice/isteps_trace.H>
 #include <isteps/hwpisteperror.H>
+#include <util/utilmem.H>
+#include <secureboot/trustedbootif.H>
 
 #ifndef CONFIG_VPO_COMPILE
 #include <freqAttrData.H>
 #endif
+
+namespace  TU = TARGETING::UTIL;
+namespace  TB = TRUSTEDBOOT;
 
 namespace ISTEP_21
 {
@@ -605,6 +610,291 @@ void IpcSp::msgHandler()
 
                 break;
             }
+
+            #ifdef CONFIG_TPMDD
+            case IPC_PCR_EXTEND:
+            {
+                const auto receiverNode = TU::getCurrentNodePhysId();
+                TRACFCOMP(g_trac_ipc, INFO_MRK
+                          "IPC_PCR_EXTEND: Received IPC request to extend a "
+                          "measurement to primary TPM on node (%d)",
+                          receiverNode);
+
+                void* pRequest = nullptr;
+                uint8_t* pDigest = nullptr;
+                uint8_t* pLogMsg = nullptr;
+                const size_t senderNode = (msg->data[0] & 0xFFFFFFFF);
+                size_t transactionId = 0;
+
+                do {
+
+                const size_t intendedReceiverNode = (msg->data[0] >> 32);
+                if(receiverNode != intendedReceiverNode)
+                {
+                    TRACFCOMP(g_trac_ipc, ERR_MRK
+                              "IPC_PCR_EXTEND: message routed to node %d but "
+                              "arrived on node %d.",
+                              intendedReceiverNode,receiverNode);
+                    /*@
+                    * @errortype
+                    * @severity   ERRL_SEV_UNRECOVERABLE
+                    * @moduleid   IPC::MOD_IPCSP_MSGHDLR
+                    * @reasoncode IPC::RC_INCORRECT_NODE_ROUTING
+                    * @userdata1  Intended receiver node
+                    * @userdata2  Actual receiver node
+                    * @devdesc    Sender node's IPC_PCR_EXTEND message was
+                    *             routed to an unintended receiver node.  This
+                    *             likely indicates a code bug.
+                    * @custdesc   Internal firmware error with trusted boot
+                    *             impact
+                    */
+                    err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        IPC::MOD_IPCSP_MSGHDLR,
+                        IPC::RC_INCORRECT_NODE_ROUTING,
+                        intendedReceiverNode,
+                        receiverNode,
+                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    break;
+                }
+
+                auto * const reqPhysAddr =
+                    reinterpret_cast<void*>(msg->extra_data);
+                if(reqPhysAddr == nullptr)
+                {
+                    TRACFCOMP(g_trac_ipc, ERR_MRK
+                              "IPC_PCR_EXTEND: Sender node's IPC_PCR_EXTEND "
+                              "message did not contain a valid physical "
+                              "address. " TRACE_ERR_FMT,
+                              TRACE_ERR_ARGS(err));
+                    /*@
+                    * @errortype
+                    * @severity   ERRL_SEV_UNRECOVERABLE
+                    * @moduleid   IPC::MOD_IPCSP_MSGHDLR
+                    * @reasoncode IPC::RC_BAD_PHYS_ADDR
+                    * @userdata1  Node claimed to have sent the message
+                    * @devdesc    Sender node's IPC_PCR_EXTEND message did not
+                    *             contain a valid physical address
+                    * @custdesc   Internal firmware error with trusted boot
+                    *             impact
+                    */
+                    err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        IPC::MOD_IPCSP_MSGHDLR,
+                        IPC::RC_BAD_PHYS_ADDR,
+                        senderNode,
+                        0,
+                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    break;
+                }
+
+                // Map physical address into VM, should be page aligned
+                const auto reqSize = msg->data[1];
+                pRequest = mm_block_map(reqPhysAddr,reqSize);
+                if(pRequest == nullptr)
+                {
+                    TRACFCOMP(g_trac_ipc, ERR_MRK
+                              "IPC_PCR_EXTEND: failed in call to mm_block_map. "
+                              "reqPhysAddr = %p, reqSize = %d. " TRACE_ERR_FMT,
+                              reqPhysAddr, reqSize, TRACE_ERR_ARGS(err));
+                    /*@
+                    * @errortype
+                    * @severity   ERRL_SEV_UNRECOVERABLE
+                    * @moduleid   IPC::MOD_IPCSP_MSGHDLR
+                    * @reasoncode IPC::RC_BLOCK_MAP_FAIL
+                    * @userdata1  Physical address
+                    * @userdata2  Size of mapping
+                    * @devdesc    Failed to map physical address into the VMM
+                    * @custdesc   Internal firmware error with trusted boot
+                    *             impact
+                    */
+                    err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        IPC::MOD_IPCSP_MSGHDLR,
+                        IPC::RC_BLOCK_MAP_FAIL,
+                        reinterpret_cast<uint64_t>(reqPhysAddr),
+                        reqSize,
+                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    break;
+                }
+
+                // UtilMem object doesn't own the memory, it's just used to
+                // deserialize the message data
+                UtilMem request(pRequest,reqSize);
+
+                TB::TPM_Pcr pcr = TB::PLATFORM_PCR; // Start with unsupported PCR
+                TB::EventTypes eventType = TB::EV_INVALID;
+                size_t digestSize = 0;
+                size_t logMsgSize = 0;
+
+                request >> transactionId >> pcr >> eventType >> digestSize;
+                err = request.getLastError();
+                if(err)
+                {
+                    TRACFCOMP(g_trac_ipc, ERR_MRK
+                              "IPC_PCR_EXTEND: failed to deserialize message "
+                              "through digestSize field. " TRACE_ERR_FMT,
+                              TRACE_ERR_ARGS(err));
+                    break;
+                }
+
+                TRACFCOMP(g_trac_ipc, INFO_MRK
+                          "Transaction ID for this request = 0x%016llX",
+                          transactionId);
+
+                pDigest = reinterpret_cast<uint8_t*>(calloc(1,digestSize));
+
+                request.read(pDigest,digestSize);
+                request >> logMsgSize;
+                err = request.getLastError();
+                if(err)
+                {
+                    TRACFCOMP(g_trac_ipc, ERR_MRK
+                              "IPC_PCR_EXTEND: failed to deserialize message "
+                              "through logMsgSize field. " TRACE_ERR_FMT,
+                              TRACE_ERR_ARGS(err));
+                    break;
+                }
+                pLogMsg = reinterpret_cast<uint8_t*>(calloc(1,digestSize));
+                request.read(pLogMsg,logMsgSize);
+                err=request.getLastError();
+                if(err)
+                {
+                    TRACFCOMP(g_trac_ipc, ERR_MRK
+                              "IPC_PCR_EXTEND: failed to deserialize message "
+                              "through logMsg field. " TRACE_ERR_FMT,
+                              TRACE_ERR_ARGS(err));
+                    break;
+                }
+
+                const bool sendAsync = true;
+                const bool extendToTpm = true;
+                const bool extendToSwLog = true;
+                // Prevent receiver of node measurement from itself mirroring
+                // the request to the other nodes
+                const bool inhibitNodeMirroring = true;
+
+                // Note: nullptr as the target will force the TPM daemon to
+                // select the primary TPM by default.  It's ok to extend if the
+                // primary TPM is already poisoned.  If it's non-functional the
+                // extend will be dropped on the floor.
+                TARGETING::Target* pPrimaryTpm = nullptr;
+                err = pcrExtend(pcr,
+                                eventType,
+                                pDigest,
+                                digestSize,
+                                pLogMsg,
+                                logMsgSize,
+                                sendAsync,
+                                pPrimaryTpm,
+                                extendToTpm,
+                                extendToSwLog,
+                                inhibitNodeMirroring);
+                if(err)
+                {
+                    TRACFCOMP(g_trac_ipc, ERR_MRK
+                              "IPC_PCR_EXTEND: failed in call to pcrExtend. "
+                              "pcr = %d, eventType = 0x%02X, digestSize = %d, "
+                              "logMsgSize = %d. " TRACE_ERR_FMT,
+                              pcr,eventType,digestSize,logMsgSize,
+                              TRACE_ERR_ARGS(err));
+                    break;
+                }
+
+                } while(0); // All errors funnel down to here
+
+                if(pRequest)
+                {
+                    const auto rc = mm_block_unmap(pRequest);
+                    if(rc != 0)
+                    {
+                        TRACFCOMP(g_trac_ipc, ERR_MRK
+                                 "IPC_PCR_EXTEND: Unexpected bad rc %d from "
+                                 "mm_block_unmap for virtual address %p.",
+                                 rc,pRequest);
+                        /*@
+                        * @errortype
+                        * @severity   ERRL_SEV_UNRECOVERABLE
+                        * @moduleid   IPC::MOD_IPCSP_MSGHDLR
+                        * @reasoncode IPC::RC_BLOCK_UNMAP_FAIL
+                        * @userdata1  Return code from mm_block_unmap
+                        * @userdata2  Virtual memory address to unmap
+                        * @devdesc    Failed to unmap a virtual to physical
+                        *             memory mapping previously created via
+                        *             mm_block_map.
+                        * @custdesc   Internal firmware error with trusted boot
+                        *             impact
+                        */
+                        auto pUnmapErr = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            IPC::MOD_IPCSP_MSGHDLR,
+                            IPC::RC_BLOCK_UNMAP_FAIL,
+                            rc,
+                            reinterpret_cast<uint64_t>(pRequest),
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                        if(err)
+                        {
+                            pUnmapErr->plid(err->plid());
+                            errlCommit(pUnmapErr,IPC_COMP_ID);
+                        }
+                        else
+                        {
+                            err = pUnmapErr;
+                            pUnmapErr = nullptr;
+                        }
+                    }
+                }
+
+                // Ok to free pointers that are already nullptr
+                free(pDigest);
+                pDigest = nullptr;
+
+                free(pLogMsg);
+                pLogMsg = nullptr;
+
+                if(err)
+                {
+                    TRACFCOMP(g_trac_ipc, ERR_MRK
+                              "IPC_PCR_EXTEND: fatal firmware error, shutting "
+                              "down.  " TRACE_ERR_FMT,
+                              TRACE_ERR_ARGS(err));
+                }
+                else
+                {
+                    const auto destNode = senderNode;
+                    err = MBOX::send(MBOX::HB_IPC_EXTEND_PCR_MSGQ,
+                                     msg, destNode);
+                    if (err)
+                    {
+                        TRACFCOMP(g_trac_ipc, ERR_MRK
+                                "IPC_PCR_EXTEND: fatal error in MBOX::send to "
+                                "node %d, shutting down. " TRACE_ERR_FMT,
+                                destNode,TRACE_ERR_ARGS(err));
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_ipc, INFO_MRK
+                                  "IPC_PCR_EXTEND: sent response to node %d "
+                                  "for transaction ID 0x%016llX.",
+                                  destNode,transactionId);
+                    }
+                }
+
+                if(err)
+                {
+                    err->collectTrace(MBOX_TRACE_NAME);
+                    err->collectTrace(MBOXMSG_TRACE_NAME);
+                    err->collectTrace(IPC_TRACE_NAME);
+
+                    const auto eid = err->eid();
+                    errlCommit(err,IPC_COMP_ID);
+                    const bool inBackground = true;
+                    INITSERVICE::doShutdown(eid,inBackground);
+                }
+
+                break;
+            }
+            #endif // End CONFIG_TPMDD specific code
 
             default:
 

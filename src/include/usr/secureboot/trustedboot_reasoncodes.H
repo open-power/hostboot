@@ -84,6 +84,7 @@ namespace TRUSTEDBOOT
         MOD_TPM_CHECK_TDP_BIT               = 0x26,
         MOD_SYNCHRONIZE_TPM_LOG             = 0x27,
         MOD_LOG_SBE_MEASUREMENT_REGS        = 0x28,
+        MOD_EXTEND_MEAS_OTHER_NODES         = 0x29,
     };
 
     enum TRUSTEDReasonCode
@@ -124,6 +125,8 @@ namespace TRUSTEDBOOT
         RC_TPM_IS_UNUSABLE               = TRBOOT_COMP_ID | 0xBE,
         RC_TPM_START_SBE_SETUP_FAILED    = TRBOOT_COMP_ID | 0xBF,
         RC_TPM_TDP_BIT_IS_SET            = TRBOOT_COMP_ID | 0xC0,
+        RC_VIRT_TO_PHYS_FAIL             = TRBOOT_COMP_ID | 0xC1,
+        RC_MBOX_QUEUE_MISMATCH           = TRBOOT_COMP_ID | 0xC2,
     };
 #ifdef __cplusplus
 }

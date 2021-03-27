@@ -243,6 +243,12 @@ namespace TRUSTEDBOOT
      * @param[in] i_extendToSwLog If true, add the log message to the TPM's SW log; if false,
      *            do not add to the TPM's SW log. Default is true. False is used to poison the tpm.
      *            Depends on valid i_logMsg and i_logMsgSize.
+     * @param[in] i_inhibitNodeMirroring If true, even when circumstances would
+     *            otherwise dictate mirroring a measurement to primary TPM in
+     *            other nodes, inhibit that behavior.  This is used to ensure
+     *            the recipient nodes don't try to re-mirror the original
+     *            mirroring request.  Default is false (don't artificially
+     *            restrict measurement mirroring).
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *      error log.
      * Digest will be right padded with zeros or truncated to match TPM digest
@@ -257,7 +263,8 @@ namespace TRUSTEDBOOT
                          bool i_sendAsync = true,
                          const TpmTarget* i_pTpm = nullptr,
                          bool i_extendToTpm = true,
-                         bool i_extendToSwLog = true);
+                         bool i_extendToSwLog = true,
+                         bool i_inhibitNodeMirroring = false);
 
     /**
      * @brief Extend a separator into the TPMs and log atomically
