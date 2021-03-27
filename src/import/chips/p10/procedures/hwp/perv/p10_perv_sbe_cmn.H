@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -189,6 +189,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_scom(
  *
  * @param[in]  i_target        Target chiplet(s) to check
  * @param[in]  i_bits_to_check Bits of the PLL_LOCK register that must be 1
+ * @param[in]  i_pre_delay     Delay before polling PLL_LOCK for the first time?
  * @param[out] o_read_value    Last value read from the PLL_LOCK register for FFDC
  *
  * @return FAPI2_RC_SUCCESS if all PLLs locked in time
@@ -199,6 +200,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_poll_pll_lock(
     const fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST,
     fapi2::MULTICAST_AND > & i_target,
     const fapi2::buffer<uint64_t> i_bits_to_check,
+    const bool i_pre_delay,
     fapi2::buffer<uint64_t>& o_read_value);
 
 fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_cfam(

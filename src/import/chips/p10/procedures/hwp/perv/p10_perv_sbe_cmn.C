@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1093,9 +1093,16 @@ fapi2::ReturnCode p10_perv_sbe_cmn_poll_pll_lock(
     const fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST,
     fapi2::MULTICAST_AND > & i_target,
     const fapi2::buffer<uint64_t> i_bits_to_check,
+    const bool i_pre_delay,
     fapi2::buffer<uint64_t>& o_read_value)
 {
     uint64_t l_timeout = PLL_LOCK_DELAY_LOOPS;
+
+    if (i_pre_delay)
+    {
+        FAPI_DBG("Executing pre-delay...");
+        FAPI_TRY(fapi2::delay(PLL_LOCK_DELAY_LOOPS * PLL_LOCK_DELAY_NS, PLL_LOCK_DELAY_LOOPS * PLL_LOCK_DELAY_CYCLES));
+    }
 
     while (l_timeout)
     {
@@ -1107,7 +1114,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_poll_pll_lock(
         }
 
         l_timeout--;
-        fapi2::delay(PLL_LOCK_DELAY_NS, PLL_LOCK_DELAY_CYCLES);
+        FAPI_TRY(fapi2::delay(PLL_LOCK_DELAY_NS, PLL_LOCK_DELAY_CYCLES));
     }
 
     return fapi2::FAPI2_RC_FALSE;
