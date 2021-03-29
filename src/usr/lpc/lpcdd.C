@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -65,7 +65,7 @@ TRAC_INIT( & g_trac_lpc, LPC_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
 #endif
 
 // Device Drive instance used for alt-master access
-static LpcDD* g_altLpcDD = NULL;
+static LpcDD* g_altLpcDD = nullptr;
 
 namespace LPC
 {
@@ -359,6 +359,7 @@ errlHndl_t create_altmaster_objects( bool i_create,
             if( g_altLpcDD )
             {
                 delete g_altLpcDD;
+                g_altLpcDD = nullptr;
             }
             else
             {

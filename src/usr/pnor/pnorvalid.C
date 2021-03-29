@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -102,6 +102,7 @@ errlHndl_t createInvalidTOC(PnorDD*  i_pnordd,
 
 errlHndl_t validateAltMaster( void )
 {
+    TRACFCOMP( g_trac_pnor, ENTER_MRK"PNOR::validateAltMaster" );
     errlHndl_t l_err = NULL;
 
     PnorDD* pnordd = NULL;
@@ -317,6 +318,7 @@ errlHndl_t validateAltMaster( void )
         tocBuffer = NULL;
     }
 
+    TRACFCOMP( g_trac_pnor, EXIT_MRK"PNOR::validateAltMaster : RC=%X", ERRL_GETRC_SAFE(l_err) );
     return l_err;
 }
 

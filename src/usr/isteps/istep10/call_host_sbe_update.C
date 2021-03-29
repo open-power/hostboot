@@ -252,8 +252,7 @@ void* call_host_sbe_update (void *io_pArgs)
 {
     errlHndl_t  l_errl  =   NULL;
     IStepError l_StepError;
-    //TODO RTC:258541 - Test + Re-enable
-    //bool l_testAltMaster = true;
+    bool l_testAltMaster = true;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_sbe_update entry" );
@@ -303,11 +302,6 @@ void* call_host_sbe_update (void *io_pArgs)
             break;
         }
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Temporarily skip testing alternate boot proc LPC/PNOR validation");
-
-//TODO RTC:258541 - Test + Re-enable
-/*
         // Run LPC Init on Alt Master Procs
         // Get list of all processors
         TARGETING::TargetHandleList l_procList;
@@ -326,7 +320,7 @@ void* call_host_sbe_update (void *io_pArgs)
             {
                 // Initialize the LPC Bus by calling the p10_sbe_lpc_init hwp
                 fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_target (l_target);
-                FAPI_INVOKE_HWP(l_errl, p10_sbe_lpc_init, l_fapi_target);
+                FAPI_INVOKE_HWP(l_errl, p10_sbe_lpc_init_any, l_fapi_target, true);
 
                 if (l_errl)
                 {
@@ -340,7 +334,7 @@ void* call_host_sbe_update (void *io_pArgs)
                     ErrlUserDetailsTarget(l_target).addToLog(l_errl);
                     //Remove any deconfigure information, we only need the PNOR Part callout and do not want
                     // to deconfigure the entire proc because of a PNOR part problem
-                    l_errl->removeDeconfigure();
+                    l_errl->removeGardAndDeconfigure();
                     // Commit error
                     errlCommit( l_errl, HWPF_COMP_ID );
                     l_testAltMaster = false;
@@ -363,12 +357,11 @@ void* call_host_sbe_update (void *io_pArgs)
             {
                 //Remove any deconfigure information, we only need the PNOR Part callout and do not want
                 // to deconfigure the entire proc because of a PNOR part problem
-                l_errl->removeDeconfigure();
+                l_errl->removeGardAndDeconfigure();
                 // Commit error
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
         }
-**/
 
         // Set SEEPROM_VERSIONS_MATCH attributes for each processor
         // this will be used later on by the sbe_retry code to determine
