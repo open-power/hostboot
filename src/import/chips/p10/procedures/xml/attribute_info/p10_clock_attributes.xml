@@ -82,6 +82,7 @@
   <enum>PLANAR = 0, PROC = 1</enum>
   <valueType>uint8</valueType>
   <default>PLANAR</default>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
