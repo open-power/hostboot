@@ -88,13 +88,6 @@ p10_hcd_core_stopclocks(
 
     FAPI_TRY( p10_hcd_corecache_clock_control(eq_target, l_regions, HCD_CLK_STOP ) );
 
-#ifndef __PPE_QME
-
-    FAPI_DBG("Drop TC_SRAM_ABIST_MODE_DC only for Scan via BIST[1]");
-    FAPI_TRY(fapi2::putScom(i_target, BIST, 0));
-
-#endif
-
 fapi_try_exit:
 
     FAPI_INF("<<p10_hcd_core_stopclocks");
