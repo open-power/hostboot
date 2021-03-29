@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2020
+# Contributors Listed Below - COPYRIGHT 2018,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -28,4 +28,5 @@
 
 PROCEDURE=exp_draminit
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_EXP_INCLUDES))
+lib$(PROCEDURE)_DEPLIBS += exp_collect_explorer_log
 $(call BUILD_PROCEDURE)

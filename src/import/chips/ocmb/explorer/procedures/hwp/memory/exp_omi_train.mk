@@ -26,4 +26,5 @@
 
 PROCEDURE=exp_omi_train
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_EXP_INCLUDES))
+lib$(PROCEDURE)_DEPLIBS += exp_collect_explorer_log
 $(call BUILD_PROCEDURE)

@@ -77,6 +77,7 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
         fapi2::ReturnCode& o_rc)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ATTR_MSS_EXP_COMM_STATE_Type l_comm_state = fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_NO_I2C;
 
     // This variable is reused multiple times to build up a unique section
     // identifier to split the log data read from the OCMB before we add
@@ -116,9 +117,35 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
     switch (i_log_type)
     {
         case ACTIVE_LOG:
-            FAPI_INF( "exp_collect_explorer_logs: Entering ... "
-                      "Grab ACTIVE_LOG with max data size: 0x%04X", l_allowable_size );
-            l_rc = exp_active_log(l_target_ocmb, l_explorer_log_data);
+            l_rc = FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_COMM_STATE, l_target_ocmb, l_comm_state);
+
+            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                FAPI_ERR("exp_collect_explorer_logs: error 0x%04X from exp_active_log: "
+                         "Unable to read ATTR_MSS_EXP_COMM_STATE",
+                         (uint32_t)l_rc);
+                return l_rc;
+            }
+
+            if (l_comm_state == fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_INBAND)
+            {
+                FAPI_INF( "exp_collect_explorer_logs (inband): Entering ... "
+                          "Grab ACTIVE_LOG with max data size: 0x%04X", l_allowable_size );
+                l_rc = exp_active_log(l_target_ocmb, l_explorer_log_data);
+            }
+            else if ((l_comm_state == fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_I2C_NO_SCOM) ||
+                     (l_comm_state == fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_I2C_WITH_SCOM))
+            {
+                FAPI_INF( "exp_collect_explorer_logs (i2c): Entering ... "
+                          "Grab ACTIVE_LOG with max data size: 0x%04X", l_allowable_size );
+                l_rc = exp_active_log_i2c(l_target_ocmb, l_explorer_log_data);
+            }
+            else
+            {
+                FAPI_ERR("exp_collect_explorer_logs: cannot collect active logs at this point in IPL: 0x%02x",
+                         l_comm_state);
+            }
+
             break;
 
         case SAVED_LOG_A:

@@ -505,7 +505,8 @@ fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_T
                  fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
                  set_OCMB_TARGET(i_target).
                  set_CMD_ID(FW_STATUS).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "Polling timeout on FW_STATUS command (still FW_BUSY) for " TARGTIDFORMAT,
                  MSSTARGID );
     // Check that Explorer is in RUNTIME_FW boot stage
@@ -834,7 +835,8 @@ fapi2::ReturnCode command_result( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
                  set_OCMB_TARGET(i_target).
                  set_CMD_ID(i_cmd_id).
                  set_COMMAND(l_cmd_data).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "Polling timeout on command 0x%02X (still FW_BUSY) for " TARGTIDFORMAT,
                  i_cmd_id, MSSTARGID );
     // Check that Explorer gave a successful return code
@@ -844,7 +846,8 @@ fapi2::ReturnCode command_result( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
                  set_CMD_ID(i_cmd_id).
                  set_COMMAND(l_cmd_data).
                  set_STATUS(l_status).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "Failing RC (0x%016X, RC 0x%02X) from command 0x%02X for " TARGTIDFORMAT,
                  l_fw_status_data, l_status, i_cmd_id, MSSTARGID );
 
@@ -880,7 +883,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_OCMB_TARGET(i_target).
                  set_CMD_ID(FW_BOOT_CONFIG).
                  set_COMMAND(l_cmd_data).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "Polling timeout on FW_BOOT_CONFIG command (still FW_BUSY) for " TARGTIDFORMAT,
                  MSSTARGID );
 
@@ -890,7 +894,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_OCMB_TARGET(i_target).
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "BOOT_CONFIG invalid command error (CMD 0x%08X, BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_cmd_data, l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::LOOPBACK_FAIL),
@@ -898,7 +903,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_OCMB_TARGET(i_target).
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "BOOT_CONFIG loopback test fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::SERDES_INIT_FAIL),
@@ -906,7 +912,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_OCMB_TARGET(i_target).
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "BOOT_CONFIG OpenCapi SerDes init fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::DLX_CONFIG_FAIL),
@@ -914,7 +921,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_OCMB_TARGET(i_target).
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "BOOT_CONFIG DLx config fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::LANE_INV_FAIL),
@@ -922,7 +930,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_OCMB_TARGET(i_target).
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "BOOT_CONFIG Lane Inversion configuration fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::PARITY_UECC_ERROR),
@@ -930,7 +939,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_OCMB_TARGET(i_target).
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "BOOT_CONFIG reported SerDes parity and/or UECC errors (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status == status_codes::I2C_SUCCESS),
@@ -939,7 +949,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_CMD_ID(FW_BOOT_CONFIG).
                  set_COMMAND(l_cmd_data).
                  set_STATUS(l_status).
-                 set_STATUS_DATA(l_fw_status_data),
+                 set_STATUS_DATA(l_fw_status_data).
+                 set_EXP_ACTIVE_LOG_SIZE(4096),
                  "Failing RC (0x%02X, full status 0x%016X) from BOOT_CONFIG command (BOOT_MODE 0x%02X) for " TARGTIDFORMAT,
                  l_status, l_fw_status_data, l_boot_mode, MSSTARGID );
 

@@ -439,6 +439,8 @@
     <ffdc>CMD_ID</ffdc>
     <ffdc>COMMAND</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -490,6 +492,8 @@
     <ffdc>COMMAND</ffdc>
     <ffdc>STATUS</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -654,6 +658,8 @@
     <ffdc>COMMAND</ffdc>
     <ffdc>BOOT_MODE</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -669,6 +675,8 @@
     <ffdc>COMMAND</ffdc>
     <ffdc>BOOT_MODE</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
@@ -691,6 +699,8 @@
     <ffdc>COMMAND</ffdc>
     <ffdc>BOOT_MODE</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
@@ -713,6 +723,8 @@
     <ffdc>COMMAND</ffdc>
     <ffdc>BOOT_MODE</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
@@ -735,6 +747,8 @@
     <ffdc>COMMAND</ffdc>
     <ffdc>BOOT_MODE</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
@@ -756,6 +770,8 @@
     <ffdc>COMMAND</ffdc>
     <ffdc>BOOT_MODE</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>

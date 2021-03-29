@@ -40,7 +40,6 @@
 #include <vector>
 #include <lib/inband/exp_fw_log.H>
 
-
 // These are the starting addresses of the circular buffer where the active logs
 // are kept in Explorer RAM, for each known FW version
 constexpr uint32_t CL397559_BUFFER_START = 0x0101C520;

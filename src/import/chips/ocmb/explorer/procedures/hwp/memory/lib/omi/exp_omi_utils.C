@@ -335,6 +335,9 @@ fapi2::ReturnCode poll_abort(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     fapi2::buffer<uint64_t> l_host_error_hold;
     fapi2::buffer<uint64_t> l_host_edpl_max_count;
     fapi2::buffer<uint64_t> l_host_status;
+    uint8_t l_is_apollo = 0;
+
+    FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
 
     // Send TWI_POLL_ABORT
     l_cmd_data.push_back(mss::exp::i2c::FW_TWI_POLL_ABORT);
@@ -354,10 +357,14 @@ fapi2::ReturnCode poll_abort(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
 
     // Grabbing and logging host registers.
     // Note: we cannot log the explorer regs due to the explorer's status
-    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::TRAINING_STATUS, l_host_training_status));
-    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::ERROR_HOLD, l_host_error_hold));
-    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::EDPL_MAX_COUNT, l_host_edpl_max_count));
-    FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::STATUS, l_host_status));
+    if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+    {
+        FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::TRAINING_STATUS, l_host_training_status));
+        FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::ERROR_HOLD, l_host_error_hold));
+        FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::EDPL_MAX_COUNT, l_host_edpl_max_count));
+        FAPI_TRY(fapi2::getScom(l_omi, scomt::omi::STATUS, l_host_status));
+    }
+
     FAPI_ASSERT( (l_status != mss::exp::i2c::status_codes::FW_BUSY),
                  fapi2::MSS_EXP_POLL_ABORT_FW_STATUS_BUSY().
                  set_OCMB_TARGET(i_target).

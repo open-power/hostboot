@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2020
+# Contributors Listed Below - COPYRIGHT 2018,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -30,4 +30,5 @@ $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/explorer/common/inb
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/nest)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/memory/lib)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
+lib$(PROCEDURE)_DEPLIBS += exp_collect_explorer_log
 $(call BUILD_PROCEDURE)
