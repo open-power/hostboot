@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -38,6 +38,7 @@ OBJS += pnor_common.o
 OBJS += pnorvalid.o
 OBJS += ecc.o
 OBJS += sfcdd.o
+OBJS += pnoraltsync.o
 
 #SFC Implementations
 OBJS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibm.o)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -365,6 +365,7 @@ class PnorRP
     friend class SfcAST2400Test;
     // allow this function to use constant(s)
     friend errlHndl_t PNOR::validateAltMaster( void );
+    friend errlHndl_t PNOR::copyPnorPartitionToAlt( PNOR::SectionId i_section );
 
     /**
      * @brief Static instance function

@@ -361,6 +361,24 @@ void* call_host_sbe_update (void *io_pArgs)
                 // Commit error
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
+
+#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+            else // Only do the copy if the basic access worked
+            {
+                // We need to keep the alt-pnor's version of the EECACHE in sync with
+                //  the active copy to handle a future failover.
+                l_errl = PNOR::copyPnorPartitionToAlt(PNOR::EECACHE);
+                if (l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"call_host_sbe_update PROBLEM syncing EECACHE to altpnor");
+                    // we don't want to deconfigure any processors since we can recover
+                    l_errl->removeGardAndDeconfigure();
+                    // commit the log but do not kill the IPL (do not use captureError)
+                    l_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                    errlCommit( l_errl, ISTEP_COMP_ID );
+                }
+            }
+#endif
         }
 
         // Set SEEPROM_VERSIONS_MATCH attributes for each processor

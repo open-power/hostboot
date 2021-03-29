@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -202,6 +202,16 @@ errlHndl_t clearSection(PNOR::SectionId i_section);
  * @return errlHndl_t  Error log if validation failed
  */
 errlHndl_t validateAltMaster( void );
+
+/**
+ * @brief Copy a given PNOR partition from the active PNOR into the
+ *        alternate copy
+ *
+ * @param[in] i_section:  PNOR section to copy over
+ *
+ * @return errlHndl_t  Error log if validation failed
+ */
+errlHndl_t copyPnorPartitionToAlt( PNOR::SectionId i_section );
 
 /**
  * @brief Retrieve some information about the PNOR/SFC hardware

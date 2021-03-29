@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -541,6 +541,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             // copy my data into the external format
             o_info.id = iv_TOC[id].id;
             o_info.name = SectionIdToString(id);
+            o_info.sizeActual = iv_TOC[id].size;
 
 #ifdef CONFIG_SECUREBOOT
             o_info.secure = iv_TOC[id].secure;

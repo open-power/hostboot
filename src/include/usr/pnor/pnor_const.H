@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,6 +106,7 @@ struct SectionInfo_t
       vaddr(0),
       flashAddr(0),
       size(0),
+      sizeActual(0),
       eccProtected(false),
       sha512Version(false),
       sha512perEC(false),
@@ -120,7 +121,8 @@ struct SectionInfo_t
     const char* name;   /**< Name of the section */
     uint64_t vaddr;     /**< Virtual address of the start of the section */
     uint32_t flashAddr; /**< Flash address of the start of the section*/
-    uint64_t size;      /**< Size of partition in bytes */
+    uint64_t size;      /**< Logical size of partition in bytes (minus headers) */
+    uint64_t sizeActual;/**< Physical size of partition in bytes */
     bool eccProtected;  /**< Section is ECC protected */
     bool sha512Version; /**< Version Checking */
     bool sha512perEC;   /**< Version Checking perEC */
