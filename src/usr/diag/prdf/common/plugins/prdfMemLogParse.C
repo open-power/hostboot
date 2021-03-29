@@ -459,7 +459,7 @@ bool parseIueCounts( uint8_t  * i_buffer, uint32_t i_buflen,
         snprintf( header, DATA_SIZE, "%d    ", rank );
 
         char data[DATA_SIZE] = { '\0' };
-        snprintf( header, DATA_SIZE, "%d", count );
+        snprintf( data, DATA_SIZE, "%d", count );
 
         i_parser.PrintString( header, data );
     }
