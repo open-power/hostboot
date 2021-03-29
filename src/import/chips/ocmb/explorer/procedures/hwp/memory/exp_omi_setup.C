@@ -48,6 +48,7 @@
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <mss_explorer_attribute_setters.H>
 #include <lib/i2c/exp_i2c_fields.H>
 #include <p10_io_omi_prbs.H>
 
@@ -177,6 +178,9 @@ extern "C"
                 return l_rc_firchk;
             }
         }
+
+        // Save our new communication state
+        FAPI_TRY(mss::attr::set_exp_comm_state(i_target, fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_I2C_WITH_SCOM));
 
         FAPI_TRY(mss::exp::workarounds::omi::gem_menterp(i_target, l_gem_menterp_workaround));
 

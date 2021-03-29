@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <lib/i2c/exp_i2c.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <mss_explorer_attribute_setters.H>
 #include <mss_explorer_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 
@@ -67,6 +68,9 @@ extern "C"
             FAPI_TRY(mss::attr::get_check_for_ready_timeout(i_target, l_poll_count));
             FAPI_TRY(mss::exp::i2c::exp_check_for_ready_helper(i_target, l_poll_count, mss::DELAY_1MS));
         }
+
+        // Save our new communication state
+        FAPI_TRY(mss::attr::set_exp_comm_state(i_target, fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_I2C_NO_SCOM));
 
     fapi_try_exit:
         return fapi2::current_err;

@@ -39,6 +39,7 @@
 #include <lib/omi/exp_omi_utils.H>
 #include <chips/common/utils/chipids.H>
 #include <mss_explorer_attribute_getters.H>
+#include <mss_explorer_attribute_setters.H>
 #include <mss_p10_attribute_getters.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/workarounds/exp_omi_workarounds.H>
@@ -670,6 +671,9 @@ fapi2::ReturnCode exp_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     FAPI_TRY(omiSetACTagPASIDMetaData(i_target));
     FAPI_TRY(omiEnableAFU(i_target));
     FAPI_TRY(mss::unmask::after_mc_omi_init<mss::mc_type::EXPLORER>(i_target));
+
+    // Save our new communication state
+    FAPI_TRY(mss::attr::set_exp_comm_state(i_target, fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_INBAND));
 
 fapi_try_exit:
 

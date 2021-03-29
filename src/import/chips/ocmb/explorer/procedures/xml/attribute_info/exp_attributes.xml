@@ -611,6 +611,26 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MSS_EXP_COMM_STATE</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      Can be used by general procedure
+      code to determine sideband/inband mode, etc.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <default>0</default>
+    <enum>
+      NO_I2C = 0,
+      I2C_NO_SCOM = 1,
+      I2C_WITH_SCOM = 2,
+      INBAND = 3
+    </enum>
+    <writeable/>
+    <mssAccessorName>exp_comm_state</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MSS_EXP_RESP_DDR4_F0RC00</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
