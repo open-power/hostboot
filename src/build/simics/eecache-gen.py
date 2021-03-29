@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -39,6 +39,7 @@ import os
 import cli
 import struct
 import sys
+import re
 
 ###########################################################################
 # version 1 header record
@@ -332,7 +333,8 @@ def get_eq_pg_records(vpd_path):
         os.unlink(vpd_path)
 
         vpd_bytes = vpd_file.read()
-        pg_idx = vpd_bytes.find('CP00VD\x0201PG')
+        pg_key = 'CP00VD\x0201PG'
+        pg_idx = vpd_bytes.find(pg_key.encode())
 
         if pg_idx == -1:
             raise Exception('Cannot find PG keyword in file ' + vpd_path)
@@ -344,5 +346,5 @@ def get_eq_pg_records(vpd_path):
         # PG VPD spreadsheet)
         pg_idx += 96
 
-        return [ struct.unpack(">I", '\x00' + vpd_bytes[pg_idx+offset:pg_idx+offset+3])[0]
+        return [ struct.unpack(">I", b'\x00' + vpd_bytes[pg_idx+offset:pg_idx+offset+3])[0]
                  for offset in range(0, 8*3, 3) ]

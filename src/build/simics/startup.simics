@@ -156,7 +156,7 @@ if($vpo_compile == "0") { # no secureboot in VPO
 }
 
 # Populate default APSS power readings for the OCC
-foreach $apss in (get-object-list -all type = apss_device) {
+foreach $apss in (list-objects -all type = apss_device) {
     ($apss)->adc_channel_val = [0x00000293, 0x00000287, 0x00000887, 0x00000877, 0x00000326, 0x000002f2, 0x00000214, 0x00000006, 0x00000003, 0x00000eb7, 0x0000001b, 0x00000013, 0x00000123, 0x000000fc, 0x000000f2, 0x00000008]
 }
 

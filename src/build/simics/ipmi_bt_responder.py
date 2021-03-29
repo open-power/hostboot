@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -230,9 +230,9 @@ def bt_debug_print(level, str, parms=None):
 
     if (bt_debug >= level):
         if parms:
-            print str % parms
+            print(str % parms)
         else:
-            print str
+            print(str)
 
 class ipmiMessage:
     #Instance constructor
@@ -262,9 +262,9 @@ class ipmiMessage:
         sendbuf[1] = self.netf_lun
         sendbuf[2] = self.seq
         sendbuf[3] = self.cmd
-        for x in xrange(4, 4+len(self.data)):
+        for x in range(4, 4+len(self.data)):
             sendbuf[x] = self.data[x-4]
-        for x in xrange(4+len(self.data), len(sendbuf)):
+        for x in range(4+len(self.data), len(sendbuf)):
             sendbuf[x] = 0xFF
 
 
@@ -307,14 +307,14 @@ class ipmiMessage:
     def dump(self, header="Debug Dump", lvl=1):
        global bt_debug
        if (bt_debug >= lvl):
-         print "======================================"
-         print "= %s " % header
-         print "================="
-         print "Net: %X cmd: %X seq: %X" % (self.netf_lun, self.cmd, self.seq)
-         print "Data: "
-         print " ".join(hex(n) for n in self.data)
-         print "======================================"
-         print " "
+         print("======================================")
+         print("= %s " % header)
+         print("=================")
+         print("Net: %X cmd: %X seq: %X" % (self.netf_lun, self.cmd, self.seq))
+         print("Data: ")
+         print(" ".join(hex(n) for n in self.data))
+         print("======================================")
+         print(" ")
 
 
 

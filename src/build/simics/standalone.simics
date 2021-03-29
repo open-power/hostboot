@@ -20,7 +20,7 @@ if ($hb_pnor == NIL) {
         @simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
         @SIM_get_object(simenv.hb_pnor[0])
     } except {
-        foreach $pnor in (get-object-list -all BmcCmp) {
+        foreach $pnor in (list-objects -all BmcCmp) {
             $hb_pnor = ($pnor)
         }
         $hb_pnor = $hb_pnor+".sfc_master_mem"
@@ -117,7 +117,7 @@ if ($hostboot_profile == FALSE) {
 # Turn on all processor cec-chips
 #################################
 foreach $proc in (get-component-list -all proc_p10_pib) {
-    foreach $cc in (get-object-list component=$proc type=cec-chip -recursive) {
+    foreach $cc in (list-objects component=$proc type=cec-chip -recursive) {
         @SIM_get_interface(SIM_get_object(simenv.cc), "signal").signal_raise()
     }
 }
@@ -135,7 +135,7 @@ try {
 ###############################
 
 # Loop over all explorer chips
-foreach $obj in (get-object-list ocmb -all){
+foreach $obj in (list-objects ocmb -all){
 
     # Allow for testing MMIO HW failures
     # Forces write access to TRACE_TRDATA_CONFIG_0(0x08010403) to fail
@@ -198,6 +198,6 @@ if ($standalone_test_dd1 == TRUE) {
 #####
 
 # Force the localbus to default to the PIB side
-foreach $fsis in (get-object-list -all fsi_slave_t3_v6) {
+foreach $fsis in (list-objects -all fsi_slave_t3_v6) {
     $fsis->enforce_lbo = FALSE
 }

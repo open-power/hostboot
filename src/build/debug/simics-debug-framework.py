@@ -43,12 +43,15 @@
 # manual wrapper command should be implemented in 'hb-simdebug.py'.
 
 
+from __future__ import print_function
 import os
 import subprocess
 import re
 import random
 import struct
 import time
+import binascii
+import sys
 
 # @class DebugFrameworkIPCMessage
 # @brief Wrapper class for constructing a properly formed IPC message for the
@@ -72,18 +75,23 @@ class DebugFrameworkIPCMessage:
         self.msg = msg
 
     def dumps(self):
-        return ("[ \"" + self.msgtype + "\", \"" +
+        if sys.version_info.major == 3:
+            msg_bytes = bytes(self.msg, 'utf-8')
+            return ("[ \"" + self.msgtype + "\", \"" +
+                    binascii.hexlify(msg_bytes).decode('utf-8') + "\" ]\n")
+        else:
+            return ("[ \"" + self.msgtype + "\", \"" +
                 self.msg.encode("hex") + "\" ]\n")
 
     def loads(self,string):
         pattern = re.compile("\[ \"([^\"]+)\", \"([0-9a-f]*)\" ]")
-        match = pattern.search(string)
+        match = pattern.search(string.decode())
         if  match is None:
             print(  "error: empty message >%s< received from perl"%(string))
             print(  "       Check for print's in your perl script!!!")
         else:
             self.msgtype = match.group(1)
-            self.msg = match.group(2).decode("hex")
+            self.msg = bytearray.fromhex(match.group(2)).decode('utf-8')
 
 # @class DebugFrameworkProcess
 # @brief Provides a wrapper to the 'subprocess' interface and IPC bridge.
@@ -135,7 +143,9 @@ class DebugFrameworkProcess:
     # Send a message into the process pipe.
     def sendMsg(self,msgtype,msg):
         msg = DebugFrameworkIPCMessage(msgtype, msg)
-        self.process.stdin.write(msg.dumps())
+        msg_dumps_bytes = str.encode(msg.dumps())
+        self.process.stdin.write(msg_dumps_bytes)
+        self.process.stdin.flush()
 
     # End sub-process by closing its pipe.
     def endProcess(self):
@@ -519,7 +529,7 @@ hb_attr_dump_file = open('hb_attr_dump.bin', 'wb')
 # Hostboot magic args should range 7000..7999.
 def magic_instruction_callback(user_arg, cpu, arg):
     # Disable our handler if someone tells us to
-    if( os.environ.has_key('HB_DISABLE_MAGIC')
+    if( ('HB_DISABLE_MAGIC' in os.environ)
         and (os.environ['HB_DISABLE_MAGIC'] == '1') ):
         print('Skipping HB magic (disabled)', arg)
         return
@@ -527,7 +537,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
     # HRMOR should match the l3 base that was set on the primary processor as
     # part of either hostboot or the SBE's startup.simics script
     if( (cpu.hrmor) & 0x00000000FFFFFFFF != getL3Base() ):
-        print('Skipping HB magic (outside of HB): magic=%s, hrmor=%s, pir=%s' % (arg, cpu.hrmor, cpu.pir))
+        print('Skipping HB magic (outside of HB): magic=', arg, ', hrmor=', cpu.hrmor, ', pir=', cpu.pir)
         return
 
     if arg == 7006:   # MAGIC_SHUTDOWN
@@ -539,7 +549,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         SIM_break_simulation( "Simulation stopped. (hap 7007)"  )
 
     if arg == 7008:
-        cpu.r3 = random.randint(1, 0xffffffffffffffffL)
+        cpu.r3 = random.randint(1, 0xffffffffffffffff)
 
     if arg == 7009:   # MAGIC_MEMORYLEAK_FUNCTION
         magic_memoryleak_function(cpu)
@@ -569,7 +579,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # (no args)
 
         # Make sure we only do 1 dump even though every thread will TI
-        if( not os.environ.has_key('HB_DUMP_COMPLETE') ):
+        if( not 'HB_DUMP_COMPLETE' in os.environ ):
             print("Generating Hostboot Dump for TI")
             os.environ['HB_DUMP_COMPLETE']="1"
             cmd1 = "hb-Dump quiet"
@@ -577,7 +587,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
     if arg == 7018:   # MAGIC_BREAK_ON_ERROR
         # Stop the simulation if an env var is set
-        if( os.environ.has_key('HB_BREAK_ON_ERROR') ):
+        if( 'HB_BREAK_ON_ERROR' in os.environ ):
             SIM_break_simulation( "Stopping sim on HB error. (hap 7018)"  )
 
     if arg == 7019:   # MAGIC_GET_SBE_TRACES
@@ -622,7 +632,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
             othercpu.tb = cpu.tb
 
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
-        if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
+        if( not 'ENABLE_HB_SIMICS_LOGS' in os.environ ):
             #print("Skipping Hostboot Simics Logging because ENABLE_HB_SIMICS_LOGS is not set")
             return
 
@@ -675,7 +685,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
                 print("Unable to find valid object on this system type, neither %s nor %s were found"%(D1Proc0String, P9Proc0String))
 
     if arg == 7023:  # MAGIC_TOGGLE_OUTPUT
-        if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
+        if( not 'ENABLE_HB_SIMICS_LOGS' in os.environ ):
             #print("Skipping Hostboot Simics Logging because ENABLE_HB_SIMICS_LOGS is not set")
             return
 
