@@ -76,7 +76,7 @@ errlHndl_t getAndSetPLDMBiosAttrs()
                    "getAndSetPLDMBiosAttrs: An error occurred getting Huge Page Count from the BMC, using default 0x%X",
                    DEFAULT_HUGE_PAGE_COUNT );
 
-        // Set size to default, commit the error and continue
+        // Set count to default, commit the error and continue
         huge_page_count = DEFAULT_HUGE_PAGE_COUNT;
         errlCommit( errl, ISTEP_COMP_ID );
     }
@@ -85,6 +85,31 @@ errlHndl_t getAndSetPLDMBiosAttrs()
                "getAndSetPLDMBiosAttrs: Set ATTR_HUGE_PAGE_COUNT = 0x%X",
                huge_page_count );
     sys->setAttr<ATTR_HUGE_PAGE_COUNT>(huge_page_count);
+
+
+    // HUGE_PAGE_SIZE
+    ATTR_HUGE_PAGE_SIZE_type huge_page_size = 0;
+    // HDAT spec: 0 = 16GB
+    const size_t DEFAULT_HUGE_PAGE_SIZE = 0;
+
+    errl = PLDM::getHugePageSize(bios_string_table,
+                                 bios_attr_table,
+                                 huge_page_size);
+    if(errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "getAndSetPLDMBiosAttrs: An error occurred getting Huge Page Size from the BMC, using default 0x%X",
+                   DEFAULT_HUGE_PAGE_SIZE );
+
+        // Set size to default, commit the error and continue
+        huge_page_size = DEFAULT_HUGE_PAGE_SIZE;
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "getAndSetPLDMBiosAttrs: Set ATTR_HUGE_PAGE_SIZE = 0x%X",
+               huge_page_size );
+    sys->setAttr<ATTR_HUGE_PAGE_SIZE>(huge_page_size);
 
 
     // LMB_SIZE
