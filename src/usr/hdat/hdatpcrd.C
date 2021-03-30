@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -361,13 +361,18 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 //TODO : RTC 147507 - Fetch TOD information
                 if(index ==0 )
                 {
-                    this->iv_spPcrd->hdatChipTodData.
-                                    hdatPcrdTodFlags=0x06;
+                    // Report this processor as a primary TOD master
+                    this->iv_spPcrd->hdatChipTodData.hdatPcrdTodFlags=0x06;
                 }
                 else
                 {
-                    this->iv_spPcrd->hdatChipTodData.
-                                    hdatPcrdTodFlags=0x05;
+#ifdef CONFIG_ENABLE_TOD_REDUNDANCY
+                    // Report this processor as a secondary TOD master
+                    this->iv_spPcrd->hdatChipTodData.hdatPcrdTodFlags=0x05;
+#else
+                    // Do not report this processor as a secondary TOD master
+                    this->iv_spPcrd->hdatChipTodData.hdatPcrdTodFlags=0x04;
+#endif
                 }
                 this->iv_spPcrd->hdatChipTodData.hdatPcrdTodControls=
                                                                 0x03F30000;
@@ -424,26 +429,26 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 this->iv_spPcrd->hdatPcrdIntData
                     [HDAT_PCRD_DA_CHIP_VPD].hdatOffset =
                             offsetof(hdatSpPcrd_t, hdatKwd) + l_asciiKeywordSize;
-        
+
                 // Get full Mvpd.
                 char *l_FullMvpd = NULL;
                 size_t l_FullMvpdSize = HDAT_FULL_MVPD_SIZE - 1;
-                
+
                 l_errl =  hdatGetFullEepromVpd(l_pProcTarget,
                                           l_FullMvpdSize,
                                           l_FullMvpd);
 
                 if(l_errl)
                 {
-                    HDAT_ERR("hdatGetFullEepromVpd returns Error [0x%08X]", 
+                    HDAT_ERR("hdatGetFullEepromVpd returns Error [0x%08X]",
                                                     l_errl->reasonCode());
                     break;
                 }
-                
+
                 //Virt address to fill full mvpd based on prev dptr end point
                 uint8_t *l_FullMvpdAddr = (reinterpret_cast<uint8_t *>
                                     (&this->iv_spPcrd->hdatKwd)) + l_asciiKeywordSize;
-                
+
                 if(l_FullMvpd != NULL)
                 {
                     memcpy(l_FullMvpdAddr ,(uint8_t *)l_FullMvpd,l_FullMvpdSize);
@@ -573,7 +578,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                                                              = 0;
                 HDAT_DBG("not a master proc, pnor data is not added");
             }
-            
+
             // Add pnor struct size to whole pcrd size, since all pcrd
             // structs should be of same size
             this->iv_spPcrd->hdatHdr.hdatSize += sizeof(hdatPcrdPnor_t);
@@ -641,14 +646,14 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
 
             // Need to populate EC level info
             // PCRD is only one per chip . Hence the array count of EC level int pntr will be only 1.
-        
+
             hdatHDIFDataArray_t *l_ECLvlInfoPcrdHdrPtr = NULL;
             l_ECLvlInfoPcrdHdrPtr = reinterpret_cast<hdatHDIFDataArray_t *>
                                 ((uint8_t *)l_SMPInfoFullPcrdHdrPtr + sizeof(hdatHDIFDataArray_t) +
                                 (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK));
             uint32_t l_pcrdECLvlTotalSize = sizeof(hdatHDIFDataArray_t) +
-                                          sizeof(hdatProcEcLvlElement_t); 
-            
+                                          sizeof(hdatProcEcLvlElement_t);
+
 
             l_ECLvlInfoPcrdHdrPtr->hdatOffset = 0x0010; // All array entries start right after header which is of 4 word size
             l_ECLvlInfoPcrdHdrPtr->hdatArrayCnt = 1;
@@ -660,7 +665,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             uint32_t l_ecLevel = 0;
             uint32_t l_chipId = 0;
 
-            l_errl = hdatGetIdEc( l_pProcTarget, 
+            l_errl = hdatGetIdEc( l_pProcTarget,
                                   l_ecLevel,
                                   l_chipId);
             if(l_errl)
@@ -673,13 +678,13 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                                     ((uint8_t *)l_ECLvlInfoPcrdHdrPtr + sizeof(hdatHDIFDataArray_t));
             l_hdatProcEcLvlEle->hdatEcLvl.hdatChipManfId = l_chipId;
             l_hdatProcEcLvlEle->hdatEcLvl.hdatChipEcLvl  = l_ecLevel;
-            
+
             TARGETING::ATTR_ECID_type l_ecid = {0};
             assert(l_pProcTarget->tryGetAttr<TARGETING::ATTR_ECID>(l_ecid));
 
             l_hdatProcEcLvlEle->hdatEcid[0] = l_ecid[0];
             l_hdatProcEcLvlEle->hdatEcid[1] = l_ecid[1];
-            
+
 
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatOffset =
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_SMP].hdatOffset + sizeof(hdatHDIFDataArray_t) +
@@ -849,12 +854,12 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         iv_spPcrd->hdatChipData.hdatPcrdProcChipId =
             i_pProcTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
         HDAT_DBG("hdatPcrdProcChipId=0x%8X",
-                 iv_spPcrd->hdatChipData.hdatPcrdProcChipId);    
+                 iv_spPcrd->hdatChipData.hdatPcrdProcChipId);
 
         iv_spPcrd->hdatChipData.hdatPcrdStatusFlags =
             isFunctional(i_pProcTarget)? i_procstatus : HDAT_PROC_NOT_USABLE;
 
-        if(i_pProcTarget->getAttr<ATTR_PROC_MASTER_TYPE>() == 
+        if(i_pProcTarget->getAttr<ATTR_PROC_MASTER_TYPE>() ==
                         TARGETING::PROC_MASTER_TYPE_ACTING_MASTER)
         {
             iv_spPcrd->hdatChipData.hdatPcrdStatusFlags |= HDAT_PROC_IPL_MASTER;
@@ -1013,7 +1018,7 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
                            isFunctional(l_predCappTarget)?1:0;
         }
 
-                                                                               
+
         //set supported stop level
         TARGETING::Target *l_pSysTarget = NULL;
         (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);

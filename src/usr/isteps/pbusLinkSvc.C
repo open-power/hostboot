@@ -102,29 +102,6 @@ static ATTR_IOHS_CONFIG_MODE_type getBusConfigMode(const Target* const i_target)
     return mode;
 }
 
-/**
- * @brief Given an IOHS and a (possibly empty) list of its children SMPGROUP
- *        targets, return true if the PBUS algorithm should use the list of
- *        SMPGROUP targets, or false if it should use the IOHS itself.
- * @param[in] i_smpgroupList  The list of SMPGROUP children
- * @return bool               Whether to use the SMPGROUPs or not.
- */
-static bool useSmpgroups(const TARGETING::TargetHandleList& i_smpgroupList)
-{
-    bool use_smpgroups = false;
-
-    for (auto smpgroup : i_smpgroupList)
-    {
-        if (smpgroup->getAttr<ATTR_PEER_TARGET>())
-        {
-            use_smpgroups = true;
-            break;
-        }
-    }
-
-    return use_smpgroups;
-}
-
 errlHndl_t PbusLinkSvc::collectPbusConnections( const IOHS_CONFIG_MODE i_busType )
 {
     errlHndl_t l_errl = nullptr;
@@ -155,15 +132,7 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( const IOHS_CONFIG_MODE i_busType
         }
 
         TargetHandleList l_busses;
-
-        // If the IOHS has SMPGROUP children then look at those instead of the
-        // IOHS itself.
         getChildAffinityTargets(l_busses, l_iohs, CLASS_NA, TYPE_SMPGROUP);
-
-        if (!useSmpgroups(l_busses))
-        {
-            l_busses.push_back(l_iohs);
-        }
 
         for (const auto l_bus : l_busses)
         {
@@ -247,7 +216,6 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( const IOHS_CONFIG_MODE i_busType
                     // save the pair if not yet done so
                     (*l_pPbusConnections)[l_bus] = l_dstTgt;
                     (*l_pPbusUniqueConnections)[l_bus] = l_dstTgt;
-                    break;
                 }
             }
         }
