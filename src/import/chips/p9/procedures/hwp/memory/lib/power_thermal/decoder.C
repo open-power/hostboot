@@ -264,7 +264,7 @@ fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
         const auto l_dimm_pos = mss::index (l_dimm);
 
         mss::dimm::kind<> l_kind (l_dimm);
-        mss::power_thermal::decoder<> l_decoder(l_kind);
+        mss::power_thermal::decoder<mss::mc_type::NIMBUS> l_decoder(l_kind);
         FAPI_TRY( l_decoder.generate_encoding(), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
 
         // The first entry into these arrays must be valid

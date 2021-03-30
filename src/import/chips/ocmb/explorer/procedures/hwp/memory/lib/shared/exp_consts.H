@@ -301,6 +301,9 @@ enum generic_consts
     // Number of DRAM for x4 vs x8
     EXP_NUM_DRAM_X4 = 20,
     EXP_NUM_DRAM_X8 = 10,
+
+    // Map MDS into Power Thermal decoder mapping
+    DIMM_TYPE_MDS = 20,
 };
 
 namespace i2c
