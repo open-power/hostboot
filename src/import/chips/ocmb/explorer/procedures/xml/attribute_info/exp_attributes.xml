@@ -1366,6 +1366,20 @@
     </attribute>
 
     <attribute>
+      <id>ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          Value for the Explorer CDR Bandwidth to be applied before
+          BOOT_CONFIG0 command.
+      </description>
+      <valueType>uint8</valueType>
+      <initToZero></initToZero>
+      <enum>NONE = 0</enum>
+      <writeable/>
+      <mssAccessorName>exp_omi_cdr_bw_override</mssAccessorName>
+    </attribute>
+
+    <attribute>
       <id>ATTR_MSS_EXP_I2C_FW_LOG_DUMP_DISABLE</id>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
       <description>

@@ -356,6 +356,7 @@ enum sizes
     FW_BOOT_CONFIG_BYTE_LEN = 4,
     FW_STATUS_BYTE_LEN      = 5,
     FW_TWI_FFE_SETTINGS_BYTE_LEN = 8,
+    FW_CDR_BANDWIDTH_SET_LEN = 2,
 
     FW_WRITE_REG_DATA_SIZE  = 0x08,
     FW_REG_ADDR_LATCH_SIZE  = 0x04,
@@ -531,11 +532,25 @@ enum response_arg
 } // namespace omi
 #endif
 
+///
+/// @brief Explorer FW versions
+/// @note this determines what inband commands/features are available
+///
 enum fw_version
 {
     FW_VER_OLD = 397559,
     FW_DTM_SUPPORTED = 402648,
     FW_VER_BOOTLEG = 99999,
+};
+
+///
+/// @brief Explorer FW API versions
+/// @note this determines what i2c commands are available
+///
+enum fw_api_version
+{
+    DL_TRAINING_VERSION2_SUPPORTED = 0x01,
+    FW_CDR_BANDWIDTH_SET_SUPPORTED = 0x03,
 };
 
 } // namespace exp
