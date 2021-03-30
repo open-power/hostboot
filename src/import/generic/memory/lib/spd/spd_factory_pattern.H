@@ -346,7 +346,9 @@ class module_factory
 
             // MSL hardware
             // Rev 1.0
-            o_map[DDIMM_DDR4_REV_1_0] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V1_0> >(iv_target, i_spd_data);
+            // Note: we are working around the 1.0 DDIMM SPD really being DDR4 base version of 1.1
+            // This will allow us to pick up good CAS latency values
+            o_map[DDIMM_DDR4_REV_1_0] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V1_1> >(iv_target, i_spd_data);
         }
 
         ///
