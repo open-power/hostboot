@@ -2324,8 +2324,7 @@
         OFF=0,
         ON=1
     </enum>
-    <initToZero/>
-    <writeable/>
+    <initToOne/>
     <overrideOnly/>
     <group>mma</group>
   </attribute>
@@ -2387,7 +2386,6 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <writeable/>
     <default>0xA</default>
     <group>mma</group>
   </attribute>
