@@ -34,10 +34,12 @@
 // *HWP Consumed by: Memory
 
 #include <fapi2.H>
+#include <i2c_access.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/workarounds/exp_omi_workarounds.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/omi/exp_omi_utils.H>
+#include <lib/i2c/exp_i2c.H>
 #include <lib/i2c/exp_i2c_fields.H>
 #include <mss_explorer_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
@@ -279,6 +281,76 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Override CDR bandwidth setting via I2C command
+///
+/// @param[in] i_cdr_bw_override setting from ATTR_OMI_CDR_BW_OVERRIDE
+/// @param[in,out] io_data i2c data to send
+///
+void setup_cdr_bw_i2c(const uint8_t i_cdr_bw_override,
+                      std::vector<uint8_t>& io_data)
+{
+    // INTEG_GAIN value should always be 0 according to the Explorer FW spec
+    constexpr uint8_t INTEG_GAIN = 0x00;
+
+    // Add the INTEG_GAIN value
+    io_data.insert(io_data.begin(), INTEG_GAIN);
+
+    // Add the override value
+    io_data.insert(io_data.begin(), i_cdr_bw_override);
+
+    // Add data length
+    io_data.insert(io_data.begin(), mss::exp::i2c::FW_CDR_BANDWIDTH_SET_LEN);
+
+    // Then add the command
+    io_data.insert(io_data.begin(), mss::exp::i2c::FW_CDR_BANDWIDTH_SET);
+}
+
+///
+/// @brief Override CDR bandwidth setting via I2C command
+///
+/// @param[in] i_target OCMB_CHIP target
+/// @param[in] i_cdr_bw_override setting from ATTR_OMI_CDR_BW_OVERRIDE
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode override_cdr_bw_i2c(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_cdr_bw_override)
+{
+    uint8_t l_version = 0;
+    std::vector<uint8_t> l_i2c_data;
+    std::vector<uint8_t> l_fw_status_data;
+
+    if (i_cdr_bw_override == fapi2::ENUM_ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE_NONE)
+    {
+        FAPI_DBG("%s No CDR bandwidth override requested", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY(mss::attr::get_exp_fw_api_version(i_target, l_version));
+
+    if (l_version < FW_CDR_BANDWIDTH_SET_SUPPORTED)
+    {
+        FAPI_INF("%s CDR bandwidth override not supported in Explorer FW version %d",
+                 mss::c_str(i_target), l_version);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Set up command
+    setup_cdr_bw_i2c(i_cdr_bw_override, l_i2c_data);
+
+    // Send the command
+    FAPI_TRY(fapi2::putI2c(i_target, l_i2c_data));
+
+    // Check status
+    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_fw_status_data));
+    FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_CDR_BANDWIDTH_SET,
+             l_i2c_data, l_fw_status_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Select and set dl_layer_boot_mode for BOOT_CONFIG0
 ///
 /// @param[in] i_target OCMB_CHIP target
@@ -294,7 +366,6 @@ fapi2::ReturnCode select_dl_layer_boot_mode(
     constexpr uint8_t BOOT_MODE_VERSION1 = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
     constexpr uint8_t BOOT_MODE_VERSION2 =
         fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING_VERSION2;
-    constexpr uint8_t VERSION2_SUPPORTED = 0x01;
 
     uint8_t l_version = 0;
 
@@ -309,7 +380,7 @@ fapi2::ReturnCode select_dl_layer_boot_mode(
 
     FAPI_TRY(mss::attr::get_exp_fw_api_version(i_target, l_version));
 
-    if (l_version >= VERSION2_SUPPORTED)
+    if (l_version >= DL_TRAINING_VERSION2_SUPPORTED)
     {
         FAPI_DBG("%s Selecting dl_layer_boot_mode = 0b01", mss::c_str(i_target));
         FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target,

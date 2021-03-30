@@ -109,6 +109,26 @@ fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
 
 ///
+/// @brief Override CDR bandwidth setting via I2C command
+///
+/// @param[in] i_cdr_bw_override setting from ATTR_OMI_CDR_BW_OVERRIDE
+/// @param[in,out] io_data i2c data to send
+///
+void setup_cdr_bw_i2c(const uint8_t i_cdr_bw_override,
+                      std::vector<uint8_t>& io_data);
+
+///
+/// @brief Override CDR bandwidth setting via I2C command
+///
+/// @param[in] i_target OCMB_CHIP target
+/// @param[in] i_cdr_bw_override setting from ATTR_OMI_CDR_BW_OVERRIDE
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode override_cdr_bw_i2c(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_cdr_bw_override);
+
+///
 /// @brief Select and set dl_layer_boot_mode for BOOT_CONFIG0
 ///
 /// @param[in] i_target OCMB_CHIP target

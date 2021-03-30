@@ -1405,6 +1405,7 @@
       <description>
           This enables the override to the Explroer CDR bandwidth, to
           the value specified by ATTR_MSS_EXP_CDR_BW_OVERRIDE_VALUE.
+          (Deprecated. Use ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE instead.)
       </description>
       <initToZero></initToZero>
       <valueType>uint8</valueType>
@@ -1419,11 +1420,26 @@
       <description>
           Value for the Explorer CDR Bandwidth when override is enabled via
           ATTR_MSS_EXP_CDR_BW_OVERRIDE_ENABLE
+          (Deprecated. Use ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE instead.)
       </description>
       <valueType>uint8</valueType>
       <default>47</default>
       <writeable/>
       <mssAccessorName>exp_cdr_bw_override_value</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          Value for the Explorer CDR Bandwidth to be applied before
+          BOOT_CONFIG0 command.
+      </description>
+      <valueType>uint8</valueType>
+      <initToZero></initToZero>
+      <enum>NONE = 0</enum>
+      <writeable/>
+      <mssAccessorName>exp_omi_cdr_bw_override</mssAccessorName>
     </attribute>
 
     <attribute>

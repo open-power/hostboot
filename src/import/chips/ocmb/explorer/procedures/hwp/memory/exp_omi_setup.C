@@ -73,6 +73,7 @@ extern "C"
         uint32_t l_omi_freq = 0;
         uint8_t l_is_apollo = 0;
         bool l_mnfg_screen_test = false;
+        fapi2::ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE_Type l_cdr_bw_override = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
@@ -111,6 +112,10 @@ extern "C"
             FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_TWI_FFE_SETTINGS, l_ffe_setup_data,
                      l_fw_status_data));
         }
+
+        // Apply override for CDR bandwidth
+        FAPI_TRY(mss::attr::get_exp_omi_cdr_bw_override(i_target, l_cdr_bw_override));
+        FAPI_TRY(mss::exp::workarounds::omi::override_cdr_bw_i2c(i_target, l_cdr_bw_override));
 
         // Gets the data setup
         FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
