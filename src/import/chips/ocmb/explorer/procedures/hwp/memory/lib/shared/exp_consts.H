@@ -299,6 +299,9 @@ enum generic_consts
     EXP_NUM_DRAM_X4 = 20,
     EXP_NUM_DRAM_X8 = 10,
 
+    // Map MDS into Power Thermal decoder mapping
+    DIMM_TYPE_MDS = 20,
+
     // Note: restore repairs and our ECC logic use the MC/DFI perspective
     // As such, our spare is located on byte 5
     // Byte where the spare DRAM(s) are located

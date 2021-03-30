@@ -54,10 +54,12 @@ namespace power_thermal
 
 const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::EXPLORER>::DIMM_TYPE_MAP =
 {
-    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM, 0b00},
-    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM, 0b01},
-    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM, 0b10},
-    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM, 0b11},
+    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM, 0b000},
+    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM, 0b001},
+    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM, 0b010},
+    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM, 0b011},
+    // MDS is not an attr enum. It is in exp_consts.H. have set this manually according to is_mds()
+    {mss::exp::DIMM_TYPE_MDS, 0b100},
     {ANY_TYPE, 0b111}
 };
 
@@ -214,7 +216,7 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
     {
         const auto l_dimm_pos = mss::index (l_dimm);
         mss::dimm::kind<> l_kind (l_dimm);
-        mss::power_thermal::decoder<> l_decoder(l_kind);
+        mss::power_thermal::decoder<mss::mc_type::EXPLORER> l_decoder(l_kind);
         fapi2::buffer<uint64_t> l_attr_value;
 
         // DDIMMs mrw slope/intercept/limit attribute values are for whole DDIMM, so divide these by total number of virtual DIMMs
@@ -300,6 +302,35 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief checks if it is a mds DIMM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
+/// @note set the l_dimm_type with correct type either mds or non-mds dimm type
+///
+template<>
+fapi2::ReturnCode decoder<mss::mc_type::EXPLORER, throttle_traits<mss::mc_type::EXPLORER>>::encode_dimm_type()
+{
+    using TT = throttle_traits<mss::mc_type::EXPLORER>;
+    bool l_mds = false;
+    uint8_t l_dimm_type = iv_kind.iv_dimm_type;
+
+    FAPI_TRY(mss::dimm::is_mds<mss::mc_type::EXPLORER>(iv_kind.iv_target, l_mds));
+
+    if(l_mds)
+    {
+        l_dimm_type = mss::exp::DIMM_TYPE_MDS;
+    }
+
+    FAPI_TRY(( encode<TT::DIMM_TYPE_START, TT::DIMM_TYPE_LEN>
+               (iv_kind.iv_target, l_dimm_type, TT::DIMM_TYPE_MAP, iv_gen_key)),
+             "Failed to generate power thermal encoding for %s val %d on target: %s",
+             "DIMM_TYPE", l_dimm_type, mss::c_str(iv_kind.iv_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+
 }
 
 } //ns power_thermal

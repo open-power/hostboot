@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -383,7 +383,7 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type
 /// @tparam TT throttle_traits throttle traits for the given mc_type
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = throttle_traits<MC>>
+template<mss::mc_type MC, typename TT = throttle_traits<MC>>
 class decoder
 {
     public:
@@ -429,6 +429,23 @@ class decoder
         /// @note populates iv_gen_key
         ///
         fapi2::ReturnCode generate_encoding ();
+
+
+        ///
+        /// @brief encodes dimm type into key, allowing special cases like MDS
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
+        /// @note populates iv_gen_key
+        ///
+        fapi2::ReturnCode encode_dimm_type()
+        {
+            FAPI_TRY(( encode<TT::DIMM_TYPE_START, TT::DIMM_TYPE_LEN>
+                       (iv_kind.iv_target, iv_kind.iv_dimm_type, TT::DIMM_TYPE_MAP, iv_gen_key)),
+                     "Failed to generate power thermal encoding for %s val %d on target: %s",
+                     "DIMM_TYPE", iv_kind.iv_dimm_type, mss::c_str(iv_kind.iv_target) );
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 
         ///
         /// @brief Finds a value for the power curve slope attributes by matching the generated hashes
@@ -493,8 +510,7 @@ fapi2::ReturnCode decoder<MC, TT>::generate_encoding()
              "DRAM_GEN", iv_kind.iv_dram_generation, mss::c_str(iv_kind.iv_target) );
 
     //DIMM_TYPE
-    FAPI_TRY(( encode<TT::DIMM_TYPE_START, TT::DIMM_TYPE_LEN>
-               (iv_kind.iv_target, iv_kind.iv_dimm_type, TT::DIMM_TYPE_MAP, iv_gen_key)),
+    FAPI_TRY(( encode_dimm_type()),
              "Failed to generate power thermal encoding for %s val %d on target: %s",
              "DIMM_TYPE", iv_kind.iv_dimm_type, mss::c_str(iv_kind.iv_target) );
 

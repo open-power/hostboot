@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,6 +77,13 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                                    uint32_t o_limit [throttle_traits<>::DIMMS_PER_PORT]);
 
 
+///
+/// @brief checks if it is a mds DIMM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
+/// @note set the l_dimm_type with correct type either mds or non-mds dimm type
+///
+template<>
+fapi2::ReturnCode decoder<mss::mc_type::EXPLORER, throttle_traits<mss::mc_type::EXPLORER>>::encode_dimm_type();
 } // power_thermal
 } // mss
 #endif
