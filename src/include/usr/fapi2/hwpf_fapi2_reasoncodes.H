@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,7 @@ namespace fapi2
         MOD_FAPI2_GET_DEFAULT_WOF_TABLE             = 0x24,
         MOD_FAPI2_GET_SEEPROM_ECC_LESS_WOF_DATA     = 0x25,
         MOD_FAPI2_GET_OVERRIDE_WOF_TABLE            = 0x26,
+        MOD_TRIGGER_ATTR_SYNC                       = 0x27,
     };
 
     /**
@@ -156,6 +157,7 @@ namespace fapi2
         RC_PROC_FREQ_MISMATCH          = HWPF_COMP_ID | 0x33,
 
         RC_INVALID_SPD_DRAM_GEN        = FAPI2_COMP_ID | 0x34,
+        RC_CANNOT_FIND_POSITION        = FAPI2_COMP_ID | 0x35,
 
     };
 
