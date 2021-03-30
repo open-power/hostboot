@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 #include <kernel/devicesegment.H>
 #include <kernel/bltohbdatamgr.H>
 #include <util/align.H>
-
 
 extern void* data_load_address;
 uint64_t VmmManager::g_patb[2];
@@ -125,6 +124,9 @@ void VmmManager::initPartitionTable()
     // Use SLB, not In-Memory Segment Tables (Process Table)
     // Set LPCR[41] (UPRT) = 0
     setLPCR(getLPCR() & (~0x0000000000400000));
+
+    //Need to zero LPIDR to set thread-context = tid
+    setLPIDR(0x0);
 
     // Set the first partition table entry (PATE)
     // HTABORG, HTABSIZE = 0 (11 bits, 256k table)

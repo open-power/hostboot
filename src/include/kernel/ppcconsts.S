@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2018
+# Contributors Listed Below - COPYRIGHT 2010,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -163,6 +163,7 @@
                 .set HRMOR,313
                 .set HSRR0,314
                 .set HSRR1,315
+                .set LPIDR,319
                 .set HMER,336
                 .set PTCR,464
                 .set HID0,1008

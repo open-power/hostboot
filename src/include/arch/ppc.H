@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -275,6 +275,21 @@ inline void setLPCR(uint64_t _lpcr)
 {
     register uint64_t lpcr = _lpcr;
     asm volatile("mtspr 318, %0; isync" :: "r" (lpcr));
+}
+
+ALWAYS_INLINE
+inline uint64_t getLPIDR()
+{
+    register uint64_t lpidr = 0;
+    asm volatile("mfspr %0, 319" : "=r" (lpidr));
+    return lpidr;
+}
+
+ALWAYS_INLINE
+inline void setLPIDR(uint64_t _lpidr)
+{
+    register uint64_t lpidr = _lpidr;
+    asm volatile("mtspr 319, %0; isync" :: "r" (lpidr));
 }
 
 ALWAYS_INLINE

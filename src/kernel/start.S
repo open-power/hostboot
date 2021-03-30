@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2020
+# Contributors Listed Below - COPYRIGHT 2010,2021
 # [+] International Business Machines Corp.
 # [+] Joel Stanley
 #
