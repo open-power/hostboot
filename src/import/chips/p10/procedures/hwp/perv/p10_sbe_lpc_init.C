@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,16 +101,12 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-fapi2::ReturnCode p10_sbe_lpc_init(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
+fapi2::ReturnCode p10_sbe_lpc_init_any(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    bool i_hasPnor)
 {
     fapi2::buffer<uint32_t> l_data32;
-    uint8_t l_is_fsp = 0;
-    uint8_t l_is_primary_proc = 0;
     FAPI_DBG("p10_sbe_lpc_init: Entering ...");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SP_MODE, i_target_chip, l_is_fsp), "Error getting ATTR_IS_SP_MODE");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target_chip, l_is_primary_proc));
 
     /* The next two steps have to take place with the nest clock muxed into the LPC clock so all the logic sees its resets */
     FAPI_TRY(switch_lpc_clock_mux(i_target_chip, true));
@@ -123,12 +119,12 @@ fapi2::ReturnCode p10_sbe_lpc_init(
     //------------------------------------------------------------------------------------------
     //--- STEP 2: Issue an LPC bus reset
     //------------------------------------------------------------------------------------------
-    FAPI_TRY(reset_lpc_bus_via_master(i_target_chip, !l_is_primary_proc));
+    FAPI_TRY(reset_lpc_bus_via_master(i_target_chip, !i_hasPnor));
 
     /* We can flip the LPC clock back to the external clock input now */
     FAPI_TRY(switch_lpc_clock_mux(i_target_chip, false));
 
-    if (!l_is_primary_proc)
+    if (!i_hasPnor)
     {
         // On secondary processors, leave the LPC bus in reset and skip initialization
         return fapi2::FAPI2_RC_SUCCESS;
@@ -156,6 +152,18 @@ fapi2::ReturnCode p10_sbe_lpc_init(
              "Error trying to set up the LPC host controller timeout");
 
     FAPI_DBG("p10_sbe_lpc_init: Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode p10_sbe_lpc_init(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
+{
+    // Assume that only the primary proc has PNOR attached
+    uint8_t l_is_primary_proc = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target_chip, l_is_primary_proc));
+    return p10_sbe_lpc_init_any( i_target_chip, l_is_primary_proc );
 
 fapi_try_exit:
     return fapi2::current_err;

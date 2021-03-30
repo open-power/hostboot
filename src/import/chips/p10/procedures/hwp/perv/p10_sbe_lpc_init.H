@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,10 +39,6 @@
 typedef fapi2::ReturnCode (*p10_sbe_lpc_init_FP_t)(const
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
-/// @brief LPC init to enable connection to PNOR
-///
-/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
-/// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
     const uint64_t LPC_LRESET_OE = 23;
@@ -59,8 +55,25 @@ extern "C"
     const uint32_t LPCM_LPC_MASTER_TIMEOUT_REG = 0xC001202C;
     const uint32_t LPCM_LPC_MASTER_TIMEOUT_VALUE = 0xFE000000;
     const uint32_t CPLT_CONF1_TC_LP_RESET = 12;
-    fapi2::ReturnCode p10_sbe_lpc_init(const
-                                       fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
+
+
+/// @brief LPC init to enable connection to PNOR
+///
+/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_sbe_lpc_init(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
+
+
+/// @brief LPC init to enable connection to PNOR
+///
+/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_hasPnor       true=this chip has PNOR attached, do full init
+///                                false=this chip has no PNOR attached, only reset controller and hold LRESET asserted
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_sbe_lpc_init_any(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+        bool i_hasPnor);
 }
 
 #endif
