@@ -40,6 +40,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <explorer_scom_addresses.H>
+#include <mss_generic_system_attribute_getters.H>
 
 ///
 /// @brief Check training state of OMI
