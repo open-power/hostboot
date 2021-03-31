@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,7 +200,8 @@ namespace HTMGT
                                 break;
 
                             case OCC_CFGDATA_TCT_CONFIG:
-                                getThermalControlMessageData(cmdData,
+                                getThermalControlMessageData(procTarget,
+                                                             cmdData,
                                                              cmdDataLen);
                                 break;
 
@@ -1088,7 +1089,8 @@ void getSystemConfigMessageData(const Occ &i_occ,
 }
 
 
-void getThermalControlMessageData(uint8_t* o_data,
+void getThermalControlMessageData(TARGETING::Target * i_procTarget,
+                                  uint8_t* o_data,
                                   uint64_t & o_size)
 {
     uint64_t index = 0;
@@ -1148,22 +1150,33 @@ void getThermalControlMessageData(uint8_t* o_data,
     // each will get a FRU type, DVS temp, error temp,
     // and max read timeout
     size_t l_numSetsOffset = index++;
+    uint8_t l_timeout = 0;
 
-    // Processor
-    o_data[index++] = CFGDATA_FRU_TYPE_PROC;
-    uint8_t l_DVFS_temp =
-        l_sys->getAttr<ATTR_OPEN_POWER_PROC_DVFS_TEMP_DEG_C>();
-    uint8_t l_ERR_temp =
-        l_sys->getAttr<ATTR_OPEN_POWER_PROC_ERROR_TEMP_DEG_C>();
-    uint8_t l_timeout = l_sys->getAttr<ATTR_OPEN_POWER_PROC_READ_TIMEOUT_SEC>();
-    if(l_DVFS_temp == 0x0)
+    // Processor Deltas
+    o_data[index++] = CFGDATA_FRU_TYPE_PROC_DELTA;
+
+    // MVPD values for proc and procIO DVFS temps will be in the OCCPB
+    // Send the deltas to the OCC
+
+    ATTR_PROC_DVFS_TEMP_DELTA_C_type l_dvfsDelta;
+    if(!i_procTarget->tryGetAttr<ATTR_PROC_DVFS_TEMP_DELTA_C>(l_dvfsDelta))
     {
-        l_DVFS_temp = OCC_PROC_DEFAULT_DVFS_TEMP;
-        l_ERR_temp  = OCC_PROC_DEFAULT_ERR_TEMP;
-        l_timeout   = OCC_PROC_DEFAULT_TIMEOUT;
+        l_dvfsDelta = OCC_PROC_DEFAULT_DVFS_DELTA_C;
     }
-    o_data[index++] = l_DVFS_temp;
-    o_data[index++] = l_ERR_temp;
+
+    ATTR_PROC_ERROR_TEMP_DELTA_C_type l_errDelta;
+    if(!i_procTarget->tryGetAttr<ATTR_PROC_ERROR_TEMP_DELTA_C>(l_errDelta))
+    {
+        l_errDelta = OCC_PROC_DEFAULT_ERR_DELTA_C;
+    }
+
+    if(!l_sys->tryGetAttr<ATTR_PROC_READ_TIMEOUT_SEC>(l_timeout) || l_timeout == 0)
+    {
+        l_timeout = OCC_PROC_DEFAULT_TIMEOUT;
+    }
+
+    o_data[index++] = l_dvfsDelta;
+    o_data[index++] = l_errDelta;
     o_data[index++] = l_timeout;
     o_data[index++] = 0x00; // reserved
     o_data[index++] = 0x00;
@@ -1183,8 +1196,8 @@ void getThermalControlMessageData(uint8_t* o_data,
 
     // DIMM
     o_data[index++] = CFGDATA_FRU_TYPE_DIMM;
-    l_DVFS_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
-    l_ERR_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
+    uint8_t l_DVFS_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
+    uint8_t l_ERR_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
     l_timeout = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_READ_TIMEOUT_SEC>();
     if(l_DVFS_temp == 0x0)
     {
@@ -1266,6 +1279,31 @@ void getThermalControlMessageData(uint8_t* o_data,
     o_data[index++] = CFGDATA_FRU_TYPE_VRM_VDD;
     o_data[index++] = l_DVFS_temp;          //DVFS
     o_data[index++] = l_ERR_temp;           //ERROR
+    o_data[index++] = l_timeout;
+    o_data[index++] = 0x00; // reserved
+    o_data[index++] = 0x00;
+    l_numSets++;
+
+    // Processor I/O Ring Deltas
+    if(!i_procTarget->tryGetAttr<ATTR_PROC_IO_DVFS_TEMP_DELTA_C>(l_dvfsDelta))
+    {
+        l_dvfsDelta = OCC_PROC_IO_DEFAULT_DVFS_DELTA_C;
+    }
+
+    if(!i_procTarget->tryGetAttr<ATTR_PROC_IO_ERROR_TEMP_DELTA_C>(l_errDelta))
+    {
+        l_errDelta = OCC_PROC_IO_DEFAULT_ERR_DELTA_C;
+    }
+
+    l_timeout = 0;
+    if(!l_sys->tryGetAttr<ATTR_PROC_IO_READ_TIMEOUT_SEC>(l_timeout) || l_timeout == 0)
+    {
+        l_timeout = OCC_PROC_IO_DEFAULT_TIMEOUT;
+    }
+
+    o_data[index++] = CFGDATA_FRU_TYPE_PROC_IO_DELTA;
+    o_data[index++] = l_dvfsDelta;          //DVFS
+    o_data[index++] = l_errDelta;           //ERROR
     o_data[index++] = l_timeout;
     o_data[index++] = 0x00; // reserved
     o_data[index++] = 0x00;
@@ -1567,8 +1605,14 @@ void readConfigData(Occ * i_occ,
             break;
 
         case OCC_CFGDATA_TCT_CONFIG:
-            getThermalControlMessageData(o_cfgDataPtr,
-                                         cfgDataLength);
+            {
+                TARGETING::Target* procTarget = nullptr;
+                procTarget = TARGETING::
+                    getImmediateParentByAffinity(i_occ->getTarget());
+                getThermalControlMessageData(procTarget,
+                                             o_cfgDataPtr,
+                                            cfgDataLength);
+            }
             break;
 
         case OCC_CFGDATA_AVSBUS_CONFIG:

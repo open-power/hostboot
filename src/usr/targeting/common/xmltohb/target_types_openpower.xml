@@ -114,6 +114,18 @@
     <attribute>
       <id>PLDM_ENTITY_ID_INFO</id>
     </attribute>
+    <attribute>
+      <id>PROC_DVFS_TEMP_DELTA_C</id>
+    </attribute>
+    <attribute>
+      <id>PROC_ERROR_TEMP_DELTA_C</id>
+    </attribute>
+    <attribute>
+      <id>PROC_IO_DVFS_TEMP_DELTA_C</id>
+    </attribute>
+    <attribute>
+      <id>PROC_IO_ERROR_TEMP_DELTA_C</id>
+    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>
@@ -384,18 +396,6 @@
     </attribute>
     <attribute>
       <id>PMIC_THROTTLE_TEMP_DEG_C</id>
-    </attribute>
-    <attribute>
-      <id>PROC_DVFS_TEMP_DELTA_C</id>
-    </attribute>
-    <attribute>
-      <id>PROC_ERROR_TEMP_DELTA_C</id>
-    </attribute>
-    <attribute>
-      <id>PROC_IO_DVFS_TEMP_DELTA_C</id>
-    </attribute>
-    <attribute>
-      <id>PROC_IO_ERROR_TEMP_DELTA_C</id>
     </attribute>
     <attribute>
       <id>PROC_IO_READ_TIMEOUT_SEC</id>

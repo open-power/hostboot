@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,12 +33,17 @@
 namespace HTMGT
 {
     const uint8_t  OCC_PROC_DEFAULT_WEIGHT = 10;     //default weight (1.0)
-    const uint8_t  OCC_PROC_DEFAULT_DVFS_TEMP = 0x55;//default from DEF file PM
-    const uint8_t  OCC_PROC_DEFAULT_ERR_TEMP  = 0x5F;
-    const uint8_t  OCC_PROC_DEFAULT_TIMEOUT   = 0x05;
-    const uint8_t  OCC_DIMM_DEFAULT_DVFS_TEMP = 0x45;//default from DEF file PM
-    const uint8_t  OCC_DIMM_DEFAULT_ERR_TEMP  = 0x56;
-    const uint8_t  OCC_DIMM_DEFAULT_TIMEOUT   = 0x1E;
+    const uint8_t  OCC_PROC_DEFAULT_DVFS_TEMP      = 0x55;//default from DEF file PM
+    const uint8_t  OCC_PROC_DEFAULT_DVFS_DELTA_C   = 0x00;
+    const uint8_t  OCC_PROC_DEFAULT_ERR_DELTA_C    = 0x0a;
+    const uint8_t  OCC_PROC_DEFAULT_TIMEOUT        = 0x05;
+    const uint8_t  OCC_PROC_IO_DEFAULT_DVFS_TEMP   = 0x55;
+    const uint8_t  OCC_PROC_IO_DEFAULT_DVFS_DELTA_C= 0x00;
+    const uint8_t  OCC_PROC_IO_DEFAULT_ERR_DELTA_C = 0x0a;
+    const uint8_t  OCC_PROC_IO_DEFAULT_TIMEOUT     = 0x05;
+    const uint8_t  OCC_DIMM_DEFAULT_DVFS_TEMP      = 0x45;//default from DEF file PM
+    const uint8_t  OCC_DIMM_DEFAULT_ERR_TEMP       = 0x56;
+    const uint8_t  OCC_DIMM_DEFAULT_TIMEOUT        = 0x1E;
     const uint8_t  OCC_NOT_DEFINED   = 0xFF;
 
     /** OCC configuration data message formats */
@@ -78,7 +83,10 @@ namespace HTMGT
         CFGDATA_FRU_TYPE_GPU_CORE   = 0x04,
         CFGDATA_FRU_TYPE_GPU_MEMORY = 0x05,
         CFGDATA_FRU_TYPE_VRM_VDD    = 0x06,
-        CFDATA_DVFS_NOT_DEFINED = 0xFF,
+        CFGDATA_FRU_TYPE_PROC_IO    = 0x09,
+        CFGDATA_FRU_TYPE_PROC_DELTA    = 0xf0,
+        CFGDATA_FRU_TYPE_PROC_IO_DELTA = 0xf9,
+        CFDATA_DVFS_NOT_DEFINED     = 0xFF,
     };
 
     enum // WOF disabled reasons
@@ -223,11 +231,14 @@ namespace HTMGT
      * Fills in the Thermal Control Thresholds Configuration
      * Data message buffer.
      *
+     * @param[in] i_procTarget - processor chip target
      * @param[out] o_data - preallocated buffer to fill in
      * @param[out] o_size - set to the message size
      * @pre o_data is large enough.
      */
-    void getThermalControlMessageData(uint8_t* o_data, uint64_t & o_size);
+    void getThermalControlMessageData(TARGETING::Target* i_procTarget,
+                                      uint8_t* o_data,
+                                      uint64_t & o_size);
 
 
     /**

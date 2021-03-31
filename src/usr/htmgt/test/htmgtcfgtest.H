@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -144,7 +144,15 @@ public:
 
         TS_TRACE(ENTER_MRK"HTMGT: testThermalControlConfigData");
 
-        getThermalControlMessageData(data, size);
+        // Get all functional processors
+        TARGETING::TargetHandleList pProcs;
+        TARGETING::getChipResources(pProcs,
+                                    TARGETING::TYPE_PROC,
+                                    TARGETING::UTIL_FILTER_FUNCTIONAL);
+        // just use the first functional proc target
+        TARGETING::Target * procTarget = *pProcs.begin();
+
+        getThermalControlMessageData(procTarget,data, size);
 
 
         if (data[0] != OCC_CFGDATA_TCT_CONFIG)
@@ -159,7 +167,7 @@ public:
                     data[1]);
         }
 
-        if (size != 42)
+        if (size != 48)
         {
             TS_FAIL("wrong size %d for thermal control config data command",
                     size);
