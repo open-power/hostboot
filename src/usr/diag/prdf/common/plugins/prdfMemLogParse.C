@@ -622,6 +622,7 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
         VCM_EVENT = 0,
         DSD_EVENT,
         TPS_EVENT,
+        RRD_EVENT,
         INVALID_EVENT = 0xf,
     };
 
@@ -687,6 +688,7 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
                 case VCM_EVENT: curType_str = "VCM"; break;
                 case DSD_EVENT: curType_str = "DSD"; break;
                 case TPS_EVENT: curType_str = "TPS"; break;
+                case RRD_EVENT: curType_str = "RRD"; break;
                 default       : curType_str = "???"; break;
             }
 
@@ -729,6 +731,7 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
                 case VCM_EVENT: itType_str = "VCM"; break;
                 case DSD_EVENT: itType_str = "DSD"; break;
                 case TPS_EVENT: itType_str = "TPS"; break;
+                case RRD_EVENT: itType_str = "RRD"; break;
                 default       : itType_str = "???"; break;
             }
 
