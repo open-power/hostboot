@@ -172,7 +172,10 @@ errlHndl_t psuSendTopologyIdTable( void )
           = l_topoTableBuffer.physAddr;
         l_psuCommand.cd7_syncFabTopoIdTable_Length
           = l_topoTable.size();
-        //static_assert(
+
+        // Make sure we don't exceed the data size that the SBE expects
+        constexpr size_t TABLE_LENGTH = 32;
+        static_assert( l_topoTable.size() == TABLE_LENGTH );
 
         // Loop through all functional procs to send to each SBE
         TargetHandleList l_procList;
