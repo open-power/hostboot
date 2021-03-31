@@ -356,35 +356,10 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R30_SAMPLE_VIN_BULK_ENABLE_ADC = 0xA8;
 
     // R31
-
-    // The high value for efuse being off is 0x90? Sounds awfully high, doesn't it?
-    // Yes! It is! The new efuse checks are checking for voltage drop when a fully
-    // enabled efuse (12V) is then turned off. It wouldn't fully drop to zero unless
-    // we waited 1 or 2 seconds. So, what we are checking is that we at least get
-    // underneath a minimum allowed voltage of 0x90 ~= 10V, which occurs quickly.
-    // This is sufficient to determine if the efuse has blown. In such a case, we
-    // wouldn't expect to see any drop.
-    static constexpr uint8_t R31_VIN_BULK_EFUSE_OFF_HIGH  = 0x90;
-
+    static constexpr uint8_t R31_VIN_BULK_EFUSE_OFF_HIGH  = 0x04;
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_HIGH   = 0xBF;
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_LOW    = 0x9D;
 
-};
-
-///
-/// @brief 4U Initialization fields
-/// @note These are full register bytes and can be written whole
-///
-enum init_fields_4u
-{
-    // Step 65
-    CLEAR_VR_ENABLE = 0x00,
-
-    // Step 66
-    CLEAR_PMIC_STATUS4 = 0x01,
-
-    // Step 67
-    VR_ENABLE = 0x80,
 };
 
 namespace i2c
@@ -439,6 +414,7 @@ enum fields : uint8_t
     INPUT_PORT_REG_PMIC_PAIR0   = 2,
     INPUT_PORT_REG_PMIC_PAIR1   = 3,
 
+    EFUSE_OUTPUT_SETTING        = 0xFF,
     EFUSE_OUTPUT_OFF            = 0xFC,
     EFUSE_OUTPUT_P0             = 0xFE,
     EFUSE_OUTPUT_P1             = 0xFD,
@@ -446,8 +422,8 @@ enum fields : uint8_t
     EFUSE_POLARITY_SETTING      = 0x00,
 
     // 1's are inputs, 0's are outputs
-    CONFIGURATION_EFUSE_EN_0    = 7,
-    CONFIGURATION_EFUSE_EN_1    = 6,
+    EFUSE_EN_BIT_0    = 7,
+    EFUSE_EN_BIT_1    = 6,
 
     CONFIGURATION_IO_MAP        = 0xFC,
     CONFIGURATION_IO_MAP_OFF    = 0xFF,
@@ -474,6 +450,9 @@ enum regs
     AUTO_SEQ_CH_SEL     = 0x12,
     ALERT_CH_SEL        = 0x14,
     ALERT_PIN_CFG       = 0x17,
+
+    HIGH_EVENT_FLAGS    = 0x1A,
+    LOW_EVENT_FLAGS     = 0x1C,
 
     HYSTERESIS_CH0      = 0x20,
     HIGH_TH_CH0         = 0x21,
@@ -535,10 +514,13 @@ enum fields
     OPMODE_CFG_AUTONOMOUS                               = 0x31,
     OSR_CFG_8_SAMPLE_OVERSAMPLING                       = 0x07,
 
+    CLEAR_EVENTS                                        = 0xFF,
 
     HYSTERESIS_UNUSED                                   = 0xF0,
     HYSTERESIS_UPPER_LIMIT_MAX_ENABLE                   = 0xF1,
     HIGH_TH_DEFAULT                                     = 0xFF,
+
+    EVENT_COUNT_CH_ENABLE_PWM                           = 0x10,
 
     EVENT_COUNT_UNUSED                                       = 0x00,
     EVENT_COUNT_ADC1_CH1_ALERT_4_CONSECUTIVE_READINGS        = 0x74,
