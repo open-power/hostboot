@@ -126,29 +126,40 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
 
         for(const auto& l_proc : l_procList)
         {
-
-            bool l_notInMrw = true;
-            // check if processor has a TPM according to the mrw
-            // for each TPM in the list compare SPI master path with
-            // the path of the current processor
+            // Check if processor has a TPM that needs to be protected by setting the TDP bit
+            // Stage 0: Assume the proc does NOT have a TPM connected to it
+            //          - If a proc is not connected to a TPM then set its TDP bit
+            // Stage 1: See if the proc has a TPM assigned to it according to the MRW
+            //          - for each TPM in the list compare SPI master path with
+            //            the path of the current processor to see if they are connected
+            // Stage 2: If they are connected and the TPM is functional then there is no need
+            //          to protect it.  Otherwise, the TPM needs to be protected.
+            bool l_protectTpm = true; // Stage 0 assumption
             for (auto itpm : l_tpmList)
             {
                 auto l_physPath = l_proc->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
                 auto l_tpmInfo = itpm->getAttr<TARGETING::ATTR_SPI_TPM_INFO>();
 
-                if (l_tpmInfo.spiMasterPath == l_physPath)
+                if (l_tpmInfo.spiMasterPath == l_physPath) // Stage 1 check
                 {
-                    l_notInMrw = false;
+                    auto hwasState = itpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+
+                    if (hwasState.functional == true) // Stage 2 check
+                    {
+                        l_protectTpm = false;
+                    }
+
+                    // Only one possible TPM per processor so break from the TPM loop here
                     break;
                 }
             }
-            if (l_notInMrw)
+            if (l_protectTpm)
             {
-                uint8_t l_protectTpm = 1;
+                uint8_t l_set_protectTpm = 1;
                 l_proc->setAttr<
                     TARGETING::ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM
-                                                                    >(l_protectTpm);
+                                                                    >(l_set_protectTpm);
             }
 
             // Check that the SBE did not use Scratch Register 11 (0x50182) to pass FFDC
