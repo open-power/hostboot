@@ -183,7 +183,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                 .set_CHIP_TARGET(i_target),
                 "Pstate Parameter Block attribute access error");
 
-
         // -----------------------------------------------------------
         // Clear the PstateSuperStructure and install the magic number
         //----------------------------------------------------------
@@ -254,12 +253,10 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // ----------------
         FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
 
-
         // ----------------
         //Initialize OPPB structure
         // ----------------
         FAPI_TRY(l_pmPPB->oppb_init(&l_occppb));
-
 
         // ----------------
         //Initialize pstate feature attribute state
@@ -269,6 +266,7 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // Put out the Parmater Blocks to the trace
         gppb_print((l_globalppb));
         oppb_print((&l_occppb));
+        print_offsets();
 
         // Populate Global,local and OCC parameter blocks into Pstate super structure
         (*io_pss).iv_globalppb = *l_globalppb;
@@ -306,22 +304,22 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
 //    sprintf (l_temp_buffer, "  %-20s : ","Frequency Ref  (KHz)");
 //    strcat(l_buffer, l_temp_buffer);
 
-    PRINT_LEAD1(l_buffer, "%-20s : ","Frequency Ref  (KHz)");
+    PRINT_LEAD1(l_buffer, "%-22s : ","Frequency Ref  (KHz)");
     HEX_DEC_STR(l_buffer,
              revle32(i_gppb->reference_frequency_khz));
     FAPI_INF("%s", l_buffer);
 
-    PRINT_LEAD1(l_buffer, "%-20s : ","Frequency Step (KHz)");
+    PRINT_LEAD1(l_buffer, "%-22s : ","Frequency Step (KHz)");
     HEX_DEC_STR(l_buffer,
              revle32(i_gppb->frequency_step_khz));
     FAPI_INF("%s", l_buffer);
 
-    PRINT_LEAD1(l_buffer, "%-20s : ","Frequency Ceil (KHz)");
+    PRINT_LEAD1(l_buffer, "%-22s : ","Frequency Ceil (KHz)");
     HEX_DEC_STR(l_buffer,
              revle32(i_gppb->frequency_ceiling_khz));
     FAPI_INF("%s", l_buffer);
 
-    PRINT_LEAD1(l_buffer, "%-20s : ","Frequency OCC  (MHz)");
+    PRINT_LEAD1(l_buffer, "%-22s : ","Frequency OCC  (MHz)");
     HEX_DEC_STR(l_buffer,
              revle32(i_gppb->occ_complex_frequency_mhz));
     FAPI_INF("%s", l_buffer);
@@ -764,6 +762,99 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
     FAPI_INF("---------------------------------------------------------------------------------------");
 }
 
+///////////////////////////////////////////////////////////
+////////    print_offsets
+///////////////////////////////////////////////////////////
+void print_offsets()
+{
+
+    FAPI_INF("---------------------------------------------------------------------------------------");
+    FAPI_INF("Pstate Parameter Block Offsets");
+    FAPI_INF("---------------------------------------------------------------------------------------");
+
+    #define PRINT_PSS_GPPB(_member) \
+        FAPI_INF("PSS %-30s : %05d (0x%04X) %05d (0x%04X)", #_member, \
+                    offsetof(PstateSuperStructure,_member), \
+                    offsetof(PstateSuperStructure,_member), \
+                    sizeof(GlobalPstateParmBlock_t), \
+                    sizeof(GlobalPstateParmBlock_t));
+    #define PRINT_PSS_OPPB(_member) \
+        FAPI_INF("PSS %-30s : %05d (0x%04X) %05d (0x%04X)", #_member, \
+                    offsetof(PstateSuperStructure,_member), \
+                    offsetof(PstateSuperStructure,_member), \
+                    sizeof(OCCPstateParmBlock_t), \
+                    sizeof(OCCPstateParmBlock_t));
+
+    FAPI_INF(" %-40s %s %-6s %s", " ", "Offset", " ", "Size");
+    PRINT_PSS_GPPB(iv_globalppb);
+    PRINT_PSS_OPPB(iv_occppb);
+
+    FAPI_INF("---------------------------------------------------------------------------------------");
+    FAPI_INF("Global Pstate Parameter Block Offsets");
+    FAPI_INF("---------------------------------------------------------------------------------------");
+
+    #define PRINT_GPPB_OFS(_member) \
+        FAPI_INF("GPPB %-30s: %05d (0x%04X) %05d (0x%04X)", #_member, \
+                    offsetof(GlobalPstateParmBlock_t,_member) + offsetof(PstateSuperStructure,iv_globalppb), \
+                    offsetof(GlobalPstateParmBlock_t,_member) + offsetof(PstateSuperStructure,iv_globalppb), \
+                    offsetof(GlobalPstateParmBlock_t,_member), \
+                    offsetof(GlobalPstateParmBlock_t,_member));
+
+    FAPI_INF(" %-33s     %s    %s", " ", "PSS Offset", "GPPB Offset");
+    PRINT_GPPB_OFS(magic);
+    PRINT_GPPB_OFS(attr);
+    PRINT_GPPB_OFS(reference_frequency_khz);
+    PRINT_GPPB_OFS(frequency_step_khz);
+    PRINT_GPPB_OFS(occ_complex_frequency_mhz);
+    PRINT_GPPB_OFS(dpll_pstate0_value);
+    PRINT_GPPB_OFS(operating_points_set);
+    PRINT_GPPB_OFS(poundv_biases_0p05pct);
+    PRINT_GPPB_OFS(vdd_sysparm);
+    PRINT_GPPB_OFS(vcs_sysparm);
+    PRINT_GPPB_OFS(vdn_sysparm);
+    PRINT_GPPB_OFS(ext_vrm_parms);
+    PRINT_GPPB_OFS(safe_voltage_mv);
+    PRINT_GPPB_OFS(safe_frequency_khz);
+    PRINT_GPPB_OFS(dds);
+    PRINT_GPPB_OFS(dds_alt_cal);
+    PRINT_GPPB_OFS(dds_tgt_act_bin);
+    PRINT_GPPB_OFS(dds_other);
+
+    FAPI_INF("---------------------------------------------------------------------------------------");
+    FAPI_INF("OCC Pstate Parameter Block Offsets");
+    FAPI_INF("---------------------------------------------------------------------------------------");
+
+    #define PRINT_OPPB_OFS(_member) \
+        FAPI_INF("OPPB %-30s: %05d (0x%04X) %05d (0x%04X)", #_member, \
+                    offsetof(OCCPstateParmBlock_t,_member) + offsetof(PstateSuperStructure,iv_occppb), \
+                    offsetof(OCCPstateParmBlock_t,_member) + offsetof(PstateSuperStructure,iv_occppb), \
+                    offsetof(OCCPstateParmBlock_t,_member), \
+                    offsetof(OCCPstateParmBlock_t,_member));
+
+    FAPI_INF(" %-33s     %s    %s", " ", "PSS Offset", "OPPB Offset");
+    PRINT_OPPB_OFS(magic);
+    PRINT_OPPB_OFS(attr);
+    PRINT_OPPB_OFS(operating_points);
+    PRINT_OPPB_OFS(vdd_sysparm);
+    PRINT_OPPB_OFS(vcs_sysparm);
+    PRINT_OPPB_OFS(vdn_sysparm)
+    PRINT_OPPB_OFS(iddq);
+    PRINT_OPPB_OFS(frequency_min_khz);
+    PRINT_OPPB_OFS(frequency_max_khz);
+    PRINT_OPPB_OFS(frequency_step_khz);
+    PRINT_OPPB_OFS(pstate_min);
+    PRINT_OPPB_OFS(occ_complex_frequency_mhz);
+    PRINT_OPPB_OFS(tdp_wof_base_frequency_mhz);
+    PRINT_OPPB_OFS(fixed_freq_mode_frequency_mhz);
+    PRINT_OPPB_OFS(pstate_max_throttle);
+    PRINT_OPPB_OFS(vdd_vret_mv);
+    PRINT_OPPB_OFS(altitude_temp_adj_degCpm);
+    PRINT_OPPB_OFS(frequency_ceiling_khz);
+    PRINT_OPPB_OFS(wof_dimension_disable_vector);
+    PRINT_OPPB_OFS(ultraturbo_freq_mhz);
+    PRINT_OPPB_OFS(fmax_freq_mhz);
+
+}
 
 ///////////////////////////////////////////////////////////
 ////////   gppb_init
@@ -1588,146 +1679,165 @@ void PlatPmPPB::attr_init( void )
     // attributes currently defined
     // ----------------------------
 
-#define DATABLOCK_GET_ATTR(attr_name, target, attr_assign) \
-FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-54s    = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_assign);
+#define PPB_GET_ATTR(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
+    FAPI_INF("%-54s    = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_assign);
 
-#define DATABLOCK_GET_ATTR_U64(attr_name, target, attr_assign) \
-FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-54s    = 0x%016llx %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_assign);
+#define PPB_GET_ATTR_U64(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
+    FAPI_INF("%-54s    = 0x%016llx %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_assign);
 
-#define DATABLOCK_GET_ATTR_2(attr_name, target, attr_assign) \
-FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
-FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);
+#define PPB_GET_ATTR_2(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed");\
+    FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]); \
+    FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);
 
-#define DATABLOCK_GET_ATTR_4(attr_name, target, attr_assign) \
-FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
-FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
-FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
-FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);
+#define PPB_GET_ATTR_4(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed");\
+    FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]); \
+    FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]); \
+    FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]); \
+    FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);
 
-#define DATABLOCK_GET_ATTR_5(attr_name, target, attr_assign) \
-FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
-FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
-FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
-FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);\
-FAPI_INF("%-54s[4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);
+#define PPB_GET_ATTR_5(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed");\
+    FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]); \
+    FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]); \
+    FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]); \
+    FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]); \
+    FAPI_INF("%-54s[4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[4], iv_attrs.attr_assign[4]);
 
-#define DATABLOCK_GET_ATTR_8(attr_name, target, attr_assign) \
-FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
-FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
-FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
-FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);\
-FAPI_INF("%-54s[4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[4], iv_attrs.attr_assign[4]);\
-FAPI_INF("%-54s[5] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[5], iv_attrs.attr_assign[5]);\
-FAPI_INF("%-54s[6] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[6], iv_attrs.attr_assign[6]);\
-FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.attr_assign[7]);
+#define PPB_GET_ATTR_8(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed");\
+    FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]); \
+    FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]); \
+    FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]); \
+    FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]); \
+    FAPI_INF("%-54s[4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[4], iv_attrs.attr_assign[4]); \
+    FAPI_INF("%-54s[5] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[5], iv_attrs.attr_assign[5]); \
+    FAPI_INF("%-54s[6] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[6], iv_attrs.attr_assign[6]); \
+    FAPI_INF("%-54s[7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[7], iv_attrs.attr_assign[7]);
+
+#define PPB_GET_ATTR_2_8(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed");\
+    FAPI_INF("%-51s[0][0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0][0], iv_attrs.attr_assign[0][0]); \
+    FAPI_INF("%-51s[0][1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0][1], iv_attrs.attr_assign[0][1]); \
+    FAPI_INF("%-51s[0][2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0][2], iv_attrs.attr_assign[0][2]); \
+    FAPI_INF("%-51s[0][3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0][3], iv_attrs.attr_assign[0][3]); \
+    FAPI_INF("%-51s[0][4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0][4], iv_attrs.attr_assign[0][4]); \
+    FAPI_INF("%-51s[0][5] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0][5], iv_attrs.attr_assign[0][5]); \
+    FAPI_INF("%-51s[0][6] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0][6], iv_attrs.attr_assign[0][6]); \
+    FAPI_INF("%-51s[0][7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0][7], iv_attrs.attr_assign[0][7]); \
+    FAPI_INF("%-51s[1][0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1][0], iv_attrs.attr_assign[1][0]); \
+    FAPI_INF("%-51s[1][1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1][1], iv_attrs.attr_assign[1][1]); \
+    FAPI_INF("%-51s[1][2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1][2], iv_attrs.attr_assign[1][2]); \
+    FAPI_INF("%-51s[1][3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1][3], iv_attrs.attr_assign[1][3]); \
+    FAPI_INF("%-51s[1][4] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1][4], iv_attrs.attr_assign[1][4]); \
+    FAPI_INF("%-51s[1][5] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1][5], iv_attrs.attr_assign[1][5]); \
+    FAPI_INF("%-51s[1][6] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1][6], iv_attrs.attr_assign[1][6]); \
+    FAPI_INF("%-51s[1][7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1][7], iv_attrs.attr_assign[1][7]);
 
     // Frequency attributes
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATE0_FREQ_MHZ, FAPI_SYSTEM, attr_pstate0_freq_mhz);
-    DATABLOCK_GET_ATTR(ATTR_NOMINAL_FREQ_MHZ, FAPI_SYSTEM, attr_nominal_freq_mhz);
+    PPB_GET_ATTR(ATTR_SYSTEM_PSTATE0_FREQ_MHZ, FAPI_SYSTEM, attr_pstate0_freq_mhz);
+    PPB_GET_ATTR(ATTR_NOMINAL_FREQ_MHZ, FAPI_SYSTEM, attr_nominal_freq_mhz);
 
 
     // Frequency Bias attributes
-    DATABLOCK_GET_ATTR(ATTR_FREQ_BIAS, iv_procChip, attr_freq_bias);
+    PPB_GET_ATTR(ATTR_FREQ_BIAS, iv_procChip, attr_freq_bias);
 
     // Voltage Bias attributes
-    DATABLOCK_GET_ATTR(ATTR_RVRM_DEADZONE_MV, iv_procChip, attr_rvrm_deadzone_mv);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_BIAS, iv_procChip, attr_voltage_ext_bias);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDN_BIAS, iv_procChip, attr_voltage_ext_vdn_bias);
-    DATABLOCK_GET_ATTR_4(ATTR_EXTERNAL_VRM_STEPSIZE, iv_procChip, attr_ext_vrm_step_size_mv);
-    DATABLOCK_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US,
+    PPB_GET_ATTR(ATTR_RVRM_DEADZONE_MV, iv_procChip, attr_rvrm_deadzone_mv);
+    PPB_GET_ATTR(ATTR_VOLTAGE_EXT_BIAS, iv_procChip, attr_voltage_ext_bias);
+    PPB_GET_ATTR(ATTR_VOLTAGE_EXT_VDN_BIAS, iv_procChip, attr_voltage_ext_vdn_bias);
+    PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_STEPSIZE, iv_procChip, attr_ext_vrm_step_size_mv);
+    PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US,
                        iv_procChip, attr_ext_vrm_transition_rate_dec_uv_per_us);
-    DATABLOCK_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US,
+    PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US,
                        iv_procChip, attr_ext_vrm_transition_rate_inc_uv_per_us);
-    DATABLOCK_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS,
+    PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS,
                        iv_procChip, attr_ext_vrm_stabilization_time_us);
-    DATABLOCK_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_START_NS,
+    PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_START_NS,
                        iv_procChip, attr_ext_vrm_transition_start_ns);
 
-    DATABLOCK_GET_ATTR(ATTR_SAFE_MODE_FREQUENCY_MHZ,iv_procChip, attr_pm_safe_frequency_mhz);
-    DATABLOCK_GET_ATTR_2(ATTR_SAFE_MODE_VOLTAGE_MV,   iv_procChip, attr_pm_safe_voltage_mv);
-    DATABLOCK_GET_ATTR_2(ATTR_SAVE_MODE_NODDS_UPLIFT_MV,   iv_procChip, attr_save_mode_nodds_uplift_mv);
+    PPB_GET_ATTR(ATTR_SAFE_MODE_FREQUENCY_MHZ,iv_procChip, attr_pm_safe_frequency_mhz);
+    PPB_GET_ATTR_2(ATTR_SAFE_MODE_VOLTAGE_MV,   iv_procChip, attr_pm_safe_voltage_mv);
+    PPB_GET_ATTR_2(ATTR_SAVE_MODE_NODDS_UPLIFT_MV,   iv_procChip, attr_save_mode_nodds_uplift_mv);
 
     // AVSBus ... needed by p10_setup_evid
-    DATABLOCK_GET_ATTR_4(ATTR_AVSBUS_BUSNUM,        iv_procChip, attr_avs_bus_num);
-    DATABLOCK_GET_ATTR_4(ATTR_AVSBUS_RAIL,          iv_procChip, attr_avs_bus_rail_select);
-    DATABLOCK_GET_ATTR_4(ATTR_BOOT_VOLTAGE,         iv_procChip, attr_boot_voltage_mv);
-    DATABLOCK_GET_ATTR(ATTR_AVSBUS_FREQUENCY,       iv_procChip, attr_avs_bus_freq);
-    DATABLOCK_GET_ATTR_4(ATTR_PROC_R_DISTLOSS_UOHM, iv_procChip, attr_proc_r_distloss_uohm);
-    DATABLOCK_GET_ATTR_4(ATTR_PROC_R_LOADLINE_UOHM, iv_procChip, attr_proc_r_loadline_uohm);
-    DATABLOCK_GET_ATTR_4(ATTR_PROC_VRM_VOFFSET_UV,  iv_procChip, attr_proc_vrm_voffset_uv);
-    DATABLOCK_GET_ATTR(ATTR_BOOT_VOLTAGE_BIAS_0P5PCT,  iv_procChip, attr_boot_voltage_biase_0p5pct);
+    PPB_GET_ATTR_4(ATTR_AVSBUS_BUSNUM,                      iv_procChip,  attr_avs_bus_num);
+    PPB_GET_ATTR_4(ATTR_AVSBUS_RAIL,                        iv_procChip,  attr_avs_bus_rail_select);
+    PPB_GET_ATTR_4(ATTR_BOOT_VOLTAGE,                       iv_procChip,  attr_boot_voltage_mv);
+    PPB_GET_ATTR(ATTR_AVSBUS_FREQUENCY,                     iv_procChip,  attr_avs_bus_freq);
+    PPB_GET_ATTR_4(ATTR_PROC_R_DISTLOSS_UOHM,               iv_procChip,  attr_proc_r_distloss_uohm);
+    PPB_GET_ATTR_4(ATTR_PROC_R_LOADLINE_UOHM,               iv_procChip,  attr_proc_r_loadline_uohm);
+    PPB_GET_ATTR_4(ATTR_PROC_VRM_VOFFSET_UV,                iv_procChip,  attr_proc_vrm_voffset_uv);
+    PPB_GET_ATTR(ATTR_BOOT_VOLTAGE_BIAS_0P5PCT,             iv_procChip,  attr_boot_voltage_biase_0p5pct);
+
 
     // Frequency attributes
-    DATABLOCK_GET_ATTR(ATTR_FREQ_PAU_MHZ,           FAPI_SYSTEM, attr_pau_frequency_mhz);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ,  iv_procChip, attr_freq_core_ceiling_mhz);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ,    iv_procChip, attr_freq_core_floor_mhz);
-    DATABLOCK_GET_ATTR(ATTR_HW543384_WAR_MODE,      FAPI_SYSTEM, attr_war_mode);
-
-    // Loadline, Distribution loss and Distribution offset attributes
-
-    // Read WOF and DPLL attributes
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOF_DISABLE,     FAPI_SYSTEM, attr_system_wof_disable);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_RVRM_DISABLE,    FAPI_SYSTEM, attr_system_rvrm_disable);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_DDS_DISABLE,     FAPI_SYSTEM, attr_system_dds_disable);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_RESCLK_DISABLE,  FAPI_SYSTEM, attr_resclk_disable);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE,    FAPI_SYSTEM, attr_pstate_mode);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_OCS_DISABLE,     FAPI_SYSTEM, attr_system_ocs_disable);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_PGPE_CURRENT_READ_DISABLE, FAPI_SYSTEM, attr_system_current_read_disable);
-    DATABLOCK_GET_ATTR_5(ATTR_SYSTEM_WOF_DISABLE_DIMENSION, FAPI_SYSTEM, attr_system_wof_disable_dimension);
-
-    DATABLOCK_GET_ATTR(ATTR_DDS_BIAS_ENABLE,                iv_procChip, attr_dds_bias_enable);
-    DATABLOCK_GET_ATTR(ATTR_DDS_COARSE_THROTTLE_ENABLE,     iv_procChip, attr_dds_coarse_thr_enable);
-    DATABLOCK_GET_ATTR(ATTR_PMCR_MOST_RECENT_MODE,          iv_procChip, attr_pmcr_most_recent_enable);
-    DATABLOCK_GET_ATTR(ATTR_PGPE_HCODE_FUNCTION_ENABLE,     FAPI_SYSTEM, attr_pgpe_hcode_function_enable);
-    DATABLOCK_GET_ATTR(ATTR_PGPE_PHANTOM_HALT_ENABLE,       FAPI_SYSTEM, attr_phantom_halt_enable);
-    DATABLOCK_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE,    FAPI_SYSTEM, attr_system_wof_throttle_control_loop_disable);
-    DATABLOCK_GET_ATTR(ATTR_WOF_PITCH_ENABLE,               FAPI_SYSTEM, attr_system_pitch_enable);
-    DATABLOCK_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE, FAPI_SYSTEM, attr_system_wof_throttle_control_loop_mode);
-    DATABLOCK_GET_ATTR(ATTR_DDS_TRIP_MODE,                  FAPI_SYSTEM, attr_dds_trip_mode);
-    DATABLOCK_GET_ATTR(ATTR_DDS_TRIP_INTERPOLATION_CONTROL, FAPI_SYSTEM, attr_dds_trip_interpolation_control);
-    DATABLOCK_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,   FAPI_SYSTEM, attr_system_wof_altitude_temp_adjustment);
-    DATABLOCK_GET_ATTR(ATTR_WOF_TDP_ALTITUDE_REFERENCE_M,   FAPI_SYSTEM, attr_system_wof_tdp_altitude_reference);
-    DATABLOCK_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,   FAPI_SYSTEM, attr_system_wof_altitude_temp_adjustment);
-    DATABLOCK_GET_ATTR_8(ATTR_WOF_VRATIO_VDD_10THPCT,       iv_procChip, attr_vratio_vdd_10th_pct);
-    DATABLOCK_GET_ATTR_8(ATTR_WOF_VRATIO_VCS_10THPCT,       iv_procChip, attr_vratio_vcs_10th_pct);
-    DATABLOCK_GET_ATTR_U64(ATTR_WOF_DCCR_VALUE,             iv_procChip, attr_wof_dccr_value);
+    PPB_GET_ATTR(ATTR_FREQ_PAU_MHZ,           FAPI_SYSTEM, attr_pau_frequency_mhz);
+    PPB_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ,  iv_procChip, attr_freq_core_ceiling_mhz);
+    PPB_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ,    iv_procChip, attr_freq_core_floor_mhz);
+    PPB_GET_ATTR(ATTR_HW543384_WAR_MODE,      FAPI_SYSTEM, attr_war_mode);
+    // Feature control
+    PPB_GET_ATTR(ATTR_SYSTEM_WOF_DISABLE,                   FAPI_SYSTEM,  attr_system_wof_disable);
+    PPB_GET_ATTR(ATTR_SYSTEM_RVRM_DISABLE,                  FAPI_SYSTEM,  attr_system_rvrm_disable);
+    PPB_GET_ATTR(ATTR_SYSTEM_DDS_DISABLE,                   FAPI_SYSTEM,  attr_system_dds_disable);
+    PPB_GET_ATTR(ATTR_SYSTEM_RESCLK_DISABLE,                FAPI_SYSTEM,  attr_resclk_disable);
+    PPB_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE,                  FAPI_SYSTEM,  attr_pstate_mode);
+    PPB_GET_ATTR(ATTR_SYSTEM_OCS_DISABLE,                   FAPI_SYSTEM,  attr_system_ocs_disable);
+    PPB_GET_ATTR(ATTR_SYSTEM_PGPE_CURRENT_READ_DISABLE,     FAPI_SYSTEM,  attr_system_current_read_disable);
+    PPB_GET_ATTR_5(ATTR_SYSTEM_WOF_DISABLE_DIMENSION,       FAPI_SYSTEM,  attr_system_wof_disable_dimension);
+    PPB_GET_ATTR(ATTR_PGPE_HCODE_FUNCTION_ENABLE,           FAPI_SYSTEM,  attr_pgpe_hcode_function_enable);
+    PPB_GET_ATTR(ATTR_PGPE_PHANTOM_HALT_ENABLE,             FAPI_SYSTEM,  attr_phantom_halt_enable);
+    PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE,    FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_disable);
+    PPB_GET_ATTR(ATTR_WOF_PITCH_ENABLE,                     FAPI_SYSTEM,  attr_system_pitch_enable);
+    PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE,       FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_mode);
+    PPB_GET_ATTR(ATTR_DDS_TRIP_MODE,                        FAPI_SYSTEM,  attr_dds_trip_mode);
+    PPB_GET_ATTR(ATTR_DDS_TRIP_INTERPOLATION_CONTROL,       FAPI_SYSTEM,  attr_dds_trip_interpolation_control);
+    PPB_GET_ATTR(ATTR_DDS_DPLL_SLEW_MODE,                   FAPI_SYSTEM,  attr_dds_dpll_slew_mode);
+    PPB_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,         FAPI_SYSTEM,  attr_system_wof_altitude_temp_adjustment);
+    PPB_GET_ATTR(ATTR_WOF_TDP_ALTITUDE_REFERENCE_M,         FAPI_SYSTEM,  attr_system_wof_tdp_altitude_reference);
+    PPB_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,         FAPI_SYSTEM,  attr_system_wof_altitude_temp_adjustment);
+    PPB_GET_ATTR_8(ATTR_WOF_VRATIO_VDD_10THPCT,             iv_procChip,  attr_vratio_vdd_10th_pct);
+    PPB_GET_ATTR_U64(ATTR_WOF_DCCR_VALUE,                   iv_procChip,  attr_wof_dccr_value);
+    PPB_GET_ATTR_U64(ATTR_WOF_FLMR_VALUE,                   iv_procChip,  attr_wof_flmr_value);
+    PPB_GET_ATTR_U64(ATTR_WOF_FMMR_VALUE,                   iv_procChip,  attr_wof_fmmr_value);
+    PPB_GET_ATTR(ATTR_DDS_BIAS_ENABLE,                      iv_procChip,  attr_dds_bias_enable);
+    PPB_GET_ATTR(ATTR_PMCR_MOST_RECENT_MODE,                iv_procChip,  attr_pmcr_most_recent_enable);
+    PPB_GET_ATTR(ATTR_DDS_COARSE_THROTTLE_ENABLE,           iv_procChip,  attr_dds_coarse_thr_enable);
+    PPB_GET_ATTR(ATTR_PMCR_MOST_RECENT_MODE,                iv_procChip,  attr_pmcr_most_recent_enable);
 
     //TBD
-    //DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
+    //PPB_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
 
-    DATABLOCK_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ,         FAPI_SYSTEM, freq_proc_refclock_khz);
-    DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,              iv_procChip, proc_dpll_divider);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_THROTTLE_PSTATE_NUMBER_LIMIT, FAPI_SYSTEM, attr_throttle_pstate_number_limit);
+    PPB_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ,         FAPI_SYSTEM, freq_proc_refclock_khz);
+    PPB_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,              iv_procChip, proc_dpll_divider);
+    PPB_GET_ATTR(ATTR_SYSTEM_THROTTLE_PSTATE_NUMBER_LIMIT, FAPI_SYSTEM, attr_throttle_pstate_number_limit);
     // AVSBus ... needed by p10_setup_evid
     //Get WOV attributes
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,       FAPI_SYSTEM,attr_wov_overv_disable);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOV_UNDERV_DISABLE,      FAPI_SYSTEM,attr_wov_underv_disable);
-    DATABLOCK_GET_ATTR(ATTR_WOV_SAMPLE_125US,               iv_procChip,attr_wov_sample_125us);
-    DATABLOCK_GET_ATTR(ATTR_WOV_MAX_DROOP_10THPCT,          iv_procChip,attr_wov_max_droop_pct);
-    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_PERF_LOSS_THRESH_10THPCT, iv_procChip,attr_wov_underv_perf_loss_thresh_pct);
-    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_STEP_INCR_10THPCT,   iv_procChip,attr_wov_underv_step_incr_pct);
-    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_STEP_DECR_10THPCT,   iv_procChip,attr_wov_underv_step_decr_pct);
-    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_MAX_10THPCT,         iv_procChip,attr_wov_underv_max_pct);
-    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_VMIN_MV,             iv_procChip,attr_wov_underv_vmin_mv);
-    DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_VMAX_SETPOINT_MV,     iv_procChip,attr_wov_overv_vmax_mv);
-    DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_STEP_INCR_10THPCT,    iv_procChip,attr_wov_overv_step_incr_pct);
-    DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_STEP_DECR_10THPCT,    iv_procChip,attr_wov_overv_step_decr_pct);
-    DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,          iv_procChip,attr_wov_overv_max_pct);
+    PPB_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,       FAPI_SYSTEM,attr_wov_overv_disable);
+    PPB_GET_ATTR(ATTR_SYSTEM_WOV_UNDERV_DISABLE,      FAPI_SYSTEM,attr_wov_underv_disable);
+    PPB_GET_ATTR(ATTR_WOV_SAMPLE_125US,               iv_procChip,attr_wov_sample_125us);
+    PPB_GET_ATTR(ATTR_WOV_MAX_DROOP_10THPCT,          iv_procChip,attr_wov_max_droop_pct);
+    PPB_GET_ATTR(ATTR_WOV_UNDERV_PERF_LOSS_THRESH_10THPCT, iv_procChip,attr_wov_underv_perf_loss_thresh_pct);
+    PPB_GET_ATTR(ATTR_WOV_UNDERV_STEP_INCR_10THPCT,   iv_procChip,attr_wov_underv_step_incr_pct);
+    PPB_GET_ATTR(ATTR_WOV_UNDERV_STEP_DECR_10THPCT,   iv_procChip,attr_wov_underv_step_decr_pct);
+    PPB_GET_ATTR(ATTR_WOV_UNDERV_MAX_10THPCT,         iv_procChip,attr_wov_underv_max_pct);
+    PPB_GET_ATTR(ATTR_WOV_UNDERV_VMIN_MV,             iv_procChip,attr_wov_underv_vmin_mv);
+    PPB_GET_ATTR(ATTR_WOV_OVERV_VMAX_SETPOINT_MV,     iv_procChip,attr_wov_overv_vmax_mv);
+    PPB_GET_ATTR(ATTR_WOV_OVERV_STEP_INCR_10THPCT,    iv_procChip,attr_wov_overv_step_incr_pct);
+    PPB_GET_ATTR(ATTR_WOV_OVERV_STEP_DECR_10THPCT,    iv_procChip,attr_wov_overv_step_decr_pct);
+    PPB_GET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,          iv_procChip,attr_wov_overv_max_pct);
 
-    DATABLOCK_GET_ATTR_2(ATTR_WOV_DIRTY_UNCURRENT_CONTROL,  FAPI_SYSTEM, attr_wov_dirty_uncurrent_ctrl);
+    PPB_GET_ATTR_2(ATTR_WOV_DIRTY_UNCURRENT_CONTROL,  FAPI_SYSTEM, attr_wov_dirty_uncurrent_ctrl);
 
     //VCS attributes
-    DATABLOCK_GET_ATTR(ATTR_VCS_FLOOR_MV,                   iv_procChip,attr_vcs_floor_mv);
-    DATABLOCK_GET_ATTR(ATTR_VCS_VDD_OFFSET_MV,              iv_procChip,attr_vcs_vdd_offset_mv);
+    PPB_GET_ATTR(ATTR_VCS_FLOOR_MV,                   iv_procChip,attr_vcs_floor_mv);
+    PPB_GET_ATTR(ATTR_VCS_VDD_OFFSET_MV,              iv_procChip,attr_vcs_vdd_offset_mv);
 
     // Current Scaling Factors
-    DATABLOCK_GET_ATTR_8(ATTR_CURRENT_SCALING_FACTOR,       FAPI_SYSTEM, attr_current_scaling_factor);
+    PPB_GET_ATTR_8(ATTR_CURRENT_SCALING_FACTOR,       FAPI_SYSTEM, attr_current_scaling_factor);
 
     // Deal with defaults if attributes are not set
 #define SET_DEFAULT(_attr_name, _attr_default) \
@@ -3460,6 +3570,47 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
             FAPI_INF("l_frequency_value_state=0");
             //iv_dds_enabled = false; // \\todo determine if this check should disable/enable dds
         }
+
+        // Check the validity of some PoundW fields if DDSs are enabled
+        if (is_dds_enabled() && !dccr_value())
+        {
+            FAPI_INF("#W DCCR is 0. Disabling Over-Current Sensor, Undervolting and Overvolting");
+            disable_ocs();
+            disable_underv();
+            disable_overv();
+
+            if (is_wof_enabled())
+            {
+                FAPI_INF("WARNING: WOF is enabled with Over-Current Sensor disabled!");
+            }
+
+            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+            fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE_Type l_sys_pdw_mode;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDW_VALIDATION_MODE, FAPI_SYSTEM,l_sys_pdw_mode));
+            if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_INFO)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                        fapi2::PSTATE_PB_ZERO_DCCR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                        .set_CHIP_TARGET(iv_procChip),
+                        "Pstate Parameter Block: #W DCCR has value of 0");
+            }
+            else if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_WARN)
+            {
+                FAPI_INF("WARNING: #W DCCR has value of 0");
+            }
+            else if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_FAIL)
+            {
+                FAPI_ASSERT(false,
+                        fapi2::PSTATE_PB_ZERO_DCCR()
+                        .set_CHIP_TARGET(iv_procChip),
+                        "Pstate Parameter Block: #W DCCR has value of 0");
+            }
+        }
+
+        // Get any FLMR and FMMR overrides
+        iv_poundW_data.other.ftc_large_droop_mode_reg_setting = flmr_value();
+        iv_poundW_data.other.ftc_misc_droop_mode_reg_setting = fmmr_value();
+
     }
     while(0);
 
@@ -5052,19 +5203,95 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
 ///////////////////////////////////////////////////////////
 uint64_t  PlatPmPPB::dccr_value()
 {
-    uint64_t value;
-    if ( iv_attrs.attr_wof_dccr_value )
+    if (!is_dds_enabled())
     {
-        // Attributes are already Endianness corrected
-        value = iv_attrs.attr_wof_dccr_value;
-        FAPI_INF("Attribute DCCR value of %016llX used",  value);
+        iv_dccr_value = 0;
     }
-    else
+    else if (!iv_dccr_value)
     {
-        value = iv_poundW_data.other.droop_count_control;
-        FAPI_INF("#W DCCR value of %016llX; used", revle64(value));
+        if (iv_attrs.attr_wof_dccr_value)
+        {
+            // Attributes are already Endianness corrected
+            iv_dccr_value = iv_attrs.attr_wof_dccr_value;
+            FAPI_INF("Setting DCCR to attribute value of %016llX", iv_dccr_value);
+        }
+        else if (iv_poundW_data.other.droop_count_control != 0)
+        {
+            iv_dccr_value = iv_poundW_data.other.droop_count_control;
+            FAPI_INF("Using #W DCCR value of %016llX", iv_dccr_value);
+        }
+        else
+        {
+          iv_dccr_value = 0x0F3EF3E9C0000000ull;
+          FAPI_INF("Setting DCCR to internal default of 0x%016llX as #W value is 0.",
+                    iv_dccr_value);
+        }
     }
-    return value;
+    return iv_dccr_value;
+}
+
+///////////////////////////////////////////////////////////
+////////  flmr_value
+///////////////////////////////////////////////////////////
+uint64_t  PlatPmPPB::flmr_value()
+{
+    if (!is_dds_enabled())
+    {
+        iv_flmr_value = 0;
+    }
+    else if (!iv_flmr_value)
+    {
+        if (iv_attrs.attr_wof_flmr_value)
+        {
+            // Attributes are already Endianness corrected
+            iv_flmr_value = iv_attrs.attr_wof_flmr_value;
+            FAPI_INF("Setting FLMR to attribute value of %016llX", iv_flmr_value);
+        }
+        else if (iv_poundW_data.other.ftc_large_droop_mode_reg_setting != 0)
+        {
+            iv_flmr_value = iv_poundW_data.other.droop_count_control;
+            FAPI_INF("Using #W FLMR value of %016llX", iv_flmr_value);
+        }
+        else
+        {
+          iv_flmr_value = 0x23E0404000000000ull;
+          FAPI_INF("Setting FLMR to internal default of 0x%016llX as #W value is 0.",
+                    iv_flmr_value);
+        }
+    }
+    return iv_flmr_value;
+}
+
+///////////////////////////////////////////////////////////
+////////  fmmr_value
+///////////////////////////////////////////////////////////
+uint64_t  PlatPmPPB::fmmr_value()
+{
+    if (!is_dds_enabled())
+    {
+        iv_fmmr_value = 0;
+    }
+    else if (!iv_fmmr_value)
+    {
+        if (iv_attrs.attr_wof_fmmr_value)
+        {
+            // Attributes are already Endianness corrected
+            iv_fmmr_value = iv_attrs.attr_wof_fmmr_value;
+            FAPI_INF("Setting FMMR to attribute value of %016llX", iv_fmmr_value);
+        }
+        else if (iv_poundW_data.other.ftc_misc_droop_mode_reg_setting != 0 )
+        {
+            iv_fmmr_value = iv_poundW_data.other.ftc_misc_droop_mode_reg_setting;
+            FAPI_INF("Using #W FMMR value of %016llX", iv_fmmr_value);
+        }
+        else
+        {
+            iv_fmmr_value = 0x048022C004424010ull;
+            FAPI_INF("Setting FMMR to internal default of 0x%016llX as #W value is 0.",
+                    iv_fmmr_value);
+        }
+    }
+    return iv_fmmr_value;
 }
 
 ///////////////////////////////////////////////////////////
@@ -5456,68 +5683,6 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
     // want to fail;  rather, we just disable WOF.
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    // Get the DCCR value from the combination of the MRW Attribute or #W
-    iv_wof_dccr_value = dccr_value();
-
-    FAPI_INF("Checking validity of DCCR.  DCCR = 0x%016llX", iv_wof_dccr_value);
-    if (iv_wof_dccr_value == 0)
-    {
-
-        FAPI_ERR("#W DCCR is 0. Disabling Over-Current Sensor, Undervolting and Overvolting");
-        disable_ocs();
-        disable_underv();
-        disable_overv();
-
-        if (is_wof_enabled())
-        {
-            FAPI_INF("WARNING: WOF is enabled with Over-Current Sensor disabled!");
-        }
-
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        fapi2::ATTR_SYSTEM_PDW_VALIDATION_MODE_Type l_sys_pdw_mode;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDW_VALIDATION_MODE, FAPI_SYSTEM,l_sys_pdw_mode));
-
-        if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_WARN ||
-            l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_INFO   )
-        {
-            FAPI_INF("WARNING: #W DCCR has value of 0");
-        }
-
-        if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_INFO)
-        {
-            FAPI_ASSERT_NOEXIT(false,
-                    fapi2::PSTATE_PB_ZERO_DCCR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                    .set_CHIP_TARGET(iv_procChip),
-                    "Pstate Parameter Block: #W DCCR has value of 0");
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_FAIL)
-        {
-            FAPI_ERR("ERROR: #W DCCR has value of 0");
-            FAPI_ASSERT(false,
-                    fapi2::PSTATE_PB_ZERO_DCCR()
-                    .set_CHIP_TARGET(iv_procChip),
-                    "Pstate Parameter Block: #W DCCR has value of 0");
-        }
-    }
-
-    // FLMR
-    if (iv_poundW_data.other.ftc_large_droop_mode_reg_setting == 0 || iv_poundW_data.other.dds_calibration_version == 0)
-    {
-        // Setting with native Endianness as that is
-        iv_poundW_data.other.ftc_large_droop_mode_reg_setting = 0x23E0404000000000ull;
-        FAPI_INF("Setting FLMR to internal default as #W value is 0.  FLMR = 0x%016llX",
-                iv_poundW_data.other.ftc_large_droop_mode_reg_setting);
-    }
-
-    // FMMR
-    if (iv_poundW_data.other.ftc_misc_droop_mode_reg_setting == 0 || iv_poundW_data.other.dds_calibration_version == 0)
-    {
-        iv_poundW_data.other.ftc_misc_droop_mode_reg_setting = 0x000002D400000010ull;
-        FAPI_INF("Setting FMMR to internal default as #W value is 0.  FMMR = 0x%016llX",
-                revle64(iv_poundW_data.other.ftc_misc_droop_mode_reg_setting));
-    }
 
 fapi_try_exit:
     if (l_wof_table_data)

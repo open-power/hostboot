@@ -197,6 +197,345 @@
     <group>dds</group>
   </attribute>
 
+ <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_FLMR_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    0:5 LARGE_INITIAL_CYCLES
+        How many Core cycles times 4 (or 2x 2:1 Core) to apply the
+        LARGE_INITIAL_ACTION in response to a Large Droop event becoming
+        active. A value of 0x0 is invalid and will cause the state machine and
+        therefore core to hang.
+    6:10 LARGE_INITIAL_ACTION
+        Actions to assert when Large Droop Condition is active.
+            1xxxx: ISSUE_NTC
+            x1xxx: uARCH HALT
+            xx1xx: FETCH_THROTTLE01( IGNORE_IFU_THROTTLE_ACTIVE should be set if
+                        this is '0')xxx1x: SLOW_COMPLETION
+            xxxx1: FLUSH pulse (not plan of record,type selected via LARGE_FLUSH_TYPE)
+    11:12 LARGE_PREFETCH_ACTION
+        Maximum of this value and the FDIR-enabled PREFETCH_THROTTLE(0:1) setting
+        is applied when Large Droop Condition is initially active until the droop
+        subsides and Phase1 Recoverybegins.
+    13 LARGE_RESPONSE_DISABLE
+        Master Control to disable all Large Throttle Response (i.e. reactions to the
+        local level and slope-based DDS thresholds, Adjacent Warn, DDP, FDIRInject
+        and Irritiate injection). Setting this bit disables any future LargeThrottle
+        Sequencer responses but does not cause the Droop Statemachine to abort its
+        current state (see FTC_RESET below) and does NOT disable the Detection of
+        Large Droop Events from being reported to CPMS.
+    14 LARGE_FLUSH_TYPE
+        When 0, bit10 causes an NTC+1 Flush pulseWhen 1, bit10 causes an NTC Flush
+        pulse
+    15 LARGE_DITHER_WINDOW_SEL
+        If uArch HALT is enabled as a LARGE_INITIAL_ACTION, then after
+        LARGE_INITIAL_CYCLES, the Halt is gradually deasserted, or "dithered",to
+        prevent hanging the core. (uarch_halt to LSU is NOT included in the dither
+        and is constantly asserted until the dither completes to avoid misbehavior)
+
+        Selects the size of the Dithering Window for disengaging the Large Droop
+        Throttle.
+        0: 8 core cycles
+        1: 32 core cycles
+    16:19 LARGE_DITHER_INITIAL
+        Selects initial number of core cycles plus 1 to deassert Halt per Dither
+        Iteration when disengaging the Large Droop Throttle. This value is loaded
+        into the ReleaseCount as the starting value when Halt Dithering is first
+        initiated by the Large Droop State Machine.
+    20:23 LARGE_DITHER_REPEAT
+        Selects how many additional times to repeat each dither setting when
+        disengaging the Large Droop Throttle to form one iteration. A value of 0x0
+        in this field causes each dither window to be applied only once. A value of
+        0xF causes each dither window to be performed a total of 16 times.
+    24:27 LARGE_DITHER_INCREASE
+        Selects how much more to deassert Large Droop Throttle controls for each
+        Dither iteration, by adding this value to the ReleaseCount.
+        Note: When LARGE_DITHER_WINDOW_SEL=0, the top bit is discarded.A value of
+        0x0 in this field is always invalid, and whenLARGE_DITHER_WINDOW_SEL=0,
+        a value of 0x8 is also invalid.
+    28:30 PHASE1_RECOVERY_ACTION
+        Actions to assert during Phase1 Large Droop Recovery (when LargeDroop
+        is no longer active)
+            1xx: SLOW_COMPLETIONx1x: ISSUE_NTC (serialize issue)
+            xx1: SLOW_FETCH (default)
+    31:32 PHASE1_RECOVERY_PREFETCHR
+        Maximum of this value and the FDIR-enabled PREFETCH_THROTTLE(0:1) settings
+        is applied during Phase1 LargeDroop Recovery.
+    33:35 PHASE1_RECOVERY_VECTORR
+        Maximum of this value, the FDIR[VECTOR_LIMIT_INJECT], and efusee nforced
+        VECTOR_LIMIT(0:2) settings is applied during Phase1 LargeDroop Recovery.
+    36:38 PHASE2_RECOVERY_ACTION
+        Actions to assert during Phase2 Large Droop Recovery (when LargeDroop is
+        no longer active):
+            1xx: SLOW_COMPLETION (default)
+            x1x: RESERVED*
+            xx1: SLOW_FETCH
+    39:40 PHASE2_RECOVERY_PREFETCH
+        Maximum of this value and the FDIR-enabled PREFETCH_THROTTLE(0:1) settings
+        is applied during Phase2 LargeDroop Recovery.
+    41:43 PHASE2_RECOVERY_VECTOR
+        Maximum of this value, the FDIR-enabled, and efuse-enforced VECTOR_LIMIT(0:2)
+        settings is applied during Phase2 Large Droop Recovery
+    44:51 PHASE2_RECOVERY_CYCLES
+        How many Core cycles times 4 (or 2x 2:1 Core cycles) to stay in
+        LARGE_PHASE2_RECOVERY before returning to "full speed".A value of 0x0 skips
+        this Phase.
+    52 MMA_DROOP_PROTECT_ENABLE
+        When set, the DDS timing margin uses the three DATA_DETECT thresholds,
+        originally intended for DPLL usage, to set the PROTECT_MMA_LIMIT which is
+        combined with the FDIR[MMA_LIMIT_INJECT] and MMAR[MMA_LIMIT] to control MMA
+        throughput.
+
+        If corresponding DDS bit is '0' as selected by:DATA0_DETECT then
+            PROTECT_MMA_LIMIT = "11"
+        else DATA1_DETECT then PROTECT_MMA_LIMIT = "10"
+        else DATA2_DETECT then PROTECT_MMA_LIMIT = "01"
+        otherwise PROTECT_MMA_LIMIT = "00"
+    53:55 MMA_DROOP_PREDICT_SELECT
+        Selects which threshold to send to ISU as the "mma margin good" signal,
+        which disables the MMA didt droop predict feature. The signal to ISU is
+        deasserted when there is insufficient timing margin, enabling the MMA
+        microarch throttle protection. When 000: Ignore DDS excess timing margin
+        (set to '0' to always engage, if enabled in ISU)else encode selects
+        non-inverted DDS bit using:
+            001: DATA2_DETECT
+            010: DATA1_DETECT
+            011: SMALL_DROOP
+            100: SLOPEA_START
+            101: SLOPEB_START
+            110: SLOPEA_END
+            111: SLOPEB_END
+            Note that this mechanism is overridden when FDIR[MMA_UARCH_ENABLE_INJECT] = 1
+    56 CORE_UCODE_IDLE_DISABLER
+        When not set, any ucode request prevents FTC from leaving the idle state.
+        When set, FTC does not prevent the droop throttle sequencer from leaving
+        the idle state, overrides CORE_UCODE_EXIT_DISABLE, and the next field must be
+        set to "11" to suppress grants for all requests, resulting in animmediate
+        "0011" code sent to CPMS.
+    57:58 CORE_UCODE_GRANT_SUPPRESS
+        When set to 00, FTC pulses the ucode_grant in response to the both types
+        of ucode_request when the Droop State is idle. Otherwise, the grant is
+        suppressed for the the selected type and FTC instead sends 0011 encode
+        on the FTC event bus, which in turn causes CPMS to send the QME an interrupt1
+        via the CPMS Event Bus.
+        When this field is:
+            01: suppress grant for reconfig type (recovery_request=0)
+            10: suppress grant for recovery type (recovery_ request=1)
+            11: always suppress ucode_grant (both types)
+    59 CORE_UCODE_GRANT_INJECT
+        On rising edge of this bit being set, FTC will pulse the ucode grant signal to
+        PC.
+    60 FTC_RESET
+        When set, all state internal to FTC is immediately reset (as outlined in
+        FDCR[STICKY_CONTROL]="11") but also including FDIR-based Droop Injection and
+        Irritation as well. Unlike the FDCR reset, this bit is a level,n ot a pulse,
+        and so must be set then cleared by hcode.No DDS controls are affected by this field.
+    61 IGNORE_IFU_THROTTLE_ACTIVE
+        When set, the Large Droop Throttle sequencer ignores the active indication
+        from IFU and exits Phase1 Recovery after waiting for thePHASE2_RECOVERY_CYCLES
+        instead.
+    62 PHASE1_DITHER_NTC
+        When set, Phase1 recovery will dither NTC_ONLY via same settings used by the
+        Small Droop Sequence in the FMMR[SMALL_DITHER_*].
+    63 CORE_UCODE_EXIT_DISABLE
+        When not set (default) AND CORE_UCODE_IDLE_DISABLE==0, ucode requests cause
+        exit from Large or Small "Run Slow" states directly to Idle state, immediately
+        releasing all throttle controls. When set, requires droop to go away and FTC
+        return to Idle state beforereacting to the request. May cause a "prolonged droop"
+        that will hang thecore if system is in an overcurrent state.
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+ <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_FMMR_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    0 SMALL_STAGGER_ENABLE
+        This field controls when the release of Small Droop throttles can occur.
+        Small droop throttle deassert is controlled by this field, when:
+            0: only when the local state machine detects the droop has subsided
+            1: waits for bottom and right cores stagger release indication signals to
+                clear before leaving the Small Run Slow state, causing the small throttle
+                release to be staggered from bottom right to top left of the chip, using the
+                SMALL_STAGGER_CYCLES counter.
+    1 SMALL_STAGGER_SELECT
+        Chooses which signal is used to transport the small stagger signal between cores,
+        driven to '1' whenever SMALL_STAGGER_ENABLE=1 and either the Small "Initial Slowdown"
+        state is active or the Small "RunSlow" state is active and a local Small Droop is
+        present.
+        When 0, the slower staged DDP Status bit 3 wire is used (TBD 4 cycles)
+        When 1, the faster ADJ_WARN signal is used (TBD 2 cycles) in which case
+            ADJ_WARN_OUTPUT_SELECT must be = "000".
+    2:3 SMALL_STAGGER_CYCLES
+        Power of 4 select from an 6-bit counter running at 2:1 to the Core. After
+        the Adjacent bottom and right Cores warn signals clear, wait for 2^(7-2N+1)
+        Core cycles where N is the value of this field before deasserting may stagger signal
+        outputs.
+        A value of 0 results in a maximum 512 core cycles, which is 128ns @4Ghz.
+        A value of 7 results in a minimum 2 core cycles which is 0.5ns @ 4Ghz.
+        All 32 cores in a 4x8 grid will take 11 stages to fully deassert.Allowing a range
+        between 1.4us to 5.5ns @4Ghz Core.(default 0x2 = 44ns @4GHz) not including staging
+        on each signalbetween cores, which may take on the order of 2 to 4 cycles additional
+        perstage (TBD) or another additional ~10ns.
+    4 ADJ_WARN_WEIGHT
+        Number of Adjacent cores that must assert a warning before this core takes an action
+        in response.
+            0: one or more adjacent cores
+            1: two or more adjacent cores
+    5 ADJ_WARN_RESPONSE
+        What to do in response to a warning as selected by the previous field:
+            0: engage Small Droop State machine1: engage Large Droop State machine
+    6:8 ADJ_WARN_OUTPUT_SELECT
+        Source for the adjacent warn output of this Core:
+            1xx: SlopeA Event Active (SLOPE_TYPEA_SEL cannot be 00)
+            x1x: SlopeB Event Active (SLOPE_TYPEB_SEL cannot be 00)
+            xx1: inverted value of DDS bit selected by LARGE_DETECT
+            000: Disabled
+    9:11 DDP_TRIP_SELECT
+        Selects which DDS DETECT threshold to use in response the Digital Droop Prediction
+        Alarm = "01". Engage the Small Droop when the selected DDS output activates (has a
+        value of '0'), as defined in FDCR:
+            000: Disabled
+            001: DATA0_DETECT
+            010: DATA1_DETECT
+            011: DATA2_DETECT
+            100: SLOPEA_START_DETECT
+            101: SLOPEB_START_DETECT
+            110: SLOPEA_END_DETECT
+            111: SLOPEB_END_DETECT
+    12:13 SLOPEA_TYPE_SELECT
+        Selects behavior of Slope A Events, when:
+            00: disabled (do not generate slope events to internal logic or CPMS).
+            01: generate an event only, but do not engage Droop Throttle sequencer
+            10: assert the Small Droop Condition, which can then engage the SmallDroop sequence
+            11: assert the Large Droop Condition, which can then engage the LargeDroop sequence
+    14:15 SLOPEB_TYPE_SELECT
+        Selects behavior of Slope B Events, same encoding as above.
+    16:17 SMALL_ASSERT_STABILITY
+        How many additional 2:1 core clock cycles in a row that SMALL_DROOP_DETECT must
+        be active before engaging the Small Droop Throttle Seqeunce. Disabled when an enabled
+        Slope is detected.
+            00: 0 cycles (disabled)
+            01: 2 cycles
+            10: 4 cycles
+            11: 8 cycles
+    18:19 SMALL_DEASSERT_STABILITY
+        How many additional 2:1 core clock cycles in a row SMALL_DROOP_DETECT must be inactive
+        before disengaging the SmallDroop State Machine.
+            00: 0 cycle (disabled)
+            01: 4 cycles
+            10: 8 cycles
+            11: 15 cycles
+    20:23 SMALL_INITIAL_CYCLES
+        How many Core cycles times 4 (or 2x 2:1 Core cycles) to apply theS MALL_INITIAL_ACTION
+        in response to a Small Droop event becoming active. A value of 0x0 is invalid and will
+        cause the state machine andtherefore core to hang.
+    24:29 SMALL_INITIAL_ACTION
+        Which throttle controls to temporarily assert on the initial small droop detection,
+        for SMALL_INITIAL_CYCLES, until the selected SMALL_THROTTLE_ACTION can take full effect.
+            1xxxxx: ISSUE_NTC
+            x1xxxx: SLOW_FETCH
+            xx1xxx: SLOW_COMPLETION
+            xxx1xx: STOP_PREFETCH (THROTTLE_PREFETCH="11")
+            xxxx1x: HALT
+            xxxxx1: NTC+1 FLUSH pulse
+    30:31 SMALL_PREFETCH_ACTION
+        Maximum of this value and the FDIR-enabled PREFETCH_THROTTLE(0:1) settings is applied
+        when Small Droop is active when in the "Run Slow" phase.
+    32 SMALL_DITHER_WINDOW_SEL
+        Defines the window for the SMALL_DITHER_* settings below, with similar functionality
+        as LARGE_DITHER_WINDOW_SEL.
+        Setting this field to '1' selects a 32 core 1:1 cycle window, else 8-cycle core 1:1
+        clock window is used.
+        This value is used for ISSUE_NTC Release in "Run Slow" state and for"Halt release"
+        after performing optional Halt Toggle during Small Droopmitigation.
+    33:35 SMALL_VECTOR_ACTION
+        Maximum of this value and the FDIR-enabled or efuse-enforced VECTOR_LIMIT(0:2) settings
+        is applied when Small Droop is active. This value is used in the "Initial Slowdown" and
+        'Run Slow" states for Small Droop mitigation.
+    36 SLOPE_TIMEOUT_SELECT
+        When set, Slope A and B active use a timeout of 32 2:1 core cycles, else 1621: core cycles.
+        This timeout cancels the large or small droop being considered active if a Small Droop
+        has not occurred in the meantime and allows the Droop Throttle Sequencer to recover back
+        to idle.
+    37:39 SMALL_THROTTLE_ACTION
+        Which throttle controls to assert while Small Droop is active.
+            1xx: SLOW_FETCH
+            x1x: TOGGLE_HALT (later dither when droop subsides)
+            xx1: Dither ISSUE_NTC (otherwise deassert immediately)
+    40:43 SMALL_DITHER_REPEAT
+        Same functionality as LARGE_DITHER_REPEAT but for deassertingS mall throttle for both
+        Halt and ISSUE_NTC. This value is used in the "Run Slow" state if Dither ISSUE_NTC is
+        selected.T his value is used in the "Halt Release" state if TOGGLE_HALT isselected.
+    44:47 SMALL_DITHER_INCREASE
+        Same functionality as LARGE_DITHER_INCREASE but for optionally deasserting Small throttle
+        Halt and ISSUE_NTC.
+    48:52 SMALL_DITHER_INITIAL RW 0x8 Used when TOGGLE_HALT is enabled as a SMALL_THROTTLE_ACTION
+        to select the number of cycles plus 1 todeassert Halt per Toggle Window. The same window
+        is continuously repeated until the small droop goes away, at which point it will Dither back
+        to full performance using this value again as the initial deassert amount.
+        Note: Unlike LARGE_DITHER_INITIAL this field specifies 5 bits, where toptwo bits are discarded
+        if SMALL_DITHER_WINDOW_SEL=0 (after adding 1 to the value).Note: a value of 0x07, 0x0F, or
+        0x17 is illegal whenS MALL_DITHER_WINDOW_SEL=0, and a value of 0x1F is always illegal.
+    53 DPLL_DATA2_SEL
+        Selects which event drives DPLL_ENCODED_DATA(2)0: Disabled (sets to '1')1: FDCR[DATA2_DETECT]
+        This signal is AND'd with all other Cores and used by the DPLL to control frequency when
+        DPLL_CTRL.DYNAMIC_SLEW_MODE=1 but is not used when DPLL_CTRL.ENABLE_JUMP_PROTECT=1.
+    54:55 DPLL_DATA1_SEL
+        Selects which additional events combine (Invert then AND) with DATA1_DETECT to also drive
+        zero on DPLL_ENCODED_DATA(1):
+            00: None (use FDCR[DATA1_DETECT] directly)
+            01: Small Droop State Machine Drooped (Not Halt Release)
+            10: SlopeA Event Active(SLOPEA_TYPE_SELECT cannot be00)
+            11: SlopeB Event Active (SLOPEB_TYPE_SELECT cannot be00)
+    56:57 DPLL_DATA0_SEL
+        Selects which additional events combine (Invert then AND) with DATA0_DETECT to also drive
+        zero on DPLL_ENCODED_DATA(0):
+            00: None (use FDCR[DATA0_DETECT] directly)
+            01: Small Droop State Machine Drooped (not Halt Release)
+            10: Large Droop State Machine Drooped (Not Phase1or2 Rcvy)
+            11: SlopeB Event Active (SLOPE_TYPEB_SEL cannot be 00)
+    58 DDS_ERROR_ENCODE_DISABLE
+        When set, disables reporting 0x1E encode when a non-thermometer codeis seen from the DDS,
+        and instead reports a "garbage" reading.
+    59 SMALL_RESPONSE_DISABLE
+        Master Control to disable all Small Throttle Response (i.e. reactions to thelocal level
+        and slope-based DDS thresholds, Adjacent Warn, DDP, FDIR Inject and Irritate injection).
+        Setting this bit disables any future Small Throttle Sequencer responses but does not cause
+        the Droop Statemachine to abort its current state (see FTC_RESET in FLMR) and does NOT
+        disable the Detection of Small Droop Events from being reported to CPMS.
+    60 SLOPE_REPORT_SEL
+        Enables Slope detects that occur on the same cycle as a SMALL or LARGE DROOP_DETECT to be
+        reported to CPMS for accounting in the TRIP and SLOPE events to the DHCR and characterization
+        counters,despite not setting the Slope Active indication.
+    61:63 OVERRIDE_VECTOR_LIMIT
+        May be used by some systems or by WOF to limit possible max currents wing under certain
+        scenarios.
+        The throttle amount provided to the VSU is given by the "maximum" of this field, eFuse setting,
+        droop inject, and droop recovery state machine outputs.Bit(0) of this field drives vsu_throttle,
+        and is an OR of all requests Bits(1:2) of this field drive flop_limit, and is the MAX value of
+        all requests
+            000: No FLOP limit
+            001: 16 FLOPS (only subset of VSU ops)
+            010: 8 FLOPS (only subset of VSU ops)
+            011: 4 FLOPS (only subset of VSU ops)
+            10X: 2 VSU ops (any type) per cycle
+            11X: 1 VSU op (any type) per cycle
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_DDS_DROOP_EXTREME_OVERRIDE</id>

@@ -143,6 +143,7 @@ typedef struct
     uint8_t attr_system_wof_throttle_control_loop_disable;
     uint8_t attr_system_wof_throttle_control_loop_mode;
     uint8_t attr_dds_trip_mode;
+    uint8_t attr_dds_dpll_slew_mode;
     uint8_t attr_dds_trip_interpolation_control;
     uint8_t attr_dds_bias_enable;
     // RTC: 269546:  remove the FMax Enable mode control
@@ -214,6 +215,8 @@ typedef struct
     uint8_t attr_current_scaling_factor[8];
 
     uint64_t attr_wof_dccr_value;
+    uint64_t attr_wof_flmr_value;
+    uint64_t attr_wof_fmmr_value;
 
 } AttributeList;
 
@@ -228,8 +231,9 @@ class PlatPmPPB
             iv_safe_frequency(0), iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
-            iv_wof_throttle_enabled(0),
-            iv_poundV_fmax_enable(true)
+            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true),
+            iv_dccr_value(0), iv_flmr_value(0), iv_fmmr_value(0),
+            iv_wts_vddPsavFreq(0), iv_wts_vddWofBaseFreq(0), iv_wts_vddUTFreq(0), iv_wts_vddFixedFreq(0)
         {
             attr_init();
         }
@@ -758,6 +762,18 @@ class PlatPmPPB
         uint64_t dccr_value();
 
         /// -----------------------------------------------------------------------
+        /// @brief Get the FLMR value that might have overrides
+        /// @return DCCR value to use
+        /// -----------------------------------------------------------------------
+        uint64_t flmr_value();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Get the FMMR value that might have overrides
+        /// @return DCCR value to use
+        /// -----------------------------------------------------------------------
+        uint64_t fmmr_value();
+
+        /// -----------------------------------------------------------------------
         /// @brief Test function to poison #V
         /// @return DCCR value to use
         /// -----------------------------------------------------------------------
@@ -825,7 +841,25 @@ class PlatPmPPB
         uint32_t                  iv_vddUTFreq;
         uint32_t                  iv_vddFmaxFreq;
 
-        uint64_t                  iv_wof_dccr_value;
+        uint64_t                  iv_dccr_value;
+        uint64_t                  iv_flmr_value;
+        uint64_t                  iv_fmmr_value;
+
+        uint32_t                  iv_vddFixedFreq;
+        uint32_t                  iv_sortPower;
+
+        uint32_t                  iv_wts_vddPsavFreq;
+        uint32_t                  iv_wts_vddWofBaseFreq;
+        uint32_t                  iv_wts_vddUTFreq;
+        uint32_t                  iv_wts_vddFixedFreq;
+        uint32_t                  iv_wts_sortPower;
+
+        bool                      iv_wts_vddPsavFreqOverride;
+        bool                      iv_wts_vddWofBaseFreqOverride;
+        bool                      iv_wts_vddUTFreqOverride;
+        bool                      iv_wts_vddFixedFreqOverride;
+        bool                      iv_wts_sortPowerOverride;
+        bool                      iv_wts_sortRdpCurrent;
 };
 
 }
@@ -841,7 +875,7 @@ extern "C"
 {
     /// -------------------------------------------------------------------
     /// @brief  Print a GlobalPstateParameterBlock structure on a given stream
-    /// @param[in]  i_gppb    The Global Pstate Parameter Block to print
+    /// @param[in]  i_gppb    pointer to Global Pstate Parameter Block
     /// @return void
     /// -------------------------------------------------------------------
     void
@@ -849,15 +883,22 @@ extern "C"
 
     /// -------------------------------------------------------------------
     /// @brief  Print a OCCPstateParameterBlock structure on a given stream
-    /// @param[in]  i_oppb The OCC Pstate Parameter Block to print
+    /// @param[in]  i_oppb    pointer to OCC Pstate Parameter Block
     /// @return void
     /// -------------------------------------------------------------------
     void
     oppb_print(OCCPstateParmBlock_t* i_oppb);
 
     /// -------------------------------------------------------------------
+    /// @brief  Print offsets of PstateSuperStructure contents
+    /// @return void
+    /// -------------------------------------------------------------------
+    void
+    print_offsets();
+
+    /// -------------------------------------------------------------------
     /// @brief  Print an iddq_print structure on a given stream
-    /// @param[in]  i_iddqt pointer to Iddq structure to output
+    /// @param[in]  i_iddqt pointer to Iddq structure
     /// @return void
     /// -------------------------------------------------------------------
     void
