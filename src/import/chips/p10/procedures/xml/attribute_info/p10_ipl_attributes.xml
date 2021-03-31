@@ -389,7 +389,7 @@
   <id>ATTR_CORE_LPAR_MODE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    Sets policy for core LPAR configuration
+    Sets policy for IPL time core LPAR configuration
   </description>
   <valueType>uint8</valueType>
   <enum>LPAR_PER_THREAD = 0x0, LPAR_PER_CORE = 0x1</enum>

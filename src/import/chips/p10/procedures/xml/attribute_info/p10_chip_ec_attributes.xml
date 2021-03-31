@@ -1355,7 +1355,7 @@
    <id>ATTR_CHIP_EC_FEATURE_HW543582</id>
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>
-      P10 Lab: Bland Alligator - 
+      P10 Lab: Bland Alligator -
       Powermixer stop 2 test hits TOD sync timeout errors causing TB to freeze
    </description>
    <chipEcFeature>
@@ -1390,7 +1390,7 @@
    <id>ATTR_CHIP_EC_FEATURE_HW548819</id>
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>
-      P10 Lab: Naive Broccoli - 
+      P10 Lab: Naive Broccoli -
       Powermixer stop 11 tests hit TB Residue Errors prior to shadow to core xfer on stop 11 exit
    </description>
    <chipEcFeature>
@@ -1652,6 +1652,23 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Correct XTS_CONFIG3 parity. Parity was incorrect due to new scanflush value and existing scaninit
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DYN_CORE_LPAR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Determine if chip supports dynamic Core LPAR mode switching
     </description>
     <chipEcFeature>
       <chip>

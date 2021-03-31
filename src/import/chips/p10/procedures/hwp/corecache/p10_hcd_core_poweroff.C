@@ -103,6 +103,69 @@ p10_hcd_core_poweroff(
     FAPI_DBG("Assert REG_WKUP_FILTER_DIS via QME_SCSR[14]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_OR, MMIO_LOAD32H( BIT32(14) ) ) );
 
+#ifndef __PPE_QME
+    {
+        // scope limitation to deal with cross-initialzation
+        using namespace scomt;
+        using namespace scomt::eq;
+        using namespace scomt::c;
+
+        fapi2::buffer<uint64_t> l_qme_scrb;
+        fapi2::buffer<uint64_t> l_scsr;
+
+        auto l_eq_mc  =
+            i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
+
+        // Upon power down for MPIPL, all of the CORE_LPAR_MODE bits are established
+        // to their static power on values.
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        fapi2::ATTR_IS_MPIPL_Type is_mpipl;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, is_mpipl));
+
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip_target;
+        l_chip_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+        fapi2::ATTR_CHIP_EC_FEATURE_DYN_CORE_LPAR_Type l_ec_dyn_core_lpar;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DYN_CORE_LPAR, l_chip_target, l_ec_dyn_core_lpar));
+
+        if(is_mpipl && l_ec_dyn_core_lpar)
+        {
+            fapi2::ATTR_CORE_LPAR_MODE_Type l_core_lpar_mode;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_LPAR_MODE, FAPI_SYSTEM, l_core_lpar_mode));
+
+            if (l_core_lpar_mode == fapi2::ENUM_ATTR_CORE_LPAR_MODE_LPAR_PER_CORE)
+            {
+                FAPI_TRY(PREP_QME_SCSR_SCOM2(i_target),
+                         "Error from prep (QME_SCSR_SCOM2)");
+                SET_P10_20_QME_SCSR_SINGLE_LPAR_MODE(l_scsr);
+                FAPI_TRY(PUT_QME_SCSR_SCOM2(i_target, l_scsr),
+                         "Error from putScom (QME_SCSR_SCOM2)");
+
+                FAPI_TRY(PREP_QME_SCRB_WO_OR(l_eq_mc),
+                         "Error from prep (QME_SCRB_WO_OR)");
+                l_qme_scrb.setBit<20, 4>();
+                FAPI_TRY(PUT_QME_SCRB_WO_OR(l_eq_mc, l_qme_scrb),
+                         "Error from putScom (QME_SCRB_WO_OR)");
+            }
+            else  // per Thread
+            {
+                FAPI_TRY(PREP_QME_SCSR_WO_CLEAR(i_target),
+                         "Error from prep (QME_SCSR_SCOM2)");
+                CLEAR_P10_20_QME_SCSR_SINGLE_LPAR_MODE(l_scsr);
+                FAPI_TRY(PUT_QME_SCSR_WO_CLEAR(i_target, l_scsr),
+                         "Error from putScom (QME_SCSR_SCOM2)");
+
+                FAPI_TRY(PREP_QME_SCRB_WO_CLEAR(l_eq_mc),
+                         "Error from prep (QME_SCRB_WO_OR)");
+                l_qme_scrb.setBit<20, 4>();
+                FAPI_TRY(PUT_QME_SCRB_WO_CLEAR(l_eq_mc, l_qme_scrb),
+                         "Error from putScom (QME_SCRB_WO_OR)");
+            }
+        }
+    }  // scope limitation
+#endif
+
+
 fapi_try_exit:
 
     FAPI_INF("<<p10_hcd_core_poweroff");

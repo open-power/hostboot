@@ -189,6 +189,8 @@ fapi2::ReturnCode p10_setup_sbe_config(
             l_attr_core_lpar_mode = fapi2::ENUM_ATTR_CORE_LPAR_MODE_LPAR_PER_THREAD;
         }
 
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CORE_LPAR_MODE, FAPI_SYSTEM, l_attr_core_lpar_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_CORE_LPAR_MODE)");
 
         if (l_use_scom)
         {
