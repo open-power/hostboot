@@ -681,6 +681,12 @@
     </attribute>
 
     <attribute>
+          <!-- HWSV code sets this based on the system planar -->
+          <id>ATTR_SYS_CLK_NE_TERMINATION_SITE</id>
+          <writeable/>
+    </attribute>
+
+    <attribute>
           <id>ATTR_BOOT_FLAGS</id>
           <writeable/>
     </attribute>
