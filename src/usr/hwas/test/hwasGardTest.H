@@ -7650,13 +7650,6 @@ public:
             break;
         }
 
-        // Enable the targets we're working with, don't care what their state
-        // was before since we're not using them for anything other than deconfigure.
-        for (auto target : { pauc, iohs0, iohs1, pau0, pau1 })
-        {
-            enableTarget(target);
-        }
-
         // Structure for our testcases
         struct deconfiguration
         {
@@ -7696,6 +7689,16 @@ public:
         for (const auto& testcase : testcases)
         {
             TS_INFO("testIohsPauDeconfigureRule: Running test index %lu", test_index);
+
+            // Enable the targets we're working with, don't care what
+            // their state was before since we're not using them for
+            // anything other than deconfigure.  We have to do this
+            // for every testcase because we restore the system state
+            // on each loop.
+            for (auto target : { pauc, iohs0, iohs1, pau0, pau1 })
+            {
+                enableTarget(target);
+            }
 
             iohs0->setAttr<ATTR_IOHS_PHY_TO_PAU_MAPPING>(testcase.iohs0mapping);
 

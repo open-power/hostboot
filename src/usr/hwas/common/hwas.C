@@ -449,7 +449,7 @@ static void deconfigureBussesWithNullPeer()
     {
         const auto peer_path = smpgroup->getAttr<ATTR_PEER_PATH>();
 
-        if (peer_path.type() == TARGETING::EntityPath::PATH_NA)
+        if (peer_path.size() == 1 && peer_path[0].type == TARGETING::TYPE_NA)
         {
             theDeconfigGard().deconfigureTarget(*smpgroup,
                                                 HWAS::DeconfigGard::DECONFIGURED_BY_NO_PEER_TARGET);
