@@ -128,6 +128,34 @@ void set_write_data( const fapi2::buffer<uint64_t>& i_data,
 namespace row_repair
 {
 
+///
+/// @brief Creates the DRAM bitmap for row repair on all DRAMS
+/// @return the DRAM bitmap for repairs on all DRAMs
+///
+fapi2::buffer<uint64_t> select_all_drams_for_repair()
+{
+    fapi2::buffer<uint64_t> l_dram_bitmap;
+    l_dram_bitmap.setBit<DRAM_START_BIT, DRAM_LEN>();
+    l_dram_bitmap.invert();
+    return l_dram_bitmap;
+}
+
+///
+/// @brief Creates the DRAM bitmap for row repair
+/// @param[in] i_dram the DRAM on which to conduct row repairs
+/// @param[out] o_dram_bitmap the DRAM bitmap on which to conduct row repairs
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode create_dram_bitmap(const uint64_t i_dram, fapi2::buffer<uint64_t>& o_dram_bitmap)
+{
+    o_dram_bitmap.flush<0>();
+
+    FAPI_TRY(o_dram_bitmap.setBit(DRAM_START_BIT + i_dram));
+    o_dram_bitmap.invert();
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Clear a row repair entry from rank
@@ -238,7 +266,7 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
         std::vector<mss::row_repair::repair_entry<mss::mc_type::EXPLORER>>& o_repairs_per_dimm)
 {
     constexpr uint8_t MAX_BANK_GROUP = 4;
-    constexpr uint8_t MAX_BANKS = 4;
+    constexpr uint8_t MAX_BANKS = 8;
 
     uint8_t l_num_dram = 0;
     uint8_t l_num_subrank = 0;
@@ -268,14 +296,15 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
                      BITS_PER_BYTE));
         }
 
+        FAPI_INF("%s row repair entry for rank%u 0x%08x", mss::c_str(i_target), l_dimm_rank, l_row_repair_data);
+
         // Create repair entry
         mss::row_repair::repair_entry<mss::mc_type::EXPLORER> l_entry(l_row_repair_data, l_dimm_rank);
 
         if (l_entry.is_valid())
         {
-            // Insert row repair request into list
-            o_repairs_per_dimm.push_back(l_entry);
-
+            const uint64_t MAX_ROW = 1 << l_kind.iv_rows;
+            const uint64_t MAX_SRANK = 1 << l_num_subrank;
             FAPI_INF("Found valid row repair request in VPD for DIMM %s, DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
                      mss::spd::c_str(i_target), l_entry.iv_dram, l_entry.iv_dimm_rank, l_entry.iv_srank, l_entry.iv_bg, l_entry.iv_bank,
                      l_entry.iv_row);
@@ -286,27 +315,29 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
 
             // Do some sanity checking here
             FAPI_ASSERT((l_entry.iv_dram < l_num_dram) &&
-                        (l_entry.iv_srank < l_num_subrank) &&
+                        (l_entry.iv_srank < MAX_SRANK) &&
                         (l_entry.iv_bg < MAX_BANK_GROUP) &&
                         (l_entry.iv_bank < MAX_BANKS) &&
-                        (l_entry.iv_row < l_kind.iv_rows),
+                        (l_entry.iv_row < MAX_ROW),
                         fapi2::EXP_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS().
                         set_DIMM_TARGET(i_target).
                         set_DRAM(l_entry.iv_dram).
                         set_DRAM_MAX(l_num_dram).
                         set_MRANK(l_dimm_rank).
                         set_SRANK(l_entry.iv_srank).
-                        set_SRANK_MAX(l_num_subrank).
+                        set_SRANK_MAX(MAX_SRANK).
                         set_BANK_GROUP(l_entry.iv_bg).
                         set_BANK_GROUP_MAX(MAX_BANK_GROUP).
                         set_BANK(l_entry.iv_bank).
                         set_BANK_MAX(MAX_BANKS).
                         set_ROW(l_entry.iv_row).
-                        set_ROW_MAX(l_kind.iv_rows),
+                        set_ROW_MAX(MAX_ROW),
                         "%s SPD contained out of bounds row repair entry: DRAM: %d MAX: %d mrank %d srank %d MAX: %d"
                         "bg %d MAX: %d bank %d MAX: %d row 0x%05x MAX: 0x%05x",
-                        mss::spd::c_str(i_target), l_entry.iv_dram, l_num_dram, l_dimm_rank, l_entry.iv_srank, l_num_subrank,
-                        l_entry.iv_bg, MAX_BANK_GROUP, l_entry.iv_bank, MAX_BANKS, l_entry.iv_row, l_kind.iv_rows);
+                        mss::spd::c_str(i_target), l_entry.iv_dram, l_num_dram, l_dimm_rank, l_entry.iv_srank, MAX_SRANK,
+                        l_entry.iv_bg, MAX_BANK_GROUP, l_entry.iv_bank, MAX_BANKS, l_entry.iv_row, MAX_ROW);
+            // Insert row repair request into list
+            o_repairs_per_dimm.push_back(l_entry);
         }
     }
 
@@ -545,7 +576,8 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
         uint8_t l_num_mranks = 0;
         uint8_t l_num_sranks = 0;
 
-        fapi2::buffer<uint64_t> l_dram_bitmap;
+        // Set all DRAM select bits so we get repairs on all DRAMs
+        const auto l_dram_bitmap = select_all_drams_for_repair();
 
         // Gets the rank info for this DIMM
         std::vector<mss::rank::info<>> l_rank_infos;
@@ -554,9 +586,6 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
         // Get dimm information
         FAPI_TRY( mss::attr::get_logical_ranks_per_dimm(l_dimm, l_num_ranks) );
         FAPI_TRY( mss::attr::get_num_master_ranks_per_dimm(l_dimm, l_num_mranks) );
-
-        // Set all DRAM select bits so we get repairs on all DRAMs
-        l_dram_bitmap.setBit<DRAM_START_BIT, DRAM_LEN>();
 
         // The number of sub ranks
         // Get dimm information ranks per DIMM is simply the number of total ranks divided by the number of master ranks
@@ -667,7 +696,7 @@ fapi2::ReturnCode deploy_mapped_repairs(
                          l_repair.iv_row);
 
                 // Set DRAM select bit for dram
-                FAPI_TRY(l_dram_bitmap.setBit(DRAM_START_BIT + l_repair.iv_dram));
+                FAPI_TRY(create_dram_bitmap(l_repair.iv_dram, l_dram_bitmap));
 
                 FAPI_TRY( row_repair(l_rank_info, l_repair, l_dram_bitmap) );
 

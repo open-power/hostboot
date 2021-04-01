@@ -80,6 +80,21 @@ void set_write_data( const fapi2::buffer<uint64_t>& i_data,
 namespace row_repair
 {
 
+///
+/// @brief Creates the DRAM bitmap for row repair on all DRAMS
+/// @return the DRAM bitmap for repairs on all DRAMs
+///
+fapi2::buffer<uint64_t> select_all_drams_for_repair();
+
+///
+/// @brief Creates the DRAM bitmap for row repair
+/// @param[in] i_dram the DRAM on which to conduct row repairs
+/// @param[out] o_dram_bitmap the DRAM bitmap on which to conduct row repairs
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode create_dram_bitmap(const uint64_t i_dram, fapi2::buffer<uint64_t>& o_dram_bitmap);
+
+
 typedef std::map< fapi2::Target<fapi2::TARGET_TYPE_DIMM>, std::vector<mss::row_repair::repair_entry<mss::mc_type::EXPLORER>> >
         REPAIR_MAP;
 

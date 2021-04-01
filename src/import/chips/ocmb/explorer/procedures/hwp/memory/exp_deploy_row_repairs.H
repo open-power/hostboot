@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,8 @@
 #define __EXP_DELPOY_ROW_REPAIR__
 
 #include <fapi2.H>
+
+typedef fapi2::ReturnCode (*exp_deploy_row_repairs_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
 
 extern "C"
 {

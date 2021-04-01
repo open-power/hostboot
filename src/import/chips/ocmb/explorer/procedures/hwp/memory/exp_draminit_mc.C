@@ -42,6 +42,7 @@
 #include <lib/mc/exp_port.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <exp_deploy_row_repairs.H>
 
 extern "C"
 {
@@ -75,7 +76,7 @@ extern "C"
         FAPI_TRY( mss::change_dfi_init_start(i_target, mss::ON ), "%s Failed to change_dfi_init_start",
                   mss::c_str(i_target));
 
-        // Start the refresh engines by setting MBAREF0Q(0) = “1”. Note that the remaining bits in
+        // Start the refresh engines by setting MBAREF0Q(0) = 1. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.
         FAPI_TRY( mss::change_refresh_enable(i_target, mss::HIGH), "%s Failed change_refresh_enable",
                   mss::c_str(i_target) );
@@ -97,16 +98,22 @@ extern "C"
         // Apply marks from OCMB VPD
         FAPI_TRY(mss::apply_mark_store(i_target), "%s Failed apply_mark_store", mss::c_str(i_target));
 
+        // Run any necessary row repairs
+        FAPI_TRY(exp_deploy_row_repairs(i_target), "%s Failed exp_deploy_row_repairs", mss::c_str(i_target));
+
         // Unmask registers after draminit_mc
         FAPI_TRY(mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target));
-
-        // TODO: Implement apply row repairs and perform fir_or_pll_fail for firChecklist::CCS
 
         FAPI_INF("%s End exp_draminit MC", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
 
     fapi_try_exit:
 
-        return fapi2::current_err;
+        // As we are running row repairs that require CCS,
+        // we need to try to blame any FIR's we see on CCS's FIR list// Due to the RAS/PRD requirements, we need to check for FIR's
+        // If any FIR's have lit up, this draminit fail could have been caused by the FIR, rather than bad hardware
+        // So, let PRD retrigger this step to see if we can resolve the issue
+        return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER,
+               mss::check::firChecklist::CCS>(i_target, fapi2::current_err);
     }
 }
