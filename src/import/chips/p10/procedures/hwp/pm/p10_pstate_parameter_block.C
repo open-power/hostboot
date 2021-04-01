@@ -863,6 +863,11 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
     FAPI_INF(">>>>>>>> gppb_init");
     do
     {
+        fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, 
+                           iv_procChip, l_hw543384),
+              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
         // Needs to be Endianness corrected going into the block
 
         io_globalppb->magic.value = revle64(PSTATE_PARMSBLOCK_MAGIC);
@@ -1071,7 +1076,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_TRIP_INTERPOLATION_CONTROL] = iv_attrs.attr_dds_trip_interpolation_control;
         // turn off voltage movement when the WAR MODE defect exists.
         io_globalppb->pgpe_flags[PGPE_FLAG_STATIC_VOLTAGE_ENABLE] =
-                            iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU ? 1 : 0;
+                           (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU) ? 1 : 0;
 
 #ifdef __HOSTBOOT_MODULE
         if (Util::isSimicsRunning())
@@ -1147,6 +1152,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
     } while (0);
 
+fapi_try_exit:
     FAPI_INF("<<<<<<<<<< gppb_init");
     return fapi2::current_err;
 }
@@ -1162,11 +1168,16 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
 
     do
     {
+        fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
         fapi2::ATTR_RVRM_VID_Type   l_rvrm_rvid;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RVRM_VID,
                                iv_procChip,
                                l_rvrm_rvid));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, 
+                           iv_procChip, l_hw543384),
+              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
         // -----------------------------------------------
         // OCC parameter block
         // -----------------------------------------------
@@ -1219,7 +1230,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         // frequency_min_khz - Value from Power safe operating point after biases
         Pstate l_ps;
 
-        if (iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+        if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
         {
             //Translate pau  frequency to pstate
             freq2pState((iv_attrs.attr_pau_frequency_mhz * 1000),
@@ -4120,6 +4131,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     uint32_t                                 l_core_floor_mhz;
     uint32_t                                 l_op_pt_mhz;
     Pstate                                   l_safe_mode_ps;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
 
     FAPI_INF(">>>>>>>>>> safe_mode_computation");
 
@@ -4130,6 +4142,10 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
                            iv_procChip,
                            l_core_floor_mhz));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, 
+                           iv_procChip, l_hw543384),
+              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
 
     if (!is_pstates_enabled())
     {
@@ -4328,7 +4344,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     // Use the biased with system parms operating points
     if (!iv_attrs.attr_system_dds_disable)
     {
-        if (iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+        if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
         {
             l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vdd_mv;
             l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vcs_mv;
@@ -4347,7 +4363,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     }
     else
     {
-        if (iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+        if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
         {
             l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vdd_mv;
             l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vcs_mv;
