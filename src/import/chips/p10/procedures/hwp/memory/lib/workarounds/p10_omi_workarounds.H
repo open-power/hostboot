@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,6 +117,17 @@ fapi2::ReturnCode training_prbs(
 fapi2::ReturnCode pre_training_prbs(
     const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
     const uint8_t i_dl_x4_backoff_en);
+
+///
+/// @brief Override OMI recal timer to DD1 setting
+/// @param[in] i_target the TARGET_TYPE_OMIC to operate on
+/// @param[in] i_override_needed value from EC attribute
+/// @param[in,out] io_data CMN_CONFIG register data
+///
+void override_recal_timer(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+    const bool i_override_needed,
+    fapi2::buffer<uint64_t>& io_data);
 
 } // namespace omi
 } // namespace workarounds

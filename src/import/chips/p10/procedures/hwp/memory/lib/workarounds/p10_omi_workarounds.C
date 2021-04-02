@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,9 @@
 // *HWP Consumed by: Memory
 
 #include <fapi2.H>
+#include <p10_scom_omic.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <mss_generic_attribute_getters.H>
 #include <lib/omi/p10_omi_utils.H>
@@ -203,6 +205,24 @@ fapi2::ReturnCode pre_training_prbs(
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Override OMI recal timer to DD1 setting
+/// @param[in] i_target the TARGET_TYPE_OMIC to operate on
+/// @param[in] i_override_needed value from EC attribute
+/// @param[in,out] io_data CMN_CONFIG register data
+///
+void override_recal_timer(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+    const bool i_override_needed,
+    fapi2::buffer<uint64_t>& io_data)
+{
+    if (i_override_needed)
+    {
+        FAPI_DBG("%s Setting up OMI recal timer to DD1 setting", mss::c_str(i_target));
+        scomt::omic::SET_CMN_CONFIG_CFG_CMN_RECAL_TIMER(mss::omi::recal_timer::RECAL_TIMER_100MS, io_data);
+    }
 }
 
 } // omi

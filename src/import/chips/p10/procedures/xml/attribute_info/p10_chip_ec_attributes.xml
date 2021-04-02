@@ -955,6 +955,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_OMI_DD1_RECAL_TIMER</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Set up OMI recal timer to 100ms for DD1.
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
   <id>ATTR_CHIP_EC_FEATURE_FILTER_PLL_HW540133</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>

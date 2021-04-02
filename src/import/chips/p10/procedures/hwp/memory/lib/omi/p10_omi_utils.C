@@ -55,15 +55,20 @@ namespace omi
 ///
 fapi2::ReturnCode setup_mc_cmn_config(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target)
 {
-    // Expected resulting register value: 0x000364008874630F
+    // Expected resulting register value: 0x000564008874630F
     fapi2::buffer<uint64_t> l_val;
     bool l_mnfg_screen_test = false;
+    fapi2::ATTR_CHIP_EC_FEATURE_OMI_DD1_RECAL_TIMER_Type l_recal_timer_override = false;
 
     // Number of cycles in 1us. Number correct for 25.6, but will also be valid for 21.3
     constexpr uint64_t CFG_CMN_1US_TMR = 1600;
     constexpr uint8_t CFG_CMN_PORT_SEL = 0;
 
     FAPI_TRY(mss::check_omi_mfg_screen_crc_setting(l_mnfg_screen_test));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_DD1_RECAL_TIMER,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                           l_recal_timer_override),
+             "Failed reading ATTR_CHIP_EC_FEATURE_OMI_DD1_RECAL_TIMER");
 
     FAPI_TRY(scomt::omic::PREP_CMN_CONFIG(i_target));
 
@@ -71,7 +76,9 @@ fapi2::ReturnCode setup_mc_cmn_config(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_SPARE(mss::states::OFF, l_val);
 
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE(mss::states::OFF, l_val);
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_RECAL_TIMER(mss::omi::recal_timer::RECAL_TIMER_100MS, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_RECAL_TIMER(mss::omi::recal_timer::RECAL_TIMER_400MS, l_val);
+    // Override to DD1 setting if needed
+    mss::workarounds::omi::override_recal_timer(i_target, l_recal_timer_override, l_val);
 
     // CFG_CMN_1US_TMR: Number of cycles in 1us.
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_1US_TMR(CFG_CMN_1US_TMR, l_val);
