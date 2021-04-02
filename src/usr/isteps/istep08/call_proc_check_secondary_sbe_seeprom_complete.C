@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,14 +127,26 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
             // Set attribute indicating that SBE is started
             l_cpu_target->setAttr<ATTR_SBE_IS_STARTED>(1);
 
-            // SBE levels that support getting FIFO capabilities over the 2nd
-            // SBE FIFO, disable this call so that the machines can still IPL.
-            //// Make the FIFO call to get and apply the SBE Capabilities
+            // Make the FIFO call to get and apply the SBE Capabilities
+            // for secondary SBEs
             l_errl = getFifoSbeCapabilities(l_cpu_target);
-
             if (l_errl)
             {
-                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+                TRACFCOMP(g_trac_isteps_trace, ERR_MRK
+                      "proc_check_secondary_sbe_seeprom_complete: "
+                      " getFifoSbeCapabilities(proc 0x%.8X) failed",
+                      get_huid(l_cpu_target));
+
+                // allow istep to continue to SBE update
+                // prevent reconfig loop by removing deconfig
+                l_errl->removeGardAndDeconfigure();
+                // Ensure the error log is visible.
+                if ( l_errl->sev() < ERRORLOG::ERRL_SEV_PREDICTIVE )
+                {
+                    l_errl->setSev( ERRORLOG::ERRL_SEV_PREDICTIVE );
+                }
+                l_errl->collectTrace("ISTEPS_TRACE", 256);
+                errlCommit(l_errl, ISTEP_COMP_ID); // commit error and move on
             }
 
             // Switch to using SBE SCOM
