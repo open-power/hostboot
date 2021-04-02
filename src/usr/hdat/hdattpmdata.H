@@ -74,14 +74,6 @@ enum TpmState {
 };
 
 /**
- * @brief Enumeration definition for the TPM roles
- */
-enum TpmRole {
-    HDAT_PRIMARY_TPM = 0x0,
-    HDAT_BACKUP_TPM = 0x1,
-};
-
-/**
  * @brief Structure definition for HDAT Tpm Node Data Header
  */
 struct hdatTpmData_t

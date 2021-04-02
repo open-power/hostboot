@@ -2647,9 +2647,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         l_tpmInstInfo->hdatTpmConfigFlags.pcrPoisonedFlag = poisonedFlag;
 
         // Set TPM role flag
-        l_tpmInstInfo->hdatTpmConfigFlags.tpmRole =
-            tpmRole == TARGETING::TPM_ROLE_TPM_PRIMARY ?
-            HDAT::HDAT_PRIMARY_TPM : HDAT::HDAT_BACKUP_TPM;
+        l_tpmInstInfo->hdatTpmConfigFlags.tpmRole = tpmRole;
 
         // advance the current offset to account for this tpm instance info
         l_currOffset += sizeof(*l_tpmInstInfo);

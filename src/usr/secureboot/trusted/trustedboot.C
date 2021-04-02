@@ -622,7 +622,8 @@ errlHndl_t anyFunctionalPrimaryTpmExists(bool &o_exists)
                 if ((!l_hdatTpmInstInfo->hdatTpmConfigFlags.pcrPoisonedFlag) &&
                     ((l_hdatTpmInstInfo->hdatFunctionalStatus & HDAT::TpmPresentAndFunctional) ==
                         HDAT::TpmPresentAndFunctional) &&
-                    (l_hdatTpmInstInfo->hdatTpmConfigFlags.tpmRole == HDAT::HDAT_PRIMARY_TPM))
+                    (l_hdatTpmInstInfo->hdatTpmConfigFlags.tpmRole ==
+                        TARGETING::TPM_ROLE_TPM_PRIMARY))
                 {
                     o_exists = true;
                     break;

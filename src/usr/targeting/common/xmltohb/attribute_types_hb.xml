@@ -1736,7 +1736,8 @@
     <description>
         Enumeration of possible roles a TPM can play within a node.  A TPM has
         the primary role if it's connected to the acting master processor,
-        otherwise it has the backup role.
+        otherwise it has the backup role. The values must be in sync with the
+        HDAT defined values.
     </description>
     <enumerator>
       <name>TPM_PRIMARY</name>
