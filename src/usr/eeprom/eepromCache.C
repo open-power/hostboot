@@ -211,10 +211,10 @@ void eepromInit(errlHndl_t & io_rtaskReturnErrl)
 
     if(l_eecacheSectionHeaderPtr->end_of_cache == UNSET_END_OF_CACHE_VALUE)
     {
-        // If end_of_cache == 0xFFFFFFFF then we will assume the cache is empty.
-        // In this case, we must set end_of_cache to be the end of the header.
-        // This means the start of first eeprom's cached data will be immediately
-        // following the end of the EECACHE header.
+        // If end_of_cache looks like an unset value then we will assume the
+        // cache is empty. In this case, we must set end_of_cache to be the end
+        // of the header. This means the start of first eeprom's cached data
+        // will be immediately following the end of the EECACHE header.
         l_eecacheSectionHeaderPtr->end_of_cache = sizeof(eecacheSectionHeader);
         TRACFCOMP( g_trac_eeprom,
                 "eepromInit() Found Empty Cache, set end of cache to be 0x%.04x (End of ToC)",
