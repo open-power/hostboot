@@ -288,9 +288,6 @@ fapi2::ReturnCode enforce_post_eff_config(const fapi2::Target<fapi2::TARGET_TYPE
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // Check SPD revision limits
-    FAPI_TRY( ddimm_spd_revision(i_target) );
-
 fapi_try_exit:
     return fapi2::current_err;
 }
