@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <p10_io_omi_post_trainadv.H>
 #include <p10_omi_scom.H>
 #include <p10_omic_scom.H>
+#include <p10_scom_pauc.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -47,8 +48,16 @@ fapi2::ReturnCode p10_io_omi_post_trainadv(const fapi2::Target<fapi2::TARGET_TYP
 {
     FAPI_DBG("Entering ...");
 
+    for (const auto l_pauc : i_target.getChildren<fapi2::TARGET_TYPE_PAUC>())
+    {
+        fapi2::buffer<uint64_t> l_fir_clear;
+        l_fir_clear.flush<1>().clearBit<scomt::pauc::PHY_SCOM_MAC_FIR_REG_PPE_CODE_RECAL_NOT_RUN>();
 
-//fapi_try_exit:
+        FAPI_TRY(fapi2::putScom(l_pauc, scomt::pauc::PHY_SCOM_MAC_FIR_REG_WO_AND, l_fir_clear));
+        FAPI_TRY(fapi2::putScom(l_pauc, scomt::pauc::PHY_SCOM_MAC_FIR_MASK_REG_WO_AND, l_fir_clear));
+    }
+
+fapi_try_exit:
     FAPI_DBG("Exiting ...");
     return fapi2::current_err;
 }

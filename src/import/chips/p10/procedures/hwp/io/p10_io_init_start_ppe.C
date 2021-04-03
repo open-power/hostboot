@@ -273,7 +273,7 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
         if (l_enable_fir)
         {
             const uint64_t l_phy_fir_mask_ppe_and = 0xFF00000000000000;
-            const uint64_t l_phy_fir_mask_ppe_or  = 0x000024C000000000;
+            const uint64_t l_phy_fir_mask_ppe_or  = 0x000026C000000000;
 
             FAPI_TRY(GET_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc_target, l_data),
                      "Error from getScom (PHY_SCOM_MAC_FIR_MASK_REG_RW)");
