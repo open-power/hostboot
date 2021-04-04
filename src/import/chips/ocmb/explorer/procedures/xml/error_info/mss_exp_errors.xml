@@ -882,6 +882,14 @@
     <ffdc>PROCEDURE</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <ffdc>RANK0_BADDQ0_63</ffdc>
+    <ffdc>RANK0_BADDQ64_80</ffdc>
+    <ffdc>RANK1_BADDQ0_63</ffdc>
+    <ffdc>RANK1_BADDQ64_80</ffdc>
+    <ffdc>RANK2_BADDQ0_63</ffdc>
+    <ffdc>RANK2_BADDQ64_80</ffdc>
+    <ffdc>RANK3_BADDQ0_63</ffdc>
+    <ffdc>RANK3_BADDQ64_80</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>

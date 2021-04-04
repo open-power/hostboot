@@ -54,11 +54,21 @@ namespace phy
 fapi2::ReturnCode send_phy_reset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                  const mss::exp::phy_param_info& i_phy_info)
 {
+    // Not needed for this procedure, but needed for function call
+    host_fw_response_struct l_rsp;
     host_fw_command_struct l_cmd;
     std::vector<uint8_t> l_rsp_data;
 
+    // We don't need an MSDG for fw_ddr_phy_init_response_code since we will not hit a
+    // training failure error from PHY RESET. We will send the function a blank one.
+    user_response_msdg l_msdg;
+
     FAPI_TRY(send_host_phy_init_cmd(i_target, i_phy_info, mss::exp::phy_init_mode::RESET, l_cmd));
-    FAPI_TRY(mss::exp::check::host_fw_response(i_target, l_cmd, mss::EXP_SCOMINIT, l_rsp_data));
+    FAPI_TRY(mss::exp::ib::getRSP(i_target, l_cmd.cmd_id, l_rsp, l_rsp_data),
+             "Failed getRSP() for  %s", mss::c_str(i_target));
+
+    FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, l_cmd, l_msdg, l_rsp.response_argument),
+             "Encountered error from host fw ddr_phy_init for %s", mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -204,8 +204,8 @@ fapi2::ReturnCode host_fw_phy_normal_init(const fapi2::Target<fapi2::TARGET_TYPE
 /// @param[in] i_target OCMB target
 /// @param[in] i_response_1 response struct for EYE_CAPTURE_STEP_1
 /// @param[in] i_response_2 response struct for EYE_CAPTURE_STEP_2
-/// @param[in] i_response_1_rc response from check::host_fw_response from EYE_CAPTURE_STEP_1
-/// @param[in] i_response_2_rc response from check::host_fw_response from EYE_CAPTURE_STEP_2
+/// @param[in] i_response_1_rc response from check_rsp_data_size from EYE_CAPTURE_STEP_1
+/// @param[in] i_response_2_rc response from check_rsp_data_size from EYE_CAPTURE_STEP_2
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else an error from above as defined in the function algorithm
 /// @note return codes are passed by value, caller should not expect these to change
 /// @note processes the bad bits based upon the passed in ReturnCodes
@@ -234,32 +234,148 @@ namespace check
 {
 
 ///
-/// @brief Check the error code returned from DDR_PHY_INIT
+/// @brief Populate the Bad DQ vectors from the attribute's bad DQ array for FFDC usage
 ///
-/// @param[in] i_target OCMB chip
-/// @param[in] i_cmd host_fw_command_struct used to generate the response
-/// @param[in] i_rsp_arg response arguement buffer
-/// @param[in] i_procedure procedure identifier for FFDC
+/// @param[in] i_bad_dq_array Bad DQ array
+/// @param[out] o_bad_dq_0_63 Bad DQ vector indexed by rank, bits 0 to 63
+/// @param[out] o_bad_dq_64_80 Bad DQ vector indexed by rank, bits 64 to 80
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note i_bad_dq_array passed by reference for speed, array is not modified
 ///
-fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const host_fw_command_struct& i_cmd,
-        const uint8_t i_rsp_arg[ARGUMENT_SIZE],
-        const uint16_t i_procedure);
+fapi2::ReturnCode populate_ffdc_dq_buffers(
+    const uint8_t (&i_bad_dq_array)[mss::BAD_BITS_RANKS][mss::BAD_DQ_BYTE_COUNT],
+    std::vector<fapi2::buffer<uint64_t>>& o_bad_dq_0_63,
+    std::vector<fapi2::buffer<uint16_t>>& o_bad_dq_64_80);
 
 ///
-/// @brief Get and check the host fw response from the explorer
+/// @brief Check the error code returned from DDR_PHY_INIT
 ///
+/// @tparam T response struct type
 /// @param[in] i_target OCMB chip
 /// @param[in] i_cmd host_fw_command_struct used to generate the response
-/// @param[in] i_procedure procedure identifier for FFDC
-/// @param[out] o_rsp_data response data
+/// @param[in] i_rsp_msdg response MSDG struct
+/// @param[in] i_rsp_arg response arguement buffer
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                   const host_fw_command_struct& i_cmd,
-                                   const uint16_t i_procedure,
-                                   std::vector<uint8_t>& o_rsp_data);
+template <typename T>
+fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const host_fw_command_struct& i_cmd,
+        const T& i_rsp_msdg,
+        const uint8_t i_rsp_arg[ARGUMENT_SIZE])
+{
+    const uint8_t l_rsp_status = i_rsp_arg[0];
+
+    // If the response isn't a success check the return code
+    if (l_rsp_status != omi::response_arg::RESPONSE_SUCCESS)
+    {
+        fapi2::buffer<uint32_t> l_error_extended_code;
+        const uint8_t l_error_code = i_rsp_arg[5];
+
+        l_error_extended_code.insertFromRight<0, BITS_PER_BYTE>(i_rsp_arg[4]).
+        insertFromRight<BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp_arg[3]).
+        insertFromRight<2 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp_arg[2]).
+        insertFromRight<3 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp_arg[1]);
+
+        // Check Explorer return code
+        FAPI_ASSERT( (l_error_code != FW_DDR_PHY_INIT_UNSUPPORTED_MODE),
+                     fapi2::MSS_EXP_DDR_PHY_INIT_UNSUPPORTED_MODE().
+                     set_TARGET(i_target).
+                     set_PROCEDURE(mss::EXP_DRAMINIT).
+                     set_PHY_INIT_MODE(i_cmd.command_argument[0]).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT unsupported mode error (TARGET %s, PHY_INIT_MODE 0x%08X, "
+                     "error_code 0x%02X, extended_error_code=0x%08X)",
+                     mss::c_str(i_target), i_cmd.command_argument[0], l_error_code, l_error_extended_code);
+
+        FAPI_ASSERT( (l_error_code != mss::exp::fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_SIZE_ERR),
+                     fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_SIZE_ERROR().
+                     set_TARGET(i_target).
+                     set_PROCEDURE(mss::EXP_DRAMINIT).
+                     set_COMMAND_SIZE(i_cmd.cmd_length).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT incorrect user_input_msdg size error (TARGET %s, CMD SIZE 0x%08X, "
+                     "error_code 0x%02X, extended_error_code=0x%08X)",
+                     mss::c_str(i_target), i_cmd.cmd_length, l_error_code, l_error_extended_code);
+
+        FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_FLAG_ERR),
+                     fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_MISSING_FLAG().
+                     set_TARGET(i_target).
+                     set_PROCEDURE(mss::EXP_DRAMINIT).
+                     set_COMMAND_FLAGS(i_cmd.cmd_flags).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT user_input_msdg missing extended data flag (TARGET %s, CMD FLAGS 0x%08X, "
+                     "error_code 0x%02X, extended_error_code=0x%08X)",
+                     mss::c_str(i_target), i_cmd.cmd_flags, l_error_code, l_error_extended_code);
+
+        FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_ERROR),
+                     fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_ERROR().
+                     set_TARGET(i_target).
+                     set_PROCEDURE(mss::EXP_DRAMINIT).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT encountered a user_input_msdg error (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
+                     mss::c_str(i_target), l_error_code, l_error_extended_code);
+
+        if (l_error_code == fw_ddr_phy_init_status::FW_DDR_PHY_INIT_TRAINING_FAIL)
+        {
+            uint8_t l_bad_dq_array[mss::BAD_BITS_RANKS][mss::BAD_DQ_BYTE_COUNT] = {{0}};
+
+            // Init with size 4
+            std::vector<fapi2::buffer<uint64_t>> l_bad_dq_0_63(mss::BAD_BITS_RANKS);
+            std::vector<fapi2::buffer<uint16_t>> l_bad_dq_64_80(mss::BAD_BITS_RANKS);
+
+            // We couldn't have gotten this far if we didn't have a dimm, so
+            // grab the child target directly, to use in getting the attribute
+            const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
+            const auto& l_dimm = l_dimms[0];
+
+            // This is the only RC which we want to record bad bits for. record_bad_bits
+            // given an MSDG struct will record bad bits for DRAMINIT
+            // record_bad_bits does check the FIRs, so we don't need to explicitly blame
+            // FIRs here
+            mss::exp::bad_bit_interface<T> l_interface(i_rsp_msdg);
+            FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
+
+            // Now read them back out
+            FAPI_TRY(mss::get_bad_dq_bitmap<mss::mc_type::EXPLORER>(l_dimm, l_bad_dq_array));
+            FAPI_TRY(populate_ffdc_dq_buffers(l_bad_dq_array, l_bad_dq_0_63, l_bad_dq_64_80));
+
+            FAPI_ASSERT(false,
+                        fapi2::MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL().
+                        set_TARGET(i_target).
+                        set_PROCEDURE(mss::EXP_DRAMINIT).
+                        set_ERROR_CODE(l_error_code).
+                        set_EXTENDED_ERROR_CODE(l_error_extended_code).
+                        set_RANK0_BADDQ0_63(l_bad_dq_0_63[0]).
+                        set_RANK0_BADDQ64_80(l_bad_dq_64_80[0]).
+                        set_RANK1_BADDQ0_63(l_bad_dq_0_63[1]).
+                        set_RANK1_BADDQ64_80(l_bad_dq_64_80[1]).
+                        set_RANK2_BADDQ0_63(l_bad_dq_0_63[2]).
+                        set_RANK2_BADDQ64_80(l_bad_dq_64_80[2]).
+                        set_RANK3_BADDQ0_63(l_bad_dq_0_63[3]).
+                        set_RANK3_BADDQ64_80(l_bad_dq_64_80[3]),
+                        "DDR_PHY_INIT encountered a training fail (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
+                        mss::c_str(i_target), l_error_code, l_error_extended_code);
+        }
+
+        FAPI_ASSERT( false,
+                     fapi2::MSS_EXP_DDR_PHY_INIT_UNKNOWN_ERROR().
+                     set_TARGET(i_target).
+                     set_PROCEDURE(mss::EXP_DRAMINIT).
+                     set_ERROR_CODE(l_error_code).
+                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
+                     "DDR_PHY_INIT encountered an unknown error code causing a fail(TARGET %s, error_code 0x%02X, extended_error_code=0x%08X) for ",
+                     mss::c_str(i_target), l_error_code, l_error_extended_code);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 } // namespace check
 
@@ -267,6 +383,8 @@ fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 /// @brief Reads and displays the normal draminit training response
 ///
 /// @param[in] i_target OCMB target
+/// @param[in] i_cmd host_fw_command_struct
+/// @param[in] i_rsp host_fw_response_struct
 /// @param[in] i_resp_data RESP data
 /// @param[in,out] io_rc return code from checking response
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
@@ -274,7 +392,9 @@ fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 ///
 fapi2::ReturnCode read_and_display_normal_training_response(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    const std::vector<uint8_t> i_resp_data,
+    const host_fw_command_struct& i_cmd,
+    const host_fw_response_struct& i_rsp,
+    const std::vector<uint8_t>& i_resp_data,
     fapi2::ReturnCode& io_rc);
 
 ///
@@ -283,21 +403,21 @@ fapi2::ReturnCode read_and_display_normal_training_response(
 /// @tparam T response struct
 /// @param[in] i_target OCMB target
 /// @param[in] i_resp_data RESP data
-/// @param[out] o_rc return code from checking response
+/// @param[out] o_response_msdg response MSDG struct
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
 ///
 template <typename T>
 fapi2::ReturnCode read_and_display_user_2d_eye_response(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    const std::vector<uint8_t> i_resp_data,
-    T& o_train_response)
+    const std::vector<uint8_t>& i_resp_data,
+    T& o_response_msdg)
 {
     // Proccesses the response data
-    FAPI_TRY(mss::exp::read_user_2d_eye_response<T>(i_target, i_resp_data, o_train_response),
+    FAPI_TRY(mss::exp::read_user_2d_eye_response<T>(i_target, i_resp_data, o_response_msdg),
              "Failed read_training_response for %s", mss::c_str(i_target));
 
     // Displays the training response
-    FAPI_TRY(mss::exp::train::display_user_2d_eye_info<T>(i_target, o_train_response));
+    FAPI_TRY(mss::exp::train::display_user_2d_eye_info<T>(i_target, o_response_msdg));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1568,7 +1688,7 @@ namespace impl_details
 /// @param[in] i_phy_init_mode phy_init_mode
 /// @param[in] i_phy_info phy information of interest
 /// @param[out] o_read_display_response_rc display response RC
-/// @param[out] o_response_rc eye response
+/// @param[out] o_response_msdg Eye response MSDG struct
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template <typename T>
@@ -1577,25 +1697,28 @@ fapi2::ReturnCode common_init_eye_capture(const fapi2::Target<fapi2::TARGET_TYPE
         const phy_param_info& i_phy_info,
         fapi2::ReturnCode& o_check_response_rc,
         fapi2::ReturnCode& o_read_display_response_rc,
-        T& o_response_rc)
+        T& o_response_msdg)
 {
     std::vector<uint8_t> l_rsp_data;
 
     host_fw_command_struct l_cmd;
+    host_fw_response_struct l_rsp;
     FAPI_TRY(send_host_phy_init_cmd(i_target, i_phy_info, i_phy_init_mode, l_cmd));
+    FAPI_TRY(mss::exp::ib::getRSP(i_target, l_cmd.cmd_id, l_rsp, l_rsp_data),
+             "Failed getRSP() for  %s", mss::c_str(i_target));
 
-    // Return code output param is that of check::response
-    // A fail of getRSP will go to fapi_try_exit
-    FAPI_TRY(mss::exp::check::host_fw_response(i_target, l_cmd, mss::EXP_DRAMINIT, l_rsp_data));
-
-    o_read_display_response_rc = check_rsp_data_size(i_target,
-                                 l_rsp_data.size(),
-                                 i_phy_init_mode);
+    o_check_response_rc = check_rsp_data_size(i_target,
+                          l_rsp_data.size(),
+                          i_phy_init_mode);
 
     // Check the return codes at the end
-    if (o_read_display_response_rc == fapi2::FAPI2_RC_SUCCESS)
+    if (o_check_response_rc == fapi2::FAPI2_RC_SUCCESS)
     {
-        o_read_display_response_rc = mss::exp::read_and_display_user_2d_eye_response(i_target, l_rsp_data, o_response_rc);
+        o_read_display_response_rc = mss::exp::read_and_display_user_2d_eye_response(i_target, l_rsp_data, o_response_msdg);
+
+        // Fails here are unrecoverable and we should exit
+        FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, l_cmd, o_response_msdg, l_rsp.response_argument),
+                 "Encountered error from host fw ddr_phy_init for %s", mss::c_str(i_target));
     }
     else
     {
@@ -1641,57 +1764,6 @@ fapi2::ReturnCode print_phy_params(
 ///
 fapi2::ReturnCode handle_training_error(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         fapi2::ReturnCode& io_training_rc);
-
-///
-/// @brief Checks if we should log the bad bits
-/// @param[in] i_training_rc the ReturnCode from conducting draminit training
-/// @return true if we need to log the bad bits based upon the passed in error, otherwise false
-///
-fapi2::ReturnCode is_bad_bits_logging_needed(const fapi2::ReturnCode& i_training_rc);
-
-///
-/// @brief Logs bad bits only if needed
-/// @tparam the training interface response to use
-/// @param[in] i_target the fapi2 target
-/// @param[in] i_training_response the training response data returned from Microchip
-/// @param[in,out] io_training_rc the ReturnCode from conducting draminit training
-/// @return true if we need to log the bad bits based upon the passed in error, otherwise false
-///
-template<typename T>
-fapi2::ReturnCode bad_bit_processing(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                     const T& i_train_response,
-                                     fapi2::ReturnCode& io_training_rc)
-{
-    // Only log bad bits for appropriate errors
-    if(is_bad_bits_logging_needed(io_training_rc))
-    {
-        // Check to see if there is a FIR associated with this RC
-        // If so, do not log the bad bits
-        const auto l_rc = mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER,
-                   mss::check::firChecklist::DRAMINIT>(i_target, io_training_rc);
-
-        // Check the RC again (yes, again)
-        // If there were no bad bits, then the RC should be success due to the FIR's
-        // Just checking the RC for only what we're looking for incase the scom error during firchecking logic changes
-        if(is_bad_bits_logging_needed(l_rc))
-        {
-            mss::exp::bad_bit_interface<T> l_interface(i_train_response);
-            FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
-        }
-
-        // Try on our current RC and exit
-        FAPI_TRY(l_rc, "mss::exp::check::response failed for %s", mss::c_str(i_target));
-    }
-    else
-    {
-        FAPI_TRY(io_training_rc);
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 }// exp
 }// mss

@@ -151,18 +151,21 @@ fapi2::ReturnCode host_fw_phy_normal_init(
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     host_fw_command_struct l_cmd;
+    host_fw_response_struct l_rsp;
     std::vector<uint8_t> l_rsp_data;
 
     // Issue full boot mode cmd though EXP-FW REQ buffer
     FAPI_TRY(send_host_phy_init_cmd(i_target, i_phy_info, phy_init_mode::NORMAL, l_cmd));
 
-    // Note: don't FAPI_TRY here!
-    // We want to grab this error, then try to update the bad bits appropriately
-    // Logging of bad bits happens in read_and_display_normal_training_response
-    l_rc = mss::exp::check::host_fw_response(i_target, l_cmd, mss::EXP_DRAMINIT, l_rsp_data);
-
+    // We will FAPI_TRY here now as the only fail for this would be an I2C failure,
+    // which we do want to exit for
+    FAPI_TRY(mss::exp::ib::getRSP(i_target, l_cmd.cmd_id, l_rsp, l_rsp_data),
+             "Failed getRSP() for  %s", mss::c_str(i_target));
     FAPI_TRY(check_rsp_data_size(i_target, l_rsp_data.size(), phy_init_mode::NORMAL));
-    FAPI_TRY(mss::exp::read_and_display_normal_training_response(i_target, l_rsp_data, l_rc));
+
+    // Because this is the last function before we handle the training errors, FAPI_TRY'ing here
+    // is ok. We wouldn't be skipping anything by exiting here.
+    FAPI_TRY(mss::exp::read_and_display_normal_training_response(i_target, l_cmd, l_rsp, l_rsp_data, l_rc));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -332,7 +335,6 @@ fapi2::ReturnCode process_eye_capture_return_codes(const fapi2::Target<fapi2::TA
         // Turns out, Microchip's firmware assumes that all bad bits are found in train_response1
         // As such, they won't log any bad bits in train_response2, even if they they take a training fail
         // No point to go through the effort if the data isn't there
-
         if (l_response_1_failed)
         {
             // Log response 2's error, and let's return response 1
@@ -345,13 +347,14 @@ fapi2::ReturnCode process_eye_capture_return_codes(const fapi2::Target<fapi2::TA
         FAPI_TRY(i_response_2_rc);
     }
 
+    // If only response 1 failed
     if (l_response_1_failed)
     {
         FAPI_ERR("%s check_fw_host_response() for %s returned error code 0x%016llu",
                  mss::c_str(i_target), "EYE_CAPTURE_STEP_1", uint64_t(i_response_1_rc));
 
-        // Handles the bad bit error processing
-        return bad_bit_processing(i_target, i_response_1, i_response_1_rc);
+        // Bad bit processing performed earlier
+        FAPI_TRY(i_response_1_rc);
     }
 
     // Else, we did not see errors!
@@ -396,125 +399,47 @@ namespace check
 {
 
 ///
-/// @brief Check the error code returned from DDR_PHY_INIT
+/// @brief Populate the Bad DQ vectors from the attribute's bad DQ array for FFDC usage
 ///
-/// @param[in] i_target OCMB chip
-/// @param[in] i_cmd host_fw_command_struct used to generate the response
-/// @param[in] i_rsp_arg response arguement buffer
-/// @param[in] i_procedure procedure identifier for FFDC
+/// @param[in] i_bad_dq_array Bad DQ array
+/// @param[out] o_bad_dq_0_63 Bad DQ vector indexed by rank, bits 0 to 63
+/// @param[out] o_bad_dq_64_80 Bad DQ vector indexed by rank, bits 64 to 80
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note i_bad_dq_array passed by reference for speed, array is not modified
 ///
-fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const host_fw_command_struct& i_cmd,
-        const uint8_t i_rsp_arg[ARGUMENT_SIZE],
-        const uint16_t i_procedure)
+fapi2::ReturnCode populate_ffdc_dq_buffers(
+    const uint8_t (&i_bad_dq_array)[mss::BAD_BITS_RANKS][mss::BAD_DQ_BYTE_COUNT],
+    std::vector<fapi2::buffer<uint64_t>>& o_bad_dq_0_63,
+    std::vector<fapi2::buffer<uint16_t>>& o_bad_dq_64_80)
 {
-    const uint8_t l_rsp_status = i_rsp_arg[0];
+    o_bad_dq_0_63.clear();
+    o_bad_dq_64_80.clear();
 
-    // If the response isn't a success check the return code
-    if (l_rsp_status != omi::response_arg::RESPONSE_SUCCESS)
+    constexpr uint8_t BADDQ_64 = 8;
+
+    for (uint8_t l_rank = 0; l_rank < mss::BAD_BITS_RANKS; ++l_rank)
     {
-        fapi2::buffer<uint32_t> l_error_extended_code;
-        const uint8_t l_error_code = i_rsp_arg[5];
+        fapi2::buffer<uint64_t> l_rank_bad_dq_0_63;
+        fapi2::buffer<uint16_t> l_rank_bad_dq_64_80;
 
-        l_error_extended_code.insertFromRight<0, BITS_PER_BYTE>(i_rsp_arg[4]).
-        insertFromRight<BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp_arg[3]).
-        insertFromRight<2 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp_arg[2]).
-        insertFromRight<3 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp_arg[1]);
+        // Do the first 8 bytes here
+        for (uint8_t l_byte = 0; l_byte < BADDQ_64; ++l_byte)
+        {
+            FAPI_TRY(l_rank_bad_dq_0_63.insert(i_bad_dq_array[l_rank][l_byte], mss::BITS_PER_BYTE * l_byte, mss::BITS_PER_BYTE));
+        }
 
-        // Check Explorer return code
-        FAPI_ASSERT( (l_error_code != FW_DDR_PHY_INIT_UNSUPPORTED_MODE),
-                     fapi2::MSS_EXP_DDR_PHY_INIT_UNSUPPORTED_MODE().
-                     set_TARGET(i_target).
-                     set_PROCEDURE(i_procedure).
-                     set_PHY_INIT_MODE(i_cmd.command_argument[0]).
-                     set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
-                     "DDR_PHY_INIT unsupported mode error (TARGET %s, PHY_INIT_MODE 0x%08X, "
-                     "error_code 0x%02X, extended_error_code=0x%08X)",
-                     mss::c_str(i_target), i_cmd.command_argument[0], l_error_code, l_error_extended_code);
+        o_bad_dq_0_63.push_back(l_rank_bad_dq_0_63);
 
-        FAPI_ASSERT( (l_error_code != mss::exp::fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_SIZE_ERR),
-                     fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_SIZE_ERROR().
-                     set_TARGET(i_target).
-                     set_PROCEDURE(i_procedure).
-                     set_COMMAND_SIZE(i_cmd.cmd_length).
-                     set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
-                     "DDR_PHY_INIT incorrect user_input_msdg size error (TARGET %s, CMD SIZE 0x%08X, "
-                     "error_code 0x%02X, extended_error_code=0x%08X)",
-                     mss::c_str(i_target), i_cmd.cmd_length, l_error_code, l_error_extended_code);
+        // Then the last two here
+        for (uint8_t l_byte = BADDQ_64; l_byte < mss::BAD_DQ_BYTE_COUNT; ++l_byte)
+        {
+            FAPI_TRY(l_rank_bad_dq_64_80.insert(i_bad_dq_array[l_rank][l_byte], mss::BITS_PER_BYTE * (l_byte % BADDQ_64),
+                                                mss::BITS_PER_BYTE));
+            // Mod division to get index 8 --> 0, 9 --> 1, etc.
+        }
 
-        FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_FLAG_ERR),
-                     fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_MISSING_FLAG().
-                     set_TARGET(i_target).
-                     set_PROCEDURE(i_procedure).
-                     set_COMMAND_FLAGS(i_cmd.cmd_flags).
-                     set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
-                     "DDR_PHY_INIT user_input_msdg missing extended data flag (TARGET %s, CMD FLAGS 0x%08X, "
-                     "error_code 0x%02X, extended_error_code=0x%08X)",
-                     mss::c_str(i_target), i_cmd.cmd_flags, l_error_code, l_error_extended_code);
-
-        FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_USER_MSDG_ERROR),
-                     fapi2::MSS_EXP_DDR_PHY_INIT_USER_INPUT_MSDG_ERROR().
-                     set_TARGET(i_target).
-                     set_PROCEDURE(i_procedure).
-                     set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
-                     "DDR_PHY_INIT encountered a user_input_msdg error (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
-                     mss::c_str(i_target), l_error_code, l_error_extended_code);
-
-        // TODO: Zenhub #818: Training callout will need to be updated
-        //       Pending additional followup meetings with MCHP
-        FAPI_ASSERT( (l_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_TRAINING_FAIL),
-                     fapi2::MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL().
-                     set_TARGET(i_target).
-                     set_PROCEDURE(i_procedure).
-                     set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
-                     "DDR_PHY_INIT encountered a training fail (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
-                     mss::c_str(i_target), l_error_code, l_error_extended_code);
-
-        FAPI_ASSERT( false,
-                     fapi2::MSS_EXP_DDR_PHY_INIT_UNKNOWN_ERROR().
-                     set_TARGET(i_target).
-                     set_PROCEDURE(i_procedure).
-                     set_ERROR_CODE(l_error_code).
-                     set_EXTENDED_ERROR_CODE(l_error_extended_code),
-                     "DDR_PHY_INIT encountered an unknown error code causing a fail(TARGET %s, error_code 0x%02X, extended_error_code=0x%08X) for ",
-                     mss::c_str(i_target), l_error_code, l_error_extended_code);
+        o_bad_dq_64_80.push_back(l_rank_bad_dq_64_80);
     }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Get and check the host fw response from the explorer
-///
-/// @param[in] i_target OCMB chip
-/// @param[in] i_cmd host_fw_command_struct used to generate the response
-/// @param[in] i_procedure procedure identifier for FFDC
-/// @param[out] o_rsp_data response data
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                   const host_fw_command_struct& i_cmd,
-                                   const uint16_t i_procedure,
-                                   std::vector<uint8_t>& o_rsp_data)
-{
-    host_fw_response_struct l_response;
-
-    FAPI_TRY(mss::exp::ib::getRSP(i_target, i_cmd.cmd_id, l_response, o_rsp_data),
-             "Failed getRSP() for  %s", mss::c_str(i_target));
-
-    FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, i_cmd, l_response.response_argument, i_procedure),
-             "Encountered error from host fw ddr_phy_init for %s", mss::c_str(i_target));
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -526,6 +451,8 @@ fapi_try_exit:
 /// @brief Reads and displays the normal draminit training response
 ///
 /// @param[in] i_target OCMB target
+/// @param[in] i_cmd host_fw_command_struct
+/// @param[in] i_rsp host_fw_response_struct
 /// @param[in] i_resp_data RESP data
 /// @param[in,out] io_rc return code from checking response
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success
@@ -533,7 +460,9 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode read_and_display_normal_training_response(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    const std::vector<uint8_t> i_resp_data,
+    const host_fw_command_struct& i_cmd,
+    const host_fw_response_struct& i_rsp,
+    const std::vector<uint8_t>& i_resp_data,
     fapi2::ReturnCode& io_rc)
 {
     user_response_msdg l_train_response;
@@ -549,8 +478,8 @@ fapi2::ReturnCode read_and_display_normal_training_response(
     // Set RC response attributes
     FAPI_TRY(set_rc_resp_attrs(i_target, l_train_response.rc_resp));
 
-    // Handles bad bit error processing
-    FAPI_TRY(bad_bit_processing(i_target, l_train_response, io_rc));
+    FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, i_cmd, l_train_response, i_rsp.response_argument),
+             "Encountered error from host fw ddr_phy_init for %s", mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1075,18 +1004,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Checks if we should log the bad bits
-/// @param[in] i_training_rc the ReturnCode from conducting draminit training
-/// @return true if we need to log the bad bits based upon the passed in error, otherwise false
-///
-fapi2::ReturnCode is_bad_bits_logging_needed(const fapi2::ReturnCode& i_training_rc)
-{
-    // TODO: Zenhub #818: Training callout will need to be updated
-    //       Pending additional followup meetings with MCHP
-    return uint64_t(i_training_rc) == uint64_t(fapi2::RC_MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL);
-}
-
-///
 /// @brief Handles the training error
 /// @param[in] i_target the fapi2 target
 /// @param[in,out] io_training_rc the ReturnCode from conducting draminit training
@@ -1099,7 +1016,7 @@ fapi2::ReturnCode handle_training_error(const fapi2::Target<fapi2::TARGET_TYPE_O
                                         fapi2::ReturnCode& io_training_rc)
 {
     // If the error is a TRAINING_FAIL, then we want to log it as recovered and continue
-    if(is_bad_bits_logging_needed(io_training_rc))
+    if (uint64_t(io_training_rc) == uint64_t(fapi2::RC_MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL))
     {
         fapi2::logError(io_training_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         io_training_rc = fapi2::FAPI2_RC_SUCCESS;
