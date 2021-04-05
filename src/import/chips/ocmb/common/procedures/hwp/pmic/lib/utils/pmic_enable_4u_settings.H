@@ -42,6 +42,7 @@
 #include <pmic_regs_fld.H>
 
 using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
 using TPS_CONSTS = mss::pmic::consts<mss::pmic::product::TPS5383X>;
@@ -84,6 +85,9 @@ const std::vector<std::pair<uint8_t, uint8_t>> PMIC0_SETTINGS =
 {
     // ADC Enable, VIN_BULK reading
     {REGS::R30, 0xA8},
+
+    // Clear status regs
+    {REGS::R14, 0x01},
 
     // LSB - SWD voltage range max
     // Conveniently, the SWD range bit is the LSB, so we can or it with the constant
@@ -132,6 +136,12 @@ const std::vector<std::pair<uint8_t, uint8_t>> PMIC0_SETTINGS =
 ///
 const std::vector<std::pair<uint8_t, uint8_t>> PMIC1_SETTINGS =
 {
+    // ADC Enable, VIN_BULK reading
+    {REGS::R30, 0xA8},
+
+    // Clear status regs
+    {REGS::R14, 0x01},
+
     // ADC Enable, VIN_BULK reading
     {REGS::R30, 0xA8},
 

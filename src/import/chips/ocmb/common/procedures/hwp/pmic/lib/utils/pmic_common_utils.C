@@ -546,19 +546,35 @@ fapi2::ReturnCode check_all_pmics_helper(
     const char* l_ocmb_c_str = mss::c_str(i_ocmb_target);
 
     bool l_pmic_error = false;
+    status_regs l_values = {0};
     FAPI_TRY(check_for_vr_enable(i_ocmb_target, i_pmic_target),
              "PMIC %s did not return enabled status", mss::c_str(i_pmic_target));
 
     // Now check if we had any bad status bits
-    FAPI_TRY(mss::pmic::status::check_pmic(i_pmic_target, l_pmic_error));
+    FAPI_TRY(mss::pmic::status::check_pmic(i_pmic_target, l_values, l_pmic_error));
 
     FAPI_ASSERT(!l_pmic_error,
                 fapi2::PMIC_STATUS_ERRORS()
                 .set_OCMB_TARGET(i_ocmb_target)
-                .set_PMIC_TARGET(i_pmic_target),
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_R04_VALUE(l_values.iv_r04)
+                .set_R05_VALUE(l_values.iv_r05)
+                .set_R06_VALUE(l_values.iv_r06)
+                .set_R08_VALUE(l_values.iv_r08)
+                .set_R09_VALUE(l_values.iv_r09)
+                .set_R0A_VALUE(l_values.iv_r0A)
+                .set_R0B_VALUE(l_values.iv_r0B),
+#ifndef __PPE__
+                "PMIC on OCMB %s had one or more status bits set after running pmic_enable(). "
+                "One of possibly several bad PMICs: %s R04=0x%02X R05=0x%02X R06=0x%02X"
+                " R08=0x%02X R09=0x%02X R0A=0x%02X R0B=0x%02X",
+                l_ocmb_c_str, mss::c_str(i_pmic_target), l_values.iv_r04, l_values.iv_r05,
+                l_values.iv_r06, l_values.iv_r08, l_values.iv_r09, l_values.iv_r0A, l_values.iv_r0B);
+#else // PPE plat supports a maximum of 4 arguments in trace
                 "PMIC on OCMB %s had one or more status bits set after running pmic_enable(). "
                 "One of possibly several bad PMICs: %s",
                 l_ocmb_c_str, mss::c_str(i_pmic_target));
+#endif
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -622,11 +638,13 @@ fapi_try_exit:
 /// @brief Check the PMIC's status codes and report back if an error occurred
 ///
 /// @param[in] i_pmic_target PMIC target
+/// @param[in,out] io_values value of status registers on this PMIC
 /// @param[out] o_error true/false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
 ///
 fapi2::ReturnCode check_pmic(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    status_regs& io_values,
     bool& o_error)
 {
     o_error = false;
@@ -643,14 +661,15 @@ fapi2::ReturnCode check_pmic(
 
         // if we exit from this try, there were i2c errors
         FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "PMIC_WARNING_BIT",
-                 mss::pmic::status::IDT_SPECIFIC_STATUS_FIELDS, l_status_error));
+                 mss::pmic::status::IDT_SPECIFIC_STATUS_FIELDS, io_values, l_status_error));
     }
 
     {
         bool l_status_error = false;
 
         // if we exit from this try, there were i2c errors
-        FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "ERROR", mss::pmic::status::STATUS_FIELDS, l_status_error));
+        FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "ERROR",
+                 mss::pmic::status::STATUS_FIELDS, io_values, l_status_error));
         o_error = l_status_error;
     }
 
@@ -686,11 +705,59 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper to fill in pmic::status::status_regs struct
+///
+/// @param[in] i_reg status register address
+/// @param[in] i_value status register value
+/// @param[in,out] io_values value of status registers on this PMIC
+///
+void status_reg_save_helper(
+    const uint8_t i_reg,
+    const uint8_t i_value,
+    status_regs& io_values)
+{
+    switch (i_reg)
+    {
+        case REGS::R04:
+            io_values.iv_r04 = i_value;
+            break;
+
+        case REGS::R05:
+            io_values.iv_r05 = i_value;
+            break;
+
+        case REGS::R06:
+            io_values.iv_r06 = i_value;
+            break;
+
+        case REGS::R08:
+            io_values.iv_r08 = i_value;
+            break;
+
+        case REGS::R09:
+            io_values.iv_r09 = i_value;
+            break;
+
+        case REGS::R0A:
+            io_values.iv_r0A = i_value;
+            break;
+
+        case REGS::R0B:
+            io_values.iv_r0B = i_value;
+            break;
+
+        default:
+            break;
+    }
+}
+
+///
 /// @brief Check an individual set of PMIC status codes
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_error_type error type for the PMIC in question
 /// @param[in] i_statuses STATUS object to check
+/// @param[in,out] io_values value of status registers on this PMIC
 /// @param[out] o_error At least one error bit was found to be set
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error in case of an I2C read error
 ///
@@ -698,6 +765,7 @@ fapi2::ReturnCode check_fields(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const char* i_error_type,
     const std::vector<std::pair<uint8_t, std::vector<status_field>>>& i_statuses,
+    status_regs& io_values,
     bool& o_error)
 {
     o_error = false;
@@ -730,6 +798,8 @@ fapi2::ReturnCode check_fields(
                 }
             }
         }
+
+        status_reg_save_helper(l_reg_bit_pair.first, l_reg_contents, io_values);
 
         l_reg_contents.flush<0>();
     }

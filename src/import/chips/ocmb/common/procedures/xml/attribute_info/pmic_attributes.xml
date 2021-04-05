@@ -35,13 +35,6 @@
             The bits are as follows: [PMIC0, PMIC1, PMIC2, PMIC3, 0, 0, 0, 0]
             Bit high = N-Mode declared, or PMIC was not identified as PRESENT
         </description>
-        <enum>
-            ALL_N_PLUS_1 = 0x00,
-            N_MODE_PMIC0 = 0x80,
-            N_MODE_PMIC1 = 0x40,
-            N_MODE_PMIC2 = 0x20,
-            N_MODE_PMIC3 = 0x10
-        </enum>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -68,6 +61,7 @@
         <default>N_PLUS_1</default>
         <valueType>uint8</valueType>
         <platInit/>
+        <mrwHide/>
         <writeable/>
         <mssAccessorName>pmic_force_n_mode</mssAccessorName>
     </attribute>

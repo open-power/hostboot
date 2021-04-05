@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -317,7 +317,7 @@ class freq_scoreboard
                                   std::vector<fapi2::Target<TT::PORT_TARGET_TYPE>>& o_deconfigured_targets,
                                   std::vector<uint32_t>& o_freqs)
         {
-            const auto l_ports = mss::find_targets<TT::PORT_TARGET_TYPE>(i_target);
+            const auto l_ports = mss::find_targets_sorted_by_pos<TT::PORT_TARGET_TYPE>(i_target);
             const auto l_port_count = l_ports.size();
 
             // empty_port_count is the number of port that are deconfigured

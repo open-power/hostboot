@@ -55,31 +55,35 @@ extern "C"
                                   const mss::pmic::enable_mode i_mode)
     {
         uint8_t l_module_height = 0;
-        auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
-        // Check that we have PMICs (we wouldn't on gemini, for example)
-        if (l_pmics.empty())
+        // Disable PMICs and clear status bits so we are starting at a known off state
+        FAPI_TRY(mss::pmic::disable_and_reset_pmics(i_ocmb_target));
+
+        // Check that we have functional pmics to enable, otherwise, we can just exit now
+        if (mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target).empty())
         {
             FAPI_INF("No PMICs to enable on %s, exiting.", mss::c_str(i_ocmb_target));
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // Disable PMICs and clear status bits so we are starting at a known off state
-        FAPI_TRY(mss::pmic::disable_and_reset_pmics(i_ocmb_target));
-
-        // Grab the module-height attribute to determine 1U/2U vs 4U
-        FAPI_TRY(mss::attr::get_dram_module_height(i_ocmb_target, l_module_height));
-
-        // Kick off the matching enable procedure
-        if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
+        // This procedure can be called with non-functional targets, so here, we will only
+        // choose to enable those that are functional (duh!)
+        if (i_ocmb_target.isFunctional())
         {
-            FAPI_INF("Enabling PMICs on %s with Redundancy/4U Mode", mss::c_str(i_ocmb_target));
-            FAPI_TRY(mss::pmic::enable_with_redundancy(i_ocmb_target));
-        }
-        else
-        {
-            FAPI_INF("Enabling PMICs on %s with 1U/2U Mode", mss::c_str(i_ocmb_target));
-            FAPI_TRY(mss::pmic::enable_1u_2u(i_ocmb_target, i_mode));
+            // Grab the module-height attribute to determine 1U/2U vs 4U
+            FAPI_TRY(mss::attr::get_dram_module_height(i_ocmb_target, l_module_height));
+
+            // Kick off the matching enable procedure
+            if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
+            {
+                FAPI_INF("Enabling PMICs on %s with Redundancy/4U Mode", mss::c_str(i_ocmb_target));
+                FAPI_TRY(mss::pmic::enable_with_redundancy(i_ocmb_target));
+            }
+            else
+            {
+                FAPI_INF("Enabling PMICs on %s with 1U/2U Mode", mss::c_str(i_ocmb_target));
+                FAPI_TRY(mss::pmic::enable_1u_2u(i_ocmb_target, i_mode));
+            }
         }
 
         return fapi2::FAPI2_RC_SUCCESS;

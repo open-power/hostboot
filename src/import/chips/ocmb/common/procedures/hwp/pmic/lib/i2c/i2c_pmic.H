@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -223,6 +223,8 @@ inline fapi2::ReturnCode reg_read(const fapi2::Target<T>& i_target,
                  mss::c_str(i_target), l_data.size(), mss::pmic::i2c::sizes::DATA_LENGTH);
 
     o_data_buffer = l_data[0];
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
