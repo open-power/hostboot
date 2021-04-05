@@ -78,16 +78,16 @@ namespace ISTEP_21
  *      Hostboot.  This function will call shutdown, passing in system
  *      attribute variables for the Payload base and Payload offset.
  *
- * @param[in] Host boot master instance number (logical node number)
- * @param[in] Is this the master HB instance [true|false]
+ * @param[in] Host boot primary instance number (logical node number)
+ * @param[in] Is this the primary HB instance [true|false]
  * @param[in] The lowest addressable location in the system, derived from the
- *            HRMOR of the master node.
+ *            HRMOR of the primary node.
  *
  * @return errlHndl_t - nullptr if succesful, otherwise a pointer to the error
  *      log.
  */
-errlHndl_t callShutdown ( uint64_t i_hbInstance,
-                          bool i_masterIntance,
+errlHndl_t callShutdown ( uint64_t i_primaryInstance,
+                          bool i_isPrimary,
                           const uint64_t i_commBase);
 
 /**
@@ -259,20 +259,27 @@ void* call_host_start_payload (void *io_pArgs)
 
     do{
 
-        // Place a separator in the TPM to indicate we are passing control
-        //  to the next level of firmware in the stack. Send the synchronous
-        //  message to make sure that the traces are flushed prior to the daemon
-        //  shutdown.
+        // Place a separator in the TPM to indicate Hostboot is passing
+        // control to the next level of firmware in the stack. Send via
+        // synchronous message to make sure that the traces are flushed
+        // prior to the daemon shutdown.
         l_errl = TRUSTEDBOOT::pcrExtendSeparator(false);
-
         if(l_errl)
         {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                      "call_host_start_payload() failed in call to "
+                      "pcrExtendSeparator(). " TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_errl));
             break;
         }
 
         l_errl = calcTrustedBootState();
         if(l_errl)
         {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                      "call_host_start_payload() failed in call to "
+                      "calcTrustedBootState(). " TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_errl));
             break;
         }
 
@@ -353,8 +360,8 @@ void* call_host_start_payload (void *io_pArgs)
 //
 // Call shutdown
 //
-errlHndl_t callShutdown ( uint64_t i_masterInstance,
-                          bool i_isMaster,
+errlHndl_t callShutdown ( uint64_t i_primaryInstance,
+                          bool i_isPrimary,
                           const uint64_t i_commBase)
 {
     errlHndl_t err = nullptr;
@@ -384,6 +391,24 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
         // all nodes.
         auto pAttrMsgQ = msg_q_resolve(TARGETING::ATTRRP_ATTR_SYNC_MSG_Q);
         INITSERVICE::unregisterShutdownEvent(pAttrMsgQ);
+
+        if(!i_isPrimary)
+        {
+            // Place a separator in the TPM to indicate Hostboot is passing
+            // control to the next level of firmware in the stack. Send via
+            // synchronous message to make sure that the traces are flushed
+            // prior to the daemon shutdown.  Primary node already made this
+            // call pre-shutdown.
+            err = TRUSTEDBOOT::pcrExtendSeparator(false);
+            if(err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                          "callShutdown() failed in call to "
+                          "pcrExtendSeparator(). " TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(err));
+                break;
+            }
+        }
 
         // Tell SBE to Close All Unsecure Memory Regions
         err = SBEIO::closeAllUnsecureMemRegions();
@@ -473,7 +498,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
             }
         }
 
-        if(i_isMaster)
+        if(i_isPrimary)
         {
             // Notify Fsp with appropriate mailbox message.
             err = notifyFsp( istepModeFlag,
@@ -561,7 +586,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
                                  payloadBase,
                                  payloadEntry,
                                  payloadData,
-                                 i_masterInstance);
+                                 i_primaryInstance);
 
     } while( 0 );
 
