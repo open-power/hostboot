@@ -25,6 +25,7 @@
 #if !defined(__IPC_MSG_TYPES_H)
 #define __IPC_MSG_TYPES_H
 
+#include <stdint.h>
 #include <mbox/mbox_queues.H>
 
 namespace IPC
@@ -44,6 +45,18 @@ namespace IPC
         IPC_FREQ_ATTR_DATA, // frequency attribute data from master to other drawers
         IPC_PCR_EXTEND,     // Extend TPM measurement to primary TPM on
                             // node
+        IPC_GET_PHYP_HRMOR, // Read the PHYP HRMOR from the primary nodes
+                             // in case it migrated since the initial IPL
+    };
+
+    // IPC_GET_PHYP_HRMOR message format
+    struct getPhypHrmor_t // overlay of msg_t
+    {
+        uint32_t type; //=IPC_GET_PHYP_HRMOR
+        uint32_t flags; //ignored
+        uint64_t sendingNode;
+        uint64_t payloadAddr; //ATTR_PAYLOAD_BASE, only valid in response
+        void* extra_data; //unused
     };
 
 }; // namespace IPC

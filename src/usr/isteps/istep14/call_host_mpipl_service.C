@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,10 @@
 
 // Misc
 #include <dump/dumpif.H>                 // DUMP::copyArchitectedRegs
+#include <conversions.H>
+#include <targeting/targplatutil.H>
+#include <targeting/common/targetservice.H>
+#include <mbox/ipc_msg_types.H>
 
 /******************************************************************************/
 // namespace shortcuts
@@ -95,13 +99,68 @@ void* call_host_mpipl_service (void *)
 void runDumpCalls()
 {
     errlHndl_t l_err(nullptr);
-    bool l_dumpCallFailed(false);
+    bool l_dumpCallFailed(true);
 
     // Use relocated payload base to get MDST, MDDT, MDRT details
     RUNTIME::useRelocatedPayloadAddr(true);
 
     do
     {
+        //Need to ask the primary node for an updated PAYLOAD
+        // address in case PHYP migrated itself since the initial
+        // IPL
+        const auto l_myNode = TARGETING::UTIL::getCurrentNodePhysId();
+        int l_primaryNode = TARGETING::UTIL::getPrimaryNodeNumber();
+        if( l_myNode != l_primaryNode )
+        {
+            // create the queue to get the answer
+            msg_q_t msgQ = msg_q_create();
+            l_err = MBOX::msgq_register(MBOX::HB_GET_PHYP_HRMOR_MSGQ, msgQ);
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "runDumpCalls: MBOX::msgq_register failed!" );
+                break;
+            }
+
+            // send the message to the primary node
+            msg_t* l_msg = msg_allocate();
+            IPC::getPhypHrmor_t* my_msg =
+              reinterpret_cast<IPC::getPhypHrmor_t*>(l_msg);
+            my_msg->type = IPC::IPC_GET_PHYP_HRMOR;
+            my_msg->sendingNode = l_myNode;
+            l_err = MBOX::send(MBOX::HB_IPC_MSGQ, l_msg, l_primaryNode);
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"MBOX::send failed trying to send update HRMOR"
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(l_err) );
+                break;
+            }
+
+            auto l_curPayload = TARGETING::UTIL::assertGetToplevelTarget()
+              ->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
+
+            // wait for a response
+            msg_t* l_response = nullptr;
+            // TODO RTC:189356 - need timeout here
+            l_response = msg_wait(msgQ);
+            my_msg = reinterpret_cast<IPC::getPhypHrmor_t*>(l_response);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "runDumpCalls: payload address %.16X->%.16X",
+                      l_curPayload,
+                      my_msg->payloadAddr);
+            if( l_curPayload != my_msg->payloadAddr )
+            {
+                RUNTIME::setPayloadBaseAddress(my_msg->payloadAddr);
+            }
+            msg_free(l_response);
+
+            MBOX::msgq_unregister(MBOX::HB_GET_PHYP_HRMOR_MSGQ);
+            msg_q_destroy(msgQ);
+        }
+
         //Copy architected register data from Reserved
         //Memory to hypervisor memory.
         l_err = DUMP::copyArchitectedRegs();
@@ -112,8 +171,6 @@ void runDumpCalls()
                        "ERROR: DUMP::copyArchitectedRegs failed"
                        TRACE_ERR_FMT,
                        TRACE_ERR_ARGS(l_err) );
-
-            l_dumpCallFailed = true;
 
             // Commit the error and break
             errlCommit( l_err, HWPF_COMP_ID );
@@ -144,8 +201,6 @@ void runDumpCalls()
                        TRACE_ERR_FMT,
                        TRACE_ERR_ARGS(l_err) );
 
-            l_dumpCallFailed = true;
-
             // Commit the error and break
             errlCommit( l_err, HWPF_COMP_ID );
 
@@ -153,6 +208,8 @@ void runDumpCalls()
         }
         else
         {
+            l_dumpCallFailed = false;
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
                        "SUCCESS: DUMP::doDumpCollect" );
         }

@@ -60,6 +60,7 @@ namespace MBOX
         HB_IPC_EXTEND_PCR_MSGQ  = 16, // IPC queue to handle extending
                                       // measurements to primary TPM in other
                                       // nodes
+        HB_GET_PHYP_HRMOR_MSGQ  = 17, // response to IPC_GET_PHYP_HRMOR
 
         // Add HB mbox msg queue ids (services) before this line
         HB_LAST_VALID_MSGQ,          // end of valid HB mbox msgQ ids

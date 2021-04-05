@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -329,6 +329,19 @@ Target* getCurrentNodeTarget(void);
  * @return unit8_t indicating the Node Id of the current Node
  */
 uint8_t getCurrentNodePhysId(void);
+
+/* @brief - returns the physical Node Id of the primary Node
+ *
+ * @par Detailed Description:
+ * Hostboot only runs on one node at a time and this interface returns
+ * the Node Id of the primary node as defined in its entity path.
+ *
+ * NOTE: Assert if more or less than 1 node is found in targeting information.
+ *
+ * @return int indicating the Node Id of the primary Node
+ */
+int getPrimaryNodeNumber(void);
+
 #endif
 
 /* @brief - Syncs the master system target's attribute with non-master system

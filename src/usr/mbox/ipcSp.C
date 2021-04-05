@@ -52,6 +52,7 @@
 #include <isteps/hwpisteperror.H>
 #include <util/utilmem.H>
 #include <secureboot/trustedbootif.H>
+#include <targeting/targplatutil.H>
 
 #ifndef CONFIG_VPO_COMPILE
 #include <freqAttrData.H>
@@ -63,7 +64,7 @@ namespace  TB = TRUSTEDBOOT;
 namespace ISTEP_21
 {
     extern errlHndl_t callShutdown ( uint64_t i_hbInstance,
-                                     bool i_masterInstance,
+                                     bool i_primaryInstance,
                                      const uint64_t i_commBase );
     extern errlHndl_t enableCoreCheckstops();
 #ifndef CONFIG_VPO_COMPILE
@@ -323,7 +324,7 @@ void IpcSp::msgHandler()
              case IPC_SET_SBE_CHIPINFO:
              {
                 //Need to send System Configuration down to SBE
-                //Master sends info to set into SBE via msg->extra_data
+                //Primary sends info to set into SBE via msg->extra_data
                 uint64_t l_systemFabricConfigurationMap =
                         reinterpret_cast<uint64_t>(msg->extra_data);
 
@@ -380,7 +381,7 @@ void IpcSp::msgHandler()
                                "Successfully sent topology id tables via SBE chip op !!");
                 }
 
-                //Send response back to the master HB to indicate successful configuration down to SBE
+                //Send response back to the primary HB to indicate successful configuration down to SBE
                 err = MBOX::send(MBOX::HB_SBE_SYSCONFIG_MSGQ, msg, msg->data[1] );
                 if (err)
                 {
@@ -427,7 +428,7 @@ void IpcSp::msgHandler()
                     uint32_t pstate = msg->data[1];
 
                     //  Function checks frequency attribute data. Returns an error
-                    //  if there is a mismatch with that of HB master data
+                    //  if there is a mismatch with that of HB primary data
                     // temporary hack to send wrong pstate
                     err = ISTEP_21::callCheckFreqAttrData(pstate);
 #endif
@@ -455,7 +456,7 @@ void IpcSp::msgHandler()
 
                 }
 
-                 //Send response back to the master HB to indicate valid freq attrs
+                 //Send response back to the primary HB to indicate valid freq attrs
                  err = MBOX::send(MBOX::HB_FREQ_ATTR_DATA_MSGQ, msg, (msg->data[0]& 0xFFFFFFFF) );
 
                  if (err)
@@ -895,6 +896,38 @@ void IpcSp::msgHandler()
                 break;
             }
             #endif // End CONFIG_TPMDD specific code
+
+             case IPC_GET_PHYP_HRMOR:
+             {
+                TRACFCOMP( g_trac_ipc,
+                           "IPC received the IPC_GET_PHYP_HRMOR msg - %u:%u",
+                            msg->data[0]>>32, (msg->data[0]& 0xFFFFFFFF));
+
+                // this should only be received by the primary node
+                const auto l_myNode = TARGETING::UTIL::getCurrentNodePhysId();
+                int l_primaryNode = TARGETING::UTIL::getPrimaryNodeNumber();
+                assert( l_myNode == l_primaryNode, "No primary node found" );
+
+                // remember which node sent the message
+                IPC::getPhypHrmor_t* my_msg =
+                  reinterpret_cast<IPC::getPhypHrmor_t*>(msg);
+                int sender = my_msg->sendingNode;
+
+                // fill in the response
+                my_msg->payloadAddr =
+                  TARGETING::UTIL::assertGetToplevelTarget()
+                  ->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
+
+                //Send response back to the primary HB to indicate valid freq attrs
+                err = MBOX::send(MBOX::HB_GET_PHYP_HRMOR_MSGQ,
+                                 msg, sender );
+                if (err)
+                {
+                    errlCommit(err,IPC_COMP_ID);
+                }
+
+                break;
+            }
 
             default:
 
