@@ -32,6 +32,7 @@
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: CI
+// EKB-Mirror-To: hw/ppe
 
 #ifndef MSS_PMIC_CONSTS_H
 #define MSS_PMIC_CONSTS_H
@@ -413,6 +414,7 @@ enum fields : uint8_t
 {
     INPUT_PORT_REG_PMIC_PAIR0   = 2,
     INPUT_PORT_REG_PMIC_PAIR1   = 3,
+    INPUT_PORT_REG_FAULT_N      = 6,
 
     EFUSE_OUTPUT_SETTING        = 0xFF,
     EFUSE_OUTPUT_OFF            = 0xFC,
@@ -450,6 +452,8 @@ enum regs
     AUTO_SEQ_CH_SEL     = 0x12,
     ALERT_CH_SEL        = 0x14,
     ALERT_PIN_CFG       = 0x17,
+
+    EVENT_FLAG          = 0x18,
 
     HIGH_EVENT_FLAGS    = 0x1A,
     LOW_EVENT_FLAGS     = 0x1C,
@@ -493,6 +497,33 @@ enum regs
     HIGH_TH_CH7         = 0x3D,
     EVENT_COUNT_CH7     = 0x3E,
     LOW_TH_CH7          = 0x3F,
+
+    RECENT_CH0_LSB      = 0xA0,
+    RECENT_CH1_LSB      = 0xA2,
+    RECENT_CH2_LSB      = 0xA4,
+    RECENT_CH3_LSB      = 0xA6,
+    RECENT_CH4_LSB      = 0xA8,
+    RECENT_CH5_LSB      = 0xAA,
+    RECENT_CH6_LSB      = 0xAC,
+    RECENT_CH7_LSB      = 0xAE,
+
+    MAX_CH0_LSB         = 0x60,
+    MAX_CH1_LSB         = 0x62,
+    MAX_CH2_LSB         = 0x64,
+    MAX_CH3_LSB         = 0x66,
+    MAX_CH4_LSB         = 0x68,
+    MAX_CH5_LSB         = 0x6A,
+    MAX_CH6_LSB         = 0x6C,
+    MAX_CH7_LSB         = 0x6E,
+
+    MIN_CH0_LSB         = 0x80,
+    MIN_CH1_LSB         = 0x82,
+    MIN_CH2_LSB         = 0x84,
+    MIN_CH3_LSB         = 0x86,
+    MIN_CH4_LSB         = 0x88,
+    MIN_CH5_LSB         = 0x8A,
+    MIN_CH6_LSB         = 0x8C,
+    MIN_CH7_LSB         = 0x8E,
 };
 
 ///

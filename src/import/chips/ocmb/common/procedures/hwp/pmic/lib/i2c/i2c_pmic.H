@@ -32,6 +32,7 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
+// EKB-Mirror-To: hw/ppe
 
 #ifndef _MSS_I2C_PMIC_H_
 #define _MSS_I2C_PMIC_H_
@@ -42,6 +43,15 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/c_str.H>
+
+#ifdef __PPE__
+    #define TARGTIDFORMAT "0x%08X"
+    #define MSSTARGID(T) T.get()
+#else
+    #include <generic/memory/lib/utils/c_str.H>
+    #define TARGTIDFORMAT "%s"
+    #define MSSTARGID(T) mss::c_str(T)
+#endif
 
 namespace mss
 {
@@ -138,8 +148,8 @@ inline fapi2::ReturnCode reg_write(const fapi2::Target<T>& i_target,
 
     // Use fapi2 putI2c interface to execute command
     FAPI_TRY(fapi2::putI2c(i_target, l_command),
-             "putI2C returned error for WRITE operation to 0x%02X on %s",
-             i_addr, mss::c_str(i_target));
+             "putI2C returned error for WRITE operation to 0x%02X on " TARGTIDFORMAT,
+             i_addr, MSSTARGID(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -208,7 +218,7 @@ inline fapi2::ReturnCode reg_read(const fapi2::Target<T>& i_target,
     reg_read_helper(i_target, i_addr, l_command);
 
     FAPI_TRY(fapi2::getI2c(i_target, mss::pmic::i2c::sizes::DATA_LENGTH, l_command, l_data),
-             "i2C read failed on %s for address 0x%02x", mss::c_str(i_target), i_addr);
+             "i2C read failed on " TARGTIDFORMAT " for address 0x%02x", MSSTARGID(i_target), i_addr);
 
     // Flush o_data_buffer to avoid stale data
     o_data_buffer.flush<0>();
@@ -219,8 +229,8 @@ inline fapi2::ReturnCode reg_read(const fapi2::Target<T>& i_target,
                  .set_ADDRESS(i_addr)
                  .set_SIZE_REQUESTED(mss::pmic::i2c::sizes::DATA_LENGTH)
                  .set_SIZE_RETURNED(l_data.size()),
-                 "%s I2C read returned vector size of %u. Expected %u",
-                 mss::c_str(i_target), l_data.size(), mss::pmic::i2c::sizes::DATA_LENGTH);
+                 TARGTIDFORMAT " I2C read returned vector size of %u. Expected %u",
+                 MSSTARGID(i_target), l_data.size(), mss::pmic::i2c::sizes::DATA_LENGTH);
 
     o_data_buffer = l_data[0];
 
