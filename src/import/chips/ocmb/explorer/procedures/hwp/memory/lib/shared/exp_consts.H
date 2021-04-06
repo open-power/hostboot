@@ -24,10 +24,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file explorer_check_for_ready.H
-/// @brief explorer_check_for_ready HWP declaration
+/// @file exp_consts.H
+/// @brief Explorer constants declaration
 ///
-// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
@@ -191,6 +191,17 @@ enum sizes
     MAX_BYTES_PER_PORT = MAX_DQ_BITS_PER_PORT / BITS_PER_BYTE,
     MAX_NIBBLES_PER_PORT = MAX_DQ_BITS_PER_PORT / BITS_PER_NIBBLE,
     MAX_RCW_RESP_ARRAY_SIZE = 27,
+    MAX_DIMM_PER_PROC = 16,
+
+    // Enumerations for the Explorer serial number attribute
+    // The hostboot team requested that we only use enumerations for attribute values
+    // These are attribute positions in an array, so moving them here
+    SERIAL_PART_NUMBER = 3,
+    SERIAL_PART_NUMBER_LEN = 7,
+    SERIAL_RAW_CARD = 12,
+    SERIAL_RAW_CARD_LEN = 2,
+    SERIAL_SERIAL_NUMBER = 14,
+    SERIAL_SERIAL_NUMBER_LEN = 12,
 };
 
 #endif

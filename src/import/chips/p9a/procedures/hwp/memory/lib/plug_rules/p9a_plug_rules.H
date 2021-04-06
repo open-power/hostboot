@@ -45,54 +45,6 @@ namespace plug_rule
 {
 
 ///
-/// @class SPD lookup key class
-/// @note allows us to lookup the min supported and latest SPD
-///
-struct spd_lookup_key
-{
-    uint16_t iv_module_mfg_id;
-    uint64_t iv_part_number;
-    uint32_t iv_card_rev;
-
-    ///
-    /// @brief Target based constructor
-    /// @param[in] i_target the DIMM target on which to operate
-    /// @param[out] o_rc SUCCESS if the function passes
-    /// @note Reads in the attributes
-    ///
-    spd_lookup_key(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc);
-
-    ///
-    /// @brief Target based constructor
-    /// @param[in] i_module_mfg_id the module manufacturing ID
-    /// @param[in] i_part_number the DIMM partnumber converted from ASCII
-    /// @param[in] i_card_rev the DIMM rawcard version converted from ASCII
-    /// @note Used to create the lookup table
-    ///
-    spd_lookup_key(const uint16_t i_module_mfg_id = 0,
-                   const uint64_t i_part_number = 0,
-                   const uint32_t i_card_rev = 0) :
-        iv_module_mfg_id(i_module_mfg_id),
-        iv_part_number(i_part_number),
-        iv_card_rev(i_card_rev)
-    {}
-
-    ///
-    /// @brief Less than comparison operator
-    /// @param[in] i_rhs the value to compare against
-    /// @return true if this spd_lookup_key is less than i_rhs
-    ///
-    bool operator<(const spd_lookup_key& i_rhs) const;
-
-    ///
-    /// @brief Not equal to comparison operator
-    /// @param[in] i_rhs the value to compare against
-    /// @return true if this spd_lookup_key is not equal to i_rhs
-    ///
-    bool operator!=(const spd_lookup_key& i_rhs) const;
-};
-
-///
 /// @brief Enforce the plug-rules we can do before mss_freq
 /// @param[in] i_target FAPI2 target (proc chip)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
@@ -127,59 +79,6 @@ fapi2::ReturnCode channel_a_before_channel_b_helper(const fapi2::Target<fapi2::T
         const std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>>& i_ocmbs,
         uint64_t& o_channel_a_pos,
         bool& o_pass);
-
-namespace check
-{
-
-///
-/// @brief Check that we recognize SPD lookup key and return the SPD versions associated with the key
-/// @param[in] i_target dimm target
-/// @param[in] i_key the SPD lookup key to be used to grab the combined revisions
-/// @param[out] o_minimum_combined_rev minimum SPD combined revisions
-/// @param[out] o_latest_combined_rev latest SPD combined revisions
-/// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
-///
-fapi2::ReturnCode spd_revision_key(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                   const spd_lookup_key& i_key,
-                                   uint16_t& o_minimum_combined_rev,
-                                   uint16_t& o_latest_combined_rev);
-
-///
-/// @brief Check DDIMM SPD revision and content revision versus minimum supported
-/// @param[in] i_target dimm target
-/// @param[in] i_key used for logging if an error occurs
-/// @param[in] i_spd_combined_revision the combined SPD revision and content
-/// @param[in] i_min_combined_rev SPD minimum combined revision information
-/// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
-/// @note The return code from this function is only used in unit tests.
-///
-fapi2::ReturnCode spd_minimum_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const spd_lookup_key& i_key,
-        const uint16_t i_spd_combined_rev,
-        const uint16_t i_min_combined_rev);
-
-///
-/// @brief Check DDIMM SPD revision and content revision versus latest supported
-/// @param[in] i_target dimm target
-/// @param[in] i_key used for logging if an error occurs
-/// @param[in] i_spd_combined_revision the combined SPD revision and content
-/// @param[in] i_latest_combined_rev latest SPD combined revision information
-/// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
-/// @note The return code from this function is only used in unit tests.
-///
-fapi2::ReturnCode spd_latest_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const spd_lookup_key& i_key,
-        const uint16_t i_spd_combined_rev,
-        const uint16_t i_latest_combined_rev);
-
-} // namespace check
-
-///
-/// @brief Enforce minimum functional DDIMM SPD revision
-/// @param[in] i_target port target
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
 
 } // ns plug_rule
 } // ns mss
