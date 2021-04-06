@@ -1,0 +1,376 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/ocmb/common/procedures/hwp/pmic/pmic_n_mode_detect.H $ */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file pmic_n_mode_detect.H
+/// @brief To be run periodically at runtime to determine n-mode states of 4U parts
+///
+// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: SBE
+// EKB-Mirror-To: hw/ppe
+
+#ifndef __PMIC_N_MODE_DETECT_H__
+#define __PMIC_N_MODE_DETECT_H__
+
+#include <fapi2.H>
+#include <lib/utils/pmic_consts.H>
+#include <hwp_data_stream.H>
+
+// Extra constants
+static constexpr double CURRENT_MULTIPLIER = 0.125;
+static constexpr double PHASE_MIN = 0.25;
+static constexpr double PHASE_MAX = 1.25;
+
+///
+/// @brief N Mode State to return
+///
+enum aggregate_state : uint8_t
+{
+    N_PLUS_1 = 0,
+    N_MODE = 1,
+    LOST = 2,
+    GI2C_I2C_FAIL = 3,
+    DIMM_NOT_4U = 4,
+};
+
+///
+/// @brief States for the pmics to be returned in a uint8_t bitmap
+///
+enum pmic_state : uint8_t
+{
+    DECONFIGURED       = 0b10000000,
+    I2C_FAIL           = 0b00000100,
+    CURRENT_IMBALANCE  = 0b00000010,
+    PWR_NOT_GOOD       = 0b00000001,
+};
+
+typedef fapi2::ReturnCode (*pmic_n_mode_detect_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+    fapi2::hwp_data_ostream&);
+
+///
+/// @brief Struct of telemetry data to populate from ADC
+///
+struct __attribute__((__packed__)) adc_telemetry
+{
+    uint8_t iv_event_low_flag = 0;
+
+    // These are the MSB and LSB,
+    // two combined 8 bit registers
+    uint16_t iv_recent_ch0_mV = 0;
+    uint16_t iv_recent_ch1_mV = 0;
+    uint16_t iv_recent_ch2_mV = 0;
+    uint16_t iv_recent_ch3_mV = 0;
+    uint16_t iv_recent_ch4_mV = 0;
+    uint16_t iv_recent_ch5_mV = 0;
+    uint16_t iv_recent_ch6_mV = 0;
+    uint16_t iv_recent_ch7_mV = 0;
+
+    uint16_t iv_max_ch0_mV = 0;
+    uint16_t iv_max_ch1_mV = 0;
+    uint16_t iv_max_ch2_mV = 0;
+    uint16_t iv_max_ch3_mV = 0;
+    uint16_t iv_max_ch4_mV = 0;
+    uint16_t iv_max_ch5_mV = 0;
+    uint16_t iv_max_ch6_mV = 0;
+    uint16_t iv_max_ch7_mV = 0;
+
+    uint16_t iv_min_ch0_mV = 0;
+    uint16_t iv_min_ch1_mV = 0;
+    uint16_t iv_min_ch2_mV = 0;
+    uint16_t iv_min_ch3_mV = 0;
+    uint16_t iv_min_ch4_mV = 0;
+    uint16_t iv_min_ch5_mV = 0;
+    uint16_t iv_min_ch6_mV = 0;
+    uint16_t iv_min_ch7_mV = 0;
+
+};
+
+///
+/// @brief Struct of telemetry data to populate from PMICs
+///
+struct __attribute__((__packed__)) pmic_telemetry
+{
+    // Status register
+    // Direct read from 8 bit register
+    uint8_t iv_r08 = 0;
+    uint8_t iv_r09 = 0;
+    uint8_t iv_r0a = 0;
+    uint8_t iv_r0b = 0;
+
+    // Values in mA
+    uint16_t iv_swa_current_mA = 0;
+    uint16_t iv_swb_current_mA = 0;
+    uint16_t iv_swc_current_mA = 0;
+    uint16_t iv_swd_current_mA = 0;
+
+    // Value in mV
+    uint16_t iv_vin_bulk_mV = 0;
+
+    // Temperature in C
+    uint16_t iv_temp_c = 0;
+
+    // Status register
+    // Direct read from 8 bit register
+    uint8_t iv_r33 = 0;
+};
+
+///
+/// @brief Struct of telemetry data
+///
+struct __attribute__((__packed__)) telemetry_data
+{
+    uint8_t iv_gpio1_port_state = 0;
+    uint8_t iv_gpio2_port_state = 0;
+
+    pmic_telemetry iv_pmic1;
+    pmic_telemetry iv_pmic2;
+    pmic_telemetry iv_pmic3;
+    pmic_telemetry iv_pmic4;
+
+    adc_telemetry iv_adc1;
+    adc_telemetry iv_adc2;
+};
+
+///
+/// @brief Runtime N-Mode Detect / Telemetry Info to return to SBE
+///
+struct __attribute__((__packed__)) runtime_n_mode_telem_info
+{
+    // Revision of this struct formatting, to be updated
+    // when the structure changes
+    uint8_t iv_revision = 0x01;
+
+    aggregate_state iv_aggregate_error = aggregate_state::N_PLUS_1;
+    uint8_t iv_pmic1_errors = 0;
+    uint8_t iv_pmic2_errors = 0;
+    uint8_t iv_pmic3_errors = 0;
+    uint8_t iv_pmic4_errors = 0;
+    telemetry_data iv_telemetry_data;
+};
+
+///
+/// @brief PMIC struct to emulate an "optional" type
+///
+struct pmic_info
+{
+    ///
+    /// @brief Default ctor
+    ///
+    pmic_info() = default;
+
+    ///
+    /// @brief Construct a new pmic state object
+    /// @param[in] i_pmic present PMIC target
+    ///
+    pmic_info(fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+    {
+        iv_pmic = i_pmic;
+        iv_state = 0;
+    }
+
+    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic;
+    uint8_t iv_state = pmic_state::DECONFIGURED;
+    telemetry_data iv_telemetry_data;
+};
+
+///
+/// @brief Get the gpio port states
+///
+/// @param[in] i_gpio1 GPIO1
+/// @param[in] i_gpio2 GPIO2
+/// @param[out] o_data data struct
+///
+void populate_gpio_port_states(
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio2,
+    telemetry_data& o_data);
+
+///
+/// @brief Populate the pmic_data struct for the given pmic
+///
+/// @param[in,out] io_pmic pmic_info class including target / state info
+/// @param[out] o_pmic_data pmic_data struct
+///
+void populate_pmic_data(
+    pmic_info& io_pmic,
+    pmic_telemetry& o_pmic_data);
+
+///
+/// @brief Get the adc scale factor object
+///
+/// @param[in] i_adc_num ADC device enum (expected to be ADC1 or ADC2)
+/// @param[in] i_adc_reg Register
+/// @return double scale factor
+///
+double get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint8_t i_adc_reg);
+
+///
+/// @brief Populate the ADC data struct
+///
+/// @param[in] i_adc ADC target
+/// @param[in] i_adc_num ADC number enum
+/// @param[out] o_adc_data data struct
+///
+void populate_adc_data(
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc,
+    const mss::generic_i2c_slave i_adc_num,
+    adc_telemetry& o_adc_data);
+
+///
+/// @brief Write a register of a PMIC target, helper function for pmic_info type
+///
+/// @param[in,out] io_pmic pmic_info class including target / state info
+/// @param[in] i_reg register
+/// @param[in] i_data Input  buffer
+/// @return fapi2::ReturnCode
+///
+void reg_write(pmic_info& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data);
+
+///
+/// @brief Read a register of a PMIC target, helper function for pmic_info type
+///
+/// @param[in,out] io_pmic pmic_info class including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_output output buffer
+/// @return fapi2::ReturnCode
+///
+void reg_read(pmic_info& io_pmic, const uint8_t i_reg, fapi2::buffer<uint8_t>& o_output);
+
+///
+/// @brief Check if we are 4U by pinging the GI2C targets
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @return true if 4U, false if not
+///
+bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+
+///
+/// @brief Check the GPIO for n mode detection
+///
+/// @param[in] i_gpio GPIO Expander target
+/// @param[in,out] io_pmic1 PMIC1/3 pmic_info class including target / state info
+/// @param[in,out] io_pmic2 PMIC2/4 pmic_info class including target / state info
+/// @return aggregate_state N mode state according to validation check pass
+///
+aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
+                           pmic_info& io_pmic1,
+                           pmic_info& io_pmic2);
+
+///
+/// @brief Check the ADC device for EVENT_FLAG
+///
+/// @param[in] i_adc ADC target
+///
+aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc);
+
+///
+/// @brief Compare two phases provided from two pmics, declaring N-mode & pmic states as needed
+///
+/// @param[in,out] io_first_pmic First pmic_info class including target / state info
+/// @param[in,out] io_second_pmic Second pmic_info class including target / state info
+/// @param[in] i_phase0 One phase
+/// @param[in] i_phase1 Other phase
+/// @param[out] o_aggregate_state Aggregate state, to be updated if needed
+///
+void phase_comparison(
+    pmic_info& io_first_pmic,
+    pmic_info& io_second_pmic,
+    const double i_phase0,
+    const double i_phase1,
+    aggregate_state& o_aggregate_state);
+
+///
+/// @brief Read a double phase voltage domain, check for N-Mode
+///
+/// @param[in,out] io_first_pmic First pmic_info class including target / state info
+/// @param[in,out] io_second_pmic Second pmic_info class including target / state info
+/// @param[in] i_rail_1 One phase of voltage - register to read
+/// @param[in] i_rail_2 Other phase of voltage - register to read
+/// @param[out] o_aggregate_state Aggregate state output, to be updated if needed
+/// @return aggregate_state Aggregate state, updated to N-Mode if failed checks
+///
+void read_double_domain(
+    pmic_info& io_first_pmic,
+    pmic_info& io_second_pmic,
+    const uint8_t i_rail_1,
+    const uint8_t i_rail_2,
+    aggregate_state& o_aggregate_state);
+
+///
+/// @brief Read a single phase voltage domain, check for N-Mode
+///
+/// @param[in,out] io_first_pmic First pmic_info class including target / state info
+/// @param[in,out] io_second_pmic Second pmic_info class including target / state info
+/// @param[in] i_rail_1 Rail register to read
+/// @param[out] o_aggregate_state Aggregate state output, to be updated if needed
+/// @return aggregate_state Aggregate state, updated to N-Mode if failed checks
+///
+void read_single_domain(
+    pmic_info& io_first_pmic,
+    pmic_info& io_second_pmic,
+    const uint8_t i_rail_1,
+    aggregate_state& o_aggregate_state);
+
+///
+/// @brief Perform voltage n mode checks
+///
+/// @param[in] i_pmics PMICS in sorted order
+/// @return aggregate_state state of the part
+///
+aggregate_state voltage_checks(std::vector<pmic_info>& i_pmics);
+
+///
+/// @brief Get the pmics object
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @return std::vector<pmic_info>
+///
+std::vector<pmic_info> get_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+
+///
+/// @brief Send the runtime_n_mode_telem_info struct
+///
+/// @param[in] i_info runtime_n_mode_telem_info struct
+/// @param[out] o_data hwp_data_ostream data stream
+///
+void send_struct(runtime_n_mode_telem_info& i_info, fapi2::hwp_data_ostream& o_data);
+
+extern "C"
+{
+    ///
+    /// @brief Runtime N-Mode detection for 4U parts
+    /// @param[in] i_ocmb_target ocmb target
+    /// @param[out] o_data hwp_data_ostream of struct information
+    /// @return FAPI2_RC_SUCCESS (0)
+    ///
+    fapi2::ReturnCode pmic_n_mode_detect(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        fapi2::hwp_data_ostream& o_data);
+}
+#endif
