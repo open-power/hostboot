@@ -188,6 +188,17 @@ enum sizes
     MAX_BYTES_PER_PORT = MAX_DQ_BITS_PER_PORT / BITS_PER_BYTE,
     MAX_NIBBLES_PER_PORT = MAX_DQ_BITS_PER_PORT / BITS_PER_NIBBLE,
     MAX_RCW_RESP_ARRAY_SIZE = 27,
+    MAX_DIMM_PER_PROC = 16,
+
+    // Enumerations for the Explorer serial number attribute
+    // The hostboot team requested that we only use enumerations for attribute values
+    // These are attribute positions in an array, so moving them here
+    SERIAL_PART_NUMBER = 3,
+    SERIAL_PART_NUMBER_LEN = 7,
+    SERIAL_RAW_CARD = 12,
+    SERIAL_RAW_CARD_LEN = 2,
+    SERIAL_SERIAL_NUMBER = 14,
+    SERIAL_SERIAL_NUMBER_LEN = 12,
 };
 
 #endif

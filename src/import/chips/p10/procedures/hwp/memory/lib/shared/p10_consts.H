@@ -49,24 +49,6 @@ namespace p10
 {
 
 ///
-/// @brief common p10 sizes
-///
-enum sizes
-{
-    MAX_DIMM_PER_PROC = 16,
-
-    // Enumerations for the Explorer serial number attribute
-    // The hostboot team requested that we only use enumerations for attribute values
-    // These are attribute positions in an array, so moving them here
-    SERIAL_PART_NUMBER = 3,
-    SERIAL_PART_NUMBER_LEN = 7,
-    SERIAL_RAW_CARD = 10,
-    SERIAL_RAW_CARD_LEN = 4,
-    SERIAL_SERIAL_NUMBER = 14,
-    SERIAL_SERIAL_NUMBER_LEN = 12,
-};
-
-///
 /// @brief explorer ffdc codes
 ///
 enum ffdc_codes
