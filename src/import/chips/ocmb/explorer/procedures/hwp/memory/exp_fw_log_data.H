@@ -40,22 +40,6 @@
 #include <vector>
 #include <lib/inband/exp_fw_log.H>
 
-// Required for Cronus
-typedef fapi2::ReturnCode (*exp_active_log_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-    std::vector<uint8_t>& );
-
-typedef fapi2::ReturnCode (*exp_saved_log_FP_t) (
-    const mss::exp::ib::exp_image,
-    const uint32_t,
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-    std::vector<uint8_t>& );
-
-typedef fapi2::ReturnCode (*exp_clear_active_log_FP_t)(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& );
-
-typedef fapi2::ReturnCode (*exp_clear_saved_log_FP_t)(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& );
 
 // These are the starting addresses of the circular buffer where the active logs
 // are kept in Explorer RAM, for each known FW version

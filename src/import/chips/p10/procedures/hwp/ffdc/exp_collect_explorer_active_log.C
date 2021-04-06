@@ -34,8 +34,8 @@
 //------------------------------------------------------------------------------
 
 #include <fapi2.H>
-#include "exp_collect_explorer_log.H"
-#include "exp_collect_explorer_active_log.H"
+#include <exp_collect_explorer_log.H>
+#include <exp_collect_explorer_active_log.H>
 
 /// See header
 fapi2::ReturnCode exp_collect_explorer_active_log(

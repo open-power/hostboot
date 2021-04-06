@@ -35,7 +35,7 @@
 //------------------------------------------------------------------------------
 
 #include <fapi2.H>
-#include "exp_collect_explorer_log.H"
+#include <exp_collect_explorer_log.H>
 #include <exp_fw_log_data.H>
 
 struct explog_section_header_t
@@ -118,22 +118,21 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
         case ACTIVE_LOG:
             FAPI_INF( "exp_collect_explorer_logs: Entering ... "
                       "Grab ACTIVE_LOG with max data size: 0x%04X", l_allowable_size );
-            FAPI_EXEC_HWP(l_rc, exp_active_log, l_target_ocmb,
-                          l_explorer_log_data);
+            l_rc = exp_active_log(l_target_ocmb, l_explorer_log_data);
             break;
 
         case SAVED_LOG_A:
             FAPI_INF( "exp_collect_explorer_logs: Entering ... "
                       "Grab SAVED_LOG_A with max data size: 0x%04X", l_allowable_size );
-            FAPI_EXEC_HWP(l_rc, exp_saved_log, mss::exp::ib::EXP_IMAGE_A, 0, l_target_ocmb,
-                          l_explorer_log_data);
+            l_rc = exp_saved_log(mss::exp::ib::EXP_IMAGE_A, 0, l_target_ocmb,
+                                 l_explorer_log_data);
             break;
 
         case SAVED_LOG_B:
             FAPI_INF( "exp_collect_explorer_logs: Entering ... "
                       "Grab SAVED_LOG_B with max data size: 0x%04X", l_allowable_size );
-            FAPI_EXEC_HWP(l_rc, exp_saved_log, mss::exp::ib::EXP_IMAGE_B, 0, l_target_ocmb,
-                          l_explorer_log_data);
+            l_rc = exp_saved_log(mss::exp::ib::EXP_IMAGE_B, 0, l_target_ocmb,
+                                 l_explorer_log_data);
             break;
     }
 
