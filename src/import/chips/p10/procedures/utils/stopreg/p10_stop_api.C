@@ -819,12 +819,20 @@ STATIC StopReturnCode_t lookUpScomRestoreRegion( void * i_pImage, const ScomSect
     l_quadId            =   ( i_instanceId >> 2 );
 
     l_relativeCorePos   =   i_instanceId % MAX_CORES_PER_QUAD;
+    #ifndef P10_STOP_API_TOOL
     l_pCpmrHdr          =   ( CpmrHeader_t *) ( (uint8_t *) i_pImage + CPMR_HOMER_OFFSET );
+    #else
+    l_pCpmrHdr          =   ( CpmrHeader_t *) ( (uint8_t *) i_pImage );
+    #endif
     l_scomLen           =   SWIZZLE_4_BYTE(l_pCpmrHdr->iv_maxCoreL2ScomEntry) +
                             SWIZZLE_4_BYTE(l_pCpmrHdr->iv_maxEqL3ScomEntry);
     l_scomLen           =   ( l_scomLen * SCOM_RESTORE_ENTRY_SIZE );
 
+    #ifndef P10_STOP_API_TOOL
     l_offset            =   ( l_scomLen * l_quadId * MAX_CORES_PER_QUAD  ) + SCOM_RESTORE_HOMER_OFFSET;
+    #else
+    l_offset            =   ( l_scomLen * l_quadId * MAX_CORES_PER_QUAD  ) + SCOM_RESTORE_CPMR_OFFSET;
+    #endif
 
     MY_INF( "QUAD_ID 0x%08x BASE OFFSET 0x%08x", l_quadId, l_offset );
 
@@ -890,7 +898,12 @@ STATIC StopReturnCode_t lookUpScomRestoreEntry( void * i_pImage, const ScomSecti
     o_pScomDat->iv_lastEntryOffset  =   0x00;
     o_pScomDat->iv_entryMatchOffset =   0x00;
     o_pScomDat->iv_matchFound       =   0x00;
+
+    #ifndef P10_STOP_API_TOOL
     l_pCpmrHdr          =   ( CpmrHeader_t * ) ( (uint8_t *) i_pImage + CPMR_HOMER_OFFSET );
+    #else
+    l_pCpmrHdr          =   ( CpmrHeader_t * ) ( (uint8_t *) i_pImage );
+    #endif
     l_pScomByte         =   ( uint8_t * )( (uint8_t *) i_pImage + o_pScomDat->iv_subRegionBaseOffset );
     l_pScom   =   (ScomEntry_t *)( l_pScomByte );
 
@@ -1606,7 +1619,9 @@ StopReturnCode_t proc_stop_save_cpureg(  void* const i_pImage,
 
     StopReturnCode_t       l_rc         =   STOP_SAVE_SUCCESS;    // procedure return code
     SmfSprRestoreRegion_t* l_sprRegion  =   NULL;
+    #ifndef P10_STOP_API_TOOL
     Homerlayout_t* l_pHomer             =   NULL;
+    #endif
 
     do
     {
@@ -1644,9 +1659,13 @@ StopReturnCode_t proc_stop_save_cpureg(  void* const i_pImage,
             break;
         }
 
-
+        #ifndef P10_STOP_API_TOOL
         l_pHomer        =   ( Homerlayout_t *) i_pImage;
         l_sprRegion     =   ( SmfSprRestoreRegion_t* )&l_pHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_coreSelfRestore[0];
+		#else
+		l_sprRegion		=   ( SmfSprRestoreRegion_t *) ( (uint8_t *)i_pImage + SMF_SELF_RESTORE_CODE_SIZE ); 
+		#endif
+
         l_sprRegion    +=   coreId;
 
         if( threadScopeReg )

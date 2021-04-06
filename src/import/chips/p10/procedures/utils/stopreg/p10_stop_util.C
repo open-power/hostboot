@@ -75,7 +75,12 @@ STATIC StopReturnCode_t  isFusedMode( void* const i_pImage, bool* o_fusedMode )
             break;
         }
 
+#ifndef P10_STOP_API_TOOL
         l_pMagic            =   (uint32_t*)( (uint8_t*)i_pImage + CPMR_HOMER_OFFSET  + 8 );
+#else
+        l_pMagic            =   (uint32_t*)( (uint8_t*)i_pImage + 8 );
+#endif
+
         l_cpmrCheckWord     =   SWIZZLE_4_BYTE( *l_pMagic );
 
         if( CPMR_REGION_CHECK_WORD != l_cpmrCheckWord )
@@ -86,7 +91,11 @@ STATIC StopReturnCode_t  isFusedMode( void* const i_pImage, bool* o_fusedMode )
             break;
         }
 
+#ifndef P10_STOP_API_TOOL
         l_pCpmr     =   (CpmrHeader_t*)( (uint8_t*)i_pImage + CPMR_HOMER_OFFSET );
+#else
+        l_pCpmr     =   (CpmrHeader_t*)( (uint8_t*)i_pImage );
+#endif
 
         if( (uint8_t) FUSED_CORE_MODE == l_pCpmr->iv_fusedMode )
         {
