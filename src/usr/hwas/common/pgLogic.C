@@ -91,6 +91,12 @@ namespace PARTIAL_GOOD
     // check EC data because those are in their own targets.
     const pg_mask_t EQ_PG_MASK = 0x00080600;
 
+    // Checks the nmmu bit of the N1_S entry.
+    const pg_mask_t NMMU1_PG_MASK = 0x004000; //bit9 of 24
+
+    // Only applicable to NMMU1 in chiplet N1_S(3)
+    const cu_mask_t NMMU1_CU_MASK = ( cu_mask(3) );
+
     // Checks the pau bit of a PAUC entry. This mask is applicable for PAU with
     // CU = 0, 3, 4, or 6.
     const pg_mask_t PAU_R1_PG_MASK = 0x00040000;
@@ -492,9 +498,16 @@ namespace PARTIAL_GOOD
         { TARGETING::TYPE_OCMB_CHIP },
         { TARGETING::TYPE_MEM_PORT },
 
-        // The NMMU is marked always-good in an always-good chiplet in
-        // the PGV so we don't need to check anything.
-        { TARGETING::TYPE_NMMU },
+        // NMMU0 is marked always-good in an always-good chiplet in
+        // the PG, but NMMU1 could be disabled.
+        { TARGETING::TYPE_NMMU,
+          MODEL_MASK_ALL,
+          NMMU1_PG_MASK,
+          ALL_OFF_AG_MASK,
+          USE_CHIPLET_ID,
+          NMMU1_CU_MASK,
+          NO_SPECIAL_RULE
+        },
 
         /// PAU rules
 

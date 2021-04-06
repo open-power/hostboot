@@ -2823,6 +2823,80 @@
   </attribute>
 
   <attribute>
+    <complexType>
+      <description>
+        Structure consisting of 5 booleans, and 3 reserved
+        bits
+      </description>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+             0b0: Target is not powered on (is off);
+             0b1: Target is powered on;
+            </description>
+        <name>poweredOn</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+             0b0: Target is not present in the system;
+             0b1: Target is present in the system
+            </description>
+        <name>present</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+             0b0: Target is not functional;
+             0b1: Target is functional
+            </description>
+        <name>functional</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>FSP Only, used by DUMP applet;
+             0b0: target is dump capabile;
+             0b1: target is not dump capabile;
+            </description>
+        <name>dumpfunctional</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Set for speculative deconfig;
+             0b0: target not speculative deconfig;
+             0b1: target is speculatively deconfigured;
+            </description>
+        <name>specdeconfig</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>3</bits>
+        <default>0</default>
+        <description>Reserved for future use</description>
+        <name>reserved</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <description>
+      Copy of HWAS_STATE that is used for save/restore operations
+      during testcase execution.
+    </description>
+    <id>HWAS_STATE_TESTSAVE</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <description>Designates the speed at which a given I2C bus should run.
         Creator: MRW
         Purpose: Used by FW to know the fastest possible bus speed that all of

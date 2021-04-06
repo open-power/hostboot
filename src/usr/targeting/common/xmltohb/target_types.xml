@@ -62,6 +62,9 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <id>HWAS_STATE_TESTSAVE</id>
+    </attribute>
+    <attribute>
       <id>MODEL</id>
     </attribute>
     <attribute>
@@ -3073,7 +3076,8 @@
       <default>
         <field>
           <id>childRollupAllowed</id>
-          <value>1</value>
+          <!-- PAUC needed for IOPPEs so leave enabled if we lose the PAUs -->
+          <value>0</value>
         </field>
         <field>
           <id>deconfigureParent</id>

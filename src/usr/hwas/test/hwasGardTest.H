@@ -139,6 +139,7 @@ Target* getAnyTargetByType(const Target& i_parent,
 
 const size_t NMMU_1_CHIPLET = 3;
 
+// PAUs are sparsely populated: 0,3,4,5,6,7
 const size_t PAU_0_INDEX = 0,
              PAU_4_INDEX = 2,
              PAU_5_INDEX = 3;
@@ -266,10 +267,16 @@ void saveSystemState()
         // Get the original state of the child
         const HwasState l_originalState = l_child->getAttr<ATTR_HWAS_STATE>();
 
-        const ATTR_SAVED_STATE_UINT8_type l_savedState = l_originalState.functional;
+        // copy in all of the fields
+        ATTR_HWAS_STATE_TESTSAVE_type l_savedState;
+        l_savedState.poweredOn = l_originalState.poweredOn;
+        l_savedState.present = l_originalState.present;
+        l_savedState.functional = l_originalState.functional;
+        l_savedState.dumpfunctional = l_originalState.dumpfunctional;
+        l_savedState.specdeconfig = l_originalState.specdeconfig;       
 
         // Store it in a scratch attribute for later
-        l_child->setAttr<ATTR_SAVED_STATE_UINT8>(l_savedState);
+        l_child->setAttr<ATTR_HWAS_STATE_TESTSAVE>(l_savedState);
         TS_TRACE("saveSystemState: SAVED HWAS_STATE for "
             "HUID=0x%X l_savedState=0x%X",
             get_huid(l_child), l_savedState);
@@ -303,7 +310,7 @@ void restoreSystemState()
     for (const auto l_child : pChildList)
     {
         // Get original HwasState from scratch attribute
-        const auto l_savedState = l_child->getAttr<ATTR_SAVED_STATE_UINT8>();
+        const auto l_savedState = l_child->getAttr<ATTR_HWAS_STATE_TESTSAVE>();
 
         // Update current HwasState
         HwasState l_state = l_child->getAttr<ATTR_HWAS_STATE>();
@@ -311,7 +318,12 @@ void restoreSystemState()
             "functional=0x%X savedState=0x%X",
             get_huid(l_child), l_state.functional, l_savedState);
 
-        l_state.functional = l_savedState != 0;
+        // copy in all of the fields
+        l_state.poweredOn = l_savedState.poweredOn;
+        l_state.present = l_savedState.present;
+        l_state.functional = l_savedState.functional;
+        l_state.dumpfunctional = l_savedState.dumpfunctional;
+        l_state.specdeconfig = l_savedState.specdeconfig;       
 
         TS_TRACE("restoreSystemState: SETTING HUID=0x%X "
             "functional=0x%X savedState=0x%X",
@@ -676,8 +688,9 @@ public:
 
             if (l_restoState.functional != l_originalState.functional)
             {
-                TS_FAIL("Original state not restored. original = %d, current = %d",
-                        l_originalState.functional, l_restoState.functional);
+                TS_FAIL("Original state not restored. original = %d, current = %d (huid=%.8X)",
+                        l_originalState.functional, l_restoState.functional,
+                        get_huid(l_pTarget));
             }
         }
         while (0);
@@ -8376,7 +8389,88 @@ public:
         } // for
         TS_INFO("testCdmDomainSet: Ended");
     }
-};
+
+
+    /**
+     *  @brief Test the deconfig rule for NMMU targets
+     */
+    void testDeconfigureNMMU()
+    {
+        // NMMU0 should knock out its parent chip
+        // NMMU1 should knock out PAUs 0,4,5
+        TS_INFO("testDeconfigureNMMU: Started");
+
+        TargetHandleList l_procList;
+        getAllChips(l_procList, TYPE_PROC);
+
+        for (Target* const l_proc : l_procList)
+        {
+            const TargetHandleList l_pauList = getSortedPAUList(*l_proc);
+
+            TargetHandleList l_nmmulist;
+            getChildChiplets(l_nmmulist, l_proc, TYPE_NMMU);
+
+            for( auto l_nmmu : l_nmmulist )
+            {
+                saveSystemState();
+
+                // knock out the NMMU
+                TS_INFO("testDeconfigureNMMU> Deconfiguring NMMU %.8X", get_huid(l_nmmu));
+                theDeconfigGard().deconfigureTarget(*l_nmmu, 0);
+
+                if( l_nmmu->getAttr<ATTR_REL_POS>() == 0 )
+                {
+                    if( l_proc->getAttr<ATTR_HWAS_STATE>().functional )
+                    {
+                        TS_FAIL("testDeconfigureNMMU> Proc %.8X is still functional after deconfiguring NMMU0 %.8X",
+                                get_huid(l_proc), get_huid(l_nmmu));
+                    }
+                    else
+                    {
+                        TS_INFO("testDeconfigureNMMU> Proc %.8X is not functional after deconfiguring NMMU0 %.8X",
+                                get_huid(l_proc), get_huid(l_nmmu));
+                    }
+                }
+                else //NMMU1
+                {
+                    bool founderror = false;
+                    if( l_pauList[PAU_0_INDEX]->getAttr<ATTR_HWAS_STATE>().functional )
+                    {
+                        TS_FAIL("testDeconfigureNMMU> PAU0 %.8X is still functional after deconfiguring NMMU1 %.8X",
+                                get_huid(l_pauList[0]), get_huid(l_nmmu));
+                        founderror = true;
+                    }
+                    if( l_pauList[PAU_4_INDEX]->getAttr<ATTR_HWAS_STATE>().functional )
+                    {
+                        TS_FAIL("testDeconfigureNMMU> PAU4 %.8X is still functional after deconfiguring NMMU1 %.8X",
+                                get_huid(l_pauList[4]), get_huid(l_nmmu));
+                        founderror = true;
+                    }
+                    if( l_pauList[PAU_5_INDEX]->getAttr<ATTR_HWAS_STATE>().functional )
+                    {
+                        TS_FAIL("testDeconfigureNMMU> PAU5 %.8X is still functional after deconfiguring NMMU1 %.8X",
+                                get_huid(l_pauList[5]), get_huid(l_nmmu));
+                        founderror = true;
+                    }
+                    if( !l_proc->getAttr<ATTR_HWAS_STATE>().functional )
+                    {
+                        TS_FAIL("testDeconfigureNMMU> Proc %.8X is not functional after deconfiguring NMMU1 %.8X",
+                                get_huid(l_proc), get_huid(l_nmmu));
+                        founderror = true;
+                    }
+                    if( !founderror )
+                    {
+                        TS_INFO("testDeconfigureNMMU> PAUs and Proc have correct functional states after deconfiguring NMMU1 %.8X",
+                                get_huid(l_nmmu));
+                    }
+                }
+
+                restoreSystemState();
+            }
+        }
+
+        TS_INFO("testDeconfigureNMMU: Ended");
+    }};
 
 #undef DISABLE_UNIT_TESTS
 #undef DISABLE_MBA_UNIT_TESTS

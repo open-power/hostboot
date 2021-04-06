@@ -402,6 +402,27 @@ void DeconfigGard::_deconfigureByAssoc(
         // We do NOT need to deconfigure the mapped PAU here, it can still be
         // used for other links.
     }
+    else if (l_targetType == TYPE_NMMU)
+    {
+        auto l_unit = i_target.getAttr<ATTR_CHIP_UNIT>();
+
+        // NMMU1 will take out the associated PAUs (0,4,5)
+        if( l_unit == 1 ) //NMMU1
+        {
+            const Target* l_parentChip = getParentChip(&i_target);
+            TargetHandleList l_pauList;
+            getChildChiplets(l_pauList,l_parentChip,TYPE_PAU);
+            for( auto pau : l_pauList )
+            {
+                auto pos = pau->getAttr<ATTR_CHIP_UNIT>();
+                if( (pos==0) || (pos==4) || (pos==5) )
+                {
+                    pTempList.push_back(pau);
+                }
+            }
+        }
+        // NMMU0 will take out the entire proc chip in _deconfigParentAssoc
+    }
 
     // Append the temporary list to the child list
     if (!pTempList.empty())
@@ -742,17 +763,17 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
             case TYPE_NMMU:
             {
-                const ATTR_CHIP_UNIT_type NEST0_CHIP_UNIT = 2;
-
                 HWAS_DBG("_deconfigParentAssoc NMMU deconfig parent proc");
                 // If this is NMMU0 then we must knock out the parent
                 // processor chip, otherwise we do the standard
                 // _deconfigAffinityParent call and break.
-                if(i_target.getAttr<ATTR_CHIP_UNIT>() != NEST0_CHIP_UNIT)
+                if(i_target.getAttr<ATTR_CHIP_UNIT>() != 0)
                 {
+                    HWAS_DBG("NMMU1 case - default");
                     _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
                     break;
                 }
+                HWAS_DBG("NMMU0 case - take out the chip");
 
                 // Otherwise if we are deconfiguring NMMU0 we must also deconfig
                 // it's parent processor chip so fall through to the next case
@@ -796,7 +817,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
             default:
             {
-              HWAS_DBG("_deconfigParentAssoc default case _deconfigAffinityParent");
+              HWAS_INF("_deconfigParentAssoc default case _deconfigAffinityParent");
               // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MC, TYPE_MI, TYPE_DMI,
               // TYPE_MCC, TYPE_MBA, TYPE_PHB, TYPE_OBUS_BRICK, TYPE_EQ
               _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
