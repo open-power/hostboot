@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,7 @@ void test_fapi2GetChildren()
         std::vector<Target<fapi2::TARGET_TYPE_MEM_PORT> > l_childMEMPORTs;
         std::vector<Target<fapi2::TARGET_TYPE_OMIC> > l_childOmics;
         std::vector<Target<fapi2::TARGET_TYPE_IOHS> > l_childIohss;
+        std::vector<Target<fapi2::TARGET_TYPE_IOLINK> > l_childIolinks;
 
         if (isHwValid(l_proc, MY_MC)
             && isHwValid(l_proc, MY_MI)
@@ -253,6 +254,23 @@ void test_fapi2GetChildren()
             if(l_actualSize != l_expectedSize)
             {
                 TS_FAIL("test_fapi2GetChildren:: IOHSs per PAUC mismatch. "
+                        "Expected %d, returned %d",
+                        l_expectedSize, l_actualSize);
+                numFails++;
+                break;
+            }
+
+            // Verify the IOHS/IOLINK relationship
+
+            l_childIolinks = fapi2_iohsTarget.getChildren<fapi2::TARGET_TYPE_IOLINK>(TARGET_STATE_PRESENT);
+
+            l_actualSize = l_childIolinks.size();
+            l_expectedSize = IOLINK_PER_IOHS;
+            numTests++;
+
+            if (l_actualSize != l_expectedSize)
+            {
+                TS_FAIL("test_fapi2GetChildren:: IOLINKs per IOHS mismatch. "
                         "Expected %d, returned %d",
                         l_expectedSize, l_actualSize);
                 numFails++;

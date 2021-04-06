@@ -746,9 +746,7 @@ void addNodeCommBusCallout(TARGETING::Target* i_pTarget,
                                           l_bus_type,
                                           i_priority);
 
-                    // TODO RTC: 256842
                     // Add HW Callout to deconfigure this SMPGROUP
-                    // NOTE:  GARD is not supported at SMPGORUP level
                     io_log->addHwCallout(l_smpGroup,
                                          i_priority,
                                          HWAS::DECONFIG,
@@ -808,4 +806,3 @@ void addNodeCommBusCallout(TARGETING::Target* i_pTarget,
 } // End NODECOMM namespace
 
 } // End SECUREBOOT namespace
-

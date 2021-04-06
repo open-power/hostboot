@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #define MEM_PORT_PER_OCMB    1
 #define OMIC_PER_PAUC        2
 #define IOHS_PER_PAUC        2
+#define IOLINK_PER_IOHS      2
 
 #define SIMULATED_GOOD_CORES 4
 
@@ -102,6 +103,7 @@ enum FAPI2_TEST_TARGET_ID {
     MY_OCMB,
     MY_MEM_PORT,
     MY_IOHS,
+    MY_IOLINK,
     MY_PAU,
     MY_PAUC,
     NUM_TARGETS
@@ -174,6 +176,7 @@ fapi2::Target<fapi2::TARGET_TYPE_MCC>        fapi2_mccTarget(targeting_targets[M
 fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>  fapi2_ocmbTarget(targeting_targets[MY_OCMB]);                   \
 fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>   fapi2_memportTarget(targeting_targets[MY_MEM_PORT]);            \
 fapi2::Target<fapi2::TARGET_TYPE_IOHS>       fapi2_iohsTarget(targeting_targets[MY_IOHS]);                   \
+fapi2::Target<fapi2::TARGET_TYPE_IOLINK>     fapi2_iolinkTarget(targeting_targets[MY_IOLINK]);               \
 fapi2::Target<fapi2::TARGET_TYPE_PAU>        fapi2_pauTarget(targeting_targets[MY_PAU]);                     \
 fapi2::Target<fapi2::TARGET_TYPE_PAUC>       fapi2_paucTarget(targeting_targets[MY_PAUC]);
 

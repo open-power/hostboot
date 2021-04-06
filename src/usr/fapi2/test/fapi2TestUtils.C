@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,7 +123,11 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
     GENERATE_TARGET(TYPE_PAUC,sys0node0proc0pauc0,MY_PAUC,0)
     // Setup IOHS
     GENERATE_TARGET(TYPE_IOHS,sys0node0proc0pauc0iohs0,MY_IOHS,0)
+    // Setup IOLINK
+    GENERATE_TARGET(TYPE_SMPGROUP,sys0node0proc0pauc0iohs0smpgroup0,MY_IOLINK,0)
 
+    // Remove IOLINK
+    l_epath.removeLast();
     // Remove IOHS
     l_epath.removeLast();
 

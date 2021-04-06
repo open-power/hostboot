@@ -4178,7 +4178,7 @@ public:
             { TYPE_OMI,       ANY_CHIPLET },
             { TYPE_OMIC,      ANY_CHIPLET },
             { TYPE_CORE,      ANY_CHIPLET },
-            { TYPE_IOHS,      ANY_CHIPLET },
+            { TYPE_SMPGROUP,  ANY_CHIPLET },
             { TYPE_MI,        ANY_CHIPLET },
             { TYPE_FC,        ANY_CHIPLET },
             { TYPE_TPM,       ANY_CHIPLET },

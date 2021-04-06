@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -550,6 +550,66 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
         FAPI_INF("Complete testVerifyCoreChipletNum");
     }
 
+    void testVerifySmpgroupChipletNum()
+    {
+        FAPI_INF("Start testVerifySmpgroupChipletNum");
+
+        do
+        {
+            TARGETING::TargetHandleList smpgroups;
+            getAllChiplets(smpgroups, TARGETING::TYPE_SMPGROUP, false);
+
+            if (smpgroups.empty())
+            {
+                TS_FAIL("testVerifySmpgroupChipletNum: empty smpgroups");
+                break;
+            }
+
+            for (const auto smpgroup : smpgroups)
+            {
+                Target<fapi2::TARGET_TYPE_IOLINK> iolink(smpgroup);
+
+                const auto iolink_chiplet_id = iolink.getChipletNumber();
+
+                FAPI_DBG("testVerifySmpgroupChipletNum HUID: 0x%08x, chiplet ID: 0x%08x",
+                         TARGETING::get_huid(smpgroup),
+                         iolink_chiplet_id);
+
+                // SMPGROUP's chiplet number must match parent IOHS's chiplet number
+
+                const auto parent_iohs = getImmediateParentByAffinity(smpgroup);
+
+                Target<fapi2::TARGET_TYPE_IOHS> fapi_iohs(parent_iohs);
+
+                const auto iohs_chiplet_id = fapi_iohs.getChipletNumber();
+
+                if (iohs_chiplet_id != iolink_chiplet_id)
+                {
+                    TS_FAIL("testVerifySmpgroupChipletNum: SMPGROUP 0x%08x's chiplet number (0x%x) does not match parent IOHS's (0x%08x) chiplet number (0x%x)",
+                            TARGETING::get_huid(smpgroup),
+                            iolink_chiplet_id,
+                            TARGETING::get_huid(parent_iohs),
+                            iohs_chiplet_id);
+                }
+
+                // SMPGROUP's parent IOHS's chip unit must be the SMPGROUP's chip unit divided by 2
+
+                const auto smpgroup_chip_unit = smpgroup->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                const auto iohs_chip_unit = parent_iohs->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                if (smpgroup_chip_unit / 2 != iohs_chip_unit)
+                {
+                    TS_FAIL("SMPGROUP 0x%08x's chip unit (0x%x) divided by 2 should be parent IOHS's (0x%08x) chip unit (0x%x)",
+                            TARGETING::get_huid(smpgroup),
+                            smpgroup_chip_unit,
+                            TARGETING::get_huid(parent_iohs),
+                            iohs_chip_unit);
+                }
+            }
+        } while(0);
+        FAPI_INF("Complete testVerifySmpgroupChipletNum");
+    }
+
     void testVerifyIohsChipletNum()
     {
         FAPI_INF("Start testVerifyIohsChipletNum");
@@ -602,7 +662,7 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                 }
             }
         } while(0);
-        FAPI_INF("Complete testVerifyCoreChipletNum");
+        FAPI_INF("Complete testVerifyIohsChipletNum");
     }
 
     void testVerifyPauChipletNum()

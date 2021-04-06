@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,6 @@
 
 // Standard library
 #include <stdint.h>
-#include <map>
 #include <arch/magic.H>
 
 // Trace
@@ -84,118 +83,6 @@ using namespace ERRORLOG;
 using namespace TARGETING;
 using namespace HWAS;
 
-typedef std::map<ATTR_HUID_type, ATTR_IOHS_LINK_TRAIN_type > IohsHuidAttrMap_t;
-
-void fillAttrMap (IohsHuidAttrMap_t& o_map)
-{
-    // IOHS buses
-    TargetHandleList l_buses;
-    getAllChiplets(l_buses, TYPE_IOHS);
-    ATTR_IOHS_CONFIG_MODE_type l_configMode;
-
-    for (const auto& l_bus : l_buses)
-    {
-        // Only care about X and A config mode
-        l_configMode = l_bus->getAttr<ATTR_IOHS_CONFIG_MODE>();
-
-        if ((l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX) ||
-            (l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA))
-        {
-            o_map[get_huid(l_bus)] = l_bus->getAttr<ATTR_IOHS_LINK_TRAIN>();
-        }
-    }
-}
-
-
-void calloutBUS(const TargetHandle_t i_proc,
-                const IohsHuidAttrMap_t& i_attrMapBeforeHWP,
-                errlHndl_t& io_errl)
-{
-    TargetHandleList l_buses;
-    getChildChiplets(l_buses, i_proc, TYPE_IOHS);
-
-    for (const auto& l_bus : l_buses)
-    {
-        auto l_trainVal = l_bus->getAttr<ATTR_IOHS_LINK_TRAIN>();
-        int l_trainValBefore = -1;
-
-        auto l_itr = i_attrMapBeforeHWP.find(get_huid(l_bus));
-        if (l_itr != i_attrMapBeforeHWP.end())
-        {
-            l_trainValBefore = l_itr->second;
-        }
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "calloutBUS: HUID=0x%x BeforeTrainVal=0x%x CurrTrainVal=0x%x",
-                  get_huid(l_bus),
-                  l_trainValBefore,
-                  l_trainVal);
-
-        if (l_trainVal == l_trainValBefore)
-        {
-            // This IOHS BUS link is fine. Value is as exepected after running HWP
-            continue;
-        }
-
-        // Get the iohs paths
-        const auto l_iohsPath = l_bus->getAttr<ATTR_PHYS_PATH>();
-        const auto l_peerPath = l_bus->getAttr<ATTR_PEER_PATH>();
-
-        // Set the bus type
-        const auto l_configMode = l_bus->getAttr<ATTR_IOHS_CONFIG_MODE>();
-        HWAS::busTypeEnum l_busType = HWAS::FSI_BUS_TYPE;
-        if (l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
-        {
-            l_busType = X_BUS_TYPE;
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "calloutBUS: bustype=%d",l_busType);
-        }
-        else if (l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
-        {
-            l_busType = A_BUS_TYPE;
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "calloutBUS: bustype=%d",l_busType);
-        }
-        else
-        {
-            // Only callout X/A bus type
-            continue;
-        }
-
-// @todo RTC:256842 Everest support for half links
-#if 0
-        TargetHandleList l_smpGroupTargets;
-        getChildAffinityTargets(l_smpGroupTargets,
-                                l_obus,
-                                CLASS_UNIT,
-                                TYPE_SMPGROUP,
-                                false);
-        for (const auto l_smpGrp : l_smpGroupTargets)
-        {
-            auto l_smpGrpPos = l_smpGrp->getAttr<ATTR_REL_POS>();
-            //if smpGrpPos%2==0, then ODD links are functional, callout even
-            //if smpGrpPos%2==1, then even are functional, callout odd
-
-            //In the rc vector we get back, we only get training errors for
-            //odd or even links or none of links train error. However, if
-            //none of the links were trained, then the OBUS target is already
-            //deconfigured. Therefore, we will never get here if LINK_TRAIN_NONE
-            if (((l_smpGrpPos % 2 == 0) && (l_trainVal == LINK_TRAIN_ODD_ONLY))
-            || ((l_smpGrpPos % 2 == 1) && (l_trainVal == LINK_TRAIN_EVEN_ONLY)))
-            {
-                const auto l_smp     = l_smpGrp->getAttr<ATTR_PHYS_PATH>();
-                const auto l_peerSMP = l_smpGrp->getAttr<ATTR_PEER_PATH>();
-                io_errl->addBusCallout (l_smp, l_peerSMP, O_BUS_TYPE,
-                        SRCI_PRIORITY_MED);
-            }
-        }
-#endif
-
-    }
-
-}
-
-
 void* call_proc_fabric_iovalid(void* const io_pArgs)
 {
     errlHndl_t l_errl = nullptr;
@@ -208,10 +95,6 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
     // get a list of all the procs in the system
     TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
-
-    //Save off the state of ATTR_IOHS_LINK_TRAIN
-    IohsHuidAttrMap_t l_attrMapBeforeHWP;
-    fillAttrMap(l_attrMapBeforeHWP);
 
     // Loop through all processors including master
     for (const auto & l_cpu_target: l_cpuTargetList)
@@ -268,11 +151,6 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
 
                     // capture the target data in the elog
                     ErrlUserDetailsTarget(l_cpu_target).addToLog(l_tempErr);
-
-                    // callout any IOHS buses we need to
-                    calloutBUS(l_cpu_target,
-                               l_attrMapBeforeHWP,
-                               l_tempErr);
 
                     // save the error
                     captureError(l_tempErr,

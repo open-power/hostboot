@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -546,10 +546,19 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
         TARGETING::TYPE l_type1 = l_pTarget1->getAttr<TARGETING::ATTR_TYPE>();
         TARGETING::TYPE l_type2 = l_pTarget2->getAttr<TARGETING::ATTR_TYPE>();
 
-        if ( (l_type1 == TARGETING::TYPE_IOHS) && (l_type2 == TARGETING::TYPE_IOHS) )
+        if ((l_type1 == TARGETING::TYPE_IOHS && l_type2 == TARGETING::TYPE_IOHS)
+            || (l_type1 == TARGETING::TYPE_SMPGROUP && l_type2 == TARGETING::TYPE_SMPGROUP))
         {
-            const auto l_configMode_pTarget1 = l_pTarget1->getAttr<TARGETING::ATTR_IOHS_CONFIG_MODE>();
-            const auto l_configMode_pTarget2 = l_pTarget2->getAttr<TARGETING::ATTR_IOHS_CONFIG_MODE>();
+            const auto l_iohsTarget1 = (l_type1 == TARGETING::TYPE_IOHS
+                                        ? l_pTarget1
+                                        : getImmediateParentByAffinity(l_pTarget1));
+            const auto l_iohsTarget2 = (l_type2 == TARGETING::TYPE_IOHS
+                                        ? l_pTarget2
+                                        : getImmediateParentByAffinity(l_pTarget2));
+
+            const auto l_configMode_pTarget1 = l_iohsTarget1->getAttr<TARGETING::ATTR_IOHS_CONFIG_MODE>();
+            const auto l_configMode_pTarget2 = l_iohsTarget2->getAttr<TARGETING::ATTR_IOHS_CONFIG_MODE>();
+
             if ((l_configMode_pTarget1 == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX) &&
                 (l_configMode_pTarget2 == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX))
             {
