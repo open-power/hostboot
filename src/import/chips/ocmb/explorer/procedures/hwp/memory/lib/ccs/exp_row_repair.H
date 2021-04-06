@@ -146,17 +146,6 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
         std::vector<mss::row_repair::repair_entry<mss::mc_type::EXPLORER>>& o_repairs_per_dimm);
 
 ///
-/// @brief Clear the corresponding bad_bits after a row repair operation
-/// @param[in] i_target DIMM target
-/// @param[in] i_dram the DRAM index
-/// @param[in,out] io_bad_bits array bad bits data from VPD
-/// @return FAPI2_RC_SUCCESS iff successful
-///
-fapi2::ReturnCode clear_bad_dq_for_row_repair(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint8_t i_dram,
-        uint8_t (&io_bad_bits)[mss::BAD_DQ_BYTE_COUNT]);
-
-///
 /// @brief Create an error log and return with a good error code if a valid row repair is found
 /// @param[in] i_target the DIMM target
 /// @param[in] i_repair the repair data to validate
@@ -181,6 +170,29 @@ fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb);
+
+///
+/// @brief Gets the number of bad bits on a DRAM for a given row repair
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_row_repair_dram_byte the byte of data that contains the row repair's DRAM information
+/// @param[in] i_bad_bits the array of bad bits for this rank
+/// @param[out] o_num_bad_bits_for_dram the number of bad bits on this DRAM
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode get_num_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const uint8_t i_row_repair_dram_byte,
+                                   const uint8_t i_bad_bits[BAD_DQ_BYTE_COUNT],
+                                   uint8_t& o_num_bad_bits_for_dram);
+
+///
+/// @brief Gets the row repair attribute and clears out any unneeded repairs
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[out] o_row_repair_data the row repair data to process for this DIMM
+/// @return FAPI2_RC_SUCCESS iff successful
+/// @note Clears out the repairs if there is more than one bad bit on the DRAM that would be repaired
+///
+fapi2::ReturnCode clear_row_repairs_on_bad_dram(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&o_row_repair_data)[mss::exp::MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK]);
 
 ///
 /// @brief Map all repair data to dimm target
