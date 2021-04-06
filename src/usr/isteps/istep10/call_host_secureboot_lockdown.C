@@ -164,8 +164,11 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
 
             // Check that the SBE did not use Scratch Register 11 (0x50182) to pass FFDC
             // on a secureboot validation error up to hostboot to log an error
+            // NOTE: While scoms store data in uint64_t's, scratch registers only have
+            //       a uint32_t worth of valid data - the left-justified data of the scom
             uint64_t scomData = 0x0;
             size_t op_size = sizeof(scomData);
+            uint32_t scratch_reg_value = 0x0;
 
             // For boot proc read from attribute that was saved off at the start of the IPL
             if (l_proc == boot_proc)
@@ -173,9 +176,8 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 const auto l_scratchRegs = TARGETING::UTIL::assertGetToplevelTarget()->
                                              getAttrAsStdArr<TARGETING::ATTR_MASTER_MBOX_SCRATCH>();
 
-                // Write to uint64_t scomData even though MboxScratch11_t::REG_IDX is a uint32_t
-                // This will preserve the scomData != 0 check below for all processors
-                scomData = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch11_t::REG_IDX];
+                // MboxScratch11_t::REG_IDX is a uint32_t
+                scratch_reg_value = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch11_t::REG_IDX];
 
             }
             // For non-boot procs read Scratch Register 11 (0x50182) directly from HW
@@ -202,33 +204,46 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                     // Try to run the HWP on all procs regardless of error.
                     continue;
                 }
+
+                // Use the left-justified 4 bytes of scomData for the scratch reg
+                scratch_reg_value = static_cast<uint32_t>(scomData >> 32);
             }
 
-            if (scomData != 0x0)
+            // Only look for verification fails in the scratch register
+            // See mboxRegs.H for official scratch register bit definition, but it looks like this:
+            // 0xAABBCCDD  where AA=reserved,
+            //                   BB=tpm fail,
+            //                   CC=HBBL verification fail,
+            //                   DD=SBE verification fail
+            uint32_t scratch_reg_mask = 0x0000FFFF;
+
+            if ((scratch_reg_value & scratch_reg_mask) != 0x0)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "call_host_secureboot_lockdown: SBE reported FFDC Data in Scratch Reg 11 "
-                          "(addr=0x%X) for Proc HUID 0x%08X: data = 0x%.16llX "
+                          "(addr=0x%X) for Proc HUID 0x%08X: data = 0x%.8X (mask = 0x%.8X)"
                           TRACE_ERR_FMT,
                           INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR,
-                          TARGETING::get_huid(l_proc), scomData,
+                          TARGETING::get_huid(l_proc), scratch_reg_value, scratch_reg_mask,
                           TRACE_ERR_ARGS(l_err));
 
                /*@
                  * @errortype
-                 * @moduleid    ISTEP::MOD_SECUREBOOT_LOCKDOWN
-                 * @reasoncode  ISTEP::RC_SBE_REPORTED_FFDC
-                 * @userdata1   HUID of Processor Target target
-                 * @userdata2   Scom Data
-                 * @devdesc     SBE put FFDC data into Scratch Register 11
-                 * @custdesc    A problem occurred during the IPL of the
-                 *              system and the system will reboot.
+                 * @moduleid         ISTEP::MOD_SECUREBOOT_LOCKDOWN
+                 * @reasoncode       ISTEP::RC_SBE_REPORTED_FFDC
+                 * @userdata1        HUID of Processor Target target
+                 * @userdata2[0:31]  Scratch Register Data
+                 * @userdata2[32:63] Scratch Register Mask
+                 * @devdesc          SBE or HBBL put FFDC data into Scratch Register 11
+                 * @custdesc         A problem occurred during the IPL of the
+                 *                   system and the system will reboot.
                  */
                 l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 ISTEP::MOD_SECUREBOOT_LOCKDOWN,
                                 ISTEP::RC_SBE_REPORTED_FFDC,
                                 TARGETING::get_huid(l_proc),
-                                scomData);
+                                TWO_UINT32_TO_UINT64(scratch_reg_value,
+                                                     scratch_reg_mask));
 
                 l_err->addHwCallout( l_proc,
                                      HWAS::SRCI_PRIORITY_HIGH,
@@ -237,8 +252,8 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
 
                 // Add the register to the log
                 ERRORLOG::ErrlUserDetailsLogRegister(l_proc,
-                              &scomData,
-                              op_size,
+                              &scratch_reg_value,
+                              sizeof(scratch_reg_value),
                               DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR))
                                   .addToLog(l_err);
 

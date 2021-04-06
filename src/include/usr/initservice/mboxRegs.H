@@ -632,9 +632,27 @@ namespace SPLESS
     // CFAM address: 0x0182
     struct MboxScratch11_t : MboxScratch_t<11>
     {
-        // For P10 SBE will use this scratch register to pass FFDC on a secureboot validation
-        // error up to hostboot to log an error
-        uint32_t value;
+        union
+        {
+            uint32_t data32;
+
+            // For P10 SBE and HBBL will use this scratch register to pass FFDC on a
+            // secureboot validation error and/or a TPM error up to hostboot to log an error
+
+            struct
+            {
+                DONOTUSE()
+                uint32_t reserved             :8; // 0:7
+
+                uint32_t failingTpmStep       :8; // 8:15
+
+                uint32_t hbblVerificationFail :8; // 16:23
+
+                uint32_t sbeVerificationFail  :8; // 24:31
+
+            } SBE_HBBL_FFDC_1;
+
+        };
     };
 
     static_assert(sizeof(MboxScratch11_t) == sizeof(uint32_t),
