@@ -159,13 +159,13 @@ uint8_t MemSymbol::getDramSpareAdjusted() const
             PRDF_ASSERT( false );
         }
 
-        const uint8_t X4_DRAM_SPARE_LOWER = 10;
-        const uint8_t X4_DRAM_SPARE_UPPER = 11;
-        const uint8_t X8_DRAM_SPARE = 5;
+        const uint8_t X4_DRAM_SPARE_LOWER = 18;
+        const uint8_t X4_DRAM_SPARE_UPPER = 19;
+        const uint8_t X8_DRAM_SPARE = 9;
         if ( isX4 )
         {
-            uint8_t l_bit  = getDq() % DQS_PER_BYTE;
-            dram = ( l_bit < 4 ) ? X4_DRAM_SPARE_LOWER : X4_DRAM_SPARE_UPPER;
+            dram = ( isDramSpared0() ) ? X4_DRAM_SPARE_LOWER
+                                       : X4_DRAM_SPARE_UPPER;
         }
         else
         {
