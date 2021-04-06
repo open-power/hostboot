@@ -130,6 +130,26 @@ static const uint32_t XSTOP1_WAIT_CYCLES_LEN = 12;
 //<< [XSTOP1]
 // pec/reg00004.H
 
+//>> [TOP1_IOPFIRMASK]
+static const uint64_t TOP1_IOPFIRMASK_RW = 0x08011503ull;
+static const uint64_t TOP1_IOPFIRMASK_WO_AND = 0x08011504ull;
+static const uint64_t TOP1_IOPFIRMASK_WO_OR = 0x08011505ull;
+
+static const uint32_t TOP1_IOPFIRMASK_PHY0_ECC_CE_MASK = 0;
+static const uint32_t TOP1_IOPFIRMASK_PHY0_ECC_UE_MASK = 1;
+static const uint32_t TOP1_IOPFIRMASK_PHY1_ECC_CE_MASK = 2;
+static const uint32_t TOP1_IOPFIRMASK_PHY1_ECC_UE_MASK = 3;
+static const uint32_t TOP1_IOPFIRMASK_SCOM0_ECC_CE_MASK = 4;
+static const uint32_t TOP1_IOPFIRMASK_SCOM0_ECC_UE_MASK = 5;
+static const uint32_t TOP1_IOPFIRMASK_SCOM1_ECC_CE_MASK = 6;
+static const uint32_t TOP1_IOPFIRMASK_SCOM1_ECC_UE_MASK = 7;
+static const uint32_t TOP1_IOPFIRMASK_SCRUB0_ECC_CE_MASK = 8;
+static const uint32_t TOP1_IOPFIRMASK_SCRUB0_ECC_UE_MASK = 9;
+static const uint32_t TOP1_IOPFIRMASK_SCRUB1_ECC_CE_MASK = 10;
+static const uint32_t TOP1_IOPFIRMASK_SCRUB1_ECC_UE_MASK = 11;
+//<< [TOP1_IOPFIRMASK]
+// pec/reg00004.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

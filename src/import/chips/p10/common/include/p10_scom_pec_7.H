@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,6 +162,14 @@ static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN = 15;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
 //<< [SYNC_CONFIG]
+// pec/reg00007.H
+
+//>> [TOP1_IOPFIRACT1]
+static const uint64_t TOP1_IOPFIRACT1 = 0x08011507ull;
+
+static const uint32_t TOP1_IOPFIRACT1_IOPFIRACT1_FIR_ACTION1 = 0;
+static const uint32_t TOP1_IOPFIRACT1_IOPFIRACT1_FIR_ACTION1_LEN = 12;
+//<< [TOP1_IOPFIRACT1]
 // pec/reg00007.H
 
 //>>THE END<<

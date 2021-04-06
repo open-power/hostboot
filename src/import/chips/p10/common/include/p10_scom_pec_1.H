@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,14 @@ static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x08010400ull;
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 //<< [TRA0_TR0_TRACE_HI_DATA_REG]
+// pec/reg00001.H
+
+//>> [TOP1_IOPFIRACT0]
+static const uint64_t TOP1_IOPFIRACT0 = 0x08011506ull;
+
+static const uint32_t TOP1_IOPFIRACT0_IOPFIRACT0_FIR_ACTION0 = 0;
+static const uint32_t TOP1_IOPFIRACT0_IOPFIRACT0_FIR_ACTION0_LEN = 12;
+//<< [TOP1_IOPFIRACT0]
 // pec/reg00001.H
 
 //>>THE END<<

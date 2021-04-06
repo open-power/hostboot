@@ -314,6 +314,14 @@ static const uint32_t XSTOP3_WAIT_CYCLES_LEN = 12;
 //<< [XSTOP3]
 // pec/reg00008.H
 
+//>> [TOP0_IOPFIRACT1]
+static const uint64_t TOP0_IOPFIRACT1 = 0x08011107ull;
+
+static const uint32_t TOP0_IOPFIRACT1_IOPFIRACT1_FIR_ACTION1 = 0;
+static const uint32_t TOP0_IOPFIRACT1_IOPFIRACT1_FIR_ACTION1_LEN = 12;
+//<< [TOP0_IOPFIRACT1]
+// pec/reg00008.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

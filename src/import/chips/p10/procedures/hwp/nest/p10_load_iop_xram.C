@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,9 +41,16 @@
 #include <p10_putsram.H>
 #include <p10_getputsram_utils.H>
 #include <fapi2_subroutine_executor.H>
+#include <p10_scom_pec.H>
 
 //@TODO: RTC 214852 - Use SCOM accessors, remove workaround code
 
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+const uint64_t IOPFIRACT0 = 0x0000000000000000ULL;
+const uint64_t IOPFIRACT1 = 0xABA0000000000000ULL;
+const uint64_t IOPFIRMASK = 0x0000000000000000ULL;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -118,6 +125,14 @@ fapi2::ReturnCode p10_load_iop_xram(
     // Reset PHYs on both PECs
     FAPI_TRY(doPhyReset(l_target_mcast),
              "p10_load_iop_xram: doPhyReset returns an error.");
+
+    // configure IOP FIR error reporting
+    FAPI_TRY(fapi2::putScom(l_target_mcast, scomt::pec::TOP0_IOPFIRACT0, IOPFIRACT0));
+    FAPI_TRY(fapi2::putScom(l_target_mcast, scomt::pec::TOP1_IOPFIRACT0, IOPFIRACT0));
+    FAPI_TRY(fapi2::putScom(l_target_mcast, scomt::pec::TOP0_IOPFIRACT1, IOPFIRACT1));
+    FAPI_TRY(fapi2::putScom(l_target_mcast, scomt::pec::TOP1_IOPFIRACT1, IOPFIRACT1));
+    FAPI_TRY(fapi2::putScom(l_target_mcast, scomt::pec::TOP0_IOPFIRMASK_RW, IOPFIRMASK));
+    FAPI_TRY(fapi2::putScom(l_target_mcast, scomt::pec::TOP1_IOPFIRMASK_RW, IOPFIRMASK));
 
     // Write CReg overrides through the CR Parallel Interface
     // This is called here because phy reset has to be deasserted for CReg access

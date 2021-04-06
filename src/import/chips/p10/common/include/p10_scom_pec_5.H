@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,6 +154,26 @@ static const uint32_t PB_PBCQ_PEPBREGS_NESTTRC_REG_PE_TRACE_ENABLE = 16;
 //>> [SCAN_LONG_ROTATE]
 static const uint64_t SCAN_LONG_ROTATE = 0x08039000ull;
 //<< [SCAN_LONG_ROTATE]
+// pec/reg00005.H
+
+//>> [TOP0_IOPFIR]
+static const uint64_t TOP0_IOPFIR_RW = 0x08011100ull;
+static const uint64_t TOP0_IOPFIR_WO_AND = 0x08011101ull;
+static const uint64_t TOP0_IOPFIR_WO_OR = 0x08011102ull;
+
+static const uint32_t TOP0_IOPFIR_PHY0_ECC_CE_ERR = 0;
+static const uint32_t TOP0_IOPFIR_PHY0_ECC_UE_ERR = 1;
+static const uint32_t TOP0_IOPFIR_PHY1_ECC_CE_ERR = 2;
+static const uint32_t TOP0_IOPFIR_PHY1_ECC_UE_ERR = 3;
+static const uint32_t TOP0_IOPFIR_SCOM0_ECC_CE = 4;
+static const uint32_t TOP0_IOPFIR_SCOM0_ECC_UE = 5;
+static const uint32_t TOP0_IOPFIR_SCOM1_ECC_CE = 6;
+static const uint32_t TOP0_IOPFIR_SCOM1_ECC_UE = 7;
+static const uint32_t TOP0_IOPFIR_SCRUB0_ECC_CE = 8;
+static const uint32_t TOP0_IOPFIR_SCRUB0_ECC_UE = 9;
+static const uint32_t TOP0_IOPFIR_SCRUB1_ECC_CE = 10;
+static const uint32_t TOP0_IOPFIR_SCRUB1_ECC_UE = 11;
+//<< [TOP0_IOPFIR]
 // pec/reg00005.H
 
 //>>THE END<<
