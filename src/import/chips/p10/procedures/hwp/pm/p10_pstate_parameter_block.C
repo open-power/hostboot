@@ -2363,7 +2363,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                     l_poundv_static_data),
                 "Error from FAPI_ATTR_GET for attribute ATTR_POUND_V_STATIC_DATA_ENABLE");
 
-        if (l_poundv_static_data)
+        if (l_poundv_static_data == 1)
         {
 
             // Bring in data for local testing

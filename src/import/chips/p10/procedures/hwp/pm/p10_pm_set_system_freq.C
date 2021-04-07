@@ -104,6 +104,8 @@ fapi2::ReturnCode pm_set_frequency(
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE_Type l_sys_freq_core_ceil_mhz_ovr;
     fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz = 0;
     fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_ceil_freq_mhz = 0;
+    fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V_Type l_chip_static_pound_v = 0;
+    fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE_Type l_poundv_static_data = 0;
 
     fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY_Type l_limited_freq_mhz;
     const fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_forced_ceil_freq_mhz = 2400;
@@ -139,6 +141,10 @@ fapi2::ReturnCode pm_set_frequency(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NOMINAL_FREQ_MHZ,
                 i_sys_target, l_sys_nominal_freq_mhz));
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
+                 i_sys_target,
+                 l_poundv_static_data),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_POUND_V_STATIC_DATA_ENABLE");
         // Find Pstate 0 across the processor chips depending on the mode (FMax or UT)
         for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
@@ -147,17 +153,28 @@ fapi2::ReturnCode pm_set_frequency(
             fapi2::toString(l_proc_target, l_tgt_string, TGT_STRING_SIZE);
             FAPI_INF("Processing %s", l_tgt_string);
 
-            fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE_Type l_poundv_static_data = 0;
             fapi2::ATTR_FREQ_BIAS_Type attr_freq_bias_0p5pct = 0;
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
-                        i_sys_target,
-                        l_poundv_static_data),
-                    "Error from FAPI_ATTR_GET for attribute ATTR_POUND_V_STATIC_DATA_ENABLE");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V,
+                        l_proc_target, l_chip_static_pound_v));
+
+            if (l_chip_static_pound_v && !l_poundv_static_data)
+            {
+                l_poundv_static_data = 1; 
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
+                            i_sys_target,
+                            l_poundv_static_data),
+                        "Error from FAPI_ATTR_SET for attribute ATTR_POUND_V_STATIC_DATA_ENABLE");
+            }
+
 
             if (l_poundv_static_data)
             {
                 FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is set");
+                FAPI_INF("&l_poundV_data %p;   &g_vpd_PVData %p sizeof(g_vpd_PVData) %d sizeof(l_poundV_data) %d",
+                        &l_poundV_data,&g_vpd_PVData,sizeof(g_vpd_PVData),sizeof(l_poundV_data));
+
+                memset(&l_poundV_data, 0, sizeof(g_vpd_PVData));
                 memcpy(&l_poundV_data, &g_vpd_PVData, sizeof(g_vpd_PVData));
             }
             else
@@ -244,7 +261,7 @@ fapi2::ReturnCode pm_set_frequency(
 
             // Processor overrides the ceiling below Pstate 0 clips it
             if (l_ceil_freq_mhz != 0 && l_ceil_freq_mhz > l_floor_freq_mhz &&
-                 l_sys_freq_core_ceil_mhz > l_ceil_freq_mhz)
+                    l_sys_freq_core_ceil_mhz > l_ceil_freq_mhz)
             {
                 l_ceil_freq_mhz = l_sys_freq_core_ceil_mhz;
                 FAPI_INF("Processor target override limiting Pstate 0. %04d MHz (0x%X)", l_ceil_freq_mhz, l_ceil_freq_mhz );
@@ -252,9 +269,9 @@ fapi2::ReturnCode pm_set_frequency(
 
             // Limit to DD specific values only if all the CEIL overrides are non-zero
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY,
-                                    l_proc_target, l_limited_freq_mhz));
+                        l_proc_target, l_limited_freq_mhz));
             if (l_limited_freq_mhz &&
-                !l_sys_freq_core_ceil_mhz_ovr && !l_sys_freq_core_ceil_mhz && !l_ceil_freq_mhz)
+                    !l_sys_freq_core_ceil_mhz_ovr && !l_sys_freq_core_ceil_mhz && !l_ceil_freq_mhz)
             {
                 if (l_sys_freq_core_ceil_mhz > l_forced_ceil_freq_mhz)
                 {
