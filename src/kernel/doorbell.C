@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,9 @@ void doorbell_send(uint64_t i_pir)
 
 void send_doorbell_wakeup(uint64_t i_pir)
 {
-    printk("send_doorbell_wakeup to pir: %lx\n", i_pir);
+    // This printk shows up a lot and can cause important debug information to be lost later in the IPL if it's longer
+    // than absolutely necessary.
+    printk("sDBW:%lu\n", i_pir);
 
     if(Util::requiresSecondaryCoreWorkaround())
     {

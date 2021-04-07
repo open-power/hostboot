@@ -161,7 +161,9 @@ void CpuManager::requestShutdown(uint64_t i_status, uint32_t i_error_data)
 
 void CpuManager::startCPU(ssize_t i)
 {
-    printk("startCPU(%ld)\n",i);
+    // This printk shows up a lot and can cause important debug information to be lost later in the IPL if it's longer
+    // than absolutely necessary.
+    printk("sCPU:%ld\n",i);
 
     // Save away the current timebase for TB synchronization.
     iv_lastStartTimebase = getTB();
@@ -414,7 +416,9 @@ void CpuManager::startCore(uint64_t pir,uint64_t i_threads)
         // Only wakeup the threads we were told to wakeup
         if( i_threads & (0x8000000000000000 >> i) )
         {
-            printk("Dbell:0x%lx\n", pir + i);
+            // This printk shows up a lot and can cause important debug information to be lost later in the IPL if it's
+            // longer than absolutely necessary.
+            printk("DB:%lu\n", pir + i);
             //Initiate the Doorbell for this core/pir
             send_doorbell_wakeup(pir + i);
         }
@@ -446,7 +450,7 @@ void CpuManager::wakeupCore(uint64_t pir,uint64_t i_threads)
         // Only wakeup the threads we were told to wakeup
         if( i_threads & (0x8000000000000000 >> i) )
         {
-            printk("Dbell2:0x%lx\n", pir + i);
+            printk("DB2:%lu\n", pir + i);
             //Initiate the Doorbell for this core/pir
             doorbell_send(pir + i);
         }
