@@ -133,6 +133,7 @@ my $pnorLayoutFile = "";
 my $system_target = "";
 my $build_all = 0;
 my $emitEccless = 0;
+my $emitIplLids = 0;
 my $install_all = 0;
 my $key_transition = "";
 my $help = 0;
@@ -165,6 +166,7 @@ GetOptions("binDir:s" => \$bin_dir,
            "hb-standalone" => \$hb_standalone,
            "lab-security-override!" => \$labSecurityOverride,
            "emit-eccless" => \$emitEccless,
+           "emit-ipl-lids" => \$emitIplLids,
            "build-type:s" => \$buildType,
            "editedLayoutLocation:s" => \$editedLayoutLocation,
            "secure-version:s" => \$secureVersionStr,
@@ -394,6 +396,8 @@ $SETTINGS .= "PNOR Layout = ".$pnorLayoutFile."\n";
 $SETTINGS .= $build_all ? "Build Phase = build_all\n" : "";
 $SETTINGS .= "Emit ECC-less versions of output files, when possible = ";
 $SETTINGS .= $emitEccless ? "Yes\n" : "No\n";
+$SETTINGS .= "Emit IPL-time lids, when possible = ";
+$SETTINGS .= $emitIplLids ? "Yes\n" : "No\n";
 $SETTINGS .= $install_all ? "Build Phase = install_all\n" : "";
 $SETTINGS .= $testRun ? "Test Mode = Yes\n" : "Test Mode = No\n";
 $SETTINGS .= $secureboot ? "Secureboot = Enabled\n" : "Secureboot = Disabled\n";
@@ -807,7 +811,23 @@ sub manipulateImages
                 }
 
                 setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
-
+                # If so instructed, take the ecc-less, unpadded file, make it
+                # 4KB byte aligned in size and emit it as EYE_CATCH.ipllid
+                # This will be used in op-build as the ipl time lids for PLDM
+                # file io.
+                if ($emitIplLids)
+                {
+                    # Get the files size and round it up to the next multiple of 4096
+                    my $file_size = -s $tempImages{HDR_PHASE};
+                    if(($file_size % 4096) ne 0)
+                    {
+                        $file_size += (4096 - ($file_size % 4096));
+                    }
+                    # Create an empty file of all 0xFF's of $file_size
+                    run_command("dd if=/dev/zero bs=$file_size count=1 | tr \"\\000\" \"\\377\" > $bin_dir/$eyeCatch.ipllid");
+                    # Write the contents of tempImages[HDR_PHASE} to the begining of the file we just made
+                    run_command("dd if=$tempImages{HDR_PHASE} conv=notrunc of=$bin_dir/$eyeCatch.ipllid");
+                }
 
                 # store binary file size + header size in hash
 
@@ -938,6 +958,21 @@ sub manipulateImages
                                           $tempImages{PAYLOAD_TEXT},
                                           $tempImages{PAD_PHASE});
                     }
+                }
+                # if we are requested to emit ipl lid artifacts ensure that the generated binary
+                # from above is 4KB byte aligned and write a copy to the $bin_dir
+                if ($emitIplLids)
+                {
+                    # Get the files size and round it up to the next multiple of 4096
+                    my $file_size = -s $tempImages{PAD_PHASE};
+                    if(($file_size % 4096) ne 0)
+                    {
+                        $file_size += (4096 - ($file_size % 4096));
+                    }
+                    # Create an empty file of all 0xFF's of $file_size
+                    run_command("dd if=/dev/zero bs=$file_size count=1 | tr \"\\000\" \"\\377\" > $bin_dir/$eyeCatch.ipllid");
+                    # Write the contents of tempImages[HDR_PHASE} to the begining of the file we just made
+                    run_command("dd if=$tempImages{PAD_PHASE} conv=notrunc of=$bin_dir/$eyeCatch.ipllid");
                 }
                 if ($eyeCatch eq "SBKT" && $emitEccless)
                 {
@@ -1350,6 +1385,9 @@ print <<"ENDUSAGE";
                                       physical jumpers on the system planar.
     --emit-eccless                In addition to typical output, also emit
                                       ECC-less versions of any input binaries
+    --emit-ipl-lids               In addition to typical output, also emit
+                                      .ipllid files which can be used for IPL
+                                      time lids for eBMC systems.
     --build-type                  Specify whether the type of build is FIPS or
                                       OpenPower, indicated by either 'fspbuild'
                                       or 'opbuild' immediately following the
