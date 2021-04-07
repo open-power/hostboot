@@ -94,6 +94,93 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
 /**
+ * @brief A wrapper around the call SBE::updateProcessorSbeSeeproms
+ *
+ * @details This methods clears the attribute ATTR_FORCE_SBE_UPDATE, to avoid
+ *          interrupting other future SBE updates, if needed, after calling the SBE's
+ *          updateProcessorSbeSeeproms method.  This method will also capture any
+ *          errors that may occur with call to SBE::updateProcessorSbeSeeproms in
+ *          an error log as well as in the IStepError component.
+ *
+ * @param[in/out] io_sysTarget  The Top Level target.
+ * @param[in]     i_sbe_update  Current state of the attribute ATTR_FORCE_SBE_UPDATE
+ * @param[in/out] io_istepErr   If an error occurs, the error details will be added
+ *                              to this component
+ * @param[in/out] i_componentId  If an error occurs, the error will be associated
+ *                               with this component.
+ *
+ */
+void updateProcessorSbeSeeproms(TargetHandle_t                    io_sysTarget,
+                                const ATTR_FORCE_SBE_UPDATE_type  i_sbe_update,
+                                IStepError                       &io_istepErr,
+                                const compId_t                    i_componentId )
+{
+    errlHndl_t l_err = SBE::updateProcessorSbeSeeproms();
+    TRACFCOMP(g_trac_isteps_trace, WARN_MRK
+              "WARNING: Return from updateProcessorSbeSeeproms "
+              "this may OR may -NOT- be an issue, "
+              "if undesired, check any configuration overrides. "
+              "FORCE_SBE_UPDATE=0x%X bit mask indicates reasons",
+              i_sbe_update);
+
+    // See attribute_types_hb.xml for SBE_UPDATE_TYPE ^^
+    // SBE_UPDATE_DISABLE and NO_SBE_UPDATES can influence
+    // Next clear FORCE_SBE_UPDATE for any future usages
+    // Clearing is just to remove the mark on the wall in case
+    // in the future we want to set/trigger in other logic
+    // and avoids conflicting signals in later isteps
+    //
+    // In updateProcessorSbeSeeproms sbeDoReboot is called,
+    // so we should be IPL'ing at this point causing hostboot
+    // to restart, thus returning from the reboot request
+    // is an error, either the request for reboot explicitly
+    // failed (error) -or- hostboot unexpectedly returned
+    // from the call without a reboot happening (also an error).
+    //
+    // If a developer overrides with SBE_UPDATE_DISABLE or
+    // NO_SBE_UPDATES this needs to be managed outside the
+    // scope of this logic.
+    //
+    io_sysTarget->setAttr<ATTR_FORCE_SBE_UPDATE>(SBE_UPDATE_TYPE_CLEAR);
+
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_isteps_trace, ERR_MRK"ERROR: updateProcessorSbeSeeproms");
+        l_err->collectTrace("ISTEPS_TRACE");
+    }
+    else
+    {
+        TRACFCOMP(g_trac_isteps_trace, ERR_MRK"ERROR: updateProcessorSbeSeeproms"
+                                               " unexpectedly returned");
+        /*@
+         * @errortype
+         * @moduleid     MOD_CALL_MSS_ATTR_UPDATE
+         * @reasoncode   RC_SBE_UPDATE_UNEXPECTEDLY_FAILED
+         * @userdata1    ATTR_FORCE_SBE_UPDATE, bit mask of reasons
+         *               See SBE_UPDATE_TYPE from attribute_types_hb.xml
+         * @userdata2    0
+         * @devdesc      Return from updateProcessorSbeSeeproms unexpectedly
+         * @custdesc     An IPL failure occurred
+         */
+        l_err = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
+                               MOD_CALL_MSS_ATTR_UPDATE,
+                               RC_SBE_UPDATE_UNEXPECTEDLY_FAILED,
+                               i_sbe_update,
+                               0);
+        TargetHandle_t l_pMasterProcChip(nullptr);
+        targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+        l_err->addHwCallout( l_pMasterProcChip,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::NO_DECONFIG,
+                             HWAS::GARD_NULL);
+        l_err->collectTrace(TARG_COMP_NAME);
+        l_err->collectTrace(SBE_COMP_NAME);
+        l_err->collectTrace(ISTEP_COMP_NAME);
+    }
+    captureError(l_err, io_istepErr, i_componentId);
+}
+
+/**
  * @brief Check mbox scratch regs versus MRW/Calculated via ATTR
  *        Sync attributes to SP and trigger reconfig loop if mismatch
  *
@@ -148,6 +235,11 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 
     if (l_err)
     {
+        // It is possible that the call to updateProcessorSbeSeeprom below, if called,
+        // may not return. Therefore commit the error right away to ensure that
+        // the error is logged.
+        errlCommit( l_err, HWPF_COMP_ID );
+
         if (l_sys->getAttr<ATTR_SKIP_PG_ENFORCEMENT>() == 0)
         {
             TRACFCOMP( g_trac_isteps_trace,
@@ -156,8 +248,12 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
             l_reconfigLoop = true;
             l_reconfigReg |= SCRATCH1_MASK | SCRATCH2_MASK;
         }
-
-        errlCommit( l_err, HWPF_COMP_ID );
+        else
+        {
+            // Update the SBE and reconfig
+            ATTR_FORCE_SBE_UPDATE_type l_sbe_update = l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>();
+            updateProcessorSbeSeeproms(l_sys, l_sbe_update, io_StepError, HWPF_COMP_ID );
+        }
     }
 
     // ----------------------------------------------------------
@@ -786,72 +882,7 @@ void* call_mss_attr_update( void *io_pArgs )
             }
             else
             {
-                l_err = SBE::updateProcessorSbeSeeproms();
-                TRACFCOMP(g_trac_isteps_trace,
-                    "WARNING: Return from updateProcessorSbeSeeproms "
-                    "this may OR may -NOT- be an issue, "
-                    "if undesired, check any configuration overrides. "
-                    "FORCE_SBE_UPDATE=0x%X bit mask indicates reasons",
-                    l_sbe_update);
-                // See attribute_types_hb.xml for SBE_UPDATE_TYPE ^^
-                // SBE_UPDATE_DISABLE and NO_SBE_UPDATES can influence
-                // Next clear FORCE_SBE_UPDATE for any future usages
-                // Clearing is just to remove the mark on the wall in case
-                // in the future we want to set/trigger in other logic
-                // and avoids conflicting signals in later isteps
-                //
-                // In updateProcessorSbeSeeproms sbeDoReboot is called,
-                // so we should be IPL'ing at this point causing hostboot
-                // to restart, thus returning from the reboot request
-                // is an error, either the request for reboot explicitly
-                // failed (error) -or- hostboot unexpectedly returned
-                // from the call without a reboot happening (also an error).
-                //
-                // If a developer overrides with SBE_UPDATE_DISABLE or
-                // NO_SBE_UPDATES this needs to be managed outside the
-                // scope of this logic.
-                //
-                l_sys->setAttr<ATTR_FORCE_SBE_UPDATE>
-                  (SBE_UPDATE_TYPE_CLEAR);
-                if(l_err)
-                {
-                    TRACFCOMP(g_trac_isteps_trace,
-                              "ERROR: updateProcessorSbeSeeproms");
-                    l_err->collectTrace("ISTEPS_TRACE");
-                    captureError(l_err, l_StepError, HWPF_COMP_ID);
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_isteps_trace,
-                          "ERROR: updateProcessorSbeSeeproms"
-                          " unexpectedly returned");
-                    /*@
-                     * @errortype
-                     * @moduleid     MOD_CALL_MSS_ATTR_UPDATE
-                     * @reasoncode   RC_SBE_UPDATE_UNEXPECTEDLY_FAILED
-                     * @userdata1    ATTR_FORCE_SBE_UPDATE, bit mask of reasons
-                     *               See SBE_UPDATE_TYPE from attribute_types_hb.xml
-                     * @userdata2    0
-                     * @devdesc      An IPL failure occurred
-                     * @custdesc     Return from updateProcessorSbeSeeproms unexpectedly
-                     */
-                    l_err = new ErrlEntry(
-                                    ERRL_SEV_UNRECOVERABLE,
-                                    MOD_CALL_MSS_ATTR_UPDATE,
-                                    RC_SBE_UPDATE_UNEXPECTEDLY_FAILED,
-                                    l_sbe_update,
-                                    0);
-                    TargetHandle_t l_pMasterProcChip(nullptr);
-                    targetService().masterProcChipTargetHandle(l_pMasterProcChip);
-                    l_err->addHwCallout(l_pMasterProcChip,
-                                         HWAS::SRCI_PRIORITY_HIGH,
-                                         HWAS::NO_DECONFIG,
-                                         HWAS::GARD_NULL);
-                    l_err->collectTrace(TARG_COMP_NAME);
-                    l_err->collectTrace(SBE_COMP_NAME);
-                    l_err->collectTrace(ISTEP_COMP_NAME);
-                    captureError(l_err, l_StepError, HWPF_COMP_ID);
-                }
+                updateProcessorSbeSeeproms(l_sys, l_sbe_update, l_StepError, HWPF_COMP_ID );
             }
         }
         else
