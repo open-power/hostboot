@@ -123,6 +123,16 @@ void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
                 PRDpriority i_rxPriority = MRU_MEDA,
                 PRDpriority i_txPriority = MRU_MEDA);
 
+/**
+ * @brief  Calls out an entire SMPGROUP bus with the given link.
+ * @param  i_chip An IOHS chip
+ * @param  io_sc  The step code data struct.
+ * @param  i_link Position of the connected SMPGROUP (0:1)
+ * @return SUCCESS always.
+ */
+int32_t smp_callout( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
+                     uint8_t i_link );
+
 //##############################################################################
 //##                        Memory specific functions
 //##############################################################################

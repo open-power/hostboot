@@ -54,3 +54,4 @@ prd_rule_plugin += prdfP10Iohs_common.o
 prd_rule_plugin += prdfP10TodPlugins.o
 prd_rule_plugin += prdfMccPlugins.o
 prd_rule_plugin += prdfOmicPlugins.o
+prd_rule_plugin += prdfPaucPlugins.o

@@ -508,6 +508,7 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
             { {TYPE_OMIC, TYPE_OMI      }, MAX_OMI_PER_OMIC   },
             { {TYPE_PEC,  TYPE_PHB      }, MAX_PHB_PER_PEC    },
             // Note: TARGETING::TYPE_SMPGROUP == fapi2::TARGET_TYPE_IOLINK
+            { {TYPE_PAUC, TYPE_SMPGROUP }, MAX_LINK_PER_PAUC  },
             { {TYPE_IOHS, TYPE_SMPGROUP }, MAX_LINK_PER_IOHS  },
         };
 

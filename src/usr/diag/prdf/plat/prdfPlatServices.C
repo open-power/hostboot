@@ -58,6 +58,7 @@
 #include <prdfParserUtils.H>
 #include <fapi2_hwp_executor.H>
 #include <errl/errludlogregister.H>
+#include <prdfP10IohsExtraSig.H>
 
 #include <exp_defaults.H>
 #include <exp_rank.H>
@@ -289,6 +290,80 @@ void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
     PRDF_ASSERT(nullptr != errl);
     errl->addBusCallout(i_rxTrgt, i_txTrgt, i_busType,
                         HWAS::SRCI_PRIORITY_LOW, i_flags);
+}
+
+//------------------------------------------------------------------------------
+
+int32_t smp_callout( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
+                     uint8_t i_link )
+{
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_IOHS == i_chip->getType());
+    PRDF_ASSERT(i_link < MAX_LINK_PER_IOHS);
+
+    // SMP callouts need to determine if the link is down. This can be done by
+    // querying the link quality status register. A zero value indicates the
+    // link has failed.
+
+    HWAS::CalloutFlag_t calloutFlag = HWAS::FLAG_NONE;
+
+    const char* reg_str = (0 == i_link) ? "IOHS_DLP_LINK0_QUALITY"
+                                        : "IOHS_DLP_LINK1_QUALITY";
+    SCAN_COMM_REGISTER_CLASS* reg = i_chip->getRegister(reg_str);
+    if (SUCCESS == reg->Read() && reg->BitStringIsZero())
+    {
+        calloutFlag = HWAS::FLAG_LINK_DOWN;
+
+        // Indicate in the multi-signature section that the link has failed.
+        io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                             PRDFSIG_LinkFailed);
+
+        // Make the error log predictive.
+        io_sc.service_data->setPredictive();
+    }
+
+    // Get the connected SMPGROUP target.
+    TargetHandle_t rxTrgt = getConnectedChild(i_chip->getTrgt(), TYPE_SMPGROUP,
+                                              i_link);
+    PRDF_ASSERT(nullptr != rxTrgt);
+
+    // Get the peer SMPGROUP target.
+    TargetHandle_t txTrgt = getConnectedPeerTarget(rxTrgt);
+
+    // If this SMPGROUP does not have a peer, just callout this target.
+    if ( nullptr == txTrgt )
+    {
+        PRDF_TRAC( "p10_iohs::__smp_callout: No peer SMPGROUP found" );
+        io_sc.service_data->SetCallout( rxTrgt, MRU_MED );
+        return SUCCESS;
+    }
+
+    // Check the IOHS config.
+    const auto configMode = i_chip->getTrgt()->getAttr<ATTR_IOHS_CONFIG_MODE>();
+    HWAS::busTypeEnum busType = HWAS::FSI_BUS_TYPE; // invalid bus type
+
+    switch( configMode )
+    {
+        // XBUS
+        case fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX:
+            busType = HWAS::X_BUS_TYPE;
+            break;
+        // ABUS
+        case fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA:
+            busType = HWAS::A_BUS_TYPE;
+            break;
+        default:
+            PRDF_TRAC( "p10_iohs::__smp_callout: invalid IOHS config mode" );
+            break;
+    }
+
+    if ( HWAS::X_BUS_TYPE == busType || HWAS::A_BUS_TYPE == busType )
+    {
+        // Callout the entire bus interface.
+        calloutBus(io_sc, rxTrgt, txTrgt, busType, calloutFlag);
+    }
+
+    return SUCCESS;
 }
 
 //##############################################################################
