@@ -99,15 +99,6 @@ const std::vector<std::pair<uint8_t, uint8_t>> PMIC0_SETTINGS =
     // PMIC Diagnostic Mode
     {REGS::R2F, 0x06},
 
-    // Current limiter warnings
-    {REGS::R1C, 0xA0},
-    {REGS::R1D, 0xA0},
-    {REGS::R1E, 0x80},
-    {REGS::R1F, 0x80},
-
-    // Startup sequences, to be populated in the future if needed
-    // {},
-
     // Soft start
     {REGS::R2C, CONSTS::R2C_R2D_4MS_ALL},
     {REGS::R2D, CONSTS::R2C_R2D_4MS_ALL},
@@ -147,15 +138,6 @@ const std::vector<std::pair<uint8_t, uint8_t>> PMIC1_SETTINGS =
 
     // PMIC Diagnostic Mode
     {REGS::R2F, 0x06},
-
-    // Current limiter warnings
-    {REGS::R1C, 0xA0},
-    {REGS::R1D, 0xA0},
-    {REGS::R1E, 0x80},
-    {REGS::R1F, 0x80},
-
-    // Startup sequences, to be populated in the future if needed
-    // {},
 
     // Soft start
     {REGS::R2C, CONSTS::R2C_R2D_4MS_ALL},

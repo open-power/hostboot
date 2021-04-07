@@ -1710,6 +1710,7 @@ fapi2::ReturnCode redundancy_vr_enable_kickoff(
         {
             // Perform VR Enable steps
             FAPI_TRY_LAMBDA(mss::pmic::set_4u_settings(i_pmic, l_enable_fields.iv_pmic_id));
+            FAPI_TRY_LAMBDA(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic, i_target_info.iv_ocmb));
             fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
             FAPI_TRY_LAMBDA(mss::pmic::start_vr_enable(i_pmic));
