@@ -577,6 +577,14 @@
         access      read_only;
     };
 
+    register RCS_SENSE_2
+    {
+        name        "RCS Sense 2 register";
+        scomaddr    0x0005001E;
+        capture     group pll_ffdc;
+        access      read_only;
+    };
+
     register TP_PCBSLV_CONFIG
     {
         name        "TP PCBSLV config register";
