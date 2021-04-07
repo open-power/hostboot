@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -737,7 +737,7 @@
         thermal sensors.
     </description>
     <valueType>uint16</valueType>
-    <default>1000</default>
+    <default>200</default>
     <platInit/>
     <mssAccessorName>mrw_thermal_sensor_polling_period</mssAccessorName>
   </attribute>
