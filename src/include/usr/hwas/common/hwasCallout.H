@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -193,8 +193,6 @@ enum busTypeEnum
     PSI_BUS_TYPE    = 6,
     O_BUS_TYPE      = 7,
     OMI_BUS_TYPE    = 8,
-
-    DMI_BUS_TYPE    = 0xFF, //@fixme-RTC:248609-Deprecated for P10
 };
 
 // Used by Hostboot code where real clock targets do not exist
