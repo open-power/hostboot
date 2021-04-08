@@ -2541,12 +2541,13 @@
     <id>ATTR_SAFE_MODE_FREQUENCY_MHZ</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Safe mode frequency in MHZ. This attribute is used within the hwp to update
-    DPLL frequency register.
+    Safe mode frequency in MHz computed as MAX(#V PowerSave Freq, ATTR_FREQ_CORE_FLOOR_MHZ).
+    This attribute is used to update DPLL frequency register for booting and by
+    PGPE Hcode (as a Pstate) when Safe Mode operation is necessary.
 
-    Consumer: p10_setup_evid.C
+    Consumer: p10_setup_evid.C, PGPE Hcode
 
-    Modified by p10_pstate_parameter_build
+    Producer: p10_pstate_parameter_build
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2561,14 +2562,17 @@
     <id>ATTR_SAFE_MODE_VOLTAGE_MV</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Safe mode voltages for VDD and VCS in mV.  If not overridden,  computed
-    from #V PowerSave voltages uplifted by ATTR_BOOT_VOLTAGE_BIAS_0P5PCT.
+    Safe mode set point voltages for VDD and VCS in mV used for booting.
+
+    If not overridden,  computed from the #V VPD Curve Fit VDD points for voltage
+    and current plus the system load line and distrubution losses such to support
+    ATTR_SAFE_MODE_FREQUENCY_MHZ frequency and then uplifted by ATTR_BOOT_VOLTAGE_BIAS_0P5PCT.
 
     [index] ->0: VDD; 1: VCS;
 
     Consumer: p10_setup_evid.C
 
-    Modified in p10_pstate_parameter_build
+    Producer: p10_pstate_parameter_build
     </description>
     <valueType>uint32</valueType>
     <array>2</array>
@@ -3204,14 +3208,9 @@
     <id>ATTR_VCS_FLOOR_MV</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Establishes the minimum effective voltage (eg at the module pins) in mV for
-    the VCS rail used during Pstate operations.
+    THIS ATTRIBUTE HAS BEEN DEPRECATED.
 
-    If the value is 0, the values in #V are used normally (eg with system
-    parameter uplift) to achieve the effective voltage.
-
-    Producer:  Override/Lab
-    Consumers: p10_pstate_parameter_build -> PGPE Hcode
+    VCS voltages are exclusively controlled by the part's #V VPD values.
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -3225,13 +3224,9 @@
     <id>ATTR_VCS_VDD_OFFSET_MV</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Establishes the minimum voltage offset at the module pins in mV that the
-    VCS rail is above the VDD rail during Pstate operations when VCS above any
-    established VCS floor defined by ATTR_VCS_FLOOR_MV.   If ATTR_VCS_FLOOR_MV
-    is 0, this offset will apply across the entire VCS voltage range.
+    THIS ATTRIBUTE HAS BEEN DEPRECATED.
 
-    Producer:  MRW
-    Consumers: p10_pstate_parameter_build -> PGPE Hcode
+    VCS voltages are exclusively controlled by the part's #V VPD values.
     </description>
     <valueType>uint8</valueType>
     <platInit/>

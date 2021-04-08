@@ -4354,8 +4354,10 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 
     FAPI_INF ("l_safe_mode_ps 0x%x (%d)",l_safe_mode_ps, l_safe_mode_ps);
 
-    // Calculate safe mode voltage
-    // Use the biased with system parms operating points
+    // Calculate safe mode set point voltage for use if an HWP has to perform
+    // safe mode actuation.  Note: PGPE uses the safe mode frequency in Pstate
+    // form to compute the safe mode voltage.
+
     if (!iv_attrs.attr_system_dds_disable)
     {
         if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
@@ -4365,8 +4367,8 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         }
         else
         {
-            l_safe_mode_mv[VDD] = ps2v_mv(l_safe_mode_ps, VDD);
-            l_safe_mode_mv[VCS] = ps2v_mv(l_safe_mode_ps, VCS);
+            l_safe_mode_mv[VDD] = ps2v_mv(l_safe_mode_ps, VDD, VPD_PT_SET_BIASED_SYSP);
+            l_safe_mode_mv[VCS] = ps2v_mv(l_safe_mode_ps, VCS, VPD_PT_SET_BIASED_SYSP);
         }
         FAPI_INF("DDS not enabled Setting safe mode VDD voltage to %d mv (0x%x)",
                 l_safe_mode_mv[VDD],
@@ -4384,8 +4386,8 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         }
         else
         {
-            l_safe_mode_mv[VDD] = ps2v_mv(l_safe_mode_ps, VDD) + iv_attrs.attr_save_mode_nodds_uplift_mv[VDD];
-            l_safe_mode_mv[VCS] = ps2v_mv(l_safe_mode_ps, VCS) + iv_attrs.attr_save_mode_nodds_uplift_mv[VCS];
+            l_safe_mode_mv[VDD] = ps2v_mv(l_safe_mode_ps, VDD, VPD_PT_SET_BIASED_SYSP) + iv_attrs.attr_save_mode_nodds_uplift_mv[VDD];
+            l_safe_mode_mv[VCS] = ps2v_mv(l_safe_mode_ps, VCS, VPD_PT_SET_BIASED_SYSP) + iv_attrs.attr_save_mode_nodds_uplift_mv[VCS];
         }
 
         FAPI_INF("DDS enabled Setting safe mode VDD voltage to %d mv (0x%x) with uplift %d mv (0x%x)",
@@ -4465,7 +4467,7 @@ fapi2::ReturnCode PlatPmPPB::compute_retention_vid()
                  &l_psave_ps,
                  ROUND_FAST);
 
-    l_psave_mv = ps2v_mv(l_psave_ps, VDD);
+    l_psave_mv = ps2v_mv(l_psave_ps, VDD, VPD_PT_SET_RAW);
 
     FAPI_DBG("PowerSave vdd_mv 0x%08x (%d)", l_psave_mv, l_psave_mv);
 
@@ -4568,93 +4570,93 @@ void PlatPmPPB::resclk_init()
 ////////  ps2v_mv
 ///////////////////////////////////////////////////////////
 uint32_t PlatPmPPB::ps2v_mv(const Pstate i_pstate,
-                            const boot_voltage_type i_type)
+                            const voltage_type i_type,
+                            const uint32_t i_point_set)
 {
 
-    uint8_t l_SlopeValue =1;
-    uint32_t l_boot_voltage = 0;
+    int16_t  l_SlopeValue = 1;
+    uint32_t l_voltage_mv = 0;
+    uint32_t r;
+    bool     l_region_found = false;
 
-    FAPI_DBG("i_pstate = 0x%x, (%d)", i_pstate, i_pstate);
+    FAPI_DBG("i_pstate = 0x%02X (%3d)", i_pstate, i_pstate);
+
+    // Find the region
+    for (r = 0; r < NUM_PV_POINTS-1; ++r)
+    {
+        FAPI_DBG("iv_operating_points[i_point_set][%d] 0x%02X (%3d) [%d] 0x%02X (%3d)",
+            r,
+            iv_operating_points[i_point_set][r].pstate,
+            iv_operating_points[i_point_set][r].pstate,
+            r+1,
+            iv_operating_points[i_point_set][r+1].pstate,
+            iv_operating_points[i_point_set][r+1].pstate);
+        if ((i_pstate <= iv_operating_points[i_point_set][r].pstate) &&
+            (i_pstate >  iv_operating_points[i_point_set][r+1].pstate)  )
+        {
+            l_region_found = true;
+            break;
+        }
+    }
+
+    if (!l_region_found)
+    {
+        FAPI_INF("ERROR:  Invalid region");
+        return 0;
+        // Bad Region
+    }
+
+    // in 4.12 form
+    l_SlopeValue =
+        compute_slope_4_12( iv_operating_points[i_point_set][r+1].vdd_mv,
+                            iv_operating_points[i_point_set][r].vdd_mv,
+                            iv_operating_points[i_point_set][r].pstate,
+                            iv_operating_points[i_point_set][r+1].pstate );
+
+    int16_t x = l_SlopeValue * (-i_pstate + iv_operating_points[i_point_set][r].pstate);
+    int16_t l_mx = x >> (VID_SLOPE_FP_SHIFT_12 -1);
+    // l_mx is in the form off IIII.D
+
+    FAPI_DBG("i_pstate = %d "
+            "p2s_mv Slope = 0x%x "
+            "x = 0x%x (%d) mx = 0x%x (%d)",
+            i_pstate,
+            l_SlopeValue,
+            x, x,
+            l_mx, l_mx);
 
     if (i_type == VDD)
     {
-
-        FAPI_INF("l_operating_points[CF0].vdd_mv 0x%-3x (%d)",
-                (iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vdd_mv),
-                (iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vdd_mv));
-        FAPI_INF("l_operating_points[CF0].pstate 0x%-3x (%d)",
-                iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate,
-                iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate);
-
-
-
-        uint32_t x = (l_SlopeValue * (-i_pstate + iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate));
-        uint32_t y = x >> VID_SLOPE_FP_SHIFT_12;
-
-        uint32_t l_vdd =
-            (((l_SlopeValue * (-i_pstate + iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate)) >> VID_SLOPE_FP_SHIFT_12)
-             + (iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vdd_mv));
-
-        // Round up
-        l_vdd = (l_vdd << 1) + 1;
-        l_vdd = l_vdd >> 1;
-
-        FAPI_DBG("i_pstate = %d "
-                "i_operating_points[VPD_PV_CF0].pstate) = %d "
-                "i_operating_points[VPD_PV_CF0].vdd_mv  = %d "
-                "VID_SLOPE_FP_SHIFT_12 = %X "
-                "x = 0x%x  (%d) y = 0x%x (%d)",
-                i_pstate,
-                iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate,
-                (iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vdd_mv),
-                VID_SLOPE_FP_SHIFT_12,
-                x, x,
-                y, y);
-        l_boot_voltage = l_vdd;
-
-        FAPI_INF ("l_vdd 0x%x (%d)", l_vdd, l_vdd);
+        FAPI_INF("VDD iv_operating_points[%d].vdd_mv 0x%-3x (%d)", r,
+                 iv_operating_points[i_point_set][r].vdd_mv,
+                 iv_operating_points[i_point_set][r].vdd_mv);
+        FAPI_INF("VDD iv_operating_points[%d].vdd_mv 0x%-3x (%d)", r+1,
+                iv_operating_points[i_point_set][r+1].vdd_mv,
+                iv_operating_points[i_point_set][r+1].vdd_mv);
+                              // Shift B to form IIII.D
+        l_voltage_mv = l_mx + (iv_operating_points[i_point_set][r].vdd_mv << 1);
     }
+
     if (i_type == VCS)
     {
 
-        FAPI_INF("l_operating_points[VPD_PV_CF0].vcs_mv 0x%-3x (%d)",
-                (iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vcs_mv),
-                (iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vcs_mv));
-        FAPI_INF("l_operating_points[VPD_PV_CF0].pstate 0x%-3x (%d)",
-                iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate,
-                iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate);
-
-
-
-        uint32_t x = (l_SlopeValue * (-i_pstate + iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate));
-        uint32_t y = x >> VID_SLOPE_FP_SHIFT_12;
-
-        uint32_t l_vcs =
-            (((l_SlopeValue * (-i_pstate + iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate)) >> VID_SLOPE_FP_SHIFT_12)
-             + (iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vcs_mv));
-
-        // Round up
-        l_vcs = (l_vcs << 1) + 1;
-        l_vcs = l_vcs >> 1;
-
-        FAPI_DBG("i_pstate = %d "
-                "i_operating_points[VPD_PV_CF0].pstate = %d "
-                "i_operating_points[VPD_PV_CF0].vcs_mv  = %d "
-                "VID_SLOPE_FP_SHIFT_12 = %X "
-                "x = 0x%x  (%d) y = 0x%x (%d)",
-                i_pstate,
-                iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].pstate,
-                (iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vcs_mv),
-                VID_SLOPE_FP_SHIFT_12,
-                x, x,
-                y, y);
-        l_boot_voltage = l_vcs;
-
-        FAPI_INF ("l_vcs 0x%x (%d)", l_vcs, l_vcs);
+        FAPI_INF("VCS iv_operating_points[%d].vcs_mv 0x%-3x (%d)", r,
+                (iv_operating_points[i_point_set][r].vcs_mv),
+                (iv_operating_points[i_point_set][r].vcs_mv));
+        FAPI_INF("VCS iv_operating_points[%d].vcs_mv 0x%-3x (%d)", r+1,
+                iv_operating_points[i_point_set][r+1].vcs_mv,
+                iv_operating_points[i_point_set][r+1].vcs_mv);
+                              // Shift B to form IIII.D
+        l_voltage_mv = l_mx + (iv_operating_points[i_point_set][r].vcs_mv << 1);
     }
 
+    // Round up -- IIII.D + 1 and then shift to IIII
+    l_voltage_mv++;
+    l_voltage_mv = l_voltage_mv >> 1;
 
-    return l_boot_voltage;
+    FAPI_INF ("ps2v_mv voltage %d (0x%x)", l_voltage_mv, l_voltage_mv);
+
+    return l_voltage_mv;
 }
 
 ///////////////////////////////////////////////////////////
@@ -4742,7 +4744,6 @@ void PlatPmPPB::pState2freq (const Pstate i_pstate,
                 (iv_frequency_step_khz));
 }
 
-
 ///////////////////////////////////////////////////////////
 ////////   get_pstate_attrs
 ///////////////////////////////////////////////////////////
@@ -4751,7 +4752,7 @@ void PlatPmPPB::get_pstate_attrs(AttributeList &o_attr)
     memcpy(&o_attr,&iv_attrs, sizeof(iv_attrs));
 } // end of get_pstate_attrs
 
-//
+
 ///////////////////////////////////////////////////////////
 ////////  compute_PStateV_I_slope
 ///////////////////////////////////////////////////////////

@@ -39,9 +39,9 @@
 #include <pstates_pgpe.H>
 #include <pstates_table.H>
 #include <p10_pm_utils.H>
-#include "p10_pm_get_poundv_bucket.H"
-#include "p10_pm_get_poundw_bucket.H"
-#include "p10_pm_set_system_freq.H"
+#include <p10_pm_get_poundv_bucket.H>
+#include <p10_pm_get_poundw_bucket.H>
+#include <p10_pm_set_system_freq.H>
 
 #define INVALID_BUS_NUM   0xFF
 
@@ -56,14 +56,14 @@ typedef enum VPD_TYPE
     RAW,
     BIASED,
 } vpd_type;
-typedef enum BOOT_VOLTAGE_TYPE
+typedef enum VOLTAGE_TYPE
 {
     VDD = 0,
     VCS = 1,
     VDN = 2,
     VIO = 3,
     MAX_VRM = 4,
-} boot_voltage_type;
+} voltage_type;
 
 enum FREQ2PSTATE_ROUNDING
 {
@@ -393,13 +393,15 @@ class PlatPmPPB
         fapi2::ReturnCode rvrm_enablement();
 
         /// -----------------------------------------------------------------------
-        /// @brief Convert pstate to voltage
-        /// @param[in]     i_pstate  pstate value that needs to be converted
-        /// @param[in]     i_type   boot voltage type
+        /// @brief Convert pstate to voltage from biased points
+        /// @param[in]     i_pstate     pstate value that needs to be converted
+        /// @param[in]     i_type       voltage type (VDD, VCS)
+        /// @param[in]     i_point_set  point set (VPD_PT_SET_BIASED, VPD_PT_SET_BIASED_SYSP)
         /// @return  boot voltage value.
         /// -----------------------------------------------------------------------
         uint32_t ps2v_mv(const Pstate i_pstate,
-                         const boot_voltage_type i_type);
+                         const voltage_type i_type,
+                         const uint32_t i_point_set);
 
         /// -----------------------------------------------------------------------
         /// @brief Converts frequency value to pstate number
@@ -412,7 +414,7 @@ class PlatPmPPB
                          const FREQ2PSTATE_ROUNDING i_round = ROUND_SLOW);
 
         /// -----------------------------------------------------------------------
-        /// @brief Converts a pstate number to a frequenc
+        /// @brief Converts a pstate number to a frequency
         /// @param[in]     i_pstate pstate output for a given inut frequency
         /// @param[out]    o_freq_khz input frequency
         /// -----------------------------------------------------------------------
@@ -615,11 +617,11 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Compute slope values for fixed point of shift 4.12
-        /// @param[in]     y1    pstate value of powersave
-        /// @param[in]     y0    pstate value of nominal
-        /// @param[in]     x1    VDD value of nominal
-        /// @param[in]     x0    VDD value of powersave
-        /// @return computed slope threshold value
+        /// @param[in]     y1
+        /// @param[in]     y0
+        /// @param[in]     x1
+        /// @param[in]     x0
+        /// @return computed slope (y1-y0)/(x1-x0) * (1 << VID_SLOPE_FP_SHIFT_12)
         /// -----------------------------------------------------------------------
         int16_t compute_slope_4_12(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
         {
@@ -632,12 +634,12 @@ class PlatPmPPB
 
         }
         /// -----------------------------------------------------------------------
-        /// @brief Compute slope values for fixed point of shift 4.12
-        /// @param[in]     y1    pstate value of powersave
-        /// @param[in]     y0    pstate value of nominal
-        /// @param[in]     x1    VDD value of nominal
-        /// @param[in]     x0    VDD value of powersave
-        /// @return computed slope threshold value
+        /// @brief Compute slope values for fixed point of shift 2.6
+        /// @param[in]     y1
+        /// @param[in]     y0
+        /// @param[in]     x1
+        /// @param[in]     x0
+        /// @return computed slope (y1-y0)/(x1-x0) * (1 << 6)
         /// -----------------------------------------------------------------------
         int16_t compute_slope_2_6(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
         {
@@ -651,11 +653,11 @@ class PlatPmPPB
         }
         /// -----------------------------------------------------------------------
         /// @brief Compute slope values for fixed point of shift 4.9
-        /// @param[in]     y1    pstate value of powersave
-        /// @param[in]     y0    pstate value of nominal
-        /// @param[in]     x1    VDD value of nominal
-        /// @param[in]     x0    VDD value of powersave
-        /// @return computed slope threshold value
+        /// @param[in]     y1
+        /// @param[in]     y0
+        /// @param[in]     x1
+        /// @param[in]     x0
+        /// @return computed slope (y1-y0)/(x1-x0) * (1 << I_SLOPE_FP_SHIFT_9)
         /// -----------------------------------------------------------------------
         int16_t compute_slope_4_9(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
         {
