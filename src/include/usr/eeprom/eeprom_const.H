@@ -25,7 +25,6 @@
 #ifndef __EEPROM_CONST_H
 #define __EEPROM_CONST_H
 
-#include <config.h>
 #include <targeting/common/entitypath.H>
 #include <string.h>
 
@@ -39,11 +38,7 @@ constexpr uint8_t MAX_BYTE_ADDR = 2;
 constexpr uint8_t EEPROM_MAX_RETRIES = 2;
 
 // EECACHE OP related consts
-#ifndef CONFIG_PNORDD_IS_PLDM
 constexpr uint32_t UNSET_INTERNAL_OFFSET_VALUE = 0xFFFFFFFF;
-#else
-constexpr uint32_t UNSET_INTERNAL_OFFSET_VALUE = 0x00000000;
-#endif
 constexpr uint32_t UNSET_END_OF_CACHE_VALUE = UNSET_INTERNAL_OFFSET_VALUE;
 constexpr uint8_t  NUM_BYTE_UNIQUE_ID = 13;
 // Note: If any of these max eeprom counts are changed here, also change them in
