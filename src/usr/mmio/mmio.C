@@ -990,8 +990,8 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                      */
                     l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    MMIO::MOD_MMIO_CHAN_CHECKSTOP,
-                                    MMIO::RC_BAD_MMIO_READ,
+                                    MMIO::MOD_MMIO_PERFORM_OP,
+                                    MMIO::RC_MMIO_CHAN_CHECKSTOP,
                                     TWO_UINT32_TO_UINT64(
                                       get_huid(i_ocmbTarget),
                                       (l_offset < (4 * GIGABYTE)) ?
