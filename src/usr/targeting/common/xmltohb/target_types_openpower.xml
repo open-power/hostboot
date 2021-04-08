@@ -374,6 +374,9 @@
       <id>OP_TRACE_LITE</id>
     </attribute>
     <attribute>
+      <id>PLDM_BIOS_ERROR_INFORMATIONAL</id>
+    </attribute>
+    <attribute>
       <id>PMIC_ERROR_TEMP_DEG_C</id>
     </attribute>
     <attribute>

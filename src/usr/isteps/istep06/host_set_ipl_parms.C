@@ -59,24 +59,25 @@ errlHndl_t getAndSetPLDMBiosAttrs(void)
       const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
 
       ATTR_PAYLOAD_KIND_type payload_kind = PAYLOAD_KIND_UNKNOWN;
+      const auto DEFAULT_PAYLOAD_KIND = PAYLOAD_KIND_PHYP;
 
       errl = PLDM::getHypervisorMode(bios_string_table,
                                      bios_attr_table,
                                      payload_kind);
-
-      // If we get an error, or are returned a payload_kind
-      // that is not PHYP or SAPPHIRE then we do not know
-      // what payload to pick. We cannot assume the payload
-      // kind as booting for the incorrect hypervisor could
-      // result in loss of data in NVRAM that was generated
-      // by the hypervisor on previous boots.
       if(errl)
       {
           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "getAndSetPLDMBiosAttrs: An error occurred getting Hypervisor Mode from the BMC" );
-          break;
+                     "getAndSetPLDMBiosAttrs: An error occurred getting Hypervisor Mode from the BMC, using default (PHYP) 0x%X",
+                     DEFAULT_PAYLOAD_KIND );
+
+          // Set payload_kind to default, commit the error and continue
+          payload_kind = DEFAULT_PAYLOAD_KIND;
+          errlCommit( errl, ISTEP_COMP_ID );
       }
 
+      // If we are returned a payload_kind
+      // that is not PHYP or SAPPHIRE then we do not know
+      // what payload to pick.
       if(payload_kind != PAYLOAD_KIND_PHYP &&
          payload_kind != PAYLOAD_KIND_SAPPHIRE)
       {

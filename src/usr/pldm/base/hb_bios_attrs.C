@@ -44,6 +44,10 @@
 // support for string user details sections
 #include <errl/errludstring.H>
 
+// sys target
+#include <targeting/common/targetservice.H>
+
+
 namespace PLDM {
 
 // Attributes
@@ -189,7 +193,7 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
       PLDM_ERR("Could not find %s in the string_table provided by the BMC",
                i_attr_string);
       /*@
-        * @errortype  ERRL_SEV_UNRECOVERABLE
+        * @errortype
         * @moduleid   MOD_GET_CURRENT_VALUE
         * @reasoncode RC_UNSUPPORTED_ATTRIBUTE
         * @userdata1  Unused
@@ -197,14 +201,24 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
         * @devdesc    Software problem, PLDM transaction failed
         * @custdesc   A software error occurred during system boot
         */
-      errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                            MOD_GET_CURRENT_VALUE,
-                            RC_UNSUPPORTED_ATTRIBUTE,
-                            0,
-                            0,
-                            ErrlEntry::NO_SW_CALLOUT);
+      errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                           MOD_GET_CURRENT_VALUE,
+                           RC_UNSUPPORTED_ATTRIBUTE,
+                           0,
+                           0,
+                           ErrlEntry::NO_SW_CALLOUT);
       ErrlUserDetailsString(i_attr_string).addToLog(errl);
       addBmcErrorCallouts(errl);
+
+      // Force to informational if requested by HB attribute.
+      // This allows new attributes to be added while waiting
+      // for the equivalent BMC BIOS attribute to be added.
+      const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+      if(sys->getAttr<TARGETING::ATTR_PLDM_BIOS_ERROR_INFORMATIONAL>())
+      {
+          errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+      }
+
       break;
   }
 

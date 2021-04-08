@@ -1637,6 +1637,24 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
+    <id>PLDM_BIOS_ERROR_INFORMATIONAL</id>
+    <description>
+        0 = set BIOS attribute lookup error to PREDICTIVE
+        1 = set BIOS attribute lookup error to INFORMATIONAL
+        Default to 1 to allow new attributes to be added
+        without a BMC attribute code dependency.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0x01</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <complexType>
       <description>
         Structure which describes the "Entity Identification Information" data
@@ -2117,12 +2135,13 @@ ID for the sensor number returned with the elog. -->
         Set to 0 to disable.
     </description>
     <simpleType>
-      <uint16_t>
-        <default>0x0000</default>
-      </uint16_t>
+      <uint8_t>
+        <default>0x00</default>
+      </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
   </attribute>
 
   <attribute>
