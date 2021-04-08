@@ -298,8 +298,15 @@ fapi2::ReturnCode p10_setup_ref_clock(const
     // Doesn't do anything on DD1 so no need for an EC level check
     l_read_reg.setBit<31>();
 
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL4_FSI, l_read_reg));
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL4_COPY_FSI, l_read_reg));
+
+    // Set bits 18+19 to make sure mux2a/b are initially in reset on DD2
+    // Don't set them in the COPY register so that the CBS clears them when it runs,
+    // freeing up the clock path to TP_CONST.
+    // Doesn't do anything on DD1 so no need for an EC level check
+    l_read_reg.setBit<18>().setBit<19>();
+
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL4_FSI, l_read_reg));
 
     FAPI_INF("p10_setup_ref_clock: Exiting ...");
 
