@@ -147,7 +147,7 @@ struct hdatSlotMapArea_t
     uint32_t   hdatSwitchDeviceId;
     uint32_t   hdatSubSysVendorId;
     uint32_t   hdatSubSysDeviceId;
-    char       hdatSlotName[8];
+    char       hdatSlotName[16];
 } __attribute__ ((packed));
 
 
@@ -457,8 +457,10 @@ public:
                                   bool i_dcm = false);
 
 
-  errlHndl_t hdatGetSlotMapTableAreas(int i_iohubNum, bool i_dcm = false);
-  errlHndl_t hdatGetSlotMapEntryInfos(int i_iohubNum, bool i_dcm = false);
+  errlHndl_t hdatGetSlotMapTableAreas(const char* i_systemType,
+      int i_iohubNum, bool i_dcm = false);
+  errlHndl_t hdatGetSlotMapEntryInfos(const char* i_systemType,
+      int i_iohubNum, bool i_dcm = false);
 
   /*
    * @brief fetches all the daughter card information for a proc when the
