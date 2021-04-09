@@ -298,7 +298,7 @@ sub createTargetExtensionFromFapi(\%,\%)
         #  to modify with new attribute
         foreach my $targ (@{$alltargext->{targetTypeExtension}})
         {
-            if( $targ->{id} =~ $targtype )
+            if( $targ->{id} =~ /^$targtype$/ )
             {
                 #print "-Found it\n";
                 $foundmatch = 1;
