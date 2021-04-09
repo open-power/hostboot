@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,17 +86,45 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 PRDF_PLUGIN_DEFINE( p10_mcc, PostAnalysis );
 
 /**
- * @brief  Plugin called to return PRD_NO_CLEAR_FIR_BITS to the rule code.
+ * @brief  Plugin called to analyze to a connected OCMB_CHIP
  * @param  i_chip A MCC chip.
  * @param  io_sc  The step code data struct.
- * @return SUCCESS.
+ * @param  i_pos  The position of the connected OCMB (0:1)
+ * @return PRD_NO_CLEAR_FIR_BITS if analysis successful, else the RC from
+ *         analyze().
  */
-int32_t ReturnPrdNoClearFirBits( ExtensibleChip * i_chip,
-                                 STEP_CODE_DATA_STRUCT & io_sc )
+int32_t analyzeConnectedOcmb( ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & io_sc,
+                              uint8_t i_pos )
 {
-    return PRD_NO_CLEAR_FIR_BITS;
+    int32_t o_rc = SUCCESS;
+    ExtensibleChip * ocmb = getConnectedChild( i_chip, TYPE_OCMB_CHIP, i_pos );
+
+    o_rc = ocmb->Analyze( io_sc,
+                          io_sc.service_data->getSecondaryAttnType() );
+    if ( SUCCESS == o_rc )
+    {
+        // If analysis was successful, the PostAnalysis function of the
+        // OCMB should have cleared the MC_DSTL_FIR bits as needed, or set
+        // them again if there are still attentions to handle. As such, return
+        // PRD_NO_CLEAR_FIR_BITS here so we don't clear the bits that may have
+        // been set.
+        o_rc = PRD_NO_CLEAR_FIR_BITS;
+    }
+
+    return o_rc;
 }
-PRDF_PLUGIN_DEFINE( p10_mcc, ReturnPrdNoClearFirBits );
+
+#define PLUGIN_ANALYZE_OCMB( POS ) \
+int32_t analyzeConnectedOcmb_##POS( ExtensibleChip * i_chip, \
+                                    STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    return analyzeConnectedOcmb( i_chip, io_sc, POS ); \
+} \
+PRDF_PLUGIN_DEFINE( p10_mcc, analyzeConnectedOcmb_##POS );
+
+PLUGIN_ANALYZE_OCMB(0);
+PLUGIN_ANALYZE_OCMB(1);
 
 //##############################################################################
 //

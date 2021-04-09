@@ -193,14 +193,12 @@ actionclass chnl1_omi_bus_th_1_CRC_UERE { SueSource; chnl1_omi_bus_th_1_CRC; };
 
 actionclass analyze_ocmb_chnl0
 {
-    analyze(connected(TYPE_OCMB_CHIP, 0));
-    funccall("ReturnPrdNoClearFirBits"); # This needs to be called last
+    funccall("analyzeConnectedOcmb_0"); # This needs to be called last
 };
 
 actionclass analyze_ocmb_chnl1
 {
-    analyze(connected(TYPE_OCMB_CHIP, 1));
-    funccall("ReturnPrdNoClearFirBits"); # This needs to be called last
+    funccall("analyzeConnectedOcmb_1"); # This needs to be called last
 };
 
 actionclass analyze_ocmb_chnl0_UERE

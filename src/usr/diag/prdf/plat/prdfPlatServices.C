@@ -51,7 +51,7 @@
 #include <initservice/initserviceif.H>
 #include <devicefw/userif.H>
 #include <prdfHomRegisterAccess.H>
-#include <ibscomreasoncodes.H>
+#include <mmio/mmio_reasoncodes.H>
 #include <scom/scomreasoncodes.H>
 #include <p10_proc_gettracearray.H>
 #include <fapi2_spd_access.H>
@@ -127,9 +127,9 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
 
         #else
 
-        // An inband SCOM failure likely means the memory channel has failed.
+        // Check the RC to see if the memory channel has failed.
         // Hostboot will have switched over to FSI SCOMs. So retry.
-        if ( IBSCOM::IBSCOM_BUS_FAILURE == errl->reasonCode() )
+        if ( MMIO::RC_MMIO_CHAN_CHECKSTOP == errl->reasonCode() )
         {
             doRetry = true;
         }

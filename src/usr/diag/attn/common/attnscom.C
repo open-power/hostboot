@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 #include "common/attnscom.H"
 #include "common/attntrace.H"
 #include <devicefw/userif.H>
-#include <ibscom/ibscomreasoncodes.H>
+#include <mmio/mmio_reasoncodes.H>
 #include <scom/scomreasoncodes.H>
 
 using namespace TARGETING;
@@ -108,10 +108,10 @@ errlHndl_t ScomImpl::putScom(
           deviceWrite(i_target, &i_data, size, DEVICE_SCOM_ADDRESS(i_address));
 
     if( ( NULL != errlH ) &&
-        ( IBSCOM::IBSCOM_BUS_FAILURE ) == errlH->reasonCode() )
+        ( MMIO::RC_MMIO_CHAN_CHECKSTOP ) == errlH->reasonCode() )
     {
         errlCommit( errlH, ATTN_COMP_ID );
-        ATTN_DBG( "deviceWrite() failed with reason code IBSCOM_BUS_FAILURE."
+        ATTN_DBG( "deviceWrite failed with reason code RC_MMIO_CHAN_CHECKSTOP."
                   " Trying again, Target HUID:0x%08X Register 0x%016X",
                   get_huid( i_target), i_address );
 
@@ -137,7 +137,7 @@ errlHndl_t ScomImpl::getScom(
        )
 #else
     if ( ( NULL != errlH ) &&
-         (IBSCOM::IBSCOM_BUS_FAILURE ) == errlH->reasonCode()
+         (MMIO::RC_MMIO_CHAN_CHECKSTOP ) == errlH->reasonCode()
        )
 #endif
     {
