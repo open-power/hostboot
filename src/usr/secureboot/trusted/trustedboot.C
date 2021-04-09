@@ -2594,7 +2594,9 @@ bool isTpmRequired()
         // TPM always required in simics
         if(Util::isSimicsRunning())
         {
-            retVal = true;
+            // @TODO RTC 270858: Re-enable TPM on SIMICS after it supports
+            // invoking TPM reset from the SBE bolt on registers.
+            retVal = false;
         }
         else
         {
