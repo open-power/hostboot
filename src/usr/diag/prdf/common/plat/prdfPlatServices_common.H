@@ -48,6 +48,7 @@
 #include <plat_hwp_invoker.H>
 
 #include <errlentry.H>
+#include <prdfCalloutMap.H>
 
 //------------------------------------------------------------------------------
 
@@ -107,17 +108,21 @@ bool isSpConfigFsp();
 /**
  * @brief Adds both endpoints to the callout list (priority medium group A) and
  *        calls out everything else in between (priority low).
- * @param io_sc     The step code data struct.
- * @param i_rxTrgt  The RX endpoint target.
- * @param i_txTrgt  The TX endpoint target.
- * @param i_busType The hardware bus type
- * @param i_flags   Extra flag for callout structure.
+ * @param io_sc        The step code data struct.
+ * @param i_rxTrgt     The RX endpoint target.
+ * @param i_txTrgt     The TX endpoint target.
+ * @param i_busType    The hardware bus type
+ * @param i_flags      Extra flag for callout structure.
+ * @param i_rxPriority Priority to callout i_rxTrgt
+ * @param i_txPriority Priority to callout i_txTrgt
  */
 void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
                 TARGETING::TargetHandle_t i_rxTrgt,
                 TARGETING::TargetHandle_t i_txTrgt,
                 HWAS::busTypeEnum i_busType,
-                HWAS::CalloutFlag_t i_flags = HWAS::FLAG_NONE);
+                HWAS::CalloutFlag_t i_flags = HWAS::FLAG_NONE,
+                PRDpriority i_rxPriority = MRU_MEDA,
+                PRDpriority i_txPriority = MRU_MEDA);
 
 //##############################################################################
 //##                        Memory specific functions

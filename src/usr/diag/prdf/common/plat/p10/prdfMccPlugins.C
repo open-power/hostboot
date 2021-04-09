@@ -202,6 +202,57 @@ int32_t calloutBusInterface_1(ExtensibleChip* i_chip,
 }
 PRDF_PLUGIN_DEFINE(p10_mcc, calloutBusInterface_1);
 
+/**
+ * @brief  Calls out the entire bus interface for OMI 0, with the OCMB as
+ *         high priority
+ * @param  i_chip An MCC chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_pos  The OMI pos (0:1)
+ * @return SUCCESS
+ */
+int32_t chnlTimeout( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
+                     uint8_t i_pos )
+{
+    #define PRDF_FUNC "[p10_mcc::chnlTimeout] "
+
+    TargetHandle_t rxTrgt = getConnectedChild( i_chip->getTrgt(), TYPE_OMI,
+                                               i_pos );
+    if ( nullptr == rxTrgt )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get connected OMI from parent MCC "
+                  "0x%08x", i_chip->getHuid() );
+        return SUCCESS;
+    }
+
+    TargetHandle_t txTrgt = getConnectedChild( rxTrgt, TYPE_OCMB_CHIP, 0 );
+    if ( nullptr == txTrgt )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get connected OCMB from parent OMI "
+                  "0x%08x", getHuid(rxTrgt) );
+        return SUCCESS;
+    }
+
+    // Since we have no way to directly check the PMIC, we assume the PMIC is
+    // the likely cause. As such, we want the OCMB to be the high priority
+    // callout, and the OMI and bus to be low priority callouts.
+    calloutBus( io_sc, rxTrgt, txTrgt, HWAS::OMI_BUS_TYPE, HWAS::FLAG_NONE,
+                MRU_LOW, MRU_HIGH );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+#define PLUGIN_CHNL_TIMEOUT(POS) \
+int32_t chnlTimeout_##POS(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)\
+{ \
+    return chnlTimeout(i_chip, io_sc, POS); \
+} \
+PRDF_PLUGIN_DEFINE(p10_mcc, chnlTimeout_##POS);
+
+PLUGIN_CHNL_TIMEOUT(0);
+PLUGIN_CHNL_TIMEOUT(1);
+
 } // end namespace p10_mcc
 
 } // end namespace PRDF

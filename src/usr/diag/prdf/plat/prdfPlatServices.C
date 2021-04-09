@@ -273,14 +273,15 @@ int32_t getCfam( ExtensibleChip * i_chip,
 
 void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
                 TargetHandle_t i_rxTrgt, TargetHandle_t i_txTrgt,
-                HWAS::busTypeEnum i_busType, HWAS::CalloutFlag_t i_flags)
+                HWAS::busTypeEnum i_busType, HWAS::CalloutFlag_t i_flags,
+                PRDpriority i_rxPriority, PRDpriority i_txPriority)
 {
     PRDF_ASSERT(nullptr != i_rxTrgt);
     PRDF_ASSERT(nullptr != i_txTrgt);
 
     // Add both endpoints to the callout list, priority medium group A.
-    io_sc.service_data->SetCallout(i_rxTrgt, MRU_MEDA);
-    io_sc.service_data->SetCallout(i_txTrgt, MRU_MEDA);
+    io_sc.service_data->SetCallout(i_rxTrgt, i_rxPriority);
+    io_sc.service_data->SetCallout(i_txTrgt, i_txPriority);
 
     // Callout the rest of the bus, priority low.
     errlHndl_t errl = ServiceGeneratorClass::ThisServiceGenerator().getErrl();

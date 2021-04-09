@@ -166,15 +166,17 @@ actionclass threshold_and_mask_chnl1_ocmb_th_1
 # Bits using these actions are CRC-related errors that are potential
 # side-effects of bits in the PAU_PHY_FIR. There is additional handling
 # to determine the callout if a root cause bit is found on as well.
-actionclass chnl0_omi_bus_th_1_CRC
+actionclass chnl0_timeout_th_1_CRC_UERE
 {
-    try( funccall("CrcSideEffect_Mcc_0"), chnl0_omi_bus );
+    SueSource;
+    try( funccall("CrcSideEffect_Mcc_0"), funccall("chnlTimeout_0") );
     threshold1;
 };
 
-actionclass chnl1_omi_bus_th_1_CRC
+actionclass chnl1_timeout_th_1_CRC_UERE
 {
-    try( funccall("CrcSideEffect_Mcc_1"), chnl1_omi_bus );
+    SueSource;
+    try( funccall("CrcSideEffect_Mcc_1"), funccall("chnlTimeout_1") );
     threshold1;
 };
 
@@ -184,8 +186,6 @@ actionclass chnl0_ocmb_th_1_UERE        { SueSource; chnl0_ocmb_th_1; };
 actionclass chnl1_ocmb_th_1_UERE        { SueSource; chnl1_ocmb_th_1; };
 actionclass chnl0_omi_bus_th_1_UERE     { SueSource; chnl0_omi_bus_th_1; };
 actionclass chnl1_omi_bus_th_1_UERE     { SueSource; chnl1_omi_bus_th_1; };
-actionclass chnl0_omi_bus_th_1_CRC_UERE { SueSource; chnl0_omi_bus_th_1_CRC; };
-actionclass chnl1_omi_bus_th_1_CRC_UERE { SueSource; chnl1_omi_bus_th_1_CRC; };
 
 ################################################################################
 # Analyze connected

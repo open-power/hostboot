@@ -647,6 +647,29 @@ bool __analyzeChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         // as a side effect. These include: N/A
         // TODO RTC 243518 -requires more input from the test team to determine
 
+        // Check OCMB for unit checkstops
+        if ( __queryUcsOcmb( ocmbChip, i_omi ) )
+        {
+            // Analyze UNIT_CS on the OCMB chip
+            if ( SUCCESS == ocmbChip->Analyze(io_sc, UNIT_CS) )
+            {
+                o_analyzed = true;
+                break;
+            }
+
+        }
+
+        // Check MCC for unit checkstops
+        if ( __queryUcsMcc( mccChip, i_omi ) )
+        {
+            // Analyze UNIT_CS on the MCC chip
+            if ( SUCCESS == mccChip->Analyze(io_sc, UNIT_CS) )
+            {
+                o_analyzed = true;
+                break;
+            }
+        }
+
         // Check OMIC for unit checkstops
         if ( __queryUcsOmic( omicChip, mccChip, i_omi ) )
         {
@@ -663,28 +686,6 @@ bool __analyzeChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
             }
         }
 
-        // Check MCC for unit checkstops
-        if ( __queryUcsMcc( mccChip, i_omi ) )
-        {
-            // Analyze UNIT_CS on the MCC chip
-            if ( SUCCESS == mccChip->Analyze(io_sc, UNIT_CS) )
-            {
-                o_analyzed = true;
-                break;
-            }
-        }
-
-        // Check OCMB for unit checkstops
-        if ( __queryUcsOcmb( ocmbChip, i_omi ) )
-        {
-            // Analyze UNIT_CS on the OCMB chip
-            if ( SUCCESS == ocmbChip->Analyze(io_sc, UNIT_CS) )
-            {
-                o_analyzed = true;
-                break;
-            }
-
-        }
         PRDF_INF( PRDF_FUNC "Failed channel detected on 0x%08x, but no active "
                   "attentions found", getHuid(i_omi) );
     }while(0);
