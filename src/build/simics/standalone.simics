@@ -34,7 +34,7 @@ echo "Master PNOR is: "+$hb_pnor
 # Look for a custom pre-built copy first
 $found_custom_eecache = 0
 try {
-    $eccPreload = (lookup-file "%simics%/custom_eecache.bin")
+    $eccPreload = (lookup-file "custom_eecache.bin")
     $found_custom_eecache = 1
 } except {
     $found_custom_eecache = 0
@@ -47,9 +47,9 @@ if( $vpo_compile == "1" ) {
         echo "    - Using custom eecache found in custom_eecache.bin"
     } else {
         if ($standalone_test_dd1 == TRUE) {
-            $eccPreload = (lookup-file "%simics%/eecache_prebuilt.bin.ecc")
+            $eccPreload = (lookup-file "eecache_prebuilt.bin.ecc")
         } else {
-            $eccPreload = (lookup-file "%simics%/eecache_prebuilt_dd2.bin.ecc")
+            $eccPreload = (lookup-file "eecache_prebuilt_dd2.bin.ecc")
         }
     }
     # NOTE must change offset if PNOR layout changes EECACHE offsets
