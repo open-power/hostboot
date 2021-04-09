@@ -24,6 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
+
     <hwpError>
         <rc>RC_EXP_UPDATE_INVALID_IMAGE_SIZE</rc>
         <description>
@@ -66,7 +67,8 @@
     <hwpError>
         <rc>RC_EXP_UPDATE_DEV_INF_ERR</rc>
         <description>
-            Explorer firmware update command encountered a device info retrieve error
+            Explorer firmware update command encountered a device info retrieve error.
+            Likely, this is caused by a bad flash part, so the part is garded
         </description>
         <ffdc>RSP_ID</ffdc>
         <ffdc>REQ_ID</ffdc>
@@ -92,6 +94,7 @@
         <rc>RC_EXP_UPDATE_DEV_SECTOR_INF_ERR</rc>
         <description>
             Explorer firmware update command encountered a device sector info retrieve error
+            Likely, this is caused by a bad flash part, so the part is garded
         </description>
         <ffdc>RSP_ID</ffdc>
         <ffdc>REQ_ID</ffdc>
@@ -117,6 +120,7 @@
         <rc>RC_EXP_UPDATE_DEV_ERASE_ERR</rc>
         <description>
             Explorer firmware update command encountered a device erase error
+            Likely, this is caused by a bad flash part, so the part is garded
         </description>
         <ffdc>RSP_ID</ffdc>
         <ffdc>REQ_ID</ffdc>
@@ -142,6 +146,7 @@
         <rc>RC_EXP_UPDATE_WRITE_FAIL</rc>
         <description>
             Explorer firmware update command encountered a device write error
+            Likely, this is caused by a bad flash part, so the part is garded
         </description>
         <ffdc>RSP_ID</ffdc>
         <ffdc>REQ_ID</ffdc>
@@ -181,13 +186,6 @@
             <procedure>CODE</procedure>
             <priority>HIGH</priority>
         </callout>
-        <callout>
-            <target>TARGET</target>
-            <priority>LOW</priority>
-        </callout>
-        <deconfigure>
-            <target>TARGET</target>
-        </deconfigure>
     </hwpError>
 
     <hwpError>

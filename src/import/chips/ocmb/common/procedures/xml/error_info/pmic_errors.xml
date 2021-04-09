@@ -22,7 +22,14 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- Note: the PMIC errors all flow through to catchall errors -->
+<!--       as a result, only the catchall errors have deconfigures -->
+<!--       non-catchall errors will be logged as recovered, -->
+<!--        prior to asserting catchalls -->
+
 <hwpErrors>
+
 
   <hwpError>
     <rc>RC_I2C_PMIC_INVALID_READ_SIZE</rc>
@@ -45,10 +52,18 @@
     <description>
        The PMIC identifier register contents did not match any known chip.
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <ffdc>VENDOR_ID</ffdc>
     <callout>
-      <target>TARGET</target>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -66,6 +81,13 @@
     <ffdc>EFD_OFFSET</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -90,29 +112,18 @@
     <description>
        The sequence order specified by the SPD was out of range for the PMIC (max 4)
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
     <ffdc>RAIL</ffdc>
     <ffdc>ORDER</ffdc>
     <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PMIC_VOLTAGE_RANGE_SETTING_OUT_OF_RANGE</rc>
-    <description>
-       The PMIC voltage setting range was too large (Valid: 0,1)
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>RAIL</ffdc>
-    <ffdc>RANGE_SETTING</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
+      <target>PMIC_TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -122,29 +133,18 @@
     <description>
        The sequence delay specified by the SPD was out of range for the PMIC (max bitmap: 0b111)
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
     <ffdc>RAIL</ffdc>
     <ffdc>DELAY</ffdc>
     <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PMIC_DIMM_SPD_UNSUPPORTED_MODULE_HEIGHT</rc>
-    <description>
-       The module_height attribute SPD of this DIMM was not identified as 1U or 2U.
-       Other heights (4U) are not supported at this time.
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>VALUE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
+      <target>PMIC_TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -177,7 +177,7 @@
     </callout>
     <callout>
       <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
     <deconfigure>
       <target>OCMB_TARGET</target>
@@ -207,7 +207,7 @@
     </callout>
     <callout>
       <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
     <deconfigure>
       <target>OCMB_TARGET</target>
@@ -228,6 +228,13 @@
     <ffdc>PMIC_TARGET</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -243,24 +250,13 @@
     <ffdc>PMIC_TARGET</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PMIC_EXPECTED_FOUR_PMICS</rc>
-    <description>
-       The presence of GPIO/ADC devices implies we should have a redundant PMIC configuration.
-       Expected 4 PMICs, but platform did not provide 4.
-    </description>
-    <ffdc>OCMB_TARGET</ffdc>
-    <ffdc>NUM_PMICS</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>OCMB_TARGET</target>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -335,34 +331,20 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_PMIC_MISMATCHING_REDUNDANCY_ATTRS</rc>
-    <description>
-       PMIC0_REDUNDANCY and PMIC1_REDUNDANCY must match (both 0 or both 1).
-       A configuration doesn't exist where only 1 PMIC has redundancy.
-    </description>
-    <ffdc>OCMB_TARGET</ffdc>
-    <ffdc>PMIC0_REDUNDANCY</ffdc>
-    <ffdc>PMIC1_REDUNDANCY</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_PMIC_ENABLE_FAIL</rc>
     <description>
        A PMIC had errors during pmic_enable. See previous recoverable errors to further diagnose.
+       Note: this return code is used for OCMB without PMIC redundancy
     </description>
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>PMIC_TARGET</ffdc>
     <ffdc>RETURN_CODE</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PMIC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
@@ -370,6 +352,12 @@
     </deconfigure>
     <gard>
       <target>OCMB_TARGET</target>
+    </gard>
+    <deconfigure>
+      <target>PMIC_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>PMIC_TARGET</target>
     </gard>
   </hwpError>
 
@@ -438,26 +426,6 @@
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_PMIC_I2C_POLLING_TIMEOUT</rc>
-    <description>
-      Polling a PMIC I2C device timed out
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>FUNCTION</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
   </hwpError>
 
 </hwpErrors>

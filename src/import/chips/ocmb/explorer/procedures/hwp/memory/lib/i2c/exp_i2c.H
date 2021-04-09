@@ -181,14 +181,6 @@ fapi2::ReturnCode boot_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
                               std::vector<uint8_t>& io_data);
 
 ///
-/// @brief Check that the FW status code returns a busy status (expected for exp_omi_train)
-///
-/// @param[in] i_target OCMB
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff busy and no error code, else, error code
-///
-fapi2::ReturnCode check_fw_status_busy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
-
-///
 /// @brief Checks if the I2C interface returns an ACK
 /// @param[in] i_target the OCMB target
 /// @return FAPI2_RC_SUCCESS iff okay

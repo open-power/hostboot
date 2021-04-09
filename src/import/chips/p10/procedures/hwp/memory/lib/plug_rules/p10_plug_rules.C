@@ -290,8 +290,15 @@ fapi2::ReturnCode reset_n_dead_load(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                                     "%s shares a reset_n signal with a deconfigured DDIMM in group %d",
                                     mss::c_str(l_callout_ocmb), l_reset_group );
 
+                // If our local error is bad, then log it prior to getting a new one
+                if(l_rc != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
+                }
+
                 // Save any bad error code so it doesn't get overwritten in the loop
                 l_rc = fapi2::current_err;
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
         }
     }

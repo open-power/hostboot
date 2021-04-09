@@ -439,7 +439,8 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
         // We put this check in here as with anything over 4, we don't really know what we can do.
         FAPI_ASSERT((l_sequence_orders[l_rail_index] < CONSTS::ORDER_LIMIT),
                     fapi2::PMIC_ORDER_OUT_OF_RANGE()
-                    .set_TARGET(i_pmic_target)
+                    .set_PMIC_TARGET(i_pmic_target)
+                    .set_OCMB_TARGET(i_ocmb_target)
                     .set_RAIL(l_rail_index)
                     .set_ORDER(l_sequence_orders[l_rail_index]),
                     "PMIC sequence order specified by the SPD was out of range for PMIC: %s Rail: %s Order: %u",
@@ -590,11 +591,13 @@ fapi2::ReturnCode set_startup_seq_register(
     };
 
     fapi2::buffer<uint8_t> l_power_on_sequence_config;
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target);
 
     // Check and make sure the given delay is less than the bitmask (else, we overflow later on)
     FAPI_ASSERT(i_delay <= CONSTS::MAX_DELAY_BITMAP,
                 fapi2::PMIC_DELAY_OUT_OF_RANGE()
-                .set_TARGET(i_pmic_target)
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_OCMB_TARGET(l_ocmb)
                 .set_RAIL(i_rail)
                 .set_DELAY(i_delay),
                 "PMIC sequence delay from the SPD attribute was out of range for PMIC: %s Rail: %s Delay: %u Max: %u",
@@ -712,7 +715,8 @@ fapi2::ReturnCode enable_spd(
     FAPI_ASSERT((i_vendor_id == mss::pmic::vendor::IDT ||
                  i_vendor_id == mss::pmic::vendor::TI),
                 fapi2::PMIC_CHIP_NOT_RECOGNIZED()
-                .set_TARGET(i_pmic_target)
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_OCMB_TARGET(i_ocmb_target)
                 .set_VENDOR_ID(i_vendor_id),
                 "Unknown PMIC: %s with vendor ID 0x%04hhX",
                 mss::c_str(i_pmic_target),
@@ -872,8 +876,14 @@ fapi2::ReturnCode enable_1u_2u(
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
+
+    // Logs the current error as prective, as it predicts that we had a PMIC enable fail
+    // Deconfigures happen at the end of an istep, so this should be ok with hostboot
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
     FAPI_ASSERT_NOEXIT(false,
-                       fapi2::PMIC_ENABLE_FAIL(fapi2::FAPI2_ERRL_SEV_PREDICTIVE)
+                       fapi2::PMIC_ENABLE_FAIL()
                        .set_OCMB_TARGET(i_ocmb_target)
                        .set_PMIC_TARGET(l_current_pmic)
                        .set_RETURN_CODE(static_cast<uint32_t>(fapi2::current_err)),
@@ -1520,6 +1530,7 @@ fapi2::ReturnCode matching_vendors_helper(
 {
     static constexpr uint8_t HI_BYTE_START = 0;
     static constexpr uint8_t HI_BYTE_LEN = 8;
+    const auto& l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target);
 
     fapi2::buffer<uint16_t> l_vendor_reg(i_vendor_reg_lo);
     l_vendor_reg.insert<HI_BYTE_START, HI_BYTE_LEN>(i_vendor_reg_hi);
@@ -1528,7 +1539,8 @@ fapi2::ReturnCode matching_vendors_helper(
                 fapi2::PMIC_MISMATCHING_VENDOR_IDS()
                 .set_VENDOR_ATTR(i_vendor_attr)
                 .set_VENDOR_REG(l_vendor_reg)
-                .set_PMIC_TARGET(i_pmic_target),
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_OCMB_TARGET(l_ocmb_target),
                 "Mismatching vendor IDs for %s. ATTR: 0x%04X REG: 0x%04X",
                 mss::c_str(i_pmic_target),
                 i_vendor_attr,
@@ -1593,11 +1605,14 @@ fapi2::ReturnCode valid_idt_revisions_helper(
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target);
+
     FAPI_ASSERT(i_rev_attr == i_rev_reg,
                 fapi2::PMIC_MISMATCHING_REVISIONS()
                 .set_REVISION_ATTR(i_rev_attr)
                 .set_REVISION_REG(i_rev_reg)
-                .set_PMIC_TARGET(i_pmic_target),
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_OCMB_TARGET(l_ocmb),
                 "Mismatching revisions for %s. ATTR: 0x%02X REG: 0x%02X",
                 mss::c_str(i_pmic_target),
                 i_rev_attr,

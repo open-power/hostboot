@@ -333,43 +333,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Check that the FW status code returns a busy status (expected for exp_omi_train)
-///
-/// @param[in] i_target OCMB
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff busy and no error code, else, error code
-///
-fapi2::ReturnCode check_fw_status_busy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
-{
-    uint8_t l_status = ~(0);
-    uint64_t l_fw_status_data = 0;
-
-    std::vector<uint8_t> l_data;
-    FAPI_TRY(get_fw_status(i_target, l_data));
-
-    FAPI_TRY(status::get_status_code(i_target, l_data, l_status));
-    FAPI_TRY(capture_status(i_target, l_data, l_fw_status_data));
-
-    // Post bootconfig1, we should see a busy status until p10_omi_train is kicked off (setting p10 to AUTO_TRAIN)
-    // explorer will return busy status until then. if we have another status, then we may not have executed bootconfig1
-    // or some previous command correctly, so we should check it here
-    // After p10_omi_train, exp_omi_train_check will check fw_status for success (in addition to checking training completion)
-    // to make sure things went smoothly
-    FAPI_ASSERT( l_status == status_codes::FW_BUSY,
-                 fapi2::MSS_EXP_I2C_FW_BOOT_CONFIG_STATUS_CODE_INVALID().
-                 set_OCMB_TARGET(i_target).
-                 set_STATUS_CODE(l_status).
-                 set_CMD_ID(FW_STATUS).
-                 set_STATUS_DATA(l_fw_status_data),
-                 "Status code did not return BUSY (%d) as expected post BOOT_CONFIG1, received (%d) for " TARGTIDFORMAT ,
-                 status_codes::FW_BUSY, l_status, MSSTARGID );
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Checks if the I2C interface returns an ACK
 /// @param[in] i_target the OCMB target
 /// @return FAPI2_RC_SUCCESS iff okay
@@ -442,6 +405,8 @@ fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_T
     uint8_t l_status = 0;
     uint8_t l_boot_stage = 0;
     uint64_t l_fw_status_data = 0;
+    const auto& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
+                         .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
     // Using using default parameters from class, with overrides for delay and poll_count
     mss::poll_parameters l_poll_params(DELAY_10NS,
@@ -459,7 +424,8 @@ fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_T
         return mss::exp::i2c::is_ready(i_target) == fapi2::FAPI2_RC_SUCCESS;
     }),
     fapi2::MSS_EXP_I2C_POLLING_TIMEOUT_RESET().
-    set_OCMB_TARGET(i_target),
+    set_OCMB_TARGET(i_target).
+    set_PROC_TARGET(l_proc),
     "Failed to see an ACK from I2C -- polling timeout coming out of reset %s",
     mss::c_str(i_target) );
 
@@ -872,6 +838,7 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     uint8_t l_status = 0;
     uint64_t l_fw_status_data = 0;
     uint64_t l_cmd_data = convert_to_long(i_cmd_data);
+    const auto& l_omi = i_target.getParent<fapi2::TARGET_TYPE_OMI>();
 
     FAPI_TRY(exp::i2c::boot_cfg::get_dl_layer_boot_mode(i_target, i_cmd_data, l_boot_mode));
     FAPI_TRY(status::get_status_code(i_target, i_rsp_data, l_status));
@@ -913,7 +880,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
                  set_STATUS_DATA(l_fw_status_data).
-                 set_EXP_ACTIVE_LOG_SIZE(4096),
+                 set_EXP_ACTIVE_LOG_SIZE(4096).
+                 set_OMI_TARGET(l_omi),
                  "BOOT_CONFIG OpenCapi SerDes init fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::DLX_CONFIG_FAIL),
@@ -922,7 +890,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
                  set_STATUS_DATA(l_fw_status_data).
-                 set_EXP_ACTIVE_LOG_SIZE(4096),
+                 set_EXP_ACTIVE_LOG_SIZE(4096).
+                 set_OMI_TARGET(l_omi),
                  "BOOT_CONFIG DLx config fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::LANE_INV_FAIL),
@@ -931,7 +900,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
                  set_STATUS_DATA(l_fw_status_data).
-                 set_EXP_ACTIVE_LOG_SIZE(4096),
+                 set_EXP_ACTIVE_LOG_SIZE(4096).
+                 set_OMI_TARGET(l_omi),
                  "BOOT_CONFIG Lane Inversion configuration fail (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status != fw_boot_cfg_status::PARITY_UECC_ERROR),
@@ -940,7 +910,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_COMMAND(l_cmd_data).
                  set_BOOT_MODE(l_boot_mode).
                  set_STATUS_DATA(l_fw_status_data).
-                 set_EXP_ACTIVE_LOG_SIZE(4096),
+                 set_EXP_ACTIVE_LOG_SIZE(4096).
+                 set_OMI_TARGET(l_omi),
                  "BOOT_CONFIG reported SerDes parity and/or UECC errors (BOOT_MODE 0x%02X, full status 0x%016X) for " TARGTIDFORMAT,
                  l_boot_mode, l_fw_status_data, MSSTARGID );
     FAPI_ASSERT( (l_status == status_codes::I2C_SUCCESS),

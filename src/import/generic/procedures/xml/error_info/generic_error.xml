@@ -37,6 +37,7 @@
 
 <hwpErrors>
 
+
   <hwpError>
     <rc>RC_MSS_BAD_MR_PARAMETER</rc>
     <description>
@@ -96,37 +97,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_EMPTY_PDA_VECTOR</rc>
-    <description>Indicates a that a vector was empty when a procedure was called</description>
-    <ffdc>PROCEDURE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_FAILED_SPD_REVISION_FALLBACK</rc>
-    <description>
-      Unable to fall back SPD decoder to the highest decoded
-      revision. Most likely a programming error.
-    </description>
-    <ffdc>FAILED_REVISION</ffdc>
-    <ffdc>FUNCTION_CODE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>MEDIUM</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_FAILED_TO_FIND_TRFC</rc>
     <description>
         Unable to find tRFC (ps) from map with SDRAM density key
@@ -142,6 +112,13 @@
     </deconfigure>
     <callout>
       <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
  </hwpError>
@@ -215,6 +192,13 @@
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
     </gard>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>PORT_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -438,6 +422,13 @@
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -460,6 +451,13 @@
     </deconfigure>
     <callout>
       <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
       <priority>MEDIUM</priority>
     </callout>
   </hwpError>
@@ -512,32 +510,6 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_INVALID_HYBRID_MODULE</rc>
-    <description>
-      Received an invalid or unsupported hybrid media (SPD byte 3, bits [6:4])
-      for a specified hybrid modue (SPD byte 3, bit [7])
-    </description>
-    <ffdc>HYBRID</ffdc>
-    <ffdc>HYBRID_MEDIA</ffdc>
-    <ffdc>FUNCTION</ffdc>
-    <callout>
-      <procedure>MEMORY_PLUGGING_ERROR</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
     </callout>
   </hwpError>
 
@@ -609,30 +581,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_INVALID_DIMM_MODULE_RECEIVED_FOR_SPD_REV_FALLBACK</rc>
-    <description>
-      Unable to fall back SPD decoder to the highest decoded
-      revision for particular DIMM module.
-      Most likely a programming error or bad SPD.
-    </description>
-    <ffdc>DIMM_MODULE</ffdc>
-    <ffdc>SPD_REV</ffdc>
-    <ffdc>DRAM_GEN</ffdc>
-    <ffdc>DIMM_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>MEDIUM</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_INVALID_SPD_RANK</rc>
     <description>
       Invalid rank passed into attribute engine.
@@ -648,7 +596,7 @@
     </deconfigure>
     <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <callout>
       <hw>
@@ -694,7 +642,7 @@
     <ffdc>FUNCTION</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
@@ -702,6 +650,13 @@
     <gard>
         <target>DIMM_TARGET</target>
     </gard>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>PORT_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -812,18 +767,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_PDA_DRAM_OUT_OF_RANGE</rc>
-    <description>Indicates a DRAM passed to the PDA code is out of range</description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>DRAM</ffdc>
-    <ffdc>MAX_DRAM</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES</rc>
     <description>Incorrect number of voltages supplied to set_voltage_attributes function</description>
     <ffdc>VOLT_TARGET</ffdc>
@@ -885,17 +828,11 @@
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
     </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_UNEXPECTED_VALUE_SEEN</rc>
-    <description> Invalid value seen versus the expected value wanted </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>EXPECTED</ffdc>
-    <ffdc>ACTUAL</ffdc>
-    <ffdc>FUNCTION</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>PORT_TARGET</refTarget>
+      </hw>
       <priority>LOW</priority>
     </callout>
   </hwpError>
@@ -912,7 +849,7 @@
     <ffdc>FUNCTION</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>LOW</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
 
@@ -928,7 +865,7 @@
     <ffdc>FUNCTION</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>LOW</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
 
@@ -954,6 +891,13 @@
     <deconfigure>
       <target>TARGET</target>
     </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -1159,28 +1103,6 @@
  </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_SPD_REV_ENCODING_LEVEL_NOT_SUPPORTED</rc>
-    <description>
-      SPD revision on byte 1 (bits 7~4) has a unsupported encoding level
-      that is greater than the largest decoded SPD decoder. There is
-      no backward compatible revision to fallback to.  This could be
-      bad SPD or a programming error.
-    </description>
-    <ffdc>ENCODING_LEVEL</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>MEDIUM</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_SPD_TIMING_FAIL</rc>
     <description>
       Timing SPD parameter failed to meet JEDEC SPD timing
@@ -1240,6 +1162,13 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
  </hwpError>
 
  <hwpError>
@@ -1293,6 +1222,13 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -1305,6 +1241,13 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
   </hwpError>
 
@@ -1327,6 +1270,13 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
   </hwpError>
 
@@ -1402,6 +1352,13 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -1420,6 +1377,13 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>PORT_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -1501,29 +1465,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_INVALID_DRAM_WIDTH</rc>
-    <description>
-        Code only supports x4 and x8 drams at this time
-    </description>
-    <ffdc>DRAM_WIDTH</ffdc>
-    <callout>
-      <procedure>MEMORY_PLUGGING_ERROR</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>MEDIUM</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_INVALID_PAGE_SIZE</rc>
     <description>
         Invalid page size
@@ -1545,38 +1486,13 @@
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_INVALID_OMI_POSITION</rc>
-    <description> An invalid OMI position was found in FIR unmask function</description>
-    <ffdc>POSITION</ffdc>
-    <ffdc>OMI_TARGET</ffdc>
     <callout>
-        <procedure>CODE</procedure>
-        <priority>HIGH</priority>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
     </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_PLUG_RULES_SINGLE_DDIMM_IN_WRONG_SLOT</rc>
-    <description>
-        A single DIMM was plugged into a secondary channel slot without
-        one plugged into the primary channel slot.
-    </description>
-    <ffdc>SLOT_POSITION</ffdc>
-    <ffdc>CHANNEL_A_SLOT_POSITION</ffdc>
-    <callout>
-      <procedure>MEMORY_PLUGGING_ERROR</procedure>
-      <priority>HIGH</priority>
-    </callout>
-     <callout>
-      <target>TARGET</target>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
   </hwpError>
 
  <hwpError>
@@ -1593,98 +1509,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_UNKNOWN_DIMM_SPD_KEY</rc>
-    <description>
-        DIMM SPD key from DIMM SPD was not recognized in
-        plug rule enforcement function. The key is the manufacturing ID,
-        the DIMM height, and the DIMM size.
-    </description>
-    <ffdc>MODULE_MFG_ID</ffdc>
-    <ffdc>PART_NUMBER</ffdc>
-    <ffdc>RAW_CARD</ffdc>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_SPD_REVISION</rc>
-    <description>
-        DIMM SPD revision is older than least supported revision.
-    </description>
-    <ffdc>SPD_REVISION</ffdc>
-    <ffdc>MINIMUM_FUNCTIONAL_SPD_REVISION</ffdc>
-    <callout>
-      <procedure>MEMORY_PLUGGING_ERROR</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_SPD_COMBINED_REVISION</rc>
-    <description>
-        DIMM SPD combined revision is older than least supported revision.
-    </description>
-    <ffdc>SPD_COMBINED_REVISION</ffdc>
-    <ffdc>MINIMUM_FUNCTIONAL_SPD_COMBINED_REVISION</ffdc>
-    <ffdc>MODULE_MFG_ID</ffdc>
-    <ffdc>PART_NUMBER</ffdc>
-    <ffdc>RAW_CARD</ffdc>
-    <callout>
-      <procedure>MEMORY_PLUGGING_ERROR</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-    <callout>
-      <hw>
-        <hwid>VPD_PART</hwid>
-        <refTarget>DIMM_TARGET</refTarget>
-      </hw>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_NON_CURRENT_SPD_COMBINED_REVISION</rc>
-    <description>
-        DIMM SPD combined revision is not current, and could be updated.
-    </description>
-    <ffdc>SPD_COMBINED_REVISION</ffdc>
-    <ffdc>LATEST_SPD_COMBINED_REVISION</ffdc>
-    <ffdc>MODULE_MFG_ID</ffdc>
-    <ffdc>PART_NUMBER</ffdc>
-    <ffdc>RAW_CARD</ffdc>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-    <callout>
-      <hw>
-        <hwid>VPD_PART</hwid>
-        <refTarget>DIMM_TARGET</refTarget>
-      </hw>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_DDIMM_RESET_N_DEAD_LOAD</rc>
     <description>
         A DDIMM shares a reset_n signal with a deconfigured DDIMM.
@@ -1692,11 +1516,11 @@
     <ffdc>OCMB_RESET_GROUP</ffdc>
     <callout>
       <procedure>MEMORY_PLUGGING_ERROR</procedure>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <callout>
       <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
     <deconfigure>
       <target>OCMB_TARGET</target>
@@ -1762,6 +1586,18 @@
     <deconfigure>
       <target>SMALLER_DIMM_TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FINE_REFRESH</rc>
+    <description>
+        Incorrect FINE Refresh Mode received
+    </description>
+    <ffdc>REFRESH_MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
 </hwpErrors>

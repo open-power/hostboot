@@ -24,6 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for exp_omi_init HWP -->
 <hwpErrors>
+
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_OCMB_IS_NOT_EXPLORER</rc>
@@ -42,6 +43,9 @@
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -60,8 +64,15 @@
     </callout>
     <callout>
       <target>PROC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -80,8 +91,15 @@
     </callout>
     <callout>
       <target>PROC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -102,6 +120,9 @@
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

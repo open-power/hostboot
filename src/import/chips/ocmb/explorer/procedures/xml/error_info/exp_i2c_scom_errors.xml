@@ -23,6 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+
   <hwpError>
     <rc>RC_I2C_GET_SCOM_INVALID_READ_SIZE</rc>
     <description>
@@ -34,6 +35,13 @@
     <ffdc>ADDRESS</ffdc>
     <ffdc>SIZE_RETURNED</ffdc>
     <ffdc>SIZE_REQUESTED</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -46,6 +54,13 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -57,6 +72,13 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
 
   </hwpErrors>

@@ -120,7 +120,8 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
                 fapi2::PROC_DOES_NOT_SUPPORT_US_B()
                 .set_PROC_TARGET(l_proc)
                 .set_B(l_enable_tmpl_b)
-                .set_US_TEMPLATES_0159(l_us_only_0159),
+                .set_US_TEMPLATES_0159(l_us_only_0159)
+                .set_OCMB_TARGET(i_target),
                 "%s Upstream template B requested, but not supported by proc. EN_TMPL_B: %u, CHIP_EC_TMPL_0159: %u",
                 mss::c_str(l_proc), l_enable_tmpl_b, l_us_only_0159);
 
@@ -354,7 +355,8 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
                 fapi2::PROC_DOES_NOT_SUPPORT_DS_A()
                 .set_PROC_TARGET(l_proc)
                 .set_DS_TEMPLATES_0147(l_ds_only_0147)
-                .set_A(l_enable_tmpl_A),
+                .set_A(l_enable_tmpl_A)
+                .set_OCMB_TARGET(i_target),
                 "%s Downstream template A requested, but not supported by proc. EN_TMPL_A: %u CHIP_EC_TMPL_0147: %u",
                 mss::c_str(l_proc), l_enable_tmpl_A, l_ds_only_0147);
 

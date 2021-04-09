@@ -24,6 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
+
   <registerFfdc>
     <id>REG_FFDC_EXP_MEMDIAGS_FAILURE</id>
     <scomRegister>EXPLR_MCBIST_MCBMR0Q</scomRegister>
@@ -61,6 +62,7 @@
     <scomRegister>EXPLR_MCBIST_MCBEA3Q</scomRegister>
   </registerFfdc>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN</rc>
     <description>A miscompare error was caused by the last MCBIST pattern</description>
@@ -77,6 +79,7 @@
     </callout>
   </hwpError>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_ERROR_IN_LAST_PATTERN</rc>
     <description>An error was caused by the last MCBIST pattern</description>
@@ -93,6 +96,7 @@
     </callout>
   </hwpError>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_MCBIST_FAILED_TO_START</rc>
     <description>The MCBIST engine failed to start its program</description>
@@ -107,6 +111,7 @@
     </callout>
   </hwpError>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_PORT_NOT_FUNCTIONAL</rc>
     <description>The port used in an MCBIST program is not functional</description>
@@ -124,6 +129,7 @@
     </callout>
   </hwpError>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT</rc>
     <description>A superfast init operation failed initialization</description>
@@ -138,6 +144,7 @@
     </callout>
   </hwpError>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT</rc>
     <description>A superfast read operation failed initialization</description>
@@ -152,6 +159,7 @@
     </callout>
   </hwpError>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_MCBIST_FAILED_TO_STOP</rc>
     <description>The MCBIST engine failed to stop its program</description>
@@ -167,6 +175,7 @@
     </callout>
   </hwpError>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT</rc>
     <description>A continuous scrub operation failed initialization</description>
@@ -181,6 +190,7 @@
     </callout>
   </hwpError>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT</rc>
     <description>A continuous scrub operation failed initialization</description>
@@ -195,6 +205,7 @@
     </callout>
   </hwpError>
 
+  <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <rc>RC_EXP_MEMDIAGS_ALREADY_AT_BOUNDARY</rc>
     <description>A continue request asked to stop at a boundary, but we are there already</description>
@@ -279,18 +290,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_EXP_DRAMINIT_BAD_NUM_RANKS</rc>
-    <description>Bad number of ranks were passed in the bad bits functionality</description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>NUM_RANKS</ffdc>
-    <ffdc>MAX_RANKS</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_EXP_DRAMINIT_UNSUPPORTED_DIMM_TYPE</rc>
     <description>Unsupported DIMM type encountered in draminit_training procedure</description>
     <ffdc>OCMB_TARGET</ffdc>
@@ -303,6 +302,13 @@
     <deconfigure>
       <target>OCMB_TARGET</target>
     </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -318,6 +324,13 @@
     <deconfigure>
       <target>OCMB_TARGET</target>
     </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -333,6 +346,13 @@
     <deconfigure>
       <target>OCMB_TARGET</target>
     </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -374,52 +394,6 @@
     <ffdc>EXPECTED</ffdc>
     <ffdc>ACTUAL</ffdc>
     <ffdc>REGISTER_DATA</ffdc>
-    <callout>
-      <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>OCMB_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_EXP_I2C_FW_STATUS_CODE_FAILED</rc>
-    <description>
-      Explorer status code for command ID EXP_FW_STATUS
-      did not return SUCCESS
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>STATUS_CODE</ffdc>
-    <ffdc>CMD_ID</ffdc>
-    <ffdc>STATUS_DATA</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_EXP_I2C_FW_BOOT_CONFIG_STATUS_CODE_INVALID</rc>
-    <description>
-      Unexpected Explorer status code returned during OMI link training pattern handshake.
-      Expected FW_BUSY, but received STATUS_CODE in FFDC data
-    </description>
-    <ffdc>OCMB_TARGET</ffdc>
-    <ffdc>STATUS_CODE</ffdc>
-    <ffdc>CMD_ID</ffdc>
-    <ffdc>STATUS_DATA</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
@@ -510,8 +484,10 @@
   <hwpError>
     <rc>RC_MSS_EXP_I2C_WRONG_BOOT_STAGE</rc>
     <description>
-      Received incorrect boot stage from
-      command ID EXP_FW_STATUS
+      Received incorrect boot stage from command ID EXP_FW_STATUS
+      This RC is set during check_for_ready.
+      At this time, the only stages that can come out are RUNTIME_FW, BOOT_ROM, and FW_UPGRADE.
+      Likely this RC is set for FW_UPGRADE, which means that explorer has missing or corrupted FW.
     </description>
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>BOOT_STAGE</ffdc>
@@ -543,6 +519,10 @@
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PROC_TARGET</target>
+      <priority>LOW</priority>
     </callout>
     <deconfigure>
       <target>OCMB_TARGET</target>
@@ -582,25 +562,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_EXP_STATUS_POLLING_TIMEOUT</rc>
-    <description>
-      Polling the explorer for successful return code
-      timed out.
-    </description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_EXP_RSP_ARG_FAILED</rc>
     <description>
       The response_argument field of the host_fw_response_struct returned a FAILURE
@@ -627,6 +588,8 @@
   </hwpError>
 
   <hwpError>
+    <!-- Note: we do not want to knock out a whole DIMM for a sensor cache fail -->
+    <!--       HB will handle the lack of deconfig on their side -->
     <rc>RC_MSS_EXP_SENSOR_CACHE_ENABLE_FAILED</rc>
     <description>
       The response_argument field of the host_fw_response_struct returned
@@ -644,9 +607,6 @@
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>OCMB_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -703,7 +663,7 @@
     <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>OCMB_TARGET</target>
@@ -711,6 +671,10 @@
     <gard>
       <target>OCMB_TARGET</target>
     </gard>
+    <callout>
+      <bus>OCMB_TARGET,OMI_TARGET</bus>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -727,7 +691,7 @@
     <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>OCMB_TARGET</target>
@@ -735,6 +699,10 @@
     <gard>
       <target>OCMB_TARGET</target>
     </gard>
+    <callout>
+      <bus>OCMB_TARGET,OMI_TARGET</bus>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -751,7 +719,7 @@
     <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>OCMB_TARGET</target>
@@ -759,6 +727,10 @@
     <gard>
       <target>OCMB_TARGET</target>
     </gard>
+    <callout>
+      <bus>OCMB_TARGET,OMI_TARGET</bus>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -774,7 +746,7 @@
     <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
       <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>OCMB_TARGET</target>
@@ -782,20 +754,8 @@
     <gard>
       <target>OCMB_TARGET</target>
     </gard>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_EXP_DDR_PHY_INIT_FAIL</rc>
-    <description>
-      Phy Init command returned with a fail. Check additional error information.
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>CMD_ID</ffdc>
-    <ffdc>RSP_STATUS</ffdc>
-    <ffdc>EXTENDED_ERROR_CODE</ffdc>
-    <ffdc>ERROR_CODE</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <bus>OCMB_TARGET,OMI_TARGET</bus>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -860,14 +820,22 @@
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
     <callout>
       <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL</rc>
     <description>
       Phy Init command encountered a training fail.
+      Note: this should be logged as recovered and bad DRAM repaired
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>PROCEDURE</ffdc>
@@ -875,6 +843,10 @@
     <ffdc>EXTENDED_ERROR_CODE</ffdc>
     <callout>
       <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -893,6 +865,13 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <registerFfdc>
@@ -1108,7 +1087,7 @@
     <ffdc>VALUE</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
 
@@ -1188,6 +1167,13 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>PORT_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -1256,20 +1242,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_EXP_MAINT_DO_STEER_INPUT_OUT_OF_RANGE</rc>
-    <description>
-       An input for setting steer mux reg was out of range.
-    </description>
-    <ffdc>PORT_TARGET</ffdc>
-    <ffdc>RANK</ffdc>
-    <ffdc>SYMBOL</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_EXP_MAINT_DO_STEER_ALL_SPARES_DEPLOYED</rc>
     <description>
        All spares are already deployed when do_steer called.
@@ -1285,6 +1257,9 @@
       <target>PORT_TARGET</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfig>
+      <target>PORT_TARGET</target>
+    </deconfig>
   </hwpError>
 
 </hwpErrors>

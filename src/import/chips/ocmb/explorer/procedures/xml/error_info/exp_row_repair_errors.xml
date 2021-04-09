@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,6 +25,7 @@
 <!-- EKB-Mirror-To: hostboot                                                -->
 <hwpErrors>
 
+
   <hwpError>
     <rc>RC_EXP_DRAM_INDEX_OUT_OF_BOUNDS</rc>
     <description>
@@ -37,6 +38,16 @@
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -60,6 +71,16 @@
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>

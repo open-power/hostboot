@@ -23,6 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+
   <hwpError>
     <rc>RC_MSS_BAD_CL_CAST</rc>
     <description>
@@ -39,6 +40,13 @@
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>PORT_TARGET</refTarget>
+      </hw>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
 
@@ -79,7 +87,7 @@
         <parent>MEM_PORT_TARGET</parent>
         <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <childTargets>
@@ -87,6 +95,10 @@
         <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
     </deconfigure>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <!-- Cronus only error when we can't match DIMM speeds to sync mode -->
@@ -138,41 +150,13 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_MRW_FREQ_SIZE_CHANGED</rc>
-    <description>
-        Size of MSS_MRW_FREQS value in VPD has changed and code hasn't been updated
-    </description>
-    <ffdc>ACTUAL_SIZE</ffdc>
-    <ffdc>SUPPOSED_SIZE</ffdc>
-    <ffdc>MCA_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_ERROR_CALCULATING_CAS_LATENCY_VECTOR</rc>
-    <description>
-        Code error setting the cas_latency.
-        Number of cas_latencies per MCS does not equal functional ports found
-    </description>
-    <ffdc>NUM_PORTS_FUNCTIONAL</ffdc>
-    <ffdc>NUM_CAS_LATENCIES_FOUND</ffdc>
-    <ffdc>MCS_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET</rc>
     <description>
       When considering the frequencies in the MRW and the max supported
       frequencies based on DIMM config (MAX_ALLOWED_DIMM_FREQ), there are no applicable frequencies
       remaining
       If sync mode required, frequencies have to match a nest frequency
+      Note: at this time this is a cronus only error
     </description>
     <ffdc>MSS_VPD_FREQ_0</ffdc>
     <ffdc>MSS_VPD_FREQ_1</ffdc>
@@ -202,71 +186,4 @@
     </callout>
   </hwpError>
 
-  <hwpError>
-    <rc>RC_MSS_NO_SUPPORTED_FREQ</rc>
-    <description>
-      When considering the frequencies in the MRW and the max supported
-      frequencies based on DIMM config, there are no applicable frequencies
-      remaining
-      If sync mode required, frequencies have to match a nest frequency
-    </description>
-    <ffdc>REQUIRED_SYNC_MODE</ffdc>
-    <ffdc>MCBIST_TARGET</ffdc>
-    <ffdc>NUM_PORTS</ffdc>
-    <ffdc>MRW_MAX_FREQ_0</ffdc>
-    <ffdc>MRW_MAX_FREQ_1</ffdc>
-    <ffdc>MRW_MAX_FREQ_2</ffdc>
-    <ffdc>MRW_MAX_FREQ_3</ffdc>
-    <ffdc>MRW_MAX_FREQ_4</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-     <callout>
-      <childTargets>
-          <parent>MCBIST_TARGET</parent>
-          <childType>TARGET_TYPE_DIMM</childType>
-      </childTargets>
-      <priority>MEDIUM</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_FREQ_TO_NEST_FREQ_RATIO_TOO_LARGE</rc>
-    <description>
-      Case when mss_freq to nest freq is above the maximum allowed.
-    </description>
-    <ffdc>MSS_FREQ</ffdc>
-    <ffdc>NEST_FREQ</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <childTargets>
-        <parent>MCS_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-      </childTargets>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <childTargets>
-        <parent>MCS_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-      </childTargets>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_FREQ_OR_NEST_FREQ_IS_ZERO</rc>
-    <description>
-      Case when mss_freq or nest_freq is zero.
-    </description>
-    <ffdc>MSS_FREQ</ffdc>
-    <ffdc>NEST_FREQ</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
 </hwpErrors>

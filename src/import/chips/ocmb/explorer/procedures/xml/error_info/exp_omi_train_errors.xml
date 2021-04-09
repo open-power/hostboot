@@ -23,6 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXP_OMI_TRAIN_ERR</rc>
@@ -89,24 +90,10 @@
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
   </hwpError>
 
-  <hwpError>
-    <rc>RC_EXP_OMI_BUMP_SL_WORKAROUND_ERROR</rc>
-    <description>
-      bump_sl_workaround received an invalid lane input
-    </description>
-    <ffdc>OCMB_TARGET</ffdc>
-    <ffdc>LANE_INPUT</ffdc>
-    <ffdc>MAX_LANE</ffdc>
-    <callout>
-        <target>OCMB_TARGET</target>
-        <priority>HIGH</priority>
-    </callout>
-    <callout>
-        <bus>OMI_TARGET, OCMB_TARGET</bus>
-        <priority>HIGH</priority>
-    </callout>
-  </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

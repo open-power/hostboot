@@ -396,6 +396,7 @@ fapi2::ReturnCode calculate_voltage_bitmap_from_attr(
     FAPI_ASSERT((o_volt_bitmap <= CONSTS::MAX_VOLT_BITMAP),
                 fapi2::PMIC_VOLTAGE_OUT_OF_RANGE()
                 .set_PMIC_TARGET(i_pmic_target)
+                .set_OCMB_TARGET(l_ocmb)
                 .set_VOLTAGE_BITMAP(o_volt_bitmap)
                 .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[i_rail])
                 .set_BASE_VOLTAGE(l_volt)
@@ -468,6 +469,7 @@ fapi2::ReturnCode calculate_4u_nominal_voltage(
     FAPI_ASSERT(l_nominal_voltage <= CONSTS::MAX_VOLT_BITMAP,
                 fapi2::PMIC_VOLTAGE_OUT_OF_RANGE()
                 .set_PMIC_TARGET(i_pmic_target)
+                .set_OCMB_TARGET(l_ocmb)
                 .set_VOLTAGE_BITMAP(l_nominal_voltage)
                 .set_RAIL(mss::pmic::VOLT_SETTING_ACTIVE_REGS[i_rail])
                 .set_BASE_VOLTAGE(l_volt)
