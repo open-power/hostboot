@@ -1698,4 +1698,22 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_IMA_DISABLE_BIT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      ECP.NC.NCCHTM.NCCHTSC.HTM_MODE: IMA enabe/disable bit control is 
+      with 1bit in DD2, we need to disable this bit during MPIPL down path
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>
