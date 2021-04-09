@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,30 +69,6 @@ const TaskInfo    g_taskinfolist[]   =   {
             }
         },
 #endif
-
-        /**
-         * @brief   PNOR    Driver  Task
-         */
-        {
-                "libpnor.so" ,                      // taskname
-                NULL,                               // no pointer to fn
-                {
-                        START_TASK,                 // start
-                        BASE_IMAGE,                 // Base Module
-                }
-        },
-
-        /**
-         * @brief  Extended VFS module
-         */
-        {
-                "libvfs.so",                        // taskname
-                NULL,
-                {
-                        START_TASK,                 // start task
-                        BASE_IMAGE,                 // Base Module
-                }
-        },
 #if defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES)
         /**
          * @brief   libmctp
@@ -119,6 +95,30 @@ const TaskInfo    g_taskinfolist[]   =   {
                 }
         },
 #endif
+
+        /**
+         * @brief   PNOR    Driver  Task
+         */
+        {
+                "libpnor.so" ,                      // taskname
+                NULL,                               // no pointer to fn
+                {
+                        START_TASK,                 // start
+                        BASE_IMAGE,                 // Base Module
+                }
+        },
+
+        /**
+         * @brief  Extended VFS module
+         */
+        {
+                "libvfs.so",                        // taskname
+                NULL,
+                {
+                        START_TASK,                 // start task
+                        BASE_IMAGE,                 // Base Module
+                }
+        },
         //  -----   Extended Image  -----------------------------------------------------
         /**
          * @brief   extinitsvc, initializes extended module area
