@@ -404,31 +404,31 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
 
     PRINT_LEAD1(l_buffer, "  %-20s : ", "Load line (uOhm)");
     HEX_DEC_STR(l_buffer,
-            (i_gppb->vdd_sysparm.loadline_uohm));
+            revle32(i_gppb->vdd_sysparm.loadline_uohm));
 
     HEX_DEC_STR(l_buffer,
-            (i_gppb->vcs_sysparm.loadline_uohm));
+            revle32(i_gppb->vcs_sysparm.loadline_uohm));
 
     HEX_DEC_STR(l_buffer,
-            (i_gppb->vdn_sysparm.loadline_uohm));
+            revle32(i_gppb->vdn_sysparm.loadline_uohm));
     FAPI_INF("%s", l_buffer);
 
     PRINT_LEAD1(l_buffer, "  %-20s : ", "Dist Loss (uOhm)");
     HEX_DEC_STR(l_buffer,
-            (i_gppb->vdd_sysparm.distloss_uohm));
+            revle32(i_gppb->vdd_sysparm.distloss_uohm));
     HEX_DEC_STR(l_buffer,
-            (i_gppb->vcs_sysparm.distloss_uohm));
+            revle32(i_gppb->vcs_sysparm.distloss_uohm));
     HEX_DEC_STR(l_buffer,
-            (i_gppb->vdn_sysparm.distloss_uohm));
+            revle32(i_gppb->vdn_sysparm.distloss_uohm));
     FAPI_INF("%s", l_buffer);
 
     PRINT_LEAD1(l_buffer, "  %-20s : ", "Offset (uV)");
     HEX_DEC_STR(l_buffer,
-            (i_gppb->vdd_sysparm.distoffset_uv));
+            revle32(i_gppb->vdd_sysparm.distoffset_uv));
     HEX_DEC_STR(l_buffer,
-            (i_gppb->vcs_sysparm.distoffset_uv));
+            revle32(i_gppb->vcs_sysparm.distoffset_uv));
     HEX_DEC_STR(l_buffer,
-            (i_gppb->vdn_sysparm.distoffset_uv));
+           revle32(i_gppb->vdn_sysparm.distoffset_uv));
     FAPI_INF("%s", l_buffer);
 
     // -------------------
@@ -884,9 +884,16 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                 revle32(io_globalppb->reference_frequency_khz),
                 revle32(io_globalppb->reference_frequency_khz));
 
-        io_globalppb->vdd_sysparm = iv_vdd_sysparam;
-        io_globalppb->vcs_sysparm = iv_vcs_sysparam;
-        io_globalppb->vdn_sysparm = iv_vdn_sysparam;
+        io_globalppb->vdd_sysparm.loadline_uohm  = revle32(iv_vdd_sysparam.loadline_uohm);
+        io_globalppb->vdd_sysparm.distloss_uohm  = revle32(iv_vdd_sysparam.distloss_uohm);
+        io_globalppb->vdd_sysparm.distoffset_uv  = revle32(iv_vdd_sysparam.distoffset_uv);
+        io_globalppb->vcs_sysparm.loadline_uohm  = revle32(iv_vcs_sysparam.loadline_uohm);
+        io_globalppb->vcs_sysparm.distloss_uohm  = revle32(iv_vcs_sysparam.distloss_uohm);
+        io_globalppb->vcs_sysparm.distoffset_uv  = revle32(iv_vcs_sysparam.distoffset_uv);
+        io_globalppb->vdn_sysparm.loadline_uohm  = revle32(iv_vdn_sysparam.loadline_uohm);
+        io_globalppb->vdn_sysparm.distloss_uohm  = revle32(iv_vdn_sysparam.distloss_uohm);
+        io_globalppb->vdn_sysparm.distoffset_uv  = revle32(iv_vdn_sysparam.distoffset_uv);
+
 
         io_globalppb->array_write_vdn_mv = revle16(iv_array_vdn_mv);
         io_globalppb->array_write_vdd_mv = revle16(iv_array_vdd_mv);
@@ -1183,9 +1190,16 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         // -----------------------------------------------
         i_occppb->magic.value = revle64(OCC_PARMSBLOCK_MAGIC);
 
-        i_occppb->vdd_sysparm     = iv_vdd_sysparam;
-        i_occppb->vcs_sysparm     = iv_vcs_sysparam;
-        i_occppb->vdn_sysparm     = iv_vdn_sysparam;
+        i_occppb->vdd_sysparm.loadline_uohm  = revle32(iv_vdd_sysparam.loadline_uohm);
+        i_occppb->vdd_sysparm.distloss_uohm  = revle32(iv_vdd_sysparam.distloss_uohm);
+        i_occppb->vdd_sysparm.distoffset_uv  = revle32(iv_vdd_sysparam.distoffset_uv);
+        i_occppb->vcs_sysparm.loadline_uohm  = revle32(iv_vcs_sysparam.loadline_uohm);
+        i_occppb->vcs_sysparm.distloss_uohm  = revle32(iv_vcs_sysparam.distloss_uohm);
+        i_occppb->vcs_sysparm.distoffset_uv  = revle32(iv_vcs_sysparam.distoffset_uv);
+        i_occppb->vdn_sysparm.loadline_uohm  = revle32(iv_vdn_sysparam.loadline_uohm);
+        i_occppb->vdn_sysparm.distloss_uohm  = revle32(iv_vdn_sysparam.distloss_uohm);
+        i_occppb->vdn_sysparm.distoffset_uv  = revle32(iv_vdn_sysparam.distoffset_uv);
+
 
         i_occppb->attr.fields.pstates_enabled     = is_pstates_enabled();
         i_occppb->attr.fields.resclk_enabled      = is_resclk_enabled();
@@ -1419,18 +1433,18 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
-            (i_oppb->vdd_sysparm.loadline_uohm),
-            (i_oppb->vdd_sysparm.loadline_uohm));
+            revle32(i_oppb->vdd_sysparm.loadline_uohm),
+           revle32(i_oppb->vdd_sysparm.loadline_uohm));
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
-            (i_oppb->vcs_sysparm.loadline_uohm),
-            (i_oppb->vcs_sysparm.loadline_uohm));
+            revle32(i_oppb->vcs_sysparm.loadline_uohm),
+            revle32(i_oppb->vcs_sysparm.loadline_uohm));
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
-            (i_oppb->vdn_sysparm.loadline_uohm),
-            (i_oppb->vdn_sysparm.loadline_uohm));
+            revle32(i_oppb->vdn_sysparm.loadline_uohm),
+            revle32(i_oppb->vdn_sysparm.loadline_uohm));
     strcat(l_buffer, l_temp_buffer);
     FAPI_INF("%s", l_buffer);
 
@@ -1439,18 +1453,18 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
-            (i_oppb->vdd_sysparm.distloss_uohm),
-            (i_oppb->vdd_sysparm.distloss_uohm));
+            revle32(i_oppb->vdd_sysparm.distloss_uohm),
+            revle32(i_oppb->vdd_sysparm.distloss_uohm));
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
-            (i_oppb->vcs_sysparm.distloss_uohm),
-            (i_oppb->vcs_sysparm.distloss_uohm));
+            revle32(i_oppb->vcs_sysparm.distloss_uohm),
+            revle32(i_oppb->vcs_sysparm.distloss_uohm));
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
-            (i_oppb->vdn_sysparm.distloss_uohm),
-            (i_oppb->vdn_sysparm.distloss_uohm));
+            revle32(i_oppb->vdn_sysparm.distloss_uohm),
+            revle32(i_oppb->vdn_sysparm.distloss_uohm));
     strcat(l_buffer, l_temp_buffer);
     FAPI_INF("%s", l_buffer);
 
@@ -1459,18 +1473,18 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
-            (i_oppb->vdd_sysparm.distoffset_uv),
-            (i_oppb->vdd_sysparm.distoffset_uv));
+            revle32(i_oppb->vdd_sysparm.distoffset_uv),
+            revle32(i_oppb->vdd_sysparm.distoffset_uv));
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
-            (i_oppb->vcs_sysparm.distoffset_uv),
-            (i_oppb->vcs_sysparm.distoffset_uv));
+            revle32(i_oppb->vcs_sysparm.distoffset_uv),
+            revle32(i_oppb->vcs_sysparm.distoffset_uv));
     strcat(l_buffer, l_temp_buffer);
 
     sprintf(l_temp_buffer, " %04X (%3d) ",
-            (i_oppb->vdn_sysparm.distoffset_uv),
-            (i_oppb->vdn_sysparm.distoffset_uv));
+            revle32(i_oppb->vdn_sysparm.distoffset_uv),
+            revle32(i_oppb->vdn_sysparm.distoffset_uv));
     strcat(l_buffer, l_temp_buffer);
     FAPI_INF("%s", l_buffer);
 
@@ -1666,12 +1680,12 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR(ATTR_FREQ_PAU_MHZ,                         FAPI_SYSTEM,  attr_pau_frequency_mhz);
     PPB_GET_ATTR(ATTR_SYSTEM_FMAX_ENABLE,                   FAPI_SYSTEM,  attr_fmax_enable);
     PPB_GET_ATTR(ATTR_FREQ_BIAS,                            FAPI_SYSTEM,  attr_freq_bias);
-    PPB_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ,               FAPI_SYSTEM,  freq_proc_refclock_khz);
+    PPB_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ,               FAPI_SYSTEM,  attr_freq_proc_refclock_khz);
     PPB_GET_ATTR(ATTR_HW543384_WAR_MODE,                    FAPI_SYSTEM,  attr_war_mode);
 
 
     PPB_GET_ATTR(ATTR_SYSTEM_THROTTLE_PSTATE_NUMBER_LIMIT,  FAPI_SYSTEM,  attr_throttle_pstate_number_limit);
-    PPB_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,                    iv_procChip,  proc_dpll_divider);
+    PPB_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,                    iv_procChip,  attr_proc_dpll_divider);
     PPB_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ,                iv_procChip,  attr_freq_core_ceiling_mhz);
     PPB_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ,                  iv_procChip,  attr_freq_core_floor_mhz);
 

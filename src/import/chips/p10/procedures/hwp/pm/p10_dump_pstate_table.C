@@ -278,17 +278,17 @@ void gppb_print(FILE* stream, const GlobalPstateParmBlock_t* gppb, uint32_t  dum
     fprintf(stream, "\nSystem_Power_Distribution_Parameters\n");
     fprintf(stream, "\t      LoadLine(uOhm) DistLoss(uOhm)  DistOffset(uV)\n");
     fprintf(stream, "\tVDD        %5u        %5u        %5u\n",
-            (gppb->vdd_sysparm.loadline_uohm),
-            (gppb->vdd_sysparm.distloss_uohm),
-            (gppb->vdd_sysparm.distoffset_uv));
+            revle32(gppb->vdd_sysparm.loadline_uohm),
+            revle32(gppb->vdd_sysparm.distloss_uohm),
+            revle32(gppb->vdd_sysparm.distoffset_uv));
     fprintf(stream, "\tVCS        %5u        %5u        %5u\n",
-            (gppb->vcs_sysparm.loadline_uohm),
-            (gppb->vcs_sysparm.distloss_uohm),
-            (gppb->vcs_sysparm.distoffset_uv));
+            revle32(gppb->vcs_sysparm.loadline_uohm),
+            revle32(gppb->vcs_sysparm.distloss_uohm),
+            revle32(gppb->vcs_sysparm.distoffset_uv));
     fprintf(stream, "\tVDN        %5u        %5u        %5u\n",
-            (gppb->vdn_sysparm.loadline_uohm),
-            (gppb->vdn_sysparm.distloss_uohm),
-            (gppb->vdn_sysparm.distoffset_uv));
+            revle32(gppb->vdn_sysparm.loadline_uohm),
+            revle32(gppb->vdn_sysparm.distloss_uohm),
+            revle32(gppb->vdn_sysparm.distoffset_uv));
 
     fprintf(stream, "\nExternal_Biases\n");
     fprintf(stream, "\tFrequency Bias: %6.1f%%\n", (double)gppb->poundv_biases_0p05pct.frequency_0p5pct);

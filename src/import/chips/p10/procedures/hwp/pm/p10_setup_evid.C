@@ -136,8 +136,8 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
         // Read and compare DPLL and safe mode value
         FAPI_TRY (p10_read_dpll_value(i_target,
-                                      attrs.freq_proc_refclock_khz,
-                                      attrs.proc_dpll_divider,
+                                      attrs.attr_freq_proc_refclock_khz,
+                                      attrs.attr_proc_dpll_divider,
                                       l_dpll_lesser_value,
                                       l_fmult_data,
                                       l_safe_mode_dpll_value,
@@ -169,13 +169,18 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         {
             FAPI_INF("Setting Boot voltage values for VDD (%d mv) and VCS (%d mv)",
                      attrs.attr_boot_voltage_mv[VDD], attrs.attr_boot_voltage_mv[VCS]);
-            FAPI_TRY(update_VDD_VCS_voltage(i_target,
-                                            attrs.attr_avs_bus_num,
-                                            attrs.attr_avs_bus_rail_select,
-                                            attrs.attr_boot_voltage_mv,
-                                            attrs.attr_ext_vrm_step_size_mv,
-                                            l_present_boot_voltage),
-                     "Error from VDD/VCS setup function");
+
+            if (attrs.attr_boot_voltage_mv[VDD] &&
+                attrs.attr_boot_voltage_mv[VCS])
+            {
+                FAPI_TRY(update_VDD_VCS_voltage(i_target,
+                                                attrs.attr_avs_bus_num,
+                                                attrs.attr_avs_bus_rail_select,
+                                                attrs.attr_boot_voltage_mv,
+                                                attrs.attr_ext_vrm_step_size_mv,
+                                                l_present_boot_voltage),
+                         "Error from VDD/VCS setup function");
+            }
         }
 
         // Set DPLL after ext volt update because of dpll is lesser the safe
@@ -619,6 +624,13 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         o_fmult_data.flush<0>();
         FAPI_TRY(fapi2::getScom(i_target, NEST_DPLL_FREQ, l_data64),
                  "ERROR: Failed to read NEST_DPLL_FREQ");
+
+        if (!i_freq_proc_refclock_khz || !i_proc_dpll_divider)
+        {
+            FAPI_IMP("p10_read_dpll_value :i_freq_proc_refclock_khz %x i_proc_dpll_divider %x",
+                     i_freq_proc_refclock_khz , !i_proc_dpll_divider);
+            break;
+        }
 
         l_data64.extractToRight<NEST_DPLL_FREQ_FMULT,
                                 NEST_DPLL_FREQ_FMULT_LEN>(o_fmult_data);

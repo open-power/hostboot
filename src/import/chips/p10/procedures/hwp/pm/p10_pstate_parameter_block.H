@@ -181,8 +181,6 @@ typedef struct
     uint32_t attr_pstate0_freq_mhz;
     uint32_t attr_nominal_freq_mhz;
     uint32_t attr_pstate0_freq;
-    uint32_t freq_proc_refclock_khz;
-    uint32_t proc_dpll_divider;
     uint8_t  attr_throttle_pstate_number_limit;
 
     //WOF Attributes
