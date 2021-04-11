@@ -42,6 +42,7 @@
 
 std::map<std::string, char> DT;  // decode table
 std::map<std::string, std::string> DD10LEVEL;
+std::map<std::string, std::string> DD20LEVEL;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -91,6 +92,7 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
     // P10
 
     const uint32_t P10_EC_DD10 = 0x120DA049;
+    const uint32_t P10_EC_DD20 = 0x220DA049;
 
     std::string DD;
 
@@ -154,6 +156,11 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
         if    (l_cfamid.getWord(0) == P10_EC_DD10 )
         {
             lookup = &DD10LEVEL;    // P10 DD1.0
+        }
+
+        if    (l_cfamid.getWord(0) == P10_EC_DD20 )
+        {
+            lookup = &DD20LEVEL;    // P10 DD2.0
         }
 
         if (lookup == NULL ||
@@ -229,6 +236,15 @@ DD10level_decodetable()
     DD10LEVEL.insert( std::pair<std::string, std::string> ( "010" , "2 (V1 fix, decap short" ) );
     DD10LEVEL.insert( std::pair<std::string, std::string> ( "110" , "3 (Unused)" ) );
     DD10LEVEL.insert( std::pair<std::string, std::string> ( "001" , "4 (Unused)" ) );
+}
+
+void
+DD20level_decodetable()
+{
+    DD20LEVEL.insert( std::pair<std::string, std::string> ( "100" , "2 (CA PCIE, N3/HB via fixes)" ) );
+    DD20LEVEL.insert( std::pair<std::string, std::string> ( "010" , "3 (Unused)" ) );
+    DD20LEVEL.insert( std::pair<std::string, std::string> ( "110" , "4 (Unused)" ) );
+    DD20LEVEL.insert( std::pair<std::string, std::string> ( "001" , "5 (Unused)" ) );
 }
 
 
