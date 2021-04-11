@@ -161,7 +161,7 @@ fapi_try_exit:
 ///
 /// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode p10_fbc_tdm_confirm_half(
+fapi2::ReturnCode p10_fbc_tdm_inject_confirm_half(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
     const bool i_even_not_odd)
 {
@@ -371,7 +371,7 @@ fapi2::ReturnCode p10_fbc_tdm_inject(
         p10_fbc_tdm_confirm_partner,
         p10_fbc_tdm_utils_fir_mask,
         p10_fbc_tdm_enter,
-        p10_fbc_tdm_confirm_half,
+        p10_fbc_tdm_inject_confirm_half,
         p10_fbc_tdm_recal_stop,
         p10_fbc_tdm_confirm_recal_stop,
         p10_fbc_tdm_partial_reset,
