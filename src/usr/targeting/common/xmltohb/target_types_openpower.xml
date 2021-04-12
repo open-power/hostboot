@@ -227,6 +227,24 @@
       <id>IS_MPIPL_SUPPORTED</id>
     </attribute>
     <attribute>
+      <id>MC_DRAM_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>MC_DRAM_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>MC_DRAM_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>MC_EXT_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>MC_EXT_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>MC_EXT_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
       <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
     </attribute>
     <attribute>
@@ -312,6 +330,15 @@
     </attribute>
     <attribute>
       <id>OP_TRACE_LITE</id>
+    </attribute>
+    <attribute>
+      <id>PMIC_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>PMIC_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>PMIC_THROTTLE_TEMP_DEG_C</id>
     </attribute>
     <attribute>
       <id>SYSTEM_PLDM_ENTITY_ID_INFO</id>

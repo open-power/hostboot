@@ -738,6 +738,85 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
+    <id>MC_DRAM_ERROR_TEMP_DEG_C</id>
+    <description>
+        External MC and DRAM temperature where an error will be generated
+        in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MC_DRAM_READ_TIMEOUT_SEC</id>
+    <description>
+        Maximum time in seconds allowed without having a new temperature
+        for the sensor covering both external MC and DRAM before memory
+        throttling will occur
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MC_DRAM_THROTTLE_TEMP_DEG_C</id>
+    <description>
+        External MC and DRAM temperature threshold where throttling will
+        occur in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MC_EXT_ERROR_TEMP_DEG_C</id>
+    <description>
+        External MC temperature where an error will be generated
+        in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MC_EXT_READ_TIMEOUT_SEC</id>
+    <description>
+        Maximum time in seconds allowed without having a new external MC
+        temperature before memory throttling will occur
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MC_EXT_THROTTLE_TEMP_DEG_C</id>
+    <description>
+        External MC temperature threshold where throttling will
+        occur in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS</id>
     <description>
         Power used by components other than CPU, memory,
@@ -1375,6 +1454,45 @@ ID for the sensor number returned with the elog. -->
     <readable/>
     <writeable/>
     <no_export/>
+  </attribute>
+
+  <attribute>
+    <id>PMIC_ERROR_TEMP_DEG_C</id>
+    <description>
+        PMIC temperature where an error will be generated
+        in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>PMIC_READ_TIMEOUT_SEC</id>
+    <description>
+        Maximum time in seconds allowed without having a new PMIC
+        temperature before memory throttling will occur
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>PMIC_THROTTLE_TEMP_DEG_C</id>
+    <description>
+        PMIC temperature threshold where throttling will
+        occur in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
   </attribute>
 
   <attribute>
