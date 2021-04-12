@@ -270,12 +270,12 @@ static const uint32_t OCC_HB_POLLTIME_MS      = 20;
 static const uint32_t OCC_HB_POLLTIME_MCYCLES = 20;
 static const uint32_t TIMEOUT_COUNT = OCC_HB_TIMEOUT_MS / OCC_HB_POLLTIME_MS;
 ///
-/// @brief Poll for OCC Heartbeat Enablement
+/// @brief Poll for OCC State Enablement
 /// @param[in] i_target  Chip target
 ///
 /// @return FAPI2_RC_SUCCESS on success, else error
 ///
-fapi2::ReturnCode pollOCCHearbeat(
+fapi2::ReturnCode pollOCCState(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
 
@@ -283,11 +283,11 @@ fapi2::ReturnCode pollOCCHearbeat(
     using namespace scomt;
     using namespace proc;
 
-    fapi2::buffer<uint64_t>  l_occhbr;
+    fapi2::buffer<uint64_t>  l_occflg0;
     uint32_t                 l_timeout_counter = TIMEOUT_COUNT;
     uint32_t retry_cnt = 10;
 
-    FAPI_DBG("OCC heartbeat polling...");
+    FAPI_DBG("OCC state polling...");
 
     while( retry_cnt-- )
     {
@@ -295,16 +295,16 @@ fapi2::ReturnCode pollOCCHearbeat(
 
         do
         {
-            FAPI_TRY(GET_TP_TPCHIP_OCC_OCI_OCB_OCCHBR(i_target, l_occhbr));
-            FAPI_DBG("OCC Heartbeat Reg: 0x%016lx; Timeout: %d",
-                     l_occhbr, l_timeout_counter);
+            FAPI_TRY(GET_TP_TPCHIP_OCC_OCI_OCB_OCCFLG0_RW(i_target, l_occflg0));
+            FAPI_DBG("OCC State Reg: 0x%016lx; Timeout: %d",
+                     l_occflg0, l_timeout_counter);
             // fapi2::delay takes ns as the arg
             fapi2::delay(OCC_HB_POLLTIME_MS * 1000 * 1000, OCC_HB_POLLTIME_MCYCLES * 1000 * 1000);
         }
-        while((l_occhbr.getBit<TP_TPCHIP_OCC_OCI_OCB_OCCHBR_EN>() != 1) &&
+        while((l_occflg0.getBit<28>() != 1) &&
               (--l_timeout_counter != 0));
 
-        if (l_occhbr.getBit<TP_TPCHIP_OCC_OCI_OCB_OCCHBR_EN>())
+        if (l_occflg0.getBit<28>())
         {
             break;
         }
@@ -312,10 +312,10 @@ fapi2::ReturnCode pollOCCHearbeat(
     }
 
     FAPI_ASSERT((l_timeout_counter &&
-                 l_occhbr.getBit<TP_TPCHIP_OCC_OCI_OCB_OCCHBR_EN>()),
+                 l_occflg0.getBit<28>()),
                 fapi2::OCC_START_TIMEOUT()
                 .set_CHIP(i_target),
-                "OCC Start via Heartbeat enable timeout");
+                "OCC Start timeout");
 
     FAPI_INF("OCC was activated successfully!!!!");
 
@@ -511,7 +511,7 @@ fapi2::ReturnCode p10_pm_occ_control
 #endif
                 //As we are seeing some intermittent issue in occ start, so will
                 // retry couple of times and then will error out.
-                FAPI_TRY(pollOCCHearbeat(i_target));
+                FAPI_TRY(pollOCCState(i_target));
 
 #ifdef __HOSTBOOT_MODULE
             }
