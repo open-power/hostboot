@@ -38,6 +38,8 @@
 #include <endian.h>
 // IPC
 #include <sys/msg.h>
+//VFS_ROOT_MSG_PLDM_REQ_OUT
+#include <sys/vfs.h>
 // Hostboot PLDM includes
 #include <pldm/pldm_const.H>
 #include <pldm/pldm_reasoncodes.H>
@@ -51,8 +53,6 @@
 
 // Other userspace module includes
 #include <mctp/mctp_message_types.H>
-
-extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
 
 using namespace ERRORLOG;
 

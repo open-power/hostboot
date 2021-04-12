@@ -32,6 +32,9 @@
 #include <vector>
 #include <sys/msg.h>
 
+// VFS_ROOT_MSG_PLDM_REQ_OUT
+#include <sys/vfs.h>
+
 // non-pldm /include headers
 #include <mctp/mctp_message_types.H>
 
@@ -45,9 +48,6 @@
 
 // pldm /src/ headers
 #include "../common/pldmtrace.H"
-
-// This is the name of the outgoing PLDM message queue.
-extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
 
 namespace PLDM
 {

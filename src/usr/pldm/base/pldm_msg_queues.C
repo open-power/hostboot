@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,6 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <sys/msg.h>
+// VFS_ROOT_MSG_PLDM_REQ_OUT
+#include <sys/vfs.h>
 #include "pldm_msg_queues.H"
 
 /**
@@ -37,7 +39,6 @@
 
 extern const char* VFS_ROOT_MSG_PLDM_REQ_IN;
 extern const char* VFS_ROOT_MSG_PLDM_RSP_IN;
-extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
 
 // Create global message queues which will be used throughout the
 // pldm_base module

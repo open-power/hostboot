@@ -98,6 +98,9 @@ namespace PLDM
 
         // getMfgFlags
         MOD_GET_MFG_FLAGS = 0x22,
+
+        // getTID
+        MOD_GET_TID = 0x23,
     };
 
     enum PLDMReasonCode

@@ -30,6 +30,8 @@
 
 #include <vector>
 #include <sys/msg.h>
+// VFS_ROOT_MSG_PLDM_REQ_OUT
+#include <sys/vfs.h>
 
 #include <pldm/requests/pldm_fileio_requests.H>
 #include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
@@ -41,9 +43,6 @@
 #include <hwas/common/hwasCallout.H>
 #include <pldm/pldm_errl.H>
 #include <limits.h>
-
-// This is the name of the outgoing PLDM message queue.
-extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
 
 namespace PLDM
 {

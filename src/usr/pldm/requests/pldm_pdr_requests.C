@@ -42,6 +42,9 @@
 // IPC
 #include <sys/msg.h>
 
+// VFS_ROOT_MSG_PLDM_REQ_OUT
+#include <sys/vfs.h>
+
 // libpldm headers from pldm subtree
 #include <openbmc/pldm/libpldm/platform.h>
 #include <openbmc/pldm/libpldm/pdr.h>
@@ -58,9 +61,6 @@
 #include <pldm/extended/pdr_manager.H>
 #include "../common/pldmtrace.H"
 #include <pldm/pldm_util.H>
-
-// This is the name of the outgoing PLDM message queue.
-extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
 
 namespace
 {

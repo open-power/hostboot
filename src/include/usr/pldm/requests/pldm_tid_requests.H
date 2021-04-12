@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pldm/base/pldm_base_init.C $                          */
+/* $Source: src/include/usr/pldm/requests/pldm_tid_requests.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2021                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,53 +22,26 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef PLDM_TID_REQUESTS_H
+#define PLDM_TID_REQUESTS_H
 
-/**
- * @file pldm_base_init.C
+/* @file pldm_tid_requests.H
  *
- * @brief Source code for the function that will be called when the pldm_base
- *        module is loaded by the init service.
- *
+ * This file defines the APIs for PLDM TID (Terminus ID) operations
  */
 
-#include <mctp/mctpif.H>
-#include "pldm_requester.H"
-#include "pldm_msg_queues.H"
-#include <initservice/taskargs.H>
-#include <pldm/requests/pldm_tid_requests.H>
+#include <errl/errlentry.H>
 
 namespace PLDM
 {
-/**
-* @brief This is the function that gets called when pldm_base is loaded by
-*        initservice. It handles registering the pldm msg queues, initializing
-*        the pldm requester task, and telling the mctp layer we are ready to
-*        register the lpc bus to start MCTP traffic.
-*/
-static void base_init(errlHndl_t& o_errl)
-{
-    // register g_outboundPldmReqMsgQ, g_inboundPldmRspMsgQ,
-    // and g_inboundPldmReqMsgQ so external modules can resolve
-    // them easily
-    registerPldmMsgQs();
 
-    // This will call the pldmRequester constructor which
-    // will launch the task waiting for inbound PLDM requests
-    // from the BMC
-    Singleton<pldmRequester>::instance().init();
+/*
+ * @brief Requests the BMC's Terminus ID (TID). Upon the receipt of this
+ * request, the BMC will send back a setEventReceiver command to HB.
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t getTID();
 
-    // Notify MCTP layer that they can register the bus
-    // and start MCTP traffic
-    MCTP::register_mctp_bus();
-
-#ifdef CONFIG_PLDM
-    // Get BMC TID (terminus ID)
-    o_errl = getTID();
+} //namespace PLDM
 #endif
-
-    return;
-}
-
-}
-
-TASK_ENTRY_MACRO( PLDM::base_init );

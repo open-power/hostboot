@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,7 @@ extern const char* VFS_ROOT_DATA;
 extern const char* VFS_ROOT_MSG;
 extern const char* VFS_ROOT_MSG_VFS;
 extern const char* VFS_ROOT_MSG_INTR;
+extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
 
 enum VfsMessages
 {
