@@ -821,7 +821,15 @@ Target* TargetService::toTarget(
     const EntityPath& i_entityPath) const
 {
     Target* o_target = nullptr;
+#ifdef __HOSTBOOT_MODULE
     Util::Memoize::memoize<int>(TargetService::_memoizeTarget, i_entityPath, o_target);
+#else
+    // Use of the memoizer inhibited on FSP compiles because the memoizer has no
+    // hooks into the primary node election algorithm.  If a new primary node
+    // were to be elected, the memoizer would potentially return a stale system
+    // target pointer.
+    TargetService::_memoizeTarget(i_entityPath, o_target);
+#endif
     return o_target;
 }
 
