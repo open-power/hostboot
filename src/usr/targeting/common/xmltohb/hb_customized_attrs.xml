@@ -423,11 +423,6 @@
      </attribute>
 
     <attribute>
-        <id>ATTR_POUND_V_STATIC_DATA_ENABLE</id>
-        <default>ON</default>
-    </attribute>
-
-    <attribute>
           <id>ATTR_POUNDV_BUCKET_NUM_OVERRIDE</id>
           <default>0</default>
      </attribute>
