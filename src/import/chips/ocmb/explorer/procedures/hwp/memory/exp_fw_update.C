@@ -38,6 +38,7 @@
 #include <lib/inband/exp_inband.H>
 #include <lib/shared/exp_consts.H>
 #include <exp_data_structs.H>
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/omi/crc32.H>
 #include <mmio_access.H>
@@ -346,7 +347,8 @@ extern "C"
 /// @return FAPI2_RC_SUCCESS if ok
 ///
     fapi2::ReturnCode exp_fw_update(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                    const uint8_t* i_image_ptr, const size_t i_image_sz)
+                                    const uint8_t* i_image_ptr,
+                                    const size_t i_image_sz)
     {
         uint16_t seq_num = 0;
         uint32_t block_crc = 0;
@@ -499,6 +501,35 @@ extern "C"
     fapi_try_exit:
         FAPI_INF("Exiting exp_fw_update(%s) with return code : 0x%08x...",
                  mss::c_str(i_target), (uint64_t) fapi2::current_err);
+        return fapi2::current_err;
+    }
+
+///
+/// @brief Updates explorer firmware on all OCMB_CHIPs under a PROC_CHIP
+/// @param[in] i_target the processor target
+/// @param[in] i_image_ptr pointer to the binary image
+/// @param[in] i_image_sz size of the binary image
+/// @return FAPI2_RC_SUCCESS if ok
+///
+    fapi2::ReturnCode exp_fw_update_all(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                        const uint8_t* i_image_ptr,
+                                        const size_t i_image_sz)
+    {
+        FAPI_INF("Entering exp_fw_update_all(%s). imageSize[0x%08x]",
+                 mss::c_str(i_target), i_image_sz);
+
+        for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
+        {
+            for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
+            {
+                FAPI_TRY(exp_fw_update(l_ocmb, i_image_ptr, i_image_sz));
+            }
+        }
+
+        FAPI_INF("Finished exp_fw_update_all(%s)",
+                 mss::c_str(i_target));
+
+    fapi_try_exit:
         return fapi2::current_err;
     }
 

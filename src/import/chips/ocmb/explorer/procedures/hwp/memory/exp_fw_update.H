@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,9 @@
 typedef fapi2::ReturnCode (*exp_fw_update_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
         const uint8_t*, const size_t);
 
+typedef fapi2::ReturnCode (*exp_fw_update_all_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+        const uint8_t*, const size_t);
+
 extern "C"
 {
 
@@ -54,7 +57,19 @@ extern "C"
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode exp_fw_update(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                    const uint8_t* i_image_ptr, const size_t i_image_sz);
+                                    const uint8_t* i_image_ptr,
+                                    const size_t i_image_sz);
+
+///
+/// @brief Updates explorer firmware on all OCMB_CHIPs under a PROC_CHIP
+/// @param[in] i_target the processor target
+/// @param[in] i_image_ptr pointer to the binary image
+/// @param[in] i_image_sz size of the binary image
+/// @return FAPI2_RC_SUCCESS if ok
+///
+    fapi2::ReturnCode exp_fw_update_all(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                        const uint8_t* i_image_ptr,
+                                        const size_t i_image_sz);
 
 }// extern C
 
