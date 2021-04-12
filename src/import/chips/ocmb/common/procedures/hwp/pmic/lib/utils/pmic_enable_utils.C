@@ -762,7 +762,7 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
     // First, grab the PMIC targets in REL_POS order
     // Make sure to grab all pmics - functional or not, in case the parent OCMB
     // was deconfigured. That may have marked the PMICs as non-functional
-    auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
+    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
 
     // Next, sort them by the sequence attributes
     FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
@@ -823,7 +823,7 @@ fapi2::ReturnCode enable_1u_2u(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::enable_mode i_mode)
 {
-    auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
     // We're guaranteed to have at least one PMIC here due to the check in pmic_enable
     auto l_current_pmic = l_pmics[0];

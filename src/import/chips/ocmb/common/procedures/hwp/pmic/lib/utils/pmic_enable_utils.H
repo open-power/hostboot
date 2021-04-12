@@ -372,7 +372,7 @@ struct target_info_redundancy
         o_rc = fapi2::FAPI2_RC_SUCCESS;
 
         const auto I2C_DEVICES =
-            mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_ocmb);
+            mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_ocmb);
 
         // The ATTR_REL_POS (mss::index) numbering is how PMIC HWP's have numbered the PMICs and how platform
         // provides them. This varies from the "Redundant Power on DIMM – Functional Specification" numbering

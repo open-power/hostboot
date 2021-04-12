@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,26 @@ class posTraits
 ///
 template<>
 class posTraits<fapi2::TARGET_TYPE_DIMM>
+{
+    public:
+        typedef uint32_t pos_type;
+};
+
+///
+/// @brief DIMM Trait class for the mss::pos functions
+///
+template<>
+class posTraits<fapi2::TARGET_TYPE_PMIC>
+{
+    public:
+        typedef uint32_t pos_type;
+};
+
+///
+/// @brief DIMM Trait class for the mss::pos functions
+///
+template<>
+class posTraits<fapi2::TARGET_TYPE_GENERICI2CSLAVE>
 {
     public:
         typedef uint32_t pos_type;
@@ -185,6 +205,23 @@ fapi_try_exit:
     FAPI_ERR("can't get our fapi position");
     fapi2::Assert(false);
     return 0;
+}
+
+///
+/// @brief Sort the provided target vector in order of pos (ascending)
+///
+/// @tparam T TargetType
+/// @param[in,out] io_targets vector of targets to sort
+///
+template <fapi2::TargetType T>
+inline void sort_targets_by_pos(std::vector<fapi2::Target<T>>& io_targets)
+{
+    std::sort(io_targets.begin(), io_targets.end(), [] (
+                  const fapi2::Target<T>& l_first_target,
+                  const fapi2::Target<T>& l_second_target) -> bool
+    {
+        return mss::fapi_pos(l_first_target) < mss::fapi_pos(l_second_target);
+    });
 }
 
 }
