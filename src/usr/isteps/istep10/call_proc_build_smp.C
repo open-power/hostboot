@@ -636,8 +636,9 @@ void retrieveAndExtendSecondaryMeasurements(
       uint8_t full_reason;
       struct
       {
-        uint8_t rsvd          : 6;
+        uint8_t rsvd          : 5;
         uint8_t PCR6_regs_0   : 1; // SBE Security State - PCR6 version
+        uint8_t PCR6_regs_1   : 1; // HW Key Hash- PCR6 version
         uint8_t PCR6_regs_4_7 : 1; // Hash of SBE Secureboot Validation Image
       } PACKED;
     } mismatch_reason_t;
@@ -690,34 +691,51 @@ void retrieveAndExtendSecondaryMeasurements(
         }
 
         mismatch_reason_t l_mismatch = {0};
-        // compare PCR6 for mismatch
+        // compare PCR6 for mismatch - register 0/security state
         if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_0,
                    l_secondarySbeMeasuredGroups.sbe_measurement_regs_0,
                    TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE))
         {
             l_mismatch.PCR6_regs_0 = 1;
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK"Mismatch found: 0x%08X processor PCR6 register 0",
+                ERR_MRK"Mismatch found: 0x%08X processor PCR6 register 0/security state",
                 get_huid(curproc) );
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 0",
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 0/security state",
                 l_primarySbeMeasuredGroups.sbe_measurement_regs_0,
                 TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE );
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 0",
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 0/security state",
                 l_secondarySbeMeasuredGroups.sbe_measurement_regs_0,
                 TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE );
         }
+        // compare PCR6 for mismatch - register 1/HW key hash
+        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_1,
+                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_1,
+                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE))
+        {
+            l_mismatch.PCR6_regs_1 = 1;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"Mismatch found: 0x%08X processor PCR6 register 1/HW key hash",
+                get_huid(curproc) );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 1/HW key hash",
+                l_primarySbeMeasuredGroups.sbe_measurement_regs_1,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 1/HW key hash",
+                l_secondarySbeMeasuredGroups.sbe_measurement_regs_1,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE );
+        }
+        // compare PCR6 for mismatch - registers 4 to 7/Hash of SBE secureboot validation image
         if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_4_7,
                    l_secondarySbeMeasuredGroups.sbe_measurement_regs_4_7,
                    TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE))
         {
             l_mismatch.PCR6_regs_4_7 = 1;
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK"Mismatch found: 0x%08X processor PCR6 registers 4-7",
+                ERR_MRK"Mismatch found: 0x%08X processor PCR6 registers 4-7/SBE secureboot validation image",
                 get_huid(curproc) );
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 4-7",
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 4-7/SBE secureboot validation image",
                 l_primarySbeMeasuredGroups.sbe_measurement_regs_4_7,
                 TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 4-7",
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 4-7/SBE secureboot validation image",
                 l_secondarySbeMeasuredGroups.sbe_measurement_regs_4_7,
                 TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
         }

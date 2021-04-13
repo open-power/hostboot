@@ -176,7 +176,8 @@ namespace TRUSTEDBOOT
      *                                       - 1B: Jumper State (x00, x01)
      *                                       - 1B: MinSecFWVer(xx)
      *                                       - 6B: unused/reserved
-     * - 1     (0x10011)         : N/A     : unused/reserved
+     * - 1     (0x10011)         : PCR 6   : "HW Key Hash"
+     *                                       - 8B: First 8 bytes of HW key hash
      * - 2     (0x10012)         : PCR 1   : "SBE Security State"
      *                                       - 1B: Jumper State (x00, x01)
      *                                       - 1B: IsPrimary (x00, x01) :
