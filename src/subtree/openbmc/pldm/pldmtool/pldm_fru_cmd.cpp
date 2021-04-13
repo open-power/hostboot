@@ -67,19 +67,18 @@ class GetFruRecordTableMetadata : public CommandInterface
                       << "rc=" << rc << ",cc=" << (int)cc << std::endl;
             return;
         }
-        std::cout << "FRUDATAMajorVersion : "
-                  << static_cast<uint32_t>(fru_data_major_version) << std::endl;
-        std::cout << "FRUDATAMinorVersion : "
-                  << static_cast<uint32_t>(fru_data_minor_version) << std::endl;
-        std::cout << "FRUTableMaximumSize : " << fru_table_maximum_size
-                  << std::endl;
-        std::cout << "FRUTableLength : " << fru_table_length << std::endl;
-        std::cout << "Total number of Record Set Identifiers in table : "
-                  << total_record_set_identifiers << std::endl;
-        std::cout << "Total number of records in table :  "
-                  << total_table_records << std::endl;
-        std::cout << "FRU DATAStructureTableIntegrityChecksum :  " << checksum
-                  << std::endl;
+        ordered_json output;
+        output["FRUDATAMajorVersion"] =
+            static_cast<uint32_t>(fru_data_major_version);
+        output["FRUDATAMinorVersion"] =
+            static_cast<uint32_t>(fru_data_minor_version);
+        output["FRUTableMaximumSize"] = fru_table_maximum_size;
+        output["FRUTableLength"] = fru_table_length;
+        output["Total number of Record Set Identifiers in table"] =
+            total_record_set_identifiers;
+        output["Total number of records in table"] = total_table_records;
+        output["FRU DATAStructureTableIntegrityChecksum"] = checksum;
+        pldmtool::helper::DisplayInJson(output);
     }
 };
 
@@ -93,20 +92,19 @@ class FRUTablePrint
     void print()
     {
         auto p = table;
+        ordered_json frutable;
+        ordered_json output;
         while (!isTableEnd(p))
         {
             auto record =
                 reinterpret_cast<const pldm_fru_record_data_format*>(p);
-            std::cout << "FRU Record Set Identifier: "
-                      << (int)le16toh(record->record_set_id) << std::endl;
-            std::cout << "FRU Record Type: "
-                      << typeToString(fruRecordTypes, record->record_type)
-                      << std::endl;
-            std::cout << "Number of FRU fields: " << (int)record->num_fru_fields
-                      << std::endl;
-            std::cout << "Encoding Type for FRU fields: "
-                      << typeToString(fruEncodingType, record->encoding_type)
-                      << std::endl;
+            output["FRU Record Set Identifier"] =
+                (int)le16toh(record->record_set_id);
+            output["FRU Record Type"] =
+                typeToString(fruRecordTypes, record->record_type);
+            output["Number of FRU fields"] = (int)record->num_fru_fields;
+            output["Encoding Type for FRU fields"] =
+                typeToString(fruEncodingType, record->encoding_type);
 
             p += sizeof(pldm_fru_record_data_format) -
                  sizeof(pldm_fru_record_tlv);
@@ -115,6 +113,9 @@ class FRUTablePrint
             std::map<uint8_t, std::string> FruFieldTypeMap;
             std::string fruFieldValue;
 
+            ordered_json frudata;
+            ordered_json frufielddata;
+            frufielddata.emplace_back(output);
             for (int i = 0; i < record->num_fru_fields; i++)
             {
                 auto tlv = reinterpret_cast<const pldm_fru_record_tlv*>(p);
@@ -174,17 +175,16 @@ class FRUTablePrint
                         fruFieldValuestring(tlv->value, tlv->length);
                 }
 
-                std::cout << "\tFRU Field Type: "
-                          << typeToString(FruFieldTypeMap, tlv->type)
-                          << std::endl;
-                std::cout << "\tFRU Field Length: " << (int)(tlv->length)
-                          << std::endl;
-                std::cout << "\tFRU Field Value: " << fruFieldValue
-                          << std::endl;
-
+                frudata["FRU Field Type"] =
+                    typeToString(FruFieldTypeMap, tlv->type);
+                frudata["FRU Field Length"] = (int)(tlv->length);
+                frudata["FRU Field Value"] = fruFieldValue;
+                frufielddata.emplace_back(frudata);
                 p += sizeof(pldm_fru_record_tlv) - 1 + tlv->length;
             }
+            frutable.emplace_back(frufielddata);
         }
+        pldmtool::helper::DisplayInJson(frutable);
     }
 
   private:

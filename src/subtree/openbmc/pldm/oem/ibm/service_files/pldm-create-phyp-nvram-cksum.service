@@ -1,0 +1,12 @@
+[Unit]
+Description=Create empty PHYP-NVRAM-CKSUM file
+ConditionPathExists=!/var/lib/pldm/PHYP-NVRAM-CKSUM
+
+[Service]
+ExecStart=/bin/mkdir -p /var/lib/pldm/
+ExecStart=/bin/dd if=/dev/zero of=/var/lib/pldm/PHYP-NVRAM-CKSUM bs=16 count=1
+Type=oneshot
+RemainAfterExit=no
+
+[Install]
+WantedBy=pldmd.service

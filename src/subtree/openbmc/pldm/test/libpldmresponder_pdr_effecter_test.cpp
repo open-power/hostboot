@@ -5,6 +5,7 @@
 #include "mocked_utils.hpp"
 
 #include <sdbusplus/test/sdbus_mock.hpp>
+#include <sdeventplus/event.hpp>
 
 #include <gtest/gtest.h>
 
@@ -27,8 +28,9 @@ TEST(GeneratePDRByStateEffecter, testGoodJson)
     auto inPDRRepo = pldm_pdr_init();
     auto outPDRRepo = pldm_pdr_init();
     Repo outRepo(outPDRRepo);
-    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good",
-                    "./event_jsons/good", inPDRRepo, nullptr, nullptr, nullptr);
+    auto event = sdeventplus::Event::get_default();
+    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", inPDRRepo,
+                    nullptr, nullptr, nullptr, nullptr, event);
     Repo inRepo(inPDRRepo);
     getRepoByType(inRepo, outRepo, PLDM_STATE_EFFECTER_PDR);
 
@@ -126,8 +128,9 @@ TEST(GeneratePDRByNumericEffecter, testGoodJson)
     auto inPDRRepo = pldm_pdr_init();
     auto outPDRRepo = pldm_pdr_init();
     Repo outRepo(outPDRRepo);
-    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", "",
-                    inPDRRepo, nullptr, nullptr, nullptr);
+    auto event = sdeventplus::Event::get_default();
+    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", inPDRRepo,
+                    nullptr, nullptr, nullptr, nullptr, event);
     Repo inRepo(inPDRRepo);
     getRepoByType(inRepo, outRepo, PLDM_NUMERIC_EFFECTER_PDR);
 
@@ -172,8 +175,9 @@ TEST(GeneratePDR, testMalformedJson)
     auto inPDRRepo = pldm_pdr_init();
     auto outPDRRepo = pldm_pdr_init();
     Repo outRepo(outPDRRepo);
-    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good",
-                    "./event_jsons/good", inPDRRepo, nullptr, nullptr, nullptr);
+    auto event = sdeventplus::Event::get_default();
+    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", inPDRRepo,
+                    nullptr, nullptr, nullptr, nullptr, event);
     Repo inRepo(inPDRRepo);
     getRepoByType(inRepo, outRepo, PLDM_STATE_EFFECTER_PDR);
 
@@ -193,8 +197,9 @@ TEST(findStateEffecterId, goodJson)
         .WillRepeatedly(Return("foo.bar"));
 
     auto inPDRRepo = pldm_pdr_init();
-    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", "",
-                    inPDRRepo, nullptr, nullptr, nullptr);
+    auto event = sdeventplus::Event::get_default();
+    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", inPDRRepo,
+                    nullptr, nullptr, nullptr, nullptr, event);
     uint16_t entityType = 33;
     uint16_t entityInstance = 0;
     uint16_t containerId = 0;

@@ -68,27 +68,23 @@ class GetDateTime : public CommandInterface
                       << "rc=" << rc << ",cc=" << (int)cc << std::endl;
             return;
         }
-        std::cout << "Date & Time : " << std::endl;
-        std::cout << "YYYY-MM-DD HH:MM:SS - ";
-        std::cout << bcd2dec16(year);
-        std::cout << "-";
-        setWidth(month);
-        std::cout << "-";
-        setWidth(day);
-        std::cout << " ";
-        setWidth(hours);
-        std::cout << ":";
-        setWidth(minutes);
-        std::cout << ":";
-        setWidth(seconds);
-        std::cout << std::endl;
+
+        std::stringstream dt;
+        ordered_json data;
+        dt << bcd2dec16(year) << "-" << setWidth(month) << "-" << setWidth(day)
+           << " " << setWidth(hours) << ":" << setWidth(minutes) << ":"
+           << setWidth(seconds);
+        data["Response"] = dt.str();
+        pldmtool::helper::DisplayInJson(data);
     }
 
   private:
-    void setWidth(uint8_t data)
+    static std::string setWidth(uint8_t data)
     {
-        std::cout << std::setfill('0') << std::setw(2)
-                  << static_cast<uint32_t>(bcd2dec8(data));
+        std::stringstream s;
+        s << std::setfill('0') << std::setw(2)
+          << static_cast<uint32_t>(bcd2dec8(data));
+        return s.str();
     }
 };
 
@@ -153,7 +149,9 @@ class SetDateTime : public CommandInterface
             return;
         }
 
-        std::cout << "SetDateTime: SUCCESS" << std::endl;
+        ordered_json data;
+        data["Response"] = "SUCCESS";
+        pldmtool::helper::DisplayInJson(data);
     }
 
   private:
@@ -344,18 +342,19 @@ class GetBIOSTableHandler : public CommandInterface
     void displayAttributeValueEntry(
         const pldm_bios_attr_val_table_entry* tableEntry,
         const std::optional<Table>& attrTable,
-        const std::optional<Table>& stringTable, bool verbose)
+        const std::optional<Table>& stringTable, bool verbose,
+        ordered_json& output)
     {
         auto attrHandle =
             pldm_bios_table_attr_value_entry_decode_attribute_handle(
                 tableEntry);
         auto attrType = static_cast<pldm_bios_attribute_type>(
             pldm_bios_table_attr_value_entry_decode_attribute_type(tableEntry));
+
         if (verbose)
         {
-            std::cout << "AttributeHandle: " << attrHandle << std::endl;
-            std::cout << "\tAttributeType: " << attrTypeMap.at(attrType)
-                      << std::endl;
+            output["AttributeHandle"] = attrHandle;
+            output["AttributeType"] = attrTypeMap.at(attrType);
         }
         switch (attrType)
         {
@@ -370,27 +369,21 @@ class GetBIOSTableHandler : public CommandInterface
                     tableEntry, handles.data(), handles.size());
                 if (verbose)
                 {
-                    std::cout << "\tNumberOfCurrentValues: " << (int)count
-                              << std::endl;
+                    output["NumberOfCurrentValues"] = (int)count;
                 }
                 for (size_t i = 0; i < handles.size(); i++)
                 {
                     if (verbose)
                     {
-                        std::cout
-                            << "\tCurrentValueStringHandleIndex[" << i
-                            << "] = " << (int)handles[i] << ", StringHandle = "
-                            << displayEnumValueByIndex(attrHandle, handles[i],
-                                                       attrTable, stringTable)
-                            << std::endl;
+                        output["CurrentValueStringHandleIndex[" +
+                               std::to_string(i) + "]"] =
+                            displayEnumValueByIndex(attrHandle, handles[i],
+                                                    attrTable, stringTable);
                     }
                     else
                     {
-                        std::cout
-                            << "CurrentValue: "
-                            << displayEnumValueByIndex(attrHandle, handles[i],
-                                                       attrTable, stringTable)
-                            << std::endl;
+                        output["CurrentValue"] = displayEnumValueByIndex(
+                            attrHandle, handles[i], attrTable, stringTable);
                     }
                 }
                 break;
@@ -402,11 +395,11 @@ class GetBIOSTableHandler : public CommandInterface
                     tableEntry);
                 if (verbose)
                 {
-                    std::cout << "\tCurrentValue: " << cv << std::endl;
+                    output["CurrentValue"] = cv;
                 }
                 else
                 {
-                    std::cout << "CurrentValue: " << cv << std::endl;
+                    output["CurrentValue"] = cv;
                 }
                 break;
             }
@@ -418,22 +411,16 @@ class GetBIOSTableHandler : public CommandInterface
                     tableEntry, &currentString);
                 if (verbose)
                 {
-                    std::cout
-                        << "\tCurrentStringLength: " << currentString.length
-                        << std::endl
-                        << "\tCurrentString: "
-                        << std::string(
-                               reinterpret_cast<const char*>(currentString.ptr),
-                               currentString.length)
-                        << std::endl;
+                    output["CurrentStringLength"] = currentString.length;
+                    output["CurrentString"] = std::string(
+                        reinterpret_cast<const char*>(currentString.ptr),
+                        currentString.length);
                 }
                 else
                 {
-                    std::cout << "CurrentValue: "
-                              << std::string(reinterpret_cast<const char*>(
-                                                 currentString.ptr),
-                                             currentString.length)
-                              << std::endl;
+                    output["CurrentValue"] = std::string(
+                        reinterpret_cast<const char*>(currentString.ptr),
+                        currentString.length);
                 }
 
                 break;
@@ -509,8 +496,7 @@ class GetBIOSTable : public GetBIOSTableHandler
             std::cerr << "GetBIOSStringTable Error" << std::endl;
             return;
         }
-        std::cout << "PLDM StringTable: " << std::endl;
-        std::cout << "BIOSStringHandle : BIOSString" << std::endl;
+        ordered_json stringdata;
 
         for (auto tableEntry : BIOSTableIter<PLDM_BIOS_STRING_TABLE>(
                  stringTable->data(), stringTable->size()))
@@ -518,8 +504,9 @@ class GetBIOSTable : public GetBIOSTableHandler
             auto strHandle =
                 pldm_bios_table_string_entry_decode_handle(tableEntry);
             auto strTableData = decodeStringFromStringEntry(tableEntry);
-            std::cout << strHandle << " : " << strTableData << std::endl;
+            stringdata[std::to_string(strHandle)] = strTableData;
         }
+        pldmtool::helper::DisplayInJson(stringdata);
     }
     void decodeAttributeTable(const std::optional<Table>& attrTable,
                               const std::optional<Table>& stringTable)
@@ -529,22 +516,25 @@ class GetBIOSTable : public GetBIOSTableHandler
             std::cerr << "GetBIOSAttributeTable Error" << std::endl;
             return;
         }
-        std::cout << "PLDM AttributeTable: " << std::endl;
+        ordered_json output;
+
         for (auto entry : BIOSTableIter<PLDM_BIOS_ATTR_TABLE>(
                  attrTable->data(), attrTable->size()))
         {
+            ordered_json attrdata;
+
             auto attrHandle =
                 pldm_bios_table_attr_entry_decode_attribute_handle(entry);
             auto attrNameHandle =
                 pldm_bios_table_attr_entry_decode_string_handle(entry);
             auto attrType = static_cast<pldm_bios_attribute_type>(
                 pldm_bios_table_attr_entry_decode_attribute_type(entry));
-            std::cout << "AttributeHandle: " << attrHandle
-                      << ", AttributeNameHandle: "
-                      << displayStringHandle(attrNameHandle, stringTable)
-                      << std::endl;
-            std::cout << "\tAttributeType: " << attrTypeMap.at(attrType)
-                      << std::endl;
+
+            attrdata["AttributeHandle"] = attrHandle;
+            attrdata["AttributeNameHandle"] =
+                displayStringHandle(attrNameHandle, stringTable);
+            attrdata["AttributeType"] = attrTypeMap.at(attrType);
+
             switch (attrType)
             {
                 case PLDM_BIOS_ENUMERATION:
@@ -560,27 +550,23 @@ class GetBIOSTable : public GetBIOSTableHandler
                     std::vector<uint8_t> defIndices(defNum);
                     pldm_bios_table_attr_entry_enum_decode_def_indices(
                         entry, defIndices.data(), defIndices.size());
-                    std::cout << "\tNumberOfPossibleValues: " << (int)pvNum
-                              << std::endl;
+
+                    attrdata["NumberOfPossibleValues"] = (int)pvNum;
 
                     for (size_t i = 0; i < pvHandls.size(); i++)
                     {
-                        std::cout
-                            << "\t\tPossibleValueStringHandle"
-                            << "[" << i << "] = "
-                            << displayStringHandle(pvHandls[i], stringTable)
-                            << std::endl;
+                        attrdata["PossibleValueStringHandle[" +
+                                 std::to_string(i) + "]"] =
+                            displayStringHandle(pvHandls[i], stringTable);
                     }
-                    std::cout << "\tNumberOfDefaultValues: " << (int)defNum
-                              << std::endl;
+                    attrdata["NumberOfDefaultValues"] = (int)defNum;
                     for (size_t i = 0; i < defIndices.size(); i++)
                     {
-                        std::cout << "\t\tDefaultValueStringHandleIndex"
-                                  << "[" << i << "] = " << (int)defIndices[i]
-                                  << ", StringHandle = "
-                                  << displayStringHandle(
-                                         pvHandls[defIndices[i]], stringTable)
-                                  << std::endl;
+                        attrdata["DefaultValueStringHandleIndex[" +
+                                 std::to_string(i) + "]"] = (int)defIndices[i];
+                        attrdata["DefaultValueStringHandle"] =
+                            displayStringHandle(pvHandls[defIndices[i]],
+                                                stringTable);
                     }
                     break;
                 }
@@ -591,10 +577,10 @@ class GetBIOSTable : public GetBIOSTableHandler
                     uint32_t scalar;
                     pldm_bios_table_attr_entry_integer_decode(
                         entry, &lower, &upper, &scalar, &def);
-                    std::cout << "\tLowerBound: " << lower << std::endl
-                              << "\tUpperBound: " << upper << std::endl
-                              << "\tScalarIncrement: " << scalar << std::endl
-                              << "\tDefaultValue: " << def << std::endl;
+                    attrdata["LowerBound"] = lower;
+                    attrdata["UpperBound"] = upper;
+                    attrdata["ScalarIncrement"] = scalar;
+                    attrdata["DefaultValue"] = def;
                     break;
                 }
                 case PLDM_BIOS_STRING:
@@ -615,14 +601,16 @@ class GetBIOSTable : public GetBIOSTableHandler
                     std::vector<char> defString(def + 1);
                     pldm_bios_table_attr_entry_string_decode_def_string(
                         entry, defString.data(), defString.size());
-                    std::cout
-                        << "\tStringType: 0x" << std::hex << std::setw(2)
-                        << std::setfill('0') << (int)strType << std::dec
-                        << std::setw(0) << std::endl
-                        << "\tMinimumStringLength: " << (int)min << std::endl
-                        << "\tMaximumStringLength: " << (int)max << std::endl
-                        << "\tDefaultStringLength: " << (int)def << std::endl
-                        << "\tDefaultString: " << defString.data() << std::endl;
+
+                    std::stringstream stringtype;
+                    stringtype << "0x" << std::hex << std::setw(2)
+                               << std::setfill('0') << (int)strType << std::dec
+                               << std::setw(0);
+                    attrdata["StringType"] = stringtype.str();
+                    attrdata["MinimumStringLength"] = (int)min;
+                    attrdata["MaximumStringLength"] = (int)max;
+                    attrdata["DefaultStringLength"] = (int)def;
+                    attrdata["DefaultString"] = defString.data();
                     break;
                 }
                 case PLDM_BIOS_PASSWORD:
@@ -630,7 +618,9 @@ class GetBIOSTable : public GetBIOSTableHandler
                     std::cout << "Password attribute: Not Supported"
                               << std::endl;
             }
+            output.emplace_back(std::move(attrdata));
         }
+        pldmtool::helper::DisplayInJson(output);
     }
     void decodeAttributeValueTable(const std::optional<Table>& attrValTable,
                                    const std::optional<Table>& attrTable,
@@ -641,13 +631,16 @@ class GetBIOSTable : public GetBIOSTableHandler
             std::cerr << "GetBIOSAttributeValueTable Error" << std::endl;
             return;
         }
-        std::cout << "PLDM AttributeValueTable: " << std::endl;
+        ordered_json output;
         for (auto tableEntry : BIOSTableIter<PLDM_BIOS_ATTR_VAL_TABLE>(
                  attrValTable->data(), attrValTable->size()))
         {
-            displayAttributeValueEntry(tableEntry, attrTable, stringTable,
-                                       true);
+            ordered_json attrValueData;
+            displayAttributeValueEntry(tableEntry, attrTable, stringTable, true,
+                                       attrValueData);
+            output.emplace_back(attrValueData);
         }
+        pldmtool::helper::DisplayInJson(output);
     }
 };
 
@@ -669,7 +662,7 @@ class GetBIOSAttributeCurrentValueByHandle : public GetBIOSTableHandler
                                                   CLI::App* app) :
         GetBIOSTableHandler(type, name, app)
     {
-        app->add_option("-a, --attribute", attrName, "pldm bios attribute name")
+        app->add_option("-a, --attribute", attrName, "pldm BIOS attribute name")
             ->required();
     }
 
@@ -734,7 +727,10 @@ class GetBIOSAttributeCurrentValueByHandle : public GetBIOSTableHandler
             reinterpret_cast<const struct pldm_bios_attr_val_table_entry*>(
                 attributeData.ptr);
 
-        displayAttributeValueEntry(tableEntry, attrTable, stringTable, false);
+        ordered_json avdata;
+        displayAttributeValueEntry(tableEntry, attrTable, stringTable, false,
+                                   avdata);
+        pldmtool::helper::DisplayInJson(avdata);
     }
 
   private:
@@ -797,7 +793,7 @@ class SetBIOSAttributeCurrentValue : public GetBIOSTableHandler
             case PLDM_BIOS_STRING_READ_ONLY:
             case PLDM_BIOS_INTEGER_READ_ONLY:
             {
-                std::cerr << "Set  attribute error: " << attrName
+                std::cerr << "Set attribute error: " << attrName
                           << "is read only." << std::endl;
                 return;
             }
@@ -906,7 +902,9 @@ class SetBIOSAttributeCurrentValue : public GetBIOSTableHandler
             return;
         }
 
-        std::cout << "SetBIOSAttributeCurrentValue: SUCCESS" << std::endl;
+        ordered_json data;
+        data["Response"] = "SUCCESS";
+        pldmtool::helper::DisplayInJson(data);
     }
 
   private:

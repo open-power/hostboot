@@ -11,6 +11,7 @@
 
 #include <sdbusplus/bus.hpp>
 #include <sdeventplus/clock.hpp>
+#include <sdeventplus/exception.hpp>
 #include <sdeventplus/source/io.hpp>
 #include <sdeventplus/source/time.hpp>
 
@@ -41,7 +42,13 @@ SoftPowerOff::SoftPowerOff(sdbusplus::bus::bus& bus, sd_event* event) :
     }
 
     rc = getEffecterID();
-    if (rc != PLDM_SUCCESS)
+    if (completed)
+    {
+        std::cerr
+            << "pldm-softpoweroff: effecter to initiate softoff not found \n";
+        return;
+    }
+    else if (rc != PLDM_SUCCESS)
     {
         hasError = true;
         return;
@@ -76,8 +83,10 @@ int SoftPowerOff::getHostState()
                 "/xyz/openbmc_project/state/host0", "CurrentHostState",
                 "xyz.openbmc_project.State.Host");
 
-        if (std::get<std::string>(propertyValue) !=
-            "xyz.openbmc_project.State.Host.HostState.Running")
+        if ((std::get<std::string>(propertyValue) !=
+             "xyz.openbmc_project.State.Host.HostState.Running") &&
+            (std::get<std::string>(propertyValue) !=
+             "xyz.openbmc_project.State.Host.HostState.TransitioningToOff"))
         {
             // Host state is not "Running", this app should return success
             completed = true;
@@ -203,6 +212,7 @@ int SoftPowerOff::getEffecterID()
     {
         std::cerr << "PLDM soft off: Error get system firmware PDR,ERROR="
                   << e.what() << "\n";
+        completed = true;
         return PLDM_ERROR;
     }
 
@@ -246,6 +256,12 @@ int SoftPowerOff::getSensorInfo()
         for (auto& rep : Response)
         {
             pdr = reinterpret_cast<pldm_state_sensor_pdr*>(rep.data());
+        }
+
+        if (!pdr)
+        {
+            std::cerr << "Failed to get state sensor PDR.\n";
+            return PLDM_ERROR;
         }
 
         sensorID = pdr->sensor_id;

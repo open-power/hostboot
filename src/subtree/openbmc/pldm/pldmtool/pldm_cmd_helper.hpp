@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include <CLI/CLI.hpp>
+#include <nlohmann/json.hpp>
 
 #include <cstring>
 #include <iomanip>
@@ -28,15 +29,7 @@ namespace helper
 using namespace pldm::utils;
 constexpr uint8_t PLDM_ENTITY_ID = 8;
 constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
-
-/** @brief Print the buffer
- *
- *  @param[in]  buffer  - Buffer to print
- *  @param[in]  pldmVerbose -verbosity flag - true/false
- *
- *  @return - None
- */
-void printBuffer(const std::vector<uint8_t>& buffer, bool pldmVerbose);
+using ordered_json = nlohmann::ordered_json;
 
 /** @brief print the input message if pldmverbose is enabled
  *
@@ -57,6 +50,18 @@ void Logger(bool pldmverbose, const char* msg, const T& data)
         std::cout << msg << s.str() << std::endl;
     }
 }
+
+/** @brief Display in JSON format.
+ *
+ *  @param[in]  data - data to print in json
+ *
+ *  @return - None
+ */
+static inline void DisplayInJson(const ordered_json& data)
+{
+    std::cout << data.dump(4) << std::endl;
+}
+
 /** @brief MCTP socket read/recieve
  *
  *  @param[in]  requestMsg - Request message to compare against loopback

@@ -177,12 +177,11 @@ int encode_fru_record(uint8_t *fru_table, size_t total_size, size_t *curr_size,
 	size_t record_hdr_size = sizeof(struct pldm_fru_record_data_format) -
 				 sizeof(struct pldm_fru_record_tlv);
 
-	if ((*curr_size + record_hdr_size + tlvs_size) != total_size) {
-		return PLDM_ERROR_INVALID_LENGTH;
-	}
-
 	if (fru_table == NULL || curr_size == NULL || !tlvs_size) {
 		return PLDM_ERROR_INVALID_DATA;
+	}
+	if ((*curr_size + record_hdr_size + tlvs_size) != total_size) {
+		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
 	struct pldm_fru_record_data_format *record =

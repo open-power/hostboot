@@ -1,0 +1,64 @@
+{
+ "sensorPDRs": [
+    {
+    "pdrType" : 4,
+    "entries" : [{
+        "type" : 91,
+        "instance" : 0,
+        "container" : 0,
+        "sensors" : [{
+            "set" : {
+                "id" : 21,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/alerts/thermal_fault_alert",
+                "interface": "xyz.openbmc_project.Object.Enable",
+                "property_name": "Enabled",
+                "property_type": "bool",
+                "property_values" : [false, true]
+             }
+        }]
+    },
+    {
+        "type" : 5,
+        "instance" : 0,
+        "container" : 0,
+        "sensors" : [{
+            "set" : {
+                "id" : 1,
+                "size" : 2,
+                "states" : [1,9]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/sensors/temperature/Ambient_Virtual_Temp",
+                "interface": "xyz.openbmc_project.Sensor.Threshold.HardShutdown",
+                "property_name": "HardShutdownAlarmHigh",
+                "property_type": "bool",
+                "property_values" : [false, true]
+             }
+        }]
+    },
+    {
+        "type" : 5,
+        "instance" : 0,
+        "container" : 0,
+        "sensors" : [{
+            "set" : {
+                "id" : 1,
+                "size" : 1,
+                "states" : [1,7]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/sensors/temperature/Ambient_Virtual_Temp",
+                "interface": "xyz.openbmc_project.Sensor.Threshold.SoftShutdown",
+                "property_name": "SoftShutdownAlarmHigh",
+                "property_type": "bool",
+                "property_values" : [false, true]
+             }
+        }]
+    }]
+  }]
+}
+

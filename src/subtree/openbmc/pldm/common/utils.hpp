@@ -4,6 +4,8 @@
 #include "libpldm/bios.h"
 #include "libpldm/platform.h"
 
+#include "types.hpp"
+
 #include <stdint.h>
 #include <systemd/sd-bus.h>
 #include <unistd.h>
@@ -121,6 +123,7 @@ T decimalToBcd(T decimal)
 }
 
 constexpr auto dbusProperties = "org.freedesktop.DBus.Properties";
+constexpr auto mapperService = "xyz.openbmc_project.ObjectMapper";
 
 struct DBusMapping
 {
@@ -135,6 +138,10 @@ using PropertyValue =
                  uint64_t, double, std::string>;
 using DbusProp = std::string;
 using DbusChangedProps = std::map<DbusProp, PropertyValue>;
+using DBusInterfaceAdded = std::vector<
+    std::pair<pldm::dbus::Interface,
+              std::vector<std::pair<pldm::dbus::Property,
+                                    std::variant<pldm::dbus::Property>>>>>;
 
 /**
  * @brief The interface for DBusHandler
@@ -288,6 +295,21 @@ std::vector<std::vector<uint8_t>> findStateSensorPDR(uint8_t tid,
                                                      uint16_t stateSetId,
                                                      const pldm_pdr* repo);
 
+/** @brief Find sensor id from a state sensor PDR
+ *
+ *  @param[in] pdrRepo - PDR repository
+ *  @param[in] tid - terminus id
+ *  @param[in] entityType - entity type
+ *  @param[in] entityInstance - entity instance number
+ *  @param[in] containerId - container id
+ *  @param[in] stateSetId - state set id
+ *
+ *  @return uint16_t - the sensor id
+ */
+uint16_t findStateSensorId(const pldm_pdr* pdrRepo, uint8_t tid,
+                           uint16_t entityType, uint16_t entityInstance,
+                           uint16_t containerId, uint16_t stateSetId);
+
 /** @brief Find effecter id from a state effecter pdr
  *  @param[in] pdrRepo - PDR repository
  *  @param[in] entityType - entity type
@@ -318,6 +340,15 @@ uint16_t findStateEffecterId(const pldm_pdr* pdrRepo, uint16_t entityType,
 int emitStateSensorEventSignal(uint8_t tid, uint16_t sensorId,
                                uint8_t sensorOffset, uint8_t eventState,
                                uint8_t previousEventState);
+
+/** @brief Print the buffer
+ *
+ *  @param[in]  buffer  - Buffer to print
+ *  @param[in]  pldmVerbose -verbosity flag - true/false
+ *
+ *  @return - None
+ */
+void printBuffer(const std::vector<uint8_t>& buffer, bool pldmVerbose);
 
 } // namespace utils
 } // namespace pldm

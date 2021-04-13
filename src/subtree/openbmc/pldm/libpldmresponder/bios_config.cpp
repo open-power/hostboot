@@ -269,6 +269,10 @@ int BIOSConfig::checkAttributeValueTable(const Table& table)
         {
             readonlyStatus =
                 biosAttributes[attrHandle % biosAttributes.size()]->readOnly;
+            description =
+                biosAttributes[attrHandle % biosAttributes.size()]->helpText;
+            displayName =
+                biosAttributes[attrHandle % biosAttributes.size()]->displayName;
         }
 
         switch (attrType)
@@ -472,13 +476,51 @@ void BIOSConfig::buildAndStoreAttrTables(const Table& stringTable)
         return;
     }
 
+    BaseBIOSTable biosTable{};
+    constexpr auto biosObjPath = "/xyz/openbmc_project/bios_config/manager";
+    constexpr auto biosInterface = "xyz.openbmc_project.BIOSConfig.Manager";
+
+    try
+    {
+        auto& bus = dbusHandler->getBus();
+        auto service = dbusHandler->getService(biosObjPath, biosInterface);
+        auto method =
+            bus.new_method_call(service.c_str(), biosObjPath,
+                                "org.freedesktop.DBus.Properties", "Get");
+        method.append(biosInterface, "BaseBIOSTable");
+        auto reply = bus.call(method);
+        std::variant<BaseBIOSTable> varBiosTable{};
+        reply.read(varBiosTable);
+        biosTable = std::get<BaseBIOSTable>(varBiosTable);
+    }
+    // Failed to read the BaseBIOSTable, so update the BaseBIOSTable with the
+    // default values populated from the BIOS JSONs to keep PLDM and
+    // bios-settings-manager in sync
+    catch (const std::exception& e)
+    {
+        std::cerr << "Failed to read BaseBIOSTable property, ERROR=" << e.what()
+                  << "\n";
+    }
+
     Table attrTable, attrValueTable;
 
     for (auto& attr : biosAttributes)
     {
         try
         {
-            attr->constructEntry(biosStringTable, attrTable, attrValueTable);
+            auto iter = biosTable.find(attr->name);
+            if (iter == biosTable.end())
+            {
+                attr->constructEntry(biosStringTable, attrTable, attrValueTable,
+                                     std::nullopt);
+            }
+            else
+            {
+                attr->constructEntry(
+                    biosStringTable, attrTable, attrValueTable,
+                    std::get<static_cast<uint8_t>(Index::currentValue)>(
+                        iter->second));
+            }
         }
         catch (const std::exception& e)
         {
@@ -641,7 +683,7 @@ int BIOSConfig::checkAttrValueToUpdate(
     };
 }
 
-int BIOSConfig::setAttrValue(const void* entry, size_t size,
+int BIOSConfig::setAttrValue(const void* entry, size_t size, bool updateDBus,
                              bool updateBaseBIOSTable)
 {
     auto attrValueTable = getBIOSTable(PLDM_BIOS_ATTR_VAL_TABLE);
@@ -693,7 +735,11 @@ int BIOSConfig::setAttrValue(const void* entry, size_t size,
         {
             return PLDM_ERROR;
         }
-        (*iter)->setAttrValueOnDbus(attrValueEntry, attrEntry, biosStringTable);
+        if (updateDBus)
+        {
+            (*iter)->setAttrValueOnDbus(attrValueEntry, attrEntry,
+                                        biosStringTable);
+        }
     }
     catch (const std::exception& e)
     {
@@ -795,6 +841,13 @@ void BIOSConfig::processBiosAttrChangeNotification(
     {
         storeTable(tableDir / attrValueTableFile, *destTable);
     }
+
+    rc = setAttrValue(newValue.data(), newValue.size(), false);
+    if (rc != PLDM_SUCCESS)
+    {
+        std::cerr << "could not setAttrValue on base bios table and dbus, rc = "
+                  << rc << "\n";
+    }
 }
 
 uint16_t BIOSConfig::findAttrHandle(const std::string& attrName)
@@ -864,7 +917,7 @@ void BIOSConfig::constructPendingAttribute(
 
         (*iter)->generateAttributeEntry(attributevalue, attrValueEntry);
 
-        setAttrValue(attrValueEntry.data(), attrValueEntry.size(), false);
+        setAttrValue(attrValueEntry.data(), attrValueEntry.size());
     }
 
     if (listOfHandles.size())
@@ -877,7 +930,6 @@ void BIOSConfig::constructPendingAttribute(
             return;
         }
 #endif
-        updateBaseBIOSTableProperty();
     }
 }
 

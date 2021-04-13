@@ -1,9 +1,9 @@
 deps = [
     libpldm,
     libpldmutils,
-    dependency('sdeventplus'),
-    dependency('sdbusplus'),
-    dependency('phosphor-dbus-interfaces'),
+    sdeventplus,
+    sdbusplus,
+    phosphor_dbus_interfaces,
     ]
 
 source = ['main.cpp','softoff.cpp']
@@ -14,7 +14,6 @@ executable('pldm-softpoweroff',source,
            install: true,
            install_dir: get_option('bindir'))
 
-systemd = dependency('systemd')
 servicedir = systemd.get_pkgconfig_variable('systemdsystemunitdir')
 
 configure_file(input: 'services/pldmSoftPowerOff.service',

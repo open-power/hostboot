@@ -610,7 +610,7 @@ TEST(GetStateSensorReadings, testGoodDecodeResponse)
                      PLDM_SENSOR_LOWERCRITICAL, PLDM_SENSOR_WARNING};
 
     uint8_t retcompletion_code = 0;
-    uint8_t retcomp_sensorCnt = 2;
+    uint8_t retcomp_sensorCnt = 0;
     std::array<get_sensor_state_field, 2> retstateField{};
 
     auto response = reinterpret_cast<pldm_msg*>(responseMsg.data());
@@ -675,7 +675,7 @@ TEST(GetStateSensorReadings, testBadDecodeResponse)
            (sizeof(get_sensor_state_field) * comp_sensorCnt));
 
     rc = decode_get_state_sensor_readings_resp(
-        response, responseMsg.size() - hdrSize, &retcompletion_code,
+        response, responseMsg.size() - hdrSize + 1, &retcompletion_code,
         &retcomp_sensorCnt, retstateField.data());
 
     EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);

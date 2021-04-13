@@ -1,5 +1,6 @@
 #include "fru.hpp"
 
+#include "libpldm/entity.h"
 #include "libpldm/utils.h"
 
 #include "common/utils.hpp"
@@ -120,7 +121,36 @@ void FruImpl::buildFRUTable()
     }
     isBuilt = true;
 }
-
+std::string FruImpl::populatefwVersion()
+{
+    static constexpr auto fwFunctionalObjPath =
+        "/xyz/openbmc_project/software/functional";
+    auto& bus = pldm::utils::DBusHandler::getBus();
+    std::string currentBmcVersion;
+    try
+    {
+        auto method =
+            bus.new_method_call(pldm::utils::mapperService, fwFunctionalObjPath,
+                                pldm::utils::dbusProperties, "Get");
+        method.append("xyz.openbmc_project.Association", "endpoints");
+        std::variant<std::vector<std::string>> paths;
+        auto reply = bus.call(method);
+        reply.read(paths);
+        auto fwRunningVersion = std::get<std::vector<std::string>>(paths)[0];
+        constexpr auto versionIntf = "xyz.openbmc_project.Software.Version";
+        auto version = pldm::utils::DBusHandler().getDbusPropertyVariant(
+            fwRunningVersion.c_str(), "Version", versionIntf);
+        currentBmcVersion = std::get<std::string>(version);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "failed to make a d-bus call "
+                     "Asociation, ERROR= "
+                  << e.what() << "\n";
+        return {};
+    }
+    return currentBmcVersion;
+}
 void FruImpl::populateRecords(
     const pldm::responder::dbus::InterfaceMap& interfaces,
     const fru_parser::FruRecordInfos& recordInfos, const pldm_entity& entity)
@@ -136,9 +166,19 @@ void FruImpl::populateRecords(
         uint8_t numFRUFields = 0;
         for (auto const& [intf, prop, propType, fieldTypeNum] : fieldInfos)
         {
+
             try
             {
-                auto propValue = interfaces.at(intf).at(prop);
+                pldm::responder::dbus::Value propValue;
+                if (entity.entity_type == PLDM_ENTITY_SYSTEM_LOGICAL &&
+                    prop == "Version")
+                {
+                    propValue = populatefwVersion();
+                }
+                else
+                {
+                    propValue = interfaces.at(intf).at(prop);
+                }
                 if (propType == "bytearray")
                 {
                     auto byteArray = std::get<std::vector<uint8_t>>(propValue);

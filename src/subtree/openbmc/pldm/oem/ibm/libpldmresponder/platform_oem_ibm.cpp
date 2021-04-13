@@ -19,20 +19,22 @@ int sendBiosAttributeUpdateEvent(int fd, uint8_t eid,
                                  dbus_api::Requester* requester,
                                  const std::vector<uint16_t>& handles)
 {
-    constexpr auto osStatePath = "/xyz/openbmc_project/state/host0";
-    constexpr auto osStateInterface =
-        "xyz.openbmc_project.State.OperatingSystem.Status";
-    constexpr auto osStateProperty = "OperatingSystemState";
+    constexpr auto hostStatePath = "/xyz/openbmc_project/state/host0";
+    constexpr auto hostStateInterface =
+        "xyz.openbmc_project.State.Boot.Progress";
+    constexpr auto hostStateProperty = "BootProgress";
 
     try
     {
         auto propVal = pldm::utils::DBusHandler().getDbusPropertyVariant(
-            osStatePath, osStateProperty, osStateInterface);
+            hostStatePath, hostStateProperty, hostStateInterface);
         const auto& currHostState = std::get<std::string>(propVal);
-        if ((currHostState != "xyz.openbmc_project.State.OperatingSystem."
-                              "Status.OSStatus.Standby") &&
-            (currHostState != "xyz.openbmc_project.State.OperatingSystem."
-                              "Status.OSStatus.BootComplete"))
+        if ((currHostState != "xyz.openbmc_project.State.Boot.Progress."
+                              "ProgressStages.SystemInitComplete") &&
+            (currHostState != "xyz.openbmc_project.State.Boot.Progress."
+                              "ProgressStages.OSRunning") &&
+            (currHostState != "xyz.openbmc_project.State.Boot.Progress."
+                              "ProgressStages.OSStart"))
         {
             return PLDM_SUCCESS;
         }

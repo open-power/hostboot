@@ -1,6 +1,9 @@
 
 #include "platform.hpp"
 
+#include "libpldm/entity.h"
+#include "libpldm/state_set.h"
+
 #include "common/types.hpp"
 #include "common/utils.hpp"
 #include "event_parser.hpp"
@@ -147,7 +150,21 @@ Response Handler::getPDR(const pldm_msg* request, size_t payloadLength)
     {
         generateTerminusLocatorPDR(pdrRepo);
         generate(*dBusIntf, pdrJsonsDir, pdrRepo);
+        if (oemPlatformHandler != nullptr)
+        {
+            oemPlatformHandler->buildOEMPDR(pdrRepo);
+        }
+
         pdrCreated = true;
+
+        if (dbusToPLDMEventHandler)
+        {
+            deferredGetPDREvent = std::make_unique<sdeventplus::source::Defer>(
+                event,
+                std::bind(std::mem_fn(&pldm::responder::platform::Handler::
+                                          _processPostGetPDRActions),
+                          this, std::placeholders::_1));
+        }
     }
 
     Response response(sizeof(pldm_msg_hdr) + PLDM_GET_PDR_MIN_RESP_BYTES, 0);
@@ -244,9 +261,24 @@ Response Handler::setStateEffecterStates(const pldm_msg* request,
 
     stateField.resize(compEffecterCnt);
     const pldm::utils::DBusHandler dBusIntf;
-    rc = platform_state_effecter::setStateEffecterStatesHandler<
-        pldm::utils::DBusHandler, Handler>(dBusIntf, *this, effecterId,
-                                           stateField);
+    uint16_t entityType{};
+    uint16_t entityInstance{};
+    uint16_t stateSetId{};
+
+    if (isOemStateEffecter(*this, effecterId, compEffecterCnt, entityType,
+                           entityInstance, stateSetId) &&
+        oemPlatformHandler != nullptr)
+    {
+        rc = oemPlatformHandler->oemSetStateEffecterStatesHandler(
+            entityType, entityInstance, stateSetId, compEffecterCnt, stateField,
+            effecterId);
+    }
+    else
+    {
+        rc = platform_state_effecter::setStateEffecterStatesHandler<
+            pldm::utils::DBusHandler, Handler>(dBusIntf, *this, effecterId,
+                                               stateField);
+    }
     if (rc != PLDM_SUCCESS)
     {
         return CmdHandler::ccOnlyResponse(request, rc);
@@ -399,7 +431,8 @@ int Handler::sensorEvent(const pldm_msg* request, size_t payloadLength,
         const auto& [containerId, entityType, entityInstance] = entityInfo;
         events::StateSensorEntry stateSensorEntry{containerId, entityType,
                                                   entityInstance, sensorOffset};
-        return stateSensorHandler.eventAction(stateSensorEntry, eventState);
+        return hostPDRHandler->handleStateSensorEvent(stateSensorEntry,
+                                                      eventState);
     }
     else
     {
@@ -582,13 +615,29 @@ Response Handler::getStateSensorReadings(const pldm_msg* request,
     }
 
     // 0x01 to 0x08
-    uint8_t sensorRearmCout = getBitfieldCount(sensorRearm);
-    std::vector<get_sensor_state_field> stateField(sensorRearmCout);
+    uint8_t sensorRearmCount = getBitfieldCount(sensorRearm);
+    std::vector<get_sensor_state_field> stateField(sensorRearmCount);
     uint8_t comSensorCnt{};
     const pldm::utils::DBusHandler dBusIntf;
-    rc = platform_state_sensor::getStateSensorReadingsHandler<
-        pldm::utils::DBusHandler, Handler>(
-        dBusIntf, *this, sensorId, sensorRearmCout, comSensorCnt, stateField);
+
+    uint16_t entityType{};
+    uint16_t entityInstance{};
+    uint16_t stateSetId{};
+
+    if (isOemStateSensor(*this, sensorId, sensorRearmCount, comSensorCnt,
+                         entityType, entityInstance, stateSetId) &&
+        oemPlatformHandler != nullptr)
+    {
+        rc = oemPlatformHandler->getOemStateSensorReadingsHandler(
+            entityType, entityInstance, stateSetId, comSensorCnt, stateField);
+    }
+    else
+    {
+        rc = platform_state_sensor::getStateSensorReadingsHandler<
+            pldm::utils::DBusHandler, Handler>(dBusIntf, *this, sensorId,
+                                               sensorRearmCount, comSensorCnt,
+                                               stateField);
+    }
 
     if (rc != PLDM_SUCCESS)
     {
@@ -608,6 +657,141 @@ Response Handler::getStateSensorReadings(const pldm_msg* request,
     }
 
     return response;
+}
+
+void Handler::_processPostGetPDRActions(
+    sdeventplus::source::EventBase& /*source */)
+{
+    deferredGetPDREvent.reset();
+    dbusToPLDMEventHandler->listenSensorEvent(pdrRepo, sensorDbusObjMaps);
+}
+
+bool isOemStateSensor(Handler& handler, uint16_t sensorId,
+                      uint8_t sensorRearmCount, uint8_t& compSensorCnt,
+                      uint16_t& entityType, uint16_t& entityInstance,
+                      uint16_t& stateSetId)
+{
+    pldm_state_sensor_pdr* pdr = nullptr;
+
+    std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> stateSensorPdrRepo(
+        pldm_pdr_init(), pldm_pdr_destroy);
+    Repo stateSensorPDRs(stateSensorPdrRepo.get());
+    getRepoByType(handler.getRepo(), stateSensorPDRs, PLDM_STATE_SENSOR_PDR);
+    if (stateSensorPDRs.empty())
+    {
+        std::cerr << "Failed to get record by PDR type\n";
+        return false;
+    }
+
+    PdrEntry pdrEntry{};
+    auto pdrRecord = stateSensorPDRs.getFirstRecord(pdrEntry);
+    while (pdrRecord)
+    {
+        pdr = reinterpret_cast<pldm_state_sensor_pdr*>(pdrEntry.data);
+        assert(pdr != NULL);
+        if (pdr->sensor_id != sensorId)
+        {
+            pdr = nullptr;
+            pdrRecord = stateSensorPDRs.getNextRecord(pdrRecord, pdrEntry);
+            continue;
+        }
+        auto tmpEntityType = pdr->entity_type;
+        auto tmpEntityInstance = pdr->entity_instance;
+        auto tmpCompSensorCnt = pdr->composite_sensor_count;
+        auto tmpPossibleStates =
+            reinterpret_cast<state_sensor_possible_states*>(
+                pdr->possible_states);
+        auto tmpStateSetId = tmpPossibleStates->state_set_id;
+
+        if (sensorRearmCount > tmpCompSensorCnt)
+        {
+            std::cerr << "The requester sent wrong sensorRearm"
+                      << " count for the sensor, SENSOR_ID=" << sensorId
+                      << "SENSOR_REARM_COUNT=" << (uint16_t)sensorRearmCount
+                      << "\n";
+            break;
+        }
+
+        if ((tmpEntityType >= PLDM_OEM_ENTITY_TYPE_START &&
+             tmpEntityType <= PLDM_OEM_ENTITY_TYPE_END) ||
+            (tmpStateSetId >= PLDM_OEM_STATE_SET_ID_START &&
+             tmpStateSetId < PLDM_OEM_STATE_SET_ID_END))
+        {
+            entityType = tmpEntityType;
+            entityInstance = tmpEntityInstance;
+            stateSetId = tmpStateSetId;
+            compSensorCnt = tmpCompSensorCnt;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return false;
+}
+
+bool isOemStateEffecter(Handler& handler, uint16_t effecterId,
+                        uint8_t compEffecterCnt, uint16_t& entityType,
+                        uint16_t& entityInstance, uint16_t& stateSetId)
+{
+    pldm_state_effecter_pdr* pdr = nullptr;
+
+    std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> stateEffecterPdrRepo(
+        pldm_pdr_init(), pldm_pdr_destroy);
+    Repo stateEffecterPDRs(stateEffecterPdrRepo.get());
+    getRepoByType(handler.getRepo(), stateEffecterPDRs,
+                  PLDM_STATE_EFFECTER_PDR);
+    if (stateEffecterPDRs.empty())
+    {
+        std::cerr << "Failed to get record by PDR type\n";
+        return false;
+    }
+
+    PdrEntry pdrEntry{};
+    auto pdrRecord = stateEffecterPDRs.getFirstRecord(pdrEntry);
+    while (pdrRecord)
+    {
+        pdr = reinterpret_cast<pldm_state_effecter_pdr*>(pdrEntry.data);
+        assert(pdr != NULL);
+        if (pdr->effecter_id != effecterId)
+        {
+            pdr = nullptr;
+            pdrRecord = stateEffecterPDRs.getNextRecord(pdrRecord, pdrEntry);
+            continue;
+        }
+
+        auto tmpEntityType = pdr->entity_type;
+        auto tmpEntityInstance = pdr->entity_instance;
+        auto tmpPossibleStates =
+            reinterpret_cast<state_effecter_possible_states*>(
+                pdr->possible_states);
+        auto tmpStateSetId = tmpPossibleStates->state_set_id;
+
+        if (compEffecterCnt > pdr->composite_effecter_count)
+        {
+            std::cerr << "The requester sent wrong composite effecter"
+                      << " count for the effecter, EFFECTER_ID=" << effecterId
+                      << "COMP_EFF_CNT=" << (uint16_t)compEffecterCnt << "\n";
+            return false;
+        }
+
+        if ((tmpEntityType >= PLDM_OEM_ENTITY_TYPE_START &&
+             tmpEntityType <= PLDM_OEM_ENTITY_TYPE_END) ||
+            (tmpStateSetId >= PLDM_OEM_STATE_SET_ID_START &&
+             tmpStateSetId < PLDM_OEM_STATE_SET_ID_END))
+        {
+            entityType = tmpEntityType;
+            entityInstance = tmpEntityInstance;
+            stateSetId = tmpStateSetId;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return false;
 }
 
 } // namespace platform

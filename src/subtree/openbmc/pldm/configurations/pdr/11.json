@@ -9,17 +9,23 @@
         "effecters" : [{
             "set" : {
                 "id" : 196,
-                "size" : 1,
-                "states" : [1,2]
+                "size" : 4,
+                "states" : [1,2,3,5,9,21,22,26]
             },
             "dbus" : {
                 "path": "/xyz/openbmc_project/state/host0",
-                "interface": "xyz.openbmc_project.State.OperatingSystem.Status",
-                "property_name": "OperatingSystemState",
+                "interface": "xyz.openbmc_project.State.Boot.Progress",
+                "property_name": "BootProgress",
                 "property_type": "string",
                 "property_values": [
-                         "xyz.openbmc_project.State.OperatingSystem.Status.OSStatus.Standby",
-                         "xyz.openbmc_project.State.OperatingSystem.Status.OSStatus.BootComplete"
+                         "xyz.openbmc_project.State.Boot.Progress.ProgressStages.Unspecified",
+                         "xyz.openbmc_project.State.Boot.Progress.ProgressStages.SystemInitComplete",
+                         "xyz.openbmc_project.State.Boot.Progress.ProgressStages.MemoryInit",
+                         "xyz.openbmc_project.State.Boot.Progress.ProgressStages.SecondaryProcInit",
+                         "xyz.openbmc_project.State.Boot.Progress.ProgressStages.PCIInit",
+                         "xyz.openbmc_project.State.Boot.Progress.ProgressStages.OSRunning",
+                         "xyz.openbmc_project.State.Boot.Progress.ProgressStages.BusInit",
+                         "xyz.openbmc_project.State.Boot.Progress.ProgressStages.PrimaryProcInit"
                 ]
              }
         }]
@@ -65,6 +71,27 @@
                 ]
             }
         }]
+     },
+     {
+         "type" : 137,
+         "instance" : 0,
+         "container" : 0,
+         "effecters" : [{
+             "set" : {
+                 "id" : 2,
+                 "size" : 2,
+                 "states" :[8]
+             },
+             "dbus" :{
+                 "path" : "/xyz/openbmc_project/state/bmc0",
+                 "interface" : "xyz.openbmc_project.State.BMC",
+                 "property_name" : "RequestedBMCTransition",
+                 "property_type" : "string",
+                 "property_values" :[
+                     "xyz.openbmc_project.State.BMC.Transition.Reboot"
+                 ]
+             }
+         }]
      }]
   },
   {
@@ -93,7 +120,7 @@
       "effecter_data_size": 4,
       "range_field_format": 4,
       "dbus" : {
-              "path":"/xyz/openbmc_project/state/scheduledHostTransition",
+              "path":"/xyz/openbmc_project/state/host0",
               "interface":"xyz.openbmc_project.State.ScheduledHostTransition",
               "property_name":"ScheduledTime",
               "property_type":"uint64_t"

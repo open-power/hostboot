@@ -24,28 +24,16 @@ const Json emptyJson{};
 const std::vector<Json> emptyJsonList{};
 const std::vector<std::string> emptyStringVec{};
 
-constexpr auto fruMasterJson = "FRU_Master.json";
-
 FruParser::FruParser(const std::string& dirPath)
 {
+    setupDefaultDBusLookup();
+    setupDefaultFruRecordMap();
+
     fs::path dir(dirPath);
-    if (!fs::exists(dir) || fs::is_empty(dir))
+    if (fs::exists(dir) && !fs::is_empty(dir))
     {
-        setupDefaultDBusLookup();
-        setupDefaultFruRecordMap();
-        return;
+        setupFruRecordMap(dirPath);
     }
-
-    fs::path masterFilePath = dir / fruMasterJson;
-    if (!fs::exists(masterFilePath))
-    {
-        std::cerr << "FRU D-Bus lookup JSON does not exist, PATH="
-                  << masterFilePath << "\n";
-        throw InternalFailure();
-    }
-
-    setupDBusLookup(masterFilePath);
-    setupFruRecordMap(dirPath);
 }
 
 void FruParser::setupDefaultDBusLookup()
@@ -64,6 +52,8 @@ void FruParser::setupDefaultDBusLookup()
         {"xyz.openbmc_project.Inventory.Item.Cpu", 135},
         {"xyz.openbmc_project.Inventory.Item.Bmc", 137},
         {"xyz.openbmc_project.Inventory.Item.Dimm", 142},
+        {"xyz.openbmc_project.Inventory.Item.Tpm", 24576},
+        {"xyz.openbmc_project.Inventory.Item.System", 11521},
     };
 
     Interfaces interfaces{};
@@ -74,33 +64,6 @@ void FruParser::setupDefaultDBusLookup()
     }
 
     lookupInfo.emplace(service, rootPath, std::move(interfaces));
-}
-
-void FruParser::setupDBusLookup(const fs::path& filePath)
-{
-    std::ifstream jsonFile(filePath);
-
-    auto data = Json::parse(jsonFile, nullptr, false);
-    if (data.is_discarded())
-    {
-        std::cerr << "Parsing FRU master config file failed, FILE=" << filePath;
-        throw InternalFailure();
-    }
-
-    Service service = data.value("service", "");
-    RootPath rootPath = data.value("root_path", "");
-    auto entities = data.value("entities", emptyJsonList);
-    Interfaces interfaces{};
-    EntityType entityType{};
-    for (auto& entity : entities)
-    {
-        auto intf = entity.value("interface", "");
-        intfToEntityType[intf] =
-            std::move(entity.value("entity_type", entityType));
-        interfaces.emplace(std::move(intf));
-    }
-    lookupInfo.emplace(std::make_tuple(std::move(service), std::move(rootPath),
-                                       std::move(interfaces)));
 }
 
 void FruParser::setupDefaultFruRecordMap()
@@ -136,18 +99,12 @@ void FruParser::setupFruRecordMap(const std::string& dirPath)
     for (auto& file : fs::directory_iterator(dirPath))
     {
         auto fileName = file.path().filename().string();
-        if (fruMasterJson == fileName)
-        {
-            continue;
-        }
-
         std::ifstream jsonFile(file.path());
         auto data = Json::parse(jsonFile, nullptr, false);
         if (data.is_discarded())
         {
 
-            std::cerr << "Parsing FRU master config file failed, FILE="
-                      << file.path();
+            std::cerr << "Parsing FRU config file failed, FILE=" << file.path();
             throw InternalFailure();
         }
 

@@ -7,6 +7,8 @@
          "scalar_increment" : 1,
          "default_value" : 0,
          "readOnly" : false,
+         "helpText" : "VDD_AVSBUS_RAIL HelpText",
+         "displayName" : "VDD_AVSBUS_RAIL DisplayName",
          "dbus":{
             "object_path" : "/xyz/openbmc_project/avsbus",
             "interface" : "xyz.openbmc.AvsBus.Manager",
@@ -20,7 +22,9 @@
          "upper_bound" : 15,
          "scalar_increment" : 1,
          "default_value" : 2,
-         "readOnly" : true
+         "readOnly" : true,
+         "helpText" : "SBE_IMAGE_MINIMUM_VALID_ECS HelpText",
+         "displayName" : "SBE_IMAGE_MINIMUM_VALID_ECS DisplayName"
       },
       {
          "attribute_name" : "INTEGER_INVALID_CASE",
@@ -28,7 +32,9 @@
          "upper_bound" : 15,
          "scalar_increment" : 2,
          "default_value" : 3,
-         "readOnly" : true
+         "readOnly" : true,
+         "helpText" : "INTEGER_INVALID_CASE HelpText",
+         "displayName" : "INTEGER_INVALID_CASE DisplayName"
       }
    ]
 }

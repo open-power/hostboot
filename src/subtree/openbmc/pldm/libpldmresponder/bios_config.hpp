@@ -80,11 +80,13 @@ class BIOSConfig
     /** @brief Set attribute value on dbus and attribute value table
      *  @param[in] entry - attribute value entry
      *  @param[in] size - size of the attribute value entry
+     *  @param[in] updateDBus          - update Attr value D-Bus property
+     *                                   if this is set to true
      *  @param[in] updateBaseBIOSTable - update BaseBIOSTable D-Bus property
      *                                   if this is set to true
      *  @return pldm_completion_codes
      */
-    int setAttrValue(const void* entry, size_t size,
+    int setAttrValue(const void* entry, size_t size, bool updateDBus = true,
                      bool updateBaseBIOSTable = true);
 
     /** @brief Remove the persistent tables */
@@ -112,6 +114,20 @@ class BIOSConfig
                      bool updateBaseBIOSTable = true);
 
   private:
+    /** @enum Index into the fields in the BaseBIOSTable
+     */
+    enum class Index : uint8_t
+    {
+        attributeType = 0,
+        readOnly,
+        displayName,
+        description,
+        menuPath,
+        currentValue,
+        defaultValue,
+        options,
+    };
+
     const fs::path jsonDir;
     const fs::path tableDir;
     DBusHandler* const dbusHandler;
@@ -202,7 +218,10 @@ class BIOSConfig
      */
     std::optional<Table> buildAndStoreStringTable();
 
-    /** @brief Build attr table and attr value table and persist them
+    /** @brief Build attribute table and attribute value table and persist them
+     *         Read the BaseBIOSTable from the bios-settings-manager and update
+     *         attribute table and attribute value table.
+     *
      *  @param[in] stringTable - The string Table
      */
     void buildAndStoreAttrTables(const Table& stringTable);

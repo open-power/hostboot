@@ -47,9 +47,12 @@ class BIOSEnumAttribute : public BIOSAttribute
      *  @param[in] stringTable - The string Table
      *  @param[in,out] attrTable - The attribute table
      *  @param[in,out] attrValueTable - The attribute value table
+     *  @param[in,out] optAttributeValue - init value of the attribute
      */
     void constructEntry(const BIOSStringTable& stringTable, Table& attrTable,
-                        Table& attrValueTable) override;
+                        Table& attrValueTable,
+                        std::optional<std::variant<int64_t, std::string>>
+                            optAttributeValue = std::nullopt) override;
 
     /** @brief Generate attribute entry by the spec DSP0247_1.0.0 Table 14
      *  @param[in] attributevalue - attribute value(Enumeration, String and

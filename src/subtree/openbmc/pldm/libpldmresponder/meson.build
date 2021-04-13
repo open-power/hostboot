@@ -1,7 +1,7 @@
 deps = [
-  dependency('phosphor-dbus-interfaces'),
-  dependency('sdbusplus'),
-  dependency('sdeventplus'),
+  phosphor_dbus_interfaces,
+  sdbusplus,
+  sdeventplus,
   libpldm,
   libpldmutils
 ]
@@ -27,13 +27,18 @@ sources = [
 
 if get_option('oem-ibm').enabled()
   sources += [
+    '../oem/ibm/libpldmresponder/utils.cpp',
     '../oem/ibm/libpldmresponder/file_io.cpp',
     '../oem/ibm/libpldmresponder/file_table.cpp',
     '../oem/ibm/libpldmresponder/file_io_by_type.cpp',
     '../oem/ibm/libpldmresponder/file_io_type_pel.cpp',
     '../oem/ibm/libpldmresponder/file_io_type_dump.cpp',
     '../oem/ibm/libpldmresponder/file_io_type_cert.cpp',
-    '../oem/ibm/libpldmresponder/platform_oem_ibm.cpp'
+    '../oem/ibm/libpldmresponder/platform_oem_ibm.cpp',
+    '../oem/ibm/libpldmresponder/oem_ibm_handler.cpp',
+    '../oem/ibm/libpldmresponder/inband_code_update.cpp',
+    '../oem/ibm/requester/dbus_to_file_handler.cpp',
+    '../oem/ibm/libpldmresponder/file_io_type_progress_src.cpp',
   ]
 endif
 

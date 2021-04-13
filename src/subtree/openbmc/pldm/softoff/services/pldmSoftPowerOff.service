@@ -2,8 +2,8 @@
 Description=PLDM soft power off app
 Wants=pldmd.service
 After=pldmd.service
-Wants=obmc-host-stopping@0.target
-Before=obmc-host-stopping@0.target
+Wants=obmc-host-stop-pre@0.target
+Before=obmc-host-stop-pre@0.target
 Conflicts=obmc-host-start@0.target
 
 [Service]

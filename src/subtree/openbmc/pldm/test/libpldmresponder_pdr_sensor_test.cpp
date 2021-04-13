@@ -5,6 +5,7 @@
 #include "mocked_utils.hpp"
 
 #include <sdbusplus/test/sdbus_mock.hpp>
+#include <sdeventplus/event.hpp>
 
 #include <gtest/gtest.h>
 
@@ -32,8 +33,9 @@ TEST(GeneratePDRByStateSensor, testGoodJson)
     auto inPDRRepo = pldm_pdr_init();
     auto outPDRRepo = pldm_pdr_init();
     Repo outRepo(outPDRRepo);
-    Handler handler(&mockedUtils, "./pdr_jsons/state_sensor/good", "",
-                    inPDRRepo, nullptr, nullptr, nullptr);
+    auto event = sdeventplus::Event::get_default();
+    Handler handler(&mockedUtils, "./pdr_jsons/state_sensor/good", inPDRRepo,
+                    nullptr, nullptr, nullptr, nullptr, event);
     handler.getPDR(req, requestPayloadLength);
     Repo inRepo(inPDRRepo);
     getRepoByType(inRepo, outRepo, PLDM_STATE_SENSOR_PDR);
@@ -82,8 +84,9 @@ TEST(GeneratePDR, testMalformedJson)
     auto inPDRRepo = pldm_pdr_init();
     auto outPDRRepo = pldm_pdr_init();
     Repo outRepo(outPDRRepo);
-    Handler handler(&mockedUtils, "./pdr_jsons/state_sensor/good", "",
-                    inPDRRepo, nullptr, nullptr, nullptr);
+    auto event = sdeventplus::Event::get_default();
+    Handler handler(&mockedUtils, "./pdr_jsons/state_sensor/good", inPDRRepo,
+                    nullptr, nullptr, nullptr, nullptr, event);
     handler.getPDR(req, requestPayloadLength);
     Repo inRepo(inPDRRepo);
     getRepoByType(inRepo, outRepo, PLDM_STATE_SENSOR_PDR);

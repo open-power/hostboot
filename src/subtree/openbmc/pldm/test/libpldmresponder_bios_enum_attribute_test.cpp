@@ -35,7 +35,9 @@ TEST_F(TestBIOSEnumAttribute, CtorTest)
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Concurrent" ],
-         "readOnly" : true
+         "readOnly" : true,
+         "helpText" : "HelpText",
+         "displayName" : "DisplayName"
       })"_json;
 
     BIOSEnumAttribute enumReadOnly{jsonEnumReadOnly, nullptr};
@@ -49,7 +51,9 @@ TEST_F(TestBIOSEnumAttribute, CtorTest)
          "attribute_name" : "CodeUpdatePolicy",
          "possible_value" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Concurrent" ],
-         "readOnly" : true
+         "readOnly" : true,
+         "helpText" : "HelpText",
+         "displayName" : "DisplayName"
       })"_json; // possible_value -> possible_values
     EXPECT_THROW((BIOSEnumAttribute{jsonEnumReadOnlyError, nullptr}),
                  Json::exception);
@@ -59,6 +63,8 @@ TEST_F(TestBIOSEnumAttribute, CtorTest)
          "possible_values" : [ "Perm", "Temp" ],
          "default_values" : [ "Perm" ],
          "readOnly" : false,
+         "helpText" : "HelpText",
+         "displayName" : "DisplayName",
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -83,7 +89,9 @@ TEST_F(TestBIOSEnumAttribute, ConstructEntry)
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Disruptive" ],
-         "readOnly" : true
+         "readOnly" : true,
+         "helpText" : "HelpText",
+         "displayName" : "DisplayName"
       })"_json;
 
     std::vector<uint8_t> expectedAttrEntry{
@@ -121,6 +129,8 @@ TEST_F(TestBIOSEnumAttribute, ConstructEntry)
          "possible_values" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Disruptive" ],
          "readOnly" : false,
+         "helpText" : "HelpText",
+         "displayName" : "DisplayName",
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -171,6 +181,8 @@ TEST_F(TestBIOSEnumAttribute, setAttrValueOnDbus)
          "possible_values" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Disruptive" ],
          "readOnly" : false,
+         "helpText" : "HelpText",
+         "displayName" : "DisplayName",
          "dbus":
             {
                "object_path" : "/xyz/abc/def",

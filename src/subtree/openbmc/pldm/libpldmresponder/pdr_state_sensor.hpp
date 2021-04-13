@@ -56,6 +56,11 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
 
         pldm_state_sensor_pdr* pdr =
             reinterpret_cast<pldm_state_sensor_pdr*>(entry.data());
+        if (!pdr)
+        {
+            std::cerr << "Failed to get state sensor PDR.\n";
+            continue;
+        }
         pdr->hdr.record_handle = 0;
         pdr->hdr.version = 1;
         pdr->hdr.type = PLDM_STATE_SENSOR_PDR;
@@ -144,27 +149,26 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
             auto propertyName = dbusEntry.value("property_name", "");
             auto propertyType = dbusEntry.value("property_type", "");
 
+            StatestoDbusVal dbusIdToValMap{};
+            pldm::utils::DBusMapping dbusMapping{};
             try
             {
                 auto service =
                     dBusIntf.getService(objectPath.c_str(), interface.c_str());
+
+                dbusMapping = pldm::utils::DBusMapping{
+                    objectPath, interface, propertyName, propertyType};
+                dbusIdToValMap = populateMapping(
+                    propertyType, dbusEntry["property_values"], stateValues);
             }
             catch (const std::exception& e)
             {
-                continue;
+                std::cerr << "D-Bus object path does not exist, sensor ID: "
+                          << pdr->sensor_id << "\n";
             }
 
-            pldm::utils::DBusMapping dbusMapping{objectPath, interface,
-                                                 propertyName, propertyType};
             dbusMappings.emplace_back(std::move(dbusMapping));
-
-            Json propValues = dbusEntry["property_values"];
-            StatestoDbusVal dbusIdToValMap =
-                populateMapping(propertyType, propValues, stateValues);
-            if (!dbusIdToValMap.empty())
-            {
-                dbusValMaps.emplace_back(std::move(dbusIdToValMap));
-            }
+            dbusValMaps.emplace_back(std::move(dbusIdToValMap));
         }
 
         handler.addDbusObjMaps(

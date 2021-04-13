@@ -1,0 +1,221 @@
+{
+   "entries":[
+      {
+         "attribute_name":"pvm_fw_boot_side",
+         "possible_values":[
+            "Perm",
+            "Temp"
+         ],
+         "default_values":[
+            "Temp"
+         ],
+         "helpText" : "pvm_fw_boot_side",
+         "displayName" : "pvm_fw_boot_side"
+      },
+      {
+         "attribute_name":"pvm_inband_code_update",
+         "possible_values":[
+            "Allowed",
+            "Not Allowed"
+         ],
+         "default_values":[
+            "Allowed"
+         ],
+         "helpText" : "pvm_inband_code_update",
+         "displayName" : "pvm_inband_code_update"
+      },
+      {
+         "attribute_name":"pvm_surveillance",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Enabled"
+         ],
+         "helpText" : "pvm_surveillance",
+         "displayName" : "pvm_surveillance"
+      },
+      {
+         "attribute_name":"pvm_pcie_error_inject",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Enabled"
+         ],
+         "helpText" : "pvm_pcie_error_inject",
+         "displayName" : "pvm_pcie_error_inject"
+      },
+      {
+         "attribute_name":"vmi_if0_ipv4_method",
+         "possible_values":[
+            "IPv4Static",
+            "IPv4DHCP"
+         ],
+         "default_values":[
+            "IPv4Static"
+         ],
+         "helpText" : "vmi_if0_ipv4_method",
+         "displayName" : "vmi_if0_ipv4_method"
+      },
+      {
+         "attribute_name":"vmi_if1_ipv4_method",
+         "possible_values":[
+            "IPv4Static",
+            "IPv4DHCP"
+         ],
+         "default_values":[
+            "IPv4Static"
+         ],
+         "helpText" : "vmi_if1_ipv4_method",
+         "displayName" : "vmi_if1_ipv4_method"
+      },
+      {
+         "attribute_name":"hb_hyp_switch",
+         "possible_values":[
+            "PowerVM",
+            "OPAL"
+         ],
+         "default_values":[
+            "PowerVM"
+         ],
+         "helpText" : "hb_hyp_switch",
+         "displayName" : "hb_hyp_switch",
+         "dbus":
+            {
+             "object_path" : "/com/ibm/host0/hypervisor",
+             "interface" : "com.ibm.Host.Target",
+             "property_name" : "Target",
+             "property_type" : "string",
+             "property_values" : ["com.ibm.Host.Target.Hypervisor.PowerVM" , "com.ibm.Host.Target.Hypervisor.OPAL"]
+            }
+      },
+      {
+         "attribute_name":"pvm_stop_at_standby",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Enabled"
+         ],
+         "helpText" : "pvm_stop_at_standby",
+         "displayName" : "pvm_stop_at_standby",
+         "dbus":
+            {
+               "object_path" : "/xyz/openbmc_project/control/host0/boot",
+               "interface" : "xyz.openbmc_project.Control.Boot.Mode",
+               "property_name" : "BootMode",
+               "property_type" : "string",
+               "property_values" : ["xyz.openbmc_project.Control.Boot.Mode.Modes.Regular", "xyz.openbmc_project.Control.Boot.Mode.Modes.Setup"]
+            }
+      },
+      {
+         "attribute_name":"hb_debug_console",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Disabled"
+         ],
+         "helpText" : "When set to Enabled Hostboot should emit debug trace information to the VUART2 device.",
+         "displayName" : "hb-debug-console"
+      },
+      {
+         "attribute_name":"pvm_system_power_off_policy",
+         "possible_values":[
+            "Power Off",
+            "Stay On",
+            "Automatic"
+         ],
+         "default_values":[
+            "Automatic"
+          ],
+         "helpText" : "The system power off policy flag is a system parameter that controls the system's behavior when the last partition (or only partition in the case of a system that is not managed by an HMC) is powered off.",
+         "displayName" : "System Automatic Power Off Policy"
+      },
+      {
+         "attribute_name":"pvm_hmc_managed",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Disabled"
+         ],
+         "helpText" : "This option enables or disables the system is managed by HMC.",
+         "displayName" : "HMC managed System"
+      },
+      {
+         "attribute_name":"pvm_rtad",
+         "possible_values":[
+            "Disabled",
+            "Enabled"
+         ],
+         "default_values":[
+            "Enabled"
+         ],
+         "helpText" : "This option enables or disables the Remote Trusted Attestation Daemon for host firmware.",
+         "displayName" : "Remote Trusted Attestation Daemon State"
+      },
+      {
+         "attribute_name":"pvm_default_os_type",
+         "possible_values":[
+            "AIX",
+            "Linux",
+            "IBM I"
+         ],
+         "default_values":[
+            "AIX"
+         ],
+         "helpText" : "CEC Primary OS",
+         "displayName" : "CEC Primary OS"
+      },
+      {
+         "attribute_name":"pvm_system_operating_mode",
+         "possible_values":[
+            "Normal",
+            "Manual"
+         ],
+         "default_values":[
+            "Normal"
+         ],
+         "helpText" : "Manual mode is used for service or maintenance purpose of the system hardware. When the system is in manual mode, various automatic functions such as recovery on error, system poweron on power loss and reboot of host on failure are disabled.",
+         "displayName" : "Server Operating Mode"
+      },
+      {
+         "attribute_name":"pvm_rpa_boot_mode",
+         "possible_values":[
+            "Normal",
+            "SavedList",
+            "SmsMenu",
+            "OkPrompt",
+            "DefaultList",
+            "PblBootLid"
+         ],
+         "default_values":[
+            "Normal"
+         ],
+         "helpText" : "Select the boot type for an AIX/Linux partition. Normal: The partition boots directly to the operating system, SavedList: The system boots from the saved service mode boot list, SmsMenu: The partition stops at the System Management Services(SMS) menu, OkPrompt: The system stops at the open firmware prompt, DefaultList: The system boots from the default boot list, PblBootLid(PBL : Petitboot Boot Loader): The partition boots from the petitboot bootloader.",
+         "displayName" : "AIX/Linux Partition Boot Mode"
+      },
+      {
+         "attribute_name":"pvm_os_ipl_type",
+         "possible_values":[
+            "A_Mode",
+            "B_Mode",
+            "C_Mode",
+            "D_Mode"
+         ],
+         "default_values":[
+            "D_Mode"
+         ],
+         "helpText" : "Select the IBMi partition boot mode for next system boot. A_Mode: Boot from disk using copy A, B_Mode: Boot from disk using copy B, C_Mode: Reserved for IBM lab use only, D_Mode: Boot from media/drives.",
+         "displayName" : "IBMi Partition Boot Mode"
+      }
+   ]
+}
+

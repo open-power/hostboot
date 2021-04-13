@@ -56,7 +56,7 @@ uint8_t getStateSensorEventState(
         std::cerr << e.what() << '\n';
     }
 
-    return PLDM_SENSOR_DISABLED;
+    return PLDM_SENSOR_UNKNOWN;
 }
 
 /** @brief Function to get the state sensor readings requested by pldm requester
@@ -117,6 +117,13 @@ int getStateSensorReadingsHandler(
                       << "SENSOR_REARM_COUNT=" << sensorRearmCnt << "\n";
             return PLDM_PLATFORM_REARM_UNAVAILABLE_IN_PRESENT_STATE;
         }
+
+        if (sensorRearmCnt == 0)
+        {
+            sensorRearmCnt = compSensorCnt;
+            stateField.resize(sensorRearmCnt);
+        }
+
         break;
     }
 
@@ -132,14 +139,21 @@ int getStateSensorReadingsHandler(
             handler.getDbusObjMaps(sensorId, TypeId::PLDM_SENSOR_ID);
 
         stateField.clear();
-        for (size_t i = 0; i < compSensorCnt; i++)
+        for (size_t i = 0; i < sensorRearmCnt; i++)
         {
             auto& dbusMapping = dbusMappings[i];
 
-            uint8_t sensorOpState = getStateSensorEventState<DBusInterface>(
+            uint8_t sensorEvent = getStateSensorEventState<DBusInterface>(
                 dBusIntf, dbusValMaps[i], dbusMapping);
-            stateField.push_back({PLDM_SENSOR_ENABLED, PLDM_SENSOR_UNKNOWN,
-                                  PLDM_SENSOR_UNKNOWN, sensorOpState});
+
+            uint8_t opState = PLDM_SENSOR_ENABLED;
+            if (sensorEvent == PLDM_SENSOR_UNKNOWN)
+            {
+                opState = PLDM_SENSOR_UNAVAILABLE;
+            }
+
+            stateField.push_back({opState, PLDM_SENSOR_NORMAL,
+                                  PLDM_SENSOR_UNKNOWN, sensorEvent});
         }
     }
     catch (const std::out_of_range& e)

@@ -90,9 +90,9 @@ std::string BIOSStringAttribute::getAttrValue()
     }
 }
 
-void BIOSStringAttribute::constructEntry(const BIOSStringTable& stringTable,
-                                         Table& attrTable,
-                                         Table& attrValueTable)
+void BIOSStringAttribute::constructEntry(
+    const BIOSStringTable& stringTable, Table& attrTable, Table& attrValueTable,
+    std::optional<std::variant<int64_t, std::string>> optAttributeValue)
 {
     pldm_bios_table_attr_entry_string_info info = {
         stringTable.findHandle(name), readOnly,
@@ -105,7 +105,25 @@ void BIOSStringAttribute::constructEntry(const BIOSStringTable& stringTable,
         table::attribute::constructStringEntry(attrTable, &info);
     auto [attrHandle, attrType, _] =
         table::attribute::decodeHeader(attrTableEntry);
-    auto currStr = getAttrValue();
+
+    std::string currStr{};
+    if (optAttributeValue.has_value())
+    {
+        auto attributeValue = optAttributeValue.value();
+        if (attributeValue.index() == 1)
+        {
+            currStr = std::get<std::string>(attributeValue);
+        }
+        else
+        {
+            currStr = getAttrValue();
+        }
+    }
+    else
+    {
+        currStr = getAttrValue();
+    }
+
     table::attribute_value::constructStringEntry(attrValueTable, attrHandle,
                                                  attrType, currStr);
 }

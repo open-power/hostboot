@@ -98,9 +98,9 @@ void BIOSIntegerAttribute::setAttrValueOnDbus(
     throw std::invalid_argument("dbus type error");
 }
 
-void BIOSIntegerAttribute::constructEntry(const BIOSStringTable& stringTable,
-                                          Table& attrTable,
-                                          Table& attrValueTable)
+void BIOSIntegerAttribute::constructEntry(
+    const BIOSStringTable& stringTable, Table& attrTable, Table& attrValueTable,
+    std::optional<std::variant<int64_t, std::string>> optAttributeValue)
 {
 
     pldm_bios_table_attr_entry_integer_info info = {
@@ -115,14 +115,31 @@ void BIOSIntegerAttribute::constructEntry(const BIOSStringTable& stringTable,
     auto [attrHandle, attrType, _] =
         table::attribute::decodeHeader(attrTableEntry);
 
-    auto currentValue = getAttrValue();
+    int64_t currentValue{};
+    if (optAttributeValue.has_value())
+    {
+        auto attributeValue = optAttributeValue.value();
+        if (attributeValue.index() == 0)
+        {
+            currentValue = std::get<int64_t>(attributeValue);
+        }
+        else
+        {
+            currentValue = getAttrValue();
+        }
+    }
+    else
+    {
+        currentValue = getAttrValue();
+    }
+
     table::attribute_value::constructIntegerEntry(attrValueTable, attrHandle,
                                                   attrType, currentValue);
 }
 
 uint64_t BIOSIntegerAttribute::getAttrValue(const PropertyValue& propertyValue)
 {
-    uint64_t value;
+    uint64_t value = 0;
     if (dBusMap->propertyType == "uint8_t")
     {
         value = std::get<uint8_t>(propertyValue);
@@ -154,6 +171,12 @@ uint64_t BIOSIntegerAttribute::getAttrValue(const PropertyValue& propertyValue)
     else if (dBusMap->propertyType == "double")
     {
         value = std::get<double>(propertyValue);
+    }
+    else
+    {
+        std::cerr << "Unsupported property type for getAttrValue: "
+                  << dBusMap->propertyType << std::endl;
+        throw std::invalid_argument("dbus type error");
     }
     return value;
 }

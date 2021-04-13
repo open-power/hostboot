@@ -42,7 +42,8 @@ tests = [
 
 if get_option('oem-ibm').enabled()
   tests += [
-    '../oem/ibm/test/libpldmresponder_fileio_test'
+    '../oem/ibm/test/libpldmresponder_fileio_test',
+    '../oem/ibm/test/libpldmresponder_oem_platform_test'
   ]
 endif
 
@@ -58,8 +59,8 @@ foreach t : tests
                          gtest,
                          gmock,
                          pldmd,
-                         dependency('phosphor-dbus-interfaces'),
-                         dependency('sdeventplus'),
-                         dependency('sdbusplus')]),
+                         phosphor_dbus_interfaces,
+                         sdeventplus,
+                         sdbusplus]),
        workdir: meson.current_source_dir())
 endforeach

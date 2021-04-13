@@ -5,6 +5,8 @@
          "possible_values" : [ "On", "Off" ],
          "default_values" : [ "On" ],
          "readOnly" : false,
+         "helpText" : "HMCManagedState HelpText",
+         "displayName" : "HMCManagedState DisplayName",
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -19,6 +21,8 @@
          "possible_values" : [ "Perm", "Temp" ],
          "default_values" : [ "Perm" ],
          "readOnly" : false,
+         "helpText" : "FWBootSide HelpText",
+         "displayName" : "FWBootSide DisplayName",
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -33,6 +37,8 @@
          "possible_values" : [ "Allowed", "NotAllowed" ],
          "default_values" : [ "Allowed" ],
          "readOnly" : false,
+         "helpText" : "InbandCodeUpdate HelpText",
+         "displayName" : "InbandCodeUpdate DisplayName",
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -46,7 +52,9 @@
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Concurrent" ],
-         "readOnly" : true
+         "readOnly" : true,
+         "helpText" : "CodeUpdatePolicy HelpText",
+         "displayName" : "CodeUpdatePolicy DisplayName"
       }
     ]
 }

@@ -7,13 +7,6 @@ extern "C" {
 
 #include "pldm_types.h"
 
-/** @brief PLDM state set ids
- */
-enum pldm_state_set_ids {
-	PLDM_BOOT_PROGRESS_STATE = 196,
-	PLDM_SYSTEM_POWER_STATE = 260,
-};
-
 /** @brief PLDM enums for the boot progress state set
  */
 enum pldm_boot_progress_states {

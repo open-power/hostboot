@@ -38,6 +38,11 @@ void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
 
         pldm_numeric_effecter_value_pdr* pdr =
             reinterpret_cast<pldm_numeric_effecter_value_pdr*>(entry.data());
+        if (!pdr)
+        {
+            std::cerr << "Failed to get numeric effecter PDR.\n";
+            continue;
+        }
         pdr->hdr.record_handle = 0;
         pdr->hdr.version = 1;
         pdr->hdr.type = PLDM_NUMERIC_EFFECTER_PDR;
@@ -192,21 +197,24 @@ void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
         auto propertyName = dbusEntry.value("property_name", "");
         auto propertyType = dbusEntry.value("property_type", "");
 
+        DbusMappings dbusMappings{};
+        DbusValMaps dbusValMaps{};
+        pldm::utils::DBusMapping dbusMapping{};
         try
         {
             auto service =
                 dBusIntf.getService(objectPath.c_str(), interface.c_str());
+
+            dbusMapping = pldm::utils::DBusMapping{objectPath, interface,
+                                                   propertyName, propertyType};
         }
         catch (const std::exception& e)
         {
-            continue;
+            std::cerr << "D-Bus object path does not exist, effecter ID: "
+                      << pdr->effecter_id << "\n";
         }
-
-        pldm::utils::DBusMapping dbusMapping{objectPath, interface,
-                                             propertyName, propertyType};
-        DbusMappings dbusMappings{};
-        DbusValMaps dbusValMaps{};
         dbusMappings.emplace_back(std::move(dbusMapping));
+
         handler.addDbusObjMaps(
             pdr->effecter_id,
             std::make_tuple(std::move(dbusMappings), std::move(dbusValMaps)));

@@ -151,18 +151,20 @@ void HostEffecterParser::processHostEffecterChangeNotification(
         }
     }
     constexpr auto hostStateInterface =
-        "xyz.openbmc_project.State.OperatingSystem.Status";
+        "xyz.openbmc_project.State.Boot.Progress";
     constexpr auto hostStatePath = "/xyz/openbmc_project/state/host0";
 
     try
     {
         auto propVal = dbusHandler->getDbusPropertyVariant(
-            hostStatePath, "OperatingSystemState", hostStateInterface);
+            hostStatePath, "BootProgress", hostStateInterface);
         const auto& currHostState = std::get<std::string>(propVal);
-        if ((currHostState != "xyz.openbmc_project.State.OperatingSystem."
-                              "Status.OSStatus.Standby") &&
-            (currHostState != "xyz.openbmc_project.State.OperatingSystem."
-                              "Status.OSStatus.BootComplete"))
+        if ((currHostState != "xyz.openbmc_project.State.Boot.Progress."
+                              "ProgressStages.SystemInitComplete") &&
+            (currHostState != "xyz.openbmc_project.State.Boot.Progress."
+                              "ProgressStages.OSRunning") &&
+            (currHostState != "xyz.openbmc_project.State.Boot.Progress."
+                              "ProgressStages.OSStart"))
         {
             std::cout << "Host is not up. Current host state: "
                       << currHostState.c_str() << "\n";

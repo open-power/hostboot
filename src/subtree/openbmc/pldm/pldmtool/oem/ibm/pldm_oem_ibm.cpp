@@ -76,11 +76,16 @@ class GetAlertStatus : public CommandInterface
             return;
         }
 
-        std::cout << "GetAlertStatus Success: " << std::endl;
-        std::cout << "rack entry: 0x" << std::setfill('0') << std::setw(8)
-                  << std::hex << (int)rack_entry << std::endl;
-        std::cout << "pri cec node: 0x" << std::setfill('0') << std::setw(8)
-                  << std::hex << (int)pri_cec_node << std::endl;
+        std::stringstream re;
+        std::stringstream pcn;
+        ordered_json data;
+        re << "0x" << std::setfill('0') << std::setw(8) << std::hex
+           << (int)rack_entry;
+        pcn << "0x" << std::setfill('0') << std::setw(8) << std::hex
+            << (int)pri_cec_node;
+        data["rack entry"] = re.str();
+        data["pri cec node"] = pcn.str();
+        pldmtool::helper::DisplayInJson(data);
     }
 
   private:
@@ -164,31 +169,35 @@ class GetFileTable : public CommandInterface
 
         auto startptr = data;
         auto endptr = startptr + length - CHKSUM_PADDING;
+        ordered_json kwVal;
 
         while (startptr < endptr)
         {
+            ordered_json fdata;
             auto filetableData =
                 reinterpret_cast<pldm_file_attr_table_entry*>(startptr);
-            std::cout << "FileHandle:" << filetableData->file_handle
-                      << std::endl;
+            fdata["FileHandle"] = std::to_string(filetableData->file_handle);
             startptr += sizeof(filetableData->file_handle);
 
             auto nameLength = filetableData->file_name_length;
-            std::cout << "  FileNameLength:" << nameLength << std::endl;
+            fdata["FileNameLength"] = nameLength;
             startptr += sizeof(filetableData->file_name_length);
 
-            std::cout << "  FileName:" << startptr << std::endl;
+            fdata["FileName"] = (std::string(
+                reinterpret_cast<char const*>(startptr), nameLength));
             startptr += nameLength;
 
             auto fileSize = *(reinterpret_cast<uint32_t*>(startptr));
-            std::cout << "  FileSize:" << le32toh(fileSize) << std::endl;
+            fdata["FileSize"] = le32toh(fileSize);
             startptr += sizeof(fileSize);
 
             auto fileTraits =
                 (*(reinterpret_cast<bitfield32_t*>(startptr))).value;
-            std::cout << "  FileTraits:" << le32toh(fileTraits) << std::endl;
+            fdata["FileTraits"] = le32toh(fileTraits);
             startptr += sizeof(fileTraits);
+            kwVal.emplace_back(fdata);
         }
+        pldmtool::helper::DisplayInJson(kwVal);
     }
 };
 

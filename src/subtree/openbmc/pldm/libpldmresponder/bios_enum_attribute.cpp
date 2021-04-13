@@ -149,21 +149,13 @@ uint8_t BIOSEnumAttribute::getAttrValueIndex()
 
 uint8_t BIOSEnumAttribute::getAttrValueIndex(const PropertyValue& propValue)
 {
-    auto defaultValueIndex = getValueIndex(defaultValue, possibleValues);
-
     try
     {
-        auto iter = valMap.find(propValue);
-        if (iter == valMap.end())
-        {
-            return defaultValueIndex;
-        }
-        auto currentValue = iter->second;
-        return getValueIndex(currentValue, possibleValues);
+        return getValueIndex(std::get<std::string>(propValue), possibleValues);
     }
     catch (const std::exception& e)
     {
-        return defaultValueIndex;
+        return getValueIndex(defaultValue, possibleValues);
     }
 }
 
@@ -180,7 +172,6 @@ void BIOSEnumAttribute::setAttrValueOnDbus(
     auto currHdls = table::attribute_value::decodeEnumEntry(attrValueEntry);
 
     assert(currHdls.size() == 1);
-
     auto valueString = stringTable.findString(pvHdls[currHdls[0]]);
 
     auto it = std::find_if(valMap.begin(), valMap.end(),
@@ -195,8 +186,9 @@ void BIOSEnumAttribute::setAttrValueOnDbus(
     dbusHandler->setDbusProperty(*dBusMap, it->first);
 }
 
-void BIOSEnumAttribute::constructEntry(const BIOSStringTable& stringTable,
-                                       Table& attrTable, Table& attrValueTable)
+void BIOSEnumAttribute::constructEntry(
+    const BIOSStringTable& stringTable, Table& attrTable, Table& attrValueTable,
+    std::optional<std::variant<int64_t, std::string>> optAttributeValue)
 {
     auto possibleValuesHandle =
         getPossibleValuesHandle(stringTable, possibleValues);
@@ -215,7 +207,24 @@ void BIOSEnumAttribute::constructEntry(const BIOSStringTable& stringTable,
         table::attribute::decodeHeader(attrTableEntry);
 
     std::vector<uint8_t> currValueIndices(1, 0);
-    currValueIndices[0] = getAttrValueIndex();
+
+    if (optAttributeValue.has_value())
+    {
+        auto attributeValue = optAttributeValue.value();
+        if (attributeValue.index() == 1)
+        {
+            auto currValue = std::get<std::string>(attributeValue);
+            currValueIndices[0] = getValueIndex(currValue, possibleValues);
+        }
+        else
+        {
+            currValueIndices[0] = getAttrValueIndex();
+        }
+    }
+    else
+    {
+        currValueIndices[0] = getAttrValueIndex();
+    }
 
     table::attribute_value::constructEnumEntry(attrValueTable, attrHandle,
                                                attrType, currValueIndices);
@@ -256,10 +265,6 @@ void BIOSEnumAttribute::generateAttributeEntry(
     if (readOnly)
     {
         entry->value[1] = getValueIndex(defaultValue, possibleValues);
-    }
-    else if (!dBusMap.has_value())
-    {
-        entry->value[1] = getValueIndex(value, possibleValues);
     }
     else
     {

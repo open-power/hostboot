@@ -1,0 +1,49 @@
+{
+   "entries":[
+      {
+         "attribute_name" : "vmi_if_count",
+         "lower_bound" : 0,
+         "upper_bound" : 2,
+         "scalar_increment" : 1,
+         "default_value" : 1,
+         "helpText" : "vmi_if_count",
+         "displayName" : "vmi_if_count"
+      },
+      {
+         "attribute_name" : "vmi_if0_ipv4_prefix_length",
+         "lower_bound" : 0,
+         "upper_bound" : 32,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "vmi_if0_ipv4_prefix_length",
+         "displayName" : "vmi_if0_ipv4_prefix_length"
+      },
+      {
+         "attribute_name" : "vmi_if1_ipv4_prefix_length",
+         "lower_bound" : 0,
+         "upper_bound" : 32,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "vmi_if1_ipv4_prefix_length",
+         "displayName" : "vmi_if1_ipv4_prefix_length"
+      },
+      {
+         "attribute_name" : "hb_number_huge_pages",
+         "lower_bound" : 0,
+         "upper_bound" : 65535,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "Specifies the number of huge pages available for memory management, requires a reboot for a change to be applied.",
+         "displayName" : "Number Huge Pages"
+      },
+      {
+         "attribute_name" : "hb_memory_region_size",
+         "lower_bound" : 0,
+         "upper_bound" : 255,
+         "scalar_increment" : 1,
+         "default_value" : 4,
+         "helpText" : "Specifies the size of the logical memory block the system uses to read memory, requires a reboot for a change to be applied. Encoded: 3=128MB 4=256MB.",
+         "displayName" : "Memory Region Size"
+      }
+   ]
+}

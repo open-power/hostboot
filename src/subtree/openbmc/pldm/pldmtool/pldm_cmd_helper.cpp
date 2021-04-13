@@ -17,23 +17,6 @@ namespace pldmtool
 namespace helper
 {
 /*
- * print the input buffer if pldm verbosity is enabled.
- *
- */
-void printBuffer(const std::vector<uint8_t>& buffer, bool pldmVerbose)
-{
-    if (pldmVerbose && !buffer.empty())
-    {
-        std::ostringstream tempStream;
-        for (int byte : buffer)
-        {
-            tempStream << std::setfill('0') << std::setw(2) << std::hex << byte
-                       << " ";
-        }
-        std::cout << tempStream.str() << std::endl;
-    }
-}
-/*
  * Initialize the socket, send pldm command & recieve response from socket
  *
  */

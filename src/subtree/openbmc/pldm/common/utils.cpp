@@ -458,5 +458,50 @@ int emitStateSensorEventSignal(uint8_t tid, uint16_t sensorId,
     return PLDM_SUCCESS;
 }
 
+uint16_t findStateSensorId(const pldm_pdr* pdrRepo, uint8_t tid,
+                           uint16_t entityType, uint16_t entityInstance,
+                           uint16_t containerId, uint16_t stateSetId)
+{
+    auto pdrs = findStateSensorPDR(tid, entityType, stateSetId, pdrRepo);
+    for (auto pdr : pdrs)
+    {
+        auto sensorPdr = reinterpret_cast<pldm_state_sensor_pdr*>(pdr.data());
+        auto compositeSensorCount = sensorPdr->composite_sensor_count;
+        auto possible_states_start = sensorPdr->possible_states;
+
+        for (auto sensors = 0x00; sensors < compositeSensorCount; sensors++)
+        {
+            auto possibleStates =
+                reinterpret_cast<state_sensor_possible_states*>(
+                    possible_states_start);
+            auto setId = possibleStates->state_set_id;
+            auto possibleStateSize = possibleStates->possible_states_size;
+            if (entityType == sensorPdr->entity_type &&
+                entityInstance == sensorPdr->entity_instance &&
+                stateSetId == setId && containerId == sensorPdr->container_id)
+            {
+                return sensorPdr->sensor_id;
+            }
+            possible_states_start +=
+                possibleStateSize + sizeof(setId) + sizeof(possibleStateSize);
+        }
+    }
+    return PLDM_INVALID_EFFECTER_ID;
+}
+
+void printBuffer(const std::vector<uint8_t>& buffer, bool pldmVerbose)
+{
+    if (pldmVerbose && !buffer.empty())
+    {
+        std::ostringstream tempStream;
+        for (int byte : buffer)
+        {
+            tempStream << std::setfill('0') << std::setw(2) << std::hex << byte
+                       << " ";
+        }
+        std::cout << tempStream.str() << std::endl;
+    }
+}
+
 } // namespace utils
 } // namespace pldm

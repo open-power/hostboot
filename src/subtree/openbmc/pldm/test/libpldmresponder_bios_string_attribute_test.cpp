@@ -34,7 +34,9 @@ TEST_F(TestBIOSStringAttribute, CtorTest)
             "maximum_string_length" : 100,
             "default_string_length" : 2,
             "default_string" : "ef",
-            "readOnly" : true
+            "readOnly" : true,
+            "helpText" : "HelpText",
+            "displayName" : "DisplayName"
         })"_json;
     BIOSStringAttribute stringReadOnly{jsonStringReadOnly, nullptr};
     EXPECT_EQ(stringReadOnly.name, "str_example3");
@@ -53,7 +55,9 @@ TEST_F(TestBIOSStringAttribute, CtorTest)
             "string_type" : "ASCII",
             "minimum_string_length" : 1,
             "maximum_string_length" : 100,
-            "default_string" : "ef"
+            "default_string" : "ef",
+            "helpText" : "HelpText",
+            "displayName" : "DisplayName"
         })"_json; // missing default_string_length
 
     EXPECT_THROW((BIOSStringAttribute{jsonStringReadOnlyError, nullptr}),
@@ -67,6 +71,8 @@ TEST_F(TestBIOSStringAttribute, CtorTest)
             "default_string_length" : 3,
             "default_string" : "abc",
             "readOnly" : false,
+            "helpText" : "HelpText",
+            "displayName" : "DisplayName",
             "dbus" : {
                 "object_path" : "/xyz/abc/def",
                 "interface" : "xyz.openbmc_project.str_example1.value",
@@ -92,7 +98,9 @@ TEST_F(TestBIOSStringAttribute, ConstructEntry)
             "maximum_string_length" : 100,
             "default_string_length" : 3,
             "default_string" : "abc",
-            "readOnly" : true
+            "readOnly" : true,
+            "helpText" : "HelpText",
+            "displayName" : "DisplayName"
         })"_json;
 
     std::vector<uint8_t> expectedAttrEntry{
@@ -128,6 +136,8 @@ TEST_F(TestBIOSStringAttribute, ConstructEntry)
             "default_string_length" : 3,
             "default_string" : "abc",
             "readOnly" : false,
+            "helpText" : "HelpText",
+            "displayName" : "DisplayName",
             "dbus" : {
                 "object_path" : "/xyz/abc/def",
                 "interface" : "xyz.openbmc_project.str_example1.value",
@@ -177,6 +187,8 @@ TEST_F(TestBIOSStringAttribute, setAttrValueOnDbus)
             "default_string_length" : 3,
             "default_string" : "abc",
             "readOnly" : false,
+            "helpText" : "HelpText",
+            "displayName" : "DisplayName",
             "dbus" : {
                 "object_path" : "/xyz/abc/def",
                 "interface" : "xyz.openbmc_project.str_example1.value",

@@ -1,0 +1,38 @@
+{
+ "entries": [
+   {
+    "containerID":0,
+    "entityType":32801,
+    "entityInstance":0,
+    "sensorOffset":0,
+    "event_states": [
+        1,
+        2,
+        3,
+        5,
+        7,
+        9,
+        21,
+        22,
+        26
+    ],
+    "dbus" : {
+        "object_path": "/xyz/openbmc_project/state/host0",
+        "interface": "xyz.openbmc_project.State.Boot.Progress",
+        "property_name": "BootProgress",
+        "property_type": "string",
+        "property_values": [
+            "xyz.openbmc_project.State.Boot.Progress.ProgressStages.Unspecified",
+            "xyz.openbmc_project.State.Boot.Progress.ProgressStages.SystemInitComplete",
+            "xyz.openbmc_project.State.Boot.Progress.ProgressStages.MemoryInit",
+            "xyz.openbmc_project.State.Boot.Progress.ProgressStages.SecondaryProcInit",
+            "xyz.openbmc_project.State.Boot.Progress.ProgressStages.SystemSetup",
+            "xyz.openbmc_project.State.Boot.Progress.ProgressStages.PCIInit",
+            "xyz.openbmc_project.State.Boot.Progress.ProgressStages.OSRunning",
+            "xyz.openbmc_project.State.Boot.Progress.ProgressStages.BusInit",
+            "xyz.openbmc_project.State.Boot.Progress.ProgressStages.PrimaryProcInit"
+        ]
+     }
+   }
+ ]
+}

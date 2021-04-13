@@ -137,6 +137,12 @@ class FruImpl
         return associatedEntityMap;
     }
 
+    /* @brief Method to populate the firmware version ID
+     *
+     * @return firmware version ID
+     */
+    std::string populatefwVersion();
+
   private:
     uint16_t nextRSI()
     {

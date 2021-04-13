@@ -13,6 +13,7 @@
 #include "libpldmresponder/base.hpp"
 #include "libpldmresponder/bios.hpp"
 #include "libpldmresponder/fru.hpp"
+#include "libpldmresponder/oem_handler.hpp"
 #include "libpldmresponder/platform.hpp"
 #include "xyz/openbmc_project/PLDM/Event/server.hpp"
 
@@ -42,6 +43,7 @@
 
 #ifdef OEM_IBM
 #include "libpldmresponder/file_io.hpp"
+#include "libpldmresponder/oem_ibm_handler.hpp"
 #endif
 
 constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
@@ -99,21 +101,6 @@ static Response processRxMsg(const std::vector<uint8_t>& requestMsg,
         requester.markFree(eid, hdr->instance_id);
     }
     return response;
-}
-
-void printBuffer(const std::vector<uint8_t>& buffer)
-{
-    std::ostringstream tempStream;
-    tempStream << "Buffer Data: ";
-    if (!buffer.empty())
-    {
-        for (int byte : buffer)
-        {
-            tempStream << std::setfill('0') << std::setw(2) << std::hex << byte
-                       << " ";
-        }
-    }
-    std::cout << tempStream.str().c_str() << std::endl;
 }
 
 void optionUsage(void)
@@ -182,8 +169,8 @@ int main(int argc, char** argv)
     if (hostEID)
     {
         hostPDRHandler = std::make_unique<HostPDRHandler>(
-            sockfd, hostEID, event, pdrRepo.get(), entityTree.get(),
-            dbusImplReq);
+            sockfd, hostEID, event, pdrRepo.get(), EVENTS_JSONS_DIR,
+            entityTree.get(), dbusImplReq, verbose);
         hostEffecterParser =
             std::make_unique<pldm::host_effecters::HostEffecterParser>(
                 &dbusImplReq, sockfd, pdrRepo.get(), dbusHandler.get(),
@@ -193,6 +180,20 @@ int main(int argc, char** argv)
     }
 
     Invoker invoker{};
+    std::unique_ptr<oem_platform::Handler> oemPlatformHandler{};
+
+#ifdef OEM_IBM
+    std::unique_ptr<pldm::responder::CodeUpdate> codeUpdate =
+        std::make_unique<pldm::responder::CodeUpdate>(dbusHandler.get());
+    codeUpdate->clearDirPath(LID_STAGING_DIR);
+    oemPlatformHandler = std::make_unique<oem_ibm_platform::Handler>(
+        dbusHandler.get(), codeUpdate.get(), sockfd, hostEID, dbusImplReq,
+        event);
+    codeUpdate->setOemPlatformHandler(oemPlatformHandler.get());
+    invoker.registerHandler(
+        PLDM_OEM, std::make_unique<oem_ibm::Handler>(
+                      oemPlatformHandler.get(), sockfd, hostEID, &dbusImplReq));
+#endif
     invoker.registerHandler(PLDM_BASE, std::make_unique<base::Handler>());
     invoker.registerHandler(PLDM_BIOS, std::make_unique<bios::Handler>(
                                            sockfd, hostEID, &dbusImplReq));
@@ -201,17 +202,19 @@ int main(int argc, char** argv)
     // FRU table is built lazily when a FRU command or Get PDR command is
     // handled. To enable building FRU table, the FRU handler is passed to the
     // Platform handler.
-    invoker.registerHandler(PLDM_PLATFORM, std::make_unique<platform::Handler>(
-                                               dbusHandler.get(), PDR_JSONS_DIR,
-                                               EVENTS_JSONS_DIR, pdrRepo.get(),
-                                               hostPDRHandler.get(),
-                                               dbusToPLDMEventHandler.get(),
-                                               fruHandler.get(), true));
-    invoker.registerHandler(PLDM_FRU, std::move(fruHandler));
-
+    auto platformHandler = std::make_unique<platform::Handler>(
+        dbusHandler.get(), PDR_JSONS_DIR, pdrRepo.get(), hostPDRHandler.get(),
+        dbusToPLDMEventHandler.get(), fruHandler.get(),
+        oemPlatformHandler.get(), event, true);
 #ifdef OEM_IBM
-    invoker.registerHandler(PLDM_OEM, std::make_unique<oem_ibm::Handler>());
+    pldm::responder::oem_ibm_platform::Handler* oemIbmPlatformHandler =
+        dynamic_cast<pldm::responder::oem_ibm_platform::Handler*>(
+            oemPlatformHandler.get());
+    oemIbmPlatformHandler->setPlatformHandler(platformHandler.get());
 #endif
+
+    invoker.registerHandler(PLDM_PLATFORM, std::move(platformHandler));
+    invoker.registerHandler(PLDM_FRU, std::move(fruHandler));
 
     pldm::utils::CustomFD socketFd(sockfd);
 
@@ -283,7 +286,7 @@ int main(int argc, char** argv)
                 if (verbose)
                 {
                     std::cout << "Received Msg" << std::endl;
-                    printBuffer(requestMsg);
+                    printBuffer(requestMsg, verbose);
                 }
                 if (MCTP_MSG_TYPE_PLDM != requestMsg[1])
                 {
@@ -301,7 +304,7 @@ int main(int argc, char** argv)
                         if (verbose)
                         {
                             std::cout << "Sending Msg" << std::endl;
-                            printBuffer(response);
+                            printBuffer(response, verbose);
                         }
 
                         iov[0].iov_base = &requestMsg[0];

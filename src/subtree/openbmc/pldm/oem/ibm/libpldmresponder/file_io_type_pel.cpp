@@ -92,7 +92,8 @@ Entry::Level getEntryLevelFromPEL(const std::string& pelFileName)
 } // namespace detail
 
 int PelHandler::readIntoMemory(uint32_t offset, uint32_t& length,
-                               uint64_t address)
+                               uint64_t address,
+                               oem_platform::Handler* /*oemPlatformHandler*/)
 {
     static constexpr auto logObjPath = "/xyz/openbmc_project/logging";
     static constexpr auto logInterface = "org.open_power.Logging.PEL";
@@ -122,7 +123,8 @@ int PelHandler::readIntoMemory(uint32_t offset, uint32_t& length,
     return PLDM_SUCCESS;
 }
 
-int PelHandler::read(uint32_t offset, uint32_t& length, Response& response)
+int PelHandler::read(uint32_t offset, uint32_t& length, Response& response,
+                     oem_platform::Handler* /*oemPlatformHandler*/)
 {
     static constexpr auto logObjPath = "/xyz/openbmc_project/logging";
     static constexpr auto logInterface = "org.open_power.Logging.PEL";
@@ -188,7 +190,8 @@ int PelHandler::read(uint32_t offset, uint32_t& length, Response& response)
 }
 
 int PelHandler::writeFromMemory(uint32_t offset, uint32_t length,
-                                uint64_t address)
+                                uint64_t address,
+                                oem_platform::Handler* /*oemPlatformHandler*/)
 {
     char tmpFile[] = "/tmp/pel.XXXXXX";
     int fd = mkstemp(tmpFile);

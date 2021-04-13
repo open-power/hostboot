@@ -162,6 +162,11 @@ enum pldm_software_termination_status_values {
 	PLDM_SW_TERM_GRACEFUL_SHUTDOWN = 7,
 	PLDM_SW_TERM_TERMINATION_REQUEST_FAILED = 8,
 };
+
+/* OEM ranges */
+#define PLDM_OEM_STATE_SET_ID_START 32768
+#define PLDM_OEM_STATE_SET_ID_END 65535
+
 #ifdef __cplusplus
 }
 #endif

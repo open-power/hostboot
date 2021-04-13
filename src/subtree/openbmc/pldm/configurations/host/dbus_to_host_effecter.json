@@ -11,12 +11,12 @@
             "effecters": [
                 {
                     "dbus_info": {
-                        "object_path": "/xyz/openbmc_project/control/host0/boot",
-                        "interface": "xyz.openbmc_project.Control.Boot.Mode",
-                        "property_name": "BootMode",
+                        "object_path": "/xyz/openbmc_project/state/hypervisor0",
+                        "interface": "xyz.openbmc_project.State.Host",
+                        "property_name": "RequestedHostTransition",
                         "property_type": "string",
                         "property_values": [
-                            "xyz.openbmc_project.Control.Boot.Mode.Modes.Regular"
+                            "xyz.openbmc_project.State.Host.Transition.On"
                         ]
                     },
                     "state" : {

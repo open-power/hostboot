@@ -10,6 +10,7 @@
 #include "file_io_type_dump.hpp"
 #include "file_io_type_lid.hpp"
 #include "file_io_type_pel.hpp"
+#include "file_io_type_progress_src.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <stdint.h>
@@ -48,6 +49,25 @@ int FileHandler::transferFileData(int32_t fd, bool upstream, uint32_t offset,
     }
     auto rc =
         xdmaInterface.transferDataHost(fd, offset, length, address, upstream);
+    return rc < 0 ? PLDM_ERROR : PLDM_SUCCESS;
+}
+
+int FileHandler::transferFileDataToSocket(int32_t fd, uint32_t& length,
+                                          uint64_t address)
+{
+    dma::DMA xdmaInterface;
+    while (length > dma::maxSize)
+    {
+        auto rc =
+            xdmaInterface.transferHostDataToSocket(fd, dma::maxSize, address);
+        if (rc < 0)
+        {
+            return PLDM_ERROR;
+        }
+        length -= dma::maxSize;
+        address += dma::maxSize;
+    }
+    auto rc = xdmaInterface.transferHostDataToSocket(fd, length, address);
     return rc < 0 ? PLDM_ERROR : PLDM_SUCCESS;
 }
 
@@ -111,29 +131,35 @@ std::unique_ptr<FileHandler> getHandlerByType(uint16_t fileType,
         case PLDM_FILE_TYPE_PEL:
         {
             return std::make_unique<PelHandler>(fileHandle);
-            break;
         }
         case PLDM_FILE_TYPE_LID_PERM:
         {
             return std::make_unique<LidHandler>(fileHandle, true);
-            break;
         }
         case PLDM_FILE_TYPE_LID_TEMP:
         {
             return std::make_unique<LidHandler>(fileHandle, false);
-            break;
+        }
+        case PLDM_FILE_TYPE_LID_MARKER:
+        {
+            return std::make_unique<LidHandler>(fileHandle, false,
+                                                PLDM_FILE_TYPE_LID_MARKER);
         }
         case PLDM_FILE_TYPE_DUMP:
+        case PLDM_FILE_TYPE_RESOURCE_DUMP_PARMS:
+        case PLDM_FILE_TYPE_RESOURCE_DUMP:
         {
-            return std::make_unique<DumpHandler>(fileHandle);
-            break;
+            return std::make_unique<DumpHandler>(fileHandle, fileType);
         }
         case PLDM_FILE_TYPE_CERT_SIGNING_REQUEST:
         case PLDM_FILE_TYPE_SIGNED_CERT:
         case PLDM_FILE_TYPE_ROOT_CERT:
         {
             return std::make_unique<CertHandler>(fileHandle, fileType);
-            break;
+        }
+        case PLDM_FILE_TYPE_PROGRESS_SRC:
+        {
+            return std::make_unique<ProgressCodeHandler>(fileHandle);
         }
         default:
         {
