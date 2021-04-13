@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2003,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2003,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,8 +165,9 @@ void PllDomain::addCallout(STEP_CODE_DATA_STRUCT& io_sc,
         PRDcallout clockCallout { chip->getTrgt(), clockType };
         io_sc.service_data->SetCallout(clockCallout, i_clockPri);
 
-        // Callout the processor.
-        io_sc.service_data->SetCallout(chip->getTrgt(), i_procPri);
+        // Callout the processor. Do not guard on low priority callouts.
+        io_sc.service_data->SetCallout(chip->getTrgt(), i_procPri,
+                                       MRU_LOW == i_procPri ? NO_GARD : GARD);
     }
 
     // Increment the threshold counter, if needed.

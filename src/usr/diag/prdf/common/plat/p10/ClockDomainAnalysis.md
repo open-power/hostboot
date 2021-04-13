@@ -153,14 +153,14 @@ planar (priority LOW) and procedure FSPSP86 to the callout list.
 if ( RCS OSC error on any chip in the domain )
 {
     call out the associated clock(s), HIGH
-    call out the processor(s), LOW
+    call out the processor(s), LOW, NO GUARD
 }
 else
 {
     if ( RCS unlock detect on non-primary clock on any chip in the domain )
     {
         call out the associated clock(s), HIGH
-        call out the processor(s), LOW
+        call out the processor(s), LOW, NO GUARD
     }
 
     if ( PLL unlock on more than one chip in the domain )

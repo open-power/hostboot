@@ -363,7 +363,6 @@ void __clearRcsAttns(ExtensibleChip* i_chip, bool i_clearOsc0, bool i_clearOsc1)
 /**
  * @brief  Clears attentions for the given error types.
  * @param  i_chip     A PROC chip.
- * @param  io_sc      The step code data struct.
  * @param  i_errTypes The types of errors to clear.
  * @return Non-SUCCESS on failure. SUCCESS, otherwise.
  */
@@ -468,7 +467,6 @@ void __maskPllUnlock(ExtensibleChip* i_chip)
 /**
  * @brief  Masks attentions for the given error types.
  * @param  i_chip     A PROC chip.
- * @param  io_sc      The step code data struct.
  * @param  i_errTypes The types of errors to mask.
  * @return Non-SUCCESS on failure. SUCCESS, otherwise.
  */
