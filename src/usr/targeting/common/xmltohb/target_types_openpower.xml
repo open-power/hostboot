@@ -203,7 +203,19 @@
       <id>CHASSIS_PLDM_ENTITY_ID_INFO</id>
     </attribute>
     <attribute>
+      <id>CORE_WEIGHT_TENTHS</id>
+    </attribute>
+    <attribute>
       <id>CUMULATIVE_PMCOMPLEX_RESET_COUNT</id>
+    </attribute>
+    <attribute>
+      <id>DIMM_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DIMM_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>DIMM_THROTTLE_TEMP_DEG_C</id>
     </attribute>
     <attribute>
       <id>HTMGT_INTERNAL_FLAGS</id>
@@ -227,6 +239,9 @@
       <id>IS_MPIPL_SUPPORTED</id>
     </attribute>
     <attribute>
+      <id>L3_WEIGHT_TENTHS</id>
+    </attribute>
+    <attribute>
       <id>MC_DRAM_ERROR_TEMP_DEG_C</id>
     </attribute>
     <attribute>
@@ -243,6 +258,33 @@
     </attribute>
     <attribute>
       <id>MC_EXT_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>MEMCTRL_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>MEMCTRL_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>MEMCTRL_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>MIN_MEM_UTILIZATION_THROTTLING</id>
+    </attribute>
+    <attribute>
+      <id>MIN_POWER_CAP_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>N_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>N_MAX_MEM_POWER_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
     </attribute>
     <attribute>
       <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
@@ -341,7 +383,43 @@
       <id>PMIC_THROTTLE_TEMP_DEG_C</id>
     </attribute>
     <attribute>
+      <id>PROC_DVFS_TEMP_DELTA_C</id>
+    </attribute>
+    <attribute>
+      <id>PROC_ERROR_TEMP_DELTA_C</id>
+    </attribute>
+    <attribute>
+      <id>PROC_IO_DVFS_TEMP_DELTA_C</id>
+    </attribute>
+    <attribute>
+      <id>PROC_IO_ERROR_TEMP_DELTA_C</id>
+    </attribute>
+    <attribute>
+      <id>PROC_IO_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>PROC_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>QUAD_WEIGHT_TENTHS</id>
+    </attribute>
+    <attribute>
+      <id>REGULATOR_EFFICIENCY_FACTOR</id>
+    </attribute>
+    <attribute>
+      <id>SOFT_MIN_POWER_CAP_WATTS</id>
+    </attribute>
+    <attribute>
       <id>SYSTEM_PLDM_ENTITY_ID_INFO</id>
+    </attribute>
+    <attribute>
+      <id>VRM_VDD_DVFS_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>VRM_VDD_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>VRM_VDD_READ_TIMEOUT_SEC</id>
     </attribute>
   </targetTypeExtension>
 
