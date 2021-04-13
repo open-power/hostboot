@@ -1665,6 +1665,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_HW555009_LOLDROP</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+    HW555009 - Mask off fallout LOLDROP reason from DL Fix for Jazzy Rabbit
+   </description>
+   <chipEcFeature>
+    <chip>
+     <name>ENUM_ATTR_NAME_P10</name>
+     <ec>
+       <value>0x10</value>
+       <test>GREATER_THAN</test>
+     </ec>
+    </chip>
+  </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW560078</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>

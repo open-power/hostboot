@@ -251,6 +251,7 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     fapi2::ATTR_OMI_CHANNEL_FAIL_ACTION_Type l_omi_fail_action = 0;
     fapi2::ATTR_CHIP_EC_FEATURE_USTLCFG_WRSTUCK_MITIGATION_Type l_wrstuck_support = false;
     fapi2::ATTR_CHIP_EC_FEATURE_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_Type l_doubledead_support = false;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW555009_LOLDROP_Type l_loldrop_support = false;
     bool l_subchannel_a_config = false;
     bool l_subchannel_b_config = false;
 
@@ -271,6 +272,11 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
                            mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
                            l_doubledead_support),
              "%s Failed to read ATTR_CHIP_EC_FEATURE_USTLCFG_LOL_DOUBLEDEAD_SUPPORT",
+             mss::c_str(i_target));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW555009_LOLDROP,
+                           mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                           l_loldrop_support),
+             "%s Failed to read ATTR_CHIP_EC_FEATURE_HW555009_LOLDROP",
              mss::c_str(i_target));
 
     // Perform all USTLFIR unmasks per RAS unmask spec
@@ -451,11 +457,13 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     FAPI_TRY(fapi2::putScom(i_target, scomt::mcc::USTL_USTLCFG, l_reg_data));
 
     // Configures the USTLLOLMASK register
-    // NOTE: These are outside of standard FIR procedure and are being configured due to p10 HW bugs
+    // NOTE: These enable checkers that set USTL_USTLFIR_CHANA/B_LOL_DROP_RECOVER
     FAPI_TRY(fapi2::getScom(i_target, scomt::mcc::USTL_USTLLOLMASK, l_reg_data));
 
     l_reg_data.insertFromRight<scomt::mcc::USTL_USTLLOLMASK_RECOVER_ENABLE_MASK, scomt::mcc::USTL_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN>
-    (0x22D860);
+    (0x22D060);
+    // Set chip EC dependent fields
+    workarounds::fir::setup_loldrop_masks(l_loldrop_support, l_reg_data);
 
     FAPI_TRY(fapi2::putScom(i_target, scomt::mcc::USTL_USTLLOLMASK, l_reg_data));
 

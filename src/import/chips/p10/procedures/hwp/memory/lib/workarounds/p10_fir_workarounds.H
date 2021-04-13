@@ -64,6 +64,14 @@ void set_wrstuck_mitigation( const bool i_wrstuck_support,
                              fapi2::buffer<uint64_t>& io_ustlcfg_data );
 
 ///
+/// @brief Function handling the chip_ec dependent setting of USTL_USTLLOLMASK
+/// @param[in] i_loldrop_support value of ATTR_CHIP_EC_FEATURE_HW555009_LOLDROP
+/// @param[in,out] io_ustllolmask_data buffer for USTLLOLMASK data
+///
+void setup_loldrop_masks( const bool i_loldrop_support,
+                          fapi2::buffer<uint64_t>& io_ustllolmask_data );
+
+///
 /// @brief Function handling the chip_ec default for ATTR_OMI_CHANNEL_FAIL_ACTION
 /// @param[in] i_target the MC target of the OMI channel FIRs in question
 /// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code
