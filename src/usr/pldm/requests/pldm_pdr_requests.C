@@ -720,10 +720,10 @@ errlHndl_t sendGracefulRebootRequest()
     // TODO RTC: 259581 Dynamically fetch this effecter from BMC instead of
     // assuming its value.
     const effector_id_t SOFTWARE_TERMINATION_STATUS_EFFECTER_ID = 0x0003;
+    const uint8_t GRACEFUL_REBOOT_STATE_FIELD = 0x06;
     std::vector<set_effecter_state_field> fields_to_set;
-    constexpr uint8_t graceful_reboot =
-            pldm_effecter_state_fields::PLDM_GRACEFUL_REBOOT;
-    fields_to_set.push_back({set_request::PLDM_REQUEST_SET, graceful_reboot});
+
+    fields_to_set.push_back({set_request::PLDM_REQUEST_SET, GRACEFUL_REBOOT_STATE_FIELD});
 
     return sendSetStateEffecterStatesRequest(SOFTWARE_TERMINATION_STATUS_EFFECTER_ID,
                                              fields_to_set);
