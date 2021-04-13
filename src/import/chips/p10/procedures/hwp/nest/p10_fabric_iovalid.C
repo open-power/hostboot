@@ -1299,7 +1299,7 @@ fapi2::ReturnCode p10_fabric_iovalid(
             ((i_update_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE)) ||
              (i_update_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE))))
         {
-            FAPI_DBG("Updating iovalid for link %s");
+            FAPI_DBG("Updating iovalid for link %s", l_targetStr);
 
             bool l_link_needs_retraining = false;
 
