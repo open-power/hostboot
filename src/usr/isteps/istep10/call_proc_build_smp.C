@@ -51,6 +51,7 @@
 #include <p10_build_smp.H>
 
 #include <secureboot/trustedbootif.H>
+#include <secureboot/service.H>
 #include <p10_scom_proc.H>
 #include <sys/time.h>
 #include <istepHelperFuncs.H>
@@ -593,6 +594,7 @@ void checkForSecurityAccessMismatch(const TargetHandleList& i_secondaryProcs,
                 curproc->setAttr<ATTR_SBE_COMPROMISED_EID>(l_errl->eid());
             }
 
+            SECUREBOOT::addSecurityRegistersToErrlog(l_errl);
             l_errl->collectTrace(ISTEP_COMP_NAME);
 
             // IPL should be able to continue, so just log the mismatch error
@@ -756,6 +758,7 @@ void retrieveAndExtendSecondaryMeasurements(
             }
             poison_eid = l_errl->eid();
             l_errl->collectTrace(ISTEP_COMP_NAME);
+            SECUREBOOT::addSecurityRegistersToErrlog(l_errl);
 
             // allow the istep to continue for just a mismatch error
             errlCommit(l_errl, ISTEP_COMP_ID);

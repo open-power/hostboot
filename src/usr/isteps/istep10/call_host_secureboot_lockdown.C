@@ -197,6 +197,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 // Associate the previous error with this one so as not
                 // to report a new problem
                 l_err->plid(l_sbe_compromised_eid);
+                SECUREBOOT::addSecurityRegistersToErrlog(l_err);
                 captureError(l_err, l_istepError, ISTEP_COMP_ID, l_proc);
 
                 // no sense in continuing on this compromised proc
