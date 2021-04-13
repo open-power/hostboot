@@ -123,7 +123,7 @@ class SbeFFDCParser
         const uint16_t iv_ffdcMagicByte = 0xFFDC;
         const uint8_t iv_ffdcWordLen = 4;
         const uint8_t iv_headerWordInBytes = iv_ffdcWordLen * 2;
-        const uint8_t iv_ffdcPackageSize = 2;
+        const uint8_t iv_ffdcPackageSize = 3;
 
         /**
          * @brief Store the data words found in FFDC package

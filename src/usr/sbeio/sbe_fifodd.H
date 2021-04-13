@@ -556,7 +556,6 @@ class SbeFifo
          */
         errlHndl_t performFifoReset(TARGETING::Target * i_target);
 
-
     protected:
 
          /**
@@ -588,9 +587,9 @@ class SbeFifo
         void * iv_ffdcPackageBuffer;
 
          /**
-          * @brief FFDC package needs to be 2 pages
+          * @brief FFDC package needs to be 3 pages
           */
-        const uint8_t ffdcPackageSize = 2;
+        const uint8_t ffdcPackageSize = 3;
 
         /**
          * @brief zero out the FFDC package buffer
