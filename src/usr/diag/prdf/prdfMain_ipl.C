@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@
 #include <prdfPlatServices.H>
 #include <prdfOcmbDataBundle.H>
 #include <prdfMemBgScrub.H>
+
+#include <fapiPlatTrace.H> // for FAPI_TRACE_NAME
 
 using namespace TARGETING;
 using namespace HWAS;

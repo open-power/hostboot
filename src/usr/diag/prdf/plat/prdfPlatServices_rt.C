@@ -56,6 +56,7 @@
 #include <exp_rank.H>
 #include <kind.H>
 #include <hwp_wrappers.H>
+#include <plat_hwp_invoker.H>
 
 //------------------------------------------------------------------------------
 

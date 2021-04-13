@@ -38,16 +38,15 @@
  * this header file.
  */
 
+#include <errlentry.H>
+#include <hwas/common/hwasCallout.H>
+
 #include <prdfTargetServices.H> // must include all common targeting code
 #include <prdfMemConst.H>
 #include <prdfTimer.H>
 #include <prdfParserEnums.H>
 #include <prdfMemSymbol.H>
 #include <prdfMemDqBitmap.H>
-
-#include <plat_hwp_invoker.H>
-
-#include <errlentry.H>
 #include <prdfCalloutMap.H>
 
 //------------------------------------------------------------------------------

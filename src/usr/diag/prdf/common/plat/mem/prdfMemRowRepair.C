@@ -35,6 +35,7 @@
 #include <target_types.H>
 
 #ifdef __HOSTBOOT_MODULE
+#include <plat_hwp_invoker.H>
 #include <rowRepairsFuncs.H>
 #endif // __HOSTBOOT_MODULE
 

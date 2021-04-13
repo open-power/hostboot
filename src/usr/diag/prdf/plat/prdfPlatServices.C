@@ -64,6 +64,7 @@
 #include <kind.H>
 #include <hwp_wrappers.H>
 #include <exp_deploy_row_repairs.H>
+#include <plat_hwp_invoker.H>
 
 #ifdef CONFIG_NVDIMM
 #include <nvdimm.H>
