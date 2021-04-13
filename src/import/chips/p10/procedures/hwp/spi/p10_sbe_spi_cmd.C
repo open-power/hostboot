@@ -714,7 +714,8 @@ fapi2::ReturnCode spi_tpm_write_with_wait_internal( SpiControlHandle& i_handle,
     FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, startWriteCmd.val));
 
 
-    // wait until sequence index 3 has executed
+    // Wait until sequence index 3 has executed (TPM finished
+    // inserting wait states)
     rc = spi_wait_for_seq_index_pass(i_handle, 3);
 
     if (rc)
@@ -925,6 +926,18 @@ fapi2::ReturnCode spi_tpm_read_internal_with_wait( SpiControlHandle& i_handle,
         FAPI_DBG("spi_wait_for_tdr_empty() done, TDR 0");
         FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, 0x0ULL));
         FAPI_DBG("TDR 0 done");
+    }
+
+    // Wait until sequence index 3 has executed (TPM finished
+    // inserting wait states)
+    rc = spi_wait_for_seq_index_pass(i_handle, 3);
+
+    if (rc)
+    {
+        FAPI_ERR("Error in wait_for_seq_index_pass, rc: 0x%08X",
+                 static_cast<uint32_t>(rc));
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
     }
 
     //receive data
