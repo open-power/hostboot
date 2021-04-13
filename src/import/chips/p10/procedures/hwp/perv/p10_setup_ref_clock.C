@@ -162,6 +162,7 @@ fapi2::ReturnCode p10_setup_ref_clock(const
 
     FAPI_DBG("Set up transmit refclock termination");
     l_read_reg.flush<0>();
+    l_read_reg.insert<24, 6>(l_ne_term_strength);
 
     if (l_ne_term_site == fapi2::ENUM_ATTR_SYS_CLK_NE_TERMINATION_SITE_PROC)
     {
@@ -169,7 +170,6 @@ fapi2::ReturnCode p10_setup_ref_clock(const
                     fapi2::SETUP_REF_CLOCK_NE_TERM_UNAVAILABLE().set_PROC_CHIP(i_target_chip),
                     "System planar requires internal near-end refclock termination, "
                     "but processor does not support this.");
-        l_read_reg.insert<24, 6>(l_ne_term_strength);
         l_read_reg.setBit<30>();
     }
 
