@@ -196,13 +196,13 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // OCC content
         memset (&l_occppb , 0, sizeof (OCCPstateParmBlock_t));
 
-        //if PSTATES_MODE is off then we dont need to execute further to collect
+        //if PSTATES_MODE is off then we don't need to execute further to collect
         //the data.
-        if (l_pmPPB->isPstateModeEnabled())
+        if (!(l_pmPPB->isPstateModeEnabled()))
         {
             FAPI_INF("Pstate mode is to not boot the PGPE.  Thus, none of the parameter blocks will be constructed");
 
-            // Set the io_size to 0 so that memory allocation issues won't ;be
+            // Set the io_size to 0 so that memory allocation issues won't be
             // detected by the caller.
             io_size = 0;
             break;
@@ -1310,14 +1310,25 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         {
             //Translate pau  frequency to pstate
 
-            FAPI_TRY(freq2pState((iv_attrs.attr_pau_frequency_mhz * 1000),
-                    &l_ps, ROUND_FAST));
+            l_rc = freq2pState((iv_attrs.attr_pau_frequency_mhz * 1000),
+                    &l_ps, ROUND_FAST);
+            if (l_rc)
+            {
+                // TODO put in notification controls
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
         }
         else
         {
             //Translate safe mode frequency to pstate
-            FAPI_TRY(freq2pState((iv_attrs.attr_pm_safe_frequency_mhz * 1000),
-                    &l_ps, ROUND_FAST));
+            l_rc = freq2pState((iv_attrs.attr_pm_safe_frequency_mhz * 1000),
+                    &l_ps, ROUND_FAST);
+
+            if (l_rc)
+            {
+                // TODO put in notification controls
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
         }
 
         //Compute real frequency
@@ -2703,7 +2714,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         FAPI_INF("#V data = 0x%04X  %-6d (%s)", l_temp, l_temp, outstr);
         l_buffer_inc += 2;
 
-        strcpy(outstr, "avdd_tdp_dc_10ma (used)");
+        strcpy(outstr, "avdd_tdp_ac_10ma (used)");
         l_temp = *l_buffer_inc;
         FAPI_INF("#V data = 0x%04X  %-6d (%s)", l_temp, l_temp, outstr);
         l_buffer_inc += 2;
@@ -2905,6 +2916,64 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 iv_vddUTFreq,
                 iv_vddFmaxFreq,
                 iv_vddFmaxFreq);
+
+        // Validate the Model Data Flag(6) to see if WOF can be enabled
+        // with the TDP currents present
+        fapi2::ATTR_CHIP_EC_FEATURE_PDV_CURRENT_MARK_Type l_pdv_current_mark;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PDV_CURRENT_MARK,
+                    iv_procChip,
+                    l_pdv_current_mark),
+                "Error from FAPI_ATTR_GET for attribute ATTR_CHIP_EC_FEATURE_PDV_CURRENT_MARK");
+
+        if (l_pdv_current_mark && is_wof_enabled())
+        {
+#ifdef __HOSTBOOT_MODULE
+            FAPI_INF("Running TDP current mark checking under FW controls");
+            fapi2::ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_Type l_pdv_tdp_current_mode;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE,
+                    FAPI_SYSTEM,
+                    l_pdv_tdp_current_mode),
+                "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_PDV_TDP_CURRENT_FW_VALIDATION_MODE");
+#else
+            FAPI_INF("Running TDP current mark checking under Lab controls");
+            fapi2::ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE_Type l_pdv_tdp_current_mode;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE,
+                    FAPI_SYSTEM,
+                    l_pdv_tdp_current_mode),
+                "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE_Type");
+#endif
+
+            if (l_pdv_tdp_current_mode != fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_OFF )
+            {
+                if ((p_poundV_data->static_rails.modelDataFlag & 0x02) != 0x02)
+                {
+                    disable_wof();
+
+                    if ( l_pdv_tdp_current_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_WARN )
+                    {
+                        FAPI_INF("WARNING: TDP current mark is off for this DD level.  WOF Disabled.");
+                    }
+
+                    if ( l_pdv_tdp_current_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_INFO )
+                    {
+                        FAPI_ASSERT_NOEXIT(false,
+                                fapi2::PSTATE_PB_PDV_TDP_CURRENT_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                .set_CHIP_TARGET(iv_procChip)
+                                .set_MODEL_DATA_FLAG(p_poundV_data->static_rails.modelDataFlag),
+                                "Pstate Parameter Block #V TDP Current Marker fail");
+                    }
+                    else if ( l_pdv_tdp_current_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_FAIL )
+                    {
+                        FAPI_ERR("ERROR: TDP current mark is off for this DD level.  WOF Disabled.");
+                        FAPI_ASSERT(false,
+                                fapi2::PSTATE_PB_PDV_TDP_CURRENT_ERROR()
+                                .set_CHIP_TARGET(iv_procChip)
+                                .set_MODEL_DATA_FLAG(p_poundV_data->static_rails.modelDataFlag),
+                                "Pstate Parameter Block #V TDP Current Marker fail");
+                    }
+                }
+            }
+        }
     }
     while(0);
 
@@ -3247,10 +3316,12 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 void PlatPmPPB::disable_pstates()
 {
+    FAPI_INF(">>> Pstates being disabled.")
+    FAPI_INF(">>> disable_pstates %d", iv_pstates_enabled);
     if (iv_pstates_enabled)
     {
-     FAPI_INF(">>> Pstates being disabled.")
-     iv_pstates_enabled = false;
+        FAPI_INF(">>> Pstates going from enabled to disabled.")
+        iv_pstates_enabled = false;
     }
 
     disable_resclk();
@@ -3377,7 +3448,13 @@ void PlatPmPPB::disable_wof_throttle()
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_pstates_enabled()
 {
-     return iv_pstates_enabled;
+    if (!isPstateModeEnabled())
+    {
+        FAPI_INF(">>> Pstates being disabled due to isPstateModeEnabled not being true.")
+        iv_pstates_enabled = false;
+    }
+
+    return iv_pstates_enabled;
 }
 
 ///////////////////////////////////////////////////////////
@@ -3390,7 +3467,7 @@ bool PlatPmPPB::is_resclk_enabled()
         FAPI_DBG(">>> Reslck disabled due to system attribute control.")
         iv_resclk_enabled = false;
     }
-     return iv_resclk_enabled;
+    return iv_resclk_enabled;
 }
 
 ///////////////////////////////////////////////////////////
@@ -3578,7 +3655,8 @@ fapi2::ReturnCode PlatPmPPB::update_biased_pstates()
 {
     FAPI_INF(">>>>>>>>>>>>> update_pstates");
 
-    Pstate      l_ps;
+    fapi2::ReturnCode   l_rc;
+    Pstate              l_ps;
 
     FAPI_INF("PSTATE Reference: 0x%X (%d)",
         iv_attrs.attr_pstate0_freq_mhz, iv_attrs.attr_pstate0_freq_mhz);
@@ -3587,8 +3665,14 @@ fapi2::ReturnCode PlatPmPPB::update_biased_pstates()
 
     for (int i = 0; i < NUM_PV_POINTS; i++)
     {
-
-        FAPI_TRY(freq2pState(iv_attr_mvpd_poundV_biased[i].frequency_mhz*1000, &l_ps, ROUND_SLOW));
+        l_rc = freq2pState(iv_attr_mvpd_poundV_biased[i].frequency_mhz*1000, &l_ps, ROUND_SLOW);
+        if (l_rc)
+        {
+            disable_pstates();
+            // TODO: put in notification controls
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            goto fapi_try_exit;
+        }
 
         iv_attr_mvpd_poundV_biased[i].pstate = l_ps;
 
@@ -3895,7 +3979,8 @@ fapi_try_exit:
 
     if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
     {
-        iv_wof_enabled = false;
+        disable_wof();
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
 
     return fapi2::current_err;
@@ -4257,6 +4342,7 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 {
+    fapi2::ReturnCode                        l_rc;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_safe_mode_freq_mhz;
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type    l_safe_mode_mv;
@@ -4382,7 +4468,14 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 
     // Calculate safe operational pstate.  This must be rounded to create
     // a faster Pstate than the floor
-    FAPI_TRY(freq2pState(l_safe_op_freq_mhz*1000, &l_safe_op_ps, ROUND_FAST));
+    l_rc = freq2pState(l_safe_op_freq_mhz*1000, &l_safe_op_ps, ROUND_FAST, PPB_WARN);
+    if (l_rc)
+    {
+        disable_pstates();
+        // TODO: put in notification controls
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        goto fapi_try_exit;
+    }
 
     // Given the Pstate might round the frequency, get that frequency
     pState2freq(l_safe_op_ps, &l_safe_mode_op_ps2freq_khz);
@@ -4474,7 +4567,13 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     }
 
     // Recalculate the Pstate as jump uplifts may have changed the previous result
-    FAPI_TRY(freq2pState(iv_attrs.attr_pm_safe_frequency_mhz*1000, &l_safe_mode_ps, ROUND_FAST));
+    l_rc = freq2pState(iv_attrs.attr_pm_safe_frequency_mhz*1000,
+                        &l_safe_mode_ps, ROUND_FAST, PPB_WARN);
+    if (l_rc)
+    {
+        // TODO: put in notification controls
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
 
     FAPI_INF ("l_safe_mode_ps 0x%x (%d)",l_safe_mode_ps, l_safe_mode_ps);
 
@@ -4576,6 +4675,7 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::compute_retention_vid()
 {
+    fapi2::ReturnCode           l_rc = fapi2::FAPI2_RC_SUCCESS;
     const uint32_t              RVRM_MIN_MV = 448;
     const uint32_t              RVRM_MAX_MV = 848;
 
@@ -4587,7 +4687,12 @@ fapi2::ReturnCode PlatPmPPB::compute_retention_vid()
     FAPI_INF("> PlatPmPPB:compute_retention_voltage");
 
     // Needs kHz
-    FAPI_TRY(freq2pState (iv_vddPsavFreq * 1000, &l_psave_ps, ROUND_FAST));
+    l_rc = freq2pState (iv_vddPsavFreq * 1000, &l_psave_ps, ROUND_FAST);
+    if (l_rc)
+    {
+        FAPI_INF("PowerSave pointer frequency cannot be converted to a Pstate :  %d", iv_vddPsavFreq);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
 
     l_psave_mv = ps2v_mv(l_psave_ps, VDD, VPD_PT_SET_RAW);
 
@@ -4787,7 +4892,8 @@ uint32_t PlatPmPPB::ps2v_mv(const Pstate i_pstate,
 fapi2::ReturnCode PlatPmPPB::freq2pState (
     const uint32_t i_freq_khz,
     Pstate* o_pstate,
-    const FREQ2PSTATE_ROUNDING i_round)
+    const FREQ2PSTATE_ROUNDING i_round,
+    const PPB_ERROR i_error_mode)
 {
     float deltaf = 0;
     float pstate32 = 0;
@@ -4795,17 +4901,59 @@ fapi2::ReturnCode PlatPmPPB::freq2pState (
 
     deltaf = (float)iv_reference_frequency_khz - (float)i_freq_khz;
 
-    FAPI_ASSERT(deltaf >= 0,
-                fapi2::PSTATE_PB_FREQ_GT_PSTATE0_FREQ()
-                   .set_CHIP_TARGET(iv_procChip)
-                   .set_FREQ_KHZ(i_freq_khz)
-                   .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
-                "Pstate conversion frequency is greater than Pstate 0 reference");
-    FAPI_ASSERT(iv_frequency_step_khz,
-                fapi2::PSTATE_PB_PSTATE_STEP_EQ_0()
-                   .set_CHIP_TARGET(iv_procChip)
-                   .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
-               "Pstate step size is 0");
+    if (!(deltaf >= 0))
+    {
+        if (i_error_mode != PPB_OFF)
+        {
+            if (i_error_mode != PPB_FAIL)
+                FAPI_INF("WARNING: iv_reference_frequency_khz %d;  i_freq_khz: %d; deltaf %f",
+                            iv_reference_frequency_khz, i_freq_khz, deltaf);
+
+            if (i_error_mode == PPB_INFO)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                            fapi2::PSTATE_PB_FREQ_GT_PSTATE0_FREQ()
+                               .set_CHIP_TARGET(iv_procChip)
+                               .set_FREQ_KHZ(i_freq_khz)
+                               .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
+                            "Pstate conversion frequency is greater than Pstate 0 reference");
+            }
+            if (i_error_mode == PPB_FAIL)
+            {
+                FAPI_ERR("ERROR: iv_reference_frequency_khz %d;  i_freq_khz: %d; deltaf %f",
+                            iv_reference_frequency_khz, i_freq_khz, deltaf);
+                FAPI_ASSERT(false,
+                            fapi2::PSTATE_PB_FREQ_GT_PSTATE0_FREQ()
+                               .set_CHIP_TARGET(iv_procChip)
+                               .set_FREQ_KHZ(i_freq_khz)
+                               .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
+                            "Pstate conversion frequency is greater than Pstate 0 reference");
+            }
+        }
+    }
+
+    if (i_error_mode != PPB_OFF)
+    {
+        FAPI_INF("iv_reference_frequency_khz %d;  i_freq_khz: %d; deltaf %f",
+                    iv_reference_frequency_khz, i_freq_khz, deltaf);
+
+        if (i_error_mode == PPB_INFO)
+        {
+            FAPI_ASSERT_NOEXIT(iv_frequency_step_khz,
+                        fapi2::PSTATE_PB_PSTATE_STEP_EQ_0()
+                           .set_CHIP_TARGET(iv_procChip)
+                           .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
+                       "Pstate step size is 0");
+        }
+        if (i_error_mode == PPB_FAIL)
+        {
+            FAPI_ASSERT(iv_frequency_step_khz,
+                        fapi2::PSTATE_PB_PSTATE_STEP_EQ_0()
+                           .set_CHIP_TARGET(iv_procChip)
+                           .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
+                       "Pstate step size is 0");
+        }
+    }
 
     // ----------------------------------
     // compute pstate for given frequency
@@ -4842,28 +4990,67 @@ fapi2::ReturnCode PlatPmPPB::freq2pState (
     if (pstate32 < PSTATE_MIN)
     {
         *o_pstate = PSTATE_MIN;
-        FAPI_ASSERT_NOEXIT(false,
-                fapi2::PSTATE_PB_XLATE_UNDERFLOW(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                   .set_CHIP_TARGET(iv_procChip)
-                   .set_FREQ_KHZ(i_freq_khz)
-                   .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz)
-                   .set_PSTATE(pstate32)
-                   .set_PSTATE_MIN(PSTATE_MIN),
-               "Pstate is less than PSTATE_MIN");
+        if (i_error_mode != PPB_OFF)
+        {
+            if (i_error_mode == PPB_WARN)
+                FAPI_INF("WARNING: Pstate is less than PSTATE_MIN");
 
+            if (i_error_mode == PPB_INFO)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                        fapi2::PSTATE_PB_XLATE_UNDERFLOW(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                           .set_CHIP_TARGET(iv_procChip)
+                           .set_FREQ_KHZ(i_freq_khz)
+                           .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz)
+                           .set_PSTATE(pstate32)
+                           .set_PSTATE_MIN(PSTATE_MIN),
+                       "Pstate is less than PSTATE_MIN");
+            }
+            if (i_error_mode == PPB_FAIL)
+            {
+                FAPI_ASSERT(false,
+                        fapi2::PSTATE_PB_XLATE_UNDERFLOW()
+                           .set_CHIP_TARGET(iv_procChip)
+                           .set_FREQ_KHZ(i_freq_khz)
+                           .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz)
+                           .set_PSTATE(pstate32)
+                           .set_PSTATE_MIN(PSTATE_MIN),
+                       "Pstate is less than PSTATE_MIN");
+             }
+        }
     }
 
     if (pstate32 > PSTATE_MAX)
     {
         *o_pstate = PSTATE_MAX;
-        FAPI_ASSERT_NOEXIT(false,
-                fapi2::PSTATE_PB_XLATE_OVERFLOW(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                   .set_CHIP_TARGET(iv_procChip)
-                   .set_FREQ_KHZ(i_freq_khz)
-                   .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz)
-                   .set_PSTATE(pstate32)
-                   .set_PSTATE_MAX(PSTATE_MIN),
-               "Pstate is less than PSTATE_MIN");
+        if (i_error_mode != PPB_OFF)
+        {
+            if (i_error_mode == PPB_WARN)
+                FAPI_INF("WARNING: Pstate is greater than PSTATE_MAX");
+
+            if (i_error_mode == PPB_INFO)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                        fapi2::PSTATE_PB_XLATE_OVERFLOW(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                           .set_CHIP_TARGET(iv_procChip)
+                           .set_FREQ_KHZ(i_freq_khz)
+                           .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz)
+                           .set_PSTATE(pstate32)
+                           .set_PSTATE_MAX(PSTATE_MIN),
+                       "Pstate is greater than PSTATE_MAX");
+            }
+            if (i_error_mode == PPB_FAIL)
+            {
+                FAPI_ASSERT(false,
+                        fapi2::PSTATE_PB_XLATE_OVERFLOW()
+                           .set_CHIP_TARGET(iv_procChip)
+                           .set_FREQ_KHZ(i_freq_khz)
+                           .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz)
+                           .set_PSTATE(pstate32)
+                           .set_PSTATE_MAX(PSTATE_MIN),
+                       "Pstate is greater than PSTATE_MAX");
+             }
+        }
     }
 
 fapi_try_exit:

@@ -70,6 +70,16 @@ enum FREQ2PSTATE_ROUNDING
     ROUND_FAST,
     ROUND_SLOW
 };
+
+enum PPB_ERROR
+{
+    PPB_OFF,
+    PPB_WARN,
+    PPB_INFO,
+    PPB_FAIL
+};
+
+
 typedef uint8_t Pstate;
 #define PSTATE_LT_PSTATE_MIN 0x00778a03
 #define PSTATE_GT_PSTATE_MAX 0x00778a04
@@ -411,7 +421,8 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode  freq2pState (const uint32_t freq_khz,
                                         Pstate* o_pstate,
-                                        const FREQ2PSTATE_ROUNDING i_round = ROUND_SLOW);
+                                        const FREQ2PSTATE_ROUNDING i_round = ROUND_SLOW,
+                                        const PPB_ERROR i_error_mode = PPB_WARN);
 
         /// -----------------------------------------------------------------------
         /// @brief Converts a pstate number to a frequency
@@ -711,7 +722,7 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         bool isPstateModeEnabled()
         {
-            return((iv_attrs.attr_pstate_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF) ?
+            return((iv_attrs.attr_pstate_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF) ?
                    true : false);
         } //end of isPstateModeEnabled
 

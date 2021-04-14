@@ -1613,6 +1613,62 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Defines the mode of #V TDP current checking via Model Data(6) in relationship
+    to system reaction under firmware.
+
+    FAIL - if not ATTR_SYSTEM_WOF_DISABLE, fails the IPL
+    INFO - if not ATTR_SYSTEM_WOF_DISABLE, error messages to traces; Info
+                error log; WOF is disabled; IPL continues(product default)
+    WARN - if not ATTR_SYSTEM_WOF_DISABLE, error messages to traces; no error
+            logs, WOF is disabled, IPL continues.
+    OFF - no checking performed.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        FAIL = 0,
+        INFO = 1,
+        WARN = 2,
+        OFF  = 3
+    </enum>
+    <default>INFO</default>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Defines the mode of #V TDP current checking via Model Data(6) in relationship
+    to system reaction under Cronus.
+
+    FAIL - if not ATTR_SYSTEM_WOF_DISABLE, fails the IPL
+    INFO - if not ATTR_SYSTEM_WOF_DISABLE, error messages to traces; Info
+                error log; WOF is disabled; IPL continues
+    WARN - if not ATTR_SYSTEM_WOF_DISABLE, error messages to traces; no error
+            logs, WOF is disabled, IPL continues.(lab default)
+    OFF - no checking performed.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        FAIL = 0,
+        INFO = 1,
+        WARN = 2,
+        OFF  = 3
+    </enum>
+    <default>WARN</default>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_PBAX_BRDCST_ID_VECTOR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>

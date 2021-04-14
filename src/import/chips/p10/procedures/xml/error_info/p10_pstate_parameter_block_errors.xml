@@ -695,4 +695,17 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_PDV_TDP_CURRENT_ERROR</rc>
+    <description>The #V TDP Current Mark is not set for an enabled DD level. WOF
+    is disabled.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MODEL_DATA_FLAG</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

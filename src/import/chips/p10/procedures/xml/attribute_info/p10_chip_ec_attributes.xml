@@ -1786,6 +1786,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_PDV_CURRENT_MARK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Indicates that #V Model Data(6) is mark for accurate TDP currents.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_DYN_CORE_LPAR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
