@@ -159,7 +159,11 @@ class PnorRP
     enum
     {
         BASE_VADDR = VMM_VADDR_PNOR_RP, /**< 2GB = 0x80000000*/
+#ifndef CONFIG_FILE_XFER_VIA_PLDM
         TOTAL_SIZE = 64*MEGABYTE, /**< Allocate 64 MB (0x4000000)*/
+#else
+        TOTAL_SIZE = VMM_SIZE_RESERVED_PER_SECTION*PNOR::NUM_SECTIONS,
+#endif
         LAST_VADDR = BASE_VADDR + TOTAL_SIZE,  /**< End of our VA range */
     };
 
@@ -236,7 +240,27 @@ class PnorRP
      */
     errlHndl_t  findTOC(size_t & o_tocSize);
 
-    /*
+    /**
+     * @brief Request the PLDM file table from the BMC and use it to fill
+     *        in information about the various PNOR sections in the iv_TOC
+     *        member of PnorRP.
+     *
+     * @return Contains the error, if one occurred, returned from the getFileTable
+     *         PLDM request. Otherwise it will return nullptr.
+     */
+    errlHndl_t populateTOC(void);
+
+    /**
+     * @brief Perform mm_alloc_block operations in order to allocate
+     *        virtual memory blocks that PnorRP will use and register
+     *        the space to be flushed on shutdown. When using the
+     *        pnor_pldmdd this function will also set permissions
+     *
+     * @return Contains an error, if one occurred, otherwise it will return nullptr.
+     */
+    errlHndl_t setupPnorVMM(void);
+
+    /**
      * @brief determines the sides information and fills the class variable
      *          iv_side
      *

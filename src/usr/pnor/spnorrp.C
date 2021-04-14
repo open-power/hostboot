@@ -129,6 +129,66 @@ SPnorRP::~SPnorRP()
     TRACDCOMP(g_trac_pnor, "< SPnorRP::~SPnorRP" );
 }
 
+SPnorRP* SPnorRP::setupVmm(const PNOR::SectionData_t * const i_TOC)
+{
+    errlHndl_t l_errhdl = nullptr;
+    for(int i = 0; i < PNOR::NUM_SECTIONS; i++)
+    {
+        if(i_TOC[i].size == 0)
+        {
+            continue;
+        }
+        const auto temp_vaddr = reinterpret_cast<void*>(i_TOC[i].virtAddr +
+                                                        VMM_VADDR_SPNOR_DELTA);
+
+        const auto spnor_vaddr = reinterpret_cast<void*>(i_TOC[i].virtAddr +
+                                                        (2*VMM_VADDR_SPNOR_DELTA));
+
+        // create a Block for temp space
+        l_errhdl = allocBlock(NULL,
+                              temp_vaddr,
+                              i_TOC[i].size );
+        if( l_errhdl )
+        {
+            break;
+        }
+
+        // set permissions for temp space
+        l_errhdl = setPermission(temp_vaddr,
+                                 i_TOC[i].size,
+                                 NO_ACCESS);
+        if ( l_errhdl )
+        {
+            break;
+        }
+
+        // create a block for secure space
+        l_errhdl = allocBlock(iv_msgQ,
+                              spnor_vaddr,
+                              i_TOC[i].size );
+        if( l_errhdl )
+        {
+             break;
+        }
+
+        // set permissions for secure space
+        l_errhdl = setPermission(spnor_vaddr,
+                                 i_TOC[i].size,
+                                 NO_ACCESS);
+        if ( l_errhdl )
+        {
+            break;
+        }
+    }
+
+    if( l_errhdl )
+    {
+        iv_startupRC = l_errhdl->reasonCode();
+        errlCommit(l_errhdl,PNOR_COMP_ID);
+    }
+    return this;
+}
+
 /**
  * @brief  A wrapper for mm_alloc_block that encapsulates error log creation.
  */
@@ -256,6 +316,7 @@ void SPnorRP::initDaemon()
 
         assert(rc == 0);
 
+#ifndef CONFIG_FILE_XFER_VIA_PLDM
         // create a Block for temp space
         l_errhdl = allocBlock( NULL, reinterpret_cast<void*>(TEMP_VADDR),
                                                              PNOR_SIZE );
@@ -287,6 +348,7 @@ void SPnorRP::initDaemon()
         {
             break;
         }
+#endif
 
         // start task to wait on the queue
         task_create( secure_wait_for_message, NULL );

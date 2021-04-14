@@ -68,6 +68,20 @@ class SPnorRP
         return false;
     };
 
+    /**
+     * @brief Perform mm_alloc_block operations in order to allocate
+     *        virtual memory blocks that SPnorRP will use. This function
+     *        is only required when using pnor_pldmdd as our pnor device
+     *        driver.
+     * @param[in]  i_TOC Pointer to an array of SectionData_t. PnorRP
+     *                   should be passing its populated iv_TOC instance
+     *                   variable to this function
+     * @return Returns a pointer to this SPnorRP instance
+     *
+     * @note Any errors that occur will be committed within this function
+     */
+    SPnorRP* setupVmm(const PNOR::SectionData_t * const i_TOC);
+
 
   protected:
     /**

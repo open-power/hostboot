@@ -49,14 +49,16 @@ PLDM_BASE_COMMON_OBJS += bios_table.o
 PLDM_BASE_COMMON_OBJS += hb_bios_attrs.o
 PLDM_BASE_COMMON_OBJS += pldm_bios_attr_requests.o
 PLDM_BASE_COMMON_OBJS += pldm_tid_requests.o
+PLDM_BASE_COMMON_OBJS += file_io.o
+PLDM_BASE_COMMON_OBJS += pldm_fileio_requests.o
 
 PLDM_EXTENDED_COMMON_OBJS += fru.o
 PLDM_EXTENDED_COMMON_OBJS += platform.o
-PLDM_EXTENDED_COMMON_OBJS += file_io.o
+
 PLDM_EXTENDED_COMMON_OBJS += pdr.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru_requests.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_pdr_requests.o
-PLDM_EXTENDED_COMMON_OBJS += pldm_fileio_requests.o
+
 PLDM_EXTENDED_COMMON_OBJS += hb_fru.o
 PLDM_EXTENDED_COMMON_OBJS += hb_pdrs.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_responder.o

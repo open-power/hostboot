@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -114,6 +114,11 @@ namespace PNOR
 
         // pnor_ipmidd.C
         MOD_IPMIPNORDD_SEND_MESSAGE     = 0xF0, /**< PnorDD::sendMessage */
+
+        // pnorrp.C
+        MOD_PNORRP_SETUP_PNOR_VMM       = 0xF1, /**< setupPnorVMM */
+        MOD_PNORRP_SETUP_PNOR_VMM_PLDM  = 0xF2, /**< setupPnorVMM */
+        MOD_POPULATE_TOC                = 0xF3, /**< populateTOC */
     };
 
     enum PNORReasonCode

@@ -23,6 +23,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include <stdlib.h>
+#include <string.h>
 #include "pnorrp.H"
 #include "spnorrp.H"
 #include <pnor/pnor_reasoncodes.H>
@@ -55,6 +57,12 @@
 #include <secureboot/settings.H>
 #include <secureboot/header.H>
 #include <secureboot/trustedbootif.H>
+#endif
+
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+#include "pnor_pldm_utils.H"
+#include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
+#include <pldm/pldm_errl.H>
 #endif
 
 extern trace_desc_t* g_trac_pnor;
@@ -195,7 +203,11 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
 
     if( Singleton<PnorRP>::instance().didStartupFail(rc)
 #ifdef CONFIG_SECUREBOOT
+#ifndef CONFIG_FILE_XFER_VIA_PLDM
         || Singleton<SPnorRP>::instance().didStartupFail(rcs)
+#else
+        || Singleton<SPnorRP>::instance().setupVmm(Singleton<PnorRP>::instance().iv_TOC)->didStartupFail(rcs)
+#endif
 #endif
       )
     {
@@ -295,42 +307,260 @@ PnorRP::~PnorRP()
 
     TRACDCOMP(g_trac_pnor, "< PnorRP::~PnorRP" );
 }
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
 
-/**
- * @brief Initialize the daemon
- */
-void PnorRP::initDaemon()
+pldm_file_attr_table_entry * sectionIdFileTableLookup( const SectionId i_secId,
+                                                       const std::vector<uint8_t> & i_fileTable)
 {
-    TRACUCOMP(g_trac_pnor, "PnorRP::initDaemon> " );
-    errlHndl_t l_errhdl = NULL;
+    /* See PLDM for File Based I/O document for details */
+    // Up to 3 bytes of padding are added to the end of the table
+    // to make table 4 byte aligned. This is needed to correctly append
+    // the CRC32 checksum at the end of the entire table. Together
+    // these will be up to 7 bytes.
+    const size_t CHKSUM_PADDING = 7;
+    auto lid_id = PLDM_PNOR::getipl_lid_ids()[i_secId];
 
-    do
+    auto start_ptr = const_cast<uint8_t *>(i_fileTable.data());
+    auto end_ptr = start_ptr + i_fileTable.size() - CHKSUM_PADDING;
+
+    pldm_file_attr_table_entry * file_table_entry = nullptr;
+    bool match_found = false;
+
+    while(start_ptr < end_ptr)
     {
-        // create a message queue
-        iv_msgQ = msg_q_create();
+        file_table_entry =
+          reinterpret_cast<pldm_file_attr_table_entry *>(start_ptr);
 
-        INITSERVICE::registerShutdownEvent( PNOR_COMP_ID,
-                                            iv_msgQ,
-                                            PNOR::MSG_SHUTDOWN,
-                                            INITSERVICE::PNOR_RP_PRIORITY );
+        const size_t NAME_SZ = 8;
+        char entry_lid_ascii[NAME_SZ+1] = {0};
+        strncpy(entry_lid_ascii,
+                const_cast<const char *>(reinterpret_cast<char *>(&file_table_entry->file_attr_table_nst[0])),
+                NAME_SZ);
+        entry_lid_ascii[NAME_SZ] = '\0';
+        auto entry_lid_id = strtoul(reinterpret_cast<char *>(&entry_lid_ascii[0]), nullptr, 16);
 
+        if(entry_lid_id == lid_id)
+        {
+            match_found = true;
+            break;
+        }
+        else
+        {
+            start_ptr += sizeof(file_table_entry->file_handle);
+            start_ptr += sizeof(file_table_entry->file_name_length);
+            start_ptr += le16toh(file_table_entry->file_name_length);
+            start_ptr += sizeof(uint32_t); // FileSize
+            start_ptr += sizeof(uint32_t); // FileTraits
+        }
+    }
+
+    if(!match_found)
+    {
+        file_table_entry = nullptr;
+    }
+
+    return file_table_entry;
+}
+
+errlHndl_t PnorRP::populateTOC( void )
+{
+    using namespace PLDM_PNOR;
+    std::vector<uint8_t> file_table;
+    errlHndl_t l_errhdl = nullptr;
+
+    do{
+        // TODO RTC: 208802 call real getFileTable when BMC has support
+        // for populating response with hostfw IPL time lids.
+        //l_errhdl= PLDM::getFileTable(file_table);
+        l_errhdl = PLDM_PNOR::getFileTableLidsMockup(file_table);
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "An error occurred when we requested the PLDM file table from the BMC");
+            break;
+        }
+
+        // Use the file table to lookup information for each
+        // section listed in the enum SectionId defined in pnor_const.H
+        for(size_t i = 0; i < NUM_SECTIONS; i++)
+        {
+            auto section_id = static_cast<SectionId>(i);
+
+            iv_TOC[i].id        = static_cast<SectionId>(section_id);
+
+            if(getipl_lid_ids()[section_id] == INVALID_LID)
+            {
+                // If there is no lid associated with this section
+                // then skip this pnor section
+                continue;
+            }
+
+            iv_TOC[i].flashAddr = i * VMM_SIZE_RESERVED_PER_SECTION;
+            iv_TOC[i].virtAddr  = iv_TOC[i].flashAddr | BASE_VADDR;
+            iv_TOC[i].chip      = 0; // always default to chip 0
+
+            auto file_table_entry = sectionIdFileTableLookup(section_id,
+                                                             file_table);
+
+            if(file_table_entry == nullptr)
+            {
+                /*@
+                * @errortype
+                * @moduleid     PNOR::MOD_POPULATE_TOC
+                * @reasoncode   PNOR::RC_INVALID_SECTION
+                * @userdata1    Section ID we are looking up
+                * @userdata2    unused
+                * @devdesc      PnorRP::setupPnorVMM> Error from mm_alloc_block or mm_set_permission
+                * @custdesc     A problem occurred accessing boot firmware.
+                */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              PNOR::MOD_POPULATE_TOC,
+                              PNOR::RC_INVALID_SECTION,
+                              section_id,
+                              0,
+                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                l_errhdl->collectTrace(PNOR_COMP_NAME);
+                PLDM::addBmcErrorCallouts(l_errhdl);
+                break;
+            }
+
+            // file's name, size, and traits
+            uint8_t * entry_nst = &file_table_entry->file_attr_table_nst[0];
+
+            iv_TOC[i].size =
+                le32toh(*reinterpret_cast<uint32_t *>(entry_nst +
+                                              le16toh(file_table_entry->file_name_length)));
+            if( iv_TOC[i].size > VMM_SIZE_RESERVED_PER_SECTION)
+            {
+                /*@
+                * @errortype
+                * @moduleid     PNOR::MOD_POPULATE_TOC
+                * @reasoncode   PNOR::RC_SECTION_SIZE_IS_BIG
+                * @userdata1    Section
+                * @userdata2    Section Size
+                * @devdesc      File size reported by BMC is larger than our max supported.
+                * @custdesc     A problem occurred accessing boot firmware.
+                */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              PNOR::MOD_POPULATE_TOC,
+                              PNOR::RC_SECTION_SIZE_IS_BIG,
+                              i,
+                              iv_TOC[i].size,
+                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                l_errhdl->collectTrace(PNOR_COMP_NAME);
+                PLDM::addBmcErrorCallouts(l_errhdl);
+                break;
+            }
+            auto entry_traits =
+                le32toh(*reinterpret_cast<uint32_t *>(entry_nst +
+                                              le16toh(file_table_entry->file_name_length) +
+                                              sizeof(uint32_t)));
+
+            if(entry_traits & PLDM_PNOR::READ_ONLY)
+            {
+                iv_TOC[i].misc |= FFS_MISC_READ_ONLY;
+            }
+
+            iv_TOC[i].secure = PNOR::isEnforcedSecureSection(i);
+        }
+    }while(0);
+
+    return l_errhdl;
+}
+
+errlHndl_t PnorRP::setupPnorVMM(void)
+{
+    errlHndl_t l_errhdl = nullptr;
+    int rc = 0;
+    int i = 0;
+    bool alloc_fail = false;
+    for(i = 0; i < PNOR::NUM_SECTIONS; i++)
+    {
+        if(iv_TOC[i].size == 0)
+        {
+            continue;
+        }
+        // create a Block, passing in the message queue
+        rc = mm_alloc_block(iv_msgQ,
+                            reinterpret_cast<void *>(iv_TOC[i].virtAddr),
+                            iv_TOC[i].size );
+        if( rc )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRP::setupPnorVMM> Error from mm_alloc_block for address 0x%lx size 0x%x : rc=%d",
+                       iv_TOC[i].virtAddr, iv_TOC[i].size, rc );
+            alloc_fail = true;
+            break;
+        }
+
+        //Register this memory range to be FLUSHed during a shutdown.
+        INITSERVICE::registerBlock(reinterpret_cast<void *>(iv_TOC[i].virtAddr),
+                                   iv_TOC[i].size,
+                                   PNOR_PRIORITY);
+
+        uint64_t access_type =
+          (iv_TOC[i].misc & FFS_MISC_READ_ONLY) ? READ_ONLY : (WRITABLE | WRITE_TRACKED);
+
+        rc = mm_set_permission(reinterpret_cast<void *>(iv_TOC[i].virtAddr),
+                               iv_TOC[i].size,
+                               access_type);
+
+        if(rc)
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRP::setupPnorVMM> Error from mm_set_permission on address 0x%lx with access type 0x%lx : rc=%d",
+                       iv_TOC[i].virtAddr, access_type, rc );
+            break;
+        }
+    }
+
+    if(rc)
+    {
+        /*@
+        * @errortype
+        * @moduleid     PNOR::MOD_PNORRP_SETUP_PNOR_VMM_PLDM
+        * @reasoncode   PNOR::RC_EXTERNAL_ERROR
+        * @userdata1      Requested Address
+        * @userdata2[0:31]  rc from mm_alloc_block or mm_set_permission
+        * @userdata2[32:63] 1 if rc if from mm_alloc_block, 0 if from mm_alloc_block
+        * @devdesc      PnorRP::setupPnorVMM> Error from mm_alloc_block or mm_set_permission
+        * @custdesc     A problem occurred while accessing the boot firmware.
+        */
+        l_errhdl = new ERRORLOG::ErrlEntry(
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                      PNOR::MOD_PNORRP_SETUP_PNOR_VMM_PLDM,
+                      PNOR::RC_EXTERNAL_ERROR,
+                      iv_TOC[i].virtAddr,
+                      TWO_UINT32_TO_UINT64(TO_UINT32(rc),TO_UINT32(alloc_fail)),
+                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errhdl->collectTrace(PNOR_COMP_NAME);
+    }
+    return l_errhdl;
+}
+
+#else
+
+errlHndl_t PnorRP::setupPnorVMM()
+{
+    errlHndl_t l_errhdl = nullptr;
+
+    do{
         // create a Block, passing in the message queue
         int rc = mm_alloc_block( iv_msgQ, (void*) BASE_VADDR, TOTAL_SIZE );
         if( rc )
         {
-            TRACFCOMP( g_trac_pnor, "PnorRP::initDaemon> Error from mm_alloc_block : rc=%d", rc );
+            TRACFCOMP( g_trac_pnor, "PnorRP::setupPnorVMM> Error from mm_alloc_block : rc=%d", rc );
             /*@
              * @errortype
-             * @moduleid     PNOR::MOD_PNORRP_INITDAEMON
+             * @moduleid     PNOR::MOD_PNORRP_SETUP_PNOR_VMM
              * @reasoncode   PNOR::RC_EXTERNAL_ERROR
              * @userdata1    Requested Address
              * @userdata2    rc from mm_alloc_block
-             * @devdesc      PnorRP::initDaemon> Error from mm_alloc_block
+             * @devdesc      PnorRP::setupPnorVMM> Error from mm_alloc_block
              * @custdesc     A problem occurred while accessing the boot flash.
              */
             l_errhdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                           PNOR::MOD_PNORRP_INITDAEMON,
+                           PNOR::MOD_PNORRP_SETUP_PNOR_VMM,
                            PNOR::RC_EXTERNAL_ERROR,
                            TO_UINT64(BASE_VADDR),
                            TO_UINT64(rc),
@@ -342,12 +572,57 @@ void PnorRP::initDaemon()
         //Register this memory range to be FLUSHed during a shutdown.
         INITSERVICE::registerBlock(reinterpret_cast<void*>(BASE_VADDR),
                                    TOTAL_SIZE,PNOR_PRIORITY);
+    }while(0);
+    return l_errhdl;
+}
 
+#endif
+
+/**
+ * @brief Initialize the daemon
+ */
+void PnorRP::initDaemon()
+{
+    TRACUCOMP(g_trac_pnor, "PnorRP::initDaemon> " );
+    errlHndl_t l_errhdl = nullptr;
+    static_assert(TOTAL_SIZE <= VMM_VADDR_PNOR_RP_MAX_SIZE,
+                  "Currently we will try to allocate too much VMM space for host fw data, check VMM_VADDR_PNOR_RP_MAX_SIZE and VMM_SIZE_RESERVED_PER_SECTION");
+
+    do
+    {
+        // create a message queue
+        iv_msgQ = msg_q_create();
+
+        INITSERVICE::registerShutdownEvent( PNOR_COMP_ID,
+                                            iv_msgQ,
+                                            PNOR::MSG_SHUTDOWN,
+                                            INITSERVICE::PNOR_RP_PRIORITY );
+
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+        // Populate iv_TOC with the file table we got from PLDM
+        l_errhdl = populateTOC();
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> populateTOC failed");
+            break;
+        }
+        assert(PLDM_PNOR::getipl_lid_ids()[PNOR::NUM_SECTIONS-1] != 0,
+               "Code bug, sections were added to the sectionId enum without "
+               "updating PLDM_PNOR::getipl_lid_ids.");
+#endif
+
+        // Initialize the VMM memory pnorrp will use
+        l_errhdl = setupPnorVMM();
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> setupPnorVMM failed");
+            break;
+        }
+
+#ifndef CONFIG_FILE_XFER_VIA_PLDM
         //Find and read the TOC in the PNOR to compute the sections and set
         //their correct permissions
-
         size_t l_sizeOfToc = 0;
-
         l_errhdl = findTOC(l_sizeOfToc);
         if( l_errhdl )
         {
@@ -362,12 +637,14 @@ void PnorRP::initDaemon()
             TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::initDaemon: Failed to readTOC");
             break;
         }
+
         l_errhdl =  setSideInfo (l_sizeOfToc);
         if(l_errhdl)
         {
             TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> setSideInfo failed");
             break;
         }
+#endif
 
         // start task to wait on the queue
         task_create( wait_for_message, NULL );
@@ -378,6 +655,7 @@ void PnorRP::initDaemon()
         iv_startupRC = l_errhdl->reasonCode();
         errlCommit(l_errhdl,PNOR_COMP_ID);
     }
+
 
 // Not supporting PNOR error in VPO
 #ifndef CONFIG_VPO_COMPILE

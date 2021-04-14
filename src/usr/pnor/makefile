@@ -26,6 +26,7 @@
 ROOTPATH = ../../..
 
 HIOMAP_DEPS = ast_mboxdd.o pnor_mboxdd.o pnor_ipmidd.o pnor_hiomapdd.o
+PLDM_DEPS = pnor_pldmdd.o pnor_pldm_utils.o
 
 MODULE = pnor
 OBJS += pnor_utils.o
@@ -34,6 +35,7 @@ OBJS += $(if $(CONFIG_SECUREBOOT),spnorrp.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_SFC),pnor_sfcdd.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_BMCMBOX),$(HIOMAP_DEPS))
 OBJS += $(if $(CONFIG_PNORDD_IS_IPMI),$(HIOMAP_DEPS))
+OBJS += $(if $(CONFIG_FILE_XFER_VIA_PLDM),$(PLDM_DEPS))
 OBJS += pnor_common.o
 OBJS += pnorvalid.o
 OBJS += ecc.o
@@ -50,6 +52,9 @@ OBJS += $(if $(CONFIG_SFC_IS_FAKE),sfc_fake.o)
 
 #NOR Implementations
 OBJS += $(if $(CONFIG_ALLOW_MICRON_PNOR),nor_micron.o)
+
+#Extra includes
+EXTRAINCDIR += $(if $(CONFIG_FILE_XFER_VIA_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm)
 
 SUBDIRS += test.d
 #SUBDIRS += runtime.d

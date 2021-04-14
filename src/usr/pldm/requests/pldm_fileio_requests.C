@@ -200,13 +200,11 @@ errlHndl_t getLidFile(const uint32_t i_fileHandle,
                       uint32_t& io_numBytesToRead,
                       uint8_t* o_file)
 {
-    PLDM_ENTER("getLidFile");
     errlHndl_t l_errl = getLidFileFromOffset(i_fileHandle,
                                              0, // Start at offset 0
                                              io_numBytesToRead,
                                              o_file);
 
-    PLDM_EXIT("getLidFile");
     return l_errl;
 }
 

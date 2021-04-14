@@ -73,6 +73,16 @@
 /** PNOR Resource Provider is at 2GB */
 #define VMM_VADDR_PNOR_RP  (2 * GIGABYTE)
 
+/** PNOR Resorce Provider is allocated 1GB of VMM space */
+#define VMM_VADDR_PNOR_RP_MAX_SIZE (1 * GIGABYTE)
+
+/** When using PLDM for PNOR Resource Provider operations,
+    reserve 16 MB of VMM address space per section.
+    Note that all of this space may not actually be
+    used by each section
+ */
+#define VMM_SIZE_RESERVED_PER_SECTION (16 * MEGABYTE)
+
 /** Temp PNOR Resource Provider space is at 5GB */
 #define VMM_VADDR_SPNOR_TEMP (5 * GIGABYTE)
 

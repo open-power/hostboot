@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -46,6 +46,9 @@ using PnorDD = PnorSfcDD;
 #elif (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
 #include "pnor_hiomapdd.H"
 using PnorDD = PnorHiomapDD;
+#elif CONFIG_FILE_XFER_VIA_PLDM
+#include "pnor_pldmdd.H"
+using PnorDD = PnorPldmDD;
 #else
 #error "No PNOR DD configured"
 #endif
