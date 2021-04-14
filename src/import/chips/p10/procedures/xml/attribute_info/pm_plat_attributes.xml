@@ -825,7 +825,7 @@
         OFF = 0x00,
         ON = 0x01
     </enum>
-    <initToZero/>
+    <default>OFF</default>
     <overrideOnly/>
     <group>debug</group>
   </attribute>
@@ -2444,8 +2444,6 @@
         <overrideOnly/>
         <group>wov</group>
     </attribute>
-
-
 
   <!-- ********************************************************************* -->
   <attribute>

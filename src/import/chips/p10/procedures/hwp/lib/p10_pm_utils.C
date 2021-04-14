@@ -490,8 +490,19 @@ fapi2::ReturnCode wof_validate_header(
     fapi2::ReturnCode l_rc = 0;
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled = fapi2::ENUM_ATTR_WOF_ENABLED_TRUE;
+
+#ifdef __HOSTBOOT_MODULE
+    FAPI_INF("Running WOF Validation checking under FW controls");
     fapi2::ATTR_SYSTEM_WOF_VALIDATION_MODE_Type l_wof_mode;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_VALIDATION_MODE, FAPI_SYSTEM, l_wof_mode));
+#else
+    FAPI_INF("Running WOF Validation checking under LAB controls");
+    fapi2::ATTR_SYSTEM_WOF_LAB_VALIDATION_MODE_Type l_wof_mode;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_LAB_VALIDATION_MODE, FAPI_SYSTEM, l_wof_mode));
+#endif
+
+
 
     do
     {
@@ -514,24 +525,21 @@ fapi2::ReturnCode wof_validate_header(
             p_wfth->vcs_size,
             l_wof_header_data_state);
 
-        if (!l_wof_header_data_state)
+
+        if (!l_wof_header_data_state && (l_wof_mode != fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_OFF))
         {
 
-            fapi2::ATTR_WOF_ENABLED_Type l_wof_disabled = fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_ENABLED,
-                                   i_proc_target,
-                                   l_wof_disabled));
+            l_wof_enabled = fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
 
-            if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_INFO)
+            if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_WARN ||
+                l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_INFO   )
             {
                 FAPI_INF("WOF Header validation failed. One or more of the following fields are zero.");
                 FAPI_INF("  vdd_start, vdd_step, vdd_size, io_start, io_step, io_size, amb_cond_start, amb_cond_step, amb_cond_size");
             }
-            else
-            {
-                FAPI_INF("WOF Header validation failed. One or more of the following fields are zero.");
-                FAPI_INF("  vdd_start, vdd_step, vdd_size, io_start, io_step, io_size, amb_cond_start, amb_cond_step, amb_cond_size");
 
+            if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_INFO)
+            {
                 // Write the returned error content to the error log
                 FAPI_ASSERT_NOEXIT(false,
                                    fapi2::PSTATE_PB_WOF_HEADER_DATA_INVALID()
@@ -556,8 +564,41 @@ fapi2::ReturnCode wof_validate_header(
                                    .set_AMB_COND_SIZE(p_wfth->amb_cond_size),
                                    "WOF Header validation failed");
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-                break;
             }
+            else if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_FAIL)
+            {
+                FAPI_ERR("WOF Header validation failed. One or more of the following fields are zero.");
+                FAPI_ERR("  vdd_start, vdd_step, vdd_size, io_start, io_step, io_size, amb_cond_start, amb_cond_step, amb_cond_size");
+
+                FAPI_ASSERT(false,
+                            fapi2::PSTATE_PB_WOF_HEADER_DATA_INVALID()
+                            .set_CHIP_TARGET(i_proc_target)
+                            .set_MAGIC_NUMBER(p_wfth->magic_number.value)
+                            .set_VERSION(p_wfth->header_version)
+                            .set_VRT_BLOCK_SIZE(p_wfth->vrt_block_size)
+                            .set_VRT_HEADER_SIZE(p_wfth->vrt_block_header_size)
+                            .set_VRT_DATA_SIZE(p_wfth->vrt_data_size)
+                            .set_CORE_COUNT(p_wfth->core_count)
+                            .set_VCS_START(p_wfth->vcs_start)
+                            .set_VCS_STEP(p_wfth->vcs_step)
+                            .set_VCS_SIZE(p_wfth->vcs_size)
+                            .set_VDD_START(p_wfth->vdd_start)
+                            .set_VDD_STEP(p_wfth->vdd_step)
+                            .set_VDD_SIZE(p_wfth->vdd_size)
+                            .set_IO_START(p_wfth->io_start)
+                            .set_IO_STEP(p_wfth->io_step)
+                            .set_IO_SIZE(p_wfth->io_size)
+                            .set_AMB_COND_START(p_wfth->amb_cond_start)
+                            .set_AMB_COND_STEP(p_wfth->amb_cond_step)
+                            .set_AMB_COND_SIZE(p_wfth->amb_cond_size),
+                            "WOF Header validation failed");
+            }
+        }
+
+        // Don't continue validation as WOF is now disabled
+        if (!l_wof_enabled)
+        {
+            break;
         }
 
         // Overrides are present only if the frequency and power fields are both
@@ -734,17 +775,21 @@ fapi2::ReturnCode wof_validate_header(
                                 "WOF Tables Override validation failed.  One of more fields mismatch.");
                 }
 
-                fapi2::ATTR_WOF_ENABLED_Type l_wof_disabled = fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_ENABLED,
-                                       i_proc_target,
-                                       l_wof_disabled));
-                FAPI_INF("WOF being disabled");
+                l_wof_enabled = fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
             }
         }
     }
     while(0);
 
 fapi_try_exit:
+
+    if (!l_wof_enabled)
+    {
+        FAPI_INF("WOF has been disabled");
+    }
+
+    FAPI_ATTR_SET(fapi2::ATTR_WOF_ENABLED, i_proc_target, l_wof_enabled);
+
     FAPI_DBG("<< wof_validate_tables");
     return fapi2::current_err;
 }
@@ -916,9 +961,9 @@ fapi2::ReturnCode print_voltage_bucket(
         PRINT_BKT_PT_16(ics_rdp_ac_cur, p);
         PRINT_BKT_PT_16(ics_rdp_dc_cur, p);
         PRINT_BKT_PT_16(core_freq_gb_sort, p);
-        PRINT_BKT_PT_8 (vdd_vmin, p);
+        PRINT_BKT_PT_16(vdd_vmin, p);
         PRINT_BKT_PT_16(ivdd_powr_cur_act, p);
-        PRINT_BKT_PT_16(core_powr_temp, p);
+        PRINT_BKT_PT_8 (core_powr_temp, p);
         PRINT_BKT_PT_16(rt_tdp_ac_10ma, p);
         PRINT_BKT_PT_16(rt_tdp_dc_10ma, p);
     }

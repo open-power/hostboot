@@ -626,7 +626,7 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_MULTINODE_PSTATE0_MISMATCH</rc>
-    <description> THere is a mismatch in pstate0 value when we
+    <description> There is a mismatch in pstate0 value when we
     compared with different node pstate0 values
     </description>
     <ffdc>LOCAL_PSTATE0_FREQ</ffdc>

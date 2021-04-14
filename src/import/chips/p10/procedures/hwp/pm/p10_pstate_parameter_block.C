@@ -1012,7 +1012,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Bias values
         memcpy(&io_globalppb->poundv_biases_0p05pct,&iv_bias,sizeof(iv_bias));
 
-        // safe_voltage_mv
+        // safe_voltage_mvL
         io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VDD]);
         io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VCS] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VCS]);
 
