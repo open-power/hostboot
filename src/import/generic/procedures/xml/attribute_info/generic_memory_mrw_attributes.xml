@@ -739,6 +739,7 @@
     <valueType>uint16</valueType>
     <default>200</default>
     <platInit/>
+    <mrwHide/>
     <mssAccessorName>mrw_thermal_sensor_polling_period</mssAccessorName>
   </attribute>
 
