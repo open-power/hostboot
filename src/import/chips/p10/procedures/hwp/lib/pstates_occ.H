@@ -224,8 +224,14 @@ typedef struct
     // Fmax frequency from #V
     uint32_t fmax_freq_mhz;
 
+    // TDP Sort Temperature from #V
+    uint32_t tdp_sort_power_temp_0p5C;
+
+    // I/O Throttle Temperature from #V
+    uint32_t io_throttle_temp_0p5C;
+
     // Pad to make the structure an even 1KB
-    uint8_t             pad_b[24];
+    uint8_t             pad_b[16];
 
 } OCCPstateParmBlock_t ;
 

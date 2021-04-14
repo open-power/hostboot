@@ -1464,19 +1464,51 @@
     <group>enablement</group>
   </attribute>
 
- <!-- ********************************************************************* -->
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_WOF_VALIDATION_MODE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-    Defines the mode of WOF checking in relationship to system reaction
+    Defines the mode of WOF checking in relationship to system reaction under firmware.
 
-    FAIL - if not ATTR_SYSTEM_WOF_DISABLE, fails the IPL (product default).
-           else act as OFF
-    INFO - if not ATTR_SYSTEM_WOF_DISABLE, Info error log; WOF is disabled;
-                IPL continues.
+    FAIL - if not ATTR_SYSTEM_WOF_DISABLE, fails the IPL.
+
+    INFO - if not ATTR_SYSTEM_WOF_DISABLE, Info error log; WOF is disabled; IPL continues.
+
     WARN - if not ATTR_SYSTEM_WOF_DISABLE, error messages to traces; no error
-                logs, WOF is disabled; IPL continues.
+             logs, WOF is disabled; IPL continues.
+    OFF  - no checking performed; IPL continues.  WOF is disabled;.
+
+    Producer: Override
+
+    Consumers: p10_pstate_parameter_build
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        FAIL = 0,
+        INFO = 1,
+        WARN = 2,
+        OFF  = 3
+    </enum>
+    <default>INFO</default>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_WOF_LAB_VALIDATION_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Defines the mode of WOF checking in relationship to system reaction under Cronus.
+
+    FAIL - if not ATTR_SYSTEM_WOF_DISABLE, fails the IPL.
+
+    INFO - if not ATTR_SYSTEM_WOF_DISABLE, Info error log; WOF is disabled; IPL continues.
+
+    WARN - if not ATTR_SYSTEM_WOF_DISABLE, error messages to traces; no error
+             logs, WOF is disabled; IPL continues.
     OFF  - no checking performed; IPL continues.  WOF is disabled;.
 
     Producer: Override
@@ -1495,7 +1527,6 @@
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
-
  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_PDV_VALIDATION_MODE</id>
