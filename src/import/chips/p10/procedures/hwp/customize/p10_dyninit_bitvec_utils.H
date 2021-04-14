@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,7 +138,7 @@ dump_bitvec(
 /// Queries platform attributes to initialize bit vector content sized
 /// to match build time attribute properties
 ///
-/// @param[in]  i_target     System scope target for attribute query
+/// @param[in]  i_target     Processor scope target for attribute query
 /// @param[in]  i_type       Type of bit vector to create.  Used to query
 ///                          appropriate platform attributes
 /// @param[out] o_bvec       Bit vector filled to platform state/capabilities
@@ -147,14 +147,14 @@ dump_bitvec(
 ///
 fapi2::ReturnCode
 init_bitvec_from_plat(
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p10_dyninit_bitvec_type i_type,
     p10_dyninit_bitvec& o_bvec);
 
 ///
 /// @brief Push bit vector state into platform attribute storage
 ///
-/// @param[in]  i_target     System scope target for attribute query
+/// @param[in]  i_target     Processor scope target for attribute query
 /// @param[in]  i_type       Type of bit vector to create.  Used to query
 ///                          appropriate platform attributes
 /// @param[in]  i_bvec       Bit vector filled to platform state/capabilities
@@ -163,7 +163,7 @@ init_bitvec_from_plat(
 ///
 fapi2::ReturnCode
 save_bitvec_to_plat(
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     p10_dyninit_bitvec& i_bvec);
 
 

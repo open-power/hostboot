@@ -833,8 +833,9 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
                          l_rc, i_ringId );
 
             FAPI_DBG("Ring found in origination section, Dynamic (.dynamic): "
-                     "ringId=0x%x, size=%u and raw length=%u",
-                     i_ringId, be16toh(((CompressedScanData*)dynRs4)->iv_size), rawBitLength);
+                     "ringId=0x%x, feature=%u, size=%u and raw length=%u",
+                     i_ringId, nextFeature,
+                     be16toh(((CompressedScanData*)dynRs4)->iv_size), rawBitLength);
 
             bDynRingFound = true;
             featureVecAcc |= 0x8000000000000000 >> nextFeature;

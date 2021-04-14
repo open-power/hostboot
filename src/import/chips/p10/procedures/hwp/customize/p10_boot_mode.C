@@ -289,6 +289,12 @@ init_bitvec_from_hw_image(
     }
 
     o_bvec.iv_bits.resize(l_bvec_size);
+
+    for (uint16_t iSet = 0; iSet < l_bvec_size; iSet++)
+    {
+        o_bvec.iv_bits[iSet] = 0;
+    }
+
     o_bvec.iv_type = i_type;
     o_bvec.iv_source = HW_IMAGE;
 
@@ -902,7 +908,7 @@ p10_boot_mode(
 
     // initialize bit vector from platform -- content will reflect attribute
     // selected init modes
-    FAPI_TRY(init_bitvec_from_plat(FAPI_SYSTEM,
+    FAPI_TRY(init_bitvec_from_plat(i_proc_target,
                                    MODE,
                                    l_plat_mode_bvec),
              "Error from init_bitvec_from_plat (mode)");
@@ -946,7 +952,7 @@ p10_boot_mode(
 
     // initialize bit vector from platform -- content will reflect
     // curent value of platform dynamic init feature vector attribute
-    FAPI_TRY(init_bitvec_from_plat(FAPI_SYSTEM,
+    FAPI_TRY(init_bitvec_from_plat(i_proc_target,
                                    FEATURE,
                                    l_plat_feature_bvec),
              "Error from init_bitvec_from_plat (feature)");
@@ -966,7 +972,7 @@ p10_boot_mode(
 
     // write platform dynamic init feature vector attribute,
     // honor platform attribute override
-    FAPI_TRY(save_bitvec_to_plat(FAPI_SYSTEM,
+    FAPI_TRY(save_bitvec_to_plat(i_proc_target,
                                  l_plat_feature_bvec),
              "Error from save_bitvec_to_plat");
 

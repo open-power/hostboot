@@ -25,7 +25,7 @@
 <attributes>
   <attribute>
     <id>ATTR_DYNAMIC_INIT_FEATURE_VEC</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
      Bit vector of dynamic init features which are applied 
      when customizing the IPL image. Individual 
@@ -41,7 +41,7 @@
   </attribute>
   <attribute>
     <id>ATTR_DYNAMIC_INIT_FEATURE_COUNT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
      Number of dynamic init features.
     </description>

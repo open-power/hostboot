@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -189,7 +189,7 @@ p10_dyninit_bitvec_utils::dump_bitvec(
     if (i_bvec.iv_bit_count)
     {
         uint16_t l_start_index = 0;
-        uint16_t l_end_index = 64;
+        uint16_t l_end_index = 63;
 
         for (uint16_t i = 0; i < i_bvec.iv_bits.size(); i++)
         {
@@ -211,7 +211,7 @@ p10_dyninit_bitvec_utils::dump_bitvec(
 /// Queries platform attributes to initialize bit vector content sized
 /// to match build time attribute properties
 ///
-/// @param[in]  i_target     System scope target for attribute query
+/// @param[in]  i_target     Processor scope target for attribute query
 /// @param[in]  i_type       Type of bit vector to create.  Used to query
 ///                          appropriate platform attributes
 /// @param[out] o_bvec       Bit vector filled to platform state/capabilities
@@ -220,7 +220,7 @@ p10_dyninit_bitvec_utils::dump_bitvec(
 ///
 fapi2::ReturnCode
 p10_dyninit_bitvec_utils::init_bitvec_from_plat(
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p10_dyninit_bitvec_type i_type,
     p10_dyninit_bitvec& o_bvec)
 {
@@ -228,15 +228,17 @@ p10_dyninit_bitvec_utils::init_bitvec_from_plat(
 
     if (i_type == MODE)
     {
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys_target;
+
         fapi2::ATTR_DYNAMIC_INIT_MODE_VEC_Type l_attr_vec;
         fapi2::ATTR_DYNAMIC_INIT_MODE_COUNT_Type l_attr_count;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DYNAMIC_INIT_MODE_VEC,
-                               i_target,
+                               l_sys_target,
                                l_attr_vec));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DYNAMIC_INIT_MODE_COUNT,
-                               i_target,
+                               l_sys_target,
                                l_attr_count));
 
         o_bvec.iv_bits.assign(l_attr_vec,
@@ -276,14 +278,14 @@ fapi_try_exit:
 ///
 /// @brief Push bit vector state into platform attribute storage
 ///
-/// @param[in]  i_target     System scope target for attribute query
+/// @param[in]  i_target     Processor scope target for attribute query
 /// @param[in]  i_bvec       Bit vector filled to platform state/capabilities
 ///
 /// @returns fapi2::ReturnCode FAPI2_RC_SUCCESS if successful, else error
 ///
 fapi2::ReturnCode
 p10_dyninit_bitvec_utils::save_bitvec_to_plat(
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     p10_dyninit_bitvec& i_bvec)
 {
     FAPI_DBG("Start");
