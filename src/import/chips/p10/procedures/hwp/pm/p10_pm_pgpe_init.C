@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <p10_ppe_defs.H>
 #include <p10_hcd_common.H>
 #include <p10_scom_proc.H>
+#include <p10_scom_proc_2.H>
 #include <p10_scom_eq.H>
 #include <multicast_group_defs.H>
 #include <vector>
@@ -94,6 +95,25 @@ fapi2::ReturnCode pgpe_start(
     uint64_t l_pgpe_base_addr = PGPE_BASE_ADDRESS;
 
     FAPI_IMP(">> pgpe_start......");
+
+    // Setup OCCMISC
+    l_data64.flush<1>();
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCMISC_WO_CLEAR, l_data64));
+
+    fapi2::ATTR_CHIP_EC_FEATURE_PVREF_ENABLE_Type l_pvref_enable;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PVREF_ENABLE,
+                            i_target,
+                            l_pvref_enable),
+              "Error getting ATTR_CHIP_EC_FEATURE_PVREF_ENABLE");
+
+    if (l_pvref_enable)
+    {
+        // Enable the Precision Voltage Reference errors (gross and fine)
+        l_data64.flush<0>()
+        .setBit<TP_TPCHIP_OCC_OCI_OCB_OCCMISC_PVREF_ERROR_EN,
+                TP_TPCHIP_OCC_OCI_OCB_OCCMISC_PVREF_ERROR_EN_LEN>();
+        FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCMISC_WO_OR, l_data64));
+    }
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_PGPE_BOOT_COPIER_IVPR_OFFSET,
                             i_target,

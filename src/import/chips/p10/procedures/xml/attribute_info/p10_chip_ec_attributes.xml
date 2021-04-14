@@ -1114,7 +1114,7 @@
   <id>ATTR_CHIP_EC_FEATURE_HW562262_HW562265</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    DD2 - enables L2 workaround for HW562262 Plucky Demonstrator 
+    DD2 - enables L2 workaround for HW562262 Plucky Demonstrator
     and HW562265 Venerated Voyage
   </description>
   <chipEcFeature>
@@ -1635,7 +1635,7 @@
    <id>ATTR_CHIP_EC_FEATURE_HW547146</id>
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>
-     Set Tepid Moonbeam workaround                  
+     Set Tepid Moonbeam workaround
    </description>
    <chipEcFeature>
      <chip>
@@ -1803,6 +1803,24 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_PVREF_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Allow the enablement of the Voltage Reference circuit needed by the
+    Retention VRMs.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_DYN_CORE_LPAR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -1823,7 +1841,7 @@
     <id>ATTR_CHIP_EC_FEATURE_IMA_DISABLE_BIT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      ECP.NC.NCCHTM.NCCHTSC.HTM_MODE: IMA enabe/disable bit control is 
+      ECP.NC.NCCHTM.NCCHTSC.HTM_MODE: IMA enabe/disable bit control is
       with 1bit in DD2, we need to disable this bit during MPIPL down path
     </description>
     <chipEcFeature>

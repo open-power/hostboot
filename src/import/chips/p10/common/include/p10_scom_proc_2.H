@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -427,6 +427,27 @@ static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_PIB_SND_BUFFER0_REGISTER_DMA_PIB_
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_PIB_SND_BUFFER0_REGISTER_DMA_PIB_SND_BUF0_REG_DATA0_LEN = 32;
 //<< [TP_TPVSB_FSI_W_SHIFT_DMA_PIB_SND_BUFFER0_REGISTER]
 // proc/reg00014.H
+
+//>> [TP_TPCHIP_OCC_OCI_OCB_OCCMISC]
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC = 0x0006c080ull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_WO_CLEAR = 0x0006c081ull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_WO_OR = 0x0006c082ull;
+
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_CORE_EXT_INTR = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_EXT_INTR_REASON = 1;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_EXT_INTR_REASON_LEN = 3;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_PVREF_ERROR_EN = 4;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_PVREF_ERROR_EN_LEN = 2;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_PVREF_ERROR_GROSS = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_PVREF_ERROR_FINE = 7;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_FIRMWARE_FAULT = 8;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_FIRMWARE_NOTIFY = 9;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_SPARE = 10;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_SPARE_LEN = 6;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_I2CM_INTR_STATUS = 16;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCMISC_I2CM_INTR_STATUS_LEN = 3;
+//<< [TP_TPCHIP_OCC_OCI_OCB_OCCMISC]
+// proc/reg00012.H
 
 //>>THE END<<
 
