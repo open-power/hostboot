@@ -657,6 +657,16 @@
     </attribute>
 
     <attribute>
+          <id>ATTR_SBE_MEASUREMENT_SEEPROM_VERSION</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_SBE_MINIMUM_SECURE_VERSION</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
           <!-- This is set dynamically based on the boot processor -->
           <id>ATTR_PROC_SBE_MASTER_CHIP</id>
           <writeable/>
