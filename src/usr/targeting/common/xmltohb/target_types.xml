@@ -301,11 +301,6 @@
   </targetType>
 
   <targetType>
-    <id>chip-fcdimm-ddr4</id>
-    <parent>lcard-dimm-cdimm</parent>
-  </targetType>
-
-  <targetType>
     <!-- OMI-attached Memory Buffer -->
     <id>chip-ocmb</id>
     <parent>chip</parent>
