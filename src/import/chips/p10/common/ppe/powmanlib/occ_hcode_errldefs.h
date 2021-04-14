@@ -103,7 +103,8 @@ typedef enum
     ERRL_USR_DTL_DASH_XGPE      = 0x09,
     ERRL_USR_DTL_DASH_QME       = 0x0A,
 #endif
-    ERRL_USR_DTL_SR_FFDC        = 0x0B,
+    ERRL_USR_DTL_PPE_REGS       = 0x0B,
+    ERRL_USR_DTL_SR_FFDC        = 0x0C,
 } ERRL_USR_DETAIL_TYPE;
 
 // These are the possible OCC States.
@@ -133,6 +134,12 @@ typedef enum
 {
     ERRL_TRACE_VERSION_1        = 0x01,
 } ERRL_TRACE_VERSION;
+
+/* Errl PPE Debug Regs Version */
+typedef enum
+{
+    ERRL_PPE_REGS_VERSION_1      = 0x01,
+} ERRL_PPE_REGS_VERSION;
 
 // Hcode related callouts will need firmware post-processing
 // Callout types will be adapted/extended for Hcode after consulting with FW
