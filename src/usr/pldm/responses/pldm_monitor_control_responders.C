@@ -40,6 +40,7 @@
 
 // Targeting
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/targetservice.H>
 
 // libpldm headers from pldm subtree
 #include <openbmc/pldm/libpldm/platform.h>
@@ -605,6 +606,104 @@ errlHndl_t handleGetStateSensorReadingsRequest(const msg_q_t i_msgQ,
     PLDM_EXIT("handleGetStateSensorReadingsRequest");
 
     return errl;
+}
+
+errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
+                                         const pldm_msg* const i_msg,
+                                         const size_t i_payload_len)
+{
+    PLDM_ENTER("handleSetEventReceiverRequest");
+    errlHndl_t l_errl = nullptr;
+    uint8_t l_response_code = PLDM_SUCCESS;
+
+    uint8_t l_event_message_global_enable = 0;
+    uint8_t l_transport_protocol_type = 0;
+    uint8_t l_event_receiver_address_info = 0;
+    uint16_t l_heartbeat_timer = 0;
+
+    // Decode and verify the request
+    do {
+
+    l_errl = decode_pldm_request(
+                decode_set_event_receiver_req,
+                i_msg,
+                i_payload_len,
+                &l_event_message_global_enable,
+                &l_transport_protocol_type,
+                &l_event_receiver_address_info,
+                &l_heartbeat_timer);
+    if(l_errl)
+    {
+        PLDM_ERR("handleSetEventReceiverRequest: failed to decode the request");
+        errlCommit(l_errl, PLDM_COMP_ID);
+        l_response_code = PLDM_ERROR;
+        break;
+    }
+
+    if(l_event_message_global_enable !=
+       PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE)
+    {
+        PLDM_ERR("handleSetEventReceiverRequest: invalid value for message global enable received: %d",
+                 l_event_message_global_enable);
+        /*@
+         * @errortype
+         * @moduleid MOD_HANDLE_SET_EVENT_RECEIVER
+         * @reasoncode RC_BAD_GLOBAL_ENABLE
+         * @userdata1 Expected value of message global enable
+         * @userdata2 Actual value of message global enable
+         * @devdesc BMC sent an unexpected message global enable value
+         *          in the SetEventReceiverRequest command
+         * @custdesc A software error occurred during system boot
+         */
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                               MOD_HANDLE_SET_EVENT_RECEIVER,
+                               RC_BAD_GLOBAL_ENABLE,
+                               PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE,
+                               l_event_message_global_enable,
+                               ErrlEntry::NO_SW_CALLOUT);
+        addBmcErrorCallouts(l_errl);
+        errlCommit(l_errl, PLDM_COMP_ID);
+        l_response_code = PLDM_PLATFORM_ENABLE_METHOD_NOT_SUPPORTED;
+        break;
+    }
+
+    if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_ISTEP_MODE>())
+    {
+        // We don't want BMC to set watchdog timer in istep mode.
+        // PLDM_PLATFORM_ENABLE_METHOD_NOT_SUPPORTED is our indicator
+        // to BMC that we don't want the watchdog timer to be set.
+        l_response_code = PLDM_PLATFORM_ENABLE_METHOD_NOT_SUPPORTED;
+        break;
+    }
+
+    }while(0);
+
+
+    // Send the response to BMC
+    do {
+    l_errl = send_pldm_response<PLDM_SET_EVENT_RECEIVER_RESP_BYTES>(
+                i_msgQ,
+                encode_set_event_receiver_resp,
+                0, // no payload size
+                i_msg->hdr.instance_id,
+                l_response_code);
+    if(l_errl)
+    {
+        PLDM_ERR("handleSetEventReceiverRequest: Could not send the response to BMC");
+        l_errl->collectTrace(PLDM_COMP_NAME);
+        break;
+    }
+
+    if(l_response_code == PLDM_SUCCESS)
+    {
+        //TODO RTC: 250776
+        // Check the heartbeat timer to be at least 15 sec and arm the HB heartbeat
+    }
+
+    }while(0);
+
+    PLDM_EXIT("handleSetEventReceiverRequest");
+    return l_errl;
 }
 
 }

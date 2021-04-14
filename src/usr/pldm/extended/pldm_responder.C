@@ -91,7 +91,8 @@ const msg_type_handler pldm_monitor_control_handlers[] =
     { PLDM_GET_PDR, handleGetPdrRequest },
     { PLDM_PLATFORM_EVENT_MESSAGE, handlePdrRepoChangeEventRequest },
     { PLDM_SET_STATE_EFFECTER_STATES, handleSetStateEffecterStatesRequest },
-    { PLDM_GET_STATE_SENSOR_READINGS, handleGetStateSensorReadingsRequest }
+    { PLDM_GET_STATE_SENSOR_READINGS, handleGetStateSensorReadingsRequest },
+    { PLDM_SET_EVENT_RECEIVER, handleSetEventReceiverRequest },
 };
 
 /*** Handlers for the MSG_FRU_DATA type ***/

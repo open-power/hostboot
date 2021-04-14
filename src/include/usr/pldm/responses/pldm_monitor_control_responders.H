@@ -124,7 +124,6 @@ errlHndl_t handleFunctionalStateSensorGetRequest(TARGETING::Target* i_target,
                                                  size_t i_payload_len,
                                                  const pldm_get_state_sensor_readings_req& i_req);
 
-
 /* @brief Handler for Get State Sensor Readings requests for OCC state sensor.
  *
  * @param[in] i_occ          The OCC target.
@@ -139,6 +138,20 @@ errlHndl_t handleOccStateSensorGetRequest(TARGETING::Target* i_occ,
                                           const pldm_msg* i_msg,
                                           size_t i_payload_len,
                                           const pldm_get_state_sensor_readings_req& i_req);
+
+/* @brief handleSetEventReceiverRequest
+ *
+ *        Handler for Set Event Receiver request. (See DSP0248 v1.2.0a
+ *        section 16.4 for details.)
+ *
+ * @param[in] i_msgQ         Handle to MCTP outbound request message queue
+ * @param[in] i_msg          The PLDM message received
+ * @param[in] i_payload_len  Length of PLDM message payload
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handleSetEventReceiverRequest(msg_q_t i_msgQ,
+                                         const pldm_msg* i_msg,
+                                         size_t i_payload_len);
 }
 
 #endif
