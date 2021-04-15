@@ -402,9 +402,9 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
 
         // Get the Target type and chip name.
         TARGETING::TYPE l_targetType = TARGETING::TYPE_NA;
-        char chipName[42], temp[42];
+        char chipName[42+14], temp[42];
         getTargetInfo(l_chipId, l_targetType, &temp[0], 42 );
-        snprintf( chipName, 42, "%s (0x%08x)", temp, l_chipId );
+        snprintf( chipName, 42+14, "%s (0x%08x)", temp, l_chipId );
         // Print out the chip ID.
         i_parser.PrintString( chipName,
                               "*********************************************" );
