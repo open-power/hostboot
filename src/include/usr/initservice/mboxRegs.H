@@ -558,7 +558,7 @@ namespace SPLESS
 
     // Mailbox Scratch Register 9 - PAU, MC Freq
     // SCOM address: 0x00050180
-    // CFAM address: 0x0180
+    // CFAM address: 0x2980
     struct MboxScratch9_t : MboxScratch_t<9>
     {
         union
@@ -589,7 +589,7 @@ namespace SPLESS
 
     // Mailbox Scratch Register 10 - IOHS PLL
     // SCOM address: 0x00050181
-    // CFAM address: 0x0181
+    // CFAM address: 0x2981
     struct MboxScratch10_t : MboxScratch_t<10>
     {
         union
@@ -629,7 +629,7 @@ namespace SPLESS
                   "MboxScratch10_t must be 32 bits");
 
     // SCOM address: 0x00050182
-    // CFAM address: 0x0182
+    // CFAM address: 0x2982
     struct MboxScratch11_t : MboxScratch_t<11>
     {
         union
@@ -659,7 +659,7 @@ namespace SPLESS
                   "MboxScratch11_t must be 32 bits");
 
     // SCOM address: 0x00050183
-    // CFAM address: 0x0183
+    // CFAM address: 0x2983
     struct MboxScratch12_t : MboxScratch_t<12>
     {
         // Placeholder
@@ -670,18 +670,44 @@ namespace SPLESS
                   "MboxScratch12_t must be 32 bits");
 
     // SCOM address: 0x00050184
-    // CFAM address: 0x0184
+    // CFAM address: 0x2984
     struct MboxScratch13_t : MboxScratch_t<13>
     {
-        // Placeholder
-        uint32_t value;
+        union
+        {
+            uint32_t data32;
+
+            // For P10 this scratch register will be used for the SPIM TPM Settings
+            // - Only valid if validReg13 (bit12) of MboxScratch8_t is set
+            // - Value will be read out and will be stored in ATTR_TPM_SPI_BUS_DIV
+            // -- NOTE: ATTR_TPM_SPI_BUS_DIV is 16 bit union of
+            //          tpm_spi_divider and tpm_spi_round_trip_delay
+            struct
+            {
+
+                union {
+                    uint16_t value                         :16; //0:15
+
+                    struct
+                    {
+                        uint16_t tpm_spi_divider           :12; //0:11
+                        uint16_t tpm_spi_round_trip_delay  :4;  //12:15
+                    };
+                } dividerAndDelay;
+
+                DONOTUSE()
+                uint32_t reserved                  :16; // 16:31
+
+            } TPM_SPI_BUS_DIVIDER_SETTINGS;
+
+        };
     };
 
     static_assert(sizeof(MboxScratch13_t) == sizeof(uint32_t),
                   "MboxScratch13_t must be 32 bits");
 
     // SCOM address: 0x00050185
-    // CFAM address: 0x0185
+    // CFAM address: 0x2985
     struct MboxScratch14_t : MboxScratch_t<14>
     {
         // Placeholder
@@ -692,7 +718,7 @@ namespace SPLESS
                   "MboxScratch14_t must be 32 bits");
 
     // SCOM address: 0x00050186
-    // CFAM address: 0x0186
+    // CFAM address: 0x2986
     struct MboxScratch15_t : MboxScratch_t<15>
     {
         // Placeholder
@@ -703,7 +729,7 @@ namespace SPLESS
                   "MboxScratch15_t must be 32 bits");
 
     // SCOM address: 0x00050187
-    // CFAM address: 0x0187
+    // CFAM address: 0x2987
     struct MboxScratch16_t : MboxScratch_t<16>
     {
         // Placeholder

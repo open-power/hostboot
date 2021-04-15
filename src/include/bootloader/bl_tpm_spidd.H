@@ -83,4 +83,19 @@ Bootloader::hbblReasonCode tpm_init_spi_engine();
  */
 Bootloader::hbblReasonCode tpmExtendHash(const uint8_t* const i_hash);
 
+
+/*
+ * @brief  API to look for and use any SPI TPM Clock Setting Overrides based
+ *         on values in Scratch Register 13.
+ *
+ * @note   This function will look at a bit in scratch register 8 to see if
+ *         the SPI TPM Clock Setting Overrides in scratch register 13 are valid.
+ *         If so, it will put the override data into ATTR_TPM_SPI_BUS_DIV so
+ *         that it can be put into a target's SPI Master Clock Configuration
+ *         register in a HWP.
+ *
+ * @return 0 on success or error code on failure
+ */
+Bootloader::hbblReasonCode get_tpm_spi_clock_overrides();
+
 #endif

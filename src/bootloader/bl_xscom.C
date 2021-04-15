@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,6 +159,26 @@ Bootloader::hbblReasonCode XSCOM::xscomPerformOp(const DeviceFW::OperationType i
     {
         l_rc = Bootloader::RC_XSCOM_OP_FAILED;
     }
+
+    // Enable for Debug
+    #if 0
+    if(i_opType == DeviceFW::READ)
+    {
+        bl_console::putString("\rXSCOM:\tREAD:\taddr:\t0x");
+    }
+    else
+    {
+        bl_console::putString("\rXSCOM:\tWRITE:\taddr:\t0x");
+    }
+    uint64_t l_addr2 = i_addr;
+    bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_addr2), sizeof(l_addr2));
+    bl_console::putString("\r\n\t\tdata:\t0x");
+    bl_console::displayHex(reinterpret_cast<unsigned char*>(io_buffer), sizeof(io_buflen));
+    bl_console::putString("\r\n\t\tl_rc:\t0x");
+    bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+    bl_console::putString("\r\n");
+    #endif
+
 
     return l_rc;
 }

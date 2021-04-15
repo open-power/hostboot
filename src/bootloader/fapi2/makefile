@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -42,7 +42,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
 
-OBJS += plat_hw_access.o
-OBJS += plat_utils.o
+OBJS += hbbl_plat_hw_access.o
+OBJS += hbbl_plat_utils.o
+OBJS += hbbl_plat_attribute_service.o
 
 include ${ROOTPATH}/config.mk

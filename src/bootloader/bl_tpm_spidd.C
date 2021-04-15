@@ -29,6 +29,12 @@
 #include <bl_console.H>
 #include <endian.h>
 #include <sys/time.h>
+#include <p10_sbe_scratch_regs.H>
+#include <p10_scom_perv.H>
+#include <bootloader/bl_xscom.H>
+#include <buffer.H>
+#include <attributeenums.H>
+#include <plat_attribute_service.H>
 
 /** @file bl_tpm_spidd.C
  *  @brief Implementations for interfaces for TPM SPI operations in HBBL
@@ -67,6 +73,13 @@ Bootloader::hbblReasonCode tpm_init_spi_engine()
                                   true); // i_pib_access
 
     do {
+
+
+    l_rc = get_tpm_spi_clock_overrides();
+    if (l_rc)
+    {
+        break;
+    }
 
     fapi2::ReturnCode l_fapi_rc = fapi2::FAPI2_RC_SUCCESS;
     FAPI_CALL_HWP(l_fapi_rc,
@@ -815,3 +828,69 @@ Bootloader::hbblReasonCode tpmExtendHash(const uint8_t* const i_hash)
     }
     return l_rc;
 }
+
+
+
+Bootloader::hbblReasonCode get_tpm_spi_clock_overrides()
+{
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target_chip;
+    fapi2::buffer<uint64_t> l_read_scratch8_reg = 0;
+    fapi2::buffer<uint64_t> l_read_scratch13_reg = 0;
+    fapi2::buffer<uint16_t> l_attr_data;
+
+    do
+    {
+        // Get Scratch Register 8
+        uint64_t l_xscom_buffer = 0;
+        size_t l_xscom_buflen = sizeof(l_xscom_buffer);
+        l_rc = XSCOM::xscomPerformOp(DeviceFW::READ,
+                                     &l_xscom_buffer,
+                                     l_xscom_buflen,
+                                     scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW);
+        if(l_rc)
+        {
+            bl_console::putString("Could not read scratch reg 8. XSCOM RC: ");
+            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+            bl_console::putString("\r\n");
+            break;
+        }
+
+        l_read_scratch8_reg = l_xscom_buffer;
+
+        // If Scratch Register 8 says Scratch Register 13 is valid, then use
+        // Divider and Receive settings in Scratch Register 13
+        if (l_read_scratch8_reg.getBit<SCRATCH13_REG_VALID_BIT>())
+        {
+            // Read Scratch Register 13
+            l_xscom_buffer = 0;
+            l_rc = XSCOM::xscomPerformOp(DeviceFW::READ,
+                                         &l_xscom_buffer,
+                                         l_xscom_buflen,
+                                         scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW);
+            if(l_rc)
+            {
+                bl_console::putString("Could not read scratch reg 13. XSCOM RC: ");
+                bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+                bl_console::putString("\r\n");
+                break;
+            }
+            l_read_scratch13_reg = l_xscom_buffer;
+
+            // the data is only in the first 16 bits
+            l_attr_data.insertFromRight< 0, 16 >(l_read_scratch13_reg.getBits< 0, 16>());
+
+            // Set HBBL attribute with the data
+            fapi2::ATTR_TPM_SPI_BUS_DIV_SETMACRO(fapi2::AttributeId::ATTR_TPM_SPI_BUS_DIV,
+                                               l_target_chip,
+                                               l_attr_data);
+        }
+
+    } while (0);
+
+    return l_rc;
+
+
+}
+

@@ -375,6 +375,19 @@ static void initializeAttributes(TargetService& i_targetService,
 
     TargetHandleList l_chips;
 
+    // Setup new TPM SPI Settings passed in via MboxScratch13_t below if that register
+    // is valid based on MboxScratch8_t
+    INITSERVICE::SPLESS::MboxScratch8_t l_scratch8;
+    l_scratch8.data32 = i_masterScratch[INITSERVICE::SPLESS::MboxScratch8_t::REG_IDX];
+    INITSERVICE::SPLESS::MboxScratch13_t l_scratch13;
+    l_scratch13.data32 = i_masterScratch[INITSERVICE::SPLESS::MboxScratch13_t::REG_IDX];
+    uint16_t l_updated_tpm_spi_attr = 0;
+    if (l_scratch8.scratchRegValid.validReg13 != 0)
+    {
+        // Set TPM SPI Attribute based on MboxScratch13_t
+        l_updated_tpm_spi_attr = l_scratch13.TPM_SPI_BUS_DIVIDER_SETTINGS.dividerAndDelay.value;
+    }
+
     i_targetService.getTopLevelTarget(l_pTopLevel);
     if(l_pTopLevel)
     {
@@ -433,7 +446,19 @@ static void initializeAttributes(TargetService& i_targetService,
 #endif
             l_pMasterProcChip->setAttr<ATTR_LPC_CONSOLE_CNFG>(l_console);
 
-        }
+            // Set TPM SPI Attribute based on MboxScratch13_t
+            if (l_updated_tpm_spi_attr != 0)
+            {
+                auto orig_attr = l_pMasterProcChip->getAttr<ATTR_TPM_SPI_BUS_DIV>();
+                TARG_INF("For boot proc=0x%.8X updating ATTR_TPM_SPI_BUS_DIV based on "
+                         "ScratchReg8=0x%.8X and ScratchReg13=0x%.8X from 0x%.4X to 0x%.4X",
+                         get_huid(l_pMasterProcChip), l_scratch8.data32, l_scratch13.data32,
+                         orig_attr, l_updated_tpm_spi_attr);
+
+                l_pMasterProcChip->setAttr<ATTR_TPM_SPI_BUS_DIV>(l_updated_tpm_spi_attr);
+            }
+
+        } // end of l_pMasterProcChip
 
         // Loop around all processors
         TargetHandleList l_allProcChips;
@@ -449,6 +474,18 @@ static void initializeAttributes(TargetService& i_targetService,
             //Turn the SBE Console enablement off for all slave chips
             ATTR_LPC_CONSOLE_CNFG_type l_consoleOff = LPC_CONSOLE_CNFG_DISABLE;
             l_chip->setAttr<ATTR_LPC_CONSOLE_CNFG>(l_consoleOff);
+
+            // Set TPM SPI Attribute based on MboxScratch13_t
+            if (l_updated_tpm_spi_attr != 0)
+            {
+                auto orig_attr = l_chip->getAttr<ATTR_TPM_SPI_BUS_DIV>();
+                TARG_INF("For secondary proc=0x%.8X updating ATTR_TPM_SPI_BUS_DIV based on "
+                         "ScratchReg8=0x%.8X and ScratchReg13=0x%.8X from 0x%.4X to 0x%.4X",
+                         get_huid(l_chip), l_scratch8.data32, l_scratch13.data32,
+                         orig_attr, l_updated_tpm_spi_attr);
+
+                l_chip->setAttr<ATTR_TPM_SPI_BUS_DIV>(l_updated_tpm_spi_attr);
+            }
         }
 
 

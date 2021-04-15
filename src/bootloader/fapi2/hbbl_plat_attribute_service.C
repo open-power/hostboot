@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/bootloader/fapi2/plat_utils.C $                           */
+/* $Source: src/bootloader/fapi2/hbbl_plat_attribute_service.C $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2021                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,47 +23,33 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file plat_utils.C
+/// @file hbbl_plat_attribute_service.C
 ///
-/// @brief Implements the plat_utils.H utility functions.
+/// @brief Implements the plat_attribute_service.H attribute functions.
 ///
 /// Note that platform code must provide the implementation.
 ///
 
-#include <plat_hw_access.H>
+#include <stdint.h>
+#include <plat_attribute_service.H>
 #include <return_code.H>
-#include <hw_access_def.H>
-#include <bl_console.H>
 
 namespace fapi2
 {
 
-// Define global current_err
-ReturnCode current_err;
-
-///
-/// @brief Resets all HWP thread_local variables
-///
-void hwpResetGlobals(void)
+namespace platAttrSvc
 {
-    // Reset all HWP thread_local vars
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    fapi2::opMode = fapi2::NORMAL;
-}
 
-///
-/// @brief HBBL's implementation of delay
-///
-/// @param[in] i_nanoSeconds the amount of ns to wait
-/// @param[in] i_simCycles unused
-/// @param[in] i_fixed unused
-///
-/// @return Always returns success
-ReturnCode delay(const uint64_t i_nanoSeconds,
-                 const uint64_t i_simCycles,
-                 const bool i_fixed)
-{
-    bl_nanosleep(0, i_nanoSeconds);
-    return FAPI2_RC_SUCCESS;
-}
-} //end namespace
+// Bootloader Attribute Bank
+// - Globals used inside Bootloader code for _GETMACRO and _SETMACRO calls
+//   from src/include/bootloader/plat_attribute_service.H
+
+// Set default value of ATTR_TPM_SPI_BUS_DIV to 0x0157 in case there isn't a
+// valid override in scratch register 13
+extern uint16_t g_attr_tpm_spi_bus_div;
+uint16_t g_attr_tpm_spi_bus_div = 0x0157;
+
+
+} // end namespace platAttrSvc
+
+} // end namespace fapi2

@@ -49,6 +49,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/bootloader/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 
 SUBDIRS += fapi2.d
 
