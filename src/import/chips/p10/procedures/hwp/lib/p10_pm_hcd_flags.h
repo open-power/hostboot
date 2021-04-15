@@ -85,7 +85,7 @@ enum PM_GPE_OCCFLG2_DEFS
     PGPE_CEFFOVR_CONTROL_LOOP               = 22,
     PGPE_WOF_VALUE_ATOMIC_FLAG              = 28,
     PGPE_EX_RATIOS_ATOMIC_FLAG              = 29,
-    PGPE_MALF_ALERT_ENABLE                  = 30,
+    PGPE_MALF_ALERT_ENABLE                  = 30, // @TODO spec sync needed - unused
     PM_CALLOUT_ACTIVE                       = 31
 };
 
@@ -116,7 +116,7 @@ enum PM_GPE_OCCFLG3_DEFS
     PM_COMPLEX_SUSPENDED                    = 19,  // Leaving a generic for use in p10_pm_suspend.
     XGPE_ZERO_CORE_CHIP                     = 20,
     XGPE_HCODE_FAULT_STATE                  = 21,
-    STOP_RECOVERY_TRIGGER_ENABLE            = 26,
+    STOP_RECOVERY_TRIGGER_ENABLE            = 26,  // @TODO spec sync needed - used
     CORE_THROT_INJECT_RESP                  = 27,
     CORE_THROT_INJECT_RESP_LEN              = 2,
     CORE_THROT_CONTIN_CHANGE_ENABLE         = 29,
@@ -205,7 +205,7 @@ enum PM_XGPE_FLAGS
 //
 enum PM_QME_PCSCR_DEFS
 {
-
+    QME_PCSCR_CRIT_ELOG_OVERFLOW           = 1,
     QME_PCSCR_MMA_POFF_DLY_POF2            = 59,
     QME_PCSCR_MMA_POFF_DLY_POF2_LEN        = 5
 };

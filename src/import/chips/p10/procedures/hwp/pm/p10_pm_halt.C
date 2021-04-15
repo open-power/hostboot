@@ -102,7 +102,7 @@ fapi2::ReturnCode p10_pm_halt(
         if (l_data64.getBit<p10hcd::PM_CALLOUT_ACTIVE>())
         {
             l_malfAlert = true;
-            FAPI_IMP("OCC FLAG2 Bit 28 [PM_CALLOUT_ACTIVE] Set: In Malf Path");
+            FAPI_IMP("OCC FLAG2 Bit 31 [PM_CALLOUT_ACTIVE] Set: In Malf Path");
         }
 
         l_data64.flush<0>().setBit<p10hcd::STOP_RECOVERY_TRIGGER_ENABLE>();
