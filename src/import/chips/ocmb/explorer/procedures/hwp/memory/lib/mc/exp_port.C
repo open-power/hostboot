@@ -280,6 +280,7 @@ uint8_t symbol_rounder(const uint8_t i_symbol)
 /// @param[in] i_nibble_idx Index of the nibble to spare out
 /// @param[in] i_spare_nibbles a vector of bytes/nibbles for the spare nibbles
 /// @param[in,out] io_deployed_spares a vector of bytes/nibbles containing which byte/nibble is spared out
+/// @param[in] i_ignore_bad_bits Set to true to deploy spare regardless of training fails on it (default false)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
 ///
@@ -288,7 +289,8 @@ fapi2::ReturnCode deploy_spare_helper<mss::mc_type::EXPLORER>( const fapi2::Targ
         const mss::rank::info<mss::mc_type::EXPLORER>& i_rank,
         const uint8_t i_nibble_idx,
         const std::vector<uint8_t>& i_spare_nibbles,
-        std::vector<uint8_t>& io_deployed_spares)
+        std::vector<uint8_t>& io_deployed_spares,
+        const bool i_ignore_bad_bits)
 {
     using PT = mss::portTraits<mss::mc_type::EXPLORER>;
 
@@ -340,7 +342,8 @@ fapi2::ReturnCode deploy_spare_helper<mss::mc_type::EXPLORER>( const fapi2::Targ
 
         FAPI_TRY(mss::exp::steer::do_steering(i_rank.get_port_target(),
                                               i_rank.get_port_rank(),
-                                              l_symbol));
+                                              l_symbol,
+                                              i_ignore_bad_bits));
 
         // Grab the next free spare to deploy
         io_deployed_spares.push_back(i_nibble_idx);

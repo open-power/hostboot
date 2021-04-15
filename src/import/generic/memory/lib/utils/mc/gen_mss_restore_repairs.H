@@ -736,6 +736,7 @@ fapi2::ReturnCode get_spare_nibbles(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// @param[in] i_nibble_idx Index of the nibble to spare out
 /// @param[in] i_spare_nibbles a vector of bytes/nibbles for the spare nibbles
 /// @param[in,out] io_deployed_spares a vector of bytes/nibbles containing which byte/nibble is spared out
+/// @param[in] i_ignore_bad_bits Set to true to deploy spare regardless of training fails on it (default false)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
 ///
@@ -744,7 +745,8 @@ fapi2::ReturnCode deploy_spare_helper( const fapi2::Target<fapi2::TARGET_TYPE_DI
                                        const mss::rank::info<MC>& i_dimm_rank,
                                        const uint8_t i_nibble_idx,
                                        const std::vector<uint8_t>& i_spare_nibbles,
-                                       std::vector<uint8_t>& io_deployed_spares);
+                                       std::vector<uint8_t>& io_deployed_spares,
+                                       const bool i_ignore_bad_bits = false);
 
 ///
 /// @brief Undeploy the specified spare on the provided rank
@@ -756,6 +758,18 @@ fapi2::ReturnCode deploy_spare_helper( const fapi2::Target<fapi2::TARGET_TYPE_DI
 ///
 template<mss::mc_type MC>
 fapi2::ReturnCode unspare(const size_t i_spare, const mss::rank::info<MC>& i_rank);
+
+///
+/// @brief Helper function to get DQ index from a deployed spare
+/// @param[in] i_spare_dq a DQ index relative to the spare nibble (0-7)
+/// @param[in] i_deployed_nibble_index index of the nibble the spare is deployed to
+/// @return original DQ index mapped to DIMM's perspective
+///
+inline uint64_t get_dq_for_deployed_spare(const uint64_t i_spare_dq,
+        const uint64_t i_deployed_nibble_index)
+{
+    return (i_spare_dq % BITS_PER_NIBBLE) + i_deployed_nibble_index * BITS_PER_NIBBLE;
+}
 
 ///
 /// @brief Restore symbol and chip marks according to BAD_DQ_BITMAP attribute, helper function for unit testing
@@ -773,6 +787,8 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
         fapi2::buffer<uint8_t>& io_repairs_exceeded)
 {
     FAPI_INF("%s Restore repair marks from bad DQ data", mss::c_str(i_dimm));
+
+    constexpr bool IGNORE_BAD_BITS_ON_SPARES = true;
 
     std::vector<mss::rank::info<MC>> l_ranks;
     uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
@@ -815,7 +831,12 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
             // For DIMM's that lack spares this becomes a no-op as the spare nibbles and deployed spares will be empty
             if((l_bad_dq_vector.size() >= 1) && (l_deployed_spares.size() < l_spare_nibbles.size()))
             {
-                FAPI_TRY(deploy_spare_helper<MC>(i_dimm, l_rank, l_nibble_idx, l_spare_nibbles, l_deployed_spares));
+                FAPI_TRY(deploy_spare_helper<MC>(i_dimm,
+                                                 l_rank,
+                                                 l_nibble_idx,
+                                                 l_spare_nibbles,
+                                                 l_deployed_spares,
+                                                 IGNORE_BAD_BITS_ON_SPARES));
             }
 
             // apply repairs and update repair machine state
@@ -865,7 +886,6 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
 
             // We want to apply repairs on the nibbles on which we deployed spares
             const auto l_nibble_idx = l_deployed_spares[l_spare];
-            const auto l_byte = l_nibble_idx / NIBBLES_PER_BYTE;
 
             // Available spares
             uint8_t l_undeployed_spare_count = l_spare_nibbles.size() - l_deployed_spares.size();
@@ -876,7 +896,12 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
             {
                 // deploy_spare_helper will always pick the next available spare,
                 // so it should skip over the currently deployed and correctly choose the next
-                FAPI_TRY(deploy_spare_helper<MC>(i_dimm, l_rank, l_nibble_idx, l_spare_nibbles, l_deployed_spares));
+                FAPI_TRY(deploy_spare_helper<MC>(i_dimm,
+                                                 l_rank,
+                                                 l_nibble_idx,
+                                                 l_spare_nibbles,
+                                                 l_deployed_spares,
+                                                 IGNORE_BAD_BITS_ON_SPARES));
 
                 // Undeploy the current spare
                 FAPI_TRY(mss::unspare(l_spare, l_rank));
@@ -889,14 +914,14 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
             // if there are no bad bits (l_bad_dq_vector.size() == 0) no action is necessary
             else if (l_bad_dq_vector.size() == 1)
             {
-                // l_bad_dq_vector is per byte, so multiply up to get the bad dq's index
-                const uint64_t l_dq = l_bad_dq_vector[0] + (l_byte * BITS_PER_BYTE);
+                // map the spare's bad dq to get the dq index to mark
+                const auto l_dq = get_dq_for_deployed_spare(l_bad_dq_vector[0], l_nibble_idx);
                 FAPI_TRY( l_machine.one_bad_dq(i_dimm, l_port_rank, l_dq, io_repairs_applied, io_repairs_exceeded) );
             }
             else if (l_bad_dq_vector.size() > 1)
             {
-                // l_bad_dq_vector is per byte, so multiply up to get the bad dq's index
-                const uint64_t l_dq = l_bad_dq_vector[0] + (l_byte * BITS_PER_BYTE);
+                // map the spare's bad dq to get the dq index to mark
+                const auto l_dq = get_dq_for_deployed_spare(l_bad_dq_vector[0], l_nibble_idx);
                 FAPI_TRY( l_machine.multiple_bad_dq(i_dimm, l_port_rank, l_dq, io_repairs_applied, io_repairs_exceeded) );
             }
 

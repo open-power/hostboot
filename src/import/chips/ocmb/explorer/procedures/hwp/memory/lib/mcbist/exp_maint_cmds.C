@@ -286,6 +286,7 @@ fapi2::ReturnCode check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 /// @brief Checks if a spare can be deployed or not
 /// @param[in] i_target MEM_PORT target
 /// @param[in] i_port_rank Rank we want to read steer mux for.
+/// @param[in] i_ignore_bad_bits Set to true to ignore training fails
 /// @param[out] o_spare0_free True if the spare is free, othewise false
 /// @param[out] o_spare1_free True if the spare is free, othewise false
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
@@ -294,6 +295,7 @@ fapi2::ReturnCode check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 ///
 fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const uint8_t i_port_rank,
+        const bool i_ignore_bad_bits,
         bool& o_spare0_free,
         bool& o_spare1_free )
 {
@@ -310,8 +312,8 @@ fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
     bool l_spare0_exists = false;
     bool l_spare1_exists = false;
-    bool l_spare0_is_clean = false;
-    bool l_spare1_is_clean = false;
+    bool l_spare0_is_clean = true;
+    bool l_spare1_is_clean = true;
     uint8_t l_dram_spare0_symbol = 0;
     uint8_t l_dram_spare1_symbol = 0;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -326,11 +328,14 @@ fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_
     l_spare1_exists = !mss::skip_dne_spare_nibble<mss::mc_type::EXPLORER>(l_dimm_spare[l_rank_info.get_dimm_rank()],
                       SPARE_DQ_BYTE, 1);
 
-    // 2) Checks if the spare is clear of errors
-    FAPI_TRY(get_bad_dq_bitmap<mss::mc_type::EXPLORER>(l_rank_info.get_dimm_target(), l_bad_bits));
+    // 2) Checks if the spare is clear of errors (only if we need to)
+    if (!i_ignore_bad_bits)
+    {
+        FAPI_TRY(get_bad_dq_bitmap<mss::mc_type::EXPLORER>(l_rank_info.get_dimm_target(), l_bad_bits));
 
-    l_spare0_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][SPARE_DQ_BYTE] & SPARE0_MASK);
-    l_spare1_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][SPARE_DQ_BYTE] & SPARE1_MASK);
+        l_spare0_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][SPARE_DQ_BYTE] & SPARE0_MASK);
+        l_spare1_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][SPARE_DQ_BYTE] & SPARE1_MASK);
+    }
 
     // 3) Checks if the spare has been deployed
     FAPI_TRY(check_steering(i_target, i_port_rank, l_dram_spare0_symbol, l_dram_spare1_symbol));
@@ -396,11 +401,13 @@ fapi_try_exit:
 /// @param[in] i_target MEM PORT target
 /// @param[in] i_port_rank Rank we want to write steer mux for.
 /// @param[in] i_symbol First symbol index of the DRAM to steer around.
+/// @param[in] i_ignore_bad_bits Set to true to deploy spare regardless of training fails on it (default false)
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
 ///
 fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                               const uint8_t i_port_rank,
-                              const uint8_t i_symbol)
+                              const uint8_t i_symbol,
+                              const bool i_ignore_bad_bits)
 {
     bool l_spare0_free = false;
     bool l_spare1_free = false;
@@ -415,7 +422,7 @@ fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
     //------------------------------------------------------
     // Determine which spare is free
     //------------------------------------------------------
-    FAPI_TRY(check_if_spare_is_free(i_target, i_port_rank, l_spare0_free, l_spare1_free));
+    FAPI_TRY(check_if_spare_is_free(i_target, i_port_rank, i_ignore_bad_bits, l_spare0_free, l_spare1_free));
 
     // If neither spare is free, assert out
     FAPI_ASSERT(l_spare0_free || l_spare1_free,

@@ -450,12 +450,14 @@ fapi2::ReturnCode program_steering_helper(const fapi2::Target<fapi2::TARGET_TYPE
 /// @brief Set write mux, wait for periodic cal, set read mux, for the given rank.
 /// @param[in] i_target MEM PORT target
 /// @param[in] i_port_rank Rank we want to write steer mux for.
-/// @param[in] i_symbol First symbol index of the DRAM to steer  around.
+/// @param[in] i_symbol First symbol index of the DRAM to steer around.
+/// @param[in] i_ignore_bad_bits Set to true to deploy spare regardless of training fails on it (default false)
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
 ///
 fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                               const uint8_t i_port_rank,
-                              const uint8_t i_symbol);
+                              const uint8_t i_symbol,
+                              const bool i_ignore_bad_bits = false);
 } // ns steer
 
 } // ns exp
