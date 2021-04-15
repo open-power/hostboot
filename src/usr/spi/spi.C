@@ -881,7 +881,7 @@ CompareSlaveDevice::CompareSlaveDevice(const HDAT::hdatSpiDevData_t*& i_hdatSpiD
     iv_device.devicePurpose = static_cast<spiSlaveDevice::slaveDevicePurpose_t>(i_hdatSpiDevice->hdatSpiDevPurp);
 }
 
-CompareSlaveDevice::CompareSlaveDevice(spiSlaveDevice i_spiDevice)
+CompareSlaveDevice::CompareSlaveDevice(const spiSlaveDevice& i_spiDevice)
 {
     iv_device.deviceId.word = i_spiDevice.deviceId.word;
     iv_device.masterEngine = i_spiDevice.masterEngine;
@@ -890,12 +890,12 @@ CompareSlaveDevice::CompareSlaveDevice(spiSlaveDevice i_spiDevice)
     iv_device.devicePurpose = i_spiDevice.devicePurpose;
 }
 
-bool CompareSlaveDevice::operator()(const spiSlaveDevice i_spiDevice)
+bool CompareSlaveDevice::operator()(const spiSlaveDevice& i_spiDevice)
 {
     return (*this)(iv_device, i_spiDevice);
 }
 
-bool CompareSlaveDevice::operator()(const spiSlaveDevice i_device1, const spiSlaveDevice i_device2)
+bool CompareSlaveDevice::operator()(const spiSlaveDevice& i_device1, const spiSlaveDevice& i_device2)
 {
    // Shift off "unique id" portion of SPI Device Id as it is not guaranteed to
    // match.

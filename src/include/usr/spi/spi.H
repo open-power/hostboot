@@ -216,7 +216,7 @@ public:
     CompareSlaveDevice(const HDAT::hdatSpiDevData_t*& i_hdatSpiDevInfo);
 
     // @brief Constructor that stores passed spiSlaveDevice as device to compare others against
-    CompareSlaveDevice(spiSlaveDevice i_spiDevInfo);
+    CompareSlaveDevice(const spiSlaveDevice& i_spiDevInfo);
 
     // @brief Used to compare the given SPI device to the internally held one.
     //
@@ -225,7 +225,7 @@ public:
     // @return   bool             TRUE: If spi devices are the same. That is to say, many unique fields between
     //                                  the two devices are the same.
     //                            FALSE: Not enough uniquely indentifiable info matches.
-    bool operator()(spiSlaveDevice i_spiDevice);
+    bool operator()(const spiSlaveDevice& i_spiDevice);
 
     // @brief Used to compare one SPI device to another to see if they are the same
     //
@@ -235,7 +235,7 @@ public:
     // @return   bool             TRUE: If spi devices are the same. That is to say, many unique fields between
     //                                  the two devices are the same.
     //                            FALSE: Not enough uniquely indentifiable info matches.
-    bool operator()(spiSlaveDevice i_spiDevice1, spiSlaveDevice i_spiDevice2);
+    bool operator()(const spiSlaveDevice& i_spiDevice1, const spiSlaveDevice& i_spiDevice2);
 };
 
 /**
