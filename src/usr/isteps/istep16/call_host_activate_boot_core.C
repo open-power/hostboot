@@ -77,27 +77,27 @@ void* call_host_activate_boot_core(void* const io_pArgs)
     {
         const bool l_isFusedMode = is_fused_mode();
 
-        // find the master core, i.e. the one we are running on
+        // find the boot core, i.e. the one we are running on
         TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_boot_core: Find master core:");
+                  "call_host_activate_boot_core: Find boot core:");
 
         // Determine top-level system target
         Target* l_sys = nullptr;
         targetService().getTopLevelTarget(l_sys);
         assert(l_sys != nullptr, "Toplevel target must not be null");
 
-        const Target* const l_masterCore = getMasterCore();
-        assert(l_masterCore != nullptr, "Master core must not be null");
+        const Target* const l_bootCore = getBootCore();
+        assert(l_bootCore != nullptr, "Boot core must not be null");
 
-        const Target* const l_proc_target = getParentChip(l_masterCore);
-        assert(l_proc_target, "Parent chip of master core must not be null");
+        const Target* const l_proc_target = getParentChip(l_bootCore);
+        assert(l_proc_target, "Parent chip of boot core must not be null");
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapi2_proc_chip(l_proc_target);
 
         // Cast OUR type of target to a FAPI2 type of target.
         const fapi2::Target<fapi2::TARGET_TYPE_CORE>
-            l_fapi2_coreTarget(l_masterCore);
+            l_fapi2_coreTarget(l_bootCore);
 
         fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_fusedTarget(nullptr);
         const Target* l_fusedCore = nullptr;
@@ -105,8 +105,8 @@ void* call_host_activate_boot_core(void* const io_pArgs)
         if (l_isFusedMode)
         {
             const uint64_t cpuid = task_getcpuid();
-            const uint64_t l_masterCoreID = PIR_t::coreFromPir(cpuid);
-            const uint64_t l_fusedCoreID = l_masterCoreID + 1;
+            const uint64_t l_bootCoreID = PIR_t::coreFromPir(cpuid);
+            const uint64_t l_fusedCoreID = l_bootCoreID + 1;
 
             // get the list of core targets for this proc chip
             TargetHandleList l_coreTargetList;
@@ -117,7 +117,7 @@ void* call_host_activate_boot_core(void* const io_pArgs)
 
             // Find the core that matched with the fusedCoreID we
             // calculated above. This core is the core that will
-            // be fused with the master.
+            // be fused with the bootcore.
             for (const auto& l_core : l_coreTargetList)
             {
                 const ATTR_CHIP_UNIT_type l_coreId =
@@ -139,8 +139,8 @@ void* call_host_activate_boot_core(void* const io_pArgs)
                 * @errortype
                 * @moduleid     ISTEP::MOD_HOST_ACTIVATE_BOOT_CORE
                 * @reasoncode   ISTEP::RC_NO_FUSED_CORE_TARGET
-                * @userdata1    Master-fused core id
-                * @userdata2    Master-fused processor chip huid
+                * @userdata1    Boot-fused core id
+                * @userdata2    Boot-fused processor chip huid
                 * @devdesc      activate_boot_core> Could not find a target
                 *               for the boot-fused core
                 * @custdesc     A problem occurred during the IPL
@@ -165,7 +165,7 @@ void* call_host_activate_boot_core(void* const io_pArgs)
 
         // @TODO RTC 245393: Still necessary?
         // Because of a bug in how the SBE injects the IPI used to wake
-        // up the master core, need to ensure no mailbox traffic
+        // up the boot core, need to ensure no mailbox traffic
         // or even an interrupt in the interrupt presenter
         // 1) Reclaim all DMA bfrs from the FSP
         // 2) suspend the mailbox with interrupt disable
@@ -291,7 +291,7 @@ void* call_host_activate_boot_core(void* const io_pArgs)
                       TRACE_ERR_ARGS(l_errl));
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_masterCore).addToLog(l_errl);
+            ErrlUserDetailsTarget(l_bootCore).addToLog(l_errl);
 
             break;
         }
@@ -334,7 +334,7 @@ void* call_host_activate_boot_core(void* const io_pArgs)
             }
         }
 
-        //  put the master into winkle.
+        //  put the bootcore into winkle.
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "call_host_activate_boot_core: put boot core into winkle...");
 
@@ -407,12 +407,12 @@ void* call_host_activate_boot_core(void* const io_pArgs)
 
         // Save off original checkstop values and override them
         // to disable core xstops and enable sys xstops.
-        l_errl = HBPM::core_checkstop_helper_hwp(l_masterCore, true);
+        l_errl = HBPM::core_checkstop_helper_hwp(l_bootCore, true);
 
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "core_checkstop_helper_hwp on master ERROR: returning.");
+                      "core_checkstop_helper_hwp on bootcore ERROR: returning.");
             break;
         }
 

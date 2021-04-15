@@ -226,30 +226,30 @@ static errlHndl_t lock_memory_crypto_settings()
     return errl;
 }
 
-/* @brief Initialize the NCU on the master core so that the DARN instruction is
+/* @brief Initialize the NCU on the boot core so that the DARN instruction is
  *        usable from that core.
  *
  * @param[in] i_node         The current node
  * @param[out] o_activecore  The core on which DARN can be executed (always
- *                           the master core)
+ *                           the boot core)
  * @param[out] o_activenx    The NX unit connected to o_activecore
  * @return errlHndl_t Error if any, otherwise nullptr
  */
-static errlHndl_t initialize_master_core_ncu(Target* const i_node,
+static errlHndl_t initialize_boot_core_ncu(Target* const i_node,
                                              const Target*& o_activecore,
                                              const Target*& o_activenx)
 {
     errlHndl_t errl = nullptr;
 
-    const Target* const mastercore = getMasterCore();
-    assert(mastercore, "Cannot get master core");
-    const Target* nx_proc = getParentChip(mastercore);
-    assert(nx_proc, "Cannot get parent chip of master core");
+    const Target* const bootcore = getBootCore();
+    assert(bootcore, "Cannot get boot core");
+    const Target* nx_proc = getParentChip(bootcore);
+    assert(nx_proc, "Cannot get parent chip of boot core");
 
     TargetHandleList nxs;
     getChildChiplets(nxs, nx_proc, TYPE_NX, true);
 
-    // We prefer to use the NX from the same processor as the master core, but
+    // We prefer to use the NX from the same processor as the boot core, but
     // if that NX is not functional, then we just grab any functional NX and get
     // its parent processor.
     // The minimum hardware check in host_gard will ensure that we have at least
@@ -262,18 +262,18 @@ static errlHndl_t initialize_master_core_ncu(Target* const i_node,
         assert(nx_proc, "NX has no parent chip");
     }
 
-    FAPI_INVOKE_HWP(errl, p10_ncu_enable_darn, { mastercore }, { nx_proc });
+    FAPI_INVOKE_HWP(errl, p10_ncu_enable_darn, { bootcore }, { nx_proc });
 
     if (errl)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  ERR_MRK"Memory encryption: initialize_master_core_ncu failed "
+                  ERR_MRK"Memory encryption: initialize_boot_core_ncu failed "
                   "for core 0x%08x and processor 0x%08x",
-                  get_huid(mastercore),
+                  get_huid(bootcore),
                   get_huid(nx_proc));
     }
 
-    o_activecore = mastercore;
+    o_activecore = bootcore;
     o_activenx = nxs[0];
 
     return errl;
@@ -355,10 +355,10 @@ static errlHndl_t enable_memory_encryption()
         break;
     }
 
-    // Set up the master core for DARN and migrate this task there so that the
+    // Set up the boot core for DARN and migrate this task there so that the
     // hardware_random64 calls below work.
     const Target* activenx = nullptr, * activecore = nullptr;
-    errl = initialize_master_core_ncu(node, activecore, activenx);
+    errl = initialize_boot_core_ncu(node, activecore, activenx);
 
     if (errl)
     {

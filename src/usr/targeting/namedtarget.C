@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,14 +55,14 @@
 namespace TARGETING
 {
 
-const TARGETING::Target *   getMasterCore( )
+const TARGETING::Target *   getBootCore( bool i_functional )
 {
     task_affinity_pin();
-    task_affinity_migrate_to_master();  //This gets us master core, thread 0
-    PIR_t l_masterPIR = PIR_t(task_getcpuid());
+    task_affinity_migrate_to_master();  //This gets us boot core, thread 0
+    PIR_t l_bootPIR = PIR_t(task_getcpuid());
     task_affinity_unpin();
 
-    const   TARGETING::Target * l_masterCore    =   NULL;
+    const   TARGETING::Target * l_bootCore    =   NULL;
 
     TARGETING::Target * l_processor =   NULL;
     (void)TARGETING::targetService().masterProcChipTargetHandle( l_processor );
@@ -73,12 +73,12 @@ const TARGETING::Target *   getMasterCore( )
     getChildChiplets( l_cores,
                       l_processor,
                       TYPE_CORE,
-                      true );
+                      i_functional );
 
     TRACFCOMP( g_trac_targeting,
-               "getMasterCore: found %d cores on master proc,"
-               "l_masterCore PIR:0x%X",
-               l_cores.size(),l_masterPIR.word );
+               "getBootCore: found %d cores on boot proc,"
+               "l_bootCore PIR:0x%X",
+               l_cores.size(),l_bootPIR.word );
 
     for (TARGETING::TargetHandleList::const_iterator
             coreIter = l_cores.begin();
@@ -92,22 +92,22 @@ const TARGETING::Target *   getMasterCore( )
 
         PIR_t l_corePIR = PIR_t(l_topologyId, l_coreId);
 
-        if (l_corePIR == l_masterPIR){
+        if (l_corePIR == l_bootPIR){
             TRACFCOMP( g_trac_targeting,
-                       "found master core: 0x%x, PIR=0x%x :",
+                       "found boot core: 0x%x, PIR=0x%x :",
                        l_coreId,
                        l_corePIR.word  );
             EntityPath l_path;
             l_path  =   l_core->getAttr<ATTR_PHYS_PATH>();
             l_path.dump();
 
-            l_masterCore    =   l_core ;
+            l_bootCore    =   l_core ;
             break;
         }
 
     }   // endfor
 
-    return l_masterCore;
+    return l_bootCore;
 }
 
 };  // end namespace

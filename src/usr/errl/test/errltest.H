@@ -1113,10 +1113,10 @@ public:
         TARGETING::TargetHandleList l_cores;
         TARGETING::getAllChiplets( l_cores, TARGETING::TYPE_CORE, true );
         TARGETING::Target* l_victim = nullptr;
-        const TARGETING::Target* l_master = TARGETING::getMasterCore();
+        const TARGETING::Target* l_bootcore = TARGETING::getBootCore();
         for( auto c : l_cores )
         {
-            if( c != l_master )
+            if( c != l_bootcore )
             {
                 l_victim = c;
                 break;

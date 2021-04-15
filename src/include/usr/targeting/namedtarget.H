@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,11 +42,11 @@ namespace TARGETING
 
 
 /**
- * @brief   find master core in system
- *
+ * @brief   find boot core in system
+ * @param[in]  true: Only return a functional target, false: Return present
  *  @return master target core, NULL otherwise
  */
-const TARGETING::Target *   getMasterCore( );
+const TARGETING::Target *   getBootCore( bool i_functional = true );
 
 }   //  end namespace
 
