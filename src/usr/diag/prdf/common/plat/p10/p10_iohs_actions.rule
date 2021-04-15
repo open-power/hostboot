@@ -103,3 +103,15 @@ actionclass opencapi_l1_th_1
     threshold1;
 };
 
+actionclass threshold_and_mask_smp_l0
+{
+    smp_callout_l0;
+    threshold_and_mask_th32;
+};
+
+actionclass threshold_and_mask_smp_l1
+{
+    smp_callout_l1;
+    threshold_and_mask_th32;
+};
+

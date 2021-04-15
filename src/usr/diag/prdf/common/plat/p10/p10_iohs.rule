@@ -725,22 +725,22 @@ group gIOHS_DLP_FIR_SMP
     /** IOHS_DLP_FIR[6] (SMP mode)
      *  link0 crc error
      */
-    (rIOHS_DLP_FIR_SMP, bit(6)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(6)) ? threshold_and_mask_smp_l0;
 
     /** IOHS_DLP_FIR[7] (SMP mode)
      *  link1 crc error
      */
-    (rIOHS_DLP_FIR_SMP, bit(7)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(7)) ? threshold_and_mask_smp_l1;
 
     /** IOHS_DLP_FIR[8] (SMP mode)
      *  link0 nak received
      */
-    (rIOHS_DLP_FIR_SMP, bit(8)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(8)) ? defaultMaskedError;
 
     /** IOHS_DLP_FIR[9] (SMP mode)
      *  link1 nak received
      */
-    (rIOHS_DLP_FIR_SMP, bit(9)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(9)) ? defaultMaskedError;
 
     /** IOHS_DLP_FIR[10] (SMP mode)
      *  link0 replay buffer full
@@ -765,22 +765,22 @@ group gIOHS_DLP_FIR_SMP
     /** IOHS_DLP_FIR[14] (SMP mode)
      *  link0 sl ecc correctable
      */
-    (rIOHS_DLP_FIR_SMP, bit(14)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(14)) ? threshold_and_mask_smp_l0;
 
     /** IOHS_DLP_FIR[15] (SMP mode)
      *  link1 sl ecc correctable
      */
-    (rIOHS_DLP_FIR_SMP, bit(15)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(15)) ? threshold_and_mask_smp_l1;
 
     /** IOHS_DLP_FIR[16] (SMP mode)
      *  link0 sl ecc ue
      */
-    (rIOHS_DLP_FIR_SMP, bit(16)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(16)) ? threshold_and_mask_smp_l0;
 
     /** IOHS_DLP_FIR[17] (SMP mode)
      *  link1 sl ecc ue
      */
-    (rIOHS_DLP_FIR_SMP, bit(17)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(17)) ? threshold_and_mask_smp_l1;
 
     /** IOHS_DLP_FIR[18] (SMP mode)
      *  link0 retrain threshold
@@ -885,12 +885,12 @@ group gIOHS_DLP_FIR_SMP
     /** IOHS_DLP_FIR[38] (SMP mode)
      *  link0 prbs select error
      */
-    (rIOHS_DLP_FIR_SMP, bit(38)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(38)) ? threshold_and_mask_smp_l0;
 
     /** IOHS_DLP_FIR[39] (SMP mode)
      *  link1 prbs select error
      */
-    (rIOHS_DLP_FIR_SMP, bit(39)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(39)) ? threshold_and_mask_smp_l1;
 
     /** IOHS_DLP_FIR[40] (SMP mode)
      *  link0 tcomplete bad
@@ -940,12 +940,12 @@ group gIOHS_DLP_FIR_SMP
     /** IOHS_DLP_FIR[50] (SMP mode)
      *  link0 osc switch
      */
-    (rIOHS_DLP_FIR_SMP, bit(50)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(50)) ? threshold_and_mask_smp_l0;
 
     /** IOHS_DLP_FIR[51] (SMP mode)
      *  link1 osc switch
      */
-    (rIOHS_DLP_FIR_SMP, bit(51)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(51)) ? threshold_and_mask_smp_l1;
 
     /** IOHS_DLP_FIR[52] (SMP mode)
      *  link0 correctable array error
