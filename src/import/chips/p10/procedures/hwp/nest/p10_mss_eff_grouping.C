@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4778,6 +4778,17 @@ fapi2::ReturnCode p10_mss_eff_grouping(
     auto l_mccChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCC>();
     // std_pair<MCC target, MCC data>
     std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>> l_mccBarDataPair;
+
+    uint8_t l_is_apollo = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_IS_APOLLO, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_apollo));
+
+    // If this is Apollo we want to skip eff grouping
+    if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_TRUE)
+    {
+        FAPI_INF("Skipping p10_mss_eff_grouping on Apollo");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // Only do memory grouping if there's at least 1 functional MCC.
     // Note: No functional MCC is a valid state, don't flag an error.
