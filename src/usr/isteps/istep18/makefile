@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -41,6 +41,7 @@ EXTRAINCDIR += ${SRC_IMPORT_PATH}/hwpf/fapi2/include
 EXTRAINCDIR += ${P10_PROCEDURES_PATH}/lib
 EXTRAINCDIR += ${P10_PROCEDURES_PATH}/nest
 EXTRAINCDIR += ${P10_PROCEDURES_PATH}/pm
+EXTRAINCDIR += ${P10_PROCEDURES_PATH}/perv
 
 # Add the sub step object files
 OBJS += call_tod_setup.o

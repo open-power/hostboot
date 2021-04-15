@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <p10_scom_eq.H>
 #include <p10_scom_c.H>
 #include <p10_pm_hcd_flags.h>
+#include <p10_sbe_tp_chiplet_init.H>
 #include <multicast_group_defs.H>
 #include <cstdint>
 
@@ -595,15 +596,8 @@ fapi2::ReturnCode init_tod_node(
                     "TOD FIR bit active!");
 
         FAPI_DBG("Set error mask to runtime configuration");
-        // Mask TTYPE received informational bits 38:43
         FAPI_TRY(PREP_TOD_ERROR_MASK_REG(l_target));
-        SET_TOD_ERROR_MASK_REG_RX_TTYPE_0_MASK(l_tod_err_mask_reg);
-        SET_TOD_ERROR_MASK_REG_RX_TTYPE_1_MASK(l_tod_err_mask_reg);
-        SET_TOD_ERROR_MASK_REG_RX_TTYPE_2_MASK(l_tod_err_mask_reg);
-        SET_TOD_ERROR_MASK_REG_RX_TTYPE_3_MASK(l_tod_err_mask_reg);
-        SET_TOD_ERROR_MASK_REG_RX_TTYPE_4_MASK(l_tod_err_mask_reg);
-        SET_TOD_ERROR_MASK_REG_RX_TTYPE_5_MASK(l_tod_err_mask_reg);
-        FAPI_TRY(PUT_TOD_ERROR_MASK_REG(l_target, l_tod_err_mask_reg),
+        FAPI_TRY(PUT_TOD_ERROR_MASK_REG(l_target, TOD_ERROR_MASK),
                  "Error from PUT_TOD_ERROR_MASK_REG");
     }
 

@@ -31,6 +31,7 @@
 // *HWP FW Maintainer   : Raja Das (rajadas2@in.ibm.com)
 // *HWP Consumed by     : SBE
 //------------------------------------------------------------------------------
+// EKB-Mirror-To: hostboot, hwsv
 
 #ifndef _P10_SBE_TP_CHIPLET_INIT_H_
 #define _P10_SBE_TP_CHIPLET_INIT_H_
@@ -38,6 +39,14 @@
 
 #include <fapi2.H>
 
+enum P10_SBE_TP_CHIPLET_INIT_Public_Constants
+{
+    // Default TOD error mask, masks:
+    //   * received TType-X            - not an error but a status indication
+    //   * external xstop              - xstop coming in from outside, should not cause a secondary error
+    //   * interrupt from clock switch - only needed by firmware for error diagnosis, not an error
+    TOD_ERROR_MASK = 0x0000000003F00042,
+};
 
 typedef fapi2::ReturnCode (*p10_sbe_tp_chiplet_init_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
