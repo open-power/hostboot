@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,9 @@ namespace PLDM
 {
     using terminus_id_t = uint16_t;
 
+    // used to match any terminus id
+    const terminus_id_t TERMINUS_ID_ALL = 0xFFFF;
+
     // These are Entity Types used in Entity Association PDRs
     enum entity_type : uint16_t
     {
@@ -45,11 +48,16 @@ namespace PLDM
         ENTITY_TYPE_DIMM = 66,
         ENTITY_TYPE_PROCESSOR_MODULE = 67,
 
+        ENTITY_TYPE_PROCESSOR = 135,
+
         // Chassis-specific entities
         ENTITY_TYPE_LOGICAL_SYSTEM = 11521,
 
         // These values are defined by IBM as OEM codes
-        ENTITY_TYPE_TPM = 24576
+        ENTITY_TYPE_TPM = 24576,
+
+        ENTITY_TYPE_LOGICAL_MARKER = 0x8000, //first bit means logical type
+        ENTITY_TYPE_LOGICAL_PROCESSOR = ENTITY_TYPE_LOGICAL_MARKER | ENTITY_TYPE_PROCESSOR,
     };
 
     // These are the different types of PLDM message types we can expect

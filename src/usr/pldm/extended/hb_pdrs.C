@@ -53,6 +53,7 @@
 #include <targeting/common/predicates/predicatehwas.H>
 #include <targeting/targplatutil.H>
 
+
 using namespace TARGETING;
 using namespace PLDM;
 using namespace ERRORLOG;
@@ -61,15 +62,119 @@ using namespace ERRORLOG;
 
 namespace
 {
+typedef std::map<fru_record_set_id, pldm_entity> FruRecordSetMap;
+
+/* @brief Add Entity Association and FRU record set PDRs for cores
+ *
+ * @param[in/out] io_tree    opaque pointer acting as a handle to the PLDM association tree
+ * @param[in/out] io_repo    The PDR repository to add PDRs to.
+ * @param[in] i_terminus_id  The host's terminus ID
+ * @param[in/out] io_fru_record_set_map Current Record Set map of FRUs
+ *                            in  - at least contains processors
+ *                            out - at least contains cores + processors
+ * @return error handle if processor entity not found to add its cores
+ */
+errlHndl_t addCoreEntityAssociationAndFruRecordSetPdrs(pldm_entity_association_tree *io_tree,
+                                                       PdrManager& io_pdrman,
+                                                       const terminus_id_t i_terminus_id,
+                                                       FruRecordSetMap &io_fru_record_set_map )
+{
+    errlHndl_t errl = nullptr;
+
+    TargetHandleList proc_targets;
+    getClassResources(proc_targets,
+                      TARGETING::CLASS_CHIP,
+                      TARGETING::TYPE_PROC,
+                      UTIL_FILTER_PRESENT);
+
+    for (const auto proc_target : proc_targets )
+    {
+        // get the parent processor pldm_entity_node
+        pldm_entity proc_entity { };
+        const auto parent_proc_rsi = getTargetFruRecordSetID(proc_target);
+
+        auto search_itr = io_fru_record_set_map.find(parent_proc_rsi);
+
+        if (search_itr == io_fru_record_set_map.end())
+        {
+            PLDM_ERR("addCoreEntityAssociationAndFruRecordSetPdrs> "
+                "Unable to find an entity matching RSI 0x%04x for HUID 0x%08x",
+                parent_proc_rsi, get_huid(proc_target));
+
+            // next commit (Add DCM support to PLDM) removes this error path
+            break;
+        }
+        proc_entity = search_itr->second;
+        pldm_entity_node * parent_node =
+                pldm_entity_association_tree_find(io_tree, &proc_entity);
+        assert(parent_node != nullptr, "addCoreEntityAssociationAndFruRecordSetPdrs: parent_node is nullptr");
+
+        TARGETING::TYPE l_core_type = TYPE_CORE;
+        if(TARGETING::is_fused_mode())
+        {
+            l_core_type = TYPE_FC;
+        }
+
+        // find all CORE or FC chiplets of the proc
+        // @TODO RTC 282978: update this to only report non-ECO cores
+        TARGETING::TargetHandleList l_coreTargetList;
+        TARGETING::getChildAffinityTargetsByState( l_coreTargetList,
+                                                   proc_target,
+                                                   CLASS_UNIT,
+                                                   l_core_type,
+                                                   UTIL_FILTER_PRESENT);
+
+        std::sort(begin(l_coreTargetList), end(l_coreTargetList),
+              [](const Target* const t1, const Target* const t2) {
+                  return t1->getAttr<ATTR_MRU_ID>() < t2->getAttr<ATTR_MRU_ID>();
+              });
+
+        for (auto & l_core_target : l_coreTargetList )
+        {
+            pldm_entity pldmEntity
+            {
+                // The entity_instance_num and entity_container_id members of
+                // this struct are filled out by
+                // pldm_entity_association_tree_add below
+                .entity_type = ENTITY_TYPE_LOGICAL_PROCESSOR
+            };
+
+            PLDM_INF("Adding entity association and FRU record set PDRs for %s HUID 0x%x",
+                     (l_core_type==TYPE_CORE)?"core":"fc", get_huid(l_core_target));
+
+            // Add the Entity Association record to the tree (will be converted
+            // to PDRs and stored in the repo at the end of this function)
+            pldm_entity_association_tree_add(io_tree,
+                                             &pldmEntity,
+                                             DEFAULT_ENITTY_ID,
+                                             parent_node,
+                                             PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+
+            // We need the FRU Record Set ID to be unique to each target
+            // instance.
+            const fru_record_set_id_t rsid = getTargetFruRecordSetID(l_core_target);
+            io_fru_record_set_map[rsid] = pldmEntity;
+
+            PLDM_DBG("FRU: th 0x%04X, fru_rsi 0x%04X, entity_type 0x%04X, entity_instance_num 0x%04X, container_id 0x%04X",
+                i_terminus_id, rsid, pldmEntity.entity_type, pldmEntity.entity_instance_num, pldmEntity.entity_container_id);
+        }
+    }
+    return errl;
+}
+
 
 /* @brief Add Entity Association and FRU Record Set PDRs for FRUs that Hostboot
  *        owns to the given PDR manager.
  *
  * @param[in/out] io_pdrman  The PDR manager to add to
  * @param[in] i_terminus_id  The host's terminus ID
+ * @return error handle
  */
-void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const terminus_id_t i_terminus_id)
+errlHndl_t addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman,
+                                             const terminus_id_t i_terminus_id)
 {
+    errlHndl_t errl = nullptr;
+
     using enttree_ptr
         = std::unique_ptr<pldm_entity_association_tree,
                           decltype(&pldm_entity_association_tree_destroy)>;
@@ -77,7 +182,8 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const termin
     const enttree_ptr enttree { pldm_entity_association_tree_init(),
                                 pldm_entity_association_tree_destroy };
 
-    std::map<fru_record_set_id_t, pldm_entity> fru_record_set_map;
+    // map so record sets can be added after associative records
+    FruRecordSetMap fru_record_set_map;
 
     /* Add the backplane (root node) to the tree. */
     pldm_entity backplane_entity
@@ -88,7 +194,7 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const termin
     const auto backplane_node
         = pldm_entity_association_tree_add(enttree.get(),
                                            &backplane_entity,
-					   DEFAULT_ENITTY_ID,
+                                           DEFAULT_ENITTY_ID,
                                            nullptr, // means "no parent" i.e. root
                                            PLDM_ENTITY_ASSOCIAION_PHYSICAL);
 
@@ -125,7 +231,7 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const termin
             // to PDRs and stored in the repo at the end of this function)
             pldm_entity_association_tree_add(enttree.get(),
                                              &pldmEntity,
-					     DEFAULT_ENITTY_ID,
+                                             DEFAULT_ENITTY_ID,
                                              backplane_node,
                                              PLDM_ENTITY_ASSOCIAION_PHYSICAL);
 
@@ -138,16 +244,26 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, const termin
         }
     }
 
-    /* Serialize the tree into the PDR repository. */
-    io_pdrman.addEntityAssociationPdrs(*enttree.get(), false /* is_remote */);
+    // Now that processors have been added, add the cores under them
+    errl = addCoreEntityAssociationAndFruRecordSetPdrs(enttree.get(), io_pdrman,
+                                                       i_terminus_id, fru_record_set_map);
 
-    /* now add all the FRU record set PDRs */
-    for (auto const& fru_record : fru_record_set_map)
+    if (!errl)
     {
-        // Add the FRU record set PDR to the repo
-        io_pdrman.addFruRecordSetPdr(fru_record.first, fru_record.second);
+        /* now add all the FRU record set PDRs */
+        for (auto const& fru_record : fru_record_set_map)
+        {
+            // Add the FRU record set PDR to the repo
+            io_pdrman.addFruRecordSetPdr(fru_record.first, fru_record.second);
+        }
+
+
+        /* Serialize the tree into the PDR repository. */
+        io_pdrman.addEntityAssociationPdrs(*enttree.get(), false /* is_remote */);
     }
+    return errl;
 }
+
 
 /* @brief Add the state effecter and sensor PDRs for OCC FRUs.
  *
@@ -317,7 +433,7 @@ namespace PLDM
 
 extern const std::array<fru_inventory_class, 2> fru_inventory_classes
 {{
-    { CLASS_CHIP,         TYPE_PROC, ENTITY_TYPE_PROCESSOR_MODULE },
+    { CLASS_CHIP,         TYPE_PROC, ENTITY_TYPE_PROCESSOR },
     { CLASS_LOGICAL_CARD, TYPE_DIMM, ENTITY_TYPE_DIMM }
 }};
 
@@ -330,10 +446,9 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
 
     errlHndl_t errl = nullptr;
 
-    addEntityAssociationAndFruRecordSetPdrs(io_pdrman,
+    errl = addEntityAssociationAndFruRecordSetPdrs(io_pdrman,
                                             io_pdrman.hostbootTerminusId());
-
-    errl = addSystemStateControlPdrs(io_pdrman);
+    errl || (errl = addSystemStateControlPdrs(io_pdrman));
     errl || (errl = addOccStateControlPdrs(io_pdrman));
     errl || (errl = addFruInventoryPdrs(io_pdrman));
 

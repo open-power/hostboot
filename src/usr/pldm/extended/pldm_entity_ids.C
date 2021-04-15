@@ -59,7 +59,8 @@ using namespace TARGETING;
 // that we can retrieve the Target instance associated with the entity.
 const entity_type hb_entity_types[] =
 {
-    ENTITY_TYPE_PROCESSOR_MODULE,
+    ENTITY_TYPE_PROCESSOR,
+    ENTITY_TYPE_LOGICAL_PROCESSOR,
     ENTITY_TYPE_DIMM
 };
 
@@ -279,7 +280,7 @@ errlHndl_t PLDM::assignTargetEntityIds()
     // corresponding Target's class/type/instance.
     for (const entity_type ent_type : hb_entity_types)
     {
-        const auto fru_rsids = thePdrManager().findFruRecordSetIdsByType(ent_type);
+        const auto fru_rsids = thePdrManager().findFruRecordSetIdsByType(ent_type, thePdrManager().hostbootTerminusId());
 
         for (const auto rsid : fru_rsids)
         {

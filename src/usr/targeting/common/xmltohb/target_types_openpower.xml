@@ -371,9 +371,25 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <!-- Processor Core : Represents smallest core for this model -->
+    <id>unit-core</id>
+    <attribute>
+      <id>PLDM_ENTITY_ID_INFO</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>unit-core-power9</id>
     <attribute>
       <id>IPMI_SENSORS</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <!-- Fused Core : SMT8 logical core, contains 2xSMT4 cores -->
+    <id>unit-fc</id>
+    <attribute>
+      <id>PLDM_ENTITY_ID_INFO</id>
     </attribute>
   </targetTypeExtension>
 

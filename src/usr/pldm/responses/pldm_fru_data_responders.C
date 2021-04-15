@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,8 @@
 #include <openbmc/pldm/libpldm/base.h>
 #include <openbmc/pldm/libpldm/fru.h>
 
+#include <openbmc/pldm/oem/ibm/libpldm/fru.h>
+
 // Targeting
 #include <targeting/common/utilFilter.H>
 #include <targeting/targplatutil.H>
@@ -72,8 +74,9 @@ const int FRU_TABLE_MAX_SIZE_UNSUPPORTED = 0;
 // This is a list of types for which we need to send a location code to the BMC
 const fru_inventory_class host_location_code_frus[] =
 {
-    { CLASS_CHIP, TYPE_PROC, ENTITY_TYPE_PROCESSOR_MODULE },
-    { CLASS_LOGICAL_CARD, TYPE_DIMM, ENTITY_TYPE_DIMM }
+    { CLASS_CHIP, TYPE_PROC, ENTITY_TYPE_PROCESSOR },
+    { CLASS_LOGICAL_CARD, TYPE_DIMM, ENTITY_TYPE_DIMM },
+    { CLASS_UNIT, TYPE_CORE, ENTITY_TYPE_LOGICAL_PROCESSOR },
 };
 
 /* @brief  Encode a GetFRURecordTable response
@@ -187,9 +190,15 @@ void FruRecordTable::loadAllFruRecords()
     {
         TargetHandleList targets;
 
+        TARGETING::TYPE l_target_type = info.targetType;
+        if (l_target_type == TYPE_CORE && TARGETING::is_fused_mode())
+        {
+            l_target_type = TYPE_FC;
+        }
+
         getClassResources(targets,
                           info.targetClass,
-                          info.targetType,
+                          l_target_type,
                           UTIL_FILTER_PRESENT);
 
         for (const auto target : targets)
@@ -271,27 +280,63 @@ void read_location_code_tlv(Target* const i_target,
     /* Append the target location code */
 
     {
-        ATTR_LOCATION_CODE_type location_code { };
+        ATTR_STATIC_ABS_LOCATION_CODE_type abs_location_code { };
 
-        static_assert(sizeof(location_code) <= UINT8_MAX,
+        // this is here to help notify future developers of a possible size conflict
+        // encodeTlv() has an assert to check against real size being passed in for location code
+        static_assert(sizeof(abs_location_code) <= UINT8_MAX,
                       "Location code too large to encode in a FRU TLV");
 
-        assert(i_target->tryGetAttr<ATTR_LOCATION_CODE>(location_code),
-               "Cannot get ATTR_LOCATION_CODE from HUID = 0x%08x",
-               get_huid(i_target));
+        assert(UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(i_target, abs_location_code),
+            "Cannot get ATTR_STATIC_ABS_LOCATION_CODE from HUID = 0x%08x", get_huid(i_target));
 
+        // location code is not null terminated
         full_location_code.insert(end(full_location_code),
-                                  location_code, location_code + strlen(location_code));
+                                  abs_location_code, abs_location_code + strlen(abs_location_code));
     }
 
     /* Encode the TLV */
 
-    const int location_code_key = 254;
+    const int location_code_key = PLDM_OEM_FRU_FIELD_TYPE_LOCATION_CODE;
 
     encodeTlv(location_code_key,
               full_location_code.size(),
               full_location_code.data(),
               o_fru_data);
+}
+
+/* @brief Reads the MRU_ID from a target and encodes it as in TLV format.
+ *
+ * @param[in] i_target        The target to grab MRU_ID from
+ * @param[in] i_field_type    The pldm field type
+ * @param[out] o_fru_data     The vector to fill with FRU TLVs
+ * @return true if tlv added, else false
+ */
+bool read_mru_id_tlv( Target* const i_target,
+                      const uint8_t i_field_type,
+                      fru_data_t& o_fru_data )
+{
+    bool l_mru_id_added = false;
+    uint32_t l_mru_id = 0xbaaddead;
+
+    // Only add for targets that have MRU_ID attribute
+    if (i_target->tryGetAttr<ATTR_MRU_ID>(l_mru_id))
+    {
+        /* Encode the TLV */
+        char asciiMruId[11] = {0};
+        snprintf(asciiMruId, sizeof(asciiMruId), "0x%08X", l_mru_id);
+        encodeTlv(i_field_type,
+                  strnlen(asciiMruId, sizeof(asciiMruId)-1),
+                  asciiMruId,
+                  o_fru_data);
+        l_mru_id_added = true;
+    }
+    else
+    {
+        PLDM_DBG("Skipping read_mru_id_tlv(0x%08X, 0x%02X) because ATTR_MRU_ID isn't defined for ATTR_TYPE %s",
+            get_huid(i_target), i_field_type, attrToString<ATTR_TYPE>(i_target->getAttr<ATTR_TYPE>()));
+    }
+    return l_mru_id_added;
 }
 
 void FruRecordTable::loadFruRecords(Target* const i_target,
@@ -304,13 +349,11 @@ void FruRecordTable::loadFruRecords(Target* const i_target,
     const fru_record_set_id_t rsid = getTargetFruRecordSetID(i_target);
 
     /* Read the target's location code, encoded as a TLV */
-
     fru_data_t fru_tlvs;
-
     read_location_code_tlv(i_target, fru_tlvs);
 
-    /* Reserve space in the record table */
 
+    /* Reserve space in the record table */
     size_t fru_record_table_used_bytes = iv_fru_record_table_bytes.size();
 
     const size_t record_hdr_size =
@@ -323,7 +366,8 @@ void FruRecordTable::loadFruRecords(Target* const i_target,
 
     /* Encode the record in the table */
 
-    const int num_tlvs = 1;
+    // location code
+    int num_tlvs = 1;
 
     const int encode_rc = encode_fru_record(iv_fru_record_table_bytes.data(),
                                             iv_fru_record_table_bytes.size(),
@@ -339,10 +383,44 @@ void FruRecordTable::loadFruRecords(Target* const i_target,
            "encode_fru_record failed with rc = %d",
            encode_rc);
 
-    /* Adjust bookkeeping numbers */
 
+    /* Adjust bookkeeping numbers */
     ++iv_num_records;
     iv_record_sets[rsid] = true;
+
+
+    // add the MRU_ID to the SN field for a general record if allowed
+    fru_tlvs.clear();
+
+    /* Read the target's mru_id, encoded as a TLV */
+    /* Adds the mru_id to fru_tlvs if mru_id exists on target */
+    bool mruid_added = read_mru_id_tlv(i_target, PLDM_FRU_FIELD_TYPE_SN, fru_tlvs);
+    if (mruid_added)
+    {
+        // SN field which has MRU_ID
+        num_tlvs = 1;
+
+        iv_fru_record_table_bytes.resize(iv_fru_record_table_bytes.size()
+                                         + record_hdr_size
+                                         + fru_tlvs.size());
+
+        const int encode_rc = encode_fru_record(iv_fru_record_table_bytes.data(),
+                                        iv_fru_record_table_bytes.size(),
+                                        &fru_record_table_used_bytes,
+                                        rsid,
+                                        PLDM_FRU_RECORD_TYPE_GENERAL,
+                                        num_tlvs,
+                                        PLDM_FRU_ENCODING_ASCII,
+                                        fru_tlvs.data(),
+                                        fru_tlvs.size());
+
+        assert(encode_rc == PLDM_SUCCESS,
+               "encode_fru_record PLDM_FRU_RECORD_TYPE_GENERAL failed with rc = %d",
+               encode_rc);
+
+        /* Adjust bookkeeping numbers */
+        ++iv_num_records;
+    }
 }
 
 } // anonymous namespace

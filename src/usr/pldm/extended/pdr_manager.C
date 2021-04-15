@@ -333,7 +333,8 @@ std::vector<pdr_handle_t> PdrManager::getAllPdrHandles() const
     return pdrs;
 }
 
-std::vector<fru_record_set_id> PdrManager::findFruRecordSetIdsByType(const entity_type i_ent_type) const
+
+std::vector<fru_record_set_id> PdrManager::findFruRecordSetIdsByType(const entity_type i_ent_type, const terminus_id_t i_terminus_id) const
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
 
@@ -363,7 +364,34 @@ std::vector<fru_record_set_id> PdrManager::findFruRecordSetIdsByType(const entit
 
             if (le16toh(record_set_pdr->entity_type) == i_ent_type)
             {
-                rsis.push_back(le16toh(record_set_pdr->fru_rsi));
+                uint16_t tid = le16toh(record_set_pdr->terminus_handle);
+                if ((i_terminus_id == TERMINUS_ID_ALL) ||
+                    (i_terminus_id == tid))
+                {
+                    PLDM_DBG("findFruRecordSetIdsByType(0x%04X, 0x%04X): "
+                        "FRU: th 0x%04X, fru_rsi 0x%04X, entity_type 0x%04X, "
+                        "entity_instance_num 0x%04X, container_id 0x%04X",
+                        i_ent_type, i_terminus_id,
+                        record_set_pdr->terminus_handle,
+                        record_set_pdr->fru_rsi,
+                        record_set_pdr->entity_type,
+                        record_set_pdr->entity_instance_num,
+                        record_set_pdr->container_id);
+
+                    rsis.push_back(le16toh(record_set_pdr->fru_rsi));
+                }
+                else
+                {
+                    PLDM_DBG("findFruRecordSetIdsByType(0x%04X, 0x%04X): "
+                        "SKIPPING FRU: th 0x%04X, fru_rsi 0x%04X, entity_type 0x%04X, "
+                        "entity_instance_num 0x%04X, container_id 0x%04X",
+                        i_ent_type, i_terminus_id,
+                        record_set_pdr->terminus_handle,
+                        record_set_pdr->fru_rsi,
+                        record_set_pdr->entity_type,
+                        record_set_pdr->entity_instance_num,
+                        record_set_pdr->container_id);
+                }
             }
         }
     } while (curr_record);

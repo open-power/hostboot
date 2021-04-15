@@ -1976,6 +1976,13 @@ sub setMruid
     my $type          = $self->getType($target);
     my $mru_prefix_id = $self->{enumeration}->{MRU_PREFIX}->{$type};
 
+    # TODO RTC 291151 - remove when FC is added to MRU_PREFIX type
+    # Do this substitution while FC is not an MRU_PREFIX type
+    if ((!defined $mru_prefix_id) && ($type eq "FC"))
+    {
+        $mru_prefix_id = $self->{enumeration}->{MRU_PREFIX}->{"EX"};
+    }
+
     if ( (!defined $mru_prefix_id) ||
          ($mru_prefix_id eq "")    ||
          ($mru_prefix_id eq "0xFFFF") )

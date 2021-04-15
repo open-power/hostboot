@@ -167,9 +167,10 @@ public:
      *         the given entity type.
      *
      * @param[in] i_entity_type  Entity type to filter by
+     * @param[in] i_terminus_id  Terminus ID for the terminus that originated the FRU record set PDR
      * @return vector            List of FRU Record Set IDs for the given entity type
      */
-    std::vector<fru_record_set_id> findFruRecordSetIdsByType(entity_type i_entity_type) const;
+    std::vector<fru_record_set_id> findFruRecordSetIdsByType(entity_type i_entity_type, terminus_id_t i_terminus_id = TERMINUS_ID_ALL) const;
 
     /* @brief  Look up the entity ID corresponding with the given FRU Record Set ID
      *         in the PDR repository.
