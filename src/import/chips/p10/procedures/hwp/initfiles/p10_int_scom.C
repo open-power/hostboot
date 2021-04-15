@@ -53,6 +53,8 @@ constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0b1 = 0b1;
+constexpr uint64_t literal_0b0 = 0b0;
+constexpr uint64_t literal_0x0000000000000000 = 0x0000000000000000;
 constexpr uint64_t literal_0x775643213F3F00 = 0x775643213F3F00;
 constexpr uint64_t literal_0x77564321000000 = 0x77564321000000;
 constexpr uint64_t literal_0x0101010101010128 = 0x0101010101010128;
@@ -67,7 +69,6 @@ constexpr uint64_t literal_0b010 = 0b010;
 constexpr uint64_t literal_0b011 = 0b011;
 constexpr uint64_t literal_0b001 = 0b001;
 constexpr uint64_t literal_0b100000 = 0b100000;
-constexpr uint64_t literal_0b0 = 0b0;
 
 fapi2::ReturnCode p10_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
                                const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
@@ -165,6 +166,34 @@ fapi2::ReturnCode p10_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
 
             l_scom_buffer.insert<5, 1, 63, uint64_t>(literal_0b1 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x2010816ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x2010830ull, l_scom_buffer ));
+
+            constexpr auto l_INT_INT_CQ_INT_CQ_FIR_AIB_FENCE_OFF = 0x0;
+            l_scom_buffer.insert<39, 1, 63, uint64_t>(l_INT_INT_CQ_INT_CQ_FIR_AIB_FENCE_OFF );
+            constexpr auto l_INT_INT_CQ_INT_CQ_FIR_CFG_REG_PERR_OFF = 0x0;
+            l_scom_buffer.insert<40, 1, 63, uint64_t>(l_INT_INT_CQ_INT_CQ_FIR_CFG_REG_PERR_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x2010830ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x2010833ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<40, 1, 63, uint64_t>(literal_0b0 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x2010833ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x2010838ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0000000000000000 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x2010838ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x2010839ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<39, 1, 63, uint64_t>(literal_0b0 );
+            l_scom_buffer.insert<40, 1, 63, uint64_t>(literal_0b0 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x2010839ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x201091full, l_scom_buffer ));
