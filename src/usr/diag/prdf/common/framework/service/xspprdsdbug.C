@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,6 @@
 
 #include <fcntl.h>     // for O_RDONLY O_WRONLY etc..
 #include <unistd.h>    // for ::read()  ::write()
-#include <utilreg.H>
 
 #endif
 

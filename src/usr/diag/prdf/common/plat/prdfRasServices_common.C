@@ -49,7 +49,6 @@
 #include <prdfCompressBuffer.H>
 
 #include <utilmem.H> //For UtilMem stream class (outputting PfaData).
-#include <utilfile.H>
 #include <vector>
 #include <algorithm>
 #include <iipSystem.h>         //For RemoveStoppedChips
