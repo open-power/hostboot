@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -574,7 +574,7 @@ void collectTodErrorFfdc(   std::vector<TodFaultData> & io_todErrorData,
                             TodErrorSummary & o_errorSummary )
 {
     std::vector<TodFaultData> faultyChip;
-    memset( &o_errorSummary, 0x00, sizeof(TodErrorSummary) );
+    o_errorSummary = TodErrorSummary();
 
     for ( auto & i : io_todErrorData )
     {
