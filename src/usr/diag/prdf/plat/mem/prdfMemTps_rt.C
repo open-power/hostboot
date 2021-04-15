@@ -492,8 +492,9 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
         // Check if a spare is available to be used
         bool spAvail = false;
-        o_rc = isSpareAvailable<T>( trgt, iv_rank,
-                i_badDqCount.symList[0].symbol.getPortSlct(), spAvail );
+
+        // TODO RTC 210072 - Support for multiple ports per OCMB
+        o_rc = isSpareAvailable<T>( trgt, iv_rank, 0, spAvail );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "isSpareAvailable(0x%08x, 0x%02x) failed",
@@ -524,7 +525,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
             {
                 // Placing a chip mark to deploy a spare does not risk a UE
-                MemMark newCM(trgt, iv_rank, i_badChipCount.symList[0].symbol);
+                MemMark newCM(trgt, iv_rank, i_badDqCount.symList.at(0).symbol);
                 o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, newCM );
                 if ( SUCCESS != o_rc )
                 {
@@ -549,7 +550,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         // TCE. Both are still correctable after a symbol mark
                         // is placed.
                         // Place a symbol mark on this bad DQ.
-                        MemSymbol symbol = i_badDqCount.symList[0].symbol;
+                        MemSymbol symbol = i_badDqCount.symList.at(0).symbol;
                         MemMark newSymMark( trgt, iv_rank, symbol );
                         o_rc = MarkStore::writeSymbolMark<T>( iv_chip,
                                 iv_rank, newSymMark );
@@ -614,7 +615,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             if ( spAvail && noSpareUeRisk  )
             {
                 // Placing a chip mark to deploy a spare does not risk a UE
-                MemMark newCM(trgt, iv_rank, i_badChipCount.symList[0].symbol);
+                MemMark newCM(trgt, iv_rank, i_badDqCount.symList.at(0).symbol);
                 o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, newCM );
                 if ( SUCCESS != o_rc )
                 {
@@ -734,7 +735,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // is still correctable after a chip mark is placed.
                     // Place a chip mark on this bad chip.
                     MemMark newChipMark( trgt, iv_rank,
-                                         i_badChipCount.symList[0].symbol );
+                                         i_badChipCount.symList.at(0).symbol );
                     o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank,
                                                         newChipMark );
                     if ( SUCCESS != o_rc )
@@ -805,7 +806,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // since we can't correct those after chip mark is placed.
                     // Place a chip mark on the bad chip.
                     MemMark newChipMark( trgt, iv_rank,
-                                         i_badChipCount.symList[0].symbol );
+                                         i_badChipCount.symList.at(0).symbol );
                     o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank,
                                                         newChipMark );
                     if ( SUCCESS != o_rc )
@@ -879,7 +880,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // since we can't correct those after symbol mark is placed.
                     // Place a symbol mark on this bad DQ.
                     MemMark newSymMark( trgt, iv_rank,
-                                        i_badDqCount.symList[0].symbol );
+                                        i_badDqCount.symList.at(0).symbol );
                     o_rc = MarkStore::writeSymbolMark<T>( iv_chip,
                         iv_rank, newSymMark );
                     if ( SUCCESS != o_rc )
@@ -893,7 +894,8 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                                                       PRDFSIG_TpsSymbolMark );
 
                     // Update VPD with the symbol mark.
-                    o_rc = dqBitmap.setSymbol( i_badDqCount.symList[0].symbol );
+                    o_rc = dqBitmap.setSymbol(
+                        i_badDqCount.symList.at(0).symbol );
                     if ( SUCCESS != o_rc )
                     {
                         PRDF_ERR( PRDF_FUNC "dqBitmap.setSymbol failed." );
