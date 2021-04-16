@@ -83,7 +83,8 @@ enum sublink_t
 typedef fapi2::ReturnCode (*p10_smp_link_firs_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&,
     sublink_t,
-    action_t);
+    action_t,
+    bool);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -95,16 +96,18 @@ extern "C"
 ///
 /// @brief Setup the FIR mask and action registers for a given SMP link
 ///
-/// @param[in] i_iohs_target   Reference to IOHS target
-/// @param[in] i_sublink       Sub-link to apply settings to
-/// @param[in] i_action        Operational state to configure the FIRs for
+/// @param[in] i_iohs_target        Reference to IOHS target
+/// @param[in] i_sublink            Sub-link to apply settings to
+/// @param[in] i_action             Operational state to configure the FIRs for
+/// @param[in] i_mask_dl_lane_errs  Mask DL lane errors, used for HW561216
 ///
 /// @return FAPI_RC_SUCCESS if the setup completes successfully, else error code.
 ///
     fapi2::ReturnCode p10_smp_link_firs(
         const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
         sublink_t i_sublink,
-        action_t i_action);
+        action_t i_action,
+        bool i_mask_dl_lane_errs);
 
 } //extern "C"
 

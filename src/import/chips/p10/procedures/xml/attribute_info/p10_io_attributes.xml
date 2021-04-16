@@ -22,6 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hwsv -->
 <attributes>
  <!-- ******************************************************************************** -->
 
@@ -57,6 +58,39 @@
     </enum>
     <default>DISABLED</default>
     <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IOHS_MFG_BAD_LANE_VEC</id>
+    <targetType>
+      TARGET_TYPE_IOHS
+    </targetType>
+    <description>
+       Bit vector specifying bad lanes identified via manufacturing
+       test.  Data is stored left aligned in attribute, one bit
+       per lane, with 0b1 indicating a bad lane, and 0b0 indicating
+       a good lane.  
+
+       Source: MER0 record, #I keyword
+    </description>
+    <valueType>uint32</valueType>
+    <initToZero/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IOHS_MFG_BAD_LANE_VEC_VALID</id>
+    <targetType>
+      TARGET_TYPE_IOHS
+    </targetType>
+    <description>
+       Indicates bad lane vector information is valid
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      FALSE = 0,
+      TRUE = 1
+    </enum>
+    <default>FALSE</default>
   </attribute>
 
   <attribute>

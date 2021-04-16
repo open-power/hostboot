@@ -181,9 +181,9 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
         // init all FIRs as inactive before applying configuration
         for(auto l_iohs : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_PRESENT))
         {
-            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH_PAUE, action_t::INACTIVE),
+            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH_PAUE, action_t::INACTIVE, false),
                      "Error from p10_smp_link_firs when masking firs for all links");
-            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH_PAUO, action_t::INACTIVE),
+            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH_PAUO, action_t::INACTIVE, false),
                      "Error from p10_smp_link_firs when masking firs for all links");
         }
     }
@@ -208,6 +208,9 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
                 fapi2::ATTR_IOHS_LINK_SPLIT_Type l_link_split;
                 fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit;
                 sublink_t l_sublink_opt;
+                fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_Type l_bad_lane_vec_valid = fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_FALSE;
+                fapi2::ATTR_CHIP_EC_FEATURE_HW561216_Type l_hw561216 = 0;
+                bool l_mask_dl_lane_errors = false;
 
                 // apply FBC TL scom initfile
                 // (depending on system configuration, same TL registers may be programmed
@@ -256,7 +259,10 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
                 }
 
                 // setup and unmask EXTFIR/TL/DL/PHY FIRs
-                FAPI_TRY(p10_smp_link_firs(l_iohs, l_sublink_opt, action_t::RUNTIME),
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID, l_iohs, l_bad_lane_vec_valid));
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW561216, i_target, l_hw561216));
+                l_mask_dl_lane_errors = (l_hw561216 && (l_bad_lane_vec_valid == fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_FALSE));
+                FAPI_TRY(p10_smp_link_firs(l_iohs, l_sublink_opt, action_t::RUNTIME, l_mask_dl_lane_errors),
                          "Error from p10_smp_link_firs when configuring for runtime operations");
             }
         }

@@ -171,6 +171,8 @@ const struct fir_registers firs_runtime =
     .PHY_FIR_MASK    = 0x0000000000000000,
 };
 
+const uint64_t DLP_FIR_MASK_RECOV = 0xFFFFFFFFFFC0C003;
+
 // DL Config Register Enums
 const uint8_t DLP_PHY_CONFIG_DL_SELECT_DLP  = 0x01;
 
@@ -536,7 +538,8 @@ fapi_try_exit:
 fapi2::ReturnCode p10_smp_link_firs(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
     sublink_t i_sublink,
-    action_t i_action)
+    action_t i_action,
+    bool i_mask_dl_lane_errs)
 {
     using namespace scomt;
     using namespace scomt::iohs;
@@ -666,7 +669,8 @@ fapi2::ReturnCode p10_smp_link_firs(
 
     // DL FIR
     l_reg_values.DLP_FIR_MASK_CLR = ~firs_btm.DLP_FIR[i_sublink];
-    l_reg_values.DLP_FIR_MASK_SET = firs_btm.DLP_FIR[i_sublink] & l_reg_values.DLP_FIR_MASK;
+    l_reg_values.DLP_FIR_MASK_SET = firs_btm.DLP_FIR[i_sublink] & (l_reg_values.DLP_FIR_MASK |
+                                    ((i_mask_dl_lane_errs) ? (DLP_FIR_MASK_RECOV) : (0)));
 
     // PHY FIR
     l_reg_values.PHY_FIR_MASK_CLR = ~firs_btm.PHY_FIR[l_iohs_pos];
