@@ -142,6 +142,8 @@ void addTpmFFDC(TpmTarget* i_pTpm,
     // Mbox Scratch 11 contains the SBE TPM RC
     ERRORLOG::ErrlUserDetailsLogRegister l_scratchReg(l_proc);
     l_scratchReg.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR));
+    // Mbox Scratch 14 provides additional FFDC when possible
+    l_scratchReg.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch14_t::REG_ADDR));
     l_scratchReg.addToLog(io_errl);
     // Add freq control reg that will help determine the PAU freq used
     ERRORLOG::ErrlUserDetailsLogRegister l_pauFreqReg(l_proc);
