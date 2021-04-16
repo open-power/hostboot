@@ -627,7 +627,7 @@
       Decodes SPD Byte 320 and 321 for ISDIMMs (Fujitsu, US Modular)
       Decodes SPD Byte 512 and 513 for DDIMMs (Micron, Samsung, Smart)
     </description>
-    <enum>MICRON = 0x802C, SAMSUNG = 0x80CE, SMART = 0x0194, FUJITSU = 0x8004, US_MODULAR = 0x04AB</enum>
+    <enum>MICRON = 0x802C, SAMSUNG = 0x80CE, SMART = 0x0194, IBM = 0x80A4, FUJITSU = 0x8004, US_MODULAR = 0x04AB</enum>
     <initToZero></initToZero>
     <valueType>uint16</valueType>
     <writeable/>
