@@ -199,6 +199,59 @@ TargetHandleList getSortedPAUList(const Target& i_proc)
     return l_pauList;
 }
 
+
+/* @brief Dumps the gard records which includes a binary dump and data
+ *        to aide root cause(s) of issues
+ *
+ *        This function provides proactive cleanup to protect the
+ *        integrity of the gard tests being run from any gard record
+ *        creation latency (from previously run tests, either parallel
+ *        or serial tests).
+ * @return errlHndl_t = nullptr on success
+ *
+ */
+errlHndl_t checkGardState()
+{
+    errlHndl_t l_pErr = nullptr;
+    DeconfigGard::GardRecords_t l_gard_records;
+
+    do
+    {
+        l_gard_records.clear();
+
+        l_pErr = theDeconfigGard().dumpGardRecords(nullptr, l_gard_records);
+
+        if (l_pErr)
+        {
+            TS_INFO("checkGardState: Error from dumpGardRecords");
+            break;
+        }
+
+        TS_INFO("checkGardState: dumpGardRecords l_gard_records.size=%d", l_gard_records.size());
+
+        if (l_gard_records.size() != 0)
+        {
+
+            l_pErr = theDeconfigGard().clearGardRecords(nullptr);
+
+            if (l_pErr)
+            {
+                TS_INFO("checkGardState: Error from trying to cleanup clearGardRecords with a nullptr");
+                break;
+            }
+            TS_INFO("checkGardState: WARNING, had to CLEANUP TEST, expected ZERO gard records but we found %d", l_gard_records.size());
+        }
+        else
+        {
+            TS_INFO("checkGardState: GOOD CHECK, we expected ZERO gard records and we found %d", l_gard_records.size());
+        }
+
+    } while (0);
+
+    return l_pErr;
+}
+
+
 /* @brief Saves the state of every target's HWAS_STATE and PG attributes.
  */
 void saveSystemState()
@@ -1979,6 +2032,7 @@ public:
 
         saveSystemState();
         errlHndl_t l_pErr = nullptr;
+        DeconfigGard::GardRecords_t l_gard_records;
         do
         {
 
@@ -2000,6 +2054,14 @@ public:
             if (pFcList.empty())
             {
                 TS_FAIL("testDeConfigFC2BadCores: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
+                break;
+            }
+
+            l_pErr = checkGardState();
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDeConfigFC2BadCores: PRE TEST CHECK Error from checkGardState");
                 break;
             }
 
@@ -2089,6 +2151,14 @@ public:
                 break;
             }
 
+            l_pErr = checkGardState();
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDeConfigFC2BadCores: POST TEST CHECK Error from checkGardState");
+                break;
+            }
+
             TS_INFO("testDeConfigFC2BadCores: Success");
 
         }
@@ -2112,6 +2182,7 @@ public:
 
         saveSystemState();
         errlHndl_t l_pErr = nullptr;
+        DeconfigGard::GardRecords_t l_gard_records;
         do
         {
 
@@ -2133,6 +2204,14 @@ public:
             if (pFcList.empty())
             {
                 TS_FAIL("testDeConfigFC1BadCore: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
+                break;
+            }
+
+            l_pErr = checkGardState();
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDeConfigFC1BadCore: PRE TEST CHECK Error from checkGardState");
                 break;
             }
 
@@ -2158,7 +2237,7 @@ public:
             TS_INFO("testDeconfigFC1BadCore pCoreList.size=%d", pCoreList.size());
             if(pCoreList.empty())
             {
-                TS_FAIL("testDeconfigFC1BadCores: empty pCoreList");
+                TS_FAIL("testDeconfigFC1BadCore: empty pCoreList");
                 break;
             }
 
@@ -2266,6 +2345,14 @@ public:
                 break;
             }
 
+            l_pErr = checkGardState();
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDeConfigFC1BadCore: POST TEST CHECK Error from checkGardState");
+                break;
+            }
+
             TS_INFO("testDeConfigFC1BadCore: Success");
         }
         while (0);
@@ -2287,6 +2374,7 @@ public:
 
         saveSystemState();
         errlHndl_t l_pErr = nullptr;
+        DeconfigGard::GardRecords_t l_gard_records;
 
         do
         {
@@ -2310,6 +2398,14 @@ public:
             if (pEqList.empty())
             {
                 TS_FAIL("testDeConfigEQ2BadFCs: empty pEqList");
+                break;
+            }
+
+            l_pErr = checkGardState();
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDeConfigEQ2BadFCs: PRE TEST CHECK Error from checkGardState");
                 break;
             }
 
@@ -2377,6 +2473,15 @@ public:
                 l_State.functional  =   1 ;
                 pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
             } // for CHILD
+
+            l_pErr = checkGardState();
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDeConfigEQ2BadFCs: POST TEST CHECK Error from checkGardState");
+                break;
+            }
+
             TS_INFO("testDeConfigEQ2BadFCs: Success");
         }
         while (0);
@@ -2421,6 +2526,14 @@ public:
             if (pEqList.empty())
             {
                 TS_FAIL("testDeConfigEQ1BadFC: empty pEqList");
+                break;
+            }
+
+            l_pErr = checkGardState();
+
+            if (l_pErr)
+            {
+                TS_FAIL("testDeConfigEQ1BadFC: PRE TEST CHECK Error from checkGardState");
                 break;
             }
 
@@ -2538,29 +2651,11 @@ public:
                 break;
             }
 
-            // Get All the GARD Records
-            l_gard_records.clear();
-
-            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_gard_records);
+            l_pErr = checkGardState();
 
             if (l_pErr)
             {
-                TS_FAIL("testDeConfigEQ1BadFC: Error from getGardRecords with a nullptr");
-                break;
-            }
-
-            // cleanup for the next test
-            l_pErr = theDeconfigGard().clearGardRecords(nullptr);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testDeConfigEQ1BadFC: Error from trying to cleanup clearGardRecords with a nullptr");
-                break;
-            }
-
-            if (l_gard_records.size() != 1)
-            {
-                TS_FAIL("testDeConfigEQ1BadFC: Expected exactly 1 gard record but we found %d", l_gard_records.size());
+                TS_FAIL("testDeConfigEQ1BadFC: POST TEST CHECK Error from checkGardState");
                 break;
             }
 
@@ -4237,7 +4332,6 @@ public:
                             break;
                         }
 
-                        // just a trace point
                         l_pErr = theDeconfigGard().dumpGardRecords(nullptr, l_records);
 
                         if (l_pErr)

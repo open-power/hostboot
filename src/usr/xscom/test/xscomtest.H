@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,6 +117,8 @@ public:
 
         size_t l_size = sizeof(uint64_t);
 
+        TS_INFO("testScom1 Start");
+
         // Loop thru table
         errlHndl_t l_err = NULL;
         for( uint32_t l_num=0; l_num < g_xscomAddrTableSz; l_num++)
@@ -217,7 +219,7 @@ public:
         }
         else
         {
-            TS_TRACE("testXscom1 runs successfully!");
+            TS_INFO("testXscom1 runs successfully!");
         }
         return;
   }
@@ -243,6 +245,9 @@ public:
 
         // Loop thru table to do initial write
         errlHndl_t l_err = NULL;
+
+        TS_INFO("testScom2 Start");
+
         for( uint32_t l_num=0; l_num < g_xscomAddrTableSz; l_num++)
         {
             testXscomAddrData l_testEntry = g_xscomAddrTable[l_num];
@@ -280,7 +285,7 @@ public:
             }
             else
             {
-                TS_TRACE("testXscom2: XSCom write, Address 0x%.8X, Data %llx",
+                TS_INFO("testXscom2: XSCom write, Address 0x%.8X, Data %llx",
                          l_testEntry.addr,
                          (long long unsigned)l_writeData);
             }
@@ -344,7 +349,7 @@ public:
         }
         else
         {
-            TS_TRACE("testXscom2 runs successfully!");
+            TS_INFO("testXscom2 runs successfully!");
         }
         return;
     }
@@ -365,6 +370,8 @@ public:
         assert(l_testTarget != NULL);
         errlHndl_t l_err = NULL;
 
+        TS_INFO("testXscom3 Start");
+
         size_t l_size = sizeof(uint64_t);
 
 
@@ -377,9 +384,9 @@ public:
         if (l_err)
         {
 
-            TS_TRACE("testXscom3: XSCom read fails as expected: invalid addr");
+            TS_INFO("testXscom3: XSCom read fails as expected: invalid addr");
             errlCommit(l_err,XSCOM_COMP_ID);
-            TS_TRACE("testXscom3 runs successfully!");
+            TS_INFO("testXscom3 runs successfully!");
         }
         else
         {
@@ -404,6 +411,8 @@ public:
         l_targetService.masterProcChipTargetHandle( l_testTarget );
         assert(l_testTarget != nullptr);
         errlHndl_t l_err(nullptr);
+
+        TS_INFO("testScom4 Start");
 
         XSCOM::HMER l_hmer;
         uint64_t *l_virtAddr(nullptr);
@@ -450,7 +459,7 @@ public:
 
             if (l_failAsExpected)
             {
-                TS_TRACE("testXscom4(negative test): XSCom read *successfully* failed as expected: invalid addr");
+                TS_INFO("testXscom4(negative test): XSCom read *successfully* failed as expected: invalid addr");
                 // This is an expected failure, no need to log it.
                 delete l_err;
                 l_err = nullptr;
@@ -458,7 +467,7 @@ public:
             }
             else
             {
-                TS_TRACE("testXscom4(negative test): XSCom read had an unexpected failure");
+                TS_INFO("testXscom4(negative test): WARNING: XSCom read had an unexpected failure");
                 errlCommit(l_err, XSCOM_COMP_ID);
             }
         }
@@ -482,6 +491,7 @@ public:
 
         // Done, un-pin
         task_affinity_unpin();
+        TS_INFO("testScom4 End");
     }; // void testXscom4(void)
 
 };
