@@ -106,7 +106,7 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_mask(
                     (((l_iohs_unit % 2) == 0) ? (sublink_t::EVEN_PAUE) : (sublink_t::EVEN_PAUO)) :
                     (((l_iohs_unit % 2) == 0) ? (sublink_t::ODD_PAUE) : (sublink_t::ODD_PAUO));
 
-    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::INACTIVE),
+    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::INACTIVE, false),
              "Error from p10_smp_link_firs");
 
 fapi_try_exit:
@@ -133,7 +133,7 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_reset_all(
                     (((l_iohs_unit % 2) == 0) ? (sublink_t::EVEN_PAUE) : (sublink_t::EVEN_PAUO)) :
                     (((l_iohs_unit % 2) == 0) ? (sublink_t::ODD_PAUE) : (sublink_t::ODD_PAUO));
 
-    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::CLEAR_ALL),
+    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::CLEAR_ALL, false),
              "Error from p10_smp_link_firs");
 
 fapi_try_exit:
@@ -160,7 +160,7 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_reset_err(
                     (((l_iohs_unit % 2) == 0) ? (sublink_t::EVEN_PAUE) : (sublink_t::EVEN_PAUO)) :
                     (((l_iohs_unit % 2) == 0) ? (sublink_t::ODD_PAUE) : (sublink_t::ODD_PAUO));
 
-    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::CLEAR_ERR),
+    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::CLEAR_ERR, false),
              "Error from p10_smp_link_firs");
 
 fapi_try_exit:
@@ -179,6 +179,9 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_unmask(
 
     fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit;
     sublink_t l_sublink_opt;
+    fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_Type l_bad_lane_vec_valid = fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_FALSE;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW561216_Type l_hw561216 = 0;
+    bool l_mask_dl_lane_errors = false;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_iohs_unit),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
@@ -187,7 +190,12 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_unmask(
                     (((l_iohs_unit % 2) == 0) ? (sublink_t::EVEN_PAUE) : (sublink_t::EVEN_PAUO)) :
                     (((l_iohs_unit % 2) == 0) ? (sublink_t::ODD_PAUE) : (sublink_t::ODD_PAUO));
 
-    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::RUNTIME),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID, i_target, l_bad_lane_vec_valid));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW561216, i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>(),
+                           l_hw561216));
+    l_mask_dl_lane_errors = (l_hw561216 && (l_bad_lane_vec_valid == fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_FALSE));
+
+    FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::RUNTIME, l_mask_dl_lane_errors),
              "Error from p10_smp_link_firs");
 
 fapi_try_exit:
