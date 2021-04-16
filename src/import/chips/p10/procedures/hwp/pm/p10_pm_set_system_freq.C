@@ -398,6 +398,15 @@ fapi2::ReturnCode pm_set_frequency(
                     l_part_freq);
         }
 
+        //Verify floor and ceil freq ratio, if remainder is greater
+        //than 2 , then need to adjust floor freq
+        //Round up the ceiling up to nearest even frequency and then divide by 2
+        uint32_t l_computed_freq_mhz = (((l_sys_freq_core_ceil_mhz << 2) + 1) >> 2) >> 1;
+        if (l_floor_freq_mhz < l_computed_freq_mhz)
+        {
+            l_floor_freq_mhz = l_computed_freq_mhz;
+        }
+
         // Write out attributes with the results
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,     i_sys_target, l_sys_pstate0_freq_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_NOMINAL_FREQ_MHZ,            i_sys_target, l_part_freq));
@@ -408,7 +417,9 @@ fapi2::ReturnCode pm_set_frequency(
 
         for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,   l_proc_target, l_sys_pstate0_freq_mhz));
+            uint32_t ceil_freq = 
+            (l_sys_pstate0_freq_mhz < l_sys_freq_core_ceil_mhz) ? l_sys_pstate0_freq_mhz : l_sys_freq_core_ceil_mhz;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,   l_proc_target, ceil_freq));
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,     l_proc_target, l_floor_freq_mhz));
         }
 

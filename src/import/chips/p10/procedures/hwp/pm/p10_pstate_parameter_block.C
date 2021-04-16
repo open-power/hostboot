@@ -3085,8 +3085,6 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                 iv_attr_mvpd_data[i].ics_rdp_ac_10ma) ||
                 (iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma >
                 iv_attr_mvpd_data[i].ics_rdp_dc_10ma) ||
-                (iv_attr_mvpd_data[i - 1].vdd_vmin >
-                iv_attr_mvpd_data[i].vdd_vmin) ||
                 (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
                 iv_attr_mvpd_data[i].rt_tdp_ac_10ma) ||
                 (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
@@ -3139,10 +3137,6 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                         POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma,
                             iv_attr_mvpd_data[i].ics_rdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_rdp_dc_10ma);
 
-                FAPI_INF("%s VDD vmin voltage value %u is %s %s VDD vmin voltage value %u",
-                        pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].vdd_vmin,
-                        POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].vdd_vmin,
-                            iv_attr_mvpd_data[i].vdd_vmin),pv_op_str[i], iv_attr_mvpd_data[i].vdd_vmin);
                 FAPI_INF("%s TDP RT AC value %u is %s %s TDP RT AC value %u",
                         pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma,
                         POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma,
