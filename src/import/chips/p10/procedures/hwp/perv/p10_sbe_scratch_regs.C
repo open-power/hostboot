@@ -376,6 +376,44 @@ fapi_try_exit:
 
 
 ///
+/// @brief Set PAU frequency attribute
+///
+/// @param[in] i_target_chip          Processor chip target
+///
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode
+p10_sbe_scratch_regs_set_pau_freq(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
+{
+    FAPI_DBG("Start");
+
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_FREQ_PAU_MHZ_Type l_attr_freq_pau_mhz = 0;
+    fapi2::ATTR_CHIP_EC_FEATURE_PAU_DPLL_IO_MARGIN_Type l_pau_dpll_io_margin = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PAU_DPLL_IO_MARGIN, i_target_chip, l_pau_dpll_io_margin),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_DPLL_IO_MARGIN)");
+
+    if (l_pau_dpll_io_margin)
+    {
+        l_attr_freq_pau_mhz = 2133;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_PAU_MHZ, FAPI_SYSTEM, l_attr_freq_pau_mhz),
+                 "Error from FAPI_ATTR_SET (ATTR_FREQ_PAU_MHZ)");
+    }
+    else
+    {
+        l_attr_freq_pau_mhz = 2050;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_PAU_MHZ, FAPI_SYSTEM, l_attr_freq_pau_mhz),
+                 "Error from FAPI_ATTR_SET (ATTR_FREQ_PAU_MHZ)");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Set all PLL BUCKET attributes
 ///
 /// @param[in] i_target_chip          Processor chip target
@@ -416,6 +454,11 @@ p10_sbe_scratch_regs_set_pll_buckets(
                  i_target_chip,
                  l_attr_iohs_pll_bucket),
              "Error from p10_sbe_scratch_regs_get_iohs_pll_bucket");
+
+    FAPI_DBG("Setting up PAU DPLL frequency");
+    FAPI_TRY(p10_sbe_scratch_regs_set_pau_freq(
+                 i_target_chip),
+             "Error from p10_sbe_scratch_regs_set_pau_freq");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -970,12 +1013,20 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
     if (i_update_all || !l_scratch8_reg.getBit<SCRATCH9_REG_VALID_BIT>())
     {
         fapi2::buffer<uint32_t> l_scratch9_reg = 0;
-        fapi2::ATTR_FREQ_PAU_MHZ_Type l_attr_freq_pau_mhz;
+        fapi2::ATTR_FREQ_PAU_MHZ_Type l_attr_freq_pau_mhz = 0;
         fapi2::ATTR_MC_PLL_BUCKET_Type l_attr_mc_pll_bucket = { 0 };
+
+        // override PAU frequency on HWSV for DD1 only
+        if (!fapi2::is_platform<fapi2::PLAT_CRONUS>() &&
+            !fapi2::is_platform<fapi2::PLAT_SBE>())
+        {
+            FAPI_TRY(p10_sbe_scratch_regs_set_pau_freq(i_target_chip),
+                     "Error from p10_sbe_scratch_regs_set_pau_freq");
+        }
 
         FAPI_DBG("Reading ATTR_FREQ_PAU_MHZ");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ, FAPI_SYSTEM, l_attr_freq_pau_mhz),
-                 "Error from FAPI_ATTR_GET (ATTR_FREQ_PAU_MHZ");
+                 "Error from FAPI_ATTR_GET (ATTR_FREQ_PAU_MHZ)");
         l_scratch9_reg.insertFromRight<ATTR_FREQ_PAU_MHZ_STARTBIT, ATTR_FREQ_PAU_MHZ_LENGTH>(l_attr_freq_pau_mhz);
 
         // calculate bucket index based on desired frequency
