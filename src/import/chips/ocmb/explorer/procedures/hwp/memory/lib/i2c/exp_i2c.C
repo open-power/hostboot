@@ -153,7 +153,8 @@ fapi2::ReturnCode get_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     fw_status_setup(l_size, l_cmd_id);
 
     // Get data and check for errors
-    FAPI_TRY(fapi2::getI2c(i_target, l_size, l_cmd_id, o_data));
+    FAPI_TRY(fapi2::getI2c(i_target, l_size, l_cmd_id, o_data),
+             TARGTIDFORMAT " Failed getI2c for FW_STATUS command", MSSTARGID);
 #ifndef __PPE__
     // PPE plat supports a maximum of 4 arguments to FAPI_DBG so this statement must be excluded
     FAPI_DBG( "status returned ( 5 bytes ) : 0x%.02X 0x%.02X 0x%.02X 0x%.02X 0x%.02X",
