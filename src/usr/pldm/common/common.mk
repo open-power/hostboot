@@ -66,6 +66,7 @@ PLDM_EXTENDED_COMMON_OBJS += pdr_manager.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_monitor_control_responders.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru_data_responders.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_watchdog.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need

@@ -129,6 +129,7 @@ namespace PLDM
         RC_NO_STATE_QUERY_HANDLER   = PLDM_COMP_ID | 0x2A,
         RC_OCC_STATUS_NOT_AVAILABLE = PLDM_COMP_ID | 0x2B,
         RC_BAD_GLOBAL_ENABLE        = PLDM_COMP_ID | 0x2C,
+        RC_BAD_WATCHDOG_VALUE       = PLDM_COMP_ID | 0x2D,
     };
 }
 #endif

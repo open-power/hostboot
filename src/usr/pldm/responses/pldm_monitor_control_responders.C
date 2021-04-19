@@ -37,6 +37,7 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_response.H>
 #include "../common/pldmtrace.H"
+#include <pldm/extended/pldm_watchdog.H>
 
 // Targeting
 #include <targeting/common/utilFilter.H>
@@ -46,6 +47,7 @@
 #include <openbmc/pldm/libpldm/platform.h>
 #include <openbmc/pldm/libpldm/base.h>
 #include <openbmc/pldm/libpldm/state_set.h>
+
 
 // PdrManager
 #include <pldm/extended/pdr_manager.H>
@@ -667,6 +669,31 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
         break;
     }
 
+    if(l_heartbeat_timer < DEFAULT_WATCHDOG_TIMEOUT_SEC)
+    {
+        // BMC requested watchdog timeout that's too small
+        /*@
+         * @errortype
+         * @moduleid MOD_HANDLE_SET_EVENT_RECEIVER
+         * @reasoncode RC_BAD_WATCHDOG_VALUE
+         * @userdata1 Minimum value of the watchdog supported by HB
+         * @userdata2 Watchdog timeout value sent by BMC
+         * @devdesc BMC requested a watchdog timeout value that's too
+         *          small
+         * @custdesc A software error occurred during system boot
+         */
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                               MOD_HANDLE_SET_EVENT_RECEIVER,
+                               RC_BAD_WATCHDOG_VALUE,
+                               DEFAULT_WATCHDOG_TIMEOUT_SEC,
+                               l_heartbeat_timer,
+                               ErrlEntry::NO_SW_CALLOUT);
+        addBmcErrorCallouts(l_errl);
+        errlCommit(l_errl, PLDM_COMP_ID);
+        l_response_code = PLDM_PLATFORM_HEARTBEAT_FREQUENCY_TOO_HIGH;
+        break;
+    }
+
     if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_ISTEP_MODE>())
     {
         // We don't want BMC to set watchdog timer in istep mode.
@@ -694,10 +721,16 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
         break;
     }
 
+    // No error happened above, so arm the watchdog and set the default timeout
+    /// value.
     if(l_response_code == PLDM_SUCCESS)
     {
-        //TODO RTC: 250776
-        // Check the heartbeat timer to be at least 15 sec and arm the HB heartbeat
+        // No need to arm the watchdog if we're in istep mode.
+        if(!UTIL::assertGetToplevelTarget()->getAttr<ATTR_ISTEP_MODE>())
+        {
+            g_pldmWatchdogArmed = true;
+            // TODO RTC: 250776 send the first watchdog to BMC
+        }
     }
 
     }while(0);
