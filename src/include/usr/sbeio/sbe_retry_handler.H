@@ -62,6 +62,7 @@ class SbeRetryHandler
             ATTEMPT_REBOOT     = 1, // Full SBE run, attempt to restart
                                     // This will run all the steps and HWP's to attempt
                                     // an SBE restart on both sides.
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
             // TEST variation values need to be greater than ATTEMPT_REBOOT
             // so when we check greater than ATTEMPT_REBOOT we get the TEST_* values
             TEST_BKP_SEEPROM   = 2,
@@ -72,9 +73,11 @@ class SbeRetryHandler
             TEST_RESTART_CBS   = 7,
             TEST_MAX_LIMITS    = 8,
             TEST_SBE_FAILURE   = 9,
+#endif
         };
 
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
         std::map<SBE_MODE_OF_OPERATION, P10_EXTRACT_SBE_RC::RETURN_ACTION> sbe_op_map =
         {
             {INFORMATIONAL_ONLY, P10_EXTRACT_SBE_RC::ERROR_RECOVERED},
@@ -88,6 +91,7 @@ class SbeRetryHandler
             {TEST_MAX_LIMITS, P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM},
             {TEST_SBE_FAILURE, P10_EXTRACT_SBE_RC::RESTART_SBE},
         };
+#endif
 
         enum SBE_RESTART_METHOD
         {
@@ -134,6 +138,7 @@ class SbeRetryHandler
             return iv_masterErrorLogPLID;
         }
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
         inline uint8_t getSwitchCount() const
         {
             return iv_switchSidesCount;
@@ -158,6 +163,7 @@ class SbeRetryHandler
         {
             return iv_boot_restart_count;
         }
+#endif
 
         inline sbeMsgReg_t getSbeRegister()
         {
@@ -187,20 +193,24 @@ class SbeRetryHandler
             return iv_sbeMode;
         }
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
         inline SBE_MODE_OF_OPERATION getSBETestMode() const
         {
             return iv_sbeTestMode;
         }
+#endif
 
         inline void setSBEMode(SBE_MODE_OF_OPERATION i_sbeMode)
         {
             iv_sbeMode = i_sbeMode;
         }
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
         inline void setSBETestMode(SBE_MODE_OF_OPERATION i_sbeTestMode)
         {
             iv_sbeTestMode = i_sbeTestMode;
         }
+#endif
 
         inline bool getUseSDB()
         {
@@ -401,10 +411,12 @@ class SbeRetryHandler
          */
         uint8_t iv_boot_restart_count;
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
         /*
          * @brief Counter used to drive test failure scenarios
          */
         uint8_t iv_sbeTestMode_recommendations;
+#endif
 
         /*
          * @brief The current sbe register
@@ -459,12 +471,14 @@ class SbeRetryHandler
          */
         SBE_MODE_OF_OPERATION iv_sbeMode;
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
         /*
          * @brief The test mode of operation that needs to be run through the
          *        SbeRetryHandler.  The different modes are specified in the
          *        SBE_MODE_OF_OPERATION enum
          */
         SBE_MODE_OF_OPERATION iv_sbeTestMode;
+#endif
 
         /*
          * @brief This instance variable will instruct the main_sbe_handler

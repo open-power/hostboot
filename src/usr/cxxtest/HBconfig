@@ -4,3 +4,8 @@ config EARLY_TESTCASES
         Execute unit tests at the end of the istep specified in
         EARLY_TESTCASES_ISTEP and then shut down.
 
+config COMPILE_CXXTEST_HOOKS
+    default n
+    help
+        Compile conditional code for CXXTESTS
+

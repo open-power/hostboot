@@ -100,7 +100,11 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     void testSBEFlowRESTART_SBE(void)
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"testSBEFlowRESTART_SBE: SKIPPING Testing SbeRetryHandler");
+#else
         SBE_TRACF_RHT(ENTER_MRK"testSBEFlowRESTART_SBE: Testing SbeRetryHandler");
+
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = nullptr;
         TARGETING::targetService().masterProcChipTargetHandle(
@@ -154,6 +158,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
         }
         SBE_TRACF_RHT(EXIT_MRK"testSBEFlowRESTART_SBE: Testing SbeRetryHandler");
+#endif
     }
 
     /**
@@ -164,6 +169,9 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     void testSBEFlowRESTART_CBS(void)
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"testSBEFlowRESTART_CBS: SKIPPING Testing SbeRetryHandler");
+#else
         SBE_TRACF_RHT(ENTER_MRK"testSBEFlowRESTART_CBS: Testing SbeRetryHandler");
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = nullptr;
@@ -221,6 +229,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
         }
         SBE_TRACF_RHT(EXIT_MRK"testSBEFlowRESTART_CBS: Testing SbeRetryHandler");
+#endif
     }
 
     /**
@@ -231,6 +240,9 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     void testSBEFlowREIPL_BKP_SEEPROM(void)
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"testSBEFlowREIPL_BKP_SEEPROM: SKIPPING Testing SbeRetryHandler");
+#else
         SBE_TRACF_RHT(ENTER_MRK"testSBEFlowREIPL_BKP_SEEPROM: Testing SbeRetryHandler");
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = nullptr;
@@ -284,6 +296,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
         }
         SBE_TRACF_RHT(EXIT_MRK"testSBEFlowREIPL_BKP_SEEPROM: Testing SbeRetryHandler");
+#endif
     }
 
     /**
@@ -294,6 +307,9 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     void testSBEFlowREIPL_UPD_SEEPROM(void)
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"testSBEFlowREIPL_UPD_SEEPROM: SKIPPING Testing SbeRetryHandler");
+#else
         SBE_TRACF_RHT(ENTER_MRK"testSBEFlowREIPL_UPD_SEEPROM: Testing SbeRetryHandler");
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = nullptr;
@@ -347,6 +363,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
         }
         SBE_TRACF_RHT(EXIT_MRK"testSBEFlowREIPL_UPD_SEEPROM: Testing SbeRetryHandler");
+#endif
     }
 
     /**
@@ -357,6 +374,9 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     void testSBEFlowREIPL_BKP_MSEEPROM(void)
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"testSBEFlowREIPL_BKP_MSEEPROM: SKIPPING Testing SbeRetryHandler");
+#else
         SBE_TRACF_RHT(ENTER_MRK"testSBEFlowREIPL_BKP_MSEEPROM: Testing SbeRetryHandler");
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = nullptr;
@@ -410,6 +430,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
         }
         SBE_TRACF_RHT(EXIT_MRK"testSBEFlowREIPL_BKP_MSEEPROM: Testing SbeRetryHandler");
+#endif
     }
 
     /**
@@ -420,6 +441,9 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     void testSBEFlowREIPL_UPD_MSEEPROM(void)
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"testSBEFlowREIPL_UPD_MSEEPROM: SKIPPING Testing SbeRetryHandler");
+#else
         SBE_TRACF_RHT(ENTER_MRK"testSBEFlowREIPL_UPD_MSEEPROM: Testing SbeRetryHandler");
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = nullptr;
@@ -472,6 +496,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
         }
         SBE_TRACF_RHT(EXIT_MRK"testSBEFlowREIPL_UPD_MSEEPROM: Testing SbeRetryHandler");
+#endif
     }
 
     /**
@@ -482,6 +507,9 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     void testSBEFlowRESTART_SBE_MAX_LIMITS(void)
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"testSBEFlowRESTART_SBE_MAX_LIMITS: SKIPPING Testing SbeRetryHandler");
+#else
         SBE_TRACF_RHT(ENTER_MRK"testSBEFlowRESTART_SBE_MAX_LIMITS: Testing SbeRetryHandler");
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = nullptr;
@@ -535,6 +563,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
         }
         SBE_TRACF_RHT(EXIT_MRK"testSBEFlowRESTART_SBE_MAX_LIMITS: Testing SbeRetryHandler");
+#endif
     }
 
 
@@ -546,6 +575,9 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     void testSBEFlowRESTART_SBE_FAILURE(void)
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"testSBEFlowRESTART_SBE_FAILURE: SKIPPING Testing SbeRetryHandler");
+#else
         SBE_TRACF_RHT(ENTER_MRK"testSBEFlowRESTART_SBE_FAILURE: Testing SbeRetryHandler");
         // Get master proc target
         TARGETING::Target* l_pMasterProcTarget = nullptr;
@@ -599,6 +631,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
 
         }
         SBE_TRACF_RHT(EXIT_MRK"testSBEFlowRESTART_SBE_FAILURE: Testing SbeRetryHandler");
+#endif
     }
 
 
@@ -698,9 +731,13 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     SbeRetryHandlerTest() : CxxTest::TestSuite()
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"SbeRetryHandlerTest SKIPPING Constructor");
+#else
         errlHndl_t err = nullptr;
         bool sbe_loaded = false;
 
+        SBE_TRACF_RHT(ENTER_MRK"SbeRetryHandlerTest Constructor");
         err = loadSbeModule(sbe_loaded);
         if(err)
         {
@@ -714,6 +751,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             TS_FAIL("SbeRetryHandlerTest() - Constructor: Call to createSbeImageVmmSpace() failed");
             errlCommit( err, SBEIO_COMP_ID );
         }
+#endif
 
     };
 
@@ -723,6 +761,10 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      */
     ~SbeRetryHandlerTest()
     {
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        SBE_TRACF_RHT(ENTER_MRK"SbeRetryHandlerTest SKIPPING Destructor");
+#else
+        SBE_TRACF_RHT(ENTER_MRK"SbeRetryHandlerTest Destructor");
         errlHndl_t err = nullptr;
 
         err = cleanupSbeImageVmmSpace();
@@ -738,6 +780,7 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             TS_FAIL("~SbeRetryHandlerTest() - Destructor: failed to load modules");
             errlCommit( err, SBEIO_COMP_ID );
         }
+#endif
 
     };
 

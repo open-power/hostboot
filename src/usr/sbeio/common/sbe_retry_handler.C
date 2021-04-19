@@ -131,14 +131,18 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
 , iv_switchSidesCount_mseeprom(0)
 , iv_switchSidesFlag(0)
 , iv_boot_restart_count(0)
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
 , iv_sbeTestMode_recommendations(0)
+#endif
 , iv_currentAction(P10_EXTRACT_SBE_RC::ERROR_RECOVERED)
 , iv_currentSBEState(SBE_REG_RETURN::SBE_NOT_AT_RUNTIME)
 , iv_shutdownReturnCode(0)
 , iv_currentSideBootAttempts(1) // It is safe to assume that the current side has attempted to boot
 , iv_currentSideBootAttempts_mseeprom(1) // It is safe to assume that the current side has attempted to boot
 , iv_sbeMode(i_sbeMode)
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
 , iv_sbeTestMode(SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY)
+#endif
 , iv_sbeRestartMethod(SBE_RESTART_METHOD::HRESET)
 , iv_initialPowerOn(false)
 {
@@ -266,6 +270,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                         this->iv_currentAction,
                         this->iv_currentSideBootAttempts_mseeprom);
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
             if (this->iv_sbeTestMode)
             {
                 // if we are forcing the failure we will be iterating trying to recover
@@ -290,6 +295,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                     }
                 }
             }
+#endif
 
             if(this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
             {
@@ -437,12 +443,14 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                 // switching seeprom sides
             }
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
             if (this->iv_sbeTestMode == TEST_MAX_LIMITS)
             {
                 (this->iv_currentSideBootAttempts) = MAX_SIDE_BOOT_ATTEMPTS;
                 (this->iv_currentSideBootAttempts_mseeprom) = MAX_SIDE_BOOT_ATTEMPTS;
                 (this->iv_boot_restart_count) = MAX_RESTARTS;
             }
+#endif
 
             // Both of the retry methods require a FAPI2 version of the target because they
             // are fapi2 HWPs
@@ -530,10 +538,12 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                 }
 
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
                 if (this->iv_sbeTestMode == TEST_RESTART_CBS)
                 {
                     break;
                 }
+#endif
 
 #ifndef __HOSTBOOT_RUNTIME
                     // If something is wrong w/ the SBE during IPL time on a FSP based system then
@@ -690,11 +700,13 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                 break;
             }
 
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
             if (this->iv_sbeTestMode == TEST_SBE_FAILURE)
             {
                 (this->iv_sbeRegister).currState = SBE_STATE_FAILURE;
                 this->iv_currentSBEState = SbeRetryHandler::SBE_REG_RETURN::SBE_NOT_AT_RUNTIME;
             }
+#endif
 
             // If the currState of the SBE is not RUNTIME then we will assume
             // our attempt to boot the SBE has failed, so run extract rc again
