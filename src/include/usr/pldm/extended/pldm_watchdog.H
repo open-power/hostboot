@@ -26,6 +26,7 @@
 #define PLDM_WATCHDOG_H
 
 #include <stdint.h>
+#include <errl/errlentry.H>
 
 /*
  * @file pldm_watchdog.H
@@ -42,5 +43,13 @@ extern bool g_pldmWatchdogArmed;
 // The value of the default timeout agreed upon between BMC and HB
 extern const uint16_t DEFAULT_WATCHDOG_TIMEOUT_SEC;
 
+/**
+ * @brief Sends a heartbeatTimerElapsedEvent to BMC via platformEventMessage
+ *        PLDM command. The value of the watchdog timer is defined internally
+ *        in Hostboot. No-op if the watchdog is not armed.
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t resetWatchdogTimer();
 } // namespace PLDM
 #endif

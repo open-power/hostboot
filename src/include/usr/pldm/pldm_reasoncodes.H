@@ -81,6 +81,7 @@ namespace PLDM
         MOD_GET_POWER_LIMIT                          = 0x28, // getPowerLimit
         MOD_HANDLE_OCC_STATE_SENSOR_GET_REQUEST      = 0x29, // handleOccStateSensorGetRequest
         MOD_HANDLE_SET_EVENT_RECEIVER                = 0x2a, // handleSetEventReceiverRequest
+        MOD_RESET_WATCHDOG_TIMER                     = 0x2b, // resetWatchdogTimer
     };
 
     enum PLDMReasonCode
