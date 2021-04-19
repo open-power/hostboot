@@ -29,11 +29,11 @@
 /// *HWP FW Owner        : Prasad Bg Ranganath <prasadbgr@in.ibm.com>
 /// *HWP Team            : PM
 /// *HWP Level           : 2
-/// *HWP Consumed by     : HB,PGPE,CME,OCC
+/// *HWP Consumed by     : HB,PGPE,OCC
 ///
 /// @verbatim
 /// Procedure Summary:
-///   - Read VPD and attributes to create the Pstate Parameter Block(s) (one each for PGPE,OCC and CMEs).
+///   - Read VPD and attributes to create the Pstate Parameter Block(s) (one each for PGPE and OCC).
 /// @endverbatim
 
 // *INDENT-OFF*
@@ -293,6 +293,8 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
     const char*     prt_rail_names[RUNTIME_RAILS] = RUNTIME_RAIL_STR;
     const char*     prt_dds_slope_names[NUM_POUNDW_DDS_FIELDS] = POUNDW_DDS_FIELDS_STR;
     char vlt_str[][4] = {"VDD","VCS"};
+    uint32_t        s;
+
     // Put out the endian-corrected scalars
     FAPI_INF("---------------------------------------------------------------------------------------");
     FAPI_INF("Global Pstate Parameter Block");
@@ -323,7 +325,10 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
     FAPI_INF("%s", l_buffer);
 
     // -------------------
-    FAPI_INF("Operating Points:          Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
+
+    s = VPD_PT_SET_RAW;
+
+    FAPI_INF("Operating Points(Raw):     Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -331,70 +336,150 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].frequency_mhz));
+                revle32(i_gppb->operating_points_set[s][i].frequency_mhz));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].vdd_mv));
+                revle32(i_gppb->operating_points_set[s][i].vdd_mv));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].idd_tdp_ac_10ma));
+                revle32(i_gppb->operating_points_set[s][i].idd_tdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].idd_tdp_dc_10ma));
+                revle32(i_gppb->operating_points_set[s][i].idd_tdp_dc_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].idd_rdp_ac_10ma));
+                revle32(i_gppb->operating_points_set[s][i].idd_rdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].idd_rdp_dc_10ma));
+                revle32(i_gppb->operating_points_set[s][i].idd_rdp_dc_10ma));
 
         FAPI_INF("%s", l_buffer);
     }
 
     // -------------------
-    FAPI_INF("Operating Points:          Freq(MHz)         VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     IDRDC(10mA)");
+    FAPI_INF("Operating Points(Raw):     Freq(MHz)         VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     IDRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].frequency_mhz));
+                revle32(i_gppb->operating_points_set[s][i].frequency_mhz));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].vcs_mv));
+                revle32(i_gppb->operating_points_set[s][i].vcs_mv));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].ics_tdp_ac_10ma));
+                revle32(i_gppb->operating_points_set[s][i].ics_tdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].ics_tdp_dc_10ma));
+                revle32(i_gppb->operating_points_set[s][i].ics_tdp_dc_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].ics_rdp_ac_10ma));
+                revle32(i_gppb->operating_points_set[s][i].ics_rdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].ics_rdp_dc_10ma));
+                revle32(i_gppb->operating_points_set[s][i].ics_rdp_dc_10ma));
 
         FAPI_INF("%s", l_buffer);
     }
 
     // -------------------
-    FAPI_INF("Operating Points:          Freq_GB(mHz)    VDD_vmin(mV)   RTTTAC(10mA)    RTTDC(10mA)");
+    FAPI_INF("Operating Points(Raw):     Freq(MHz)    VDD_vmin(mV)  IDD_POW(10mA) CORE_POWR_TEMP(0.5C)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].frequency_mhz));
+                revle32(i_gppb->operating_points_set[s][i].frequency_mhz));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].vdd_vmin));
+                revle32(i_gppb->operating_points_set[s][i].vdd_vmin));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].rt_tdp_ac_10ma));
+                revle32(i_gppb->operating_points_set[s][i].rt_tdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].rt_tdp_dc_10ma));
+                revle32(i_gppb->operating_points_set[s][i].rt_tdp_dc_10ma));
+
+        FAPI_INF("%s", l_buffer);
+    }
+
+    // -------------------
+
+    s = VPD_PT_SET_BIASED;
+
+    FAPI_INF("Operating Points(Biased):  Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
+    for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
+    {
+        strcpy(l_buffer,"");
+        sprintf (l_temp_buffer, "  %-20s : ",pv_op_str[i]);
+        strcat(l_buffer, l_temp_buffer);
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].frequency_mhz));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].vdd_mv));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].idd_tdp_ac_10ma));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].idd_tdp_dc_10ma));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].idd_rdp_ac_10ma));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].idd_rdp_dc_10ma));
+
+        FAPI_INF("%s", l_buffer);
+    }
+
+    // -------------------
+    FAPI_INF("Operating Points(Biased):  Freq(MHz)         VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     IDRDC(10mA)");
+    for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
+    {
+        PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].frequency_mhz));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].vcs_mv));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].ics_tdp_ac_10ma));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].ics_tdp_dc_10ma));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].ics_rdp_ac_10ma));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].ics_rdp_dc_10ma));
+
+        FAPI_INF("%s", l_buffer);
+    }
+
+    // -------------------
+    FAPI_INF("Operating Points(Biased):  Freq(MHz)    VDD_vmin(mV)  IDD_POW(10mA) CORE_POWR_TEMP(0.5C)");
+    for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
+    {
+        PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].frequency_mhz));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].vdd_vmin));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].rt_tdp_ac_10ma));
+
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[s][i].rt_tdp_dc_10ma));
 
         FAPI_INF("%s", l_buffer);
     }
@@ -865,7 +950,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
     {
         fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384,
                            iv_procChip, l_hw543384),
               "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
         // Needs to be Endianness corrected going into the block
@@ -940,31 +1025,6 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                 revle32(io_globalppb->safe_frequency_khz),
                 revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]),
                 revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
-
-#if 0
-
-        //load vpd operating points
-        for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
-        {
-            io_globalppb->operating_points[i].frequency_mhz   = revle32(iv_attr_mvpd_poundV_biased[i].frequency_mhz);
-            io_globalppb->operating_points[i].vdd_mv          = revle32(iv_attr_mvpd_poundV_biased[i].vdd_mv);
-            io_globalppb->operating_points[i].idd_tdp_ac_10ma = revle32(iv_attr_mvpd_poundV_biased[i].idd_tdp_ac_10ma);
-            io_globalppb->operating_points[i].idd_tdp_dc_10ma = revle32(iv_attr_mvpd_poundV_biased[i].idd_tdp_dc_10ma);
-            io_globalppb->operating_points[i].idd_rdp_ac_10ma = revle32(iv_attr_mvpd_poundV_biased[i].idd_rdp_ac_10ma);
-            io_globalppb->operating_points[i].idd_rdp_dc_10ma = revle32(iv_attr_mvpd_poundV_biased[i].idd_rdp_dc_10ma);
-            io_globalppb->operating_points[i].vcs_mv          = revle32(iv_attr_mvpd_poundV_biased[i].vcs_mv);
-            io_globalppb->operating_points[i].ics_tdp_ac_10ma = revle32(iv_attr_mvpd_poundV_biased[i].ics_tdp_ac_10ma);
-            io_globalppb->operating_points[i].ics_tdp_dc_10ma = revle32(iv_attr_mvpd_poundV_biased[i].ics_tdp_ac_10ma);
-            io_globalppb->operating_points[i].frequency_guardband_sort_mhz =
-            revle32(iv_attr_mvpd_poundV_biased[i].frequency_guardband_sort_mhz);
-            io_globalppb->operating_points[i].vdd_vmin        = revle32(iv_attr_mvpd_poundV_biased[i].vdd_vmin);
-            io_globalppb->operating_points[i].idd_power_pattern_10ma =
-            revle32(iv_attr_mvpd_poundV_biased[i].idd_power_pattern_10ma);
-            io_globalppb->operating_points[i].core_power_pattern_temp_0p5C =
-            revle32(iv_attr_mvpd_poundV_biased[i].core_power_pattern_temp_0p5C);
-            io_globalppb->operating_points[i].pstate          = iv_attr_mvpd_poundV_biased[i].pstate;
-        }
-#endif
 
         // Initialize res clk data
         memset(&io_globalppb->resclk,0,sizeof(ResClkSetup_t));
@@ -1182,7 +1242,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
                                iv_procChip,
                                l_rvrm_rvid));
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384,
                            iv_procChip, l_hw543384),
               "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
         // -----------------------------------------------
@@ -1375,7 +1435,7 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     FAPI_INF("OCC Pstate Parameter Block");
     FAPI_INF("---------------------------------------------------------------------------------------");
 
-    FAPI_INF("Operating Points:          Freq(MHz)     VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
+    FAPI_INF("Operating Points(biased):  Freq(MHz)     VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -1397,7 +1457,7 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
         FAPI_INF("%s", l_buffer);
     }
 
-    FAPI_INF("Operating Points:          Freq(MHz)     VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     ICRDC(10mA)");
+    FAPI_INF("Operating Points(biased):  Freq(MHz)     VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     ICRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -1420,7 +1480,7 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
         FAPI_INF("%s", l_buffer);
     }
 
-    FAPI_INF("Operating Points:          Freq_GB(mHz)    VDD_vmin(mV)   RTTTAC(10mA)    RTTDC(10mA)");
+    FAPI_INF("Operating Points(biased):  Freq(MHz)     VDD_vmin(mV)  IDD_POW(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -3479,7 +3539,6 @@ fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
         //Update pstate for all points
         for (int i = 0; i < NUM_PV_POINTS; i++)
         {
-            // TODO RTC: 211812
             iv_attr_mvpd_poundV_biased[i].pstate = (iv_attr_mvpd_poundV_biased[CF7].frequency_mhz -
             iv_attr_mvpd_poundV_biased[i].frequency_mhz) * 1000 / (iv_frequency_step_khz);
 
@@ -3487,11 +3546,24 @@ fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
                      iv_attr_mvpd_poundV_biased[i].frequency_mhz,iv_attr_mvpd_poundV_biased[i].pstate);
         }
 
-
         FAPI_DBG("Pstate Base Frequency - after bias %X (%d)",
                  iv_attr_mvpd_poundV_biased[CF7].frequency_mhz * 1000,
                  iv_attr_mvpd_poundV_biased[CF7].frequency_mhz * 1000);
-    }while(0);
+
+        // Bias the pointer frequencies
+
+        #define BIAS_POINTER_FREQ(_member) \
+            iv_attr_mvpd_poundV_other_info._member = \
+                bias_adjust_mhz(iv_attr_mvpd_poundV_other_info._member, iv_bias.frequency_0p5pct); \
+            FAPI_INF("Biased Pointer %s:  %4d (0x%4X)", #_member, \
+                iv_attr_mvpd_poundV_other_info._member, iv_attr_mvpd_poundV_other_info._member);
+
+        BIAS_POINTER_FREQ(fixed_freq_mhz);
+        BIAS_POINTER_FREQ(powersave_freq_mhz);
+        BIAS_POINTER_FREQ(ultraturbo_freq_mhz);
+        BIAS_POINTER_FREQ(fmax_freq_mhz);
+
+    } while(0);
 
 fapi_try_exit:
     FAPI_INF("<<<<<<<<<<<< apply_biased_values");
@@ -4208,7 +4280,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
                            iv_procChip,
                            l_core_floor_mhz));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384,
                            iv_procChip, l_hw543384),
               "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
 
