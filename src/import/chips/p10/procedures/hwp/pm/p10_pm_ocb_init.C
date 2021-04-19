@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,7 +69,6 @@ using namespace scomt::proc;
 enum PM_OCB_CONST
 {
     MAX_OCB_QUE_LEN = 31,   // Max length of PULL/PUSH queue
-    INTERRUPT_SRC_MASK_REG = 0xFFFFFFFF, // Mask for interrupt source register
 };
 
 // channel register arrrays
@@ -138,18 +137,6 @@ const uint64_t OCBLWSBRn[4]    = {TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR0,
                                   TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR2,
                                   TP_TPCHIP_OCC_OCI_OCB_OCBLWSBR3
                                  };
-
-const uint32_t PU_OCB_OCI_OIMR0_OR = TP_TPCHIP_OCC_OCI_OCB_OIMR0_WO_OR;
-const uint32_t PU_OCB_OCI_OIMR1_OR = TP_TPCHIP_OCC_OCI_OCB_OIMR1_WO_OR;
-const uint32_t PU_OCB_OCI_OIMR0_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OIMR0_WO_CLEAR;
-const uint32_t PU_OCB_OCI_OIMR1_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OIMR1_WO_CLEAR;
-
-const uint32_t PU_OCB_OCI_OITR0_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OITR0_WO_CLEAR;
-const uint32_t PU_OCB_OCI_OITR1_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OITR1_WO_CLEAR;
-const uint32_t PU_OCB_OCI_OIEPR0_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OIEPR0_WO_CLEAR;
-const uint32_t PU_OCB_OCI_OIEPR1_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OIEPR1_WO_CLEAR;
-const uint32_t PU_OCB_OCI_OISR0_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OISR0_WO_CLEAR;
-const uint32_t PU_OCB_OCI_OISR1_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OISR1_WO_CLEAR;
 
 //------------------------------------------------------------------------------
 //  Function prototypes
@@ -585,86 +572,8 @@ fapi2::ReturnCode pm_ocb_reset(
                  "Channel %d Linear Window Base Register", chan);
     }
 
-    // Set Interrupt Source Mask Registers 0 & 1
-    //  - keep word1 0's for simics
-    l_data64.flush<0>().insertFromRight<0, 32>(INTERRUPT_SRC_MASK_REG);
-    FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OIMR0_OR,
-                            l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt Source Mask Register0 (OIMR0)");
-
-    FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OIMR1_OR,
-                            l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt Source Mask Register1 (OIMR1)");
-
-    // Clear OCC Interrupt Type Registers 0 & 1
-    l_data64.flush<1>();
-    FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OITR0_CLEAR,
-                            l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt Type Register0 (OITR0)");
-
-    FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OITR1_CLEAR,
-                            l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt Type Register1 (OITR1)");
-
-    // Clear OCC Interupt Edge/Polarity Registers 0 & 1
-    FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OIEPR0_CLEAR,
-                            l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt Edge Polarity Register0 (OIEPR0)");
-
-    FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OIEPR1_CLEAR,
-                            l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt Edge Polarity Register1 (OIEPR1)");
-
-    // Clear OCC Interrupt Source Registers 0 & 1
-    FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OISR0_CLEAR,
-                            l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt Source Register0 (OISR0)");
-
-    FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OISR1_CLEAR,
-                            l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt Source Register1 (OISR1)");
-
-    // Clear Interrupt Route (A, B, C) Registers 0 & 1
-    l_data64.flush<0>();
-    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR0A_RW, l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt 0 Route A Register (OIRR0A)");
-
-    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR0B_RW, l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt 0 Route B Register (OIRR0A)");
-
-    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR0C_RW, l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt 0 Route C Register (OIRR0A)");
-
-    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR1A_RW, l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt 1 Route A Register (OIRR1A)");
-
-    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR1B_RW, l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt 1 Route B Register (OIRR1B)");
-
-    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR1C_RW, l_data64),
-             "**** ERROR : Unexpected error encountered in write to OCC "
-             "Interrupt 1 Route C Register (OIRR1C)");
+    // OITR and OIEPR resetting is in p10_pm_xgpe_init as that is the
+    // first HWP run in starting the complex.
 
     // Clear OCC Interrupt Timer Registers 0 & 1
     //  - need bits 0&1 set to clear register

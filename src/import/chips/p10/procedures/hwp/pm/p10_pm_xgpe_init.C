@@ -56,7 +56,7 @@ static const uint32_t XGPE_TIMEOUT_MCYCLES  = 20;
 static const uint32_t XGPE_POLLTIME_MS      = 20;
 static const uint32_t XGPE_POLLTIME_MCYCLES = 2;
 static const uint32_t TIMEOUT_COUNT = XGPE_TIMEOUT_MS / XGPE_POLLTIME_MS;
-
+static const uint32_t INTERRUPT_SRC_MASK_REG = 0xFFFFFFFF;
 
 #define HALT    2
 
@@ -81,6 +81,19 @@ fapi2::ReturnCode xgpe_start(
 #ifndef __PPE__
     using namespace scomt::proc;
 
+    const uint32_t PU_OCB_OCI_OIMR0_OR = TP_TPCHIP_OCC_OCI_OCB_OIMR0_WO_OR;
+    const uint32_t PU_OCB_OCI_OIMR1_OR = TP_TPCHIP_OCC_OCI_OCB_OIMR1_WO_OR;
+    const uint32_t PU_OCB_OCI_OITR0_OR = TP_TPCHIP_OCC_OCI_OCB_OITR0_WO_OR;
+    const uint32_t PU_OCB_OCI_OITR1_OR = TP_TPCHIP_OCC_OCI_OCB_OITR1_WO_OR;
+
+    const uint32_t PU_OCB_OCI_OIEPR0_OR = TP_TPCHIP_OCC_OCI_OCB_OIEPR0_WO_OR;
+    const uint32_t PU_OCB_OCI_OIEPR1_OR = TP_TPCHIP_OCC_OCI_OCB_OIEPR1_WO_OR;
+
+//    const uint32_t PU_OCB_OCI_OIEPR0_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OIEPR0_WO_CLEAR;
+//    const uint32_t PU_OCB_OCI_OIEPR1_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OIEPR1_WO_CLEAR;
+    const uint32_t PU_OCB_OCI_OISR0_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OISR0_WO_CLEAR;
+    const uint32_t PU_OCB_OCI_OISR1_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OISR1_WO_CLEAR;
+
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_occ_flag3;
     fapi2::buffer<uint64_t> l_xcr;
@@ -96,15 +109,108 @@ fapi2::ReturnCode xgpe_start(
 
     FAPI_IMP(">> xgpe_start......");
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET,
-                            i_target,
-                            l_ivpr_offset),
-              "Error getting ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET");
+    // Set Interrupt Source Mask Registers 0 & 1
+    //  - keep word1 0's for simics
+    l_data64.flush<0>().insertFromRight<0, 32>(INTERRUPT_SRC_MASK_REG);
+    FAPI_TRY(fapi2::putScom(i_target,
+                            PU_OCB_OCI_OIMR0_OR,
+                            l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt Source Mask Register0 (OIMR0)");
+
+    FAPI_TRY(fapi2::putScom(i_target,
+                            PU_OCB_OCI_OIMR1_OR,
+                            l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt Source Mask Register1 (OIMR1)");
+
+    // Set OCC Interrupt Type Registers 0 & 1 to Edge to keep the OISRx
+    // register from capturing bad default values
+    l_data64.flush<1>();
+    FAPI_TRY(fapi2::putScom(i_target,
+                            PU_OCB_OCI_OITR0_OR,
+                            l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt Type Register0 (OITR0)");
+
+    FAPI_TRY(fapi2::putScom(i_target,
+                            PU_OCB_OCI_OITR1_OR,
+                            l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt Type Register1 (OITR1)");
+
+    // Clear OCC Interupt Edge/Polarity Registers 0 & 1 TBD
+    FAPI_TRY(fapi2::putScom(i_target,
+                            PU_OCB_OCI_OIEPR0_OR,
+                            l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt Edge Polarity Register0 (OIEPR0)");
+
+    FAPI_TRY(fapi2::putScom(i_target,
+                            PU_OCB_OCI_OIEPR1_OR,
+                            l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt Edge Polarity Register1 (OIEPR1)");
+
+    // Clear OCC Interrupt Source Registers 0 & 1
+    FAPI_TRY(fapi2::putScom(i_target,
+                            PU_OCB_OCI_OISR0_CLEAR,
+                            l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt Source Register0 (OISR0)");
+
+    FAPI_TRY(fapi2::putScom(i_target,
+                            PU_OCB_OCI_OISR1_CLEAR,
+                            l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt Source Register1 (OISR1)");
+
+    // Clear Interrupt Route (A, B, C) Registers 0 & 1
+    l_data64.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR0A_RW, l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt 0 Route A Register (OIRR0A)");
+
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR0B_RW, l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt 0 Route B Register (OIRR0A)");
+
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR0C_RW, l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt 0 Route C Register (OIRR0A)");
+
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR1A_RW, l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt 1 Route A Register (OIRR1A)");
+
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR1B_RW, l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt 1 Route B Register (OIRR1B)");
+
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR1C_RW, l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "Interrupt 1 Route C Register (OIRR1C)");
+
+    // Read back OCC Interrupt Source Registers 0 & 1
+    FAPI_TRY(fapi2::getScom(i_target,
+                            TP_TPCHIP_OCC_OCI_OCB_OISR0_RO,
+                            l_data64));
+    FAPI_INF("OISR0 Readback 0x%016llX", l_data64);
+
+    FAPI_TRY(fapi2::getScom(i_target,
+                            TP_TPCHIP_OCC_OCI_OCB_OISR1_RO,
+                            l_data64));
+    FAPI_INF("OISR1 Readback 0x%016llX", l_data64);
+
 
     //Clear OCC Special Timeout Error status Register)
     FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_PLBTO_OCB_PIB_OSTOESR, 0));
 
     // Program XGPE IVPR
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET,
+                            i_target,
+                            l_ivpr_offset),
+              "Error getting ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET");
     FAPI_INF("  ATTR IVPR with 0x%16llX", l_ivpr_offset);
     l_ivpr.flush<0>().insertFromRight<0, 32>(l_ivpr_offset);
     FAPI_INF("  Writing IVPR with 0x%16llX", l_ivpr);
