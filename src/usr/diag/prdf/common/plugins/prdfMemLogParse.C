@@ -455,6 +455,8 @@ bool parseIueCounts( uint8_t  * i_buffer, uint32_t i_buflen,
         uint8_t rank  = i_buffer[idx];
         uint8_t count = i_buffer[idx+1];
 
+        if ( 0 == count ) continue;
+
         char header[HEADER_SIZE] = { '\0' };
         snprintf( header, DATA_SIZE, "%d    ", rank );
 
