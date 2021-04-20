@@ -215,17 +215,6 @@ template<TARGETING::TYPE TT, typename SCT>
 uint32_t startTdScrub( ExtensibleChip * i_chip, const MemRank & i_rank,
                        AddrRangeType i_rangeType, SCT i_stopCond );
 
-/*
- * @brief  Resumes a scrub command on the target.
- * @param  i_chip      OCMB chip.
- * @param  i_rangeType See enum AddrRangeType.
- * @param  i_stopCond  The stop conditions for the targeted scrub.
- * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
- */
-template<TARGETING::TYPE TT, typename SCT>
-uint32_t resumeTdScrub( ExtensibleChip * i_chip, SCT i_stopCond );
-
-
 //##############################################################################
 //##                  Core/cache trace array functions
 //##############################################################################

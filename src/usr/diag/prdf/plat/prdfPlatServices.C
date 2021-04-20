@@ -456,11 +456,7 @@ uint32_t deployRowRepair<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
-    //errlHndl_t errl = nullptr;
-
-    PRDF_TRAC( PRDF_FUNC "exp_deploy_row_repairs not yet enabled" );
-
-    /* TODO
+    errlHndl_t errl = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb( i_chip->getTrgt() );
     FAPI_INVOKE_HWP( errl, exp_deploy_row_repairs, fapiOcmb );
@@ -471,7 +467,6 @@ uint32_t deployRowRepair<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-    */
 
     return o_rc;
 
@@ -740,53 +735,6 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t resumeTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
-        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> i_stopCond)
-{
-    #define PRDF_FUNC "[PlatServices::resumeTdScrub<TYPE_OCMB_CHIP>] "
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    // Get the OCMB fapi target
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
-
-    do
-    {
-        // Clear all of the counters and maintenance ECC attentions.
-        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // Resume the command on the next address.
-        errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, exp_continue_cmd, fapiTrgt,
-            mss::mcbist::end_boundary::DONT_CHANGE, i_stopCond );
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "exp_continue_cmd(0x%08x) failed",
-                      i_chip->getHuid() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-
 }
 
 //##############################################################################

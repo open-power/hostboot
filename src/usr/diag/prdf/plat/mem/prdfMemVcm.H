@@ -134,32 +134,23 @@ class VcmEvent : public TdEntry
     {
         uint32_t signature = 0;
 
-        if ( iv_canResumeScrub )
+        switch ( iv_phase )
         {
-            signature = PRDFSIG_VcmResume;
-            PRDF_TRAC( "[VcmEvent] Resuming VCM Phase %d: 0x%08x,0x%02x",
-                       iv_phase, iv_chip->getHuid(), getKey() );
+            case TD_PHASE_0:
+                iv_phase  = TD_PHASE_1;
+                signature = PRDFSIG_StartVcmPhase1;
+                break;
+
+            case TD_PHASE_1:
+                iv_phase  = TD_PHASE_2;
+                signature = PRDFSIG_StartVcmPhase2;
+                break;
+
+            default: PRDF_ASSERT( false ); // invalid phase
         }
-        else
-        {
-            switch ( iv_phase )
-            {
-                case TD_PHASE_0:
-                    iv_phase  = TD_PHASE_1;
-                    signature = PRDFSIG_StartVcmPhase1;
-                    break;
 
-                case TD_PHASE_1:
-                    iv_phase  = TD_PHASE_2;
-                    signature = PRDFSIG_StartVcmPhase2;
-                    break;
-
-                default: PRDF_ASSERT( false ); // invalid phase
-            }
-
-            PRDF_TRAC( "[VcmEvent] Starting VCM Phase %d: 0x%08x,0x%02x",
-                       iv_phase, iv_chip->getHuid(), getKey() );
-        }
+        PRDF_TRAC( "[VcmEvent] Starting VCM Phase %d: 0x%08x,0x%02x",
+                   iv_phase, iv_chip->getHuid(), getKey() );
 
         io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
 
@@ -338,6 +329,7 @@ class VcmEvent : public TdEntry
 
     const MemMark iv_mark; ///< The chip mark from hardware.
     const bool iv_rowRepairEnabled; ///< True if Row Repair is enabled.
+    bool iv_resumeNextRow = false; ///< True if scrub is resuming on next row.
     uint8_t iv_mceCount = 0; ///< MCEs hit count, currently for Row Repair only.
     MemAddr iv_rowRepairFailAddr; ///< Address stored to apply Row Repair on.
 };

@@ -125,8 +125,8 @@ class MemSymbol
     /** @return The DRAM index for this symbol. */
     uint8_t getDram() const;
 
-    /** @return The DRAM index for this sym, adjusted if steered to a spare. */
-    uint8_t getDramSpareAdjusted() const;
+    /** @return The DRAM relative to the Centaur DQs */
+    uint8_t getDramRelCenDqs() const;
 
     /** @return The bad pins associated with this symbol in relation to the DRAM
      *          (x4 mode is 4-bits, x8 mode is 8-bits). */

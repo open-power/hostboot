@@ -56,7 +56,6 @@ PRDR_ERROR_SIGNATURE(VcmVerDiffDram,  0xffff0024, "", "VCM: verified: previous P
 PRDR_ERROR_SIGNATURE(VcmVerFirstMce,  0xffff0025, "", "VCM: verified: first MCE");
 PRDR_ERROR_SIGNATURE(VcmVerSecMce,    0xffff0026, "", "VCM: verified: second MCE");
 PRDR_ERROR_SIGNATURE(VcmVerRowFail,   0xffff0027, "", "VCM: verified: common row fail");
-PRDR_ERROR_SIGNATURE(VcmResume,       0xffff0028, "", "VCM: Resuming procedure");
 PRDR_ERROR_SIGNATURE(AllDramRepairs,  0xffff002F, "", "all DRAM repairs used");
 
 PRDR_ERROR_SIGNATURE(RdrInternalFail,  0xffff0040, "", "RDR: Internal failure");
