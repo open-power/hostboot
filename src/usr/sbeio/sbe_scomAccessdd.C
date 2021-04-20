@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -205,7 +205,7 @@ errlHndl_t ddPsuScomChipOp(DeviceFW::OperationType i_opType,
              * @custdesc     Firmware error communicating with boot device
              */
             errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            SBEIO_FIFO,
+                                            SBEIO_PSU,
                                             SBEIO_PSU_INVALID_OPERATION,
                                             address,
                                             TO_UINT64(i_opType),
