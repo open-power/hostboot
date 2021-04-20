@@ -61,6 +61,8 @@ const char PLDM_BIOS_HB_LMB_SIZE_STRING[] = "hb_memory_region_size";
 const char PLDM_BIOS_HB_MFG_FLAGS_STRING[] = "hb_mfg_flags";
 const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[] = "hb_field_core_override";
 const char PLDM_BIOS_HB_USB_SECURITY_STRING[] = "hb_usb_security";
+const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[] = "hb_power_limit_enable";
+const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[] = "hb_power_limit_in_watts";
 
 // Possible Values
 constexpr char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
@@ -81,6 +83,10 @@ constexpr const char* POSSIBLE_HB_DEBUG_CONSOLE_STRINGS[] =
 constexpr const char* POSSIBLE_HB_MEM_REGION_SIZE_STRINGS[] =
                       { PLDM_BIOS_128_MB_STRING,
                         PLDM_BIOS_256_MB_STRING };
+
+constexpr const char* POSSIBLE_HB_POWER_LIMIT_STRINGS[] =
+                      { PLDM_BIOS_ENABLED_STRING,
+                        PLDM_BIOS_DISABLED_STRING };
 
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
 constexpr size_t MFG_FLAGS_CONVERT_STRING_SIZE = 8;
@@ -635,8 +641,8 @@ errlHndl_t getDebugConsoleEnabled(bool &o_debugConsoleEnabled)
     }
 
     // Find the longest string that we will accept as a
-    // possible value for the a given PLDM BIOS attribute
-    // so we can allocate a sufficiently sized buffer.
+    // possible value for a given PLDM BIOS attribute
+    // so a sufficiently sized buffer can be allocated.
     // Add 1 byte to buffer to account for null terminator
     constexpr auto max_possible_value_length =
          std::accumulate(std::begin(POSSIBLE_HB_DEBUG_CONSOLE_STRINGS),
@@ -644,8 +650,8 @@ errlHndl_t getDebugConsoleEnabled(bool &o_debugConsoleEnabled)
                          0ul,
                          find_maxstrlen) + 1;
 
-    // Ensure max_possible_value_length is larger than the extra
-    // extra byte we added to account for the null terminator.
+    // Ensure max_possible_value_length is larger than the
+    // extra byte added to account for the null terminator.
     // This assert forces the constexpr to be evaluated at
     // compile-time
     static_assert(max_possible_value_length > 1);
@@ -713,8 +719,8 @@ errlHndl_t getHypervisorMode(std::vector<uint8_t>& io_string_table,
       break;
     }
     // Find the longest string that we will accept as a
-    // possible value for the a given PLDM BIOS attribute
-    // so we can allocate a sufficiently sized buffer.
+    // possible value for a given PLDM BIOS attribute
+    // so a sufficiently sized buffer can be allocated.
     // Add 1 byte to buffer to account for null terminator
     constexpr auto max_possible_value_length =
          std::accumulate(std::begin(POSSIBLE_HYP_VALUE_STRINGS),
@@ -722,8 +728,8 @@ errlHndl_t getHypervisorMode(std::vector<uint8_t>& io_string_table,
                          0ul,
                          find_maxstrlen) + 1;
 
-    // Ensure max_possible_value_length is larger than the extra
-    // extra byte we added to account for the null terminator.
+    // Ensure max_possible_value_length is larger than the
+    // extra byte added to account for the null terminator.
     // This assert forces the constexpr to be evaluated at
     // compile-time
     static_assert(max_possible_value_length > 1);
@@ -1253,6 +1259,108 @@ errlHndl_t getUsbSecurity(
     o_usbSecurity = static_cast<TARGETING::ATTR_USB_SECURITY_type>(l_attr_val);
 
     } while(0);
+
+    return errl;
+}
+
+
+errlHndl_t getPowerLimit(bool &o_powerLimitEnable,
+                         uint16_t &o_powerLimitWatts)
+{
+    errlHndl_t errl = nullptr;
+
+    do{
+
+    // Enable Attribute
+    const pldm_bios_string_table_entry * cur_val_string_entry_ptr = nullptr;
+    std::vector<uint8_t> string_table, attr_table;
+
+    errl = systemEnumAttrLookup(string_table,
+                                attr_table,
+                                PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING,
+                                cur_val_string_entry_ptr);
+    if(errl)
+    {
+        PLDM_ERR("Failed to lookup value for %s",
+                 PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING);
+        break;
+    }
+
+    // Find the longest string that we will accept as a
+    // possible value for a given PLDM BIOS attribute
+    // so a sufficiently sized buffer can be allocated.
+    // Add 1 byte to buffer to account for null terminator
+    constexpr auto max_possible_value_length =
+         std::accumulate(std::begin(POSSIBLE_HB_POWER_LIMIT_STRINGS),
+                         std::end(POSSIBLE_HB_POWER_LIMIT_STRINGS),
+                         0ul,
+                         find_maxstrlen) + 1;
+
+    // Ensure max_possible_value_length is larger than the
+    // extra byte added to account for the null terminator.
+    // This assert forces the constexpr to be evaluated at
+    // compile-time
+    static_assert(max_possible_value_length > 1);
+    char translated_string[max_possible_value_length] = {0};
+
+    pldm_bios_table_string_entry_decode_string(cur_val_string_entry_ptr,
+                                               translated_string,
+                                               max_possible_value_length);
+
+    if(strncmp(translated_string, PLDM_BIOS_DISABLED_STRING, max_possible_value_length) == 0)
+    {
+        o_powerLimitEnable = false;
+        PLDM_INF("Power Limit Disabled by BMC PLDM BIOS attribute");
+    }
+    else if(strncmp(translated_string, PLDM_BIOS_ENABLED_STRING, max_possible_value_length) == 0)
+    {
+        o_powerLimitEnable = true;
+        PLDM_INF("Power Limit Enabled by BMC PLDM BIOS attribute");
+    }
+    else
+    {
+        // print the entire buffer
+        PLDM_INF_BIN("Unexpected string : ",translated_string, max_possible_value_length);
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_POWER_LIMIT
+          * @reasoncode RC_UNSUPPORTED_TYPE
+          * @userdata1  Unused
+          * @userdata2  Unused
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_GET_POWER_LIMIT,
+                             RC_UNSUPPORTED_TYPE,
+                             0,
+                             0,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING).addToLog(errl);
+        ErrlUserDetailsString(translated_string).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+
+    // Limit Attribute
+    uint64_t l_attr_val = 0;
+    errl = systemIntAttrLookup(string_table,
+                               attr_table,
+                               PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING,
+                               l_attr_val);
+    if(errl)
+    {
+        PLDM_ERR("getPowerLimit() Failed to lookup value for %s",
+                 PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING);
+        break;
+    }
+
+    o_powerLimitWatts = l_attr_val;
+    PLDM_INF("Power Limit Watts from BMC PLDM BIOS attribute 0x%X",o_powerLimitWatts);
+
+    }while(0);
 
     return errl;
 }

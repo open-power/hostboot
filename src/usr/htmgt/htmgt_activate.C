@@ -43,6 +43,11 @@
 #include <sys/time.h>
 #include <console/consoleif.H>
 
+#ifdef CONFIG_PLDM
+#include <pldm/base/hb_bios_attrs.H>
+#include <pldm/pldm_errl.H>
+#endif
+
 using namespace TARGETING;
 
 namespace HTMGT
@@ -196,7 +201,20 @@ namespace HTMGT
         do
         {
 
-// TODO: RTC 209572 Update with IPMI alternative
+// TODO: RTC 209572 Support power caps based on power supply type
+#ifdef CONFIG_PLDM
+            err = PLDM::getPowerLimit(active, limit);
+            if(err)
+            {
+                TMGT_ERR("getPowerLimit: An error occurred getting Power Limit from the BMC");
+                break;
+            }
+            else
+            {
+                TMGT_INF("getPowerLimit: active %d limit 0x%X", active, limit);
+            }
+#endif
+
 #if 0
 #ifdef CONFIG_BMC_IPMI
             err = SENSOR::getUserPowerLimit(limit, active);

@@ -171,6 +171,19 @@ namespace PLDM
                            std::vector<uint8_t>& io_attr_table,
                            TARGETING::ATTR_MFG_FLAGS_typeStdArr &o_mfgFlags);
 
+    /** @brief Retrieve the current power limit PLDM bios attributes
+    *          from the BMC and return to the caller.
+    *
+    * @param[out] o_powerLimitEnable  If no error occurs will contain the value
+    *                                 we found for hb_power_limit_enable.
+    * @param[out] o_powerLimitWatts   If no error occurs will contain the value
+    *                                 we found for hb_power_limit_in_watts.
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getPowerLimit(bool &o_powerLimitEnable,
+                             uint16_t &o_powerLimitWatts);
+
     /** @brief Retrieve the current value of the hb_debug_console
     *          PLDM bios attribute, convert it to a boolean value.
     *
