@@ -171,7 +171,7 @@ const struct fir_registers firs_runtime =
     .PHY_FIR_MASK    = 0x0000000000000000,
 };
 
-const uint64_t DLP_FIR_MASK_RECOV = 0xFFFFFFFFFFC0C003;
+const uint64_t DLP_FIR_MASK_RECOV = 0xFFFFFFFFFFCCC003;
 
 // DL Config Register Enums
 const uint8_t DLP_PHY_CONFIG_DL_SELECT_DLP  = 0x01;
