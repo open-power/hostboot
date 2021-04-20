@@ -75,18 +75,6 @@ void maskIfCoreCs( ExtensibleChip * i_chip )
         eq_chiplet_re_fir_mask->Write();
         eq_chiplet_ucs_fir_mask->Write();
 
-        // Clear the local checkstop summary bit on bit 2 of the RE chiplet FIR
-        SCAN_COMM_REGISTER_CLASS * eq_chiplet_re_fir =
-            eq->getRegister("EQ_CHIPLET_RE_FIR");
-        l_rc = eq_chiplet_re_fir->ForceRead();
-
-        if ( SUCCESS != l_rc ) break;
-
-        if ( eq_chiplet_re_fir->IsBitSet(2) )
-        {
-            eq_chiplet_re_fir->ClearBit(2);
-            eq_chiplet_re_fir->Write();
-        }
     }while(0);
 }
 #endif
