@@ -195,7 +195,7 @@ class ddimm_efd_0_3
         ///
         virtual bool check_rcd_ibt(const uint8_t i_field) const
         {
-            return (i_field == 0x00);
+            return true;
         }
 
         ///
@@ -206,7 +206,9 @@ class ddimm_efd_0_3
         ///
         virtual bool check_rcd_db_dic(const uint8_t i_field) const
         {
-            return (i_field == 0x00);
+            // Mask to ensure bits 0-4 and 6 are unset
+            constexpr uint8_t REVERSE_MASK = 0xFA;
+            return ((i_field & REVERSE_MASK) == 0);
         }
 
         ///
@@ -294,7 +296,21 @@ class ddimm_efd_0_3
         ///
         virtual bool check_rcd_slew_rate_ctrl_1(const uint8_t i_field) const
         {
-            return (i_field == 0x00);
+            // Masks to ensure no bit pair has both bits set
+            constexpr uint8_t REVERSE_MASK_0 = 0xC0;
+            constexpr uint8_t REVERSE_MASK_1 = 0x30;
+            constexpr uint8_t REVERSE_MASK_2 = 0x0C;
+            constexpr uint8_t REVERSE_MASK_3 = 0x03;
+
+            const uint8_t MASK_RESULT_0 = i_field & REVERSE_MASK_0;
+            const uint8_t MASK_RESULT_1 = i_field & REVERSE_MASK_1;
+            const uint8_t MASK_RESULT_2 = i_field & REVERSE_MASK_2;
+            const uint8_t MASK_RESULT_3 = i_field & REVERSE_MASK_3;
+
+            return !(MASK_RESULT_0 == REVERSE_MASK_0 ||
+                     MASK_RESULT_1 == REVERSE_MASK_1 ||
+                     MASK_RESULT_2 == REVERSE_MASK_2 ||
+                     MASK_RESULT_3 == REVERSE_MASK_3);
         }
 
         ///
@@ -305,7 +321,21 @@ class ddimm_efd_0_3
         ///
         virtual bool check_rcd_slew_rate_ctrl_0(const uint8_t i_field) const
         {
-            return (i_field == 0x00);
+            // Masks to ensure no bit pair has both bits set
+            constexpr uint8_t REVERSE_MASK_0 = 0xC0;
+            constexpr uint8_t REVERSE_MASK_1 = 0x30;
+            constexpr uint8_t REVERSE_MASK_2 = 0x0C;
+            constexpr uint8_t REVERSE_MASK_3 = 0x03;
+
+            const uint8_t MASK_RESULT_0 = i_field & REVERSE_MASK_0;
+            const uint8_t MASK_RESULT_1 = i_field & REVERSE_MASK_1;
+            const uint8_t MASK_RESULT_2 = i_field & REVERSE_MASK_2;
+            const uint8_t MASK_RESULT_3 = i_field & REVERSE_MASK_3;
+
+            return !(MASK_RESULT_0 == REVERSE_MASK_0 ||
+                     MASK_RESULT_1 == REVERSE_MASK_1 ||
+                     MASK_RESULT_2 == REVERSE_MASK_2 ||
+                     MASK_RESULT_3 == REVERSE_MASK_3);
         }
 
         ///
@@ -373,7 +403,9 @@ class ddimm_efd_0_3
         ///
         virtual bool check_pmic_rail_current_warning(const uint8_t i_field) const
         {
-            return (i_field == 0x00);
+            // Mask to ensure bits 6 and 7 are unset
+            constexpr uint8_t REVERSE_MASK = 0x03;
+            return ((i_field & REVERSE_MASK) == 0x00);
         }
 
         ///
@@ -384,7 +416,7 @@ class ddimm_efd_0_3
         ///
         virtual bool check_phy_slew_rate_dq_dqs(const uint8_t i_field) const
         {
-            return true;
+            return (i_field == 0x00 || i_field == 0x0F);
         }
 
         ///
@@ -395,7 +427,12 @@ class ddimm_efd_0_3
         ///
         virtual bool check_atx_slew_rate(const uint8_t i_field) const
         {
-            return true;
+            constexpr uint8_t REVERSE_MASK_RESERVED = 0xF0;
+            constexpr uint8_t REVERSE_MASK_RESERVED_MODE = 0x03;
+            const uint8_t MASK_RESULT_0 = i_field & REVERSE_MASK_RESERVED;
+            const uint8_t MASK_RESULT_1 = i_field & REVERSE_MASK_RESERVED_MODE;
+
+            return ((MASK_RESULT_0 == 0x00) && (MASK_RESULT_1 != 0x03));
         }
 
         ///
@@ -406,7 +443,12 @@ class ddimm_efd_0_3
         ///
         virtual bool check_ck_slew_rate(const uint8_t i_field) const
         {
-            return true;
+            constexpr uint8_t REVERSE_MASK_RESERVED = 0xF0;
+            constexpr uint8_t REVERSE_MASK_RESERVED_MODE = 0x03;
+            const uint8_t MASK_RESULT_0 = i_field & REVERSE_MASK_RESERVED;
+            const uint8_t MASK_RESULT_1 = i_field & REVERSE_MASK_RESERVED_MODE;
+
+            return ((MASK_RESULT_0 == 0x00) && (MASK_RESULT_1 != 0x03));
         }
 
         ///
@@ -2572,7 +2614,9 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         ///
         virtual bool check_pmic_rail_current_warning(const uint8_t i_field) const override
         {
-            return (i_field <= 0xFC);
+            // Mask to ensure bits 6 amd 7 are unset
+            constexpr uint8_t REVERSE_MASK = 0x03;
+            return ((i_field & REVERSE_MASK) == 0x00);
         }
 
         ///
@@ -2632,7 +2676,9 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         ///
         virtual bool check_rcd_db_dic(const uint8_t i_field) const
         {
-            return (i_field <= 0x05);
+            // Mask to ensure bits 0-4 and 6 are unset
+            constexpr uint8_t REVERSE_MASK = 0xFA;
+            return ((i_field & REVERSE_MASK) == 0);
         }
 
         ///
@@ -2728,7 +2774,21 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         ///
         virtual bool check_rcd_slew_rate_ctrl_1(const uint8_t i_field) const override
         {
-            return true;
+            // Masks to ensure no bit pair has both bits set
+            constexpr uint8_t REVERSE_MASK_0 = 0xC0;
+            constexpr uint8_t REVERSE_MASK_1 = 0x30;
+            constexpr uint8_t REVERSE_MASK_2 = 0x0C;
+            constexpr uint8_t REVERSE_MASK_3 = 0x03;
+
+            const uint8_t MASK_RESULT_0 = i_field & REVERSE_MASK_0;
+            const uint8_t MASK_RESULT_1 = i_field & REVERSE_MASK_1;
+            const uint8_t MASK_RESULT_2 = i_field & REVERSE_MASK_2;
+            const uint8_t MASK_RESULT_3 = i_field & REVERSE_MASK_3;
+
+            return !(MASK_RESULT_0 == REVERSE_MASK_0 ||
+                     MASK_RESULT_1 == REVERSE_MASK_1 ||
+                     MASK_RESULT_2 == REVERSE_MASK_2 ||
+                     MASK_RESULT_3 == REVERSE_MASK_3);
         }
 
         ///
@@ -2740,7 +2800,21 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         ///
         virtual bool check_rcd_slew_rate_ctrl_0(const uint8_t i_field) const override
         {
-            return true;
+            // Masks to ensure no bit pair has both bits set
+            constexpr uint8_t REVERSE_MASK_0 = 0xC0;
+            constexpr uint8_t REVERSE_MASK_1 = 0x30;
+            constexpr uint8_t REVERSE_MASK_2 = 0x0C;
+            constexpr uint8_t REVERSE_MASK_3 = 0x03;
+
+            const uint8_t MASK_RESULT_0 = i_field & REVERSE_MASK_0;
+            const uint8_t MASK_RESULT_1 = i_field & REVERSE_MASK_1;
+            const uint8_t MASK_RESULT_2 = i_field & REVERSE_MASK_2;
+            const uint8_t MASK_RESULT_3 = i_field & REVERSE_MASK_3;
+
+            return !(MASK_RESULT_0 == REVERSE_MASK_0 ||
+                     MASK_RESULT_1 == REVERSE_MASK_1 ||
+                     MASK_RESULT_2 == REVERSE_MASK_2 ||
+                     MASK_RESULT_3 == REVERSE_MASK_3);
         }
 
         // Virtual function overloads go here

@@ -786,7 +786,7 @@ class base_0_3
             FAPI_TRY(get_field_spd(iv_ocmb, F::PRIM_SIGNAL_LOADING, i_spd, SET_PRIM_STACK_TYPE, l_field));
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_revision(l_field),
+                                  check_prim_signal_loading(l_field),
                                   F::PRIM_SIGNAL_LOADING.get_byte(i_spd),
                                   l_field,
                                   SET_PRIM_STACK_TYPE,
@@ -1195,6 +1195,7 @@ class base_0_3
 
             using TT = mss::dimmPosTraits<mss::mc_type::EXPLORER>;
             FAPI_TRY(gen::dimm_pos<TT>(iv_dimm, l_field));
+
             FAPI_TRY(mss::attr::set_dimm_pos_metadata(iv_dimm, l_field));
 
         fapi_try_exit:
@@ -2522,6 +2523,7 @@ class base_0_4 : public base_0_3
 // Can be updated with the earliest supported base cnfg revision
 //
 using base_cnfg_base = base_0_3;
+using base_cnfg_latest = base_0_4;
 
 } // spd
 

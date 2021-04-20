@@ -229,8 +229,8 @@ class ddimm_0_3
         {
             // Mask to ensure all bits except 4:5 (which is 2:3 in SPD) are not set for x4 device spare mapping
             // Allows only nibbles 10 and 11 to be spares as per Explorer config
-            constexpr uint8_t SPARE_DEVICE_REVERSE_MASK = 0xF3;
-            return ((i_field & SPARE_DEVICE_REVERSE_MASK) == 0);
+            constexpr uint8_t REVERSE_MASK = 0xF3;
+            return ((i_field & REVERSE_MASK) == 0);
         }
 
         ///
@@ -263,7 +263,9 @@ class ddimm_0_3
         ///
         virtual bool check_spd_content_revision(const uint8_t i_field) const
         {
-            return true;
+            // Mask to ensure bit 2 is unset (bit 5 in SPD) since it is reserved
+            constexpr uint8_t REVERSE_MASK = 0x20;
+            return ((i_field & REVERSE_MASK) == 0);
         }
 
         // Traits common to all 4 PMIC rails on both PMIC0 and PMIC1
@@ -375,7 +377,7 @@ class ddimm_0_3
         ///
         virtual bool check_pmic_rail_order(const uint8_t i_field) const
         {
-            return (i_field <= 0x08);
+            return (i_field <= 0x04);
         }
 
         ///
@@ -417,9 +419,10 @@ class ddimm_0_3
         /// @param[in] i_field field value
         /// @return true/false in specified range
         ///
-        virtual bool check_therm_sensor_0_second_avail(const uint8_t i_field) const
+        virtual bool check_therm_sensor_0_second_avail(const uint8_t i_field_secondary, const uint8_t i_field_primary) const
         {
-            return (i_field <= 0b1);
+            // Disallow availability of secondary thermal sensor if primary thermal sensor is not available
+            return (i_field_secondary != 0b1) || (i_field_primary == 0b1);
         }
 
         ///
@@ -452,7 +455,9 @@ class ddimm_0_3
         ///
         virtual bool check_therm_sensor_0_i2c_address(const uint8_t i_field) const
         {
-            return true;
+            // Mask to ensure the R/W bit (bit 7) is unset
+            constexpr uint8_t REVERSE_MASK = 0x01;
+            return ((i_field & REVERSE_MASK) == 0);
         }
 
         ///
@@ -483,9 +488,10 @@ class ddimm_0_3
         /// @param[in] i_field field value
         /// @return true/false in specified range
         ///
-        virtual bool check_therm_sensor_1_second_avail(const uint8_t i_field) const
+        virtual bool check_therm_sensor_1_second_avail(const uint8_t i_field_secondary, const uint8_t i_field_primary) const
         {
-            return (i_field <= 0b1);
+            // Disallow availability of secondary thermal sensor if primary thermal sensor is not available
+            return (i_field_secondary != 0b1) || (i_field_primary == 0b1);
         }
 
         ///
@@ -518,7 +524,9 @@ class ddimm_0_3
         ///
         virtual bool check_therm_sensor_1_i2c_address(const uint8_t i_field) const
         {
-            return true;
+            // Mask to ensure the R/W bit (bit 7) is unset
+            constexpr uint8_t REVERSE_MASK = 0x01;
+            return ((i_field & REVERSE_MASK) == 0);
         }
 
         ///
@@ -573,7 +581,9 @@ class ddimm_0_3
         ///
         virtual bool check_therm_sensor_diff_i2c_address(const uint8_t i_field) const
         {
-            return true;
+            // Mask to ensure the R/W bit (bit 7) is unset
+            constexpr uint8_t REVERSE_MASK = 0x01;
+            return ((i_field & REVERSE_MASK) == 0);
         }
 
         ///
@@ -584,7 +594,9 @@ class ddimm_0_3
         ///
         virtual bool check_therm_sensor_0_second_i2c_address(const uint8_t i_field) const
         {
-            return true;
+            // Mask to ensure the R/W bit (bit 7) is unset
+            constexpr uint8_t REVERSE_MASK = 0x01;
+            return ((i_field & REVERSE_MASK) == 0);
         }
 
         ///
@@ -595,7 +607,9 @@ class ddimm_0_3
         ///
         virtual bool check_therm_sensor_1_second_i2c_address(const uint8_t i_field) const
         {
-            return true;
+            // Mask to ensure the R/W bit (bit 7) is unset
+            constexpr uint8_t REVERSE_MASK = 0x01;
+            return ((i_field & REVERSE_MASK) == 0);
         }
 
         ///
@@ -1521,7 +1535,7 @@ class ddimm_0_3
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_pmic_rail_delay(l_field),
+                                  check_pmic_rail_order(l_field),
                                   F::PMIC0_SWA_ORDER.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC0_SWA_SEQUENCE_ORDER,
@@ -1661,7 +1675,7 @@ class ddimm_0_3
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_pmic_rail_delay(l_field),
+                                  check_pmic_rail_order(l_field),
                                   F::PMIC0_SWB_ORDER.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC0_SWB_SEQUENCE_ORDER,
@@ -1801,7 +1815,7 @@ class ddimm_0_3
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_pmic_rail_delay(l_field),
+                                  check_pmic_rail_order(l_field),
                                   F::PMIC0_SWC_ORDER.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC0_SWC_SEQUENCE_ORDER,
@@ -1941,7 +1955,7 @@ class ddimm_0_3
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_pmic_rail_delay(l_field),
+                                  check_pmic_rail_order(l_field),
                                   F::PMIC0_SWD_ORDER.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC0_SWD_SEQUENCE_ORDER,
@@ -1991,7 +2005,7 @@ class ddimm_0_3
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_pmic_redundancy(l_field),
+                                  check_pmic_phase_combin(l_field),
                                   F::PMIC0_PHASE_COMBIN.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC0_PHASE_COMB,
@@ -2131,7 +2145,7 @@ class ddimm_0_3
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_pmic_rail_delay(l_field),
+                                  check_pmic_rail_order(l_field),
                                   F::PMIC1_SWA_ORDER.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC1_SWA_SEQUENCE_ORDER,
@@ -2271,7 +2285,7 @@ class ddimm_0_3
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_pmic_rail_delay(l_field),
+                                  check_pmic_rail_order(l_field),
                                   F::PMIC1_SWB_ORDER.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC1_SWB_SEQUENCE_ORDER,
@@ -2411,7 +2425,7 @@ class ddimm_0_3
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_pmic_rail_delay(l_field),
+                                  check_pmic_rail_order(l_field),
                                   F::PMIC1_SWC_ORDER.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC1_SWC_SEQUENCE_ORDER,
@@ -2551,7 +2565,7 @@ class ddimm_0_3
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_pmic_rail_delay(l_field),
+                                  check_pmic_rail_order(l_field),
                                   F::PMIC1_SWD_ORDER.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC1_SWD_SEQUENCE_ORDER,
@@ -2646,18 +2660,21 @@ class ddimm_0_3
         ///
         virtual fapi2::ReturnCode set_therm_sensor_0_second_avail(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_0_SECOND_AVAIL, i_spd, exp::SET_THERM_SENSOR_0_SECOND_AVAIL, l_field));
+            uint8_t l_field_secondary = 0;
+            uint8_t l_field_primary = 0;
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_0_SECOND_AVAIL, i_spd, exp::SET_THERM_SENSOR_0_SECOND_AVAIL,
+                                   l_field_secondary));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_0_AVAIL, i_spd, exp::SET_THERM_SENSOR_0_AVAIL, l_field_primary));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_therm_sensor_0_second_avail(l_field),
+                                  check_therm_sensor_0_second_avail(l_field_secondary, l_field_primary),
                                   F::THERM_SENSOR_0_SECOND_AVAIL.get_byte(i_spd),
-                                  l_field,
+                                  l_field_secondary,
                                   exp::SET_THERM_SENSOR_0_SECOND_AVAIL,
                                   "Thermal Sensor 0 Second Availability"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_0_secondary_availability(iv_port, l_field));
+            FAPI_TRY(mss::attr::set_therm_sensor_0_secondary_availability(iv_port, l_field_secondary));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2805,18 +2822,21 @@ class ddimm_0_3
         ///
         virtual fapi2::ReturnCode set_therm_sensor_1_second_avail(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_1_SECOND_AVAIL, i_spd, exp::SET_THERM_SENSOR_1_SECOND_AVAIL, l_field));
+            uint8_t l_field_secondary = 0;
+            uint8_t l_field_primary = 0;
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_1_SECOND_AVAIL, i_spd, exp::SET_THERM_SENSOR_1_SECOND_AVAIL,
+                                   l_field_secondary));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_1_AVAIL, i_spd, exp::SET_THERM_SENSOR_1_AVAIL, l_field_primary));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_therm_sensor_1_second_avail(l_field),
+                                  check_therm_sensor_1_second_avail(l_field_secondary, l_field_primary),
                                   F::THERM_SENSOR_1_SECOND_AVAIL.get_byte(i_spd),
-                                  l_field,
+                                  l_field_secondary,
                                   exp::SET_THERM_SENSOR_1_SECOND_AVAIL,
                                   "Thermal Sensor 1 Second Avail"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_1_secondary_availability(iv_port, l_field));
+            FAPI_TRY(mss::attr::set_therm_sensor_1_secondary_availability(iv_port, l_field_secondary));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -3611,7 +3631,7 @@ class ddimm_0_3
 };
 
 ///
-/// @brief Class for DDIMM SPD Rev 0.3
+/// @brief Class for DDIMM SPD Rev 0.4
 ///
 class ddimm_0_4 : public ddimm_0_3
 {
@@ -3655,6 +3675,7 @@ class ddimm_0_4 : public ddimm_0_3
 // Can be updated with the earliest supported ddimm module revision
 //
 using ddimm_base = ddimm_0_3;
+using ddimm_base_latest = ddimm_0_4;
 
 } // spd
 
