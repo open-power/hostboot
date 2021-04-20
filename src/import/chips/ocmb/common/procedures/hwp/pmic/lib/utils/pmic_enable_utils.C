@@ -760,9 +760,9 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     // First, grab the PMIC targets in POS order
-    // Make sure to grab all pmics - functional or not, in case the parent OCMB
-    // was deconfigured. That may have marked the PMICs as non-functional
-    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
+    // Note: you'd think we'd want to grab all PMIC's but we're running into cronus giving us non existant PMICs
+    // As hostboot is no longer generating patches, there's no need for grabbing the present targets
+    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
     // Next, sort them by the sequence attributes
     FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
