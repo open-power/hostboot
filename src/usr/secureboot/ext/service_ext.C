@@ -46,6 +46,9 @@
 #include <isteps/istep_reasoncodes.H>
 #include <targeting/common/mfgFlagAccessors.H>
 
+#include <arch/pvrformat.H>
+#include <sys/mmio.h>
+
 namespace SECUREBOOT
 {
 
@@ -825,6 +828,145 @@ void validateSecuritySettings()
     #endif // CONFIG_SECUREBOOT
 
     SB_EXIT("validateSecuritySettings");
+}
+
+errlHndl_t verifyMeasurementSeepromSecurity(const TARGETING::TargetHandle_t& i_proc)
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+
+        // Check if this is DD1 hardware.
+        PVR_t pvr(mmio_pvr_read() & 0xFFFFFFFF);
+        if (pvr.isP10DD10())
+        {
+            // Only verify security settings on DD2 hardware or above.
+            SB_INF("verifyMeasurementSeepromSecurity: Detected DD1 hardware, this verification "
+                   "is only necessary on DD2 hardware and beyond. Skipping...");
+            break;
+        }
+
+        // Check if system has set the manufacturing flag, that will determine error severity.
+        // The informational log is created instead of unrecoverable in non-mfg mode so that devs aren't
+        // stopped by this issue. It shouldn't be possible for a chip to leave mfg without having passed
+        // this verification code.
+        ERRORLOG::errlSeverity_t sev = ERRORLOG::ERRL_SEV_INFORMATIONAL;
+        if (TARGETING::isSeepromSecurityChecksSet())
+        {
+            sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+        }
+
+        // Check the version of the measurement seeprom
+        SecureRegisterValues reg;
+        reg.procTgt = i_proc;
+        // 0x10012 is the register that holds the version info
+        reg.addr = sbe_measurement_regs[2];
+        reg.data = 0x0;
+
+        errl = getSbeMeasurementRegister(reg);
+        if (errl)
+        {
+            break;
+        }
+        // Establish a minimum secure version
+        constexpr uint32_t MINIMUM_SECURE_MEASUREMENT_VERSION = 0x00020013;
+        // Only interested in bytes 4-7 for the version info.
+        constexpr uint64_t VERSION_BYTES_MASK = 0x00000000FFFFFFFFull;
+
+        // Ensure the measurement fuse has been blown for this proc
+        constexpr uint64_t EXPORT_REGL_STATUS_SCOM_REG = 0x10009;
+        constexpr uint64_t IS_MEASUREMENT_FUSE_BLOWN_MASK = 0x0008000000000000ull;
+        uint64_t data = 0;
+        size_t size = sizeof(data);
+
+        errl = deviceRead(i_proc,
+                          &data,
+                          size,
+                          DEVICE_SCOM_ADDRESS(EXPORT_REGL_STATUS_SCOM_REG));
+
+        if (errl)
+        {
+            SB_ERR("verifyMeasurementSeepromSecurity: "
+                    "Error reading register 0x%x from PROC 0x%x to determine fuse state.",
+                    EXPORT_REGL_STATUS_SCOM_REG,
+                    TARGETING::get_huid(i_proc));
+            break;
+        }
+
+        bool fuseWasBlown = (data & IS_MEASUREMENT_FUSE_BLOWN_MASK) != 0;
+
+        // If the version of the seeprom is less than the minimum secure version then create an error to return.
+        if ((reg.data & VERSION_BYTES_MASK) < MINIMUM_SECURE_MEASUREMENT_VERSION)
+        {
+            SB_ERR("verifyMeasurementSeepromSecurity: "
+                    "Detected Measurement SEEPROM version was 0x%x which is lower than expected minimum level 0x%x. "
+                    "Platform security is compromised.",
+                    (reg.data & VERSION_BYTES_MASK),
+                    MINIMUM_SECURE_MEASUREMENT_VERSION);
+            /*@
+             * @errortype
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE/INFORMATIONAL
+             * @moduleid         SECUREBOOT::MOD_VERIFY_MEASUREMENT_SEEPROM_SECURITY
+             * @reasoncode       SECUREBOOT::RC_UNSECURE_MEASUREMENT_VERSION
+             * @devdesc          Measurement SEEPROM version for the given proc did not meet the minimum secure version.
+             *                   Manufacturing must update to required level
+             * @custdesc         Server firmware detected a hardware error that could compromise platform security.
+             * @userdata1[00:31] Actual measurement SEEPROM version read from hardware
+             * @userdata1[32:63] Required minimum measurement SEEPROM version
+             * @userdata2[00:31] OTP_SPIM_MEAS_SEEPROM_LOCK bit. 1 is set, 0 is unset.
+             * @userdata2[32:63] HUID of the proc.
+             */
+            errl = new ERRORLOG::ErrlEntry(
+                    sev,
+                    SECUREBOOT::MOD_VERIFY_MEASUREMENT_SEEPROM_SECURITY,
+                    SECUREBOOT::RC_UNSECURE_MEASUREMENT_VERSION,
+                    TWO_UINT32_TO_UINT64(reg.data, MINIMUM_SECURE_MEASUREMENT_VERSION),
+                    TWO_UINT32_TO_UINT64(fuseWasBlown, TARGETING::get_huid(i_proc)));
+
+            errl->collectTrace(SECURE_COMP_NAME);
+            errl->addHwCallout(i_proc,
+                              HWAS::SRCI_PRIORITY_HIGH,
+                              HWAS::NO_DECONFIG,
+                              HWAS::GARD_NULL);
+
+            break;
+        }
+
+        if (!fuseWasBlown)
+        {
+            SB_ERR("verifyMeasurementSeepromSecurity: "
+                    "Detected Measurement SEEPROM fuse has not been blown. "
+                    "Platform security is compromised.",
+                    (reg.data & VERSION_BYTES_MASK),
+                    MINIMUM_SECURE_MEASUREMENT_VERSION);
+            /*@
+             * @errortype
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE/INFORMATIONAL
+             * @moduleid         SECUREBOOT::MOD_VERIFY_MEASUREMENT_SEEPROM_SECURITY
+             * @reasoncode       SECUREBOOT::RC_UNBLOWN_MEASUREMENT_FUSE
+             * @devdesc          Measurement SEEPROM of the given proc has the minimum secure version of measurement
+             *                   SEEPROM code but the fuse remains intact. Manufacturing must blow the fuse.
+             * @custdesc         Server firmware detected a hardware error that could compromise platform security.
+             * @userdata1[00:31] HUID of Proc
+             * @userdata1[32:63] Unused
+             */
+            errl = new ERRORLOG::ErrlEntry(
+                    sev,
+                    SECUREBOOT::MOD_VERIFY_MEASUREMENT_SEEPROM_SECURITY,
+                    SECUREBOOT::RC_UNBLOWN_MEASUREMENT_FUSE,
+                    TWO_UINT32_TO_UINT64(TARGETING::get_huid(i_proc), 0));
+
+            errl->collectTrace(SECURE_COMP_NAME);
+            errl->addHwCallout(i_proc,
+                              HWAS::SRCI_PRIORITY_HIGH,
+                              HWAS::NO_DECONFIG,
+                              HWAS::GARD_NULL);
+            break;
+        }
+
+    } while(0);
+
+    return errl;
 }
 
 } // namespace SECUREBOOT

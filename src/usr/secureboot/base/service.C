@@ -64,6 +64,156 @@
 using namespace ERRORLOG;
 using namespace TARGETING;
 
+namespace
+{
+
+/*
+ * @brief Determines if the given target handle can be XSCOM-ed.
+ *
+ * @param[in]   i_pProc     The target to assess.
+ *
+ * @return      errlHndl_t  nullptr if the target can be XSCOM-ed. Otherwise, an error.
+ */
+errlHndl_t canXscomProc(const TargetHandle_t i_pProc)
+{
+    errlHndl_t err = nullptr;
+
+    // Assume the op can't be done.
+    bool do_op = false;
+
+    // Need to support MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+    if (i_pProc == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        do_op = true;
+    }
+    else if (Util::isTargetingLoaded())
+    {
+        // Check that i_pProc isn't nullptr and is of type proc
+        assert((i_pProc != nullptr) &&
+               (i_pProc->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC ),
+               "canXscomProc: i_pProc either nullptr or !TYPE_PROC");
+
+        if (i_pProc->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
+        {
+            do_op = true;
+        }
+    }
+
+    // Can't XSCOM the proc, return an error.
+    if (do_op != true)
+    {
+        // Fail since proc target is not scommable at this time
+        // NOTE: the master proc is always scommable
+        SB_ERR("canXscomProc: FAIL: Tgt=0x%.08X not set up to use Xscom at this time",
+               TARGETING::get_huid(i_pProc));
+
+        /*@
+         * @errortype
+         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        SECUREBOOT::MOD_CAN_XSCOM_PROC
+         * @reasoncode      SECUREBOOT::RC_SECURE_BAD_TARGET
+         * @userdata1       HUID of Processor Target
+         * @userdata2       <unused>
+         * @devdesc         Processor Parameter is not scommable
+         * @custdesc        A firmware error occurred.
+         */
+        err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        SECUREBOOT::MOD_CAN_XSCOM_PROC,
+                        SECUREBOOT::RC_SECURE_BAD_TARGET,
+                        get_huid(i_pProc),
+                        0,
+                        ErrlEntry::ADD_SW_CALLOUT);
+
+        err->collectTrace(SECURE_COMP_NAME);
+    }
+
+    return err;
+}
+
+/*
+ * @brief   Reads a given Measurement SEEPROM register from the given SecureRegisterValues struct and returns the data.
+ *          Will verify that the given target is xscommable.
+ *
+ * @param[in/out]  io_reg        The register to read from for the given proc.
+ *
+ * @return         errlHndl_t    nullptr on success. Otherwise, an error.
+ */
+errlHndl_t readSbeMeasurementRegister(SecureRegisterValues& io_reg)
+{
+    errlHndl_t err = nullptr;
+
+    SB_DBG("readSbeMeasurementRegister: Getting Target=0x%.08X Reg=0x%.08X",
+           TARGETING::get_huid(io_reg.procTgt), io_reg.addr);
+
+    do {
+        // Do the operation if we have a valid target.
+        err = canXscomProc(io_reg.procTgt);
+        if (err)
+        {
+            // Can't perform the op with this proc.
+            break;
+        }
+
+        // Read the register
+        io_reg.data = 0x0;
+        size_t op_actual_size = sizeof(io_reg.data);
+        const size_t op_expected_size = op_actual_size;
+
+        err = deviceRead( io_reg.procTgt,
+                          &(io_reg.data),
+                          op_actual_size,
+                          DEVICE_SCOM_ADDRESS(io_reg.addr));
+
+        if( err )
+        {
+            // Something failed on the read.
+            SB_ERR("readSbeMeasurementRegister: Error from scom read: "
+                   "Target 0x%.8X: Register: 0x%.8X "
+                   TRACE_ERR_FMT,
+                   TARGETING::get_huid(io_reg.procTgt),
+                   io_reg.addr,
+                   TRACE_ERR_ARGS(err));
+
+            // Don't expect any xscom errors so break and return this error
+            err->collectTrace(SECURE_COMP_NAME);
+            break;
+        }
+
+        if (op_actual_size != op_expected_size)
+        {
+            SB_ERR("readSbeMeasurementRegister: size returned from device read (%d) is not the expected size of %d",
+                   op_actual_size, op_expected_size);
+            /*@
+             * @errortype
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        SECUREBOOT::MOD_READ_SBE_MEASUREMENT_REGISTER
+             * @reasoncode      SECUREBOOT::RC_DEVICE_READ_ERR
+             * @userdata1       Actual size read
+             * @userdata2       Expected size read
+             * @devdesc         Device read did not return expected size
+             * @custdesc        A firmware error occurred.
+             */
+            err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            SECUREBOOT::MOD_READ_SBE_MEASUREMENT_REGISTER,
+                            SECUREBOOT::RC_DEVICE_READ_ERR,
+                            op_actual_size,
+                            op_expected_size,
+                            ErrlEntry::ADD_SW_CALLOUT);
+
+            // Don't expect any xscom errors so break and return this error
+            err->collectTrace(SECURE_COMP_NAME);
+            break;
+        }
+    } while(0);
+
+    return err;
+}
+
+};
+
+
 namespace SECUREBOOT
 {
 
@@ -98,133 +248,27 @@ errlHndl_t getSbeMeasurementRegisters(
 
     SecureRegisterValues l_regValue;
 
-    // Don't do the operation until i_pProc is verified
-    bool do_op = false;
-
     do {
 
-    // Need to support MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-    if (i_pProc == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-    {
-        do_op = true;
-    }
-    else if (Util::isTargetingLoaded())
-    {
-        // Check that i_pProc isn't nullptr and is of type proc
-        assert((i_pProc != nullptr) &&
-               (i_pProc->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC ),
-               "getSbeMeasurementRegisters: i_pProc either nullptr or !TYPE_PROC");
-
-        if (i_pProc->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
-        {
-            do_op = true;
-        }
-    }
-
-    // Do the operation if we have a valid target
-    if (do_op == true)
-    {
         l_regValue.procTgt=i_pProc;
 
         for ( const auto scom_reg : sbe_measurement_regs )
         {
             l_regValue.addr = scom_reg;
 
-            SB_DBG("getSbeMeasurementRegisters: Getting Target=0x%.08X Reg=0x%.08X",
-                   TARGETING::get_huid(l_regValue.procTgt), l_regValue.addr);
-
-            // Read the register via
-            l_regValue.data = 0x0;
-            size_t op_actual_size = sizeof(l_regValue.data);
-            const size_t op_expected_size = op_actual_size;
-
-            err = deviceRead( l_regValue.procTgt,
-                              &(l_regValue.data),
-                              op_actual_size,
-                              DEVICE_SCOM_ADDRESS(l_regValue.addr));
-
-            if( err )
+            err = readSbeMeasurementRegister(l_regValue);
+            if (err)
             {
-                // Something failed on the read.  Commit the error
-                // here but continue
-                SB_ERR("getSbeMeasurementRegisters: Error from scom read: "
-                       "Target 0x%.8X: Register: 0x%.8X "
-                       TRACE_ERR_FMT,
-                       TARGETING::get_huid(l_regValue.procTgt),
-                       l_regValue.addr,
-                       TRACE_ERR_ARGS(err));
-
-                // Don't expect any xscom errors so break and return this error
-                err->collectTrace(SECURE_COMP_NAME);
                 break;
             }
-
-            if (op_actual_size != op_expected_size)
-            {
-                SB_ERR("getSbeMeasurementRegisters: size returned from device write (%d) is not the expected size of %d",
-                       op_actual_size, op_expected_size);
-                /*@
-                 * @errortype
-                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid        SECUREBOOT::MOD_SECURE_GET_SBE_MEASUREMENT_REGS
-                 * @reasoncode      SECUREBOOT::RC_DEVICE_READ_ERR
-                 * @userdata1       Actual size written
-                 * @userdata2       Expected size written
-                 * @devdesc         Device write did not return expected size
-                 * @custdesc        Firmware Error
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                SECUREBOOT::MOD_SECURE_GET_SBE_MEASUREMENT_REGS,
-                                SECUREBOOT::RC_DEVICE_READ_ERR,
-                                op_actual_size,
-                                op_expected_size,
-                                ErrlEntry::ADD_SW_CALLOUT);
-
-                // Don't expect any xscom errors so break and return this error
-                err->collectTrace(SECURE_COMP_NAME);
-                break;
-            }
-
             // push back result
             o_regs.push_back(l_regValue);
 
         } // end of loop on SBE Measurement Registers
-
         if (err)
         {
             break;
         }
-
-    }
-    else
-    {
-        // Fail since proc target is not scommable at this time
-        // NOTE: the master proc is always scommable
-        SB_ERR("getSbeMeasurementRegisters: FAIL: Tgt=0x%.08X not set up to use Xscom at this time",
-               TARGETING::get_huid(i_pProc));
-
-        /*@
-         * @errortype
-         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid        SECUREBOOT::MOD_SECURE_GET_SBE_MEASUREMENT_REGS
-         * @reasoncode      SECUREBOOT::RC_SECURE_BAD_TARGET
-         * @userdata1       HUID of Processor Target
-         * @userdata2       <unused>
-         * @devdesc         Processor Parameter is not scommable
-         * @custdesc        Firmware Error
-         */
-        err = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        SECUREBOOT::MOD_SECURE_GET_SBE_MEASUREMENT_REGS,
-                        SECUREBOOT::RC_SECURE_BAD_TARGET,
-                        get_huid(i_pProc),
-                        0,
-                        ErrlEntry::ADD_SW_CALLOUT);
-
-        err->collectTrace(SECURE_COMP_NAME);
-        break;
-    }
 
     } while(0);
 
@@ -232,6 +276,38 @@ errlHndl_t getSbeMeasurementRegisters(
             TRACE_ERR_FMT,
             o_regs.size(),
             TRACE_ERR_ARGS(err));
+
+    return err;
+}
+
+/** @brief Get an SBE Measurement register
+ *
+ *  See service.H for more details
+ */
+errlHndl_t getSbeMeasurementRegister(SecureRegisterValues& io_reg)
+{
+    errlHndl_t err = nullptr;
+
+    SB_ENTER("getSbeMeasurementRegister: Target=0x%.08X",
+             get_huid(io_reg.procTgt));
+
+    // The upper portion of the measurement seeprom address range
+    constexpr uint32_t ADDR = 0x1001;
+    // The lower four bits of any value are valid, so shift those off and check
+    // the rest of the address to ensure it's in range.
+    assert(ADDR == (io_reg.addr >> 4),
+          "getSbeMeasurementRegister: Requested address is out of range for SBE Measurement SEEPROM");
+
+    do {
+
+        // Call function to read the requested reg.
+        err = readSbeMeasurementRegister(io_reg);
+        if (err)
+        {
+            break;
+        }
+
+    } while(0);
 
     return err;
 }

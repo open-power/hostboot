@@ -100,17 +100,18 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
         TRUSTEDBOOT::tpmMarkFailed(backup_tpm, l_err);
     }
 
+    TARGETING::TargetHandleList l_procList;
+    getAllChips(l_procList,TARGETING::TYPE_PROC);
+
+
 #ifdef CONFIG_SECUREBOOT
 
+    TARGETING::TargetHandleList l_tpmList;
+    TARGETING::Target* boot_proc = nullptr;
     if(SECUREBOOT::enabled())
     {
-        TARGETING::TargetHandleList l_procList;
-        TARGETING::TargetHandleList l_tpmList;
-
-        getAllChips(l_procList,TARGETING::TYPE_PROC);
         getAllChips(l_tpmList,TARGETING::TYPE_TPM,false);
 
-        TARGETING::Target* boot_proc = nullptr;
         l_err = TARGETING::targetService().queryMasterProcChipTargetHandle(boot_proc);
         if(l_err)
         {
@@ -124,8 +125,28 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
             // If targeting can't get the boot proc, then it's broke, so break here
             break;
         }
+    }
+#endif
 
-        for(const auto& l_proc : l_procList)
+    for(const auto& l_proc : l_procList)
+    {
+        // Check that the measurement seeproms are the approriate level for a "blessed" route of trust on the sytem
+        // and that the fuse has been blown. In mnfg mode, failing these will result in a termination of the IPL but
+        // in production an informational log will be committed instead.
+        l_err = SECUREBOOT::verifyMeasurementSeepromSecurity(l_proc);
+
+        if (l_err && l_err->sev() != ERRORLOG::ERRL_SEV_UNRECOVERABLE)
+        {
+            // Just commit the error since we're not in mfg mode.
+            ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+        }
+        else if (l_err)
+        {
+            captureError(l_err, l_istepError, ISTEP_COMP_ID, l_proc);
+        }
+
+#ifdef CONFIG_SECUREBOOT
+        if(SECUREBOOT::enabled())
         {
             // Check if processor has a TPM that needs to be protected by setting the TDP bit
             // Stage 0: Assume the proc does NOT have a TPM connected to it
@@ -363,13 +384,15 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                     ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
                 }
             }
-        } // end of loop on procs
-    } // end of SECUREBOOT::enabled() check
+        } // end of SECUREBOOT::enabled() check
+#endif
+    } // end of loop on procs
     if(l_istepError.getErrorHandle())
     {
         break;
     }
 
+#ifdef CONFIG_SECUREBOOT
     SECUREBOOT::validateSecuritySettings();
 #endif
 

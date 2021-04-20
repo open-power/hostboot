@@ -62,6 +62,13 @@ const std::array<uint32_t,16> sbe_measurement_regs { 0x10010, 0x10011, 0x10012, 
  */
 struct SecureRegisterValues
 {
+    SecureRegisterValues()
+    {
+        procTgt = nullptr;
+        addr = 0;
+        data = 0;
+    }
+
     TARGETING::Target * procTgt;
     uint32_t addr;
     uint64_t data;
@@ -166,6 +173,22 @@ namespace SECUREBOOT
     errlHndl_t getSbeMeasurementRegisters(
             std::vector<SecureRegisterValues> & o_regs,
             TARGETING::Target* i_pProc);
+
+    /** @brief Get an SBE Measurement register
+     *  @par Detailed Description:
+     *      Returns a SecureRegisterValues struct that represents the read values of the SBE Measurement Seeprom of the
+     *      given target.
+     *  @param[in,out] io_reg       SecureRegisterValues struct that contains processor security register values.
+     *                       IN:    The target processor and the SBE Measurement Register to read.
+     *                              Assert if provided target is nullptr, if not of type TYPE_PROC, or reg value not
+     *                              within range.
+     *                       OUT:   The function will fill in the data field of this struct as the output.
+     *                       NOTE:  The state of the system/processors (ie, SCOM vs FSI) determines which registers
+     *                              can be read.
+     *
+     *  @return errHndl_t Error log handle indicating success or failure
+     */
+    errlHndl_t getSbeMeasurementRegister(SecureRegisterValues & io_reg);
 
     /**
      *  @brief  Clear specified bits in the processor security switch register
@@ -331,7 +354,7 @@ namespace SECUREBOOT
     /**
      * @brief Common secureboot handler for secureboot failures.
      *        Properly handles callouts etc.
-     * @param[in/out] io_err Reference to error log handle.  Caller's handle
+     * @param[in,out] io_err Reference to error log handle.  Caller's handle
      *     will be nullified.  Handle must not be NULL, or function asserts.
      * @param[in] i_waitForShutdown Whether to wait for system to shutdown (and
      *     never return from this call) or not (and return from this call).
@@ -351,7 +374,7 @@ namespace SECUREBOOT
      *  @brief Adds the values of the Security Registers of the processors in
      *         the system to an existing error log
      *
-     *  @param[in/out] io_err  Error Log that the values of the security
+     *  @param[in,out] io_err  Error Log that the values of the security
      *                         registers will be added to. Must not be nullptr.
      *                         NOTE:  The state of the system/processors
      *                         (ie, SCOM vs FSI) determines which registers can
@@ -366,7 +389,7 @@ namespace SECUREBOOT
     /**
      * @brief Common handler for adding all relevant secureboot information to
      *        the user details section of an error log
-     * @param[in/out] io_err  Error Log to add secure info to.
+     * @param[in,out] io_err  Error Log to add secure info to.
      *                        Must not be nullptr.
      * @param[in] i_calledByRP See the handleSecurebootFailure function's
      *                        "called by resource provider" option.

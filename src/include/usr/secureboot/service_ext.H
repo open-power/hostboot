@@ -41,5 +41,16 @@ namespace SECUREBOOT
      */
     void validateSecuritySettings();
 
+    /*
+     * @brief Verifies that the measurement seeprom for the given target has the appropriate measurement code version
+     *        and that the fuse for the measurement seeprom has been blown ensuring the code level is locked in and
+     *        cannot be changed.
+     *
+     * @param[in]  i_proc     The processor which to verify the measurement seeprom security against.
+     *
+     * @return errlHndl_t   nullptr on success, otherwise an error log.
+     */
+    errlHndl_t verifyMeasurementSeepromSecurity(const TARGETING::TargetHandle_t& i_proc);
+
 } // namespace SECUREBOOT
 #endif

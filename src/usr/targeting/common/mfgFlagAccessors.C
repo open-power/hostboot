@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,6 +185,11 @@ bool isNoGardSet()
     return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_NO_GARD);
 };
 
+bool isSeepromSecurityChecksSet()
+{
+    return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_SEEPROM_SECURITY_CHECKS);
+};
+
 // Canned responses with bit-field of all the manufacturing flags as a parameter
 bool isMfgSpareDramDeploy(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
 {
@@ -286,6 +291,12 @@ bool isSMPWrapConfig(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
 bool isNoGardSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
 {
     return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_NO_GARD,
+                        i_mfgFlags);
+}
+
+bool isSeepromSecurityChecksSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
+{
+    return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_SEEPROM_SECURITY_CHECKS,
                         i_mfgFlags);
 }
 
