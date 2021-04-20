@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include "utillidmgrdefs.H"
 #include "utilbase.H"
 #include <initservice/initserviceif.H>
+#include <initservice/istepdispatcherif.H>
 #include <sys/mm.h>
 #include <util/align.H>
 
@@ -631,6 +632,11 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize,
         else
         {
 #ifdef CONFIG_PLDM
+
+            // Send the progres code (reset the watchdog), since it may take a
+            // while to fetch a lid from BMC
+            INITSERVICE::sendProgressCode();
+
             uint32_t l_reportedLidSize = 0;
             // We don't know the exact size of the lid, so we will have to rely
             // on BMC to tell us how big the lid is. However, we can still limit

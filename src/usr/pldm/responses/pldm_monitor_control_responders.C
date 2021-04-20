@@ -56,6 +56,7 @@
 #include <errl/errlmanager.H>
 #include <runtime/interface.h>
 #include <htmgt/htmgt.H>
+#include <initservice/istepdispatcherif.H>
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -642,6 +643,9 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
         break;
     }
 
+    PLDM_INF("handleSetEventReceiverRequest: BMC requested watchdog timeout of %d seconds",
+             l_heartbeat_timer);
+
     if(l_event_message_global_enable !=
        PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE)
     {
@@ -669,7 +673,7 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
         break;
     }
 
-    if(l_heartbeat_timer < DEFAULT_WATCHDOG_TIMEOUT_SEC)
+    if(l_heartbeat_timer < HB_MIN_WATCHDOG_TIMEOUT_SEC)
     {
         // BMC requested watchdog timeout that's too small
         /*@
@@ -685,13 +689,18 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
         l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                MOD_HANDLE_SET_EVENT_RECEIVER,
                                RC_BAD_WATCHDOG_VALUE,
-                               DEFAULT_WATCHDOG_TIMEOUT_SEC,
+                               HB_MIN_WATCHDOG_TIMEOUT_SEC,
                                l_heartbeat_timer,
                                ErrlEntry::NO_SW_CALLOUT);
         addBmcErrorCallouts(l_errl);
         errlCommit(l_errl, PLDM_COMP_ID);
         l_response_code = PLDM_PLATFORM_HEARTBEAT_FREQUENCY_TOO_HIGH;
         break;
+    }
+    else
+    {
+        // Set the internal watchdog period to what BMC indicated
+        g_pldmWatchdogPeriodSec = l_heartbeat_timer;
     }
 
     if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_ISTEP_MODE>())
@@ -729,7 +738,9 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
         if(!UTIL::assertGetToplevelTarget()->getAttr<ATTR_ISTEP_MODE>())
         {
             g_pldmWatchdogArmed = true;
-            // TODO RTC: 250776 send the first watchdog to BMC
+#ifndef __HOSTBOOT_RUNTIME
+            INITSERVICE::sendProgressCode();
+#endif
         }
     }
 

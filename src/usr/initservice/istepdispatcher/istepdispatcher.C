@@ -75,10 +75,10 @@
 #ifdef CONFIG_PLDM
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/base/hb_bios_attrs.H>
+#include <pldm/extended/pldm_watchdog.H>
 #endif
 
 #ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
 #include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
 #include <ipmi/ipmichassiscontrol.H>
 #include <ipmi/ipmisensor.H>
@@ -409,26 +409,8 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
         if(iv_istepMode)
         {
+            // Note: PLDM watchdog is never armed in istep mode
 
-
-#ifdef CONFIG_BMC_IPMI
-            // Disable watchdog action to prevent the system from shutting down
-            errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                                  IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN,
-                                  static_cast<uint8_t>
-                                  (IPMIWATCHDOG::DO_NOT_STOP |
-                                   IPMIWATCHDOG::BIOS_FRB2),
-                                   IPMIWATCHDOG::NO_ACTIONS); // do nothing
-            if(err_ipmi)
-            {
-               TRACFCOMP(g_trac_initsvc,
-                              "init: ERROR: Set IPMI watchdog Failed");
-                err_ipmi->collectTrace("INITSVC", 1024);
-                errlCommit(err_ipmi, INITSVC_COMP_ID );
-
-            }
-
-#endif
             // In IStep mode (receive messages to run individual steps)
             // always listen to debug interface.  If on FSP this allows
             // both HWSV, Cronus, and debug tools to control the IPL
@@ -443,20 +425,8 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         }
         else
         {
-
-#ifdef CONFIG_BMC_IPMI
-
-            // Start the watchdog
-            err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
-            if(err_ipmi)
-            {
-               TRACFCOMP(g_trac_initsvc,
-                              "init: ERROR: Starting IPMI watchdog Failed");
-                err_ipmi->collectTrace("INITSVC", 1024);
-                errlCommit(err_ipmi, INITSVC_COMP_ID );
-
-            }
-#endif
+            // Reset watchdog timer
+            sendProgressCode();
 
             // Non-IStep mode (run all isteps automatically)
             if(iv_spBaseServicesEnabled)
@@ -551,20 +521,11 @@ errlHndl_t IStepDispatcher::executeAllISteps()
         {
             if( INITSERVICE::isIplStopped() == true )
             {
-#ifdef CONFIG_BMC_IPMI
                 // if we came in here and we are connected to a BMC, then
                 // we are in the process of an orderly shutdown, reset the
                 // watchdog to give ample time for the graceful shutdown
                 // to proceed.
-                errlHndl_t err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
-                if(err_ipmi)
-                {
-                    TRACFCOMP(g_trac_initsvc,
-                            "init: ERROR: reset IPMI watchdog Failed");
-                    err_ipmi->collectTrace("INITSVC", 1024);
-                    errlCommit(err_ipmi, INITSVC_COMP_ID );
-                }
-#endif
+                sendProgressCode();
                 stop();
             }
 
@@ -790,22 +751,6 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 CONSOLE::flush();
                 #endif
 
-                // Turn off the watchdog so it doesn't trip
-                errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                                   IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN,
-                                   static_cast<uint8_t>
-                                              (IPMIWATCHDOG::DO_NOT_STOP |
-                                               IPMIWATCHDOG::BIOS_FRB2),
-                                   IPMIWATCHDOG::NO_ACTIONS); // do nothing
-                if(err_ipmi)
-                {
-                   TRACFCOMP(g_trac_initsvc,
-                                  "init: ERROR: Failed to disable IPMI "
-                                  " watchdog");
-                    err_ipmi->collectTrace("INITSVC");
-                    errlCommit(err_ipmi, INITSVC_COMP_ID );
-                }
-
                 // Flush out the error logs so we can get as much info as
                 // possible
                 ERRORLOG::ErrlManager::callFlushErrorLogs();
@@ -819,7 +764,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 #else
                 //Disable reboots so system really halts
                 SENSOR::RebootControlSensor l_rbotCtl;
-                err_ipmi = l_rbotCtl.setRebootControl(
+                errlHndl_t err_ipmi = l_rbotCtl.setRebootControl(
                  SENSOR::RebootControlSensor::autoRebootSetting::DISABLE_REBOOTS
                     );
 
@@ -2639,15 +2584,15 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
 
 
     //--- Reset the watchdog before every istep
-#ifdef CONFIG_BMC_IPMI
-    errlHndl_t err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
+#ifdef CONFIG_PLDM
+    errlHndl_t err_pldm = PLDM::resetWatchdogTimer();
 
-    if(err_ipmi)
+    if(err_pldm)
     {
        TRACFCOMP(g_trac_initsvc,
-                      "init: ERROR: reset IPMI watchdog Failed");
-        err_ipmi->collectTrace("INITSVC", 1024);
-        errlCommit(err_ipmi, INITSVC_COMP_ID );
+                 "init: ERROR: reset PLDM watchdog Failed");
+        err_pldm->collectTrace(PLDM_COMP_NAME);
+        errlCommit(err_pldm, INITSVC_COMP_ID );
     }
 #endif
 
@@ -3158,22 +3103,8 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
                         l_p_pauseCfg->bpTagInfo
                         );
 
-            // Disable watchdog action to prevent the system from shutting down
-#ifdef CONFIG_BMC_IPMI
-            errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                               IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN,
-                               IPMIWATCHDOG::BIOS_FRB2,
-                               IPMIWATCHDOG::NO_ACTIONS); // do nothing when
-                                                          // timeout occurs
-            if(err_ipmi)
-            {
-               TRACFCOMP(g_trac_initsvc,
-                              "init: ERROR: Failed to disable IPMI watchdog");
-                err_ipmi->collectTrace("INITSVC", 1024);
-                errlCommit(err_ipmi, INITSVC_COMP_ID );
+            // TODO RTC: 250776 Disable the watchdog
 
-            }
-#endif
             // If full stop is requested then send breakpoint message to FSP.
             // This stop can be resumed via external command from FSP.
             if(l_p_pauseCfg->fullStopEn)
@@ -3206,33 +3137,7 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
             {
                 nanosleep(l_p_pauseCfg->pauseLen,0);
             }
-
-#ifdef CONFIG_BMC_IPMI
-            // Re-enable the watchdog timer with default settings
-            err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                       IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN);
-
-            if(err_ipmi)
-            {
-               TRACFCOMP(g_trac_initsvc,
-                              "init: ERROR: Set IPMI watchdog Failed");
-                err_ipmi->collectTrace("INITSVC", 1024);
-                errlCommit(err_ipmi, INITSVC_COMP_ID );
-
-            }
-
-            // Start the watchdog timer
-            err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
-            if(err_ipmi)
-            {
-               TRACFCOMP(g_trac_initsvc,
-                              "init: ERROR: Start IPMI watchdog Failed");
-                err_ipmi->collectTrace("INITSVC", 1024);
-                errlCommit(err_ipmi, INITSVC_COMP_ID );
-
-            }
-#endif
-
+            sendProgressCode();
         }
     }
 }

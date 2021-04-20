@@ -40,8 +40,14 @@ namespace PLDM
 // Whether the watchdog timer is armed and HB should be sending regular
 // heartbeats.
 extern bool g_pldmWatchdogArmed;
-// The value of the default timeout agreed upon between BMC and HB
+// The period (in seconds) of the PLDM watchdog, as dictated by BMC.
+extern uint16_t g_pldmWatchdogPeriodSec;
+// The max value of the default timeout agreed upon between BMC and HB;
+// BMC will reboot us after this amount of time expires.
 extern const uint16_t DEFAULT_WATCHDOG_TIMEOUT_SEC;
+// The minimum value of the watchdog timeout internal to HB; HB will not
+// accept timeout values smaller than this one from BMC.
+extern const uint16_t HB_MIN_WATCHDOG_TIMEOUT_SEC;
 
 /**
  * @brief Sends a heartbeatTimerElapsedEvent to BMC via platformEventMessage

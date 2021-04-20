@@ -71,7 +71,6 @@
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
-#include <ipmi/ipmiwatchdog.H>
 #endif
 #include <initservice/istepdispatcherif.H>
 #ifdef CONFIG_SECUREBOOT

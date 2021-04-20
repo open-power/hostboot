@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,10 +50,6 @@
 #include <errno.h>
 
 #include <console/consoleif.H>
-
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
-#endif
 
 // Defined in ipmidd.C
 extern trace_desc_t * g_trac_ipmi;
@@ -128,31 +124,6 @@ void IpmiRP::daemonProcess(errlHndl_t& o_errl)
 {
     task_create(&IpmiRP::attach, NULL);
     task_create(&IpmiRP::start, NULL);
-
-#ifdef CONFIG_BMC_IPMI
-    errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                          IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN);
-
-    if(err_ipmi)
-    {
-        TRACFCOMP(g_trac_ipmi,
-        "init: ERROR: Set IPMI watchdog Failed");
-        err_ipmi->collectTrace("IPMI", 1024);
-        errlCommit(err_ipmi, IPMI_COMP_ID );
-
-    }
-
-    // Start the watchdog
-    err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
-    if(err_ipmi)
-    {
-        TRACFCOMP(g_trac_ipmi,
-        "init: ERROR: Starting IPMI watchdog Failed");
-        err_ipmi->collectTrace("IPMI", 1024);
-        errlCommit(err_ipmi, IPMI_COMP_ID );
-    }
-#endif
-
 }
 
 /**

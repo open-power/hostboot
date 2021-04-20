@@ -56,7 +56,6 @@
 //Fapi support
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-#include <ipmi/ipmiwatchdog.H>
 #include <errno.h>
 #include <p10_int_scom.H>
 #include <sbeio/sbeioif.H>
@@ -65,6 +64,8 @@
 #include <kernel/misc.H>
 #include "../hdat/hdattpmdata.H"
 #include "hdatstructs.H"
+
+#include <pldm/extended/pldm_watchdog.H>
 
 using namespace ERRORLOG;
 using namespace ISTEP;
@@ -293,20 +294,7 @@ void* call_host_start_payload (void *io_pArgs)
 
         task_affinity_unpin();
 
-#ifdef CONFIG_BMC_IPMI
-        // Run the watchdog with a longer expiration during the transition
-        // into OPAL.
-        errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                IPMIWATCHDOG::DEFAULT_HB_OPAL_TRANSITION_COUNTDOWN);
-
-        if(err_ipmi)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "init: ERROR: Set IPMI watchdog Failed");
-                err_ipmi->collectTrace("ISTEPS_TRACE",256);
-                errlCommit(err_ipmi, ISTEP_COMP_ID );
-        }
-#endif
+        INITSERVICE::sendProgressCode();
 
 #ifdef CONFIG_PLDM
 

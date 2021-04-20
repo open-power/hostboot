@@ -48,7 +48,6 @@
 #include <initservice/initsvcreasoncodes.H>
 #include <errl/errludtarget.H>
 #include <util/misc.H>
-#include <ipmi/ipmiwatchdog.H>
 
 #include <p10_start_cbs.H>
 #include <p10_sbe_hreset.H>

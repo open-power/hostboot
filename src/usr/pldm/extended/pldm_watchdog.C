@@ -41,8 +41,10 @@
 namespace PLDM
 {
 
+const uint16_t DEFAULT_WATCHDOG_TIMEOUT_SEC = 10 * 60; // 10 min
+const uint16_t HB_MIN_WATCHDOG_TIMEOUT_SEC = 15;
 bool g_pldmWatchdogArmed = false;
-const uint16_t DEFAULT_WATCHDOG_TIMEOUT_SEC = 15;
+uint16_t g_pldmWatchdogPeriodSec = DEFAULT_WATCHDOG_TIMEOUT_SEC;
 
 errlHndl_t resetWatchdogTimer()
 {

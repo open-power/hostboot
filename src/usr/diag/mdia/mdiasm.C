@@ -42,7 +42,6 @@
 #include <targeting/common/utilFilter.H>
 #include <errl/errludlogregister.H>
 #include <initservice/istepdispatcherif.H>
-#include <ipmi/ipmiwatchdog.H>
 #include <initservice/initserviceif.H>
 #include <sys/time.h>
 #include <sys/misc.h>
@@ -51,6 +50,7 @@
 #include <exp_rank.H>
 #include <kind.H>
 #include <hwp_wrappers.H>
+#include <pldm/extended/pldm_watchdog.H>
 
 #include <lib/mc/exp_port.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
@@ -232,19 +232,20 @@ uint64_t getTimeoutValue()
         }
     }
 
+#ifdef CONFIG_PLDM
     // Ensure that the timeout is less than the watchdog timer.
     // NOTE: This should only be done on BMC based machines. The watch dog timer
     // is not checked on FSP based machines.
-    if ( !INITSERVICE::spBaseServicesEnabled() &&
-         timeout >= IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN )
+    if (timeout >= PLDM::g_pldmWatchdogPeriodSec)
     {
         // If the watchdog timer for some reason happens to be 10 seconds or
         // less, just set the MDIA timeout to the watchdog timeout. Otherwise,
         // set it to ten seconds less than the watchdog timer.
-        timeout = ( IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN <= 10 )
-                      ? IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN
-                      : IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN - 10;
+        timeout = ( PLDM::g_pldmWatchdogPeriodSec <= 10 )
+                      ? PLDM::g_pldmWatchdogPeriodSec
+                      : PLDM::g_pldmWatchdogPeriodSec - 10;
     }
+#endif
 
     return timeout * NS_PER_SEC;
 }
