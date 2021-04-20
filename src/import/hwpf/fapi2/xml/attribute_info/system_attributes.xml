@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -182,7 +182,7 @@
         MNFG_POLICY_FLAG_AVAIL_01           = 96,
         MNFG_POLICY_FLAG_AVAIL_02           = 97,
         MNFG_POLICY_FLAG_AVAIL_03           = 98,
-        MNFG_POLICY_FLAG_AVAIL_04           = 99,
+        MNFG_SEEPROM_SECURITY_CHECKS        = 99,
         MNFG_POLICY_FLAG_AVAIL_05           = 100,
         MNFG_POLICY_FLAG_AVAIL_06           = 101,
         MNFG_POLICY_FLAG_AVAIL_07           = 102,
