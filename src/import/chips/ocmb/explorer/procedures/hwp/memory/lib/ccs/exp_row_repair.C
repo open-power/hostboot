@@ -381,18 +381,19 @@ fapi_try_exit:
 /// @param[in] i_rank_info rank info of the address to repair
 /// @param[in] i_repair the address repair information
 /// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @param[in, out] io_program the ccs program to setup for row repair
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
+fapi2::ReturnCode setup_sppr( const mss::rank::info<>& i_rank_info,
                               const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
-                              const fapi2::buffer<uint64_t>& i_dram_bitmap)
+                              const fapi2::buffer<uint64_t>& i_dram_bitmap,
+                              mss::ccs::program& io_program)
 {
     using TT = mrsTraits<mss::mc_type::EXPLORER>;
     constexpr size_t ENABLE_SPPR = 1;
     constexpr size_t NO_DELAY = 0;
 
     // Variable Declarations
-    fapi2::buffer<uint64_t> l_modeq_reg;
     uint64_t l_delay = 0;
     uint64_t l_repeat = 0;
     uint64_t l_freq = 0;
@@ -401,24 +402,22 @@ fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     uint8_t l_odt_attr[4] = {0};
 
+    // Use rank to determine ranks and targets
     // Get port rank and target
     const auto l_port_target = i_rank_info.get_port_target();
     const auto l_port_rank = i_rank_info.get_port_rank();
+
+    // Get dimm rank and target
+    const auto l_dimm_target = i_rank_info.get_dimm_target();
+    const auto l_dimm_rank = i_rank_info.get_dimm_rank();
+
+    // Get the OCMB target
+    const auto l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
 
     // Declare timings
     const uint64_t tMOD = TT::mrs_tmod( l_port_target );
     uint8_t tRCD = 0;
     uint8_t tWR = 255;
-
-    // Use rank to determine dimm rank and target
-    const auto l_dimm_target = i_rank_info.get_dimm_target();
-    const auto l_dimm_rank = i_rank_info.get_dimm_rank();
-
-    // Get OCMB Target
-    const auto l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
-
-    // Create Program
-    mss::ccs::program l_program;
 
     // Create local instruction
     mss::ccs::instruction_t l_inst;
@@ -443,30 +442,30 @@ fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
 
     // 0. Add des command for Self Time Refresh
     l_inst = mss::ccs::des_command();
-    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tMOD, l_inst, l_program.iv_instructions) );
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tMOD, l_inst, io_program.iv_instructions) );
 
     // 1. Precharge_all(): Create instruction for precharge and add it to the instruction array.
     l_inst = mss::ccs::precharge_all_command(l_port_rank);
-    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tRCD, l_inst, l_program.iv_instructions) );
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tRCD, l_inst, io_program.iv_instructions) );
 
     // 2. Enable sPPR and wait tMOD:
     l_data4.iv_soft_ppr = ENABLE_SPPR;
-    FAPI_TRY(mss::mrs_engine( l_dimm_target, l_data4, l_port_rank, tMOD, l_program.iv_instructions));
+    FAPI_TRY(mss::mrs_engine( l_dimm_target, l_data4, l_port_rank, tMOD, io_program.iv_instructions));
 
     // 3. Guard Key Sequence:
     FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_ONE,
-                                l_program.iv_instructions) );
+                                io_program.iv_instructions) );
     FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_TWO,
-                                l_program.iv_instructions) );
+                                io_program.iv_instructions) );
     FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_THREE,
-                                l_program.iv_instructions) );
+                                io_program.iv_instructions) );
     FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_FOUR,
-                                l_program.iv_instructions) );
+                                io_program.iv_instructions) );
 
     // 4. ACT to failed bank/address
     l_inst = mss::ccs::act_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg,
              i_repair.iv_row, tRCD);
-    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tRCD, l_inst, l_program.iv_instructions) );
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tRCD, l_inst, io_program.iv_instructions) );
 
     // 5. WR Command with dq bits low:
     l_inst = mss::ccs::wr_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, NO_DELAY);
@@ -475,36 +474,104 @@ fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
     mss::exp::ccs::set_write_data(i_dram_bitmap, l_invert, l_inst);
     // Set ODT Bits on WR command
     mss::ccs::set_odt_bits<mss::mc_type::EXPLORER>(l_odt_bits, l_inst);
-    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, NO_DELAY, l_inst, l_program.iv_instructions) );
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, NO_DELAY, l_inst, io_program.iv_instructions) );
 
     // 6. Add odt command
     l_repeat = 4;
     l_inst = mss::ccs::odt_command(l_odt_bits);
     mss::ccs::set_wr_repeats<mss::mc_type::EXPLORER>(l_repeat, l_inst);
-    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, l_program.iv_instructions) );
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, io_program.iv_instructions) );
 
     // 7. PRE to Bank (and wait at least 20ns to register)
     // Currently waiting tWR for debug
     l_inst = mss::ccs::pre_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg, l_delay);
-    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, l_program.iv_instructions) );
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tWR, l_inst, io_program.iv_instructions) );
 
     // 8. Set MR4 bit "A5=0" to exit sPPR
     l_data4.iv_soft_ppr = 0;
-    FAPI_TRY( mss::mrs_engine(l_dimm_target, l_data4, l_port_rank, tMOD, l_program.iv_instructions) );
+    FAPI_TRY( mss::mrs_engine(l_dimm_target, l_data4, l_port_rank, tMOD, io_program.iv_instructions) );
 
     // Add des command
     l_inst = mss::ccs::des_command();
-    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tMOD, l_inst, l_program.iv_instructions) );
+    FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tMOD, l_inst, io_program.iv_instructions) );
 
-    // TODO: Add in once details of dynamic row repairs are complete
-    // See Zenhub #646: Implement Dynamic Row Repair
-    // l_inst = mss::ccs::self_refresh_entry_command(l_port_rank);
-    // FAPI_TRY( mss::ccs::process_inst<mss::mc_type::EXPLORER>(i_rank_info, tMOD, l_inst, l_program.iv_instructions) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform a sPPR row repair operation during ipl
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode maint_row_repair( const mss::rank::info<>& i_rank_info,
+                                    const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+                                    const fapi2::buffer<uint64_t>& i_dram_bitmap)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_modeq_reg;
+
+    // Get port rank and target
+    const auto l_port_target = i_rank_info.get_port_target();
+
+    // Get OCMB Target
+    const auto l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
+
+    // Create Program
+    mss::ccs::program l_program;
+
+    // Setup SPPR CCS program
+    FAPI_TRY( setup_sppr(i_rank_info, i_repair, i_dram_bitmap, l_program) );
 
     // EXECUTE CCS ARRAY
     mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
     mss::ccs::execute(l_ocmb_target, l_program, l_port_target);
     mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform a sPPR row repair operation at runtime
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
+                                      const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+                                      const fapi2::buffer<uint64_t>& i_dram_bitmap)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_modeq_reg;
+
+    // Get port rank and target
+    const auto l_port_target = i_rank_info.get_port_target();
+
+    // Get OCMB Target
+    const auto l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
+
+    // Create Program
+    mss::ccs::program l_program;
+
+    // Setup SPPR CCS program
+    FAPI_TRY( setup_sppr(i_rank_info, i_repair, i_dram_bitmap, l_program) );
+
+    // TODO: Zenhub#983 Handle PRD Takeover and Pass-back of MCBIST engine at runtime
+    // Check MCBIST SRQ to ensure MCBIST is free
+
+    // Save MCBIST settings from PRD scrub command
+
+    // EXECUTE CONCURRENT CCS ARRAY
+    mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
+    // TODO: Zenhub#959: Enable CCS Execution via the MCBIST Engine
+    // mss::ccs::mcbist_execute(l_ocmb_target, l_program, l_port_target);
+    mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
+
+    // Restore MCBIST settings for PRD
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -567,7 +634,7 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
 
                     FAPI_INF("%s Deploying row repairs on port rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
                              mss::spd::c_str(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
-                    FAPI_TRY( row_repair(l_rank_info, l_repair, l_dram_bitmap) );
+                    FAPI_TRY( maint_row_repair(l_rank_info, l_repair, l_dram_bitmap) );
                 }
             }
         }
@@ -770,7 +837,7 @@ fapi2::ReturnCode deploy_mapped_repairs(
                 // Set DRAM select bit for dram
                 FAPI_TRY(create_dram_bitmap(l_repair.iv_dram, l_dram_bitmap));
 
-                FAPI_TRY( row_repair(l_rank_info, l_repair, l_dram_bitmap) );
+                FAPI_TRY( maint_row_repair(l_rank_info, l_repair, l_dram_bitmap) );
 
                 // Clear bad DQ bits for this port, DIMM, rank that will be fixed by this row repair
                 FAPI_INF("Updating bad bits on DIMM %s, DRAM %d, port rank %d, subrank %d, bg %d, bank %d, row 0x%05x",

@@ -159,11 +159,36 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
 /// @param[in] i_rank_info rank info of the address to repair
 /// @param[in] i_repair the address repair information
 /// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @param[in, out] io_program the ccs program to setup for row repair
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode row_repair( const mss::rank::info<>& i_rank_info,
+fapi2::ReturnCode setup_sppr( const mss::rank::info<>& i_rank_info,
                               const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
-                              const fapi2::buffer<uint64_t>& i_dram_bitmap);
+                              const fapi2::buffer<uint64_t>& i_dram_bitmap,
+                              mss::ccs::program& io_program);
+
+///
+/// @brief Perform a sPPR row repair operation during ipl
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode maint_row_repair( const mss::rank::info<>& i_rank_info,
+                                    const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+                                    const fapi2::buffer<uint64_t>& i_dram_bitmap);
+
+///
+/// @brief Perform a sPPR row repair operation at runtime
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_dram_bitmap bitmap of DRAMs selected for repair (b'1 to repair, b'0 to not repair)
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
+                                      const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
+                                      const fapi2::buffer<uint64_t>& i_dram_bitmap);
+
 ///
 /// @brief Deploy enough PPR row repairs to test all spare rows
 /// @param[in] i_target_ocmb ocmb target
