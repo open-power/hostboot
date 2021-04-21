@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/hwas/test/makefile $
+# $Source: src/usr/hwas/common/test/common.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2021
 # [+] International Business Machines Corp.
 #
 #
@@ -22,25 +22,12 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
+################################################################################
+#
+#  @file hwas/common/test/common.mk
+#
+#  @brief Common test makefile to be included in hwas/test/makefile
+#
+################################################################################
 
-# Determine relative paths to common targeting makefile
-COMMON_TARGETING_REL_PATH = ../common
-COMMON_MAKEFILE = ${COMMON_TARGETING_REL_PATH}/test/common.mk
-
-include ${COMMON_MAKEFILE}
-
-COMMON_TESTCASE_REL_PATHS = \
-	$(addprefix ${COMMON_TARGETING_REL_PATH}/test/,${COMMON_TESTCASES})
-
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-
-MODULE = testhwas
-TESTS = hwas1test.H hwasGardTest.H hwasPlatErrorTest.H
-TESTS += ${COMMON_TESTCASE_REL_PATHS}
-
-OBJS += attributestrings.o
-
-include ${ROOTPATH}/config.mk
-
-vpath %.C ${GENDIR}
+COMMON_TESTCASES += hwasCalloutTest.H
