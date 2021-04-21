@@ -697,11 +697,11 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
     rawImageInfo_t l_imageInfo;
     bool l_imageLoaded = false;
 
-    // Get a handle to the System target
-    TargetHandle_t l_systemTarget = UTIL::assertGetToplevelTarget();
+    // Get a handle to the current node target
+    TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
 
     ATTR_OCMB_FW_UPDATE_STATUS_type l_updStatus =
-        l_systemTarget->getAttr<ATTR_OCMB_FW_UPDATE_STATUS>();
+        l_nodeTarget->getAttr<ATTR_OCMB_FW_UPDATE_STATUS>();
 
     TRACFCOMP(g_trac_expupd, "ocmbFwI2cUpdateStatusCheck: "
               "Enter OCMB_FW_UPDATE_STATUS: updateRequired = %d, "
@@ -747,7 +747,7 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
         l_updStatus.hardFailure = 0;
     }
 
-    l_systemTarget->setAttr<ATTR_OCMB_FW_UPDATE_STATUS>(l_updStatus);
+    l_nodeTarget->setAttr<ATTR_OCMB_FW_UPDATE_STATUS>(l_updStatus);
     TRACFCOMP(g_trac_expupd, "ocmbFwI2cUpdateStatusCheck: "
               "Exit OCMB_FW_UPDATE_STATUS: updateRequired = %d, "
               "updateI2c = %d, i2cUpdateAttepted = %d, hardFailure = %d",

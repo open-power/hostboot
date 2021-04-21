@@ -1409,6 +1409,9 @@
       <id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id>
     </attribute>
     <attribute>
+      <id>OCMB_FW_UPDATE_STATUS</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>
@@ -2212,9 +2215,6 @@
     </attribute>
     <attribute>
       <id>OCMB_FW_UPDATE_OVERRIDE</id>
-    </attribute>
-    <attribute>
-      <id>OCMB_FW_UPDATE_STATUS</id>
     </attribute>
     <attribute>
       <default>

@@ -44,6 +44,7 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/targplatutil.H>
 #include    <attributetraits.H>
 #include    <config.h>
 #include    <util/align.H>
@@ -324,6 +325,7 @@ void captureErrorOcmbUpdateCheck(errlHndl_t               &io_err,
 {
     // Get a handle to the System target
     TargetHandle_t l_systemTarget = UTIL::assertGetToplevelTarget();
+    TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
 
     bool runNormalErrorCapture = true;
     do {
@@ -334,7 +336,7 @@ void captureErrorOcmbUpdateCheck(errlHndl_t               &io_err,
         }
 
         TARGETING::ATTR_OCMB_FW_UPDATE_STATUS_type l_updStatus =
-            l_systemTarget->getAttr<ATTR_OCMB_FW_UPDATE_STATUS>();
+            l_nodeTarget->getAttr<ATTR_OCMB_FW_UPDATE_STATUS>();
 
         if ( !l_updStatus.updateRequired)
         {
@@ -359,7 +361,7 @@ void captureErrorOcmbUpdateCheck(errlHndl_t               &io_err,
                 "captureErrorOcmbUpdateCheck: "
                 "ATTR_OCMB_FW_UPDATE_STATUS set to hardFailure");
             l_updStatus.hardFailure = 1;
-            l_systemTarget->setAttr<ATTR_OCMB_FW_UPDATE_STATUS>(l_updStatus);
+            l_nodeTarget->setAttr<ATTR_OCMB_FW_UPDATE_STATUS>(l_updStatus);
 
             // do normal error capture
             break;
@@ -370,7 +372,7 @@ void captureErrorOcmbUpdateCheck(errlHndl_t               &io_err,
         {
             // try to update OCMBs via I2C
             l_updStatus.updateI2c = 1;
-            l_systemTarget->setAttr<ATTR_OCMB_FW_UPDATE_STATUS>(l_updStatus);
+            l_nodeTarget->setAttr<ATTR_OCMB_FW_UPDATE_STATUS>(l_updStatus);
 
             // trigger reconfig loop
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
