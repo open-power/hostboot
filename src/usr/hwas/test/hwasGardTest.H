@@ -2156,6 +2156,7 @@ public:
             if (l_pErr)
             {
                 TS_FAIL("testDeConfigFC2BadCores: POST TEST CHECK Error from checkGardState");
+                errlCommit(l_pErr, CXXTEST_COMP_ID);
                 break;
             }
 
@@ -2212,6 +2213,7 @@ public:
             if (l_pErr)
             {
                 TS_FAIL("testDeConfigFC1BadCore: PRE TEST CHECK Error from checkGardState");
+                errlCommit(l_pErr, CXXTEST_COMP_ID);
                 break;
             }
 
@@ -2350,6 +2352,7 @@ public:
             if (l_pErr)
             {
                 TS_FAIL("testDeConfigFC1BadCore: POST TEST CHECK Error from checkGardState");
+                errlCommit(l_pErr, CXXTEST_COMP_ID);
                 break;
             }
 
@@ -2406,6 +2409,7 @@ public:
             if (l_pErr)
             {
                 TS_FAIL("testDeConfigEQ2BadFCs: PRE TEST CHECK Error from checkGardState");
+                errlCommit(l_pErr, CXXTEST_COMP_ID);
                 break;
             }
 
@@ -2479,6 +2483,7 @@ public:
             if (l_pErr)
             {
                 TS_FAIL("testDeConfigEQ2BadFCs: POST TEST CHECK Error from checkGardState");
+                errlCommit(l_pErr, CXXTEST_COMP_ID);
                 break;
             }
 
@@ -2534,6 +2539,7 @@ public:
             if (l_pErr)
             {
                 TS_FAIL("testDeConfigEQ1BadFC: PRE TEST CHECK Error from checkGardState");
+                errlCommit(l_pErr, CXXTEST_COMP_ID);
                 break;
             }
 
@@ -2656,6 +2662,7 @@ public:
             if (l_pErr)
             {
                 TS_FAIL("testDeConfigEQ1BadFC: POST TEST CHECK Error from checkGardState");
+                errlCommit(l_pErr, CXXTEST_COMP_ID);
                 break;
             }
 

@@ -407,7 +407,7 @@ class SbeRetryHandler
         uint8_t iv_switchSidesFlag;
 
         /*
-         * @brief Counter used to indicate how may times we attempt RESTART_SBE's
+         * @brief Counter used to indicate how many times we attempt RESTART_SBE's
          */
         uint8_t iv_boot_restart_count;
 
