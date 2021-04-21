@@ -23,6 +23,10 @@ various PCIE devices.
 - Used by Hostboot
 - Connects to DDIMMs
 
+### Note on register address mapping
+The FSI and PIB engines use overlapping, but not identical register maps.  We hide the offset difference inside the i2cRegisterOp() function so most code doesn't need to care.  For example, the Status Register is offset 7 (I2C_REG_STATUS) in FSI-space but it is offset B in PIB-space.
+
+
 
 ## Multiple Masters
 Many of these devices have multiple potential masters.  To avoid contention, it is assumed
@@ -43,3 +47,12 @@ rules are:
 - A6..A17 == B2..B13 == C2..C13 == E4..E15
 
 
+## I2C Reset
+On initial boot we can't be sure that the i2c busses are in a useable state.  Before using them we will perform an extended reset sequence to get everything working.
+- clear interrupt masks
+- reset port busy
+- send a stop
+- reset the engine registers
+- reset any sticky errors in the engine (and the fifo)
+- reset port busy (again)
+- send stop to all downstream devices

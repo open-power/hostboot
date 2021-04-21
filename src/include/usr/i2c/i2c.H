@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,18 +188,20 @@ const int HOST_ENGINE_E = 3;
  */
 enum i2c_reg_offset_t
 {
-    I2C_REG_FIFO        = 0,
-    I2C_REG_COMMAND     = 1,
-    I2C_REG_MODE        = 2,
-    I2C_REG_INTMASK     = 4,
-    I2C_REG_INTERRUPT   = 6,
-    I2C_REG_STATUS      = 7,
-    I2C_REG_RESET       = 7,
-    I2C_REG_RESET_ERRORS= 8,
-    I2C_REG_SET_SCL     = 9,
-    I2C_REG_RESET_SCL   = 11,
-    I2C_REG_SET_SDA     = 12,
-    I2C_REG_RESET_SDA   = 13,
+    I2C_REG_FIFO            = 0x0, //PIB=4
+    I2C_REG_COMMAND         = 0x1, //PIB=5
+    I2C_REG_MODE            = 0x2, //PIB=6
+    I2C_REG_INTMASK         = 0x4, //PIB=8
+    I2C_REG_INTERRUPT       = 0x6, //PIB=A
+    I2C_REG_STATUS          = 0x7, //PIB=B
+    I2C_REG_RESET           = 0x7, //PIB=B
+    I2C_REG_EXTENDED_STATUS = 0x8, //PIB=C
+    I2C_REG_RESET_ERRORS    = 0x8, //PIB=C
+    I2C_REG_SET_SCL         = 0x9, //PIB=D
+    I2CM_PORT_BUSY_REGISTER = 0xA, //PIB=E
+    I2C_REG_RESET_SCL       = 0xB, //PIB=F
+    I2C_REG_SET_SDA         = 0xC, //PIB=10
+    I2C_REG_RESET_SDA       = 0xD, //PIB=11
 
 };
 

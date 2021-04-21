@@ -326,6 +326,45 @@ void dumpMiscArgsData(const I2C::misc_args_t & i_args)
     l_muxPath = nullptr;
 }
 
+#if 0 // Useful to enable for debug
+void read_status( TARGETING::Target * i_target,
+                  misc_args_t & i_args )
+{
+    errlHndl_t err = nullptr;
+
+    // Read the status Reg
+    status_reg_t stat;
+    stat.value=0;
+    err = i2cRegisterOp( DeviceFW::READ,
+                         i_target,
+                         &stat.value,
+                         I2C_REG_STATUS,
+                         i_args );
+    if( err )
+    {
+        delete err;
+    }
+    TRACFCOMP(g_trac_i2c,"Reading I2C_REG_STATUS(7)=%.8X",
+              stat.value);
+
+    // Read the extended status Reg
+    int I2C_REG_EXTENDED_STATUS = 0x8;
+    extended_status_reg_t extstat;
+    extstat.value=0;
+    err = i2cRegisterOp( DeviceFW::READ,
+                         i_target,
+                         &extstat.value,
+                         I2C_REG_EXTENDED_STATUS,
+                         i_args );
+    if( err )
+    {
+        delete err;
+    }
+    TRACFCOMP(g_trac_i2c,"Reading I2C_REG_EXTENDED_STATUS(8)=%.8X",
+              extstat.value);
+}
+#endif // debug only
+
 // ------------------------------------------------------------------
 // i2cPerformOp
 // ------------------------------------------------------------------
@@ -3158,6 +3197,8 @@ errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
 
         if( err )
         {
+            TRACFCOMP( g_trac_i2c,
+                       "i2cReadStatusReg() saw i2cCheckForErrors error" );
             break;
         }
     } while( 0 );
@@ -3273,11 +3314,34 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
 
         }
 
+        // read the extended status too
+        if( errorFound || busArbiLostFound )
+        {
+            // Read the extended status Reg
+            extended_status_reg_t extstat;
+            extstat.value=0;
+            err = i2cRegisterOp( DeviceFW::READ,
+                                 i_target,
+                                 &extstat.value,
+                                 I2C_REG_EXTENDED_STATUS,
+                                 i_args );
+
+            if( err )
+            {
+                TRACFCOMP( g_trac_i2c, ERR_MRK"i2cCheckForErrors()> I2C_REG_EXTENDED_STATUS read failed - ignoring!!" );
+                delete err;
+            }
+            TRACFCOMP(g_trac_i2c,"Reading I2C_REG_EXTENDED_STATUS(8)=%.8X",
+                      extstat.value);
+        }
+
+
         if( errorFound )
         {
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"i2cCheckForErrors() - Error(s) found"
+                       ERR_MRK"i2cCheckForErrors() - Error(s) found on %.8X"
                        TRACE_I2C_ADDR_FMT,
+                       TARGETING::get_huid(i_target),
                        TRACE_I2C_ADDR_ARGS(i_args) );
 
 
@@ -3320,8 +3384,9 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
         else if ( nackFound )
         {
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"i2cCheckForErrors() - NACK found (only error)"
+                       ERR_MRK"i2cCheckForErrors() - NACK found (only error) on %.8X"
                        TRACE_I2C_ADDR_FMT,
+                       TARGETING::get_huid(i_target),
                        TRACE_I2C_ADDR_ARGS(i_args) );
 
             /*@
@@ -3363,8 +3428,9 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
         else if( busArbiLostFound )
         {
             TRACFCOMP( g_trac_i2c,
-            ERR_MRK"i2cCheckForErrors() - Bus Arbitration Lost (only error)"
+            ERR_MRK"i2cCheckForErrors() - Bus Arbitration Lost (only error) on %.8X"
                     TRACE_I2C_ADDR_FMT,
+                    TARGETING::get_huid(i_target),
                     TRACE_I2C_ADDR_ARGS(i_args) );
 
 
@@ -3616,7 +3682,7 @@ errlHndl_t i2cToggleClockLine(TARGETING::Target * i_target,
 
     errlHndl_t err = nullptr;
 
-    TRACUCOMP( g_trac_i2c,
+    TRACFCOMP( g_trac_i2c,
                ENTER_MRK"i2cToggleClockLine()" );
 
     do
@@ -3627,7 +3693,7 @@ errlHndl_t i2cToggleClockLine(TARGETING::Target * i_target,
         //toggle clock line
         // set clock low: write 0 to immediate reset scl register
 
-        TRACUCOMP(g_trac_i2c,"i2cToggleClockLine()"
+        TRACFCOMP(g_trac_i2c,"i2cToggleClockLine()"
                   "clock line 0x%016llx",
                   clkline.value );
 
@@ -3677,7 +3743,7 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
     // I2C Bus Speed Array
     TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speed_array;
 
-    TRACUCOMP( g_trac_i2c,
+    TRACFCOMP( g_trac_i2c,
                ENTER_MRK"i2cForceResetAndUnlock()" );
 
     do
@@ -3716,7 +3782,7 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
         uint32_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
         if (i_args.switches.useFsiI2C == 1)
         {
-            TRACUCOMP( g_trac_i2c,INFO_MRK
+            TRACFCOMP( g_trac_i2c,INFO_MRK
                       "Using FSI I2C, use numports: %d", FSI_MODE_MAX_PORT);
             l_numPorts = FSI_MODE_MAX_PORT;
         }
@@ -3783,8 +3849,9 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
             }
 
             TRACFCOMP( g_trac_i2c,
-                       INFO_MRK"i2cForceResetAndUnlock() - Performing op on "
+                       INFO_MRK"i2cForceResetAndUnlock() - Performing op on %8X "
                        "engine=%d, port=%d",
+                       TARGETING::get_huid(i_target),
                        i_args.engine, port);
 
             // Clear mode register
@@ -3872,28 +3939,136 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
 {
     errlHndl_t err = nullptr;
 
-    TRACUCOMP( g_trac_i2c,
-               ENTER_MRK"i2cReset()" );
-
-    // Writing to the Status Register does a full I2C reset.
-    status_reg_t reset;
+    TRACFCOMP( g_trac_i2c,
+               ENTER_MRK"i2cReset() on %.8X, level=%d" TRACE_I2C_ADDR_FMT,
+               TARGETING::get_huid(i_target),
+               i_reset_level,
+               TRACE_I2C_ADDR_ARGS(i_args) );
 
     do
     {
-        reset.value = 0x0;
+        // Go through a complete reset sequence in case we have floating lines
+        //  or other issues
+        // - clear interrupt masks
+        // - reset port busy
+        // - send a stop
+        // - reset the engine registers
+        // - reset any sticky errors in the engine (and the fifo)
+        // - reset port busy (again)
 
+        uint64_t dataval = 0;
+
+        // Zero out any interrupt setup
+        dataval = 0;
         err = i2cRegisterOp( DeviceFW::WRITE,
                              i_target,
-                             &reset.value,
-                             I2C_REG_RESET,
+                             &dataval,
+                             I2C_REG_INTMASK,
                              i_args );
-
         if( err )
         {
-            TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C Reset Failed!!" );
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cReset()> I2C_REG_INTMASK write failed - continue with reset!!" );
+            delete err;
+            err = nullptr;
+        }
+
+        // From I2CM spec :
+        // The entire register can be forced to reset by writing 0x8000000000000000
+        //  (i.e bit 0:1 = 0b10 and other bits can be any value)
+        dataval = 0x8000000000000000;
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &dataval,
+                             I2CM_PORT_BUSY_REGISTER,
+                             i_args );
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cReset()> I2CM_PORT_BUSY_REGISTER write failed - continue with reset!!" );
+            delete err;
+            err = nullptr;
+        }
+
+        // Sets the with_stop bit to force a generic STOP to everything
+        dataval = 0x1000000000000000;
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &dataval,
+                             I2C_REG_COMMAND,
+                             i_args );
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cReset()> I2C_REG_COMMAND write failed - continue with reset!!" );
+            delete err;
+            err = nullptr;
+        }
+
+        // Any write to this address will reset the engine
+        dataval = 0;
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &dataval,
+                             I2C_REG_RESET,
+                             i_args );
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cReset()> I2C_REG_RESET write failed - continue with reset!!" );
+            delete err;
+            err = nullptr;
+        }
+
+        nanosleep( 0, I2C_RESET_DELAY_NS );
+
+        // Any write to this address will reset the engine along with
+        //  several error conditions
+        dataval = 0;
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &dataval,
+                             I2C_REG_RESET_ERRORS,
+                             i_args );
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cReset()> I2C_REG_RESET_ERRORS write failed - continue with reset!!" );
+            delete err;
+            err = nullptr;
+        }
+
+        nanosleep( 0, I2C_RESET_DELAY_NS );
+
+        // Resetting the port busy again after we reset the logic
+        dataval = 0x8000000000000000;
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &dataval,
+                             I2CM_PORT_BUSY_REGISTER,
+                             i_args );
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cReset()> I2CM_PORT_BUSY_REGISTER write failed - continue with reset!!" );
+            delete err;
+            err = nullptr;
+        }
+
+        nanosleep( 0, I2C_RESET_DELAY_NS );
+
+        // Read the status reg at the end for possible FFDC
+        status_reg_t stat;
+        stat.value=0;
+        err = i2cRegisterOp( DeviceFW::READ,
+                             i_target,
+                             &stat.value,
+                             I2C_REG_STATUS,
+                             i_args );
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cReset()> I2C_REG_STATUS read failed!!" );
             break;
         }
+        TRACFCOMP(g_trac_i2c,"i2cReset()> I2C_REG_STATUS(7) after reset=%.8X",
+                  stat.value);
+
+        //--- Standard reset is complete
+
 
         //if the reset is a force unlock then we need to enable
         //diagnostic mode and toggle the clock and data lines
@@ -3905,6 +4080,8 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
 
             if( err )
             {
+                TRACFCOMP( g_trac_i2c,
+                           "i2cReset() committing log from i2cForceResetAndUnlock" );
                 // We still want to send the slave stop command since the
                 // initial reset completed above.
                 // So just commit the log here and let the function continue.
@@ -3913,7 +4090,7 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
         }
 
         // Part of doing the I2C Master reset is also sending a stop
-        // command to the slave device.
+        // command to all of the slave devices.
         err = i2cSendSlaveStop( i_target,
                                 i_args );
 
@@ -3923,7 +4100,7 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
         }
     } while( 0 );
 
-    TRACUCOMP( g_trac_i2c,
+    TRACFCOMP( g_trac_i2c,
                EXIT_MRK"i2cReset()" );
 
     return err;
@@ -3986,7 +4163,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
         uint32_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
         if (i_args.switches.useFsiI2C == 1)
         {
-            TRACUCOMP( g_trac_i2c,INFO_MRK
+            TRACFCOMP( g_trac_i2c,INFO_MRK
                       "Using FSI I2C, use numports: %d", FSI_MODE_MAX_PORT);
             l_numPorts = FSI_MODE_MAX_PORT;
         }
@@ -4005,7 +4182,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
             //   presence detect here to remove this workaround
             if ( (i_args.engine == 1) && (port >= 4) )
             {
-                TRACUCOMP( g_trac_i2c,
+                TRACFCOMP( g_trac_i2c,
                   "Saw Errors resetting these devices, temporarily skipping engine: %d, port: %d",
                    i_args.engine, port);
                 continue;
@@ -4022,6 +4199,8 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                                        i_args );
             if( err )
             {
+                TRACFCOMP( g_trac_i2c,
+                           "i2cSendSlaveStop() committing log from i2cSetBusVariables" );
                 // We still need to send the slave stop to the other ports
                 // on this I2C engine
                 errlCommit( err, I2C_COMP_ID );
@@ -4029,7 +4208,6 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
             }
 
             mode.bit_rate_div = i_args.bit_rate_divisor;
-
             TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
                       "mode: 0x%016llx",
                       mode.value );
@@ -4042,6 +4220,8 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
             if( err )
             {
+                TRACFCOMP( g_trac_i2c,
+                           "i2cSendSlaveStop() committing log from i2cRegisterOp" );
                 // We still need to send the slave stop to the other ports
                 // on this I2C engine
                 errlCommit( err, I2C_COMP_ID );
@@ -4081,6 +4261,8 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
             if ( err )
             {
+                TRACFCOMP( g_trac_i2c,
+                           "i2cSendSlaveStop() committing log from i2cRegisterOp 1" );
                 // We still need to send the slave stop to the other ports
                 // on this I2C engine
                 errlCommit( err, I2C_COMP_ID );
@@ -4132,7 +4314,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
             cmd.value = 0x0ull;
             cmd.with_stop = 1;
 
-            TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
+            TRACFCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
                       "cmd: 0x%016llx",
                       cmd.value );
 
@@ -4144,6 +4326,8 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
             if( err )
             {
+                TRACFCOMP( g_trac_i2c,
+                           "i2cSendSlaveStop() committing log from i2cRegisterOp 2" );
                 // We still need to send the slave stop to the other ports
                 // on this I2C engine
                 errlCommit( err, I2C_COMP_ID );
@@ -4156,6 +4340,9 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
             if( err )
             {
+                TRACFCOMP( g_trac_i2c,
+                           "i2cSendSlaveStop() committing log from i2cWaitForCmdComp on port %d",
+                           port );
                 // We still need to send the slave stop to the other ports
                 // on this I2C engine
                 errlCommit( err, I2C_COMP_ID );
