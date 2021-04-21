@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,6 +108,30 @@ errlHndl_t checkForHbOnNvdimm();
 
 // default unknown EC level
 constexpr TARGETING::ATTR_EC_type INVALID__ATTR_EC = 0xFF;
+
+
+/**
+ * @brief Compare hostboot presence detection with what the service
+ *.       processor saw.  Calls crosscheck_sp_presence_target() for each
+ *        target in targetService.
+ *
+ * @note Any error logs created will be committed in this function
+ *
+ */
+void crosscheck_sp_presence();
+
+
+/**
+ * @brief Compare hostboot presence detection of a specified target with
+ *        what the service processor saw.  An error log will be generated
+ *        on any mismatch and returned to the caller.
+ *
+ * @param[in] i_target Target being crosschecked. Assert if nullptr.
+ *
+ * @return errlHndl_t Error if any, otherwise nullptr.
+ */
+errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target);
+
 
 } // namespace HWAS
 

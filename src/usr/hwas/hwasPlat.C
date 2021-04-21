@@ -1657,4 +1657,150 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target,
     return l_errLog;
 } // verifyDeconfiguration
 
+
+void crosscheck_sp_presence()
+{
+    errlHndl_t l_errhdl = nullptr;
+    errlHndl_t firstErr = nullptr;
+
+    // Loop through every target to check any with the attribute
+    for( TARGETING::TargetIterator target = TARGETING::targetService().begin();
+         target != TARGETING::targetService().end();
+         ++target )
+    {
+        l_errhdl = crosscheck_sp_presence_target(*target);
+        if(l_errhdl)
+        {
+            // Store the first error in order to link any later related errors
+            // to it
+            if(!firstErr)
+            {
+                firstErr = l_errhdl;
+                l_errhdl = nullptr;
+            }
+            else
+            {
+                l_errhdl->plid(firstErr->plid());
+                errlCommit (l_errhdl, HWAS_COMP_ID);
+            }
+        }
+    }
+
+    if(firstErr)
+    {
+        errlCommit (firstErr, HWAS_COMP_ID);
+    }
+}
+
+errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
+{
+    errlHndl_t l_errhdl = nullptr;
+
+    assert (i_target != nullptr, "crosscheck_sp_presence_target i_target == nullptr");
+
+    HWAS_DBG(ENTER_MRK"crosscheck_sp_presence_target: i_target=0x%.8X",
+             TARGETING::get_huid(i_target));
+
+    do
+    {
+        TARGETING::ATTR_FOUND_PRESENT_BY_SP_type sp_presence =
+          TARGETING::FOUND_PRESENT_BY_SP_NO_ATTEMPT;
+        if( !(i_target->tryGetAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>(sp_presence)) )
+        {
+            // not relevant for this target
+            break;
+        }
+
+        // check what we determined
+        bool hb_presence = i_target->getAttr<TARGETING::ATTR_HWAS_STATE>().present;
+
+        // SP did not attempt presence-detection, nothing to cross-check
+        if( (TARGETING::FOUND_PRESENT_BY_SP_NO_ATTEMPT == sp_presence)
+            || (TARGETING::FOUND_PRESENT_BY_SP_SKIP == sp_presence) )
+        {
+            // nothing to do here
+            break;
+        }
+        // HB sees it but the SP didn't
+        else if( hb_presence &&
+                 (TARGETING::FOUND_PRESENT_BY_SP_MISSING == sp_presence) )
+        {
+            HWAS_INF("0x%.8X detected by Hostboot but not by the Service Processor",
+                     TARGETING::get_huid(i_target));
+            /*@
+             * @errortype
+             * @moduleid     MOD_CROSSCHECK_SP_PRESENCE
+             * @reasoncode   RC_PRESENCE_MISMATCH_SP
+             * @userdata1    HUID of missing target
+             * @devdesc      Hostboot detected a part that the service
+             *               processor did not.
+             * @custdesc     A problem occurred during the IPL
+             *               of the system.
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             MOD_CROSSCHECK_SP_PRESENCE,
+                             RC_PRESENCE_MISMATCH_SP,
+                             TARGETING::get_huid(i_target),
+                             0);
+            // most likely to be a hardware issue of some kind
+            //  knock it out so we agree with the SP
+            l_errhdl->addHwCallout( i_target,
+                                    HWAS::SRCI_PRIORITY_HIGH,
+                                    HWAS::DECONFIG,
+                                    HWAS::GARD_NULL );
+            // could also be a code bug on the SP
+            l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                           HWAS::SRCI_PRIORITY_MED );
+            l_errhdl->collectTrace(ISTEP_COMP_NAME,256);
+            l_errhdl->collectTrace(HWAS_COMP_NAME,256);
+
+        }
+        // The SP sees it but HB didn't
+        else if( !hb_presence &&
+                 (TARGETING::FOUND_PRESENT_BY_SP_FOUND == sp_presence) )
+        {
+            HWAS_INF("0x%.8X detected by the Service Processor but not by Hostboot",
+                     TARGETING::get_huid(i_target));
+            /*@
+             * @errortype
+             * @moduleid     MOD_CROSSCHECK_SP_PRESENCE
+             * @reasoncode   RC_PRESENCE_MISMATCH_HB
+             * @userdata1    HUID of missing target
+             * @devdesc      Hostboot did not detect a part that the service
+             *               processor found.
+             * @custdesc     A problem occurred during the IPL
+             *               of the system.
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             MOD_CROSSCHECK_SP_PRESENCE,
+                             RC_PRESENCE_MISMATCH_HB,
+                             TARGETING::get_huid(i_target),
+                             0);
+            // most likely to be a hardware issue of some kind
+            //  knock it out so we agree with the SP
+            l_errhdl->addHwCallout( i_target,
+                                    HWAS::SRCI_PRIORITY_HIGH,
+                                    HWAS::DECONFIG,
+                                    HWAS::GARD_NULL );
+            // could also be a code bug in HB
+            l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                           HWAS::SRCI_PRIORITY_MED );
+            l_errhdl->collectTrace(ISTEP_COMP_NAME,256);
+            l_errhdl->collectTrace(HWAS_COMP_NAME,256);
+            l_errhdl->collectTrace(FSI_COMP_NAME,256);
+            l_errhdl->collectTrace(I2C_COMP_NAME,256);
+            l_errhdl->collectTrace(SPI_COMP_NAME,256);
+            l_errhdl->collectTrace(EEPROM_COMP_NAME,256);
+        }
+        // otherwise we match so we're fine
+
+    } while (0);
+
+    HWAS_DBG(EXIT_MRK"crosscheck_sp_presence_target");
+
+    return l_errhdl;
+}
+
 } // namespace HWAS

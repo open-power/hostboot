@@ -77,6 +77,7 @@
 #include <util/misc.H>
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/deconfigGard.H>
+#include <hwas/hwasPlat.H>
 #include <kernel/bltohbdatamgr.H>
 #include <sys/misc.h>
 
@@ -1943,23 +1944,36 @@ void doInitBackupTpm()
             else
             {
                 l_backupHwasState.present = false;
+                l_backupHwasState.functional = false;
                 l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(
                     l_backupHwasState);
+            }
+
+            // Crosscheck with the state that the SP had
+            l_errl = HWAS::crosscheck_sp_presence_target(l_backupTpm);
+            if(l_errl)
+            {
+                // Mark tpm as failed; among other things this commits the error log
+                tpmMarkFailed(l_backupTpm, l_errl);
                 break;
             }
         }
 
-        mutex_lock(l_backupTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
-        tpmInitialize(l_backupTpm);
-        TpmLogMgr* l_tpmLogMgr = getTpmLogMgr(l_backupTpm);
-        if(!l_tpmLogMgr)
+        // If present, try to initialize
+        if (l_backupHwasState.present == true)
         {
-            l_tpmLogMgr = new TpmLogMgr;
-            setTpmLogMgr(l_backupTpm, l_tpmLogMgr);
-            TpmLogMgr_initialize(l_tpmLogMgr);
-        }
-        mutex_unlock(l_backupTpm->
+            mutex_lock(l_backupTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
+            tpmInitialize(l_backupTpm);
+            TpmLogMgr* l_tpmLogMgr = getTpmLogMgr(l_backupTpm);
+            if(!l_tpmLogMgr)
+            {
+                l_tpmLogMgr = new TpmLogMgr;
+                setTpmLogMgr(l_backupTpm, l_tpmLogMgr);
+                TpmLogMgr_initialize(l_tpmLogMgr);
+            }
+            mutex_unlock(l_backupTpm->
                                 getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
+        }
     }
     else
     {

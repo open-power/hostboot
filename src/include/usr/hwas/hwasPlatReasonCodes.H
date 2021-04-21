@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,11 +34,12 @@ namespace HWAS
         //
         //  @note Must always start @ 0x80, since common module IDs occupy
         //      0x00 -> 0x7F range
-        MOD_HOST_DISCOVER_TARGETS = 0x80,
-        MOD_PLAT_DECONFIG_GARD    = 0x81,
-        MOD_PLAT_READIDEC         = 0x82,
-        MOD_PLAT_READLX           = 0x83,
-        MOD_CHECK_HB_NVDIMM       = 0x84,
+        MOD_HOST_DISCOVER_TARGETS  = 0x80,
+        MOD_PLAT_DECONFIG_GARD     = 0x81,
+        MOD_PLAT_READIDEC          = 0x82,
+        MOD_PLAT_READLX            = 0x83,
+        MOD_CHECK_HB_NVDIMM        = 0x84,
+        MOD_CROSSCHECK_SP_PRESENCE = 0x85,
     };
 
     enum HwasPlatReasonCode
@@ -60,6 +61,8 @@ namespace HWAS
         RC_NO_FRU_TARGET                    = HWAS_COMP_ID | 0x8C,
         RC_NOT_CURRENT_GARD_VERSION         = HWAS_COMP_ID | 0x8D,
         RC_CLEAN_GARD_RECORDS               = HWAS_COMP_ID | 0x8E,
+        RC_PRESENCE_MISMATCH_SP             = HWAS_COMP_ID | 0x8F,
+        RC_PRESENCE_MISMATCH_HB             = HWAS_COMP_ID | 0x90,
     };
 
 };
