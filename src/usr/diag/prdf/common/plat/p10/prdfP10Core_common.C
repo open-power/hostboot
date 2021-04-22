@@ -212,17 +212,117 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
 PRDF_PLUGIN_DEFINE( p10_core, CheckCoreCheckstop );
 
 /**
- * @brief  This is a special plugin where we intentionally want to return
- *         PRD_SCAN_COMM_REGISTER_ZERO back to the rule code.
+ * @brief  EQ_CORE_FIR[56] - analyzes recoverable attentions on the neighbor
+ *         core in the core pair.
  * @param  i_chip A core chip.
  * @param  io_sc  The step code data struct.
- * @return PRD_SCAN_COMM_REGISTER_ZERO always.
+ * @return Non-SUCCESS on error. Otherwise, SUCCESS.
  */
-int32_t returnScomRegisterZero(ExtensibleChip*, STEP_CODE_DATA_STRUCT&)
+int32_t analyzeNeighborCore_RE(ExtensibleChip* i_chip,
+                               STEP_CODE_DATA_STRUCT& io_sc)
 {
-    return PRD_SCAN_COMM_REGISTER_ZERO;
+    // First, check if there is a neighbor core.
+    ExtensibleChip* neighbor = getNeighborCore(i_chip);
+    if (nullptr == neighbor)
+    {
+        // There is no neighbor core. This would be a bug because this FIR bit
+        // should only be unmasked if there is a neighbor core. Return saying
+        // nothing was found and the rule code will callout level 2 support.
+        PRDF_ERR("analyzeNeighborCore_RE(0x%08x) no neighbor core",
+                 i_chip->getHuid());
+        return PRD_SCAN_COMM_REGISTER_ZERO;
+    }
+
+    // Then, check if there are any unit checkstop attentions on the other core.
+    SCAN_COMM_REGISTER_CLASS* wof  = neighbor->getRegister("EQ_CORE_FIR_WOF");
+    SCAN_COMM_REGISTER_CLASS* mask = neighbor->getRegister("EQ_CORE_FIR_MASK");
+    SCAN_COMM_REGISTER_CLASS* act0 = neighbor->getRegister("EQ_CORE_FIR_ACT0");
+    SCAN_COMM_REGISTER_CLASS* act1 = neighbor->getRegister("EQ_CORE_FIR_ACT1");
+
+    if (SUCCESS != (wof->Read() | mask->Read() | act0->Read() | act1->Read()))
+    {
+        PRDF_ERR("analyzeNeighborCore_RE(0x%08x) read failure",
+                 i_chip->getHuid());
+        return PRD_SCANCOM_FAILURE;
+    }
+
+    // Ignore bit 56 because it says there are recoverable attentions on this
+    // core and it could send us in an infinite loop.
+    if (0 == ( wof->GetBitFieldJustified( 0, 64) &
+              ~mask->GetBitFieldJustified(0, 64) & // not masked
+              ~act0->GetBitFieldJustified(0, 64) & // act0=0
+               act1->GetBitFieldJustified(0, 64) & // act1=1
+              ~0x0000000000000080ll))              // bit 56 is not set
+    {
+        // There are no active recoverable attentions. This would be a bug
+        // because this FIR should only fire if there was an attention. Return
+        // saying nothing was found and the rule code will callout level 2
+        // support.
+        PRDF_ERR("analyzeNeighborCore_RE(0x%08x) no attn on neighbor",
+                 i_chip->getHuid());
+        return PRD_SCAN_COMM_REGISTER_ZERO;
+    }
+
+    // There are active recoverable attentions on the neighbor core. Analyze it.
+    return neighbor->Analyze(io_sc, io_sc.service_data->getSecondaryAttnType());
 }
-PRDF_PLUGIN_DEFINE(p10_core, returnScomRegisterZero);
+PRDF_PLUGIN_DEFINE(p10_core, analyzeNeighborCore_RE);
+
+/**
+ * @brief  EQ_CORE_FIR[57] - analyzes unit checkstop attentions on the neighbor
+ *         core in the core pair.
+ * @param  i_chip A core chip.
+ * @param  io_sc  The step code data struct.
+ * @return Non-SUCCESS on error. Otherwise, SUCCESS.
+ */
+int32_t analyzeNeighborCore_UCS(ExtensibleChip* i_chip,
+                                STEP_CODE_DATA_STRUCT& io_sc)
+{
+    // First, check if there is a neighbor core.
+    ExtensibleChip* neighbor = getNeighborCore(i_chip);
+    if (nullptr == neighbor)
+    {
+        // There is no neighbor core. This would be a bug because this FIR bit
+        // should only be unmasked if there is a neighbor core. Return saying
+        // nothing was found and the rule code will callout level 2 support.
+        PRDF_ERR("analyzeNeighborCore_UCS(0x%08x) no neighbor core",
+                 i_chip->getHuid());
+        return PRD_SCAN_COMM_REGISTER_ZERO;
+    }
+
+    // Then, check if there are any unit checkstop attentions on the other core.
+    SCAN_COMM_REGISTER_CLASS* fir  = neighbor->getRegister("EQ_CORE_FIR");
+    SCAN_COMM_REGISTER_CLASS* mask = neighbor->getRegister("EQ_CORE_FIR_MASK");
+    SCAN_COMM_REGISTER_CLASS* act0 = neighbor->getRegister("EQ_CORE_FIR_ACT0");
+    SCAN_COMM_REGISTER_CLASS* act1 = neighbor->getRegister("EQ_CORE_FIR_ACT1");
+
+    if (SUCCESS != (fir->Read() | mask->Read() | act0->Read() | act1->Read()))
+    {
+        PRDF_ERR("analyzeNeighborCore_UCS(0x%08x) read failure",
+                 i_chip->getHuid());
+        return PRD_SCANCOM_FAILURE;
+    }
+
+    // Ignore bit 57 because it says there are unit CS attentions on this core
+    // and it could send us in an infinite loop.
+    if (0 == ( fir->GetBitFieldJustified( 0, 64) &
+              ~mask->GetBitFieldJustified(0, 64) & // not masked
+               act0->GetBitFieldJustified(0, 64) & // act0=1
+               act1->GetBitFieldJustified(0, 64) & // act1=1
+              ~0x0000000000000040ll))              // bit 57 is not set
+    {
+        // There are no active unit CS attentions. This would be a bug because
+        // this FIR should only fire if there was an attention. Return saying
+        // nothing was found and the rule code will callout level 2 support.
+        PRDF_ERR("analyzeNeighborCore_UCS(0x%08x) no attn on neighbor",
+                 i_chip->getHuid());
+        return PRD_SCAN_COMM_REGISTER_ZERO;
+    }
+
+    // There are active unit CS attentions on the neighbor core. Analyze it.
+    return neighbor->Analyze(io_sc, io_sc.service_data->getSecondaryAttnType());
+}
+PRDF_PLUGIN_DEFINE(p10_core, analyzeNeighborCore_UCS);
 
 //##############################################################################
 //##                       Line Delete Functions

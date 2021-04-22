@@ -125,16 +125,18 @@ actionclass analyzeEQ_L3_FIR
 #  - These attentions should be masked when NOT in fused core mode.
 #  - These two bits should be the last bits in this FIR to be analyzed to ensure
 #    all bits in this FIR are analyzed before moving on to the other core.
-#  - If isolation needs to move on to the other core, the rule code will
-#    automatically clear this attention before moving on.
-#  - If there truly is an attention in the other core, it should be properly
-#    reported via the FIR hierarchy. Therefore, it is unnecessary to add extra
-#    plugin code to switch analysis to the other core. Instead, all we have to
-#    do is give a non-SUCCESS return code to tell the rule code to move onto the
-#    next active attention (which should be on the other core).
-actionclass analyzeNeighborCore
+#  - If there truly is an attention in the other core, the plugins below will
+#    switch analysis to the other core. As analysis wraps up, post analysis will
+#    be called and the rule code will clear the active attention on that core.
+#    Then the same will happen for this core.
+actionclass analyzeNeighborCore_RE
 {
-    funccall("returnScomRegisterZero");
+    try(funccall("analyzeNeighborCore_RE"), level2_th_1);
+};
+
+actionclass analyzeNeighborCore_UCS
+{
+    try(funccall("analyzeNeighborCore_UCS"), level2_th_1);
 };
 
 actionclass master_power_bus_chip_procedure

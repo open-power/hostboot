@@ -1078,12 +1078,12 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[56]
      *  Other Core Chiplet recoverable error
      */
-    (rEQ_CORE_FIR, bit(56)) ? analyzeNeighborCore;
+    (rEQ_CORE_FIR, bit(56)) ? analyzeNeighborCore_RE;
 
     /** EQ_CORE_FIR[57]
      *  Other Core Chiplet core checkstop
      */
-    (rEQ_CORE_FIR, bit(57)) ? analyzeNeighborCore;
+    (rEQ_CORE_FIR, bit(57)) ? analyzeNeighborCore_UCS;
 
     /** EQ_CORE_FIR[58]
      *  Other Core Chiplet system checkstop

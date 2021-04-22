@@ -128,7 +128,17 @@ int32_t PostAnalysis(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
     #ifdef __HOSTBOOT_RUNTIME
     if ( io_sc.service_data->isProcCoreCS() )
     {
+        // Mask off all attentions for this core.
         maskIfCoreCs(i_chip);
+
+        // Mask off all attentions for the neighbor core, if it exists. Note
+        // that if the attention existed in the odd core in the core pair,
+        // analysis likely shifted from the even core to the odd core via
+        // EQ_CORE_FIR[57]. This will result in the post analysis of the odd
+        // core being called, then the post analysis of the even code being
+        // called. This will actually result in the this function being called
+        // twice for each core. It's a little annoying, but at least we will
+        // ensure the appropriate bits are masked in all cases.
         if (neighborCore != nullptr)
         {
             maskIfCoreCs(neighborCore);
