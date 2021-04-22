@@ -161,6 +161,78 @@ bool PdrManager::findPdr(pdr_handle_t& io_record_handle,
     return found;
 }
 
+errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
+{
+    errlHndl_t l_errl = nullptr;
+    uint32_t l_pdr_handle = 0;
+
+    // Grab a temp scope to lock the PDR mutex for the duration of
+    // the operations on the PDR repo
+    {
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+    pldm_terminus_locator_pdr* l_terminus_locator_pdr = findHBTerminusLocatorPdr();
+    if(!l_terminus_locator_pdr)
+    {
+        /*@
+         * @errortype
+         * @moduleid   MOD_PDR_MANAGER
+         * @reasoncode RC_TERM_LOCATOR_NOT_FOUND
+         * @devdesc    Could not find Terminus Locator PDR in the PDR repo
+         * @custdesc   A software error occurred during system boot
+         */
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                               MOD_PDR_MANAGER,
+                               RC_TERM_LOCATOR_NOT_FOUND,
+                               0,
+                               0,
+                               ErrlEntry::ADD_SW_CALLOUT);
+    }
+    else
+    {
+        l_terminus_locator_pdr->validity = PLDM_TL_PDR_NOT_VALID;
+        l_pdr_handle = le32toh(l_terminus_locator_pdr->hdr.record_handle);
+    }
+    }
+
+    if(l_pdr_handle)
+    {
+        // Tell BMC that this PDR has changed
+        std::vector<uint32_t>l_pdr_handles = {l_pdr_handle};
+        l_errl = sendPdrRepositoryChangeEvent(l_pdr_handles);
+    }
+
+    return l_errl;
+}
+
+pldm_terminus_locator_pdr* PdrManager::findHBTerminusLocatorPdr()
+{
+    const pldm_pdr_record* l_curr_record = nullptr;
+    pldm_terminus_locator_pdr* l_hb_pdr = nullptr;
+
+    do
+    {
+        uint8_t* l_record_data = nullptr;
+        uint32_t l_record_size = 0;
+
+        l_curr_record = pldm_pdr_find_record_by_type(iv_pdr_repo.get(),
+                                                     PLDM_TERMINUS_LOCATOR_PDR,
+                                                     l_curr_record,
+                                                     &l_record_data,
+                                                     &l_record_size);
+        if(l_curr_record)
+        {
+            auto l_terminus_locator_record = reinterpret_cast<pldm_terminus_locator_pdr*>(l_record_data);
+            if(le16toh(l_terminus_locator_record->terminus_handle) == hostbootTerminusId())
+            {
+                // We found the HB terminus locator; return it.
+                l_hb_pdr = l_terminus_locator_record;
+                break;
+            }
+        }
+    } while(l_curr_record);
+    return l_hb_pdr;
+}
+
 errlHndl_t PdrManager::sendPdrRepositoryChangeEvent(const std::vector<pdr_handle_t>& i_handles) const
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);

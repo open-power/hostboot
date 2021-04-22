@@ -51,6 +51,7 @@
 #include <isteps/hwpf_reasoncodes.H>
 #include <console/consoleif.H>
 #include <secureboot/trustedbootif.H>
+#include <pldm/extended/pdr_manager.H>
 
 //Fapi support
 #include <fapi2/target.H>
@@ -304,6 +305,19 @@ void* call_host_start_payload (void *io_pArgs)
                             "init: ERROR: Set IPMI watchdog Failed");
                 err_ipmi->collectTrace("ISTEPS_TRACE",256);
                 errlCommit(err_ipmi, ISTEP_COMP_ID );
+        }
+#endif
+
+#ifdef CONFIG_PLDM
+
+        // Invalidate HB Terminus Locator PDR so that BMC can start watching PHYP
+        // for watchdogs.
+        l_errl = PLDM::thePdrManager().invalidateHBTerminusLocatorPdr();
+        if(l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_start_payload: ERROR: Could not invalidate HB Terminus Locator PDR");
+            break;
         }
 #endif
 

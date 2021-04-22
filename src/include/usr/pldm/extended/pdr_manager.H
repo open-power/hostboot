@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 
 // libpldm
 #include <openbmc/pldm/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/platform.h>
 
 // Misc
 #include <sys/sync.h>
@@ -100,6 +101,13 @@ public:
                  std::vector<uint8_t>* o_data,
                  uint32_t& o_next_record_handle) const;
 
+    /* @brief Sets the Hostboot Terminus Locator PDR's state to not valid
+     *        and syncs that PDR to BMC.
+     *
+     * @return nullptr on success; non-nullptr on error
+     */
+    errlHndl_t invalidateHBTerminusLocatorPdr();
+
     /* @brief Send an event to the BMC indicating that the given set of PDRs
      *        has been added to the repository.
      *
@@ -119,6 +127,7 @@ public:
      * @return size_t Repository's PDR count
      */
     size_t pdrCount() const;
+
 #ifndef __HOSTBOOT_RUNTIME
     /* @brief  Send notification that the BMC's PDR repository has changed. This
      *         will cause one task blocking on awaitBmcPdrRepoChanged (on this
@@ -204,6 +213,13 @@ private:
     // Holds a msg_q_t
     std::shared_ptr<void> iv_bmc_repo_changed_event_q;
 #endif
+
+    /* @brief Find a Terminus Locator PDR associated with Hostboot
+     *
+     * @return The pointer to the Terminus Locator PDR structure if
+     *         it is found in the PDR repo, or nullptr if not found
+     */
+    pldm_terminus_locator_pdr* findHBTerminusLocatorPdr();
 
 protected:
     PdrManager();

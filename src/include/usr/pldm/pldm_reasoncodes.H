@@ -144,6 +144,7 @@ namespace PLDM
         RC_NOT_READY                = PLDM_COMP_ID | 0x25,
         RC_UNSUPPORTED_STRING_TYPE  = PLDM_COMP_ID | 0x26,
         RC_UNEXPECTED_STRING_SIZE   = PLDM_COMP_ID | 0x27,
+        RC_TERM_LOCATOR_NOT_FOUND   = PLDM_COMP_ID | 0x28,
     };
 }
 #endif

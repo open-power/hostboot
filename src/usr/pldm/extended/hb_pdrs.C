@@ -39,6 +39,7 @@
 #include <pldm/extended/pdr_manager.H>
 #include "../common/pldmtrace.H"
 #include <pldm/pldm_reasoncodes.H>
+#include "../../mctp/libmctp-hostlpc.h"
 
 // libpldm headers from pldm subtree
 #include <openbmc/pldm/libpldm/pdr.h>
@@ -384,6 +385,46 @@ errlHndl_t addOccStateControlPdrs(pldm_pdr* const io_repo)
     return errl;
 }
 
+/**
+ * @brief Populates the input Terminus Locator PDR with the correct data for
+ *        if to be added to a PDR repository.
+ *
+ * @param[in] i_pdr the input PDR pointer to be populated
+ */
+void generateTerminusLocatorPDR(pldm_terminus_locator_pdr* const i_pdr)
+{
+    const uint8_t DEFAULT_CONTAINER_ID = 0;
+    i_pdr->hdr.record_handle = 0; // record_handle will be generated for us
+    i_pdr->hdr.version = 1;
+    i_pdr->hdr.type = PLDM_TERMINUS_LOCATOR_PDR;
+    i_pdr->hdr.record_change_num = 0;
+    i_pdr->hdr.length = htole16(sizeof(pldm_terminus_locator_pdr) - sizeof(pldm_pdr_hdr));
+    i_pdr->terminus_handle = htole16(PLDM::thePdrManager().hostbootTerminusId());
+    i_pdr->validity = PLDM_TL_PDR_VALID;
+    i_pdr->tid = PLDM::thePdrManager().hostbootTerminusId();
+    i_pdr->container_id = DEFAULT_CONTAINER_ID;
+    i_pdr->terminus_locator_type = PLDM_TERMINUS_LOCATOR_TYPE_MCTP_EID;
+    i_pdr->terminus_locator_value_size = sizeof(pldm_terminus_locator_type_mctp_eid);
+    auto l_locatorValue = reinterpret_cast<pldm_terminus_locator_type_mctp_eid*>(i_pdr->terminus_locator_value);
+    l_locatorValue->eid = HOST_EID;
+}
+
+/**
+ * @brief Adds a Terminus Locator PDR to the input PDR repository
+ *
+ * @param[in/out] io_repo the PDR repository to add the Terminus Locator PDR to
+ */
+void addTerminusLocatorPDR(pldm_pdr* const io_repo)
+{
+    pldm_terminus_locator_pdr l_pdr;
+
+    generateTerminusLocatorPDR(&l_pdr);
+    pldm_pdr_add(io_repo, reinterpret_cast<const uint8_t*>(&l_pdr),
+                 sizeof(l_pdr),
+                 PDR_AUTO_CALCULATE_RECORD_HANDLE,
+                 PDR_IS_NOT_REMOTE);
+}
+
 }
 
 namespace PLDM
@@ -405,6 +446,8 @@ errlHndl_t addHostbootPdrs(pldm_pdr* const io_repo)
                                             thePdrManager().hostbootTerminusId());
 
     errl = addOccStateControlPdrs(io_repo);
+
+    addTerminusLocatorPDR(io_repo);
 
     PLDM_EXIT("addHostbootPdrs completed %s error", errl ? "with" : "without");
 
