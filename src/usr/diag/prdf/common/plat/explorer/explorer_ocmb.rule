@@ -638,7 +638,7 @@ rule rMMIOFIR
 
 group gMMIOFIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(3,4,5)
 {
     /** MMIOFIR[0]
      *  AFU desc unimp
@@ -720,7 +720,7 @@ rule rSRQFIR
 
 group gSRQFIR
     filter singlebit,
-           cs_root_cause(18)
+           cs_root_cause(1,7,10,11,12,13,16,17,18,19,20,22,24,26,27)
 {
     /** SRQFIR[0]
      *  SRQ recoverable error
@@ -897,7 +897,7 @@ rule rMCBISTFIR
 
 group gMCBISTFIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(2,3,14)
 {
     /** MCBISTFIR[0]
      *  Invalid maint address
@@ -1019,7 +1019,7 @@ rule rRDFFIR
 
 group gRDFFIR
     filter singlebit,
-           cs_root_cause(14,15,17,35,37)
+           cs_root_cause(13,14,15,16,17,33,35,36,37,43,44,47,48)
 {
     /** RDFFIR[0]
      *  Mainline read MPE on rank 0
@@ -1276,7 +1276,7 @@ rule rTLXFIR
 
 group gTLXFIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(1,2,3,4,5,6,7,8,11,18,20,21,22,23,24,25)
 {
     /** TLXFIR[0]
      *  Info reg parity error
@@ -1469,7 +1469,7 @@ rule rOMIDLFIR
 
 group gOMIDLFIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(0,1)
 {
     /** OMIDLFIR[0]
      *  OMI-DL0 fatal error
