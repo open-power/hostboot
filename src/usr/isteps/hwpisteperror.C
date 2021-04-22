@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ void ISTEP_ERROR::IStepError::addErrorDetails( const errlHndl_t i_err )
          * @userdata1[32:63] Reason code of first error
          * @userdata2[0:31] Total number of elogs included
          * @userdata2[32:64] iStep and SubStep that failed
-         * @devdesc     IStep failed, see other log(s) with the same PLID
+         * @devdesc     IStep failed, Check other log(s) with the same PLID
          *              for reason.
          *
          */

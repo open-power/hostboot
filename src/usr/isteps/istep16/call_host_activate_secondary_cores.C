@@ -253,7 +253,7 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
                  *
                  * @devdesc Kernel returned error when trying to activate
                  *          core.
-                 * @custdesc Unable to activate all hardware during boot..
+                 * @custdesc Unable to activate all hardware during boot.
                  */
                 l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                  MOD_HOST_ACTIVATE_SECONDARY_CORES,

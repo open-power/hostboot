@@ -858,9 +858,9 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
                  * @reasoncode   RC_HWP_GENERATED_ERROR
                  * @userdata1    RC value from HWP
                  * @userdata2    <unused>
-                 * @devdesc      HW Procedure generated error. See User Data.
+                 * @devdesc      HW Procedure generated error. Check User Data.
                  * @custdesc     Error initializing processor/memory subsystem
-                 *               during boot. See FRU list for repair actions
+                 *               during boot. Check FRU list for repair actions
                  */
                 l_pError = new ERRORLOG::ErrlEntry(i_sev,
                                                    MOD_FAPI2_RC_TO_ERRL,

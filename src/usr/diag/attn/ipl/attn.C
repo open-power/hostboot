@@ -163,9 +163,9 @@ errlHndl_t checkForIplAttentions()
              *
              * @devdesc    A hardware procedure failed with the assumption that
              *             there were active attentions. However, no attentions
-             *             were found. See the other log with matching PLID.
+             *             were found. Check the other log with matching PLID.
              *
-             * @custdesc   A hardware procedure failed. See the other log with
+             * @custdesc   A hardware procedure failed. Check the other log with
              *             matching PLID.
              */
             l_plidElog = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2021
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -971,7 +971,6 @@ foreach my $prdfFile (@prdfFilesToParse)
 #------------------------------------------------------------------
 my %subsysList;
 my $in_enum = 0;
-
 open(SUBSYSTEM_TYPES_FILE, $errlTypes) or die("Cannot open: $errlTypes: $!");
 
 while (my $line = <SUBSYSTEM_TYPES_FILE> and $in_enum lt 2)
@@ -1007,10 +1006,38 @@ close(SUBSYSTEM_TYPES_FILE);
 # Generate a list of all possible SRCs and their descriptions
 # ------------------------------------------------------------------
 open(OFILE, ">", $srcFileName) or die ("Cannot open: $srcFileName: $!");
-foreach my $rcVal (sort keys %srcList)
+my $srcCount = 0;          # number of SRCs per file
+my $srcFileGroupCount = 0; # number of Rcdl files with the same sub system name, increments
+                           # if the Rcdl file for the current subsystem exceeds 4000 SRCs
+my $srcFileBaseName = "";  # path to the Rcdl file to create
+foreach my $sub (sort keys %subsysList)
 {
-    foreach my $sub (sort keys %subsysList)
+    $srcCount = 0;
+    $srcFileGroupCount = 0;
+
+    # append the subsystem name from hberrltypes.H's epubSubSystem_t to the HB_BCxxRcdl_ filename
+    $srcFileBaseName = $genFilesPath . "/HB_BCxxRcdl_" . $subsysList{$sub} . ".h";
+    open(RCDLFILE, ">", $srcFileBaseName) or die ("Cannot open: $srcFileBaseName $!");
+
+    foreach my $rcVal (sort keys %srcList)
     {
+        if ($srcCount % 4000 == 0 and $srcCount != 0)
+        {
+            # If we reach 4000 SRCs in one file, open a new file to write to.
+            # This keeps the file sizes small so that RcdlSniffer2Perl can
+            # parse the individual files in a reasonable amount of time
+
+            # close the prior RCDLFILE handle
+            close(RCDLFILE);
+
+            # increment the file count for this subsystem group
+            $srcFileGroupCount += 1;
+            $srcFileBaseName = $genFilesPath . "/HB_BCxxRcdl_" . $subsysList{$sub} . "_" .
+                               $srcFileGroupCount . ".h";
+            open(RCDLFILE, ">", $srcFileBaseName) or die ("Cannot open: $srcFileBaseName $!");
+
+        }
+        $srcCount += 1;
         my $src = "BC$sub$rcVal";
         print OFILE "//////////////////////////////////////////////////////\n";
         print OFILE "/****************************************************/\n";
@@ -1023,6 +1050,20 @@ foreach my $rcVal (sort keys %srcList)
         print OFILE "\$MODULE = NA\n";
         print OFILE "\$TYPE = AUTO\n\n";
         print OFILE "\@SubsystemOrProduct = FSP_SRC\n\n";
+
+
+        print RCDLFILE "//////////////////////////////////////////////////////\n";
+        print RCDLFILE "/****************************************************/\n";
+        print RCDLFILE "#define Refcode_$src 0x$src\n";
+        print RCDLFILE "/****************************************************/\n";
+        print RCDLFILE "\n/***** $src RCDL text starts here.\n";
+        print RCDLFILE "\$OWNER = J.Patel\n";
+        print RCDLFILE "\$LOCATION = Austin\n";
+        print RCDLFILE "\$COMPONENT = FSP\n";
+        print RCDLFILE "\$MODULE = NA\n";
+        print RCDLFILE "\$TYPE = AUTO\n\n";
+        print RCDLFILE "\@SubsystemOrProduct = FSP_SRC\n\n";
+
         my $txt = "\$DESCRIPTION = $srcList{$rcVal}";
         if(not $txt =~/.*\.$/)
         {
@@ -1032,7 +1073,8 @@ foreach my $rcVal (sort keys %srcList)
         my $word = shift(@atxt);
         my $line_sz = length($word);
         print OFILE "$word";
-        while (my $word = shift(@atxt))
+        print RCDLFILE "$word";
+        foreach my $word (@atxt)
         {
             if (lc $word eq "fsp")
             {
@@ -1047,25 +1089,45 @@ foreach my $rcVal (sort keys %srcList)
             if($line_sz > 76 )
             {
                 $line_sz = $wordlen;
-                print OFILE "\n$word";
+                print OFILE " \n$word";
+                print RCDLFILE " \n$word";
             }
             else
             {
                 print OFILE " $word";
+                print RCDLFILE " $word";
             }
         }
         print OFILE "\n\$ENDDESCRIPTION\n\n";
         print OFILE "\$RepairAction = The FRU callouts are calculated at the ".
-                     "time of the failure.\n";
-        print OFILE "See the error log for the actual replacement strategy.\n";
+                    "time of the failure.\n";
+        print OFILE "Check the error log for the actual replacement strategy.\n";
         print OFILE "\$ENDRepairAction\n\n";
         print OFILE "\@REPORTING_LEVEL = Call_Home\n\n\n";
         print OFILE "   |------          Callout List          ------|\n";
         print OFILE "   \$FRU = \$NOFRU\n\n";
         print OFILE "*****   $src RCDL text ends here.  */\n\n\n";
+
+        print RCDLFILE "\n\$ENDDESCRIPTION\n\n";
+        print RCDLFILE "\$RepairAction = The FRU callouts are calculated at the ".
+                        "time of the failure.\n";
+        print RCDLFILE "Check the error log for the actual replacement strategy.\n";
+        print RCDLFILE "\$ENDRepairAction\n\n";
+        print RCDLFILE "\@REPORTING_LEVEL = Call_Home\n\n\n";
+        print RCDLFILE "   |------          Callout List          ------|\n";
+        print RCDLFILE "   \$FRU = \$NOFRU\n\n";
+        print RCDLFILE "*****   $src RCDL text ends here.  */\n\n\n";
     }
+
+    # if there are no SRCs for a given subsystem, delete the empty file that was opened
+    if($srcCount == 0)
+    {
+        unlink($srcFileBaseName) or die("Cannot delete empty file: $srcFileBaseName: $!");
+    }
+
 }
 close(OFILE);
+close(RCDLFILE);
 
 #------------------------------------------------------------------------------
 # For each component value, print a file containing the parse code

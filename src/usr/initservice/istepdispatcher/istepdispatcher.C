@@ -2940,7 +2940,7 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
      * @userdata2[08:15] Manufacturing Mode (MNFG_FLAG_SRC_TERM)
      * @userdata2[16:63] Unused
      * @devdesc          Hostboot has requested a reconfig loop due to a
-     *                   hardware error.  Causes could be:
+     *                   hardware error. Causes could be:
      *                   - deconfiguration during an istep outside of the
      *                     the reconfig loop
      *                   - deconfiguration while running in istep mode
@@ -2948,7 +2948,7 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
      *                   - exceeded the number of allowed reconfig attempts
      *                   - recoverable hardware error that requires a
      *                     reboot to clear out
-     * @custdesc    A hardware error occurred during the IPL. See previous logs
+     * @custdesc    A hardware error occurred during the IPL. Check previous logs
      *              for details.
      */
     err = new ERRORLOG::ErrlEntry(

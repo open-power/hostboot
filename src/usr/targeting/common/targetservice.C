@@ -1913,10 +1913,10 @@ uint32_t TargetService::resetMutexAttributes(const Target* i_pTarget)
                     *
                     *   @devdesc   For some reason attr IDs in hbMutexAttrIds list
                     *              are not matching the attribute IDs that target
-                    *              service is seeing. This is causing incorrect matching
+                    *              service is seeing. This is causing incorrect matching.
                     *              Make sure mutexattribute.H in genfiles has good values
                     *
-                    *   @custdesc  Attempted to perform an invalid attribute look up
+                    *   @custdesc  Attempted to conduct an invalid attribute look up.
                     */
                     errlHndl_t l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
                                                         TARG_SVC_RESET_MUTEX,

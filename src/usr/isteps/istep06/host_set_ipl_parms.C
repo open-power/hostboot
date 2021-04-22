@@ -347,7 +347,7 @@ void* host_set_ipl_parms( void *io_pArgs )
          * @userdata2[0-31]  CONFIG_PNORDD_IS_BMCMBOX
          * @userdata2[32:63] CONFIG_PNORDD_IS_IPMI
          * @devdesc      PNOR-IPMI not enabled, BMC firmware needs to be updated
-         * @custdesc     PNOR-IPMI not enabled, BMC firmware needs to be updated
+         * @custdesc     Check BMC firmware version and update
          */
         l_pnor_err = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_PREDICTIVE,

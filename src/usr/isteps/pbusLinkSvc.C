@@ -167,7 +167,7 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( const IOHS_CONFIG_MODE i_busType
                      * @reasoncode   RC_MIXED_PBUS_CONNECTION
                      * @userdata1    Endpoint1 bus type
                      * @userdata2    Endpoint2 bus type
-                     * @custdesc      Platform generated error. See User Data.
+                     * @custdesc     Platform generated error. Check User Data.
                      * @devdesc      Mixed bus connection of two types
                      */
                     l_errl = new ERRORLOG::ErrlEntry(
@@ -276,7 +276,7 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( const IOHS_CONFIG_MODE i_busType
              * @reasoncode   RC_CONFLICT_PBUS_CONNECTION
              * @userdata1    Bus endpoint target pointer1
              * @userdata2    Bus endpoint target pointer2
-             * @custdesc     Platform generated error. See User Data.
+             * @custdesc     Platform generated error. Check User Data.
              * @devdesc      Connection is conflicting.
              *               endp1 -> endp2 but endp2 -> endp3.
              *               endp1 -> endp2 but
