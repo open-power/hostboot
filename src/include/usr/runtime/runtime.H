@@ -325,7 +325,6 @@ errlHndl_t updateHostProcDumpActual( SectionId i_section,
  *
  * @param[in] i_section        Chunk of data to find
  * @param[in] maxHwDumpSize    HW Data size per processor (Includes FFDC)
- * @param[in] threadRegVersion Register data format version
  *
  * @return errlHndl_t          NULL on success
  */

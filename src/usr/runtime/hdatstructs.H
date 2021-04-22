@@ -123,7 +123,7 @@ enum hdatSpiraHDataAreas
     SPIRAH_MS_DUMP_RSLT_TBL = 5,    // mainstore dump results table
     SPIRAH_PROC_DUMP_TBL    = 6,    // Proc reg dump area table
     SPIRAH_HW_DUMP_TBL      = 7,    // Processor HW Dump Area table
-    SPIRAH_LAST             = 7
+    SPIRAH_LAST             = SPIRAH_HW_DUMP_TBL
 };
 
 /** @enum hdatSpiraSDataAreas

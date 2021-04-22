@@ -448,6 +448,10 @@ errlHndl_t copyArchitectedRegs(void)
         TARGETING::Target * l_sys = NULL;
         TARGETING::targetService().getTopLevelTarget( l_sys );
         assert(l_sys != NULL);
+        //The ATTR_SBE_ARCH_DUMP_ADDR will be updated with Node specific value
+        //in the forward IPL path. (populate_HbRsvMem)
+        //eg:Node 0: 0xe6800000
+        //   Node 1: 0x4000e6800000 etc
         auto srcAddr =
                   l_sys->getAttr<TARGETING::ATTR_SBE_ARCH_DUMP_ADDR>();
  
@@ -742,7 +746,7 @@ errlHndl_t copyArchitectedRegs(void)
         l_sys->setAttr<TARGETING::ATTR_PDA_THREAD_REG_ENTRY_SIZE>(
                                                  procTableEntry->threadRegSize);
 
-        //Update teh HW Dump Area table
+        //Update the HW Dump Area table
         TRACFCOMP(g_trac_dump, "Updating the HW Dump Area Table");
         //Fetch the reference to the HW Dump area table to update the proc specific offset
         uint64_t l_hostDataAddr = 0;
@@ -759,6 +763,7 @@ errlHndl_t copyArchitectedRegs(void)
 
         for (uint32_t procNum = 0; procNum < procChips.size(); procNum++)
         {
+
             //Fetch PROC specific Meta Data
             uint64_t procSrcAddr = (reinterpret_cast<uint64_t>(vMapSrcAddrBase)+
                                   procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);

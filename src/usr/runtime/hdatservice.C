@@ -87,7 +87,6 @@ const hdatHeaderExp_t SPIRAS_HEADER = {
 
 //big enough to hold all of PHYP
 const uint64_t HDAT_MEM_SIZE = 128*MEGABYTE;
-
 /********************
  Utility Functions
  ********************/
@@ -1323,7 +1322,7 @@ errlHndl_t hdatService::updateHWDumpActual( SectionId i_section,
         }
 
         hwDumpTable = reinterpret_cast<DUMP::HwDumpAreaTable *>(l_hostDataAddr);
-        hwDumpTable->hwDataFormatVersion = 0x1;
+        hwDumpTable->hwDataFormatVersion = DUMP::MPIPL_METADATA_VERSION;
         hwDumpTable->hwDataSizePerProc = maxHwDumpSize;
     } while(0);
 

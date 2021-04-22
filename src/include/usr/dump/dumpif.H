@@ -244,6 +244,9 @@ namespace DUMP
         uint64_t regVal;
     } PACKED;
 
+
+     //Supported Metadata Version
+     static const uint16_t MPIPL_METADATA_VERSION = 0x1;
      /**
      *  @brief Defines the 128 bytes metadata structure used for capturing architected
      *         and HW data as part of MPIPL.
@@ -284,14 +287,14 @@ namespace DUMP
         //Init all parameters to zero
         void init()
         {
-            metaDataVersion = 0x1;
-            memset(reserved1,0,7);
+            metaDataVersion = MPIPL_METADATA_VERSION;
+            memset(reserved1,0,sizeof(reserved1));
             archDataMemoryAddr = 0x0;
             archDataMemAllocSize = 0x0;
             hwDataMemoryAddr = 0x0;
             hwDataMemAllocSize = 0x0;
             hwDataMemCapturedSize = 0x0;
-            memset(reserved2,0,80);
+            memset(reserved2,0,sizeof(reserved2));
         }
 
     } PACKED;
