@@ -906,7 +906,8 @@ void IpcSp::msgHandler()
                 // this should only be received by the primary node
                 const auto l_myNode = TARGETING::UTIL::getCurrentNodePhysId();
                 int l_primaryNode = TARGETING::UTIL::getPrimaryNodeNumber();
-                assert( l_myNode == l_primaryNode, "No primary node found" );
+                assert( l_myNode == l_primaryNode,
+                        "IPC_GET_PHYP_HRMOR send to non-primary node" );
 
                 // remember which node sent the message
                 IPC::getPhypHrmor_t* my_msg =
@@ -918,7 +919,7 @@ void IpcSp::msgHandler()
                   TARGETING::UTIL::assertGetToplevelTarget()
                   ->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
 
-                //Send response back to the primary HB to indicate valid freq attrs
+                //Send response back to the sending HB to indicate valid freq attrs
                 err = MBOX::send(MBOX::HB_GET_PHYP_HRMOR_MSGQ,
                                  msg, sender );
                 if (err)
