@@ -633,5 +633,66 @@
     <ffdc>SYSTEM_PSTATE0_FREQ</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
-
+  <hwpError>
+    <rc>RC_PSTATE_PB_FREQ_GT_PSTATE0_FREQ</rc>
+    <description> A frequency desiring to be converted to a Pstate is greater
+    than the Pstate 0 reference frequency.  This is typically due to a mismatch
+    between #V VPD and WOF Tables.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
+    <ffdc>SYSTEM_PSTATE0_FREQ_KHZ</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_PSTATE_STEP_EQ_0</rc>
+    <description> In converting a frequency to a Pstate, the Pstate step size is 0.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
+    <ffdc>SYSTEM_PSTATE0_FREQ_KHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_XLATE_UNDERFLOW</rc>
+    <description> An underflow occured translating to a Pstate.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
+    <ffdc>SYSTEM_PSTATE0_FREQ_KHZ</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <ffdc>PSTATE_MIN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_XLATE_OVERFLOW</rc>
+    <description> An overflow occured translating to a Pstate.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
+    <ffdc>SYSTEM_PSTATE0_FREQ_KHZ</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <ffdc>PSTATE_MAX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

@@ -1235,6 +1235,8 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
 
     do
     {
+        fapi2::ReturnCode l_rc;
+
         fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
         fapi2::ATTR_RVRM_VID_Type   l_rvrm_rvid;
 
@@ -1307,14 +1309,15 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
         {
             //Translate pau  frequency to pstate
-            freq2pState((iv_attrs.attr_pau_frequency_mhz * 1000),
-                    &l_ps, ROUND_FAST);
+
+            FAPI_TRY(freq2pState((iv_attrs.attr_pau_frequency_mhz * 1000),
+                    &l_ps, ROUND_FAST));
         }
         else
         {
             //Translate safe mode frequency to pstate
-            freq2pState((iv_attrs.attr_pm_safe_frequency_mhz * 1000),
-                    &l_ps, ROUND_FAST);
+            FAPI_TRY(freq2pState((iv_attrs.attr_pm_safe_frequency_mhz * 1000),
+                    &l_ps, ROUND_FAST));
         }
 
         //Compute real frequency
@@ -1351,17 +1354,17 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         // The minimum Pstate must be rounded FAST so that core floor
         // constraints are not violated.
         Pstate pstate_min;
-        int rc = freq2pState(revle32(i_occppb->frequency_min_khz),
+        l_rc = freq2pState(revle32(i_occppb->frequency_min_khz),
                              &pstate_min,
                              ROUND_FAST);
 
-        switch (rc)
+        switch ((int)l_rc)
         {
-            case -PSTATE_LT_PSTATE_MIN:
+            case fapi2::RC_PSTATE_PB_XLATE_UNDERFLOW:
                 FAPI_INF("OCC Minimum Frequency was clipped to Pstate 0");
                 break;
 
-            case -PSTATE_GT_PSTATE_MAX:
+            case fapi2::RC_PSTATE_PB_XLATE_OVERFLOW:
                 FAPI_INF("OCC Minimum Frequency %d KHz is outside the range that can be represented"
                          " by a Pstate with a base frequency of %d KHz and step size %d KHz",
                          revle32(i_occppb->frequency_min_khz),
@@ -1370,6 +1373,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
                 FAPI_INF("Pstate is set to %X (%d)", pstate_min);
                 break;
         }
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
         i_occppb->pstate_min = pstate_min;
         i_occppb->pstate_min = revle32(i_occppb->pstate_min);
@@ -2047,13 +2051,15 @@ void PlatPmPPB::attr_init( void )
     iv_frequency_step_khz = (iv_attrs.attr_freq_proc_refclock_khz /
                              iv_attrs.attr_proc_dpll_divider);
 
-    iv_frequency_step_khz = 16666;
-    FAPI_INF ("iv_attrs.attr_freq_proc_refclock_khz %08X iv_attrs.attr_proc_dpll_divider %08x",
-            iv_attrs.attr_freq_proc_refclock_khz,
+    FAPI_INF ("iv_frequency_step_khz calculated %08X %d",
+            iv_frequency_step_khz, iv_frequency_step_khz);
+
+    iv_frequency_step_khz = 16667;
+    FAPI_INF ("iv_attrs.attr_freq_proc_refclock_khz %08X %d iv_attrs.attr_proc_dpll_divider %08x",
+            iv_attrs.attr_freq_proc_refclock_khz, iv_attrs.attr_freq_proc_refclock_khz,
             iv_attrs.attr_proc_dpll_divider);
-    FAPI_INF ("iv_frequency_step_khz %08X %08X",
-            iv_frequency_step_khz,
-            revle32(iv_frequency_step_khz));
+    FAPI_INF ("iv_frequency_step_khz %08X %d",
+            iv_frequency_step_khz, iv_frequency_step_khz);
 
     iv_occ_freq_mhz      = iv_attrs.attr_pau_frequency_mhz/4;
 
@@ -3582,7 +3588,7 @@ fapi2::ReturnCode PlatPmPPB::update_biased_pstates()
     for (int i = 0; i < NUM_PV_POINTS; i++)
     {
 
-        freq2pState(iv_attr_mvpd_poundV_biased[i].frequency_mhz*1000, &l_ps, ROUND_SLOW);
+        FAPI_TRY(freq2pState(iv_attr_mvpd_poundV_biased[i].frequency_mhz*1000, &l_ps, ROUND_SLOW));
 
         iv_attr_mvpd_poundV_biased[i].pstate = l_ps;
 
@@ -3593,6 +3599,7 @@ fapi2::ReturnCode PlatPmPPB::update_biased_pstates()
             iv_attr_mvpd_poundV_biased[i].frequency_mhz);
     }
 
+fapi_try_exit:
     FAPI_INF("<<<<<<<<<< update_pstates");
     return fapi2::current_err;
 }
@@ -4375,7 +4382,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 
     // Calculate safe operational pstate.  This must be rounded to create
     // a faster Pstate than the floor
-    freq2pState(l_safe_op_freq_mhz*1000, &l_safe_op_ps, ROUND_FAST);
+    FAPI_TRY(freq2pState(l_safe_op_freq_mhz*1000, &l_safe_op_ps, ROUND_FAST));
 
     // Given the Pstate might round the frequency, get that frequency
     pState2freq(l_safe_op_ps, &l_safe_mode_op_ps2freq_khz);
@@ -4467,7 +4474,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     }
 
     // Recalculate the Pstate as jump uplifts may have changed the previous result
-    freq2pState(iv_attrs.attr_pm_safe_frequency_mhz*1000, &l_safe_mode_ps, ROUND_FAST);
+    FAPI_TRY(freq2pState(iv_attrs.attr_pm_safe_frequency_mhz*1000, &l_safe_mode_ps, ROUND_FAST));
 
     FAPI_INF ("l_safe_mode_ps 0x%x (%d)",l_safe_mode_ps, l_safe_mode_ps);
 
@@ -4580,9 +4587,7 @@ fapi2::ReturnCode PlatPmPPB::compute_retention_vid()
     FAPI_INF("> PlatPmPPB:compute_retention_voltage");
 
     // Needs kHz
-    freq2pState (iv_vddPsavFreq * 1000,
-                 &l_psave_ps,
-                 ROUND_FAST);
+    FAPI_TRY(freq2pState (iv_vddPsavFreq * 1000, &l_psave_ps, ROUND_FAST));
 
     l_psave_mv = ps2v_mv(l_psave_ps, VDD, VPD_PT_SET_RAW);
 
@@ -4779,24 +4784,33 @@ uint32_t PlatPmPPB::ps2v_mv(const Pstate i_pstate,
 ///////////////////////////////////////////////////////////
 ////////    freq2pState
 ///////////////////////////////////////////////////////////
-int PlatPmPPB::freq2pState (const uint32_t i_freq_khz,
-                            Pstate* o_pstate,
-                            const FREQ2PSTATE_ROUNDING i_round)
+fapi2::ReturnCode PlatPmPPB::freq2pState (
+    const uint32_t i_freq_khz,
+    Pstate* o_pstate,
+    const FREQ2PSTATE_ROUNDING i_round)
 {
-    int rc = 0;
+    float deltaf = 0;
     float pstate32 = 0;
+    char  round_str[32];
 
-    FAPI_DBG("freq2pState enter: ref_freq_khz = %u (0x%X); step_freq_khz= %u (0x%X)",
-                (iv_reference_frequency_khz),
-                (iv_reference_frequency_khz),
-                (iv_frequency_step_khz),
-                (iv_frequency_step_khz));
+    deltaf = (float)iv_reference_frequency_khz - (float)i_freq_khz;
+
+    FAPI_ASSERT(deltaf >= 0,
+                fapi2::PSTATE_PB_FREQ_GT_PSTATE0_FREQ()
+                   .set_CHIP_TARGET(iv_procChip)
+                   .set_FREQ_KHZ(i_freq_khz)
+                   .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
+                "Pstate conversion frequency is greater than Pstate 0 reference");
+    FAPI_ASSERT(iv_frequency_step_khz,
+                fapi2::PSTATE_PB_PSTATE_STEP_EQ_0()
+                   .set_CHIP_TARGET(iv_procChip)
+                   .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
+               "Pstate step size is 0");
 
     // ----------------------------------
     // compute pstate for given frequency
     // ----------------------------------
-    pstate32 = ((float)((iv_reference_frequency_khz) - (float)i_freq_khz)) /
-                (float) (iv_frequency_step_khz);
+    pstate32 = deltaf / (float) (iv_frequency_step_khz);
     // @todo Bug fix from Characterization team to deal with VPD not being
     // exactly in step increments
     //       - not yet included to separate changes
@@ -4806,16 +4820,16 @@ int PlatPmPPB::freq2pState (const uint32_t i_freq_khz,
     if ((i_round ==  ROUND_SLOW) && (i_freq_khz))
     {
         *o_pstate  = (Pstate)internal_ceil(pstate32);
-        FAPI_DBG("freq2pState: ROUND SLOW");
+         strcpy(round_str, "SLOW");
     }
     else
     {
         *o_pstate  = (Pstate)pstate32;
-         FAPI_DBG("freq2pState: ROUND FAST");
+         strcpy(round_str, "FAST");
     }
 
-    FAPI_DBG("freq2pState: i_freq_khz = %u (0x%X); pstate32 = %f; o_pstate = %u (0x%X)",
-                i_freq_khz, i_freq_khz, pstate32, *o_pstate, *o_pstate);
+    FAPI_DBG("freq2pState: i_freq_khz = %u (0x%X); pstate32 = %f; o_pstate = %u (0x%X) Rounding: %s",
+                i_freq_khz, i_freq_khz, pstate32, *o_pstate, *o_pstate, round_str);
     FAPI_DBG("freq2pState: ref_freq_khz = %u (0x%X); step_freq_khz= %u (0x%X)",
                 (iv_reference_frequency_khz),
                 (iv_reference_frequency_khz),
@@ -4827,17 +4841,34 @@ int PlatPmPPB::freq2pState (const uint32_t i_freq_khz,
     // ------------------------------
     if (pstate32 < PSTATE_MIN)
     {
-        rc = -PSTATE_LT_PSTATE_MIN;
         *o_pstate = PSTATE_MIN;
+        FAPI_ASSERT_NOEXIT(false,
+                fapi2::PSTATE_PB_XLATE_UNDERFLOW(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                   .set_CHIP_TARGET(iv_procChip)
+                   .set_FREQ_KHZ(i_freq_khz)
+                   .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz)
+                   .set_PSTATE(pstate32)
+                   .set_PSTATE_MIN(PSTATE_MIN),
+               "Pstate is less than PSTATE_MIN");
+
     }
 
     if (pstate32 > PSTATE_MAX)
     {
-        rc = -PSTATE_GT_PSTATE_MAX;
         *o_pstate = PSTATE_MAX;
+        FAPI_ASSERT_NOEXIT(false,
+                fapi2::PSTATE_PB_XLATE_OVERFLOW(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                   .set_CHIP_TARGET(iv_procChip)
+                   .set_FREQ_KHZ(i_freq_khz)
+                   .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz)
+                   .set_PSTATE(pstate32)
+                   .set_PSTATE_MAX(PSTATE_MIN),
+               "Pstate is less than PSTATE_MIN");
     }
 
-    return rc;
+fapi_try_exit:
+    return fapi2::current_err;
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -5241,15 +5272,15 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
                              uint8_t* i_pBuffer,
                              VRT_t* o_vrt_data)
 {
-    uint32_t l_index_0 = 0;
-    uint8_t  l_type = 0;
-    uint32_t l_freq_khz = 0;
-    uint32_t l_step_freq_khz;
-    Pstate   l_ps;
-    uint8_t  l_temp = 0;
+    uint32_t          l_index_0 = 0;
+    uint8_t           l_type = 0;
+    uint32_t          l_freq_khz = 0;
+    uint32_t          l_step_freq_khz;
+    Pstate            l_ps;
+    uint8_t           l_temp = 0;
 
-    l_step_freq_khz = (iv_frequency_step_khz);
-    FAPI_DBG("l_step_freq_khz = 0x%X (%d)", l_step_freq_khz, l_step_freq_khz);
+    l_step_freq_khz = iv_frequency_step_khz;
+//    FAPI_DBG("l_step_freq_khz = 0x%X (%d)", l_step_freq_khz, l_step_freq_khz);
 
 #define UINT16_GET(__uint8_ptr)   ((uint16_t)( ( (*((const uint8_t *)(__uint8_ptr)) << 8) | *((const uint8_t *)(__uint8_ptr) + 1) ) ))
     //Initialize VRT header
@@ -5275,10 +5306,11 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     char l_buffer_str[256];   // Temporary formatting string buffer
     char l_line_str[256];     // Formatted output line string
 
-    // Filtering Tracing output to only only QID of 0
+    // Filtering Tracing output to only the maximum of some dimensions
+    // as these have the most interesting values to corroborate.
     bool b_output_trace = false;
     if (o_vrt_data->vrtHeader.fields.vdd_ceff_id == 25 &&
-        o_vrt_data->vrtHeader.fields.io_id == 5 &&
+        o_vrt_data->vrtHeader.fields.vcs_ceff_id == 3 &&
         o_vrt_data->vrtHeader.fields.ac_id == 3)
     {
         b_output_trace = true;
@@ -5299,6 +5331,7 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
         strcat(l_line_str, l_buffer_str);
         FAPI_INF("%s ", l_line_str)
     }
+
     // Get the frequency biases in place and check that they all match
     double f_freq_bias = 0;
     int freq_bias_value_hp = 0;
@@ -5311,48 +5344,33 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
                     f_freq_bias);
 
     //Initialize VRT data part
-
     for (l_index_0 = 0; l_index_0 < WOF_VRT_SIZE; ++l_index_0)
     {
         strcpy(l_line_str, "    ");
         strcpy(l_buffer_str, "");
 
         // Offset MHz*1000 (khz) + step (khz) * (sysvalue - 60)
+        // Note: the table generation already did rounding so simply translate
         float l_freq_raw_khz;
         float l_freq_biased_khz;
         l_freq_raw_khz = (float)(1000 * 1000 + (l_step_freq_khz * ((*i_pBuffer) - 60)));
 
         l_freq_biased_khz = l_freq_raw_khz * f_freq_bias;
-
-        // Round to nearest MHz as that is how the system tables are generated
-        float l_freq_raw_up_mhz = (l_freq_biased_khz + 500)/1000;
-        float l_freq_raw_dn_mhz = (l_freq_biased_khz)/1000;
-        float l_freq_rounded_khz;
-        if (l_freq_raw_up_mhz >= l_freq_raw_dn_mhz)
-            l_freq_rounded_khz = (uint32_t)(l_freq_raw_up_mhz * 1000);
-        else
-            l_freq_rounded_khz = (uint32_t)(l_freq_raw_dn_mhz * 1000);
-
-        l_freq_khz = (uint32_t)(l_freq_rounded_khz);
-
-        FAPI_DBG("freq_raw_khz  = %f; freq_biased_khz = %f; freq_rounded = 0x%X (%d); sysvalue = 0x%X (%d)",
-                l_freq_raw_khz,
-                l_freq_biased_khz,
-                l_freq_khz, l_freq_khz,
-                *i_pBuffer, *i_pBuffer);
+        l_freq_khz = (uint32_t)(l_freq_biased_khz);
 
         // Translate to Pstate.  The called function will clip to the
-        // legal range.  The rc is only interesting if we care that
-        // the pstate was clipped;  in this case, we don't.
-        freq2pState(l_freq_khz, &l_ps, ROUND_SLOW);
+        // legal range.
+        FAPI_TRY(freq2pState(l_freq_khz, &l_ps, ROUND_SLOW));
         o_vrt_data->data[l_index_0] = l_ps;
 
-        // Trace the last 8 values of the 24 for debug. As this is
-        // in a loop that is processing over 1000 tables, the last
-        // 8 gives a view that can correlate that the input data read
-        // is correct without overfilling the HB trace buffer.
         if (b_output_trace)
         {
+            FAPI_DBG("sysvalue: 0x%X (%d); freq_raw_khz: %7.0f; freq_biased_khz: %7.0f; freq: %d",
+            *i_pBuffer, *i_pBuffer,
+            l_freq_raw_khz,
+            l_freq_biased_khz,
+            l_freq_khz);
+
             sprintf(l_buffer_str, "[%2d] PS 0x%02X MHz %4d",
                     l_index_0, o_vrt_data->data[l_index_0],  l_freq_khz / 1000);
             strcat(l_line_str, l_buffer_str);
@@ -5366,9 +5384,9 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     l_type = 1;
     o_vrt_data->vrtHeader.fields.type =  l_type;
 
+fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///////////////////////////////////////////////////////////
 ////////  dccr_value
@@ -5535,7 +5553,7 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
                     );
             if (l_rc)
             {
-                iv_wof_enabled = false;
+                disable_wof();
                 FAPI_TRY(l_rc);  // Exit the function as a fail
             }
 

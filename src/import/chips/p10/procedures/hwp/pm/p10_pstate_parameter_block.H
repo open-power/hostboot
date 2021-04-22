@@ -407,11 +407,11 @@ class PlatPmPPB
         /// @brief Converts frequency value to pstate number
         /// @param[in]     i_freq_khz input frequency
         /// @param[out]    o_pstate pstate output for a given inut frequency
-        /// @return        error statee
+        /// @return        fapi::ReturnCode
         /// -----------------------------------------------------------------------
-        int freq2pState (const uint32_t freq_khz,
-                         Pstate* o_pstate,
-                         const FREQ2PSTATE_ROUNDING i_round = ROUND_SLOW);
+        fapi2::ReturnCode  freq2pState (const uint32_t freq_khz,
+                                        Pstate* o_pstate,
+                                        const FREQ2PSTATE_ROUNDING i_round = ROUND_SLOW);
 
         /// -----------------------------------------------------------------------
         /// @brief Converts a pstate number to a frequency
