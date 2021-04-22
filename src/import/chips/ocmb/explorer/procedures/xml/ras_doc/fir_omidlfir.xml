@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -48,6 +48,7 @@
             See DL0_ERROR_HOLD[52:63]
         </note>
         <action id="predefined" name="dl_fatal_error" />
+        <flag id="SUE_SOURCE" />
     </bit>
 
     <bit pos="1" attn_type="UNIT_CS"
@@ -56,6 +57,7 @@
             See DL0_ERROR_HOLD[50:51]
         </note>
         <action id="predefined" name="self_th_1" />
+        <flag id="SUE_SOURCE" />
     </bit>
 
     <bit pos="2" attn_type="RE"
