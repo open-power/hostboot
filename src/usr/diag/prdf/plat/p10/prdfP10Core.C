@@ -39,43 +39,31 @@ namespace p10_core
 {
 
 #ifdef __HOSTBOOT_RUNTIME
-void maskIfCoreCs( ExtensibleChip * i_chip )
+/**
+ * @brief Helper function to mask off all attentions from a core due to a core
+ *        unit checkstop.
+ * @param The target core.
+ */
+void __maskIfCoreCs(ExtensibleChip* i_chip)
 {
-    int32_t l_rc = SUCCESS;
+    // Masking at the chiplet level. Will need the parent EQ and the bit
+    // position of the core within the chiplet FIRs.
+    ExtensibleChip* eq = getConnectedParent(i_chip, TYPE_EQ);
+    unsigned int bit = 5 + i_chip->getPos() % MAX_EC_PER_EQ; // bits 5-8
 
-    ExtensibleChip * eq = getConnectedParent( i_chip, TYPE_EQ );
-
-    do
+    // Mask this core in the chiplet FIRs for all attention types.
+    const char* list[] = {"EQ_CHIPLET_CS_FIR_MASK",
+                          "EQ_CHIPLET_RE_FIR_MASK",
+                          "EQ_CHIPLET_UCS_FIR_MASK"};
+    for (auto reg : list)
     {
-        // Get the EQ chiplet level mask registers.
-        SCAN_COMM_REGISTER_CLASS * eq_chiplet_cs_fir_mask =
-            eq->getRegister("EQ_CHIPLET_CS_FIR_MASK");
-
-        SCAN_COMM_REGISTER_CLASS * eq_chiplet_re_fir_mask =
-            eq->getRegister("EQ_CHIPLET_RE_FIR_MASK");
-
-        SCAN_COMM_REGISTER_CLASS * eq_chiplet_ucs_fir_mask =
-            eq->getRegister("EQ_CHIPLET_UCS_FIR_MASK");
-
-        // Read values.
-        l_rc  = eq_chiplet_cs_fir_mask->Read();
-        l_rc |= eq_chiplet_re_fir_mask->Read();
-        l_rc |= eq_chiplet_ucs_fir_mask->Read();
-
-        if ( SUCCESS != l_rc ) break;
-
-        uint8_t corePos = i_chip->getPos() % MAX_EC_PER_EQ; // 0-3
-
-        // Mask analysis to the EQ_CORE_FIR depending on the core position
-        eq_chiplet_cs_fir_mask->SetBit(5+corePos);
-        eq_chiplet_re_fir_mask->SetBit(5+corePos);
-        eq_chiplet_ucs_fir_mask->SetBit(5+corePos);
-
-        eq_chiplet_cs_fir_mask->Write();
-        eq_chiplet_re_fir_mask->Write();
-        eq_chiplet_ucs_fir_mask->Write();
-
-    }while(0);
+        SCAN_COMM_REGISTER_CLASS* mask = eq->getRegister(reg);
+        if ((SUCCESS == mask->Read()) && !mask->IsBitSet(bit))
+        {
+            mask->SetBit(bit);
+            mask->Write();
+        }
+    }
 }
 #endif
 
@@ -117,7 +105,7 @@ int32_t PostAnalysis(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
     if ( io_sc.service_data->isProcCoreCS() )
     {
         // Mask off all attentions for this core.
-        maskIfCoreCs(i_chip);
+        __maskIfCoreCs(i_chip);
 
         // Mask off all attentions for the neighbor core, if it exists. Note
         // that if the attention existed in the odd core in the core pair,
@@ -129,7 +117,7 @@ int32_t PostAnalysis(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
         // ensure the appropriate bits are masked in all cases.
         if (neighborCore != nullptr)
         {
-            maskIfCoreCs(neighborCore);
+            __maskIfCoreCs(neighborCore);
         }
 
         // NOTE: We no longer need to do a runtime deconfig of the core here as
