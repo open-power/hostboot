@@ -1295,6 +1295,9 @@
       <id>ATTN_AREA_2_ADDR</id>
     </attribute>
     <attribute>
+      <id>BLOCK_SPEC_DECONFIG</id>
+    </attribute>
+    <attribute>
       <default>NODE</default>
       <id>CDM_DOMAIN</id>
     </attribute>
@@ -2022,9 +2025,6 @@
       <id>ASYNC_NEST_FREQ_MHZ</id>
     </attribute>
     <attribute>
-      <id>BLOCK_SPEC_DECONFIG</id>
-    </attribute>
-    <attribute>
       <id>BOOT_FREQ_MHZ</id>
     </attribute>
     <attribute>
@@ -2042,9 +2042,6 @@
     </attribute>
     <attribute>
       <id>CLEAR_DIMM_SPD_ENABLE</id>
-    </attribute>
-    <attribute>
-      <id>DPO_MIN_FREQ_PERCENT</id>
     </attribute>
     <attribute>
       <id>EECACHE_DISABLE_AUTO_RESET</id>

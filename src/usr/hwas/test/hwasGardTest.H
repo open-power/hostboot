@@ -4092,6 +4092,7 @@ public:
 
             // find an fc unit that we can play with
             Target* pSys = UTIL::assertGetToplevelTarget();
+            auto pNode = UTIL::getCurrentNodeTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -4115,12 +4116,12 @@ public:
 
             // Save ATTR_BLOCK_SPEC_DECONFIG value
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig
-                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+                = pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
             TS_INFO("testGard9: l_orig_block_spec_deconfig=0x%X", l_orig_block_spec_deconfig);
 
             // Allow speculative deconfigs (clear ATTR_BLOCK_SPEC_DECONFIG)
             TS_INFO("testGard9: Allow speculative deconfigs");
-            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+            pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
 
             // create GARD record, call 'doGard' step and confirm target is
             //  deconfigured
@@ -4167,7 +4168,7 @@ public:
 
             // Block speculative deconfigs(set ATTR_BLOCK_SPEC_DECONFIG)
             TS_INFO("testGard9: Block speculative deconfigs");
-            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(1);
+            pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(1);
 
             // restore functional state
             l_state.functional = true;
@@ -4183,7 +4184,7 @@ public:
             }
 
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
-                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+                = pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
             TS_INFO("testGard9: l_block_spec_deconfig=0x%X", l_block_spec_deconfig);
             if(l_block_spec_deconfig == 0)
             {
@@ -4209,7 +4210,7 @@ public:
                 break;
             }
 
-            l_block_spec_deconfig = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            l_block_spec_deconfig = pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
             TS_INFO("testGard9: l_block_spec_deconfig=0x%X", l_block_spec_deconfig);
             if(l_block_spec_deconfig != 0)
             {
@@ -4229,7 +4230,7 @@ public:
             // Restore
             l_state.functional = true;
             l_target->setAttr<ATTR_HWAS_STATE>(l_state);
-            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
+            pNode->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
             TS_INFO("testGard9: Success");
         }

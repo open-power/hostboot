@@ -2338,11 +2338,18 @@ errlHndl_t DeconfigGard::updateSpecDeconfigTargetStates(
     {
         // It is a caller error if this function is called and spec deconfig
         // is not enabled.
-        Target * pSys;
-        targetService().getTopLevelTarget(pSys);
-        HWAS_ASSERT((pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>() == 1),
-                "HWAS updateSpecDeconfigTargetStates: "
-                "ATTR_BLOCK_SPEC_DECONFIG != 1");
+        // Get all node targets
+        TargetHandleList l_nodelist;
+        getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                        TARGETING::UTIL_FILTER_FUNCTIONAL);
+        int l_blockSet = 0;
+        for( auto l_node : l_nodelist )
+        {
+            l_blockSet |= l_node->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+        }
+        HWAS_ASSERT((l_blockSet),
+                    "HWAS updateSpecDeconfigTargetStates: "
+                    "ATTR_BLOCK_SPEC_DECONFIG != 1 on any node");
 
         // Get all GARD Records
         GardRecords_t l_gardRecords;
@@ -3121,13 +3128,18 @@ uint8_t DeconfigGard::clearBlockSpecDeconfigForReplacedTargets()
     HWAS_INF("Clear Block Spec Deconfig for replaced Targets");
 
     // Get Block Spec Deconfig value
-    Target *pSys;
-    targetService().getTopLevelTarget(pSys);
-    ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
-        pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+    ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig = 0;
 
     do
     {
+        TargetHandleList l_nodelist;
+        getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                        TARGETING::UTIL_FILTER_FUNCTIONAL);
+        for( auto l_node : l_nodelist )
+        {
+            l_block_spec_deconfig |= l_node->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+        }
+
         // Check Block Spec Deconfig value
         if(l_block_spec_deconfig == 0)
         {
@@ -3153,8 +3165,6 @@ uint8_t DeconfigGard::clearBlockSpecDeconfigForReplacedTargets()
                 if(l_block_spec_deconfig == 1)
                 {
                     l_block_spec_deconfig = 0;
-                    pSys->setAttr
-                        <ATTR_BLOCK_SPEC_DECONFIG>(l_block_spec_deconfig);
                     HWAS_INF("Block Spec Deconfig cleared due to HWAS state "
                              "change for 0x%.8x",
                              get_huid(l_pTarget));
@@ -3166,6 +3176,15 @@ uint8_t DeconfigGard::clearBlockSpecDeconfigForReplacedTargets()
                 clear_hwas_changed_bit(l_pTarget, HWAS_CHANGED_BIT_RESRC_RECOV);
             }
         } // for
+
+        // Clear on all nodes if we found a reason
+        if( l_block_spec_deconfig == 0 )
+        {
+            for( auto l_node : l_nodelist )
+            {
+                l_node->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_block_spec_deconfig);
+            }
+        }
     } while (0);
 
     return l_block_spec_deconfig;
@@ -3179,10 +3198,6 @@ errlHndl_t
 
     errlHndl_t l_pErr = NULL;
     GardRecords_t l_records;
-
-    // Get system target
-    Target *pSys;
-    targetService().getTopLevelTarget(pSys);
 
     do
     {
@@ -3224,7 +3239,6 @@ errlHndl_t
                 if(io_blockAttr == 1)
                 {
                     io_blockAttr = 0;
-                    pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(io_blockAttr);
                     HWAS_INF("Block Spec Deconfig cleared due to no gard "
                              "records for 0x%.8x",
                              get_huid(l_pTarget));
@@ -3237,6 +3251,18 @@ errlHndl_t
                                        HWAS_CHANGED_BIT_GARD_APPLIED);
             }
         } // for
+
+        // Clear on all nodes if we found a reason
+        if( io_blockAttr == 0 )
+        {
+            TargetHandleList l_nodelist;
+            getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                            TARGETING::UTIL_FILTER_FUNCTIONAL);
+            for( auto l_node : l_nodelist )
+            {
+                l_node->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(io_blockAttr);
+            }
+        }
     } while (0);
 
     return l_pErr;

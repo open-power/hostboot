@@ -2245,10 +2245,15 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                     "NOT available" : "available");
     if((l_errl != nullptr)||((o_bootable!=nullptr)&&(!*o_bootable)))
     {
-        // Minimum hardware not available, block speculative deconfigs
-        Target *pSys;
-        targetService().getTopLevelTarget(pSys);
-        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(1);
+        // Get all node targets
+        TargetHandleList l_nodelist;
+        getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                        TARGETING::UTIL_FILTER_FUNCTIONAL);
+        for( auto l_node : l_nodelist )
+        {
+            // Minimum hardware not available, block speculative deconfigs
+            l_node->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(1);
+        }
     }
 
     return  l_errl ;
