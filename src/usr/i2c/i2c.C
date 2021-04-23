@@ -5747,68 +5747,11 @@ void addHwCalloutsI2c(errlHndl_t i_err,
     assert(i_err != nullptr, "Error log must not be nullptr");
     assert(i_target != nullptr, "i2cMaster target must not be nullptr.");
 
-    if (!INITSERVICE::spBaseServicesEnabled())
-    {
-        i_err->addI2cDeviceCallout(i_target,
-                                   i_args.engine,
-                                   i_args.port,
-                                   i_args.devAddr,
-                                   HWAS::SRCI_PRIORITY_HIGH);
-    }
-    else
-    {
-        // For FSP systems which don't yet have special handling for i2c device
-        // callouts we still need to handle the UCD search to avoid regression
-        // back to the "non UCD aware" behavior.
-        bool l_devFound = false;
-        const auto l_physPath = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
-
-        // Loop thru the UCDs in the system and match physical path,
-        // engine, and port to the i2c master.
-
-        TARGETING::TargetHandleList allUcds;
-        TARGETING::getAllChips(allUcds,
-                               TARGETING::TYPE_POWER_SEQUENCER,
-                               false);
-
-        for(const auto &ucd: allUcds)
-        {
-            const auto l_ucdInfo = ucd->
-                getAttr<TARGETING::ATTR_I2C_CONTROL_INFO>();
-
-            if ((l_ucdInfo.i2cMasterPath == l_physPath) &&
-                (l_ucdInfo.engine == i_args.engine) &&
-                (l_ucdInfo.port == i_args.port) &&
-                (l_ucdInfo.devAddr == i_args.devAddr))
-            {
-                TRACFCOMP(g_trac_i2c,
-                          "Unresponsive UCD found: "
-                          "Engine=%d, masterPort=%d, address=0x%X "
-                          "huid for its i2c master is 0x%.8X",
-                          l_ucdInfo.engine,
-                          l_ucdInfo.port,
-                          l_ucdInfo.devAddr,
-                          TARGETING::get_huid(i_target));
-
-                i_err->addHwCallout(ucd,
-                                    HWAS::SRCI_PRIORITY_HIGH,
-                                    HWAS::NO_DECONFIG,
-                                    HWAS::GARD_NULL);
-
-                l_devFound = true;
-                break;
-            }
-        }
-
-        // Could also be an issue with Processor or its bus
-        // -- both on the same FRU
-        i_err->addHwCallout(i_target,
-                            l_devFound ?
-                            HWAS::SRCI_PRIORITY_MED :
-                            HWAS::SRCI_PRIORITY_HIGH,
-                            HWAS::NO_DECONFIG,
-                            HWAS::GARD_NULL);
-    }
+    i_err->addI2cDeviceCallout(i_target,
+                               i_args.engine,
+                               i_args.port,
+                               i_args.devAddr,
+                               HWAS::SRCI_PRIORITY_HIGH);
 }
 
 } // end namespace I2C
