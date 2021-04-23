@@ -236,6 +236,9 @@
       <id>SYSTEM_BRAND_NAME</id>
     </attribute>
     <attribute>
+      <id>USB_SECURITY</id>
+    </attribute>
+    <attribute>
       <id>VLAN_SWITCHES</id>
     </attribute>
     <attribute>

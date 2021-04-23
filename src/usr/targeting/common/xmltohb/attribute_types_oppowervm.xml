@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -586,6 +586,19 @@
       </string>
     </simpleType>
     <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>USB_SECURITY</id>
+    <description>
+      Usb Security State
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
   </attribute>

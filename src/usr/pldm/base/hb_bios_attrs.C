@@ -59,6 +59,7 @@ const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[] = "hb_huge_page_size";
 const char PLDM_BIOS_HB_LMB_SIZE_STRING[] = "hb_memory_region_size";
 const char PLDM_BIOS_HB_MFG_FLAGS_STRING[] = "hb_mfg_flags";
 const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[] = "hb_field_core_override";
+const char PLDM_BIOS_HB_USB_SECURITY_STRING[] = "hb_usb_security";
 
 // Possible Values
 constexpr char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
@@ -871,7 +872,7 @@ errlHndl_t getLmbSize(
 {
     errlHndl_t errl = nullptr;
 
-    do{
+    do {
 
     const pldm_bios_string_table_entry * cur_val_string_entry_ptr = nullptr;
     errl = systemEnumAttrLookup(io_string_table,
@@ -1192,6 +1193,34 @@ errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
     }
 
     }while(0);
+
+    return errl;
+}
+
+errlHndl_t getUsbSecurity(
+        std::vector<uint8_t>& io_string_table,
+        std::vector<uint8_t>& io_attr_table,
+        TARGETING::ATTR_USB_SECURITY_type &o_usbSecurity)
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+
+    uint64_t l_attr_val = 0;
+    errl = systemIntAttrLookup(io_string_table,
+                               io_attr_table,
+                               PLDM_BIOS_HB_USB_SECURITY_STRING,
+                               l_attr_val);
+    if(errl)
+    {
+        PLDM_ERR("getUsbSecurity() Failed to lookup value for %s",
+                 PLDM_BIOS_HB_USB_SECURITY_STRING);
+        break;
+    }
+
+    o_usbSecurity = static_cast<TARGETING::ATTR_USB_SECURITY_type>(l_attr_val);
+
+    } while(0);
 
     return errl;
 }

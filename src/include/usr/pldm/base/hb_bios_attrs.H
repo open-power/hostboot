@@ -85,6 +85,22 @@ namespace PLDM
     errlHndl_t getHugePageCount(std::vector<uint8_t>& io_string_table,
                                 std::vector<uint8_t>& io_attr_table,
                                 TARGETING::ATTR_HUGE_PAGE_COUNT_type &o_hugePageCount);
+ 
+   /** @brief Retrieve the current value of the hb_usb_security
+    *          PLDM bios attribute and return the value converted
+    *          to a ATTR_USB_SECURITY_type.
+    *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
+    * @param[out]    o_usb_security   If no error occurs will contain the value
+    *                                 for hb_usb_security translated
+    *                                 to terms of ATTR_USB_SECURITY_type.
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getUsbSecurity(std::vector<uint8_t>& io_string_table,
+                              std::vector<uint8_t>& io_attr_table,
+                              TARGETING::ATTR_USB_SECURITY_type &o_usb_security);
 
     /** @brief Retrieve the current value of the hb_huge_page_size
     *          PLDM bios attribute and return the value converted

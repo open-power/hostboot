@@ -116,6 +116,49 @@ errlHndl_t getAndSetFieldCoreOverrideFromBmcBios( std::vector<uint8_t>& io_strin
                         get_huid(l_nodeTarget) );
         }
     }
+    return l_errl;
+}
+
+/*
+ * @brief Retrieve the USB Security State from the BMC BIOS and set the system
+ *        attribute ATTR_USB_SECURITY to the retrieved value, if no error occurred.
+ *        If an error occurs retrieving the BMC BIOS, then the attribute is left as is.
+ *
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H
+ * @param[in]     i_sys             System target handle
+ *
+ * @return Error if failed to retrieve the USB security state, otherwise nullptr
+ */
+errlHndl_t getAndSetUsbSecurityFromBmcBios(std::vector<uint8_t>& io_string_table,
+                                           std::vector<uint8_t>& io_attr_table,
+                                           TARGETING::TargetHandle_t i_sys)
+{
+    // Create a variable to hold the retrieved USB security value from the BMC BIOS
+    TARGETING::ATTR_USB_SECURITY_type l_usbSecurity(0);
+
+    // Get the USB Security from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getUsbSecurity(io_string_table, io_attr_table,
+                                             l_usbSecurity);
+
+    if (unlikely(l_errl != nullptr))
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                  "getAndSetUsbSecurityFromBmcBios(): An error occurred getting "
+                  "USB Security State from the BMC BIOS. Leaving the system "
+                  "attribute ATTR_USB_SECURITY at its current value %d",
+                  i_sys->getAttr<ATTR_USB_SECURITY>());
+    }
+    else
+    {
+        // Set the system attribute ATTR_USB_SECURITY to the retrieved value
+        i_sys->setAttr<ATTR_USB_SECURITY>(l_usbSecurity);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                  "getAndSetUsbSecurityFromBmcBios(): Succeeded in getting the BMC "
+                  "BIOS USB Securirty State attribute %d and setting the attribute "
+                  "ATTR_USB_SECURITY",
+                  l_usbSecurity);
+    }
 
     return l_errl;
 }
@@ -280,6 +323,16 @@ errlHndl_t getAndSetPLDMBiosAttrs()
     }
 
     sys->setAttr<ATTR_PAYLOAD_KIND>(payload_kind);
+
+    // Retrieve the Usb Security value from the BMC bios and set the
+    // system attribute ATTR_USB_SECURITY to that value.
+    errl = getAndSetUsbSecurityFromBmcBios(bios_string_table, bios_attr_table, sys);
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "
+                  "getAndSetUsbSecurityFromBmcBios failed to get and then set the security state");
+        errlCommit(errl, ISTEP_COMP_ID);
+    }
 
     }while(0);
 
