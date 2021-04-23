@@ -1978,29 +1978,6 @@
     </hwpfToHbAttrMap>
   </attribute>
 
-  <attribute>
-    <id>FREQ_CORE_MAX</id>
-    <description>
-      SYSTEM Attribute
-      Maximum frequency (binary in MHz) that any processor in the system will
-      run. Used to define the top end of the PState range in the frequency space.
-      From this, the ATTR_PROCPM_PSTATE0_FREQUENCY is computed using
-      ATTR_SYSTEM_REFCLK_FREQUENCY to determine the step size.
-
-      Consumers: proc_build_gpstate_table.C (among others)
-
-      Data is is provided by MVPD #V and is calculated as the minimum
-      of the turbo frequencies
-    </description>
-    <simpleType>
-      <uint32_t/>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <no_export/>
-  </attribute>
-
   <!-- Required by FSP -->
   <attribute>
     <id>FREQ_PROC_REFCLOCK</id>

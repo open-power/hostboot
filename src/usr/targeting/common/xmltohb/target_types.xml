@@ -2077,9 +2077,6 @@
       <id>FREQ_CORE_CEILING_MHZ</id>
     </attribute>
     <attribute>
-      <id>FREQ_CORE_MAX</id>
-    </attribute>
-    <attribute>
       <id>FUSED_CORE_MODE_HB</id>
     </attribute>
     <attribute>

@@ -59,32 +59,6 @@ namespace ISTEP_21
     };
 
     /**
-    *  @brief   structure to hold frequency attribute data
-    *
-    */
-    typedef union
-    {
-        struct{
-            uint16_t nominalFreq;    //ATTR_NOMINAL_FREQ_MHZ
-            uint16_t floorFreq;      //ATTR_FREQ_FLOOR_MHZ
-            uint16_t ceilingFreq ;   //ATTR_FREQ_CORE_CEILING_MHZ
-            uint16_t ultraTurboFreq; //ATTR_ULTRA_TURBO_FREQ_MHZ
-            uint16_t turboFreq;      //ATTR_FREQ_CORE_MAX
-            uint16_t nestFreq;       //ATTR_FREQ_PB_MHZ
-            uint16_t powerModeNom;   //ATTR_SOCKET_POWER_NOMINAL
-            uint16_t powerModeTurbo; //ATTR_SOCKET_POWER_TURBO
-        };
-
-        struct {
-            uint64_t freqData1;
-            uint64_t freqData2;
-        };
-
-    }freq_data;
-
-
-
-    /**
      * @brief Timer function for safe error handling in sendFreqAttrData
      *
      * @description Used inside the sendFreqAttrData() to wait for

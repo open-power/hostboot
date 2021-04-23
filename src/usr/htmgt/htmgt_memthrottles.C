@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -478,7 +478,7 @@ void calculate_system_power()
     //check_wof_support(freq_nominal, freq_turbo, freq_ultra);
     if (freq_turbo == 0)
     {
-        freq_turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
+        freq_turbo = 0;//ATTR_FREQ_CORE_MAX removed for P10
         // Turbo Frequency biasing (ATTR_FREQ_BIAS_TURBO) will be ignored here
         if (freq_turbo == 0)
         {
