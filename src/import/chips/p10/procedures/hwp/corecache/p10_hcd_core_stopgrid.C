@@ -91,20 +91,25 @@ p10_hcd_core_stopgrid(
     uint32_t                l_timeout  = 0;
     uint32_t                l_core_change_done = 0;
     uint32_t                l_regions  = i_target.getCoreSelect();
+    uint8_t                 l_attr_mma_poweroff_disable = 0;
     fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
     fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_SYSTEM_MMA_POWEROFF_DISABLE, l_sys, l_attr_mma_poweroff_disable ) );
 
     FAPI_INF(">>p10_hcd_core_stopgrid");
 
-    // also stop mma clocks after/with core clocks
+    // Also stop mma clocks after/with core clocks
     // not part of core_stopclocks for its pure usage at p10_stopclocks
-    // shared with both stop11 and stop3 path
+    // this hwp is shared stop2,3,11 path
     FAPI_TRY( p10_hcd_mma_stopclocks( i_target ) );
 
-    //also shutdown mma power here as for WOF benefit
-    //always turn off MMA if it becomes unavailable
-    FAPI_TRY( p10_hcd_mma_poweroff( i_target ) );
+    if( !l_attr_mma_poweroff_disable )
+    {
+        //also shutdown mma power here as for WOF benefit
+        //only do so when dynamic mode is enabled
+        FAPI_TRY( p10_hcd_mma_poweroff( i_target ) );
+    }
 
     FAPI_DBG("Disable ECL2 Skewadjust via CPMS_CGCSR_[1:CL2_CLK_SYNC_ENABLE]");
     FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CGCSR_WO_CLEAR, BIT64(1) ) );
