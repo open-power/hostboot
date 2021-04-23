@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -17574,6 +17574,238 @@ fapi_try_exit:
 }
 //<< GET_[TOD_ERROR_REG_SPARE_ERROR_63]
 
+
+//>> PREP_[OTPC_M_I2CM_SLVID_CONFIG_REG_B]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_OTPC_M_I2CM_SLVID_CONFIG_REG_B(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    scomt::last_scom = OTPC_M_I2CM_SLVID_CONFIG_REG_B;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[OTPC_M_I2CM_SLVID_CONFIG_REG_B]
+
+//>> GET_[OTPC_M_I2CM_SLVID_CONFIG_REG_B]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_OTPC_M_I2CM_SLVID_CONFIG_REG_B(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    scomt::last_scom = OTPC_M_I2CM_SLVID_CONFIG_REG_B;
+#endif
+    return fapi2::getScom(i_target, OTPC_M_I2CM_SLVID_CONFIG_REG_B, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[OTPC_M_I2CM_SLVID_CONFIG_REG_B]
+
+//>> PUT_[OTPC_M_I2CM_SLVID_CONFIG_REG_B]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_OTPC_M_I2CM_SLVID_CONFIG_REG_B(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return fapi2::putScom(i_target, OTPC_M_I2CM_SLVID_CONFIG_REG_B, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[OTPC_M_I2CM_SLVID_CONFIG_REG_B]
+
+
+//>> SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return o_data.insertFromRight<P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B,
+           P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B]
+
+//>> SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return o_data.insertFromRight<P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B,
+           P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B]
+
+//>> GET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return i_data.extractToRight<P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B,
+           P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B]
+
+//>> SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return o_data.insertFromRight<P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B,
+           P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B]
+
+//>> SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return o_data.insertFromRight<P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B,
+           P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B]
+
+//>> GET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return i_data.extractToRight<P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B,
+           P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B]
+
+//>> SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return o_data.insertFromRight<P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B,
+           P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B]
+
+//>> SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return o_data.insertFromRight<P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B,
+           P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B]
+
+//>> GET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(OTPC_M_I2CM_SLVID_CONFIG_REG_B));
+#endif
+    return i_data.extractToRight<P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B,
+           P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B]
 
 //>>THE END<<
 

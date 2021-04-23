@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -943,6 +943,18 @@ static const uint32_t TP_TPVSB_FSI_W_SBE_FIFO_FSB_DOWNFIFO_RESET_FSI_BYTE = 0x00
 
 static const uint32_t TP_TPVSB_FSI_W_SBE_FIFO_FSB_DOWNFIFO_RESET_DNFIFO_RESET = 0;
 //<< [TP_TPVSB_FSI_W_SBE_FIFO_FSB_DOWNFIFO_RESET]
+// proc/reg00078.H
+
+//>> [P10_20_TP_TPCHIP_PIB_OTP_OTPC_M_I2CM_SLVID_CONFIG_REG_B]
+static const uint64_t TP_TPCHIP_PIB_OTP_OTPC_M_I2CM_SLVID_CONFIG_REG_B = 0x00010020ull; // p10:20,
+
+static const uint32_t P10_20_TP_TPCHIP_PIB_OTP_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B = 0;
+static const uint32_t P10_20_TP_TPCHIP_PIB_OTP_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B_LEN = 18;
+static const uint32_t P10_20_TP_TPCHIP_PIB_OTP_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B = 18;
+static const uint32_t P10_20_TP_TPCHIP_PIB_OTP_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B_LEN = 7;
+static const uint32_t P10_20_TP_TPCHIP_PIB_OTP_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B = 25;
+static const uint32_t P10_20_TP_TPCHIP_PIB_OTP_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B_LEN = 7;
+//<< [P10_20_TP_TPCHIP_PIB_OTP_OTPC_M_I2CM_SLVID_CONFIG_REG_B]
 // proc/reg00078.H
 
 //>>THE END<<

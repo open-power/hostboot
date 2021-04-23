@@ -1872,4 +1872,21 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_OCMB_SECURITY_SUPPORTED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      I2C OCMB Security Capable
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -306,6 +306,18 @@ static const uint32_t TOD_VALUE_REG_WOF_COUNTER_VALUE = 60;
 static const uint32_t TOD_VALUE_REG_WOF_COUNTER_VALUE_LEN = 4;
 //<< [TOD_VALUE_REG]
 // perv/reg00021.H
+
+//>> [P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B]
+static const uint64_t OTPC_M_I2CM_SLVID_CONFIG_REG_B = 0x00010020ull; // p10:20,
+
+static const uint32_t P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B = 0;
+static const uint32_t P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_PORT_PROTECTION_B_LEN = 18;
+static const uint32_t P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B = 18;
+static const uint32_t P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_SLV_ID_B_LEN = 7;
+static const uint32_t P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B = 25;
+static const uint32_t P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B_MASK_ID_B_LEN = 7;
+//<< [P10_20_OTPC_M_I2CM_SLVID_CONFIG_REG_B]
+// perv/reg00020.H
 
 //>>THE END<<
 

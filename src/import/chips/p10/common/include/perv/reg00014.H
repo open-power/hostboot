@@ -10143,6 +10143,295 @@ fapi_try_exit:
 }
 //<< GET_[SINGLE_OTP_ROM_OTPROM_REG0_REGISTER0]
 
+//>> PREP_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER]
+
+//>> GET_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER]
+
+//>> PUT_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER]
+
+
+//>> SET_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER]
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER,
+           FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER]
+
+//>> SET_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER]
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER,
+           FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER]
+
+//>> GET_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER]
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return i_data.extractToRight<FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER,
+           FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_I2C_DEVICEID_REGISTER]
+
+//>> SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return o_data.insertFromRight<P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A,
+           P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A]
+
+//>> SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return o_data.insertFromRight<P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A,
+           P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A]
+
+//>> GET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return i_data.extractToRight<P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A,
+           P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_PORT_PROTECTION_A]
+
+//>> SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return o_data.insertFromRight<P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A,
+           P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A]
+
+//>> SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return o_data.insertFromRight<P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A,
+           P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A]
+
+//>> GET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return i_data.extractToRight<P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A,
+           P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_SLV_ID_A]
+
+//>> SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return o_data.insertFromRight<P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A,
+           P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A]
+
+//>> SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return o_data.insertFromRight<P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A,
+           P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A]
+
+//>> GET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER));
+#endif
+    return i_data.extractToRight<P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A,
+           P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_FSXCOMP_FSXLOG_I2CDEVICEID_REGISTER_MASK_ID_A]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
