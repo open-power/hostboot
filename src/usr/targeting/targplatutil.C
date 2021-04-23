@@ -591,35 +591,49 @@ errlHndl_t check_proc0_memory_config()
 } // end check_proc0_memory_config()
 
 
+#ifndef __HOSTBOOT_RUNTIME
 // Return the numerical number of the primary node
 int getPrimaryNodeNumber( void )
 {
     int l_primaryNode = -1;
 
-    auto hb_images = TARGETING::UTIL::assertGetToplevelTarget()
+  // the primary node is always the functional node with the lowest
+  //  position number, i.e. the first bit set in this attribute
+  auto hb_images = TARGETING::UTIL::assertGetToplevelTarget()
       ->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
 
-    // start the 1 in the mask at leftmost position
-    decltype(hb_images) l_mask = 0x1 <<
-      (sizeof(hb_images)*8-1);
-
-    for( size_t x = 0;
-         x < (sizeof(hb_images)*8);
-         x++ )
+    // This attribute is only set on multidrawer, so zero means
+    //  we are a single node system
+    if( hb_images == 0 )
     {
-        if( l_mask & hb_images )
+        // the node we are on now is the primary (only) node
+        l_primaryNode = TARGETING::UTIL::getCurrentNodePhysId();
+    }
+    else
+    {
+        // start the 1 in the mask at leftmost position
+        decltype(hb_images) l_mask = 0x1 <<
+          (sizeof(hb_images)*8-1);
+
+        for( size_t x = 0;
+             x < (sizeof(hb_images)*8);
+             x++ )
         {
-            l_primaryNode = x;
-            break;
+            if( l_mask & hb_images )
+            {
+                l_primaryNode = x;
+                break;
+            }
+            l_mask >>= 1;
         }
-        l_mask >>= 1;
     }
 
     // make sure that at least 1 node is in the list
-    assert( l_primaryNode != -1 );
+    assert( l_primaryNode != -1, "No primary node discovered" );
 
     return l_primaryNode;
 }
+#endif //#ifndef __HOSTBOOT_RUNTIME
 
 
 #undef TARG_NAMESPACE
