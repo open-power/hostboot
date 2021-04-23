@@ -138,16 +138,28 @@ can cause cause PLL unlock attentions if the frequency deviates beyond the
 specified PLL frequency band. Jitter can cause PLL unlock attentions, but will
 most likely be caught by the RCS checkers. In addition, PLL unlock attentions
 may indicate there is a problem within the processor that reported the error.
-Therefore, PRD must call out both the primary clock and the processor. If more
-than one processor in the clock domain is reporting PLL unlock attentions,
-then the primary clock is more likely at fault than the processors. Similarly,
-if all PLL unlock attentions are scoped to a single processor in the clock
-domain, then the processor is more likely at fault than the primary clock.
+Therefore, PRD must call out both the primary clock and the processor.
+
+If more than one processor in the clock domain is reporting PLL unlock
+attentions, then the primary clock is more likely at fault than the processors.
+
+Conversely, if all PLL unlock attentions are scoped to a single processor in
+the clock domain, we cannot definitively determine that a part is more at fault
+than the other, especially if a system only has one configured processor.
+Therefore, we will call out both the primary clock and the processor at medium
+priority. In addition, the clock will be the first in the list as it is the
+easiest part to repair.
+
+In all the cases referenced above, the clock is either more likely the root
+cause or it is indeterminate which of the two parts is at fault. Guarding the
+processor has the potential (based on resources) to prevent the system from
+IPLing, which would be undesirable when there could be a perfectly good
+redundant clock available. Therefore, we will not guard the processor on any of
+these errors.
 
 The following is a summary for clock domain analysis based on the detailed
 description above. Note that any time a clock is called out, HWSV will add the
-planar (priority LOW) and procedure FSPSP86 to the callout list.
-
+planar (priority LOW) and procedure FSPSP96 to the callout list.
 
 ```
 if ( RCS OSC error on any chip in the domain )
@@ -166,12 +178,12 @@ else
     if ( PLL unlock on more than one chip in the domain )
     {
         call out the primary clock, HIGH
-        call out the processor(s), MEDIUM
+        call out the processor(s), MEDIUM, NO GUARD
     }
     else if ( PLL unlock on only one chip in the domain )
     {
-        call out the processor, HIGH
         call out the primary clock, MEDIUM
+        call out the processor, MEDIUM, NO GUARD
     }
 }
 ```

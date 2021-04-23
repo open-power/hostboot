@@ -165,9 +165,8 @@ void PllDomain::addCallout(STEP_CODE_DATA_STRUCT& io_sc,
         PRDcallout clockCallout { chip->getTrgt(), clockType };
         io_sc.service_data->SetCallout(clockCallout, i_clockPri);
 
-        // Callout the processor. Do not guard on low priority callouts.
-        io_sc.service_data->SetCallout(chip->getTrgt(), i_procPri,
-                                       MRU_LOW == i_procPri ? NO_GARD : GARD);
+        // Callout the processor. Do not guard on any callout.
+        io_sc.service_data->SetCallout(chip->getTrgt(), i_procPri, NO_GARD);
     }
 
     // Increment the threshold counter, if needed.
@@ -377,11 +376,18 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // attentions, but will most likely be caught by the RCS checkers. In
     // addition, PLL unlock attentions may indicate there is a problem within
     // the processor that reported the error.  Therefore, PRD must call out
-    // both the primary clock and the processor. If more than one processor in
-    // the clock domain is reporting PLL unlock attentions, then the primary
-    // clock is more likely at fault than the processors. Similarly, if all PLL
-    // unlock attentions are scoped to a single processor in the clock domain,
-    // then the processor is more likely at fault than the primary clock.
+    // both the primary clock and the processor.
+
+    // If more than one processor in the clock domain is reporting PLL unlock
+    // attentions, then the primary clock is more likely at fault than the
+    // processors.
+
+    // Conversely, if all PLL unlock attentions are scoped to a single
+    // processor in the clock domain, we cannot definitively determine that a
+    // part is more at fault than the other, especially if a system only has
+    // one configured processor.  Therefore, we will call out both the primary
+    // clock and the processor at medium priority. In addition, the clock will
+    // be the first in the list as it is the easiest part to repair.
 
     if (!errList[PllErrTypes::RCS_OSC_ERROR_0].empty() ||
         !errList[PllErrTypes::RCS_OSC_ERROR_1].empty())
@@ -405,9 +411,9 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         {
             // If PLL unlock errors are present on more than one chip, the clock
             // is more likely to be the problem. If PLL unlock errors are scoped
-            // to a single chip, the chip is more likely to be the problem.
+            // to a single chip, either are equally at fault.
             PRDpriority clockPri = (1 == pllChips) ? MRU_MED  : MRU_HIGH;
-            PRDpriority procPri  = (1 == pllChips) ? MRU_HIGH : MRU_MED;
+            PRDpriority procPri  = MRU_MED;
 
             // Callout associated clocks/procs and threshold, if needed.
             addCallout(io_sc, errList, PllErrTypes::PLL_UNLOCK_0, maskErrTypes,
