@@ -382,11 +382,11 @@ fapi2::ReturnCode wof_get_tables(
             FAPI_DBG("ATTR_SYS_VRT_STATIC_DATA_ENABLE is not SET");
 
             // Read System VRT data
-            l_rc = FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
-                                 i_proc_target,
-                                 (*i_wof_table_data));
+            fapi2::current_err = FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
+                                               i_proc_target,
+                                               (*i_wof_table_data));
 
-            if (l_rc)
+            if (fapi2::current_err)
             {
 
                 FAPI_INF("ATTR_WOF_TABLE_DATA attribute failed.  Disabling WOF");
@@ -396,7 +396,7 @@ fapi2::ReturnCode wof_get_tables(
                                        l_wof_disabled));
 
                 // Write the returned error content to the error log
-                fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
+                fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
                 break;
             }
         }
@@ -527,8 +527,6 @@ fapi2::ReturnCode wof_validate_header(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_LAB_VALIDATION_MODE, FAPI_SYSTEM, l_wof_mode));
 #endif
 
-
-
     do
     {
         //Validate WOF header part
@@ -549,7 +547,6 @@ fapi2::ReturnCode wof_validate_header(
             p_wfth->vcs_step,
             p_wfth->vcs_size,
             l_wof_header_data_state);
-
 
         if (!l_wof_header_data_state && (l_wof_mode != fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_OFF))
         {
@@ -843,7 +840,6 @@ fapi2::ReturnCode wof_apply_overrides(
     fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data =
         (fapi2::ATTR_WOF_TABLE_DATA_Type*)new fapi2::ATTR_WOF_TABLE_DATA_Type;
 
-
     do
     {
         if (!i_wof_state)
@@ -852,10 +848,26 @@ fapi2::ReturnCode wof_apply_overrides(
             break;
         }
 
-        FAPI_TRY(wof_get_tables(i_proc_target, l_wof_table_data));
+        fapi2::current_err = wof_get_tables(i_proc_target, l_wof_table_data);
 
-        // This sets the OVERRIDE attribute set
+        if (fapi2::current_err)
+        {
+            // wof_get_table disabled WOF.  Exit as success to allow IPL to continue.
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            break;
+        }
+
+        // This sets the fapi2::ATTR_WOF_ENABLED attribute with the result
         FAPI_TRY(wof_validate_header(i_proc_target, l_wof_table_data));
+
+        // Determine if we can continue
+        fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED, i_proc_target, l_wof_enabled));
+
+        if (!l_wof_enabled)
+        {
+            break;
+        }
 
         fapi2::ATTR_WOF_TABLE_OVERRIDE_PS_Type ps_ovrd;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_OVERRIDE_PS, FAPI_SYSTEM, ps_ovrd));
@@ -902,7 +914,6 @@ fapi2::ReturnCode wof_apply_overrides(
 
     }
     while(0);
-
 
 fapi_try_exit:
 
