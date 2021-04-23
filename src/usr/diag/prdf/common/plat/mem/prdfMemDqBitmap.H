@@ -193,6 +193,15 @@ class MemDqBitmap
     uint32_t isChipMark( const MemSymbol & i_symbol, bool & o_cm );
 
     /**
+     * @brief  Helper function for getSymbolList to adjust for possible spares
+     * @param  i_symbol   A symbol on the target DRAM.
+     * @param  o_symOnSp0 True if the symbol is on spare 0, false otherwise
+     * @param  o_symOnSp1 True if the symbol is on spare 1, false otherwise
+     */
+    void checkIfSymSpared( uint8_t i_symbol, bool & o_symOnSp0,
+                           bool & o_symOnSp1 );
+
+    /**
      * @brief  Returns a list of all active (non-zero) symbols.
      * @param  i_portSlct The port select. Default is 0. Only needed for MBA.
      * @return Vector of all active symbols.

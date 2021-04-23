@@ -212,6 +212,17 @@ uint8_t dram2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_dram,
 
 //------------------------------------------------------------------------------
 
+template<>
+uint8_t symbol2Dram<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol,
+                                                bool i_isX4Dram )
+{
+    return (true == i_isX4Dram) ?
+        symbol2Nibble<TARGETING::TYPE_OCMB_CHIP>(i_symbol) :
+        symbol2Byte<TARGETING::TYPE_OCMB_CHIP>(i_symbol);
+}
+
+//------------------------------------------------------------------------------
+
 } // namespace PARSERUTILS
 
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)

@@ -417,6 +417,56 @@ uint32_t MemDqBitmap::isChipMark( const MemSymbol & i_symbol, bool & o_cm )
 
 //------------------------------------------------------------------------------
 
+void MemDqBitmap::checkIfSymSpared( uint8_t i_symbol, bool & o_symOnSp0,
+                                    bool & o_symOnSp1 )
+{
+    #define PRDF_FUNC "[MemDqBitmap::checkIfSymSpared] "
+
+    int32_t rc = SUCCESS;
+
+    // assume the symbols are not on a spare
+    o_symOnSp0 = false;
+    o_symOnSp1 = false;
+
+    // Get the spares
+    MemSymbol sp0, sp1;
+    TYPE trgtType = getTargetType( iv_trgt );
+    TargetHandle_t trgt = iv_trgt;
+    if ( TYPE_MEM_PORT == trgtType )
+    {
+        trgt = getConnectedParent( iv_trgt, TYPE_OCMB_CHIP );
+    }
+
+    rc = mssGetSteerMux<TYPE_OCMB_CHIP>( trgt, iv_rank, sp0, sp1 );
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failure from mssGetSteerMux()" );
+    }
+    else
+    {
+        // Compare the dram of the symbol to the dram in the spares if they are
+        // valid to determine if the symbol is on a spared dram.
+        uint8_t dram  = symbol2Dram<TYPE_OCMB_CHIP>( i_symbol, iv_x4Dram );
+        uint8_t dram0 = symbol2Dram<TYPE_OCMB_CHIP>(sp0.getSymbol(), iv_x4Dram);
+        uint8_t dram1 = symbol2Dram<TYPE_OCMB_CHIP>(sp1.getSymbol(), iv_x4Dram);
+
+        if ( sp0.isValid() && (dram == dram0) )
+        {
+            // The symbol is on spare 0
+            o_symOnSp0 = true;
+        }
+        if ( sp1.isValid() && (dram == dram1) )
+        {
+            // The symbol is on spare 1
+            o_symOnSp1 = true;
+        }
+    }
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 std::vector<MemSymbol> MemDqBitmap::getSymbolList( uint8_t i_portSlct )
 {
     #define PRDF_FUNC "[MemDqBitmap::getSymbolList] "
@@ -440,6 +490,9 @@ std::vector<MemSymbol> MemDqBitmap::getSymbolList( uint8_t i_portSlct )
         // loop through each byte in the bitmap
         for ( uint8_t byte = 0; byte < DQ_BITMAP::BITMAP_SIZE; byte++ )
         {
+            // skip the spare byte
+            if ( iv_spareByte == byte ) continue;
+
             // loop through each symbol index
             for ( uint8_t symIdx = 0; symIdx < symbolsPerByte; symIdx++ )
             {
@@ -466,6 +519,30 @@ std::vector<MemSymbol> MemDqBitmap::getSymbolList( uint8_t i_portSlct )
                             PRDF_ERR( "Invalid trgt type" );
                             PRDF_ASSERT( false );
                             break;
+                    }
+
+                    // Check if the symbol is on a spare
+                    bool onSp0 = false;
+                    bool onSp1 = false;
+                    checkIfSymSpared( symbol, onSp0, onSp1 );
+
+                    if ( onSp0 || onSp1 )
+                    {
+                        // This symbol is on a spare dram, check the equivalent
+                        // bit in the spare dram to see if there was any bad
+                        // bits set there.
+                        uint8_t spByte = iv_data[port].bitmap[iv_spareByte];
+                        uint8_t spNibble = onSp0 ? (spByte & 0xf0) >> 4
+                                                 : (spByte & 0x0f);
+                        uint8_t spShift = shift % 4;
+
+                        if ( ((spNibble >> spShift) & bitMask) == 0 )
+                        {
+                            // This symbol is on a spare and there are no
+                            // bad bits set on the spare dram, continue to the
+                            // next symbol
+                            continue;
+                        }
                     }
 
                     // add symbol to output

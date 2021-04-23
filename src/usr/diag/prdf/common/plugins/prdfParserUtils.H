@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,6 +118,15 @@ uint8_t symbol2Byte( uint8_t i_symbol );
  */
 template<TARGETING::TYPE T>
 uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram );
+
+/**
+ * @brief Find the dram index of a given symbol
+ * @param i_dram     The Dram
+ * @param i_isX4Dram TRUE if DRAM is x4
+ * @return The Symbol
+ */
+template<TARGETING::TYPE T>
+uint8_t symbol2Dram( uint8_t i_symbol, bool i_isX4Dram );
 
 } // namespace PARSERUTILS
 
