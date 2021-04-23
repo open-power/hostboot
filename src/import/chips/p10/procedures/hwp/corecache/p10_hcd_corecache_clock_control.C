@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,8 @@ p10_hcd_corecache_clock_control(
     // 3) As conventional usage, this module always assume to operate on all 3 tholds
     //    Therefore, no type parameter is provided as they were never used
     uint32_t i_regions,
-    uint32_t i_command)
+    uint32_t i_command,
+    bool i_inhibit_flush)
 
 {
     fapi2::buffer<uint64_t> l_scomData              = 0;
@@ -208,8 +209,11 @@ p10_hcd_corecache_clock_control(
     FAPI_DBG("Clear CLK_REGION_TYPE Register");
     FAPI_TRY( HCD_PUTSCOM_Q( i_target, CLK_REGION, 0 ) );
 
-    FAPI_DBG("Enter Flush (clear flushmode inhibit) via CPLT_CTRL4[REGIONS]");
-    FAPI_TRY( HCD_PUTSCOM_Q( i_target, CPLT_CTRL4_WO_CLEAR, SCOM_LOAD32H(i_regions) ) );
+    if (!i_inhibit_flush)
+    {
+        FAPI_DBG("Enter Flush (clear flushmode inhibit) via CPLT_CTRL4[REGIONS]");
+        FAPI_TRY( HCD_PUTSCOM_Q( i_target, CPLT_CTRL4_WO_CLEAR, SCOM_LOAD32H(i_regions) ) );
+    }
 
 fapi_try_exit:
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ typedef fapi2::ReturnCode (*p10_hcd_corecache_clock_control_FP_t) (
     const fapi2::Target < fapi2::TARGET_TYPE_EQ |
     fapi2::TARGET_TYPE_MULTICAST,
     fapi2::MULTICAST_AND > &,
-    uint32_t, uint32_t);
+    uint32_t, uint32_t, bool);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -53,9 +53,10 @@ extern "C"
 ///
 /// @brief start/stop quad clock regions
 ///
-/// @param[in] i_target       Reference to processor chip target
-/// @param[in] i_command      bit0:stop, bit1:start, bit2:slave, bit3:master
-/// @param[in] i_regions      clock regions
+/// @param[in] i_target        Reference to processor chip target
+/// @param[in] i_command       bit0:stop, bit1:start, bit2:slave, bit3:master
+/// @param[in] i_regions       clock regions
+/// @param[in] i_inhibit_flush inhibit flush mode for processed regions at exit
 /// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p10_hcd_corecache_clock_control(
@@ -63,7 +64,8 @@ extern "C"
         fapi2::TARGET_TYPE_MULTICAST,
         fapi2::MULTICAST_AND > & i_target,
         uint32_t i_regions,
-        uint32_t i_command);
+        uint32_t i_command,
+        bool i_inhibit_flush = false);
 
 } // extern "C"
 
