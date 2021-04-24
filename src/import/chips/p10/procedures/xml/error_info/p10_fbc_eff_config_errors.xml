@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -30,6 +30,18 @@
     Unsupported epsilon table type or content detected.
   </description>
   <ffdc>TABLE_TYPE</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_PAU_FREQ_ERR</rc>
+  <description>
+    Unsupported PAU frequency specified for epsilon table lookup.
+  </description>
+  <ffdc>PAU_FREQ</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
