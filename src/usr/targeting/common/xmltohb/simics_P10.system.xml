@@ -177,7 +177,7 @@
     </attribute>
     <attribute>
       <id>FREQ_PAU_MHZ</id>
-      <default>0x960</default>
+      <default>0x802</default>
     </attribute>
     <attribute>
       <id>SMF_CONFIG</id>
