@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,17 @@ extern "C" {
 #define HOST_EID 9
 
 #define HOST_DESIRED_MTU 32768
+
+// The maximum amount of memory we will allocate for a message
+// context we are building for an incoming MCTP message made
+// of multiple MCTP packets. We will se this to be 128KB as the
+// largest message we expect is the response to 127KB +1 PLDM
+// file read requests HB makes during lid verification in istep 21
+// We cannot use 127KB+1 directly because this value must be a
+// 8KB, 16KB, 32KB, 64KB, 128KB, 256KB etc. due the the way we currently
+// grow the memory buffer allotted for a given message context.
+// See extern/core.c mctp_msg_ctx_add_pkt for more info.
+#define HOST_MAX_INCOMING_MESSAGE_ALLOCATION 131072
 
 
 struct mctp_binding_hostlpc {

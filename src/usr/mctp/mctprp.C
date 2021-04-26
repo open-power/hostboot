@@ -495,6 +495,10 @@ void MctpRP::_init(void)
     // will handle the message in the RX space accordingly
     mctp_set_rx_all(iv_mctp, rx_message, NULL);
 
+    // Set the max message size to be larget enough to account for
+    // the maximum PLDM transfer size we expect
+    mctp_set_max_message_size(iv_mctp, HOST_MAX_INCOMING_MESSAGE_ALLOCATION);
+
     TRACFCOMP(g_trac_mctp, "MctpRP::_init exit");
     return;
 }
