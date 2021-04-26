@@ -49,6 +49,7 @@
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <mapattrmetadata.H>
 
 namespace TARGETING
 {
@@ -478,6 +479,12 @@ Target * getTargetFromIPMISensor( uint32_t i_sensorNumber );
  *                          nullptr if no errors;
  */
 errlHndl_t check_proc0_memory_config();
+
+/**
+ * @brief Single entry point to access attribute metadata map
+ * @return reference to metadata
+ */
+const AttrMetadataMapper& getMapMetadataForAllAttributes();
 
 } // End namespace TARGETING::UTIL
 

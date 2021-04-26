@@ -100,6 +100,7 @@ namespace util
     class Mutex;
 }
 
+// Pre-declare to allow friend-ing
 #ifdef __HOSTBOOT_MODULE
 namespace TARGETING
 {
@@ -108,6 +109,7 @@ namespace TARGETING
         void dumpHBAttrs(uint32_t);
     }
 }
+class AttributeRulesTest;
 #endif
 
 // for friend declaration
@@ -962,6 +964,7 @@ class Target
 
 #ifdef __HOSTBOOT_MODULE
         friend void UTIL::dumpHBAttrs(uint32_t i_huid);
+        friend class ::AttributeRulesTest;
 #endif
 
 #ifndef __HOSTBOOT_RUNTIME

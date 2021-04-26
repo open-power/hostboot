@@ -75,8 +75,7 @@ void dumpHBAttrs(const uint32_t i_huid)
 
     l_targetList.push_back(l_topSysTarget);
 
-    const auto& l_attrMetaData
-        = theMapAttrMetadata::instance().getMapMetadataForAllAttributes();
+    const auto& l_attrMetaData = getMapMetadataForAllAttributes();
 
     // Dump every attribute of every target.
     for (const auto l_target: l_targetList)
@@ -737,6 +736,13 @@ int getPrimaryNodeNumber( void )
 }
 #endif //#ifndef __HOSTBOOT_RUNTIME
 
+/**
+ * @brief Single entry point to access attribute metadata map
+ */
+const AttrMetadataMapper& getMapMetadataForAllAttributes()
+{
+    return theMapAttrMetadata::instance().getMapMetadataForAllAttributes();
+}
 
 #undef TARG_NAMESPACE
 #undef TARG_CLASS
