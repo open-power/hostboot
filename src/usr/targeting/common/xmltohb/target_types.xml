@@ -2799,10 +2799,6 @@
       <default>MEM</default>
     </attribute>
     <attribute>
-      <id>CDM_DOMAIN</id>
-      <default>IO</default>
-    </attribute>
-    <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
     </attribute>
