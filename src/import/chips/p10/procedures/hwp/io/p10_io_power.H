@@ -50,6 +50,7 @@ extern "C"
 /// @brief Set power on/off for targeted lanes.
 ///
 /// @param[in] i_iolink_target Iolink target to work with
+/// @param[in] i_on Specified action (true=on, false=off)
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode p10_io_iolink_power(
@@ -60,6 +61,7 @@ extern "C"
 /// @brief Set power on/off for targeted lanes.
 ///
 /// @param[in] i_iohs_target Iohs target to work with
+/// @param[in] i_on Specified action (true=on, false=off)
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode p10_io_iohs_power(
@@ -70,6 +72,7 @@ extern "C"
 /// @brief Set power on/off for targeted lanes.
 ///
 /// @param[in] i_omic_target Omic target to work with
+/// @param[in] i_on Specified action (true=on, false=off)
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode p10_io_omic_power(

@@ -142,9 +142,10 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Set the lane bits for each target and write them to the chip
+/// @brief Set power on/off for targeted lanes.
 ///
-/// @param[in] i_iohs_target Iohs target to work with
+/// @param[in] i_iolink_target Iohs target to work with
+/// @param[in] i_on Specified action (true=on, false=off)
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_io_iolink_power(const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_iolink_target, const bool& i_on)
@@ -180,9 +181,10 @@ fapi_try_exit:
 
 
 ///
-/// @brief Set the lane bits for each target and write them to the chip
+/// @brief Set power on/off for targeted lanes.
 ///
 /// @param[in] i_iohs_target Iohs target to work with
+/// @param[in] i_on Specified action (true=on, false=off)
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_io_iohs_power(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target, const bool& i_on)
@@ -216,9 +218,10 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Set the lane bits for each target and write them to the chip
+/// @brief Set power on/off for targeted lanes.
 ///
 /// @param[in] i_omic_target Omic target to work with
+/// @param[in] i_on Specified action (true=on, false=off)
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_io_omic_power(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_omic_target, const bool& i_on)
