@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -289,7 +289,7 @@ extern "C"
     {
         FAPI_IMP(">> p10_pm_callout" );
 
-        o_rasAction = NO_CALLOUT;
+        o_rasAction = PROC_CHIP_CALLOUT;
 
         CoreAction l_coreActn( i_procTgt );
 
@@ -308,6 +308,7 @@ extern "C"
                   "Failed To Config Cores For Dump" );
 
         l_coreActn.getDeadCoreVector( o_deadCores ); //retrieve Phyp generated dead core vector
+
         FAPI_INF("Dead cores from PHYP: 0x%08x", o_deadCores);
 
     fapi_try_exit:
