@@ -107,7 +107,20 @@ struct mctp_pktbuf *mctp_pktbuf_alloc(struct mctp_binding *binding, size_t len)
   struct mctp_pktbuf *buf;
   size_t size;
 
-  size = binding->pkt_size + binding->pkt_pad;
+  // Hostboot downstream code
+  // Hostboot hit memory fragmentation issues when we
+  // enabled PNOR I/O via PLDM. This was because this
+  // function was always allocating an MTU of data
+  // for every request, even if the request was only
+  // 20 bytes. It is difficult for Hostboot to come up
+  // with 8 consecutive pages without pinning the pages.
+  // As a workaround we will only allocate as much space
+  // as is needed for a given packet. This will limit
+  // libmctp's ability to add to this packet later, which
+  // is a feature that Hostboot does not currently use.
+  // It is not clear if this change can be upstreamed and
+  // this issue may be revisted in the future.
+  size = len + binding->pkt_pad;
 
   /* todo: pools */
   buf = __mctp_alloc(sizeof(*buf) + size);
