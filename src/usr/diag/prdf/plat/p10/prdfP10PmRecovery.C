@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,13 +55,14 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     if (o_rc != SUCCESS)
     {
-        PRDF_ERR(PRDF_FUNC "pmCallout failed huid %x", getHuid(target));
+        PRDF_ERR(PRDF_FUNC "pmCallout(0x%08x) failed", getHuid(target));
         io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_HIGH);
         io_sc.service_data->SetCallout(target);
         break;
     }
 
-    PRDF_TRAC(PRDF_FUNC "lost cores vector %x", deadCores);
+    PRDF_INF(PRDF_FUNC "huid=0x%08x enum=%d cores=0x%08x",
+             getHuid(target), ra, deadCores);
 
     // Get the Global Errorlog PLID and EID
     errlHndl_t globalErrl =
@@ -77,8 +78,10 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             TargetHandle_t coreTgt = getConnectedChild( target, TYPE_CORE, pos);
             if (coreTgt == nullptr)
             {
-                PRDF_ERR(PRDF_FUNC "Failed to get child core for huid %x "
-                         "core pos %d", getHuid(target), pos);
+                // This could happen in fused core mode where the other core in
+                // the pair was just deconfigured.
+                PRDF_INF(PRDF_FUNC "Connected core already non-functional: "
+                         "huid=0x%08x pos=%d", getHuid(target), pos);
                 continue;
             }
 
@@ -91,7 +94,7 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
             if (errl)
             {
-                PRDF_ERR( PRDF_FUNC "Deconfig failed on core %x",
+                PRDF_ERR( PRDF_FUNC "Deconfig failed: huid=0x%08x",
                           getHuid(coreTgt));
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             }
@@ -99,15 +102,18 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     }
 
     // Make callout indicated by p10_pm_callout
-    switch (ra) {
+    switch (ra)
+    {
+        case NO_CALLOUT:
+            break; // Do nothing
+
         case PROC_CHIP_CALLOUT:
-            PRDF_TRAC(PRDF_FUNC "HUID 0x%08x PROC_CHIP_CALLOUT",
-                      getHuid(target));
             io_sc.service_data->SetCallout(target);
             break;
+
         default:
-            PRDF_TRAC(PRDF_FUNC "HUID 0x%08x Unexpected callout enum",
-                     getHuid(target));
+            PRDF_ERR(PRDF_FUNC "Unexpected callout: huid=0x%08x enum=%d",
+                     getHuid(target), ra);
             io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_HIGH);
             io_sc.service_data->SetCallout(target);
             break;
