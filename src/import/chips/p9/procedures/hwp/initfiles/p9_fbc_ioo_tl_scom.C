@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,6 +158,9 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x40 );
             }
 
+            constexpr auto l_PB_IOO_SCOM_FP0_DISABLE_GATHERING_ON = 0x1;
+            l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_IOO_SCOM_FP0_DISABLE_GATHERING_ON );
+
             if ((l_def_OBUS0_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x36 - (l_def_OBUS0_LO_LIMIT_N / l_def_OBUS0_LO_LIMIT_D)) );
@@ -171,6 +174,9 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x40 );
             }
+
+            constexpr auto l_PB_IOO_SCOM_FP1_DISABLE_GATHERING_ON = 0x1;
+            l_scom_buffer.insert<33, 1, 63, uint64_t>(l_PB_IOO_SCOM_FP1_DISABLE_GATHERING_ON );
 
             if ((l_def_OBUS0_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
@@ -213,6 +219,9 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x40 );
             }
 
+            constexpr auto l_PB_IOO_SCOM_FP2_DISABLE_GATHERING_ON = 0x1;
+            l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_IOO_SCOM_FP2_DISABLE_GATHERING_ON );
+
             if ((l_def_OBUS1_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x2A - (l_def_OBUS1_LO_LIMIT_N / l_def_OBUS1_LO_LIMIT_D)) );
@@ -226,6 +235,9 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x40 );
             }
+
+            constexpr auto l_PB_IOO_SCOM_FP3_DISABLE_GATHERING_ON = 0x1;
+            l_scom_buffer.insert<33, 1, 63, uint64_t>(l_PB_IOO_SCOM_FP3_DISABLE_GATHERING_ON );
 
             if ((l_def_OBUS1_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
@@ -268,6 +280,9 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x40 );
             }
 
+            constexpr auto l_PB_IOO_SCOM_FP4_DISABLE_GATHERING_ON = 0x1;
+            l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_IOO_SCOM_FP4_DISABLE_GATHERING_ON );
+
             if ((l_def_OBUS2_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x1B - (l_def_OBUS2_LO_LIMIT_N / l_def_OBUS2_LO_LIMIT_D)) );
@@ -281,6 +296,9 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x40 );
             }
+
+            constexpr auto l_PB_IOO_SCOM_FP5_DISABLE_GATHERING_ON = 0x1;
+            l_scom_buffer.insert<33, 1, 63, uint64_t>(l_PB_IOO_SCOM_FP5_DISABLE_GATHERING_ON );
 
             if ((l_def_OBUS2_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
@@ -323,6 +341,9 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x40 );
             }
 
+            constexpr auto l_PB_IOO_SCOM_FP6_DISABLE_GATHERING_ON = 0x1;
+            l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_IOO_SCOM_FP6_DISABLE_GATHERING_ON );
+
             if ((l_def_OBUS3_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x22 - (l_def_OBUS3_LO_LIMIT_N / l_def_OBUS3_LO_LIMIT_D)) );
@@ -336,6 +357,9 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x40 );
             }
+
+            constexpr auto l_PB_IOO_SCOM_FP7_DISABLE_GATHERING_ON = 0x1;
+            l_scom_buffer.insert<33, 1, 63, uint64_t>(l_PB_IOO_SCOM_FP7_DISABLE_GATHERING_ON );
 
             if ((l_def_OBUS3_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
