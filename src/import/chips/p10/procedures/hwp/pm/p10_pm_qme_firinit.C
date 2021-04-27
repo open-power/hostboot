@@ -194,7 +194,7 @@ fapi2::ReturnCode pm_qme_fir_init(
         FAPI_TRY(l_qmeFir.setRecvAttn(RESCLK_PROTOCOL_ERR),         FIR_REC_ATTN_ERROR);    // 15
         FAPI_TRY(l_qmeFir.setQMEIntr(PCB_RESET_WHEN_ACTIVE),        FIR_QME_INTR_ERROR);    // 16
         FAPI_TRY(l_qmeFir.setQMEIntr(SPECIAL_WKUP_PROTOCOL_ERR),    FIR_QME_INTR_ERROR);    // 17
-        FAPI_TRY(l_qmeFir.setQMEIntr(SPECIAL_WKUP_DONE_WINDOW),     FIR_QME_INTR_ERROR);    // 18
+        FAPI_TRY(l_qmeFir.setQMEIntr(SPECIAL_WKUP_DONE_WINDOW),     FIR_MASK_ERROR);        // 18
         FAPI_TRY(l_qmeFir.setQMEIntr(DISABLED_INTR),                FIR_QME_INTR_ERROR);    // 19
         FAPI_TRY(l_qmeFir.setQMEIntr(DECONFIGURED_INTR),            FIR_QME_INTR_ERROR);    // 20
         FAPI_TRY(l_qmeFir.mask(RS4_TIMEOUT),                        FIR_MASK_ERROR);        // 21 Not supported
