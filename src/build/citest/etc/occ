@@ -1,6 +1,6 @@
 # OCC artifact ID used to assemble PNOR image
 # OCC is not automatically pulled in from github for standalone model.
-# Need to create artifact directory (use commit number) in:
-#     /gsa/ausgsa/projects/h/hostboot/simbuild/dependencies/occ/
+# Need to create artifact directory (use occ build name) in:
+#     /gsa/rchgsa/projects/h/hostboot_rch/simbuild/dependencies/occ
 # and then build 81e00430.lid and copy to that new directory
-export OCC_ARTIFACT_ID=rchgsahack
+export OCC_ARTIFACT_ID=occ1010_210422a
