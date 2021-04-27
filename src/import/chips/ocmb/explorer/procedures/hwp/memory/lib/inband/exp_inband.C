@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1012,6 +1012,170 @@ fapi_try_exit:
              static_cast<uint64_t>(fapi2::current_err));
     return fapi2::current_err;
 }
+
+///
+/// @brief Converts little endian data array to big endian data and saves into app_fw_ddr_calibration_data_struct
+/// @param[in,out] io_data little endian data to process
+/// @param[out] o_calib_params app_fw_ddr_calibration_data_struct structure
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode app_fw_ddr_calibration_data_struct_from_little_endian(
+    std::vector<uint8_t>& io_data,
+    app_fw_ddr_calibration_data_struct& o_calib_params)
+{
+    uint32_t l_idx = 0;
+    uint32_t l_temp_var_for_conversion = 0;
+
+    FAPI_TRY(correctMMIOEndianForStruct(io_data));
+    FAPI_TRY(correctMMIOword_order(io_data));
+
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_temp_var_for_conversion));
+    o_calib_params.header = l_temp_var_for_conversion;
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_ranks = 0; l_ranks < MAX_NUM_RANKS; ++l_ranks)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NUM_DQ, l_idx,
+                                         &o_calib_params.timing_data.delay_data.TxDqDly[l_pstate][l_ranks][0]));
+        }
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_ranks = 0; l_ranks < MAX_NUM_RANKS; ++l_ranks)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx,
+                                         &o_calib_params.timing_data.delay_data.TxDmDly[l_pstate][l_ranks][0]));
+        }
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_ranks = 0; l_ranks < MAX_NUM_RANKS; ++l_ranks)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx,
+                                         &o_calib_params.timing_data.delay_data.TxDqsDly_u0[l_pstate][l_ranks][0]));
+        }
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_ranks = 0; l_ranks < MAX_NUM_RANKS; ++l_ranks)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx,
+                                         &o_calib_params.timing_data.delay_data.TxDqsDly_u1[l_pstate][l_ranks][0]));
+        }
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_ranks = 0; l_ranks < MAX_NUM_RANKS; ++l_ranks)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx,
+                                         &o_calib_params.timing_data.delay_data.RxClkDly_u0[l_pstate][l_ranks][0]));
+        }
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_ranks = 0; l_ranks < MAX_NUM_RANKS; ++l_ranks)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx,
+                                         &o_calib_params.timing_data.delay_data.RxClkDly_u1[l_pstate][l_ranks][0]));
+        }
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_ranks = 0; l_ranks < MAX_NUM_RANKS; ++l_ranks)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx,
+                                         &o_calib_params.timing_data.delay_data.RxEnDly_u0[l_pstate][l_ranks][0]));
+        }
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_ranks = 0; l_ranks < MAX_NUM_RANKS; ++l_ranks)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx,
+                                         &o_calib_params.timing_data.delay_data.RxEnDly_u1[l_pstate][l_ranks][0]));
+        }
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx, &o_calib_params.timing_data.delay_data.ATxDly_A[l_pstate][0]));
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx, &o_calib_params.timing_data.delay_data.ATxDly_B[l_pstate][0]));
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx, &o_calib_params.timing_data.delay_data.DFIMRL[l_pstate][0]));
+    }
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(readCrctEndianArray(io_data, NUM_DQ, l_idx, &o_calib_params.timing_data.delay_data.RxPBDly[l_pstate][0]));
+    }
+
+    FAPI_TRY(readCrctEndianArray(io_data, NUM_BYTES, l_idx, &o_calib_params.timing_data.delay_data.StepSize[0]));
+    FAPI_TRY(readCrctEndianArray(io_data, MSDG_MAX_PSTATE, l_idx, &o_calib_params.timing_data.delay_data.DFIMRL_ddrclk[0]));
+
+    FAPI_TRY(readCrctEndian(io_data, l_idx, o_calib_params.timing_data.cdd_data.rr));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, o_calib_params.timing_data.cdd_data.ww));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, o_calib_params.timing_data.cdd_data.rw));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, o_calib_params.timing_data.cdd_data.wr));
+
+    FAPI_TRY(readCrctEndianArray(io_data, NUM_DQ, l_idx, &o_calib_params.vref_data.vrefdqDeviceVoltageSetting.VrefDAC0[0]));
+    FAPI_TRY(readCrctEndianArray(io_data, NUM_DQ, l_idx, &o_calib_params.vref_data.vrefdqDeviceVoltageSetting.VrefDAC1[0]));
+    FAPI_TRY(readCrctEndianArray(io_data, MSDG_MAX_PSTATE, l_idx,
+                                 &o_calib_params.vref_data.vrefdqDeviceVoltageSetting.VrefInGlobal[0]));
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_bytes = 0; l_bytes < NUM_BYTES; ++l_bytes)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NIBBLES_PER_BYTE, l_idx,
+                                         &o_calib_params.vref_data.vrefdqDeviceVoltageSetting.DqDqsRcvCntrl[l_pstate][l_bytes][0]));
+        }
+    }
+
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_temp_var_for_conversion));
+    o_calib_params.vref_data.vrefdqDeviceVoltageSetting.PllTestMode = l_temp_var_for_conversion;
+
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_temp_var_for_conversion));
+    o_calib_params.vref_data.vrefdqDeviceVoltageSetting.PllCtrl2 = l_temp_var_for_conversion;
+
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_temp_var_for_conversion));
+    o_calib_params.vref_data.vrefdqDeviceVoltageSetting.PllCtrl3 = l_temp_var_for_conversion;
+
+    FAPI_TRY(readCrctEndianArray(io_data, MSDG_MAX_PSTATE, l_idx,
+                                 &o_calib_params.vref_data.vrefdqDeviceVoltageSetting.DllLockParam[0]));
+    FAPI_TRY(readCrctEndianArray(io_data, MSDG_MAX_PSTATE, l_idx,
+                                 &o_calib_params.vref_data.vrefdqDeviceVoltageSetting.DllGainCtl[0]));
+
+    for (uint16_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        for(uint16_t l_padding = 0; l_padding < MAX_NUM_RANKS; ++l_padding)
+        {
+            FAPI_TRY(readCrctEndianArray(io_data, NUM_DRAM, l_idx,
+                                         &o_calib_params.vref_data.vrefdqDramVoltageSetting.VrefDQ[l_pstate][l_padding][0]));
+        }
+    }
+
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_temp_var_for_conversion));
+    o_calib_params.crc = l_temp_var_for_conversion;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 namespace check
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -502,6 +502,17 @@ fapi2::ReturnCode readCrctEndian(const std::vector<uint8_t>& i_input, uint32_t& 
 template <typename T>
 fapi2::ReturnCode readCrctEndianArray(const std::vector<uint8_t>& i_input, const uint32_t i_size, uint32_t& io_idx,
                                       T* o_data);
+
+///
+/// @brief Converts little endian data array to big endian data and saves into app_fw_ddr_calibration_data_struct
+/// @param[in,out] io_data little endian data to process
+/// @param[out] o_calib_params app_fw_ddr_calibration_data_struct structure
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode app_fw_ddr_calibration_data_struct_from_little_endian(
+    std::vector<uint8_t>& io_data,
+    app_fw_ddr_calibration_data_struct& o_calib_params);
+
 
 //--------------------------------------------------------------------------------
 

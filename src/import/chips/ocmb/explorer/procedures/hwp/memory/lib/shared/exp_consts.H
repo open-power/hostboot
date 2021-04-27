@@ -348,6 +348,7 @@ enum cmd_id : uint8_t
     FW_PRBS_CAL_STATUS_READ                  = 0x27,
     FW_CONT_SERDES_CAL_DISABLE               = 0x28,
     FW_READ_ACTIVE_LOGS                      = 0x29,
+    FW_READ_SAVED_DDR_PARAMS                 = 0x2A,
 };
 
 ///
