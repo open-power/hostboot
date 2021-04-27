@@ -89,10 +89,27 @@ fapi2::ReturnCode p10_pm_halt(
     fapi2::ATTR_PM_MALF_ALERT_ENABLE_Type l_malfEnabled =
         fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_FALSE;
     bool l_malfAlert = false;
-
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    fapi2::ATTR_PM_MALF_CYCLE_Type l_pmMalfCycle =
+        fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
+    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
+                             l_pmMalfCycle));
+
     FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_ALERT_ENABLE,
                              FAPI_SYSTEM, l_malfEnabled));
+
+    // Avoid another PM Reset before we get through the PM Init
+    // Protect FIR Masks, Special Wakeup States, PM FFDC, etc. from being
+    // trampled.
+    if (l_pmMalfCycle == fapi2::ENUM_ATTR_PM_MALF_CYCLE_ACTIVE)
+    {
+        FAPI_IMP ("PM Malf Cycle Active: Skip extraneous PM Reset!");
+        FAPI_IMP( "<< p10_pm_halt");
+
+        goto fapi_try_exit;
+    }
+
 
     if (l_malfEnabled == fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_TRUE)
     {
@@ -135,11 +152,19 @@ fapi2::ReturnCode p10_pm_halt(
     FAPI_EXEC_HWP(l_rc, p10_pm_firinit, i_target, pm::PM_RESET_SOFT);
     FAPI_TRY(l_rc, "ERROR: Failed to mask PBA & QME FIRs.");
 
-
-    //  ************************************************************************
-    //  Enable the special wakeup for all cores only if QME is active
-    //  ************************************************************************
-    FAPI_TRY(initiateSPWU(i_target));
+    if (l_malfAlert == false)
+    {
+        //  ************************************************************************
+        //  Enable the special wakeup for all cores only if QME is active
+        //  ************************************************************************
+        FAPI_TRY(initiateSPWU(i_target));
+    }
+    else
+    {
+        // Put a mark that we are in a PM Reset as part of handling a PM Malf Alert
+        l_pmMalfCycle = fapi2::ENUM_ATTR_PM_MALF_CYCLE_ACTIVE;
+        FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_PM_MALF_CYCLE, i_target, l_pmMalfCycle));
+    }
 
     //  ************************************************************************
     //  Issue halt to OCC GPEs ( GPE0 and GPE1) (Bring them to HALT)
@@ -254,6 +279,6 @@ fapi2::ReturnCode initiateSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
 
 fapi_try_exit:
 
-    FAPI_IMP("<< p10_pm_halt");
+    FAPI_IMP("<< initiateSPWU");
     return fapi2::current_err;
 }

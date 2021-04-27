@@ -80,6 +80,8 @@ fapi2::ReturnCode p10_pm_start(
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_data64;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_PM_MALF_CYCLE_Type l_malfCycle =
+        fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
 
     fapi2::ATTR_PM_MALF_ALERT_ENABLE_Type malfAlertEnable =
         fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_FALSE;
@@ -154,8 +156,24 @@ fapi2::ReturnCode p10_pm_start(
     //  STOP_OVERRIDE_MODE and STOP_ACTIVE_MASK bits are cleared by the
     //  p10_pm_qme_init(halt) procedure."
     //  ************************************************************************
-    FAPI_DBG("Disable special wakeup for all functional  core targets");
-    fapi2::specialWakeup (i_target, false);
+    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
+                             l_malfCycle));
+
+    if (l_malfCycle == fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE)
+    {
+
+        FAPI_DBG("Disable special wakeup for all functional  core targets");
+        fapi2::specialWakeup (i_target, false);
+    }
+    else
+    {
+        // Do not deassert wakeup's in Malf path, as we did not assert them in Reset
+        // as well and reset the attribute.
+        FAPI_INF("MALF Handling in progress! Skipped Disable Special Wakeup");
+        l_malfCycle = fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
+        FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
+                                 l_malfCycle));
+    }
 
     //  Initialize the XGPE Engine
     //  ************************************************************************
