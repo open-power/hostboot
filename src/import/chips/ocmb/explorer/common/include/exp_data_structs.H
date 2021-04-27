@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,13 @@ enum exp_struct_sizes
 
     // EXP_FW_ADAPTER_PROPERTIES_GET number of images
     FW_ADAPTER_MAX_FW_IMAGE = 2,
+
+    // EXP_FW_READ_SAVED_DDR_PARAMS enums
+    MAX_NUM_RANKS       = TRAINING_RESPONSE_NUM_RANKS,
+    NUM_BYTES           = DBYTE_N_SIZE,
+    NUM_DQ              = TRAINING_RESPONSE_NUM_LANES,
+    NUM_DRAM            = TRAINING_RESPONSE_NUM_DRAM,
+    NIBBLES_PER_BYTE    = 2,
 };
 
 ///
@@ -925,5 +932,217 @@ typedef struct __attribute__((packed))
     uint32_t error_buffer_size;       // FW error buffer size in bytes
 }
 fw_adapter_properties_struct;
+
+///
+/// @class train_delay_msdg
+/// @brief MCHP delay data structure
+///
+typedef struct __attribute__((packed)) train_delay_msdg
+{
+    //9bit Write Data Delay
+    //TxDqDly[pstate][rank][DQ index]
+    uint16_t TxDqDly[MSDG_MAX_PSTATE][MAX_NUM_RANKS][NUM_DQ];
+
+    //9bit Write DM Delay (invalid in X4 device)
+    //TxDmDly[pstate][rank][byte index]u
+    uint16_t TxDmDly[MSDG_MAX_PSTATE][MAX_NUM_RANKS][NUM_BYTES];
+
+    //10bit Write Dqs Delay (lower nibble)
+    //TxDqsDly_u0[pstate][rank][byte index]
+    uint16_t TxDqsDly_u0[MSDG_MAX_PSTATE][MAX_NUM_RANKS][NUM_BYTES];
+
+    //10bit Write Dqs Delay (upper nibble)
+    //TxDqsDly_u1[pstate][rank][byte index]
+    uint16_t TxDqsDly_u1[MSDG_MAX_PSTATE][MAX_NUM_RANKS][NUM_BYTES];
+
+    //6bit Read DQS Delay (lower nibble)
+    //RxClkDly_u0[pstate][rank][byte index]
+    uint8_t  RxClkDly_u0[MSDG_MAX_PSTATE][MAX_NUM_RANKS][NUM_BYTES];
+
+    //6bit read DQS Delay (upper nibble)
+    //RxClkDly_u1[pstate][rank][byte index]
+    uint8_t  RxClkDly_u1[MSDG_MAX_PSTATE][MAX_NUM_RANKS][NUM_BYTES];
+
+    //11bit Read Gate Delay (lower nibble)
+    //RxEnDly_u0[pstate][rank][byte index]
+    uint16_t RxEnDly_u0[MSDG_MAX_PSTATE][MAX_NUM_RANKS][NUM_BYTES];
+
+    //11bit Read Gate Delay (upper nibble)
+    //RxEnDly_u1[pstate][rank][byte index]
+    uint16_t RxEnDly_u1[MSDG_MAX_PSTATE][MAX_NUM_RANKS][NUM_BYTES];
+
+    //7bit A-side AC Delay (ACX4[8]:CK0/1;ACX4[9]:N/A)
+    //ATxDly_A[pstate][NumAnib]
+    uint8_t  ATxDly_A[MSDG_MAX_PSTATE][NUM_BYTES];
+
+    //7bit B-side AC Delay (ACX4[8]:CK0/1;ACX4[9]:N/A)
+    //ATxDly_B[pstate][NumAnib]
+    uint8_t  ATxDly_B[MSDG_MAX_PSTATE][NUM_BYTES];
+
+    //5 bit Max Read Latency (per DFICLK)
+    //DFIMRL[pstate][byte index]
+    uint8_t  DFIMRL[MSDG_MAX_PSTATE][NUM_BYTES];
+
+    //7bit Read Data Delay
+    //RxPBDly[rank][DQ index]
+    uint8_t  RxPBDly[MAX_NUM_RANKS][NUM_DQ];
+
+    //LCDL Step size from lcdl_txln0
+    //It is used to convert RxPBDly
+    //StepSize[byte index]
+    uint16_t StepSize[NUM_BYTES];
+
+    //5 bit Max Read Latency (per DFICTLCLK)
+    //DFIMRL_ddrclk[pstate]
+    uint8_t  DFIMRL_ddrclk[MSDG_MAX_PSTATE];
+
+    // Explorer FW doesn't "pack" this struct so it ends up with a byte of padding here
+    uint8_t Padding;
+
+}
+train_delay_msdg_t;
+
+///
+/// @class phy_cdd
+/// @brief MCHP phy cdd data structure
+///
+typedef struct __attribute__((packed)) phy_cdd
+{
+    int8_t rr;
+    int8_t ww;
+    int8_t rw;
+    int8_t wr;
+}
+phy_cdd_t;
+
+///
+/// @class ddr_timing_data
+/// @brief MCHP DDR timing data structure
+///
+typedef struct __attribute__((packed)) ddr_timing_data
+{
+    train_delay_msdg_t  delay_data;
+    phy_cdd_t           cdd_data;
+}
+ddr_timing_data_t;
+
+///
+/// @class train_host_vref_msdg
+/// @brief MCHP train vref data structure
+///
+typedef struct __attribute__((packed)) train_host_vref_msdg
+{
+    // VrefDAC0 value for each bit VrefDAC0[6:0]
+    // PHY RX VREF DAC control for rxdq cell internal VREF, (used only when 2D training is enabled in DDR4)
+    // DAC control for rxdq cell internal VREF, trained by Firmware
+    // The VREF generators have different ranges, depending on the Mission Mode settings for
+    // {DqDqsRcvCntrl::MajorMode,DqDqsRcvCntrl::ExtVrefRange}
+    // {011,0} :: VREF = VDDQ*(0.510 + VrefDAC0[6:0]*0.00345)
+    uint8_t  VrefDAC0[NUM_DQ];
+
+    // VrefDAC1 value for each bit VrefDAC1[6:0]
+    // VrefDAC1 controls the alternate VREF setting for DFE (used only when DFE is enabled in DDR4)
+    // DAC control for rxdq cell internal VREF, trained by Firmware
+    // The VREF generators have different ranges, depending on the Mission Mode settings for
+    // {DqDqsRcvCntrl::MajorMode,DqDqsRcvCntrl::ExtVrefRange}
+    // {011,0} :: VREF = VDDQ*(0.510 + VrefDAC1[6:0]*0.00345)
+    // {non-enumerated encodings are reserved}
+    uint8_t  VrefDAC1[NUM_DQ];
+
+    // VrefInGlobal[pstate].
+    // Vref setting has two registers assocoated, it is better to put those critical registers in this same struct.
+    // VrefInGlobal = {GlobalVrefInDac[6:0], GlobalVreInSel[2:0]}
+    // GlobalVrefInDac[6:0]: DAC code for internal Vref generation,
+    // For DDR4, GlobalVrefInSel[2] = 0, the coding :
+    // DAC Output Voltage = GlobalVrefInDAC == 6'h00 ? Hi-Z : 0.345*VDDQ +
+    // (0.005*GlobalVrefInDAC)*VDDQ// GlobalVrefInSel[1:0] :
+    // 2'b00 -PHY Vref DAC Range0 --BP_VREF = Hi-Z   (internal Vref mode)
+    // 2'b01 -Reserved Encoding
+    // 2'b10 -PHY Vref DAC Range0 --BP_VREF connected to PLL Analog Bus (used and anlog test pin)
+    // 2'b11 -PHY Vref DAC Range0 --BP_VREF connected to PHY Vref DAC   (External VREF mode)
+    uint32_t  VrefInGlobal[MSDG_MAX_PSTATE];
+
+    // DqDqsRcvCntrl[pstate][byte][nibble]
+    // = {GainCurrAdj[4:0], MajorModebyte[2:0], DfeCtrl[1:0], ExtVrefRange, SelAnalogVref}
+    // GainCurrAdj[4:0] :   Adjust gain current of RX amplifier stage, It is recommended to use default values for this CSR.
+    // MajorModebyte[2:0] :
+    // Selects the major mode of operation for the receiver.
+    // These settings are determined by PHY Configuration based on DRAM protocol
+    // 000 -Input signal is terminated/referenced to VDDQ/2 (or unterminated)
+    // 001 -reserved
+    // 010 -Input signal is terminated/referenced to VSSQ
+    // 011 -Input signal is terminated/referenced to VDDQ, this is the recommended mode to use for DDR4.
+    // others -reserved.
+    // DFECTRL// 00 -DFE off// 01 -DFE on
+    // 10 -Train DFE0 Amplifier
+    // 11 -Train DFE1 Amplifier
+    // These settings are determined by PHY Training FW and should not
+    // be overridden.
+    // ExtVrefRange: Extends the range available in the local per-bit VREF gener
+    // SelAnalogVref  :  Setting this signal high will force the local per-bit VREF generator to pass the global VREFA to the samplers.
+    uint32_t  DqDqsRcvCntrl[MSDG_MAX_PSTATE][NUM_BYTES][NIBBLES_PER_BYTE];
+
+    // PLL Test Mode
+    uint32_t  PllTestMode;
+
+    // PLL Control Register 2
+    uint32_t  PllCtrl2;
+
+    // PLL Control Register 3
+    uint32_t  PllCtrl3;
+
+    // DLL locking parameter for each power state
+    uint32_t  DllLockParam[MSDG_MAX_PSTATE];
+
+    // DLL gain control
+    uint32_t  DllGainCtl[MSDG_MAX_PSTATE];
+}
+train_host_vref_msdg_t;
+
+///
+/// @class train_dram_vref_msdg
+/// @brief The train DDR vref data structure
+///
+typedef struct __attribute__((packed)) train_dram_vref_msdg
+{
+    // VrefDQ value for each nibble MR6[6:0].
+    // VrefDQ[pstate][rank][nibble]
+    // X4 DRAM:  VrefDQ[pstate][rank][19:0] represents VrefDQ for each nibble
+    // X8 DRAM:  VrefDQ[pstate][rank][2*i+1] == VrefDQ[pstate][rank][2*i]
+    // X16 DRAM: VrefDQ[pstate][rank][4*i+3] == VrefDQ[pstate][rank][4*i+2] == VrefDQ[pstate][rank][4*i+1] == VrefDQ[pstate][rank][4*i]
+    uint8_t  VrefDQ[MSDG_MAX_PSTATE][MAX_NUM_RANKS][NUM_DRAM];
+}
+train_dram_vref_msdg_t;
+
+///
+/// @class ddr_vref_data
+/// @brief The DDR vref data structure
+///
+typedef struct __attribute__((packed)) ddr_vref_data
+{
+    train_host_vref_msdg_t  vrefdqDeviceVoltageSetting;
+    train_dram_vref_msdg_t  vrefdqDramVoltageSetting;
+}
+ddr_vref_data_t;
+
+///
+/// @class app_fw_ddr_calibration_data_struct
+/// @brief The calibration parameters data structure
+///
+typedef struct __attribute__((packed))
+{
+    // 32-bit header to identify the section -0x20dd20dd
+    uint32_t            header;
+
+    // Structure containing the saved timing data
+    ddr_timing_data_t   timing_data;
+
+    // Structure containing the saved vref data
+    ddr_vref_data_t     vref_data;
+
+    // The saved CRC value calculated for the structure
+    uint32_t            crc;
+}
+app_fw_ddr_calibration_data_struct;
 
 #endif
