@@ -33,6 +33,41 @@
 #    can make pulling in the latest upstream changes difficult. This
 #    script eases that process.
 
+PUSH_COMMITS="0"
+
+function usage()
+{
+    echo "Hostboot developers sometimes want to make changes to the local"
+    echo "subtree that are not in the upstream openbmc/pldm repo yet. This"
+    echo "can make pulling in the latest upstream changes difficult. This"
+    echo "script eases that process."
+    echo ""
+    echo "update_pldm_subtree.sh"
+    echo "\t-h --help"
+    echo "\t-p --push=$PUSH_COMMITS"
+    echo ""
+}
+
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        -p | --push)
+            PUSH_COMMITS="1";
+            ;;
+        *)
+            echo "ERROR: unknown parameter \"$PARAM\""
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
 # Check if we are in a hostboot repository directory
 if [ `ls ./example_customrc 2>/dev/null | wc -c` -eq 0 ] > /dev/null 2>&1; then
   echo "Error! This script is expected to be ran from the top-level of a hostboot repository. cd to that directory and try again."
@@ -51,9 +86,10 @@ if [ `git status --porcelain 2>/dev/null| grep "^??" | wc -l` -gt 0 ]; then
   exit 1
 fi
 
-# Find the last commit's short GUID that we used to sync with openbmc/pldm
-LAST_SYNC_COMMIT=`grep pldm src/subtree/latest_commit_sync | awk '{print $2}'`
-# Find the current commit's short GUID
+# Find the last commit's gerrit Change-Id that we use to sync with openbmc/pldm
+LAST_SYNC_CHANGE_ID=`grep pldm src/subtree/latest_commit_sync | awk '{print $2}'`
+LAST_SYNC_COMMIT=`ssh gerrit gerrit query --current-patch-set $LAST_SYNC_CHANGE_ID | grep revision | awk '{print $2}'| cut -b1-6`
+# Find the current commit's GUID
 CURRENT_TOP_COMMIT=`git rev-parse --short HEAD`
 
 # Figure out all of the changes we have made to the pldm subtree between now and
@@ -95,7 +131,7 @@ git merge --squash -s recursive -Xsubtree=src/subtree/openbmc/pldm -Xtheirs bmc-
 git commit -m "Update to latest openbmc/pldm commit $BMC_PLDM_TOP_COMMIT" > /dev/null 2>&1
 
 # store the new sync commit which will be used to update src/subtree/latest_commit_sync
-NEW_SYNC_COMMIT=`git rev-parse --short HEAD`
+NEW_SYNC_CHANGE_ID=`git log -1 | grep "Change-Id" | awk '{print $2}'`
 
 # if we generated a patch above, try to apply it
 if [ $diff_found -eq 1 ]; then
@@ -105,12 +141,16 @@ if [ $diff_found -eq 1 ]; then
 fi
 
 echo "Updating src/subtree/latest/commit_sync .."
-sed -i "s/pldm $LAST_SYNC_COMMIT/pldm $NEW_SYNC_COMMIT/g" src/subtree/latest_commit_sync
+sed -i "s/pldm $LAST_SYNC_CHANGE_ID/pldm $NEW_SYNC_CHANGE_ID/g" src/subtree/latest_commit_sync
 git add src/subtree/latest_commit_sync
 
 # If the git am ran clean then we need to amend the latest_commit_sync changes
 if ! git diff-index --quiet HEAD --; then
   git commit --amend --no-edit
+fi
+
+if [ "$PUSH_COMMITS" == "1" ]; then
+  git push origin HEAD:refs/for/master-p10
 fi
 
 #cleanup patch
