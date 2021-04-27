@@ -83,6 +83,15 @@ const uint64_t  RAWLANEAONN_DIG_FAST_FLAGS_REG[NUM_OF_INSTANCES] =
     0x8001702B0801153F,
 };
 
+const uint8_t SKIP_RX_DFE_CAL_CONT = 58;
+const uint64_t RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[NUM_OF_INSTANCES] =
+{
+    0x800070130801113F,
+    0x800170130801113F,
+    0x800070130801153F,
+    0x800170130801153F,
+};
+
 // October 2020 FW overrides
 const uint16_t FW_VER_0_OCT_2020 = 0x2002;
 const uint16_t FW_VER_1_OCT_2020 = 0x00D2;
@@ -326,6 +335,15 @@ fapi2::ReturnCode p10_load_iop_override(
                 FAPI_DBG("RAWLANEN_DIG_FSM_FW_SCRATCH_15 0x%.0x", l_data);
                 FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEN_DIG_FSM_FW_SCRATCH_15[i] , l_data),
                          "Error from putScom 0x%.16llX", RAWLANEN_DIG_FSM_FW_SCRATCH_15[i]);
+
+                //This bit skips RX DFE slicer continuous calibration.
+                l_data = 0;
+                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i] , l_data),
+                         "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i]);
+                l_data.setBit<SKIP_RX_DFE_CAL_CONT>();
+                FAPI_DBG("RAWLANEAONN_DIG_RX_CONT_ALGO_CTL 0x%.0x", l_data);
+                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i] , l_data),
+                         "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i]);
             }
 
             // GEN1/GEN2 workaround - Yield issue.
