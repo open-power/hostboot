@@ -119,6 +119,30 @@ fapi2::ReturnCode override_cdr_bw_i2c(
     const uint8_t i_cdr_bw_override);
 
 ///
+/// @brief Override CDR offset setting via I2C command
+///
+/// @param[in] i_cdr_offset setting from ATTR_MSS_EXP_OMI_CDR_OFFSET
+/// @param[in] i_cdr_offset_lane_mask setting from ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK
+/// @param[in,out] io_data i2c data to send
+///
+void setup_cdr_offset_i2c(const uint8_t i_cdr_offset,
+                          const uint8_t i_cdr_offset_lane_mask,
+                          std::vector<uint8_t>& io_data);
+
+///
+/// @brief Override CDR offset setting via I2C command
+///
+/// @param[in] i_target OCMB_CHIP target
+/// @param[in] i_cdr_offset setting from ATTR_MSS_EXP_OMI_CDR_OFFSET
+/// @param[in] i_cdr_offset_lane_mask setting from ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode override_cdr_offset(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_cdr_offset,
+    const uint8_t i_cdr_offset_lane_mask);
+
+///
 /// @brief Select and set dl_layer_boot_mode for BOOT_CONFIG0
 ///
 /// @param[in] i_target OCMB_CHIP target

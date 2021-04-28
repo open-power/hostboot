@@ -68,6 +68,8 @@ extern "C"
         uint8_t l_enable_ffe_settings = 0;
         uint8_t l_is_apollo = 0;
         fapi2::ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE_Type l_cdr_bw_override = 0;
+        fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET_Type l_cdr_offset = 0;
+        fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK_Type l_cdr_offset_lane_mask = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
@@ -180,7 +182,12 @@ extern "C"
                                      false));
         }
 
-        // Perform p9a workaround
+        // Apply override for CDR offset
+        FAPI_TRY(mss::attr::get_exp_omi_cdr_offset(i_target, l_cdr_offset));
+        FAPI_TRY(mss::attr::get_exp_omi_cdr_offset_lane_mask(i_target, l_cdr_offset_lane_mask));
+        FAPI_TRY(mss::exp::workarounds::omi::override_cdr_offset(i_target, l_cdr_offset, l_cdr_offset_lane_mask));
+
+        // Start P9a PHY training by sending upstream PRBS pattern
         // Train mode 6 (state 3)
         FAPI_TRY(mss::exp::workarounds::omi::pre_training_prbs(i_target));
 

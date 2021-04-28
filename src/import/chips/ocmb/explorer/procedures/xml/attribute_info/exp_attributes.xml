@@ -1380,6 +1380,36 @@
     </attribute>
 
     <attribute>
+      <id>ATTR_MSS_EXP_OMI_CDR_OFFSET</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          Value for the Explorer CDR offset to be applied after
+          BOOT_CONFIG0 command. This is a signed two's complement value.
+      </description>
+      <valueType>uint8</valueType>
+      <initToZero></initToZero>
+      <writeable/>
+      <mssAccessorName>exp_omi_cdr_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          Lane mask for the Explorer CDR offset specified in
+          ATTR_MSS_EXP_OMI_CDR_OFFSET. Bit 0 is for lane 0, and so on.
+          A '1' in each bit means to apply the offset for that lane.
+          Default is to apply to all lanes (0xFF)
+      </description>
+      <valueType>uint8</valueType>
+      <default>0xFF</default>
+      <platInit/>
+      <mrwHide/>
+      <writeable/>
+      <mssAccessorName>exp_omi_cdr_offset_lane_mask</mssAccessorName>
+    </attribute>
+
+    <attribute>
       <id>ATTR_MSS_EXP_I2C_FW_LOG_DUMP_DISABLE</id>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
       <description>
