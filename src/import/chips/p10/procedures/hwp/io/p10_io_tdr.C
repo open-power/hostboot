@@ -143,7 +143,7 @@ fapi2::ReturnCode p10_io_tdr(
             }
     }
 
-    FAPI_DBG("Your iohs freq: %d   -- c_fs_per_ui: %d", l_iohs_freq, c_fs_per_ui)
+    FAPI_DBG("Your iohs freq: %d   -- c_fs_per_ui: %d", l_iohs_freq, c_fs_per_ui);
 
     FAPI_TRY(p10_io_tdr_get_tdr_offsets(l_iohs_target, c_pulse_width, tdr_offset_width));
     FAPI_DBG("***TDR Offset width: %d", tdr_offset_width);
@@ -496,7 +496,7 @@ fapi2::ReturnCode p10_io_tdr_find_horizontal_crossing(const fapi2::Target<fapi2:
     FAPI_TRY(p10_io_tdr_set_pulse_offset(i_target, x_vals[1]));
     FAPI_TRY(p10_io_tdr_get_capt_val(i_target, i_lane, y_vals[1]));
 
-    FAPI_DBG("y_vals[0]: %d   y_vals[1]: %d", y_vals[0], y_vals[1])
+    FAPI_DBG("y_vals[0]: %d   y_vals[1]: %d", y_vals[0], y_vals[1]);
 
     // If the two y_vals are the same, assert error
     FAPI_ASSERT(y_vals[0] != y_vals[1],
