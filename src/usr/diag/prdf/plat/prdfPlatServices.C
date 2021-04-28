@@ -818,11 +818,12 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 
 int32_t restartTraceArray(TargetHandle_t i_tgt)
 {
+    PRDF_ASSERT(nullptr != i_tgt);
+    PRDF_ASSERT(TYPE_CORE == getTargetType(i_tgt));
+
     int32_t o_rc = SUCCESS;
     errlHndl_t err = nullptr;
-    TYPE tgtType = getTargetType(i_tgt);
     proc_gettracearray_args taArgs;
-    TargetHandle_t l_tgt = nullptr;
 
     // We can use the PROC_TB_L20 trace array bus ID passed into the
     // p10_proc_gettracearray procedure to restart the core trace arrays on
@@ -830,30 +831,6 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
     // Which core you pass in shouldn't matter as it will still restart all
     // the core traces within the EQ.
     taArgs.trace_bus = PROC_TB_L20;
-
-    if (TYPE_CORE == tgtType)
-    {
-        l_tgt = i_tgt;
-    }
-    else if (TYPE_EQ == tgtType)
-    {
-        // It doesn't matter which core we pass in, so just get the first.
-        TargetHandleList lst = getConnectedChildren( i_tgt, TYPE_CORE );
-        if (lst.size() > 0)
-        {
-            l_tgt = lst[0];
-        }
-        else
-        {
-            PRDF_ERR( "restartTraceArray: no functional CORE for EQ 0x%08x",
-                      getHuid(i_tgt) );
-            return FAIL;
-        }
-    }
-    else
-    {
-        PRDF_ASSERT(false); // should only call this on EC/EQ/EX
-    }
 
     taArgs.stop_pre_dump = false;
     taArgs.ignore_mux_setting = true;
@@ -863,7 +840,7 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
 
     fapi2::variable_buffer taData;
 
-    fapi2::Target<PROC_GETTRACEARRAY_TARGET_TYPES> fapiTrgt (l_tgt);
+    fapi2::Target<PROC_GETTRACEARRAY_TARGET_TYPES> fapiTrgt (i_tgt);
     FAPI_INVOKE_HWP( err,
                      p10_proc_gettracearray,
                      fapiTrgt,
