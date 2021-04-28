@@ -58,6 +58,7 @@ const char PLDM_BIOS_HB_HUGE_PAGE_COUNT_STRING[] = "hb_number_huge_pages";
 const char PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING[] = "hb_huge_page_size";
 const char PLDM_BIOS_HB_LMB_SIZE_STRING[] = "hb_memory_region_size";
 const char PLDM_BIOS_HB_MFG_FLAGS_STRING[] = "hb_mfg_flags";
+const char PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING[] = "hb_field_core_override";
 
 // Possible Values
 constexpr char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
@@ -1045,6 +1046,50 @@ errlHndl_t systemStringAttrLookup(std::vector<uint8_t>& io_string_table,
 
     return errl;
 }
+
+// getFieldCoreOverride
+errlHndl_t
+getFieldCoreOverride( std::vector<uint8_t>& io_string_table,
+                      std::vector<uint8_t>& io_attr_table,
+                      TARGETING::ATTR_FIELD_CORE_OVERRIDE_type &o_fieldCoreOverride)
+{
+    PLDM_ENTER("getFieldCoreOverride(): %s", PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING);
+
+    errlHndl_t l_errl = nullptr;
+
+    // Zero out the FCO value before continuing
+    o_fieldCoreOverride = 0;
+
+    do
+    {
+        // Create a variable to hold the retrieved BMC bios value
+        uint64_t l_retrievedBmcAttributeValue = 0;
+
+        l_errl = systemIntAttrLookup( io_string_table,
+                                      io_attr_table,
+                                      PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING,
+                                      l_retrievedBmcAttributeValue);
+
+        if (l_errl)
+        {
+            PLDM_ERR( "getFieldCoreOverride(): Failed to retrieve the Field Core "
+                      "Override (FCO) from the BMC bios %s",
+                      PLDM_BIOS_HB_FIELD_CORE_OVERRIDE_STRING );
+            break;
+        }
+
+        PLDM_INF( "getFieldCoreOverride(): Call to systemIntAttrLookup succeeded. FCO %d",
+                  l_retrievedBmcAttributeValue );
+
+        // Return the value with the correct type
+        o_fieldCoreOverride = static_cast<TARGETING::ATTR_FIELD_CORE_OVERRIDE_type>
+                              (l_retrievedBmcAttributeValue);
+    } while(0);
+
+    PLDM_EXIT("getFieldCoreOverride(): returning FCO %d", o_fieldCoreOverride);
+
+    return l_errl;
+} // getFieldCoreOverride
 
 errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
                        std::vector<uint8_t>& io_attr_table,

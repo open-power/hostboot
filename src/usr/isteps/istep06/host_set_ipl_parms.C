@@ -53,6 +53,73 @@ using namespace ISTEP;
 namespace ISTEP_06
 {
 #ifdef CONFIG_PLDM
+
+/**
+ * @brief Retrieve the Field Core Override (FCO) from the BMC BIOS and set the system's
+ *        nodes attribute ATTR_FIELD_CORE_OVERRIDE to the retrieved value,
+ *        if no error occurred. If an error occurs retrieving the BMC BIOS, then the
+ *        attribute, for the individual NODE targets, is left as is.
+ *
+ * @note Changing the attribute ATTR_FIELD_CORE_OVERRIDE to all existing nodes and not
+ *       just functional nodes because discover targets has not been run yet.
+ *
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H.
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H.
+ * @param[in] i_systemTarget  The System's target to which the all NODE targets
+ *                            will have their attribute ATTR_FIELD_CORE_OVERRIDE
+ *                            set, if no error occurred retrieving the BMC BIOS value.
+ *
+ * @return Error if failed to retrieve the FCO, otherwise nullptr on success
+*/
+errlHndl_t getAndSetFieldCoreOverrideFromBmcBios( std::vector<uint8_t>& io_string_table,
+                                                  std::vector<uint8_t>& io_attr_table,
+                                                  TARGETING::TargetHandle_t i_systemTarget)
+{
+    // Create a variable to hold the retrieved FCO value from the BMC BIOS
+    TARGETING::ATTR_FIELD_CORE_OVERRIDE_type l_fieldCoreOverride(0);
+
+    // Get the FCO from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getFieldCoreOverride(io_string_table, io_attr_table,
+                                                   l_fieldCoreOverride);
+    if ( unlikely(l_errl != nullptr) )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                   "getAndSetFieldCoreOverrideFromBmcBios(): An error occurred getting "
+                   "the Field Core Override(FCO) from the BMC BIOS. Leaving the FCO for "
+                   "the individual NODE targets as is." );
+    }
+    else
+    {
+        // Iterate over all of the nodes, not just functional, and set ALL the node's
+        // attribute ATTR_FIELD_CORE_OVERRIDE to the retrieved BMC FCO BIOS value.
+        // Setting all of the nodes and not just functional nodes, because discover
+        // targets has not been run yet and therefore no functional targets have
+        // been established.
+        PredicateCTM predNode(CLASS_ENC, TYPE_NODE);
+        PredicatePostfixExpr nodeCheckExpr;
+        nodeCheckExpr.push(&predNode);
+
+        TargetHandleList l_nodeTargetList;
+        targetService().getAssociated(l_nodeTargetList, i_systemTarget,
+                        TargetService::CHILD, TargetService::IMMEDIATE,
+                        &nodeCheckExpr);
+
+        for(const auto& l_nodeTarget : l_nodeTargetList)
+        {
+            l_nodeTarget->setAttr<ATTR_FIELD_CORE_OVERRIDE>(l_fieldCoreOverride);
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                       "getAndSetFieldCoreOverrideFromBmcBios(): Succeeded in getting the BMC "
+                       "BIOS Field Core Override(FCO) attribute %d, and setting the attribute "
+                       "ATTR_FIELD_CORE_OVERRIDE to %d for NODE target 0x%0.8x",
+                        l_fieldCoreOverride,
+                        l_nodeTarget->getAttr<ATTR_FIELD_CORE_OVERRIDE>(),
+                        get_huid(l_nodeTarget) );
+        }
+    }
+
+    return l_errl;
+}
+
 errlHndl_t getAndSetPLDMBiosAttrs()
 {
     errlHndl_t errl = nullptr;
@@ -62,6 +129,17 @@ errlHndl_t getAndSetPLDMBiosAttrs()
     std::vector<uint8_t> bios_string_table;
     std::vector<uint8_t> bios_attr_table;
     const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+    // Retrieve the Field Core Override value from the BMC bios and set all of
+    // the NODE target's attribute ATTR_FIELD_CORE_OVERRIDE to that value.
+    errl = getAndSetFieldCoreOverrideFromBmcBios(bios_string_table, bios_attr_table, sys);
+    if(errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "
+                   "getAndSetFieldCoreOverrideFromBmcBios failed to get and then set the FCO" );
+        errlCommit( errl, ISTEP_COMP_ID );
+    }
+
 
     // HUGE_PAGE_COUNT
     ATTR_HUGE_PAGE_COUNT_type huge_page_count = 0;

@@ -119,6 +119,26 @@ namespace PLDM
                           std::vector<uint8_t>& io_attr_table,
                           TARGETING::ATTR_LMB_SIZE_type &o_lmbSize);
 
+    /** @brief Retrieve the Field Core Override (FCO) from the BMC bios
+    *
+    * @details This method retrieves the FCO from the BMC bios via the PLDM interface.
+    *          A FCO value of 0 is interpreted as all cores will be activated.
+    *          For a fused core, a non-zero value N, is interpreted as 2N cores activated.
+    *          For a non-fused core, a non-zero value N, is interpreted as N cores activated.
+    *
+    * @param[in,out] io_string_table   See brief at the top of this file.
+    * @param[in,out] io_attr_table     See brief at the top of this file.
+    * @param[out] o_fieldCoreOverride  If no error occurred then will contain the value
+    *                                  of the FCO from the BMC bios.
+    *                                  If error then will be zeroed out.
+    *
+    * @return Error if failed to retrieve the FCO, otherwise nullptr on success
+    */
+    errlHndl_t getFieldCoreOverride( std::vector<uint8_t>& io_string_table,
+                                     std::vector<uint8_t>& io_attr_table,
+                                     TARGETING::ATTR_FIELD_CORE_OVERRIDE_type &o_fieldCoreOverride);
+
+
     /** @brief Retrieve the current value of the hb_mfg_flags
     *          PLDM bios attribute from the BMC and return the value
     *          converted to a ATTR_MFG_FLAGS array attribute type.
