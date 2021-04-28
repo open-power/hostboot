@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,9 +167,20 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     }
 
 #ifdef CONFIG_NVDIMM
-    // Update hose with current NV_STATUS
+    // Update host with current NV_STATUS
     rtPost->callSendNvStatus();
 #endif
+
+    // Execute any required concurrent inits we might have
+    if( rtPost->callDoConcurrentInits )
+    {
+        (intf->puts)("Calling callDoConcurrentInits.\n");
+        rtPost->callDoConcurrentInits();
+    }
+    else
+    {
+        (intf->puts)("callDoConcurrentInits is null.\n");
+    }
 
     // do any version mismatch fixups
     rt_version_fixup();

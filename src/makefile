@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2020
+# Contributors Listed Below - COPYRIGHT 2010,2021
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -322,7 +322,7 @@ RUNTIME_MODULES += p9_cpuWkup
 RUNTIME_MODULES += fsi_rt
 RUNTIME_MODULES += sbeio_rt
 RUNTIME_MODULES += tod_rt
-RUNTIME_MODULES += nestmemutils
+RUNTIME_MODULES += hwplibs_rt
 RUNTIME_MODULES += imageprocs_rt
 RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
 RUNTIME_MODULES += mss_rt

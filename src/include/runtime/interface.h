@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1137,6 +1137,12 @@ struct postInitCalls_t
      *
      */
     void (*callSendNvStatus)();
+
+    /**
+     * @brief Perform any required concurrent inits
+     *
+     */
+    void (*callDoConcurrentInits)();
 };
 
 extern hostInterfaces_t* g_hostInterfaces;

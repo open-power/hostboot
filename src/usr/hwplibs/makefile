@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,8 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 SUBDIRS += nest.d
+
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk
 
