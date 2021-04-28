@@ -74,6 +74,8 @@ extern "C"
         uint8_t l_is_apollo = 0;
         bool l_mnfg_screen_test = false;
         fapi2::ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE_Type l_cdr_bw_override = 0;
+        fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET_Type l_cdr_offset = 0;
+        fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK_Type l_cdr_offset_lane_mask = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
@@ -236,9 +238,15 @@ extern "C"
             FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
         }
 
+        // TODO Zen-1002: See if we can remove this
         // Update explorer CDR BW value to 0x2F based on Chris Steffen's testing
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
         FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target, l_omi_freq));
+
+        // Apply override for CDR offset
+        FAPI_TRY(mss::attr::get_exp_omi_cdr_offset(i_target, l_cdr_offset));
+        FAPI_TRY(mss::attr::get_exp_omi_cdr_offset_lane_mask(i_target, l_cdr_offset_lane_mask));
+        FAPI_TRY(mss::exp::workarounds::omi::override_cdr_offset(i_target, l_cdr_offset, l_cdr_offset_lane_mask));
 
         // Start P10 PHY training by sending upstream PRBS pattern
         // Train mode 6 (state 3)

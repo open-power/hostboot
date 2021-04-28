@@ -351,6 +351,80 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Override CDR offset setting via I2C command
+///
+/// @param[in] i_cdr_offset setting from ATTR_MSS_EXP_OMI_CDR_OFFSET
+/// @param[in] i_cdr_offset_lane_mask setting from ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK
+/// @param[in,out] io_data i2c data to send
+///
+void setup_cdr_offset_i2c(const uint8_t i_cdr_offset,
+                          const uint8_t i_cdr_offset_lane_mask,
+                          std::vector<uint8_t>& io_data)
+{
+    // Add the offset value
+    io_data.insert(io_data.begin(), i_cdr_offset);
+
+    // Add the lane mask
+    io_data.insert(io_data.begin(), i_cdr_offset_lane_mask);
+
+    // Add data length
+    io_data.insert(io_data.begin(), mss::exp::i2c::FW_CDR_OFFSET_FROM_CAL_SET_LEN);
+
+    // Then add the command
+    io_data.insert(io_data.begin(), mss::exp::i2c::FW_CDR_OFFSET_FROM_CAL_SET);
+}
+
+///
+/// @brief Override CDR offset setting via I2C command
+///
+/// @param[in] i_target OCMB_CHIP target
+/// @param[in] i_cdr_offset setting from ATTR_MSS_EXP_OMI_CDR_OFFSET
+/// @param[in] i_cdr_offset_lane_mask setting from ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode override_cdr_offset(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_cdr_offset,
+    const uint8_t i_cdr_offset_lane_mask)
+{
+    uint8_t l_version = 0;
+    std::vector<uint8_t> l_i2c_data;
+    std::vector<uint8_t> l_fw_status_data;
+
+    if (i_cdr_offset == 0)
+    {
+        FAPI_DBG("%s No CDR offset requested", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY(mss::attr::get_exp_fw_api_version(i_target, l_version));
+
+    if (l_version < FW_CDR_OFFSET_FROM_CAL_SET_SUPPORTED)
+    {
+        FAPI_INF("%s CDR offset command not supported in Explorer FW version %d",
+                 mss::c_str(i_target), l_version);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_INF("%s Setting CDR offset of %d from calibrated value, with lane mask 0x%02X",
+             mss::c_str(i_target), static_cast<int8_t>(i_cdr_offset), i_cdr_offset_lane_mask);
+
+    // Set up command
+    setup_cdr_offset_i2c(i_cdr_offset, i_cdr_offset_lane_mask, l_i2c_data);
+
+    // Send the command
+    FAPI_TRY(fapi2::putI2c(i_target, l_i2c_data));
+
+    // Check status
+    FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 100, l_fw_status_data));
+    FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_CDR_OFFSET_FROM_CAL_SET,
+             l_i2c_data, l_fw_status_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Select and set dl_layer_boot_mode for BOOT_CONFIG0
 ///
 /// @param[in] i_target OCMB_CHIP target
