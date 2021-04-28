@@ -221,6 +221,20 @@ int32_t CollectOmiFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, CollectOmiFfdc );
 
+/**
+ * @brief  Returns PRD_NO_CLEAR_FIR_BITS
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t returnNoClearFirBits( ExtensibleChip* i_chip,
+                              STEP_CODE_DATA_STRUCT& io_sc )
+{
+    return PRD_NO_CLEAR_FIR_BITS;
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, returnNoClearFirBits );
+
+
 //##############################################################################
 //
 //                             Callout plugins

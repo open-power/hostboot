@@ -261,6 +261,27 @@ actionclass threshold_and_mask_mnfgInfo_th1
     funccall("ClearServiceCallFlag_mnfgInfo"); # must be called after threshold
 };
 
+actionclass self_th_1_noClearFirBits
+{
+    calloutSelfMed;
+    threshold1;
+    funccall("returnNoClearFirBits");
+};
+
+actionclass mem_port_th_1_noClearFirBits
+{
+    mem_port;
+    threshold1;
+    funccall("returnNoClearFirBits");
+};
+
+actionclass omi_bus_th_1_noClearFirBits
+{
+    omi_bus;
+    threshold1;
+    funccall("returnNoClearFirBits");
+};
+
 ################################################################################
 #                           Callouts with flags                                #
 ################################################################################
@@ -303,6 +324,7 @@ actionclass dl_fatal_error
 {
     try( funccall("DlFatalError"), omi_bus );
     threshold1;
+    funccall("returnNoClearFirBits");
 };
 
 /** MCBIST program complete */
@@ -333,6 +355,7 @@ actionclass mainline_aue_iaue_handling
     funccall("AnalyzeFetchAueIaue");
     mem_port_L;
     threshold1;
+    funccall("returnNoClearFirBits");
 };
 
 /** Mainline UE handling */
@@ -386,6 +409,7 @@ actionclass maintenance_aue_handling
     funccall("AnalyzeMaintAue");
     mem_port_L;
     threshold1;
+    funccall("returnNoClearFirBits");
 };
 
 /** Handle Maintenance IAUEs */
@@ -393,6 +417,7 @@ actionclass maintenance_iaue_handling
 {
     all_dimm_H_memport_L;
     threshold1;
+    funccall("returnNoClearFirBits");
 };
 
 /** RDF RCD Parity Error */
@@ -425,6 +450,7 @@ actionclass mem_port_failure
 {
     all_dimm_H_memport_L;
     threshold1;                                # Threshold 1
+    funccall("returnNoClearFirBits");
 };
 
 ################################################################################

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,6 +182,13 @@ class OcmbDataBundle : public DataBundle
      *  Since we only want to do one cleanup, we will use this variable to
      *  indicate if a cleanup is still required or has already been done. */
     bool iv_doChnlFailCleanup = false;
+
+    /** If we get a channel fail on an OCMB, we cannot be sure whether we
+     *  will be able to do putScoms after the fail. This would mean we
+     *  won't be able to clear or mask registers. So to compensate, we will
+     *  also use this flag to indicate that this OCMB has failed and should
+     *  be "masked" and not analyzed to in the future. */
+    bool iv_maskChnl = false;
 
     #ifdef __HOSTBOOT_MODULE
 

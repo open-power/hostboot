@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -557,9 +557,6 @@ bool MemOps::resolve(
 void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
                            AttentionList & io_attentions )
 {
-
-    ATTN_SLOW( "MemOps::resolveOcmbs start" );
-
     // Check the attribute whether we are at a point in the IPL where we can
     // get attentions from the OCMBs but will not get interrupts.
     TargetHandle_t sys = nullptr;
@@ -567,7 +564,6 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
     assert( sys != nullptr );
     if ( 0 == sys->getAttr<ATTR_ATTN_CHK_OCMBS>() )
     {
-        ATTN_SLOW( "MemOps::resolveOcmbs ATTN_CHK_OCMBS not set" );
         return;
     }
 
@@ -611,11 +607,18 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
         { 0x08040004, 0x08040007, HOST_ATTN   }, // OCMB_CHIPLET_SPA_FIR
     };
 
-    ATTN_SLOW( "MemOps::resolveOcmbs ATTN_CHK_OCMBS ocmbList size=%d",
-               ocmbList.size() );
     bool attnFound = false;
     for ( const auto & ocmb : ocmbList )
     {
+        if ( iv_ocmbChnlFail[ocmb] )
+        {
+            // We've already handled a channel fail on this OCMB, so skip it
+            ATTN_SLOW( "MemOps::resolveOcmbs Channel fail attention already "
+                       "handled on ocmb 0x%08x, skipping further analysis",
+                       get_huid(ocmb) );
+            continue;
+        }
+
         if ( pollPlid )
         {
             uint32_t plid = 0;
@@ -656,11 +659,16 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
             // Check for any FIR bits on
             if ( firData & ~firMaskData )
             {
-                ATTN_SLOW( "MemOps::resolveOcmbs found attn" );
                 // If FIR bits are on, add the OCMB attn to the attn list
                 AttnData newData( ocmb, fir.attnType );
                 io_attentions.add( Attention(newData, this) );
                 attnFound = true;
+
+                // If the attention was a UNIT_CS then update iv_ocmbChnlFail
+                if ( UNIT_CS == fir.attnType )
+                {
+                    iv_ocmbChnlFail[ocmb] = true;
+                }
                 break;
             }
         }

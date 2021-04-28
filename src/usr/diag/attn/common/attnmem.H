@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,11 @@ class MemOps : public AttentionOps
         uint64_t chkMembufAttn( TARGETING::TargetHandle_t  i_memBuf,
                                 const PRDF::ATTENTION_VALUE_TYPE i_attnType );
 
+        /** Used to indicate that an OCMB has hit a channel fail. Because we
+         *  cannot mask the OCMB chiplet level FIR, we will only handle the
+         *  one channel fail before forgoing further OCMB analysis */
+        std::map<TARGETING::TargetHandle_t, bool> iv_ocmbChnlFail;
+
     public:
 
         /**
@@ -109,6 +114,10 @@ class MemOps : public AttentionOps
          */
         void resolveOcmbs( const TARGETING::TargetHandle_t i_proc,
                            AttentionList & io_attentions );
+        /**
+         * @brief Clears the iv_ocmbChnlFail map
+         */
+        void clearChnlFailMap() { iv_ocmbChnlFail.clear(); }
 
         /**
          * @brief dtor

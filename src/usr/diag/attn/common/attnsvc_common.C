@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -301,6 +301,11 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
        #endif //__HOSTBOOT_RUNTIME
 
    } while(!attentions.empty());
+
+   // We have finished handling attentions. Clear the iv_ocmbChnlFail map in
+   // case any OCMB that had a channel fail is recovered and we want to
+   // analyze to it again.
+   memOps.clearChnlFailMap();
 
    return err;
 }

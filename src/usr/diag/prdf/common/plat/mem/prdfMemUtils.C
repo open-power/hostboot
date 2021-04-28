@@ -537,6 +537,12 @@ bool __queryUcsOcmb( ExtensibleChip * i_ocmb, TargetHandle_t i_omi )
 
     bool o_activeAttn = false;
 
+    // If this OCMB has been marked as masked, skip it
+    if ( getOcmbDataBundle(i_ocmb)->iv_maskChnl )
+    {
+        return o_activeAttn;
+    }
+
     // Check that the MC_DSTL_FIR bits that normally analyze to the OCMB for
     // UNIT_CS are setup correct. If they aren't set up as UNIT_CS, skip
     // querying for channel fails on the OCMB. This is primarily needed for the
@@ -787,6 +793,14 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
 
         #ifdef __HOSTBOOT_MODULE // only do cleanup in Hostboot, no-op in FSP
 
+        // After a channel fail, we can't be sure whether we will be able
+        // to perform putscoms to the OCMB. As such, we can't mask anything
+        // on the OCMB itself, so we'll need to rely on the iv_maskChnl
+        // flag and the MC_DSTL_FIR being masked.
+
+        // Set iv_maskChnl in the data bundle to indicate this chnl is masked
+        getOcmbDataBundle(ocmbChip)->iv_maskChnl = true;
+
         TargetHandle_t omic = getConnectedParent( i_omi, TYPE_OMIC );
         ExtensibleChip * omicChip = (ExtensibleChip *)systemPtr->GetChip(omic);
 
@@ -842,11 +856,6 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         }
         reg = mccChip->getRegister( "MC_USTL_FIR_MASK_OR" );
         reg->SetBitFieldJustified( 0, 64, mask );
-        reg->Write();
-
-        // Mask off all attentions from the chiplet FIRs in the OCMB
-        reg = ocmbChip->getRegister( "OCMB_CHIPLET_FIR_MASK" );
-        reg->setAllBits(); // Blindly mask everything
         reg->Write();
 
         //   During runtime, send a dynamic memory deallocation message.
