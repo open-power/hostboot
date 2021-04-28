@@ -79,6 +79,7 @@ template<>
 void __maskMainlineNceTces<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 {
     getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
+    getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns();
 }
 
 //------------------------------------------------------------------------------
