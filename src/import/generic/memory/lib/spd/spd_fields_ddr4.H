@@ -444,7 +444,7 @@ class fields<DDR4, BASE_CNFG>
         static constexpr mss::field_t<mss::endian::LITTLE> TFAWMIN_LSB{37, TFAWMIN_LSB_START, TFAWMIN_LSB_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> TRRD_S_MIN{38, TRRD_S_MIN_START, TRRD_S_MIN_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> TRRD_L_MIN{39, TRRD_L_MIN_START, TRRD_L_MIN_LEN};
-        static constexpr mss::field_t<mss::endian::LITTLE> TCCD_L_MIN{39, TCCD_L_MIN_START, TCCD_L_MIN_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TCCD_L_MIN{40, TCCD_L_MIN_START, TCCD_L_MIN_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> TWRMIN_MSN{41, TWRMIN_MSN_START, TWRMIN_MSN_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> TWRMIN_LSB{42, TWRMIN_LSB_START, TWRMIN_LSB_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> TWTRMIN_S_MSN{43, TWTRMIN_S_MSN_START, TWTRMIN_S_MSN_LEN};
