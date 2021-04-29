@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,14 @@
 
 #include <fapi2/plat_hwp_invoker.H>
 #include <p10_rng_init_phase2.H>
+#include <p10_disable_ocmb_i2c.H>
+
+#include <secureboot/service.H>
+
+#include <istepHelperFuncs.H>           // captureError
+
+#include <i2c/i2c.H>
+#include <i2c/i2c_common.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -85,6 +93,9 @@ void* call_host_secure_rng(void* const io_pArgs)
     //  get a list of all the procs in the system
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    do
+    {
 
     // Loop through all processors including master
     for (const auto& l_cpu_target : l_cpuTargetList)
@@ -135,7 +146,96 @@ void* call_host_secure_rng(void* const io_pArgs)
             l_StepError.addErrorDetails(l_err);
             errlCommit(l_err, HWPF_COMP_ID);
         }
+        else
+        {
+            // All good now so process OCMBs
+#ifdef CONFIG_SECUREBOOT
+            if(SECUREBOOT::enabled())
+            {
+                const bool overrideForceDisable = false; // No need to force security
+                const bool overrideSULsetup = false;     // Flag for the HWP to skip the
+                                                         // SUL stage OCMB lock,
+                                                         // i.e. when Engine A is setup
+                                                         // to block OCMB I2C reads and writes
+                                                         // SUL (SEEPROM UPDATE LOCK) stage
+                                                         // SUL logic in call_host_secureboot_lockdown
+                const bool overrideSOLsetup = true;      // Flag for SOL stage OCMB lock
+                                                         // i.e. when Engine B, C, E is setup
+                                                         // to block OCMB I2C reads and writes
+                                                         // SOL (Secure OCMB Lock) stage
+
+                fapi2::ATTR_CHIP_EC_FEATURE_OCMB_SECURITY_SUPPORTED_Type l_ec_ocmb_security_supported;
+                FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OCMB_SECURITY_SUPPORTED,
+                                  l_fapi2_proc_target, l_ec_ocmb_security_supported);
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "host_secure_rng:: ATTR_CHIP_EC_FEATURE_OCMB_SECURITY_SUPPORTED=%d",
+                    l_ec_ocmb_security_supported);
+
+                if (l_ec_ocmb_security_supported)
+                {
+                    I2C::ocmb_data_t l_ocmb_data = {};
+                    // see I2C::calcOcmbPortMaskForEngine for details
+                    I2C::calcOcmbPortMaskForEngine(l_cpu_target, l_ocmb_data);
+
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "p10_disable_ocmb_i2c HWP target HUID 0x%.8x",
+                        get_huid(l_cpu_target));
+
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_host_secure_rng: PIB_ENGINE DEVICE_PROTECTION_DEVADDR=0x%X "
+                        "portlist_B=0x%llx portlist_C=0x%llx portlist_E=0x%llx",
+                        l_ocmb_data.devAddr, l_ocmb_data.portlist_B,
+                        l_ocmb_data.portlist_C, l_ocmb_data.portlist_E);
+
+                    FAPI_INVOKE_HWP(l_err, p10_disable_ocmb_i2c,
+                                    l_fapi2_proc_target,
+                                    l_ocmb_data.devAddr,       // devAddr ENGINE A
+                                    l_ocmb_data.devAddr,       // devAddr ENGINE B
+                                    l_ocmb_data.devAddr,       // devAddr ENGINE C
+                                    l_ocmb_data.devAddr,       // devAddr ENGINE E
+                                    l_ocmb_data.portlist_A,    // portlist for A
+                                    l_ocmb_data.portlist_B,    // portlist for B
+                                    l_ocmb_data.portlist_C,    // portlist for C
+                                    l_ocmb_data.portlist_E,    // portlist for E
+                                    overrideForceDisable,
+                                    overrideSULsetup,
+                                    overrideSOLsetup);
+
+                    if (l_err)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "ERROR : call_host_secure_rng: p10_disable_ocmb_i2c "
+                            "failed for PROC HUID 0x%08X "
+                            TRACE_ERR_FMT,
+                            get_huid(l_cpu_target),
+                            TRACE_ERR_ARGS(l_err));
+                        // Knock out the OCMBs but allow to continue
+                        TARGETING::TargetHandleList l_ocmb_list;
+                        // get the functional OCMBs
+                        getChildAffinityTargets(l_ocmb_list, l_cpu_target,
+                                                TARGETING::CLASS_CHIP,
+                                                TARGETING::TYPE_OCMB_CHIP);
+                        for (const auto& l_ocmb : l_ocmb_list)
+                        {
+                            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                "call_host_secure_rng: Deconfiguring OCMBs "
+                                "due to HWP p10_disable_ocmb_i2c failure: "
+                                "PROC HUID=0x%08X OCMB HUID=0x%08X ",
+                                 get_huid(l_cpu_target), get_huid(l_ocmb));
+                            l_err->addHwCallout(l_ocmb,
+                                                HWAS::SRCI_PRIORITY_MED,
+                                                HWAS::DECONFIG,
+                                                HWAS::GARD_NULL);
+                        }
+                        l_err->collectTrace(ISTEP_COMP_NAME);
+                        errlCommit(l_err, HWPF_COMP_ID);
+                    }
+                } // end l_ec_ocmb_security_supported
+            } // end SECUREBOOT::enabled
+#endif
+        }  // end else
     } // end of going through all processors
+    } while (0);
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_host_secure_rng exit");

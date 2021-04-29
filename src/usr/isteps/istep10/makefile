@@ -28,6 +28,7 @@ MODULE = istep10
 NEST_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest
 INITFILES_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/initfiles
 PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
+MEMORY_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory
 PROCEDURES_PATH += ${ROOTPATH}/src/import/chips/p10/procedures
 XIP_CUSTOMIZE_PATH = ${PROCEDURES_PATH}/hwp/customize
 HWP_ACC_PATH += ${PROCEDURES_PATH}/hwp/accessors
@@ -86,6 +87,7 @@ OBJS+=p10_lpc_utils.o
 
 # Istep 10.3 -- host_secureboot_lockdown
 OBJS+=p10_update_security_ctrl.o
+OBJS+=p10_disable_ocmb_i2c.o
 
 #Istep 10.4 -- proc_chiplet_scominit
 #              proc_psi_scominit
@@ -125,6 +127,7 @@ OBJS+=p10_rng_init_phase1.o
 VPATH += ${NEST_HWP_PATH}
 VPATH += ${INITFILES_HWP_PATH}
 VPATH += ${PERV_HWP_PATH}
+VPATH += ${MEMORY_HWP_PATH}
 VPATH += ${PROCEDURES_PATH}/hwp/io
 VPATH += ${PROCEDURES_PATH}/hwp/pm
 VPATH += ${PROCEDURES_PATH}/hwp/lib

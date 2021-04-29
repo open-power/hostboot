@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -102,6 +102,7 @@ OBJS += p10_l2_flush.o
 OBJS += p10_sbe_stop_hb.o
 OBJS += p10_pcie_scom.o
 OBJS += p10_rng_init_phase2.o
+OBJS += p10_disable_ocmb_i2c.o
 OBJS += p10_ncu_enable_darn.o
 
 #TODO-RTC:257623--Consolidate this into 3rd-party module to avoid duplication with istep10

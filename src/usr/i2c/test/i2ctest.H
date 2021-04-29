@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
 #include <i2c/i2c.H>
+#include <secureboot/service.H>
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -1031,6 +1032,61 @@ class I2CTest: public CxxTest::TestSuite
             }
 
             TRACFCOMP(g_trac_i2c, EXIT_MRK"test_getDeviceInfo");
+        }
+
+        void test_secureInfo( void )
+        {
+#ifdef CONFIG_SECUREBOOT
+        do
+        {
+        TS_INFO("test_secureInfo Start SECUREBOOT::enabled()=%d", SECUREBOOT::enabled());
+        if (SECUREBOOT::enabled()) // executing in secure mode
+        {
+            errlHndl_t l_err = nullptr;
+            uint64_t l_regValue = 0; // security switch
+            l_err = SECUREBOOT::getSecuritySwitch(l_regValue,
+                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+            if (l_err)
+            {
+                TS_FAIL("test_secureInfo Unable to retrieve the security switch, so unable to continue checks");
+                errlCommit(l_err, CXXTEST_COMP_ID );
+                break;
+            }
+
+            if (!(l_regValue & static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SULBit)))
+            {
+                TS_FAIL("test_secureInfo SULBit (SEEPROM Update Lock) should have been set in host_secureboot_lockdown");
+                break;
+            }
+            else
+            {
+                TS_INFO("test_secureInfo SULBit (SEEPROM Update Lock) properly set");
+            }
+
+            if (!(l_regValue & static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SabBit)))
+            {
+                TS_FAIL("test_secureInfo SabBit (Secure Access Bit) should have been set before reaching RUNTIME");
+                break;
+            }
+            else
+            {
+                TS_INFO("test_secureInfo SabBit (Secure Access Bit) properly set");
+            }
+
+            if (!(l_regValue & static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SOLBit)))
+            {
+                TS_INFO("test_secureInfo SOLBit (Secure OCMB Lock) should have been set in host_secure_rng");
+                break;
+            }
+            else
+            {
+                TS_INFO("test_secureInfo SOLBit (Secure OCMB Lock) properly set");
+            }
+        } // end executing in Secure Mode
+        } while(0);
+
+        TS_INFO("test_secureInfo Exit");
+#endif
         }
 
         /**

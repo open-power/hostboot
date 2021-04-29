@@ -60,9 +60,17 @@
 // Secureboot lockdown HWP
 #include <plat_hwp_invoker.H>
 #include <p10_update_security_ctrl.H>
+#include <p10_disable_ocmb_i2c.H>
 
 // PHyp/OPAL loads
 #include <targeting/common/mfgFlagAccessors.H>
+
+#include <targeting/common/utilFilter.H> // getAllChips
+
+#include <i2c/i2c.H>
+#include <i2c/i2c_common.H>
+
+using   namespace   TARGETING;
 
 namespace ISTEP_10
 {
@@ -327,8 +335,78 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 continue;
             }
 
-
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+            I2C::ocmb_data_t l_ocmb_data = {};
+
+            // see I2C::calcOcmbPortMaskForEngine for details
+            I2C::calcOcmbPortMaskForEngine(l_proc, l_ocmb_data);
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "call_host_secureboot_lockdown: FSI_ENGINE_A_DEVICE_PROTECTION_DEVADDR=0x%X "
+                "portlist_A=0x%llx",
+                l_ocmb_data.devAddr, l_ocmb_data.portlist_A);
+
+            // Need to configure the SUL OCMB lock PRIOR to setting SULbit
+            // Protected PORTs of I2C Engine A, can only be updated when SUL=0
+            //
+            // Each PROC defines its configurable Engine Device Protection devAddr
+            // The devAddr is used to allow the DD2 HW to block reads and writes to
+            // the OCMB via I2C
+
+            const bool overrideForceDisable = false;  // No need to force security
+            const bool overrideSULsetup = true;       // Flag for SUL stage OCMB lock,
+                                                      // i.e. configure just Engine A
+                                                      // to block OCMB I2C reads and writes
+                                                      // SUL (SEEPROM UPDATE LOCK)
+            const bool overrideSOLsetup = false;      // Flag to skip SOL stage OCMB lock
+                                                      // SOL OCMB logic happens in
+                                                      // call_host_secure_rng
+                                                      // SOL (Secure OCMB Lock),
+                                                      // i.e. configure Engine B, C, E
+                                                      // to block OCMB I2C reads and writes
+            FAPI_INVOKE_HWP(l_err,
+                            p10_disable_ocmb_i2c,
+                            l_fapiProc,
+                            l_ocmb_data.devAddr,      // devAddr ENGINE A
+                            l_ocmb_data.devAddr,      // devAddr ENGINE B
+                            l_ocmb_data.devAddr,      // devAddr ENGINE C
+                            l_ocmb_data.devAddr,      // devAddr ENGINE E
+                            l_ocmb_data.portlist_A,   // portlist for A
+                            l_ocmb_data.portlist_B,   // portlist for B
+                            l_ocmb_data.portlist_C,   // portlist for C
+                            l_ocmb_data.portlist_E,   // portlist for E
+                            overrideForceDisable,
+                            overrideSULsetup,
+                            overrideSOLsetup);
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_host_secureboot_lockdown: p10_disable_ocmb_i2c "
+                    "failed for Proc HUID 0x%08x "
+                    TRACE_ERR_FMT, TARGETING::get_huid(l_proc),
+                    TRACE_ERR_ARGS(l_err));
+                // Knock out the OCMBs but allow to continue
+                TARGETING::TargetHandleList l_ocmb_list;
+                // get the functional OCMBs
+                getChildAffinityTargets(l_ocmb_list, l_proc,
+                                        TARGETING::CLASS_CHIP,
+                                        TARGETING::TYPE_OCMB_CHIP);
+                for (const auto& l_ocmb : l_ocmb_list)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_host_secureboot_lockdown: Deconfiguring OCMBs "
+                        "due to HWP p10_disable_ocmb_i2c failure: "
+                        "PROC HUID=0x%08X OCMB HUID=0x%08X ",
+                        get_huid(l_proc), get_huid(l_ocmb));
+                    l_err->addHwCallout(l_ocmb,
+                                        HWAS::SRCI_PRIORITY_MED,
+                                        HWAS::DECONFIG,
+                                        HWAS::GARD_NULL);
+                }
+                l_err->collectTrace(ISTEP_COMP_NAME);
+                ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+            }
+
             const bool DO_NOT_FORCE_SECURITY = false; // No need to force security
             const bool DO_NOT_LOCK_ABUS_MAILBOXES = false; // Do not lock abus mailboxes
             FAPI_INVOKE_HWP(l_err,
@@ -339,13 +417,15 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
             if(l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "call_host_secureboot_lockdown: p10_update_security_ctrl failed for Proc HUID 0x%08x "
+                          "call_host_secureboot_lockdown: p10_update_security_ctrl "
+                          "failed for Proc HUID 0x%08x "
                           TRACE_ERR_FMT, TARGETING::get_huid(l_proc),
                           TRACE_ERR_ARGS(l_err));
                 l_istepError.addErrorDetails(l_err);
                 ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
                 // Try to run the HWP on all procs regardless of error.
             }
+
             // Lock OPAL keystore if in PHyp boot
             if (TARGETING::is_phyp_load())
             {

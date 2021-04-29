@@ -183,6 +183,10 @@ const int HOST_ENGINE_C = 1;
 const int HOST_ENGINE_D = 2;
 const int HOST_ENGINE_E = 3;
 
+// port max is zero based for bits 0-17
+// of the device protection register
+const int ENGINE_PORTMASK_MAX = 17;
+
 /**
  * @brief I2C Register Offsets
  */
@@ -204,6 +208,15 @@ enum i2c_reg_offset_t
     I2C_REG_RESET_SDA       = 0xD, //PIB=11
 
 };
+
+struct ocmb_data_t
+{
+    uint64_t portlist_A;
+    uint64_t portlist_B;
+    uint64_t portlist_C;
+    uint64_t portlist_E;
+    uint8_t devAddr;
+} PACKED;
 
 /**
 * @brief I2C FIFO register definition
@@ -969,6 +982,18 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
  */
 void setLogicalFsiEnginePort(size_t &io_logical_engine,
                                    size_t &io_logical_port);
+
+/**
+ * @brief This function builds a translated list of ports
+ *        to be used in the I2C device protection register
+ *
+ * @param[in]  i_proc - PROC target to build OCMBs from
+ * @param[out] io_ocmb_data - translated ports built from OCMBs and devAddr
+ *
+ * @return void
+ */
+void calcOcmbPortMaskForEngine(const TARGETING::Target* i_proc,
+                     ocmb_data_t& io_ocmb_data);
 
 /**
  * @brief This function handles adding hw callouts to error logs that may arise

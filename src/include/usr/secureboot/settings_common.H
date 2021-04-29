@@ -47,7 +47,7 @@ namespace SECUREBOOT
         // Spare = 0x0020000000000000ull,
         // Spare = 0x0010000000000000ull,
         TDPBit   = 0x0008000000000000ull, // TPM deconfig protection
-        // Spare = 0x0004000000000000ull,
+        SOLBit   = 0x0004000000000000ull, // Secure OCMB lock
         // Spare = 0x0002000000000000ull,
         // Spare = 0x0001000000000000ull,
         KsPhypWrLock =  0x0000800000000000ull, // Keystore write lock (PHyp)

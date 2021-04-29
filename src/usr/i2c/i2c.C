@@ -5708,6 +5708,91 @@ uint64_t I2C_SET_USER_DATA_2 ( misc_args_t args)
                       args.bit_rate_divisor );
 }
 
+void calcOcmbPortMaskForEngine(const TARGETING::Target* i_proc,
+                 ocmb_data_t& io_ocmb_data)
+{
+    TRACFCOMP(g_trac_i2c, ENTER_MRK"I2C::calcOcmbPortMaskForEngine HUID=0x%X ", get_huid(i_proc));
+    memset(&io_ocmb_data, 0, sizeof(io_ocmb_data));
+
+    // Retrieve the configurable PROC OCMB PORTs to protect
+    // for the Device Protection devAddr
+
+    TARGETING::TargetHandleList ocmb_list;
+    // get the functional OCMBs
+    getChildAffinityTargets(ocmb_list, i_proc,
+                            TARGETING::CLASS_CHIP,
+                            TARGETING::TYPE_OCMB_CHIP);
+    TRACFCOMP(g_trac_i2c,
+              "I2C::calcOcmbPortMaskForEngine: PROC HUID=0x%X has %d OCMB_CHIPs",
+              get_huid(i_proc), ocmb_list.size());
+    uint8_t first_devAddr = 0x0; // store the first OCMB devAddr
+    uint32_t first_ocmb_huid = 0x0; // store the first OCMB HUID
+
+    bool first_time = true;
+
+    // if ocmb_list is empty for the PROC we do NOT block any ports
+    // OCMB's are Engine E based ports
+    // so we translate from Engine 3/Port -> Desired Destination Engine/Port
+    for (const auto & ocmb : ocmb_list)
+    {
+        const TARGETING::ATTR_FAPI_I2C_CONTROL_INFO_type l_fapiI2cControlInfo =
+            ocmb->getAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>();
+
+        // Bounds check to make sure translation is proper
+        auto l_port = l_fapiI2cControlInfo.port;
+        if (l_port > (ENGINE_PORTMASK_MAX-2))
+        {
+            // the ENGINE_PORTMASK_MAX is how many bit positions we CAN
+            // support in the device protection registers, however for the
+            // actual port mappings to be functional we need
+            // the base Engine E port to be inside that range boundary
+            // so we can properly map port to other supported engines
+            TRACFCOMP(g_trac_i2c, ERR_MRK"I2C::calcOcmbPortMaskForEngine: l_port=%d "
+                "is outside the supported range.", l_port);
+            assert(false, "I2C:: INVALID CONFIG on ports, check setup");
+        }
+        // Translation to perform from the Engine E base
+        // E0..E3  = A0..A3
+        // E4..E15 = A6..A17 = B2..B13 = C2..C13
+        if (l_port > 3)
+        {
+            io_ocmb_data.portlist_A |= (0x1ull << (63 - (l_port+2)));
+            io_ocmb_data.portlist_B |= (0x1ull << (63 - (l_port-2)));
+            io_ocmb_data.portlist_C |= (0x1ull << (63 - (l_port-2)));
+        }
+        else
+        {
+            io_ocmb_data.portlist_A |= (0x1ull << (63 - l_port));
+        }
+        io_ocmb_data.portlist_E |= (0x1ull << (63 - l_port));
+
+        if (first_time)
+        {
+            first_time = false;
+            first_ocmb_huid = get_huid(ocmb);
+            first_devAddr = l_fapiI2cControlInfo.devAddr;
+            io_ocmb_data.devAddr = l_fapiI2cControlInfo.devAddr;  // seed the devAddr
+        }
+        // Check to make sure devAddr config seems proper OR the port is greater than
+        // what the device protection register can handle in the port mask bits 0-17
+        if ( (first_devAddr != l_fapiI2cControlInfo.devAddr) ||
+             (l_fapiI2cControlInfo.port > ENGINE_PORTMASK_MAX) )
+        {
+            // This problem is likely a problem in the attribute configuration
+            TRACFCOMP(g_trac_i2c,
+            ERR_MRK"I2C::calcOcmbPortMaskForEngine: On PROC HUID=0x%X OCMB HUID=0x%X "
+            "devAddr=0x%X does -NOT- match "
+            "OCMB HUID=0x%X devAddr=0x%X OR the port is greater than supported,"
+            " port=%d. We support security masking not greater than port %d. "
+            "Check the setup for mismatched configuration on OCMB devAddrs and/or ports.",
+            get_huid(i_proc), get_huid(ocmb), l_fapiI2cControlInfo.devAddr,
+            first_ocmb_huid, first_devAddr, l_fapiI2cControlInfo.port, ENGINE_PORTMASK_MAX);
+            assert(false, "I2C:: INVALID CONFIG, check setup");
+        }
+    }
+
+    TRACFCOMP(g_trac_i2c, EXIT_MRK"I2C::calcOcmbPortMaskForEngine HUID=0x%X", get_huid(i_proc));
+}
 
 void setLogicalFsiEnginePort(size_t &io_logical_engine, size_t &io_logical_port)
 {

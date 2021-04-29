@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -91,7 +91,6 @@ OBJS += p10_omi_setup_bars.o
 OBJS += exp_omi_init.o
 OBJS += p10_omi_init.o
 OBJS += p10_omi_init_scom.o
-OBJS += p10_disable_ocmb_i2c.o
 OBJS += exp_getecid.o
 OBJS += p10_io_omi_pre_trainadv.o
 OBJS += p10_io_omi_post_trainadv.o
