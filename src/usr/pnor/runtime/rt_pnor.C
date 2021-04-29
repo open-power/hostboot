@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,11 @@
 #include "../pnor_utils.H"
 #include <runtime/common/runtime_utils.H>
 
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+#include <pldm/base/hb_bios_attrs.H>
+#include <pldm/requests/pldm_fileio_requests.H>
+#include "../pnor_pldm_utils.H"
+#endif
 
 // Trace definition
 extern trace_desc_t* g_trac_pnor;
@@ -102,6 +107,13 @@ void PNOR::getPnorInfo( PnorInfo_t& o_pnorInfo )
 #endif
 
 }
+
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+const std::array<uint32_t, PNOR::NUM_SECTIONS>& PNOR::getLidIds()
+{
+    return Singleton<RtPnor>::instance().get_lid_ids();
+}
+#endif
 
 /****************Public Methods***************************/
 
@@ -366,20 +378,48 @@ errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
 RtPnor::RtPnor()
 {
     iv_initialized = false;
+    errlHndl_t l_err = nullptr;
     do {
         errlHndl_t l_err = getMasterProcId();
         if (l_err)
         {
-          errlCommit(l_err, PNOR_COMP_ID);
-        break;
+            TRACFCOMP(g_trac_pnor, "RtPnor(): getMasterProcId returned an error");
+            break;
         }
+#ifndef CONFIG_FILE_XFER_VIA_PLDM
           l_err = readTOC();
-        if (l_err)
+          if (l_err)
+          {
+              TRACFCOMP(g_trac_pnor, "RtPnor(): readTOC returned an error");
+              break;
+          }
+#else
+
+        // declare these vectors in their own scope so we dont keep them around any
+        // longer than we need to
         {
-          errlCommit(l_err, PNOR_COMP_ID);
-          break;
+            std::vector<uint8_t> bios_string_table, bios_attr_table;
+            l_err = PLDM::getLidIds(bios_string_table, bios_attr_table, iv_ipltime_lid_ids);
         }
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_pnor, "RtPnor(): An error occurred when we requested the hb_lid_ids attribute from the BMC");
+            break;
+        }
+
+        l_err = PNOR::populateTOC(iv_TOC, iv_ipltime_lid_ids, iv_initialized);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_pnor, "RtPnor(): populateTOC returned an error");
+            break;
+        }
+#endif
     } while (0);
+
+    if (l_err)
+    {
+        errlCommit(l_err, PNOR_COMP_ID);
+    }
 }
 
 /*************************/
@@ -388,21 +428,18 @@ RtPnor::~RtPnor()
 }
 
 /*******************Private Methods*********************/
-errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
-                                   PNOR::SectionId i_section,
-                                   uint64_t i_offset,
-                                   size_t i_size,
-                                   bool i_ecc,
-                                   void* o_data) const
+#ifndef CONFIG_FILE_XFER_VIA_PLDM
+errlHndl_t RtPnor::readFromDeviceOpal(uint64_t i_procId,
+                                      PNOR::SectionId i_section,
+                                      uint64_t i_offset,
+                                      size_t i_size,
+                                      bool i_ecc,
+                                      void* o_data) const
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::readFromDevice: i_offset=0x%X, "
-           "i_procId=%d sec=%d size=0x%X ecc=%d", i_offset, i_procId, i_section,
-             i_size, i_ecc);
     errlHndl_t l_err        = nullptr;
     uint8_t*   l_eccBuffer  = nullptr;
     do
     {
-
         const char* l_partitionName  = SectionIdToString(i_section);
         void*  l_dataToRead          = o_data;
         size_t l_readSize            = i_size;
@@ -426,14 +463,14 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                     l_offset, l_dataToRead, l_readSize);
             if (l_rc < 0)
             {
-                TRACFCOMP(g_trac_pnor, "RtPnor::readFromDevice: pnor_read"
+                TRACFCOMP(g_trac_pnor, "readFromDeviceOpal: pnor_read"
                         " failed proc:%d, part:%s, offset:0x%X, size:0x%X,"
                         " dataPt:0x%X, rc:%d", i_procId, l_partitionName,
                         l_offset, l_readSize, l_dataToRead, l_rc);
 
                 // prevent hang between ErrlManager and rt_pnor
                 assert(iv_initialized,
-                      "RtPnor::readFromDevice: pnor_read returned an error"
+                      "readFromDeviceOpal: pnor_read returned an error"
                       " during initialization");
 
                 /*@
@@ -459,7 +496,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
             }
             else if( l_rc != static_cast<int>(l_readSize) )
             {
-                TRACFCOMP( g_trac_pnor, "RtPnor::readFromDevice: only read 0x%X bytes, expecting 0x%X", l_rc, l_readSize );
+                TRACFCOMP( g_trac_pnor, "readFromDeviceOpal: only read 0x%X bytes, expecting 0x%X", l_rc, l_readSize );
 
                 if( PNOR::TOC == i_section )
                 {
@@ -472,7 +509,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                 {
                   // prevent hang between ErrlManager and rt_pnor
                   assert(iv_initialized,
-                      "RtPnor::readFromDevice: pnor_read failed to read "
+                      "readFromDeviceOpal: pnor_read failed to read "
                       "expected amount before rt_pnor initialization");
 
                     /*@
@@ -500,12 +537,12 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
         }
         else
         {
-            TRACFCOMP(g_trac_pnor,"RtPnor::readFromDevice: This version of"
+            TRACFCOMP(g_trac_pnor,"readFromDeviceOpal: This version of"
                     " OPAL does not support pnor_read");
 
             // prevent hang between ErrlManager and rt_pnor
             assert(iv_initialized,
-                      "RtPnor::readFromDevice: OPAL version does NOT support"
+                      "readFromDeviceOpal: OPAL version does NOT support"
                       "pnor_read during initialization");
             /*@
              * @errortype
@@ -525,7 +562,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
         // remove the ECC data
         if( i_ecc )
         {
-            TRACFCOMP(g_trac_pnor, "RtPnor::readFromDevice: removing ECC...");
+            TRACFCOMP(g_trac_pnor, "readFromDeviceOpal: removing ECC...");
             // remove the ECC and fix the original data if it is broken
             size_t l_eccSize = (l_rc/9)*8;
             l_eccSize = std::min( l_eccSize, i_size );
@@ -537,13 +574,13 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
             // create an error if we couldn't correct things
             if( ecc_stat == PNOR::ECC::UNCORRECTABLE )
             {
-                TRACFCOMP(g_trac_pnor,"RtPnor::readFromDevice>"
+                TRACFCOMP(g_trac_pnor,"readFromDeviceOpal>"
                     " Uncorrectable ECC error : chip=%d,offset=0x%.X",
                     i_procId, i_offset );
 
                 // prevent hang between ErrlManager and rt_pnor
                 assert(iv_initialized,
-                      "RtPnor::readFromDevice: UNCORRECTABLE_ECC encountered"
+                      "readFromDeviceOpal: UNCORRECTABLE_ECC encountered"
                       " during initialization");
                 /*@
                  * @errortype
@@ -563,7 +600,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
             // found an error so we need to fix something
             else if( ecc_stat != PNOR::ECC::CLEAN )
             {
-                TRACFCOMP(g_trac_pnor,"RtPnor::readFromDevice>"
+                TRACFCOMP(g_trac_pnor,"readFromDeviceOpal>"
                       "Correctable ECC error : chip=%d, offset=0x%.X",
                       i_procId, i_offset );
                 if (g_hostInterfaces && g_hostInterfaces->pnor_write)
@@ -574,12 +611,12 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                             l_partitionName,l_offset, l_dataToRead,l_readSize);
                     if (l_rc != static_cast<int>(l_readSize))
                     {
-                        TRACFCOMP(g_trac_pnor, "RtPnor::readFromDevice> Error"
+                        TRACFCOMP(g_trac_pnor, "readFromDeviceOpal> Error"
                         " writing corrected data back to device");
 
                         // prevent hang between ErrlManager and rt_pnor
                         assert(iv_initialized,
-                            "RtPnor::readFromDevice: pnor_write returned an"
+                            "readFromDeviceOpal: pnor_write returned an"
                             " error during initialization");
 
                         /*@
@@ -608,24 +645,18 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
         delete[] l_eccBuffer;
     }
 
-    TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::readFromDevice" );
     return l_err;
 }
 
-/*********************************************************************/
-errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
-                                  PNOR::SectionId i_section,
-                                  uint64_t i_offset,
-                                  size_t i_size,
-                                  bool i_ecc,
-                                  void* i_src )
+errlHndl_t RtPnor::writeToDeviceOpal(uint64_t i_procId,
+                                     PNOR::SectionId i_section,
+                                     uint64_t i_offset,
+                                     size_t i_size,
+                                     bool i_ecc,
+                                     void* i_src)
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::writeToDevice: i_offset=0x%X, "
-           "i_procId=%d sec=%d size=0x%X ecc=%d", i_offset, i_procId, i_section,
-             i_size, i_ecc);
     errlHndl_t l_err        = nullptr;
     uint8_t*   l_eccBuffer  = nullptr;
-
     do
     {
         void*  l_dataToWrite      = i_src;
@@ -653,7 +684,7 @@ errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
                         l_partitionName,l_offset,l_dataToWrite,l_writeSize);
             if (l_rc != static_cast<int>(l_writeSize))
             {
-                TRACFCOMP(g_trac_pnor, "RtPnor::writeToDevice: pnor_write failed "
+                TRACFCOMP(g_trac_pnor, "RtPnor::writeToDeviceOpal: pnor_write failed "
                     "proc:%d, part:%s, offset:0x%X, size:0x%X, dataPt:0x%X,"
                     " rc:%d", i_procId, l_partitionName, l_offset, l_writeSize,
                     l_dataToWrite, l_rc);
@@ -677,14 +708,10 @@ errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
                              true);
                  break;
             }
-            else if( l_rc != static_cast<int>(l_writeSize) )
-            {
-                TRACFCOMP( g_trac_pnor, "RtPnor::writeToDevice: only read 0x%X bytes, expecting 0x%X", l_rc, l_writeSize );
-            }
         }
         else
         {
-            TRACFCOMP(g_trac_pnor,"RtPnor::writeToDevice: This version of"
+            TRACFCOMP(g_trac_pnor,"RtPnor::writeToDeviceOpal: This version of"
                     " OPAL does not support pnor_write");
             /*@
              * @errortype
@@ -709,6 +736,203 @@ errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
         delete[] l_eccBuffer;
     }
 
+    return l_err;
+}
+
+#else
+
+/**
+  * @brief  Use PLDM to read data from the PNOR device
+  *
+  * @param[in] i_section section of the pnor to read back
+  * @param[in] i_offset  offset into the pnor
+  * @param[in] i_size    size of data to read in bytes
+  * @param[in] o_data    Buffer to copy data into
+  *
+  * @return Error from device
+  */
+errlHndl_t readFromDevicePldm(PNOR::SectionId i_section,
+                              uint64_t i_offset,
+                              size_t i_size,
+                              void* o_data)
+{
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        auto actual_size = static_cast<uint32_t>(i_size);
+        uint32_t lid_id = 0;
+
+        errl = PLDM_PNOR::sectionIdToLidId(i_section, lid_id);
+        if(errl)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "RtPnor::readFromDevicePldm: an error occurred looking up the lid id for section %d"
+                      TRACE_ERR_FMT,
+                      i_section,
+                      TRACE_ERR_ARGS(errl));
+            break;
+        }
+
+        errl = PLDM::getLidFileFromOffset(lid_id,
+                                          i_offset,
+                                          actual_size,
+                                          reinterpret_cast<uint8_t *>(o_data));
+        if(errl)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "RtPnor::readFromDevicePldm: an error occurred reading pnor data from the BMC"
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(errl));
+            break;
+        }
+        else if(actual_size != i_size)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "RtPnor::readFromDevicePldm: size returned (0x%lx) is less than size requested (0x%lx)",
+                      actual_size,
+                      i_size);
+            /*@
+            * @errortype
+            * @moduleid            PNOR::MOD_RTPNOR_READFROMDEVICE_PLDM
+            * @reasoncode          PNOR::RC_WRONG_SIZE_FROM_READ
+            * @userdata1[00:31]    section ID
+            * @userdata1[32:63]    offset within the section
+            * @userdata2[00:31]    size we tried to read in bytes
+            * @userdata2[32:63]    actual size of data read in bytes
+            * @devdesc             getLidFileFromOffset PLDM call failed
+            * @custdesc            Error accessing system firmware flash
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            PNOR::MOD_RTPNOR_READFROMDEVICE_PLDM,
+                            PNOR::RC_WRONG_SIZE_FROM_READ,
+                            TWO_UINT32_TO_UINT64(i_section, i_offset),
+                            TWO_UINT32_TO_UINT64(static_cast<uint32_t>(i_size), actual_size),
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+    }while(0);
+
+    return errl;
+}
+
+/**
+  * @brief  Use PLDM to write data back to the PNOR device
+  *
+  * @param[in] i_section section of the pnor to write back
+  * @param[in] i_offset  offset into the pnor
+  * @param[in] i_size    size of data to write in bytes
+  * @param[in] i_src     Buffer to copy data from
+  *
+  * @return Error from device
+  */
+errlHndl_t writeToDevicePldm(PNOR::SectionId i_section,
+                             uint64_t i_offset,
+                             size_t i_size,
+                             void* i_src)
+{
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        auto actual_size = static_cast<uint32_t>(i_size);
+        uint32_t lid_id = 0;
+
+        errl = PLDM_PNOR::sectionIdToLidId(i_section, lid_id);
+        if(errl)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "RtPnor::readFromDevicePldm: an error occurred looking up the lid id for section %d"
+                      TRACE_ERR_FMT,
+                      i_section,
+                      TRACE_ERR_ARGS(errl));
+            break;
+        }
+
+        errl = PLDM::writeLidFileFromOffset(lid_id,
+                                            i_offset,
+                                            actual_size,
+                                            reinterpret_cast<const uint8_t *>(i_src));
+
+        if(errl)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "RtPnor::writeToDevicePldm: an error occurred writing pnor data from the BMC"
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(errl));
+        }
+        else if(actual_size != i_size)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "RtPnor::writeToDevicePldm: size returned (0x%lx) is less than size requested (0x%lx)",
+                      actual_size,
+                      i_size);
+            /*@
+            * @errortype
+            * @moduleid            PNOR::MOD_RTPNOR_WRITETODEVICE_PLDM
+            * @reasoncode          PNOR::RC_WRONG_SIZE_FROM_WRITE
+            * @userdata1[00:31]    section ID
+            * @userdata1[32:63]    offset within the section
+            * @userdata2[00:31]    size we tried to write in bytes
+            * @userdata2[32:63]    actual size of data write in bytes
+            * @devdesc             writeLidFileFromOffset PLDM call failed
+            * @custdesc            Error accessing system firmware flash
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            PNOR::MOD_RTPNOR_WRITETODEVICE_PLDM,
+                            PNOR::RC_WRONG_SIZE_FROM_WRITE,
+                            TWO_UINT32_TO_UINT64(i_section, i_offset),
+                            TWO_UINT32_TO_UINT64(static_cast<uint32_t>(i_size), actual_size),
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+    }while(0);
+
+    return errl;
+}
+#endif
+
+errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
+                                   PNOR::SectionId i_section,
+                                   uint64_t i_offset,
+                                   size_t i_size,
+                                   bool i_ecc,
+                                   void* o_data) const
+{
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::readFromDevice: i_offset=0x%X, "
+           "i_procId=%d sec=%d size=0x%X ecc=%d", i_offset, i_procId, i_section,
+             i_size, i_ecc);
+    errlHndl_t l_err        = nullptr;
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+    l_err = readFromDevicePldm(i_section, i_offset, i_size, o_data);
+#else
+    l_err = readFromDeviceOpal(i_procId, i_section, i_offset,
+                               i_size, i_ecc, o_data);
+#endif
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::readFromDevice" );
+    return l_err;
+}
+
+/*********************************************************************/
+errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
+                                  PNOR::SectionId i_section,
+                                  uint64_t i_offset,
+                                  size_t i_size,
+                                  bool i_ecc,
+                                  void* i_src )
+{
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::writeToDevice: i_offset=0x%X, "
+           "i_procId=%d sec=%d size=0x%X ecc=%d", i_offset, i_procId, i_section,
+             i_size, i_ecc);
+    errlHndl_t l_err        = nullptr;
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+    l_err = writeToDevicePldm(i_section, i_offset, i_size, i_src);
+#else
+    l_err = writeToDeviceOpal(i_procId, i_section, i_offset,
+                              i_size, i_ecc, i_src);
+#endif
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::writeToDevice" );
     return l_err;
 }
@@ -923,9 +1147,6 @@ void initPnor()
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"initPnor");
 
-    //@TODO-RTC:249470-Remove all runtime pnor access once PLDM is live
-    TRACFCOMP(g_trac_pnor,"No PNOR support");
-#if 0
     errlHndl_t l_errl = nullptr;
     // Only run PNOR init on non-FSP based systems
     if ( !INITSERVICE::spBaseServicesEnabled() )
@@ -941,7 +1162,6 @@ void initPnor()
         errlCommit (l_errl, PNOR_COMP_ID);
       }
     }
-#endif
     TRACFCOMP(g_trac_pnor, EXIT_MRK"initPnor");
 }
 

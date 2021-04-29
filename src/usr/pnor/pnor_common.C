@@ -45,6 +45,14 @@
 #include <util/misc.H>
 #endif
 
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+#include "pnor_pldm_utils.H"
+#include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
+#include <pldm/requests/pldm_fileio_requests.H>
+#include <pldm/base/hb_bios_attrs.H>
+#include <pldm/pldm_errl.H>
+#endif
+
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
 TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW); //4K
@@ -435,3 +443,216 @@ bool PNOR::isSectionEmpty(const PNOR::SectionId i_section)
 
     return l_result;
 }
+
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+
+errlHndl_t sectionIdFileTableLookup( const PNOR::SectionId i_secId,
+                                     const std::vector<uint8_t> & i_fileTable,
+                                     const std::array<uint32_t, PNOR::NUM_SECTIONS> & i_lid_ids,
+                                     pldm_file_attr_table_entry *& o_tableEntryPtr)
+{
+    using namespace PLDM_PNOR;
+    errlHndl_t errl = nullptr;
+    do
+    {
+        /* See PLDM for File Based I/O document for details */
+        // Up to 3 bytes of padding are added to the end of the table
+        // to make table 4 byte aligned. This is needed to correctly append
+        // the CRC32 checksum at the end of the entire table. Together
+        // these will be up to 7 bytes.
+        const size_t CHKSUM_PADDING = 7;
+        auto start_ptr = const_cast<uint8_t *>(i_fileTable.data());
+        auto end_ptr = start_ptr + i_fileTable.size() - CHKSUM_PADDING;
+        bool match_found = false;
+        o_tableEntryPtr = nullptr;
+
+        uint32_t lid_id = 0;
+        errl = sectionIdToLidId(i_secId, lid_id, i_lid_ids);
+        if(errl)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "sectionIdFileTableLookup> An error occurred looking up the lid id mapped to SectionId %d"
+                      TRACE_ERR_FMT,
+                      i_secId,
+                      TRACE_ERR_ARGS(errl));
+            break;
+        }
+
+        while(start_ptr < end_ptr)
+        {
+            o_tableEntryPtr =
+              reinterpret_cast<pldm_file_attr_table_entry *>(start_ptr);
+
+            const size_t NAME_SZ = 8;
+            char entry_lid_ascii[NAME_SZ+1] = {0};
+            strncpy(entry_lid_ascii,
+                    const_cast<const char *>(reinterpret_cast<char *>(&o_tableEntryPtr->file_attr_table_nst[0])),
+                    NAME_SZ);
+            entry_lid_ascii[NAME_SZ] = '\0';
+            auto entry_lid_id = strtoul(reinterpret_cast<char *>(&entry_lid_ascii[0]), nullptr, 16);
+
+            if(entry_lid_id == lid_id)
+            {
+                match_found = true;
+                break;
+            }
+            else
+            {
+                start_ptr += sizeof(o_tableEntryPtr->file_handle);
+                start_ptr += sizeof(o_tableEntryPtr->file_name_length);
+                start_ptr += le16toh(o_tableEntryPtr->file_name_length);
+                start_ptr += sizeof(uint32_t); // FileSize
+                start_ptr += sizeof(uint32_t); // FileTraits
+            }
+        }
+
+        if(!match_found)
+        {
+            o_tableEntryPtr = nullptr;
+        }
+    }while(0);
+
+    return errl;
+}
+
+errlHndl_t PNOR::populateTOC( SectionData_t * o_TOC ,
+                              std::array<uint32_t, PNOR::NUM_SECTIONS> & i_lid_ids,
+                              bool i_pnorInitialized)
+{
+    std::vector<uint8_t> file_table;
+    errlHndl_t l_errhdl = nullptr;
+
+    do{
+
+        l_errhdl = PLDM::getFileTable(file_table);
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "An error occurred when we requested the PLDM file table from the BMC");
+            break;
+        }
+
+        // Use the file table to lookup information for each
+        // section listed in the enum SectionId defined in pnor_const.H
+        static_assert(PNOR::NUM_SECTIONS == i_lid_ids.size(),
+              "SectionId will over run lid mapping list");
+
+        for(size_t i = 0; i < NUM_SECTIONS; i++)
+        {
+            auto section_id = static_cast<SectionId>(i);
+            o_TOC[i].id        = section_id;
+
+            if(i_lid_ids[section_id] == PLDM_PNOR::INVALID_LID)
+            {
+                TRACFCOMP(g_trac_pnor, "populateTOC> Skipping lid %d", section_id);
+                // If there is no lid associated with this section
+                // then skip this pnor section
+                continue;
+            }
+            o_TOC[i].flashAddr = i * VMM_SIZE_RESERVED_PER_SECTION;
+            o_TOC[i].virtAddr  = o_TOC[i].flashAddr | VMM_VADDR_PNOR_RP;
+            o_TOC[i].chip      = 0; // always default to chip 0
+
+            pldm_file_attr_table_entry * file_table_entry = nullptr;
+            l_errhdl = sectionIdFileTableLookup(section_id,
+                                                file_table,
+                                                i_lid_ids,
+                                                file_table_entry);
+
+            if(l_errhdl)
+            {
+                TRACFCOMP(g_trac_pnor,
+                          "populateTOC> An error occurred looking up SectionId %d in the PLDM file table"
+                          TRACE_ERR_FMT,
+                          section_id,
+                          TRACE_ERR_ARGS(l_errhdl));
+                break;
+            }
+
+            if(file_table_entry == nullptr)
+            {
+                /*@
+                * @errortype
+                * @moduleid     PNOR::MOD_POPULATE_TOC
+                * @reasoncode   PNOR::RC_INVALID_SECTION
+                * @userdata1    Section ID we are looking up
+                * @userdata2    unused
+                * @devdesc      PnorRP::populateTOC> Could not find section id in PLDM file table
+                * @custdesc     A problem occurred while accessing the boot firmware.
+                */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              PNOR::MOD_POPULATE_TOC,
+                              PNOR::RC_INVALID_SECTION,
+                              section_id,
+                              0,
+                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                TRACFCOMP(g_trac_pnor,
+                          "populateTOC> Could not find section id in PLDM file table %d"
+                          TRACE_ERR_FMT,
+                          section_id,
+                          TRACE_ERR_ARGS(l_errhdl));
+                l_errhdl->collectTrace(PNOR_COMP_NAME);
+                PLDM::addBmcErrorCallouts(l_errhdl);
+                break;
+            }
+
+            // file's name, size, and traits
+            uint8_t * entry_nst = &(file_table_entry->file_attr_table_nst[0]);
+
+            o_TOC[i].size =
+                le32toh(*reinterpret_cast<uint32_t *>(entry_nst +
+                                              le16toh(file_table_entry->file_name_length)));
+            if( o_TOC[i].size > VMM_SIZE_RESERVED_PER_SECTION)
+            {
+                /*@
+                * @errortype
+                * @moduleid     PNOR::MOD_POPULATE_TOC
+                * @reasoncode   PNOR::RC_SECTION_SIZE_IS_BIG
+                * @userdata1    Section
+                * @userdata2    Section Size
+                * @devdesc      File size reported by BMC is larger than our max supported.
+                * @custdesc     A problem occurred accessing boot firmware.
+                */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              PNOR::MOD_POPULATE_TOC,
+                              PNOR::RC_SECTION_SIZE_IS_BIG,
+                              i,
+                              o_TOC[i].size,
+                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+                TRACFCOMP(g_trac_pnor,
+                          "populateTOC> Size reported by bmc is larger (0x%x) than we can handle (0x%x) for section %d"
+                          TRACE_ERR_FMT,
+                          o_TOC[i].size,
+                          VMM_SIZE_RESERVED_PER_SECTION,
+                          section_id,
+                          TRACE_ERR_ARGS(l_errhdl));
+                l_errhdl->collectTrace(PNOR_COMP_NAME);
+                PLDM::addBmcErrorCallouts(l_errhdl);
+                break;
+            }
+            auto entry_traits =
+                le32toh(*reinterpret_cast<uint32_t *>(entry_nst +
+                                              le16toh(file_table_entry->file_name_length) +
+                                              sizeof(uint32_t)));
+
+            if(entry_traits & PLDM_PNOR::READ_ONLY)
+            {
+                o_TOC[i].misc |= FFS_MISC_READ_ONLY;
+            }
+
+            o_TOC[i].secure = PNOR::isEnforcedSecureSection(i);
+        }
+    }while(0);
+
+    if(l_errhdl)
+    {
+        // prevent hang between ErrlManager and Pnor
+        assert(i_pnorInitialized,
+                "Failed to get file table from BMC "
+                " during pnor initialization");
+    }
+    return l_errhdl;
+}
+
+#endif

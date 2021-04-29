@@ -90,9 +90,11 @@ namespace PNOR
         // rt_pnor.C
         MOD_RTPNOR_GETSECTIONINFO       = 0xB0, /**< RtPnor::getSectionInfo*/
         MOD_RTPNOR_FLUSH                = 0xB1, /**< RtPnor::flush */
-        MOD_RTPNOR_READFROMDEVICE       = 0xB2, /**< RtPnor::readFromDevice */
-        MOD_RTPNOR_WRITETODEVICE        = 0xB3, /**< RtPnor::writeToDevice */
+        MOD_RTPNOR_READFROMDEVICE       = 0xB2, /**< RtPnor::readFromDeviceOpal*/
+        MOD_RTPNOR_WRITETODEVICE        = 0xB3, /**< RtPnor::writeToDeviceOpal */
         MOD_RTPNOR_GETSIDEINFO          = 0xB4, /**< RtPnor::getSideInfo */
+        MOD_RTPNOR_READFROMDEVICE_PLDM  = 0xB5, /**< RtPnor::readFromDevicePldm*/
+        MOD_RTPNOR_WRITETODEVICE_PLDM   = 0xB6, /**< RtPnor::writeToDevicePldm*/
 
         // pnor_common.C
         MOD_PNORCOMMON_PARSETOC         = 0xC0, /**< PNOR::parseTOC */
@@ -201,6 +203,7 @@ namespace PNOR
         RC_READ_ONLY_PERM_FAIL       = PNOR_COMP_ID | 0x3D,
         RC_VERIFY_PAGE_FAILED        = PNOR_COMP_ID | 0x3E,
         RC_NO_LID_MAPPING            = PNOR_COMP_ID | 0x3F,
+        RC_WRONG_SIZE_FROM_WRITE     = PNOR_COMP_ID | 0x40,
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
         RC_PNOR_CORRUPTION           = PNOR_COMP_ID | 0x99,

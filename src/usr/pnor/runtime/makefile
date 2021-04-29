@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2020
+# Contributors Listed Below - COPYRIGHT 2014,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -27,12 +27,17 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = pnor_rt
 
+PLDM_DEPS = pnor_pldmdd.o pnor_pldm_utils.o
+
 OBJS += rt_pnor.o
 OBJS += pnor_utils.o
 OBJS += pnor_common.o
 OBJS += ecc.o
+OBJS += $(if $(CONFIG_FILE_XFER_VIA_PLDM),$(PLDM_DEPS))
 
 SUBDIRS += test.d
+
+EXTRAINCDIR += $(if $(CONFIG_FILE_XFER_VIA_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm)
 
 VPATH += ../
 

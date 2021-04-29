@@ -333,6 +333,7 @@ RUNTIME_MODULES += tod_rt        # ~/src/usr/isteps/tod/runtime/ - no runtime te
 RUNTIME_MODULES += nestmemutils  # ~/src/usr/hwplibs/nest/ - no runtime test
 RUNTIME_MODULES += mss_rt        # ~/src/usr/isteps/mss/runtime/ - no runtime test
 RUNTIME_MODULES += pm_rt         # ~/src/usr/isteps/pm/runtime/
+RUNTIME_MODULES += $(if $(CONFIG_FSP_BUILD),,pnor_rt) # ~/src/usr/pnor/runtime/
 RUNTIME_MODULES += expaccess_rt  # ~/src/usr/expaccess/runtime/
 RUNTIME_MODULES += eeprom_rt     # ~/src/usr/eeprom/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt) # ~/src/usr/diag/prdf/runtime/

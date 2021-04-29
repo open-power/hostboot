@@ -290,6 +290,17 @@ bool isSectionEmpty(const PNOR::SectionId i_section);
 void readAndClearCounter( uint32_t i_threshold,
                           bool i_clear = true );
 
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+/**
+* @brief Return a const ref to the iv_ipltime_lid std:array for
+*        either PnorRP or RtPnor depending if we call this during
+*        the boot vs at runtime.
+*
+* @return a const ref to the iv_ipltime_lid member variable.
+*/
+const std::array<uint32_t, PNOR::NUM_SECTIONS>& getLidIds();
+#endif
+
 } // PNOR
 
 #endif

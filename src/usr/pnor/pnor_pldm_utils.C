@@ -25,12 +25,13 @@
 
 /* Local includes */
 #include "pnor_pldm_utils.H"
-#include "pnorrp.H"
+
 
 /* Misc Userspace Module Includes */
 #include <trace/interface.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <pldm/pldm_errl.H>
+#include <pnor/pnorif.H>
 
 /* PLDM Subtree Includes */
 #include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
@@ -51,12 +52,18 @@ namespace PLDM_PNOR
     errlHndl_t sectionIdToLidId(const PNOR::SectionId i_sectionId,
                                 uint32_t & o_lidId)
     {
+        auto lid_table = PNOR::getLidIds();
+        return sectionIdToLidId(i_sectionId, o_lidId, lid_table);
+    }
+
+  errlHndl_t sectionIdToLidId(const PNOR::SectionId i_sectionId,
+                              uint32_t & o_lidId,
+                              const std::array<uint32_t, PNOR::NUM_SECTIONS> & i_lid_ids)
+    {
         errlHndl_t errl = nullptr;
         assert(i_sectionId < PNOR::NUM_SECTIONS,
               "sectionIdToLidId attempting to lookup invalid SectionId" );
-        auto lid_table = Singleton<PnorRP>::instance().get_lid_ids();
-
-        o_lidId = lid_table[i_sectionId];
+        o_lidId = i_lid_ids[i_sectionId];
         if(o_lidId == INVALID_LID)
         {
             TRACFCOMP(g_trac_pnor,
@@ -64,8 +71,8 @@ namespace PLDM_PNOR
                       i_sectionId);
             for(size_t i = 0; i < PNOR::NUM_SECTIONS; i++)
             {
-                TRACFCOMP(g_trac_pnor, "PLDM_PNOR::sectionIdToLidId: lid_table[%d] = %lx",
-                          i , lid_table[i]);
+                TRACFCOMP(g_trac_pnor, "PLDM_PNOR::sectionIdToLidId: i_lid_ids[%d] = 0x%08x",
+                          i , i_lid_ids[i]);
             }
             /*@
             * @errortype
@@ -78,7 +85,7 @@ namespace PLDM_PNOR
             * @custdesc     A problem occurred while accessing the boot firmware.
             */
             errl = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        ERRORLOG::ERRL_SEV_PREDICTIVE,
                         PNOR::MOD_PNOR_PLDM_SEC_TO_LID,
                         PNOR::RC_INVALID_SECTION,
                         i_sectionId,

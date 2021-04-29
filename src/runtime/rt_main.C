@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,6 +159,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 #ifdef CONFIG_PLDM
     // initialize PLDM
     rtPost->callInitPldm();
+
+    // We only support PNOR access if PLDM is available
+    rtPost->callInitPnor();
 #endif
 
     // Make sure errlmanager is ready

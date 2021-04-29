@@ -54,7 +54,8 @@ namespace PLDM_PNOR
     * @brief Given SectionId enum value lookup the lid id associated
     *        with that section. This function also validates that
     *        the given SectionId is valid and the mapping is also
-    *        valid.
+    *        valid. This function will lookup the lid_ids mapping and call
+    *        the overload of this function that takes i_lid_ids as a param
     *
     * @param[in]  i_sectionId SectionId we want to know the lid id of.
     * @param[out] o_lidId A uint32 representing the lid id assigned
@@ -64,6 +65,22 @@ namespace PLDM_PNOR
     */
   errlHndl_t sectionIdToLidId(const PNOR::SectionId i_sectionId,
                               uint32_t & o_lidId);
+
+  /**
+  * @brief Given SectionId enum value and the list of lid_id mappings,
+  *        lookup the lid id associated with that section. This function
+  *        also validates that the given SectionId is valid and
+  *        the mapping is also valid.
+  *
+  * @param[in]  i_sectionId SectionId we want to know the lid id of.
+  * @param[out] o_lidId A uint32 representing the lid id assigned
+  *                     to this pnor section on the service processor.
+  * @return nullptr if no error is found. Will return error if i_sectionId
+  *         maps to INVALID_LID
+  */
+  errlHndl_t sectionIdToLidId(const PNOR::SectionId i_sectionId,
+                              uint32_t & o_lidId,
+                              const std::array<uint32_t, PNOR::NUM_SECTIONS> & i_lid_ids);
 
 
     /**

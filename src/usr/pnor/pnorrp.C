@@ -60,10 +60,8 @@
 #endif
 
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
-#include "pnor_pldm_utils.H"
-#include <pldm/requests/pldm_fileio_requests.H>
 #include <pldm/base/hb_bios_attrs.H>
-#include <pldm/pldm_errl.H>
+#include "pnor_pldm_utils.H"
 #endif
 
 extern trace_desc_t* g_trac_pnor;
@@ -187,6 +185,13 @@ void PNOR::readAndClearCounter( uint32_t i_threshold,
                                                       i_clear);
 }
 
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+const std::array<uint32_t, PNOR::NUM_SECTIONS>& PNOR::getLidIds()
+{
+    return Singleton<PnorRP>::instance().get_lid_ids();
+}
+#endif
+
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 
@@ -309,176 +314,6 @@ PnorRP::~PnorRP()
     TRACDCOMP(g_trac_pnor, "< PnorRP::~PnorRP" );
 }
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
-
-pldm_file_attr_table_entry * PnorRP::sectionIdFileTableLookup(const SectionId i_secId,
-                                                             const std::vector<uint8_t> & i_fileTable)
-{
-    /* See PLDM for File Based I/O document for details */
-    // Up to 3 bytes of padding are added to the end of the table
-    // to make table 4 byte aligned. This is needed to correctly append
-    // the CRC32 checksum at the end of the entire table. Together
-    // these will be up to 7 bytes.
-    const size_t CHKSUM_PADDING = 7;
-    auto lid_id = iv_ipltime_lid_ids[i_secId];
-
-    auto start_ptr = const_cast<uint8_t *>(i_fileTable.data());
-    auto end_ptr = start_ptr + i_fileTable.size() - CHKSUM_PADDING;
-
-    pldm_file_attr_table_entry * file_table_entry = nullptr;
-    bool match_found = false;
-
-    while(start_ptr < end_ptr)
-    {
-        file_table_entry =
-          reinterpret_cast<pldm_file_attr_table_entry *>(start_ptr);
-
-        const size_t NAME_SZ = 8;
-        char entry_lid_ascii[NAME_SZ+1] = {0};
-        strncpy(entry_lid_ascii,
-                const_cast<const char *>(reinterpret_cast<char *>(&file_table_entry->file_attr_table_nst[0])),
-                NAME_SZ);
-        entry_lid_ascii[NAME_SZ] = '\0';
-        auto entry_lid_id = strtoul(reinterpret_cast<char *>(&entry_lid_ascii[0]), nullptr, 16);
-
-        if(entry_lid_id == lid_id)
-        {
-            match_found = true;
-            break;
-        }
-        else
-        {
-            start_ptr += sizeof(file_table_entry->file_handle);
-            start_ptr += sizeof(file_table_entry->file_name_length);
-            start_ptr += le16toh(file_table_entry->file_name_length);
-            start_ptr += sizeof(uint32_t); // FileSize
-            start_ptr += sizeof(uint32_t); // FileTraits
-        }
-    }
-
-    if(!match_found)
-    {
-        file_table_entry = nullptr;
-    }
-
-    return file_table_entry;
-}
-
-errlHndl_t PnorRP::populateTOC( void )
-{
-    std::vector<uint8_t> file_table;
-    errlHndl_t l_errhdl = nullptr;
-
-    do{
-        // declare these vectors in their own scope so we dont keep them around any
-        // longer than we need to
-        {
-            std::vector<uint8_t> bios_string_table, bios_attr_table;
-            l_errhdl = PLDM::getLidIds(bios_string_table, bios_attr_table, iv_ipltime_lid_ids);
-        }
-        if(l_errhdl)
-        {
-            TRACFCOMP(g_trac_pnor, "An error occurred when we requested the hb_lid_ids attribute from the BMC");
-            break;
-        }
-
-        l_errhdl = PLDM::getFileTable(file_table);
-
-        if(l_errhdl)
-        {
-            TRACFCOMP(g_trac_pnor, "An error occurred when we requested the PLDM file table from the BMC");
-            break;
-        }
-
-        // Use the file table to lookup information for each
-        // section listed in the enum SectionId defined in pnor_const.H
-        for(size_t i = 0; i < NUM_SECTIONS; i++)
-        {
-            auto section_id = static_cast<SectionId>(i);
-
-            iv_TOC[i].id        = static_cast<SectionId>(section_id);
-
-            if(iv_ipltime_lid_ids[section_id] == PLDM_PNOR::INVALID_LID)
-            {
-                // If there is no lid associated with this section
-                // then skip this pnor section
-                continue;
-            }
-
-            iv_TOC[i].flashAddr = i * VMM_SIZE_RESERVED_PER_SECTION;
-            iv_TOC[i].virtAddr  = iv_TOC[i].flashAddr | BASE_VADDR;
-            iv_TOC[i].chip      = 0; // always default to chip 0
-
-            auto file_table_entry = sectionIdFileTableLookup(section_id,
-                                                             file_table);
-
-            if(file_table_entry == nullptr)
-            {
-                /*@
-                * @errortype
-                * @moduleid     PNOR::MOD_POPULATE_TOC
-                * @reasoncode   PNOR::RC_INVALID_SECTION
-                * @userdata1    Section ID we are looking up
-                * @userdata2    unused
-                * @devdesc      PnorRP::setupPnorVMM> Error from mm_alloc_block or mm_set_permission
-                * @custdesc     A problem occurred accessing boot firmware.
-                */
-                l_errhdl = new ERRORLOG::ErrlEntry(
-                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                              PNOR::MOD_POPULATE_TOC,
-                              PNOR::RC_INVALID_SECTION,
-                              section_id,
-                              0,
-                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-                l_errhdl->collectTrace(PNOR_COMP_NAME);
-                PLDM::addBmcErrorCallouts(l_errhdl);
-                break;
-            }
-
-            // file's name, size, and traits
-            uint8_t * entry_nst = &file_table_entry->file_attr_table_nst[0];
-
-            iv_TOC[i].size =
-                le32toh(*reinterpret_cast<uint32_t *>(entry_nst +
-                                              le16toh(file_table_entry->file_name_length)));
-            if( iv_TOC[i].size > VMM_SIZE_RESERVED_PER_SECTION)
-            {
-                /*@
-                * @errortype
-                * @moduleid     PNOR::MOD_POPULATE_TOC
-                * @reasoncode   PNOR::RC_SECTION_SIZE_IS_BIG
-                * @userdata1    Section
-                * @userdata2    Section Size
-                * @devdesc      File size reported by BMC is larger than our max supported.
-                * @custdesc     A problem occurred accessing boot firmware.
-                */
-                l_errhdl = new ERRORLOG::ErrlEntry(
-                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                              PNOR::MOD_POPULATE_TOC,
-                              PNOR::RC_SECTION_SIZE_IS_BIG,
-                              i,
-                              iv_TOC[i].size,
-                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-                l_errhdl->collectTrace(PNOR_COMP_NAME);
-                PLDM::addBmcErrorCallouts(l_errhdl);
-                break;
-            }
-            auto entry_traits =
-                le32toh(*reinterpret_cast<uint32_t *>(entry_nst +
-                                              le16toh(file_table_entry->file_name_length) +
-                                              sizeof(uint32_t)));
-
-            if(entry_traits & PLDM_PNOR::READ_ONLY)
-            {
-                iv_TOC[i].misc |= FFS_MISC_READ_ONLY;
-            }
-
-            iv_TOC[i].secure = PNOR::isEnforcedSecureSection(i);
-        }
-    }while(0);
-
-    return l_errhdl;
-}
-
 errlHndl_t PnorRP::setupPnorVMM(void)
 {
     errlHndl_t l_errhdl = nullptr;
@@ -546,9 +381,7 @@ errlHndl_t PnorRP::setupPnorVMM(void)
     }
     return l_errhdl;
 }
-
 #else
-
 errlHndl_t PnorRP::setupPnorVMM()
 {
     errlHndl_t l_errhdl = nullptr;
@@ -585,7 +418,6 @@ errlHndl_t PnorRP::setupPnorVMM()
     }while(0);
     return l_errhdl;
 }
-
 #endif
 
 /**
@@ -596,7 +428,7 @@ void PnorRP::initDaemon()
     TRACUCOMP(g_trac_pnor, "PnorRP::initDaemon> " );
     errlHndl_t l_errhdl = nullptr;
     static_assert(TOTAL_SIZE <= VMM_VADDR_PNOR_RP_MAX_SIZE,
-                  "Currently we will try to allocate too much VMM space for host fw data, check VMM_VADDR_PNOR_RP_MAX_SIZE and VMM_SIZE_RESERVED_PER_SECTION");
+                  "Attempted to allocate too much VMM space for host fw data, check VMM_VADDR_PNOR_RP_MAX_SIZE and VMM_SIZE_RESERVED_PER_SECTION");
 
     do
     {
@@ -609,8 +441,20 @@ void PnorRP::initDaemon()
                                             INITSERVICE::PNOR_RP_PRIORITY );
 
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
+        // declare these vectors in their own scope so we dont keep them around any
+        // longer than we need to
+        {
+            std::vector<uint8_t> bios_string_table, bios_attr_table;
+            l_errhdl = PLDM::getLidIds(bios_string_table, bios_attr_table, iv_ipltime_lid_ids);
+        }
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "An error occurred when we requested the hb_lid_ids attribute from the BMC");
+            break;
+        }
+
         // Populate iv_TOC with the file table we got from PLDM
-        l_errhdl = populateTOC();
+        l_errhdl = populateTOC(iv_TOC, iv_ipltime_lid_ids);
         if(l_errhdl)
         {
             TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> populateTOC failed");

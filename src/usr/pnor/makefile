@@ -57,7 +57,7 @@ OBJS += $(if $(CONFIG_ALLOW_MICRON_PNOR),nor_micron.o)
 EXTRAINCDIR += $(if $(CONFIG_FILE_XFER_VIA_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm)
 
 SUBDIRS += test.d
-#SUBDIRS += runtime.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,25 @@ namespace PNOR {
      */
     errlHndl_t parseTOC(uint8_t* i_tocBuffer, PNOR::SectionData_t * o_TOC,
                         bool i_pnorInitialized = true);
+
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+
+    /**
+     * @brief Request the PLDM file table from the BMC and use it to fill
+     *        in information about the various PNOR sections in the iv_TOC
+     *        member of PnorRP.
+     * @param[out] o_TOC           sectionInformation of the TOC used
+     * @param[in] i_lid_ids        array of length NUM_SECTION that all the
+     *                             lid id mappings we can find for SectionIds
+     * @param[in] i_pnorInitialized PNOR::init() has completed
+     * @return Contains the error, if one occurred, returned from the getFileTable
+     *         PLDM request. Otherwise it will return nullptr.
+     */
+    errlHndl_t populateTOC( SectionData_t * o_TOC ,
+                              std::array<uint32_t, PNOR::NUM_SECTIONS> & i_lid_ids,
+                              bool i_pnorInitialized = true);
+
+#endif
 
     /**
      *  @brief: determine the physical offset of ffs entry
