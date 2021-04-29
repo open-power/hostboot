@@ -95,6 +95,7 @@ uint32_t bias_adjust_mv(
     const uint32_t i_value,
     const int8_t i_bias_0p5pct);
 
+#ifndef DFT
 /// ----------------------------------------------------------------------------
 /// @brief Get the WOF Table Header
 /// @param[in]    i_proc_target Chip Target
@@ -114,6 +115,7 @@ fapi2::ReturnCode wof_get_tables(
 fapi2::ReturnCode wof_validate_header(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
     fapi2::ATTR_WOF_TABLE_DATA_Type* i_wof_table_data);
+#endif //DFT
 
 /// ----------------------------------------------------------------------------
 /// @brief Apply the WOF Table Overrides to #V
