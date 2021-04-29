@@ -444,6 +444,21 @@
   </attribute>
 
   <attribute>
+    <description>Indicates the MCTP EID of HBRT</description>
+    <id>HBRT_EID</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t>
+        <!-- Default EID for HBRT is 10 -->
+        <default>10</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>HB_EXISTING_IMAGE</id>
     <description>Indicates which logical nodes have a hostboot image.</description>
     <!-- Bit position [0-7] (left to right) represents logical node.

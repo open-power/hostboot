@@ -291,6 +291,9 @@
       <id>FORCE_SBE_UPDATE</id>
     </attribute>
     <attribute>
+      <id>HBRT_EID</id>
+    </attribute>
+    <attribute>
       <id>HB_EXISTING_IMAGE</id>
     </attribute>
     <attribute>
