@@ -79,6 +79,8 @@ fapi2::ReturnCode check_omi_mfg_screen_crc_setting(bool& o_is_set)
     FAPI_TRY(mss::attr::get_mfg_screen_omi_crc_allowed(l_crc_allowed));
 
     o_is_set = check_omi_mfg_screen_setting_helper(l_omi_screen_set, l_crc_allowed);
+    FAPI_DBG("MNFG OMI screening CRC test %s set up: MFG policy flag %d, Number CRC allowed %d",
+             o_is_set ? "is" : "is not", l_omi_screen_set, l_crc_allowed);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -104,6 +106,8 @@ fapi2::ReturnCode check_omi_mfg_screen_edpl_setting(bool& o_is_set)
     FAPI_TRY(mss::attr::get_mfg_screen_omi_edpl_allowed(l_edpl_allowed));
 
     o_is_set = check_omi_mfg_screen_setting_helper(l_omi_screen_set, l_edpl_allowed);
+    FAPI_DBG("MNFG OMI screening EDPL test %s set up: MFG policy flag %d, Number EDPL allowed %d",
+             o_is_set ? "is" : "is not", l_omi_screen_set, l_edpl_allowed);
 
 fapi_try_exit:
     return fapi2::current_err;

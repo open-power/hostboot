@@ -172,6 +172,22 @@ inline bool state_machine_success(const uint64_t i_state_machine_state)
     return (i_state_machine_state == STATE_MACHINE_SUCCESS);
 }
 
+///
+/// @brief Check the OMI CRC counters for MFG screen test
+/// @param[in] i_target OMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_omi_mfg_screen_crc_counts(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target);
+
+///
+/// @brief Check the OMI EDPL counters for MFG screen test
+/// @param[in] i_target OMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_omi_mfg_screen_edpl_counts(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target);
+
 } // namespace omi
 } // namespace mss
 

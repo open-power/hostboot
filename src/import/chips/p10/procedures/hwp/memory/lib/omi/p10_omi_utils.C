@@ -39,6 +39,7 @@
 #include <p10_scom_omic.H>
 #include <lib/workarounds/p10_omi_workarounds.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mss_log_utils.H>
 #include <lib/p10_attribute_accessors_manual.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <mss_generic_attribute_getters.H>
@@ -609,6 +610,155 @@ fapi2::ReturnCode omi_train_status(
     scomt::omi::GET_STATUS_TRAINING_STATE_MACHINE(l_omi_status, o_state_machine_state);
 
     o_omi_status = l_omi_status;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check the OMI CRC counters for MFG screen test
+/// @param[in] i_target OMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_omi_mfg_screen_crc_counts(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_pmu_data;
+    uint64_t l_crc_count = 0;
+    uint64_t l_total_crc_count = 0;
+    fapi2::ATTR_MFG_SCREEN_OMI_CRC_ALLOWED_Type l_crc_allowed = 0;
+
+    FAPI_TRY(mss::attr::get_mfg_screen_omi_crc_allowed(l_crc_allowed));
+
+    FAPI_TRY(scomt::omic::GET_PMU_CNTR(i_target, l_pmu_data));
+
+    // Check upstream CRC count
+    scomt::omic::GET_PMU_CNTR_2(l_pmu_data, l_crc_count);
+    FAPI_INF("%s Upstream CRC count from PMU2: %d", mss::c_str(i_target), l_crc_count);
+    l_total_crc_count += l_crc_count;
+
+    scomt::omic::GET_PMU_CNTR_0(l_pmu_data, l_crc_count);
+    FAPI_INF("%s Upstream CRC count from PMU0: %d", mss::c_str(i_target), l_crc_count);
+    l_total_crc_count += l_crc_count;
+
+    // Using NOEXIT here so we capture all fails, and not only the first one
+    FAPI_ASSERT_NOEXIT((l_total_crc_count <= l_crc_allowed),
+                       fapi2::P10_MFG_OMI_SCREEN_UPSTREAM_CRC()
+                       .set_OMIC_TARGET(i_target)
+                       .set_THRESHHOLD(l_crc_allowed)
+                       .set_CRC_COUNT(l_total_crc_count),
+                       "%s MFG OMI screen upstream CRC count (%d) exceeded threshhold (%d)",
+                       mss::c_str(i_target),
+                       l_total_crc_count,
+                       l_crc_allowed );
+
+    // Capture and log the error if the above assert failed
+    mss::log_and_capture_error(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE, l_rc);
+
+    // Check downstream CRC count
+    l_total_crc_count = 0;
+    scomt::omic::GET_PMU_CNTR_3(l_pmu_data, l_crc_count);
+    FAPI_INF("%s Downstream CRC count from PMU3: %d", mss::c_str(i_target), l_crc_count);
+    l_total_crc_count += l_crc_count;
+
+    scomt::omic::GET_PMU_CNTR_1(l_pmu_data, l_crc_count);
+    FAPI_INF("%s Downstream CRC count from PMU1: %d", mss::c_str(i_target), l_crc_count);
+    l_total_crc_count += l_crc_count;
+
+    FAPI_ASSERT_NOEXIT((l_total_crc_count <= l_crc_allowed),
+                       fapi2::P10_MFG_OMI_SCREEN_DOWNSTREAM_CRC()
+                       .set_OMIC_TARGET(i_target)
+                       .set_THRESHHOLD(l_crc_allowed)
+                       .set_CRC_COUNT(l_total_crc_count),
+                       "%s MFG OMI screen downstream CRC (NACK) count (%d) exceeded threshhold (%d)",
+                       mss::c_str(i_target),
+                       l_total_crc_count,
+                       l_crc_allowed );
+
+    // Capture and log the error if the above assert failed
+    mss::log_and_capture_error(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE, l_rc);
+
+    // l_rc holds any error from the ASSERT_NOEXITs above
+    // it will get thrown out by the caller, but is used in the unit tests
+    return l_rc;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check the OMI EDPL counters for MFG screen test
+/// @param[in] i_target OMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_omi_mfg_screen_edpl_counts(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ATTR_MFG_SCREEN_OMI_EDPL_ALLOWED_Type l_edpl_allowed = 0;
+
+    FAPI_TRY(mss::attr::get_mfg_screen_omi_edpl_allowed(l_edpl_allowed));
+
+    // Check upstream EDPL count (downstream is checked in Explorer library)
+    for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
+    {
+        fapi2::buffer<uint64_t> l_pmu_data;
+        uint64_t l_edpl_count = 0;
+        uint64_t l_total_edpl_count = 0;
+
+        FAPI_TRY(scomt::omi::GET_EDPL_MAX_COUNT(l_omi, l_pmu_data));
+
+        scomt::omi::GET_EDPL_MAX_COUNT_0_MAX_COUNT(l_pmu_data, l_edpl_count);
+        FAPI_INF("%s Upstream EDPL count from EDPL_MAX_COUNT_0: %d", mss::c_str(l_omi), l_edpl_count);
+        l_total_edpl_count += l_edpl_count;
+
+        scomt::omi::GET_EDPL_MAX_COUNT_1_MAX_COUNT(l_pmu_data, l_edpl_count);
+        FAPI_INF("%s Upstream EDPL count from EDPL_MAX_COUNT_1: %d", mss::c_str(l_omi), l_edpl_count);
+        l_total_edpl_count += l_edpl_count;
+
+        scomt::omi::GET_EDPL_MAX_COUNT_2_MAX_COUNT(l_pmu_data, l_edpl_count);
+        FAPI_INF("%s Upstream EDPL count from EDPL_MAX_COUNT_2: %d", mss::c_str(l_omi), l_edpl_count);
+        l_total_edpl_count += l_edpl_count;
+
+        scomt::omi::GET_EDPL_MAX_COUNT_3_MAX_COUNT(l_pmu_data, l_edpl_count);
+        FAPI_INF("%s Upstream EDPL count from EDPL_MAX_COUNT_3: %d", mss::c_str(l_omi), l_edpl_count);
+        l_total_edpl_count += l_edpl_count;
+
+        scomt::omi::GET_EDPL_MAX_COUNT_4_MAX_COUNT(l_pmu_data, l_edpl_count);
+        FAPI_INF("%s Upstream EDPL count from EDPL_MAX_COUNT_4: %d", mss::c_str(l_omi), l_edpl_count);
+        l_total_edpl_count += l_edpl_count;
+
+        scomt::omi::GET_EDPL_MAX_COUNT_5_MAX_COUNT(l_pmu_data, l_edpl_count);
+        FAPI_INF("%s Upstream EDPL count from EDPL_MAX_COUNT_5: %d", mss::c_str(l_omi), l_edpl_count);
+        l_total_edpl_count += l_edpl_count;
+
+        scomt::omi::GET_EDPL_MAX_COUNT_6_MAX_COUNT(l_pmu_data, l_edpl_count);
+        FAPI_INF("%s Upstream EDPL count from EDPL_MAX_COUNT_6: %d", mss::c_str(l_omi), l_edpl_count);
+        l_total_edpl_count += l_edpl_count;
+
+        scomt::omi::GET_EDPL_MAX_COUNT_7_MAX_COUNT(l_pmu_data, l_edpl_count);
+        FAPI_INF("%s Upstream EDPL count from EDPL_MAX_COUNT_7: %d", mss::c_str(l_omi), l_edpl_count);
+        l_total_edpl_count += l_edpl_count;
+
+        // Using NOEXIT here so we capture all fails, and not only the first one
+        FAPI_ASSERT_NOEXIT((l_total_edpl_count <= l_edpl_allowed),
+                           fapi2::P10_MFG_OMI_SCREEN_UPSTREAM_EDPL()
+                           .set_OMI_TARGET(l_omi)
+                           .set_THRESHHOLD(l_edpl_allowed)
+                           .set_EDPL_COUNT(l_total_edpl_count),
+                           "%s MFG OMI screen upstream EDPL count (%d) exceeded threshhold (%d)",
+                           mss::c_str(l_omi),
+                           l_total_edpl_count,
+                           l_edpl_allowed );
+
+        // Capture and log the error if the above assert failed
+        mss::log_and_capture_error(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE, l_rc);
+    }
+
+    // l_rc holds any error from the ASSERT_NOEXITs above
+    // it will get thrown out by the caller, but is used in the unit tests
+    return l_rc;
 
 fapi_try_exit:
     return fapi2::current_err;

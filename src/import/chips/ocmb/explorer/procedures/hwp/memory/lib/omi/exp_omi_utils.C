@@ -40,11 +40,13 @@
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <generic/memory/lib/utils/mss_log_utils.H>
 #include <lib/shared/exp_consts.H>
 #include <p10_scom_omi_a.H>
 #include <lib/i2c/exp_i2c.H>
 #include <i2c_access.H>
 #include <p10_scom_omi.H>
+#include <mss_p10_attribute_getters.H>
 
 namespace mss
 {
@@ -198,6 +200,78 @@ fapi2::ReturnCode ffe_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
 
     FAPI_TRY(mss::exp::i2c::ffe_settings::set_pre_cursor( i_target, o_data, l_pre_cursor ));
     FAPI_TRY(mss::exp::i2c::ffe_settings::set_post_cursor( i_target, o_data, l_post_cursor ));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check the OMI EDPL counters for MFG screen test
+/// @param[in] i_target OCMB_CHIP target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_omi_mfg_screen_edpl_counts(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_pmu_data;
+    uint64_t l_edpl_count = 0;
+    uint64_t l_total_edpl_count = 0;
+    fapi2::ATTR_MFG_SCREEN_OMI_EDPL_ALLOWED_Type l_edpl_allowed = 0;
+
+    FAPI_TRY(mss::attr::get_mfg_screen_omi_edpl_allowed(l_edpl_allowed));
+
+    // Check downstream EDPL count (upstream is checked in P10 library)
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_EDPL_MAX_COUNT, l_pmu_data));
+
+    l_pmu_data.extractToRight<EXPLR_DLX_DL0_EDPL_MAX_COUNT_L0, EXPLR_DLX_DL0_EDPL_MAX_COUNT_L0_LEN>(l_edpl_count);
+    FAPI_INF("%s Downstream EDPL count from EDPL_MAX_COUNT_L0: %d", mss::c_str(i_target), l_edpl_count);
+    l_total_edpl_count += l_edpl_count;
+
+    l_pmu_data.extractToRight<EXPLR_DLX_DL0_EDPL_MAX_COUNT_L1, EXPLR_DLX_DL0_EDPL_MAX_COUNT_L1_LEN>(l_edpl_count);
+    FAPI_INF("%s Downstream EDPL count from EDPL_MAX_COUNT_L1: %d", mss::c_str(i_target), l_edpl_count);
+    l_total_edpl_count += l_edpl_count;
+
+    l_pmu_data.extractToRight<EXPLR_DLX_DL0_EDPL_MAX_COUNT_L2, EXPLR_DLX_DL0_EDPL_MAX_COUNT_L2_LEN>(l_edpl_count);
+    FAPI_INF("%s Downstream EDPL count from EDPL_MAX_COUNT_L2: %d", mss::c_str(i_target), l_edpl_count);
+    l_total_edpl_count += l_edpl_count;
+
+    l_pmu_data.extractToRight<EXPLR_DLX_DL0_EDPL_MAX_COUNT_L3, EXPLR_DLX_DL0_EDPL_MAX_COUNT_L3_LEN>(l_edpl_count);
+    FAPI_INF("%s Downstream EDPL count from EDPL_MAX_COUNT_L3: %d", mss::c_str(i_target), l_edpl_count);
+    l_total_edpl_count += l_edpl_count;
+
+    l_pmu_data.extractToRight<EXPLR_DLX_DL0_EDPL_MAX_COUNT_L4, EXPLR_DLX_DL0_EDPL_MAX_COUNT_L4_LEN>(l_edpl_count);
+    FAPI_INF("%s Downstream EDPL count from EDPL_MAX_COUNT_L4: %d", mss::c_str(i_target), l_edpl_count);
+    l_total_edpl_count += l_edpl_count;
+
+    l_pmu_data.extractToRight<EXPLR_DLX_DL0_EDPL_MAX_COUNT_L5, EXPLR_DLX_DL0_EDPL_MAX_COUNT_L5_LEN>(l_edpl_count);
+    FAPI_INF("%s Downstream EDPL count from EDPL_MAX_COUNT_L5: %d", mss::c_str(i_target), l_edpl_count);
+    l_total_edpl_count += l_edpl_count;
+
+    l_pmu_data.extractToRight<EXPLR_DLX_DL0_EDPL_MAX_COUNT_L6, EXPLR_DLX_DL0_EDPL_MAX_COUNT_L6_LEN>(l_edpl_count);
+    FAPI_INF("%s Downstream EDPL count from EDPL_MAX_COUNT_L6: %d", mss::c_str(i_target), l_edpl_count);
+    l_total_edpl_count += l_edpl_count;
+
+    l_pmu_data.extractToRight<EXPLR_DLX_DL0_EDPL_MAX_COUNT_L7, EXPLR_DLX_DL0_EDPL_MAX_COUNT_L7_LEN>(l_edpl_count);
+    FAPI_INF("%s Downstream EDPL count from EDPL_MAX_COUNT_L7: %d", mss::c_str(i_target), l_edpl_count);
+    l_total_edpl_count += l_edpl_count;
+
+    FAPI_ASSERT_NOEXIT((l_total_edpl_count <= l_edpl_allowed),
+                       fapi2::P10_MFG_OMI_SCREEN_DOWNSTREAM_EDPL()
+                       .set_OCMB_TARGET(i_target)
+                       .set_THRESHHOLD(l_edpl_allowed)
+                       .set_EDPL_COUNT(l_total_edpl_count),
+                       "%s MFG OMI screen downstream EDPL count (%d) exceeded threshhold (%d)",
+                       mss::c_str(i_target),
+                       l_total_edpl_count,
+                       l_edpl_allowed );
+
+    // Capture and log the error if the above assert failed
+    mss::log_and_capture_error(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE, l_rc);
+
+    // l_rc holds any error from the ASSERT_NOEXIT above
+    // it will get thrown out by the caller, but is used in the unit tests
+    return l_rc;
 
 fapi_try_exit:
     return fapi2::current_err;

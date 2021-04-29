@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -109,6 +109,78 @@
     <gard>
         <target>OMI_TARGET</target>
     </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_MFG_OMI_SCREEN_UPSTREAM_CRC</rc>
+    <description>
+      Manufacturing OMI screen test upstream CRC count was above
+      threshhold set in ATTR_MFG_SCREEN_OMI_CRC_ALLOWED
+    </description>
+    <ffdc>OMIC_TARGET</ffdc>
+    <ffdc>THRESHHOLD</ffdc>
+    <ffdc>CRC_COUNT</ffdc>
+    <callout>
+        <target>OMIC_TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>OMIC_TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_MFG_OMI_SCREEN_DOWNSTREAM_CRC</rc>
+    <description>
+      Manufacturing OMI screen test downstream CRC count was above
+      threshhold set in ATTR_MFG_SCREEN_OMI_CRC_ALLOWED
+    </description>
+    <ffdc>OMIC_TARGET</ffdc>
+    <ffdc>THRESHHOLD</ffdc>
+    <ffdc>CRC_COUNT</ffdc>
+    <callout>
+        <target>OMIC_TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>OMIC_TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_MFG_OMI_SCREEN_UPSTREAM_EDPL</rc>
+    <description>
+      Manufacturing OMI screen test upstream EDPL count was above
+      threshhold set in ATTR_MFG_SCREEN_OMI_EDPL_ALLOWED
+    </description>
+    <ffdc>OMI_TARGET</ffdc>
+    <ffdc>THRESHHOLD</ffdc>
+    <ffdc>EDPL_COUNT</ffdc>
+    <callout>
+        <target>OMI_TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>OMI_TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_MFG_OMI_SCREEN_DOWNSTREAM_EDPL</rc>
+    <description>
+      Manufacturing OMI screen test downstream EDPL count was above
+      threshhold set in ATTR_MFG_SCREEN_OMI_EDPL_ALLOWED
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>THRESHHOLD</ffdc>
+    <ffdc>EDPL_COUNT</ffdc>
+    <callout>
+        <target>OCMB_TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

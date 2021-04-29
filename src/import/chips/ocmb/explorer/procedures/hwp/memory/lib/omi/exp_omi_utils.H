@@ -265,6 +265,14 @@ fapi2::ReturnCode setup_int_cmd_flags(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 fapi2::ReturnCode ffe_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                              std::vector<uint8_t>& o_data );
 
+///
+/// @brief Check the OMI EDPL counters for MFG screen test
+/// @param[in] i_target OCMB_CHIP target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_omi_mfg_screen_edpl_counts(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
 namespace train
 {
 
