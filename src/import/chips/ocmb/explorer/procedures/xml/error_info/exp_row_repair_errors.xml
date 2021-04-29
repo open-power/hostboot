@@ -101,4 +101,36 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_EXP_ROW_REPAIR_MCBIST_STUCK_IN_PROGRESS</rc>
+    <description>
+        MCBIST is failed to exit scrub or is in use and not available for repair.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_ROW_REPAIR_CCS_STUCK_IN_PROGRESS</rc>
+    <description>
+        CCS engine is in use and not available for repair.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

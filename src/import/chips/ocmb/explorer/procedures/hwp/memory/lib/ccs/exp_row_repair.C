@@ -38,6 +38,7 @@
 #include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/ccs/ccs_traits_explorer.H>
+#include <lib/mcbist/exp_mcbist_traits.H>
 #include <lib/dimm/exp_mrs_traits.H>
 #include <lib/ccs/exp_row_repair.H>
 #include <lib/dimm/exp_rank.H>
@@ -545,8 +546,15 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
                                       const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
                                       const fapi2::buffer<uint64_t>& i_dram_bitmap)
 {
+    using CCS = ccsTraits<mss::mc_type::EXPLORER>;
+    using MCB = mss::mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_modeq_reg;
+    fapi2::buffer<uint64_t> l_mcbist_status;
+    fapi2::buffer<uint64_t> l_ccs_status;
+    poll_parameters l_poll_parameters;
+    bool l_poll_result = false;
 
     // Get port rank and target
     const auto l_port_target = i_rank_info.get_port_target();
@@ -560,18 +568,50 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
     // Setup SPPR CCS program
     FAPI_TRY( setup_sppr(i_rank_info, i_repair, i_dram_bitmap, l_program) );
 
-    // TODO: Zenhub#983 Handle PRD Takeover and Pass-back of MCBIST engine at runtime
-    // Check MCBIST SRQ to ensure MCBIST is free
+    // Poll MCBIST and CCS STATQ to ensure both are free
+    // Verify that the in-progress bit has not been set for MCBIST, meaning the MCBIST is free
+    l_poll_result = mss::poll(l_ocmb_target, MCB::STATQ_REG, l_poll_parameters,
+                              [&l_mcbist_status, &l_ocmb_target](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_DBG("%s looking for mcbist to clear, mcbist statq 0x%llx, remaining: %d", mss::c_str(l_ocmb_target), stat_reg, poll_remaining);
+        l_mcbist_status = stat_reg;
+        // We're done polling when we see mcbist is not in progress.
+        return (l_mcbist_status.getBit<MCB::MCBIST_IN_PROGRESS>() == false);
+    });
 
-    // Save MCBIST settings from PRD scrub command
+    // Check that mcbist is not being used after poll
+    FAPI_ASSERT(l_poll_result,
+                fapi2::EXP_ROW_REPAIR_MCBIST_STUCK_IN_PROGRESS().
+                set_OCMB_TARGET(l_ocmb_target),
+                "%s MCBIST failed to exit previous command and is not available for repair",
+                mss::c_str(l_ocmb_target));
+
+    // Verify that the in-progress bit has not been set for CCS, meaning no other CCS is running
+    l_poll_result = mss::poll(l_ocmb_target, CCS::STATQ_REG, l_poll_parameters,
+                              [&l_ccs_status, &l_ocmb_target](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_DBG("%s looking for ccs to clear, ccs statq 0x%llx, remaining: %d", mss::c_str(l_ocmb_target), stat_reg, poll_remaining);
+        l_ccs_status = stat_reg;
+        // We're done polling when we see ccs is not in progress.
+        return (l_ccs_status.getBit<CCS::CCS_IN_PROGRESS>() == false);
+    });
+
+    // Check that ccs is not being used after poll
+    FAPI_ASSERT(l_poll_result,
+                fapi2::EXP_ROW_REPAIR_CCS_STUCK_IN_PROGRESS().
+                set_OCMB_TARGET(l_ocmb_target),
+                "%s CCS engine is in use and is not available for repair",
+                mss::c_str(l_ocmb_target));
 
     // EXECUTE CONCURRENT CCS ARRAY
     mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
+
     // TODO: Zenhub#959: Enable CCS Execution via the MCBIST Engine
     // mss::ccs::mcbist_execute(l_ocmb_target, l_program, l_port_target);
-    mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
 
-    // Restore MCBIST settings for PRD
+    // Revert to previous settings
+    // NOTE: May require MCBIST restoration for exp_background_scrub
+    mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
 
 fapi_try_exit:
     return fapi2::current_err;
