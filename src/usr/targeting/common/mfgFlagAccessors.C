@@ -367,6 +367,32 @@ void setAllMfgFlags(const ATTR_MFG_FLAGS_typeStdArr &i_allMfgFlags)
     l_systemTarget->setAttrFromStdArr<ATTR_MFG_FLAGS>(i_allMfgFlags);
 }
 
+// clearMfgFlag
+void clearMfgFlag(const TARGETING::MFG_FLAGS i_mfgFlag)
+{
+    // Create local storage to hold all of the manufacturing flags
+    ATTR_MFG_FLAGS_typeStdArr l_allMfgFlags = { 0 };
+
+    // Get the manufacturing flags from the System target
+    getAllMfgFlags(l_allMfgFlags);
+
+    // Convert caller's manufacturing flag to a mask and then clear
+    // this mask (flag) at the correct cell location.
+    l_allMfgFlags[getMfgFlagCellIndex(i_mfgFlag)] &= ~convertFlagNumericValueToFlagMask(i_mfgFlag);
+
+    // Update the System target to contain the additional flag
+    setAllMfgFlags(l_allMfgFlags);
+}
+
+// clearMfgFlag
+void clearMfgFlag(const TARGETING::MFG_FLAGS       i_mfgFlag,
+                  ATTR_MFG_FLAGS_typeStdArr       &io_allMfgFlags)
+{
+    // Convert caller's manufacturing flag to a mask and then clear
+    // this mask (flag) at the correct cell location
+    io_allMfgFlags[getMfgFlagCellIndex(i_mfgFlag)] &= ~convertFlagNumericValueToFlagMask(i_mfgFlag);
+}
+
 // isMfgFlagSet
 bool isMfgFlagSet(const TARGETING::MFG_FLAGS       i_mfgFlag,
                   const ATTR_MFG_FLAGS_typeStdArr &i_allMfgFlags)

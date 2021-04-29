@@ -29,6 +29,13 @@
 
 namespace SECUREBOOT
 {
+
+
+    // Minimum secure version for the measurement seeproms in the system
+    constexpr uint32_t MINIMUM_SECURE_MEASUREMENT_VERSION = 0x00020013;
+    // Measurement seeprom version resides from bytes 4-7 in register 0x10012.
+    constexpr uint64_t VERSION_BYTES_MASK = 0x00000000FFFFFFFFull;
+
     /*
      * @brief Calls p10_update_security_ctrl HWP to lock down the secure
      *        mailboxes on all functional processors. All errors are committed

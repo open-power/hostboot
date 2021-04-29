@@ -868,10 +868,6 @@ errlHndl_t verifyMeasurementSeepromSecurity(const TARGETING::TargetHandle_t& i_p
         {
             break;
         }
-        // Establish a minimum secure version
-        constexpr uint32_t MINIMUM_SECURE_MEASUREMENT_VERSION = 0x00020013;
-        // Only interested in bytes 4-7 for the version info.
-        constexpr uint64_t VERSION_BYTES_MASK = 0x00000000FFFFFFFFull;
 
         // Ensure the measurement fuse has been blown for this proc
         constexpr uint64_t EXPORT_REGL_STATUS_SCOM_REG = 0x10009;

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -24,7 +24,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = secureboot_ext
-SUBDIRS +=
+SUBDIRS += test.d
 
 PERV_HWP_PATH = $(ROOTPATH)/src/import/chips/p10/procedures/hwp/perv/
 

@@ -246,6 +246,7 @@ TESTCASE_MODULES += testpnor
 TESTCASE_MODULES += testvfs
 TESTCASE_MODULES += testutil
 TESTCASE_MODULES += testsecureboot
+TESTCASE_MODULES += testsecureboot_ext
 TESTCASE_MODULES += testfsiscom
 TESTCASE_MODULES += testlpc
 TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)

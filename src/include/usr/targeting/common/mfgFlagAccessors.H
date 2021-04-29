@@ -255,6 +255,33 @@ void setMfgFlag(TARGETING::MFG_FLAGS       i_mfgFlag,
  */
 void setAllMfgFlags(const ATTR_MFG_FLAGS_typeStdArr &i_allMfgFlags);
 
+
+/**
+ * @brief Clears an individual manufacturing flag
+ *
+ * @details Clear an individual manufacturing flag for the System target on
+ *          attribute ATTR_MFG_FLAGS.
+ *
+ * @note Will assert if unable to get a handle to the System target.
+ *
+ * @param[in] i_mfgFlag - manufacturing flag to clear
+ */
+void clearMfgFlag(const TARGETING::MFG_FLAGS i_mfgFlag);
+
+/**
+ * @brief Clears an individual manufacturing flag
+ *
+ * @details Clear an individual manufacturing flag for the System target on
+ *          attribute ATTR_MFG_FLAGS.
+ *
+ * @note Will assert if unable to get a handle to the System target.
+ *
+ * @param[in] i_mfgFlag     - manufacturing flag to clear
+ * @param[in/out] i_allMfgFlags - data to clear the flag against
+ */
+void clearMfgFlag(const TARGETING::MFG_FLAGS       i_mfgFlag,
+                  ATTR_MFG_FLAGS_typeStdArr       &io_allMfgFlags);
+
 /**
  * @brief Determine if a manufacturing flag is set
  *
