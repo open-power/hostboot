@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 
 //Hwp
 #include    <p10_setup_evid.H>
+#include    <p10_sbe_scratch_regs.H>
 
 
 using namespace TARGETING;
@@ -71,6 +72,29 @@ void* call_host_voltage_config( void *io_pArgs )
         // for each proc target
         for( const auto & l_proc : l_procList )
         {
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+
+            // Sets up ATTR_FREQ_PAU_MHZ which is required by p10_setup_evid
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Running p10_sbe_scratch_regs_set_pll_buckets HWP on processor target %.8X",
+                      get_huid(l_proc));
+
+            FAPI_INVOKE_HWP(l_err,
+                            p10_sbe_scratch_regs_set_pll_buckets,
+                            l_fapiProc);
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR in p10_sbe_scratch_regs_set_pll_buckets HWP "
+                          "for HUID %.8x. "
+                          TRACE_ERR_FMT,
+                          get_huid(l_proc),
+                          TRACE_ERR_ARGS(l_err));
+                l_stepError.addErrorDetails(l_err);
+                errlCommit( l_err, HWPF_COMP_ID );
+                continue;
+            }
+
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "call_host_voltage_config: calling p10_setup_evid:"
@@ -79,7 +103,6 @@ void* call_host_voltage_config( void *io_pArgs )
 
             // call p10_setup_evid for each processor to first COMPUTE
             // the voltage settings for each proc
-            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
             FAPI_INVOKE_HWP(l_err,
                             p10_setup_evid,
                             l_fapiProc,
