@@ -233,7 +233,7 @@ int32_t analyzeNeighborCore_RE(ExtensibleChip* i_chip,
         return PRD_SCAN_COMM_REGISTER_ZERO;
     }
 
-    // Then, check if there are any unit checkstop attentions on the other core.
+    // Then, check if there are any recoverable attentions on the other core.
     SCAN_COMM_REGISTER_CLASS* wof  = neighbor->getRegister("EQ_CORE_FIR_WOF");
     SCAN_COMM_REGISTER_CLASS* mask = neighbor->getRegister("EQ_CORE_FIR_MASK");
     SCAN_COMM_REGISTER_CLASS* act0 = neighbor->getRegister("EQ_CORE_FIR_ACT0");
@@ -254,12 +254,14 @@ int32_t analyzeNeighborCore_RE(ExtensibleChip* i_chip,
                act1->GetBitFieldJustified(0, 64) & // act1=1
               ~0x0000000000000080ll))              // bit 56 is not set
     {
-        // There are no active recoverable attentions. This would be a bug
-        // because this FIR should only fire if there was an attention. Return
-        // saying nothing was found and the rule code will callout level 2
-        // support.
-        PRDF_ERR("analyzeNeighborCore_RE(0x%08x) no attn on neighbor",
-                 i_chip->getHuid());
+        // There are no active recoverable attentions on the peer core.
+        // Typically, this would be a bug. Unfortunately, we don't have a
+        // reliable way to clear this attention after the rule code clears the
+        // recoverable attention on the peer core. Therefore, we'll have to
+        // surpress this log.
+        PRDF_INF("analyzeNeighborCore_RE(0x%08x) no attn on neighbor, deleting "
+                 "error log", i_chip->getHuid());
+        io_sc.service_data->setDontCommitErrl();
         return PRD_SCAN_COMM_REGISTER_ZERO;
     }
 

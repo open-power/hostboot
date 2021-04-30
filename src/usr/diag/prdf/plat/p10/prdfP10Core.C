@@ -78,29 +78,6 @@ void __maskIfCoreCs(ExtensibleChip* i_chip)
  */
 int32_t PostAnalysis(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
 {
-    // EQ_CORE_FIR[56] indicates that there was a recoverable attention on the
-    // other core in the fused core pair. This bit is useless for PRD because
-    // the other attention will be reported appropriately. Unfortunately, we
-    // can't mask it because the hardware uses this to communicate info to the
-    // other core. We have code in place to tell PRD to analyze the other core
-    // if it sees this bit. The problem is that if PRD handles the recoverable
-    // error on the other core first, we'll need to manually clear this bit so
-    // we don't get an errant attention. Therefore, we'll just blindly clear it
-    // in the Hostboot post analysis. Note that this is not necessary for
-	// EQ_CORE_FIR[57] since that is a core unit checkstop case and the entire
-	// fused core pair will be masked off (see below).
-    ExtensibleChip* neighborCore = getNeighborCore(i_chip);
-    if (nullptr != neighborCore)
-    {
-        // Must do a RMW to the WOF register.
-        auto wof = neighborCore->getRegister("EQ_CORE_FIR_WOF");
-        if (SUCCESS == wof->Read() && wof->IsBitSet(56))
-        {
-            wof->ClearBit(56);
-            wof->Write();
-        }
-    }
-
     #ifdef __HOSTBOOT_RUNTIME
     if ( io_sc.service_data->isProcCoreCS() )
     {
@@ -115,6 +92,7 @@ int32_t PostAnalysis(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
         // called. This will actually result in the this function being called
         // twice for each core. It's a little annoying, but at least we will
         // ensure the appropriate bits are masked in all cases.
+        ExtensibleChip* neighborCore = getNeighborCore(i_chip);
         if (neighborCore != nullptr)
         {
             __maskIfCoreCs(neighborCore);
