@@ -104,10 +104,22 @@ void IpcSp::distributeLocalNodeAddr( void )
     uint64_t l_remoteAddr;
     qryLocalIpcInfo( l_localNode, l_remoteAddr );
 
-    Util::writeScratchReg (INITSERVICE::SPLESS::MboxScratch7_t::REG_ADDR,
-                           l_remoteAddr>>32);
-    Util::writeScratchReg (INITSERVICE::SPLESS::MboxScratch8_t::REG_ADDR,
-                           l_remoteAddr);
+    // Need to loop around all processors to handle topology id swapping
+    //  that creates assymetrical effective topology ids across nodes.
+    //  By writing this data to every processor, we can be sure that
+    //  whichever proc is chosen for the remote xscom it will have the
+    //  data we need.
+    TARGETING::TargetHandleList l_procChips;
+    getAllChips( l_procChips, TARGETING::TYPE_PROC , true);
+    for(auto l_proc : l_procChips)
+    {
+        Util::writeScratchReg( INITSERVICE::SPLESS::MboxScratch7_t::REG_ADDR,
+                               l_remoteAddr>>32,
+                               l_proc );
+        Util::writeScratchReg( INITSERVICE::SPLESS::MboxScratch8_t::REG_ADDR,
+                               l_remoteAddr,
+                               l_proc );
+    }
 }
 
 void IpcSp::acquireRemoteNodeAddrs( void )
@@ -981,6 +993,8 @@ void IpcSp::_acquireRemoteNodeAddrs( void )
     if // remote addresses have not been gathered
       (iv_IsRemoteNodeAddrsValid == false)
     {
+        TRACFCOMP( g_trac_ipc, ENTER_MRK"_acquireRemoteNodeAddrs" );
+
         TARGETING::Target * l_sys = NULL;
         TARGETING::targetService().getTopLevelTarget(l_sys);
 
@@ -997,6 +1011,7 @@ void IpcSp::_acquireRemoteNodeAddrs( void )
                 l_sys->tryGetAttr
                 <TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS>
                 (l_ipcDataAddrs);
+                TRACFBIN( g_trac_ipc, "ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS=",l_ipcDataAddrs,sizeof(l_ipcDataAddrs) );
 
                 // extract valid node map
                 uint8_t validNodeBitMap =
@@ -1006,6 +1021,8 @@ void IpcSp::_acquireRemoteNodeAddrs( void )
                 uint64_t l_ThisNode;
                 uint64_t l_RemoteAddr;
                 qryLocalIpcInfo( l_ThisNode, l_RemoteAddr );
+                TRACFCOMP( g_trac_ipc, "l_ThisNode=%X, l_RemoteAddr=%X",
+                           l_ThisNode, l_RemoteAddr );
 
                 // loop thru all Nodes
                 for ( uint64_t i = 0;
@@ -1040,6 +1057,9 @@ void IpcSp::_acquireRemoteNodeAddrs( void )
                             l_RemoteAddr = IPC_INVALID_REMOTE_ADDR | i;
                         }
 
+                        TRACFCOMP( g_trac_ipc, "node%d = %X",
+                                   i, l_RemoteAddr );
+
                         // push results to IPC and Attributes shadow
                         updateRemoteIpcAddr( i, l_RemoteAddr );
                         l_ipcDataAddrs[i] = l_RemoteAddr;
@@ -1062,6 +1082,8 @@ void IpcSp::_acquireRemoteNodeAddrs( void )
             // read the scoms only once
             iv_IsRemoteNodeAddrsValid = true;
         } // end acquire scoms
+
+        TRACFCOMP( g_trac_ipc, EXIT_MRK"_acquireRemoteNodeAddrs" );
     } // end remote addrs not gathered
     else
     {
