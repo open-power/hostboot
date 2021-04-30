@@ -57,14 +57,14 @@ p10_get_freq_compat_settings(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_s
                              uint32_t *o_pstate0)
 {
     FAPI_DBG("> p10_get_freq_compat_settings");
-    fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
+    fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ_Type l_sys_compat_freq_mhz = 0;
 
     do
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
-                i_sys_targ,l_sys_pstate0_freq_mhz));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ,
+                i_sys_targ,l_sys_compat_freq_mhz));
 
-        *o_pstate0 = l_sys_pstate0_freq_mhz;
+        *o_pstate0 = l_sys_compat_freq_mhz;
     }
     while(0);
 

@@ -606,14 +606,14 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_UT_PSTATE0_FREQ_MISMATCH</rc>
-    <description>The computed system pstate0 frequency attribute does not match
-     with the UltraTurbo frequency for this part. This indicates the parts from
-     different sorts may be plugged into the machine.
+    <rc>RC_PSTATE_PB_UT_FREQ_MISMATCH</rc>
+    <description>The UltraTurbo frequency for this part does not match the others
+    in the system. This indicates the parts from different sorts may be plugged 
+    into the machine.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>UT_FREQ</ffdc>
-    <ffdc>PSTATE0_FREQ</ffdc>
+    <ffdc>COMPAT_FREQ</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -625,12 +625,12 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_MULTINODE_PSTATE0_MISMATCH</rc>
-    <description> There is a mismatch in pstate0 value when we
-    compared with different node pstate0 values
+    <rc>RC_MULTINODE_FREQ_MISMATCH</rc>
+    <description> There is a mismatch in the UltraTurbo frequency values between
+    different nodes
     </description>
-    <ffdc>LOCAL_PSTATE0_FREQ</ffdc>
-    <ffdc>SYSTEM_PSTATE0_FREQ</ffdc>
+    <ffdc>LOCAL_UT_FREQ</ffdc>
+    <ffdc>SYSTEM_UT_FREQ</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>

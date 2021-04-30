@@ -813,6 +813,20 @@
   </attribute>
   <!-- *********************************************************************-->
   <attribute>
+    <id>ATTR_SYSTEM_COMPAT_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The frequency that is to be common across the nodes of a multi-nodes system.
+
+    Producer: p10_pstate_parameter_block
+    Consumers: p10_get_compat_freq
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
     <id>ATTR_WOF_TABLE_OVERRIDE_UT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -923,7 +937,7 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
-<attribute>
+  <attribute>
     <id>ATTR_VDN_VOLTAGE_MV</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>

@@ -57,13 +57,13 @@ p10_check_freq_compat(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_targ
                              uint32_t i_pstate0)
 {
     FAPI_DBG("> p10_check_freq_compat");
-    fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
+    fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ_Type l_sys_compat_freq_mhz = 0;
     fapi2::ATTR_SYSTEM_FMAX_ENABLE_Type l_sys_fmax_enable = 0;
 
     do
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
-                i_sys_targ,l_sys_pstate0_freq_mhz));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ,
+                i_sys_targ,l_sys_compat_freq_mhz));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_FMAX_ENABLE,
                 i_sys_targ,l_sys_fmax_enable));
@@ -71,13 +71,12 @@ p10_check_freq_compat(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_targ
        if (!l_sys_fmax_enable)
        {
 
-           FAPI_ASSERT((i_pstate0 == l_sys_pstate0_freq_mhz),
-                   fapi2::MULTINODE_PSTATE0_MISMATCH()
-                   .set_LOCAL_PSTATE0_FREQ(l_sys_pstate0_freq_mhz)
-                   .set_SYSTEM_PSTATE0_FREQ(i_pstate0),
+           FAPI_ASSERT((i_pstate0 == l_sys_compat_freq_mhz),
+                   fapi2::MULTINODE_FREQ_MISMATCH()
+                   .set_LOCAL_UT_FREQ(l_sys_compat_freq_mhz)
+                   .set_SYSTEM_UT_FREQ(i_pstate0),
                    "p10_check_freq_compat :Failed to match the same pstate0 freq across node");
        }
-
     }
     while(0);
 
