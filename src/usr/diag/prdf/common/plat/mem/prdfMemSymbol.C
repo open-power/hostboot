@@ -58,6 +58,8 @@ MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
 MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
                                  uint8_t i_galois, uint8_t i_mask )
 {
+    #define PRDF_FUNC "[MemSymbol::fromGalois] "
+
     // Get symbol from Galois field.
     uint8_t symbol = SYMBOLS_PER_RANK;
     for ( uint32_t i = 0; i < SYMBOLS_PER_RANK; i++ )
@@ -69,9 +71,75 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
         }
     }
 
-    return MemSymbol( i_trgt, i_rank, symbol );
+    MemSymbol o_sym( i_trgt, i_rank, symbol );
+
+    MemSymbol sp0, sp1;
+    int32_t rc = mssGetSteerMux<TYPE_OCMB_CHIP>( i_trgt, i_rank, sp0, sp1 );
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
+                  "rank: 0x%02x", getHuid(i_trgt), i_rank.getKey() );
+    }
+    else
+    {
+        o_sym.updateSpared(sp0, sp1);
+    }
+
+    return o_sym;
+
+    #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+MemSymbol MemSymbol::fromSymbol( TARGETING::TargetHandle_t i_trgt,
+                                 const MemRank & i_rank, uint8_t i_symbol )
+{
+    #define PRDF_FUNC "[MemSymbol::fromSymbol] "
+
+    MemSymbol o_sym( i_trgt, i_rank, i_symbol );
+    MemSymbol sp0, sp1;
+
+    int32_t rc = mssGetSteerMux<TARGETING::TYPE_OCMB_CHIP>( i_trgt, i_rank,
+                                                            sp0, sp1 );
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
+                  "rank: 0x%02x", getHuid(i_trgt), i_rank.getKey() );
+    }
+    else
+    {
+        o_sym.updateSpared(sp0, sp1);
+    }
+
+    return o_sym;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+MemSymbol MemSymbol::fromSparedSymbol( TARGETING::TargetHandle_t i_trgt,
+                                       const MemRank & i_rank, uint8_t i_symbol,
+                                       bool i_sp0, bool i_sp1 )
+{
+    #define PRDF_FUNC "[MemSymbol::fromSparedSymbol] "
+
+    MemSymbol o_sym( i_trgt, i_rank, i_symbol );
+
+    if ( i_sp0 )
+    {
+        o_sym.setDramSpared0();
+    }
+    else if ( i_sp1 )
+    {
+        o_sym.setDramSpared1();
+    }
+
+    return o_sym;
+
+    #undef PRDF_FUNC
+}
 //------------------------------------------------------------------------------
 
 uint8_t MemSymbol::getDq() const
@@ -329,18 +397,6 @@ uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                         nceGalois, nceMask );
         o_sym2 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank,
                                         tceGalois, tceMask );
-
-        MemSymbol sp0, sp1;
-        o_rc = mssGetSteerMux<TYPE_OCMB_CHIP>( i_chip->getTrgt(), i_rank,
-                                               sp0, sp1 );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
-                      "rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
-            break;
-        }
-        o_sym1.updateSpared(sp0, sp1);
-        o_sym2.updateSpared(sp0, sp1);
 
     } while (0);
 

@@ -86,10 +86,22 @@ class MemSymbol
      *         successful in creating a valid object.
      */
     static MemSymbol fromSymbol( TARGETING::TargetHandle_t i_trgt,
-                                 const MemRank & i_rank, uint8_t i_symbol )
-    {
-        return MemSymbol ( i_trgt, i_rank, i_symbol );
-    }
+                                 const MemRank & i_rank, uint8_t i_symbol );
+
+    /**
+     * @brief  Creates a MemSymbol from a symbol returned during mssGetSteerMux.
+     * @param  i_trgt   OCMB_CHIP target.
+     * @param  i_rank   The rank this symbol is on.
+     * @param  i_symbol The input symbol.
+     * @param  i_sp0    If the symbol is on sp0.
+     * @param  i_sp1    If the symbol is on sp1.
+     * @return A MemSymbol. Must call isValid() to determine if the function was
+     *         successful in creating a valid object.
+     */
+    static MemSymbol fromSparedSymbol( TARGETING::TargetHandle_t i_trgt,
+                                       const MemRank & i_rank,
+                                       uint8_t i_symbol,
+                                       bool i_sp0, bool i_sp1 );
 
     /**
      * @brief  Creates a MemSymbol from a Galois field.

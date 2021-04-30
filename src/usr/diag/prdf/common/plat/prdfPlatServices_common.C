@@ -343,8 +343,10 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     }
     else
     {
-        o_spare0 = MemSymbol::fromSymbol( i_ocmb, i_rank, port0Spare );
-        o_spare1 = MemSymbol::fromSymbol( i_ocmb, i_rank, port1Spare );
+        o_spare0 = MemSymbol::fromSparedSymbol( i_ocmb, i_rank, port0Spare,
+                                                true, false );
+        o_spare1 = MemSymbol::fromSparedSymbol( i_ocmb, i_rank, port1Spare,
+                                                false, true );
     }
 #endif
 
