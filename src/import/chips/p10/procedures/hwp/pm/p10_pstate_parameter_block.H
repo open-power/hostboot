@@ -234,9 +234,10 @@ class PlatPmPPB
     public:
         //Constructor with Proc target as input
         PlatPmPPB ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_target ) :
-            iv_init_error(false), iv_procChip (i_target), iv_pstates_enabled(0), iv_resclk_enabled(0),
-            iv_dds_enabled(0), iv_rvrm_enabled(0), iv_wof_enabled(0), iv_safe_voltage (0),
-            iv_safe_frequency(0), iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
+            iv_init_error(false), iv_procChip (i_target), iv_boot_mode(false),
+            iv_pstates_enabled(0), iv_resclk_enabled(0), iv_dds_enabled(0), iv_rvrm_enabled(0),
+            iv_wof_enabled(0), iv_safe_voltage(0), iv_safe_frequency(0),
+            iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
             iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true),
@@ -407,7 +408,7 @@ class PlatPmPPB
         /// @param[in]     i_pstate     pstate value that needs to be converted
         /// @param[in]     i_type       voltage type (VDD, VCS)
         /// @param[in]     i_point_set  point set (VPD_PT_SET_BIASED, VPD_PT_SET_BIASED_SYSP)
-        /// @return  boot voltage value.
+        /// @return  voltage value.
         /// -----------------------------------------------------------------------
         uint32_t ps2v_mv(const Pstate i_pstate,
                          const voltage_type i_type,
@@ -758,6 +759,7 @@ class PlatPmPPB
     private:
         fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > iv_procChip;  // processor chip target
         AttributeList             iv_attrs;
+        bool                      iv_boot_mode;
         uint8_t                   iv_pstates_enabled;
         uint8_t                   iv_resclk_enabled;
         uint8_t                   iv_dds_enabled;
@@ -783,6 +785,7 @@ class PlatPmPPB
         bool                      iv_poundV_fmax_enable;
         uint16_t                  iv_array_vdn_mv;
         uint16_t                  iv_array_vdd_mv;
+        uint8_t                   iv_pdv_model_data;
 
         PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];
         PoundVOpPoint_t           iv_attr_mvpd_poundV_raw[NUM_PV_POINTS];

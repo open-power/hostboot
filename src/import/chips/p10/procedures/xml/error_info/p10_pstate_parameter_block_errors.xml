@@ -666,6 +666,23 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_PSTATE_PB_PSTATE0_FREQ_NOT_SET</rc>
+    <description> The Pstate0 reference frequency is 0.  Pstates cannot work unless
+    this is set.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>SYSTEM_PSTATE0_FREQ_KHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+      <target>CHIP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_PSTATE_PB_XLATE_UNDERFLOW</rc>
     <description> An underflow occured translating to a Pstate.
     </description>

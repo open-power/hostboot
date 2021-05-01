@@ -2062,6 +2062,9 @@ void PlatPmPPB::attr_init( void )
     iv_frequency_step_khz = (iv_attrs.attr_freq_proc_refclock_khz /
                              iv_attrs.attr_proc_dpll_divider);
 
+    // Round
+    iv_frequency_step_khz = ((iv_frequency_step_khz << 2) + 1) >> 2 ;
+
     FAPI_INF ("iv_frequency_step_khz calculated %08X %d",
             iv_frequency_step_khz, iv_frequency_step_khz);
 
@@ -2104,6 +2107,11 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
 {
     fapi2::ReturnCode l_rc;
 
+    const uint32_t  VDN_SORT_ADJUST_MV = 50;   // work-around for early sorted parts
+    uint32_t        l_vdn_adjust_mv = 0;
+    bool            b_vdn_allow_uplift = true;
+
+    iv_boot_mode       = true;
     iv_pstates_enabled = true;
     iv_resclk_enabled  = true;
     iv_dds_enabled     = true;
@@ -2117,131 +2125,118 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
         //inputed to the HWP tells us to
         if(i_action == COMPUTE_VOLTAGE_SETTINGS)
         {
+            //Disable wof when we are in setup_evid procedure
+            SET_ATTR(fapi2::ATTR_WOF_ENABLED, iv_procChip, iv_wof_enabled);
 
-            // query VPD if any of the voltage attributes are zero
-            // NOTE: P10 does not support VIO via AVSBus so this check is not made
-            if (!iv_attrs.attr_boot_voltage_mv[VDD] ||
-                !iv_attrs.attr_boot_voltage_mv[VCS] ||
-                !iv_attrs.attr_boot_voltage_mv[VDN])
+            // get VPD data (#V,#W)
+            FAPI_TRY(vpd_init(),"vpd_init function failed")
+
+            FAPI_INF("VDN VPD voltage before:  %d mV (0x%X)",
+                        iv_attr_mvpd_poundV_static_rails.vdn_mv,
+                        iv_attr_mvpd_poundV_static_rails.vdn_mv);
+
+            // Compute the VPD operating points
+            compute_vpd_pts();
+
+            FAPI_TRY(safe_mode_init());
+
+            if (iv_attrs.attr_boot_voltage_mv[VDN])
             {
-                //Disable wof when we are in setup_evid procedure
-                SET_ATTR(fapi2::ATTR_WOF_ENABLED, iv_procChip, iv_wof_enabled);
-
-                // get VPD data (#V,#W)
-                FAPI_TRY(vpd_init(),"vpd_init function failed")
-
-                FAPI_INF("VDN VPD voltage before:  %d mV (0x%X)",
-                            iv_attr_mvpd_poundV_static_rails.vdn_mv,
-                            iv_attr_mvpd_poundV_static_rails.vdn_mv);
-
-                // Compute the VPD operating points
-                compute_vpd_pts();
-
-                FAPI_TRY(safe_mode_init());
-
-                if (iv_attrs.attr_boot_voltage_mv[VDN])
-                {
-                    FAPI_INF("VDN boot voltage override set: %d mV (0x%X)",
-                            revle16(iv_attrs.attr_boot_voltage_mv[VDN]),
-                            revle16(iv_attrs.attr_boot_voltage_mv[VDN]));
-                }
-                else if(iv_attrs.attr_avs_bus_num[VDN] == INVALID_BUS_NUM)
-                {
-                    FAPI_INF("Skipping VDN access as this rail is not configured for AVSBus");
-                }
-                else
-                {
-                    FAPI_INF("VDN boot voltage override not set, using VPD value and correcting for applicable load line setting");
-
-                    uint32_t l_int_vdn_mv = (uint32_t)(iv_attr_mvpd_poundV_static_rails.vdn_mv);
-                    uint32_t l_idn_ma =
-                            (uint32_t)((iv_attr_mvpd_poundV_static_rails.idn_tdp_ac_10ma +
-                                        iv_attr_mvpd_poundV_static_rails.idn_tdp_dc_10ma) * 10);
-
-                    uint32_t l_ext_vdn_mv = sysparm_uplift(l_int_vdn_mv,
-                            l_idn_ma,
-                            iv_vdn_sysparam.loadline_uohm,
-                            iv_vdn_sysparam.distloss_uohm,
-                            iv_vdn_sysparam.distoffset_uv);
-
-                    FAPI_INF("VDN VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                            l_int_vdn_mv,
-                            l_ext_vdn_mv,
-                            l_idn_ma,
-                            iv_vdn_sysparam.loadline_uohm,
-                            iv_vdn_sysparam.distloss_uohm,
-                            iv_vdn_sysparam.distoffset_uv);
-
-                    iv_attrs.attr_boot_voltage_mv[VDN] = (l_ext_vdn_mv);
-                    FAPI_INF("AW VDN voltage: %d mV (0x%X)",
-                            revle16(iv_array_vdn_mv),
-                            revle16(iv_array_vdn_mv));
-                    if (iv_attrs.attr_boot_voltage_mv[VDN] >= iv_array_vdn_mv)
-                    {
-                        FAPI_INF("Setting array write asset flag");
-                        iv_attrs.attr_array_write_assist_set = 1;
-                    }
-                }
-
-                if (iv_attrs.attr_boot_voltage_mv[VIO])
-                {
-                    FAPI_INF("VIO boot voltage override set");
-                }
-                else if(iv_attrs.attr_avs_bus_num[VIO] == INVALID_BUS_NUM)
-                {
-                    FAPI_INF("Skipping VIO VPD access as this rail is not configured for AVSBus");
-                }
-                else
-                {
-                    FAPI_INF("VIO boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                    uint32_t l_int_vio_mv = (uint32_t)(iv_attr_mvpd_poundV_static_rails.vio_mv);
-                    uint32_t l_iio_ma =
-                            (uint32_t)((iv_attr_mvpd_poundV_static_rails.iio_tdp_ac_10ma +
-                                        iv_attr_mvpd_poundV_static_rails.iio_tdp_dc_10ma) * 10);
-
-                    uint32_t l_ext_vio_mv = sysparm_uplift(l_int_vio_mv,
-                            l_iio_ma,
-                            iv_vio_sysparam.loadline_uohm,
-                            iv_vio_sysparam.distloss_uohm,
-                            iv_vio_sysparam.distoffset_uv);
-
-                    FAPI_INF("VIO VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                            l_int_vio_mv,
-                            l_ext_vio_mv,
-                            l_iio_ma,
-                            iv_vio_sysparam.loadline_uohm,
-                            iv_vio_sysparam.distloss_uohm,
-                            iv_vio_sysparam.distoffset_uv);
-
-                    iv_attrs.attr_boot_voltage_mv[VIO]= (l_ext_vio_mv);
-                }
+                FAPI_INF("VDN boot voltage override set: %d mV (0x%X)",
+                        revle16(iv_attrs.attr_boot_voltage_mv[VDN]),
+                        revle16(iv_attrs.attr_boot_voltage_mv[VDN]));
+            }
+            else if(iv_attrs.attr_avs_bus_num[VDN] == INVALID_BUS_NUM)
+            {
+                FAPI_INF("Skipping VDN access as this rail is not configured for AVSBus");
             }
             else
             {
-#if 0
-                FAPI_INF("Using overrides for all boot voltages (VDD/VCS/VDN/VIO) and core frequency");
+                FAPI_INF("Using VDN #V VPD value and correcting for applicable system parameters");
 
-                // Set safe frequency to the default BOOT_FREQ_MULT
-                fapi2::ATTR_BOOT_FREQ_MULT_Type l_boot_freq_mult;
-                FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_BOOT_FREQ_MULT,
-                                        iv_procChip,
-                                        l_boot_freq_mult));
+                fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384,
+                                       iv_procChip, l_hw543384),
+                          "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
 
-                uint32_t l_boot_freq_mhz =
-                    ((l_boot_freq_mult * iv_attrs.freq_proc_refclock_khz ) /
-                     iv_attrs.proc_dpll_divider )
-                    / 1000;
+                if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+                {
+                    FAPI_INF("ATTR_HW543384_WAR_MODE is set to TIE_NEST_TO_PAU on an applicable part.  Not performing VDN uplifts.");
+                    b_vdn_allow_uplift = false;
+                }
 
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
-                                       iv_procChip,
-                                       l_boot_freq_mhz));
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
-                                       iv_procChip,
-                                       (iv_attrs.vdd_voltage_mv)));
-                FAPI_INF("Safe mode Frequency = %d MHz (0x%x), Safe mode voltage = %d mV (0x%x)",
-                         l_boot_freq_mhz, l_boot_freq_mhz,
-                         (iv_attrs.vdd_voltage_mv), (iv_attrs.vdd_voltage_mv));
-#endif
+                if (((iv_pdv_model_data & 0x01) != 0x01) && b_vdn_allow_uplift)
+                {
+                    FAPI_INF("VDN #V adjust suppression flag not set.  Uplifting by %d mV", VDN_SORT_ADJUST_MV);
+                    l_vdn_adjust_mv = VDN_SORT_ADJUST_MV;
+                }
+
+                uint32_t l_int_vdn_mv = (uint32_t)(iv_attr_mvpd_poundV_static_rails.vdn_mv) + l_vdn_adjust_mv;
+                uint32_t l_idn_ma =
+                        (uint32_t)((iv_attr_mvpd_poundV_static_rails.idn_tdp_ac_10ma +
+                                    iv_attr_mvpd_poundV_static_rails.idn_tdp_dc_10ma) * 10);
+
+                uint32_t l_ext_vdn_mv = l_int_vdn_mv;
+                if (b_vdn_allow_uplift)
+                {
+                    l_ext_vdn_mv = sysparm_uplift(l_int_vdn_mv,
+                        l_idn_ma,
+                        iv_vdn_sysparam.loadline_uohm,
+                        iv_vdn_sysparam.distloss_uohm,
+                        iv_vdn_sysparam.distoffset_uv);
+                }
+
+                FAPI_INF("VDN values: VPD %d mV; Adjusted %d mV; Set point: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+                        iv_attr_mvpd_poundV_static_rails.vdn_mv,
+                        l_int_vdn_mv,
+                        l_ext_vdn_mv,
+                        l_idn_ma,
+                        iv_vdn_sysparam.loadline_uohm,
+                        iv_vdn_sysparam.distloss_uohm,
+                        iv_vdn_sysparam.distoffset_uv);
+
+                iv_attrs.attr_boot_voltage_mv[VDN] = (l_ext_vdn_mv);
+                FAPI_INF("VDN AW voltage: %d mV (0x%X)",
+                        revle16(iv_array_vdn_mv),
+                        revle16(iv_array_vdn_mv));
+                if (iv_array_vdn_mv && iv_attrs.attr_boot_voltage_mv[VDN] >= iv_array_vdn_mv)
+                {
+                    FAPI_INF("Setting array write assist flag");
+                    iv_attrs.attr_array_write_assist_set = 1;
+                }
+            }
+
+            if (iv_attrs.attr_boot_voltage_mv[VIO])
+            {
+                FAPI_INF("VIO boot voltage override set");
+            }
+            else if(iv_attrs.attr_avs_bus_num[VIO] == INVALID_BUS_NUM)
+            {
+                FAPI_INF("Skipping VIO VPD access as this rail is not configured for AVSBus");
+            }
+            else
+            {
+                FAPI_INF("VIO boot voltage override not set, using VPD value and correcting for applicable load line setting");
+                uint32_t l_int_vio_mv = (uint32_t)(iv_attr_mvpd_poundV_static_rails.vio_mv);
+                uint32_t l_iio_ma =
+                        (uint32_t)((iv_attr_mvpd_poundV_static_rails.iio_tdp_ac_10ma +
+                                    iv_attr_mvpd_poundV_static_rails.iio_tdp_dc_10ma) * 10);
+
+                uint32_t l_ext_vio_mv = sysparm_uplift(l_int_vio_mv,
+                        l_iio_ma,
+                        iv_vio_sysparam.loadline_uohm,
+                        iv_vio_sysparam.distloss_uohm,
+                        iv_vio_sysparam.distoffset_uv);
+
+                FAPI_INF("VIO VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+                        l_int_vio_mv,
+                        l_ext_vio_mv,
+                        l_iio_ma,
+                        iv_vio_sysparam.loadline_uohm,
+                        iv_vio_sysparam.distloss_uohm,
+                        iv_vio_sysparam.distoffset_uv);
+
+                iv_attrs.attr_boot_voltage_mv[VIO]= (l_ext_vio_mv);
             }
 
             FAPI_INF("Setting Boot Voltage attributes: VDD = %dmV; VCS = %dmV; VDN = %dmV",
@@ -2259,6 +2254,18 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
             FAPI_INF("Read back Boot Voltage attributes: VDD = %dmV; VCS = %dmV; VDN = %dmV",
                      l_boot_voltages[VDD], l_boot_voltages[VCS],
                      l_boot_voltages[VDN], l_boot_voltages[VIO]);
+
+            if (l_boot_voltages[VDD] != iv_attrs.attr_boot_voltage_mv[VDD])
+            {
+                FAPI_INF ("Attribute override VDD boot voltage being used");
+            }
+
+            if (l_boot_voltages[VDN] != iv_attrs.attr_boot_voltage_mv[VDN])
+            {
+                FAPI_INF ("Attribute override VDN boot voltage being used");
+            }
+
+
         }  // COMPUTE_VOLTAGE_SETTINGS
     }
     while(0);
@@ -2329,7 +2336,6 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
 
-
         // Read #IQ data
         // if wof is disabled.. don't call IQ function
         if (is_wof_enabled())
@@ -2395,7 +2401,6 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundAW()
 
         if (l_aw_static_data)
         {
-
             //// AW sample data
             const uint8_t g_AWData[] =
             {
@@ -2408,7 +2413,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundAW()
         }
         else
         {
-            FAPI_INF("attribute ATTR_AW_STATIC_DATA_ENABLE is set");
+            FAPI_INF("attribute ATTR_AW_STATIC_DATA_ENABLE is NOT set");
             // Second read is to get data of VPD record
             FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
                     fapi2::MVPD_KEYWORD_AW,
@@ -2452,7 +2457,6 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
     uint8_t*            l_buffer_inc  = nullptr;
     char                outstr[50];
     fapi2::ATTR_SOCKET_POWER_NOMINAL_Type l_powr_nom;
-    uint8_t             l_model_data_flag;
     uint16_t            l_temp;
 
     do
@@ -2720,8 +2724,8 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         l_buffer_inc += 2;
 
         strcpy(outstr, "model_data_flag");
-        l_model_data_flag = *l_buffer_inc;
-        FAPI_INF("#V data = 0x%04X  %-6d (%s)", l_model_data_flag, l_model_data_flag, outstr);
+        iv_pdv_model_data = *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_pdv_model_data, iv_pdv_model_data, outstr);
         l_buffer_inc += 1;
 
         strcpy(outstr, "vdd_vmax_mv (used)");
@@ -2945,7 +2949,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
 
             if (l_pdv_tdp_current_mode != fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_OFF )
             {
-                if ((p_poundV_data->static_rails.modelDataFlag & 0x02) != 0x02)
+                if ((iv_pdv_model_data & 0x02) != 0x02)
                 {
                     disable_wof();
 
@@ -2959,7 +2963,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                         FAPI_ASSERT_NOEXIT(false,
                                 fapi2::PSTATE_PB_PDV_TDP_CURRENT_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                 .set_CHIP_TARGET(iv_procChip)
-                                .set_MODEL_DATA_FLAG(p_poundV_data->static_rails.modelDataFlag),
+                                .set_MODEL_DATA_FLAG(iv_pdv_model_data),
                                 "Pstate Parameter Block #V TDP Current Marker fail");
                     }
                     else if ( l_pdv_tdp_current_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_FAIL )
@@ -2968,7 +2972,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                         FAPI_ASSERT(false,
                                 fapi2::PSTATE_PB_PDV_TDP_CURRENT_ERROR()
                                 .set_CHIP_TARGET(iv_procChip)
-                                .set_MODEL_DATA_FLAG(p_poundV_data->static_rails.modelDataFlag),
+                                .set_MODEL_DATA_FLAG(iv_pdv_model_data),
                                 "Pstate Parameter Block #V TDP Current Marker fail");
                     }
                 }
@@ -3448,7 +3452,7 @@ void PlatPmPPB::disable_wof_throttle()
 ///////////////////////////////////////////////////////////
 bool PlatPmPPB::is_pstates_enabled()
 {
-    if (!isPstateModeEnabled())
+    if (!isPstateModeEnabled() && !iv_boot_mode)
     {
         FAPI_INF(">>> Pstates being disabled due to isPstateModeEnabled not being true.")
         iv_pstates_enabled = false;
@@ -4373,7 +4377,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 
     if (!is_pstates_enabled())
     {
-        FAPI_INF("Pstates are disabled which implies the #V is bad.  Skipping safe mode computation being skipped");
+        FAPI_INF("Pstates are disabled which implies the #V is not able to be used.  Skipping safe mode computation being skipped");
         goto fapi_try_exit;
     }
 
@@ -4522,6 +4526,11 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
                 iv_attrs.attr_pm_safe_frequency_mhz,
                 iv_attrs.attr_pm_safe_frequency_mhz);
 
+    if (l_safe_mode_freq_mhz != iv_attrs.attr_pm_safe_frequency_mhz)
+    {
+        FAPI_INF ("Attribute override safe mode frequency being used");
+    }
+
     // Safe frequency must be less than Pstate 0 frequency.
     // if not log an error
     if ((iv_attrs.attr_pm_safe_frequency_mhz*1000) > iv_reference_frequency_khz)
@@ -4625,6 +4634,11 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
                 iv_attrs.attr_save_mode_nodds_uplift_mv[VCS]);
     }
 
+
+    FAPI_INF ("Setting safe mode voltages mV: VDD 0x%04x (%4d) VCS=N 0x%04x (%4d)",
+                l_safe_mode_mv[VDD], l_safe_mode_mv[VDD],
+                l_safe_mode_mv[VCS], l_safe_mode_mv[VCS]);
+
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
                                iv_procChip,
                                l_safe_mode_mv));
@@ -4633,6 +4647,20 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
                                 iv_procChip,
                                 iv_attrs.attr_pm_safe_voltage_mv));
+
+    FAPI_INF ("Read back safe mode voltages mV: VDD 0x%04x (%4d) VDN 0x%04x (%4d)",
+                iv_attrs.attr_boot_voltage_mv[VDD], iv_attrs.attr_boot_voltage_mv[VDD],
+                iv_attrs.attr_boot_voltage_mv[VCS], iv_attrs.attr_boot_voltage_mv[VCS]);
+
+    if (l_safe_mode_mv[VDD] != iv_attrs.attr_pm_safe_voltage_mv[VDD])
+    {
+        FAPI_INF ("Attribute override safe mode VDD voltage being used");
+    }
+
+    if (l_safe_mode_mv[VCS] != iv_attrs.attr_pm_safe_voltage_mv[VCS])
+    {
+        FAPI_INF ("Attribute override safe mode VCS voltage being used");
+    }
 
     // Calculate boot mode voltages
     if (!iv_attrs.attr_boot_voltage_mv[VDD])
@@ -5991,6 +6019,48 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     iv_attrs.attr_pstate0_freq_mhz = l_sys_pstate0_freq_mhz;
     iv_reference_frequency_mhz = l_sys_pstate0_freq_mhz;
     iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
+
+    if ((iv_reference_frequency_mhz = 0) || (iv_reference_frequency_khz == 0))
+    {
+
+        disable_pstates();
+
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE_Type l_pdv_mode;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
+                    FAPI_SYSTEM, l_pdv_mode));
+
+        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN ||
+            l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO   )
+        {
+            FAPI_INF("**** WARNING : Pstate0 frequency is not set.");
+            FAPI_INF("**** WARNING : Pstates (and all dependent functions) are disabled but continuing on anyway.");
+            FAPI_INF("**** WARNING : Tracing due to ATTR_SYSTEM_PDV_VALIDATION_MODE = WARN or INFO");
+        }
+
+        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
+        {
+            FAPI_ASSERT_NOEXIT(false,
+                    fapi2::PSTATE_PB_PSTATE0_FREQ_NOT_SET(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                    .set_CHIP_TARGET(iv_procChip)
+                    .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
+                    "Pstate Parameter Block Pstate0 reference frequency not set");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+        {
+            FAPI_ERR("**** ERROR : Pstate0 frequency is not set.");
+            FAPI_ERR("**** ERROR : Pstates (and all dependent functions) are disabled but continuing on anyway.");
+            FAPI_ERR("**** ERROR : Halting due to ATTR_SYSTEM_PDV_VALIDATION_MODE = FAIL");
+
+           FAPI_ASSERT_NOEXIT(false,
+                    fapi2::PSTATE_PB_PSTATE0_FREQ_NOT_SET()
+                    .set_CHIP_TARGET(iv_procChip)
+                    .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
+                    "Pstate Parameter Block Pstate0 reference frequency not set");
+        }
+    }
 
 fapi_try_exit:
     FAPI_INF("PlatPmPPB::pm_set_frequency <<<<<<<");
