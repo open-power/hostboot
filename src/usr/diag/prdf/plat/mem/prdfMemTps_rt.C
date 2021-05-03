@@ -973,7 +973,8 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         // We may have placed a chip mark so do any necessary cleanup. This must
         // be called after writing the bad DQ bitmap because this function
         // will also write it if necessary.
-        o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, io_sc );
+        bool junk = false;
+        o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, io_sc, junk );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "MarkStore::chipMarkCleanup(0x%08x,0x%02x) "

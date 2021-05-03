@@ -1099,14 +1099,26 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                     break;
                 }
 
+                bool dsd = false;
                 o_rc = MarkStore::chipMarkCleanup<TYPE_OCMB_CHIP>( i_chip, rank,
-                                                                   io_sc );
+                                                                   io_sc, dsd );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
                               i_chip->getHuid(), rank.getKey() );
                     break;
                 }
+
+                #ifdef __HOSTBOOT_MODULE
+
+                if ( dsd )
+                {
+                    // If a dram spare deploy procedure has been started,
+                    // trigger the TD controller
+                    MemDbUtils::triggerDsdImpeTh<TYPE_OCMB_CHIP>(i_chip, io_sc);
+                }
+
+                #endif
             }
         }
 

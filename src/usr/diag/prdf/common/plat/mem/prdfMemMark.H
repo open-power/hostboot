@@ -227,11 +227,12 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
  * @param  i_chip OCMB chip.
  * @param  i_rank Target rank.
  * @param  io_sc  The step code data struct.
+ * @param  o_dsd  Flag to indicate a dram spare deploy procedure was queued
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          STEP_CODE_DATA_STRUCT & io_sc );
+                          STEP_CODE_DATA_STRUCT & io_sc, bool & o_dsd );
 
 #endif // Not supported on FSP.
 

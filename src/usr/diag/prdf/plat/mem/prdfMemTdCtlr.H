@@ -100,6 +100,24 @@ class MemTdCtlr
         iv_queue.push(i_entry);
     }
 
+    /**
+     * @brief  This tells the TD controller there was a DSD (dram spare deploy)
+     *         event added to the queue because of an IMPE threshold and
+     *         additional processing may be needed to start the next TD
+     *         procedure. This is similar to handleTdEvent below, but is used
+     *         after we hit IMPE threshold to trigger a DSD (dram spare deploy)
+     *         event which could be either IPL or runtime.
+     *
+     * @pre    A TdEntry must be added to the queue (via pushToQueue) before
+     *         calling this function.
+     *
+     * @note   Initializes the TD controller, if needed.
+     * @param  io_sc    The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc );
+
+
     #ifdef __HOSTBOOT_RUNTIME
 
     /**
@@ -267,6 +285,13 @@ class MemTdCtlr
      */
     void collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
                                   const char * i_startEnd );
+
+    /**
+     * @brief  Refreshes all relevant registers that may have changed since the
+     *         initial capture.
+     * @param  io_sc The step code data struct.
+     */
+    void recaptureRegs(STEP_CODE_DATA_STRUCT & io_sc);
 
     #ifdef __HOSTBOOT_RUNTIME
 

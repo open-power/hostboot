@@ -150,8 +150,9 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
 
     do
     {
+        bool junk = false;
         o_rc = MarkStore::chipMarkCleanup<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
-                                                           io_sc );
+                                                           io_sc, junk );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",

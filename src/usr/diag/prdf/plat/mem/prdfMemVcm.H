@@ -289,7 +289,8 @@ class VcmEvent : public TdEntry
 
         uint32_t o_rc = SUCCESS;
 
-        o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, io_sc );
+        bool junk = false;
+        o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, io_sc, junk );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",

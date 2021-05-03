@@ -724,7 +724,7 @@ uint32_t applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<TARGETING::TYPE T>
 uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          STEP_CODE_DATA_STRUCT & io_sc )
+                          STEP_CODE_DATA_STRUCT & io_sc, bool & o_dsd )
 {
     #define PRDF_FUNC "[chipMarkCleanup] "
 
@@ -732,6 +732,7 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
     PRDF_ASSERT( T == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
+    o_dsd = false;
 
     do
     {
@@ -775,6 +776,7 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         // Add the DRAM spare event to the queue if needed.
         if ( nullptr != dsdEvent )
         {
+            o_dsd = true;
             MemDbUtils::pushToQueue<T>( i_chip, dsdEvent );
         }
 
@@ -788,7 +790,8 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
 template
 uint32_t chipMarkCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank,
-                                          STEP_CODE_DATA_STRUCT & io_sc );
+                                          STEP_CODE_DATA_STRUCT & io_sc,
+                                          bool & o_dsd );
 
 #endif // not supported on FSP
 

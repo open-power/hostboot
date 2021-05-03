@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfMemTdCtlr.H>
+
+// Framework includes
+#include <prdfRegisterCache.H>
+#include <UtilHash.H>
 
 // Platform includes
 #include <prdfMemAddress.H>
@@ -429,6 +433,134 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 
     #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
+
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemTdCtlr::triggerDsdEventImpeTh] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Make sure the TD controller is initialized.
+        o_rc = initialize();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "initialize() failed on 0x%08x",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // Don't interrupt a TD procedure if one is already in progress.
+        if ( nullptr != iv_curProcedure ) break;
+
+        #ifdef __HOSTBOOT_RUNTIME
+
+        // Stop background scrubbing.
+        o_rc = stopBgScrub<T>( iv_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "stopBgScrub<T>(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // Update the rank we stopped background scrub on
+        MemAddr addr;
+        o_rc = getMemMaintAddr<T>( iv_chip, addr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        iv_stoppedRank = __getStopRank<T>( iv_chip, addr );
+
+        // At this point, there are new TD procedures in the queue so we
+        // want to mask certain fetch attentions to avoid the complication
+        // of handling the attentions during the TD procedures.
+        o_rc = maskEccAttns();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+            break;
+        }
+
+        #endif
+
+        // Since we had to manually stop the maintenance command, refresh all
+        // relevant registers that may have changed since the initial capture.
+        recaptureRegs( io_sc );
+
+        collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
+
+        // Move onto the next step in the state machine.
+        o_rc = nextStep( io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "nextStep() failed on 0x%08x",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+    } while (0);
+
+    // Gather capture data even if something failed above.
+    collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed on 0x%08x", iv_chip->getHuid() );
+
+        // Change signature indicating there was an error in analysis.
+        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                          PRDFSIG_CmdComplete_ERROR );
+
+        // Something definitely failed, so callout 2nd level support.
+        io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH );
+        io_sc.service_data->setServiceCall();
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+void MemTdCtlr<TYPE_OCMB_CHIP>::recaptureRegs( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[recaptureRegs<TYPE_OCMB_CHIP>] "
+
+    RegDataCache & cache = RegDataCache::getCachedRegisters();
+    CaptureData & cd = io_sc.service_data->GetCaptureData();
+
+    // refresh and recapture the ocmb registers
+    const char * ocmbRegs[] =
+    {
+        "MCBISTFIR", "RDFFIR", "MBSEC0", "MBSEC1", "OCMB_MBSSYMEC0",
+        "OCMB_MBSSYMEC1", "OCMB_MBSSYMEC2", "OCMB_MBSSYMEC3",
+        "OCMB_MBSSYMEC4", "OCMB_MBSSYMEC5", "OCMB_MBSSYMEC6",
+        "OCMB_MBSSYMEC7", "OCMB_MBSSYMEC8", "MBSMSEC", "MCBMCAT",
+    };
+
+    for ( uint32_t i = 0; i < sizeof(ocmbRegs)/sizeof(char*); i++ )
+    {
+        SCAN_COMM_REGISTER_CLASS * reg = iv_chip->getRegister( ocmbRegs[i] );
+        cache.flush( iv_chip, reg );
+    }
+
+    iv_chip->CaptureErrorData( cd, Util::hashString("MaintCmdRegs_ocmb") );
+
+    #undef PRDF_FUNC
+}
+
 
 //------------------------------------------------------------------------------
 

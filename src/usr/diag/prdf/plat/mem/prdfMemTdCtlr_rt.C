@@ -29,10 +29,6 @@
 
 #include <prdfMemTdCtlr.H>
 
-// Framework includes
-#include <prdfRegisterCache.H>
-#include <UtilHash.H>
-
 // Platform includes
 #include <prdfMemCaptureData.H>
 #include <prdfMemEccAnalysis.H>
@@ -49,41 +45,6 @@ namespace PRDF
 {
 
 using namespace PlatServices;
-
-//------------------------------------------------------------------------------
-
-template<TARGETING::TYPE T>
-void __recaptureRegs( STEP_CODE_DATA_STRUCT & io_sc, ExtensibleChip * i_chip );
-
-template<>
-void __recaptureRegs<TYPE_OCMB_CHIP>( STEP_CODE_DATA_STRUCT & io_sc,
-                                   ExtensibleChip * i_chip )
-{
-    #define PRDF_FUNC "[__recaptureRegs<TYPE_OCMB_CHIP>] "
-
-    RegDataCache & cache = RegDataCache::getCachedRegisters();
-    CaptureData & cd = io_sc.service_data->GetCaptureData();
-
-    // refresh and recapture the ocmb registers
-    const char * ocmbRegs[] =
-    {
-        "MCBISTFIR", "RDFFIR", "MBSEC0", "MBSEC1", "OCMB_MBSSYMEC0",
-        "OCMB_MBSSYMEC1", "OCMB_MBSSYMEC2", "OCMB_MBSSYMEC3",
-        "OCMB_MBSSYMEC4", "OCMB_MBSSYMEC5", "OCMB_MBSSYMEC6",
-        "OCMB_MBSSYMEC7", "OCMB_MBSSYMEC8", "MBSMSEC", "MCBMCAT",
-    };
-
-    for ( uint32_t i = 0; i < sizeof(ocmbRegs)/sizeof(char*); i++ )
-    {
-        SCAN_COMM_REGISTER_CLASS * reg =
-            i_chip->getRegister( ocmbRegs[i] );
-        cache.flush( i_chip, reg );
-    }
-
-    i_chip->CaptureErrorData( cd, Util::hashString("MaintCmdRegs_ocmb") );
-
-    #undef PRDF_FUNC
-}
 
 //------------------------------------------------------------------------------
 
@@ -135,7 +96,7 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Since we had to manually stop the maintenance command, refresh all
         // relevant registers that may have changed since the initial capture.
-        __recaptureRegs<T>( io_sc, iv_chip );
+        recaptureRegs( io_sc );
 
         collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
 
