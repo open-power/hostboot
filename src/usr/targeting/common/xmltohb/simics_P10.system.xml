@@ -176,10 +176,6 @@
       <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
     </attribute>
     <attribute>
-      <id>FREQ_PAU_MHZ</id><!-- Going to remove this once HWP gets in -->
-      <default>0x960</default>
-    </attribute>
-    <attribute>
       <id>SMF_CONFIG</id>
       <default>0x0</default>
     </attribute>
