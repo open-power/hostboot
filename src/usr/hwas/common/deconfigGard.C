@@ -776,6 +776,24 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 break;
             } // TYPE_PAUC or TYPE_EQ
 
+            case TYPE_PSI:
+            {
+                // Get peer endpoint target
+                const Target * l_pDstTarget = i_target.
+                              getAttr<ATTR_PEER_TARGET>();
+                // If target is valid
+                if (l_pDstTarget)
+                {
+                    // Deconfigure peer endpoint
+                    HWAS_INF("_deconfigParentAssoc PSI Peer: 0x%08x",
+                        get_huid(l_pDstTarget));
+                    _deconfigureTarget(const_cast<Target &> (*l_pDstTarget),
+                                       i_errlEid, NULL,
+                                       i_deconfigRule);
+                }
+                break;
+            } // TYPE_PSI
+
             default:
             {
               HWAS_DBG("_deconfigParentAssoc default case _deconfigAffinityParent");
