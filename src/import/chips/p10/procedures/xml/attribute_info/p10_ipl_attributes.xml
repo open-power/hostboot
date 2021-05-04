@@ -40,6 +40,21 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_CHIP_IPL_PHASE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Define context for current phase of chip IPL for use in contained_ipl only
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    PRE_CONTAINED_IPL  = 0x1,
+    CONTAINED_IPL      = 0x2
+  </enum>
+  <default>PRE_CONTAINED_IPL</default>
+  <writeable/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_CONTAINED_IPL_TYPE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Indicate if performing a contained system IPL and if so the type
