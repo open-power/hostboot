@@ -74,6 +74,10 @@ uint32_t l_poll_counter;
 const uint16_t FW_VER_0_JUL_2020 = 0x1100;
 const uint16_t FW_VER_1_JUL_2020 = 0x033A;
 
+// December 2020 FW overrides
+const uint16_t FW_VER_0_DEC_2020 = 0x2004;
+const uint16_t FW_VER_1_DEC_2020 = 0x0262;
+
 const uint8_t FAST_RX_CONT_CAL_ADAPT_BIT = 60;
 const uint64_t  RAWLANEAONN_DIG_FAST_FLAGS_REG[NUM_OF_INSTANCES] =
 {
@@ -327,6 +331,17 @@ fapi2::ReturnCode p10_load_iop_override(
                 FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
                          "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
             }
+            else if ((l_fw_ver_0 == FW_VER_0_DEC_2020) && (l_fw_ver_1 == FW_VER_1_DEC_2020))
+            {
+                //This bit skips RX DFE slicer continuous calibration.
+                l_data = 0;
+                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i] , l_data),
+                         "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i]);
+                l_data.setBit<SKIP_RX_DFE_CAL_CONT>();
+                FAPI_DBG("RAWLANEAONN_DIG_RX_CONT_ALGO_CTL 0x%.0x", l_data);
+                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i] , l_data),
+                         "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i]);
+            }
             else
             {
                 //Disable scratch_15 algo
@@ -336,14 +351,6 @@ fapi2::ReturnCode p10_load_iop_override(
                 FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEN_DIG_FSM_FW_SCRATCH_15[i] , l_data),
                          "Error from putScom 0x%.16llX", RAWLANEN_DIG_FSM_FW_SCRATCH_15[i]);
 
-                //This bit skips RX DFE slicer continuous calibration.
-                l_data = 0;
-                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i] , l_data),
-                         "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i]);
-                l_data.setBit<SKIP_RX_DFE_CAL_CONT>();
-                FAPI_DBG("RAWLANEAONN_DIG_RX_CONT_ALGO_CTL 0x%.0x", l_data);
-                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i] , l_data),
-                         "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i]);
             }
 
             // GEN1/GEN2 workaround - Yield issue.
