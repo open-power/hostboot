@@ -65,7 +65,7 @@ void getDIMMTargets ( TargetHandleList & o_dimmList )
 errlHndl_t getMemType( TARGETING::Target * i_target,
                  uint8_t & i_memType )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     size_t theSize = 0x1;
     err = deviceRead( i_target,
                       &i_memType,
@@ -85,24 +85,24 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdRead ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
-            uint8_t * theData = NULL;
+            uint8_t * theData = nullptr;
 
             TRACFCOMP( g_trac_spd,
-                       ENTER_MRK"testSpdRead()" );
+                       ENTER_MRK"testSpdRead() DIMM" );
 
             do
             {
-                TARGETING::Target * theTarget = NULL;
+                TARGETING::Target * theTarget = nullptr;
 
                 // Get DIMM Targets
                 TargetHandleList dimmList;
                 getDIMMTargets( dimmList );
 
                 if( ( 0 == dimmList.size() ) ||
-                    ( NULL == dimmList[0] ) )
+                    ( nullptr == dimmList[0] ) )
                 {
                     TRACFCOMP( g_trac_spd,
                                "testSpdRead - No DIMMs found!" );
@@ -112,6 +112,7 @@ class SPDTest: public CxxTest::TestSuite
                 // Operate on first DIMM.
                 theTarget = dimmList[0];
                 size_t theSize = 0;
+                bool writeable = false;
                 uint32_t entry = 0x0;
 
                 // Get the DDR revision
@@ -147,28 +148,16 @@ class SPDTest: public CxxTest::TestSuite
                      keyword <= SPD::SPD_LAST_NORM_KEYWORD; keyword++ )
                 {
                     cmds++;
-                    if( NULL != theData )
+                    writeable = false;
+                    if( nullptr != theData )
                     {
                         free( theData );
-                        theData = NULL;
+                        theData = nullptr;
                     }
 
                     // Get the required size of the buffer
                     theSize = 0;
-                    if( SPD_DDR3_TYPE == memType )
-                    {
-                        for( entry = 0;
-                             entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
-                             entry++ )
-                        {
-                            if( keyword == ddr3Data[entry].keyword )
-                            {
-                                theSize = ddr3Data[entry].length;
-                                break;
-                            }
-                        }
-                    }
-                    else if( SPD_DDR4_TYPE == memType )
+                    if( SPD_DDR4_TYPE == memType )
                     {
                         size_t dataSize = (modType == DDIMM)
                             ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
@@ -183,6 +172,7 @@ class SPDTest: public CxxTest::TestSuite
                                 if( keyword == ddr4DDIMMData[entry].keyword )
                                 {
                                     theSize = ddr4DDIMMData[entry].length;
+                                    writeable = ddr4DDIMMData[entry].writable;
                                     break;
                                 }
                             }
@@ -191,6 +181,7 @@ class SPDTest: public CxxTest::TestSuite
                                 if( keyword == ddr4Data[entry].keyword )
                                 {
                                     theSize = ddr4Data[entry].length;
+                                    writeable = ddr4Data[entry].writable;
                                     break;
                                 }
                             }
@@ -254,12 +245,65 @@ class SPDTest: public CxxTest::TestSuite
                                    theSize );
                     }
 
-                    if( NULL != theData )
+                    if (writeable)
                     {
-                        free( theData );
-                        theData = NULL;
+                        // Currently only the following two keywords are writeable
+                        // other tests will explicitly do writes to validate these two
+                        if ((keyword == SPD::DIMM_BAD_DQ_DATA) ||
+                            (keyword == SPD::EXPLORER_FW_VERSION))
+                        {
+                            TS_INFO( "testspdRead - CONFIRMED PASS on keyword: %04x, "
+                                     "NORM keyword table defines as WRITEABLE",
+                                     keyword );
+                        }
+                        else
+                        {
+                            fails++;
+                            TS_FAIL("testspdRead NORM keyword=%04x table defines as "
+                                    "WRITEABLE but should only be READABLE", keyword);
+                        }
+
                     }
-                }
+                    else
+                    {
+                        // Keyword is -NOT- writeable, so attempt the write which should fail
+                        err = deviceWrite( theTarget,
+                                           theData,
+                                           theSize,
+                                           DEVICE_SPD_ADDRESS( keyword ) );
+                        if (theData != nullptr)
+                        {
+                            delete theData;
+                            theData = nullptr;
+                        }
+                        if (err == nullptr)
+                        {
+                            fails++;
+                            TS_FAIL("testspdRead We should have failed writing "
+                                    "to a READ ONLY keyword=0x%X", keyword);
+                            break;
+                        }
+                        else
+                        {
+                            if ( ERRL_GETRC_SAFE(err) != VPD::VPD_KEYWORD_NOT_WRITABLE)
+                            {
+                                fails++;
+                                TS_FAIL("testspdRead BAD RESULT - We DID -NOT- FAIL writing "
+                                    "as expected to a READ ONLY keyword=0x%X RC=0x%X", keyword,
+                                    ERRL_GETRC_SAFE(err));
+                                break;
+                            }
+                            else
+                            {
+                                TS_INFO("testspdRead GOOD RESULT - We DID FAIL writing "
+                                    "to a READ ONLY keyword=0x%X RC=0x%X", keyword,
+                                    ERRL_GETRC_SAFE(err));
+                                delete err;
+                                err = nullptr;
+                            }
+                        }
+                    }
+                } // end for
 
                 if( err )
                 {
@@ -267,10 +311,10 @@ class SPDTest: public CxxTest::TestSuite
                 }
             } while( 0 );
 
-            if( NULL != theData )
+            if( nullptr != theData )
             {
                 free( theData );
-                theData = NULL;
+                theData = nullptr;
             }
 
             if( cmds == 0 )
@@ -289,18 +333,18 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdWriteDQ ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
-            uint8_t * testData = NULL;
-            uint8_t * origData = NULL;
-            uint8_t * verifyData = NULL;
+            uint8_t * testData = nullptr;
+            uint8_t * origData = nullptr;
+            uint8_t * verifyData = nullptr;
 
             TS_INFO("testSpdWriteDQ Entry");
 
             do
             {
-                TARGETING::Target * theTarget = NULL;
+                TARGETING::Target * theTarget = nullptr;
 
                 // Get DIMM Targets
                 TargetHandleList dimmList;
@@ -308,7 +352,7 @@ class SPDTest: public CxxTest::TestSuite
 
                 TS_INFO( "testSpdWriteDQ dimmList.size()=%d", dimmList.size() );
                 if( ( 0 == dimmList.size() ) ||
-                    ( NULL == dimmList[0] ) )
+                    ( nullptr == dimmList[0] ) )
                 {
                     TS_FAIL("testSpdWriteDQ - No DIMMs found! Why not?");
                     break;
@@ -349,23 +393,8 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Get the size
-                if( SPD_DDR3_TYPE == memType )
+                if( SPD_DDR4_TYPE == memType )
                 {
-                    TS_INFO("testSpdWriteDQ SPD_DDR3_TYPE");
-                    for( uint32_t entry = 0;
-                         entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
-                         entry++ )
-                    {
-                        if( SPD::DIMM_BAD_DQ_DATA == ddr3Data[entry].keyword )
-                        {
-                            theSize = ddr3Data[entry].length;
-                            break;
-                        }
-                    }
-                }
-                else if( SPD_DDR4_TYPE == memType )
-                {
-                    TS_INFO("testSpdWriteDQ SPD_DDR4_TYPE");
                     size_t dataSize = (modType == DDIMM)
                         ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
                         : (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
@@ -416,13 +445,12 @@ class SPDTest: public CxxTest::TestSuite
                                   origData,
                                   theSize,
                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
-                TS_INFO( "testSpdWriteDQ - ORIGINAL DIMM Bad DQ data" );
-                TRACFBIN( g_trac_spd, "original read=", origData, theSize );
+                TRACFBIN( g_trac_spd, "testSpdWriteDQ ORIGINAL DIMM BAD DQ DATA read=", origData, theSize );
 
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - failed to read ORIGINAL DIMM Bad DQ data!" );
+                    TS_FAIL( "testSpdWriteDQ - failed to read ORIGINAL DIMM BAD DQ DATA!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     break;
@@ -444,7 +472,7 @@ class SPDTest: public CxxTest::TestSuite
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - Error writing data to DIMM Bad DQ data" );
+                    TS_FAIL( "testSpdWriteDQ - Error writing data to DIMM BAD DQ DATA" );
                     break;
                 }
 
@@ -454,13 +482,12 @@ class SPDTest: public CxxTest::TestSuite
                                   verifyData,
                                   theSize,
                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
-                TS_INFO( "testSpdWriteDQ - DUMMY DIMM Bad DQ data" );
-                TRACFBIN( g_trac_spd, "dummy data read=", verifyData, theSize );
+                TRACFBIN( g_trac_spd, "testSpdWriteDQ TEST DATA read=", verifyData, theSize );
 
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - failed to read DUMMY DIMM Bad DQ data!" );
+                    TS_FAIL( "testSpdWriteDQ - failed to read DUMMY DIMM BAD DQ DATA!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     break;
@@ -469,15 +496,15 @@ class SPDTest: public CxxTest::TestSuite
                 if( memcmp( testData, verifyData, theSize ) )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - DIMM Bad DQ data does not match what we wrote!" );
-                    TRACFBIN( g_trac_spd, "MISMATCH PROBLEM wrote=", testData, theSize );
-                    TRACFBIN( g_trac_spd, "MISMATCH PROBLEM read=", verifyData, theSize );
+                    TS_FAIL( "testSpdWriteDQ - DIMM BAD DQ DATA does not match what we wrote!" );
+                    TRACFBIN( g_trac_spd, "PROBLEM DIMM BAD DQ DATA MISMATCH wrote=", testData, theSize );
+                    TRACFBIN( g_trac_spd, "PROBLEM DIMM BAD DQ DATA MISMATCH read=", verifyData, theSize );
                 }
                 else
                 {
-                    TS_INFO( "testSpdWriteDQ - DIMM Bad DQ data written successfully!" );
-                    TRACFBIN( g_trac_spd, "wrote=", testData, theSize );
-                    TRACFBIN( g_trac_spd, "read=", verifyData, theSize );
+                    TS_INFO( "testSpdWriteDQ - DIMM BAD DQ DATA written successfully!" );
+                    TRACFBIN( g_trac_spd, "CONFIRMED DIMM BAD DQ DATA wrote=", testData, theSize );
+                    TRACFBIN( g_trac_spd, "CONFIRMED DIMM BAD DQ DATA read=", verifyData, theSize );
                 }
 
                 // put the original data back to be a good citizen
@@ -485,38 +512,40 @@ class SPDTest: public CxxTest::TestSuite
                                    origData,
                                    theSize,
                                    DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
-                TS_INFO( "testSpdWriteDQ - deviceWrite Restoring ORIGINAL DIMM Bad DQ" );
+                TS_INFO( "testSpdWriteDQ - deviceWrite Restoring ORIGINAL DIMM BAD DQ DATA" );
 
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - Error writing original data back to DIMM Bad DQ data, things may be corrupted!");
+                    TS_FAIL( "testSpdWriteDQ - Error writing original data back to "
+                             "DIMM BAD DQ DATA, things may be corrupted!");
                     break;
                 }
                 else
                 {
-                    TS_INFO("testSpdWriteDQ - Successfully restored original DIMM Bad DQ theSize=0x%X", theSize);
+                    TS_INFO("testSpdWriteDQ - Successfully restored original "
+                            "DIMM BAD DQ DATA theSize=0x%X", theSize);
                 }
 
 
             } while( 0 );
 
-            if( NULL != testData )
+            if( nullptr != testData )
             {
                 delete testData;
-                testData = NULL;
+                testData = nullptr;
             }
 
-            if( NULL != origData )
+            if( nullptr != origData )
             {
                 delete origData;
-                origData = NULL;
+                origData = nullptr;
             }
 
-            if( NULL != verifyData )
+            if( nullptr != verifyData )
             {
                 delete verifyData;
-                verifyData = NULL;
+                verifyData = nullptr;
             }
 
             if( cmds == 0 )
@@ -525,6 +554,243 @@ class SPDTest: public CxxTest::TestSuite
             }
 
             TS_INFO("testSpdWriteDQ Exit - %d/%d fails", fails, cmds);
+        }
+
+        /**
+         * @brief Test a SPD Write EXPLORER_FW_VERSION
+         */
+        void testSpdWriteFW ( void )
+        {
+            errlHndl_t err = nullptr;
+            uint64_t cmds = 0x0;
+            uint64_t fails = 0x0;
+            uint8_t * testData = nullptr;
+            uint8_t * origData = nullptr;
+            uint8_t * verifyData = nullptr;
+
+            TS_INFO("testSpdWriteFW Entry");
+
+            do
+            {
+                TARGETING::Target * theTarget = nullptr;
+
+                // Get DIMM Targets
+                TargetHandleList dimmList;
+                getDIMMTargets( dimmList );
+
+                TS_INFO( "testSpdWriteFW dimmList.size()=%d", dimmList.size() );
+                if( ( 0 == dimmList.size() ) ||
+                    ( nullptr == dimmList[0] ) )
+                {
+                    TS_FAIL("testSpdWriteFW - No DIMMs found! Why not?");
+                    break;
+                }
+
+                // Operate on first DIMM
+                cmds++;
+                theTarget = dimmList[0];
+                size_t theSize = 0;
+
+                // Get Memory Type
+                uint8_t memType = 0x0;
+                err = getMemType( theTarget,
+                                  memType );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFW - failed to read memtype!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                // Get the module type.
+                modSpecTypes_t modType = NA;
+                err = getModType(modType,
+                                 theTarget,
+                                 memType,
+                                 VPD::AUTOSELECT);
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL("testSpdWriteFW- Failure reading memory module type!");
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                // Get the size
+                if( SPD_DDR4_TYPE == memType )
+                {
+                    size_t dataSize = (modType == DDIMM)
+                        ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
+                        : (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+
+                    for( uint32_t entry = 0;
+                         entry < dataSize;
+                         entry++ )
+                    {
+                        if (modType == DDIMM)
+                        {
+                            if( SPD::EXPLORER_FW_VERSION == ddr4DDIMMData[entry].keyword )
+                            {
+                                theSize = ddr4DDIMMData[entry].length;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if( SPD::EXPLORER_FW_VERSION == ddr4Data[entry].keyword )
+                            {
+                                theSize = ddr4Data[entry].length;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFW - Unsupported memory type: 0x%04x", memType );
+                    errlCommit( err, VPD_COMP_ID);
+                    break;
+                }
+
+                if( 0 == theSize )
+                {
+                    // memType or Keyword not supported
+                    TS_INFO("testSpdWriteFW memType Keyword not supported, but we tried...");
+                    cmds++;
+                    break;
+                }
+
+                // Allocate data buffer
+                origData = static_cast<uint8_t*>(malloc( theSize ));
+
+                // Read the data out first
+                err = deviceRead( theTarget,
+                                  origData,
+                                  theSize,
+                                  DEVICE_SPD_ADDRESS( EXPLORER_FW_VERSION ) );
+                TRACFBIN( g_trac_spd, "testSpdWriteFW ORIGINAL EXPLORER_FW_VERSION read=",
+                            origData, theSize );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFW - failed to read ORIGINAL EXPLORER_FW_VERSION!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                // fill it up with some dummy data
+                testData = static_cast<uint8_t*>(malloc( theSize ));
+                for( size_t x=0; x<theSize; x++ )
+                {
+                    testData[x] = x;
+                }
+
+                // Write the test data in
+                err = deviceWrite( theTarget,
+                                   testData,
+                                   theSize,
+                                   DEVICE_SPD_ADDRESS( EXPLORER_FW_VERSION ) );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFW - Error writing data to EXPLORER_FW_VERSION" );
+                    break;
+                }
+
+                // Read the data out again to check it
+                verifyData = static_cast<uint8_t*>(malloc( theSize ));
+                err = deviceRead( theTarget,
+                                  verifyData,
+                                  theSize,
+                                  DEVICE_SPD_ADDRESS( EXPLORER_FW_VERSION ) );
+                TRACFBIN( g_trac_spd, "testSpdWriteFW TEST DATA EXPLORER_FW_VERSION data read=",
+                            verifyData, theSize );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFW - failed to read TEST DATA for EXPLORER_FW_VERSION!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                if( memcmp( testData, verifyData, theSize ) )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFW - PROBLEM DIMM EXPLORER_FW_VERSION "
+                             "data does not match what we wrote!" );
+                    TRACFBIN( g_trac_spd, "PROBLEM EXPLORER_FW_VERSION MISMATCH wrote=",
+                                testData, theSize );
+                    TRACFBIN( g_trac_spd, "PROBLEM EXPLORER_FW_VERSION MISMATCH read=",
+                                verifyData, theSize );
+                }
+                else
+                {
+                    TS_INFO( "testSpdWriteFW - CONFIRMED DIMM EXPLORER_FW_VERSION "
+                             "data written successfully!" );
+                    TRACFBIN( g_trac_spd, "CONFIRMED EXPLORER_FW_VERSION wrote=",
+                                testData, theSize );
+                    TRACFBIN( g_trac_spd, "CONFIRMED EXPLORER_FW_VERSION read=",
+                                verifyData, theSize );
+                }
+
+                // put the original data back to be a good citizen
+                err = deviceWrite( theTarget,
+                                   origData,
+                                   theSize,
+                                   DEVICE_SPD_ADDRESS( EXPLORER_FW_VERSION ) );
+                TS_INFO( "testSpdWriteFW - deviceWrite Restoring ORIGINAL "
+                         "DIMM EXPLORER_FW_VERSION" );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteFW - Error writing original data back to "
+                             "DIMM EXPLORER_FW_VERSION data, things may be corrupted!");
+                    break;
+                }
+                else
+                {
+                    TS_INFO("testSpdWriteFW - Successfully restored original "
+                            "DIMM EXPLORER_FW_VERSION theSize=0x%X", theSize);
+                }
+
+
+            } while( 0 );
+
+            if( nullptr != testData )
+            {
+                delete testData;
+                testData = nullptr;
+            }
+
+            if( nullptr != origData )
+            {
+                delete origData;
+                origData = nullptr;
+            }
+
+            if( nullptr != verifyData )
+            {
+                delete verifyData;
+                verifyData = nullptr;
+            }
+
+            if( cmds == 0 )
+            {
+                TS_FAIL("testSpdWriteFW - No tests ran, something is wrong...");
+            }
+
+            TS_INFO("testSpdWriteFW Exit - %d/%d fails", fails, cmds);
         }
 
         /**
@@ -537,25 +803,25 @@ class SPDTest: public CxxTest::TestSuite
         void _testSpdWriteSmall ( void )
         {
 #ifndef __HOSTBOOT_RUNTIME
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
-            uint8_t* testData = NULL;
-            uint8_t* origData = NULL;
+            uint8_t* testData = nullptr;
+            uint8_t* origData = nullptr;
 
             TRACFCOMP( g_trac_spd,
                        ENTER_MRK"testSpdWriteSmall()" );
 
             do
             {
-                TARGETING::Target * theTarget = NULL;
+                TARGETING::Target * theTarget = nullptr;
 
                 // Get DIMM Targets
                 TargetHandleList dimmList;
                 getDIMMTargets( dimmList );
 
                 if( ( 0 == dimmList.size() ) ||
-                    ( NULL == dimmList[0] ) )
+                    ( nullptr == dimmList[0] ) )
                 {
                     TRACFCOMP( g_trac_spd,
                                "testSpdWriteSmall - No DIMMs found!" );
@@ -703,16 +969,16 @@ class SPDTest: public CxxTest::TestSuite
 
             } while( 0 );
 
-            if( NULL != testData )
+            if( nullptr != testData )
             {
                 delete[] testData;
-                testData = NULL;
+                testData = nullptr;
             }
 
-            if( NULL != origData )
+            if( nullptr != origData )
             {
                 delete[] origData;
-                origData = NULL;
+                origData = nullptr;
             }
 
             if( cmds == 0 )
@@ -730,7 +996,7 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdInvalidKeyword ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -739,14 +1005,14 @@ class SPDTest: public CxxTest::TestSuite
 
             do
             {
-                TARGETING::Target * theTarget = NULL;
+                TARGETING::Target * theTarget = nullptr;
 
                 // Get DIMM Targets
                 TargetHandleList dimmList;
                 getDIMMTargets( dimmList );
 
                 if( ( 0 == dimmList.size() ) ||
-                    ( NULL == dimmList[0] ) )
+                    ( nullptr == dimmList[0] ) )
                 {
                     TRACFCOMP( g_trac_spd,
                                "testSpdInvalidKeyword - No DIMMs found!" );
@@ -755,7 +1021,7 @@ class SPDTest: public CxxTest::TestSuite
 
                 // Test on first DIMM only.
                 theTarget = dimmList[0];
-                uint8_t * theData = NULL;
+                uint8_t * theData = nullptr;
                 size_t theSize = 0x0;
 
                 cmds++;
@@ -764,7 +1030,7 @@ class SPDTest: public CxxTest::TestSuite
                                   theSize,
                                   DEVICE_SPD_ADDRESS( SPD::INVALID_SPD_KEYWORD ) );
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testSpdInvalidKeyword - No error returned!" );
@@ -773,7 +1039,7 @@ class SPDTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
             } while( 0 );
 
@@ -787,7 +1053,7 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdInvalidSize ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -796,14 +1062,14 @@ class SPDTest: public CxxTest::TestSuite
 
             do
             {
-                TARGETING::Target * theTarget = NULL;
+                TARGETING::Target * theTarget = nullptr;
 
                 // Get DIMM Targets
                 TargetHandleList dimmList;
                 getDIMMTargets( dimmList );
 
                 if( ( 0 == dimmList.size() ) ||
-                    ( NULL == dimmList[0] ) )
+                    ( nullptr == dimmList[0] ) )
                 {
                     TRACFCOMP( g_trac_spd,
                                "testSpdInvalidSize - No DIMMs found!" );
@@ -812,7 +1078,7 @@ class SPDTest: public CxxTest::TestSuite
 
                 // Test on first DIMM only.
                 theTarget = dimmList[0];
-                //If theData is NULL, deviceRead will return the size
+                //If theData is nullptr, deviceRead will return the size
                 // need to give this an arbitrary size so test is still valid
                 uint8_t * theData = static_cast<uint8_t*>(malloc( 0x1 ));
                 size_t theSize = 0x0;   // Invalid size of 0x0
@@ -824,12 +1090,12 @@ class SPDTest: public CxxTest::TestSuite
                                   DEVICE_SPD_ADDRESS( SPD::SPD_FIRST_NORM_KEYWORD ) );
 
                 // clean up the data
-                if( NULL != theData )
+                if( nullptr != theData )
                 {
                     delete theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testSpdInvalidSize - No error for invalid size!" );
@@ -838,7 +1104,7 @@ class SPDTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
             } while( 0 );
 
@@ -852,7 +1118,7 @@ class SPDTest: public CxxTest::TestSuite
         void testSpdInvalidWrite ( void )
         {
 #ifndef __HOSTBOOT_RUNTIME
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -861,14 +1127,14 @@ class SPDTest: public CxxTest::TestSuite
 
             do
             {
-                TARGETING::Target * theTarget = NULL;
+                TARGETING::Target * theTarget = nullptr;
 
                 // Get DIMM Targets
                 TargetHandleList dimmList;
                 getDIMMTargets( dimmList );
 
                 if( ( 0 == dimmList.size() ) ||
-                    ( NULL == dimmList[0] ) )
+                    ( nullptr == dimmList[0] ) )
                 {
                     TRACFCOMP( g_trac_spd,
                                "testSpdInvalidSize - No DIMMs found!" );
@@ -881,19 +1147,20 @@ class SPDTest: public CxxTest::TestSuite
                 uint8_t * theData = static_cast<uint8_t*>(malloc( theSize ));
 
                 cmds++;
+                // This fails since SPD_FIRST_NORM_KEYWORD is not writable
                 err = deviceWrite( theTarget,
                                    theData,
                                    theSize,
                                    DEVICE_SPD_ADDRESS( SPD::SPD_FIRST_NORM_KEYWORD ) );
 
                 // clean up the data
-                if( NULL != theData )
+                if( nullptr != theData )
                 {
                     delete theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "No failure for Invalid Write attempt to "
@@ -903,7 +1170,7 @@ class SPDTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
             } while( 0 );
 
@@ -918,25 +1185,25 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testspdModSpecKwds( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
             uint8_t memType = 0x0;
-            uint8_t * theData = NULL;
+            uint8_t * theData = nullptr;
 
             TRACFCOMP( g_trac_spd,
                        ENTER_MRK"testspdModSpecKwds()" );
 
             do
             {
-                TARGETING::Target * theTarget = NULL;
+                TARGETING::Target * theTarget = nullptr;
 
                 // Get DIMM Targets
                 TargetHandleList dimmList;
                 getDIMMTargets( dimmList );
 
                 if( ( 0 == dimmList.size() ) ||
-                    ( NULL == dimmList[0] ) )
+                    ( nullptr == dimmList[0] ) )
                 {
                     TRACFCOMP( g_trac_spd,
                                "testspdModSpecKwds - No DIMMs found!" );
@@ -946,10 +1213,13 @@ class SPDTest: public CxxTest::TestSuite
                 // Operate on first DIMM.
                 theTarget = dimmList[0];
                 size_t theSize = 0;
+                bool writeable = false;
                 uint32_t entry = 0x0;
 
                 // Get the DDR revision
                 size_t tmpSize = 0x1;
+                TS_INFO("testspdModSpecKwds WORKING on FIRST DIMM HUID=0x%X",
+                        TARGETING::get_huid(theTarget));
                 err = deviceRead( theTarget,
                                   &memType,
                                   tmpSize,
@@ -985,30 +1255,18 @@ class SPDTest: public CxxTest::TestSuite
                      keyword <= SPD::SPD_LAST_MOD_SPEC; keyword++ )
                 {
                     cmds++;
-                    if( NULL != theData )
+                    // Keep track of writeable to check later
+                    writeable = false;
+                    if( nullptr != theData )
                     {
                         free( theData );
-                        theData = NULL;
+                        theData = nullptr;
                     }
 
                     // Get the required size of the buffer
                     theSize = 0;
                     KeywordData kwdData;
-                    if( SPD_DDR3_TYPE == memType )
-                    {
-                        for( entry = 0;
-                             entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
-                             entry++ )
-                        {
-                            if( keyword == ddr3Data[entry].keyword )
-                            {
-                                kwdData = ddr3Data[entry];
-                                theSize = ddr3Data[entry].length;
-                                break;
-                            }
-                        }
-                    }
-                    else if( SPD_DDR4_TYPE == memType )
+                    if( SPD_DDR4_TYPE == memType )
                     {
                         size_t dataSize = (modType == DDIMM)
                             ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
@@ -1024,6 +1282,7 @@ class SPDTest: public CxxTest::TestSuite
                                 {
                                     kwdData = ddr4DDIMMData[entry];
                                     theSize = ddr4DDIMMData[entry].length;
+                                    writeable = ddr4DDIMMData[entry].writable;
                                     break;
                                 }
                             }
@@ -1033,6 +1292,7 @@ class SPDTest: public CxxTest::TestSuite
                                 {
                                     kwdData = ddr4Data[entry];
                                     theSize = ddr4Data[entry].length;
+                                    writeable = ddr4Data[entry].writable;
                                     break;
                                 }
                             }
@@ -1048,8 +1308,7 @@ class SPDTest: public CxxTest::TestSuite
                     }
 
                     // Check that the module type supports this keyword
-                    TRACFCOMP( g_trac_spd,
-                               INFO_MRK"SPD Error traces will follow!!!  "
+                    TS_INFO("SPD Error traces MAY follow!!!  "
                                "Not all module specific keywords will be "
                                "valid for all types of modules.  IGNORE!!" );
                     err = checkModSpecificKeyword( kwdData,
@@ -1061,7 +1320,7 @@ class SPDTest: public CxxTest::TestSuite
                         // This keyword isn't supported with this module type
                         cmds--;
                         delete err;
-                        err = NULL;
+                        err = nullptr;
                         continue;
                     }
 
@@ -1113,18 +1372,29 @@ class SPDTest: public CxxTest::TestSuite
                                    theSize );
                     }
 
-                    if( NULL != theData )
+                    if( nullptr != theData )
                     {
                         free( theData );
-                        theData = NULL;
+                        theData = nullptr;
+                    }
+                    // At this time only ONE MOD SPEC Keyword is WRITEABLE
+                    // so fail if keyword is something not expected as WRITEABLE
+                    if (writeable)
+                    {
+                        if (keyword != SPD::EXPLORER_FW_VERSION)
+                        {
+                            fails++;
+                            TS_FAIL("testspdModSpecKwds MOD SPEC keyword=%04x table defines "
+                                    "as WRITEABLE but should only be READABLE", keyword);
+                        }
                     }
                 }
             } while( 0 );
 
-            if( NULL != theData )
+            if( nullptr != theData )
             {
                 free( theData );
-                theData = NULL;
+                theData = nullptr;
             }
 
             TRACFCOMP( g_trac_spd,
