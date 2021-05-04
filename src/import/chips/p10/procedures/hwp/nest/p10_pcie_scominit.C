@@ -342,16 +342,13 @@ fapi2::ReturnCode p10_load_iop_override(
                 FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i] , l_data),
                          "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i]);
             }
-            else
-            {
-                //Disable scratch_15 algo
-                l_data = 0;
-                l_data.setBit(SCRATCH_15_START, SCRATCH_15_LEN);
-                FAPI_DBG("RAWLANEN_DIG_FSM_FW_SCRATCH_15 0x%.0x", l_data);
-                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEN_DIG_FSM_FW_SCRATCH_15[i] , l_data),
-                         "Error from putScom 0x%.16llX", RAWLANEN_DIG_FSM_FW_SCRATCH_15[i]);
 
-            }
+            //Disable scratch_15 algo
+            l_data = 0;
+            l_data.setBit(SCRATCH_15_START, SCRATCH_15_LEN);
+            FAPI_DBG("RAWLANEN_DIG_FSM_FW_SCRATCH_15 0x%.0x", l_data);
+            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEN_DIG_FSM_FW_SCRATCH_15[i] , l_data),
+                     "Error from putScom 0x%.16llX", RAWLANEN_DIG_FSM_FW_SCRATCH_15[i]);
 
             // GEN1/GEN2 workaround - Yield issue.
             // Step 1

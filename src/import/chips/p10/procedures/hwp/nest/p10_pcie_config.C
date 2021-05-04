@@ -55,7 +55,7 @@ const uint8_t P10_PCIE_CONFIG_BAR_SHIFT = 8;
 // Nest FIR Register constants
 const uint64_t NFIR_ACTION0_REG = 0x5B0F81E000000000ULL;
 const uint64_t NFIR_ACTION1_REG = 0x7F0F81E000000000ULL;
-const uint64_t NFIR_MASK_REG    = 0x0030001C00000000ULL;
+const uint64_t NFIR_MASK_REG    = 0x003001DC00000000ULL;
 
 // PCI PBCQ Hardware Configuration Register field definitions
 const uint8_t PBCQ_HWCFG_HANG_POLL_SCALE = 0x0;
