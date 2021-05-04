@@ -51,14 +51,17 @@
 
 namespace PLDM
 {
+    constexpr uint8_t LMB_SIZE_ENCODE_128MB = 0x3;
+    constexpr uint8_t LMB_SIZE_ENCODE_256MB = 0x4;
+
     /** @brief Retrieve the current value of the hb_hyp_switch
     *          PLDM bios attribute and return the value converted
     *          to a ATTR_PAYLOAD_KIND enum.
     *
     * @param[in,out] io_string_table  See brief at the top of this file.
     * @param[in,out] io_attr_table    See brief at the top of this file.
-    * @param[out]    o_payloadType    If no error occurs will contain the value
-    *                                 we found for hb_hyp_switch translated to
+    * @param[out]    o_payloadType    If no error occurred will contain the value
+    *                                 found for hb_hyp_switch translated to
     *                                 terms of ATTR_PAYLOAD_KIND_type.
     *
     * @return Error if any, otherwise nullptr.
@@ -73,8 +76,8 @@ namespace PLDM
     *
     * @param[in,out] io_string_table  See brief at the top of this file.
     * @param[in,out] io_attr_table    See brief at the top of this file.
-    * @param[out]    o_hugePageCount  If no error occurs will contain the value
-    *                                 we found for hb_number_huge_pages translated
+    * @param[out]    o_hugePageCount  If no error occurred will contain the value
+    *                                 found for hb_number_huge_pages translated
     *                                 to terms of ATTR_HUGE_PAGE_COUNT_type.
     *
     * @return Error if any, otherwise nullptr.
@@ -89,8 +92,8 @@ namespace PLDM
     *
     * @param[in,out] io_string_table  See brief at the top of this file.
     * @param[in,out] io_attr_table    See brief at the top of this file.
-    * @param[out]    o_hugePageSize   If no error occurs will contain the value
-    *                                 we found for hb_huge_page_size
+    * @param[out]    o_hugePageSize   If no error occurred will contain the value
+    *                                 found for hb_huge_page_size
     *                                 translated to terms of
     *                                 ATTR_HUGE_PAGE_SIZE_type_type.
     *
@@ -106,8 +109,8 @@ namespace PLDM
     *
     * @param[in,out] io_string_table  See brief at the top of this file.
     * @param[in,out] io_attr_table    See brief at the top of this file.
-    * @param[out]    o_lmbSize        If no error occurs will contain the value
-    *                                 we found for hb_memory_region_size translated
+    * @param[out]    o_lmbSize        If no error occurred will contain the value
+    *                                 found for hb_memory_region_size translated
     *                                 to terms of ATTR_LMB_SIZE_type.
     *
     * @return Error if any, otherwise nullptr.
@@ -122,8 +125,8 @@ namespace PLDM
     *
     * @param[in,out] io_string_table  See brief at the top of this file.
     * @param[in,out] io_attr_table    See brief at the top of this file.
-    * @param[out]    o_mfgFlags       If no error occurs will contain the value
-    *                                 we found for hb_mfg_flags translated to
+    * @param[out]    o_mfgFlags       If no error occurred will contain the value
+    *                                 found for hb_mfg_flags translated to
     *                                 terms of ATTR_MFG_FLAGS_typeStdArr.
     *
     * @return Error if any, otherwise nullptr.

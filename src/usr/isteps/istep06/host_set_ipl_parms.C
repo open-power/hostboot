@@ -114,7 +114,6 @@ errlHndl_t getAndSetPLDMBiosAttrs()
 
     // LMB_SIZE
     ATTR_LMB_SIZE_type lmb_size = 0;
-    const size_t DEFAULT_LMB_SIZE = 0x4; // 256MB
 
     errl = PLDM::getLmbSize(bios_string_table,
                             bios_attr_table,
@@ -123,10 +122,10 @@ errlHndl_t getAndSetPLDMBiosAttrs()
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "getAndSetPLDMBiosAttrs: An error occurred getting LMB Size from the BMC, using default 0x%X",
-                   DEFAULT_LMB_SIZE );
+                   PLDM::LMB_SIZE_ENCODE_256MB );
 
         // Set size to default, commit the error and continue
-        lmb_size = DEFAULT_LMB_SIZE;
+        lmb_size = PLDM::LMB_SIZE_ENCODE_256MB;
         errlCommit( errl, ISTEP_COMP_ID );
     }
 

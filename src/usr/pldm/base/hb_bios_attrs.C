@@ -64,6 +64,8 @@ constexpr char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
 constexpr char PLDM_BIOS_HB_POWERVM_STRING[] = "PowerVM";
 constexpr char PLDM_BIOS_ENABLED_STRING[] = "Enabled";
 constexpr char PLDM_BIOS_DISABLED_STRING[] = "Disabled";
+constexpr char PLDM_BIOS_128_MB_STRING[] = "128MB";
+constexpr char PLDM_BIOS_256_MB_STRING[] = "256MB";
 
 constexpr const char* POSSIBLE_HYP_VALUE_STRINGS[] =
                       { PLDM_BIOS_HB_OPAL_STRING,
@@ -72,6 +74,10 @@ constexpr const char* POSSIBLE_HYP_VALUE_STRINGS[] =
 constexpr const char* POSSIBLE_HB_DEBUG_CONSOLE_STRINGS[] =
                       { PLDM_BIOS_ENABLED_STRING,
                         PLDM_BIOS_DISABLED_STRING };
+
+constexpr const char* POSSIBLE_HB_MEM_REGION_SIZE_STRINGS[] =
+                      { PLDM_BIOS_128_MB_STRING,
+                        PLDM_BIOS_256_MB_STRING };
 
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
 constexpr size_t MFG_FLAGS_CONVERT_STRING_SIZE = 8;
@@ -866,11 +872,11 @@ errlHndl_t getLmbSize(
 
     do{
 
-    uint64_t l_attr_val = 0;
-    errl = systemIntAttrLookup(io_string_table,
-                               io_attr_table,
-                               PLDM_BIOS_HB_LMB_SIZE_STRING,
-                               l_attr_val);
+    const pldm_bios_string_table_entry * cur_val_string_entry_ptr = nullptr;
+    errl = systemEnumAttrLookup(io_string_table,
+                                io_attr_table,
+                                PLDM_BIOS_HB_LMB_SIZE_STRING,
+                                cur_val_string_entry_ptr);
     if(errl)
     {
         PLDM_ERR("getLmbSize() Failed to lookup value for %s",
@@ -878,7 +884,62 @@ errlHndl_t getLmbSize(
         break;
     }
 
-    o_lmbSize = l_attr_val;
+    // Find the longest string that we will accept as a
+    // possible value for the a given PLDM BIOS attribute
+    // so we can allocate a sufficiently sized buffer.
+    // Add 1 byte to buffer to account for null terminator
+    constexpr auto max_possible_value_length =
+         std::accumulate(std::begin(POSSIBLE_HB_MEM_REGION_SIZE_STRINGS),
+                         std::end(POSSIBLE_HB_MEM_REGION_SIZE_STRINGS),
+                         0ul,
+                         find_maxstrlen) + 1;
+
+    // Ensure max_possible_value_length is larger than the extra
+    // extra byte we added to account for the null terminator.
+    // This assert forces the constexpr to be evaluated at
+    // compile-time
+    static_assert(max_possible_value_length > 1);
+    char translated_string[max_possible_value_length] = {0};
+
+    pldm_bios_table_string_entry_decode_string(cur_val_string_entry_ptr,
+                                               translated_string,
+                                               max_possible_value_length);
+
+    if(strncmp(translated_string, PLDM_BIOS_128_MB_STRING, max_possible_value_length) == 0)
+    {
+        PLDM_INF("Memory region size set to 128MB by the BMC");
+        o_lmbSize = LMB_SIZE_ENCODE_128MB;
+    }
+    else if(strncmp(translated_string, PLDM_BIOS_256_MB_STRING, max_possible_value_length) == 0)
+    {
+        PLDM_INF("Memory region size set to 256MB by the BMC");
+        o_lmbSize = LMB_SIZE_ENCODE_256MB;
+    }
+    else
+    {
+        // Print the entire buffer
+        PLDM_INF_BIN("Unexpected string : ",translated_string, max_possible_value_length);
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_LMB_SIZE
+          * @reasoncode RC_UNSUPPORTED_TYPE
+          * @userdata1  Unused
+          * @userdata2  Unused
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_GET_LMB_SIZE,
+                             RC_UNSUPPORTED_TYPE,
+                             0,
+                             0,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_LMB_SIZE_STRING).addToLog(errl);
+        ErrlUserDetailsString(translated_string).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        break;
+    }
 
     } while(0);
 
@@ -939,7 +1000,9 @@ errlHndl_t systemStringAttrLookup(std::vector<uint8_t>& io_string_table,
             attr_entry_ptr);
 
     // Size is the first 2 bytes of the data
-    uint16_t stringLength = (attr_value[0] << 8) | attr_value[1];
+    // Little endian so swap bytes
+    uint16_t stringLength = (attr_value[1] << 8) | attr_value[0];
+
     bool useDefault = false;
 
     // If string is not set get the default
@@ -1020,9 +1083,8 @@ errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
     // Check for string type == 0x02 Hex
     if (bios_string_type != PLDM_BIOS_STRING_TYPE_HEX)
     {
-        PLDM_ERR("Unexpected string type 0x%X for %s, mfg flags string %s",
-                 bios_string_type, PLDM_BIOS_HB_MFG_FLAGS_STRING,
-                 reinterpret_cast<const char*>(mfg_flags_string.data()));
+        PLDM_ERR("Unexpected string type 0x%X for %s",
+                 bios_string_type, PLDM_BIOS_HB_MFG_FLAGS_STRING);
         /*@
           * @errortype
           * @severity   ERRL_SEV_PREDICTIVE
@@ -1047,9 +1109,8 @@ errlHndl_t getMfgFlags(std::vector<uint8_t>& io_string_table,
     // Check the string size against original, it may have been resized
     if (mfg_flags_string.size() != bios_string_size)
     {
-        PLDM_ERR("BMC attr size %d does not match HB attr size %d, mfg flags string %s",
-                 mfg_flags_string.size(), bios_string_size,
-                 reinterpret_cast<const char*>(mfg_flags_string.data()));
+        PLDM_ERR("BMC attr size %d does not match HB attr size %d",
+                 mfg_flags_string.size(), bios_string_size);
         /*@
           * @errortype
           * @severity   ERRL_SEV_PREDICTIVE

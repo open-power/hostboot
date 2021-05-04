@@ -163,6 +163,8 @@ void* calloc(size_t num, size_t size)
 
 /**
  * Note: endptr is not currently supported
+ * Note: strtoul is also defined in runtime/rt_stdlib.C,
+ *       any changes to this function should be mirrored there
  */
 uint64_t strtoul(const char *nptr, char **endptr, int base)
 {

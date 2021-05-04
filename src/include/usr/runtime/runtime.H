@@ -478,6 +478,8 @@ inline uint64_t getLMBSizeInMB()
     // Default to 256 MB for non-pldm system
     uint64_t ret = 256;
 
+    // @TODO RTC 258716: Make HB aware of FSP LMB size
+
 #ifdef CONFIG_PLDM
     const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
     const auto lmb_size = sys->getAttr<TARGETING::ATTR_LMB_SIZE>();

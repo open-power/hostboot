@@ -93,7 +93,7 @@ namespace PLDM
         // systemEnumAttrLookup
         MOD_SYSTEM_ENUM_ATTR_LOOKUP = 0x20,
 
-        // writeLidFrileFromOffset
+        // writeLidFileFromOffset
         MOD_WRITE_LID_FILE              = 0x21,
 
         // getMfgFlags
@@ -101,6 +101,9 @@ namespace PLDM
 
         // getTID
         MOD_GET_TID = 0x23,
+
+        // getLmbSize
+        MOD_GET_LMB_SIZE = 0x24,
     };
 
     enum PLDMReasonCode
