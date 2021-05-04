@@ -349,6 +349,17 @@ fapi2::ReturnCode p10_sbe_tracearray_do_dump(
         *(o_ta_data + (2 * i + 1)) = buf;
     }
 
+    /*
+     * Run empty scoms to move the address pointer of trace array control
+     * logic, till it reaches the same row again, as the trace array is
+     * a circular buffer
+     */
+    for (uint32_t i = 0; i < (P10_TRACEARRAY_NUM_ROWS - i_num_rows); i++)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, i_scom_base + TRACE_LO_DATA_OFS, buf),
+                 "Failed to read trace array low data register, "
+                 "iteration %d", i);
+    }
 
     /* Then dump the high data */
     for (uint32_t i = 0; i < i_num_rows; i++)
