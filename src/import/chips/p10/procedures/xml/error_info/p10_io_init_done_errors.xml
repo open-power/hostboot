@@ -44,6 +44,9 @@
     <ffdc>ERROR_VALID</ffdc>
     <ffdc>ERROR_THREAD</ffdc>
     <ffdc>ERROR_LANE</ffdc>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
 

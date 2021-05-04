@@ -97,7 +97,7 @@
     </collectRegisterFfdc>
     <callout>
         <target>OMI_TARGET</target>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
     <callout>
         <bus>OMI_TARGET, OCMB_TARGET</bus>

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -30,8 +30,17 @@
     <description>
       Procedure: p10_omi_init
       Downstream template 1 required
+
+      This info is determined by the OCMB. For
+      P10 we only support the Explorer OCMBs
+      who should always have this set, and if
+      they do not it points to a software problem.
     </description>
     <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -39,8 +48,17 @@
     <description>
       Procedure: p10_omi_init
       Downstream template 4 or/and 7 is required
+
+      This info is determined by the OCMB. For
+      P10 we only support the Explorer OCMBs
+      who should always have this set, and if
+      they do not it points to a software problem.
     </description>
     <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
