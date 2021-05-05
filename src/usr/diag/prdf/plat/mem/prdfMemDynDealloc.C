@@ -57,61 +57,6 @@ bool isEnabled()
              !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() );
 }
 
-int32_t __getAddrConfig( ExtensibleChip * i_chip, uint8_t i_dslct,
-                         bool & o_twoDimmConfig, uint8_t & o_mrnkBits,
-                         uint8_t & o_srnkBits, uint8_t & o_extraRowBits )
-{
-    #define PRDF_FUNC "[MemDealloc::__getAddrConfig] "
-
-    int32_t o_rc = SUCCESS;
-
-    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MC_ADDR_TRANS" );
-    o_rc = reg->Read();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS: i_chip=0x%08x",
-                  i_chip->getHuid() );
-        return o_rc;
-    }
-
-    o_twoDimmConfig = false;
-    if ( reg->IsBitSet(0) && reg->IsBitSet(16) )
-        o_twoDimmConfig = true;
-
-    o_mrnkBits = 0;
-    if ( reg->IsBitSet(i_dslct ? 21: 5) ) o_mrnkBits++;
-    if ( reg->IsBitSet(i_dslct ? 22: 6) ) o_mrnkBits++;
-
-    o_srnkBits = 0;
-    if ( reg->IsBitSet(i_dslct ? 25: 9) ) o_srnkBits++;
-    if ( reg->IsBitSet(i_dslct ? 26:10) ) o_srnkBits++;
-    if ( reg->IsBitSet(i_dslct ? 27:11) ) o_srnkBits++;
-
-    // According to the hardware team, B2 is used for DDR4e which went away. If
-    // for some reason B2 is valid, there is definitely a bug.
-    if ( reg->IsBitSet(i_dslct ? 28:12) )
-    {
-        PRDF_ERR( PRDF_FUNC "B2 enabled in MC_ADDR_TRANS: i_chip=0x%08x "
-                  "i_dslct=%d", i_chip->getHuid(), i_dslct );
-        return FAIL;
-    }
-
-    o_extraRowBits = 0;
-    if ( reg->IsBitSet(i_dslct ? 29:13) ) o_extraRowBits++;
-    if ( reg->IsBitSet(i_dslct ? 30:14) ) o_extraRowBits++;
-    if ( reg->IsBitSet(i_dslct ? 31:15) ) o_extraRowBits++;
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-uint64_t __maskBits( uint64_t i_val, uint64_t i_numBits )
-{
-    uint64_t mask = (0xffffffffffffffffull >> i_numBits) << i_numBits;
-    return i_val & ~mask;
-}
-
 uint64_t __countBits( uint64_t i_val )
 {
     uint64_t o_count = 0;
@@ -143,10 +88,6 @@ uint64_t ranks2bits( uint64_t i_numRnks )
     return 0;
 }
 
-template <TYPE T>
-int32_t __getPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
-                               uint64_t & o_addr );
-
 void __adjustCapiAddrBitPos( uint8_t & io_bitPos )
 {
     // Note: the translation bitmaps are all 5 bits that are defined
@@ -174,6 +115,10 @@ void __adjustCapiAddrBitPos( uint8_t & io_bitPos )
     }
 }
 
+template <TYPE T>
+int32_t __getPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
+                       uint64_t & o_addr );
+
 template <>
 int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
                                        uint64_t & o_addr )
@@ -194,19 +139,11 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
 
     // Determine if a two DIMM config is used. Also, determine how many
     // mrank (M0-M1), srnk (S0-S2), or extra row (R17-R15) bits are used.
-    bool twoDimmConfig;
+    bool twoDimmConfig, col3Config;
     uint8_t mrnkBits, srnkBits, extraRowBits;
-    o_rc = __getAddrConfig( i_chip, dslct, twoDimmConfig, mrnkBits, srnkBits,
-                            extraRowBits );
+    o_rc = getAddrConfig<TYPE_OCMB_CHIP>( i_chip, dslct, twoDimmConfig,
+        mrnkBits, srnkBits, extraRowBits, col3Config );
     if ( SUCCESS != o_rc ) return o_rc;
-
-    // Mask off the non-configured bits. If this address came from hardware,
-    // this would not be a problem. However, the get_mrank_range() and
-    // get_srank_range() HWPS got lazy just set the entire fields and did not
-    // take into account the actual bit ranges.
-    mrnk = __maskBits( mrnk, mrnkBits );
-    srnk = __maskBits( srnk, srnkBits );
-    row  = __maskBits( row,  15 + extraRowBits );
 
     // Insert the needed bits based on the config defined in the MC Address
     // Translation Registers.

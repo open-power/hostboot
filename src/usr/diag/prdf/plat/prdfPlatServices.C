@@ -41,6 +41,7 @@
 
 #include <prdfOcmbDataBundle.H>
 #include <prdfMemScrubUtils.H>
+#include <prdfMemUtils.H>
 
 #include <iipServiceDataCollector.h>
 #include <UtilHash.H>
@@ -407,21 +408,71 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+uint64_t __maskBits( uint64_t i_val, uint64_t i_numBits )
+{
+    uint64_t mask = (0xffffffffffffffffull >> i_numBits) << i_numBits;
+    return i_val & ~mask;
+}
 
 //------------------------------------------------------------------------------
 
-MemAddr __convertMssMcbistAddr( const mss::mcbist::address & i_addr )
+template <TARGETING::TYPE T>
+uint32_t __convertMssMcbistAddr( ExtensibleChip * i_chip,
+                                 const mss::mcbist::address & i_addr,
+                                 MemAddr & o_addr );
+
+
+template<>
+uint32_t __convertMssMcbistAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+        const mss::mcbist::address & i_addr, MemAddr & o_addr )
 {
-    uint64_t dslct = i_addr.get_dimm();
-    uint64_t rslct = i_addr.get_master_rank();
-    uint64_t srnk  = i_addr.get_slave_rank();
-    uint64_t bnk   = i_addr.get_bank();
-    uint64_t row   = i_addr.get_row();
-    uint64_t col   = i_addr.get_column();
+    #define PRDF_FUNC "[PlatServices::__convertMssMcbistAddr] "
 
-    uint64_t mrnk  = (dslct << 2) | rslct;
+    uint32_t o_rc = SUCCESS;
 
-    return MemAddr ( MemRank ( mrnk, srnk ), bnk, row, col );
+    uint64_t dslct   = i_addr.get_dimm();
+    uint64_t rslct   = i_addr.get_master_rank();
+    uint64_t srnk    = i_addr.get_slave_rank();
+    uint64_t bnk     = i_addr.get_bank();
+    uint64_t bnk_grp = i_addr.get_bank_group();
+    uint64_t row     = i_addr.get_row();
+    uint64_t col     = i_addr.get_column();
+
+    uint64_t bnkFull = (bnk << 2) | bnk_grp;
+
+    // Adjust the address components based on what is configured.
+    bool twoDimmConfig, col3Config;
+    uint8_t prnkBits, srnkBits, extraRowBits;
+    o_rc = MemUtils::getAddrConfig<TYPE_OCMB_CHIP>( i_chip, dslct,
+            twoDimmConfig, prnkBits, srnkBits, extraRowBits, col3Config );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failure from getAddrConfig" );
+    }
+    else
+    {
+        // Mask off the non-configured bits. If this address came from
+        // hardware,this would not be a problem. However, the get_mrank_range()
+        // and get_srank_range() HWPS got lazy, just set the entire fields
+        // and did not take into account the actual bit ranges.
+        rslct = __maskBits( rslct, prnkBits );
+        srnk  = __maskBits( srnk, srnkBits );
+        row = (row >> (3-extraRowBits)) << (3-extraRowBits);
+
+        if ( !col3Config )
+        {
+            col = col & 0xffffffffffffffbfull;
+        }
+    }
+
+    uint64_t prnk    = (dslct << 2) | rslct;
+    o_addr = MemAddr ( MemRank ( prnk, srnk ), bnkFull, row, col );
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -433,16 +484,47 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           MemAddr & o_endAddr,
                                           AddrRangeType i_rangeType )
 {
+    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
+
+    uint32_t o_rc = SUCCESS;
     mss::mcbist::address saddr, eaddr;
-    uint32_t o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr,
-                                                     eaddr, i_rangeType );
-    if ( SUCCESS == o_rc )
+
+    do
     {
-        o_startAddr = __convertMssMcbistAddr( saddr );
-        o_endAddr   = __convertMssMcbistAddr( eaddr );
-    }
+        uint32_t o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr,
+                                                         eaddr, i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_TRAC( PRDF_FUNC "Fail from getMemAddrRange(0x%08x,0x%02x,%d)",
+                       i_chip->getHuid(), i_rank.getKey(), i_rangeType );
+            break;
+        }
+
+        o_rc = __convertMssMcbistAddr<TYPE_OCMB_CHIP>( i_chip, saddr,
+                                                       o_startAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_TRAC( PRDF_FUNC "Could not convert start address from "
+                       "chip=0x%08x, rank=0x%02x.", i_chip->getHuid(),
+                       i_rank.getKey() );
+            break;
+        }
+
+        o_rc = __convertMssMcbistAddr<TYPE_OCMB_CHIP>( i_chip, eaddr,
+                                                       o_endAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_TRAC( PRDF_FUNC "Could not convert end address from "
+                       "chip=0x%08x, rank=0x%02x.", i_chip->getHuid(),
+                       i_rank.getKey() );
+            break;
+        }
+
+    } while(0);
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -516,7 +598,8 @@ bool isRowRepairEnabled<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     // Row repair is supported for OCMBs
-    return true;
+    // TODO - change back to true once the below hwp is enabled
+    return false;
 
     #undef PRDF_FUNC
 }

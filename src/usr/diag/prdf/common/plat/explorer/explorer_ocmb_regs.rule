@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -99,7 +99,7 @@
 
     register MBSEVR0
     {
-        name        "P9 MBS Error Vector Trap reg 0 (port 0)";
+        name        "Explorer MBS Error Vector Trap reg 0 (port 0)";
         scomaddr    0x0801187E;
         capture     group default;
     };
@@ -135,35 +135,35 @@
 
     register MBSTR
     {
-        name        "P9 MCBIST Memory Scrub/Read Error Threshold Register";
+        name        "Explorer MCBIST Memory Scrub/Read Err Threshold Register";
         scomaddr    0x08011857;
         capture     group default;
     };
 
     register MCBAGRA
     {
-        name        "P9 MCBIST Address Generator Configuration Register";
+        name        "Explorer MCBIST Address Generator Configuration Register";
         scomaddr    0x080118D6;
         capture     group default;
     };
 
     register MCBMCAT
     {
-        name        "P9 Maint Current Address Trap Register";
+        name        "Explorer Maint Current Address Trap Register";
         scomaddr    0x080118D7;
         capture     group default;
     };
 
     register MCB_CNTL
     {
-        name        "P9 MCBIST target MCBIST Control Register";
+        name        "Explorer MCBIST target MCBIST Control Register";
         scomaddr    0x080118DB;
         capture     group default;
     };
 
     register MCB_CNTLSTAT
     {
-        name        "P9 MCBIST Configured Command Sequence Status Register";
+        name        "Explorer MCBIST Configured Cmd Sequence Status Register";
         scomaddr    0x080118DC;
         capture     group default;
     };
@@ -230,7 +230,7 @@
 
     register MCBISTFIR_AND
     {
-        name        "P9 OCMB target MCBISTFIR AND";
+        name        "Explorer OCMB target MCBISTFIR AND";
         scomaddr    0x08011801;
         capture     group never;
         access      write_only;
@@ -238,7 +238,7 @@
 
     register MCBISTFIR_OR
     {
-        name        "P9 OCMB target MCBISTFIR OR";
+        name        "Explorer OCMB target MCBISTFIR OR";
         scomaddr    0x08011802;
         capture     group never;
         access      write_only;
@@ -246,7 +246,7 @@
 
     register MCBISTFIR_MASK_OR
     {
-        name        "P9 OCMB target MCBISTFIR MASK OR";
+        name        "Explorer OCMB target MCBISTFIR MASK OR";
         scomaddr    0x08011805;
         capture     group never;
         access      write_only;
@@ -258,56 +258,56 @@
 
     register HW_MS0
     {
-        name        "P9 Hardware Mark Store rank 0";
+        name        "Explorer Hardware Mark Store rank 0";
         scomaddr    0x08011C10;
         capture     group default;
     };
 
     register HW_MS1
     {
-        name        "P9 Hardware Mark Store rank 1";
+        name        "Explorer Hardware Mark Store rank 1";
         scomaddr    0x08011C11;
         capture     group default;
     };
 
     register HW_MS2
     {
-        name        "P9 Hardware Mark Store rank 2";
+        name        "Explorer Hardware Mark Store rank 2";
         scomaddr    0x08011C12;
         capture     group default;
     };
 
     register HW_MS3
     {
-        name        "P9 Hardware Mark Store rank 3";
+        name        "Explorer Hardware Mark Store rank 3";
         scomaddr    0x08011C13;
         capture     group default;
     };
 
     register HW_MS4
     {
-        name        "P9 Hardware Mark Store rank 4";
+        name        "Explorer Hardware Mark Store rank 4";
         scomaddr    0x08011C14;
         capture     group default;
     };
 
     register HW_MS5
     {
-        name        "P9 Hardware Mark Store rank 5";
+        name        "Explorer Hardware Mark Store rank 5";
         scomaddr    0x08011C15;
         capture     group default;
     };
 
     register HW_MS6
     {
-        name        "P9 Hardware Mark Store rank 6";
+        name        "Explorer Hardware Mark Store rank 6";
         scomaddr    0x08011C16;
         capture     group default;
     };
 
     register HW_MS7
     {
-        name        "P9 Hardware Mark Store rank 7";
+        name        "Explorer Hardware Mark Store rank 7";
         scomaddr    0x08011C17;
         capture     group default;
     };
@@ -318,56 +318,56 @@
 
     register FW_MS0
     {
-        name        "P9 Firmware Mark Store 0";
+        name        "Explorer Firmware Mark Store 0";
         scomaddr    0x08011C18;
         capture     group default;
     };
 
     register FW_MS1
     {
-        name        "P9 Firmware Mark Store 1";
+        name        "Explorer Firmware Mark Store 1";
         scomaddr    0x08011C19;
         capture     group default;
     };
 
     register FW_MS2
     {
-        name        "P9 Firmware Mark Store 2";
+        name        "Explorer Firmware Mark Store 2";
         scomaddr    0x08011C1A;
         capture     group default;
     };
 
     register FW_MS3
     {
-        name        "P9 Firmware Mark Store 3";
+        name        "Explorer Firmware Mark Store 3";
         scomaddr    0x08011C1B;
         capture     group default;
     };
 
     register FW_MS4
     {
-        name        "P9 Firmware Mark Store 4";
+        name        "Explorer Firmware Mark Store 4";
         scomaddr    0x08011C1C;
         capture     group default;
     };
 
     register FW_MS5
     {
-        name        "P9 Firmware Mark Store 5";
+        name        "Explorer Firmware Mark Store 5";
         scomaddr    0x08011C1D;
         capture     group default;
     };
 
     register FW_MS6
     {
-        name        "P9 Firmware Mark Store 6";
+        name        "Explorer Firmware Mark Store 6";
         scomaddr    0x08011C1E;
         capture     group default;
     };
 
     register FW_MS7
     {
-        name        "P9 Firmware Mark Store 7";
+        name        "Explorer Firmware Mark Store 7";
         scomaddr    0x08011C1F;
         capture     group default;
     };
@@ -378,7 +378,7 @@
 
     register DL0_ERROR_HOLD
     {
-        name        "P9 OCMB target DL0 Error Hold Register";
+        name        "Explorer OCMB target DL0 Error Hold Register";
         scomaddr    0x08012813;
         capture     group omi_ocmb_ffdc;
     };
@@ -412,7 +412,7 @@
 
     register TLX_ERR1_REPORT
     {
-        name        "P9 OCMB target TLX Error Report Register";
+        name        "Explorer OCMB target TLX Error Report Register";
         scomaddr    0x0801241D;
         reset       (&, 0x0801241D);
         mask        (|, 0x08012415);
@@ -428,7 +428,7 @@
 
     register TLX_ERR1_REPORT_MASK
     {
-        name        "P9 OCMB target TLX Error Report Register Mask";
+        name        "Explorer OCMB target TLX Error Report Register Mask";
         scomaddr    0x08012415;
         capture     group default;
     };
@@ -594,22 +594,29 @@
 
     register MC_ADDR_TRANS
     {
-        name        "P9 OCMB target address translation register0";
+        name        "Explorer OCMB target address translation register0";
         scomaddr    0x0801186F;
         capture     group default;
     };
 
     register MC_ADDR_TRANS1
     {
-        name        "P9 OCMB target address translation register1";
+        name        "Explorer OCMB target address translation register1";
         scomaddr    0x08011870;
         capture     group default;
     };
 
     register MC_ADDR_TRANS2
     {
-        name        "P9 OCMB target address translation register2";
+        name        "Explorer OCMB target address translation register2";
         scomaddr    0x08011871;
+        capture     group default;
+    };
+
+    register MCBCFG
+    {
+        name        "Explorer MCBIST Configuration Register";
+        scomaddr    0x080118E0;
         capture     group default;
     };
 

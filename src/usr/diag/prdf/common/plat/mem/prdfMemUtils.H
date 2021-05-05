@@ -172,8 +172,25 @@ void cleanupChnlFail( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
  * @param  i_numBits The number of bits in the bit string to reverse.
  * @return The reversed bit string value.
  */
-
 uint64_t reverseBits( uint64_t i_val, uint64_t i_numBits );
+
+
+/**
+ * @brief  Gets the address configuration for the inputted OCMB
+ * @param  i_chip          An OCMB chip.
+ * @param  i_dslct         The dimm select (0:1).
+ * @param  o_twoDimmConfig True if there are two dimms configured.
+ * @param  o_prnkBits      The number of primary rank bits.
+ * @param  o_srnkBits      The number of secondary rank bits.
+ * @param  o_extraRowBits  The number of extra row bits.
+ * @param  o_col3Config    True if the col3 bit is used.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getAddrConfig( ExtensibleChip * i_chip, uint8_t i_dslct,
+                        bool & o_twoDimmConfig, uint8_t & o_prnkBits,
+                        uint8_t & o_srnkBits, uint8_t & o_extraRowBits,
+                        bool & o_col3Config );
 
 } // end namespace MemUtils
 
