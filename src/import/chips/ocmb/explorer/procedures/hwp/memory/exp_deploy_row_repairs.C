@@ -78,7 +78,9 @@ extern "C"
             return mss::exp::row_repair::activate_all_spare_rows(i_target_ocmb);
         }
 
-        FAPI_TRY( mss::exp::row_repair::map_repairs_per_dimm(i_target_ocmb, l_row_repairs) );
+        FAPI_TRY( mss::exp::row_repair::map_repairs_per_dimm(i_target_ocmb, l_row_repairs),
+                  "Failed to map repairs on dimms for %s",
+                  mss::c_str(i_target_ocmb) );
 
         // If DRAM repairs are disabled (mfg flag), we're done (but need to callout DIMM if it has row repair data)
         if (l_no_rbs)
@@ -101,7 +103,8 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        FAPI_TRY( mss::exp::row_repair::deploy_mapped_repairs(l_row_repairs, MAINT_REPAIR) );
+        FAPI_TRY( mss::exp::row_repair::deploy_mapped_repairs(l_row_repairs, MAINT_REPAIR),
+                  "Failed to deploy maint repairs from repair map for %s", mss::c_str(i_target_ocmb) );
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -148,7 +151,8 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        FAPI_TRY( mss::exp::row_repair::deploy_mapped_repairs(l_row_repairs, RUNTIME_REPAIR) );
+        FAPI_TRY( mss::exp::row_repair::deploy_mapped_repairs(l_row_repairs, RUNTIME_REPAIR),
+                  "Failed to deploy repairs from repair map for %s", mss::c_str(i_target_ocmb));
 
     fapi_try_exit:
         return fapi2::current_err;

@@ -183,7 +183,6 @@ fapi2::ReturnCode maint_row_repair( const mss::rank::info<>& i_rank_info,
 /// @brief Helper that adds power down disable for dynamic row repair
 /// @param[in] i_target port target on which to operate
 /// @param[in, out] io_program program holding CCS instructions to add to
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 void disable_power_down_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                mss::ccs::program& io_program);

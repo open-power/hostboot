@@ -152,7 +152,6 @@ fapi2::buffer<uint64_t> select_all_drams_for_repair()
 fapi2::ReturnCode create_dram_bitmap(const uint64_t i_dram, fapi2::buffer<uint64_t>& o_dram_bitmap)
 {
     o_dram_bitmap.flush<0>();
-
     FAPI_TRY(o_dram_bitmap.setBit(DRAM_START_BIT + i_dram));
     o_dram_bitmap.invert();
 
@@ -205,7 +204,9 @@ fapi2::ReturnCode add_sppr_guardkey( const mss::rank::info<>& i_rank_info,
     // Initialize Instructions
     l_inst_a_side = mss::ccs::mrs_command(l_port_rank, MRS00);
 
-    FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(l_dimm, l_has_rcd));
+    FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(l_dimm, l_has_rcd),
+             "Failed to check has_rcd on %s",
+             mss::c_str(l_dimm) );
 
     // Manipulate data based on step of guard key sequence
     // Clearing bits per DDR4 SPPR spec despite MRS setup
@@ -223,7 +224,9 @@ fapi2::ReturnCode add_sppr_guardkey( const mss::rank::info<>& i_rank_info,
 
     // Far as I can tell with explorer, the address and inversion should be handled for us
     // So we need to see if the A17 bit is enabled. If it is we need to invert it for the CCS parity
-    FAPI_TRY( is_a17_needed<mss::mc_type::EXPLORER>( l_dimm, l_is_a17) );
+    FAPI_TRY( is_a17_needed<mss::mc_type::EXPLORER>( l_dimm, l_is_a17),
+              "Failed to detect A17 bit requirements on %s",
+              mss::c_str(l_dimm) );
     l_inst_b_side = mss::address_invert(l_dimm, l_inst_a_side, l_is_a17);
 
     // Insert the delay into arr1 (control reg)
@@ -435,11 +438,15 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<>& i_rank_info,
     FAPI_TRY( mss::attr::get_dram_trcd(l_port_target, tRCD) );
 
     // Get freq from attributes:
-    FAPI_TRY( mss::freq(l_ocmb_target, l_freq) );
+    FAPI_TRY( mss::freq(l_ocmb_target, l_freq),
+              "Failed to retrieve freq values on %s",
+              mss::c_str(l_ocmb_target) );
 
     // Get ODT bits for ccs
     FAPI_TRY( mss::attr::get_si_odt_wr(l_dimm_target, l_odt_attr) );
-    FAPI_TRY( mss::ccs::convert_odt_attr_to_ccs(l_odt_attr[l_dimm_rank], l_port_target, l_odt_bits) );
+    FAPI_TRY( mss::ccs::convert_odt_attr_to_ccs(l_odt_attr[l_dimm_rank], l_port_target, l_odt_bits),
+              "Failed odt to ccs conversion on port rank %d on port %s",
+              l_port_rank, mss::c_str(l_port_target));
 
     //-------------------------------
     // SPPR COMMAND:
@@ -455,17 +462,27 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<>& i_rank_info,
 
     // 2. Enable sPPR and wait tMOD:
     l_data4.iv_soft_ppr = ENABLE_SPPR;
-    FAPI_TRY(mss::mrs_engine( l_dimm_target, l_data4, l_port_rank, tMOD, io_program.iv_instructions));
+    FAPI_TRY(mss::mrs_engine( l_dimm_target, l_data4, l_port_rank, tMOD, io_program.iv_instructions),
+             "Failed to setup mrs engine on dimm rank %d on dimm %s",
+             l_dimm_rank, mss::c_str(l_dimm_target) );
 
     // 3. Guard Key Sequence:
     FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_ONE,
-                                io_program.iv_instructions) );
+                                io_program.iv_instructions),
+              "Failed to setup guard key seq one for dimm rank %d on dimm %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
     FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_TWO,
-                                io_program.iv_instructions) );
+                                io_program.iv_instructions),
+              "Failed to setup guard key seq two for dimm rank %d on dimm %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
     FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_THREE,
-                                io_program.iv_instructions) );
+                                io_program.iv_instructions),
+              "Failed to setup guard key seq three for dimm rank %d on dimm %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
     FAPI_TRY( add_sppr_guardkey(i_rank_info, tMOD, GUARDKEY_SEQ_FOUR,
-                                io_program.iv_instructions) );
+                                io_program.iv_instructions),
+              "Failed to setup guard key seq four for dimm rank %d on dimm %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
 
     // 4. ACT to failed bank/address
     l_inst = mss::ccs::act_load<mss::mc_type::EXPLORER>(i_rank_info, i_repair.iv_bank, i_repair.iv_bg,
@@ -494,7 +511,9 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<>& i_rank_info,
 
     // 8. Set MR4 bit "A5=0" to exit sPPR
     l_data4.iv_soft_ppr = 0;
-    FAPI_TRY( mss::mrs_engine(l_dimm_target, l_data4, l_port_rank, tMOD, io_program.iv_instructions) );
+    FAPI_TRY( mss::mrs_engine(l_dimm_target, l_data4, l_port_rank, tMOD, io_program.iv_instructions),
+              "Failed to setup mrs engine on rank %d on %s",
+              l_dimm_rank, mss::c_str(l_dimm_target) );
 
     // Add des command
     l_inst = mss::ccs::des_command();
@@ -528,7 +547,11 @@ fapi2::ReturnCode maint_row_repair( const mss::rank::info<>& i_rank_info,
     mss::ccs::program l_program;
 
     // Setup SPPR CCS program
-    FAPI_TRY( setup_sppr(i_rank_info, i_repair, i_dram_bitmap, l_program) );
+    FAPI_TRY( setup_sppr(i_rank_info, i_repair, i_dram_bitmap, l_program),
+              "Failed sppr program setup for maint_row_repair on %s",
+              mss::c_str(l_port_target) );
+
+    FAPI_INF("%s Deploying maint row repair during ipl", mss::c_str(l_ocmb_target));
 
     // EXECUTE CCS ARRAY
     FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
@@ -543,7 +566,6 @@ fapi_try_exit:
 /// @brief Helper that adds power down disable for dynamic row repair
 /// @param[in] i_target port target on which to operate
 /// @param[in, out] io_program program holding CCS instructions to add to
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 void disable_power_down_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                mss::ccs::program& io_program)
@@ -593,7 +615,9 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
     disable_power_down_helper(l_port_target, l_program);
 
     // Setup SPPR CCS program
-    FAPI_TRY( setup_sppr(i_rank_info, i_repair, i_dram_bitmap, l_program) );
+    FAPI_TRY( setup_sppr(i_rank_info, i_repair, i_dram_bitmap, l_program),
+              "Failed sppr program setup for dynamic_row_repair on %s",
+              mss::c_str(l_port_target)  );
 
     // Poll MCBIST and CCS STATQ to ensure both are free
     // Verify that the in-progress bit has not been set for MCBIST, meaning the MCBIST is free
@@ -629,6 +653,8 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
                 set_OCMB_TARGET(l_ocmb_target),
                 "%s CCS engine is in use and is not available for repair",
                 mss::c_str(l_ocmb_target));
+
+    FAPI_INF("%s Deploying dynamic row repair", mss::c_str(l_ocmb_target));
 
     // Configure CCS regs for execution
     FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg ) );
@@ -668,7 +694,9 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
 
         // Gets the rank info for this DIMM
         std::vector<mss::rank::info<>> l_rank_infos;
-        FAPI_TRY(ranks_on_dimm(l_dimm, l_rank_infos));
+        FAPI_TRY(ranks_on_dimm(l_dimm, l_rank_infos),
+                 "Failed to retrieve ranks on dimm on %s",
+                 mss::c_str(l_dimm) );
 
         // Get dimm information
         FAPI_TRY( mss::attr::get_logical_ranks_per_dimm(l_dimm, l_num_ranks) );
@@ -699,9 +727,12 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                             BANK_POS,
                             l_row);
 
-                    FAPI_INF("%s Deploying row repairs on port rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                    FAPI_INF("%s Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
                              mss::spd::c_str(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
-                    FAPI_TRY( maint_row_repair(l_rank_info, l_repair, l_dram_bitmap) );
+
+                    FAPI_TRY( maint_row_repair(l_rank_info, l_repair, l_dram_bitmap),
+                              "Failed maint_row_repair on %s rank %d",
+                              mss::c_str(l_dimm), l_dimm_rank );
                 }
             }
         }
@@ -815,7 +846,9 @@ fapi2::ReturnCode clear_row_repairs_on_bad_dram(const fapi2::Target<fapi2::TARGE
         FAPI_TRY(get_num_bad_bits(i_target,
                                   o_row_repair_data[l_rank][ROW_REPAIR_DRAM_BYTE],
                                   l_bad_dq_bitmap[l_rank],
-                                  l_num_bad_bits));
+                                  l_num_bad_bits),
+                 "Failed to retrieve number of bad bits on rank %d on %s",
+                 l_rank, mss::c_str(i_target));
 
         // If the whole DRAM would be called out as bad, then clear the row repair data associated
         // This way, we free up the row repair on this rank
@@ -855,10 +888,14 @@ fapi2::ReturnCode map_repairs_per_dimm( const fapi2::Target<fapi2::TARGET_TYPE_O
 
         // Clear out any repairs on bad DRAM
         // This way, we can use those row repairs again if needed
-        FAPI_TRY( clear_row_repairs_on_bad_dram(l_dimm, l_row_repair_data) );
+        FAPI_TRY( clear_row_repairs_on_bad_dram(l_dimm, l_row_repair_data),
+                  "Failed to clear row repairs on %s",
+                  mss::c_str(l_dimm) );
 
         // Build repair table
-        FAPI_TRY( build_row_repair_table(l_dimm, l_row_repair_data, l_repairs_per_dimm) );
+        FAPI_TRY( build_row_repair_table(l_dimm, l_row_repair_data, l_repairs_per_dimm),
+                  "Failed to build row repair table on %s",
+                  mss::c_str(l_dimm) );
 
         // Add dimm repairs to map
         o_repair_map.insert(std::make_pair(l_dimm, l_repairs_per_dimm));
@@ -903,16 +940,21 @@ fapi2::ReturnCode deploy_mapped_repairs( const REPAIR_MAP& i_repair_map,
                          l_repair.iv_row);
 
                 // Set DRAM select bit for dram
-                FAPI_TRY(create_dram_bitmap(l_repair.iv_dram, l_dram_bitmap));
+                FAPI_TRY(create_dram_bitmap(l_repair.iv_dram, l_dram_bitmap),
+                         "Failed to create dram bitmap", mss::c_str(l_dimm) );
 
                 // Check if at runtime for dynamic vs maint
                 if (i_runtime)
                 {
-                    FAPI_TRY( dynamic_row_repair(l_rank_info, l_repair, l_dram_bitmap) );
+                    FAPI_TRY( dynamic_row_repair(l_rank_info, l_repair, l_dram_bitmap),
+                              "Failed dynamic_row_repair on %s rank %d",
+                              mss::c_str(l_dimm), l_dimm_rank );
                 }
                 else
                 {
-                    FAPI_TRY( maint_row_repair(l_rank_info, l_repair, l_dram_bitmap) );
+                    FAPI_TRY( maint_row_repair(l_rank_info, l_repair, l_dram_bitmap),
+                              "Failed maint_row_repair on %s rank %d",
+                              mss::c_str(l_dimm), l_dimm_rank );
                 }
 
                 // Clear bad DQ bits for this port, DIMM, rank that will be fixed by this row repair

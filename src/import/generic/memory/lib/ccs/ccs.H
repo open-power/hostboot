@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
 
 namespace mss
@@ -1461,6 +1462,10 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     // Run prelude to execution
     FAPI_TRY( prelude_to_execution(i_target, io_program, i_ports), "Error setting up ccs engine before execution on %s",
               mss::c_str(i_target));
+
+    // Stop any ongoing MCBIST command
+    FAPI_TRY( mss::memdiags::stop(i_target), "MCBIST engine failed to stop current command in progress on %s",
+              mss::c_str(i_target) );
 
     // Setup CCS per port
     for (const auto& p : i_ports)
