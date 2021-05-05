@@ -137,6 +137,14 @@ p10_hcd_corecache_power_control(
     uint32_t                l_isL3            = (i_command & HCD_PFET_MMA_MASK) >> 1;
     uint32_t                l_isON            = (i_command & HCD_PFET_ON_MASK);
     uint32_t                l_isVCS           = l_isON;
+    uint32_t                l_timeout         = 0;
+    uint32_t                l_pfet_stat       = 0;
+    uint32_t                l_expected_mask   = 0;
+#ifdef USE_RUNN
+    fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
+    fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
+#endif
 
     if (l_isL3 != 2) // if not MMA then figure out if L3 or CL2
     {
@@ -146,13 +154,6 @@ p10_hcd_corecache_power_control(
     {
         l_isVCS = 1; // if MMA only perform VDD, see common bit flip below
     }
-
-    uint32_t                l_timeout         = 0;
-    uint32_t                l_pfet_stat       = 0;
-    uint32_t                l_expected_mask   = 0;
-    fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
-    fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
-    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
 
     FAPI_INF(">>p10_hcd_corecache_power_control[%x](b1x:L3,bx1:ON)", i_command);
 
@@ -173,14 +174,12 @@ p10_hcd_corecache_power_control(
         FAPI_TRY( HCD_GETMMIO_S(l_mc_or, HCD_CPMS_PFETCNTL[l_isL3], l_scomData ) ); // use Multicast_OR to check 0s
 
         SCOM_EXTRACT(0, 4, l_pfet_seq_states);
-        FAPI_ASSERT((l_pfet_seq_states == 0),
-                    fapi2::CORECACHE_PFET_SEQ_STATE_ERROR()
-                    .set_PFET_SEQ_STATES(l_pfet_seq_states)
-                    .set_POW_COMMAND(l_isON)
-                    .set_POW_HEADERS(l_isVCS)
-                    .set_POW_DOMAINS(l_isL3)
-                    .set_CORE_TARGET(i_target),
-                    "PFET_SEQ_STATE not 0");
+        HCD_ASSERT((l_pfet_seq_states == 0),
+                   CORECACHE_PFET_SEQ_STATE_ERROR,
+                   set_POW_COMMAND, i_command,
+                   set_PFET_SEQ_STATES, l_pfet_seq_states,
+                   set_CORE_TARGET, i_target,
+                   "PFET_SEQ_STATE not 0");
 
         FAPI_DBG("Clear L3/CL2[%x] PFET stage select and value override bits via PFETCNTL[4,5/6,7]", l_isL3);
         FAPI_TRY( HCD_PUTMMIO_S( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], SCOM_LOAD32H( HCD_PFET_OVERRIDES[l_isVCS] ) ) );
@@ -216,7 +215,10 @@ p10_hcd_corecache_power_control(
 
             FAPI_DBG("PFETSTAT %x finger0_sense_mask %x", l_pfet_stat, HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS]);
 
-            if( ( !l_attr_runn_mode ) &&
+            if(
+#ifdef USE_RUNN
+                ( !l_attr_runn_mode ) &&
+#endif
                 ( ( l_pfet_stat & HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] ) == l_expected_mask ) )
             {
                 break;
@@ -228,7 +230,10 @@ p10_hcd_corecache_power_control(
 
             FAPI_DBG("PFETSTAT %x actual_mask %x", l_pfet_stat, HCD_PFET_ACTUAL_MASKS[l_isVCS]);
 
-            if( ( !l_attr_runn_mode ) &&
+            if(
+#ifdef USE_RUNN
+                ( !l_attr_runn_mode ) &&
+#endif
                 ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == l_expected_mask ) )
             {
                 // Introduce 100ns delay before doing next scom
@@ -239,7 +244,7 @@ p10_hcd_corecache_power_control(
 #endif
 
             // Debug read
-            FAPI_TRY( HCD_GETMMIO_S( i_target, HCD_CPMS_PFETCNTL[l_isL3], l_scomData ) );
+            //FAPI_TRY( HCD_GETMMIO_S( i_target, HCD_CPMS_PFETCNTL[l_isL3], l_scomData ) );
 
             fapi2::delay(HCD_CORECACHE_POW_CTRL_POLL_DELAY_HW_NS,
                          HCD_CORECACHE_POW_CTRL_POLL_DELAY_SIM_CYCLE);
@@ -248,20 +253,21 @@ p10_hcd_corecache_power_control(
 
         if( l_isVCS == 0 || l_isL3 == 1 )
         {
-            FAPI_ASSERT( ( l_attr_runn_mode ?
+            HCD_ASSERT( (
+#ifdef USE_RUNN
+                            l_attr_runn_mode ?
 #if defined(POWER10_DD_LEVEL) && POWER10_DD_LEVEL != 10
-                           ( ( l_pfet_stat & HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] ) == l_expected_mask ) : (l_timeout != 0) ),
+                            ( ( l_pfet_stat & HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] ) == l_expected_mask ) :
 #else
-                           ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == l_expected_mask ) :  (l_timeout != 0) ),
+                            ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == l_expected_mask ) :
 #endif
-                         fapi2::CORECACHE_POW_CTRL_TIMEOUT()
-                         .set_POW_CTRL_POLL_TIMEOUT_HW_NS(HCD_CORECACHE_POW_CTRL_POLL_TIMEOUT_HW_NS)
-                         .set_PFET_SENSES(l_pfet_stat)
-                         .set_POW_COMMAND(l_isON)
-                         .set_POW_HEADERS(l_isVCS)
-                         .set_POW_DOMAINS(l_isL3)
-                         .set_CORE_TARGET(i_target),
-                         "ERROR: Core/Cache PFET Control Timeout");
+#endif
+                            (l_timeout != 0) ),
+                        CORECACHE_POW_CTRL_TIMEOUT,
+                        set_POW_COMMAND, i_command,
+                        set_PFET_SENSES, l_pfet_stat,
+                        set_CORE_TARGET, i_target,
+                        "ERROR: Core/Cache PFET Control Timeout");
 
         }
 
@@ -270,11 +276,11 @@ p10_hcd_corecache_power_control(
         FAPI_TRY( HCD_PUTMMIO_S( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], SCOM_LOAD32H( HCD_PFET_SEQ_STATES[1][l_isVCS] ) ) );
 
         // Debug read
-        FAPI_DBG("Check PFET Sequencer State via PFETCNTL[0,1/2,3]");
-        FAPI_TRY( HCD_GETMMIO_S( i_target, HCD_CPMS_PFETCNTL[l_isL3], l_scomData ) );
+        //FAPI_DBG("Check PFET Sequencer State via PFETCNTL[0,1/2,3]");
+        //FAPI_TRY( HCD_GETMMIO_S( i_target, HCD_CPMS_PFETCNTL[l_isL3], l_scomData ) );
 
-        SCOM_EXTRACT(0, 4, l_pfet_seq_states);
-        FAPI_DBG("Current PFET Sequencer State is %x, clear value is %x", l_pfet_seq_states, HCD_PFET_SEQ_STATES[1][l_isVCS]);
+        //SCOM_EXTRACT(0, 4, l_pfet_seq_states);
+        //FAPI_DBG("Current PFET Sequencer State is %x, clear value is %x", l_pfet_seq_states, HCD_PFET_SEQ_STATES[1][l_isVCS]);
 
         if (l_isL3 == 2) // if MMA only perform VDD
         {

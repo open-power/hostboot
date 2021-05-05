@@ -40,6 +40,46 @@
 
 #ifndef __PPE_QME
 
+#define HCD_ASSERT(__conditional__, RCODE, NAME0, DATA0, NAME1, DATA1, NAME2, DATA2, ...) \
+    FAPI_ASSERT(__conditional__,                                                          \
+                fapi2::RCODE().NAME0(DATA0).NAME1(DATA1).NAME2(DATA2),                    \
+                __VA_ARGS__)
+
+#else
+
+#include "iota_panic_codes.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "qme_record.h"
+extern QmeRecord G_qme_record;
+void qme_errlog();
+
+#ifdef __cplusplus
+}
+#endif
+
+// not taking DATA0, but use the slot for the fapi rc code
+// so FW knows which error in xml this is after qme errlog
+// DATA0 will be not critical data on purpose for this reason
+
+#define HCD_ASSERT(__conditional__, RCODE, NAME0, DATA0, NAME1, DATA1, NAME2, DATA2, ...) \
+    if (! (__conditional__))                                                              \
+    {                                                                                     \
+        G_qme_record.errl_panic = RCODE;                                                  \
+        G_qme_record.errl_data0 = fapi2::RC_##RCODE;                                      \
+        G_qme_record.errl_data1 = DATA1;                                                  \
+        G_qme_record.errl_data2 = DATA2.getCoreSelect();                                  \
+        FAPI_ERR(__VA_ARGS__);                                                            \
+        qme_errlog();                                                                     \
+    }
+#endif
+
+
+#ifndef __PPE_QME
+
     #define CPMS_MMAR_WO_OR              CPMS_MMAR_SCOM2
 
     #define CPMS_FDCR_WO_CLEAR           CPMS_FDCR_SCOM1

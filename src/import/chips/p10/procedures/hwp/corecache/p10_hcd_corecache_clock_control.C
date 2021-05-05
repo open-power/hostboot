@@ -118,14 +118,28 @@ p10_hcd_corecache_clock_control(
     }
     while( (--l_timeout) != 0 );
 
+#ifdef __PPE_QME
+    fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > l_chip =
+        i_target.getParent< fapi2::TARGET_TYPE_PROC_CHIP >();
+    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST >
+    l_target = l_chip.getMulticast<fapi2::MULTICAST_AND>(fapi2::MCGROUP_GOOD_EQ,
+               static_cast<fapi2::MulticastCoreSelect>(i_regions));
+    HCD_ASSERT((l_timeout != 0),
+               CORECACHE_CLK_CTRL_TIMEOUT,
+               set_CLK_COMMAND, i_command,
+               set_CPLT_STAT0, l_scomData,
+               set_CORE_TARGET, l_target,
+               "ERROR: Core/Cache Clock Control Timeout");
+#else
     FAPI_ASSERT((l_timeout != 0),
                 fapi2::CORECACHE_CLK_CTRL_TIMEOUT()
                 .set_CLK_CTRL_POLL_TIMEOUT_HW_NS(HCD_CORECACHE_CLK_CTRL_POLL_TIMEOUT_HW_NS)
-                .set_CPLT_STAT0(l_scomData)
                 .set_CLK_COMMAND(i_command)
+                .set_CPLT_STAT0(l_scomData)
                 .set_CLK_REGIONS(i_regions)
                 .set_QUAD_TARGET(i_target),
                 "ERROR: Core/Cache Clock Control Timeout");
+#endif
 
 #ifndef EQ_CLOCK_STAT_DISABLE
     // IF clocks are stopped, check for stat bits ON, use MC_AND target

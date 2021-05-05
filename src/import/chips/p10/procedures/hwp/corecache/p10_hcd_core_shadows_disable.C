@@ -130,12 +130,12 @@ p10_hcd_core_shadows_disable(
         }
         while( (--l_timeout) != 0 );
 
-        FAPI_ASSERT((l_timeout != 0),
-                    fapi2::SHADOW_DIS_FDCR_UPDATE_IN_PROG_TIMEOUT()
-                    .set_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS)
-                    .set_CPMS_CUCR(l_scomData)
-                    .set_CORE_TARGET(i_target),
-                    "ERROR: FDCR Update Timeout");
+        HCD_ASSERT((l_timeout != 0),
+                   SHADOW_DIS_FDCR_UPDATE_IN_PROG_TIMEOUT,
+                   set_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS, HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS,
+                   set_CPMS_CUCR, l_scomData,
+                   set_CORE_TARGET, i_target,
+                   "ERROR: FDCR Update Timeout");
     }
 
     FAPI_DBG("Disable CORE_SHADOW via CUCR[0]");
@@ -162,12 +162,12 @@ p10_hcd_core_shadows_disable(
     }
     while( (--l_timeout) != 0 );
 
-    FAPI_ASSERT((l_timeout != 0),
-                fapi2::SHADOW_DIS_CORE_SHADOW_STATE_TIMEOUT()
-                .set_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS)
-                .set_CPMS_CUCR(l_scomData)
-                .set_CORE_TARGET(i_target),
-                "ERROR: Shadow Disable FTC/PP/DPT Shadow State Timeout");
+    HCD_ASSERT((l_timeout != 0),
+               SHADOW_DIS_CORE_SHADOW_STATE_TIMEOUT,
+               set_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS, HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS,
+               set_CPMS_CUCR, l_shadow_states,
+               set_CORE_TARGET, i_target,
+               "ERROR: Shadow Disable FTC/PP/DPT Shadow State Timeout");
 
     FAPI_DBG("Assert CTFS_WKUP_ENABLE via PCR_SCSR[27]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_OR, MMIO_1BIT(27) ) );

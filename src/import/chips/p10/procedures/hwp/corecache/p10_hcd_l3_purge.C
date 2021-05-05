@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,12 +106,12 @@ p10_hcd_l3_purge(
     }
     while( (--l_timeout) != 0 );
 
-    FAPI_ASSERT((l_timeout != 0),
-                fapi2::L3_PURGE_DONE_TIMEOUT()
-                .set_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS(HCD_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS)
-                .set_PM_PURGE_REG(l_scomData)
-                .set_CORE_TARGET(i_target),
-                "ERROR: L3 Purge Done Timeout");
+    HCD_ASSERT((l_timeout != 0),
+               L3_PURGE_DONE_TIMEOUT,
+               set_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS, HCD_L3_PURGE_DONE_POLL_TIMEOUT_HW_NS,
+               set_PM_PURGE_REG, l_scomData,
+               set_CORE_TARGET, i_target,
+               "ERROR: L3 Purge Done Timeout");
 
 fapi_try_exit:
 

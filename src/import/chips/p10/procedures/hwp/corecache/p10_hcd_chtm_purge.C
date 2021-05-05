@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,12 +107,12 @@ p10_hcd_chtm_purge(
     }
     while( (--l_timeout) != 0 );
 
-    FAPI_ASSERT((l_timeout != 0),
-                fapi2::CHTM_PURGE_DONE_TIMEOUT()
-                .set_CHTM_PURGE_DONE_POLL_TIMEOUT_HW_NS(HCD_CHTM_PURGE_DONE_POLL_TIMEOUT_HW_NS)
-                .set_QME_SCSR(l_mmioData)
-                .set_CORE_TARGET(i_target),
-                "ERROR: CHTM Purge Done Timeout");
+    HCD_ASSERT((l_timeout != 0),
+               CHTM_PURGE_DONE_TIMEOUT,
+               set_CHTM_PURGE_DONE_POLL_TIMEOUT_HW_NS, HCD_CHTM_PURGE_DONE_POLL_TIMEOUT_HW_NS,
+               set_QME_SCSR, l_mmioData,
+               set_CORE_TARGET, i_target,
+               "ERROR: CHTM Purge Done Timeout");
 
     FAPI_DBG("Drop CHTM_PURGE_REQ via PCR_SCSR[11]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_CLEAR, MMIO_LOAD32H( BIT32(11) ) ) );

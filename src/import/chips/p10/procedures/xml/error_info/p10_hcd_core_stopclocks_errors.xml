@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -33,7 +33,6 @@
     </description>
     <ffdc>CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS</ffdc>
     <ffdc>CORE_CHANGE_DONE</ffdc>
-    <ffdc>CORE_SELECT</ffdc>
     <ffdc>CORE_TARGET</ffdc>
     <callout>
       <childTargets>

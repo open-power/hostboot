@@ -93,9 +93,11 @@ p10_hcd_core_stopgrid(
     uint32_t                l_regions  = i_target.getCoreSelect();
     uint8_t                 l_attr_mma_poweroff_disable = 0;
     fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_SYSTEM_MMA_POWEROFF_DISABLE, l_sys, l_attr_mma_poweroff_disable ) );
+#ifdef USE_RUNN
     fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
-    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_SYSTEM_MMA_POWEROFF_DISABLE, l_sys, l_attr_mma_poweroff_disable ) );
+#endif
 
     FAPI_INF(">>p10_hcd_core_stopgrid");
 
@@ -123,7 +125,10 @@ p10_hcd_core_stopgrid(
         FAPI_TRY( HCD_GETMMIO_S( i_target, CPMS_CGCSR, l_scomData ) );
 
         // use multicastOR to check 0
-        if( ( !l_attr_runn_mode ) &&
+        if(
+#ifdef USE_RUNN
+            ( !l_attr_runn_mode ) &&
+#endif
             ( SCOM_GET(33) == 0 ) )
         {
             break;
@@ -134,12 +139,16 @@ p10_hcd_core_stopgrid(
     }
     while( (--l_timeout) != 0 );
 
-    FAPI_ASSERT( ( l_attr_runn_mode ? ( SCOM_GET(33) == 0 ) : (l_timeout != 0) ),
-                 fapi2::ECL2_CLK_SYNC_DROP_TIMEOUT()
-                 .set_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS(HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS)
-                 .set_CPMS_CGCSR(l_scomData)
-                 .set_CORE_TARGET(i_target),
-                 "ERROR: ECL2 Clock Sync Drop Timeout");
+    HCD_ASSERT( (
+#ifdef USE_RUNN
+                    l_attr_runn_mode ? ( SCOM_GET(33) == 0 ) :
+#endif
+                    (l_timeout != 0) ),
+                ECL2_CLK_SYNC_DROP_TIMEOUT,
+                set_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS, HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS,
+                set_CPMS_CGCSR, l_scomData,
+                set_CORE_TARGET, i_target,
+                "ERROR: ECL2 Clock Sync Drop Timeout");
 
     FAPI_DBG("Assert CORE_OFF_REQ[0:3] of Resonent Clocking via RCSCR[0:3]");
     FAPI_TRY( HCD_PUTMMIO_Q( eq_target, QME_RCSCR_WO_OR, MMIO_LOAD32H( ( l_regions << SHIFT32(3) ) ) ) );
@@ -154,7 +163,10 @@ p10_hcd_core_stopgrid(
 
         MMIO_EXTRACT(4, 4, l_core_change_done);
 
-        if( ( !l_attr_runn_mode ) &&
+        if(
+#ifdef USE_RUNN
+            ( !l_attr_runn_mode ) &&
+#endif
             ( (l_core_change_done & l_regions) == l_regions) )
         {
             break;
@@ -165,13 +177,16 @@ p10_hcd_core_stopgrid(
     }
     while( (--l_timeout) != 0 );
 
-    FAPI_ASSERT( ( l_attr_runn_mode ? ((l_core_change_done & l_regions) == l_regions) : (l_timeout != 0)),
-                 fapi2::CORE_CHANGE_DONE_RESCLK_ENTRY_TIMEOUT()
-                 .set_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS(HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS)
-                 .set_CORE_CHANGE_DONE(l_core_change_done)
-                 .set_CORE_SELECT(l_regions)
-                 .set_CORE_TARGET(i_target),
-                 "ERROR: Core Resclk Change Done Entry Timeout");
+    HCD_ASSERT( (
+#ifdef USE_RUNN
+                    l_attr_runn_mode ? ((l_core_change_done & l_regions) == l_regions) :
+#endif
+                    (l_timeout != 0) ),
+                CORE_CHANGE_DONE_RESCLK_ENTRY_TIMEOUT,
+                set_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS, HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS,
+                set_CORE_CHANGE_DONE, l_core_change_done,
+                set_CORE_TARGET, i_target,
+                "ERROR: Core Resclk Change Done Entry Timeout");
 
     FAPI_DBG("Switch glsmux to refclk to save clock grid power via CPMS_CGCSR[11]");
     FAPI_TRY( HCD_PUTMMIO_S( i_target, CPMS_CGCSR_WO_CLEAR, BIT64(11) ) );
