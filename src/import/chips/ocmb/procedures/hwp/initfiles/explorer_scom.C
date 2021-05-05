@@ -157,14 +157,34 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_Type l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM, TGT1,
                                l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM));
-        uint64_t l_def_NUM_MRANKS_1 = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1] == literal_0x0) |
-                                       l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1]);
-        fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_Type l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM, TGT1, l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM));
-        uint64_t l_def_NUM_SRANKS_1 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] / l_def_NUM_MRANKS_1);
         uint64_t l_def_NUM_MRANKS_0 = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] == literal_0x0) |
                                        l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0]);
+        fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_Type l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM, TGT1, l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM));
         uint64_t l_def_NUM_SRANKS_0 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] / l_def_NUM_MRANKS_0);
+        fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_Type l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, TGT0,
+                               l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE));
+        fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_Type l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, TGT0, l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE));
+        fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE_Type l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE, TGT0,
+                               l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE));
+        fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE_Type l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE, TGT0, l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE));
+        uint64_t l_def_enterprise_mode = ((l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE == literal_1)
+                                          && (l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE == literal_0));
+        uint64_t l_def_half_dimm_mode = ((l_def_enterprise_mode == literal_1)
+                                         && (((l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE == literal_1) && (l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE != literal_1))
+                                             || ((l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE == literal_0)
+                                                     && (l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE == literal_2))));
+        uint64_t l_def_NUM_MRANKS_SLOT1 = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1] == literal_0x0) |
+                                           l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1]);
+        uint64_t l_def_NUM_SRANKS_SLOT1 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] / l_def_NUM_MRANKS_SLOT1);
+        uint64_t l_def_NUM_SRANKS_1 = (((l_def_half_dimm_mode == literal_0) * l_def_NUM_SRANKS_SLOT1) +
+                                       (l_def_half_dimm_mode * l_def_NUM_SRANKS_0));
+        uint64_t l_def_NUM_MRANKS_1 = (((l_def_half_dimm_mode == literal_0) * l_def_NUM_MRANKS_SLOT1) +
+                                       (l_def_half_dimm_mode * l_def_NUM_MRANKS_0));
         fapi2::ATTR_MSS_MRW_DRAM_2N_MODE_Type l_TGT2_ATTR_MSS_MRW_DRAM_2N_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DRAM_2N_MODE, TGT2, l_TGT2_ATTR_MSS_MRW_DRAM_2N_MODE));
         fapi2::ATTR_MEM_2N_MODE_Type l_TGT0_ATTR_MEM_2N_MODE;
@@ -198,8 +218,9 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                                           && (l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] == literal_0x4));
         fapi2::ATTR_MEM_SI_ODT_WR_Type l_TGT1_ATTR_MEM_SI_ODT_WR;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_WR, TGT1, l_TGT1_ATTR_MEM_SI_ODT_WR));
-        uint64_t l_def_NUM_RANKS = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] +
-                                    l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1]);
+        uint64_t l_def_NUM_RANKS = ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] +
+                                     l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1]) + (l_def_half_dimm_mode *
+                                             l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0]));
         uint64_t l_def_NUM_RANKS_DENOMINATOR = ((l_def_NUM_RANKS == literal_0x0) | l_def_NUM_RANKS);
         fapi2::ATTR_MEM_EFF_DRAM_TREFI_Type l_TGT1_ATTR_MEM_EFF_DRAM_TREFI;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TREFI, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TREFI));
@@ -209,42 +230,30 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRFC_DLR;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRFC_DLR));
         uint64_t l_def_REFR_CHECK_INTERVAL = (((l_def_REFRESH_INTERVAL * l_def_NUM_RANKS) * literal_6) / literal_5);
-        fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_Type l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, TGT0,
-                               l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE));
-        fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_Type l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, TGT0, l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE));
-        fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE_Type l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE, TGT0,
-                               l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE));
-        fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE_Type l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE, TGT0, l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE));
-        uint64_t l_def_enterprise_mode = ((l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE == literal_1)
-                                          && (l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE == literal_1));
-        uint64_t l_def_half_dimm_mode = ((l_def_enterprise_mode == literal_1)
-                                         && (((l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE == literal_1) && (l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE != literal_1))
-                                             || ((l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE == literal_0)
-                                                     && (l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE == literal_2))));
         uint64_t l_def_s0_val_0 = (l_def_NUM_SRANKS_0 > literal_4);
         uint64_t l_def_s1_val_0 = (l_def_NUM_SRANKS_0 >= literal_4);
         uint64_t l_def_s2_val_0 = (l_def_NUM_SRANKS_0 >= literal_2);
-        uint64_t l_def_s0_val_1 = (l_def_NUM_SRANKS_1 > literal_4);
-        uint64_t l_def_s1_val_1 = (l_def_NUM_SRANKS_1 >= literal_4);
-        uint64_t l_def_s2_val_1 = (l_def_NUM_SRANKS_1 >= literal_2);
+        uint64_t l_def_s0_val_1 = ((l_def_NUM_SRANKS_1 > literal_4) || (l_def_half_dimm_mode && l_def_s0_val_0));
+        uint64_t l_def_s1_val_1 = ((l_def_NUM_SRANKS_1 >= literal_4) || (l_def_half_dimm_mode && l_def_s1_val_0));
+        uint64_t l_def_s2_val_1 = ((l_def_NUM_SRANKS_1 >= literal_2) || (l_def_half_dimm_mode && l_def_s2_val_0));
         fapi2::ATTR_MEM_EFF_DRAM_ROW_BITS_Type l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_ROW_BITS, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS));
         uint64_t l_def_row_bit15_val_0 = (l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_0] >= literal_16);
-        uint64_t l_def_row_bit15_val_1 = (l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_1] >= literal_16);
+        uint64_t l_def_row_bit15_val_1 = ((l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_1] >= literal_16) || (l_def_half_dimm_mode
+                                          && l_def_row_bit15_val_0));
         uint64_t l_def_row_bit16_val_0 = (l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_0] >= literal_17);
-        uint64_t l_def_row_bit16_val_1 = (l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_1] >= literal_17);
+        uint64_t l_def_row_bit16_val_1 = ((l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_1] >= literal_17) || (l_def_half_dimm_mode
+                                          && l_def_row_bit16_val_0));
         uint64_t l_def_row_bit17_val_0 = (l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_0] >= literal_18);
-        uint64_t l_def_row_bit17_val_1 = (l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_1] >= literal_18);
+        uint64_t l_def_row_bit17_val_1 = ((l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_1] >= literal_18) || (l_def_half_dimm_mode
+                                          && l_def_row_bit17_val_0));
         uint64_t l_def_slot_val_0 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] > literal_0);
-        uint64_t l_def_slot_val_1 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] > literal_0);
+        uint64_t l_def_slot_val_1 = ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] > literal_0)
+                                     || l_def_half_dimm_mode);
         uint64_t l_def_m0_val_0 = (l_def_NUM_MRANKS_0 > literal_2);
         uint64_t l_def_m1_val_0 = (l_def_NUM_MRANKS_0 >= literal_2);
-        uint64_t l_def_m0_val_1 = (l_def_NUM_MRANKS_1 > literal_2);
-        uint64_t l_def_m1_val_1 = (l_def_NUM_MRANKS_1 >= literal_2);
+        uint64_t l_def_m0_val_1 = ((l_def_NUM_MRANKS_1 > literal_2) || (l_def_half_dimm_mode && l_def_m0_val_0));
+        uint64_t l_def_m1_val_1 = ((l_def_NUM_MRANKS_1 >= literal_2) || (l_def_half_dimm_mode && l_def_m1_val_0));
         uint64_t l_def_num_of_bitvals_0 = (((((((l_def_row_bit17_val_0 + l_def_row_bit16_val_0) + l_def_row_bit15_val_0) +
                                                l_def_m0_val_0) + l_def_m1_val_0) + l_def_s0_val_0) + l_def_s1_val_0) + l_def_s2_val_0);
         uint64_t l_def_num_of_bitvals_1 = (((((((l_def_row_bit17_val_1 + l_def_row_bit16_val_1) + l_def_row_bit15_val_1) +
@@ -655,98 +664,146 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             l_scom_buffer.insert<1, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_6) );
             l_scom_buffer.insert<2, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_3) &
                     literal_0b1) && (l_def_cs_tied == literal_0))
-                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<3, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_2) &
                     literal_0b1) && (l_def_cs_tied == literal_0))
-                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<4, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_7) );
             l_scom_buffer.insert<5, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_6) );
             l_scom_buffer.insert<6, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_3) &
                     literal_0b1) && (l_def_cs_tied == literal_0))
-                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<7, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_2) &
                     literal_0b1) && (l_def_cs_tied == literal_0))
-                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<8, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_7) );
             l_scom_buffer.insert<9, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_6) );
             l_scom_buffer.insert<10, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_3)
-                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_7)
-                            && (l_def_encoded_quad_cs == literal_1))) );
+                    && (l_def_encoded_quad_cs == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<11, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_2)
-                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_6)
-                            && (l_def_encoded_quad_cs == literal_1))) );
+                    && (l_def_encoded_quad_cs == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<12, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_7) );
             l_scom_buffer.insert<13, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_6) );
             l_scom_buffer.insert<14, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_3)
-                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_7)
-                            && (l_def_encoded_quad_cs == literal_1))) );
+                    && (l_def_encoded_quad_cs == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<15, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_2)
-                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_6)
-                            && (l_def_encoded_quad_cs == literal_1))) );
+                    && (l_def_encoded_quad_cs == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<16, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_0] >> literal_7) );
             l_scom_buffer.insert<17, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_0] >> literal_6) );
-            l_scom_buffer.insert<18, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_0] >> literal_3) );
-            l_scom_buffer.insert<19, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_0] >> literal_2) );
+            l_scom_buffer.insert<18, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_0] >> literal_3)
+                    && (l_def_half_dimm_mode == literal_0))
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_1))) );
+            l_scom_buffer.insert<19, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_0] >> literal_2)
+                    && (l_def_half_dimm_mode == literal_0))
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_1))) );
             l_scom_buffer.insert<20, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_1] >> literal_7) );
             l_scom_buffer.insert<21, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_1] >> literal_6) );
-            l_scom_buffer.insert<22, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_1] >> literal_3) );
-            l_scom_buffer.insert<23, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_1] >> literal_2) );
+            l_scom_buffer.insert<22, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_1] >> literal_3)
+                    && (l_def_half_dimm_mode == literal_0))
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_1))) );
+            l_scom_buffer.insert<23, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_1] >> literal_2)
+                    && (l_def_half_dimm_mode == literal_0))
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_1))) );
             l_scom_buffer.insert<24, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_2] >> literal_7) );
             l_scom_buffer.insert<25, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_2] >> literal_6) );
-            l_scom_buffer.insert<26, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_2] >> literal_3) );
-            l_scom_buffer.insert<27, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_2] >> literal_2) );
+            l_scom_buffer.insert<26, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_2] >> literal_3)
+                    && (l_def_half_dimm_mode == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_1))) );
+            l_scom_buffer.insert<27, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_2] >> literal_2)
+                    && (l_def_half_dimm_mode == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_1))) );
             l_scom_buffer.insert<28, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_3] >> literal_7) );
             l_scom_buffer.insert<29, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_3] >> literal_6) );
-            l_scom_buffer.insert<30, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_3] >> literal_3) );
-            l_scom_buffer.insert<31, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_3] >> literal_2) );
+            l_scom_buffer.insert<30, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_3] >> literal_3)
+                    && (l_def_half_dimm_mode == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_1))) );
+            l_scom_buffer.insert<31, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_3] >> literal_2)
+                    && (l_def_half_dimm_mode == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_3] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_1))) );
             l_scom_buffer.insert<32, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_7) );
             l_scom_buffer.insert<33, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_6) );
             l_scom_buffer.insert<34, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_3) &
                     literal_0b1) && (l_def_cs_tied == literal_0))
-                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<35, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_2) &
                     literal_0b1) && (l_def_cs_tied == literal_0))
-                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<36, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_7) );
             l_scom_buffer.insert<37, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_6) );
             l_scom_buffer.insert<38, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_3) &
                     literal_0b1) && (l_def_cs_tied == literal_0))
-                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<39, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_2) &
                     literal_0b1) && (l_def_cs_tied == literal_0))
-                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<40, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_7) );
             l_scom_buffer.insert<41, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_6) );
             l_scom_buffer.insert<42, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_3)
-                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_7)
-                            && (l_def_encoded_quad_cs == literal_1))) );
+                    && (l_def_encoded_quad_cs == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<43, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_2)
-                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_6)
-                            && (l_def_encoded_quad_cs == literal_1))) );
+                    && (l_def_encoded_quad_cs == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<44, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_7) );
             l_scom_buffer.insert<45, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_6) );
             l_scom_buffer.insert<46, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_3)
-                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_7)
-                            && (l_def_encoded_quad_cs == literal_1))) );
+                    && (l_def_encoded_quad_cs == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<47, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_2)
-                    && (l_def_encoded_quad_cs == literal_0)) || ((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_6)
-                            && (l_def_encoded_quad_cs == literal_1))) );
+                    && (l_def_encoded_quad_cs == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_0))) );
             l_scom_buffer.insert<48, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_0] >> literal_7) );
             l_scom_buffer.insert<49, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_0] >> literal_6) );
-            l_scom_buffer.insert<50, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_0] >> literal_3) );
-            l_scom_buffer.insert<51, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_0] >> literal_2) );
+            l_scom_buffer.insert<50, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_0] >> literal_3)
+                    && (l_def_half_dimm_mode == literal_0))
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_1))) );
+            l_scom_buffer.insert<51, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_0] >> literal_2)
+                    && (l_def_half_dimm_mode == literal_0))
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_1))) );
             l_scom_buffer.insert<52, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_1] >> literal_7) );
             l_scom_buffer.insert<53, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_1] >> literal_6) );
-            l_scom_buffer.insert<54, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_1] >> literal_3) );
-            l_scom_buffer.insert<55, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_1] >> literal_2) );
+            l_scom_buffer.insert<54, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_1] >> literal_3)
+                    && (l_def_half_dimm_mode == literal_0))
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_1))) );
+            l_scom_buffer.insert<55, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_1] >> literal_2)
+                    && (l_def_half_dimm_mode == literal_0))
+                    || ((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))
+                        && (l_def_half_dimm_mode == literal_1))) );
             l_scom_buffer.insert<56, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_2] >> literal_7) );
             l_scom_buffer.insert<57, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_2] >> literal_6) );
-            l_scom_buffer.insert<58, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_2] >> literal_3) );
-            l_scom_buffer.insert<59, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_2] >> literal_2) );
+            l_scom_buffer.insert<58, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_2] >> literal_3)
+                    && (l_def_half_dimm_mode == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_1))) );
+            l_scom_buffer.insert<59, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_2] >> literal_2)
+                    && (l_def_half_dimm_mode == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_1))) );
             l_scom_buffer.insert<60, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_3] >> literal_7) );
             l_scom_buffer.insert<61, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_3] >> literal_6) );
-            l_scom_buffer.insert<62, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_3] >> literal_3) );
-            l_scom_buffer.insert<63, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_3] >> literal_2) );
+            l_scom_buffer.insert<62, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_3] >> literal_3)
+                    && (l_def_half_dimm_mode == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_7)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_1))) );
+            l_scom_buffer.insert<63, 1, 63, uint64_t>((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_1][literal_3] >> literal_2)
+                    && (l_def_half_dimm_mode == literal_0)) || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_3] >> literal_6)
+                            && (l_def_encoded_quad_cs == literal_1)) && (l_def_half_dimm_mode == literal_1))) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011417ull, l_scom_buffer));
         }
         {
