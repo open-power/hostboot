@@ -982,6 +982,10 @@
         <id>ATTR_CORE_LPAR_MODE_POLICY</id>
         <no_export/>
     </attribute> 
+    <attribute>
+        <id>ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT</id>
+        <writeable/>
+    </attribute>
 
     <!-- =====================================================================
      End of customizations definitions
