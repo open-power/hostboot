@@ -169,7 +169,7 @@ enum BlockPriority
  *     reservation order impact MPIPL (see copyArchitectedRegs()).
  */
 #define VMM_ARCH_REG_DATA_START_OFFSET VMM_OCC_COMMON_END_OFFSET
-#define VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB 256
+#define VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB 384
 #define VMM_ARCH_REG_DATA_PER_PROC_SIZE \
  ( VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB*KILOBYTE )
 
