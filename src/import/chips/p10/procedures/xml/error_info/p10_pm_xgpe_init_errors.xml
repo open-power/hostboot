@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -158,4 +158,45 @@
 
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_SUSPEND_XGPE_FAILS</rc>
+    <description>
+     XGPE failed to suspend power management
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>OCCFLG3_DATA</ffdc>
+    <ffdc>GPE3XIDBGPRO</ffdc>
+    <ffdc>GPE3XIRAMDBG</ffdc>
+    <ffdc>GPE3XIRAMEDR</ffdc>
+    <ffdc>GPE3XISRR0</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_PGPE_SAFE_MODE_FAILS</rc>
+    <description>
+     PGPE fails to put the system to safe freq/volt
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>OCCFLG2_DATA</ffdc>
+    <ffdc>GPE2XIDBGPRO</ffdc>
+    <ffdc>GPE2XIRAMDBG</ffdc>
+    <ffdc>GPE2XIRAMEDR</ffdc>
+    <ffdc>GPE2XISRR0</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 </hwpErrors>
