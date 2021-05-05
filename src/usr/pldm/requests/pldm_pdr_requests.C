@@ -477,13 +477,13 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
         {
             const int rc
                 = encode_sensor_event_data(event_data,
-                                                event_data_bytes.size(),
-                                                i_sensor_id,
-                                                PLDM_STATE_SENSOR_STATE,
-                                                i_sensor_offset,
-                                                i_sensor_state,
-                                                i_sensor_state,
-                                                &actual_event_data_size);
+                                           event_data_bytes.size(),
+                                           i_sensor_id,
+                                           PLDM_STATE_SENSOR_STATE,
+                                           i_sensor_offset,
+                                           i_sensor_state,
+                                           i_sensor_state,
+                                           &actual_event_data_size);
 
             assert(rc == PLDM_SUCCESS,
                    "encode_sensor_event_data failed in "

@@ -695,7 +695,8 @@ const state_query_handler_t handlers[] =
 {
     { nullptr, nullptr },                               // STATE_QUERY_HANDLER_NONE
     { handleFunctionalStateSensorGetRequest, nullptr }, // STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR
-    { nullptr, handleOccSetStateEffecterRequest }       // STATE_QUERY_HANDLER_OCC_STATE_EFFECTER
+    { handleOccStateSensorGetRequest,                   // STATE_QUERY_HANDLER_OCC_STATE_QUERY
+      handleOccSetStateEffecterRequest }
 };
 
 state_query_handler_t get_state_handler(PdrManager::state_query_handler_id_t i_id)

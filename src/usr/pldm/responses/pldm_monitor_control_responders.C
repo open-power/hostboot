@@ -343,6 +343,73 @@ errlHndl_t handleFunctionalStateSensorGetRequest(Target* const i_target,
     return errl;
 }
 
+errlHndl_t handleOccStateSensorGetRequest(TARGETING::Target* i_occ,
+                                          const msg_q_t i_msgQ,
+                                          const pldm_msg* const i_msg,
+                                          const size_t i_payload_len,
+                                          const pldm_get_state_sensor_readings_req& i_req)
+{
+    Target* const i_occ_proc = getImmediateParentByAffinity(i_occ);
+
+    PLDM_INF(ENTER_MRK"handleOccStateSensorGetRequest 0x%08x %d",
+             get_huid(i_occ_proc),
+             i_req.sensor_id);
+
+    errlHndl_t errl = nullptr;
+
+    /* Encode and send a PLDM response to the request. */
+
+#ifdef __HOSTBOOT_RUNTIME
+    const sensor_state_t current_state = ( HTMGT::occsAreRunning()
+                                          ? PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE
+                                          : PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_STOPPED);
+
+    get_sensor_state_field sensor_state =
+    {
+        .sensor_op_state = 0,
+        .present_state = current_state,
+        .previous_state = current_state,
+        .event_state = current_state
+    };
+
+    errl =
+        send_pldm_response<PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES>
+        (i_msgQ,
+         encode_get_state_sensor_readings_resp,
+         sizeof(sensor_state),
+         i_msg->hdr.instance_id,
+         PLDM_SUCCESS,
+         1, // sensor count of 1
+         &sensor_state);
+#else
+    // there isn't a need to grab the sensor status during IPL time
+    PLDM_ERR("handleOccStateSensorGetRequest: Unsupported grabbing OCC state "
+        "on PROC HUID = 0x%08x at IPL time", get_huid(i_occ_proc));
+
+    /*@
+     * @errortype  ERRL_SEV_PREDICTIVE
+     * @moduleid   MOD_HANDLE_OCC_STATE_SENSOR_GET_REQUEST
+     * @reasoncode RC_OCC_STATUS_NOT_AVAILABLE
+     * @userdata1  HUID of the PROC with the OCC
+     * @devdesc    Software problem, BMC requested OCC status during IPL
+     * @custdesc   A software error occurred during system boot
+     */
+    errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                         MOD_HANDLE_OCC_STATE_SENSOR_GET_REQUEST,
+                         RC_OCC_STATUS_NOT_AVAILABLE,
+                         get_huid(i_occ_proc),
+                         0,
+                         ErrlEntry::NO_SW_CALLOUT);
+    addBmcErrorCallouts(errl);
+
+    PLDM::send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_NOT_READY);
+#endif
+
+    PLDM_INF(EXIT_MRK"handleOccStateSensorGetRequest");
+
+    return errl;
+}
+
 errlHndl_t handleOccSetStateEffecterRequest(Target* const i_occ,
                                             const msg_q_t i_msgQ,
                                             const pldm_msg* const i_msg,

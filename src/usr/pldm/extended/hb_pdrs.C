@@ -190,13 +190,13 @@ errlHndl_t addOccStateControlPdrs(PdrManager& io_pdrman)
                                       PLDM_STATE_SET_BOOT_RESTART_CAUSE,
                                       (enum_bit(PLDM_STATE_SET_BOOT_RESTART_CAUSE_WARM_RESET)
                                        | enum_bit(PLDM_STATE_SET_BOOT_RESTART_CAUSE_HARD_RESET)),
-                                      PdrManager::STATE_QUERY_HANDLER_OCC_STATE_EFFECTER);
+                                      PdrManager::STATE_QUERY_HANDLER_OCC_STATE_QUERY);
 
         io_pdrman.addStateSensorPdr(target, entity,
                                     PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS,
                                     (enum_bit(PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_STOPPED)
                                      | enum_bit(PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE)),
-                                    PdrManager::STATE_QUERY_HANDLER_NONE);
+                                    PdrManager::STATE_QUERY_HANDLER_OCC_STATE_QUERY);
     }
 
     return errl;

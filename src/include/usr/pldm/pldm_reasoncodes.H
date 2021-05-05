@@ -79,6 +79,7 @@ namespace PLDM
         MOD_GET_LMB_SIZE                             = 0x26, // getLmbSize
         MOD_FIND_TERMINATION_STATUS_ID               = 0x27, // findTerminationStatusEffecterId
         MOD_GET_POWER_LIMIT                          = 0x28, // getPowerLimit
+        MOD_HANDLE_OCC_STATE_SENSOR_GET_REQUEST      = 0x29, // handleOccStateSensorGetRequest
     };
 
     enum PLDMReasonCode
@@ -124,7 +125,8 @@ namespace PLDM
         RC_UNEXPECTED_STRING_SIZE   = PLDM_COMP_ID | 0x27,
         RC_TERM_LOCATOR_NOT_FOUND   = PLDM_COMP_ID | 0x28,
         RC_INVALID_STATE_QUERY_ID   = PLDM_COMP_ID | 0x29,
-        RC_NO_STATE_QUERY_HANDLER   = PLDM_COMP_ID | 0x30,
+        RC_NO_STATE_QUERY_HANDLER   = PLDM_COMP_ID | 0x2A,
+        RC_OCC_STATUS_NOT_AVAILABLE = PLDM_COMP_ID | 0x2B,
     };
 }
 #endif
