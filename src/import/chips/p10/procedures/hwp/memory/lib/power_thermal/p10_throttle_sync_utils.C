@@ -119,7 +119,8 @@ fapi2::ReturnCode setup_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_targe
     using namespace scomt::mc;
 
     fapi2::ATTR_CHIP_EC_FEATURE_THROTTLE_SYNC_HW550549_Type l_ec_workaround = 0;
-    mss::states l_sync_val = mss::states::OFF;
+    mss::states l_disable_mc_sync = mss::states::OFF;
+    const mss::states l_enable_sync_in = i_primary ? mss::states::OFF : mss::states::ON;
     fapi2::buffer<uint64_t> l_scomData;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_THROTTLE_SYNC_HW550549,
@@ -131,8 +132,8 @@ fapi2::ReturnCode setup_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_targe
     // -------------------------------------------------------------------
     // 1. Setup MCMODE0 register
     // -------------------------------------------------------------------
-    l_sync_val = mss::workarounds::mc::get_mc_sync_value(i_primary, l_ec_workaround);
-    FAPI_TRY(configure_sync_operations(i_target, l_sync_val));
+    l_disable_mc_sync = mss::workarounds::mc::get_mc_sync_value(i_primary, l_ec_workaround);
+    FAPI_TRY(configure_sync_operations(i_target, l_disable_mc_sync));
 
     // -------------------------------------------------------------------
     // 2. Setup MCSYNC register. Do not initiate a sync yet!
@@ -142,7 +143,7 @@ fapi2::ReturnCode setup_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_targe
     FAPI_TRY(GET_SCOMFIR_MCSYNC(i_target, l_scomData),
              "Failed GET_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
     CLEAR_SCOMFIR_MCSYNC_SYNC_GO(l_scomData);
-    SET_SCOMFIR_MCSYNC_EN_SYNC_IN(l_sync_val, l_scomData);
+    SET_SCOMFIR_MCSYNC_EN_SYNC_IN(l_enable_sync_in, l_scomData);
     FAPI_TRY(PUT_SCOMFIR_MCSYNC(i_target, l_scomData),
              "Failed PUT_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
 
