@@ -2603,7 +2603,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         //Update pstate for all points
         for (uint32_t i = 0; i < NUM_PV_POINTS; i++)
         {
-            iv_attr_mvpd_poundV_raw[i].pstate = (iv_attr_mvpd_poundV_raw[CF7].frequency_mhz -
+            iv_attr_mvpd_poundV_raw[i].pstate = (iv_reference_frequency_mhz  -
             iv_attr_mvpd_poundV_raw[i].frequency_mhz) * 1000 / (iv_frequency_step_khz);
 
             iv_vddPsavFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddPsavCoreFreq));
@@ -2613,7 +2613,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             iv_vddFmaxFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddFmxCoreFreq));
 
 
-            FAPI_INF("PSTATE %x %x %d PSAV %x WOF %x UT %x Fmax %x",iv_attr_mvpd_poundV_raw[CF7].frequency_mhz,
+            FAPI_INF("PSTATE %x %x %d PSAV %x WOF %x UT %x Fmax %x",iv_reference_frequency_mhz,
                      iv_attr_mvpd_poundV_raw[i].frequency_mhz,iv_attr_mvpd_poundV_raw[i].pstate,
                      iv_vddPsavFreq, iv_vddWofBaseFreq,
                       iv_vddUTFreq, iv_vddFmaxFreq);
