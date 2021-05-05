@@ -38,6 +38,7 @@
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/fir/exp_fir_traits.H>
+#include <lib/fir/exp_fir.H>
 #include <p10_scom_mcc_9.H>
 #include <p10_scom_mcc_b.H>
 #include <p10_scom_omic_3.H>
@@ -158,13 +159,13 @@ fapi2::ReturnCode bad_fir_bits_helper_with_mask(const fapi2::Target<fapi2::TARGE
     FAPI_TRY(fapi2::getScom(i_target, i_fir_reg.first, l_reg_data));
     FAPI_TRY(fapi2::getScom(i_target, i_fir_reg.second, l_mask_data));
 
-    // AND together the input mask with the mask register value so we aren't checking any FIRs
+    // OR together the input mask with the mask register value so we aren't checking any FIRs
     // that are currently masked in hardware
-    o_fir_error = fir_with_mask_helper(l_reg_data, (i_mask & l_mask_data));
+    o_fir_error = fir_with_mask_helper(l_reg_data, (i_mask | l_mask_data));
 
     FAPI_INF("%s %s on reg 0x%016lx value 0x%016lx and mask value 0x%016lx", mss::c_str(i_target),
              o_fir_error ? "has FIR's set" : "has no FIR's set",
-             i_fir_reg.first, l_reg_data, (i_mask & l_mask_data));
+             i_fir_reg.first, l_reg_data, (i_mask | l_mask_data));
 
     // Log the error if need be
     log_fir_helper(i_target, o_fir_error, io_rc);

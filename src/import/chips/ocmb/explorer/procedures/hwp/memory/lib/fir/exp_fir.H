@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,24 @@
 namespace mss
 {
 
-// FIR Register Traits for Explorer will be here sooner or later.
+namespace check
+{
 
-}
+///
+/// @brief Helper for bad_fir_bits to check a fir register/mask pair against a desired mask value
+/// @param[in] i_target - the target on which to operate
+/// @param[in] i_fir_reg - the register/mask pair to compare against mask
+/// @param[in] i_mask - the 64-bit mask that we want to compare the reg against
+/// @param[in,out] io_rc - the return code for the function
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode bad_fir_bits_helper_with_mask(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::pair<uint64_t, uint64_t>& i_fir_reg,
+        const fapi2::buffer<uint64_t>& i_mask,
+        fapi2::ReturnCode& io_rc,
+        bool& o_fir_error);
+
+} // end check ns
+} // end mss ns
 #endif
