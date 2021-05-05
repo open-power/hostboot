@@ -129,6 +129,11 @@ do
             shift
         ;;
 
+        "--src-check")
+            SNIFFER_CHECK=1
+            shift
+        ;;
+
         "--corrupt")
             # Format is "--corrupt <partition[=pro|unpro]>"
             CORRUPT_PARAMS="$CORRUPT_PARAMS $1"
@@ -212,6 +217,47 @@ else
         echo "ERROR: Not in a git repo."
         exit
     fi
+fi
+
+# if requested, pull in RcdlSniffer2Perl and run against all HB_BCxxRcdl files
+if [[ $SNIFFER_CHECK -eq 1 || -n ${PARSE_RCDL_STRICT} ]]; then
+
+    if [[ ! -d "${PROJECT_ROOT}/standalone/pubs-tools" ]];then
+        mkdir -p ${PROJECT_ROOT}/standalone/pubs-tools
+        git clone git@github.ibm.com:open-power/pubs-tools.git ${PROJECT_ROOT}/standalone/pubs-tools
+    fi
+
+    set +e
+
+    # if genfiles dir does not exist and strict parsing is on, fail the prime
+    if [[ ! -d "${PROJECT_ROOT}/obj/genfiles" && -n ${PARSE_RCDL_STRICT} ]]; then
+        echo "PARSE_RCDL_STRICT is set but ${PROJECT_ROOT}/obj/genfiles does not exist"
+        exit -1
+    else
+        echo "Running RcdlSniffer2Perl against all HB_BCxxRcdl_ files"
+        for fname in $(ls ${PROJECT_ROOT}/obj/genfiles/HB_BCxxRcdl_*); do
+
+             ${PROJECT_ROOT}/standalone/pubs-tools/RcdlSniffer2Perl PROFILE=${PROJECT_ROOT}/standalone/pubs-tools/snifferStandardProfile.h $fname 2> ${PROJECT_ROOT}/standalone/pubs-tools/sniffer.log > /dev/null
+             rc=$?
+             # if RcdlSniffer2Perl encounters an error
+             if [[ "$rc" -ne 0 ]]; then
+                 echo "RcdlSniffer2Perl failed with $rc on $fname error msg saved in ${PROJECT_ROOT}/standalone/pubs-tools/sniffer.log"
+                 cat ${PROJECT_ROOT}/standalone/pubs-tools/sniffer.log
+                 # and if PARSE_RCDL_STRICT is set to something other than the empty string
+                 if [[ -n ${PARSE_RCDL_STRICT} ]]; then
+                     # stop the prime
+                     exit -1
+                 else
+                     # otherwise break the loop so duplicate errors from
+                     # different RCDL files aren't displayed to the screen
+                     # and continue prime
+                     break
+                 fi
+             fi
+
+        done
+    fi
+    set -e
 fi
 
 # Point to various signing related path components
