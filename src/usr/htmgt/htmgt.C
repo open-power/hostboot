@@ -1010,4 +1010,8 @@ namespace HTMGT
 
     } // end passThruCommand()
 
+    bool occsAreRunning()
+    {
+        return OccManager::occsAreRunning();
+    }
 }
