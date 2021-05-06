@@ -396,10 +396,29 @@ avsVoltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 const uint32_t i_RailSelect,
                 const uint32_t i_Voltage)
 {
-
     uint32_t l_CmdType     = 0; // write and commit
     uint32_t l_CmdGroup    = 0;
     uint32_t l_CmdDataType = 0;
+
+
+    if (i_Voltage > p10avslib::AVSBUS_MAX_VOLTAGE_MV)
+    {
+        FAPI_ERR("ERROR: A voltage greater than the AVSBUS VRM allow maximum of %4d \
+                  mV was to be attempted to bus %d, rail %d",
+                 p10avslib::AVSBUS_MAX_VOLTAGE_MV,
+                 i_avsBusNum, i_RailSelect);
+
+
+        FAPI_ASSERT(i_Voltage <= p10avslib::AVSBUS_MAX_VOLTAGE_MV,
+                    fapi2::PM_AVSBUS_EXCESSIVE_VOLTAGE_ERROR()
+                    .set_CHIP_TARGET(i_target)
+                    .set_BUS(i_avsBusNum)
+                    .set_RAIL(i_RailSelect)
+                    .set_BRIDGE(i_o2sBridgeNum)
+                    .set_VOLTAGE(i_Voltage),
+                    "A voltage greater than the AVSBUS VRM allow maximum was to be attempted");
+    }
+
 
     // Drive a Write Command
     FAPI_TRY(avsDriveCommand(i_target,

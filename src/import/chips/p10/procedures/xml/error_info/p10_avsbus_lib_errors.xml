@@ -250,4 +250,20 @@
     </callout>
     </hwpError>
     <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_EXCESSIVE_VOLTAGE_ERROR</rc>
+      <description>
+        A voltage higher than the VRM maximum was to be attempted.
+      </description>
+      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>RAIL</ffdc>
+      <ffdc>BRIDGE</ffdc>
+      <ffdc>VOLTAGE</ffdc>
+      <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+      </callout>
+    </hwpError>    
+    <!-- ******************************************************************** -->
 </hwpErrors>

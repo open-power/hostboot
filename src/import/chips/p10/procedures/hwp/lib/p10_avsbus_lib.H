@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,7 +139,8 @@ enum avslibconstants
     AVS_CRC_DATA_MASK = 0xfffffff8,
     O2S_FRAME_SIZE = 0x20,
     O2S_IN_DELAY1 = 0x3F,
-    AVSBUS_FREQUENCY = 0x2710
+    AVSBUS_FREQUENCY = 0x2710,
+    AVSBUS_MAX_VOLTAGE_MV = 1200
 };
 
 // OIMR Mask Values
