@@ -384,7 +384,7 @@ fapi2::ReturnCode p10_fabric_iovalid_lane_validate(
     uint64_t l_lane_not_locked_count = DL_NUM_LANES_PER_HALF_LINK;
     o_bus_failed = false;
 
-    FAPI_DBG("Checking for fail on %s lanes", ((i_even_not_odd) ? ("even") : ("odd")));
+    FAPI_INF("Checking for fail on %s lanes", ((i_even_not_odd) ? ("even") : ("odd")));
 
     if(i_even_not_odd)
     {
@@ -407,7 +407,7 @@ fapi2::ReturnCode p10_fabric_iovalid_lane_validate(
         GET_DLP_LINK1_RX_LANE_CONTROL_LOCKED(l_dl_rx_control, l_lane_not_locked);
     }
 
-    FAPI_DBG("Lane status: lanes failed = 0x%03X, lanes not locked = 0x%03X, lanes enabled = 0x%03X",
+    FAPI_INF("Lane status: lanes failed = 0x%03X, lanes not locked = 0x%03X, lanes enabled = 0x%03X",
              l_lane_failed, l_lane_not_locked, l_lane_enabled);
 
     l_lane_failed &= l_lane_enabled;
@@ -422,7 +422,7 @@ fapi2::ReturnCode p10_fabric_iovalid_lane_validate(
     }
     else
     {
-        FAPI_DBG("Non-zero lane error count: lanes failed = %d, lanes not locked = %d",
+        FAPI_INF("Non-zero lane error count: lanes failed = %d, lanes not locked = %d",
                  l_lane_failed_count, l_lane_not_locked_count);
 
         if ((l_lane_failed_count <= 1) && (l_lane_not_locked_count <= 1))
@@ -524,15 +524,23 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
         fapi2::ATTR_CHIP_UNIT_POS_Type l_loc_iolink_id;
         fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_iolink_target;
 
+        char l_iolink_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+        fapi2::toString(l_loc_iolink_target, l_iolink_targetStr, sizeof(l_iolink_targetStr));
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_loc_iolink_target, l_loc_iolink_id),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
+        FAPI_INF("iolink: %s, unit_pos: %d",
+                 l_iolink_targetStr, l_loc_iolink_id);
+
         if ((l_loc_iolink_id % 2) == 0)
         {
+            FAPI_INF("  set even FFDC");
             l_loc_evn_iolink_target = l_loc_iolink_target;
         }
         else
         {
+            FAPI_INF("  set odd FFDC");
             l_loc_odd_iolink_target = l_loc_iolink_target;
         }
 
@@ -560,6 +568,9 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
              "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_SPLIT)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_loc_endp_target, l_iohs_unit_id),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+    FAPI_INF("iohs: %s link_train: %d, link_split: %d, unit_pos: %d",
+             l_targetStr, l_loc_link_train, l_link_split, l_iohs_unit_id);
 
     // validate DL training state; poll for training completion
     for(uint32_t l_poll_loops = DL_MAX_POLL_LOOPS; l_poll_loops > 0 && !l_dl_trained; l_poll_loops--)
@@ -653,7 +664,7 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
                       )
                      );
 
-                FAPI_DBG("evn fail: %d, timeout_state: 0x%X / odd fail: %d, timeout_state: 0x%X",
+                FAPI_INF("evn fail: %d, timeout_state: 0x%X / odd fail: %d, timeout_state: 0x%X",
                          l_dl_fail_evn ? (1) : (0), l_dl_timeout_state_evn,
                          l_dl_fail_odd ? (1) : (0), l_dl_timeout_state_odd);
             }
@@ -698,7 +709,7 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
     // (hw may also raise an error by setting the training_failed FIR at this point)
     if (l_dl_trained)
     {
-        FAPI_DBG("Checking for DL lane failures");
+        FAPI_INF("Checking for DL lane failures");
 
         bool l_dl_fail_by_lane_status = false;
 
@@ -734,7 +745,7 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
     }
     else
     {
-        FAPI_DBG("Skipping check for DL lane failures");
+        FAPI_INF("Skipping check for DL lane failures");
     }
 
     // Reconfigure link train attribute to attempt retrain
@@ -753,7 +764,7 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
                                     (fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY) :
                                     (fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY);
 
-            FAPI_DBG("Retraining is possible with half-link configuration");
+            FAPI_INF("Retraining is possible with half-link configuration");
         }
         // otherwise, no retraining will be attempted:
         // - tried to train only half-width, and was not successful
@@ -761,10 +772,10 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
         else
         {
             l_loc_link_train_next = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE;
-            FAPI_DBG("Retraining not possible and will not be attempted");
+            FAPI_INF("Retraining not possible and will not be attempted");
         }
 
-        FAPI_DBG("Reconfiguring ATTR_IOHS_LINK_TRAIN from 0x%X -> 0x%X for %s",
+        FAPI_INF("Reconfiguring ATTR_IOHS_LINK_TRAIN from 0x%X -> 0x%X for %s",
                  l_loc_link_train, l_loc_link_train_next, l_targetStr);
 
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_LINK_TRAIN, i_loc_endp_target, l_loc_link_train_next),
@@ -818,7 +829,7 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
     }
 
     // validate TL training state
-    FAPI_DBG("Validating TL training state...");
+    FAPI_INF("Validating TL training state...");
 
     FAPI_TRY(GET_PB_PTL_FIR_REG_RW(l_loc_pauc_target, l_tl_fir_reg),
              "Error from getScom (PB_PTLSCOM10_PTL_FIR_REG_RW)");
