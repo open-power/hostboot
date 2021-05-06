@@ -87,11 +87,10 @@ uint32_t __getRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     // get port select
     uint8_t l_ps = getDimmPort( i_dimm );
 
-    // get mba
-    TargetHandle_t l_mba = getConnectedParent( i_dimm, T );
-    fapi2::Target<F> l_fapiMba( l_mba );
+    TargetHandle_t l_trgt = getConnectedParent( i_dimm, T );
+    fapi2::Target<F> l_fapiTrgt( l_trgt );
 
-    FAPI_INVOKE_HWP( l_errl, getRowRepair, l_fapiMba, i_rank.getDimmSlct(),
+    FAPI_INVOKE_HWP( l_errl, getRowRepair, l_fapiTrgt, i_rank.getDimmSlct(),
                      i_rank.getRankSlct(), l_data, l_ps );
     if ( nullptr != l_errl )
     {
@@ -151,11 +150,10 @@ uint32_t __setRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
         // get port select
         uint8_t l_ps = getDimmPort( i_dimm );
 
-        // get mba
-        TargetHandle_t l_mba = getConnectedParent(i_dimm, T);
-        fapi2::Target<F> l_fapiMba( l_mba );
+        TargetHandle_t l_trgt = getConnectedParent(i_dimm, T);
+        fapi2::Target<F> l_fapiTrgt( l_trgt );
 
-        FAPI_INVOKE_HWP( l_errl, setRowRepair, l_fapiMba, i_rank.getDimmSlct(),
+        FAPI_INVOKE_HWP( l_errl, setRowRepair, l_fapiTrgt, i_rank.getDimmSlct(),
                          i_rank.getRankSlct(), l_data, l_ps );
         if ( nullptr != l_errl )
         {

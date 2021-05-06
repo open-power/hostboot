@@ -206,25 +206,9 @@ uint8_t MemSymbol::getDram() const
 
 //------------------------------------------------------------------------------
 
-uint8_t MemSymbol::getDramRelCenDqs() const
+uint8_t MemSymbol::getDramSpareAdjusted() const
 {
-    // This function will return the DRAM position for this symbol relative
-    // to the Centaur DQs. Mainly this is needed for the DRAM position input
-    // of Row Repair.
-
-    bool isX4 = true;
-    if ( TYPE_OCMB_CHIP == getTargetType(iv_trgt) )
-    {
-        TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
-        isX4 = isDramWidthX4( dimm );
-    }
-    else
-    {
-        isX4 = isDramWidthX4( iv_trgt );
-    }
-
-    uint8_t l_dramWidth = ( isX4 ) ? 4 : 8;
-    uint8_t l_dram = getDq() / l_dramWidth; // (x8: 0-9, x4: 0-19)
+    uint8_t dram = getDram();
 
     // Adjust for spares
     if ( isDramSpared() )
@@ -248,17 +232,16 @@ uint8_t MemSymbol::getDramRelCenDqs() const
         const uint8_t X8_DRAM_SPARE = 9;
         if ( isX4 )
         {
-            l_dram = ( isDramSpared0() ) ? X4_DRAM_SPARE_LOWER
-                                         : X4_DRAM_SPARE_UPPER;
+            dram = ( isDramSpared0() ) ? X4_DRAM_SPARE_LOWER
+                                       : X4_DRAM_SPARE_UPPER;
         }
         else
         {
-            l_dram = X8_DRAM_SPARE;
+            dram = X8_DRAM_SPARE;
         }
     }
 
-    return l_dram;
-
+    return dram;
 }
 
 //------------------------------------------------------------------------------
