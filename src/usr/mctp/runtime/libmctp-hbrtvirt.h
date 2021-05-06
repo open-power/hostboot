@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,9 +48,16 @@ extern "C" {
 #define HOST_EID 9
 #define HBRT_EID 10
 
+// HBRT will use a base max transmission unit of 4 KB - 4
+#define RT_MCTP_BMTU (4092)
+
+// Phyp messages have a header size of 8 bytes to
+// define the type of message.
+#define PHYP_HDR_SIZE (8)
+
 // layout of TX/RX areas
-const uint32_t  rx_size   = MCTP_BMTU;
-const uint32_t  tx_size   = MCTP_BMTU;
+const uint32_t  rx_size   = RT_MCTP_BMTU + PHYP_HDR_SIZE;
+const uint32_t  tx_size   = RT_MCTP_BMTU;
 
 struct mctp_binding_hbrtvirt_ops {
   int (*mctp_send)(uint32_t len, void *val);

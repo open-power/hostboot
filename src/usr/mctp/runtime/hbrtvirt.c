@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,7 @@ static int mctp_binding_hbrtvirt_tx(struct mctp_binding *b,
     {
         struct mctp_binding_hbrtvirt *hbrtvirt = binding_to_hbrtvirt(b);
         uint32_t len = mctp_pktbuf_size(pkt);
-        if (len > MCTP_BMTU - sizeof(len)) {
+        if (len > tx_size) {
             rc = RC_MCTP_INVALID_LENGTH;
             break;
         }
@@ -78,7 +78,7 @@ static int mctp_binding_hbrtvirt_tx(struct mctp_binding *b,
 int mctp_hbrtvirt_rx_start(struct mctp_binding_hbrtvirt * const i_hbrtvirt)
 {
     int rc = 0;
-    uint64_t len = i_hbrtvirt->binding.pkt_size;
+    uint64_t len = rx_size;
     uint8_t *virtual_rx = (uint8_t*)calloc(1, len);
 
     do {
@@ -124,7 +124,7 @@ static struct mctp_binding_hbrtvirt *__mctp_hbrtvirt_init(void)
     hbrtvirt->binding.version = HBRT_VER_CUR;
     hbrtvirt->binding.tx = mctp_binding_hbrtvirt_tx;
     hbrtvirt->binding.start = NULL;
-    hbrtvirt->binding.pkt_size = MCTP_BMTU;
+    hbrtvirt->binding.pkt_size = RT_MCTP_BMTU;
     hbrtvirt->binding.pkt_pad = 0;
     return hbrtvirt;
 }
