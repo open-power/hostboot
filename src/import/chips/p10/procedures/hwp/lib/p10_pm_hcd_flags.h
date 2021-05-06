@@ -144,6 +144,7 @@ enum PM_QME_FLAG_DEFS
     QME_FLAGS_HALT_ON_CHECKSTOP             = 3,
     QME_FLAGS_DEBUG_TRAP_ENABLE             = 4,
     QME_FLAGS_DEBUG_HALT_ENABLE             = 5,
+    QME_FLAGS_RVRM_ENABLE                   = 6,
     QME_FLAGS_TOD_SETUP_COMPLETE            = 8,
     QME_FLAGS_SMF_DISABLE_MODE              = 9,
     QME_FLAGS_RUNTIME_WAKEUP_MODE           = 10,
