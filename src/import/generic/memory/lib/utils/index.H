@@ -31,13 +31,21 @@
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
-// *HWP Consumed by: HB:FSP
+// *HWP Consumed by: HB:FSP:SBE
+// EKB-Mirror-To: hw/ppe
 
 #ifndef _MSS_INDEX_H_
 #define _MSS_INDEX_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+#ifdef __PPE__
+    #include "plat_target.H"
+    #include "mss_generic_consts.H"
+    #include "plat_utils.H"
+#else
+    #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#endif
 
 namespace mss
 {
@@ -51,11 +59,16 @@ namespace mss
 template< fapi2::TargetType T >
 inline size_t index(const fapi2::Target<T>& i_target)
 {
+    uint8_t l_pos = 0;
+
+#ifdef __PPE__
+    STATIC_CHECK(T == fapi2::TARGET_TYPE_GENERICI2CSLAVE,
+                 "index() called for Invalid target type");
+    l_pos = i_target.get().fields.chiplet_num % GI2C_PER_OCMB;
+#else
     // Unrolled c_str to avoid a circular include
     char l_c_str_storage[fapi2::MAX_ECMD_STRING_LEN] = {};
     fapi2::toString( i_target, l_c_str_storage, fapi2::MAX_ECMD_STRING_LEN );
-
-    uint8_t l_pos = 0;
 
     // Don't use FAPI_TRY as you'll mess up fapi2::current_err which
     // lmits where this can be used.
@@ -64,11 +77,17 @@ inline size_t index(const fapi2::Target<T>& i_target)
         goto fapi_try_exit;
     }
 
+#endif // __PPE
+
     return l_pos;
 
 fapi_try_exit:
+
+#ifndef __PPE__
     // If we can't get our relative position, we're in other trouble
     FAPI_ERR("can't get ATTR_REL_POS for %s", l_c_str_storage);
+#endif
+
     fapi2::Assert(false);
     return 0;
 }

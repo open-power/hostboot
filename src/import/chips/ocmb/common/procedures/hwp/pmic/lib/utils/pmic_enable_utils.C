@@ -861,6 +861,8 @@ fapi2::ReturnCode enable_1u_2u(
             FAPI_TRY((enable_spd(l_pmic, i_ocmb_target, l_vendor_id)),
                      "pmic_enable: Error enabling PMIC %s", mss::c_str(l_pmic));
         }
+
+        fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
     }
 
     // Check that all the PMIC statuses are good post-enable

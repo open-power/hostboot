@@ -37,8 +37,6 @@
 #ifndef MSS_PMIC_CONSTS_H
 #define MSS_PMIC_CONSTS_H
 
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-
 namespace mss
 {
 namespace pmic
@@ -116,81 +114,6 @@ enum rail
     SWB = 1,
     SWC = 2,
     SWD = 3,
-};
-
-///
-/// @brief pmic attr_eff_engine_fields
-///
-enum class attr_eff_engine_fields
-{
-    // Template recursive base case
-    ATTR_EFF_BASE_CASE = 0,
-
-    PMIC0_SWA_VOLTAGE_SETTING           = 1,
-    PMIC0_SWA_VOLTAGE_RANGE_SELECT      = 2,
-    PMIC0_SWA_VOLTAGE_OFFSET            = 3,
-    PMIC0_SWA_SEQUENCE_DELAY            = 4,
-    PMIC0_SWA_SEQUENCE_ORDER            = 5,
-
-    PMIC0_SWB_VOLTAGE_SETTING           = 6,
-    PMIC0_SWB_VOLTAGE_RANGE_SELECT      = 7,
-    PMIC0_SWB_VOLTAGE_OFFSET            = 8,
-    PMIC0_SWB_SEQUENCE_DELAY            = 9,
-    PMIC0_SWB_SEQUENCE_ORDER            = 10,
-
-    PMIC0_SWC_VOLTAGE_SETTING           = 11,
-    PMIC0_SWC_VOLTAGE_RANGE_SELECT      = 12,
-    PMIC0_SWC_VOLTAGE_OFFSET            = 13,
-    PMIC0_SWC_SEQUENCE_DELAY            = 14,
-    PMIC0_SWC_SEQUENCE_ORDER            = 15,
-
-    PMIC0_SWD_VOLTAGE_SETTING           = 16,
-    PMIC0_SWD_VOLTAGE_RANGE_SELECT      = 17,
-    PMIC0_SWD_VOLTAGE_OFFSET            = 18,
-    PMIC0_SWD_SEQUENCE_DELAY            = 19,
-    PMIC0_SWD_SEQUENCE_ORDER            = 20,
-
-    PMIC1_SWA_VOLTAGE_SETTING           = 21,
-    PMIC1_SWA_VOLTAGE_RANGE_SELECT      = 22,
-    PMIC1_SWA_VOLTAGE_OFFSET            = 23,
-    PMIC1_SWA_SEQUENCE_DELAY            = 24,
-    PMIC1_SWA_SEQUENCE_ORDER            = 25,
-
-    PMIC1_SWB_VOLTAGE_SETTING           = 26,
-    PMIC1_SWB_VOLTAGE_RANGE_SELECT      = 27,
-    PMIC1_SWB_VOLTAGE_OFFSET            = 28,
-    PMIC1_SWB_SEQUENCE_DELAY            = 29,
-    PMIC1_SWB_SEQUENCE_ORDER            = 30,
-
-    PMIC1_SWC_VOLTAGE_SETTING           = 31,
-    PMIC1_SWC_VOLTAGE_RANGE_SELECT      = 32,
-    PMIC1_SWC_VOLTAGE_OFFSET            = 33,
-    PMIC1_SWC_SEQUENCE_DELAY            = 34,
-    PMIC1_SWC_SEQUENCE_ORDER            = 35,
-
-    PMIC1_SWD_VOLTAGE_SETTING           = 36,
-    PMIC1_SWD_VOLTAGE_RANGE_SELECT      = 37,
-    PMIC1_SWD_VOLTAGE_OFFSET            = 38,
-    PMIC1_SWD_SEQUENCE_DELAY            = 39,
-    PMIC1_SWD_SEQUENCE_ORDER            = 40,
-
-    PMIC0_PHASE_COMB                    = 41,
-    PMIC1_PHASE_COMB                    = 42,
-
-    PMIC0_MFG_ID                        = 43,
-    PMIC1_MFG_ID                        = 44,
-
-    PMIC0_SEQUENCE                      = 45,
-    PMIC1_SEQUENCE                      = 46,
-
-    PMIC0_REDUNDANCY                    = 47,
-    PMIC1_REDUNDANCY                    = 48,
-
-    PMIC0_REVISION                      = 49,
-    PMIC1_REVISION                      = 50,
-
-    // Dispatcher set to last enum value
-    DISPATCHER = PMIC1_REVISION,
 };
 
 ///

@@ -40,15 +40,15 @@
 #include <fapi2.H>
 #include <i2c_access.H>
 #include <lib/utils/pmic_consts.H>
-#include <generic/memory/lib/utils/pos.H>
-#include <generic/memory/lib/utils/index.H>
-#include <generic/memory/lib/utils/c_str.H>
 
 #ifdef __PPE__
     #define TARGTIDFORMAT "0x%08X"
     #define MSSTARGID(T) T.get()
+    #include "index.H"
 #else
+    #include <generic/memory/lib/utils/pos.H>
     #include <generic/memory/lib/utils/c_str.H>
+    #include <generic/memory/lib/utils/index.H>
     #define TARGTIDFORMAT "%s"
     #define MSSTARGID(T) mss::c_str(T)
 #endif
@@ -223,6 +223,7 @@ inline fapi2::ReturnCode reg_read(const fapi2::Target<T>& i_target,
     // Flush o_data_buffer to avoid stale data
     o_data_buffer.flush<0>();
 
+#ifndef __PPE__
     FAPI_ASSERT( (l_data.size() == mss::pmic::i2c::sizes::DATA_LENGTH),
                  fapi2::I2C_PMIC_INVALID_READ_SIZE()
                  .set_TARGET(i_target)
@@ -233,6 +234,16 @@ inline fapi2::ReturnCode reg_read(const fapi2::Target<T>& i_target,
                  MSSTARGID(i_target), l_data.size(), mss::pmic::i2c::sizes::DATA_LENGTH);
 
     o_data_buffer = l_data[0];
+#else // if PPE
+
+    if (l_data.size() > 0)
+    {
+        o_data_buffer = l_data[0];
+    }
+
+    // Otherwise, leave it as-is, this will be fine for PPE.
+#endif
+
 
     return fapi2::FAPI2_RC_SUCCESS;
 
