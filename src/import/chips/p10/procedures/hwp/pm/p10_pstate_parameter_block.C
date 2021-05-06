@@ -6020,7 +6020,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     iv_reference_frequency_mhz = l_sys_pstate0_freq_mhz;
     iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
 
-    if ((iv_reference_frequency_mhz = 0) || (iv_reference_frequency_khz == 0))
+    if ((iv_reference_frequency_mhz == 0) || (iv_reference_frequency_khz == 0))
     {
 
         disable_pstates();
