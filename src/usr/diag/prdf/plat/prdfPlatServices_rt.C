@@ -318,7 +318,7 @@ int32_t l3LineDelete(TargetHandle_t i_coreTgt,
                         ((uint64_t)ldData.getFieldJustify(32, 32));
 
     err = RTPM::hcode_update(PROC_STOP_SECTION_L3, PROC_STOP_SCOM_APPEND,
-                             i_coreTgt, 0x1001180E, scomVal);
+                             i_coreTgt, 0x2001860E, scomVal);
     if (nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l3LineDelete] HUID: 0x%08x hcode_update "
@@ -422,7 +422,7 @@ int32_t l2LineDelete(TargetHandle_t i_coreTgt,
                         ((uint64_t)ldData.getFieldJustify(32, 32));
 
     err = RTPM::hcode_update(PROC_STOP_SECTION_L2, PROC_STOP_SCOM_APPEND,
-                             i_coreTgt, 0x1001080E, scomVal);
+                             i_coreTgt, 0x2002800E, scomVal);
     if (nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l2LineDelete] HUID: 0x%08x hcode_update "
