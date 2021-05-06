@@ -1748,7 +1748,7 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
             l_errhdl->addHwCallout( i_target,
                                     HWAS::SRCI_PRIORITY_HIGH,
                                     HWAS::DECONFIG,
-                                    HWAS::GARD_NULL );
+                                    HWAS::GARD_NULL);
             // could also be a code bug on the SP
             l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
                                            HWAS::SRCI_PRIORITY_MED );
@@ -1762,6 +1762,34 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
         {
             HWAS_INF("0x%.8X detected by the Service Processor but not by Hostboot",
                      TARGETING::get_huid(i_target));
+
+            HWAS::GARD_ErrorType gardType = HWAS::GARD_NULL;
+            if(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM)
+            {
+                // If target could have a deferred presence detect, fatally
+                // guard it to prevent Hostboot from inadvertently resurrecting
+                // it later and triggering endless failovers.  One such case,
+                // absent this mitigation, is if both TPMs in a node hit
+                // this flavor of mismatch and the "TPM Required Policy" is
+                // "Required".  In that case the system flags the primary TPM
+                // as bad, then fails over to the other FSP and attempts a new
+                // boot.  On that boot, discovery assumes the backup TPM
+                // is present and functional until it can check it in istep
+                // 10.3, but the bad primary TPM leads to a termination first,
+                // causing the backup's "good" present/functional status to
+                // replicate down to the FSP.  This fools the alignment check to
+                // think the original primary TPM is now good and thus the
+                // alignment check forces a fail over back to the original FSP
+                // where the cycle starts over.
+                //
+                // Guard records can only be placed on present targets, so
+                // force state to what SP believes and guard it.
+                auto state = i_target->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                state.present = 0b1;
+                i_target->setAttr<TARGETING::ATTR_HWAS_STATE>(state);
+                gardType = HWAS::GARD_Fatal;
+            }
+
             /*@
              * @errortype
              * @moduleid     MOD_CROSSCHECK_SP_PRESENCE
@@ -1778,12 +1806,13 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
                              RC_PRESENCE_MISMATCH_HB,
                              TARGETING::get_huid(i_target),
                              0);
-            // most likely to be a hardware issue of some kind
-            //  knock it out so we agree with the SP
+
+            // Problem is most likely a hardware issue of some kind; knock
+            // it out so Hostboot agrees with the SP.
             l_errhdl->addHwCallout( i_target,
                                     HWAS::SRCI_PRIORITY_HIGH,
                                     HWAS::DECONFIG,
-                                    HWAS::GARD_NULL );
+                                    gardType);
             // could also be a code bug in HB
             l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                            HWAS::SRCI_PRIORITY_MED );
