@@ -39,6 +39,10 @@
 #include <lib/i2c/i2c_pmic.H>
 #include <lib/utils/pmic_consts.H>
 
+#ifdef __PPE__
+    #include <ppe42_string.h>
+#endif
+
 ///
 /// @brief Write a register of a PMIC target, helper function for pmic_info type
 ///
@@ -96,6 +100,8 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
                            pmic_info& io_pmic1,
                            pmic_info& io_pmic2)
 {
+    FAPI_INF(TARGTIDFORMAT "Performing GPIO N-Mode Detection", MSSTARGID(i_gpio));
+
     aggregate_state l_state = aggregate_state::N_PLUS_1;
 
     uint8_t l_failed_pmics = 0;
@@ -137,6 +143,8 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
 ///
 aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc)
 {
+    FAPI_INF(TARGTIDFORMAT "Checking ADC for EVENT_FLAG", MSSTARGID(i_adc));
+
     // Start with the buffer polluted. If the reg read fails, we assume l_reg will
     // be left unchanged, so 0xFF will force an n-mode declaration
     fapi2::buffer<uint8_t> l_reg(0xFF);
@@ -162,8 +170,8 @@ aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE
 void phase_comparison(
     pmic_info& io_first_pmic,
     pmic_info& io_second_pmic,
-    const double i_phase0,
-    const double i_phase1,
+    const uint32_t i_phase0,
+    const uint32_t i_phase1,
     aggregate_state& o_aggregate_state)
 {
     if (((i_phase0 < PHASE_MIN) && i_phase1 > PHASE_MAX) || ((i_phase1 < PHASE_MIN) && (i_phase0 > PHASE_MAX)))
@@ -198,8 +206,8 @@ void read_double_domain(
     const uint8_t i_rail_2,
     aggregate_state& o_aggregate_state)
 {
-    double l_phase0 = 0;
-    double l_phase1 = 0;
+    uint32_t l_phase0 = 0;
+    uint32_t l_phase1 = 0;
 
     fapi2::buffer<uint8_t> l_reg0;
     fapi2::buffer<uint8_t> l_reg1;
@@ -232,8 +240,8 @@ void read_single_domain(
     const uint8_t i_rail_1,
     aggregate_state& o_aggregate_state)
 {
-    double l_phase0 = 0;
-    double l_phase1 = 0;
+    uint32_t l_phase0 = 0;
+    uint32_t l_phase1 = 0;
 
     fapi2::buffer<uint8_t> l_reg0;
     fapi2::buffer<uint8_t> l_reg1;
@@ -275,15 +283,19 @@ aggregate_state voltage_checks(std::vector<pmic_info>& i_pmics)
     // Note that for RCDless dimms this voltage domain does not exist, but this is fine.
     // We should read out close to 0A for both currents and therefore should not trigger
     // the N-mode condition.
+    FAPI_INF("Checking voltage domain VDDR1");
     read_double_domain(PMIC1, PMIC2, SWA_CURRENT, SWB_CURRENT, l_aggregate_state);
 
     // VPP
+    FAPI_INF("Checking voltage domain VPP");
     read_single_domain(PMIC1, PMIC2, SWD_CURRENT, l_aggregate_state);
 
     // VDDR2 (or VDDR for RCDless dimms)
+    FAPI_INF("Checking voltage domain VDDR2");
     read_double_domain(PMIC3, PMIC4, SWA_CURRENT, SWB_CURRENT, l_aggregate_state);
 
     // VDD
+    FAPI_INF("Checking voltage domain VDD");
     read_single_domain(PMIC3, PMIC4, SWD_CURRENT, l_aggregate_state);
 
     // VIO is intentionally skipped as the current draw
@@ -328,10 +340,10 @@ void populate_gpio_port_states(
     fapi2::buffer<uint8_t> l_reg_contents_1;
     fapi2::buffer<uint8_t> l_reg_contents_2;
 
-    fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
-    fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
-
+    FAPI_INF(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio1));
     mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::INPUT_PORT_REG, l_reg_contents_1);
+
+    FAPI_INF(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio2));
     mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::INPUT_PORT_REG, l_reg_contents_2);
 
     // In the case of an I2C read failure, we don't want to abort the procedure. The
@@ -354,6 +366,8 @@ void populate_pmic_data(
     pmic_info& io_pmic,
     pmic_telemetry& o_pmic_data)
 {
+    FAPI_INF(TARGTIDFORMAT " Populating PMIC data", MSSTARGID(io_pmic.iv_pmic));
+
     // Required regs
     static constexpr uint8_t R08 = 0x08;
     static constexpr uint8_t R09 = 0x09;
@@ -455,10 +469,13 @@ void populate_pmic_data(
 /// @param[in] i_adc_reg Register
 /// @return double scale factor
 ///
-double get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint8_t i_adc_reg)
+uint32_t get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint8_t i_adc_reg)
 {
-    static constexpr double DUAL_PHASE_SCALE   = 0.00007553100585;
-    static constexpr double SINGLE_PHASE_SCALE = 0.00003776550292;
+    // mul by 5
+
+    // All these values * 10^-9
+    static constexpr uint32_t DUAL_PHASE_SCALE   = 75531;
+    static constexpr uint32_t SINGLE_PHASE_SCALE = 37765;
 
     // Specific channels need specific scale factors due to the dual phasing
     if (i_adc_num == mss::generic_i2c_slave::ADC1)
@@ -497,42 +514,41 @@ void populate_adc_data(
     const mss::generic_i2c_slave i_adc_num,
     adc_telemetry& o_adc_data)
 {
-    static constexpr uint16_t V_TO_MV = 1000;
+    FAPI_INF(TARGTIDFORMAT " Populating ADC data", MSSTARGID(i_adc));
+
+    static constexpr uint64_t TO_MV = 1000000;
     static constexpr uint8_t ADC_U16_MAP_LEN = 24;
     static constexpr uint8_t REG_SIZE_BITS = 8;
 
     // Fields that map a LSB register to the uint16_t destination in o_adc_data
-    // TK - if SBE does not implement pair, we will implement our own pair
-    const std::array<std::pair<uint8_t, uint16_t*>, ADC_U16_MAP_LEN> ADC_U16_MAP =
+    const adu_map_t ADC_U16_MAP[ADC_U16_MAP_LEN] =
     {
-        {
-            {mss::adc::regs::RECENT_CH0_LSB, &o_adc_data.iv_recent_ch0_mV},
-            {mss::adc::regs::RECENT_CH1_LSB, &o_adc_data.iv_recent_ch1_mV},
-            {mss::adc::regs::RECENT_CH2_LSB, &o_adc_data.iv_recent_ch2_mV},
-            {mss::adc::regs::RECENT_CH3_LSB, &o_adc_data.iv_recent_ch3_mV},
-            {mss::adc::regs::RECENT_CH4_LSB, &o_adc_data.iv_recent_ch4_mV},
-            {mss::adc::regs::RECENT_CH5_LSB, &o_adc_data.iv_recent_ch5_mV},
-            {mss::adc::regs::RECENT_CH6_LSB, &o_adc_data.iv_recent_ch6_mV},
-            {mss::adc::regs::RECENT_CH7_LSB, &o_adc_data.iv_recent_ch7_mV},
+        {mss::adc::regs::RECENT_CH0_LSB, &o_adc_data.iv_recent_ch0_mV},
+        {mss::adc::regs::RECENT_CH1_LSB, &o_adc_data.iv_recent_ch1_mV},
+        {mss::adc::regs::RECENT_CH2_LSB, &o_adc_data.iv_recent_ch2_mV},
+        {mss::adc::regs::RECENT_CH3_LSB, &o_adc_data.iv_recent_ch3_mV},
+        {mss::adc::regs::RECENT_CH4_LSB, &o_adc_data.iv_recent_ch4_mV},
+        {mss::adc::regs::RECENT_CH5_LSB, &o_adc_data.iv_recent_ch5_mV},
+        {mss::adc::regs::RECENT_CH6_LSB, &o_adc_data.iv_recent_ch6_mV},
+        {mss::adc::regs::RECENT_CH7_LSB, &o_adc_data.iv_recent_ch7_mV},
 
-            {mss::adc::regs::MAX_CH0_LSB, &o_adc_data.iv_max_ch0_mV},
-            {mss::adc::regs::MAX_CH1_LSB, &o_adc_data.iv_max_ch1_mV},
-            {mss::adc::regs::MAX_CH2_LSB, &o_adc_data.iv_max_ch2_mV},
-            {mss::adc::regs::MAX_CH3_LSB, &o_adc_data.iv_max_ch3_mV},
-            {mss::adc::regs::MAX_CH4_LSB, &o_adc_data.iv_max_ch4_mV},
-            {mss::adc::regs::MAX_CH5_LSB, &o_adc_data.iv_max_ch5_mV},
-            {mss::adc::regs::MAX_CH6_LSB, &o_adc_data.iv_max_ch6_mV},
-            {mss::adc::regs::MAX_CH7_LSB, &o_adc_data.iv_max_ch7_mV},
+        {mss::adc::regs::MAX_CH0_LSB, &o_adc_data.iv_max_ch0_mV},
+        {mss::adc::regs::MAX_CH1_LSB, &o_adc_data.iv_max_ch1_mV},
+        {mss::adc::regs::MAX_CH2_LSB, &o_adc_data.iv_max_ch2_mV},
+        {mss::adc::regs::MAX_CH3_LSB, &o_adc_data.iv_max_ch3_mV},
+        {mss::adc::regs::MAX_CH4_LSB, &o_adc_data.iv_max_ch4_mV},
+        {mss::adc::regs::MAX_CH5_LSB, &o_adc_data.iv_max_ch5_mV},
+        {mss::adc::regs::MAX_CH6_LSB, &o_adc_data.iv_max_ch6_mV},
+        {mss::adc::regs::MAX_CH7_LSB, &o_adc_data.iv_max_ch7_mV},
 
-            {mss::adc::regs::MIN_CH0_LSB, &o_adc_data.iv_min_ch0_mV},
-            {mss::adc::regs::MIN_CH1_LSB, &o_adc_data.iv_min_ch1_mV},
-            {mss::adc::regs::MIN_CH2_LSB, &o_adc_data.iv_min_ch2_mV},
-            {mss::adc::regs::MIN_CH3_LSB, &o_adc_data.iv_min_ch3_mV},
-            {mss::adc::regs::MIN_CH4_LSB, &o_adc_data.iv_min_ch4_mV},
-            {mss::adc::regs::MIN_CH5_LSB, &o_adc_data.iv_min_ch5_mV},
-            {mss::adc::regs::MIN_CH6_LSB, &o_adc_data.iv_min_ch6_mV},
-            {mss::adc::regs::MIN_CH7_LSB, &o_adc_data.iv_min_ch7_mV}
-        }
+        {mss::adc::regs::MIN_CH0_LSB, &o_adc_data.iv_min_ch0_mV},
+        {mss::adc::regs::MIN_CH1_LSB, &o_adc_data.iv_min_ch1_mV},
+        {mss::adc::regs::MIN_CH2_LSB, &o_adc_data.iv_min_ch2_mV},
+        {mss::adc::regs::MIN_CH3_LSB, &o_adc_data.iv_min_ch3_mV},
+        {mss::adc::regs::MIN_CH4_LSB, &o_adc_data.iv_min_ch4_mV},
+        {mss::adc::regs::MIN_CH5_LSB, &o_adc_data.iv_min_ch5_mV},
+        {mss::adc::regs::MIN_CH6_LSB, &o_adc_data.iv_min_ch6_mV},
+        {mss::adc::regs::MIN_CH7_LSB, &o_adc_data.iv_min_ch7_mV}
     };
 
     // Set each one
@@ -555,7 +571,8 @@ void populate_adc_data(
         l_channel_lsb.extract<0, REG_SIZE_BITS, REG_SIZE_BITS>(l_channel_field);
 
         // scale
-        (*l_adc_pair.second) = static_cast<uint16_t>(l_channel_field * get_adc_scale_factor(i_adc_num, REG) * V_TO_MV);
+        const uint64_t l_field_unscaled = l_channel_field * get_adc_scale_factor(i_adc_num, REG);
+        (*l_adc_pair.second) = static_cast<uint16_t>(l_field_unscaled / TO_MV);
     }
 
     return;
@@ -598,6 +615,8 @@ fapi2::ReturnCode pmic_n_mode_detect(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     fapi2::hwp_data_ostream& o_data)
 {
+    FAPI_INF(TARGTIDFORMAT " Running pmic_n_mode_detect HWP", MSSTARGID(i_ocmb_target));
+
     runtime_n_mode_telem_info l_info;
     aggregate_state l_state = aggregate_state::N_PLUS_1;
 
@@ -668,5 +687,7 @@ fapi2::ReturnCode pmic_n_mode_detect(
     populate_adc_data(ADC2, mss::generic_i2c_slave::ADC2, l_info.iv_telemetry_data.iv_adc2);
 
     send_struct(l_info, o_data);
+
+    FAPI_INF(TARGTIDFORMAT " Compeleted pmic_n_mode_detect procedure", MSSTARGID(i_ocmb_target));
     return fapi2::FAPI2_RC_SUCCESS;
 }

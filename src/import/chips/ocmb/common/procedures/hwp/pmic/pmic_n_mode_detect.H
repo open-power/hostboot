@@ -42,9 +42,9 @@
 #include <hwp_data_stream.H>
 
 // Extra constants
-static constexpr double CURRENT_MULTIPLIER = 0.125;
-static constexpr double PHASE_MIN = 0.25;
-static constexpr double PHASE_MAX = 1.25;
+static constexpr uint16_t CURRENT_MULTIPLIER = 125;
+static constexpr uint16_t PHASE_MIN = 250;
+static constexpr uint16_t PHASE_MAX = 1250;
 
 ///
 /// @brief N Mode State to return
@@ -79,6 +79,8 @@ typedef fapi2::ReturnCode (*pmic_n_mode_detect_FP_t) (
 struct __attribute__((__packed__)) adc_telemetry
 {
     uint8_t iv_event_low_flag = 0;
+
+    uint8_t PADDING = 0;
 
     // These are the MSB and LSB,
     // two combined 8 bit registers
@@ -138,6 +140,8 @@ struct __attribute__((__packed__)) pmic_telemetry
     // Status register
     // Direct read from 8 bit register
     uint8_t iv_r33 = 0;
+
+    uint8_t PADDING = 0;
 };
 
 ///
@@ -196,8 +200,22 @@ struct pmic_info
 
     fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic;
     uint8_t iv_state = pmic_state::DECONFIGURED;
+
+    // This padding is needed for the iv_telemetry_data to start out aligned
+    uint8_t PADDING = 0;
+
     telemetry_data iv_telemetry_data;
 };
+
+///
+/// @brief Struct type for pair
+///
+typedef struct
+{
+    uint8_t first;
+    uint16_t* second;
+} adu_map_t;
+
 
 ///
 /// @brief Get the gpio port states
@@ -228,7 +246,7 @@ void populate_pmic_data(
 /// @param[in] i_adc_reg Register
 /// @return double scale factor
 ///
-double get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint8_t i_adc_reg);
+uint32_t get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint8_t i_adc_reg);
 
 ///
 /// @brief Populate the ADC data struct
@@ -301,8 +319,8 @@ aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE
 void phase_comparison(
     pmic_info& io_first_pmic,
     pmic_info& io_second_pmic,
-    const double i_phase0,
-    const double i_phase1,
+    const uint32_t i_phase0,
+    const uint32_t i_phase1,
     aggregate_state& o_aggregate_state);
 
 ///
