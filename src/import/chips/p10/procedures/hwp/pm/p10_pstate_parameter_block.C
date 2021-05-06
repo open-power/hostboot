@@ -216,7 +216,7 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // ----------------
         // Compute VPD points for different regions
         // ----------------
-        l_pmPPB->compute_vpd_pts();
+        FAPI_TRY(l_pmPPB->compute_vpd_pts());
 
         // Safe mode freq and volt init
         // ----------------
@@ -1377,8 +1377,8 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
                 FAPI_INF("OCC Minimum Frequency %d KHz is outside the range that can be represented"
                          " by a Pstate with a base frequency of %d KHz and step size %d KHz",
                          revle32(i_occppb->frequency_min_khz),
-                         (iv_reference_frequency_khz),
-                         (iv_frequency_step_khz));
+                         iv_reference_frequency_khz,
+                         iv_frequency_step_khz);
                 FAPI_INF("Pstate is set to %X (%d)", pstate_min);
                 break;
         }
@@ -1787,7 +1787,7 @@ void PlatPmPPB::attr_init( void )
                                                             iv_procChip,  attr_ext_vrm_transition_rate_inc_uv_per_us);
     PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS,
                                                             iv_procChip,  attr_ext_vrm_stabilization_time_us);
-    PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_START_NS, iv_procChip,  attr_ext_vrm_transition_start_ns);
+    PPB_GET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_START_NS, iv_procChip,    attr_ext_vrm_transition_start_ns);
 
    // Safe Mode attributes
     PPB_GET_ATTR(ATTR_SAFE_MODE_FREQUENCY_MHZ,              iv_procChip,  attr_pm_safe_frequency_mhz);
@@ -1795,52 +1795,50 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR_2(ATTR_SAVE_MODE_NODDS_UPLIFT_MV,          iv_procChip,  attr_save_mode_nodds_uplift_mv);
 
     // AVSBus ... needed by p10_setup_evid
+    PPB_GET_ATTR(ATTR_AVSBUS_FREQUENCY,                     iv_procChip,  attr_avs_bus_freq);
     PPB_GET_ATTR_4(ATTR_AVSBUS_BUSNUM,                      iv_procChip,  attr_avs_bus_num);
     PPB_GET_ATTR_4(ATTR_AVSBUS_RAIL,                        iv_procChip,  attr_avs_bus_rail_select);
     PPB_GET_ATTR_4(ATTR_BOOT_VOLTAGE,                       iv_procChip,  attr_boot_voltage_mv);
-    PPB_GET_ATTR(ATTR_AVSBUS_FREQUENCY,                     iv_procChip,  attr_avs_bus_freq);
+    PPB_GET_ATTR(ATTR_BOOT_VOLTAGE_BIAS_0P5PCT,             iv_procChip,  attr_boot_voltage_biase_0p5pct);
     PPB_GET_ATTR_4(ATTR_PROC_R_DISTLOSS_UOHM,               iv_procChip,  attr_proc_r_distloss_uohm);
     PPB_GET_ATTR_4(ATTR_PROC_R_LOADLINE_UOHM,               iv_procChip,  attr_proc_r_loadline_uohm);
     PPB_GET_ATTR_4(ATTR_PROC_VRM_VOFFSET_UV,                iv_procChip,  attr_proc_vrm_voffset_uv);
-    PPB_GET_ATTR(ATTR_BOOT_VOLTAGE_BIAS_0P5PCT,             iv_procChip,  attr_boot_voltage_biase_0p5pct);
 
     // Feature control
+    PPB_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE,                  FAPI_SYSTEM,  attr_pstate_mode);
     PPB_GET_ATTR(ATTR_SYSTEM_WOF_DISABLE,                   FAPI_SYSTEM,  attr_system_wof_disable);
     PPB_GET_ATTR(ATTR_SYSTEM_RVRM_DISABLE,                  FAPI_SYSTEM,  attr_system_rvrm_disable);
     PPB_GET_ATTR(ATTR_SYSTEM_DDS_DISABLE,                   FAPI_SYSTEM,  attr_system_dds_disable);
     PPB_GET_ATTR(ATTR_SYSTEM_RESCLK_DISABLE,                FAPI_SYSTEM,  attr_resclk_disable);
-    PPB_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE,                  FAPI_SYSTEM,  attr_pstate_mode);
     PPB_GET_ATTR(ATTR_SYSTEM_OCS_DISABLE,                   FAPI_SYSTEM,  attr_system_ocs_disable);
     PPB_GET_ATTR(ATTR_SYSTEM_PGPE_CURRENT_READ_DISABLE,     FAPI_SYSTEM,  attr_system_current_read_disable);
+    PPB_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,             FAPI_SYSTEM,  attr_wov_overv_disable);
+    PPB_GET_ATTR(ATTR_SYSTEM_WOV_UNDERV_DISABLE,            FAPI_SYSTEM,  attr_wov_underv_disable);
     PPB_GET_ATTR_5(ATTR_SYSTEM_WOF_DISABLE_DIMENSION,       FAPI_SYSTEM,  attr_system_wof_disable_dimension);
     PPB_GET_ATTR(ATTR_PGPE_HCODE_FUNCTION_ENABLE,           FAPI_SYSTEM,  attr_pgpe_hcode_function_enable);
     PPB_GET_ATTR(ATTR_PGPE_PHANTOM_HALT_ENABLE,             FAPI_SYSTEM,  attr_phantom_halt_enable);
-    PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE,    FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_disable);
-    PPB_GET_ATTR(ATTR_WOF_PITCH_ENABLE,                     FAPI_SYSTEM,  attr_system_pitch_enable);
-    PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE,       FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_mode);
     PPB_GET_ATTR(ATTR_DDS_TRIP_MODE,                        FAPI_SYSTEM,  attr_dds_trip_mode);
     PPB_GET_ATTR(ATTR_DDS_TRIP_INTERPOLATION_CONTROL,       FAPI_SYSTEM,  attr_dds_trip_interpolation_control);
     PPB_GET_ATTR(ATTR_DDS_DPLL_SLEW_MODE,                   FAPI_SYSTEM,  attr_dds_dpll_slew_mode);
+    PPB_GET_ATTR(ATTR_DDS_BIAS_ENABLE,                      iv_procChip,  attr_dds_bias_enable);
+    PPB_GET_ATTR(ATTR_DDS_COARSE_THROTTLE_ENABLE,           iv_procChip,  attr_dds_coarse_thr_enable)
+    PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE,    FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_disable);
+    PPB_GET_ATTR(ATTR_WOF_PITCH_ENABLE,                     FAPI_SYSTEM,  attr_system_pitch_enable);
+    PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE,       FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_mode);
     PPB_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,         FAPI_SYSTEM,  attr_system_wof_altitude_temp_adjustment);
     PPB_GET_ATTR(ATTR_WOF_TDP_ALTITUDE_REFERENCE_M,         FAPI_SYSTEM,  attr_system_wof_tdp_altitude_reference);
     PPB_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,         FAPI_SYSTEM,  attr_system_wof_altitude_temp_adjustment);
     PPB_GET_ATTR_8(ATTR_WOF_VRATIO_VDD_10THPCT,             iv_procChip,  attr_vratio_vdd_10th_pct);
+    PPB_GET_ATTR_8(ATTR_WOF_VRATIO_VCS_10THPCT,             iv_procChip,  attr_vratio_vcs_10th_pct);
     PPB_GET_ATTR_U64(ATTR_WOF_DCCR_VALUE,                   iv_procChip,  attr_wof_dccr_value);
     PPB_GET_ATTR_U64(ATTR_WOF_FLMR_VALUE,                   iv_procChip,  attr_wof_flmr_value);
     PPB_GET_ATTR_U64(ATTR_WOF_FMMR_VALUE,                   iv_procChip,  attr_wof_fmmr_value);
-    PPB_GET_ATTR(ATTR_DDS_BIAS_ENABLE,                      iv_procChip,  attr_dds_bias_enable);
-    PPB_GET_ATTR(ATTR_PMCR_MOST_RECENT_MODE,                iv_procChip,  attr_pmcr_most_recent_enable);
-    PPB_GET_ATTR_8(ATTR_WOF_VRATIO_VCS_10THPCT,             iv_procChip,  attr_vratio_vcs_10th_pct);
-    PPB_GET_ATTR(ATTR_DDS_BIAS_ENABLE,                      iv_procChip,  attr_dds_bias_enable);
-    PPB_GET_ATTR(ATTR_DDS_COARSE_THROTTLE_ENABLE,           iv_procChip,  attr_dds_coarse_thr_enable);
     PPB_GET_ATTR(ATTR_PMCR_MOST_RECENT_MODE,                iv_procChip,  attr_pmcr_most_recent_enable);
 
     //TBD
     //PPB_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
 
     // WOV attributes
-    PPB_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,             FAPI_SYSTEM,  attr_wov_overv_disable);
-    PPB_GET_ATTR(ATTR_SYSTEM_WOV_UNDERV_DISABLE,            FAPI_SYSTEM,  attr_wov_underv_disable);
     PPB_GET_ATTR(ATTR_WOV_UNDERV_STEP_INCR_10THPCT,         iv_procChip,  attr_wov_underv_step_incr_pct);
     PPB_GET_ATTR(ATTR_WOV_UNDERV_STEP_DECR_10THPCT,         iv_procChip,  attr_wov_underv_step_decr_pct);
     PPB_GET_ATTR(ATTR_WOV_UNDERV_MAX_10THPCT,               iv_procChip,  attr_wov_underv_max_pct);
@@ -1849,7 +1847,7 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR(ATTR_WOV_OVERV_STEP_INCR_10THPCT,          iv_procChip,  attr_wov_overv_step_incr_pct);
     PPB_GET_ATTR(ATTR_WOV_OVERV_STEP_DECR_10THPCT,          iv_procChip,  attr_wov_overv_step_decr_pct);
     PPB_GET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,                iv_procChip,  attr_wov_overv_max_pct);
-    PPB_GET_ATTR_2(ATTR_WOV_DIRTY_UNCURRENT_CONTROL,        FAPI_SYSTEM, attr_wov_dirty_uncurrent_ctrl);
+    PPB_GET_ATTR_2(ATTR_WOV_DIRTY_UNCURRENT_CONTROL,        FAPI_SYSTEM,  attr_wov_dirty_uncurrent_ctrl);
 
     // Current Scaling Factors
     PPB_GET_ATTR_8(ATTR_CURRENT_SCALING_FACTOR,             FAPI_SYSTEM,  attr_current_scaling_factor);
@@ -2024,26 +2022,16 @@ void PlatPmPPB::attr_init( void )
     iv_wov_underv_enabled = true;
     iv_wov_overv_enabled = true;
 
-    //Set default values
-    SET_ATTR(fapi2::ATTR_PSTATES_ENABLED, iv_procChip, iv_pstates_enabled);
-    SET_ATTR(fapi2::ATTR_RESCLK_ENABLED,  iv_procChip, iv_resclk_enabled);
-    SET_ATTR(fapi2::ATTR_DDS_ENABLED,     iv_procChip, iv_dds_enabled);
-    SET_ATTR(fapi2::ATTR_RVRM_ENABLED,    iv_procChip, iv_rvrm_enabled);
-    SET_ATTR(fapi2::ATTR_WOF_ENABLED,     iv_procChip, iv_wof_enabled);
-    //SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, iv_procChip, iv_wov_underv_enabled);
-    //SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, iv_procChip, iv_wov_overv_enabled);
-
     //Calculate nest & frequency_step_khz
     iv_frequency_step_khz = (iv_attrs.attr_freq_proc_refclock_khz /
                              iv_attrs.attr_proc_dpll_divider);
 
     // Round
-    iv_frequency_step_khz = ((iv_frequency_step_khz << 2) + 1) >> 2 ;
+    iv_frequency_step_khz = ((iv_frequency_step_khz << 2) + 5) >> 2 ;
 
     FAPI_INF ("iv_frequency_step_khz calculated %08X %d",
             iv_frequency_step_khz, iv_frequency_step_khz);
 
-    iv_frequency_step_khz = 16667;
     FAPI_INF ("iv_attrs.attr_freq_proc_refclock_khz %08X %d iv_attrs.attr_proc_dpll_divider %08x",
             iv_attrs.attr_freq_proc_refclock_khz, iv_attrs.attr_freq_proc_refclock_khz,
             iv_attrs.attr_proc_dpll_divider);
@@ -2111,7 +2099,7 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                         iv_attr_mvpd_poundV_static_rails.vdn_mv);
 
             // Compute the VPD operating points
-            compute_vpd_pts();
+            FAPI_TRY(compute_vpd_pts());
 
             FAPI_TRY(safe_mode_init());
 
@@ -2600,23 +2588,29 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
 //        poison_mvpd_poundV();
         FAPI_TRY(chk_valid_poundv(false));
 
+        iv_vddPsavFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddPsavCoreFreq));
+        iv_vddWofBaseFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddTdpWofCoreFreq));
+        iv_vddUTFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddUTCoreFreq));
+        iv_vddFmaxFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddFmxCoreFreq));
+        FAPI_INF("Pointer Frequencies:  PSAV  0x%04x (%04d) WOF  0x%04x (%04d) UT  0x%04x (%04d) Fmax  0x%04x (%04d)",
+                        iv_vddPsavFreq, iv_vddPsavFreq,
+                        iv_vddWofBaseFreq, iv_vddWofBaseFreq,
+                        iv_vddUTFreq, iv_vddUTFreq,
+                        iv_vddFmaxFreq, iv_vddFmaxFreq);
+
+        FAPI_INF("Reference Frequency: 0x%04x (%04d)",
+                        iv_reference_frequency_mhz, iv_reference_frequency_mhz);
+
         //Update pstate for all points
         for (uint32_t i = 0; i < NUM_PV_POINTS; i++)
         {
             iv_attr_mvpd_poundV_raw[i].pstate = (iv_reference_frequency_mhz  -
             iv_attr_mvpd_poundV_raw[i].frequency_mhz) * 1000 / (iv_frequency_step_khz);
 
-            iv_vddPsavFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddPsavCoreFreq));
-
-            iv_vddWofBaseFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddTdpWofCoreFreq));
-            iv_vddUTFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddUTCoreFreq));
-            iv_vddFmaxFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddFmxCoreFreq));
-
-
-            FAPI_INF("PSTATE %x %x %d PSAV %x WOF %x UT %x Fmax %x",iv_reference_frequency_mhz,
-                     iv_attr_mvpd_poundV_raw[i].frequency_mhz,iv_attr_mvpd_poundV_raw[i].pstate,
-                     iv_vddPsavFreq, iv_vddWofBaseFreq,
-                      iv_vddUTFreq, iv_vddFmaxFreq);
+            FAPI_INF("CF[%d] Raw Frequency: 0x%04x (%04d) PSTATE 0x%02x (%03d)",
+                        i,
+                        iv_attr_mvpd_poundV_raw[i].frequency_mhz, iv_attr_mvpd_poundV_raw[i].frequency_mhz,
+                        iv_attr_mvpd_poundV_raw[i].pstate, iv_attr_mvpd_poundV_raw[i].pstate);
         }
 
         // Static Rails
@@ -2907,19 +2901,20 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         if (l_pdv_current_mark && is_wof_enabled())
         {
 #ifdef __HOSTBOOT_MODULE
-            FAPI_INF("Running TDP current mark checking under FW controls");
             fapi2::ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_Type l_pdv_tdp_current_mode;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE,
                     FAPI_SYSTEM,
                     l_pdv_tdp_current_mode),
                 "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_PDV_TDP_CURRENT_FW_VALIDATION_MODE");
+            FAPI_INF("Running TDP current mark checking under FW controls = %d", l_pdv_tdp_current_mode);
 #else
-            FAPI_INF("Running TDP current mark checking under Lab controls");
+
             fapi2::ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE_Type l_pdv_tdp_current_mode;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE,
                     FAPI_SYSTEM,
                     l_pdv_tdp_current_mode),
                 "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE_Type");
+            FAPI_INF("Running TDP current mark checking under Lab controls = %d", l_pdv_tdp_current_mode);
 #endif
 
             if (l_pdv_tdp_current_mode != fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_OFF )
@@ -3644,7 +3639,7 @@ fapi2::ReturnCode PlatPmPPB::update_biased_pstates()
 
     for (int i = 0; i < NUM_PV_POINTS; i++)
     {
-        l_rc = freq2pState(iv_attr_mvpd_poundV_biased[i].frequency_mhz*1000, &l_ps, ROUND_SLOW);
+        l_rc = freq2pState(iv_attr_mvpd_poundV_biased[i].frequency_mhz*1000, &l_ps, ROUND_NEAR);
         if (l_rc)
         {
             disable_pstates();
@@ -4156,7 +4151,7 @@ void iddq_print(IddqTable_t* i_iddqt)
 ///////////////////////////////////////////////////////////
 ////////   compute_vpd_pts
 ///////////////////////////////////////////////////////////
-void PlatPmPPB::compute_vpd_pts()
+fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
 {
     uint32_t l_vdd_loadline_uohm    = iv_vdd_sysparam.loadline_uohm;
     uint32_t l_vdd_distloss_uohm    = iv_vdd_sysparam.distloss_uohm;
@@ -4165,6 +4160,9 @@ void PlatPmPPB::compute_vpd_pts()
     uint32_t l_vcs_distloss_uohm    = iv_vcs_sysparam.distloss_uohm;
     uint32_t l_vcs_distoffset_uv    = iv_vcs_sysparam.distoffset_uv;
 
+    fapi2::ReturnCode l_rc;
+
+    FAPI_INF(">>>>>>>>>> compute_vpd_pts");
 
     //RAW POINTS. We just copy them as is
     memcpy (iv_operating_points[VPD_PT_SET_RAW],
@@ -4223,10 +4221,17 @@ void PlatPmPPB::compute_vpd_pts()
     // Now that the Pstate 0 frequency is known, Pstates can be calculated
     for (auto p = 0; p < NUM_PV_POINTS; p++)
     {
-        iv_operating_points[VPD_PT_SET_BIASED][p].pstate =
-            (((iv_reference_frequency_mhz  -
-               (iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz)) * 1000) /
-             (iv_frequency_step_khz));
+        Pstate l_ps;
+        l_rc = freq2pState(iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz*1000, \
+                            &l_ps, ROUND_NEAR, PPB_INFO);
+        if (l_rc)
+        {
+            // As this is fundamental to the rest of the Pstate functionality,
+            // disable them (all the dependent functions)
+            disable_pstates();
+            fapi2::current_err = l_rc;
+            goto fapi_try_exit;
+        }
 
         FAPI_DBG("Bi: OpPoint=[%d][%d], PS=%3d, Freq=0x%3X (%4d), Vdd=0x%3X (%4d), CF6 Freq=0x%3d (%4d) Step Freq=%5d",
                     VPD_PT_SET_BIASED, p,
@@ -4292,6 +4297,9 @@ void PlatPmPPB::compute_vpd_pts()
         iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].frequency_mhz =
                iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz;
     }
+fapi_try_exit:
+    FAPI_INF("<<<<<<<<<< compute_vpd_pts");
+    return fapi2::current_err;
 }
 
 ///////////////////////////////////////////////////////////
@@ -4973,6 +4981,11 @@ fapi2::ReturnCode PlatPmPPB::freq2pState (
         *o_pstate  = (Pstate)internal_ceil(pstate32);
          strcpy(round_str, "SLOW");
     }
+    else if (i_round ==  ROUND_NEAR)
+    {
+        *o_pstate  = (Pstate)internal_round(pstate32);
+         strcpy(round_str, "NEAR");
+    }
     else
     {
         *o_pstate  = (Pstate)pstate32;
@@ -4982,10 +4995,10 @@ fapi2::ReturnCode PlatPmPPB::freq2pState (
     FAPI_DBG("freq2pState: i_freq_khz = %u (0x%X); pstate32 = %f; o_pstate = %u (0x%X) Rounding: %s",
                 i_freq_khz, i_freq_khz, pstate32, *o_pstate, *o_pstate, round_str);
     FAPI_DBG("freq2pState: ref_freq_khz = %u (0x%X); step_freq_khz= %u (0x%X)",
-                (iv_reference_frequency_khz),
-                (iv_reference_frequency_khz),
-                (iv_frequency_step_khz),
-                (iv_frequency_step_khz));
+                iv_reference_frequency_khz,
+                iv_reference_frequency_khz,
+                iv_frequency_step_khz,
+                iv_frequency_step_khz);
 
     // ------------------------------
     // perform pstate bounds checking
@@ -5550,7 +5563,7 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
 
         // Translate to Pstate.  The called function will clip to the
         // legal range.
-        FAPI_TRY(freq2pState(l_freq_khz, &l_ps, ROUND_SLOW));
+        FAPI_TRY(freq2pState(l_freq_khz, &l_ps, ROUND_NEAR));
         o_vrt_data->data[l_index_0] = l_ps;
 
         if (b_output_trace)
@@ -5693,13 +5706,13 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
 #ifdef __HOSTBOOT_MODULE
-    FAPI_INF("Running WOF Validation checking under FW controls");
     fapi2::ATTR_SYSTEM_WOF_VALIDATION_MODE_Type l_wof_mode;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_VALIDATION_MODE, FAPI_SYSTEM, l_wof_mode));
+    FAPI_INF("Running WOF Validation checking under FW controls = %d", l_wof_mode);
 #else
-    FAPI_INF("Running WOF Validation checking under LAB controls");
     fapi2::ATTR_SYSTEM_WOF_LAB_VALIDATION_MODE_Type l_wof_mode;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_LAB_VALIDATION_MODE, FAPI_SYSTEM, l_wof_mode));
+    FAPI_INF("Running WOF Validation checking under LAB controls = %d", l_wof_mode);
 #endif
 
     VRT_t l_vrt;

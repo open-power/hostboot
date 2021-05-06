@@ -151,6 +151,22 @@ double internal_floor(double x)
 }
 
 /// -----------------------------------------------------------------------
+/// @brief Compute the rounded value for a given input
+/// @param[in]     x value
+/// @return rounded value
+/// -----------------------------------------------------------------------
+double internal_round(double x)
+{
+
+    if(x >= 0)
+    {
+        return static_cast<int>(x + 0.5);
+    }
+
+    return static_cast<int>(x - 0.5 - 0.9999999999999999);
+}
+
+/// -----------------------------------------------------------------------
 /// @brief Adjust bias value for given frequency value
 /// @param[in]     i_value  frequency value
 /// @param[in]     i_bias_0p5pct  bias value

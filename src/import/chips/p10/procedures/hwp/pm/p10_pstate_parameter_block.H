@@ -51,11 +51,13 @@ typedef enum
     COMPUTE_VOLTAGE_SETTINGS,
     APPLY_VOLTAGE_SETTINGS
 } VoltageConfigActions_t;
+
 typedef enum VPD_TYPE
 {
     RAW,
     BIASED,
 } vpd_type;
+
 typedef enum VOLTAGE_TYPE
 {
     VDD = 0,
@@ -68,7 +70,8 @@ typedef enum VOLTAGE_TYPE
 enum FREQ2PSTATE_ROUNDING
 {
     ROUND_FAST,
-    ROUND_SLOW
+    ROUND_SLOW,
+    ROUND_NEAR
 };
 
 enum PPB_ERROR
@@ -476,9 +479,9 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Compute VPD points of different regions
-        /// @return none
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
-        void compute_vpd_pts();
+        fapi2::ReturnCode compute_vpd_pts();
 
         /// -----------------------------------------------------------------------
         /// @brief Read IQ vpd data

@@ -1689,7 +1689,7 @@
         WARN = 2,
         OFF  = 3
     </enum>
-    <default>WARN</default>
+    <default>OFF</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>

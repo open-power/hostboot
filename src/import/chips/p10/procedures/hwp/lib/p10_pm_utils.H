@@ -68,6 +68,13 @@ double internal_ceil(double x);
 /// ----------------------------------------------------------------------------
 double internal_floor(double x);
 
+/// -----------------------------------------------------------------------
+/// @brief Compute the rounded value for a given input
+/// @param[in]     x value
+/// @return rounded value
+/// -----------------------------------------------------------------------
+double internal_round(double x);
+
 /// ----------------------------------------------------------------------------
 /// @brief Adjust bias value for given frequency value
 /// @param[in]     i_value  frequency value
