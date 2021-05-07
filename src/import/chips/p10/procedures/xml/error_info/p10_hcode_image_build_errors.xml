@@ -553,6 +553,7 @@
     <ffdc>QME_HCODE_SIZE</ffdc>
     <ffdc>CMN_RING_SIZE</ffdc>
     <ffdc>INST_RING_SIZE</ffdc>
+    <ffdc>SCOM_RESTORE_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

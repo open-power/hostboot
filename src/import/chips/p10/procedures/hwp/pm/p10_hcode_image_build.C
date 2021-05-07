@@ -2118,11 +2118,8 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
             ( XgpeHeader_t *) &i_pChipHomer->iv_xpmrRegion.iv_xgpeSramRegion[XGPE_INT_VECTOR_SIZE];
 
     pCpmrHdr->iv_cpmrMagicWord      =   htobe64(CPMR_MAGIC_NUMBER);
+    pQmeImgHdr->g_qme_magic_number  =   htobe64(SCOM_RESTORE_OPT_VER);
 
-    if( pQmeImgHdr->g_qme_magic_number != htobe64(QME_SRAM_OPT_VER ))
-    {
-        pQmeImgHdr->g_qme_magic_number  =   htobe64(QME_SRAM_MAGIC_WORD);
-    }
     //QME image header magic word will come from hw image. This is for
     //managing compatibility between hw image and hcode image build.
     l_pPpmrHdr->iv_ppmrMagicWord    =   htobe64(PPMR_MAGIC_NUMBER);
@@ -2717,17 +2714,17 @@ fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncMode
             l_tempSize = htobe32( pCpmrHdr->iv_specRingLength);
         }
 
-        if( l_tempSize <  htobe32( pImgHdr->g_qme_coreL2ScomLength ) )
+        if( l_tempSize <  ( htobe32( pImgHdr->g_qme_coreL2ScomLength ) >> 2 ) )
         {
-            l_tempSize = htobe32( pImgHdr->g_qme_coreL2ScomLength );
+            l_tempSize = ( htobe32( pImgHdr->g_qme_coreL2ScomLength ) >> 2 );
         }
 
-        if( l_tempSize <  htobe32( pImgHdr->g_qme_L3ScomLength ) )
+        if( l_tempSize < ( htobe32( pImgHdr->g_qme_L3ScomLength ) >> 2 ) )
         {
-            l_tempSize = htobe32( pImgHdr->g_qme_L3ScomLength );
+            l_tempSize = ( htobe32( pImgHdr->g_qme_L3ScomLength ) >> 2 );
         }
 
-        FAPI_DBG( "QME Hcode Size 0x%08x, QME SRAM Buffer Size 0x%08x Max of Rings and Scom Restore 0x%08x ",
+        FAPI_INF( "QME Hcode Size 0x%08x, QME SRAM Buffer Size 0x%08x Max of Rings and Scom Restore 0x%08x ",
                     htobe32( pCpmrHdr->iv_qmeImgLength ), l_bceBufSize, l_tempSize );
 
         FAPI_ASSERT( ( l_bceBufSize >= l_tempSize ),
@@ -2735,7 +2732,8 @@ fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncMode
                      .set_BCE_BUF_SIZE( l_bceBufSize )
                      .set_QME_HCODE_SIZE( htobe32( pCpmrHdr->iv_qmeImgLength ) )
                      .set_CMN_RING_SIZE( htobe32( pCpmrHdr->iv_commonRingLength ) )
-                     .set_INST_RING_SIZE( htobe32( pCpmrHdr->iv_specRingLength ) ),
+                     .set_INST_RING_SIZE( htobe32( pCpmrHdr->iv_specRingLength ) )
+                     .set_SCOM_RESTORE_SIZE( htobe32( pImgHdr->g_qme_L3ScomLength ) + htobe32( pImgHdr->g_qme_coreL2ScomLength ) ),
                      "BCE Buffer cannot contain all non-hcode sections of QME image BCE Buf 0x%08x Max Non Hcode Sectn 0x%08x",
                      l_bceBufSize, l_tempSize );
     }
