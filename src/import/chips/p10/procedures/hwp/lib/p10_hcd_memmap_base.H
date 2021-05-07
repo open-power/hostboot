@@ -63,6 +63,7 @@ HCD_CONST(PGPE_BUILD_VERSION,                   0x001) // PGPE_1.0
 HCD_CONST(CPMR_REGION_CHECK_WORD,               (0x43504d52))             // CPMR
 HCD_CONST(SCOM_REST_MAGIC_WORD,                 (0x5343))//SC
 HCD_CONST(CPMR_BUILD_VER,                       1)
+HCD_CONST64(SCOM_RESTORE_OPT_VER,               ULL(0x514d455f5f312e32)) // QME__1.2
 
 
 /// Size constants
