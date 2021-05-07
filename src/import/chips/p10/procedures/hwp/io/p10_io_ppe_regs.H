@@ -219,6 +219,7 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_bad_eye_opt_width[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_bank_sync_fail[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_ber_fail[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_ber_timer_sel_bist[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_clr_lane_recal_cnt[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_cmd_init_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_ctle_gain_fail[5];
@@ -241,6 +242,7 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_hysteresis[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_measure_limited[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_min_err_lim[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_small_eye_warning[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_ap[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_clkadj_coeff[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_debug[5];
@@ -253,8 +255,6 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_min_check[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_disable_bank_pdwn[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_enable_auto_recal[5];
-        p10_io_ppe_sram_reg p10_io_ppe_rx_enable_lane_cal_copy[5];
-        p10_io_ppe_sram_reg p10_io_ppe_rx_enable_lane_cal_lte_copy[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_eo_converged_end_count[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_eo_enable_bank_sync[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_eo_enable_ctle_peak_cal[5];
@@ -288,9 +288,10 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_hist_min_eye_width_valid[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_init_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lane_bad[5];
-        p10_io_ppe_sram_reg p10_io_ppe_rx_lane_bad_0_15[5];
-        p10_io_ppe_sram_reg p10_io_ppe_rx_lane_bad_16_23[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lane_busy[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_lane_fail_0_15[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_lane_fail_16_23[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_lane_fail_cnt[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lane_hist_min_eye_height[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lane_hist_min_eye_height_bank[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lane_hist_min_eye_height_latch[5];

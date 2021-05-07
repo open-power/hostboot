@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,14 @@ static const uint32_t HANG_PULSE_5_REG_HANG_PULSE_REG_5_LEN = 6;
 static const uint32_t HANG_PULSE_5_REG_SUPPRESS_HANG_5 = 6;
 //<< [HANG_PULSE_5_REG]
 // iohs/reg00030.H
+
+//>> [IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG]
+static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG = 0x800a800010012c3full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1 = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1_LEN = 16;
+//<< [IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG]
+// iohs/reg00033.H
 
 //>>THE END<<
 

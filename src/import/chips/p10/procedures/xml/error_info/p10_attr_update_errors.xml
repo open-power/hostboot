@@ -1,0 +1,107 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_attr_update_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2021                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot -->
+<hwpErrors>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_ATTR_UPDATE_MVPD_READ_ERR</rc>
+  <description>
+    Procedure: p10_attr_update
+    Invalid MER0 record size read from MVPD
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>KEYWORD</ffdc>
+  <ffdc>KEYWORD_SIZE</ffdc>
+  <callout>
+    <hw>
+      <hwid>VPD_PART</hwid>
+      <refTarget>TARGET</refTarget>
+    </hw>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_ATTR_UPDATE_VD_KEYWORD_VERSION_ERR</rc>
+  <description>
+    Procedure: p10_attr_update
+    Unsupported MER0 VD keyword version value found in MVPD
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>VERSION</ffdc>
+  <callout>
+    <hw>
+      <hwid>VPD_PART</hwid>
+      <refTarget>TARGET</refTarget>
+    </hw>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_ATTR_UPDATE_PDI_KEYWORD_HEADER_ERR</rc>
+  <description>
+    Procedure: p10_attr_update
+    Unsupported MER0 #I keyword header content found in MVPD
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>HEADER_B0</ffdc>
+  <ffdc>HEADER_B1</ffdc>
+  <ffdc>HEADER_B2</ffdc>
+  <ffdc>HEADER_B3</ffdc>
+  <ffdc>HEADER_B4</ffdc>
+  <ffdc>HEADER_B5</ffdc>
+  <callout>
+    <hw>
+      <hwid>VPD_PART</hwid>
+      <refTarget>TARGET</refTarget>
+    </hw>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_ATTR_UPDATE_PDI_KEYWORD_CHIPLET_ID_ERR</rc>
+  <description>
+    Procedure: p10_attr_update
+    Unsupported MER0 #I entry content found in MVPD
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>ENTRY_OFFSET</ffdc>
+  <ffdc>ENTRY_B0</ffdc>
+  <ffdc>ENTRY_B1</ffdc>
+  <ffdc>ENTRY_B2</ffdc>
+  <ffdc>CHIPLET_ID</ffdc>
+  <ffdc>UNIT_POS</ffdc>
+  <callout>
+    <hw>
+      <hwid>VPD_PART</hwid>
+      <refTarget>TARGET</refTarget>
+    </hw>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+</hwpErrors>

@@ -35,7 +35,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_fabric_link_layer.H>
-#include <p10_scom_iohs_c.H>
+#include <p10_scom_iohs.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -57,24 +57,92 @@ fapi2::ReturnCode p10_fabric_link_layer_train_link(
 
     FAPI_DBG("Start");
 
+    const uint8_t l_bitmap_rev[]   = { 7, 6, 5, 4, 8, 3, 2, 1, 0 };
+    const uint8_t l_bitmap_norev[] = { 0, 1, 2, 3, 8, 4, 5, 6, 7 };
     fapi2::buffer<uint64_t> l_dlp_control_data;
+    fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_Type l_bad_lane_vec_valid = fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_FALSE;
+    fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_Type l_bad_lane_vec = 0;
+    fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL_Type l_iohs_fabric_lane_reversal = 0;
 
     bool l_even = (i_en == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH) ||
                   (i_en == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY);
+
     bool l_odd  = (i_en == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH) ||
                   (i_en == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID, i_target, l_bad_lane_vec_valid));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC, i_target, l_bad_lane_vec));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL, i_target, l_iohs_fabric_lane_reversal));
 
     FAPI_TRY(GET_DLP_CONTROL(i_target, l_dlp_control_data),
              "Error from getScom (DLP_CONTROL)");
 
     if (l_even)
     {
+        if (l_bad_lane_vec_valid == fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_TRUE)
+        {
+            fapi2::buffer<uint64_t> l_dlp_link_rx_lane_control = 0;
+            fapi2::buffer<uint64_t> l_dlp_link_rx_lane_control_copy = 0;
+            const uint8_t* l_bitmap;
+            FAPI_TRY(GET_DLP_LINK0_RX_LANE_CONTROL(i_target, l_dlp_link_rx_lane_control));
+            l_dlp_link_rx_lane_control_copy.insert<0, 9, 0>(l_bad_lane_vec);
+
+            if (l_iohs_fabric_lane_reversal & 0x40) // rx lane reversal
+            {
+                l_bitmap = l_bitmap_rev;
+            }
+            else
+            {
+                l_bitmap = l_bitmap_norev;
+            }
+
+            for (uint8_t x = 0; x < 9; x++)
+            {
+                FAPI_DBG("Even, bit pos: %d (mapped to bit pos: %d)", x, l_bitmap[x]);
+                bool l_bit;
+                l_bit = l_dlp_link_rx_lane_control_copy.getBit(x);
+                FAPI_TRY(l_dlp_link_rx_lane_control.writeBit(l_bit, l_bitmap[x]));
+            }
+
+            FAPI_TRY(PUT_DLP_LINK0_RX_LANE_CONTROL(i_target, l_dlp_link_rx_lane_control));
+        }
+
+        FAPI_TRY(PREP_DLP_CONTROL(i_target));
         SET_DLP_CONTROL_0_PHY_TRAINING(l_dlp_control_data);
         SET_DLP_CONTROL_0_STARTUP(l_dlp_control_data);
     }
 
     if (l_odd)
     {
+        if (l_bad_lane_vec_valid == fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_TRUE)
+        {
+            fapi2::buffer<uint64_t> l_dlp_link_rx_lane_control = 0;
+            fapi2::buffer<uint64_t> l_dlp_link_rx_lane_control_copy = 0;
+            const uint8_t* l_bitmap;
+            FAPI_TRY(GET_DLP_LINK1_RX_LANE_CONTROL(i_target, l_dlp_link_rx_lane_control));
+            l_dlp_link_rx_lane_control_copy.insert<0, 9, 9>(l_bad_lane_vec);
+
+            if (l_iohs_fabric_lane_reversal & 0x10) // rx lane reversal
+            {
+                l_bitmap = l_bitmap_rev;
+            }
+            else
+            {
+                l_bitmap = l_bitmap_norev;
+            }
+
+            for (uint8_t x = 0; x < 9; x++)
+            {
+                FAPI_DBG("Odd, bit pos: %d (mapped to bit pos: %d)", x, l_bitmap[x]);
+                bool l_bit;
+                l_bit = l_dlp_link_rx_lane_control_copy.getBit(x);
+                FAPI_TRY(l_dlp_link_rx_lane_control.writeBit(l_bit, l_bitmap[x]));
+            }
+
+            FAPI_TRY(PUT_DLP_LINK1_RX_LANE_CONTROL(i_target, l_dlp_link_rx_lane_control));
+        }
+
+        FAPI_TRY(PREP_DLP_CONTROL(i_target));
         SET_DLP_CONTROL_1_PHY_TRAINING(l_dlp_control_data);
         SET_DLP_CONTROL_1_STARTUP(l_dlp_control_data);
     }

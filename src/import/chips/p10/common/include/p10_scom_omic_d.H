@@ -102,6 +102,14 @@ static const uint32_t CTL_REGS_TX_CNTL6_PG_TX_TDR_PULSE_WIDTH_LEN = 9;
 //<< [CTL_REGS_TX_CNTL6_PG]
 // omic/reg00013.H
 
+//>> [DATASM_REGS_RX_CNTL5_PG]
+static const uint64_t DATASM_REGS_RX_CNTL5_PG = 0x8009a84010012c3full;
+
+static const uint32_t DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15 = 48;
+static const uint32_t DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15_LEN = 16;
+//<< [DATASM_REGS_RX_CNTL5_PG]
+// omic/reg00013.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

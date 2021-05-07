@@ -379,6 +379,7 @@ fapi2::ReturnCode p10_fabric_iovalid_lane_validate(
     fapi2::buffer<uint64_t> l_dl_fir;
     uint64_t l_lane_failed           = 0x1FF;
     uint64_t l_lane_not_locked       = 0x1FF;
+    uint64_t l_lane_enabled          = 0x1FF;
     uint64_t l_lane_failed_count     = DL_NUM_LANES_PER_HALF_LINK;
     uint64_t l_lane_not_locked_count = DL_NUM_LANES_PER_HALF_LINK;
     o_bus_failed = false;
@@ -390,11 +391,9 @@ fapi2::ReturnCode p10_fabric_iovalid_lane_validate(
         FAPI_TRY(GET_DLP_LINK0_RX_LANE_CONTROL(i_iohs_target, l_dl_rx_control),
                  "Error from getScom (DLP_LINK0_RX_LANE_CONTROL)");
 
-        // extract first 8 lanes, last lane is spare
         GET_DLP_LINK0_RX_LANE_CONTROL_FAILED(l_dl_rx_control, l_lane_failed);
-        l_lane_failed = l_lane_failed >> 1;
-
         l_dl_rx_control.invert();
+        GET_DLP_LINK0_RX_LANE_CONTROL_DISABLED(l_dl_rx_control, l_lane_enabled);
         GET_DLP_LINK0_RX_LANE_CONTROL_LOCKED(l_dl_rx_control, l_lane_not_locked);
     }
     else
@@ -402,13 +401,17 @@ fapi2::ReturnCode p10_fabric_iovalid_lane_validate(
         FAPI_TRY(GET_DLP_LINK1_RX_LANE_CONTROL(i_iohs_target, l_dl_rx_control),
                  "Error from getScom (DLP_LINK1_RX_LANE_CONTROL)");
 
-        // extract first 8 lanes, last lane is spare
         GET_DLP_LINK1_RX_LANE_CONTROL_FAILED(l_dl_rx_control, l_lane_failed);
-        l_lane_failed = l_lane_failed >> 1;
-
         l_dl_rx_control.invert();
+        GET_DLP_LINK1_RX_LANE_CONTROL_DISABLED(l_dl_rx_control, l_lane_enabled);
         GET_DLP_LINK1_RX_LANE_CONTROL_LOCKED(l_dl_rx_control, l_lane_not_locked);
     }
+
+    FAPI_DBG("Lane status: lanes failed = 0x%03X, lanes not locked = 0x%03X, lanes enabled = 0x%03X",
+             l_lane_failed, l_lane_not_locked, l_lane_enabled);
+
+    l_lane_failed &= l_lane_enabled;
+    l_lane_not_locked &= l_lane_enabled;
 
     p10_fabric_iovalid_count_ones(l_lane_failed, l_lane_failed_count);
     p10_fabric_iovalid_count_ones(l_lane_not_locked, l_lane_not_locked_count);
@@ -1156,6 +1159,79 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Force psav on bad lanes
+///
+/// @param[in] i_target         Reference to IOHS target to configure
+///
+/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_psav_bad_lanes(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target)
+{
+    FAPI_DBG("Begin");
+    using namespace scomt::pauc;
+    using namespace scomt::iohs;
+
+    fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_Type l_bad_valid;
+    fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_Type l_bad_vec;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID, i_iohs_target, l_bad_valid),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_MFG_BAD_LANE_VEC_VALID)");
+
+    if (l_bad_valid == fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_TRUE)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC, i_iohs_target, l_bad_vec),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_MFG_BAD_LANE_VEC)");
+
+        if (l_bad_vec != 0)
+        {
+            fapi2::buffer<uint64_t> l_data;
+
+            FAPI_TRY(GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG(i_iohs_target, l_data));
+
+            l_data.insert(l_bad_vec,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1_LEN,
+                          0);
+
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG(i_iohs_target, l_data));
+
+
+            FAPI_TRY(GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG(i_iohs_target, l_data));
+
+            l_data.insert(l_bad_vec,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG_RX_PSAVE_FORCE_REQ_16_23_1,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG_RX_PSAVE_FORCE_REQ_16_23_1_LEN,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNT32_PG_RX_PSAVE_FORCE_REQ_0_15_1_LEN);
+
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT33_PG(i_iohs_target, l_data));
+
+
+            FAPI_TRY(GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG(i_iohs_target, l_data));
+
+            l_data.insert(l_bad_vec,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15_LEN,
+                          0);
+
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG(i_iohs_target, l_data));
+
+            FAPI_TRY(GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG(i_iohs_target, l_data));
+
+            l_data.insert(l_bad_vec,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG_RX_PSAVE_FENCE_REQ_DL_IO_16_23,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG_RX_PSAVE_FENCE_REQ_DL_IO_16_23_LEN,
+                          IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15_LEN);
+
+            FAPI_TRY(PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL6_PG(i_iohs_target, l_data));
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
 /// @brief Update iovalid settings for fabric links (A/X) associated with
 ///        provided IOHS target
 ///
@@ -1340,6 +1416,8 @@ fapi2::ReturnCode p10_fabric_iovalid(
                          "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_LINK_DELAY");
                 FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_LINK_DELAY, i_target, l_a_agg_link_delay),
                          "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_LINK_DELAY");
+
+                FAPI_TRY(p10_psav_bad_lanes(l_iohs));
             }
         }
         else

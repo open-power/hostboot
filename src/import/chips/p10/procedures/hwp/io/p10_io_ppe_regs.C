@@ -1079,6 +1079,14 @@ p10_io_ppe_rx_ber_fail
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b000000101, 0x1, 0),
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b000000101, 0x1, 0)
 },
+p10_io_ppe_rx_ber_timer_sel_bist
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b110000101, 0xf000, 12),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b110000101, 0xf000, 12),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b110000101, 0xf000, 12),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b110000101, 0xf000, 12),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b110000101, 0xf000, 12)
+},
 p10_io_ppe_rx_clr_lane_recal_cnt
 {
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b000000001, 0x8000, 15),
@@ -1255,6 +1263,14 @@ p10_io_ppe_rx_ddc_min_err_lim
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b110001110, 0x38, 3),
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b110001110, 0x38, 3)
 },
+p10_io_ppe_rx_ddc_small_eye_warning
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b000000100, 0x10, 4),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b000000100, 0x10, 4),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b000000100, 0x10, 4),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b000000100, 0x10, 4),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b000000100, 0x10, 4)
+},
 p10_io_ppe_rx_dfe_ap
 {
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b000001001, 0xff, 0),
@@ -1350,22 +1366,6 @@ p10_io_ppe_rx_enable_auto_recal
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b000000000, 0x4000, 14),
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b000000000, 0x4000, 14),
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b000000000, 0x4000, 14)
-},
-p10_io_ppe_rx_enable_lane_cal_copy
-{
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b110000011, 0x4, 2),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b110000011, 0x4, 2),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b110000011, 0x4, 2),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b110000011, 0x4, 2),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b110000011, 0x4, 2)
-},
-p10_io_ppe_rx_enable_lane_cal_lte_copy
-{
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b110000011, 0x2, 1),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b110000011, 0x2, 1),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b110000011, 0x2, 1),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b110000011, 0x2, 1),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b110000011, 0x2, 1)
 },
 p10_io_ppe_rx_eo_converged_end_count
 {
@@ -1631,22 +1631,6 @@ p10_io_ppe_rx_lane_bad
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b000000100, 0x20, 5),
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b000000100, 0x20, 5)
 },
-p10_io_ppe_rx_lane_bad_0_15
-{
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b111000101, 0xffff, 0),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b111000101, 0xffff, 0),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b111000101, 0xffff, 0),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b111000101, 0xffff, 0),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b111000101, 0xffff, 0)
-},
-p10_io_ppe_rx_lane_bad_16_23
-{
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b111000110, 0xff00, 8),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b111000110, 0xff00, 8),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b111000110, 0xff00, 8),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b111000110, 0xff00, 8),
-    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b111000110, 0xff00, 8)
-},
 p10_io_ppe_rx_lane_busy
 {
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b000000100, 0x2000, 13),
@@ -1654,6 +1638,30 @@ p10_io_ppe_rx_lane_busy
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b000000100, 0x2000, 13),
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b000000100, 0x2000, 13),
     p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b000000100, 0x2000, 13)
+},
+p10_io_ppe_rx_lane_fail_0_15
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b111000101, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b111000101, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b111000101, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b111000101, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b111000101, 0xffff, 0)
+},
+p10_io_ppe_rx_lane_fail_16_23
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b111000110, 0xff00, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b111000110, 0xff00, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b111000110, 0xff00, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b111000110, 0xff00, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b111000110, 0xff00, 8)
+},
+p10_io_ppe_rx_lane_fail_cnt
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[0], 0b111001011, 0x6, 1),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[1], 0b111001011, 0x6, 1),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[2], 0b111001011, 0x6, 1),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[3], 0b111001011, 0x6, 1),
+    p10_io_ppe_sram_reg(&p10_io_ppe_mem_regs[4], 0b111001011, 0x6, 1)
 },
 p10_io_ppe_rx_lane_hist_min_eye_height
 {

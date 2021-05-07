@@ -38,8 +38,6 @@
 #include <p10_scom_iohs.H>
 #include <p10_scom_omi.H>
 #include <p10_io_lib.H>
-//#include <p10_scom_iohs_0_unused.H>
-//#include <p10_scom_iohs_1_unused.H>
 
 class p10_io_init : public p10_io_ppe_cache_proc
 {
@@ -47,6 +45,7 @@ class p10_io_init : public p10_io_ppe_cache_proc
         fapi2::ReturnCode lane_reversal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
         fapi2::ReturnCode flush_mem_regs();
         fapi2::ReturnCode flush_fw_regs();
+        fapi2::ReturnCode disable_bad_lanes(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target);
         fapi2::ReturnCode init_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
         fapi2::ReturnCode img_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
         fapi2::ReturnCode sim_speedup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
@@ -292,6 +291,70 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Disable bad lanes
+///
+/// @param[in] i_iohs_target target to disable bad lanes
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_init::disable_bad_lanes(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target)
+{
+    FAPI_DBG("Begin");
+    using namespace scomt::pauc;
+    using namespace scomt::iohs;
+
+    fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_Type l_bad_valid;
+    fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_Type l_bad_vec;
+    int l_thread = 0;
+    fapi2::Target<fapi2::TARGET_TYPE_PAUC> l_pauc_target = i_iohs_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+
+    FAPI_TRY(p10_io_get_iohs_thread(i_iohs_target, l_thread));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID, i_iohs_target, l_bad_valid),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_MFG_BAD_LANE_VEC_VALID)");
+
+    if (l_bad_valid == fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_TRUE)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC, i_iohs_target, l_bad_vec),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_MFG_BAD_LANE_VEC)");
+
+        if (l_bad_vec != 0)
+        {
+            uint32_t l_mask = 0x80000000;
+
+            for (int l_lane = 0; l_lane < P10_IO_LIB_NUMBER_OF_IOHS_LANES; l_lane++)
+            {
+                if ((l_mask & l_bad_vec) == l_mask)
+                {
+
+                    FAPI_TRY(p10_io_iohs_put_pl_regs_single(i_iohs_target,
+                                                            IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL,
+                                                            IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL_RUN_LANE_DL_MASK,
+                                                            1,
+                                                            l_lane,
+                                                            1));
+
+                    FAPI_TRY(p10_io_iohs_put_pl_regs_single(i_iohs_target,
+                                                            IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_CNTL1_PL,
+                                                            IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_CNTL1_PL_INIT_DONE,
+                                                            1,
+                                                            l_lane,
+                                                            1));
+
+                    FAPI_TRY(p10_io_ppe_rx_recal_abort[l_thread].putData(l_pauc_target, 1, l_lane));
+
+                }
+
+                l_mask >>= 1;
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
 /// @brief Setup custom init settings for the mem regs
 ///
 /// @param[in] i_target Chip target to start
@@ -307,7 +370,10 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
 
     fapi2::ATTR_FREQ_OMI_MHZ_Type l_omi_freq;
     fapi2::ATTR_FREQ_IOHS_LINK_MHZ_Type l_iohs_freq;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW550299_Type l_hw550299;
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW550299, i_target, l_hw550299),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW550299)");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_omi_freq),
              "Error from FAPI_ATTR_GET (ATTR_FREQ_OMI_MHZ)");
@@ -416,6 +482,8 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
             FAPI_TRY(p10_io_ppe_ppe_channel_loss[l_thread].putData(l_pauc_target, l_ppe_channel_loss));
 
             FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_full_cal[l_thread].putData(l_pauc_target, 0x0));
+
+            FAPI_TRY(disable_bad_lanes(l_iohs_target));
         }
 
         for (auto l_omic_target : l_omic_targets)
@@ -506,9 +574,13 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
 
                 // Eye Opt / Recal Steps
                 //FAPI_TRY(p10_io_ppe_tx_dc_enable_dcc[l_thread].putData(l_pauc_target, 0x0));
-                FAPI_TRY(p10_io_ppe_rx_eo_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_full_cal [l_thread].putData(l_pauc_target, 0x0));
-                FAPI_TRY(p10_io_ppe_rx_rc_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
+
+                if (l_hw550299)
+                {
+                    FAPI_TRY(p10_io_ppe_rx_eo_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
+                    FAPI_TRY(p10_io_ppe_rx_rc_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
+                }
 
             }
         }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,6 +108,17 @@ static const uint32_t DLP_FIR_REG_0_INTERNAL_ERROR = 60;
 static const uint32_t DLP_FIR_REG_1_INTERNAL_ERROR = 61;
 //<< [DLP_FIR_REG]
 // iohs/reg00025.H
+
+//>> [IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL]
+static const uint64_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL = 0x8003d00010012c3full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL_RUN_LANE_DL_MASK = 50;
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_MASK = 51;
+static const uint32_t IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
+//<< [IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL]
+// iohs/reg00028.H
 
 //>>THE END<<
 

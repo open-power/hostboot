@@ -75,6 +75,7 @@
     </description>
     <valueType>uint32</valueType>
     <initToZero/>
+    <writeable/>
   </attribute>
 
   <attribute>
@@ -91,6 +92,7 @@
       TRUE = 1
     </enum>
     <default>FALSE</default>
+    <writeable/>
   </attribute>
 
   <attribute>
