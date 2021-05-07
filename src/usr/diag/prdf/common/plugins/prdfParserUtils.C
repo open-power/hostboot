@@ -126,9 +126,9 @@ uint8_t nibble2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_x4Dram )
     static const uint8_t nibble2symbol[] =
     {
         68, 36, 64, 32, 60, // nibbles 0-4
-        28, 56, 24,  4,  0, // nibbles 5-9
-        sp, sp, 52, 20, 48, // nibbles 10-14
-        16, 44, 12, 40,  8, // nibbles 15-19
+        28, 56, 24, 52, 20, // nibbles 5-9
+        48, 16, 44, 12, 40, // nibbles 10-14
+         8,  4,  0, sp, sp, // nibbles 15-19
     };
 
     if ( NIBBLES_PER_DIMM > i_x4Dram )
@@ -149,8 +149,8 @@ uint8_t byte2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_x8Dram )
 
     static const uint8_t byte2symbol[] =
     {
-        36, 32, 28, 24, 0, // bytes 0-4
-        sp, 20, 16, 12, 8, // bytes 5-9
+        36, 32, 28, 24, 20, // bytes 0-4
+        16, 12,  8,  0, sp, // bytes 5-9
     };
 
     if ( BYTES_PER_DIMM > i_x8Dram )
