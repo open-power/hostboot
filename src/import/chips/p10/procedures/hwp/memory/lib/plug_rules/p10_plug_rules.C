@@ -45,10 +45,9 @@
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
-#include <lib/shared/p10_consts.H>
-
 #include <lib/plug_rules/p10_plug_rules.H>
 #include <lib/dimm/exp_kind.H>
+
 
 namespace mss
 {
@@ -65,8 +64,6 @@ fapi2::ReturnCode check_mds(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_targe
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_worst_rc = fapi2::FAPI2_RC_SUCCESS;
-
-
 
     bool l_is_mds = false;
     bool l_mds_dimm = false;
@@ -304,6 +301,7 @@ fapi2::ReturnCode reset_n_dead_load(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 
 } // ns plug_rule
 

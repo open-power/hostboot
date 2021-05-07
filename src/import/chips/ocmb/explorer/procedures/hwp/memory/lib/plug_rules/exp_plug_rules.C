@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <lib/plug_rules/exp_plug_rules.H>
 #include <mss_explorer_attribute_getters.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 
 namespace mss
 {
@@ -150,6 +151,97 @@ fapi2::ReturnCode enterprise_mode(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Plug rule for no mixing DIMM size
+/// @param[in] i_target omic target
+/// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will commit error logs representing the mixing failure
+///
+fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                                   const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_ignore_dimm_size_mix_plug_rule = 0;
+    constexpr uint8_t MAX_DIMM_PER_OMIC = 2;
+
+    // If there are one or fewer DIMM's, we can just get out.
+    if (i_kinds.size() < MAX_DIMM_PER_OMIC)
+    {
+        FAPI_INF("Skipping dimm size mixing plug rule check on %s because it doesn't have 2 DIMMS", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // get the ignore plug attr
+    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules_dimm_size_mix(l_ignore_dimm_size_mix_plug_rule) );
+
+    if(l_ignore_dimm_size_mix_plug_rule == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_DIMM_SIZE_MIX_YES)
+    {
+        FAPI_INF("%s Attribute set to ignore dimm size mixing plug rule checking", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    //If we have 1 or 0 DIMMs on the port, we don't care
+
+    FAPI_ASSERT( (i_kinds[1].iv_size <= i_kinds[0].iv_size),
+                 fapi2::MSS_PLUG_RULES_INVALID_DIMM_SIZE_MIX()
+                 .set_SMALLER_DIMM_TARGET(i_kinds[0].iv_target)
+                 .set_LARGER_DIMM_TARGET(i_kinds[1].iv_target)
+                 .set_SMALLER_DIMM_SIZE(i_kinds[0].iv_size)
+                 .set_LARGER_DIMM_SIZE(i_kinds[1].iv_size)
+                 .set_OMIC_TARGET(i_target),
+                 "%s has two different sizes of DIMM installed of size %d  and of size %d. Cannot mix DIMM sizes on OMIC channel pair",
+                 mss::c_str(i_target), i_kinds[1].iv_size, i_kinds[0].iv_size );
+
+    FAPI_ASSERT( (i_kinds[0].iv_size <= i_kinds[1].iv_size),
+                 fapi2::MSS_PLUG_RULES_INVALID_DIMM_SIZE_MIX()
+                 .set_SMALLER_DIMM_TARGET(i_kinds[1].iv_target)
+                 .set_LARGER_DIMM_TARGET(i_kinds[0].iv_target)
+                 .set_SMALLER_DIMM_SIZE(i_kinds[1].iv_size)
+                 .set_LARGER_DIMM_SIZE(i_kinds[0].iv_size)
+                 .set_OMIC_TARGET(i_target),
+                 "%s has two different sizes of DIMM installed of size %d and of size %d. Cannot mix DIMM sizes on OMIC channel pair",
+                 mss::c_str(i_target), i_kinds[0].iv_size, i_kinds[1].iv_size );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enforce the plug-rules we can do at the beginning of eff_config_thermal
+/// @param[in] i_target FAPI2 target (ocmb_chip)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target));
+
+    // Get vector of l_kinds
+    std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>> l_kinds;
+
+    // Get the vector of DIMMS to be checked for size
+    for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(l_omic))
+    {
+        for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
+        {
+            for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
+            {
+                l_kinds.push_back(mss::dimm::kind<mss::mc_type::EXPLORER>(l_dimm));
+            }
+        }
+    }
+
+    // Checking the plug rule for dimm size mix
+    FAPI_TRY( dimm_size_mixing( l_omic, l_kinds ) );
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // plug_rule
 } // exp
 } // mss

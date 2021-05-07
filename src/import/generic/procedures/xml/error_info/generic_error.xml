@@ -1738,4 +1738,30 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_DIMM_SIZE_MIX</rc>
+    <description>
+        Memory addressing setup requires DIMMs under an OMI channel pair to be of equal size.
+        If this is not the case, the DIMM with the smaller size will be deconfigured.
+        For characterization testing this plug rule can be skipped by overriding
+        ATTR_MEM_IGNORE_PLUG_RULES_DIMM_SIZE_MIX
+    </description>
+    <ffdc>SMALLER_DIMM_TARGET</ffdc>
+    <ffdc>LARGER_DIMM_TARGET</ffdc>
+    <ffdc>SMALLER_DIMM_SIZE</ffdc>
+    <ffdc>LARGER_DIMM_SIZE</ffdc>
+    <ffdc>OMIC_TARGET</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+      <target>SMALLER_DIMM_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>SMALLER_DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

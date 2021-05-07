@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #define _EXP_PLUG_RULES_H_
 
 #include <fapi2.H>
+#include <lib/dimm/exp_kind.H>
 
 namespace mss
 {
@@ -74,6 +75,24 @@ fapi2::ReturnCode enterprise_mode(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const bool i_enterprise_fuse,
     bool& o_is_enterprise_mode );
+
+///
+/// @brief Plug rule for no mixing DIMM size
+/// @param[in] i_target omic target
+/// @param[in] i_kinds a vector of DIMM (sorted while procesing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+/// @note This function will commit error logs representing the mixing failure
+///
+fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                                   const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds);
+
+
+///
+/// @brief Enforce the plug-rules we can do at the beginning of eff_config_thermal
+/// @param[in] i_target FAPI2 target (OCMB Chip)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+///
+fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 } // plug_rule
 } // exp

@@ -152,7 +152,7 @@ const mss::states exp_is_broadcast_capable(const std::vector<fapi2::Target<fapi2
 /// @param[in] i_kinds the dimms to effect
 /// @return o_capable - yes iff these vector of targets are broadcast capable
 ///
-const mss::states exp_is_broadcast_capable(const std::vector<mss::dimm::kind<>>& i_kinds);
+const mss::states exp_is_broadcast_capable(const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds);
 
 ///
 /// @brief Undeploy the specified spare on the provided rank for Explorer

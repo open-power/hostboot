@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,7 @@ namespace dimm
 /// @tparam MC the MC type
 /// @brief A class containing information about a dimm like ranks, density, configuration - what kind of dimm is it?
 ///
-template<mss::mc_type MC = DEFAULT_MC_TYPE>
+template<mss::mc_type MC>
 class kind
 {
     public:

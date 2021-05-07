@@ -273,7 +273,7 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_num_subrank = 0;
 
     // Determine repair data bounds
-    mss::dimm::kind<> l_kind(i_target);
+    mss::dimm::kind<mss::mc_type::EXPLORER> l_kind(i_target);
     // TODO: Move to helper function Zen#646
     l_num_dram = l_kind.iv_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ?
                  mss::exp::generic_consts::EXP_NUM_DRAM_X4 : mss::exp::generic_consts::EXP_NUM_DRAM_X8;

@@ -48,6 +48,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <lib/plug_rules/exp_plug_rules.H>
 
 extern "C"
 {
@@ -79,6 +80,14 @@ extern "C"
                      .set_MIN_UTIL_VALUE(l_min_util),
                      "MRW safemode util (%d centi percent) has less util than the min util allowed (%d centi percent)",
                      l_safemode_util, l_min_util );
+
+        for (const auto& l_ocmb : i_targets)
+        {
+            // Run eff_config_thermal so that we can run plug rules.
+            FAPI_INF("Running enforce_pre_eff_config_thermal on %s", mss::c_str(l_ocmb));
+            FAPI_TRY( mss::exp::plug_rule::enforce_pre_eff_config_thermal(l_ocmb),
+                      "Fail encountered in enforce_pre_eff_config_thermal for %s", mss::c_str(l_ocmb));
+        }
 
         for ( const auto& l_ocmb : i_targets)
         {
