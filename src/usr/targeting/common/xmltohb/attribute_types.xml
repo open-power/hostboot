@@ -3190,6 +3190,7 @@
     <description>
         Indicates types of Key Clear Requests are being made
     </description>
+    <no_export/>
     <persistency>non-volatile</persistency>
     <readable/>
     <simpleType>

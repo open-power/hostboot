@@ -188,9 +188,9 @@ void getKeyClearRequestAttr(TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
     SB_ENTER("getKeyClearRequestAttr");
 
     // Get the attributes associated with Key Clear Requests
-    Target* sys = UTIL::assertGetToplevelTarget();
+    Target* nodeTgt = UTIL::getCurrentNodeTarget();
 
-    o_keyClearRequests = sys->getAttr<ATTR_KEY_CLEAR_REQUEST>();
+    o_keyClearRequests = nodeTgt->getAttr<ATTR_KEY_CLEAR_REQUEST>();
 
     SB_EXIT("getKeyClearRequestAttr: o_keyClearRequests = 0x%.04X",
             o_keyClearRequests);
@@ -279,8 +279,8 @@ void getKeyClearRequest(bool & o_requestPhysPres,
     }
 
     // Set (potentially updated) Key Clear Requests attribute
-    Target* sys = UTIL::assertGetToplevelTarget();
-    sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(l_keyClearRequests);
+    Target* nodeTgt = UTIL::getCurrentNodeTarget();
+    nodeTgt->setAttr<ATTR_KEY_CLEAR_REQUEST>(l_keyClearRequests);
 
     } while (0);
 

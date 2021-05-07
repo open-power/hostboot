@@ -1393,6 +1393,9 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <id>KEY_CLEAR_REQUEST</id>
+    </attribute>
+    <attribute>
       <id>KEY_TRANSITION_STATE</id>
     </attribute>
     <attribute>

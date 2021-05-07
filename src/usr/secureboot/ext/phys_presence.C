@@ -73,14 +73,14 @@ errlHndl_t detectPhysPresence(void)
     bool doesKeyClearRequestPhysPres = false;
 
     // Get the attributes associated with Physical Presence
-    Target* sys = UTIL::assertGetToplevelTarget();
+    Target* nodeTgt = UTIL::getCurrentNodeTarget();
 
     do
     {
     uint8_t attr_open_window =
-        sys->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
+        nodeTgt->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
 
-    uint8_t attr_fake_assert = sys->getAttr<ATTR_PHYS_PRES_FAKE_ASSERT>();
+    uint8_t attr_fake_assert = nodeTgt->getAttr<ATTR_PHYS_PRES_FAKE_ASSERT>();
     // NOTE: Using attributes to request opening the physical presence window
     // and/or fake the assertion of physical presence is only for testing
     // purposes.  Both attributes will default to 'no' and cannot be changed
@@ -189,7 +189,7 @@ errlHndl_t detectPhysPresence(void)
                attr_fake_assert);
 
         // Write the attribute so faking the assert only happens once
-        sys->setAttr<ATTR_PHYS_PRES_FAKE_ASSERT>(0x0);
+        nodeTgt->setAttr<ATTR_PHYS_PRES_FAKE_ASSERT>(0x0);
     }
 
     SB_INF("detectPhysPresence: LEDs=0x%.2X, led_WO=0x%X, led_PPA=0x%X, "
@@ -329,7 +329,7 @@ errlHndl_t detectPhysPresence(void)
     {
         // If no error, including in closing the window, then write attribute
         // for Physical Presence Assertion
-        sys->setAttr<ATTR_PHYS_PRES_ASSERTED>(is_phys_pres_asserted);
+        nodeTgt->setAttr<ATTR_PHYS_PRES_ASSERTED>(is_phys_pres_asserted);
     }
 
     // If there is an error, but there was not a key clear request requiring
@@ -384,7 +384,7 @@ errlHndl_t handlePhysPresenceWindow(void)
     bool doAttrCrossOver = false;
 
     // Used to get the attributes associated with Physical Presence
-    Target* sys = UTIL::assertGetToplevelTarget();
+    Target* nodeTgt = UTIL::getCurrentNodeTarget();
 
     do
     {
@@ -395,11 +395,11 @@ errlHndl_t handlePhysPresenceWindow(void)
     // when security is enabled in a production driver since attribute
     // overrides are not allowed in that scenario.
     uint8_t attr_open_window =
-        sys->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
+        nodeTgt->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
 
-    uint8_t attr_phys_pres_asserted = sys->getAttr<ATTR_PHYS_PRES_ASSERTED>();
+    uint8_t attr_phys_pres_asserted = nodeTgt->getAttr<ATTR_PHYS_PRES_ASSERTED>();
 
-    uint8_t attr_phys_pres_reipl = sys->getAttr<ATTR_PHYS_PRES_REIPL>();
+    uint8_t attr_phys_pres_reipl = nodeTgt->getAttr<ATTR_PHYS_PRES_REIPL>();
 
     // Get info associated with Key Clear Requests - another possible reason
     // to open the Physical Presence Window
@@ -441,7 +441,7 @@ errlHndl_t handlePhysPresenceWindow(void)
                    attr_phys_pres_reipl);
 
             attr_phys_pres_reipl = 0x00;
-            sys->setAttr<ATTR_PHYS_PRES_REIPL>(attr_phys_pres_reipl);
+            nodeTgt->setAttr<ATTR_PHYS_PRES_REIPL>(attr_phys_pres_reipl);
         }
 
         if (attr_open_window != 0)
@@ -452,7 +452,7 @@ errlHndl_t handlePhysPresenceWindow(void)
                    "clearing open window request",
                    attr_open_window);
             attr_open_window = 0x00;
-            sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(attr_open_window);
+            nodeTgt->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(attr_open_window);
         }
 
         doAttrCrossOver = true;
@@ -474,7 +474,7 @@ errlHndl_t handlePhysPresenceWindow(void)
                doesKeyClearRequestPhysPres);
 
         attr_phys_pres_reipl = 0x00;
-        sys->setAttr<ATTR_PHYS_PRES_REIPL>(attr_phys_pres_reipl);
+        nodeTgt->setAttr<ATTR_PHYS_PRES_REIPL>(attr_phys_pres_reipl);
 
         doAttrCrossOver = true;
 
@@ -550,7 +550,7 @@ errlHndl_t handlePhysPresenceWindow(void)
     }
 
     // The PCA9551 device that controls the "window open" and
-    // "physical presence asserted" logic is connected to the master processor
+    // "physical presence asserted" logic is connected to the boot processor
     err = targetService().queryMasterProcChipTargetHandle(mproc);
     if(err)
     {
@@ -650,13 +650,13 @@ errlHndl_t handlePhysPresenceWindow(void)
     errlCommit( err_info, SECURE_COMP_ID );
 
     // Close request to open the window and sync attributes
-    sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(0x00);
-    attr_open_window = sys->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
+    nodeTgt->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(0x00);
+    attr_open_window = nodeTgt->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
 
     // Set the attribute telling us that this re-IPL is purposely for
     // opening a physical presence window
-    sys->setAttr<ATTR_PHYS_PRES_REIPL>(0x01);
-    attr_phys_pres_reipl = sys->getAttr<ATTR_PHYS_PRES_REIPL>();
+    nodeTgt->setAttr<ATTR_PHYS_PRES_REIPL>(0x01);
+    attr_phys_pres_reipl = nodeTgt->getAttr<ATTR_PHYS_PRES_REIPL>();
 
     SB_INF("handlePhysPresenceWindow: Closing request attr_open_window=0x0 (0x%.2X), "
            "and setting ATTR_PHYS_PRES_REIPL to 0x01 (0x%.2X)",
@@ -725,12 +725,10 @@ errlHndl_t handlePhysPresenceWindow(void)
     if (doAttrCrossOver == true)
     {
         // Convert ATTR_KEY_CLEAR_REQUEST to ATTR_KEY_CLEAR_REQUEST_HB
-        // and clear ATTR_KEY_CLEAR_REQUEST so this will get synced
-        // down to FSP in istep 16
+        // NOTE:  ATTR_KEY_CLEAR_REQUEST will be cleared right before
+        // attributes are synced down to FSP in istep 16
         keyClearRequests_HB = keyClearRequests;
-        keyClearRequests = KEY_CLEAR_REQUEST_NONE;
-        sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
-        sys->setAttr<ATTR_KEY_CLEAR_REQUEST_HB>(keyClearRequests_HB);
+        nodeTgt->setAttr<ATTR_KEY_CLEAR_REQUEST_HB>(keyClearRequests_HB);
     }
 
     SB_EXIT("handlePhysPresenceWindow: err_rc=0x%X",

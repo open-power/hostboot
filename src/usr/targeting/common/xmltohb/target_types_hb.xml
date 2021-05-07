@@ -203,7 +203,22 @@
       <id>IS_SLAVE_DRAWER</id>
     </attribute>
     <attribute>
+      <id>KEY_CLEAR_REQUEST_HB</id>
+    </attribute>
+    <attribute>
       <id>PART_NUMBER</id>
+    </attribute>
+    <attribute>
+      <id>PHYS_PRES_ASSERTED</id>
+    </attribute>
+    <attribute>
+      <id>PHYS_PRES_FAKE_ASSERT</id>
+    </attribute>
+    <attribute>
+      <id>PHYS_PRES_REIPL</id>
+    </attribute>
+    <attribute>
+      <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
     </attribute>
     <attribute>
       <id>SERIAL_NUMBER</id>
@@ -312,9 +327,6 @@
       <id>IS_MPIPL_HB</id>
     </attribute>
     <attribute>
-      <id>KEY_CLEAR_REQUEST_HB</id>
-    </attribute>
-    <attribute>
       <id>MASTER_MBOX_SCRATCH</id>
     </attribute>
     <attribute>
@@ -337,18 +349,6 @@
     </attribute>
     <attribute>
       <id>PDA_THREAD_REG_STATE_ENTRY_FORMAT</id>
-    </attribute>
-    <attribute>
-      <id>PHYS_PRES_ASSERTED</id>
-    </attribute>
-    <attribute>
-      <id>PHYS_PRES_FAKE_ASSERT</id>
-    </attribute>
-    <attribute>
-      <id>PHYS_PRES_REIPL</id>
-    </attribute>
-    <attribute>
-      <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
     </attribute>
     <attribute>
       <id>SBE_ARCH_DUMP_ADDR</id>

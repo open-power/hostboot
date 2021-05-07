@@ -1842,12 +1842,11 @@ errlHndl_t populate_hbSecurebootData ( void )
         l_sysSecSets->sbeSecBackdoor = sbe_security_backdoor;
 
         // populate "System Physical Presence has been asserted"
-        TARGETING::Target* sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget( sys );
-        assert(sys != nullptr, "populate_hbSecurebootData() - Could not obtain top level target");
+        Target* nodeTgt = UTIL::getCurrentNodeTarget();
+
         auto phys_pres_asserted = 0;
 #ifdef CONFIG_PHYS_PRES_PWR_BUTTON
-        phys_pres_asserted = sys->getAttr<TARGETING::ATTR_PHYS_PRES_ASSERTED>();
+        phys_pres_asserted = nodeTgt->getAttr<TARGETING::ATTR_PHYS_PRES_ASSERTED>();
 #endif
         l_sysSecSets->physicalPresenceAsserted = phys_pres_asserted;
 
@@ -1890,7 +1889,7 @@ errlHndl_t populate_hbSecurebootData ( void )
         // in HDAT spec; this enum is used for both ATTR_KEY_CLEAR_REQUEST
         // and ATTR_KEY_CLEAR_REQUEST_HB
         auto key_clear_request =
-            sys->getAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST_HB>();
+            nodeTgt->getAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST_HB>();
 
 #ifdef CONFIG_KEY_CLEAR
         // If Physical Presence was not asserted, then mask off all bits
@@ -1957,7 +1956,7 @@ errlHndl_t populate_hbSecurebootData ( void )
 
         // Clear the Key Clear Requests
         key_clear_request = KEY_CLEAR_REQUEST_NONE;
-        sys->setAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST_HB>(key_clear_request);
+        nodeTgt->setAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST_HB>(key_clear_request);
 #ifdef CONFIG_BMC_IPMI
         l_elog = SECUREBOOT::clearKeyClearSensor();
         if(l_elog != nullptr)

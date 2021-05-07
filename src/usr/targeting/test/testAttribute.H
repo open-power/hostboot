@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1290,6 +1290,7 @@ void AttributeTest::testGeneratedInvalidsForAttr(void)
     uint8_t l_numFails(0);
 
     Target* sys = UTIL::assertGetToplevelTarget();
+    Target* nodeTgt = UTIL::getCurrentNodeTarget();
 
     //tests for enums
     TS_TRACE(INFO_MRK "Testing Attribute Enums");
@@ -1383,12 +1384,12 @@ void AttributeTest::testGeneratedInvalidsForAttr(void)
     TS_TRACE(INFO_MRK "Testing Attribute Traits");
     TS_TRACE(INFO_MRK "Test3: PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID = 0x%X", test3);
 
-    auto defaultGet3 = sys->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
+    auto defaultGet3 = nodeTgt->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
 
     TS_TRACE(INFO_MRK "get default value for PHYS_PRES_REQUEST_OPEN_WINDOW = 0x%X", defaultGet3);
 
-    sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(test3);
-    test3 = sys->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
+    nodeTgt->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(test3);
+    test3 = nodeTgt->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
     TS_TRACE(INFO_MRK "set PHYS_PRES_REQUEST_OPEN_WINDOW to its INVALID value = 0x%X", test3 );
 
     ++l_numTests;
@@ -1416,7 +1417,7 @@ void AttributeTest::testGeneratedInvalidsForAttr(void)
         ++l_numFails;
     }
 
-    sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(defaultGet3);
+    nodeTgt->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(defaultGet3);
 
     //// END THIRD TEST CASE ////
     //test for strings

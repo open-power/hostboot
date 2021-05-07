@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -203,6 +203,11 @@ void* call_host_ipl_complete(void* const io_pArgs)
                       spAttnArea1Addr,
                       spAttnArea2Addr);
         }
+
+        // Clear ATTR_KEY_CLEAR_REQUEST before sync.
+        // Any Key Clear Request should have already been saved in ATTR_KEY_CLEAR_REQUEST_HB
+        auto keyClearRequests = KEY_CLEAR_REQUEST_NONE;
+        sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
 
         // Sync attributes to Fsp/Bmc
         l_err = TARGETING::AttrRP::syncAllAttributesToSP();

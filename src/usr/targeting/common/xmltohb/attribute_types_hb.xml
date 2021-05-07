@@ -914,6 +914,8 @@
           KEY_CLEAR_REQUEST so that the shared attribute can be cleared and
           synced with the FSP on istep 16.
     </description>
+    <hbOnly/>
+    <no_export/>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <simpleType>
@@ -1217,6 +1219,7 @@
         <default>0x0</default>
       </uint8_t>
     </simpleType>
+    <no_export/>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
@@ -1235,6 +1238,7 @@
         <default>0x0</default>
       </uint8_t>
     </simpleType>
+    <no_export/>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
@@ -1253,6 +1257,7 @@
         <default>0x0</default>
       </uint8_t>
     </simpleType>
+    <no_export/>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
@@ -1270,6 +1275,8 @@
         <default>0x0</default>
       </uint8_t>
     </simpleType>
+    <hbOnly/>
+    <no_export/>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
