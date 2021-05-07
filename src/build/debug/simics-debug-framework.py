@@ -76,7 +76,7 @@ class DebugFrameworkIPCMessage:
 
     def dumps(self):
         if sys.version_info.major == 3:
-            msg_bytes = bytes(self.msg, 'utf-8')
+            msg_bytes = bytes(self.msg, 'latin-1')
             return ("[ \"" + self.msgtype + "\", \"" +
                     binascii.hexlify(msg_bytes).decode('utf-8') + "\" ]\n")
         else:

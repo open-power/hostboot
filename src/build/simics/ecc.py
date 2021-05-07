@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -139,7 +139,7 @@ def alignFileByValue( io_filename, alignmentValue ):
         paddingAmount = alignmentValue - (statinfo.st_size % alignmentValue);
         #print "Adding",paddingAmount,"0xFF's to",io_filename,"for", alignmentValue,"alignment"
         with open( io_filename, 'ab') as p:
-            p.write('\xFF' * paddingAmount)
+            p.write(bytes([255]) * paddingAmount)
 
     return None;
 

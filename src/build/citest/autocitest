@@ -237,7 +237,8 @@ echo
 loopcount=1
 while true; do
     sleep 5
-    HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r'`
+    # Get HRMOR; use 'cut' to remove stray control codes that SIMICS can surface
+    HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r' | cut -c 1-10`
     echo "HRMOR = $HRMOR"
 
     ## if HRMOR is at a 0x200000 (2MB) offset then we can assume we
@@ -303,8 +304,9 @@ shutdown_status=`grep "CpuManager::cv_shutdown_status" \
 imageId_addr=`grep "CpuManager::cv_shutdown_status" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
 
-#Adjust addresses for HRMOR
-HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r'`
+#Adjust addresses for HRMOR; use 'cut' to remove stray control codes that
+# SIMICS can surface
+HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r' | cut -c 1-10`
 
 temp=$(($HRMOR + 0x$totaltests_addr))
 totaltests_addr=`echo "obase=16; $temp" | bc`
