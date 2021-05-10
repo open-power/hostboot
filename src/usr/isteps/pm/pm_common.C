@@ -968,8 +968,10 @@ namespace HBPM
                 if(l_errl)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              ERR_MRK"resetPmComplex: service::handleAttentions "
-                              "returned error for RtProc: 0x%08X", get_huid(i_target));
+                              ERR_MRK"resetPmComplex: service::handleAttentions returned error EID 0x%08x for RtProc: 0x%08X; committing the error and continuing.",
+                              l_errl->eid(), get_huid(i_target));
+                    l_errl->collectTrace(PRDF_COMP_NAME);
+                    errlCommit(l_errl, PRDF_COMP_ID);
                     break;
                 }
             }
