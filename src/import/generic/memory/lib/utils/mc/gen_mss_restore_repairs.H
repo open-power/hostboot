@@ -870,7 +870,7 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
             const auto l_spare_byte = l_spare_idx / NIBBLES_PER_BYTE;
             const auto l_spare_nibble = l_spare_idx % NIBBLES_PER_BYTE;
 
-            const auto l_bad_dq_vector = mss::bad_dq_attr_to_vector(i_bad_bits[l_dimm_idx][l_spare_byte], l_spare_nibble);
+            const auto l_bad_dq_vector = mss::bad_dq_attr_to_vector(i_bad_bits[l_dimm_rank][l_spare_byte], l_spare_nibble);
             FAPI_DBG("%s Total bad bits on spare%u DIMM:%d rank:%d nibble%d: %d",
                      mss::c_str(i_dimm), l_spare, l_dimm_idx, l_port_rank, (l_spare_byte * NIBBLES_PER_BYTE) + l_spare_nibble,
                      l_bad_dq_vector.size());
