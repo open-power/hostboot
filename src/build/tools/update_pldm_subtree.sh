@@ -43,10 +43,13 @@ function usage()
     echo "script eases that process."
     echo ""
     echo "update_pldm_subtree.sh"
-    echo "\t-h --help"
-    echo "\t-p --push=$PUSH_COMMITS"
+    echo "    -h --help"
+    echo "    -p --push"
+    echo "    -r --reviewer=<reviewer email>"
     echo ""
 }
+
+REVIEWER=""
 
 while [ "$1" != "" ]; do
     PARAM=`echo $1 | awk -F= '{print $1}'`
@@ -58,6 +61,9 @@ while [ "$1" != "" ]; do
             ;;
         -p | --push)
             PUSH_COMMITS="1";
+            ;;
+        -r | --reviewer)
+            REVIEWER=$VALUE;
             ;;
         *)
             echo "ERROR: unknown parameter \"$PARAM\""
@@ -73,6 +79,9 @@ if [ `ls ./example_customrc 2>/dev/null | wc -c` -eq 0 ] > /dev/null 2>&1; then
   echo "Error! This script is expected to be ran from the top-level of a hostboot repository. cd to that directory and try again."
   exit 1
 fi
+
+# Poor-man's './hb workon'
+. ./env.bash
 
 # Check if there are any outstanding changes in the current branch
 if ! git diff-index --quiet HEAD --; then
@@ -151,6 +160,10 @@ fi
 
 if [ "$PUSH_COMMITS" == "1" ]; then
   git push origin HEAD:refs/for/master-p10
+  if [ "$REVIEWER" != "" ]; then
+      echo "Adding $REVIEWER as a reviewer to ${NEW_SYNC_CHANGE_ID}"
+      ssh gerrit gerrit set-reviewers -p hostboot -a ${REVIEWER} ${NEW_SYNC_CHANGE_ID}
+  fi
 fi
 
 #cleanup patch
