@@ -2567,6 +2567,32 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                               pnor_sbe_secure_version, min_secure_version,
                               lockin_policy, pnor_sbe_secure_version);
                 }
+                // Special case (likely for early ship customers) where ...
+                // The lockin policy is false
+                // -- AND -- the incoming value (ie, "pnor_sbe_secure_version") is >= 1
+                //           NOTE: which must be true for the above check to be true:
+                //            "else if (pnor_sbe_secure_version > min_secure_version)"
+                // -- AND -- the current Minimum Secure Version is zero
+                // -- AND -- security is enabled
+                // THEN set the minimum secure version to 1
+                //
+                // NOTE: This is intended to benefit early ship customers who likely will initially
+                // get a build with MSV=0 before normal GA and will eventually get a GA-level build
+                // with MSV=1.  This method will safely update them without them having to set the
+                // LOCKIN _POLICY via the ASM menu.
+                else if ((min_secure_version == 0) &&
+                         (isSecurityEnabled == true))
+                {
+                    TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Special Case: "
+                              "SBE Image from pnor has secure version=0x%.2X, which is greater than"
+                              " min_secure_version=0x%.2X. But ATTR_SECURE_VERSION_LOCKIN_POLICY=%d"
+                              ". However, since MSV==0 and security is enabled, will set new "
+                              "minimum secure version value to 1 (ie ignoring LOCKIN_POLICY)",
+                              pnor_sbe_secure_version, min_secure_version,
+                              lockin_policy);
+                    pnor_sbe_secure_version = 1;
+                }
+                // Default case where lockini_policy == false
                 else
                 {
                     TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
