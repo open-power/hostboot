@@ -440,8 +440,6 @@ uint32_t __convertMssMcbistAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     uint64_t row     = i_addr.get_row();
     uint64_t col     = i_addr.get_column();
 
-    uint64_t bnkFull = (bnk << 2) | bnk_grp;
-
     // Adjust the address components based on what is configured.
     bool twoDimmConfig, col3Config;
     uint8_t prnkBits, srnkBits, extraRowBits;
@@ -465,8 +463,10 @@ uint32_t __convertMssMcbistAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         {
             col = col & 0xffffffffffffffbfull;
         }
+        bnk = (bnk >> 1) << 1; //bnk2 not used
     }
 
+    uint64_t bnkFull = (bnk << 2) | bnk_grp;
     uint64_t prnk    = (dslct << 2) | rslct;
     o_addr = MemAddr ( MemRank ( prnk, srnk ), bnkFull, row, col );
 
