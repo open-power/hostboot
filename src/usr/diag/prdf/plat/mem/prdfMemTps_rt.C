@@ -785,6 +785,10 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         // Else if bad DQ nibble count is 1 and bad chip nibble count is 1
         else if ( 1 == i_badDqCount.count && 1 == i_badChipCount.count )
         {
+            // Keep track of if the symbol mark signature needs to be added to
+            // the multi-signature list instead of as the primary signature.
+            bool multiSig = false;
+
             // If neither chip nor symbol mark is available.
             if ( chipMark.isValid() && symMark.isValid() )
             {
@@ -800,6 +804,11 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // If the chip mark is available.
             if ( !chipMark.isValid() )
             {
+                // We're going to set some signature for the chip mark, so
+                // any signature for the symbol mark will be added to the
+                // multi-signature list.
+                multiSig = true;
+
                 // If the sum above one nibble count is 0
                 if ( 0 == i_sumAboveOneCount.count )
                 {
@@ -891,8 +900,16 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         break;
                     }
 
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_TpsSymbolMark );
+                    if ( !multiSig )
+                    {
+                        io_sc.service_data->setSignature(
+                            iv_chip->getHuid(), PRDFSIG_TpsSymbolMark );
+                    }
+                    else
+                    {
+                        io_sc.service_data->AddSignatureList(
+                            iv_chip->getTrgt(), PRDFSIG_TpsSymbolMark );
+                    }
 
                     // Update VPD with the symbol mark.
                     o_rc = dqBitmap.setSymbol(
@@ -917,8 +934,16 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         PRDF_ERR(PRDF_FUNC "__updateVpdSumAboveOne() failed.");
                     }
 
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_TpsSymUeRisk );
+                    if ( !multiSig )
+                    {
+                        io_sc.service_data->setSignature(
+                            iv_chip->getHuid(), PRDFSIG_TpsSymUeRisk );
+                    }
+                    else
+                    {
+                        io_sc.service_data->AddSignatureList(
+                            iv_chip->getTrgt(), PRDFSIG_TpsSymUeRisk );
+                    }
 
                     // Make the error log predictive.
                     io_sc.service_data->setServiceCall();
