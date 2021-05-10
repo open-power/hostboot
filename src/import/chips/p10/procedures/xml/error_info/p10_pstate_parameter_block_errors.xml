@@ -725,4 +725,18 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_DPLL_FREQ_UPDATE_FAIL</rc>
+    <description>
+    Safe mode freq update failed during host_set_voltage
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>DPLL_FREQ</ffdc>
+    <ffdc>DPLL_STAT</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

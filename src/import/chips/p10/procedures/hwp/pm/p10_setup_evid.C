@@ -57,8 +57,14 @@
 
 using namespace pm_pstate_parameter_block;
 using namespace scomt;
+static const uint32_t DPLL_TIMEOUT_MS       = 50000;
+static const uint32_t DPLL_TIMEOUT_MCYCLES  = 20;
+static const uint32_t DPLL_POLLTIME_MS      = 20;
+static const uint32_t DPLL_POLLTIME_MCYCLES = 2;
+static const uint32_t TIMEOUT_COUNT = DPLL_TIMEOUT_MS / DPLL_POLLTIME_MS;
 
 static const uint32_t NEST_DPLL_FREQ             = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ;
+static const uint32_t NEST_DPLL_STAT             = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_STAT;
 static const uint32_t NEST_DPLL_FREQ_FMULT       = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMULT;
 static const uint32_t NEST_DPLL_FREQ_FMULT_LEN   = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMULT_LEN;
 static const uint32_t NEST_DPLL_FREQ_FMAX        = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMAX;
@@ -727,6 +733,7 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
     fapi2::buffer<uint64_t> l_data64;
     uint8_t l_mask_restore = 0;
     using namespace scomt::proc;
+    uint32_t l_timeout_counter = TIMEOUT_COUNT;
 
     // Only change the DPLL if the values are non-zero
     do
@@ -767,6 +774,26 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 
         FAPI_TRY(fapi2::putScom(i_target, NEST_DPLL_FREQ, l_data64),
                  "ERROR: Failed to write for EQ_QPPM_DPLL_FREQ");
+
+
+        do
+        {
+            FAPI_TRY(fapi2::getScom(i_target, NEST_DPLL_STAT, l_data64),
+                     "ERROR: Failed to read for EQ_QPPM_DPLL_STAT");
+            // fapi2::delay takes ns as the arg
+            fapi2::delay(DPLL_POLLTIME_MS * 1000 * 1000, DPLL_POLLTIME_MCYCLES * 1000 * 1000);
+        }
+        while((l_data64.getBit<TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_STAT_UPDATE_COMPLETE>() != 1 ||
+               (l_data64.getBit<TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_STAT_LOCK>() != 1)) &&
+              (--l_timeout_counter != 0));
+
+        FAPI_ASSERT(l_timeout_counter != 0,
+                    fapi2::PM_DPLL_FREQ_UPDATE_FAIL()
+                    .set_CHIP_TARGET(i_target)
+                    .set_DPLL_FREQ(i_safe_mode_dpll_value)
+                    .set_DPLL_STAT(l_data64),
+                    "update dpll freq fail");
+
 
         // clear sticky PLL unlock indicator before unmasking reporting
         // register is WCLEAR
