@@ -628,7 +628,12 @@ void getMemConfigMessageData(Occ *i_occ,
     Target* sys = nullptr;
     targetService().getTopLevelTarget(sys);
 
-    const uint16_t l_update_time = 1000; // ms
+    ATTR_MSS_MRW_THERMAL_SENSOR_POLLING_PERIOD_type l_update_time;
+    if(!sys->tryGetAttr<ATTR_MSS_MRW_THERMAL_SENSOR_POLLING_PERIOD>(l_update_time))
+    {
+        l_update_time = 200; //ms
+    }
+
     o_data[index++] = l_update_time >> 8;
     o_data[index++] = l_update_time & 0xFF;
 
@@ -750,7 +755,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
         }
     }
 
-    // TODO RTC 247144 - use real memory throttle procedures
+    // TODO RTC 269380 - use real memory throttle procedures
 #if 0
     for(const auto & mcs_target : mcs_list)
     {
@@ -1106,9 +1111,9 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
 
 
     // Processor Core Weight
-    ATTR_OPEN_POWER_PROC_WEIGHT_type l_proc_weight;
+    ATTR_CORE_WEIGHT_TENTHS_type l_proc_weight;
     if ( ! l_sys->tryGetAttr          //if attr does not exists.
-           <ATTR_OPEN_POWER_PROC_WEIGHT>(l_proc_weight))
+           <ATTR_CORE_WEIGHT_TENTHS>(l_proc_weight))
     {
         l_proc_weight = OCC_PROC_DEFAULT_WEIGHT;
     }
@@ -1120,9 +1125,9 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
 
 
     // Processor Quad Weight
-    ATTR_OPEN_POWER_QUAD_WEIGHT_type l_quad_weight;
+    ATTR_QUAD_WEIGHT_TENTHS_type l_quad_weight;
     if ( ! l_sys->tryGetAttr          //if attr does not exists.
-           <ATTR_OPEN_POWER_QUAD_WEIGHT>(l_quad_weight))
+           <ATTR_QUAD_WEIGHT_TENTHS>(l_quad_weight))
     {
         l_quad_weight = OCC_PROC_DEFAULT_WEIGHT;
     }
@@ -1134,9 +1139,9 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
 
 
     // Processor L3 Weight
-    ATTR_OPEN_POWER_L3_WEIGHT_type l_l3_weight;
+    ATTR_L3_WEIGHT_TENTHS_type l_l3_weight;
     if ( ! l_sys->tryGetAttr          //if attr does not exists.
-           <ATTR_OPEN_POWER_L3_WEIGHT>(l_l3_weight))
+           <ATTR_L3_WEIGHT_TENTHS>(l_l3_weight))
     {
         l_l3_weight = OCC_PROC_DEFAULT_WEIGHT;
     }
@@ -1183,28 +1188,77 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
     l_numSets++;
 
     // Memory Buffers
+    uint8_t l_DVFS_temp = l_sys->getAttr<ATTR_MEMCTRL_THROTTLE_TEMP_DEG_C>();
+    if(l_DVFS_temp == 0)
+    {
+        l_DVFS_temp =  OCC_MEMCTRL_DEFAULT_THROT_TEMP;
+    }
+
+    uint8_t l_ERR_temp = l_sys->getAttr<ATTR_MEMCTRL_ERROR_TEMP_DEG_C>();
+    if(l_ERR_temp == 0)
+    {
+        l_ERR_temp = OCC_MEMCTRL_DEFAULT_ERROR_TEMP;
+    }
+
+    l_timeout = l_sys->getAttr<ATTR_MEMCTRL_READ_TIMEOUT_SEC>();
+    if(l_timeout == 0)
+    {
+        l_timeout = OCC_MEMCTRL_DEFAULT_TIMEOUT;
+    }
     o_data[index++] = CFGDATA_FRU_TYPE_MEMBUF;
-    o_data[index++] =
-        l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C>();
-    o_data[index++] =
-        l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C>();
-    o_data[index++] =
-        l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC>();
+    o_data[index++] = l_DVFS_temp;
+    o_data[index++] = l_ERR_temp;
+    o_data[index++] = l_timeout;
     o_data[index++] = 0x00; // reserved
     o_data[index++] = 0x00;
     l_numSets++;
 
     // DIMM
-    o_data[index++] = CFGDATA_FRU_TYPE_DIMM;
-    uint8_t l_DVFS_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
-    uint8_t l_ERR_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
-    l_timeout = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_READ_TIMEOUT_SEC>();
-    if(l_DVFS_temp == 0x0)
+    l_DVFS_temp =l_sys->getAttr<ATTR_DIMM_THROTTLE_TEMP_DEG_C>();
+    if(l_DVFS_temp == 0)
     {
         l_DVFS_temp = OCC_DIMM_DEFAULT_DVFS_TEMP;
+    }
+
+    l_ERR_temp =l_sys->getAttr<ATTR_DIMM_ERROR_TEMP_DEG_C>();
+    if(l_ERR_temp == 0)
+    {
         l_ERR_temp  = OCC_DIMM_DEFAULT_ERR_TEMP;
+    }
+
+    l_timeout = l_sys->getAttr<ATTR_DIMM_READ_TIMEOUT_SEC>();
+    if(l_timeout == 0)
+    {
         l_timeout   = OCC_DIMM_DEFAULT_TIMEOUT;
     }
+    o_data[index++] = CFGDATA_FRU_TYPE_DIMM;
+    o_data[index++] = l_DVFS_temp;
+    o_data[index++] = l_ERR_temp;
+    o_data[index++] = l_timeout;
+    o_data[index++] = 0x00; // reserved
+    o_data[index++] = 0x00;
+    l_numSets++;
+
+    // DRAM  (MC+DIMM)
+    l_DVFS_temp = l_sys->getAttr<ATTR_MC_DRAM_THROTTLE_TEMP_DEG_C>();
+    if(l_DVFS_temp == 0)
+    {
+        l_DVFS_temp =  OCC_DRAM_DEFAULT_THROT_TEMP;
+    }
+
+    l_ERR_temp = l_sys->getAttr<ATTR_MC_DRAM_ERROR_TEMP_DEG_C>();
+    if(l_ERR_temp == 0)
+    {
+        l_ERR_temp = OCC_DRAM_DEFAULT_ERROR_TEMP;
+    }
+
+    l_timeout = l_sys->getAttr<ATTR_MC_DRAM_READ_TIMEOUT_SEC>();
+    if(l_timeout == 0)
+    {
+        l_timeout = OCC_DRAM_DEFAULT_TIMEOUT;
+    }
+
+    o_data[index++] = CFGDATA_FRU_TYPE_MCDIMM;
     o_data[index++] = l_DVFS_temp;
     o_data[index++] = l_ERR_temp;
     o_data[index++] = l_timeout;
@@ -1258,23 +1312,23 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
     l_numSets++;
 
     // VRM Vdd
-    if(!l_sys->tryGetAttr<ATTR_OPEN_POWER_VRM_VDD_DVFS_TEMP_DEG_C>(l_DVFS_temp))
-        l_DVFS_temp = OCC_NOT_DEFINED;
+    if(!l_sys->tryGetAttr<ATTR_VRM_VDD_DVFS_TEMP_DEG_C>(l_DVFS_temp))
+        l_DVFS_temp = OCC_VRM_DEFAULT_DVFS_TEMP;
     if (l_DVFS_temp == 0)
     {
-        l_DVFS_temp = OCC_NOT_DEFINED;
+        l_DVFS_temp = OCC_VRM_DEFAULT_DVFS_TEMP;
     }
-    if(!l_sys->tryGetAttr<ATTR_OPEN_POWER_VRM_VDD_ERROR_TEMP_DEG_C>(l_ERR_temp))
-        l_ERR_temp = OCC_NOT_DEFINED;
+    if(!l_sys->tryGetAttr<ATTR_VRM_VDD_ERROR_TEMP_DEG_C>(l_ERR_temp))
+        l_ERR_temp = OCC_VRM_DEFAULT_ERROR_TEMP;
     if (l_ERR_temp == 0)
     {
-        l_ERR_temp = OCC_NOT_DEFINED;
+        l_ERR_temp = OCC_VRM_DEFAULT_ERROR_TEMP;
     }
-    if(!l_sys->tryGetAttr<ATTR_OPEN_POWER_VRM_VDD_READ_TIMEOUT_SEC>(l_timeout))
-        l_timeout = OCC_NOT_DEFINED;
+    if(!l_sys->tryGetAttr<ATTR_VRM_VDD_READ_TIMEOUT_SEC>(l_timeout))
+        l_timeout = OCC_VRM_DEFAULT_TIMEOUT;
     if(l_timeout == 0)
     {
-        l_timeout = OCC_NOT_DEFINED;
+        l_timeout = OCC_VRM_DEFAULT_TIMEOUT;
     }
     o_data[index++] = CFGDATA_FRU_TYPE_VRM_VDD;
     o_data[index++] = l_DVFS_temp;          //DVFS
@@ -1283,6 +1337,61 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
     o_data[index++] = 0x00; // reserved
     o_data[index++] = 0x00;
     l_numSets++;
+
+    // PMIC
+    l_DVFS_temp = l_sys->getAttr<ATTR_PMIC_THROTTLE_TEMP_DEG_C>();
+    if(l_DVFS_temp == 0)
+    {
+        l_DVFS_temp =  OCC_PMIC_DEFAULT_THROT_TEMP;
+    }
+
+    l_ERR_temp = l_sys->getAttr<ATTR_PMIC_ERROR_TEMP_DEG_C>();
+    if(l_ERR_temp == 0)
+    {
+        l_ERR_temp = OCC_PMIC_DEFAULT_ERROR_TEMP;
+    }
+
+    l_timeout = l_sys->getAttr<ATTR_PMIC_READ_TIMEOUT_SEC>();
+    if(l_timeout == 0)
+    {
+        l_timeout = OCC_PMIC_DEFAULT_TIMEOUT;
+    }
+
+    o_data[index++] = CFGDATA_FRU_TYPE_PMIC;
+    o_data[index++] = l_DVFS_temp;
+    o_data[index++] = l_ERR_temp;
+    o_data[index++] = l_timeout;
+    o_data[index++] = 0x00; // reserved
+    o_data[index++] = 0x00;
+    l_numSets++;
+
+    // MEMCTRL_EXT
+    l_DVFS_temp = l_sys->getAttr<ATTR_MC_EXT_THROTTLE_TEMP_DEG_C>();
+    if(l_DVFS_temp == 0)
+    {
+        l_DVFS_temp =  OCC_MCEXT_DEFAULT_THROT_TEMP;
+    }
+
+    l_ERR_temp = l_sys->getAttr<ATTR_MC_EXT_ERROR_TEMP_DEG_C>();
+    if(l_ERR_temp == 0)
+    {
+        l_ERR_temp = OCC_MCEXT_DEFAULT_ERROR_TEMP;
+    }
+
+    l_timeout = l_sys->getAttr<ATTR_MC_EXT_READ_TIMEOUT_SEC>();
+    if(l_timeout == 0)
+    {
+        l_timeout = OCC_MCEXT_DEFAULT_TIMEOUT;
+    }
+
+    o_data[index++] = CFGDATA_FRU_TYPE_MEMCTRL_EXT;
+    o_data[index++] = l_DVFS_temp;
+    o_data[index++] = l_ERR_temp;
+    o_data[index++] = l_timeout;
+    o_data[index++] = 0x00; // reserved
+    o_data[index++] = 0x00;
+    l_numSets++;
+
 
     // Processor I/O Ring Deltas
     if(!i_procTarget->tryGetAttr<ATTR_PROC_IO_DVFS_TEMP_DELTA_C>(l_dvfsDelta))

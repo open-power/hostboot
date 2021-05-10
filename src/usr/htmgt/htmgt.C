@@ -89,7 +89,7 @@ namespace HTMGT
                     {
                         do
                         {
-                            // TODO: RTC 247144
+                            // TODO: RTC 269380
 #if 0
 #ifndef __HOSTBOOT_RUNTIME
                             // Calc memory throttles (once per IPL)

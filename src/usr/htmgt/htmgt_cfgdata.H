@@ -37,13 +37,36 @@ namespace HTMGT
     const uint8_t  OCC_PROC_DEFAULT_DVFS_DELTA_C   = 0x00;
     const uint8_t  OCC_PROC_DEFAULT_ERR_DELTA_C    = 0x0a;
     const uint8_t  OCC_PROC_DEFAULT_TIMEOUT        = 0x05;
+
     const uint8_t  OCC_PROC_IO_DEFAULT_DVFS_TEMP   = 0x55;
     const uint8_t  OCC_PROC_IO_DEFAULT_DVFS_DELTA_C= 0x00;
     const uint8_t  OCC_PROC_IO_DEFAULT_ERR_DELTA_C = 0x0a;
     const uint8_t  OCC_PROC_IO_DEFAULT_TIMEOUT     = 0x05;
-    const uint8_t  OCC_DIMM_DEFAULT_DVFS_TEMP      = 0x45;//default from DEF file PM
-    const uint8_t  OCC_DIMM_DEFAULT_ERR_TEMP       = 0x56;
-    const uint8_t  OCC_DIMM_DEFAULT_TIMEOUT        = 0x1E;
+
+    const uint8_t  OCC_DIMM_DEFAULT_DVFS_TEMP      = 76;
+    const uint8_t  OCC_DIMM_DEFAULT_ERR_TEMP       = 80;
+    const uint8_t  OCC_DIMM_DEFAULT_TIMEOUT        = 30;
+
+    const uint8_t  OCC_VRM_DEFAULT_DVFS_TEMP       = 85;
+    const uint8_t  OCC_VRM_DEFAULT_ERROR_TEMP      = 95;
+    const uint8_t  OCC_VRM_DEFAULT_TIMEOUT         = 5;
+
+    const uint8_t  OCC_MEMCTRL_DEFAULT_THROT_TEMP  = 82;
+    const uint8_t  OCC_MEMCTRL_DEFAULT_ERROR_TEMP  = 86;
+    const uint8_t  OCC_MEMCTRL_DEFAULT_TIMEOUT     = 30;
+
+    const uint8_t  OCC_MCEXT_DEFAULT_THROT_TEMP    = 65;
+    const uint8_t  OCC_MCEXT_DEFAULT_ERROR_TEMP    = 69;
+    const uint8_t  OCC_MCEXT_DEFAULT_TIMEOUT       = 30;
+
+    const uint8_t  OCC_PMIC_DEFAULT_THROT_TEMP     = 72;
+    const uint8_t  OCC_PMIC_DEFAULT_ERROR_TEMP     = 76;
+    const uint8_t  OCC_PMIC_DEFAULT_TIMEOUT        = 30;
+
+    const uint8_t  OCC_DRAM_DEFAULT_THROT_TEMP     = 65;
+    const uint8_t  OCC_DRAM_DEFAULT_ERROR_TEMP     = 69;
+    const uint8_t  OCC_DRAM_DEFAULT_TIMEOUT        = 30;
+
     const uint8_t  OCC_NOT_DEFINED   = 0xFF;
 
     /** OCC configuration data message formats */
@@ -76,16 +99,18 @@ namespace HTMGT
 
         CFGDATA_CORES = 32,
 
-        CFGDATA_FRU_TYPE_PROC       = 0x00,
-        CFGDATA_FRU_TYPE_MEMBUF     = 0x01,
-        CFGDATA_FRU_TYPE_DIMM       = 0x02,
-        CFGDATA_FRU_TYPE_MCDIMM     = 0x03,
-        CFGDATA_FRU_TYPE_GPU_CORE   = 0x04,
-        CFGDATA_FRU_TYPE_GPU_MEMORY = 0x05,
-        CFGDATA_FRU_TYPE_VRM_VDD    = 0x06,
-        CFGDATA_FRU_TYPE_PROC_IO    = 0x09,
-        CFGDATA_FRU_TYPE_PROC_DELTA    = 0xf0,
-        CFGDATA_FRU_TYPE_PROC_IO_DELTA = 0xf9,
+        CFGDATA_FRU_TYPE_PROC           = 0x00,
+        CFGDATA_FRU_TYPE_MEMBUF         = 0x01,
+        CFGDATA_FRU_TYPE_DIMM           = 0x02,
+        CFGDATA_FRU_TYPE_MCDIMM         = 0x03,  // MEMCTRL_DRAM
+        CFGDATA_FRU_TYPE_GPU_CORE       = 0x04,
+        CFGDATA_FRU_TYPE_GPU_MEMORY     = 0x05,
+        CFGDATA_FRU_TYPE_VRM_VDD        = 0x06,
+        CFGDATA_FRU_TYPE_PMIC           = 0x07,
+        CFGDATA_FRU_TYPE_MEMCTRL_EXT    = 0x08,
+        CFGDATA_FRU_TYPE_PROC_IO        = 0x09,
+        CFGDATA_FRU_TYPE_PROC_DELTA     = 0xf0,
+        CFGDATA_FRU_TYPE_PROC_IO_DELTA  = 0xf9,
         CFDATA_DVFS_NOT_DEFINED     = 0xFF,
     };
 

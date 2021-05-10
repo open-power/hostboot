@@ -474,7 +474,7 @@ void calculate_system_power()
     const uint16_t freq_min = sys->getAttr<ATTR_MIN_FREQ_MHZ>();
     // Minimum Frequency biasing (ATTR_FREQ_BIAS_POWERSAVE) will be ignored here
     uint16_t freq_nominal, freq_turbo, freq_ultra;
-    // TODO: RTC 247144
+    // TODO: RTC 269380
     //check_wof_support(freq_nominal, freq_turbo, freq_ultra);
     if (freq_turbo == 0)
     {

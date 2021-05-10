@@ -51,7 +51,7 @@ private:
 
 public:
 
-    // TODO: RTC 247144 - Add Mem Config Support
+    // TODO: RTC 269380 - Add Mem Config Support
 
     void testOCCRoleConfigData()
     {
@@ -167,7 +167,7 @@ public:
                     data[1]);
         }
 
-        if (size != 48)
+        if (size != 66)
         {
             TS_FAIL("wrong size %d for thermal control config data command",
                     size);
