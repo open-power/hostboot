@@ -181,6 +181,10 @@ errlHndl_t copyPnorPartitionToAlt( PNOR::SectionId i_section )
         {
             TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::copyPnorPartitionToAlt> parseTOC fail for 0x%X.",
                        TARGETING::get_huid(l_altProc) );
+            // This can be caused by a genesis boot where the alt side has never been IPLed.
+            // Need to just ignore this error and move on.
+            l_errhdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errhdl,PNOR_COMP_ID);
             break;
         }
 
