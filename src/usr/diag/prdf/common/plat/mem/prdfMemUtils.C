@@ -846,7 +846,7 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         #else
         if ( isInMdiaMode() )
         {
-            mdiaSendEventMsg( ocmb, MDIA::STOP_TESTING );
+            mdiaSendEventMsg( ocmb, MDIA::CHNL_FAILED );
         }
         #endif
 

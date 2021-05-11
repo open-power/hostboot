@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
             expected.push_back(START_PATTERN_0);
             expected.push_back(START_SCRUB);
             expected.push_back(CLEAR_HW_CHANGED_STATE);
+            expected.push_back(POST_MEMDIAGS_HWPS);
 
             err = getWorkFlow(mode, wf, globals);
 

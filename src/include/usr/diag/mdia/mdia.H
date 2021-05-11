@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,9 @@ enum MaintCommandEventType
 
     /** PRD detected an error and needs time to complete analysis. */
     RESET_TIMER,
+
+    /** The channel has failed and no further testing is needed */
+    CHNL_FAILED,
 };
 
 /**

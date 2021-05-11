@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -319,7 +319,8 @@ class MdiaSmTest : public CxxTest::TestSuite
                 Checks(START_PATTERN_6, true),
                 Checks(START_PATTERN_7, true),
                 Checks(START_SCRUB, true),
-                Checks(CLEAR_HW_CHANGED_STATE, false)
+                Checks(CLEAR_HW_CHANGED_STATE, false),
+                Checks(POST_MEMDIAGS_HWPS, false)
             };
 
             StateMachine sm;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,13 +53,6 @@
 // Fapi
 #include <fapi2/target.H>                // fapi2::TARGET_TYPE_OCMB_CHIP
 #include <fapi2/plat_hwp_invoker.H>      // FAPI_INVOKE_HWP
-
-// HWP
-#include <lib/shared/exp_defaults.H>      // mss::DEFAULT_MC_TYPE, needed by gen_mss_unmask.H
-#include <lib/mc/exp_port.H>              // needed by gen_mss_port.H
-// Using a long path to ensure that the correct file for P10 is used
-#include <generic/memory/lib/utils/fir/gen_mss_unmask.H> // mss::unmask::after_memdiags
-#include <generic/memory/lib/utils/mc/gen_mss_port.H>    // mss::reset_reorder_queue_settings
 
 // Diagnostics
 #include <diag/attn/attn.H>              // ATTN::startService,stopService
@@ -204,73 +197,6 @@ void* call_mss_memdiag (void*)
                            "skipped, no Explorer OCMB chips found." );
             }
         }
-
-        // If running Memory Diagnostics returns with no error, then unmask
-        // mainline FIRs.
-        for ( auto & l_ocmbTarget : l_ocmbTargetList )
-        {
-            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
-                                             l_fapiOcmbTarget ( l_ocmbTarget );
-
-
-            // Calling after_memdiags on target, trace out stating so
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                       "Running mss::unmask::after_memdiags HWP call "
-                       "on OCMB target HUID 0x%.8X.",
-                       TARGETING::get_huid(l_ocmbTarget));
-
-            // Unmask mainline FIRs.
-            FAPI_INVOKE_HWP( l_err,
-                             mss::unmask::after_memdiags,
-                             l_fapiOcmbTarget );
-
-            if (l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                           "ERROR: mss::unmask::after_memdiags HWP call "
-                           "on OCMB target HUID 0x%08x failed."
-                           TRACE_ERR_FMT,
-                           get_huid(l_ocmbTarget),
-                           TRACE_ERR_ARGS(l_err) );
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                           "SUCCESS: mss::unmask::after_memdiags HWP call "
-                           "on OCMB target HUID 0x%08x.",
-                           get_huid(l_ocmbTarget) );
-            }
-
-
-            // Calling reset_reorder_queue_settings on target, trace out stating so
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                       "Running mss::reset_reorder_queue_settings HWP call "
-                       "on OCMB target HUID 0x%.8X.",
-                       TARGETING::get_huid(l_ocmbTarget) );
-
-            // Turn off FIFO mode to improve performance.
-            FAPI_INVOKE_HWP( l_err,
-                             mss::reset_reorder_queue_settings,
-                             l_fapiOcmbTarget );
-            if ( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                           "ERROR: mss::reset_reorder_queue_settings HWP call "
-                           "on OCMB target HUID 0x%08x failed."
-                           TRACE_ERR_FMT,
-                           get_huid(l_ocmbTarget),
-                           TRACE_ERR_ARGS(l_err) );
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                           "SUCCESS: mss::reset_reorder_queue_settings HWP "
-                           "call on OCMB target HUID 0x%08x.",
-                           get_huid(l_ocmbTarget) );
-            }
-        } // end for ( auto & l_ocmbTarget : l_ocmbTargetList )
 
     } while (0);
 

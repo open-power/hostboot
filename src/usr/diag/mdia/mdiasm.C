@@ -52,6 +52,11 @@
 #include <kind.H>
 #include <hwp_wrappers.H>
 
+#include <lib/mc/exp_port.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
+
+
 using namespace TARGETING;
 using namespace ERRORLOG;
 using namespace std;
@@ -638,6 +643,7 @@ bool StateMachine::workItemIsAsync(WorkFlowProperties & i_wfp)
         case DUMMY_SYNC_PHASE:
         case CLEAR_HW_CHANGED_STATE:
         case ANALYZE_IPL_MNFG_CE_STATS:
+        case POST_MEMDIAGS_HWPS:
 
             // no attention associated with these so
             // schedule the next work item now
@@ -652,6 +658,64 @@ bool StateMachine::workItemIsAsync(WorkFlowProperties & i_wfp)
     }
 
     return async;
+}
+
+/**
+ * @brief Run post memdiags hardware procedures
+ *
+ * @param[in] i_trgt input ocmb target
+ * @return nullptr on success; non-nullptr on error
+ *
+ */
+errlHndl_t __runPostMemdiagsHwps( TargetHandle_t i_trgt )
+{
+    // The workflow is complete on this target. Trigger the hardware
+    // procedures that need to be run on the target after memdiags.
+    errlHndl_t err = nullptr;
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt( i_trgt );
+
+    do
+    {
+        // Calling after_memdiags on target, trace out stating so
+        MDIA_FAST( "Running mss::unmask::after_memdiags HWP call on OCMB "
+                   "target HUID 0x%08X.", get_huid(i_trgt));
+
+        // Unmask mainline FIRs.
+        FAPI_INVOKE_HWP( err, mss::unmask::after_memdiags, fapiTrgt );
+
+        if ( err )
+        {
+            MDIA_FAST( "ERROR: mss::unmask::after_memdiags HWP call on OCMB "
+                       "target HUID 0x%08x failed.", get_huid(i_trgt) );
+            break;
+        }
+        else
+        {
+            MDIA_FAST( "SUCCESS: mss::unmask::after_memdiags HWP call on OCMB "
+                       "target HUID 0x%08x.", get_huid(i_trgt) );
+        }
+
+        // Calling reset_reorder_queue_settings on target, trace out stating so
+        MDIA_FAST( "Running mss::reset_reorder_queue_settings HWP call on OCMB "
+                   "target HUID 0x%08X.", get_huid(i_trgt) );
+
+        // Turn off FIFO mode to improve performance.
+        FAPI_INVOKE_HWP( err, mss::reset_reorder_queue_settings, fapiTrgt );
+        if ( err )
+        {
+            MDIA_FAST( "ERROR: mss::reset_reorder_queue_settings HWP call on "
+                       "OCMB target HUID 0x%08x failed.", get_huid(i_trgt) );
+            break;
+        }
+        else
+        {
+            MDIA_FAST( "SUCCESS: mss::reset_reorder_queue_settings HWP call "
+                       "on OCMB target HUID 0x%08x.", get_huid(i_trgt) );
+        }
+
+    }while(0);
+
+    return err;
 }
 
 bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
@@ -736,6 +800,16 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                 }
 
             }
+                break;
+
+            case POST_MEMDIAGS_HWPS:
+
+                mutex_lock(&iv_mutex);
+
+                err = __runPostMemdiagsHwps( getTarget( *i_wfp ) );
+
+                mutex_unlock(&iv_mutex);
+
                 break;
 
             default:
@@ -967,24 +1041,33 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
                 // command stopped or complete at end of last rank
                 // move to the next command
-
                 ++wfp.workItem;
 
-
                 // done with this maint command
-
                 flags = DELETE_CMD | START_NEXT_CMD;
                 break;
 
             case STOP_TESTING:
 
                 // stop testing on this target
-
                 wfp.status = COMPLETE;
 
                 // done with this command
                 flags = DELETE_CMD | STOP_CMD | START_NEXT_CMD;
 
+                break;
+
+            case CHNL_FAILED:
+
+                // Stop testing on this target
+                wfp.status = COMPLETE;
+
+                // Done with this command. Note: since the channel has failed,
+                // putscoms to the target may not work, as such we cannot stop
+                // the mcbist command. We make the assertion that since the
+                // channel has failed, nothing else is happening on that
+                // channel afterwards and we do not need to stop the command.
+                flags = DELETE_CMD | START_NEXT_CMD;
                 break;
 
             case RESET_TIMER:

@@ -116,6 +116,7 @@ errlHndl_t getWorkFlow(
     }
 
     o_wf.push_back(CLEAR_HW_CHANGED_STATE);
+    o_wf.push_back(POST_MEMDIAGS_HWPS);
 
     return 0;
 }
