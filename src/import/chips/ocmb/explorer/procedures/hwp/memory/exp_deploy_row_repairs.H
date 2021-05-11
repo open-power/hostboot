@@ -40,6 +40,15 @@
 
 typedef fapi2::ReturnCode (*exp_deploy_row_repairs_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
 
+///
+/// @brief Indicating runtime execution or not
+///
+enum runtime_exec
+{
+    MAINT_REPAIR = false,
+    RUNTIME_REPAIR = true,
+};
+
 extern "C"
 {
 
@@ -49,6 +58,13 @@ extern "C"
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
     fapi2::ReturnCode exp_deploy_row_repairs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb);
+
+    ///
+    /// @brief Deploy SPPR row repair at runtime
+    /// @param[in] i_target_ocmb ocmb target
+    /// @return FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode exp_deploy_dynamic_row_repairs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb);
 
 }
 #endif

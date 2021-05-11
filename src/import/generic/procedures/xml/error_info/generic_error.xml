@@ -1625,4 +1625,19 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_CONCURRENT_CCS_EXCEEDS_INSTRUCTION_LIMIT</rc>
+    <description>
+        Requested CCS Program exceeds the 32 instruction limit for concurrent CCS.
+    </description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>REQUESTED_INSTRUCTIONS</ffdc>
+    <ffdc>MAX_INSTRUCTIONS</ffdc>
+    <!-- No hardware callout due to being a runtime only error -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

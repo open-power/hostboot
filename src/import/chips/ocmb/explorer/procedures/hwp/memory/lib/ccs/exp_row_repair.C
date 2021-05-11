@@ -41,6 +41,7 @@
 #include <lib/mcbist/exp_mcbist_traits.H>
 #include <lib/dimm/exp_mrs_traits.H>
 #include <lib/ccs/exp_row_repair.H>
+#include <lib/mcbist/exp_mcbist_traits.H>
 #include <lib/dimm/exp_rank.H>
 #include <lib/dimm/exp_kind.H>
 #include <lib/ccs/exp_bad_dq_bitmap_funcs.H>
@@ -527,12 +528,32 @@ fapi2::ReturnCode maint_row_repair( const mss::rank::info<>& i_rank_info,
     FAPI_TRY( setup_sppr(i_rank_info, i_repair, i_dram_bitmap, l_program) );
 
     // EXECUTE CCS ARRAY
-    mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
-    mss::ccs::execute(l_ocmb_target, l_program, l_port_target);
-    mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
+    FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
+    FAPI_TRY( mss::ccs::execute(l_ocmb_target, l_program, l_port_target) );
+    FAPI_TRY( mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Helper that adds power down disable for dynamic row repair
+/// @param[in] i_target port target on which to operate
+/// @param[in, out] io_program program holding CCS instructions to add to
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+void disable_power_down_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                               mss::ccs::program& io_program)
+{
+    // The power down mode is set when CCS execution starts at runtime
+    // We need to exit power down mode by holding the CKE high
+    // The time for this is 5 clocks or tRFC + 10ns at max
+    // This is 560ns -> 746 clocks. rounded up to 750 for saftey
+    constexpr uint16_t POWER_DOWN_EXIT_DELAY = 750;
+
+    io_program.iv_instructions.clear();
+
+    io_program.iv_instructions.push_back(mss::ccs::des_command(POWER_DOWN_EXIT_DELAY));
 }
 
 ///
@@ -564,6 +585,9 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
 
     // Create Program
     mss::ccs::program l_program;
+
+    // Add des command for power down exit
+    disable_power_down_helper(l_port_target, l_program);
 
     // Setup SPPR CCS program
     FAPI_TRY( setup_sppr(i_rank_info, i_repair, i_dram_bitmap, l_program) );
@@ -603,15 +627,15 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<>& i_rank_info,
                 "%s CCS engine is in use and is not available for repair",
                 mss::c_str(l_ocmb_target));
 
-    // EXECUTE CONCURRENT CCS ARRAY
-    mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
+    // Configure CCS regs for execution
+    FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg ) );
 
-    // TODO: Zenhub#959: Enable CCS Execution via the MCBIST Engine
-    // mss::ccs::mcbist_execute(l_ocmb_target, l_program, l_port_target);
+    // Run CCS via MCBIST for Concurrent CCS
+    FAPI_TRY( execute_via_mcbist(l_ocmb_target, l_program, l_port_target) );
 
-    // Revert to previous settings
+    // Revert CCS regs after execution
     // NOTE: May require MCBIST restoration for exp_background_scrub
-    mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg);
+    FAPI_TRY( mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -844,10 +868,11 @@ fapi_try_exit:
 ///
 /// @brief Deploy mapped row repairs
 /// @param[in] i_repair_map the map with repair data pairs
+/// @param[in] i_runtime true if at runtime requiring dynamic
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode deploy_mapped_repairs(
-    const REPAIR_MAP& i_repair_map )
+fapi2::ReturnCode deploy_mapped_repairs( const REPAIR_MAP& i_repair_map,
+        const bool i_runtime )
 {
     // Iterate through DRAM repairs structure
     for (const auto l_pair : i_repair_map)
@@ -877,7 +902,15 @@ fapi2::ReturnCode deploy_mapped_repairs(
                 // Set DRAM select bit for dram
                 FAPI_TRY(create_dram_bitmap(l_repair.iv_dram, l_dram_bitmap));
 
-                FAPI_TRY( maint_row_repair(l_rank_info, l_repair, l_dram_bitmap) );
+                // Check if at runtime for dynamic vs maint
+                if (i_runtime)
+                {
+                    FAPI_TRY( dynamic_row_repair(l_rank_info, l_repair, l_dram_bitmap) );
+                }
+                else
+                {
+                    FAPI_TRY( maint_row_repair(l_rank_info, l_repair, l_dram_bitmap) );
+                }
 
                 // Clear bad DQ bits for this port, DIMM, rank that will be fixed by this row repair
                 FAPI_INF("Updating bad bits on DIMM %s, DRAM %d, port rank %d, subrank %d, bg %d, bank %d, row 0x%05x",

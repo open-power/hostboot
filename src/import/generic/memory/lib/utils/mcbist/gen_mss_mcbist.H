@@ -489,8 +489,8 @@ class subtest_t
 ///
 /// @brief Return a write subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -525,8 +525,8 @@ inline subtest_t<MC, T, TT> write_subtest()
 ///
 /// @brief Return an alter subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -559,8 +559,8 @@ inline subtest_t<MC, T, TT> alter_subtest()
 ///
 /// @brief Return an display subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -593,8 +593,8 @@ inline subtest_t<MC, T, TT> display_subtest()
 ///
 /// @brief Return an scrub subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -627,8 +627,8 @@ inline subtest_t<MC, T, TT> scrub_subtest()
 ///
 /// @brief Return a steer subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -659,10 +659,42 @@ inline subtest_t<MC, T, TT> steer_subtest()
 }
 
 ///
+/// @brief Return a steer subtest - configured simply
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+inline subtest_t<MC, T, TT> ccsexec_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<MC, T, TT> l_subtest;
+
+    // 0:3   = 1111 - we want subtest type to be a Steer
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::CCS_EXECUTE);
+
+    // NOTE: I'm unsure on these but as of right now none appear to be required from lab testing
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    return l_subtest;
+}
+
+///
 /// @brief Return a read subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -695,8 +727,8 @@ inline subtest_t<MC, T, TT> read_subtest()
 ///
 /// @brief Return a read write subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -730,8 +762,8 @@ inline subtest_t<MC, T, TT> read_write_subtest()
 ///
 /// @brief Return a write read subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -764,8 +796,8 @@ inline subtest_t<MC, T, TT> write_read_subtest()
 ///
 /// @brief Return a read write read subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -798,8 +830,8 @@ inline subtest_t<MC, T, TT> read_write_read_subtest()
 ///
 /// @brief Return a read read write subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -832,8 +864,8 @@ inline subtest_t<MC, T, TT> read_read_write_subtest()
 ///
 /// @brief Return a read write write subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -866,8 +898,8 @@ inline subtest_t<MC, T, TT> read_write_write_subtest()
 ///
 /// @brief Return a random subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -900,8 +932,8 @@ inline subtest_t<MC, T, TT> random_subtest()
 ///
 /// @brief Return a goto subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] the subtest we should go to
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
@@ -924,8 +956,8 @@ inline subtest_t<MC, T, TT> goto_subtest( const uint64_t i_jump_to )
 ///
 /// @brief Return a refresh-only subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] the subtest we should go to
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
@@ -949,8 +981,8 @@ inline subtest_t<MC, T, TT> refresh_subtest( )
 ///
 /// @brief Return an init subtest - configured simply
 /// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the mcbistTraits associated with T
 /// @return mss::mcbist::subtest_t
 /// @note Configures for start/end address select bit as address config register 0
 ///
@@ -2528,7 +2560,7 @@ fapi_try_exit:
 /// @brief Load the mcbist control register
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -2545,7 +2577,7 @@ inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const m
 /// @brief Load the address generator config
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -2561,7 +2593,7 @@ inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const 
 /// @brief Configure address range based on index
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
@@ -2598,7 +2630,7 @@ fapi_try_exit:
 /// @brief Configure address range 0
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
@@ -2619,7 +2651,7 @@ inline fapi2::ReturnCode config_address_range0( const fapi2::Target<T>& i_target
 /// @brief Configure address range 1
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
@@ -2640,7 +2672,7 @@ inline fapi2::ReturnCode config_address_range1( const fapi2::Target<T>& i_target
 /// @brief Configure address range 2
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
@@ -2661,7 +2693,7 @@ inline fapi2::ReturnCode config_address_range2( const fapi2::Target<T>& i_target
 /// @brief Configure address range 3
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
@@ -2680,7 +2712,7 @@ inline fapi2::ReturnCode config_address_range3( const fapi2::Target<T>& i_target
 /// @brief Start or stop the MCBIST engine
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start_stop bool START for starting, STOP otherwise
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
@@ -2704,7 +2736,7 @@ fapi_try_exit:
 /// @brief Resume the MCBIST engine
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
@@ -2724,7 +2756,7 @@ fapi_try_exit:
 /// @brief Reset the MCBIST error logs
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
@@ -2744,7 +2776,7 @@ fapi_try_exit:
 /// @brief Return whether or not the MCBIST engine has an operation in progress
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[out] o_in_progress - false if no operation is in progress
 /// @return FAPI2_RC_SUCCESS if getScom succeeded
@@ -2766,7 +2798,7 @@ fapi_try_exit:
 /// @brief Load a set of MCBIST subtests in to the MCBIST registers
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -2846,7 +2878,7 @@ fapi_try_exit:
 /// @brief Load a set of MCBIST address map registers
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] the target to effect
 /// @param[in] the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -2876,7 +2908,7 @@ fapi_try_exit:
 /// @brief Load MCBIST Memory Parameter Register
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] the target to effect
 /// @param[in] the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -2892,7 +2924,7 @@ inline fapi2::ReturnCode load_mcbparm( const fapi2::Target<T>& i_target, const m
 /// @brief Clear mcbist errors
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target fapi2::Target<T> of the MCBIST
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
@@ -2971,7 +3003,7 @@ inline fapi2::buffer<uint64_t> generate_eccspare_pattern(const pattern& i_patter
 /// @brief Load MCBIST ECC (and?) spare data pattern given a pattern
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_pattern an mcbist::patterns
 /// @param[in] i_invert whether to invert the pattern or not
@@ -2986,7 +3018,7 @@ fapi2::ReturnCode load_eccspare_pattern( const fapi2::Target<T>& i_target, const
 /// @brief Load MCBIST pattern given a pattern
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_pattern an mcbist::patterns
 /// @param[in] i_invert whether to invert the pattern or not
@@ -3071,7 +3103,7 @@ fapi_try_exit:
 /// @brief Load MCBIST pattern given an index
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_index the pattern index
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3098,7 +3130,7 @@ fapi_try_exit:
 /// @brief Load MCBIST pattern given an index
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3112,7 +3144,7 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const m
 ///
 /// @brief Load MCBIST maint pattern given a pattern
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @tparam MC the mc type of the T
 /// @param[in] i_target the target to effect
 /// @param[in] i_pattern an mcbist::patterns
@@ -3191,7 +3223,7 @@ fapi_try_exit:
 /// @brief Load MCBIST maint pattern given an index
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_index the pattern index
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3218,7 +3250,7 @@ fapi_try_exit:
 /// @brief Load MCBIST Maint mode pattern given an index
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3234,7 +3266,7 @@ inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, c
 /// @brief Load MCBIST 24b random data seeds given a pattern index
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_random24_data_seed mcbist::random24_data_seed
 /// @param[in] i_random24_map mcbist::random24_seed_map
@@ -3334,7 +3366,7 @@ fapi_try_exit:
 /// @brief Load MCBIST 24b Random data seeds given a pattern index
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_data_seed the 24b random data seed index
 /// @param[in] i_seed_map the 24b random data map index
@@ -3379,7 +3411,7 @@ fapi_try_exit:
 /// @brief Load MCBIST 24b Random data seeds given a program conatining a pattern index
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3394,7 +3426,7 @@ inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
 /// @brief Loads the FIFO value if needed
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3429,7 +3461,7 @@ fapi_try_exit:
 /// @brief Load MCBIST data patterns and configuration
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3466,7 +3498,7 @@ fapi_try_exit:
 /// @brief Load MCBIST data compare mask registers
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist::program
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3496,7 +3528,7 @@ fapi_try_exit:
 /// @brief Load MCBIST Thresholds
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_thresholds the thresholds
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3512,7 +3544,7 @@ inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, cons
 /// @brief Load MCBIST Threshold Register
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the program containing the thresholds
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -3526,8 +3558,8 @@ inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, cons
 ///
 /// @brief Read entries from MCBIST Read Modify Write (RMW) array
 /// @tparam MC the mc type of the T
-/// @tparam T, the fapi2::TargetType
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start_addr the array address to read first
 /// @param[in] i_num_entries the number of array entries to read
@@ -3604,8 +3636,8 @@ fapi_try_exit:
 /// @brief Read entries from MCBIST Read Modify Write (RMW) array
 /// Overload for the case where o_ecc_data is not needed
 /// @tparam MC the mc type of the T
-/// @tparam T, the fapi2::TargetType
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start_addr the array address to read first
 /// @param[in] i_num_entries the number of array entries to read
@@ -3642,8 +3674,8 @@ fapi2::ReturnCode configure_broadcast_mode(const fapi2::Target<T>& i_target, mcb
 ///
 /// @brief Read entries from MCBIST Read Buffer (RB) array
 /// @tparam MC the mc type of the T
-/// @tparam T, the fapi2::TargetType
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start_addr the array address to read first
 /// @param[in] i_num_entries the number of array entries to read
@@ -3663,7 +3695,7 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
 /// Overload for the case where o_ecc_data is not needed
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam TT, the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start_addr the array address to read first
 /// @param[in] i_num_entries the number of array entries to read
@@ -3684,7 +3716,7 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
 /// @brief Poll the mcbist engine and check for errors
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program, the mcbist program which is executing
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
@@ -3756,7 +3788,7 @@ fapi_try_exit:
 /// function to put any necessary workaround in it.
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist program to execute
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
@@ -3774,7 +3806,7 @@ fapi_try_exit:
 /// @brief Execute the mcbist program
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
+/// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist program to execute
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -214,6 +214,29 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
         }
 
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Load MCBIST ECC (and?) spare data pattern given a pattern - explorer specialization
+/// @param[in] i_target the target to effect
+/// @param[in] i_pattern an mcbist::patterns
+/// @param[in] i_invert whether to invert the pattern or not
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+fapi2::ReturnCode load_eccspare_pattern<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const pattern& i_pattern,
+    const bool i_invert )
+{
+    // First up assemble the pattern
+    const auto l_pattern = generate_eccspare_pattern(i_pattern, i_invert);
+
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MCBIST_MCBFDQ, l_pattern));
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MCBIST_MCBFDSPQ, l_pattern));
 
 fapi_try_exit:
     return fapi2::current_err;

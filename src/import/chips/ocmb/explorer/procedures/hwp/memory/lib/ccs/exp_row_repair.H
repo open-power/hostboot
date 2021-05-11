@@ -178,6 +178,16 @@ fapi2::ReturnCode maint_row_repair( const mss::rank::info<>& i_rank_info,
                                     const mss::row_repair::repair_entry<mss::mc_type::EXPLORER>& i_repair,
                                     const fapi2::buffer<uint64_t>& i_dram_bitmap);
 
+
+///
+/// @brief Helper that adds power down disable for dynamic row repair
+/// @param[in] i_target port target on which to operate
+/// @param[in, out] io_program program holding CCS instructions to add to
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+void disable_power_down_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                               mss::ccs::program& io_program);
+
 ///
 /// @brief Perform a sPPR row repair operation at runtime
 /// @param[in] i_rank_info rank info of the address to repair
@@ -231,9 +241,11 @@ fapi2::ReturnCode map_repairs_per_dimm( const fapi2::Target<fapi2::TARGET_TYPE_O
 ///
 /// @brief Deploy mapped row repairs
 /// @param[in] i_repair_map the map with repair data pairs
+/// @param[in] i_runtime true if at runtime requiring dynamic
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode deploy_mapped_repairs( const REPAIR_MAP& i_repair_map );
+fapi2::ReturnCode deploy_mapped_repairs( const REPAIR_MAP& i_repair_map,
+        const bool i_runtime );
 
 } // row repair
 } // exp
