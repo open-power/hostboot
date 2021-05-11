@@ -153,6 +153,7 @@ fapi2::ReturnCode xgpe_start(
 
     const uint32_t PU_OCB_OCI_OIEPR0_OR = TP_TPCHIP_OCC_OCI_OCB_OIEPR0_WO_OR;
     const uint32_t PU_OCB_OCI_OIEPR1_OR = TP_TPCHIP_OCC_OCI_OCB_OIEPR1_WO_OR;
+    const uint64_t TP_TPCHIP_OCC_OCI_OCB_PIB_OPPCINJ = 0x0006d111ull;
 
 //    const uint32_t PU_OCB_OCI_OIEPR0_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OIEPR0_WO_CLEAR;
 //    const uint32_t PU_OCB_OCI_OIEPR1_CLEAR = TP_TPCHIP_OCC_OCI_OCB_OIEPR1_WO_CLEAR;
@@ -255,6 +256,13 @@ fapi2::ReturnCode xgpe_start(
     FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OIRR1C_RW, l_data64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt 1 Route C Register (OIRR1C)");
+
+
+    // Clear OCC error injection register
+    l_data64.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_PIB_OPPCINJ, l_data64),
+             "**** ERROR : Unexpected error encountered in write to OCC "
+             "TP_TPCHIP_OCC_OCI_OCB_PIB_OPPCINJ");
 
     // Read back OCC Interrupt Source Registers 0 & 1
     FAPI_TRY(fapi2::getScom(i_target,
