@@ -107,8 +107,8 @@ set_hrmor()
       # Calculate HRMOR (in decimal).
       HRMOR=`expr ${HB_BASE_HRMOR} \* ${NODE} + ${HB_OFFSET}`
     else
-      #convert string to a int
-      HRMOR=$(( HRMOR ))
+      #convert hex string to a decimal
+      HRMOR=$(printf "%d" $HRMOR)
     fi
 }
 
@@ -119,7 +119,7 @@ set_hrmor()
 update_progress_bar() (
     if [[ ${DISPLAY} -eq 1 ]]; then
         current=$1
-        product=$((current * total_dump_size))
+        product=`expr $current \* $total_dump_size`
         # figure out what percentage 'p' we have completed
         # check for zero to ensure we avoid a divide-by-zero case
         if [[ $product -ne 0 ]]; then
@@ -202,6 +202,7 @@ dump()
         rm /tmp/memdump.part
         rm /tmp/memdumpoutput.tmp 2> /dev/null
         copied_so_far=$((copied_so_far+size))
+#        echo "copied so far $copied_so_far   size $size"
         if [ 1 -eq ${DISPLAY} ]; then
             update_progress_bar $copied_so_far
         fi
