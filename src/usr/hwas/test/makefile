@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -27,7 +27,7 @@ ROOTPATH = ../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 
 MODULE = testhwas
-TESTS = hwas1test.H hwasGardTest.H
+TESTS = hwas1test.H hwasGardTest.H hwasPlatErrorTest.H
 
 OBJS += attributestrings.o
 
