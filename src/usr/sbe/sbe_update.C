@@ -2258,6 +2258,8 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                sizeof(io_sbeState.new_imageBuild.buildTag) );
 
         do{
+            // Always current total image size, updated after any modification
+            uint32_t l_latestSize = 0;
 
             /***********************************************/
             /*  Determine which SEEPROM System Booted On   */
@@ -2434,6 +2436,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            TRACE_ERR_ARGS(err));
                 break;
             }
+            l_latestSize = sbeHbblImgSize;
 
             // Now append HBBL section to the SBE Image
             err = modifySbeSection(P9_XIP_SECTION_SBE_HBBL,
@@ -2451,6 +2454,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            TRACE_ERR_ARGS(err));
                 break;
             }
+            l_latestSize = sbeHbblImgSize;
 
 
             /*******************************************************/
@@ -2460,7 +2464,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /*******************************************************/
             // Eventually this define will come from including a SBE file
             const uint32_t HBBL_TRUNCATED_HEADER_SIZE = 1288;
-            uint32_t sbeSbhHbblImgSize = sbeHbblImgSize + HBBL_TRUNCATED_HEADER_SIZE;
+            uint32_t sbeSbhHbblImgSize = l_latestSize + HBBL_TRUNCATED_HEADER_SIZE;
             uint8_t pTruncatedHbblHeader[HBBL_TRUNCATED_HEADER_SIZE]={0};
 
             // If CONFIG_SECUREBOOT is set then get Header by backing up 1 PAGESIZE
@@ -2491,13 +2495,14 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            TRACE_ERR_ARGS(err));
                 break;
             }
+            l_latestSize = sbeSbhHbblImgSize;
 
             /*******************************************************/
             /*  Update the HW Keys' Hash and Secure Version to the */
             /*  "sb_settings" SBE section.                         */
             /*  Then append P9_XIP_SECTION_SBE_SB_SETTINGS         */
             /*******************************************************/
-            uint32_t sbeSbSettingsImgSize = sbeSbhHbblImgSize + sizeof(sb_settings);
+            uint32_t sbeSbSettingsImgSize = l_latestSize + sizeof(sb_settings);
 
             /*********************************************/
             /*  Get the HW Keys' Hash and Secure Version */
@@ -2708,7 +2713,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            TRACE_ERR_ARGS(err));
                 break;
             }
-
+            l_latestSize = sbeSbSettingsImgSize;
 
             // We are now done with the SBE and HBBL images in PNOR, unload
             //  them now to save memory for the other images we have to load
@@ -2733,7 +2738,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             // Check if we have a valid ring override section and
             // append it in if so
             uint32_t l_ovdImgSize =
-              static_cast<uint32_t>(sbeHbblImgSize+RING_OVD_SIZE);
+              static_cast<uint32_t>(l_latestSize+RING_OVD_SIZE);
             err = ringOvd(sbeHbblImgPtr,l_ovdImgSize);
             if(err)
             {
@@ -2744,23 +2749,23 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             }
 
             //If it's larger than the original size then we added some overrides
-            if(l_ovdImgSize > sbeHbblImgSize)
+            if(l_ovdImgSize > l_latestSize)
             {
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"procCustomizeSbeImg(): We added some "
                            "ring overrides, initial image size:%u "
                            "new image size:%u",
-                           sbeHbblImgSize, l_ovdImgSize);
+                           l_latestSize, l_ovdImgSize);
 
                 // Set new size for use below
-                sbeHbblImgSize = l_ovdImgSize;
+                l_latestSize = l_ovdImgSize;
             }
 
             // Pass in the larger of our custom size or MAX_SEEPROM_IMAGE_SIZE
             // -- p10_ipl_customize expects minimum of MAX_SEEPROM_IMAGE_SIZE
             // if custom size is NOT able to be pruned to fit physical SEEPROM
             // by p10_ipl_customize, then error flows will handle
-            sbeHbblImgSize = std::max(sbeHbblImgSize, MAX_SEEPROM_IMAGE_SIZE);
+            l_latestSize = std::max(l_latestSize, MAX_SEEPROM_IMAGE_SIZE);
 
             /*******************************************/
             /*  Customize SBE/HBBL Image and           */
@@ -2790,8 +2795,8 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             err = procCustomizeSbeImg(io_sbeState.target,
                                       l_hCodeAddr,    // HCODE in memory
                                       sbeHbblImgPtr,  //SBE, HBBL in memory
-                                      sbeHbblImgSize, // MAX size on INPUT
-                                      pCustomizedBfr,  //destination
+                                      l_latestSize,   // MAX size on INPUT
+                                      pCustomizedBfr, //destination
                                       sbeImgSize);
 
             if(err)
