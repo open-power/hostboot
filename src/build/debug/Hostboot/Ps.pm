@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -59,10 +59,10 @@ sub main
 {
     my ($packName,$args) = @_;
 
-    my $withBacktrace = 0;
-    if(defined $args->{"with-backtrace"} or (defined $args->{"--with-backtrace"}))
+    my $withBacktrace = 1;
+    if(defined $args->{"without-backtrace"} or (defined $args->{"--without-backtrace"}))
     {
-        $withBacktrace = 1;
+        $withBacktrace = 0;
     }
 
     # Find symbol containing kernel list of task objects.
