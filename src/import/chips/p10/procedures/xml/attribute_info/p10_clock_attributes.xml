@@ -120,7 +120,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>OSC0 = 0x0, OSC1 = 0x1, BOTH_OSC0 = 0x2, BOTH_OSC1 = 0x3, BOTH_OSC0_NORED = 0x4, BOTH_OSC1_NORED = 0x5</enum>
-  <initToZero/>
+  <platInit/>
   <writeable/>
   <persistRuntime/>
 </attribute>
