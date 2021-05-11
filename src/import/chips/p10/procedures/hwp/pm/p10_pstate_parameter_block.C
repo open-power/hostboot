@@ -1168,8 +1168,6 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
         //WOV parameters
         io_globalppb->wov_sample_125us                = revle32(iv_attrs.attr_wov_sample_125us);
-        io_globalppb->wov_max_droop_pct               = revle32(iv_attrs.attr_wov_max_droop_pct);
-        io_globalppb->wov_underv_perf_loss_thresh_pct = iv_attrs.attr_wov_underv_perf_loss_thresh_pct;
         io_globalppb->wov_underv_step_incr_pct        = iv_attrs.attr_wov_underv_step_incr_pct;
         io_globalppb->wov_underv_step_decr_pct        = iv_attrs.attr_wov_underv_step_decr_pct;
         io_globalppb->wov_underv_max_pct              = iv_attrs.attr_wov_underv_max_pct;
@@ -1843,9 +1841,6 @@ void PlatPmPPB::attr_init( void )
     // WOV attributes
     PPB_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,             FAPI_SYSTEM,  attr_wov_overv_disable);
     PPB_GET_ATTR(ATTR_SYSTEM_WOV_UNDERV_DISABLE,            FAPI_SYSTEM,  attr_wov_underv_disable);
-    PPB_GET_ATTR(ATTR_WOV_SAMPLE_125US,                     iv_procChip,  attr_wov_sample_125us);
-    PPB_GET_ATTR(ATTR_WOV_MAX_DROOP_10THPCT,                iv_procChip,  attr_wov_max_droop_pct);
-    PPB_GET_ATTR(ATTR_WOV_UNDERV_PERF_LOSS_THRESH_10THPCT,  iv_procChip,  attr_wov_underv_perf_loss_thresh_pct);
     PPB_GET_ATTR(ATTR_WOV_UNDERV_STEP_INCR_10THPCT,         iv_procChip,  attr_wov_underv_step_incr_pct);
     PPB_GET_ATTR(ATTR_WOV_UNDERV_STEP_DECR_10THPCT,         iv_procChip,  attr_wov_underv_step_decr_pct);
     PPB_GET_ATTR(ATTR_WOV_UNDERV_MAX_10THPCT,               iv_procChip,  attr_wov_underv_max_pct);
@@ -1853,12 +1848,8 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR(ATTR_WOV_OVERV_VMAX_SETPOINT_MV,           iv_procChip,  attr_wov_overv_vmax_mv);
     PPB_GET_ATTR(ATTR_WOV_OVERV_STEP_INCR_10THPCT,          iv_procChip,  attr_wov_overv_step_incr_pct);
     PPB_GET_ATTR(ATTR_WOV_OVERV_STEP_DECR_10THPCT,          iv_procChip,  attr_wov_overv_step_decr_pct);
-    PPB_GET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,                iv_procChip,  attr_wov_overv_max_pct)
+    PPB_GET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,                iv_procChip,  attr_wov_overv_max_pct);
     PPB_GET_ATTR_2(ATTR_WOV_DIRTY_UNCURRENT_CONTROL,        FAPI_SYSTEM, attr_wov_dirty_uncurrent_ctrl);
-
-    //VCS attributes
-    PPB_GET_ATTR(ATTR_VCS_FLOOR_MV,                         iv_procChip,  attr_vcs_floor_mv);
-    PPB_GET_ATTR(ATTR_VCS_VDD_OFFSET_MV,                    iv_procChip,  attr_vcs_vdd_offset_mv);
 
     // Current Scaling Factors
     PPB_GET_ATTR_8(ATTR_CURRENT_SCALING_FACTOR,             FAPI_SYSTEM,  attr_current_scaling_factor);
@@ -1930,16 +1921,13 @@ void PlatPmPPB::attr_init( void )
         EXT_VRM_STEPSIZE_MV[2],
         EXT_VRM_STEPSIZE_MV[3]);
 
-    SET_DEFAULT(attr_wov_sample_125us, 2);
-    SET_DEFAULT(attr_wov_max_droop_pct, 125);
     SET_DEFAULT(attr_wov_overv_step_incr_pct, 5);
     SET_DEFAULT(attr_wov_overv_step_decr_pct, 5);
-    SET_DEFAULT(attr_wov_overv_max_pct, 0);
+    SET_DEFAULT(attr_wov_overv_max_pct, 30);
     SET_DEFAULT(attr_wov_overv_vmax_mv, 1150);
     SET_DEFAULT(attr_wov_underv_step_incr_pct, 5);
     SET_DEFAULT(attr_wov_underv_step_decr_pct, 5);
     SET_DEFAULT(attr_wov_underv_max_pct, 100);
-    SET_DEFAULT(attr_wov_underv_perf_loss_thresh_pct, 5);
 
 #define SET_FLOOR(_attr_name, _attr_default) \
     if (iv_attrs._attr_name < _attr_default) \
@@ -1958,54 +1946,41 @@ void PlatPmPPB::attr_init( void )
     }
     //Ensure that the ranges for WOV attributes are honored
 
-    SET_FLOOR(attr_wov_sample_125us,                2   );
     SET_CEIL (attr_wov_overv_step_incr_pct,         20  );
     SET_CEIL (attr_wov_overv_step_decr_pct,         20  );
     SET_CEIL (attr_wov_overv_max_pct,               100 );
     SET_CEIL (attr_wov_underv_step_incr_pct,        20  );
     SET_CEIL (attr_wov_underv_step_decr_pct,        20  );
     SET_FLOOR(attr_wov_underv_max_pct,              2   );
-    SET_CEIL (attr_wov_underv_perf_loss_thresh_pct, 20  );
 
-//   if (iv_attrs.attr_wov_sample_125us < 2)
-//     {
-//         iv_attrs.attr_wov_sample_125us = 2;
-//     }
-//
-//     if(iv_attrs.attr_wov_overv_step_incr_pct > 20)
-//     {
-//         iv_attrs.attr_wov_overv_step_incr_pct = 20;
-//     }
-//
-//     if(iv_attrs.attr_wov_overv_step_decr_pct > 20)
-//     {
-//         iv_attrs.attr_wov_overv_step_decr_pct = 20;
-//     }
-//
-//     if(iv_attrs.attr_wov_overv_max_pct > 100)
-//     {
-//         iv_attrs.attr_wov_overv_max_pct = 100;
-//     }
-//
-//     if(iv_attrs.attr_wov_underv_step_incr_pct > 20)
-//     {
-//         iv_attrs.attr_wov_underv_step_incr_pct = 20;
-//     }
-//
-//     if(iv_attrs.attr_wov_underv_step_decr_pct > 20)
-//     {
-//         iv_attrs.attr_wov_underv_step_decr_pct = 20;
-//     }
-//
-//     if(iv_attrs.attr_wov_underv_max_pct < 10)
-//     {
-//         iv_attrs.attr_wov_underv_step_decr_pct = 10;
-//     }
-//
-//     if (iv_attrs.attr_wov_underv_perf_loss_thresh_pct > 20)
-//     {
-//         iv_attrs.attr_wov_underv_perf_loss_thresh_pct = 20;
-//     }
+#define PPB_SET_ATTR(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute write failed"); \
+    FAPI_INF("Writing %-46s    = 0x%08x %d (after default and range filtering)", \
+                  #attr_name, iv_attrs.attr_assign, iv_attrs.attr_assign);
+
+#define PPB_SET_ATTR_4(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed");\
+    FAPI_INF("Writing %-46s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]); \
+    FAPI_INF("Writing %-46s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]); \
+    FAPI_INF("Writing %-46s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]); \
+    FAPI_INF("Writing %-46s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);
+
+    // Write the values that might have been defaulted or clipped back out
+    PPB_SET_ATTR(ATTR_WOV_OVERV_STEP_INCR_10THPCT,          iv_procChip,  attr_wov_overv_step_incr_pct);
+    PPB_SET_ATTR(ATTR_WOV_OVERV_STEP_DECR_10THPCT,          iv_procChip,  attr_wov_overv_step_decr_pct);
+    PPB_SET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,                iv_procChip,  attr_wov_overv_max_pct);
+    PPB_SET_ATTR(ATTR_WOV_OVERV_VMAX_SETPOINT_MV,           iv_procChip,  attr_wov_overv_vmax_mv);
+    PPB_SET_ATTR(ATTR_WOV_UNDERV_STEP_INCR_10THPCT,         iv_procChip,  attr_wov_underv_step_incr_pct);
+    PPB_SET_ATTR(ATTR_WOV_UNDERV_STEP_DECR_10THPCT,         iv_procChip,  attr_wov_underv_step_decr_pct);
+    PPB_SET_ATTR(ATTR_WOV_UNDERV_MAX_10THPCT,               iv_procChip,  attr_wov_underv_max_pct);
+
+    PPB_SET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US,
+                                                            iv_procChip,  attr_ext_vrm_transition_rate_dec_uv_per_us);
+    PPB_SET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US,
+                                                            iv_procChip,  attr_ext_vrm_transition_rate_inc_uv_per_us);
+    PPB_SET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS,
+                                                            iv_procChip,  attr_ext_vrm_stabilization_time_us);
+    PPB_SET_ATTR_4(ATTR_EXTERNAL_VRM_TRANSITION_START_NS, iv_procChip,    attr_ext_vrm_transition_start_ns);
 
     // Deal with critical attributes that are not set and that any defaults chosen
     // could well be very wrong

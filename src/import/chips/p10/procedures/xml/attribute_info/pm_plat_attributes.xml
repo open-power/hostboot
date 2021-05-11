@@ -1174,7 +1174,7 @@
         OFF=0,
         ON=1
     </enum>
-    <default>OFF</default>
+    <default>ON</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -1301,7 +1301,7 @@
     <valueType>uint8</valueType>
     <array>5</array>
     <platInit/>
-    <default>0,0,0,0,0</default>
+    <default>0,1,0,0,0</default>
     <overrideOnly/>
     <group>wof</group>
   </attribute>
@@ -1660,7 +1660,7 @@
         WARN = 2,
         OFF  = 3
     </enum>
-    <default>INFO</default>
+    <default>OFF</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -2049,6 +2049,8 @@
     <array>4</array>
     <platInit/>
     <default>0</default>
+    <writeable/>
+    <overrideOnly/>
     <group>vrm</group>
   </attribute>
 
@@ -2074,6 +2076,8 @@
     <array>4</array>
     <platInit/>
     <default>0</default>
+    <writeable/>
+    <overrideOnly/>
     <group>vrm</group>
   </attribute>
 
@@ -2101,6 +2105,8 @@
     <array>4</array>
     <platInit/>
     <default>0</default>
+    <writeable/>
+    <overrideOnly/>
     <group>vrm</group>
   </attribute>
 
@@ -2129,6 +2135,8 @@
     <array>4</array>
     <platInit/>
     <default>0</default>
+    <writeable/>
+    <overrideOnly/>
     <group>vrm</group>
   </attribute>
 
@@ -2263,6 +2271,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -2283,6 +2292,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -2302,6 +2312,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -2319,21 +2330,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
-    <group>wov</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_WOV_SAMPLE_125US</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    If WOV undervolting and/or WOF overvolting is enabled, then this determines
-    which the undervolting and/or overvolting is run. For P9, the minimum is
-    </description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <initToZero/>
-    <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -2354,20 +2351,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
-    <group>wov</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_WOV_UNDERV_PERF_LOSS_THRESH_10THPCT</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    THIS ATTRIBUTE IS DEPRECATED AND WILL BE REMOVED.
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <initToZero/>
-    <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -2389,6 +2373,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -2410,6 +2395,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -2429,6 +2415,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -2448,6 +2435,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -2456,7 +2444,7 @@
     <id>ATTR_WOV_UNDERV_VMIN_MV</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Maximum regulator voltage allowed without exceeding the technology Vmax at
+    Minimum regulator voltage allowed without violating the chip Vmin at the
     pins.
 
     If, 0, then default value of 1150(1.15V)
@@ -2465,6 +2453,7 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <writeable/>
     <group>wov</group>
   </attribute>
 
@@ -3316,37 +3305,6 @@
 
   <!-- *********************************************************************-->
   <attribute>
-    <id>ATTR_VCS_FLOOR_MV</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    THIS ATTRIBUTE HAS BEEN DEPRECATED.
-
-    VCS voltages are exclusively controlled by the part's #V VPD values.
-    </description>
-    <valueType>uint16</valueType>
-    <platInit/>
-    <initToZero/>
-    <overrideOnly/>
-    <group>pstate</group>
-  </attribute>
-
-  <!-- *********************************************************************-->
-  <attribute>
-    <id>ATTR_VCS_VDD_OFFSET_MV</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    THIS ATTRIBUTE HAS BEEN DEPRECATED.
-
-    VCS voltages are exclusively controlled by the part's #V VPD values.
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <default>0</default>
-    <group>pstate</group>
-  </attribute>
-
-  <!-- *********************************************************************-->
-  <attribute>
     <id>ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -3484,8 +3442,8 @@
     </description>
     <valueType>uint8</valueType>
      <enum>
-	STATIC  = 0,
-        DYNAMIC = 1
+     STATIC  = 0,
+     DYNAMIC = 1
      </enum>
     <overrideOnly/>
     <default>STATIC</default>
