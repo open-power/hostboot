@@ -275,8 +275,8 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize WOF data
-        /// @param[out]     o_buf points to WOF data
-        /// @param[inout]   io_size size of the wof  table
+        /// @param[out]    o_buf points to WOF data
+        /// @param[inout]  io_size size of the wof  table
         /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode wof_init(

@@ -5728,6 +5728,12 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
                         l_vcs_size, l_vdd_size, l_io_size,l_ac_size);
         FAPI_INF("WOF: total_index  %02d", l_total_index);
 
+        //init ATTR_WOF_TDP_IO_INDEX to facilitate IODLR operation by XGPE
+        fapi2::ATTR_WOF_TDP_IO_INDEX_Type l_wof_tdp_io_index;
+        l_wof_tdp_io_index  =   p_wfth->io_tdp_pwr_indx;
+        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_WOF_TDP_IO_INDEX, iv_procChip, l_wof_tdp_io_index ) );
+        FAPI_DBG( "ATTR_WOF_TDP_IO_INDEX value is 0x%02x", l_wof_tdp_io_index );
+
         // Convert system vrt to homer vrt
         for (uint32_t vrt_index = 0;
                 vrt_index < l_total_index;
@@ -5840,7 +5846,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         {
           b_wof_error = true;
         }
-        if (wof_convert_tables(l_wof_table_data, o_buf, io_size))
+        if (wof_convert_tables( l_wof_table_data, o_buf, io_size ))
         {
           b_wof_error = true;
         }

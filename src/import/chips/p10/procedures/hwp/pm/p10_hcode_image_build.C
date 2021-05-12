@@ -844,22 +844,27 @@ fapi2::ReturnCode setIOAttr(CONST_FAPI2_PROC& i_procTgt,
             "Error from FAPI_ATTR_GET for ATTR_WOF_IO_POWER_MODE" );
     pXgpeHeader->g_xgpe_wofIoPowMode  =  attrTemp8;
 
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_WOF_TDP_IO_INDEX, i_procTgt, attrTemp8 ),
+              "Error from FAPI_ATTR_GET for ATTR_WOF_TDP_IO_INDEX" );
+    pXgpeHeader->g_xgpe_wofTdpIoIndex  =  attrTemp8;
+
 #ifndef __HOSTBOOT_MODULE
     pXgpeHeader->g_xgpe_ioStart             =  htobe16(pXgpeHeader->g_xgpe_ioStart);
     pXgpeHeader->g_xgpe_ioStep              =  htobe16(pXgpeHeader->g_xgpe_ioStep);
-    pXgpeHeader->g_xgpe_ioCount              =  htobe16(pXgpeHeader->g_xgpe_ioCount);
+    pXgpeHeader->g_xgpe_ioCount             =  htobe16(pXgpeHeader->g_xgpe_ioCount);
     pXgpeHeader->g_xgpe_vdnVoltage          =  htobe16(pXgpeHeader->g_xgpe_vdnVoltage);
     pXgpeHeader->g_xgpe_groundedLinks       =  htobe64(pXgpeHeader->g_xgpe_groundedLinks);;
     pXgpeHeader->g_xgpe_groundedCtrls       =  htobe16(pXgpeHeader->g_xgpe_groundedCtrls);
 
     FAPI_DBG( "====================== XGPE Header =======================" );
-    FAPI_INF( "XGPE IO Start     	    0x%04x", htobe16( pXgpeHeader->g_xgpe_ioStart ) );
-    FAPI_INF( "XGPE IO Step     	    0x%04x", htobe16( pXgpeHeader->g_xgpe_ioStep ) );
+    FAPI_INF( "XGPE IO Start                0x%04x", htobe16( pXgpeHeader->g_xgpe_ioStart ) );
+    FAPI_INF( "XGPE IO Step                 0x%04x", htobe16( pXgpeHeader->g_xgpe_ioStep ) );
     FAPI_INF( "XGPE IO Count                0x%04x", htobe16( pXgpeHeader->g_xgpe_ioCount ) );
     FAPI_INF( "XGPE VND Voltage             0x%04x", htobe16( pXgpeHeader->g_xgpe_vdnVoltage ) );
     FAPI_INF( "XGPE Ground Links            0x%016lx", htobe64( pXgpeHeader->g_xgpe_groundedLinks ) );
     FAPI_INF( "XGPE Ground Controller       0x%04x", htobe16( pXgpeHeader->g_xgpe_groundedCtrls ) );
-    FAPI_INF( "XGPE Power Mode       	    0x%02x", pXgpeHeader->g_xgpe_wofIoPowMode );
+    FAPI_INF( "XGPE Power Mode              0x%02x", pXgpeHeader->g_xgpe_wofIoPowMode );
+    FAPI_INF( "XGPE WOF TDP IO Index        0x%08x", pXgpeHeader->g_xgpe_wofTdpIoIndex );
     FAPI_DBG( "==========================================================" );
 #endif
 
@@ -906,6 +911,7 @@ fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
     pXgpeHeader->g_xgpe_xgpeDeepOpTraceMemAddr   =
         ( EXT_MEM_ADDR | ( HOMER_XPMR_REGION_NUM * ONE_MB ) |  l_sectn.iv_sectnOffset );
     pXgpeHeader->g_xgpe_xgpeDeepOpTraceLength    =   l_sectn.iv_sectnLength;
+
 
 #ifndef __HOSTBOOT_MODULE
     pXgpeHeader->g_xgpe_hcodeLength         =    htobe32( pXgpeHeader->g_xgpe_hcodeLength );

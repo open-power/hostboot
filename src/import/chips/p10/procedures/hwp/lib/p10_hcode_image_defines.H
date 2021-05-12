@@ -312,6 +312,7 @@ HCD_HDR_UINT16( g_xgpe_vdnVoltage,               0 );
 HCD_HDR_UINT64( g_xgpe_groundedLinks,            0 );
 HCD_HDR_UINT16( g_xgpe_groundedCtrls,            0 );
 HCD_HDR_UINT8 ( g_xgpe_wofIoPowMode,             0 );
+HCD_HDR_UINT8 ( g_xgpe_wofTdpIoIndex,            0 );
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
