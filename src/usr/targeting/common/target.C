@@ -731,6 +731,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_LPCREFCLKENDPT):
                 case(TYPE_NA):
                 case(TYPE_TEST_FAIL):
+                case(TYPE_DCM):
                 case(TYPE_LAST_IN_RANGE):
                 case(TYPE_INVALID):
                 {

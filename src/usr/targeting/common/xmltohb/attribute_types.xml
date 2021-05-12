@@ -9629,8 +9629,12 @@
       <value>86</value>
     </enumerator>
     <enumerator>
-      <name>LAST_IN_RANGE</name>
+      <name>DCM</name>
       <value>87</value>
+    </enumerator>
+    <enumerator>
+      <name>LAST_IN_RANGE</name>
+      <value>88</value>
     </enumerator>
     <id>TYPE</id>
   </enumerationType>

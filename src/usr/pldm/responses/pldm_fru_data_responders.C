@@ -120,6 +120,8 @@ int encode_get_fru_record_table_resp_hb(const uint8_t i_instance_id,
     return rc;
 }
 
+using fru_data_t = std::vector<uint8_t>;
+
 // @brief A class to manage creating a FRU record table
 class FruRecordTable
 {
@@ -145,6 +147,21 @@ public:
     void loadAllFruRecords();
 
 private:
+    /* @brief Add FRU record entry into table
+     *
+     * @parm[in]  i_rsid        FRU record set identifier
+     * @parm[in]  i_num_tlvs    Number of FRU fields in formatted data
+     * @parm[in]  i_fru_tlvs    TLV formatted FRU field data
+     * @parm[in]  i_record_type FRU record type
+     * @parm[in]  i_encoding    FRU encoding type for FRU fields
+     *
+     */
+    void addFruRecord(const fru_record_set_id_t & i_rsid,
+                      const uint8_t i_num_tlvs,
+                      fru_data_t & i_fru_tlvs,
+                      const uint8_t i_record_type,
+                      const uint8_t i_encoding);
+
     /* @brief Load all the FRU records for a particular target.
      *
      * @note Right now this only loads the location code.
@@ -155,9 +172,31 @@ private:
     void loadFruRecords(TARGETING::Target* const i_target,
                         const entity_type i_entityType);
 
+    /* @brief Loads all the FRU records for every DCM.
+     *
+     * @note DCMs do not have a target, so this is a special case
+     */
+    void loadFruRecordsForDCMs();
+
+    /* @brief Loads a particular DCM FRU record
+     * @note Called by loadFruRecordsForDCMs
+     * @param[in] i_proc    The processor target associated with DCM (used for RSID)
+     *                      This should be the lowest position processor grouped by location_code
+     */
+    void loadDcmFruRecord(TARGETING::Target* const i_proc);
+
+    // storage of the full fru record table
     std::vector<uint8_t> iv_fru_record_table_bytes;
+
+    // current bytes used in iv_fru_record_table_bytes
+    size_t iv_fru_record_table_used_bytes = 0;
+
+    // total number of fru records in table
     uint16_t iv_num_records = 0;
+
+    // set of unique records in fru record table
     std::map<fru_record_set_id_t, bool> iv_record_sets;
+
 };
 
 uint32_t FruRecordTable::recordDataByteSize() const
@@ -180,12 +219,12 @@ uint16_t FruRecordTable::recordSetCount() const
     return iv_record_sets.size();
 }
 
+
 void FruRecordTable::loadAllFruRecords()
 {
     PLDM_INF("Loading all FRU records...");
 
     /* Iterate the relevant targets and serialize each location code */
-
     for (const auto& info : host_location_code_frus)
     {
         TargetHandleList targets;
@@ -206,6 +245,8 @@ void FruRecordTable::loadAllFruRecords()
             loadFruRecords(target, info.entityType);
         }
     }
+
+    loadFruRecordsForDCMs();
 
     PLDM_INF("Done loading all FRU records (%d records, %d record sets, %d bytes)",
              recordCount(),
@@ -239,7 +280,6 @@ void encodeTlv(const uint8_t i_type,
                    static_cast<const uint8_t*>(i_value) + i_length);
 }
 
-using fru_data_t = std::vector<uint8_t>;
 
 /* @brief Reads the location code from a target and encodes it as in TLV format.
  *
@@ -339,6 +379,125 @@ bool read_mru_id_tlv( Target* const i_target,
     return l_mru_id_added;
 }
 
+/* @brief Reads the Serial number from a target and encodes it in TLV format.
+ *
+ * @param[in] i_target        The target to grab serial number from
+ * @param[in] i_field_type    The pldm field type
+ * @param[out] o_fru_data     The vector to fill with FRU TLVs
+ */
+void read_serial_tlv( Target* const i_target,
+                      const uint8_t i_field_type,
+                      fru_data_t& o_fru_data )
+{
+    ATTR_SERIAL_NUMBER_type serial_number = { };
+    static_assert(sizeof(serial_number) <= UINT8_MAX,
+            "Serial number too large to encode in a FRU TLV");
+
+    assert(i_target->tryGetAttr<ATTR_SERIAL_NUMBER>(serial_number),
+               "Cannot get ATTR_SERIAL_NUMBER from target 0x%08x",
+               get_huid(i_target));
+
+    /* Encode the TLV */
+    encodeTlv(i_field_type,
+              strnlen(reinterpret_cast<char*>(serial_number), sizeof(serial_number)),
+              serial_number,
+              o_fru_data);
+}
+
+
+void FruRecordTable::addFruRecord(const fru_record_set_id_t & i_rsid,
+                                  const uint8_t i_num_tlvs,
+                                  fru_data_t & i_fru_tlvs,
+                                  const uint8_t i_record_type,
+                                  const uint8_t i_encoding)
+{
+    /* Reserve space in the record table */
+    const size_t record_hdr_size =
+        (sizeof(struct pldm_fru_record_data_format)
+         - sizeof(struct pldm_fru_record_tlv));
+
+    iv_fru_record_table_bytes.resize(iv_fru_record_table_used_bytes
+                                     + record_hdr_size
+                                     + i_fru_tlvs.size());
+
+    /* Encode the record in the table */
+    const int encode_rc = encode_fru_record(iv_fru_record_table_bytes.data(),
+                                    iv_fru_record_table_bytes.size(),
+                                    &iv_fru_record_table_used_bytes,
+                                    i_rsid,
+                                    i_record_type,
+                                    i_num_tlvs,
+                                    i_encoding,
+                                    i_fru_tlvs.data(),
+                                    i_fru_tlvs.size());
+
+    assert(encode_rc == PLDM_SUCCESS,
+           "encode_fru_record record RSID: 0x%04X, record type %x, encoding %x failed with rc = %d",
+           i_rsid, i_record_type, i_encoding, encode_rc);
+
+    /* Adjust bookkeeping numbers */
+    // NOTE: iv_fru_record_table_used_bytes is updated via encode_fru_record()
+    ++iv_num_records;
+    iv_record_sets[i_rsid] = true;
+}
+
+void FruRecordTable::loadDcmFruRecord(TARGETING::Target* const i_proc)
+{
+    PLDM_INF("Loading FRU record for DCM associated with proc 0x%08x", get_huid(i_proc));
+
+    const fru_record_set_id_t rsid = getTargetFruRecordSetID(i_proc, TYPE_DCM);
+
+    /* Read the target's serial number, encoded as a TLV */
+    fru_data_t fru_tlvs;
+    read_serial_tlv(i_proc, PLDM_FRU_FIELD_TYPE_SN, fru_tlvs);
+    const uint8_t num_tlvs = 1;
+
+    addFruRecord(rsid, num_tlvs, fru_tlvs, PLDM_FRU_RECORD_TYPE_GENERAL, PLDM_FRU_ENCODING_ASCII);
+}
+
+void FruRecordTable::loadFruRecordsForDCMs()
+{
+    PLDM_INF("Loading DCM FRU records...");
+
+    struct cmp_str
+    {
+       // note: vectors contain strings (null-terminated)
+       bool operator()(std::vector<char> a, std::vector<char> b) const
+       {
+            return strcmp(a.data(), b.data()) > 0;
+       }
+    };
+    // using vector for memory cleanup
+    std::map<std::vector<char>, TARGETING::Target*, cmp_str> l_dcmLocationMap;
+
+    TargetHandleList procTargets;
+    getClassResources(procTargets,
+                      CLASS_CHIP,
+                      TYPE_PROC,
+                      UTIL_FILTER_PRESENT);
+
+    std::sort(begin(procTargets), end(procTargets),
+              [](const Target* const t1, const Target* const t2) {
+                  return t1->getAttr<ATTR_POSITION>() < t2->getAttr<ATTR_POSITION>();
+              });
+
+    // figure out what processors are associated with DCMs
+    for (const auto & l_procTarget : procTargets)
+    {
+        ATTR_STATIC_ABS_LOCATION_CODE_type abs_location_code { };
+        assert(UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(l_procTarget, abs_location_code),
+                "Cannot get ATTR_STATIC_ABS_LOCATION_CODE from PROC HUID = 0x%08x", get_huid(l_procTarget));
+        std::vector<char> vLocationStr(abs_location_code, abs_location_code + std::size(abs_location_code));
+        auto it = l_dcmLocationMap.find(vLocationStr);
+        if (it == l_dcmLocationMap.end())
+        {
+            // no DCM yet for this processor
+            loadDcmFruRecord(l_procTarget);
+            l_dcmLocationMap[vLocationStr] = l_procTarget;
+        }
+    }
+}
+
 void FruRecordTable::loadFruRecords(Target* const i_target,
                                     const entity_type i_entityType)
 {
@@ -352,42 +511,11 @@ void FruRecordTable::loadFruRecords(Target* const i_target,
     fru_data_t fru_tlvs;
     read_location_code_tlv(i_target, fru_tlvs);
 
-
-    /* Reserve space in the record table */
-    size_t fru_record_table_used_bytes = iv_fru_record_table_bytes.size();
-
-    const size_t record_hdr_size =
-        (sizeof(struct pldm_fru_record_data_format)
-         - sizeof(struct pldm_fru_record_tlv));
-
-    iv_fru_record_table_bytes.resize(iv_fru_record_table_bytes.size()
-                                     + record_hdr_size
-                                     + fru_tlvs.size());
-
     /* Encode the record in the table */
 
     // location code
-    int num_tlvs = 1;
-
-    const int encode_rc = encode_fru_record(iv_fru_record_table_bytes.data(),
-                                            iv_fru_record_table_bytes.size(),
-                                            &fru_record_table_used_bytes,
-                                            rsid,
-                                            PLDM_FRU_RECORD_TYPE_OEM,
-                                            num_tlvs,
-                                            PLDM_FRU_ENCODING_ASCII,
-                                            fru_tlvs.data(),
-                                            fru_tlvs.size());
-
-    assert(encode_rc == PLDM_SUCCESS,
-           "encode_fru_record failed with rc = %d",
-           encode_rc);
-
-
-    /* Adjust bookkeeping numbers */
-    ++iv_num_records;
-    iv_record_sets[rsid] = true;
-
+    const uint8_t num_tlvs = 1;
+    addFruRecord(rsid, num_tlvs, fru_tlvs, PLDM_FRU_RECORD_TYPE_OEM, PLDM_FRU_ENCODING_ASCII);
 
     // add the MRU_ID to the SN field for a general record if allowed
     fru_tlvs.clear();
@@ -397,29 +525,7 @@ void FruRecordTable::loadFruRecords(Target* const i_target,
     bool mruid_added = read_mru_id_tlv(i_target, PLDM_FRU_FIELD_TYPE_SN, fru_tlvs);
     if (mruid_added)
     {
-        // SN field which has MRU_ID
-        num_tlvs = 1;
-
-        iv_fru_record_table_bytes.resize(iv_fru_record_table_bytes.size()
-                                         + record_hdr_size
-                                         + fru_tlvs.size());
-
-        const int encode_rc = encode_fru_record(iv_fru_record_table_bytes.data(),
-                                        iv_fru_record_table_bytes.size(),
-                                        &fru_record_table_used_bytes,
-                                        rsid,
-                                        PLDM_FRU_RECORD_TYPE_GENERAL,
-                                        num_tlvs,
-                                        PLDM_FRU_ENCODING_ASCII,
-                                        fru_tlvs.data(),
-                                        fru_tlvs.size());
-
-        assert(encode_rc == PLDM_SUCCESS,
-               "encode_fru_record PLDM_FRU_RECORD_TYPE_GENERAL failed with rc = %d",
-               encode_rc);
-
-        /* Adjust bookkeeping numbers */
-        ++iv_num_records;
+        addFruRecord(rsid, num_tlvs, fru_tlvs, PLDM_FRU_RECORD_TYPE_GENERAL, PLDM_FRU_ENCODING_ASCII);
     }
 }
 

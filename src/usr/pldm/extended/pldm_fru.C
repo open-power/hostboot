@@ -59,9 +59,9 @@ static_assert(sizeof(encoded_rsid_t) == sizeof(PLDM::fru_record_set_id_t),
               "Encoded RSID union not packed");
 
 
-PLDM::fru_record_set_id_t PLDM::getTargetFruRecordSetID(const Target* const i_target)
+PLDM::fru_record_set_id_t PLDM::getTargetFruRecordSetID(const Target* const i_target, TYPE i_target_type)
 {
-    const auto l_target_type = i_target->getAttr<ATTR_TYPE>();
+    const auto l_target_type = (i_target_type == TYPE_NA) ? i_target->getAttr<ATTR_TYPE>() : i_target_type;
     const auto l_ordinal_id = i_target->getAttr<ATTR_ORDINAL_ID>();
 
     assert(l_target_type < (1 << target_type_bits),
@@ -80,26 +80,36 @@ PLDM::fru_record_set_id_t PLDM::getTargetFruRecordSetID(const Target* const i_ta
     return rsid.packed_rsid;
 }
 
+
+
 Target* PLDM::getTargetFromHostbootFruRecordSetID(const fru_record_set_id_t i_rsid)
 {
     encoded_rsid_t encoded_rsid = { .packed_rsid = i_rsid };
 
-    TARGETING::TargetHandleList target_list;
-    getClassResources(target_list,
-                      CLASS_NA,
-                      encoded_rsid.target_type,
-                      UTIL_FILTER_PRESENT);
-
     Target* result_target = nullptr;
-
-    for (Target* const target : target_list)
-    {
-        if (target->getAttr<ATTR_ORDINAL_ID>() == encoded_rsid.ordinal_id)
+    do {
+        // no target for DCMs
+        if (encoded_rsid.target_type == TYPE_DCM)
         {
-            result_target = target;
             break;
         }
-    }
+
+        TARGETING::TargetHandleList target_list;
+        getClassResources(target_list,
+                          CLASS_NA,
+                          encoded_rsid.target_type,
+                          UTIL_FILTER_PRESENT);
+
+        for (Target* const target : target_list)
+        {
+            if (target->getAttr<ATTR_ORDINAL_ID>() == encoded_rsid.ordinal_id)
+            {
+                result_target = target;
+                break;
+            }
+        }
+    } while (0);
 
     return result_target;
 }
+

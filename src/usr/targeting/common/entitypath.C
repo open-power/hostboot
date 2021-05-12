@@ -507,6 +507,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "GENERIC_I2C_DEVICE";
         case TYPE_MDS_CTLR:
             return "MDS_CTLR";
+        case TYPE_DCM:
+            return "DCM";
         default:
             return "Unknown path type";
     }

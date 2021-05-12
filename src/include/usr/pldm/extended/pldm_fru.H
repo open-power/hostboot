@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,9 +54,10 @@ constexpr uint8_t SUPPORTED_FRU_VERSION_MINOR = 0;
  *       least-significant octet of the 16-bit RSID.
  *
  * @param[in] i_target  The target to get the FRU RSID for.
+ * @param[in] i_target_type Optional target type (used if i_target's type doesn't match)
  * @return fru_record_set_id_t  The encoded FRU Record Set ID.
  */
-fru_record_set_id_t getTargetFruRecordSetID(const TARGETING::Target* i_target);
+fru_record_set_id_t getTargetFruRecordSetID(const TARGETING::Target* i_target, TARGETING::TYPE i_target_type = TARGETING::TYPE_NA);
 
 /* @brief Returns a Target handle from a given FRU Record Set ID.
  *        The RSID must have been encoded by getTargetFruRecordSetID.
@@ -66,6 +67,8 @@ fru_record_set_id_t getTargetFruRecordSetID(const TARGETING::Target* i_target);
  *                    or nullptr if none match
  */
 TARGETING::Target* getTargetFromHostbootFruRecordSetID(fru_record_set_id_t i_rsid);
+
+
 
 }
 
