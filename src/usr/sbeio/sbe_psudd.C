@@ -979,17 +979,17 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                 /*@
                  * @errortype
                  * @moduleid    SBEIO_PSU
-                 * @reasoncode  SBEIO_PSU_FFDC_MISSING
+                 * @reasoncode  SBEIO_PSU_RESPONSE_SBE_NOT_RESPONDING
                  * @userdata1[00:15]    Primary Status in mbox4
                  * @userdata1[16:31]    Sequence Id in mbox4
                  * @userdata1[32:63]    Processor Target
                  * @userdata2   Failing Request
-                 * @devdesc     Timeout waiting for PSU command to complete
+                 * @devdesc     Timeout waiting for PSU command to complete, SBE not responding.
                  * @custdesc    Firmware error communicating with boot device
                  */
                 l_errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                 SBEIO_PSU,
-                                SBEIO_PSU_FFDC_MISSING,
+                                SBEIO_PSU_RESPONSE_SBE_NOT_RESPONDING,
                                 TWO_UINT32_TO_UINT64(
                                   TWO_UINT16_TO_UINT32(
                                     l_resp->primaryStatus,
