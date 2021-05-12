@@ -883,63 +883,11 @@ uint16_t getMaxPowerCap(Target *i_sys, bool & o_is_redundant)
     uint16_t o_maxPcap = 0;
     o_is_redundant = true;
 
-    // Check if HPC limit was found
-    ATTR_OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS_type hpc_pcap;
-    if (i_sys->tryGetAttr
-        <ATTR_OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS>(hpc_pcap))
-    {
-        if (0 != hpc_pcap)
-        {
-
-// TODO: RTC 209572 Update with IPMI alternative
-#if 0
-#ifdef CONFIG_BMC_IPMI
-            // Check if redundant power supply policy is enabled (on BMC)
-            SENSOR::getSensorReadingData redPolicyData;
-            SENSOR::SensorBase
-                redPolicySensor(TARGETING::SENSOR_NAME_REDUNDANT_PS_POLICY,
-                                i_sys);
-            errlHndl_t err = redPolicySensor.readSensorData(redPolicyData);
-            if (nullptr == err)
-            {
-                // 0x02 == Asserted bit (redundant policy is enabled)
-                if ((redPolicyData.event_status & 0x02) == 0x00)
-                {
-                    // non-redundant policy allows higher bulk power limit
-                    // with the potential impact of OCC not being able to
-                    // lower power fast enough
-                    o_is_redundant = false;
-                    TMGT_INF("getMaxPowerCap: maximum power cap = %dW"
-                             " (HPC/non-redundant PS bulk power limit)",
-                             hpc_pcap);
-                    o_maxPcap = hpc_pcap;
-                }
-                // else redundant policy enabled, use default
-            }
-            else
-            {
-                // error reading policy, commit and use default
-                TMGT_ERR("getMaxPowerCap: unable to read power supply"
-                         " redundancy policy sensor, rc=0x%04X",
-                         err->reasonCode());
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-            }
-#endif
-#endif
-        }
-        // else no valid HPC limit, use default
-    }
-    // else HPC limit not found, use default
-
-    if (o_is_redundant)
-    {
-        // Read the default N+1 bulk power limit (redundant PS policy)
-        o_maxPcap = i_sys->
-            getAttr<ATTR_OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
-        TMGT_INF("getMaxPowerCap: maximum power cap = %dW "
-                 "(redundant PS bulk power limit)", o_maxPcap);
-    }
-
+    // Read the default N+1 bulk power limit (redundant PS policy)
+    o_maxPcap = i_sys->
+        getAttr<ATTR_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
+    TMGT_INF("getMaxPowerCap: maximum power cap = %dW "
+             "(redundant PS bulk power limit)", o_maxPcap);
     return o_maxPcap;
 
 } // end getMaxPowerCap()
@@ -959,13 +907,13 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     o_data[index++] = 0x20; // version
 
     // Minimum HARD Power Cap
-    ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS_type min_pcap =
-        sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
+    ATTR_MIN_POWER_CAP_WATTS_type min_pcap =
+        sys->getAttr<ATTR_MIN_POWER_CAP_WATTS>();
 
     // Minimum SOFT Power Cap
-    ATTR_OPEN_POWER_SOFT_MIN_PCAP_WATTS_type soft_pcap;
+    ATTR_SOFT_MIN_POWER_CAP_WATTS_type soft_pcap;
     if ( ! sys->tryGetAttr
-            <ATTR_OPEN_POWER_SOFT_MIN_PCAP_WATTS>(soft_pcap))
+            <ATTR_SOFT_MIN_POWER_CAP_WATTS>(soft_pcap))
     {
         // attr does not exist (us min)
         soft_pcap = min_pcap;
@@ -984,9 +932,9 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     index += 2;
 
     // Quick Power Drop Power Cap
-    ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS_type qpd_pcap;
+    ATTR_N_BULK_POWER_LIMIT_WATTS_type qpd_pcap;
     if ( ! sys->tryGetAttr
-         <ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS>(qpd_pcap))
+         <ATTR_N_BULK_POWER_LIMIT_WATTS>(qpd_pcap))
     {
         // attr does not exist, so disable by sending 0
         qpd_pcap = 0;
@@ -1261,51 +1209,6 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
     o_data[index++] = CFGDATA_FRU_TYPE_MCDIMM;
     o_data[index++] = l_DVFS_temp;
     o_data[index++] = l_ERR_temp;
-    o_data[index++] = l_timeout;
-    o_data[index++] = 0x00; // reserved
-    o_data[index++] = 0x00;
-    l_numSets++;
-
-    // GPU Cores
-    if (!l_sys->tryGetAttr<ATTR_OPEN_POWER_GPU_READ_TIMEOUT_SEC>(l_timeout))
-        l_timeout = 0xFF;
-    if (l_timeout == 0)
-    {
-        l_timeout = 0xFF;
-    }
-    if (!l_sys->
-        tryGetAttr<ATTR_OPEN_POWER_GPU_ERROR_TEMP_DEG_C>(l_ERR_temp))
-        l_ERR_temp = OCC_NOT_DEFINED;
-    if (l_ERR_temp == 0)
-    {
-        l_ERR_temp = OCC_NOT_DEFINED;
-    }
-    o_data[index++] = CFGDATA_FRU_TYPE_GPU_CORE;
-    o_data[index++] = OCC_NOT_DEFINED;      //DVFS
-    o_data[index++] = l_ERR_temp;           //ERROR
-    o_data[index++] = l_timeout;
-    o_data[index++] = 0x00; // reserved
-    o_data[index++] = 0x00;
-    l_numSets++;
-
-    // GPU Memory
-    if (!l_sys->
-        tryGetAttr<ATTR_OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC>(l_timeout))
-        l_timeout = 0xFF;
-    if (l_timeout == 0)
-    {
-        l_timeout = 0xFF;
-    }
-    if (!l_sys->
-        tryGetAttr<ATTR_OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C>(l_ERR_temp))
-        l_ERR_temp = OCC_NOT_DEFINED;
-    if (l_ERR_temp == 0)
-    {
-        l_ERR_temp = OCC_NOT_DEFINED;
-    }
-    o_data[index++] = CFGDATA_FRU_TYPE_GPU_MEMORY;
-    o_data[index++] = OCC_NOT_DEFINED;      //DVFS
-    o_data[index++] = l_ERR_temp;           //ERROR
     o_data[index++] = l_timeout;
     o_data[index++] = 0x00; // reserved
     o_data[index++] = 0x00;

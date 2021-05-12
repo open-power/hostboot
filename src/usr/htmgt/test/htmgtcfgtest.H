@@ -167,7 +167,7 @@ public:
                     data[1]);
         }
 
-        if (size != 66)
+        if (size != 54)
         {
             TS_FAIL("wrong size %d for thermal control config data command",
                     size);

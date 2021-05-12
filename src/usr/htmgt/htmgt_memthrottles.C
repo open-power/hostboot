@@ -234,7 +234,7 @@ errlHndl_t memPowerThrottleRedPower(
     assert(sys != NULL);
 
     //Get the max redundant (N+1) power allocated to memory
-    power = sys->getAttr<ATTR_OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS>();
+    power = sys->getAttr<ATTR_N_PLUS_ONE_MAX_MEM_POWER_WATTS>();
     power *= 100; // convert to centiWatts
 
     //Account for the regulator efficiency (percentage), if supplied
@@ -516,7 +516,7 @@ errlHndl_t calcMemThrottles()
     assert(sys != NULL);
 
     uint8_t min_utilization =
-        sys->getAttr<ATTR_OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING>();
+        sys->getAttr<ATTR_MIN_MEM_UTILIZATION_THROTTLING>();
     if (min_utilization == 0)
     {
         // Use SAFEMODE utilization
@@ -534,7 +534,7 @@ errlHndl_t calcMemThrottles()
         }
     }
     const uint8_t efficiency =
-        sys->getAttr<ATTR_OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR>();
+        sys->getAttr<ATTR_REGULATOR_EFFICIENCY_FACTOR>();
     TMGT_INF("calcMemThrottles: Using min utilization=%d, efficiency=%d"
              " percent", min_utilization, efficiency);
 
@@ -583,17 +583,6 @@ errlHndl_t calcMemThrottles()
                                        min_utilization,
                                        efficiency);
         if (NULL != err) break;
-
-        //Calculate Throttle settings for Power Capping
-        uint8_t pcap_min_utilization;
-        if (!sys->tryGetAttr<ATTR_OPEN_POWER_MIN_MEM_UTILIZATION_POWER_CAP>
-            (pcap_min_utilization))
-        {
-            pcap_min_utilization = 0;
-        }
-        err = memPowerThrottlePowercap(l_fapi_target_list,
-                                       pcap_min_utilization,
-                                       efficiency);
 
     } while(0);
 

@@ -218,7 +218,7 @@ namespace HTMGT
             {
                 //Make sure this value is between the min & max allowed
                 bool is_redundant;
-                min = sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
+                min = sys->getAttr<ATTR_MIN_POWER_CAP_WATTS>();
                 max = getMaxPowerCap(sys, is_redundant);
                 if ((limit != 0) && (limit < min))
                 {
