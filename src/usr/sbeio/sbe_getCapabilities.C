@@ -308,47 +308,10 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
         {
             capabilities_array_size = SBEIO::SBE_CAPABILITY_VERSION_1_1_SIZE;
         }
-        else if ((pSbeCapabilities->majorVersion == 1) &&
-                 (pSbeCapabilities->minorVersion == 2))
+        else if ((pSbeCapabilities->majorVersion >= 1) &&
+                 (pSbeCapabilities->minorVersion >= 2))
         {
             capabilities_array_size = SBEIO::SBE_CAPABILITY_VERSION_1_2_SIZE;
-        }
-        else
-        {
-            // unknown/unsupported capabilities version
-            TRACFCOMP(g_trac_sbeio, ERR_MRK
-                "getFifoSbeCapabilities: Unsupported capabilities version "
-                "%04X:%04X",
-                pSbeCapabilities->majorVersion,
-                pSbeCapabilities->minorVersion);
-            /*@
-             * @errortype
-             * @moduleid          SBEIO_GET_FIFO_SBE_CAPABILITIES
-             * @reasoncode        SBEIO_UNSUPPORTED_CAPABILITIES_VERSION
-             * @userdata1         Target HUID
-             * @userdata2[0:15]   Major version
-             * @userdata2[16:31]  Minor version
-             * @userdata2[32:47]  Latest major version supported
-             * @userdata2[48:63]  Latest minor version supported
-             * @devdesc           SBE FIFO getCapabilities response has
-             *                    an unsupported version.
-             * @custdesc          A problem occurred during the IPL
-             */
-            l_errl = new ErrlEntry(
-                ERRL_SEV_INFORMATIONAL,
-                SBEIO_GET_FIFO_SBE_CAPABILITIES,
-                SBEIO_UNSUPPORTED_CAPABILITIES_VERSION,
-                get_huid(i_target),
-                TWO_UINT32_TO_UINT64(
-                  TWO_UINT16_TO_UINT32(pSbeCapabilities->majorVersion,
-                                       pSbeCapabilities->minorVersion),
-                  TWO_UINT16_TO_UINT32(1,
-                                       2)),
-                 ErrlEntry::ADD_SW_CALLOUT );
-
-            l_errl->collectTrace(SBEIO_COMP_NAME, 256);
-
-            break;
         }
 
         // update response end pointer to after sbeCapabilities size
