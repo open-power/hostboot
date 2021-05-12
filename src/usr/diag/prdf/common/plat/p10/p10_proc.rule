@@ -2862,7 +2862,7 @@ group gOCC_FIR
     /** OCC_FIR[3]
      *  Stop recovery, notify PRD
      */
-    (rOCC_FIR, bit(3)) ? pmRecovery;
+    (rOCC_FIR, bit(3)) ? defaultMaskedError;
 
     /** OCC_FIR[4]
      *  OCC Heartbeat Error

@@ -92,12 +92,6 @@ actionclass hang_recovery_gte_es2 {capture(PbStationModeES2); hang_recovery_gte;
 actionclass hang_recovery_gte_es3 {capture(PbStationModeES3); hang_recovery_gte;};
 actionclass hang_recovery_gte_es4 {capture(PbStationModeES4); hang_recovery_gte;};
 
-actionclass pmRecovery
-{
-    funccall("PmRecovery");
-    threshold1;
-};
-
 actionclass sbe_vital_attn
 {
     # Thresholding is only necessary to prevent flooding. PRD should not need to

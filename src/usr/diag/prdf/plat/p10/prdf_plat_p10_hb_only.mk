@@ -60,7 +60,6 @@ endif
 ifeq (${HOSTBOOT_RUNTIME},1)
 
 # plat/p10/ (non-rule plugin related)
-prd_obj += prdfP10PmRecovery.o
 
 endif
 
