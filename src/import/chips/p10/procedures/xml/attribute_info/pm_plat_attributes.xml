@@ -668,6 +668,7 @@
         SLOPEA  = 0x2,
         SLOPEB  = 0x1
     </enum>
+    <default>0x88</default>
     <initToZero/>
     <group>dds</group>
   </attribute>
@@ -2342,7 +2343,7 @@
     If WOV undervolting is enabled, then this specifies the maximum amount of
     The value is specified in tenths of percentage(0.1%).
 
-    If, 0, then default value of 6%(60) is used.
+    If, 0, then default value of 10%(100) is used.
 
     Value can range from 10(1%) to 255(25.5%). For values between 1(0.1%) and
     of 10(1%) will be used.
