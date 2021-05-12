@@ -1783,9 +1783,12 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
                 // where the cycle starts over.
                 //
                 // Guard records can only be placed on present targets, so
-                // force state to what SP believes and guard it.
+                // force state to what SP believes and guard it. Force the TPM
+                // to be functional too so that the EID can be correctly
+                // displayed in the gard tool.
                 auto state = i_target->getAttr<TARGETING::ATTR_HWAS_STATE>();
                 state.present = 0b1;
+                state.functional = 0b1;
                 i_target->setAttr<TARGETING::ATTR_HWAS_STATE>(state);
                 gardType = HWAS::GARD_Fatal;
             }
