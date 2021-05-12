@@ -212,6 +212,9 @@ enum PM_QME_PCSCR_DEFS
     QME_PCSCR_STOP3_RVRM_POWON_FAULT_INJECT = 5,
     QME_PCSCR_STOP11_POWON_FAULT_INJECT     = 6,
     QME_PCSCR_SELF_RESTORE_FAULT_INJECT     = 7,
+// backup bits in case we need to enable them
+//    QME_PCSCR_BAD_SCOM_FAULT_INJECT         = 8,
+//    QME_PCSCR_BAD_LOCAL_FAULT_INJECT        = 9,
     QME_PCSCR_MMA_POFF_DLY_POF2            = 59,
     QME_PCSCR_MMA_POFF_DLY_POF2_LEN        = 5
 };
