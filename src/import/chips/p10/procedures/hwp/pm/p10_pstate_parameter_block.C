@@ -5629,7 +5629,7 @@ uint64_t  PlatPmPPB::flmr_value()
         }
         else if (iv_poundW_data.other.ftc_large_droop_mode_reg_setting != 0)
         {
-            iv_flmr_value = iv_poundW_data.other.droop_count_control;
+            iv_flmr_value = iv_poundW_data.other.ftc_large_droop_mode_reg_setting;
             FAPI_INF("Using #W FLMR value of %016llX", iv_flmr_value);
         }
         else
