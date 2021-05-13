@@ -506,14 +506,24 @@ PRDF_PLUGIN_DEFINE( p10_core, L3UE );
  */
 int32_t L2CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-#if defined(__HOSTBOOT_RUNTIME) || defined(ESW_SIM_COMPILE)
+    #ifdef __HOSTBOOT_RUNTIME
 
-    do {
-        P10CoreDataBundle * l_bundle = getCoreDataBundle(i_coreChip);
-        uint16_t l_maxLineDelAllowed = 0;
+    P10CoreDataBundle* l_bundle = getCoreDataBundle(i_coreChip);
+
+    // FFDC will be collected throughout function and added to SDC at the end.
+    LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
+
+    // Get the maximum number of line deletes allowed and add to FFDC.
+    uint16_t l_maxLineDelAllowed = mfgMode()
+                ? getSystemTarget()->getAttr<ATTR_MNFG_TH_L2_LINE_DELETES>()
+                : getSystemTarget()->getAttr<ATTR_FIELD_TH_L2_LINE_DELETES>();
+
+    ldcrffdc.L2LDMaxAllowed = l_maxLineDelAllowed;
+
+    do
+    {
         int32_t l_rc = SUCCESS;
 
-#ifdef __HOSTBOOT_RUNTIME
         p10_l2err_extract_err_data errorAddr =
             { L2ERR_CE_UE, 0, 0, 0, 0, 0, 0 };
 
@@ -533,22 +543,12 @@ int32_t L2CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
                    errorAddr.bank, errorAddr.back_of_2to1_nextcycle,
                    errorAddr.syndrome_col, errorAddr.real_address_47_56 );
 
-        LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
-        ldcrffdc.L2LDcnt       = l_bundle->iv_L2LDCount;
         ldcrffdc.L2errMember   = errorAddr.member;
         ldcrffdc.L2errDW       = errorAddr.dw;
         ldcrffdc.L2errBank     = errorAddr.bank;
         ldcrffdc.L2errBack2to1 = errorAddr.back_of_2to1_nextcycle;
         ldcrffdc.L2errSynCol   = errorAddr.syndrome_col;
         ldcrffdc.L2errAddress  = errorAddr.real_address_47_56;
-        addL2LdCrFfdc( i_coreChip, io_sc, ldcrffdc );
-#endif
-        if (mfgMode())
-            l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_MNFG_TH_L2_LINE_DELETES>();
-        else
-            l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_FIELD_TH_L2_LINE_DELETES>();
 
         // Ensure we're still allowed to issue repairs
         if (l_bundle->iv_L2LDCount >= l_maxLineDelAllowed)
@@ -579,9 +579,7 @@ int32_t L2CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
         // Execute the line delete
         PRDF_TRAC( "[L2CE] HUID: 0x%08x apply directed line delete",
                         i_coreChip->getHuid());
-#ifdef __HOSTBOOT_RUNTIME
         l_rc = l2LineDelete(i_coreChip->getTrgt(), errorAddr);
-#endif
         if (SUCCESS != l_rc)
         {
             PRDF_ERR( "[L2CE] HUID: 0x%08x l2LineDelete failed",
@@ -601,7 +599,14 @@ int32_t L2CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 
     } while(0);
 
-#endif
+    // The line delete count may, or may not, have been updated. Regardless, add
+    // the latest value to the FFDC.
+    ldcrffdc.L2LDcnt = l_bundle->iv_L2LDCount;
+
+    // Finally, add the FFDC to the SDC.
+    addL2LdCrFfdc(i_coreChip, io_sc, ldcrffdc);
+
+    #endif // __HOSTBOOT_RUNTIME
 
     return SUCCESS;
 
@@ -616,16 +621,25 @@ PRDF_PLUGIN_DEFINE( p10_core, L2CE );
  */
 int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 {
+    #ifdef __HOSTBOOT_RUNTIME
 
-#if defined(__HOSTBOOT_RUNTIME) || defined(ESW_SIM_COMPILE)
+    P10CoreDataBundle* l_bundle = getCoreDataBundle(i_coreChip);
 
-    do {
-        P10CoreDataBundle * l_bundle = getCoreDataBundle(i_coreChip);
-        uint16_t l_maxLineDelAllowed = 0;
+    // FFDC will be collected throughout function and added to SDC at the end.
+    LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
+
+    // Get the maximum number of line deletes allowed and add to FFDC.
+    uint16_t l_maxLineDelAllowed = mfgMode()
+                ? getSystemTarget()->getAttr<ATTR_MNFG_TH_L3_LINE_DELETES>()
+                : getSystemTarget()->getAttr<ATTR_FIELD_TH_L3_LINE_DELETES>();
+
+    ldcrffdc.L3LDMaxAllowed = l_maxLineDelAllowed;
+
+    do
+    {
         uint16_t curMem = 0xFFFF;
         int32_t l_rc = SUCCESS;
 
-#ifdef __HOSTBOOT_RUNTIME
         p10_l3err_extract_err_data errorAddr =
             { L3ERR_CE_UE, 0, 0, 0, 0, 0 };
 
@@ -644,25 +658,13 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
                    errorAddr.bank, errorAddr.syndrome_col,
                    errorAddr.real_address_46_57 );
 
-
-        LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
-        ldcrffdc.L3LDcnt      = l_bundle->iv_L3LDCount;
         ldcrffdc.L3errMember  = errorAddr.member;
         ldcrffdc.L3errDW      = errorAddr.dw;
         ldcrffdc.L3errBank    = errorAddr.bank;
         ldcrffdc.L3errSynCol  = errorAddr.syndrome_col;
         ldcrffdc.L3errAddress = errorAddr.real_address_46_57;
-        addL3LdCrFfdc( i_coreChip, io_sc, ldcrffdc );
 
         curMem = errorAddr.member;
-#endif
-
-        if (mfgMode())
-            l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_MNFG_TH_L3_LINE_DELETES>();
-        else
-            l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_FIELD_TH_L3_LINE_DELETES>();
 
         // Ensure we're still allowed to issue repairs
         if (l_bundle->iv_L3LDCount >= l_maxLineDelAllowed)
@@ -714,9 +716,7 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 
         PRDF_TRAC( "[L3CE] HUID: 0x%08x apply directed line delete",
                 i_coreChip->getHuid());
-        #ifdef __HOSTBOOT_RUNTIME
         l_rc = l3LineDelete(i_coreChip->getTrgt(), errorAddr);
-        #endif
 
 
         if (SUCCESS != l_rc)
@@ -738,7 +738,14 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 
     } while(0);
 
-#endif
+    // The line delete count may, or may not, have been updated. Regardless, add
+    // the latest value to the FFDC.
+    ldcrffdc.L3LDcnt = l_bundle->iv_L3LDCount;
+
+    // Finally, add the FFDC to the SDC.
+    addL3LdCrFfdc( i_coreChip, io_sc, ldcrffdc );
+
+    #endif // __HOSTBOOT_RUNTIME
 
     return SUCCESS;
 
