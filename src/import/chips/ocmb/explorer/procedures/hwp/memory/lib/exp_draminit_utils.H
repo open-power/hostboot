@@ -248,6 +248,112 @@ fapi2::ReturnCode populate_ffdc_dq_buffers(
     std::vector<fapi2::buffer<uint16_t>>& o_bad_dq_64_80);
 
 ///
+/// @brief Handles the explorer training error code detailed callouts
+/// @param[in] i_target OCMB chip
+/// @param[in] i_error_code the microchip error code to process
+/// @param[in] i_error_extended_code the detailed microchip extended error code
+/// @param[in] i_rsp_msdg response MSDG struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+template <typename T>
+fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_error_code,
+        const fapi2::buffer<uint32_t>& i_error_extended_code,
+        const T& i_rsp_msdg)
+{
+    constexpr uint16_t TRAINING_TIMEOUT = 0x002;
+    constexpr uint16_t CATASTROPHIC_PHY_MRLTRAINING = 0x056;
+    constexpr uint16_t CATASTROPHIC_MRGN_SANITY_BIST_FAIL = 0x090;
+    constexpr uint64_t ERROR_CODE_START = 20;
+    constexpr uint64_t ERROR_CODE_LEN = 12;
+
+    if (i_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_TRAINING_FAIL)
+    {
+        FAPI_INF("%s error code:%u does not match a training fail:%u. Skipping training check",
+                 mss::c_str(i_target), i_error_code, fw_ddr_phy_init_status::FW_DDR_PHY_INIT_TRAINING_FAIL);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Microchip only puts the data we know about in the last three nibbles of the extended error code
+    // We only use these three nibbles for the comparisons below
+    uint16_t l_extended_error_code_compare = 0;
+    i_error_extended_code.extractToRight<ERROR_CODE_START, ERROR_CODE_LEN>(l_extended_error_code_compare);
+
+    // Check for a training timeout first
+    // These are special errors that could be handled by a retry
+    // We have seen these crop up in the lab separately, so we want to log them specially
+    FAPI_ASSERT(l_extended_error_code_compare != TRAINING_TIMEOUT,
+                fapi2::MSS_EXP_DRAMINIT_TRAINING_TIMEOUT_FAIL().
+                set_OCMB_TARGET(i_target).
+                set_ERROR_CODE(i_error_code).
+                set_EXTENDED_ERROR_CODE(i_error_extended_code),
+                "Encountered a training timeout. Please retry the IPL (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
+                mss::c_str(i_target), i_error_code, i_error_extended_code);
+
+    // Check for catastrophic training fails next
+    // For catastrophic training fails, we will not be able to recover
+    // As such, we have a special error code for them
+    FAPI_ASSERT(l_extended_error_code_compare != CATASTROPHIC_PHY_MRLTRAINING &&
+                l_extended_error_code_compare != CATASTROPHIC_MRGN_SANITY_BIST_FAIL,
+                fapi2::MSS_EXP_CATASTROPHIC_DRAMINIT_TRAINING_FAIL().
+                set_OCMB_TARGET(i_target).
+                set_ERROR_CODE(i_error_code).
+                set_EXTENDED_ERROR_CODE(i_error_extended_code),
+                "Encountered a catastrophic training fail. (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
+                mss::c_str(i_target), i_error_code, i_error_extended_code);
+
+    // Finally, check for non-catastrophic training fails
+    // These type of training fails will be logged as recovered later in the procedure
+    // In hostboot, any fails seen on the DRAM will be handled in restore_repairs
+    {
+        uint8_t l_bad_dq_array[mss::BAD_BITS_RANKS][mss::BAD_DQ_BYTE_COUNT] = {{0}};
+
+        // Init with size 4
+        std::vector<fapi2::buffer<uint64_t>> l_bad_dq_0_63(mss::BAD_BITS_RANKS);
+        std::vector<fapi2::buffer<uint16_t>> l_bad_dq_64_80(mss::BAD_BITS_RANKS);
+
+        // We couldn't have gotten this far if we didn't have a dimm, so
+        // grab the child target directly, to use in getting the attribute
+        const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
+        const auto& l_dimm = l_dimms[0];
+
+        // This is the only RC which we want to record bad bits for. record_bad_bits
+        // given an MSDG struct will record bad bits for DRAMINIT
+        // record_bad_bits does check the FIRs, so we don't need to explicitly blame
+        // FIRs here
+        mss::exp::bad_bit_interface<T> l_interface(i_rsp_msdg);
+        FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
+
+        // Now read them back out
+        FAPI_TRY(mss::get_bad_dq_bitmap<mss::mc_type::EXPLORER>(l_dimm, l_bad_dq_array));
+        FAPI_TRY(populate_ffdc_dq_buffers(l_bad_dq_array, l_bad_dq_0_63, l_bad_dq_64_80));
+
+        FAPI_ASSERT(false,
+                    fapi2::MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL().
+                    set_TARGET(i_target).
+                    set_PROCEDURE(mss::EXP_DRAMINIT).
+                    set_ERROR_CODE(i_error_code).
+                    set_EXTENDED_ERROR_CODE(i_error_extended_code).
+                    set_RANK0_BADDQ0_63(l_bad_dq_0_63[0]).
+                    set_RANK0_BADDQ64_80(l_bad_dq_64_80[0]).
+                    set_RANK1_BADDQ0_63(l_bad_dq_0_63[1]).
+                    set_RANK1_BADDQ64_80(l_bad_dq_64_80[1]).
+                    set_RANK2_BADDQ0_63(l_bad_dq_0_63[2]).
+                    set_RANK2_BADDQ64_80(l_bad_dq_64_80[2]).
+                    set_RANK3_BADDQ0_63(l_bad_dq_0_63[3]).
+                    set_RANK3_BADDQ64_80(l_bad_dq_64_80[3]),
+                    "DDR_PHY_INIT encountered a training fail (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
+                    mss::c_str(i_target), i_error_code, i_error_extended_code);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
 /// @brief Check the error code returned from DDR_PHY_INIT
 ///
 /// @tparam T response struct type
@@ -319,47 +425,8 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
                      "DDR_PHY_INIT encountered a user_input_msdg error (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
                      mss::c_str(i_target), l_error_code, l_error_extended_code);
 
-        if (l_error_code == fw_ddr_phy_init_status::FW_DDR_PHY_INIT_TRAINING_FAIL)
-        {
-            uint8_t l_bad_dq_array[mss::BAD_BITS_RANKS][mss::BAD_DQ_BYTE_COUNT] = {{0}};
-
-            // Init with size 4
-            std::vector<fapi2::buffer<uint64_t>> l_bad_dq_0_63(mss::BAD_BITS_RANKS);
-            std::vector<fapi2::buffer<uint16_t>> l_bad_dq_64_80(mss::BAD_BITS_RANKS);
-
-            // We couldn't have gotten this far if we didn't have a dimm, so
-            // grab the child target directly, to use in getting the attribute
-            const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
-            const auto& l_dimm = l_dimms[0];
-
-            // This is the only RC which we want to record bad bits for. record_bad_bits
-            // given an MSDG struct will record bad bits for DRAMINIT
-            // record_bad_bits does check the FIRs, so we don't need to explicitly blame
-            // FIRs here
-            mss::exp::bad_bit_interface<T> l_interface(i_rsp_msdg);
-            FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
-
-            // Now read them back out
-            FAPI_TRY(mss::get_bad_dq_bitmap<mss::mc_type::EXPLORER>(l_dimm, l_bad_dq_array));
-            FAPI_TRY(populate_ffdc_dq_buffers(l_bad_dq_array, l_bad_dq_0_63, l_bad_dq_64_80));
-
-            FAPI_ASSERT(false,
-                        fapi2::MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL().
-                        set_TARGET(i_target).
-                        set_PROCEDURE(mss::EXP_DRAMINIT).
-                        set_ERROR_CODE(l_error_code).
-                        set_EXTENDED_ERROR_CODE(l_error_extended_code).
-                        set_RANK0_BADDQ0_63(l_bad_dq_0_63[0]).
-                        set_RANK0_BADDQ64_80(l_bad_dq_64_80[0]).
-                        set_RANK1_BADDQ0_63(l_bad_dq_0_63[1]).
-                        set_RANK1_BADDQ64_80(l_bad_dq_64_80[1]).
-                        set_RANK2_BADDQ0_63(l_bad_dq_0_63[2]).
-                        set_RANK2_BADDQ64_80(l_bad_dq_64_80[2]).
-                        set_RANK3_BADDQ0_63(l_bad_dq_0_63[3]).
-                        set_RANK3_BADDQ64_80(l_bad_dq_64_80[3]),
-                        "DDR_PHY_INIT encountered a training fail (TARGET %s, error_code 0x%02X, extended_error_code=0x%08X)",
-                        mss::c_str(i_target), l_error_code, l_error_extended_code);
-        }
+        // Handle any training errors
+        FAPI_TRY(explorer_detailed_training_codes(i_target, l_error_code, l_error_extended_code, i_rsp_msdg));
 
         FAPI_ASSERT( false,
                      fapi2::MSS_EXP_DDR_PHY_INIT_UNKNOWN_ERROR().

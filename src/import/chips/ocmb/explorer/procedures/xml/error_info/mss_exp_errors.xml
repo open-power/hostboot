@@ -901,6 +901,52 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_EXP_DRAMINIT_TRAINING_TIMEOUT_FAIL</rc>
+    <description>
+      Phy Init command encountered a training timeout fail.
+      These can usually be solved by retrying training
+      As we are not able to retrigger training, we deconfigure the part
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>ERROR_CODE</ffdc>
+    <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_CATASTROPHIC_DRAMINIT_TRAINING_FAIL</rc>
+    <description>
+      Phy Init command encountered a catastrophic training fail.
+      This error means that the bad bits coming out of training cannot be trusted
+      As such, the part will be deconfigured
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>ERROR_CODE</ffdc>
+    <ffdc>EXTENDED_ERROR_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_DDR_PHY_INIT_UNKNOWN_ERROR</rc>
     <description>
       Phy Init command encountered an unknown fail.
