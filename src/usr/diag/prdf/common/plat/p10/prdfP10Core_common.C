@@ -330,6 +330,18 @@ PRDF_PLUGIN_DEFINE(p10_core, analyzeNeighborCore_UCS);
 //##                       Line Delete Functions
 //##############################################################################
 
+// IMPORTANT NOTE ABOUT APPLYING LINE DELETES:
+// In legacy iterations of the line delete design, thresholding would be done
+// on a per address basis. The fundamental problem is that the address captured
+// for a CE is not locked and could change any number of times before PRD has
+// had a chance to analyze the first CE. In order to be accurate, the design
+// ended being very complicated and hard to test. Since at least P9, we have
+// changed the design to be a "poor man's" line delete where a line delete is
+// issued when the CE theshold is reached regardless of the addresses that are
+// reported. It has been observed in the field that single bit fails are almost
+// all on the same address, which is what allows us to get away with this
+// simpler design.
+
 /**
  * @brief Adds L2 Line Delete/Column Repair FFDC to an SDC.
  * @param i_coreChip A core chip.
@@ -548,29 +560,22 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         ldcrffdc.L2errSynCol   = errorAddr.syndrome_col;
         ldcrffdc.L2errAddress  = errorAddr.real_address_47_56;
 
-        // Ensure we're still allowed to issue repairs
-        if (l_bundle->iv_L2LDCount >= l_maxLineDelAllowed)
+        // Increment the CE count and determine if a line delete is needed.
+        // IMPORTANT: Yes, we are actually passing the line delete count as the
+        // "address" parameter of this function. See the notice above regarding
+        // the thesholding for the "poor man's" line delete design.
+        if (!l_bundle->iv_L2CETable->addAddress(l_bundle->iv_L2LDCount, io_sc))
         {
-            PRDF_TRAC("[L2CE] HUID: 0x%08x No more repairs allowed", huid);
-
-            // MFG wants to be able to ignore these errors
-            // If they have LD  allowed set to 0, wait for
-            // predictive threshold
-            if (!mfgMode() ||
-                l_maxLineDelAllowed != 0 )
-            {
-                io_sc.service_data->SetThresholdMaskId(0);
-            }
-            break;
+            break; // no line delete on this CE, nothing more to do
         }
 
-        // Add to CE table and Check if we need to issue a repair on this CE
-        if (l_bundle->iv_L2CETable->addAddress(l_bundle->iv_L2LDCount,
-                                               io_sc) == false)
+        // A line delete is required. Before continuing, there is a special case
+        // for manufacturing where we don't want to check the line delete
+        // threshold if the max allowed is 0. Instead, report this as a CE and
+        // let the rule code threholding kick in.
+        if (mfgMode() && (0 == l_maxLineDelAllowed))
         {
-            // No action required on this CE, we're waiting for additional
-            // errors before applying a line delete
-            break;
+            break; // nothing more to do
         }
 
         PRDF_INF("[L2CE] HUID: 0x%08x applying line delete", huid);
@@ -578,15 +583,21 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         if (SUCCESS != l2LineDelete(trgt, errorAddr))
         {
             PRDF_ERR("[L2CE] HUID: 0x%08x l2LineDelete failed", huid);
-            // Set signature to indicate L2 Line Delete failed
             io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L2CE_LD_FAILURE);
+            io_sc.service_data->setPredictive();
+            break; // nothing more to do
         }
-        else
-        {
-            l_bundle->iv_L2LDCount++;
 
-            // Set signature to indicate L2 Line Delete issued
-            io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L2CE_LD_ISSUED);
+        // The line delete was successful applied.
+        l_bundle->iv_L2LDCount++;
+        io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L2CE_LD_ISSUED);
+
+        // Check if the line delete threshold has been reached.
+        if (l_maxLineDelAllowed <= l_bundle->iv_L2LDCount)
+        {
+            PRDF_INF("[L2CE] HUID: 0x%08x line delete threshold reached", huid);
+            io_sc.service_data->setPredictive();
+            break; // nothing more to do
         }
 
     } while(0);
@@ -657,31 +668,6 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
         curMem = errorAddr.member;
 
-        // Ensure we're still allowed to issue repairs
-        if (l_bundle->iv_L3LDCount >= l_maxLineDelAllowed)
-        {
-            PRDF_TRAC("[L3CE] HUID: 0x%08x No more repairs allowed", huid);
-
-            // MFG wants to be able to ignore these errors
-            // If they have LD  allowed set to 0, wait for
-            // predictive threshold
-            if (!mfgMode() ||
-                l_maxLineDelAllowed != 0 )
-            {
-                io_sc.service_data->SetThresholdMaskId(0);
-            }
-            break;
-        }
-
-        // Add to CE table and Check if we need to issue a repair on this CE
-        if (l_bundle->iv_L3CETable->addAddress(l_bundle->iv_L3LDCount,
-                                               io_sc) == false)
-        {
-            // No action required on this CE, we're waiting for additional
-            // errors before applying a line delete
-            break;
-        }
-
         // Check for multi-bitline fail
         Timer curTime = io_sc.service_data->GetTOE();
         uint16_t prvMem = l_bundle->iv_prevMember;
@@ -693,29 +679,53 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             // We have multiple bit lines failing within a 24 hour period
             // Make this predictive
             PRDF_INF("[L3CE] HUID: 0x%08x Multi-bitline fail detected", huid);
-            io_sc.service_data->SetThresholdMaskId(0);
             io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L3CE_MBF_FAIL);
-            break;
+            io_sc.service_data->setPredictive();
+            break; // nothing more to do
         }
 
         // Update saved bitline data
         l_bundle->iv_prevMember = curMem;
         l_bundle->iv_blfTimeout = curTime + Timer::SEC_IN_DAY;
 
+        // Increment the CE count and determine if a line delete is needed.
+        // IMPORTANT: Yes, we are actually passing the line delete count as the
+        // "address" parameter of this function. See the notice above regarding
+        // the thesholding for the "poor man's" line delete design.
+        if (!l_bundle->iv_L3CETable->addAddress(l_bundle->iv_L3LDCount, io_sc))
+        {
+            break; // no line delete on this CE, nothing more to do
+        }
+
+        // A line delete is required. Before continuing, there is a special case
+        // for manufacturing where we don't want to check the line delete
+        // threshold if the max allowed is 0. Instead, report this as a CE and
+        // let the rule code threholding kick in.
+        if (mfgMode() && (0 == l_maxLineDelAllowed))
+        {
+            break; // nothing more to do
+        }
+
         PRDF_INF("[L3CE] HUID: 0x%08x applying line delete", huid);
 
         if (SUCCESS != l3LineDelete(trgt, errorAddr))
         {
             PRDF_ERR("[L3CE] HUID: 0x%08x l3LineDelete failed", huid);
-            // Set signature to indicate L3 Line Delete failed
             io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L3CE_LD_FAILURE);
+            io_sc.service_data->setPredictive();
+            break; // nothing more to do
         }
-        else
-        {
-            l_bundle->iv_L3LDCount++;
 
-            // Set signature to indicate L3 Line Delete issued
-            io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L3CE_LD_ISSUED);
+        // The line delete was successful applied.
+        l_bundle->iv_L3LDCount++;
+        io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L3CE_LD_ISSUED);
+
+        // Check if the line delete threshold has been reached.
+        if (l_maxLineDelAllowed <= l_bundle->iv_L3LDCount)
+        {
+            PRDF_INF("[L3CE] HUID: 0x%08x line delete threshold reached", huid);
+            io_sc.service_data->setPredictive();
+            break; // nothing more to do
         }
 
     } while(0);
