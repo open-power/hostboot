@@ -853,10 +853,6 @@ bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
             rc = parseExtMemMru( i_buffer, i_buflen, i_parser );
             break;
 
-        case ErrlPmFfdcData:
-            rc = parsePmFfdcData(i_buffer, i_buflen, i_parser, i_ver);
-            break;
-
         default:
             printUnknown( i_parser, i_ver, i_sst );
             i_parser.PrintHexDump(i_buffer, i_buflen);

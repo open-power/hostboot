@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -39,12 +39,6 @@ class errludP_prdf:
         jsonStr = json.dumps(d)
         return jsonStr
 
-    def UdParserPrdfPmFfdcData(ver, data):
-        d = dict()
-        # TODO
-        jsonStr = json.dumps(d)
-        return jsonStr
-
     def UdParserPrdfPfaData(ver, data):
         d = dict()
         # TODO
@@ -63,7 +57,6 @@ class errludP_prdf:
 UserDetailsTypes = {
      1: "UdParserPrdfCapData",
     10: "UdParserPrdfString",
-    20: "UdParserPrdfPmFfdcData",
     51: "UdParserPrdfPfaData",
     62: "UdParserPrdfMruData",
 }

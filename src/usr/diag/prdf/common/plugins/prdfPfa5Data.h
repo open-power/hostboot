@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,7 +68,6 @@ enum ErrlSubsect
     ErrlCapData_1    = 1,
     ErrlMruData      = 62, // For the 80 byte centaur DQ pin map
     ErrlString       = 10,
-    ErrlPmFfdcData   = 20,
 };
 
 struct MsDumpStruct
