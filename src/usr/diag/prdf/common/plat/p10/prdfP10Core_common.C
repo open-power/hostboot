@@ -500,15 +500,17 @@ PRDF_PLUGIN_DEFINE( p10_core, L3UE );
 
 /**
  * @brief  Handle an L2 CE
- * @param  i_coreChip Core chip.
- * @param  io_sc      Step code data struct.
+ * @param  i_chip Core chip.
+ * @param  io_sc  Step code data struct.
  * @return SUCCESS always
  */
-int32_t L2CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
+int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #ifdef __HOSTBOOT_RUNTIME
 
-    P10CoreDataBundle* l_bundle = getCoreDataBundle(i_coreChip);
+    P10CoreDataBundle* l_bundle = getCoreDataBundle(i_chip);
+    auto trgt = i_chip->getTrgt();
+    auto huid = i_chip->getHuid();
 
     // FFDC will be collected throughout function and added to SDC at the end.
     LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
@@ -522,24 +524,20 @@ int32_t L2CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
 
     do
     {
-        int32_t l_rc = SUCCESS;
-
         p10_l2err_extract_err_data errorAddr =
             { L2ERR_CE_UE, 0, 0, 0, 0, 0, 0 };
 
         // Get failing location from trace array
-        l_rc = extractL2Err( i_coreChip->getTrgt(), true, errorAddr );
-        if (SUCCESS != l_rc)
+        if (SUCCESS != extractL2Err(trgt, true, errorAddr))
         {
-            PRDF_ERR( "[L2CE] HUID: 0x%08x extractL2Err failed",
-                      i_coreChip->getHuid());
+            PRDF_ERR("[L2CE] HUID: 0x%08x extractL2Err failed", huid);
             break;
         }
 
         PRDF_TRAC( "[L2CE] HUID: 0x%08x Error data: member=%d dw=%d "
                    "bank=%d back_of_2to1_nextcycle=%d syndrome_col=%x "
                    "addr=%x",
-                   i_coreChip->getHuid(), errorAddr.member, errorAddr.dw,
+                   huid, errorAddr.member, errorAddr.dw,
                    errorAddr.bank, errorAddr.back_of_2to1_nextcycle,
                    errorAddr.syndrome_col, errorAddr.real_address_47_56 );
 
@@ -553,8 +551,7 @@ int32_t L2CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
         // Ensure we're still allowed to issue repairs
         if (l_bundle->iv_L2LDCount >= l_maxLineDelAllowed)
         {
-            PRDF_TRAC( "[L2CE] HUID: 0x%08x No more repairs allowed",
-                       i_coreChip->getHuid());
+            PRDF_TRAC("[L2CE] HUID: 0x%08x No more repairs allowed", huid);
 
             // MFG wants to be able to ignore these errors
             // If they have LD  allowed set to 0, wait for
@@ -576,25 +573,20 @@ int32_t L2CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        // Execute the line delete
-        PRDF_TRAC( "[L2CE] HUID: 0x%08x apply directed line delete",
-                        i_coreChip->getHuid());
-        l_rc = l2LineDelete(i_coreChip->getTrgt(), errorAddr);
-        if (SUCCESS != l_rc)
+        PRDF_INF("[L2CE] HUID: 0x%08x applying line delete", huid);
+
+        if (SUCCESS != l2LineDelete(trgt, errorAddr))
         {
-            PRDF_ERR( "[L2CE] HUID: 0x%08x l2LineDelete failed",
-                      i_coreChip->getHuid());
+            PRDF_ERR("[L2CE] HUID: 0x%08x l2LineDelete failed", huid);
             // Set signature to indicate L2 Line Delete failed
-            io_sc.service_data->SetErrorSig(
-                            PRDFSIG_P10CORE_L2CE_LD_FAILURE);
+            io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L2CE_LD_FAILURE);
         }
         else
         {
             l_bundle->iv_L2LDCount++;
 
             // Set signature to indicate L2 Line Delete issued
-            io_sc.service_data->SetErrorSig(
-                                PRDFSIG_P10CORE_L2CE_LD_ISSUED);
+            io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L2CE_LD_ISSUED);
         }
 
     } while(0);
@@ -604,7 +596,7 @@ int32_t L2CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
     ldcrffdc.L2LDcnt = l_bundle->iv_L2LDCount;
 
     // Finally, add the FFDC to the SDC.
-    addL2LdCrFfdc(i_coreChip, io_sc, ldcrffdc);
+    addL2LdCrFfdc(i_chip, io_sc, ldcrffdc);
 
     #endif // __HOSTBOOT_RUNTIME
 
@@ -615,15 +607,17 @@ PRDF_PLUGIN_DEFINE( p10_core, L2CE );
 
 /**
  * @brief Handle an L3 CE
- * @param i_coreChip Core chip.
- * @param io_sc      Step Code data struct
+ * @param  i_chip Core chip.
+ * @param  io_sc  Step code data struct.
  * @return PRD return code
  */
-int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
+int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #ifdef __HOSTBOOT_RUNTIME
 
-    P10CoreDataBundle* l_bundle = getCoreDataBundle(i_coreChip);
+    P10CoreDataBundle* l_bundle = getCoreDataBundle(i_chip);
+    auto trgt = i_chip->getTrgt();
+    auto huid = i_chip->getHuid();
 
     // FFDC will be collected throughout function and added to SDC at the end.
     LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
@@ -638,23 +632,20 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
     do
     {
         uint16_t curMem = 0xFFFF;
-        int32_t l_rc = SUCCESS;
 
         p10_l3err_extract_err_data errorAddr =
             { L3ERR_CE_UE, 0, 0, 0, 0, 0 };
 
         // Get failing location from trace array
-        l_rc = extractL3Err( i_coreChip->getTrgt(), true, errorAddr );
-        if (SUCCESS != l_rc)
+        if (SUCCESS != extractL3Err(trgt, true, errorAddr))
         {
-            PRDF_ERR( "[L3CE] HUID: 0x%08x extractL3Err failed",
-                      i_coreChip->getHuid());
+            PRDF_ERR("[L3CE] HUID: 0x%08x extractL3Err failed", huid);
             break;
         }
 
         PRDF_TRAC( "[L3CE] HUID: 0x%08x Error data: member=%d dw=%d "
                    "bank=%d syndrome_col=%x addr=%x",
-                   i_coreChip->getHuid(), errorAddr.member, errorAddr.dw,
+                   huid, errorAddr.member, errorAddr.dw,
                    errorAddr.bank, errorAddr.syndrome_col,
                    errorAddr.real_address_46_57 );
 
@@ -669,8 +660,7 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
         // Ensure we're still allowed to issue repairs
         if (l_bundle->iv_L3LDCount >= l_maxLineDelAllowed)
         {
-            PRDF_TRAC( "[L3CE] HUID: 0x%08x No more repairs allowed",
-                       i_coreChip->getHuid());
+            PRDF_TRAC("[L3CE] HUID: 0x%08x No more repairs allowed", huid);
 
             // MFG wants to be able to ignore these errors
             // If they have LD  allowed set to 0, wait for
@@ -702,10 +692,9 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
         {
             // We have multiple bit lines failing within a 24 hour period
             // Make this predictive
-            PRDF_TRAC( "[L3CE] HUID: 0x%08x Multi-bitline fail detected",
-                       i_coreChip->getHuid() );
+            PRDF_INF("[L3CE] HUID: 0x%08x Multi-bitline fail detected", huid);
             io_sc.service_data->SetThresholdMaskId(0);
-            io_sc.service_data->SetErrorSig( PRDFSIG_P10CORE_L3CE_MBF_FAIL );
+            io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L3CE_MBF_FAIL);
             break;
         }
 
@@ -713,27 +702,20 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
         l_bundle->iv_prevMember = curMem;
         l_bundle->iv_blfTimeout = curTime + Timer::SEC_IN_DAY;
 
+        PRDF_INF("[L3CE] HUID: 0x%08x applying line delete", huid);
 
-        PRDF_TRAC( "[L3CE] HUID: 0x%08x apply directed line delete",
-                i_coreChip->getHuid());
-        l_rc = l3LineDelete(i_coreChip->getTrgt(), errorAddr);
-
-
-        if (SUCCESS != l_rc)
+        if (SUCCESS != l3LineDelete(trgt, errorAddr))
         {
-            PRDF_ERR( "[L3CE] HUID: 0x%08x l3LineDelete failed",
-                      i_coreChip->getHuid());
+            PRDF_ERR("[L3CE] HUID: 0x%08x l3LineDelete failed", huid);
             // Set signature to indicate L3 Line Delete failed
-            io_sc.service_data->SetErrorSig(
-                            PRDFSIG_P10CORE_L3CE_LD_FAILURE);
+            io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L3CE_LD_FAILURE);
         }
         else
         {
             l_bundle->iv_L3LDCount++;
 
             // Set signature to indicate L3 Line Delete issued
-            io_sc.service_data->SetErrorSig(
-                                PRDFSIG_P10CORE_L3CE_LD_ISSUED);
+            io_sc.service_data->SetErrorSig(PRDFSIG_P10CORE_L3CE_LD_ISSUED);
         }
 
     } while(0);
@@ -743,7 +725,7 @@ int32_t L3CE( ExtensibleChip * i_coreChip, STEP_CODE_DATA_STRUCT & io_sc )
     ldcrffdc.L3LDcnt = l_bundle->iv_L3LDCount;
 
     // Finally, add the FFDC to the SDC.
-    addL3LdCrFfdc( i_coreChip, io_sc, ldcrffdc );
+    addL3LdCrFfdc(i_chip, io_sc, ldcrffdc);
 
     #endif // __HOSTBOOT_RUNTIME
 
