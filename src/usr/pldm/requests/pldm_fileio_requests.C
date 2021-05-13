@@ -94,96 +94,89 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
     };
 
     uint8_t* l_outputBuffer = nullptr;
+    uint8_t  l_dataOffset = 0;
     size_t l_fileTableSize = 0;
 
-    // Decode twice: the first time decode_get_file_table_resp will return the
-    // size of the requested table; then we resize the output buffer to fit
-    // the table and decode again, in which case decode_get_file_table will
-    // populate the output buffer.
-    for(int i = 0; i < 2; ++i)
+    l_errl = decode_pldm_response(decode_get_file_table_resp,
+                                  l_responseBytes,
+                                  &l_fileTableResp.completion_code,
+                                  &l_fileTableResp.next_transfer_handle,
+                                  &l_fileTableResp.transfer_flag,
+                                  &l_dataOffset,
+                                  &l_fileTableSize);
+    if(l_errl)
     {
-        l_errl = decode_pldm_response(decode_get_file_table_resp,
-                                      l_responseBytes,
-                                      &l_fileTableResp.completion_code,
-                                      &l_fileTableResp.next_transfer_handle,
-                                      &l_fileTableResp.transfer_flag,
-                                      l_outputBuffer,
-                                      &l_fileTableSize);
-        if(l_errl)
-        {
-            PLDM_ERR("getFileTable: Could not decode PLDM response (pass %d)",
-                     i);
-            break;
-        }
+        PLDM_ERR("getFileTable: Could not decode PLDM response");
+        break;
+    }
 
-        if(l_fileTableResp.completion_code != PLDM_SUCCESS)
-        {
-            PLDM_ERR("getFileTable: PLDM op retuned code %d",
-                     l_fileTableResp.completion_code);
-            pldm_msg* const l_pldmResponse =
-                reinterpret_cast<pldm_msg*>(l_responseBytes.data());
-            const uint64_t l_responseHeader = pldmHdrToUint64(*l_pldmResponse);
+    if(l_fileTableResp.completion_code != PLDM_SUCCESS)
+    {
+        PLDM_ERR("getFileTable: PLDM op retuned code %d",
+                  l_fileTableResp.completion_code);
+        pldm_msg* const l_pldmResponse =
+            reinterpret_cast<pldm_msg*>(l_responseBytes.data());
+        const uint64_t l_responseHeader = pldmHdrToUint64(*l_pldmResponse);
 
-            /*@
-             * @errortype
-             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_GET_FILE_TABLE
-             * @reasoncode RC_BAD_COMPLETION_CODE
-             * @userdata1  Completion code
-             * @userdata2  Response header data
-             * @devdesc    File Table request completed unsuccessfully
-             *             (bad completion code)
-             * @custdesc   A host failure occurred
-             */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             MOD_GET_FILE_TABLE,
-                                             RC_BAD_COMPLETION_CODE,
-                                             l_fileTableResp.completion_code,
-                                             l_responseHeader);
-            addBmcErrorCallouts(l_errl);
-            break;
-        }
+        /*@
+          * @errortype
+          * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_FILE_TABLE
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Completion code
+          * @userdata2  Response header data
+          * @devdesc    File Table request completed unsuccessfully
+          *             (bad completion code)
+          * @custdesc   A host failure occurred
+          */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_GET_FILE_TABLE,
+                                          RC_BAD_COMPLETION_CODE,
+                                          l_fileTableResp.completion_code,
+                                          l_responseHeader);
+        addBmcErrorCallouts(l_errl);
+        break;
+    }
 
-        if(l_fileTableResp.transfer_flag != PLDM_START_AND_END)
-        {
-            PLDM_ERR("getFileTable: bad transfer flag %d",
-                     l_fileTableResp.transfer_flag);
-            pldm_msg* const l_pldmResponse =
-                reinterpret_cast<pldm_msg*>(l_responseBytes.data());
-            const uint64_t l_responseHeader = pldmHdrToUint64(*l_pldmResponse);
+    if(l_fileTableResp.transfer_flag != PLDM_START_AND_END)
+    {
+        PLDM_ERR("getFileTable: bad transfer flag %d",
+                  l_fileTableResp.transfer_flag);
+        pldm_msg* const l_pldmResponse =
+            reinterpret_cast<pldm_msg*>(l_responseBytes.data());
+        const uint64_t l_responseHeader = pldmHdrToUint64(*l_pldmResponse);
 
-            /*@
-             * @errortype
-             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_GET_FILE_TABLE
-             * @reasoncode RC_BAD_TRANSFER_FLAG
-             * @userdata1  Returned transfer flag
-             * @userdata2  Response header data
-             * @devdesc    File Table request completed unsuccessfully
-             *             (bad response flag)
-             * @custdesc   A host failure occurred
-             */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             MOD_GET_FILE_TABLE,
-                                             RC_BAD_TRANSFER_FLAG,
-                                             l_fileTableResp.transfer_flag,
-                                             l_responseHeader);
-            addBmcErrorCallouts(l_errl);
-            break;
-        }
+        /*@
+          * @errortype
+          * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_FILE_TABLE
+          * @reasoncode RC_BAD_TRANSFER_FLAG
+          * @userdata1  Returned transfer flag
+          * @userdata2  Response header data
+          * @devdesc    File Table request completed unsuccessfully
+          *             (bad response flag)
+          * @custdesc   A host failure occurred
+          */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_GET_FILE_TABLE,
+                                          RC_BAD_TRANSFER_FLAG,
+                                          l_fileTableResp.transfer_flag,
+                                          l_responseHeader);
+        addBmcErrorCallouts(l_errl);
+        break;
+    }
 
-        if(l_fileTableSize && (l_outputBuffer == nullptr))
-        {
-            PLDM_INF("getFileTable: file table size: %llu", l_fileTableSize);
-            o_table.resize(l_fileTableSize);
-            l_outputBuffer = o_table.data();
-        }
-        else if(l_fileTableSize == 0)
-        {
-            // BMC returned file table size of 0; no need to decode again
-            break;
-        }
-    } // end for loop
+    if(l_fileTableSize && (l_outputBuffer == nullptr))
+    {
+        PLDM_INF("getFileTable: file table size: %llu", l_fileTableSize);
+        o_table.resize(l_fileTableSize);
+        memcpy(o_table.data(), l_responseBytes.data() + l_dataOffset + sizeof(pldm_msg_hdr), l_fileTableSize);
+    }
+    else if(l_fileTableSize == 0)
+    {
+        // BMC returned file table size of 0; no need to decode again
+        break;
+    }
 
     if(l_errl)
     {
