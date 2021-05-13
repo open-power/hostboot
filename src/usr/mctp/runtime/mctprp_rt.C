@@ -35,6 +35,7 @@
 
 // Headers from local directory
 #include "mctprp_rt.H"
+#include "../mctp_trace.H"
 #include "libmctp-hbrtvirt.h"
 // System Headers
 #include <stdlib.h>
@@ -194,6 +195,8 @@ MctpRP::MctpRP(void):
     mctp_register_bus(iv_mctp, &iv_hbrtvirt->binding, HBRT_EID);
 
     mctp_binding_set_tx_enabled(&iv_hbrtvirt->binding, true);
+
+    mctp_set_log_custom(mctp_log_fn);
 
     TRACFCOMP(g_trac_mctp, "MctpRP constructor exit");
 }

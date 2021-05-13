@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/mctp
 OBJS += core.o
 OBJS += alloc.o
 OBJS += log.o
+OBJS += mctp_trace.o
 
 VPATH += ${ROOTPATH}/src/usr/mctp
 VPATH += ${ROOTPATH}/src/usr/mctp/extern

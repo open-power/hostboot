@@ -30,10 +30,9 @@
 
 // Headers from local directory
 #include "mctprp.H"
+#include "mctp_trace.H"
 #include "libmctp-hostlpc.h"
 // System Headers
-#include <stdlib.h>
-#include <string.h>
 #include <sys/time.h>
 #include <kernel/console.H>
 // Userspace Headers
@@ -498,6 +497,9 @@ void MctpRP::_init(void)
     // Set the max message size to be larget enough to account for
     // the maximum PLDM transfer size we expect
     mctp_set_max_message_size(iv_mctp, HOST_MAX_INCOMING_MESSAGE_ALLOCATION);
+
+    // Setup the trace hook to point at mctp_log_fn
+    mctp_set_log_custom(mctp_log_fn);
 
     TRACFCOMP(g_trac_mctp, "MctpRP::_init exit");
     return;
