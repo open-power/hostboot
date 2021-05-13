@@ -1909,8 +1909,8 @@ void IStepDispatcher::requestReboot(const char* i_reason)
 #ifdef CONFIG_PLDM
         PLDM::thePdrManager().sendAllFruFunctionalStates();
 
-        // Issue a PLDM request for a reboot
-        errlHndl_t l_errl = PLDM::sendGracefulRebootRequest();
+        // Issue a PLDM request for a graceful restart
+        errlHndl_t l_errl = PLDM::sendGracefulRestartRequest();
         if(l_errl)
         {
             TRACFCOMP(g_trac_initsvc, ERR_MRK"IStepDispatcher::requestReboot(): Could not request PLDM reboot");

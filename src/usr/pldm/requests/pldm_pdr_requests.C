@@ -729,18 +729,22 @@ errlHndl_t sendSetStateEffecterStatesRequest(
     return errl;
 }
 
-errlHndl_t sendGracefulRebootRequest()
+errlHndl_t sendGracefulRestartRequest()
 {
-    // TODO RTC: 259581 Dynamically fetch this effecter from BMC instead of
-    // assuming its value.
-    const effector_id_t SOFTWARE_TERMINATION_STATUS_EFFECTER_ID = 0x0003;
-    const uint8_t GRACEFUL_REBOOT_STATE_FIELD = 0x06;
-    std::vector<set_effecter_state_field> fields_to_set;
+    uint16_t sw_term_effecter_id = 0;
+    errlHndl_t err =
+        thePdrManager().findTerminationStatusEffecterId(sw_term_effecter_id);
 
-    fields_to_set.push_back({set_request::PLDM_REQUEST_SET, GRACEFUL_REBOOT_STATE_FIELD});
+    if(!err)
+    {
+        std::vector<set_effecter_state_field> fields_to_set;
+        fields_to_set.push_back({set_request::PLDM_REQUEST_SET,
+                                PLDM_SW_TERM_GRACEFUL_RESTART_REQUESTED});
+        err = sendSetStateEffecterStatesRequest(sw_term_effecter_id,
+                                                fields_to_set);
+    }
 
-    return sendSetStateEffecterStatesRequest(SOFTWARE_TERMINATION_STATUS_EFFECTER_ID,
-                                             fields_to_set);
+    return err;
 }
 
 }

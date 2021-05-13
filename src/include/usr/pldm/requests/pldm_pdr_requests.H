@@ -114,11 +114,11 @@ errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* i_target,
                                               state_query_id_t i_sensor_id,
                                               bool i_functional);
 
-/* @brief Send a PLDM command notifying the BMC that Hostboot wants to be rebooted
+/* @brief Send a PLDM command notifying the BMC that Hostboot wants to be restarted
  *
  * @return errlHndl_t          Error if any, otherwise nullptr.
  */
-errlHndl_t sendGracefulRebootRequest();
+errlHndl_t sendGracefulRestartRequest();
 }
 
 #endif

@@ -77,6 +77,7 @@ namespace PLDM
         MOD_ADD_INVENTORY_PDRS                       = 0x24, // addFruInventoryPdrs
         MOD_HANDLE_SET_OCC_STATE                     = 0x25, // handleOccSetStateEffecterRequest
         MOD_GET_LMB_SIZE                             = 0x26, // getLmbSize
+        MOD_FIND_TERMINATION_STATUS_ID               = 0x27, // findTerminationStatusEffecterId
     };
 
     enum PLDMReasonCode

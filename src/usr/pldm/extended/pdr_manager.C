@@ -41,9 +41,9 @@
 
 #include <util/singleton.H>
 
-#include <pdr.h>
-#include <platform.h>
-#include <state_set.h>
+#include <openbmc/pldm/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/state_set.h>
 
 #include <sys/msg.h>
 #include <util/misc.H>
@@ -238,6 +238,65 @@ pldm_terminus_locator_pdr* PdrManager::findHBTerminusLocatorPdr()
         }
     } while(l_curr_record);
     return l_hb_pdr;
+}
+
+// find the State Effecter PDR used to control the software state, this is used
+// for hostboot to trigger a graceful reboot.
+errlHndl_t PdrManager::findTerminationStatusEffecterId(uint16_t &o_effecter_id)
+{
+    errlHndl_t errl = nullptr;
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+    const pldm_pdr_record* curr_record = nullptr;
+    bool termination_pdr_found = false;
+    do
+    {
+        uint8_t* record_data = nullptr;
+        uint32_t record_size = 0;
+
+        curr_record = pldm_pdr_find_record_by_type(iv_pdr_repo.get(),
+                                                   PLDM_STATE_EFFECTER_PDR,
+                                                   curr_record,
+                                                   &record_data,
+                                                   &record_size);
+        if(curr_record)
+        {
+            auto cur_state_effecter_pdr =
+              reinterpret_cast<pldm_state_effecter_pdr*>(record_data);
+
+            auto possible_states =
+              reinterpret_cast<state_sensor_possible_states*>(cur_state_effecter_pdr->possible_states);
+
+            if(le16toh(possible_states->state_set_id) == PLDM_STATE_SET_SW_TERMINATION_STATUS)
+            {
+                // We found the HB SW Termination Status pdr; return its effecter id.
+                o_effecter_id = le16toh(cur_state_effecter_pdr->effecter_id);
+                termination_pdr_found = true;
+                break;
+            }
+        }
+    } while(curr_record);
+
+    if(!termination_pdr_found)
+    {
+        /*@
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_FIND_TERMINATION_STATUS_ID
+         * @reasoncode RC_INVALID_EFFECTER_ID
+         * @userdata1  The total number of PDRs that PDR Manager is aware of.
+         * @userdata2[0:31]  PLDM_STATE_EFFECTER_PDR enum value
+         * @userdata2[32:63] PLDM_STATE_SET_SW_TERMINATION_STATUS enum value
+         * @devdesc    Software problem, could not find SW Termination PDR.
+         * @custdesc   A software error occurred during system boot.
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_FIND_TERMINATION_STATUS_ID,
+                             RC_INVALID_EFFECTER_ID,
+                             PLDM::thePdrManager().pdrCount(),
+                             TWO_UINT32_TO_UINT64(PLDM_STATE_EFFECTER_PDR,
+                                                  PLDM_STATE_SET_SW_TERMINATION_STATUS),
+                             ErrlEntry::ADD_SW_CALLOUT);
+    }
+    return errl;
 }
 
 errlHndl_t PdrManager::sendPdrRepositoryChangeEvent(const std::vector<pdr_handle_t>& i_handles) const

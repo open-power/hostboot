@@ -313,6 +313,16 @@ public:
      */
     void addTerminusLocatorPDR();
 
+    /** @brief Find the effect id for the Terminus Status State Effecter
+     *
+     * @param[out] o_effecter_id will be set to be effecter id for termination status
+     *                           state effecter. If errorlog is set this value is invalid.
+     *
+     * @return Errorlog if a termination status effecter id was not found,
+     *         otherwise will be nullptr.
+     */
+    errlHndl_t findTerminationStatusEffecterId(uint16_t &o_effecter_id);
+
 private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> iv_pdr_repo;
     mutable mutex_t iv_access_mutex;
