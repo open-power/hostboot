@@ -238,6 +238,7 @@ enum ProcedureCallout
     LVL_SUPPORT           = 1, // Call next level of support
     MEMORY_PLUGGING_ERROR = 2, // DIMM Plugging error
     BUS_CALLOUT           = 3, // Bus Called Out
+    FIND_DECONFIGURED_PART = 4, // Error caused by other deconfigurations
 };
 }
 
