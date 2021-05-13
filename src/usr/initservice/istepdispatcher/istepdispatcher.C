@@ -2935,8 +2935,10 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
      * @userdata1[32:47] Desired istep
      * @userdata1[48:63] Desired substep
      * @userdata2[00:07] Value of ATTR_RECONFIGURE_LOOP
-     *                   - 0x01 = DECONFIGURE
-     *                   - 0x02 = BAD_DQ_BIT_SET
+     *                   - 0x01 = DECONFIGURE;
+     *                   - 0x02 = BAD_DQ_BIT_SET;
+     *                   - 0x08 = OCMB_FW_UPDATE;
+     *                   - 0x10 = TOPOLOGY_SWAP;
      * @userdata2[08:15] Manufacturing Mode (MNFG_FLAG_SRC_TERM)
      * @userdata2[16:63] Unused
      * @devdesc          Hostboot has requested a reconfig loop due to a

@@ -7164,25 +7164,6 @@
     <no_export/>
   </attribute>
 
-  <enumerationType>
-    <description>Enumeration of RECONFIGURE_LOOP flags</description>
-    <enumerator>
-      <description>
-            Indicates HW has been deconfigured
-        </description>
-      <name>DECONFIGURE</name>
-      <value>0x01</value>
-    </enumerator>
-    <enumerator>
-      <description>
-            Indicates a bad DQ bit was set in the BadDqBitmap
-        </description>
-      <name>BAD_DQ_BIT_SET</name>
-      <value>0x02</value>
-    </enumerator>
-    <id>RECONFIGURE_LOOP</id>
-  </enumerationType>
-
   <attribute>
     <description> System attribute array that defines the reconfig loop test cases
       consumer: istep dispatcher reconfigLoopTestRunner function

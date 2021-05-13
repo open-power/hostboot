@@ -52,6 +52,9 @@
 // Attribute length info
 #include <mapattrmetadata.H>
 
+// MMIO constants
+#include <arch/memorymap.H>
+
 namespace TARGETING
 {
 
@@ -413,6 +416,8 @@ typedef struct procIds
 
 const uint8_t INVALID_PROC = 0xFF;
 
+using namespace MEMMAP; // memorymap.H
+
 errlHndl_t check_proc0_memory_config()
 {
     errlHndl_t l_err = nullptr;
@@ -553,6 +558,7 @@ errlHndl_t check_proc0_memory_config()
     }
 
     // Loop through all procs detecting that IDs are set correctly
+    bool l_swappedIds = false;
     for (i = 0; i < l_procsList.size(); i++)
     {
         TRACDCOMP(g_trac_targeting,
@@ -574,6 +580,7 @@ errlHndl_t check_proc0_memory_config()
                 l_procIds[i].topoId);
             (l_procIds[i].proc)->
                 setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(l_procIds[i].topoId);
+            l_swappedIds = true;
         }
 
         TRACDCOMP(g_trac_targeting,
@@ -585,6 +592,101 @@ errlHndl_t check_proc0_memory_config()
                 (l_procIds[i].proc)->
                 getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(),
                 (l_procIds[i].proc)->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>());
+    }
+
+    // If we have any procs where FABRIC_EFF_TOPOLOGY_ID != FABRIC_TOPOLOGY_ID
+    //  then we need to recompute all of the BARs as well
+    // note: This is similar to what we do in adjustMemoryMap(), but that only
+    //       handles the boot processor
+    if( l_swappedIds )
+    {
+        TARG_INF( "Recomputing BARs after topology id swap" );
+        auto l_pTopLevel = TARGETING::UTIL::assertGetToplevelTarget();
+
+        TARGETING::TargetHandleList l_funcProcs;
+        getAllChips(l_funcProcs, TYPE_PROC, false );
+
+        // Get topology mode (same for all procs)
+        const auto l_topologyMode =
+          l_pTopLevel->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+         TARG_INF( "ATTR_PROC_FABRIC_TOPOLOGY_MODE=%d", l_topologyMode );
+
+        // Save off the base (group0-chip0) value for the BARs
+        ATTR_XSCOM_BASE_ADDRESS_type l_xscomBase =
+          l_pTopLevel->getAttr<ATTR_XSCOM_BASE_ADDRESS>();
+        ATTR_LPC_BUS_ADDR_type l_lpcBase =
+          l_pTopLevel->getAttr<ATTR_LPC_BUS_ADDR>();
+
+        for (i = 0; i < l_procsList.size(); i++)
+        {
+            TARG_INF( "Proc=%.8X (eff_topo_id=0x%X)",
+                      get_huid(l_procIds[i].proc),
+                      l_procIds[i].topoId );
+
+            ATTR_XSCOM_BASE_ADDRESS_type l_xscomBAR =
+              computeMemoryMapOffset( l_xscomBase,
+                                      l_topologyMode,
+                                      l_procIds[i].topoId);
+            TARG_INF( "l_xscomBase=%.8X, l_topologyMode=%d, l_xscomBAR=%.8X",
+                      l_xscomBase, l_topologyMode, l_xscomBAR );
+
+            //If Xscom addr has SMF bit on... propagate
+            auto l_curXscomBAR =
+              (l_procIds[i].proc)->getAttr<ATTR_XSCOM_BASE_ADDRESS>();
+            if(l_curXscomBAR & IS_SMF_ADDR_BIT)
+            {
+                l_xscomBAR |= IS_SMF_ADDR_BIT;
+            }
+
+            TARG_INF( " XSCOM=%.16llX", l_xscomBAR );
+            (l_procIds[i].proc)->setAttr<ATTR_XSCOM_BASE_ADDRESS>(l_xscomBAR);
+
+            // Compute default LPC BAR
+            ATTR_LPC_BUS_ADDR_type l_lpcBAR =
+              computeMemoryMapOffset( l_lpcBase, l_topologyMode, l_procIds[i].topoId);
+            TARG_INF( " LPC=%.16llX", l_lpcBAR );
+            (l_procIds[i].proc)->setAttr<ATTR_LPC_BUS_ADDR>(l_lpcBAR);
+
+            //Setup Interrupt Related Bars
+            ATTR_PSI_BRIDGE_BASE_ADDR_type l_psiBridgeBAR =
+              computeMemoryMapOffset(MMIO_GROUP0_CHIP0_PSI_BRIDGE_BASE_ADDR,
+                                     l_topologyMode, l_procIds[i].topoId);
+            TARG_INF( " PSI_BRIDGE_BAR =%.16llX", l_psiBridgeBAR );
+            (l_procIds[i].proc)->setAttr<ATTR_PSI_BRIDGE_BASE_ADDR>(l_psiBridgeBAR);
+
+            ATTR_XIVE_CONTROLLER_BAR_ADDR_type l_xiveCtrlBAR =
+              computeMemoryMapOffset(MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR,
+                                     l_topologyMode, l_procIds[i].topoId);
+            TARG_INF( " XIVE_CONTROLLER_BAR =%.16llX", l_xiveCtrlBAR );
+            (l_procIds[i].proc)->setAttr<ATTR_XIVE_CONTROLLER_BAR_ADDR>(l_xiveCtrlBAR);
+
+            ATTR_INT_CQ_TM_BAR_ADDR_type l_intCqTmBAR =
+              computeMemoryMapOffset(MMIO_GROUP0_CHIP0_INT_CQ_TM_BASE_ADDR,
+                                     l_topologyMode, l_procIds[i].topoId);
+            TARG_INF( " INT_CQ_TM_BAR =%.16llX", l_intCqTmBAR );
+            (l_procIds[i].proc)->setAttr<ATTR_INT_CQ_TM_BAR_ADDR>(l_intCqTmBAR);
+
+            ATTR_PSI_HB_ESB_ADDR_type l_psiHbEsbBAR =
+              computeMemoryMapOffset(MMIO_GROUP0_CHIP0_PSI_HB_ESB_BASE_ADDR,
+                                     l_topologyMode, l_procIds[i].topoId);
+            TARG_INF( " PSI_HB_ESB_BAR =%.16llX", l_psiHbEsbBAR );
+            (l_procIds[i].proc)->setAttr<ATTR_PSI_HB_ESB_ADDR>(l_psiHbEsbBAR);
+
+            ATTR_FSP_BASE_ADDR_type l_fspBAR =
+              computeMemoryMapOffset(MMIO_GROUP0_CHIP0_FSP_BASE_ADDR,
+                                     l_topologyMode, l_procIds[i].topoId);
+            TARG_INF( " FSP_BAR =%.16llX", l_fspBAR );
+            (l_procIds[i].proc)->setAttr<ATTR_FSP_BASE_ADDR>(l_fspBAR);
+
+        }
+
+        // If we swapped any topologies, we need to do a reconfig loop to
+        //  get the memory configuration back in sync with reality since
+        //  that was computed before this logic runs.
+        auto l_reconfigAttr =
+              l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
+        l_reconfigAttr |= 0x10; //@fixme-Change to RECONFIGURE_LOOP_TOPOLOGY_SWAP after ekb change
+        l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
     }
 
     return l_err;

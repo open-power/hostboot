@@ -759,14 +759,29 @@ static void adjustMemoryMap( TargetService& i_targetService )
     i_targetService.masterProcChipTargetHandle(l_pMasterProcChip);
     assert(l_pMasterProcChip,"No Master Proc");
 
-    // Save off the base (group0-chip0) value for the BARs
-    Target* l_pTopLevel = nullptr;
-    i_targetService.getTopLevelTarget(l_pTopLevel);
+    // Save off the base (group0-chip0) value for the XSCOM BARs
     ATTR_XSCOM_BASE_ADDRESS_type l_xscomBase =
-      l_pTopLevel->getAttr<ATTR_XSCOM_BASE_ADDRESS>();
+      MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
+
+    // Propagate SMF but to system-level base attribute
+    if(l_curXscomBAR & IS_SMF_ADDR_BIT)
+    {
+        l_xscomBase |= IS_SMF_ADDR_BIT;
+    }
+    else
+    {
+        l_xscomBase &= ~IS_SMF_ADDR_BIT;
+    }
+    Target* l_pTopLevel = TARGETING::UTIL::assertGetToplevelTarget();
+    l_pTopLevel->setAttr<ATTR_XSCOM_BASE_ADDRESS>(l_xscomBase);
+
 
     ATTR_LPC_BUS_ADDR_type l_lpcBase =
       l_pTopLevel->getAttr<ATTR_LPC_BUS_ADDR>();
+
+    // Get topology mode (same for all procs)
+    const auto l_topologyMode =
+        l_pTopLevel->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
 
     // Loop through all the procs to recompute all the BARs
     //  also find the victim to swap with
@@ -775,10 +790,6 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
     TARGETING::TargetHandleList l_funcProcs;
     getAllChips(l_funcProcs, TYPE_PROC, false );
-
-    // Get topology mode (same for all procs)
-    const auto l_topologyMode =
-        l_pTopLevel->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
 
     for( auto & l_procChip : l_funcProcs )
     {
@@ -794,12 +805,6 @@ static void adjustMemoryMap( TargetService& i_targetService )
         ATTR_XSCOM_BASE_ADDRESS_type l_xscomBAR =
             computeMemoryMapOffset(l_xscomBase, l_topologyMode, l_topologyId);
 
-        //If SBE Xscom addr has SMF bit on... propagate
-        if(l_curXscomBAR & IS_SMF_ADDR_BIT)
-        {
-            l_xscomBAR |= IS_SMF_ADDR_BIT;
-        }
-
         TARG_INF( " XSCOM=%.16llX", l_xscomBAR );
         l_procChip->setAttr<ATTR_XSCOM_BASE_ADDRESS>(l_xscomBAR);
 
@@ -811,7 +816,6 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
             l_swapAttrs[ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID] = l_topologyId;
             l_swapAttrs[ATTR_XSCOM_BASE_ADDRESS] = l_xscomBAR;
-            l_pTopLevel->setAttr<ATTR_XSCOM_BASE_ADDRESS>(l_curXscomBAR);
         }
 
         // Compute default LPC BAR
@@ -887,7 +891,6 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
         //finished setting up interrupt bars
 
-        // Set the rest of the BARs...
     }
 
     // We should have found a match, but if a processor was swapped
@@ -976,6 +979,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
            XSCOM::get_master_bar() );
         TARG_ASSERT( false, "XSCOM BARs are inconsistent" );
     }
+
 }
 
 
