@@ -183,12 +183,6 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
 
             if ((l_def_AX0_EVN_CNFG == literal_1))
             {
-                constexpr auto l_PB_PTLSCOM10_FP0_DISABLE_GATHERING_ON = 0x1;
-                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP0_DISABLE_GATHERING_ON );
-            }
-
-            if ((l_def_AX0_EVN_CNFG == literal_1))
-            {
                 constexpr auto l_PB_PTLSCOM10_FP0_FMR_ENABLE_1PER4_PRESP_ON = 0x1;
                 l_scom_buffer.insert<20, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP0_FMR_ENABLE_1PER4_PRESP_ON );
             }
@@ -212,12 +206,6 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
             {
                 constexpr auto l_PB_PTLSCOM10_FP0_CREDIT_PRIORITY_4_NOT_8_ON = 0x1;
                 l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP0_CREDIT_PRIORITY_4_NOT_8_ON );
-            }
-
-            if ((l_def_AX0_ODD_CNFG == literal_1))
-            {
-                constexpr auto l_PB_PTLSCOM10_FP1_DISABLE_GATHERING_ON = 0x1;
-                l_scom_buffer.insert<33, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP1_DISABLE_GATHERING_ON );
             }
 
             if ((l_def_AX0_ODD_CNFG == literal_1))
@@ -263,12 +251,6 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
 
             if ((l_def_AX1_EVN_CNFG == literal_1))
             {
-                constexpr auto l_PB_PTLSCOM10_FP2_DISABLE_GATHERING_ON = 0x1;
-                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP2_DISABLE_GATHERING_ON );
-            }
-
-            if ((l_def_AX1_EVN_CNFG == literal_1))
-            {
                 constexpr auto l_PB_PTLSCOM10_FP2_FMR_ENABLE_1PER4_PRESP_ON = 0x1;
                 l_scom_buffer.insert<20, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP2_FMR_ENABLE_1PER4_PRESP_ON );
             }
@@ -292,12 +274,6 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
             {
                 constexpr auto l_PB_PTLSCOM10_FP2_CREDIT_PRIORITY_4_NOT_8_ON = 0x1;
                 l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP2_CREDIT_PRIORITY_4_NOT_8_ON );
-            }
-
-            if ((l_def_AX1_ODD_CNFG == literal_1))
-            {
-                constexpr auto l_PB_PTLSCOM10_FP3_DISABLE_GATHERING_ON = 0x1;
-                l_scom_buffer.insert<33, 1, 63, uint64_t>(l_PB_PTLSCOM10_FP3_DISABLE_GATHERING_ON );
             }
 
             if ((l_def_AX1_ODD_CNFG == literal_1))
