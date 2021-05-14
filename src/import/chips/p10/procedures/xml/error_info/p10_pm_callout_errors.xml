@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -32,6 +32,52 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_NO_MALF_PM_RESET</rc>
+    <description>PM Complex has been reset for a reason other than malfunction</description>
+    <ffdc>OCC_FLAG2_REG</ffdc>
+    <ffdc>CHIP</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+ <!-- The platform is expected to add a callout to all of the CORE targets specified by the -->
+ <!-- o_deadCores vector returned from p10_pm_callout. -->
+  <hwpError>
+    <rc>RC_PM_MALF_DEAD_CORES_FOUND</rc>
+    <description>PM malfunction caused loss of functional cores</description>
+    <ffdc>DEAD_CORE_VECTOR</ffdc>
+    <ffdc>OCC_FLAG2_REG</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_MALF_NO_DEAD_CORES</rc>
+    <description>PM malfunction detected but it did not cause loss of functional cores.
+    </description>
+    <ffdc>DEAD_CORE_VECTOR</ffdc>
+    <ffdc>OCC_FLAG2_REG</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

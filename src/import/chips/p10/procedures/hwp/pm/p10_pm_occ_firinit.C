@@ -81,7 +81,7 @@ enum OCC_FIR_BITS
     OCC_FW0 = 0,
     OCC_FW1 = 1,
     QME_ERROR_NOTIFY = 2,
-    STOP_RECOVERY_NOTIFY_PRD = 3,
+    SPARE_3 = 3,
     OCC_HB_ERROR = 4,
     GPE0_WATCHDOG_TIMEOUT = 5,
     GPE1_WATCHDOG_TIMEOUT = 6,
@@ -232,7 +232,7 @@ fapi2::ReturnCode pm_occ_fir_init(
     FAPI_TRY(l_occFir.mask(OCC_FW0),                         FIR_MASK_ERROR);       // 0
     FAPI_TRY(l_occFir.mask(OCC_FW1),                         FIR_MASK_ERROR);       // 1
     FAPI_TRY(l_occFir.mask(QME_ERROR_NOTIFY),                FIR_MASK_ERROR);       // 2
-    FAPI_TRY(l_occFir.setRecvAttn(STOP_RECOVERY_NOTIFY_PRD), FIR_REC_ATTN_ERROR);   // 3  Unmasked by PGPE Hcode too
+    FAPI_TRY(l_occFir.mask(SPARE_3),                         FIR_MASK_ERROR);       // 3
     FAPI_TRY(l_occFir.mask(OCC_HB_ERROR),                    FIR_MASK_ERROR);       // 4  Set to RECOV_INTR by PGPE Hcode
     FAPI_TRY(l_occFir.mask(GPE0_WATCHDOG_TIMEOUT),           FIR_MASK_ERROR);       // 5
     FAPI_TRY(l_occFir.mask(GPE1_WATCHDOG_TIMEOUT),           FIR_MASK_ERROR);       // 6

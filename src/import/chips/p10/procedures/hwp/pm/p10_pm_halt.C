@@ -228,33 +228,6 @@ fapi2::ReturnCode p10_pm_halt(
     FAPI_TRY(l_rc, "ERROR: Failed to halt PSS & HWC");
 
 
-    //  ************************************************************************
-    //  Trigger OCC LFIR so that bad ec/ex/eq are updated for pm_init and prd
-    //  gets a chance to deconfig cores and callout hw and grab ffdc to logs
-    //  This should be the last phase in pm reset
-    //  ************************************************************************
-    if (l_malfAlert == true)
-    {
-        const uint32_t l_OCC_LFIR_BIT_STOP_RCV_NOTIFY_PRD = 3;
-
-        pmFIR::PMFir <pmFIR::FIRTYPE_OCC_LFIR, fapi2::TARGET_TYPE_PROC_CHIP> l_occFir(i_target);
-        FAPI_TRY(l_occFir.get(pmFIR::REG_ALL),
-                 "ERROR: Failed to get the OCC FIR values");
-        FAPI_TRY(l_occFir.setRecvAttn(l_OCC_LFIR_BIT_STOP_RCV_NOTIFY_PRD),
-                 FIR_REC_ATTN_ERROR);
-        // Not doing the restoreSavedMask, as this is a special case between reset->init
-        // and pm init handles it
-        FAPI_TRY(l_occFir.put(),
-                 "ERROR: Failed to write OCC LFIR setting for STOP_RCV_NOTIFY_PRD");
-
-        l_data64.flush<0>();
-        l_data64.setBit(l_OCC_LFIR_BIT_STOP_RCV_NOTIFY_PRD);
-
-        FAPI_IMP ("p10_pm_halt: Signalling PRD via OCCLFIR Bit 3 [STOP_RCV_NOTIFY_PRD]!");
-        FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_OR, l_data64),
-                 "ERROR: Failed to write to OCC Flag Register");
-    }
-
 fapi_try_exit:
 
     FAPI_IMP("<< p10_pm_halt");

@@ -117,6 +117,13 @@ class CoreAction
         //@return       fapi2 return code.
         fapi2::ReturnCode clearPmMalFuncRegs();
 
+        //@brief        confirms if it is a case of PM malfunction.
+        //param[out]    true for PM malfunction, false otherwise
+        //param[out]    OCC Flag2 register value.
+        //@return       fapi2 return code.
+        fapi2::ReturnCode isPmMalfunction( bool& o_pmMalfunc,
+                                           fapi2::buffer <uint64_t>& o_occFlag2Val );
+
     private:    //data
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> iv_procChipTgt; // Proc Chip
         fapi2::buffer <uint32_t> iv_deadCoreVect;   // vector of dead cores
@@ -236,6 +243,23 @@ fapi_try_exit:
 }
 
 //--------------------------------------------------------------------------------------------------------
+fapi2::ReturnCode CoreAction :: isPmMalfunction( bool& o_pmMalfunc, fapi2::buffer <uint64_t>& o_occFlag2Val )
+{
+    o_pmMalfunc  =  false;
+
+    FAPI_TRY( fapi2::getScom( iv_procChipTgt, scomt::proc::TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_RW, o_occFlag2Val ),
+              "Failed To Read OCC Flag2 Register" );
+
+    if( o_occFlag2Val.getBit<p10hcd::PM_CALLOUT_ACTIVE>() )
+    {
+        o_pmMalfunc = true;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//--------------------------------------------------------------------------------------------------------
 
 fapi2::ReturnCode CoreAction :: init( )
 {
@@ -261,7 +285,7 @@ void CoreAction :: getDeadCoreVector( fapi2::buffer <uint32_t>& o_deadCoreVectBu
 fapi2::ReturnCode CoreAction :: clearPmMalFuncRegs( )
 {
     fapi2::buffer <uint64_t> l_scomData;
-
+    fapi2::ReturnCode l_rcTemp = fapi2::current_err;
     l_scomData.flush < 0 >();
     l_scomData.setBit( 0, MAX_CORES_PER_CHIP );   // clear dead core vector
 
@@ -274,6 +298,7 @@ fapi2::ReturnCode CoreAction :: clearPmMalFuncRegs( )
               "Failed To Write OCC Flag2 Register" );
 
 fapi_try_exit:
+    fapi2::current_err  =  l_rcTemp;
     return fapi2::current_err;
 }
 //--------------------------------------------------------------------------------------------------------
@@ -289,7 +314,9 @@ extern "C"
     {
         FAPI_IMP(">> p10_pm_callout" );
 
-        o_rasAction = PROC_CHIP_CALLOUT;
+        o_rasAction = NO_CALLOUT;
+        bool l_pmMalfFunc   =   false;
+        fapi2::buffer <uint64_t> l_occFlag2Value;
 
         CoreAction l_coreActn( i_procTgt );
 
@@ -300,6 +327,13 @@ extern "C"
 
         //Ensure we got an empty vector. It is HWP which must fill it in.
         l_coreActn.init();
+        l_coreActn.isPmMalfunction( l_pmMalfFunc, l_occFlag2Value );
+
+        FAPI_ASSERT( ( l_pmMalfFunc == true ),
+                     fapi2::NO_MALF_PM_RESET()
+                     .set_OCC_FLAG2_REG( l_occFlag2Value )
+                     .set_CHIP( i_procTgt ),
+                     "PM Callout Has Been Called For A Reason Other Than Malfunction" );
 
         FAPI_TRY( l_coreActn.updateCoreConfigState(),
                   "Failed To Update Core Configuration" );
@@ -310,6 +344,25 @@ extern "C"
         l_coreActn.getDeadCoreVector( o_deadCores ); //retrieve Phyp generated dead core vector
 
         FAPI_INF("Dead cores from PHYP: 0x%08x", o_deadCores);
+
+        //PM Malfunction: if there are dead cores, callout should be cores with high priority
+        o_rasAction = CORE_CALLOUT;
+
+        FAPI_ASSERT( ( 0 == (uint32_t)o_deadCores ),
+                     fapi2::PM_MALF_DEAD_CORES_FOUND()
+                     .set_DEAD_CORE_VECTOR( o_deadCores )
+                     .set_OCC_FLAG2_REG( l_occFlag2Value )
+                     .set_CHIP( i_procTgt ),
+                     "PM Malfunction And Dead Cores Found 0x%08x", o_deadCores );
+
+        //PM Malfunction: if there are no dead cores, callout should be chip with low priority
+        o_rasAction =  PROC_CHIP_CALLOUT;
+        FAPI_ASSERT( false,
+                     fapi2::PM_MALF_NO_DEAD_CORES()
+                     .set_DEAD_CORE_VECTOR( o_deadCores )
+                     .set_OCC_FLAG2_REG( l_occFlag2Value )
+                     .set_CHIP( i_procTgt ),
+                     "PM Malfunction But No Dead Cores Found 0x%08x", o_deadCores );
 
     fapi_try_exit:
 
