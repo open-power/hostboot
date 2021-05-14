@@ -90,7 +90,8 @@ const msg_type_handler pldm_monitor_control_handlers[] =
 {
     { PLDM_GET_PDR, handleGetPdrRequest },
     { PLDM_PLATFORM_EVENT_MESSAGE, handlePdrRepoChangeEventRequest },
-    { PLDM_SET_STATE_EFFECTER_STATES, handleSetStateEffecterStatesRequest }
+    { PLDM_SET_STATE_EFFECTER_STATES, handleSetStateEffecterStatesRequest },
+    { PLDM_GET_STATE_SENSOR_READINGS, handleGetStateSensorReadingsRequest }
 };
 
 /*** Handlers for the MSG_FRU_DATA type ***/
@@ -131,40 +132,6 @@ void * handle_inbound_req_messages_task(void*)
     return nullptr;
 }
 #endif
-
-/* @brief send_cc_only_response
- *
- *        Send a PLDM response that consists solely of a PLDM header and a
- *        completion code.
- *
- * @param[in] i_msgQ  Handle to the MCTP outgoing response queue
- * @param[in] i_msg   Message to respond to
- * @param[in] i_cc    Completion code
- */
-void send_cc_only_response(const msg_q_t i_msgQ,
-                           const pldm_msg* i_msg,
-                           const uint8_t i_cc)
-{
-    static const int PLDM_CC_ONLY_RESP_BYTES = 1;
-
-    errlHndl_t errl =
-        send_pldm_response<PLDM_CC_ONLY_RESP_BYTES>
-        (i_msgQ,
-         encode_cc_only_resp,
-         0, // No variable-size payload
-         i_msg->hdr.instance_id,
-         i_msg->hdr.type,
-         i_msg->hdr.command,
-         i_cc);
-
-    if (errl)
-    {
-        PLDM_INF("Failed to send completion code-only response");
-
-        errl->collectTrace(PLDM_COMP_NAME);
-        errlCommit(errl, PLDM_COMP_ID);
-    }
-}
 
 /* @brief handle_inbound_req
  *

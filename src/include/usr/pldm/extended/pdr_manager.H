@@ -37,8 +37,10 @@
 
 // PLDM
 #include <pldm/extended/hb_pdrs.H>
+#include <pldm/extended/pldm_fru.H>
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/requests/pldm_fru_requests.H>
+#include <pldm/responses/pldm_monitor_control_responders.H>
 
 // libpldm
 #include <openbmc/pldm/libpldm/pdr.h>
@@ -48,6 +50,11 @@
 #include <sys/sync.h>
 #include <errl/errlentry.H>
 #include <sys/msg.h>
+
+// Forward declarations
+
+struct pldm_set_state_effecter_states_req;
+struct pldm_get_state_sensor_readings_req;
 
 class PldmPdrTestSuite;
 
@@ -63,6 +70,8 @@ namespace PLDM
 class PdrManager
 {
 public:
+    PdrManager();
+
     // Non-copyable, non-assignable
     PdrManager(const PdrManager&) = delete;
     PdrManager& operator=(const PdrManager&) = delete;
@@ -73,13 +82,8 @@ public:
      */
     errlHndl_t addRemotePdrs();
 
-    /* @brief  Adds Hostboot PDRs to the repository.
-     *
-     * @return Error if any, otherwise nullptr.
-     */
-    errlHndl_t addLocalPdrs();
-
-    /* @brief  Remove all PDRs from the repository.
+    /* @brief  Remove all PDRs from the repository. Does NOT remove the sensor/effecter handlers
+     *         previously registered with addStateEffecterPdr/addStateSensorPdr.
      */
     void resetPdrs();
 
@@ -189,6 +193,109 @@ public:
     // @TODO RTC 256140: Remove this function when the BMC normalizes all PDRs
     bool findEntityByTypeAndId(pldm_entity& io_entity) const;
 
+    /* A "state query" is either a state sensor get-request or a state effecter
+     * set-request. */
+    enum state_query_handler_id_t
+    {
+        STATE_QUERY_HANDLER_NONE = 0,
+        STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR = 1,
+        STATE_QUERY_HANDLER_OCC_STATE_EFFECTER = 2,
+        STATE_QUERY_HANDLER_INVALID = 0xFF
+    };
+
+    /* @brief  Add a state effecter PDR to the PDR repository.
+     *
+     * @param[in] i_target           target that this effecter pertains to. Will be passed to the callback.
+     * @param[in] i_entity           Entity information for the FRU that this effecter pertains to.
+     * @param[in] i_state_set_id     State set ID that this effecter uses (e.g. PLDM_STATE_SET_HEALTH_STATE)
+     * @param[in] i_possible_states  Bitset of valid states in the state set for this effecter. Only 8 states
+     *                               are currently supported.
+     * @param[in] i_qhandler         The enumeration representing the SetStateEffecterStates callback for
+     *                               this effecter. The given function will be called to handle the
+     *                               SetStateEffecterStates command for the effecter ID of the new effecter
+     *                               PDR. If this is NONE, then the PDR will be created, but the
+     *                               SetStateEffecterStates PLDM command for this effecter will respond with
+     *                               an error.
+     */
+    void addStateEffecterPdr(TARGETING::Target* i_target,
+                             const pldm_entity& i_entity,
+                             uint16_t i_state_set_id,
+                             uint8_t i_possible_states,
+                             state_query_handler_id_t i_qhandler);
+
+    /* @brief  Add a state sensor PDR to the PDR repository.
+     *
+     * @param[in] i_target           Target that this sensor pertains to. This will be passed to the callback.
+     * @param[in] i_entity           Entity information for the FRU that this sensor pertains to.
+     * @param[in] i_state_set_id     State set ID that this sensor uses (e.g. PLDM_STATE_SET_HEALTH_STATE)
+     * @param[in] i_possible_states  Bitset of valid states in the state set for this sensor. Only 8 states
+     *                               are currently supported.
+     * @param[in] i_qhandler         The enumeration representing the GetStateSensorReadings callback for
+     *                               this effecter. The given function will be called to handle the
+     *                               SetStateEffecterStates command for the effecter ID of the new effecter
+     *                               PDR. If this is NONE, then the PDR will be created, but the
+     *                               GetStateSensorReadings PLDM command for this effecter will respond with
+     *                               an error.
+     */
+    void addStateSensorPdr(TARGETING::Target* const i_target,
+                           const pldm_entity& i_entity,
+                           uint16_t i_state_set_id,
+                           uint8_t i_possible_states,
+                           state_query_handler_id_t i_qhandler);
+
+    /* @brief  Handle a SetStateEffecterStates command and send a response.
+     *
+     * This function invokes the appropriate callback registered with addStateEffecterPdr if there is one,
+     * or responds with an error if there is no handler.
+     *
+     * @param[in] i_msgQ         Handle to the PLDM message queue.
+     * @param[in] i_msg          Pointer to the PLDM message.
+     * @param[in] i_payload_len  Length of the PLDM message.
+     * @param[in] i_req          Decoded PLDM request.
+     * @return errlHndl_t        Error if any, otherwise nullptr.
+     */
+    errlHndl_t setStateEffecterStates(msg_q_t i_msgQ,
+                                      const pldm_msg* i_msg,
+                                      size_t i_payload_len,
+                                      const pldm_set_state_effecter_states_req* i_req);
+
+    /* @brief  Handle a GetStateSensorReadings command and send a response.
+     *
+     * This function invokes the appropriate callback registered with addStateSensorPdr if there is one,
+     * or responds with an error if there is no handler.
+     *
+     * @param[in] i_msgQ         Handle to the PLDM message queue.
+     * @param[in] i_msg          Pointer to the PLDM message.
+     * @param[in] i_payload_len  Length of the PLDM message.
+     * @param[in] i_req          Decoded PLDM request.
+     * @return errlHndl_t        Error if any, otherwise nullptr.
+     */
+    errlHndl_t getStateSensorReadings(msg_q_t i_msgQ,
+                                      const pldm_msg* i_msg,
+                                      size_t i_payload_len,
+                                      const pldm_get_state_sensor_readings_req* i_req);
+
+    /* @brief  Add a FRU Record Set PDR to the repository.
+     *
+     * @param[in] i_rsid    Record Set ID for the new PDR.
+     * @param[in] i_entity  Entity information for the PDR.
+     */
+    void addFruRecordSetPdr(fru_record_set_id_t i_rsid,
+                            const pldm_entity& i_entity);
+
+    /* @brief  Add the entity association PDRs from the given tree to the repository.
+     *
+     * @param[in] i_tree       The entity association tree to add.
+     * @param[in] i_is_remote  Whether the PDRs should have the "remote" flag set.
+     */
+    void addEntityAssociationPdrs(const pldm_entity_association_tree& i_tree, bool i_is_remote);
+
+    /* @brief  Send information about all the functional states of the FRUs in this repository to the BMC.
+     *         FRUs that have functional state are the FRUs that have state sensor PDRs for the
+     *         PLDM_STATE_SET_HEALTH_STATE state set.
+     */
+    void sendAllFruFunctionalStates() const;
+
     /* @brief Hostboot's PLDM Terminus ID.
      * @return terminus_id_t Hostboot's current terminus ID.
      */
@@ -201,12 +308,17 @@ public:
         return 2;
     }
 
+    /*
+     * @brief Adds a Terminus Locator PDR to the PDR repository
+     */
+    void addTerminusLocatorPDR();
+
 private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> iv_pdr_repo;
     mutable mutex_t iv_access_mutex;
 
-    // This unique_ptr points to access_mutex, and it will call mutex_destroy on
-    // access_mutex when this object is destroyed.
+    // This unique_ptr points to iv_access_mutex, and it will call mutex_destroy on
+    // iv_access_mutex when this object is destroyed.
     std::unique_ptr<mutex_t, void(*)(mutex_t*)> iv_access_mutex_owner;
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -221,8 +333,37 @@ private:
      */
     pldm_terminus_locator_pdr* findHBTerminusLocatorPdr();
 
-protected:
-    PdrManager();
+    /* This monotonically increasing value is used to assign sensor/effecter IDs, and the IDs are stored in
+     * attributes, along with a state_query_handler_id_t value, to record how to handle PLDM sensor/effecter
+     * queries. */
+    state_query_id_t iv_next_state_query_id = 1;
+
+    /* Enumeration for handleStateQueryRequest. A state query is either an
+     * effecter set-request or a sensor get-request. */
+    enum state_query_type_t
+    {
+        STATE_QUERY_SENSOR = 1,
+        STATE_QUERY_EFFECTER = 2
+    };
+
+    /* @brief  Handle a PLDM state sensor or effecter command.
+     *
+     * @param[in] i_querytype    Whether this is a sensor-read or effecter-write command.
+     * @param[in] i_query_id     Sensor/effecter ID.
+     * @param[in] i_msgQ         Handle to the PLDM message queue.
+     * @param[in] i_msg          PLDM message.
+     * @param[in] i_payload_len  PLDM message length.
+     * @param[in] i_req          Decoded PLDM message. Must point to a pldm_get_state_sensor_readings_req
+     *                           if i_querytype is STATE_QUERY_SENSOR, or pldm_set_state_effecter_states_req
+     *                           if i_querytype is STATE_QUERY_EFFECTER.
+     * @return errlHndl_t        Error if any, otherwise nullptr.
+     */
+    errlHndl_t handleStateQueryRequest(state_query_type_t i_querytype,
+                                       state_query_id_t i_query_id,
+                                       msg_q_t i_msgQ,
+                                       const pldm_msg* i_msg,
+                                       size_t i_payload_len,
+                                       const void* i_req);
 
     // For testcases
     friend class ::PldmPdrTestSuite;

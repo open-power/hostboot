@@ -52,6 +52,7 @@
 #include <secureboot/phys_presence_if.H>
 
 // Misc
+#include <pldm/extended/pdr_manager.H>
 #include <config.h>
 #include <errl/errludtarget.H>
 #include <console/consoleif.H>
@@ -409,6 +410,11 @@ void* host_gard( void *io_pArgs )
         l_stepError.addErrorDetails(l_err);
         ERRORLOG::errlCommit( l_err, SECURE_COMP_ID );
     }
+#endif
+
+
+#ifdef CONFIG_PLDM
+    PLDM::thePdrManager().sendAllFruFunctionalStates();
 #endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );

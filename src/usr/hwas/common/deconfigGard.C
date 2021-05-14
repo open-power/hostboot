@@ -312,27 +312,6 @@ void DeconfigGard::_deconfigureTarget(
 void DeconfigGard::_doDeconfigureActions(Target & i_target)
 {
  // Placeholder for any necessary deconfigure actions
-
-// @TODO: RTC 244854: Enable once runtime IPMI is enabled
-//        Having linking issue with symbol SENSOR::StatusSensor for Jenkins OP-BUILD
-#ifndef __HOSTBOOT_RUNTIME
-#ifdef CONFIG_BMC_IPMI
-    // set the BMC status for this target
-    SENSOR::StatusSensor l_sensor( &i_target );
-
-    // can assume the presence sensor is in the correct state, just
-    // assert that it is now non functional.
-    errlHndl_t err = l_sensor.setStatus( SENSOR::StatusSensor::NON_FUNCTIONAL );
-
-    if(err)
-    {
-        HWAS_ERR("Error returned from call to set sensor status for HUID 0x%x",
-                 TARGETING::get_huid( &i_target) );
-        err->collectTrace(HWAS_COMP_NAME, 512);
-        errlCommit(err, HWAS_COMP_ID);
-    }
-#endif  // #ifndef CONFIG_BMC_IPMI
-#endif  // #ifndef __HOSTBOOT_RUNTIME
 } // _doDeconfigureActions
 
 //******************************************************************************

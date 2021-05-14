@@ -56,6 +56,9 @@
 #ifdef CONFIG_DEVTREE
 #include <devtree/devtree.H>
 #endif
+#ifdef CONFIG_PLDM
+#include <pldm/extended/pdr_manager.H>
+#endif
 
 #include <vmmconst.h>
 #include <targeting/targplatutil.H>
@@ -208,6 +211,10 @@ void* call_host_ipl_complete(void* const io_pArgs)
         // Any Key Clear Request should have already been saved in ATTR_KEY_CLEAR_REQUEST_HB
         auto keyClearRequests = KEY_CLEAR_REQUEST_NONE;
         sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
+
+#ifdef CONFIG_PLDM
+        PLDM::thePdrManager().sendAllFruFunctionalStates();
+#endif
 
         // Sync attributes to Fsp/Bmc
         l_err = TARGETING::AttrRP::syncAllAttributesToSP();

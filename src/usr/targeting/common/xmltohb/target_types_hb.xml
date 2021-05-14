@@ -147,6 +147,12 @@
       <id>I2C_PAGE_MUTEX_3</id>
     </attribute>
     <attribute>
+      <id>PLDM_EFFECTER_INFO</id>
+    </attribute>
+    <attribute>
+      <id>PLDM_SENSOR_INFO</id>
+    </attribute>
+    <attribute>
       <id>SPI_ENGINE_MUTEX_0</id>
     </attribute>
     <attribute>
@@ -249,6 +255,12 @@
     </attribute>
     <attribute>
       <id>PART_NUMBER</id>
+    </attribute>
+    <attribute>
+      <id>PLDM_EFFECTER_INFO</id>
+    </attribute>
+    <attribute>
+      <id>PLDM_SENSOR_INFO</id>
     </attribute>
     <attribute>
       <id>SERIAL_NUMBER</id>
@@ -373,6 +385,16 @@
     <id>unit-fc-power10</id>
     <attribute>
       <id>SPCWKUP_COUNT</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>unit-occ-power10</id>
+    <attribute>
+      <id>PLDM_EFFECTER_INFO</id>
+    </attribute>
+    <attribute>
+      <id>PLDM_SENSOR_INFO</id>
     </attribute>
   </targetTypeExtension>
 

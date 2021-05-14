@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,11 @@ namespace std
 
             template <typename U, typename V>
                 pair (const pair<U,V> & p) : first(p.first), second(p.second) {}
+
+            pair(const pair&) = default;
+            pair(pair&&) = default;
+            pair& operator=(const pair&) = default;
+            pair& operator=(pair&&) = default;
         };
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,27 +56,13 @@ public:
         using repo_ptr = std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)>;
         const repo_ptr repo { pldm_pdr_init(), pldm_pdr_destroy };
 
-        PLDM::addHostbootPdrs(repo.get());
+        PLDM::PdrManager pdrmgr;
 
-        const pldm_pdr_types pdrTypes[] =
+        addHostbootPdrs(pdrmgr);
+
+        if (pdrmgr.pdrCount() == 0)
         {
-            PLDM_PDR_ENTITY_ASSOCIATION,
-            PLDM_PDR_FRU_RECORD_SET
-        };
-
-        for (const auto pdrType : pdrTypes)
-        {
-            uint32_t pdrSize = 0;
-            uint8_t* pdrData = nullptr;
-
-            if (!pldm_pdr_find_record_by_type(repo.get(),
-                                              pdrType,
-                                              nullptr,
-                                              &pdrData,
-                                              &pdrSize))
-            {
-                TS_FAIL("test_addHbPdrs: no records of type %d", pdrType);
-            }
+            TS_FAIL("test_addHbPdrs: No PDRs added");
         }
 
         TS_INFO("exit test_addHbPdrs");
@@ -89,9 +75,9 @@ public:
 
         TS_INFO("enter test_fruRecordSetIdLookup");
 
-        PdrManager pdrmgr;
+        PLDM::PdrManager pdrmgr;
 
-        pdrmgr.addLocalPdrs();
+        addHostbootPdrs(pdrmgr);
 
         const auto dimm_rsids = pdrmgr.findFruRecordSetIdsByType(ENTITY_TYPE_DIMM);
 

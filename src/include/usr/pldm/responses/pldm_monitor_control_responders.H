@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,8 @@
 #include <errl/errlentry.H>
 
 struct pldm_msg;
+struct pldm_get_state_sensor_readings_req;
+struct pldm_set_state_effecter_states_req;
 
 namespace PLDM
 {
@@ -79,6 +81,48 @@ errlHndl_t handlePdrRepoChangeEventRequest(msg_q_t i_msgQ,
 errlHndl_t handleSetStateEffecterStatesRequest(msg_q_t i_msgQ,
                                                const pldm_msg* i_msg,
                                                size_t i_payload_len);
+
+/* @brief Handler for Get State Sensor Readings requests. (See DSP0248 v1.2.0
+ *        section 20.2 for details.)
+ *
+ * @param[in] i_msgQ         Handle to MCTP outbound request message queue
+ * @param[in] i_msg          The PLDM message received
+ * @param[in] i_payload_len  Length of PLDM message payload
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handleGetStateSensorReadingsRequest(msg_q_t i_msgQ,
+                                               const pldm_msg* i_msg,
+                                               size_t i_payload_len);
+
+/* @brief Handler for Set State Effecter requests for OCC state effecters.
+ *
+ * @param[in] i_occ_proc     Processor that contains the OCC target.
+ * @param[in] i_msgQ         Handle to MCTP outbound request message queue
+ * @param[in] i_msg          PLDM message received
+ * @param[in] i_payload_len  Length of PLDM message payload
+ * @param[in] i_req          Decoded PLDM request.
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handleOccSetStateEffecterRequest(TARGETING::Target* i_occ_proc,
+                                            msg_q_t i_msgQ,
+                                            const pldm_msg* i_msg,
+                                            size_t i_payload_len,
+                                            const pldm_set_state_effecter_states_req& i_req);
+
+/* @brief Handler for Get State Sensor Readings requests for FRU functional state sensors.
+ *
+ * @param[in] i_target       The FRU target for the sensor.
+ * @param[in] i_msgQ         Handle to MCTP outbound request message queue
+ * @param[in] i_msg          PLDM message received
+ * @param[in] i_payload_len  Length of PLDM message payload
+ * @param[in] i_req          Decoded PLDM request.
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handleFunctionalStateSensorGetRequest(TARGETING::Target* i_target,
+                                                 msg_q_t i_msgQ,
+                                                 const pldm_msg* i_msg,
+                                                 size_t i_payload_len,
+                                                 const pldm_get_state_sensor_readings_req& i_req);
 
 }
 

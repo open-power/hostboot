@@ -500,77 +500,74 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
 
     do
     {
+        const msg_q_t msgQ = MSG_Q_RESOLVE("sendSensorStateChangedEvent",
+                                           VFS_ROOT_MSG_PLDM_REQ_OUT);
+
+        std::vector<uint8_t> response_bytes;
+
+        // Value from DSP0248 section 16.6
+        const uint8_t DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION = 1;
+
+        errl = sendrecv_pldm_request<PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES>
+            (response_bytes,
+             event_data_bytes,
+             msgQ,
+             encode_platform_event_message_req,
+             DEFAULT_INSTANCE_ID,
+             DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
+             thePdrManager().hostbootTerminusId(),
+             PLDM_SENSOR_EVENT,
+             event_data_bytes.data(),
+             event_data_bytes.size());
+
+        if (errl)
         {
-            const msg_q_t msgQ = MSG_Q_RESOLVE("sendSensorStateChangedEvent",
-                                               VFS_ROOT_MSG_PLDM_REQ_OUT);
-
-            std::vector<uint8_t> response_bytes;
-
-            // Value from DSP0248 section 16.6
-            const uint8_t DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION = 1;
-
-            errl = sendrecv_pldm_request<PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES>
-                (response_bytes,
-                 event_data_bytes,
-                 msgQ,
-                 encode_platform_event_message_req,
-                 DEFAULT_INSTANCE_ID,
-                 DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
-                 thePdrManager().hostbootTerminusId(),
-                 PLDM_SENSOR_EVENT,
-                 event_data_bytes.data(),
-                 event_data_bytes.size());
-
-            if (errl)
-            {
-                PLDM_INF("Failed to send/recv sensor state change event");
-                break;
-            }
-
-            uint8_t completion_code = PLDM_SUCCESS;
-            uint8_t status = 0;
-
-            errl =
-                decode_pldm_response(decode_platform_event_message_resp,
-                                     response_bytes,
-                                     &completion_code,
-                                     &status);
-
-            if (errl)
-            {
-                PLDM_INF("Failed to decode sensor state change response");
-                break;
-            }
-
-            if (completion_code != PLDM_SUCCESS)
-            {
-                PLDM_INF("Event completion code is not PLDM_SUCCESS, is %d (status = %d)",
-                         completion_code,
-                         status);
-
-                /*@
-                 * @errortype  ERRL_SEV_UNRECOVERABLE
-                 * @moduleid   MOD_SEND_SENSOR_STATE_CHANGED_EVENT
-                 * @reasoncode RC_BAD_COMPLETION_CODE
-                 * @userdata1  Completion code returned from BMC
-                 * @userdata2  Status code returned from BMC
-                 * @devdesc    Software problem, Sensor State Changed notification unsuccessful
-                 * @custdesc   A software error occurred during system boot
-                 */
-                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                     MOD_SEND_SENSOR_STATE_CHANGED_EVENT,
-                                     RC_BAD_COMPLETION_CODE,
-                                     completion_code,
-                                     status,
-                                     ErrlEntry::NO_SW_CALLOUT);
-                errl->collectTrace(PLDM_COMP_NAME);
-                addBmcErrorCallouts(errl);
-                break;
-            }
-
-            PLDM_INF("Sent Sensor State Changed Event successfully (code is %d, status is %d)",
-                     completion_code, status);
+            PLDM_INF("Failed to send/recv sensor state change event");
+            break;
         }
+
+        uint8_t completion_code = PLDM_SUCCESS;
+        uint8_t status = 0;
+
+        errl = decode_pldm_response(decode_platform_event_message_resp,
+                                    response_bytes,
+                                    &completion_code,
+                                    &status);
+
+        if (errl)
+        {
+            PLDM_INF("Failed to decode sensor state change response");
+            break;
+        }
+
+        if (completion_code != PLDM_SUCCESS)
+        {
+            PLDM_INF("Event completion code is not PLDM_SUCCESS, is %d (status = %d)",
+                     completion_code,
+                     status);
+
+            /*@
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_SEND_SENSOR_STATE_CHANGED_EVENT
+             * @reasoncode RC_BAD_COMPLETION_CODE
+             * @userdata1  Completion code returned from BMC
+             * @userdata2  Status code returned from BMC
+             * @devdesc    Software problem, Sensor State Changed notification unsuccessful
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_SEND_SENSOR_STATE_CHANGED_EVENT,
+                                 RC_BAD_COMPLETION_CODE,
+                                 completion_code,
+                                 status,
+                                 ErrlEntry::NO_SW_CALLOUT);
+            errl->collectTrace(PLDM_COMP_NAME);
+            addBmcErrorCallouts(errl);
+            break;
+        }
+
+        PLDM_INF("Sent Sensor State Changed Event successfully (code is %d, status is %d)",
+                 completion_code, status);
     } while (false);
 
     PLDM_EXIT("sendSensorStateChangedEvent");
@@ -581,8 +578,8 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
 errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_proc_target,
                                     const occ_state i_new_state)
 {
-    // The Processor entities only have one sensor associated with them, and it
-    // is at index 0.
+    // The OCC sensors only have one state associated with them, and it is at
+    // index 0.
     constexpr int OCC_STATE_SENSOR_INDEX = 0;
 
     sensor_state_t new_occ_state = 0;
@@ -603,6 +600,23 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_proc_target
     return sendSensorStateChangedEvent(i_proc_target->getAttr<TARGETING::ATTR_ORDINAL_ID>(),
                                        OCC_STATE_SENSOR_INDEX,
                                        new_occ_state);
+}
+
+errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* const i_target,
+                                              const state_query_id_t i_sensor_id,
+                                              const bool i_functional)
+{
+    // The functional state sensors only have one value associated with them,
+    // and it is at index 0.
+    constexpr int FUNCTIONAL_STATE_SENSOR_INDEX = 0;
+
+    const sensor_state_t functional_state = (i_functional
+                                             ? PLDM_STATE_SET_HEALTH_STATE_NORMAL
+                                             : PLDM_STATE_SET_HEALTH_STATE_CRITICAL);
+
+    return sendSensorStateChangedEvent(i_sensor_id,
+                                       FUNCTIONAL_STATE_SENSOR_INDEX,
+                                       functional_state);
 }
 
 errlHndl_t sendSetStateEffecterStatesRequest(

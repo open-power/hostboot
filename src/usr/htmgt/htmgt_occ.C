@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -421,28 +421,6 @@ namespace HTMGT
     void Occ::updateGpuPresence()
     {
         // No GPUs are currently supported
-#if 0
-        TARGETING::ConstTargetHandle_t const_proc_target =
-            TARGETING::getParentChip(iv_target);
-        SENSOR::StatusSensor::statusEnum gpu_status[MAX_GPUS] =
-        {
-            SENSOR::StatusSensor::NOT_PRESENT,
-            SENSOR::StatusSensor::NOT_PRESENT,
-            SENSOR::StatusSensor::NOT_PRESENT
-        };
-        if (iv_gpuCfg & GPUCFG_GPU0_PRESENT)
-            gpu_status[0] = SENSOR::StatusSensor::PRESENT_FUNCTIONAL;
-        if (iv_gpuCfg & GPUCFG_GPU1_PRESENT)
-            gpu_status[1] = SENSOR::StatusSensor::PRESENT_FUNCTIONAL;
-        if (iv_gpuCfg & GPUCFG_GPU2_PRESENT)
-            gpu_status[2] = SENSOR::StatusSensor::PRESENT_FUNCTIONAL;
-
-        TMGT_INF("updateGpuPresence: OCC%d - GPU0:%d, GPU1:%d, GPU2:%d",
-                 iv_instance, gpu_status[0], gpu_status[1], gpu_status[2]);
-        SENSOR::updateGpuSensorStatus(const_cast<TARGETING::TargetHandle_t>
-                                      (const_proc_target),
-                                      gpu_status);
-#endif
     }
 
 

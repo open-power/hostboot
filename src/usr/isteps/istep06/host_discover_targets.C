@@ -321,7 +321,7 @@ static errlHndl_t exchange_pdrs()
 
         /* Add our own PDRs to our repository. */
 
-        l_err = PLDM::thePdrManager().addLocalPdrs();
+        l_err = addHostbootPdrs(PLDM::thePdrManager());
 
         if (l_err)
         {

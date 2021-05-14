@@ -127,6 +127,21 @@ enum pldm_state_set_ids {
 	PLDM_STATE_SET_SLOT_STATE = 353,
 };
 
+/* @brief List of states for the Health State state set (ID 1).
+ */
+enum pldm_state_set_health_state_values {
+	PLDM_STATE_SET_HEALTH_STATE_NORMAL = 1,
+	PLDM_STATE_SET_HEALTH_STATE_NON_CRITICAL = 2,
+	PLDM_STATE_SET_HEALTH_STATE_CRITICAL = 3,
+	PLDM_STATE_SET_HEALTH_STATE_FATAL = 4,
+	PLDM_STATE_SET_HEALTH_STATE_UPPER_NON_CRITICAL = 5,
+	PLDM_STATE_SET_HEALTH_STATE_LOWER_NON_CRITICAL = 6,
+	PLDM_STATE_SET_HEALTH_STATE_UPPER_CRITICAL = 7,
+	PLDM_STATE_SET_HEALTH_STATE_LOWER_CRITICAL = 8,
+	PLDM_STATE_SET_HEALTH_STATE_UPPER_FATAL = 9,
+	PLDM_STATE_SET_HEALTH_STATE_LOWER_FATAL = 10,
+};
+
 /* @brief List of states for the Boot Restart Cause state set (ID 192).
  */
 enum pldm_state_set_boot_restart_cause_values {

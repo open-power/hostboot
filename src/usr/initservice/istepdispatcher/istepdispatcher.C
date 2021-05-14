@@ -103,6 +103,9 @@
 #include <initservice/extinitserviceif.H>
 #include <kernel/terminate.H>
 
+#ifdef CONFIG_PLDM
+#include <pldm/extended/pdr_manager.H>
+#endif
 
 namespace ISTEPS_TRACE
 {
@@ -590,6 +593,10 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     (!l_manufacturingMode) &&
                     (!l_MPIPLMode) )
                 {
+#ifdef CONFIG_PLDM
+                    PLDM::thePdrManager().sendAllFruFunctionalStates();
+#endif
+
                     // Within the Reconfig Loop, going to loop back
                     // first, check to make sure we still have a bootable system
                     errlHndl_t l_errl = HWAS::checkMinimumHardware();
@@ -1797,7 +1804,7 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
     {
         TRACFCOMP(g_trac_initsvc,
                   "IStepDispatcher::handleShutdownMsg> Error disabling shutdown");
-        errlCommit(l_errhdl, INITSVC_COMP_ID);        
+        errlCommit(l_errhdl, INITSVC_COMP_ID);
     }
 
     // find the step/substep. The step is in the top 32bits, the substep is in
@@ -1900,6 +1907,8 @@ void IStepDispatcher::requestReboot(const char* i_reason)
         INITSERVICE::stopIpl();
 
 #ifdef CONFIG_PLDM
+        PLDM::thePdrManager().sendAllFruFunctionalStates();
+
         // Issue a PLDM request for a reboot
         errlHndl_t l_errl = PLDM::sendGracefulRebootRequest();
         if(l_errl)

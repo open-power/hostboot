@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 
 // Error handling
 #include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <mctp/mctpif_rt.H>
@@ -288,6 +289,40 @@ errlHndl_t decode_pldm_request(const Decoder i_decoder,
     }
 
     return errl;
+}
+
+/* @brief send_cc_only_response
+ *
+ *        Send a PLDM response that consists solely of a PLDM header and a
+ *        completion code.
+ *
+ * @param[in] i_msgQ  Handle to the MCTP outgoing response queue
+ * @param[in] i_msg   Message to respond to
+ * @param[in] i_cc    Completion code
+ */
+inline void send_cc_only_response(const msg_q_t i_msgQ,
+                                  const pldm_msg* const i_msg,
+                                  const uint8_t i_cc)
+{
+    static const int PLDM_CC_ONLY_RESP_BYTES = 1;
+
+    errlHndl_t errl =
+        send_pldm_response<PLDM_CC_ONLY_RESP_BYTES>
+        (i_msgQ,
+         encode_cc_only_resp,
+         0, // No variable-size payload
+         i_msg->hdr.instance_id,
+         i_msg->hdr.type,
+         i_msg->hdr.command,
+         i_cc);
+
+    if (errl)
+    {
+        PLDM_INF("Failed to send completion code-only response");
+
+        errl->collectTrace(PLDM_COMP_NAME);
+        errlCommit(errl, PLDM_COMP_ID);
+    }
 }
 
 }

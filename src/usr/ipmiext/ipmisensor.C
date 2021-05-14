@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -209,52 +209,6 @@ namespace SENSOR
     {
 
         errlHndl_t l_err = NULL;
-
-#if 0 // TODO RTC: 246392 Remove this code when PLDM is up
-        iv_msg->iv_sensor_number = static_cast<uint8_t>(getSensorNumber());
-
-        if( iv_msg->iv_sensor_number != TARGETING::UTIL::INVALID_IPMI_SENSOR )
-        {
-
-            // iv_msg is deleted by the IPMI resource provider.
-            l_err = sendSetSensorReading( iv_msg);
-
-            if( l_err )
-            {
-                TRACFCOMP(g_trac_ipmi,"error returned from "
-                        "sendSetSensorReading() for sensor number 0x%x",
-                        getSensorNumber());
-            }
-        }
-        else
-        {
-            TRACFCOMP(g_trac_ipmi,"We were not able to find a sensor number in"
-                      " the IPMI_SENSORS attribute for sensor_name=0x%x "
-                      "for target with huid=0x%x, skipping call to "
-                      "sendSetSensorReading()",
-                    iv_name, TARGETING::get_huid( iv_target ));
-
-            /*@
-             * @errortype       ERRL_SEV_UNRECOVERABLE
-             * @moduleid        IPMI::MOD_IPMISENSOR
-             * @reasoncode      IPMI::RC_SENSOR_NOT_FOUND
-             * @userdata1       Returned sensor number.
-             * @userdata2       bytes [0-3]sensor name
-             *                  bytes [4-7]HUID of target.
-             * @devdesc         Requested sensor attribute not found.
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                IPMI::MOD_IPMISENSOR,
-                IPMI::RC_SENSOR_NOT_FOUND,
-                iv_msg->iv_sensor_number,
-                TWO_UINT32_TO_UINT64( iv_name,
-                                      TARGETING::get_huid( iv_target ) ),
-                true);
-
-            delete iv_msg;
-        }
-#endif
 
         return l_err;
     };

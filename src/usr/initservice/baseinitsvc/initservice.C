@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,9 @@
 #include    "initservice.H"
 #include    "initsvctasks.H"
 
+#ifdef CONFIG_PLDM
+#include    <pldm/extended/pdr_manager.H>
+#endif
 
 //  -----   namespace   SPLESS  -----------------------------------------------
 namespace   SPLESS
@@ -903,6 +906,10 @@ void InitService::_doShutdown(uint64_t i_status,
 #endif
 
     TRACFCOMP(g_trac_initsvc, "_doShutdown> status=%.16X",iv_worst_status);
+
+#ifdef CONFIG_PLDM
+    PLDM::thePdrManager().sendAllFruFunctionalStates();
+#endif
 
     // sort the queue by priority before sending..
     std::sort( iv_regMsgQ.begin(), iv_regMsgQ.end());

@@ -38,6 +38,7 @@
 
 namespace PLDM
 {
+
 /*
  * This table contains info on how to add each target type's info to the
  * assocation tree.
@@ -52,17 +53,18 @@ struct fru_inventory_class
 
 extern const std::array<fru_inventory_class, 2> fru_inventory_classes;
 
+class PdrManager;
+
 /* @brief Adds Hostboot's PDRs to the given PDR repository.
  *        These PDRs are:
- *        1) FRU Record Set PDRs, one for each DIMM and PROC
- *        2) Entity Association PDRs, one for each relationship between the
- *           DIMMs/PROCs and the Backplane.
+ *        1) FRU Record Set PDRs
+ *        2) Entity Association PDRs
+ *        3) State sensor and effecter PDRs
  *
- * @param[in/out] io_repository        The repository to add the PDRs to. Must not
- *                                     be nullptr.
- * @return errlHndl_t    Error if any, otherwise nullptr.
+ * @param[in/out] io_pdrman       The PDR manager to add to.
+ * @return errlHndl_t             Error if any, otherwise nullptr.
  */
-errlHndl_t addHostbootPdrs(pldm_pdr* io_repository);
+errlHndl_t addHostbootPdrs(PdrManager& io_pdrman);
 
 }
 
