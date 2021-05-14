@@ -109,3 +109,14 @@
         reset       (&, 0x1001182A);
         capture     group default;
     };
+
+    ############################################################################
+    # PAU_PHY_FIR Regs
+    ############################################################################
+
+    register PAU_PHY_FIR_MASK_OR
+    {
+        name        "PAU_PHY_FIR_MASK atomic OR reg";
+        scomaddr    0x10012c05;
+        capture     group default;
+    };

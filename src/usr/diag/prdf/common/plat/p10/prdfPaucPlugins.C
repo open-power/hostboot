@@ -263,6 +263,67 @@ PLUGIN_PAUC_SMP_CALLOUT( 1 );
 PLUGIN_PAUC_SMP_CALLOUT( 2 );
 PLUGIN_PAUC_SMP_CALLOUT( 3 );
 
+/**
+ * @brief  For use with CRC root cause bits in the PAU_PHY_FIR, this will leave
+ *         the FIR bit on, but still mask it once it has hit threshold.
+ * @param  i_chip A PAUC chip
+ * @param  io_sc  The step code data struct.
+ * @param  i_bit  The bit in the PAU_PHY_FIR to mask but not clear.
+ * @return PRD_NO_CLEAR_FIR_BITS if at threshold, SUCCESS otherwise.
+ */
+int32_t __crcRootCause( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
+                        uint8_t i_bit )
+{
+    #define PRDF_FUNC "[p10_pauc::CrcRootCause] "
+
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_PAUC == i_chip->getType());
+
+    #ifdef __HOSTBOOT_MODULE
+    // Mask the bit in the PAU_PHY_FIR manually if we're at threshold
+    if ( io_sc.service_data->IsAtThreshold() )
+    {
+        SCAN_COMM_REGISTER_CLASS * mask_or =
+            i_chip->getRegister( "PAU_PHY_FIR_MASK_OR" );
+
+        mask_or->SetBit(i_bit);
+        if ( SUCCESS != mask_or->Write() )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed for PAU_PHY_FIR_MASK_OR on "
+                      "0x%08x", i_chip->getHuid() );
+        }
+
+        // Return PRD_NO_CLEAR_FIR_BITS so the rule code doesn't clear the bit
+        return PRD_NO_CLEAR_FIR_BITS;
+    }
+    #endif
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+#define PLUGIN_CRC_ROOT_CAUSE( POS ) \
+int32_t CrcRootCause_##POS( ExtensibleChip * i_chip, \
+                            STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    return __crcRootCause( i_chip, io_sc, POS ); \
+} \
+PRDF_PLUGIN_DEFINE( p10_pauc, CrcRootCause_##POS );
+
+PLUGIN_CRC_ROOT_CAUSE( 2 );
+PLUGIN_CRC_ROOT_CAUSE( 3 );
+PLUGIN_CRC_ROOT_CAUSE( 6 );
+PLUGIN_CRC_ROOT_CAUSE( 7 );
+PLUGIN_CRC_ROOT_CAUSE( 9 );
+PLUGIN_CRC_ROOT_CAUSE( 10 );
+PLUGIN_CRC_ROOT_CAUSE( 11 );
+PLUGIN_CRC_ROOT_CAUSE( 12 );
+PLUGIN_CRC_ROOT_CAUSE( 13 );
+PLUGIN_CRC_ROOT_CAUSE( 14 );
+PLUGIN_CRC_ROOT_CAUSE( 19 );
+PLUGIN_CRC_ROOT_CAUSE( 22 );
+PLUGIN_CRC_ROOT_CAUSE( 23 );
 
 } // end namespace p10_pauc
 

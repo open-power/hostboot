@@ -1985,12 +1985,12 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[2]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(2)) ? threshold_and_mask_parent_proc_th1;
+    (rPAU_PHY_FIR, bit(2)) ? threshold_and_mask_parent_proc_th1_CrcRoot2;
 
     /** PAU_PHY_FIR[3]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(3)) ? threshold_and_mask_parent_proc_th1;
+    (rPAU_PHY_FIR, bit(3)) ? threshold_and_mask_parent_proc_th1_CrcRoot3;
 
     /** PAU_PHY_FIR[4]
      *  TX state machine parity or mode register parity er
@@ -2005,12 +2005,12 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[6]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(6)) ? threshold_and_mask_parent_proc_th1;
+    (rPAU_PHY_FIR, bit(6)) ? threshold_and_mask_parent_proc_th1_CrcRoot6;
 
     /** PAU_PHY_FIR[7]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(7)) ? threshold_and_mask_parent_proc_th1;
+    (rPAU_PHY_FIR, bit(7)) ? threshold_and_mask_parent_proc_th1_CrcRoot7;
 
     /** PAU_PHY_FIR[8]
      *  TX ZCAL state machine parity or mode register pari
@@ -2020,32 +2020,32 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[9]
      *  A PPE internal error has occurred.
      */
-    (rPAU_PHY_FIR, bit(9)) ? parent_proc_th_1;
+    (rPAU_PHY_FIR, bit(9)) ? parent_proc_th_1_CrcRoot9;
 
     /** PAU_PHY_FIR[10]
      *  A PPE external error has occurred.
      */
-    (rPAU_PHY_FIR, bit(10)) ? parent_proc_th_1;
+    (rPAU_PHY_FIR, bit(10)) ? parent_proc_th_1_CrcRoot10;
 
     /** PAU_PHY_FIR[11]
      *  A PPE Halt due to Watchdog or Interrupt has occurr
      */
-    (rPAU_PHY_FIR, bit(11)) ? parent_proc_M_level2_L_th_1;
+    (rPAU_PHY_FIR, bit(11)) ? parent_proc_M_level2_L_th_1_CrcRoot11;
 
     /** PAU_PHY_FIR[12]
      *  A PPE Halt due to Debug has occurred.
      */
-    (rPAU_PHY_FIR, bit(12)) ? level2_th_1;
+    (rPAU_PHY_FIR, bit(12)) ? level2_th_1_CrcRoot12;
 
     /** PAU_PHY_FIR[13]
      *  PPE Halted.
      */
-    (rPAU_PHY_FIR, bit(13)) ? parent_proc_M_level2_L_th_1;
+    (rPAU_PHY_FIR, bit(13)) ? parent_proc_M_level2_L_th_1_CrcRoot13;
 
     /** PAU_PHY_FIR[14]
      *  A PPE Watchdog Timeout has occurred.
      */
-    (rPAU_PHY_FIR, bit(14)) ? parent_proc_M_level2_L_th_1;
+    (rPAU_PHY_FIR, bit(14)) ? parent_proc_M_level2_L_th_1_CrcRoot14;
 
     /** PAU_PHY_FIR[15]
      *  A PPE Array Scrub was missed.
@@ -2070,7 +2070,7 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[19]
      *  A PPE Code Fatal Error has occurred.
      */
-    (rPAU_PHY_FIR, bit(19)) ? parent_proc_th_1;
+    (rPAU_PHY_FIR, bit(19)) ? parent_proc_th_1_CrcRoot19;
 
     /** PAU_PHY_FIR[20]
      *  A PPE Code Warning has occurred.
@@ -2085,12 +2085,12 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[22]
      *  A PPE Code Recal Not Run has occurred.
      */
-    (rPAU_PHY_FIR, bit(22)) ? level2_th_32perDay;
+    (rPAU_PHY_FIR, bit(22)) ? level2_th_32perDay_CrcRoot22;
 
     /** PAU_PHY_FIR[23]
      *  A PPE Code Thread Locked has occurred.
      */
-    (rPAU_PHY_FIR, bit(23)) ? level2_th_1;
+    (rPAU_PHY_FIR, bit(23)) ? level2_th_1_CrcRoot23;
 
     /** PAU_PHY_FIR[24]
      *  Reserved

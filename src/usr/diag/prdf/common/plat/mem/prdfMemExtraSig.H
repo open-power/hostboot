@@ -133,5 +133,7 @@ PRDR_ERROR_SIGNATURE(DsdBadSpare,     0xbbbb0031, "", "DSD: DRAM spare is bad");
 PRDR_ERROR_SIGNATURE(RrdRowDeployed,  0xbbbb0032, "", "RRD: Spare row successfully deployed");
 PRDR_ERROR_SIGNATURE(RrdBadRow,       0xbbbb0033, "", "RRD: Bad spare row");
 
+PRDR_ERROR_SIGNATURE(CrcRootCause,    0xffff009F, "", "Root cause of CRC error found in PAU_PHY_FIR");
+
 #endif // __prdfMemExtraSig_H
 

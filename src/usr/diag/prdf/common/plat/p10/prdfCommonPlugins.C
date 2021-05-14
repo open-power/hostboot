@@ -35,6 +35,7 @@
 #include <prdfPlatServices.H>
 #include <UtilHash.H> // for Util::hashString
 #include <xspprdService.h>
+#include <prdfMemExtraSig.H>
 
 using namespace TARGETING;
 
@@ -323,6 +324,13 @@ int32_t CrcSideEffect( ExtensibleChip * i_chip,
         }
 
     } while(0);
+
+    // If o_rc is SUCCESS, a root cause was found, add an additional signature
+    if ( SUCCESS == o_rc )
+    {
+        io_sc.service_data->AddSignatureList( i_chip->getTrgt(),
+                                              PRDFSIG_CrcRootCause );
+    }
 
     return o_rc;
 

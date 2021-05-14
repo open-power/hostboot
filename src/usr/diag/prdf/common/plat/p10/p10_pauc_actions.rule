@@ -112,3 +112,85 @@ actionclass smp_callout_3_th1
     funccall("smp_callout_3");
     threshold1;
 };
+
+###############################################################################
+# CRC root cause actions
+###############################################################################
+
+actionclass threshold_and_mask_parent_proc_th1_CrcRoot2
+{
+    threshold_and_mask_parent_proc_th1;
+    funccall("CrcRootCause_2"); # must be called after threshold
+};
+
+actionclass threshold_and_mask_parent_proc_th1_CrcRoot3
+{
+    threshold_and_mask_parent_proc_th1;
+    funccall("CrcRootCause_3"); # must be called after threshold
+};
+
+actionclass threshold_and_mask_parent_proc_th1_CrcRoot6
+{
+    threshold_and_mask_parent_proc_th1;
+    funccall("CrcRootCause_6"); # must be called after threshold
+};
+
+actionclass threshold_and_mask_parent_proc_th1_CrcRoot7
+{
+    threshold_and_mask_parent_proc_th1;
+    funccall("CrcRootCause_7"); # must be called after threshold
+};
+
+actionclass parent_proc_th_1_CrcRoot9
+{
+    parent_proc_th_1;
+    funccall("CrcRootCause_9"); # must be called after threshold
+};
+
+actionclass parent_proc_th_1_CrcRoot10
+{
+    parent_proc_th_1;
+    funccall("CrcRootCause_10"); # must be called after threshold
+};
+
+actionclass parent_proc_M_level2_L_th_1_CrcRoot11
+{
+    parent_proc_M_level2_L_th_1;
+    funccall("CrcRootCause_11"); # must be called after threshold
+};
+
+actionclass level2_th_1_CrcRoot12
+{
+    level2_th_1;
+    funccall("CrcRootCause_12"); # must be called after threshold
+};
+
+actionclass parent_proc_M_level2_L_th_1_CrcRoot13
+{
+    parent_proc_M_level2_L_th_1;
+    funccall("CrcRootCause_13"); # must be called after threshold
+};
+
+actionclass parent_proc_M_level2_L_th_1_CrcRoot14
+{
+    parent_proc_M_level2_L_th_1;
+    funccall("CrcRootCause_14"); # must be called after threshold
+};
+
+actionclass parent_proc_th_1_CrcRoot19
+{
+    parent_proc_th_1;
+    funccall("CrcRootCause_19"); # must be called after threshold
+};
+
+actionclass level2_th_32perDay_CrcRoot22
+{
+    level2_th_32perDay;
+    funccall("CrcRootCause_22"); # must be called after threshold
+};
+
+actionclass level2_th_1_CrcRoot23
+{
+    level2_th_1;
+    funccall("CrcRootCause_23"); # must be called after threshold
+};
