@@ -241,24 +241,25 @@ HWAS::epubProcedureID xlateProcedureCallout(
 {
     // Use the ProcedureCallout enum value as an index
     HWAS::epubProcedureID l_proc = HWAS::EPUB_PRC_HB_CODE;
-    size_t l_index = i_fapiProc;
 
-    //@TODO RTC:124673 - need to verify the order still matches
-    const HWAS::epubProcedureID HWAS_PROC[] = {
-        HWAS::EPUB_PRC_HB_CODE,
-        HWAS::EPUB_PRC_LVL_SUPP,
-        HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
-        HWAS::EPUB_PRC_EIBUS_ERROR};
-
-    if (l_index < (sizeof(HWAS_PROC)/sizeof(HWAS::epubProcedureID)))
+    switch( i_fapiProc )
     {
-        l_proc = HWAS_PROC[l_index];
-    }
-    else
-    {
-        FAPI_ERR("fapi2::xlateProcedureCallout: Unknown proc 0x%x, assuming CODE",
-                i_fapiProc);
-    }
+        case(ProcedureCallouts::CODE):
+            l_proc = HWAS::EPUB_PRC_HB_CODE;
+            break;
+        case(ProcedureCallouts::LVL_SUPPORT):
+            l_proc = HWAS::EPUB_PRC_LVL_SUPP;
+            break;
+        case(ProcedureCallouts::MEMORY_PLUGGING_ERROR):
+            l_proc = HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR;
+            break;
+        case(ProcedureCallouts::BUS_CALLOUT):
+            l_proc = HWAS::EPUB_PRC_EIBUS_ERROR;
+            break;
+        case(ProcedureCallouts::FIND_DECONFIGURED_PART):
+            l_proc = HWAS::EPUB_PRC_FIND_DECONFIGURED_PART;
+            break;
+    } //no default so that we catch changes at compile time
 
     return l_proc;
 }
