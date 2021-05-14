@@ -635,7 +635,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
     using namespace scomt::perv;
 
     fapi2::buffer<uint64_t> present_chiplets, functional_chiplets,
-          eqs_with_good_cores_attr, eqs_with_good_cores_reg;
+          eqs_with_good_cores_attr, eqs_with_good_cores_reg, good_pci;
     fapi2::buffer<uint64_t> pgood_cplt_status_masks[NUM_PGOOD_CHOICES];
     bool l_core_pgood_reg_known = false;
     const uint64_t CPLT_MC_MEMBERSHIP = 0xFC00000000000000;
@@ -664,11 +664,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
     FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, fapi2::TARGET_STATE_PRESENT, present_chiplets));
     FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, fapi2::TARGET_STATE_FUNCTIONAL, functional_chiplets));
     FAPI_TRY(p10_perv_sbe_cmn_eqs_with_good_cores(i_target_chip, false, eqs_with_good_cores_attr));
+    FAPI_TRY(p10_perv_sbe_cmn_good_pci(i_target_chip, good_pci));
 
     pgood_cplt_status_masks[IGNORE_PGOOD]          = present_chiplets;
     pgood_cplt_status_masks[HONOR_PGOOD]           = functional_chiplets;
     pgood_cplt_status_masks[HONOR_CORE_PGOOD_ATTR] = (functional_chiplets & ~EQ_CHIPLET_MASK) | eqs_with_good_cores_attr;
     pgood_cplt_status_masks[HONOR_PGOOD_FORCE_EQ]  = functional_chiplets | (present_chiplets & EQ_CHIPLET_MASK);
+    pgood_cplt_status_masks[HONOR_PCI_GOOD]        = good_pci;
 
     while (true)
     {
@@ -810,6 +812,28 @@ fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+/// @brief Query a bitmask representing good PCI chiplets based on the platform
+///        present and functional state (non-pervasive)
+///
+/// @param[in] i_target_chip Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[out] o_cplt_status_mask returns 64 bit mask value with each chiplet functional status
+/// @return FAPI2_RC_SUCCESS
+fapi2::ReturnCode p10_perv_sbe_cmn_good_pci(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    fapi2::buffer<uint64_t>& o_cplt_status_mask)
+{
+    using namespace scomt::perv;
+
+    auto l_cplts = i_target_chip.getChildren<fapi2::TARGET_TYPE_PEC>();
+
+    for(auto& targ : l_cplts)
+    {
+        o_cplt_status_mask.setBit(targ.getChipletNumber());
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 /// @brief --For all chiplets exit flush

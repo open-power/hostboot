@@ -100,6 +100,7 @@ enum mc_pgood_type : uint8_t
     HONOR_PGOOD_FORCE_EQ,
     HONOR_CORE_PGOOD_ATTR,
     HONOR_CORE_PGOOD_REG,
+    HONOR_PCI_GOOD,
     NUM_PGOOD_CHOICES
 };
 
@@ -164,6 +165,10 @@ fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
 
 fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_COMPARE > & i_mcast_target);
+
+fapi2::ReturnCode p10_perv_sbe_cmn_good_pci(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    fapi2::buffer<uint64_t>& o_cplt_status_mask);
 
 fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,5 +126,18 @@ static const mc_setup_t ISTEP4_MC_GROUPS[] =
     { fapi2::MCGROUP_GOOD_IOHS,  MC_GROUP_3, HONOR_PGOOD,           0, 0x000000FF00000000 },
     { fapi2::MCGROUP_GOOD_PAU,   MC_GROUP_4, HONOR_PGOOD,           0, 0x0000F00000000000 },
     { fapi2::MCGROUP_GOOD_PCI,   MC_GROUP_5, HONOR_PGOOD,           0, 0x00C0000000000000 },
+    { fapi2::MCGROUP_GOOD_EQ,    MC_GROUP_6, HONOR_CORE_PGOOD_REG,  1, 0x00000000FF000000 },
+};
+
+// ISTEP10_MC_GROUPS must be kept the same as ISTEP4_MC_GROUPS EXCEPT for MC_GROUP5 that
+// must stay "HONOR_PCI_GOOD"
+static const mc_setup_t ISTEP10_MC_GROUPS[] =
+{
+    { fapi2::MCGROUP_GOOD,       MC_GROUP_0, HONOR_PGOOD,           0, 0x7FFFFFFFFFFFFFFF },
+    { fapi2::MCGROUP_GOOD_NO_TP, MC_GROUP_1, HONOR_PGOOD,           0, 0x3FFFFFFFFFFFFFFF },
+    { fapi2::MCGROUP_GOOD_MC,    MC_GROUP_2, HONOR_PGOOD,           0, 0x000F000000000000 },
+    { fapi2::MCGROUP_GOOD_IOHS,  MC_GROUP_3, HONOR_PGOOD,           0, 0x000000FF00000000 },
+    { fapi2::MCGROUP_GOOD_PAU,   MC_GROUP_4, HONOR_PGOOD,           0, 0x0000F00000000000 },
+    { fapi2::MCGROUP_GOOD_PCI,   MC_GROUP_5, HONOR_PCI_GOOD,        0, 0x00C0000000000000 },
     { fapi2::MCGROUP_GOOD_EQ,    MC_GROUP_6, HONOR_CORE_PGOOD_REG,  1, 0x00000000FF000000 },
 };
