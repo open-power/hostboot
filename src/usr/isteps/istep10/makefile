@@ -100,6 +100,7 @@ OBJS+=p10_nx_scom.o
 OBJS+=p10_nmmu_scom.o
 OBJS+=p10_mcc_omi_pretrain_scom.o
 OBJS+=p10_mi_omi_pretrain_scom.o
+OBJS+=p10_perv_sbe_cmn.o
 
 #istep 10.5 -- proc_pau_scominit
 OBJS+=p10_pau_scominit.o

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,8 @@
 
 #include    "host_proc_pcie_scominit.H"
 #include    <p10_pcie_scominit.H>
+#include    <p10_perv_sbe_cmn.H>
+#include    <p10_hang_pulse_mc_setup_tables.H>
 
 namespace   ISTEP_10
 {
@@ -130,6 +132,22 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS : proc_pcie_scominit HWP" );
+        }
+
+        // Reset multicast groups, since those may have changed based on the
+        // the logic above.
+        FAPI_INVOKE_HWP(l_errl, p10_perv_sbe_cmn_setup_multicast_groups,
+                        l_fapi2_proc_target, ISTEP10_MC_GROUPS);
+        if(l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_proc_pcie_scominit: call to p10_perv_sbe_cmn_setup_multicast_groups failed for PROC HUID 0x%08x",
+                      get_huid(curproc));
+
+            // Capture this error and continue, since the HWP above needs
+            // to run on all procs.
+            captureError(l_errl, l_stepError, HWPF_COMP_ID, curproc);
+            continue;
         }
     }
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
