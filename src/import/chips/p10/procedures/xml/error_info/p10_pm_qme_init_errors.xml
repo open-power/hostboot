@@ -294,4 +294,43 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PPEBAR_TOPOLOGY_INIT_ERROR</rc>
+    <description> PPE BAR register is initialized with an address which do not fall into
+     list of regions marked valid in topology scom registers.
+    </description>
+    <ffdc>PPE_BAR_REG</ffdc>
+    <ffdc>TOPO_SCOM_REG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_BCEBAR0_TOPOLOGY_INIT_ERROR</rc>
+    <description> BCEBAR0 register is initialized with an address which do not fall into
+     list of regions marked valid in topology scom registers.
+    </description>
+    <ffdc>BCE0_BAR_REG</ffdc>
+    <ffdc>TOPO_SCOM_REG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_BCEBAR1_TOPOLOGY_INIT_ERROR</rc>
+    <description> BCEBAR1 register is initialized with an address which do not fall into
+     list of regions marked valid in topology scom registers.
+    </description>
+    <ffdc>BCE1_BAR_REG</ffdc>
+    <ffdc>TOPO_SCOM_REG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

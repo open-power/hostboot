@@ -78,6 +78,8 @@
 #include <p10_scom_proc_d.H>
 #include <p10_scom_proc_b.H>
 #include <p10_scom_eq_c.H>
+#include <p10_scom_eq_a.H>
+#include <p10_scom_eq_6.H>
 #ifndef __PPE__
     #include <p10_tod_utils.H>
 #endif
@@ -113,10 +115,14 @@ enum
     CPMR_BASE               =   (2 * 1024 * 1024),
     MBASE_SHIFT             =   5,
     QME_PIG_REQ_INT_TYPE    =   1,
-    QME_PIG_REQ_INT_TYPE_LEN  = 4,
-    QME_PIG_REG             =   0x200e0030,
     QME_QUIESCE_TIMEOUT_MS  =   250,
     OCC_FLAG7_RW            =   0x6c0c1,
+    QME_PIG_REQ_INT_TYPE_LEN    =   4,
+    QME_PIG_REG                 =   0x200e0030,
+    MAX_TOPOLOGY_SCOMS          =   0x04,
+    MAX_TOPO_ENT_PER_SCOM       =   0x08,
+    TOPO_REGION_START_OFFSET    =   0x07,   //Topology Region field in real address 8:15
+    TOPO_REGION_BIT_LEN         =   0x05,
 };
 
 // -----------------------------------------------------------------------------
@@ -611,6 +617,9 @@ fapi2::ReturnCode init_topo_id_tables(
     FAPI_DBG(">> init_topo_id_tables");
 
     uint64_t data = 0;
+    fapi2::buffer<uint64_t> l_ppeBarRegVal;
+    fapi2::buffer<uint64_t> l_bceBarRegVal;
+    fapi2::buffer<uint64_t> l_topoRegVal;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip_target =
         eq.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
@@ -635,6 +644,41 @@ fapi2::ReturnCode init_topo_id_tables(
     FAPI_TRY(PUT_QME_SCOM_PBTXTR2(eq, topo_scoms[2]));
     PREP_QME_SCOM_PBTXTR3(eq);
     FAPI_TRY(PUT_QME_SCOM_PBTXTR3(eq, topo_scoms[3]));
+
+    FAPI_TRY( fapi2::getScom( eq, QME_PPEBAR, l_ppeBarRegVal ));
+    l_ppeBarRegVal.extractToRight( data, ( QME_PPEBAR_BASE + TOPO_REGION_START_OFFSET ), TOPO_REGION_BIT_LEN );
+    FAPI_INF( "PPE Bar b15-b19 0x%08x", data );
+
+    FAPI_TRY( fapi2::getScom( eq, ( QME_SCOM_PBTXTR0 + ( data / MAX_TOPO_ENT_PER_SCOM )), l_topoRegVal ));
+
+    FAPI_ASSERT( l_topoRegVal.getBit( ( data % MAX_TOPO_ENT_PER_SCOM )),
+                 fapi2::PPEBAR_TOPOLOGY_INIT_ERROR()
+                 .set_PPE_BAR_REG( l_ppeBarRegVal )
+                 .set_TOPO_SCOM_REG( l_topoRegVal ),
+                 "Topology Register Is Not Initialized Correctly b15-b19 0x%016lx", data );
+
+    FAPI_TRY( fapi2::getScom( eq, QME_BCEBAR0, l_bceBarRegVal ));
+    l_bceBarRegVal.extractToRight( data, ( QME_BCEBAR0_BASE + TOPO_REGION_START_OFFSET ), TOPO_REGION_BIT_LEN );
+    FAPI_INF( "BCE Bar b15-b19 0x%08x", data );
+
+    FAPI_TRY( fapi2::getScom( eq, ( QME_SCOM_PBTXTR0 + ( data / MAX_TOPO_ENT_PER_SCOM )), l_topoRegVal ));
+
+    FAPI_ASSERT( l_topoRegVal.getBit( ( data % MAX_TOPO_ENT_PER_SCOM ) ),
+                 fapi2::BCEBAR0_TOPOLOGY_INIT_ERROR()
+                 .set_BCE0_BAR_REG( l_bceBarRegVal )
+                 .set_TOPO_SCOM_REG( l_topoRegVal ),
+                 "Topology Register Is Not Initialized Correctly b15-b19 0x%016lx", data );
+
+    FAPI_TRY( fapi2::getScom( eq, QME_BCEBAR1, l_bceBarRegVal ));
+    l_bceBarRegVal.extractToRight( data, ( QME_BCEBAR1_BASE + TOPO_REGION_START_OFFSET ), TOPO_REGION_BIT_LEN );
+
+    FAPI_TRY( fapi2::getScom( eq, ( QME_SCOM_PBTXTR0 + ( data / MAX_TOPO_ENT_PER_SCOM )), l_topoRegVal ));
+
+    FAPI_ASSERT( l_topoRegVal.getBit( ( data % MAX_TOPO_ENT_PER_SCOM )),
+                 fapi2::BCEBAR1_TOPOLOGY_INIT_ERROR()
+                 .set_BCE1_BAR_REG( l_bceBarRegVal )
+                 .set_TOPO_SCOM_REG( l_topoRegVal ),
+                 "Topology Register Is Not Initialized Correctly  b15-b19 0x%016lx", data );
 
 fapi_try_exit:
     FAPI_DBG("<< init_topo_id_tables");
