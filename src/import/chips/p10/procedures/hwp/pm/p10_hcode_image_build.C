@@ -2354,8 +2354,8 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     l_pPpmrHdr->iv_pstateLength =   l_sectn.iv_sectnLength;
 
     //PGPE SRAM
-    l_pPpmrHdr->iv_sramSize     =   l_pPpmrHdr->iv_hcodeLength + l_pPpmrHdr->iv_gpspbLength +
-                                        PGPE_OCC_SHARED_SRAM_SIZE + PGPE_SRAM_BOOT_REGION;
+    l_pPpmrHdr->iv_sramSize     =   l_pPpmrHdr->iv_hcodeLength + l_pPpmrHdr->iv_gpspbLength ;
+
 
     //WOF Table
     i_ppmrBuildRecord.getSection( "WOF Tables", l_sectn );
@@ -2744,7 +2744,7 @@ fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncMode
 
     l_imageSize     =   htobe32( l_pPpmrHdr->iv_sramSize );
 
-    FAPI_ASSERT( ( l_imageSize <= OCC_SRAM_PGPE_REGION_SIZE ),
+    FAPI_ASSERT( ( l_imageSize +  PGPE_OCC_SHARED_SRAM_SIZE + PGPE_SRAM_BOOT_REGION  <= OCC_SRAM_PGPE_REGION_SIZE ),
                  fapi2::PGPE_IMG_EXCEED_SRAM_SIZE()
                  .set_BAD_IMG_SIZE( l_imageSize )
                  .set_MAX_PGPE_IMG_SIZE_ALLOWED(OCC_SRAM_PGPE_REGION_SIZE)
