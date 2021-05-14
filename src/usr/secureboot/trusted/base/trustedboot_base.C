@@ -401,15 +401,19 @@ errlHndl_t extendPnorSectionHash(
     // Extend swKeyHash to the next PCR after the hash extension PCR.
     const TPM_Pcr swKeyHashPcr = static_cast<TPM_Pcr>(pnorHashPcr + 1);
 
-    // By default, extend and log. But, only log for HBB since HBBL has already extended HBB
-    bool extendToTpm = true;
+    // By default, extend and log.
+    // Special case for HBB:
+    // -- for pnorHashPcr  (PCR_0): only log for HBB since HBBL has already extended HBB
+    // -- for swKeyHashPcr (PCR_1): extend and log HBB
+    bool extendToTpm_PNOR = true;
+    bool extendToTpm_SW = true;
     bool extendToSwLog = true;
     if (i_sec == PNOR::HB_BASE_CODE)
     {
-        extendToTpm = false;
+        extendToTpm_PNOR = false;
         TRACUCOMP(g_trac_trustedboot, ENTER_MRK " extendPnorSectionHash for "
-                  "section: %s: setting extendToTpm to %d (extendToSwLog=%d)",
-                  sectionInfo.name, extendToTpm, extendToSwLog);
+                  "section: %s: setting extendToTpm_PNOR to %d (extendToSwLog=%d)",
+                  sectionInfo.name, extendToTpm_PNOR, extendToSwLog);
     }
 
     // Set other default parameters to pick up extendToTpm and extendToSwLog input parameters
@@ -427,7 +431,7 @@ errlHndl_t extendPnorSectionHash(
               strlen(sectionInfo.name) + 1,
               sendAsync,
               pTpm,
-              extendToTpm,
+              extendToTpm_PNOR,
               extendToSwLog);
         if (pError)
         {
@@ -446,7 +450,7 @@ errlHndl_t extendPnorSectionHash(
                     strlen(swKeyMsg) + 1,
                     sendAsync,
                     pTpm,
-                    extendToTpm,
+                    extendToTpm_SW,
                     extendToSwLog);
 
         if (pError)
@@ -470,7 +474,7 @@ errlHndl_t extendPnorSectionHash(
                 strlen(sectionInfo.name) + 1,
                 sendAsync,
                 pTpm,
-                extendToTpm,
+                extendToTpm_PNOR,
                 extendToSwLog);
 
         if (pError)

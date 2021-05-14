@@ -1311,6 +1311,17 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
            "pcrExtendSingleTpm: BUG! Expected target to be of TPM type, but "
            "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
 
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK"pcrExtendSingleTpm: i_tpm=0x%.8X, i_pcr=%d, i_eventType=%d, "
+              "i_digestSize=0x%X, i_logSize=0x%X, i_extendToTpm=%d, i_extendToSwLog=%d",
+              get_huid(i_pTpm), i_pcr, i_eventType, i_digestSize, i_logMsgSize,
+              i_extendToTpm, i_extendToSwLog);
+
+    if (i_logMsg != nullptr)
+    {
+        TRACUBIN(g_trac_trustedboot, "pcrExtendSingleTpm:  Extended Data Log msg",
+                 i_logMsg, i_logMsgSize);
+    }
+
     errlHndl_t err = nullptr;
     TCG_PCR_EVENT2 eventLog;
     bool unlock = false;
