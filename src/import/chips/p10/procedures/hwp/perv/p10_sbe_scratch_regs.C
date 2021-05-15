@@ -33,6 +33,7 @@
 //------------------------------------------------------------------------------
 
 #include <p10_scom_perv.H>
+#include <p10_scom_proc.H>
 #include <p10_sbe_scratch_regs.H>
 #include <p10_frequency_buckets.H>
 #include <target_filters.H>
@@ -376,7 +377,13 @@ fapi_try_exit:
 
 
 ///
-/// @brief Set PAU frequency attribute
+/// @brief Set PAU frequency attribute.
+/// Function is called by:
+///   - Hostboot (via p10_sbe_scratch_regs_set_pll_buckets standalone function) to determine
+///     non-primary chip frequency
+///   - HWSV/BMC (istep 0) to set primary chip frequency
+///
+///   BMC currently doesn't support EC feature attributes, read CHIPID directly
 ///
 /// @param[in] i_target_chip          Processor chip target
 ///
@@ -387,12 +394,35 @@ p10_sbe_scratch_regs_set_pau_freq(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     FAPI_DBG("Start");
+    using namespace scomt::proc;
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_FREQ_PAU_MHZ_Type l_attr_freq_pau_mhz = 0;
-    fapi2::ATTR_CHIP_EC_FEATURE_PAU_DPLL_IO_MARGIN_Type l_pau_dpll_io_margin = 0;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PAU_DPLL_IO_MARGIN, i_target_chip, l_pau_dpll_io_margin),
-             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_DPLL_IO_MARGIN)");
+    uint8_t l_pau_dpll_io_margin = 0;
+
+    if (fapi2::is_platform<fapi2::PLAT_HOSTBOOT>() ||
+        fapi2::is_platform<fapi2::PLAT_HWSV>())
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PAU_DPLL_IO_MARGIN, i_target_chip, l_pau_dpll_io_margin),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_DPLL_IO_MARGIN)");
+    }
+    else
+    {
+        // BMC platform doesn't currently support EC feature attributes
+        fapi2::buffer<uint32_t> l_chipid = 0;
+        uint32_t l_major = 0;
+        uint32_t l_minor = 0;
+        uint32_t l_ec = 0;
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
+                                        TP_TPVSB_FSI_W_FSI2PIB_CHIPID_FSI,
+                                        l_chipid),
+                 "Error reading CFAM chip id");
+        l_major = 0xF0000000 & l_chipid;
+        l_minor = 0x00F00000 & l_chipid;
+        l_ec = ((l_major >> 24) | (l_minor >> 20));
+
+        l_pau_dpll_io_margin = (l_ec == 0x10) ? (1) : (0);
+    }
 
     if (l_pau_dpll_io_margin)
     {
@@ -1016,7 +1046,7 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
         fapi2::ATTR_FREQ_PAU_MHZ_Type l_attr_freq_pau_mhz = 0;
         fapi2::ATTR_MC_PLL_BUCKET_Type l_attr_mc_pll_bucket = { 0 };
 
-        // override PAU frequency on HWSV for DD1 only
+        // override PAU frequency on FSP (HWSV)/BMC for DD1 only
         if (!fapi2::is_platform<fapi2::PLAT_CRONUS>() &&
             !fapi2::is_platform<fapi2::PLAT_SBE>())
         {
