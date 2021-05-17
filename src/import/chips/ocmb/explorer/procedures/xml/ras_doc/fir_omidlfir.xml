@@ -68,8 +68,9 @@
         <action id="predefined" name="self_th_32perDay" />
     </bit>
 
-    <bit pos="3" attn_type="MASKED"
+    <bit pos="3" attn_type="RE"
          desc="OMI-DL0 detected a CRC error">
+        <action id="predefined" name="threshold_and_mask_omi" />
     </bit>
 
     <bit pos="4" attn_type="MASKED"
@@ -84,11 +85,12 @@
         <action id="predefined" name="omi_bus_th_1" />
     </bit>
 
-    <bit pos="6" attn_type="MASKED"
+    <bit pos="6" attn_type="RE"
          desc="OMI-DL0 parity error detection on a lane">
         <note>
             See DL0_ERROR_HOLD[36:43]
         </note>
+        <action id="predefined" name="threshold_and_mask_omi" />
     </bit>
 
     <bit pos="7" attn_type="RE"
