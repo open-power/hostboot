@@ -508,7 +508,7 @@ fapi2::ReturnCode host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 {
     host_fw_response_struct l_response;
 
-    FAPI_TRY(mss::exp::ib::getRSP(i_target, l_response, o_rsp_data),
+    FAPI_TRY(mss::exp::ib::getRSP(i_target, i_cmd.cmd_id, l_response, o_rsp_data),
              "Failed getRSP() for  %s", mss::c_str(i_target));
 
     FAPI_TRY(mss::exp::check::fw_ddr_phy_init_response_code(i_target, i_cmd, l_response.response_argument, i_procedure),

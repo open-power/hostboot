@@ -447,7 +447,7 @@ extern "C"
                 else
                 {
                     // Poll response doorbell only
-                    FAPI_TRY(mss::exp::ib::poll_for_response_ready(i_target),
+                    FAPI_TRY(mss::exp::ib::poll_for_response_ready(i_target, mss::exp::omi::cmd_and_response_id::EXP_FW_BINARY_UPGRADE),
                              "exp_fw_update: error polling response for flash_write "
                              "on %s! seq_num[%u]",
                              mss::c_str(i_target), seq_num);

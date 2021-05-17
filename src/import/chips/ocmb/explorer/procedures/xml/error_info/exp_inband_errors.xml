@@ -79,6 +79,7 @@
     <ffdc>DATA</ffdc>
     <ffdc>NUM_LOOPS</ffdc>
     <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>CMD</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>

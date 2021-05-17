@@ -83,7 +83,8 @@ fapi2::ReturnCode sensor_interval_read(
             FAPI_TRY( mss::exp::ib::putCMD(i_target, l_cmd_sensor),
                       "Failed putCMD() for  %s", mss::c_str(i_target) );
 
-            FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response, l_rsp_data),
+            FAPI_TRY( mss::exp::ib::getRSP(i_target, mss::exp::omi::EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ, l_response,
+                                           l_rsp_data),
                       "Failed getRSP() for  %s", mss::c_str(i_target) );
 
             FAPI_TRY( mss::exp::check::sensor_response(i_target, l_response),

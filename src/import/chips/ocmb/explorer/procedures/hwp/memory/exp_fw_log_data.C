@@ -76,7 +76,7 @@ extern "C"
                  mss::c_str(i_ocmbTarget));
 
         // Get the response
-        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, l_response, o_data),
+        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, mss::exp::ib::SUB_CMD_READ_ACTIVE_LOG, l_response, o_data),
                  "exp_active_log: Failed getRSP() cmd for %s!",
                  mss::c_str(i_ocmbTarget));
 
@@ -121,7 +121,7 @@ extern "C"
                  mss::c_str(i_ocmbTarget));
 
         // Get the response
-        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, l_response, io_data),
+        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, mss::exp::ib::SUB_CMD_READ_SAVED_LOG, l_response, io_data),
                  "exp_saved_log: Failed getRSP() for %s!",
                  mss::c_str(i_ocmbTarget));
 
@@ -192,7 +192,7 @@ extern "C"
                  mss::c_str(i_ocmbTarget));
 
         // Get the response
-        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, l_response, l_data),
+        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, mss::exp::ib::SUB_CMD_CLEAR_ACTIVE_LOG, l_response, l_data),
                  "exp_clear_active_log: Failed getRSP() cmd for %s!",
                  mss::c_str(i_ocmbTarget));
 
@@ -233,7 +233,7 @@ extern "C"
                  mss::c_str(i_ocmbTarget));
 
         // Get the response
-        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, l_response, l_data),
+        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, mss::exp::ib::SUB_CMD_ERASE_SAVED_LOG, l_response, l_data),
                  "exp_clear_saved_log: Failed getRSP() cmd for %s!",
                  mss::c_str(i_ocmbTarget));
 

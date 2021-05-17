@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,7 +188,7 @@ class OCMBCommTest: public CxxTest::TestSuite
 
                 // grab the response
                 FAPI_INVOKE_HWP(l_errl, mss::exp::ib::getRSP, l_fapi2_target,
-                                l_rsp, l_rsp_data);
+                                l_cmd.cmd_id, l_rsp, l_rsp_data);
                 if (l_errl)
                 {
                     TS_FAIL("Error from getRSP for 0x%.8X target, plid=0x%X rc=0x%X",

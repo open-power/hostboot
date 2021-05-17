@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -339,9 +339,11 @@ fapi2::ReturnCode getOCCfg(
 ///
 /// @brief Polls for response ready door bell bit
 /// @param[in] i_target the OCMB target on which to operate
+/// @param[in] i_cmd the command ID for which we are waiting for a response
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_cmd);
 
 ///
 /// @brief Clears outbound (response ready) door bell bit
@@ -354,13 +356,14 @@ fapi2::ReturnCode clear_outbound_doorbell(const fapi2::Target<fapi2::TARGET_TYPE
 /// @brief Reads a response from the response buffer
 ///
 /// @param[in] i_target     The Explorer chip to read data from
+/// @param[in] i_cmd        The original command
 /// @param[out] o_rsp       The response data read from the buffer
 /// @param[out] o_data      Raw (little-endian) response data buffer portion
-///                         The size of this buffer will be a multiple of 8
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode getRSP(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_cmd,
     host_fw_response_struct& o_rsp,
     std::vector<uint8_t>& o_data);
 

@@ -432,9 +432,11 @@ fapi_try_exit:
 ///
 /// @brief Polls for response ready door bell bit
 /// @param[in] i_target the OCMB target on which to operate
+/// @param[in] i_cmd the command ID for which we are waiting for a response
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_cmd)
 {
     // NUM_LOOPS is based on EXP_FW_DDR_PHY_INIT command, which completes in ~370ms in HW.
     // We initially delay 8ms, so we should only need to poll for ~360ms here.
@@ -467,6 +469,7 @@ fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE
                 fapi2::EXP_INBAND_RSP_NO_DOORBELL()
                 .set_OCMB_TARGET(i_target)
                 .set_DATA(l_data)
+                .set_CMD(i_cmd)
                 .set_NUM_LOOPS(l_loop),
                 "%s doorbell timed out after %u loops: data 0x%016lx",
                 mss::c_str(i_target), l_loop, l_data);
@@ -500,19 +503,21 @@ fapi_try_exit:
 /// @brief Reads a response from the response buffer
 ///
 /// @param[in] i_target     The Explorer chip to read data from
+/// @param[in] i_cmd        The original command
 /// @param[out] o_rsp       The response data read from the buffer
 /// @param[out] o_data      Raw (little-endian) response data buffer portion
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode getRSP(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_cmd,
     host_fw_response_struct& o_rsp,
     std::vector<uint8_t>& o_data)
 {
     std::vector<uint8_t> l_data(static_cast<int>(sizeof(o_rsp)));
 
     // Polls for the response to be ready first
-    FAPI_TRY(poll_for_response_ready(i_target));
+    FAPI_TRY(poll_for_response_ready(i_target, i_cmd));
 
     FAPI_DBG("Reading the response buffer...");
     FAPI_TRY(fapi2::getMMIO(i_target, EXPLR_IB_RSP_ADDR, BUFFER_TRANSACTION_SIZE, l_data));
@@ -561,7 +566,7 @@ fapi2::ReturnCode getRSP(
     host_fw_response_struct& o_rsp,
     std::vector<uint8_t>& o_data)
 {
-    FAPI_TRY(getRSP(i_target, o_rsp, o_data));
+    FAPI_TRY(getRSP(i_target, i_cmd.cmd_id, o_rsp, o_data));
     FAPI_TRY(check::request_id(i_target, o_rsp, i_cmd));
 
 fapi_try_exit:

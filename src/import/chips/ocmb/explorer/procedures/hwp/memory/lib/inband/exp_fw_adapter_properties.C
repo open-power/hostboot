@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -272,7 +272,7 @@ fapi2::ReturnCode run_fw_adapter_properties_get(const fapi2::Target<fapi2::TARGE
               "Error from putCMD for %s", mss::c_str(i_target) );
 
     // grab the response
-    FAPI_TRY( mss::exp::ib::getRSP(i_target, l_rsp, l_rsp_data),
+    FAPI_TRY( mss::exp::ib::getRSP(i_target, l_cmd.cmd_id, l_rsp, l_rsp_data),
               "Error from getRSP for %s", mss::c_str(i_target) );
 
     // NOTE: the Simics model used in HB CI returns an incorrect value for response_length
