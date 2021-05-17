@@ -72,10 +72,10 @@ enum PM_GPE_OCCFLG2_DEFS
     PGPE_DEBUG_TRAP_ENABLE                  = 4,
     PGPE_DEBUG_HALT_ENABLE                  = 5,
     PGPE_HCODE_ERROR_INJECT                 = 6,
-    PGPE_HCODE_ERROR_INJECT_LEN             = 2,
+    PGPE_HCODE_ERROR_INJECT_LEN         = 2,
     PGPE_OP_TRACE_DISABLE                   = 8,
     PGPE_OP_TRACE_MEM_MODE                  = 9,
-    PGPE_OP_TRACE_MEM_MODE_LEN              = 2,
+    PGPE_OP_TRACE_MEM_MODE_LEN          = 2,
     PGPE_HW_ERROR_INJECT                    = 11,
     PGPE_ACTIVE                             = 16,
     PGPE_PSTATE_PROTOCOL_ACTIVE             = 17,
@@ -83,9 +83,6 @@ enum PM_GPE_OCCFLG2_DEFS
     PGPE_HCODE_FAULT_STATE                  = 19,
     PGPE_SAFE_MODE_ERROR                    = 20,
     PGPE_CEFFOVR_CONTROL_LOOP               = 22,
-    PGPE_WOF_VALUE_ATOMIC_FLAG              = 28,
-    PGPE_EX_RATIOS_ATOMIC_FLAG              = 29,
-    PGPE_MALF_ALERT_ENABLE                  = 30, // @TODO spec sync needed - unused
     PM_CALLOUT_ACTIVE                       = 31
 };
 
@@ -100,15 +97,15 @@ enum PM_GPE_OCCFLG3_DEFS
     XGPE_DEBUG_TRAP_ENABLE                  = 4,
     XGPE_DEBUG_HALT_ENABLE                  = 5,
     XGPE_HCODE_ERROR_INJECT                 = 6,
-    XGPE_HCODE_ERROR_INJECT_LEN             = 2,
+    XGPE_HCODE_ERROR_INJECT_LEN         = 2,
     XGPE_OP_TRACE_DISABLE                   = 8,
     XGPE_OP_TRACE_MEM_MODE                  = 9,
-    XGPE_OP_TRACE_MEM_MODE_LEN              = 2,
+    XGPE_OP_TRACE_MEM_MODE_LEN          = 2,
     XGPE_IGNORE_STOP_CONTROL                = 11,
     XGPE_IGNORE_STOP_ACTION                 = 12,
     XGPE_IGNORE_STOP_EXITS                  = 13,
     XGPE_IGNORE_STOP_ENTRIES                = 14,
-    XGPE_IGNORE_STOP_LEN                    = 4,
+    XGPE_IGNORE_STOP_LEN                = 4,
     XGPE_ACTIVE                             = 16,
     XGPE_IODLR_ACTIVE                       = 17,
     AUX_THREAD_ACTIVE                       = 18,
@@ -116,9 +113,9 @@ enum PM_GPE_OCCFLG3_DEFS
     PM_COMPLEX_SUSPENDED                    = 19,  // Leaving a generic for use in p10_pm_suspend.
     XGPE_ZERO_CORE_CHIP                     = 20,
     XGPE_HCODE_FAULT_STATE                  = 21,
-    STOP_RECOVERY_TRIGGER_ENABLE            = 26,  // @TODO spec sync needed - used
+    STOP_RECOVERY_TRIGGER_ENABLE            = 26,
     CORE_THROT_INJECT_RESP                  = 27,
-    CORE_THROT_INJECT_RESP_LEN              = 2,
+    CORE_THROT_INJECT_RESP_LEN          = 2,
     CORE_THROT_CONTIN_CHANGE_ENABLE         = 29,
     CORE_THROT_SINGLE_EVENT_INJECT          = 30,
     FORCE_LEGACY_THROTTLE                   = 31,
