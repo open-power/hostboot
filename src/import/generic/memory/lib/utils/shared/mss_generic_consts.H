@@ -110,6 +110,7 @@ enum conversions
 {
     CONVERT_PS_IN_A_NS      = 1000,     ///< 1000 pico in an nano
     CONVERT_PS_IN_A_US      = 1000000,  ///< 1000000 picos in a micro
+    CONVERT_NS_IN_A_US      = 1000,     ///< 1000 nano in a micro
     MHZ_TO_KHZ              = 1000,
     SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
     NIBBLES_PER_BYTE = 2,

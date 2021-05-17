@@ -423,16 +423,24 @@ fapi2::ReturnCode configure_tstab(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
                                   const bool i_has_rcd)
 {
     fapi2::buffer<uint64_t> l_reg_data = 0;
-    // Clock stabilization time with an RCD on the DIMM is 5us
-    constexpr uint8_t tstab_val = 5;
 
+    // Clock stabilization time with an RCD on the DIMM is 5us which is converted to ns
+    constexpr uint64_t TSTAB_VAL_IN_NS = 5 * CONVERT_NS_IN_A_US;
+    uint64_t l_tstab_cfg_val = 0;
+
+    // Convert the ns to cycles.
+    l_tstab_cfg_val = mss::ns_to_cycles(i_target, TSTAB_VAL_IN_NS);
+
+    // Reading from the register into l_reg_data
     FAPI_TRY(mss::getScom(i_target, EXPLR_SRQ_MBAREFAQ, l_reg_data));
+
 
     // tSTAB should be 5us if RCD exists, otherwise default of 0
     l_reg_data.insertFromRight<EXPLR_SRQ_MBAREFAQ_CFG_TSTAB,
                                EXPLR_SRQ_MBAREFAQ_CFG_TSTAB_LEN>
-                               (i_has_rcd ? tstab_val : 0);
+                               (i_has_rcd ? l_tstab_cfg_val : 0);
 
+    // Writing the updated value to the regitster
     FAPI_TRY(mss::putScom(i_target, EXPLR_SRQ_MBAREFAQ, l_reg_data));
 
     return fapi2::FAPI2_RC_SUCCESS;
