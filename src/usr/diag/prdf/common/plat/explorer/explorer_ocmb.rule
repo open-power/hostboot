@@ -1489,7 +1489,7 @@ group gOMIDLFIR
     /** OMIDLFIR[3]
      *  OMI-DL0 detected a CRC error
      */
-    (rOMIDLFIR, bit(3)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(3)) ? threshold_and_mask_omi;
 
     /** OMIDLFIR[4]
      *  OMI-DL0 received a nack
@@ -1504,7 +1504,7 @@ group gOMIDLFIR
     /** OMIDLFIR[6]
      *  OMI-DL0 parity error detection on a lane
      */
-    (rOMIDLFIR, bit(6)) ? defaultMaskedError;
+    (rOMIDLFIR, bit(6)) ? threshold_and_mask_omi;
 
     /** OMIDLFIR[7]
      *  OMI-DL0 retrained due to no forward progress

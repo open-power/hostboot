@@ -233,6 +233,12 @@ actionclass threshold_and_mask_mem_port
     threshold_and_mask_th32;
 };
 
+actionclass threshold_and_mask_omi
+{
+    omi;
+    threshold_and_mask_th32;
+};
+
 /**
  * Threshold on first occurence. Do not predictively callout on threshold in the
  * field, instead just mask.
