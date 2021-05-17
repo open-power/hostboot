@@ -59,12 +59,6 @@ using namespace scomt::c;
 //------------------------------------------------------------------------------
 // Implement workaround for P10 defect HW527708.
 const bool IMPLEMENT_HW527708_WORKAROUND = true;
-// in TOD counts of 32Mhz clock; needs to account for SCOM latency
-// and number of chips to be started in sync
-const uint64_t P10_TOD_SSCG_START_DELAY_SIM_LOG_MIN = 8;
-const uint64_t P10_TOD_SSCG_START_DELAY_SIM_LOG_MAX = 8;
-const uint64_t P10_TOD_SSCG_START_DELAY_HW_LOG_MIN = 24; // about 0.5 seconds @ 32Mhz TOD Clock
-const uint64_t P10_TOD_SSCG_START_DELAY_HW_LOG_MAX = 28; // about 8 seconds @ 32Mhz TOD Clock
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -324,48 +318,21 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// @brief Reset the TOD Timer Value Field and Status bits
-/// @param[in] i_tod_node Reference to TOD topology
-/// @return FAPI2_RC_SUCCESS if succesful else error
-fapi2::ReturnCode p10_tod_init_reset_timers(
-    const tod_topology_node* i_tod_node)
-{
-    fapi2::buffer<uint64_t> l_tod_timer_data;
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets;
-
-    FAPI_DBG("Start");
-
-    get_targets(i_tod_node, 0, l_targets);
-
-    for (auto l_chip : l_targets)
-    {
-        FAPI_TRY(PREP_TOD_TIMER_REG(l_chip));
-        SET_TOD_TIMER_REG_VALUE(0, l_tod_timer_data);
-        // Timers need to be enabled to reset Status bits.
-        SET_TOD_TIMER_REG_ENABLE0(l_tod_timer_data);
-        SET_TOD_TIMER_REG_ENABLE1(l_tod_timer_data);
-        FAPI_TRY(PUT_TOD_TIMER_REG(l_chip, l_tod_timer_data), "Error from PUT_TOD_TIMER_REG");
-    }
-
-fapi_try_exit:
-    FAPI_DBG("End");
-    return fapi2::current_err;
-
-}
-
 /// @brief Distribute synchronization signal to SS PLL using
 ///        TOD network
 /// @param[in] i_tod_node Reference to TOD topology
-/// @param[in] i_sscg_start_delay SSCG Start Delay
-/// @param[in] i_is_simulation true if simulation, else false
-/// @param[out] o_target_fail Target that failed the sync_spread if returned P10_TOD_TIMER_START_SIGNAL_ERROR
+/// @param[in] i_is_simulation True if simulation, else false
 /// @return FAPI2_RC_SUCCESS if TOD sync is succesful else error
-fapi2::ReturnCode sync_spread_delay(
+fapi2::ReturnCode sync_spread(
     const tod_topology_node* i_tod_node,
-    const uint64_t& i_sscg_start_delay,
-    const bool i_is_simulation,
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& o_target_fail)
+    const bool i_is_simulation)
 {
+    FAPI_DBG("Start");
+
+    // in TOD counts of 32Mhz clock; needs to account for SCOM latency
+    // and number of chips to be started in sync
+    const uint64_t P10_TOD_SSCG_START_DELAY = ((i_is_simulation) ? (0x100) : (0x1000000));
+
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets;
     get_targets(i_tod_node, 0, l_targets);
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_master_chip;
@@ -373,7 +340,6 @@ fapi2::ReturnCode sync_spread_delay(
     fapi2::buffer<uint64_t> l_tod_value_reg;
     fapi2::buffer<uint64_t> l_tod_timer_data;
     uint64_t l_poll_cycle_delay = 0;
-    fapi2::ReturnCode l_rc_fapi(fapi2::FAPI2_RC_SUCCESS);
 
     FAPI_ASSERT(l_targets.size(),
                 fapi2::P10_TOD_SETUP_NULL_NODE(),
@@ -391,7 +357,7 @@ fapi2::ReturnCode sync_spread_delay(
     for (auto l_chip : l_targets)
     {
         FAPI_TRY(PREP_TOD_TIMER_REG(l_chip));
-        SET_TOD_TIMER_REG_VALUE(l_tod_value_reg_tod_value + i_sscg_start_delay, l_tod_timer_data);
+        SET_TOD_TIMER_REG_VALUE(l_tod_value_reg_tod_value + P10_TOD_SSCG_START_DELAY, l_tod_timer_data);
         SET_TOD_TIMER_REG_ENABLE0(l_tod_timer_data);
         SET_TOD_TIMER_REG_ENABLE1(l_tod_timer_data);
         FAPI_TRY(PUT_TOD_TIMER_REG(l_chip, l_tod_timer_data),
@@ -399,7 +365,7 @@ fapi2::ReturnCode sync_spread_delay(
     }
 
     FAPI_TRY(p10_tod_polling_delay(i_is_simulation,
-                                   2 * i_sscg_start_delay,  // Wait twice the expected delay before declaring timeout
+                                   2 * P10_TOD_SSCG_START_DELAY,  // Wait twice the expected delay before declaring timeout
                                    P10_TOD_UTIL_TIMEOUT_COUNT,
                                    l_poll_cycle_delay));
 
@@ -433,76 +399,12 @@ fapi2::ReturnCode sync_spread_delay(
         }
     }
 
-    if (!l_targets.empty())
-    {
-        o_target_fail = l_targets.front();
-        l_rc_fapi = (fapi2::ReturnCode) fapi2::RC_P10_TOD_TIMER_START_SIGNAL_ERROR;
-    }
+    FAPI_ASSERT(l_targets.empty(),
+                fapi2::P10_TOD_TIMER_START_SIGNAL_ERROR().
+                set_TARGET(l_targets.front()),
+                "Spread spectrum operation did not start on all processors; the SMP fabric might be dead now!");
 
 fapi_try_exit:
-
-    if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
-    {
-        l_rc_fapi = fapi2::current_err;
-    }
-
-    return l_rc_fapi;
-}
-
-/// @brief Distribute synchronization signal to SS PLL using
-///        TOD network
-/// @param[in] i_tod_node Reference to TOD topology
-/// @param[in] i_is_simulation True if simulation, else false
-/// @return FAPI2_RC_SUCCESS if TOD sync is succesful else error
-fapi2::ReturnCode sync_spread(
-    const tod_topology_node* i_tod_node,
-    const bool i_is_simulation)
-{
-    fapi2::ReturnCode l_rc_fapi(fapi2::FAPI2_RC_SUCCESS);
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target_fail;
-
-    FAPI_DBG("Start");
-
-    uint64_t l_tod_sscg_start_delay = ((i_is_simulation) ?
-                                       (1ULL << P10_TOD_SSCG_START_DELAY_SIM_LOG_MIN) :
-                                       (1ULL << P10_TOD_SSCG_START_DELAY_HW_LOG_MIN));
-
-    uint64_t l_tod_sscg_start_delay_max = ((i_is_simulation) ?
-                                           (1ULL << P10_TOD_SSCG_START_DELAY_SIM_LOG_MAX) :
-                                           (1ULL << P10_TOD_SSCG_START_DELAY_HW_LOG_MAX));
-
-    while (1)
-    {
-        l_rc_fapi = sync_spread_delay(i_tod_node, l_tod_sscg_start_delay, i_is_simulation, l_target_fail);
-
-        if (l_rc_fapi == (fapi2::ReturnCode) fapi2::RC_P10_TOD_TIMER_START_SIGNAL_ERROR &&
-            l_tod_sscg_start_delay < l_tod_sscg_start_delay_max)
-        {
-            // Increase delay until sync_spread_delay passes, or until we reach a maximum delay.
-            // See SW518715
-            l_tod_sscg_start_delay <<= 1;
-            FAPI_TRY(p10_tod_init_reset_timers(i_tod_node));
-        }
-        else if (l_rc_fapi == (fapi2::ReturnCode) fapi2::RC_P10_TOD_TIMER_START_SIGNAL_ERROR)
-        {
-            FAPI_ASSERT(false,
-                        fapi2::P10_TOD_TIMER_START_SIGNAL_ERROR().
-                        set_TARGET(l_target_fail),
-                        "Spread spectrum operation did not start on all processors; the SMP fabric might be dead now!");
-        }
-        else
-        {
-            break;
-        }
-    }
-
-fapi_try_exit:
-
-    if (l_rc_fapi != fapi2::FAPI2_RC_SUCCESS)
-    {
-        fapi2::current_err = l_rc_fapi;
-    }
-
     FAPI_DBG("End");
     return fapi2::current_err;
 }
