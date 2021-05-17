@@ -236,20 +236,9 @@ void BlToHbDataManager::relocatePreservedArea()
     l_pBltoHbDataStart += iv_data.secureRomSize;
 
     // Copy in HW keys' Hash
-    // @TODO RTC 269616 - Remove if{} block and just use else{} block
-    if (iv_data.version == Bootloader::BLTOHB_INIT)
-    {
-        // Default the HW Key Hash to this imprint / development value
-        memcpy(l_pBltoHbDataStart,
-               Bootloader::default_hw_key_hash,
-               iv_data.hwKeysHashSize);
-    }
-    else
-    {
-        memcpy(l_pBltoHbDataStart,
-               iv_data.hwKeysHashPtr,
-               iv_data.hwKeysHashSize);
-    }
+    memcpy(l_pBltoHbDataStart,
+           iv_data.hwKeysHashPtr,
+           iv_data.hwKeysHashSize);
 
     // Change pointer to new location and increment
     iv_data.hwKeysHashPtr = l_pBltoHbDataStart;

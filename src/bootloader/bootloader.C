@@ -128,13 +128,8 @@ namespace Bootloader{
         {
             // Add cases as additional versions are created
             case SB_SETTING:
-                g_blData->blToHbData.version = BLTOHB_TPM_FFDC;
-                break;
-
-            // @TODO RTC 269616 - Remove INIT and make SB_SETTING default
-            case INIT:
             default:
-                g_blData->blToHbData.version = BLTOHB_INIT;
+                g_blData->blToHbData.version = BLTOHB_TPM_FFDC;
                 break;
         }
 
@@ -161,32 +156,15 @@ namespace Bootloader{
             // Set data size of HW key hash
             g_blData->blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;
 
-            // @TODO RTC 269616 - Remove if{} section and keep else{} section
-            if (g_blData->blToHbData.version < BLTOHB_SB_SETTING)
-            {
-                // Use default imprint hash for versions withoout .sb_setting SBE section
-                g_blData->blToHbData.hwKeysHashPtr = default_hw_key_hash;
+            // Get HW Keys' Hash Ptr
+            g_blData->blToHbData.hwKeysHashPtr = &l_blConfigData->sbSettings.hwKeyHash[0];
 
-                // Set Minimum FW Secure Version
-                // Use default of 0 for early version of SBE code
-                g_blData->blToHbData.min_secure_version = 0;
+            // Get Minimum Secure Version
+            g_blData->blToHbData.min_secure_version = l_blConfigData->sbSettings.msv;
 
-                // Set Measurement Seeprom Version
-                // Use default of 0 for early version of SBE code
-                g_blData->blToHbData.measurement_seeprom_version = 0;
-            }
-            else
-            {
-                // Get HW Keys' Hash Ptr
-                g_blData->blToHbData.hwKeysHashPtr = &l_blConfigData->sbSettings.hwKeyHash[0];
-
-                // Get Minimum Secure Version
-                g_blData->blToHbData.min_secure_version = l_blConfigData->sbSettings.msv;
-
-                // Get Measurement Seeprom Version
-                g_blData->blToHbData.measurement_seeprom_version =
-                    l_blConfigData->mSeepromVersion;
-            }
+            // Get Measurement Seeprom Version
+            g_blData->blToHbData.measurement_seeprom_version =
+                l_blConfigData->mSeepromVersion;
 
             // Set HBB header and size
             g_blData->blToHbData.hbbHeader = i_pHbbSrc;
