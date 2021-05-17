@@ -909,7 +909,6 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
                           TARGETING::get_huid(i_target),
                            (this->iv_sbeRegister).reg);
             }
-            l_loops++;
 #ifndef __HOSTBOOT_RUNTIME
             // reset watchdog before performing the nanosleep
             INITSERVICE::sendProgressCode();
