@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2002,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2002,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,8 +58,8 @@ int32_t ProcDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
     else
     {
-        // Capture Global FIRs on xstp and recovered errors for domain.
-        if ((attentionType == MACHINE_CHECK) || (attentionType == RECOVERABLE))
+        // Capture global FIRs on system checkstop attention for extra FFDC.
+        if (attentionType == MACHINE_CHECK)
         {
             // start at 1 to skip analyzed
             for (uint32_t i = 1; i < GetSize(); ++i)
@@ -67,13 +67,6 @@ int32_t ProcDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 LookUp(i)->CaptureErrorData(
                                     serviceData.service_data->GetCaptureData(),
                                     Util::hashString("GlobalFIRs"));
-
-                if (attentionType == MACHINE_CHECK)
-                {
-                    LookUp(i)->CaptureErrorData(
-                                    serviceData.service_data->GetCaptureData(),
-                                    Util::hashString("AllFIRs"));
-                }
             }
         }
     }

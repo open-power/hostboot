@@ -55,6 +55,7 @@ chip p10_proc
         name        "Global Checkstop Attention FIR";
         scomaddr    0x570F001C;
         capture     group default;
+        capture     group GlobalFIRs;
         capture     group default_pll_ffdc;
     };
 
@@ -67,6 +68,7 @@ chip p10_proc
         name        "Global Recoverable Attention FIR";
         scomaddr    0x570F001B;
         capture     group default;
+        capture     group GlobalFIRs;
         capture     group default_pll_ffdc;
     };
 
@@ -79,6 +81,7 @@ chip p10_proc
         name        "Global Unit Checkstop Attention FIR";
         scomaddr    0x570F002A;
         capture     group default;
+        capture     group GlobalFIRs;
         capture     group default_pll_ffdc;
     };
 
@@ -91,6 +94,7 @@ chip p10_proc
         name        "Global Host Attention FIR";
         scomaddr    0x570F002B;
         capture     group default;
+        capture     group GlobalFIRs;
         capture     group default_pll_ffdc;
     };
 
@@ -564,6 +568,7 @@ chip p10_proc
         name        "N1 Chiplet Checkstop FIR";
         scomaddr    0x03040000;
         capture     group default;
+        capture     group GlobalFIRs;
     };
 
     register N1_CHIPLET_CS_FIR_MASK
@@ -571,6 +576,7 @@ chip p10_proc
         name        "N1 Chiplet Checkstop FIR MASK";
         scomaddr    0x03040040;
         capture     group default;
+        capture     group GlobalFIRs;
     };
 
     ############################################################################
