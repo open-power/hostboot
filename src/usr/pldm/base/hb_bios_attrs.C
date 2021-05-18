@@ -44,6 +44,7 @@
 
 // support for string user details sections
 #include <errl/errludstring.H>
+#include <errl/errlmanager.H>
 
 // sys target
 #include <targeting/common/targetservice.H>
@@ -881,8 +882,39 @@ errlHndl_t getLmbSize(
                                 cur_val_string_entry_ptr);
     if(errl)
     {
-        PLDM_ERR("getLmbSize() Failed to lookup value for %s",
+        PLDM_ERR("getLmbSize() Failed to lookup enum value for %s",
                  PLDM_BIOS_HB_LMB_SIZE_STRING);
+
+        if ((errl->moduleId() != MOD_GET_CURRENT_VALUE) ||
+            (errl->reasonCode() != RC_UNSUPPORTED_TYPE))
+        {
+            break;
+        }
+
+        // Found bios attr but not enum type, make the error informational
+        const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+        if(sys->getAttr<TARGETING::ATTR_PLDM_BIOS_ERROR_INFORMATIONAL>())
+        {
+            errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        }
+
+        // Commit the error and try int type
+        ERRORLOG::errlCommit(errl, PLDM_COMP_ID);
+
+        uint64_t l_attr_val = 0;
+        errl = systemIntAttrLookup(io_string_table,
+                                   io_attr_table,
+                                   PLDM_BIOS_HB_LMB_SIZE_STRING,
+                                   l_attr_val);
+        if(errl)
+        {
+            PLDM_ERR("getLmbSize() Failed to lookup int value for %s",
+                     PLDM_BIOS_HB_LMB_SIZE_STRING);
+            break;
+        }
+
+        // Set size and exit
+        o_lmbSize = l_attr_val;
         break;
     }
 
