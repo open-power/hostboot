@@ -258,13 +258,14 @@
     <id>ATTR_RECONFIGURE_LOOP</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-        Used to inidicate if a reconfigure loop is needed
+        Used to indicate the reason a reconfigure loop is needed.
     </description>
     <valueType>uint8</valueType>
     <enum>
-        DECONFIGURE      = 0x1,
-        BAD_DQ_BIT_SET   = 0x2,
-        OCMB_FW_UPDATE   = 0x8
+        DECONFIGURE      = 0x01,
+        BAD_DQ_BIT_SET   = 0x02,
+        OCMB_FW_UPDATE   = 0x08,
+        TOPOLOGY_SWAP    = 0x10
     </enum>
     <writeable/>
   </attribute>
