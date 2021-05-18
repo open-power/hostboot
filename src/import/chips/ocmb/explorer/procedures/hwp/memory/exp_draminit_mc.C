@@ -72,6 +72,10 @@ extern "C"
         FAPI_TRY( mss::change_iml_complete(i_target, mss::HIGH), "%s Failed to set_ipm_complete",
                   mss::c_str(i_target));
 
+        // Run any necessary row repairs
+        // Note: this needs to be run before we start our periodics or before we start refresh
+        FAPI_TRY(exp_deploy_row_repairs(i_target), "%s Failed exp_deploy_row_repairs", mss::c_str(i_target));
+
         // Set DFI init start requested from Stephen Powell
         FAPI_TRY( mss::change_dfi_init_start(i_target, mss::ON ), "%s Failed to change_dfi_init_start",
                   mss::c_str(i_target));
@@ -97,9 +101,6 @@ extern "C"
 
         // Apply marks from OCMB VPD
         FAPI_TRY(mss::apply_mark_store(i_target), "%s Failed apply_mark_store", mss::c_str(i_target));
-
-        // Run any necessary row repairs
-        FAPI_TRY(exp_deploy_row_repairs(i_target), "%s Failed exp_deploy_row_repairs", mss::c_str(i_target));
 
         // Unmask registers after draminit_mc
         FAPI_TRY(mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target));
