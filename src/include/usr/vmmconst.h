@@ -173,12 +173,23 @@ enum BlockPriority
 #define VMM_ALL_HOMER_OCC_MEMORY_SIZE \
  (VMM_OCC_COMMON_SIZE + VMM_HOMER_REGION_SIZE)
 
+/** Internode communication area outside of the HB image.
+ * Preserved between mpipl.
+ *
+ * @node There is one area per hostboot instance.
+ *  Need to add (ATTR_HB_HRMOR_NODAL_BASE * hbinstance_num) to this
+ *  address to get the physical address
+ */
+#define VMM_INTERNODE_PRESERVED_MEMORY_SIZE (4*MEGABYTE)
+#define VMM_INTERNODE_PRESERVED_MEMORY_ADDR (VMM_OCC_COMMON_END_OFFSET)
+
 /**
  * Memory for Architected state (max 8 procs - 256KB Each)
  * XXX MPIPL depends on memory reservation layout. Any change in the
  *     reservation order impact MPIPL (see copyArchitectedRegs()).
  */
-#define VMM_ARCH_REG_DATA_START_OFFSET VMM_OCC_COMMON_END_OFFSET
+#define VMM_ARCH_REG_DATA_START_OFFSET (VMM_INTERNODE_PRESERVED_MEMORY_ADDR + \
+                                        VMM_INTERNODE_PRESERVED_MEMORY_SIZE)
 #define VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB 384
 #define VMM_ARCH_REG_DATA_PER_PROC_SIZE \
  ( VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB*KILOBYTE )
@@ -223,22 +234,10 @@ enum BlockPriority
 #define VMM_RT_VPD_SIZE (2816*KILOBYTE) /* 2816KB aligned (size EECACHE section size) */
 #endif
 
-
-/** Internode communication area outside of the HB image.
- * Preserved between mpipl.
- *
- * @node There is one area per hostboot instance.
- *  Need to add (ATTR_HB_HRMOR_NODAL_BASE * hbinstance_num) to this
- *  address to get the physical address
- */
-#define VMM_INTERNODE_PRESERVED_MEMORY_SIZE (4*MEGABYTE)
-#define VMM_INTERNODE_PRESERVED_MEMORY_ADDR (VMM_HB_RSV_MEM_SIZE - \
-                                            VMM_INTERNODE_PRESERVED_MEMORY_SIZE)
-
 /** PHYP ATTN AREA OFFSET */
 /** This offset is relative to the HRMOR of a given node */
 #define PHYP_ATT_AREA_SIZE (64*MEGABYTE)
-#define PHYP_ATTN_AREA_OFFSET (VMM_INTERNODE_PRESERVED_MEMORY_ADDR - \
+#define PHYP_ATTN_AREA_OFFSET (VMM_HB_RSV_MEM_SIZE  - \
                                PHYP_ATT_AREA_SIZE)
 #define PHYP_ATTN_AREA_1_SIZE (1*KILOBYTE)
 
@@ -268,15 +267,15 @@ enum BlockPriority
 /** Layout
  * (HRMOR+64MB)..(HRMOR+96MB): HOMER for each proc (32MB)
  * (HRMOR+96MB)..(HRMOR+104MB): OCC Common (8MB)
- * (HRMOR+104MB)..(HRMOR+105MB): Arch reg data (1MB)
- * (HRMOR+105MB)..(HRMOR+106MB): HBRT Data TOC (hbrtTableOfContents_t)
- * (HRMOR+106MB): Reserved mem start
- * (HRMOR+(168MB-20KB)): Reserved mem end
- * (HRMOR+(168MB-20KB))..(HRMOR+168MB): MCL_ADDR (20KB)
- * (HRMOR+168MB)..(HRMOR+232MB): MCL_TMP_ADDR (64MB + PAGESIZE)
- * (HRMOR+232MB)..(HRMOR+248MB): HDAT_TMP_ADDR (16MB)
- * (HRMOR+248MB)..(HRMOR+252MB): TCE Table (needs to be 4-byte aligned) (4MB)
- * (HRMOR+252MB)..(HRMOR+256MB): VMM_INTERNODE_PRESERVED_MEMORY_ADDR (4MB)
+ * (HRMOR+104MB)..(HRMOR+108MB): VMM_INTERNODE_PRESERVED_MEMORY_ADDR (4MB)
+ * (HRMOR+108MB)..(HRMOR+109MB): Arch reg data (1MB)
+ * (HRMOR+109MB)..(HRMOR+110MB): HBRT Data TOC (hbrtTableOfContents_t)
+ * (HRMOR+110MB): Reserved mem start
+ * (HRMOR+(172MB-20KB)): Reserved mem end
+ * (HRMOR+(172MB-20KB))..(HRMOR+172MB): MCL_ADDR (20KB)
+ * (HRMOR+172MB)..(HRMOR+236MB): MCL_TMP_ADDR (64MB + PAGESIZE)
+ * (HRMOR+236MB)..(HRMOR+252MB): HDAT_TMP_ADDR (16MB)
+ * (HRMOR+252MB)..(HRMOR+256MB): TCE Table (needs to be 4-byte aligned) (4MB)
  * (HRMOR+256MB): The end of usable memory
  */
 
@@ -307,7 +306,7 @@ enum BlockPriority
 
 /** Physical memory location of the TCE Table */
 /** - needs to be aligned on 4MB boundary     */
-#define TCE_TABLE_ADDR  (VMM_INTERNODE_PRESERVED_MEMORY_ADDR - TCE_TABLE_SIZE)
+#define TCE_TABLE_ADDR  (VMM_HB_RSV_MEM_SIZE - TCE_TABLE_SIZE)
 
 /** Physical memory location used for Unsecure Memory Region Testing */
 /** - place it after TCE Table */

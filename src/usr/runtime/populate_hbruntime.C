@@ -1185,6 +1185,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         {
             l_archAddr = l_topMemAddr
                         - VMM_ALL_HOMER_OCC_MEMORY_SIZE
+                        - VMM_INTERNODE_PRESERVED_MEMORY_SIZE
                         - VMM_ARCH_REG_DATA_SIZE_ALL_PROC;
         }
         l_sys->setAttr<TARGETING::ATTR_SBE_ARCH_DUMP_ADDR>(l_archAddr);
