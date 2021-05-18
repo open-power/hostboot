@@ -1015,8 +1015,9 @@ foreach my $sub (sort keys %subsysList)
     $srcCount = 0;
     $srcFileGroupCount = 0;
 
-    # append the subsystem name from hberrltypes.H's epubSubSystem_t to the HB_BCxxRcdl_ filename
-    $srcFileBaseName = $genFilesPath . "/HB_BCxxRcdl_" . $subsysList{$sub} . ".h";
+    # append the hex value representing the subsystem name from
+    # hberrltypes.H's epubSubSystem_t to the HB_BCxxRcdl_ filename
+    $srcFileBaseName = $genFilesPath . "/HB_BCxxRcdl_" . $sub . ".h";
     open(RCDLFILE, ">", $srcFileBaseName) or die ("Cannot open: $srcFileBaseName $!");
 
     foreach my $rcVal (sort keys %srcList)
@@ -1032,7 +1033,7 @@ foreach my $sub (sort keys %subsysList)
 
             # increment the file count for this subsystem group
             $srcFileGroupCount += 1;
-            $srcFileBaseName = $genFilesPath . "/HB_BCxxRcdl_" . $subsysList{$sub} . "_" .
+            $srcFileBaseName = $genFilesPath . "/HB_BCxxRcdl_" . $sub . "_" .
                                $srcFileGroupCount . ".h";
             open(RCDLFILE, ">", $srcFileBaseName) or die ("Cannot open: $srcFileBaseName $!");
 
