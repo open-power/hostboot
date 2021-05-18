@@ -37,6 +37,7 @@
 #include <p10_omi_train_check.H>
 #include <p10_scom_omi.H>
 #include <lib/omi/p10_omi_utils.H>
+#include <lib/fir/p10_fir.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <explorer_scom_addresses.H>
@@ -144,6 +145,8 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
              l_state_machine_state,
              l_omi_status,
              l_omi_training_status);
+
+    FAPI_TRY(mss::unmask::after_p10_omi_train_check(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target)));
 
     return fapi2::FAPI2_RC_SUCCESS;
 

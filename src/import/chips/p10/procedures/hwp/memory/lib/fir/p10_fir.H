@@ -29,6 +29,7 @@
 #include <fapi2.H>
 #include <p10_scom_mcc.H>
 #include <p10_scom_omi.H>
+#include <p10_scom_pauc.H>
 #include <lib/fir/p10_fir_traits.H>
 #include <lib/mc/host_mc_traits.H>
 #include <lib/workarounds/p10_fir_workarounds.H>
@@ -758,6 +759,92 @@ inline fapi2::ReturnCode after_p10_omi_init_omi_fir_helper(const fapi2::Target<f
             FAPI_TRY(setup_reg_dl_after_omi_init_helper(l_omi));
         }
 
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Unmask FIR registers at the beginning of p10_omi_setup procedure
+/// @param[in] i_target PROC_CHIP target to find targets to initialize
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS iff success
+///
+inline fapi2::ReturnCode before_p10_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    // Re-mask IOO_OMI_PHY_SCOM_MAC_FIR_REG[22] because it could be erroneously flagged during OMI training
+    for (const auto& l_pauc : mss::find_targets<fapi2::TARGET_TYPE_PAUC>(i_target))
+    {
+        fapi2::buffer<uint64_t> l_reg_data;
+
+        FAPI_TRY(scomt::pauc::PREP_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc));
+        FAPI_TRY(scomt::pauc::GET_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc, l_reg_data));
+        scomt::pauc::SET_PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK(1, l_reg_data);
+        FAPI_TRY(scomt::pauc::PUT_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc, l_reg_data));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Unmask FIR registers after p10_omi_train_check procedure
+/// @param[in] i_target PROC_CHIP target to find targets to initialize
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS iff success
+///
+inline fapi2::ReturnCode after_p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    constexpr uint64_t PPE_ERROR_ADDRESS = 0xFFFF11A000000000;
+    constexpr uint64_t PPE_ERROR_STATE_START = 0;
+    constexpr uint64_t PPE_ERROR_STATE_LEN = 16;
+    constexpr uint64_t PPE_ERROR_VALID = 16;
+    constexpr uint64_t PPE_ERROR_THREAD_START = 17;
+    constexpr uint64_t PPE_ERROR_THREAD_LEN = 3;
+    constexpr uint16_t PPE_STATE_RECAL_NOT_RUN = 0xF009;
+    constexpr uint16_t PPE_THREAD_EXPECT2 = 2;
+    constexpr uint16_t PPE_THREAD_EXPECT3 = 3;
+
+    // 1. If ppe_error_state = 0xF009 (PPE Recal Not Run) AND ppe_error_thread is either a 2 or 3
+    //    clear ppe_error_valid
+    // 2. clear IOO_OMI_PHY_SCOM_MAC_FIR_REG[22]
+    // 3. unmask IOO_OMI_PHY_SCOM_MAC_FIR_REG[22]
+    for (const auto& l_pauc : mss::find_targets<fapi2::TARGET_TYPE_PAUC>(i_target))
+    {
+        fapi2::buffer<uint64_t> l_csdr_data;
+        fapi2::buffer<uint64_t> l_mask;
+        uint16_t l_ppe_error_state = 0;
+        uint16_t l_ppe_error_thread = 0;
+        fapi2::buffer<uint64_t> l_fir_data(0xFFFFFFFFFFFFFFFF);
+
+        // Check the PPE error state and thread
+        // First set the address of the PPE_ERROR register
+        FAPI_TRY(scomt::pauc::PREP_PHY_PPE_WRAP_ARB_CSAR(l_pauc));
+        FAPI_TRY(scomt::pauc::PUT_PHY_PPE_WRAP_ARB_CSAR(l_pauc, PPE_ERROR_ADDRESS));
+        // Then Read the register
+        FAPI_TRY(scomt::pauc::PREP_PHY_PPE_WRAP_ARB_CSDR(l_pauc));
+        FAPI_TRY(scomt::pauc::GET_PHY_PPE_WRAP_ARB_CSDR(l_pauc, l_csdr_data));
+        l_csdr_data.extractToRight<PPE_ERROR_STATE_START, PPE_ERROR_STATE_LEN>(l_ppe_error_state);
+        l_csdr_data.extractToRight<PPE_ERROR_THREAD_START, PPE_ERROR_THREAD_LEN>(l_ppe_error_thread);
+
+        if ((l_ppe_error_state == PPE_STATE_RECAL_NOT_RUN) &&
+            ((l_ppe_error_thread == PPE_THREAD_EXPECT2) || (l_ppe_error_thread == PPE_THREAD_EXPECT3)))
+        {
+            // Clear ppe_error_valid
+            l_csdr_data.clearBit<PPE_ERROR_VALID>();
+            FAPI_TRY(scomt::pauc::PUT_PHY_PPE_WRAP_ARB_CSDR(l_pauc, l_csdr_data));
+        }
+
+        // Clear the FIR
+        // use a different buffer for the FIR reg, l_fir_data
+        FAPI_TRY(scomt::pauc::PREP_PHY_SCOM_MAC_FIR_REG_WO_AND(l_pauc));
+        scomt::pauc::SET_PHY_SCOM_MAC_FIR_REG_PPE_CODE_RECAL_NOT_RUN(0, l_fir_data);
+        FAPI_TRY(scomt::pauc::PUT_PHY_SCOM_MAC_FIR_REG_WO_AND(l_pauc, l_fir_data));
+
+        // Unmask the FIR
+        FAPI_TRY(scomt::pauc::PREP_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc));
+        FAPI_TRY(scomt::pauc::GET_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc, l_mask));
+        scomt::pauc::SET_PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK(0, l_mask);
+        FAPI_TRY(scomt::pauc::PUT_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc, l_mask));
     }
 
 fapi_try_exit:

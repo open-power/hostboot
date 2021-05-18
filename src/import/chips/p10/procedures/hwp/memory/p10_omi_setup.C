@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <p10_omi_setup.H>
 #include <lib/omi/p10_omi_utils.H>
+#include <lib/fir/p10_fir.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
@@ -64,6 +65,8 @@ fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i
         FAPI_INF("Sim, exiting p10_omi_setup %s", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    FAPI_TRY(mss::unmask::before_p10_omi_setup(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target)));
 
     FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
 
