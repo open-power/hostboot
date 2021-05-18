@@ -76,6 +76,7 @@ struct fields
     static constexpr mss::field_t<mss::endian::BIG> STATUS_CODE{1, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> BOOT_STAGE{2, 6, 2};
     static constexpr mss::field_t<mss::endian::BIG> FW_API_VERSION{2, 1, 5};
+    static constexpr mss::field_t<mss::endian::BIG> FW_STATUS_EXT_ERR{3, 0, 8};
 #ifndef __PPE__
     // Part of EXP_FW_TWI_FFE_SETTINGS
     static constexpr mss::field_t<mss::endian::BIG> FFE_POST_CURSOR_BYTE0{0, 0, 8};
@@ -260,6 +261,20 @@ struct fieldTraits<fields::FW_API_VERSION>
 {
     static constexpr uint8_t COMPARISON_VAL = 0x00;
     static constexpr const char* FIELD_STR = "Firmware API Version";
+
+    template <typename T>
+    using COMPARISON_OP = std::greater_equal<T>;
+};
+
+///
+/// @class fieldTraits - FW_STATUS_EXT_ERR specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::FW_STATUS_EXT_ERR>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x00;
+    static constexpr const char* FIELD_STR = "Extended Error Code";
 
     template <typename T>
     using COMPARISON_OP = std::greater_equal<T>;
@@ -805,6 +820,20 @@ inline fapi2::ReturnCode get_fw_api_version(const fapi2::Target<fapi2::TARGET_TY
         uint8_t& o_setting)
 {
     return get_field<fields::FW_API_VERSION>(i_target, i_data, o_setting);
+}
+
+///
+/// @brief FW_STATUS_EXT_ERR getter
+/// @param[in] i_target the OCMB target
+/// @param[in] i_data the buffer as a reference to a vector
+/// @param[out] o_setting
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode get_fw_status_ext_err(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        uint8_t& o_setting)
+{
+    return get_field<fields::FW_STATUS_EXT_ERR>(i_target, i_data, o_setting);
 }
 
 ///

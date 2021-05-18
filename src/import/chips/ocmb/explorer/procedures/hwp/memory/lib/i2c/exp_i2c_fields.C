@@ -45,6 +45,7 @@ constexpr mss::field_t<mss::endian::BIG> fields::CMD_ID;
 constexpr mss::field_t<mss::endian::BIG> fields::STATUS_CODE;
 constexpr mss::field_t<mss::endian::BIG> fields::BOOT_STAGE;
 constexpr mss::field_t<mss::endian::BIG> fields::FW_API_VERSION;
+constexpr mss::field_t<mss::endian::BIG> fields::FW_STATUS_EXT_ERR;
 
 namespace boot_cfg
 {

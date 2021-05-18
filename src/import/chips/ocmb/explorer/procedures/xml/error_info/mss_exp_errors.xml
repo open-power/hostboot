@@ -659,6 +659,7 @@
     <ffdc>COMMAND</ffdc>
     <ffdc>BOOT_MODE</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXT_ERR_CODE</ffdc>
     <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
     <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
     <callout>
@@ -668,6 +669,46 @@
     <deconfigure>
       <target>OCMB_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
+    <callout>
+      <bus>OCMB_TARGET,OMI_TARGET</bus>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_BOOT_CONFIG_SERDES_DLL_LOCK_FAIL</rc>
+    <description>
+      BOOT_CONFIG command encountered an OMI SerDes DLL lock
+      failure.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>OMI_TARGET</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>BOOT_MODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+    <ffdc>EXT_ERR_CODE</ffdc>
+    <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
+    <collectFfdc>exp_collect_explorer_active_log, OCMB_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
+    <callout>
+      <target>OMI_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>OMI_TARGET</target>
+    </deconfigure>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OMI_TARGET</target>
+    </gard>
     <gard>
       <target>OCMB_TARGET</target>
     </gard>

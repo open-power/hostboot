@@ -412,6 +412,18 @@ enum fw_boot_cfg_status
     PARITY_UECC_ERROR = 0x20,
 };
 
+///
+/// @brief extended error codes for FW_BOOT_CONFIG
+///
+enum fw_boot_cfg_ext_err
+{
+    CSU_FAILED_1        = 0x02,
+    CSU_FAILED_2        = 0x23,
+    SERDES_CALIB_FAILED = 0x03,
+    DLL_LOCK_FAIL       = 0x07,
+    DEASSERT_RESET_FAIL = 0x08,
+};
+
 #endif
 
 ///
