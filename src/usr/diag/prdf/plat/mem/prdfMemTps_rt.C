@@ -457,7 +457,10 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
     do
     {
+        // Keep track of if there was a false alarm and if we added a VCM
+        // event to the targeted diagnostics queue.
         bool tpsFalseAlarm = false;
+        bool vcmQueued = false;
 
         // Get the Bad DQ Bitmap.
         TargetHandle_t trgt = iv_chip->getTrgt();
@@ -753,6 +756,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     TdEntry * vcm = new VcmEvent<T>{ iv_chip, iv_rank,
                                                      newChipMark };
                     MemDbUtils::pushToQueue<T>( iv_chip, vcm );
+                    vcmQueued = true;
                 }
                 else
                 {
@@ -858,6 +862,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     TdEntry * vcm = new VcmEvent<T>{ iv_chip, iv_rank,
                                                      newChipMark };
                     MemDbUtils::pushToQueue<T>( iv_chip, vcm );
+                    vcmQueued = true;
                 }
                 else
                 {
@@ -997,14 +1002,19 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
         // We may have placed a chip mark so do any necessary cleanup. This must
         // be called after writing the bad DQ bitmap because this function
-        // will also write it if necessary.
-        bool junk = false;
-        o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, io_sc, junk );
-        if ( SUCCESS != o_rc )
+        // will also write it if necessary. If we added a VCM event to the
+        // queue, we will skip this and let that VCM event handle the cleanup
+        // of the chip mark once it finishes.
+        if ( !vcmQueued )
         {
-            PRDF_ERR( PRDF_FUNC "MarkStore::chipMarkCleanup(0x%08x,0x%02x) "
-                      "failed", iv_chip->getHuid(), getKey() );
-            break;
+            bool junk = false;
+            o_rc = MarkStore::chipMarkCleanup<T>(iv_chip, iv_rank, io_sc, junk);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MarkStore::chipMarkCleanup(0x%08x,0x%02x) "
+                          "failed", iv_chip->getHuid(), getKey() );
+                break;
+            }
         }
 
     } while (0);
