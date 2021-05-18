@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1328,8 +1328,8 @@ fapi2::ReturnCode mss_firmware_background_scrub_helper( const fapi2::Target<T>& 
                i_speed,
                i_address) );
 
-    // Unmask firs after background scrub is started
-    FAPI_TRY ( mss::unmask::after_background_scrub<MC>( i_target ) );
+    // Do not unmask firs here, since PRD explicitly calls mss::unmask::after_background_scrub.
+    // In Cronus, the procedure calls mss_background_scrub_helper which does the unmasks.
 
 fapi_try_exit:
     return fapi2::current_err;
