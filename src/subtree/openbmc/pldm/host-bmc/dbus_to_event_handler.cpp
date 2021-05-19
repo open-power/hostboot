@@ -80,6 +80,12 @@ void DbusToPLDMEvent::sendStateSensorEvent(SensorId sensorId,
 {
     // Encode PLDM platform event msg to indicate a state sensor change.
     // DSP0248_1.2.0 Table 19
+    if (!dbusMaps.contains(sensorId))
+    {
+        std::cerr << "Invalid sensor ID : " << sensorId << std::endl;
+        return;
+    }
+
     size_t sensorEventSize = PLDM_SENSOR_EVENT_DATA_MIN_LENGTH + 1;
     const auto& [dbusMappings, dbusValMaps] = dbusMaps.at(sensorId);
     for (uint8_t offset = 0; offset < dbusMappings.size(); ++offset)
@@ -151,7 +157,11 @@ void DbusToPLDMEvent::listenSensorEvent(const pdr_utils::Repo& repo,
         {
             pdr = reinterpret_cast<pldm_state_sensor_pdr*>(pdrEntry.data);
             SensorId sensorId = LE16TOH(pdr->sensor_id);
-            sensorHandlers.at(pdrType)(sensorId, dbusMaps);
+            if (sensorHandlers.contains(pdrType))
+            {
+                sensorHandlers.at(pdrType)(sensorId, dbusMaps);
+            }
+
             pdrRecord = sensorPDRs.getNextRecord(pdrRecord, pdrEntry);
         }
     }

@@ -31,6 +31,350 @@
         }]
     },
     {
+        "type" : 45,
+        "instance" : 0,
+        "container" : 0,
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/enclosure_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/base_op_panel_blyth",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/base_blyth_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/ebmc_card_bmc",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/bmc_ingraham_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/cpu0_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/cpu0_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu2",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/cpu1_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu3",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/cpu1_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/fan0",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/fan0_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/fan1",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/fan1_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/fan2",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/fan2_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/fan3",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/fan3_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/fan4",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/fan4_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/fan5",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/fan5_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/lcd_op_panel_hill",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/lcd_russel_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply0",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/powersupply0_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply1",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/powersupply1_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/tpm_wilson",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/tpm_wilson_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/vdd_vrm0",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/cpu0_vrm0_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "entity_path" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/vdd_vrm1",
+        "effecters" : [{
+            "set" : {
+                "id" : 17,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/cpu1_vrm0_identify",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
+        "type" : 45,
+        "instance" : 0,
+        "container" : 0,
+        "effecters" : [{
+            "set" : {
+                "id" : 10,
+                "size" : 1,
+                "states" : [1,2]
+            },
+            "dbus" : {
+                "path": "/xyz/openbmc_project/led/groups/enclosure_fault",
+                "interface": "xyz.openbmc_project.Led.Group",
+                "property_name": "Asserted",
+                "property_type": "bool",
+                "property_values" : [true, false]
+             }
+        }]
+    },
+    {
        "type" : 45,
        "instance" : 0,
        "container" : 0,

@@ -48,11 +48,27 @@ class DbusToFileHandler
     void processNewResourceDump(const std::string& vspString,
                                 const std::string& resDumpReqPass);
 
+    /** @brief Process the new CSR file available
+     *  @param[in] csr - CSR string
+     *  @param[in] fileHandle - file Handle for  new file request
+     */
+    void newCsrFileAvailable(const std::string& csr,
+                             const std::string fileHandle);
+
   private:
     /** @brief Send the new file available command request to hypervisor
      *  @param[in] fileSize - size of the file
      */
     void sendNewFileAvailableCmd(uint64_t fileSize);
+
+    /** @brief Send the new file available command request to hypervisor
+     *  @param[in] fileSize - size of the file
+     *  @param[in] fileHandle - file handle
+     *  @param[in] type - file type
+     */
+    void newFileAvailableSendToHost(const uint32_t fileSize,
+                                    const uint32_t fileHandle,
+                                    const uint16_t type);
 
     /** @brief fd of MCTP communications socket */
     int mctp_fd;

@@ -16,6 +16,7 @@ extern "C" {
 #define PLDM_GET_STATE_SENSOR_READINGS_REQ_BYTES 4
 #define PLDM_GET_NUMERIC_EFFECTER_VALUE_REQ_BYTES 2
 #define PLDM_GET_SENSOR_READING_REQ_BYTES 4
+#define PLDM_SET_EVENT_RECEIVER_REQ_BYTES 5
 /* Response lengths are inclusive of completion code */
 #define PLDM_SET_STATE_EFFECTER_STATES_RESP_BYTES 1
 
@@ -23,6 +24,8 @@ extern "C" {
 #define PLDM_SET_NUMERIC_EFFECTER_VALUE_MIN_REQ_BYTES 4
 
 #define PLDM_GET_PDR_REQ_BYTES 13
+
+#define PLDM_SET_EVENT_RECEIVER_RESP_BYTES 1
 /* Minimum response length */
 #define PLDM_GET_PDR_MIN_RESP_BYTES 12
 #define PLDM_GET_NUMERIC_EFFECTER_VALUE_MIN_RESP_BYTES 5
@@ -110,6 +113,7 @@ enum pldm_effecter_oper_state {
 };
 
 enum pldm_platform_commands {
+	PLDM_SET_EVENT_RECEIVER = 0x04,
 	PLDM_GET_SENSOR_READING = 0x11,
 	PLDM_GET_STATE_SENSOR_READINGS = 0x21,
 	PLDM_SET_NUMERIC_EFFECTER_VALUE = 0x31,
@@ -171,6 +175,10 @@ enum pldm_platform_completion_codes {
 	PLDM_PLATFORM_TRANSFER_TIMEOUT = 0x84,
 
 	PLDM_PLATFORM_SET_EFFECTER_UNSUPPORTED_SENSORSTATE = 0x82,
+
+	PLDM_PLATFORM_INVALID_PROTOCOL_TYPE = 0x80,
+	PLDM_PLATFORM_ENABLE_METHOD_NOT_SUPPORTED = 0x81,
+	PLDM_PLATFORM_HEARTBEAT_FREQUENCY_TOO_HIGH = 0x82,
 };
 
 /** @brief PLDM Event types
@@ -260,6 +268,16 @@ enum pldm_terminus_locator_type {
 	PLDM_TERMINUS_LOCATOR_TYPE_MCTP_EID,
 	PLDM_TERMINUS_LOCATOR_TYPE_SMBUS_RELATIVE,
 	PLDM_TERMINUS_LOCATOR_TYPE_SYS_SW
+};
+
+/** @brief PLDM event message global enable for
+ *  SetEventReceiver command
+ */
+enum pldm_event_message_global_enable {
+	PLDM_EVENT_MESSAGE_GLOBAL_DISABLE,
+	PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC,
+	PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_POLLING,
+	PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE
 };
 
 /** @struct pldm_pdr_hdr
@@ -557,6 +575,18 @@ struct pldm_get_pdr_req {
 	uint8_t transfer_op_flag;
 	uint16_t request_count;
 	uint16_t record_change_number;
+} __attribute__((packed));
+
+/** @struct pldm_set_event_receiver_req
+ *
+ * Structure representing SetEventReceiver command.
+ * This structure applies only for MCTP as a transport type.
+ */
+struct pldm_set_event_receiver_req {
+	uint8_t event_message_global_enable;
+	uint8_t transport_protocol_type;
+	uint8_t event_receiver_address_info;
+	uint16_t heartbeat_timer;
 } __attribute__((packed));
 
 /** @struct pldm_set_numeric_effecter_value_req
@@ -1039,7 +1069,6 @@ int decode_get_pdr_resp(const struct pldm_msg *msg, size_t payload_length,
  *         field parameter as sizeof(set_effecter_state_field) *
  *         comp_effecter_count
  *  @param[out] msg - Message will be written to this
- *  @param[in] payload_length - Length of request message payload
  *  @return pldm_completion_codes
  *  @note  Caller is responsible for memory alloc and dealloc of param
  *         'msg.payload'
@@ -1049,8 +1078,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg,
-					 size_t payload_length);
+					 struct pldm_msg *msg);
 
 /** @brief Decode SetStateEffecterStates response data
  *
@@ -1462,6 +1490,77 @@ int decode_get_sensor_reading_resp(
     uint8_t *sensor_data_size, uint8_t *sensor_operational_state,
     uint8_t *sensor_event_message_enable, uint8_t *present_state,
     uint8_t *previous_state, uint8_t *event_state, uint8_t *present_reading);
+
+/** @brief Encode the SetEventReceiver request message
+ *
+ * @param[in] instance_id - Message's instance id
+ * @param[in] event_message_global_enable - This value is used to enable or
+ *        disable event message generation from the terminus value: {
+ *        disable, enableAsync, enablePolling, enableAsyncKeepAlive }
+ * @param[in] transport_protocol_type - This value is provided in the request
+ *        to help the responder verify that the content of the
+ *        eventReceiverAddressInfo field used in this request is correct for
+ *        the messaging protocol supported by the terminus.
+ * @param[in] event_receiver_address_info - this value is a medium and
+ *        protocol-specific address that the responder should use when
+ *        transmitting event messages using the indicated protocol
+ * @param[in] heartbeat_timer - Amount of time in seconds after each elapsing
+ *        of which the terminus shall emit a heartbeat event to the receiver
+ * @param[out] msg - Argument to capture the Message
+ * @return pldm_completion_codes
+ */
+int encode_set_event_receiver_req(uint8_t instance_id,
+				  uint8_t event_message_global_enable,
+				  uint8_t transport_protocol_type,
+				  uint8_t event_receiver_address_info,
+				  uint16_t heartbeat_timer,
+				  struct pldm_msg *msg);
+
+/** @brief Decode the SetEventReceiver response message
+ *
+ * @param[in] msg - Request message
+ * @param[in] payload_length - Length of response message payload
+ * @param[out] completion_code - PLDM completion code
+ * @return pldm_completion_codes
+ */
+int decode_set_event_receiver_resp(const struct pldm_msg *msg,
+				   size_t payload_length,
+				   uint8_t *completion_code);
+
+/** @brief Decode the SetEventReceiver request message
+ *
+ * @param[in] msg - Request message
+ * @param[in] payload_length - Length of request message payload
+ * @param[out] event_message_global_enable - This value is used to enable or
+ *        disable event message generation from the terminus value: {
+ *        disable, enableAsync, enablePolling, enableAsyncKeepAlive }
+ * @param[out] transport_protocol_type - This value is provided in the request
+ *        to help the responder verify that the content of the
+ *        eventReceiverAddressInfo field used in this request is correct for
+ *        the messaging protocol supported by the terminus.
+ * @param[out] event_receiver_address_info - This value is a medium and
+ *        protocol-specific address that the responder should use when
+ *        transmitting event messages using the indicated protocol
+ * @param[out] heartbeat_timer - Amount of time in seconds after each elapsing
+ *        of which the terminus shall emit a heartbeat event to the receiver
+ * @return pldm_completion_codes
+ */
+int decode_set_event_receiver_req(const struct pldm_msg *msg,
+				  size_t payload_length,
+				  uint8_t *event_message_global_enable,
+				  uint8_t *transport_protocol_type,
+				  uint8_t *event_receiver_address_info,
+				  uint16_t *heartbeat_timer);
+
+/** @brief Encode the SetEventReceiver response message
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] completion_code - PLDM completion code
+ *  @param[out] msg - Argument to capture the Message
+ *  @return pldm_completion_codes
+ */
+int encode_set_event_receiver_resp(uint8_t instance_id, uint8_t completion_code,
+				   struct pldm_msg *msg);
 
 #ifdef __cplusplus
 }

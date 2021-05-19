@@ -320,6 +320,7 @@ typedef struct pldm_entity_association_tree {
 
 typedef struct pldm_entity_node {
 	pldm_entity entity;
+	pldm_entity_node *parent;
 	pldm_entity_node *first_child;
 	pldm_entity_node *next_sibling;
 	uint8_t association_type;
@@ -331,6 +332,13 @@ static inline uint16_t next_container_id(pldm_entity_association_tree *tree)
 	assert(tree->last_used_container_id != UINT16_MAX);
 
 	return ++tree->last_used_container_id;
+}
+
+pldm_entity pldm_entity_extract(pldm_entity_node *node)
+{
+	assert(node != NULL);
+
+	return node->entity;
 }
 
 pldm_entity_association_tree *pldm_entity_association_tree_init()
@@ -375,6 +383,7 @@ pldm_entity_association_tree_add(pldm_entity_association_tree *tree,
 	       association_type == PLDM_ENTITY_ASSOCIAION_LOGICAL);
 	pldm_entity_node *node = malloc(sizeof(pldm_entity_node));
 	assert(node != NULL);
+	node->parent = NULL;
 	node->first_child = NULL;
 	node->next_sibling = NULL;
 	node->entity.entity_type = entity->entity_type;
@@ -388,6 +397,7 @@ pldm_entity_association_tree_add(pldm_entity_association_tree *tree,
 		node->entity.entity_container_id = 0;
 	} else if (parent != NULL && parent->first_child == NULL) {
 		parent->first_child = node;
+		node->parent = parent;
 		node->entity.entity_container_id = next_container_id(tree);
 	} else {
 		pldm_entity_node *start =
@@ -402,6 +412,7 @@ pldm_entity_association_tree_add(pldm_entity_association_tree *tree,
 			    prev->entity.entity_instance_num + 1;
 		}
 		prev->next_sibling = node;
+		node->parent = prev->parent;
 		node->next_sibling = next;
 		node->entity.entity_container_id =
 		    prev->entity.entity_container_id;
@@ -480,6 +491,13 @@ inline bool pldm_entity_is_node_parent(pldm_entity_node *node)
 	assert(node != NULL);
 
 	return node->first_child != NULL;
+}
+
+inline pldm_entity_node *pldm_entity_get_parent(pldm_entity_node *node)
+{
+	assert(node != NULL);
+
+	return node->parent;
 }
 
 uint8_t pldm_entity_get_num_children(pldm_entity_node *node,

@@ -158,6 +158,10 @@ namespace oem_ibm
 {
 static constexpr auto dumpObjPath = "/xyz/openbmc_project/dump/resource/entry/";
 static constexpr auto resDumpEntry = "com.ibm.Dump.Entry.Resource";
+
+static constexpr auto certObjPath = "/xyz/openbmc_project/certs/ca/";
+static constexpr auto certAuthority =
+    "xyz.openbmc_project.PLDM.Provider.Certs.Authority.CSR";
 class Handler : public CmdHandler
 {
   public:
@@ -260,6 +264,47 @@ class Handler : public CmdHandler
                             hostSockFd, hostEid, dbusImplReqester, path);
                         dbusToFileHandler->processNewResourceDump(vspstring,
                                                                   password);
+                        break;
+                    }
+                }
+            });
+        vmiCertMatcher = std::make_unique<sdbusplus::bus::match::match>(
+            pldm::utils::DBusHandler::getBus(),
+            sdbusplus::bus::match::rules::interfacesAdded() +
+                sdbusplus::bus::match::rules::argNpath(0, certObjPath),
+            [hostSockFd, hostEid,
+             dbusImplReqester](sdbusplus::message::message& msg) {
+                std::map<
+                    std::string,
+                    std::map<std::string, std::variant<std::string, uint32_t>>>
+                    interfaces;
+                sdbusplus::message::object_path path;
+                msg.read(path, interfaces);
+                std::string csr;
+
+                for (auto& interface : interfaces)
+                {
+                    if (interface.first == certAuthority)
+                    {
+                        for (const auto& property : interface.second)
+                        {
+                            if (property.first == "CSR")
+                            {
+                                csr = std::get<std::string>(property.second);
+                                auto fileHandle =
+                                    sdbusplus::message::object_path(path)
+                                        .filename();
+
+                                auto dbusToFileHandler =
+                                    std::make_unique<pldm::requester::oem_ibm::
+                                                         DbusToFileHandler>(
+                                        hostSockFd, hostEid, dbusImplReqester,
+                                        path);
+                                dbusToFileHandler->newCsrFileAvailable(
+                                    csr, fileHandle);
+                                break;
+                            }
+                        }
                         break;
                     }
                 }
@@ -374,6 +419,9 @@ class Handler : public CmdHandler
     std::unique_ptr<sdbusplus::bus::match::match>
         resDumpMatcher; //!< Pointer to capture the interface added signal
                         //!< for new resource dump
+    std::unique_ptr<sdbusplus::bus::match::match>
+        vmiCertMatcher; //!< Pointer to capture the interface added signal
+                        //!< for new csr string
 };
 
 } // namespace oem_ibm

@@ -1,6 +1,3 @@
-systemd_system_unit_dir = systemd.get_pkgconfig_variable(
-    'systemdsystemunitdir',
-    define_variable: ['prefix', get_option('prefix')])
 packagedir = join_paths(
     get_option('prefix'),
     get_option('datadir'),

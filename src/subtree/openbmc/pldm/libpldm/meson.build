@@ -60,7 +60,7 @@ libpldm = library(
   version: meson.project_version(),
   install: true)
 
-libpldm = declare_dependency(
+libpldm_dep = declare_dependency(
   include_directories: include_directories(libpldm_headers),
   link_with: libpldm)
 

@@ -37,13 +37,31 @@
          "displayName" : "Number Huge Pages"
       },
       {
-         "attribute_name" : "hb_memory_region_size",
+         "attribute_name" : "hb_huge_page_size",
          "lower_bound" : 0,
          "upper_bound" : 255,
          "scalar_increment" : 1,
-         "default_value" : 4,
-         "helpText" : "Specifies the size of the logical memory block the system uses to read memory, requires a reboot for a change to be applied. Encoded: 3=128MB 4=256MB.",
-         "displayName" : "Memory Region Size"
+         "default_value" : 0,
+         "helpText" : "Specifies the size of huge pages, 0 = 16GB, requires a reboot for a change to be applied.",
+         "displayName" : "Huge Page Size"
+      },
+      {
+         "attribute_name" : "hb_field_core_override",
+         "lower_bound" : 0,
+         "upper_bound" : 255,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "The number of cores to activate where 0 being to activate all available cores. Where N, for fused cores, is to activate 2N cores. Where N, for non-fused cores, is to activate N cores.",
+         "displayName" : "Field Core Override"
+      },
+      {
+         "attribute_name" : "hb_power_limit_in_watts",
+         "lower_bound" : 0,
+         "upper_bound" : 65535,
+         "scalar_increment" : 1,
+         "default_value" : 0,
+         "helpText" : "Specifies the power limit in watts.",
+         "displayName" : "Power Limit In Watts"
       }
    ]
 }

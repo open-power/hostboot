@@ -143,8 +143,8 @@ int setStateEffecterStatesHandler(
     }
     catch (const std::out_of_range& e)
     {
-        std::cerr << "the effecterId does not exist. effecter id: "
-                  << effecterId << e.what() << '\n';
+        std::cerr << "Unknown effecter ID : " << effecterId << e.what() << '\n';
+        return PLDM_ERROR;
     }
 
     return rc;

@@ -350,7 +350,8 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
     }
 
     // Add a timer to the event loop, default 30s.
-    auto timerCallback = [=](Timer& /*source*/, Timer::TimePoint /*time*/) {
+    auto timerCallback = [=, this](Timer& /*source*/,
+                                   Timer::TimePoint /*time*/) {
         if (!responseReceived)
         {
             std::cerr << "PLDM soft off: ERROR! Can't get the response for the "
@@ -364,7 +365,7 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
                std::chrono::seconds{1}, std::move(timerCallback));
 
     // Add a callback to handle EPOLLIN on fd
-    auto callback = [=](IO& io, int fd, uint32_t revents) {
+    auto callback = [=, this](IO& io, int fd, uint32_t revents) {
         if (!(revents & EPOLLIN))
         {
             return;

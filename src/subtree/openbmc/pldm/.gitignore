@@ -1,3 +1,6 @@
+subprojects/*
+!subprojects/*.wrap
+
 # Template from
 # https://github.com/github/gitignore/blob/master/Autotools.gitignore
 

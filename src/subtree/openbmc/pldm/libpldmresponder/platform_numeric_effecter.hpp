@@ -251,21 +251,30 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
         return rc;
     }
 
-    const auto& [dbusMappings, dbusValMaps] =
-        handler.getDbusObjMaps(effecterId);
-    DBusMapping dbusMapping{
-        dbusMappings[0].objectPath, dbusMappings[0].interface,
-        dbusMappings[0].propertyName, dbusMappings[0].propertyType};
     try
     {
-        dBusIntf.setDbusProperty(dbusMapping, dbusValue.value());
+        const auto& [dbusMappings, dbusValMaps] =
+            handler.getDbusObjMaps(effecterId);
+        DBusMapping dbusMapping{
+            dbusMappings[0].objectPath, dbusMappings[0].interface,
+            dbusMappings[0].propertyName, dbusMappings[0].propertyType};
+        try
+        {
+
+            dBusIntf.setDbusProperty(dbusMapping, dbusValue.value());
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error setting property, ERROR=" << e.what()
+                      << " PROPERTY=" << dbusMapping.propertyName
+                      << " INTERFACE=" << dbusMapping.interface << " PATH="
+                      << dbusMapping.objectPath << "\n";
+            return PLDM_ERROR;
+        }
     }
-    catch (const std::exception& e)
+    catch (const std::out_of_range& e)
     {
-        std::cerr << "Error setting property, ERROR=" << e.what()
-                  << " PROPERTY=" << dbusMapping.propertyName << " INTERFACE="
-                  << dbusMapping.interface << " PATH=" << dbusMapping.objectPath
-                  << "\n";
+        std::cerr << "Unknown effecter ID : " << effecterId << e.what() << '\n';
         return PLDM_ERROR;
     }
 

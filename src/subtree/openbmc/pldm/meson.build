@@ -1,10 +1,10 @@
 project('pldm', ['c', 'cpp'],
-        version: '0.1', meson_version: '>=0.53.2',
+        version: '0.1', meson_version: '>=0.57.0',
         default_options: [
           'warning_level=3',
           'default_library=shared',
           'werror=true',
-          'cpp_std=c++17',
+          'cpp_std=c++20',
           'buildtype=debugoptimized'
         ])
 
@@ -22,13 +22,15 @@ if(get_option('optimization') == '0')
 endif
 
 conf_data = configuration_data()
+if get_option('libpldmresponder').enabled()
 conf_data.set_quoted('BIOS_JSONS_DIR', '/usr/share/pldm/bios')
 conf_data.set_quoted('BIOS_TABLES_DIR', '/var/lib/pldm/bios')
 conf_data.set_quoted('PDR_JSONS_DIR', '/usr/share/pldm/pdr')
 conf_data.set_quoted('FRU_JSONS_DIR', '/usr/share/pldm/fru')
 conf_data.set_quoted('HOST_JSONS_DIR', '/usr/share/pldm/host')
 conf_data.set_quoted('EVENTS_JSONS_DIR', '/usr/share/pldm/events')
-conf_data.set('PLDM_VERBOSITY',get_option('verbosity'))
+add_project_arguments('-DLIBPLDMRESPONDER', language : ['c','cpp'])
+endif
 if get_option('softoff').enabled()
   conf_data.set('SOFTOFF_TIMEOUT_SECONDS', get_option('softoff-timeout-seconds'))
 endif
@@ -41,17 +43,87 @@ if get_option('oem-ibm').enabled()
   conf_data.set_quoted('LID_ALTERNATE_PATCH_DIR', '/usr/local/share/hostfw/alternate')
   conf_data.set_quoted('LID_STAGING_DIR', '/var/lib/phosphor-software-manager/hostfw/staging')
   conf_data.set('DMA_MAXSIZE', get_option('oem-ibm-dma-maxsize'))
-  add_global_arguments('-DOEM_IBM', language : 'c')
-  add_global_arguments('-DOEM_IBM', language : 'cpp')
+  add_project_arguments('-DOEM_IBM', language : 'c')
+  add_project_arguments('-DOEM_IBM', language : 'cpp')
 endif
+conf_data.set('PLDM_VERBOSITY',get_option('verbosity'))
 configure_file(output: 'config.h',
   configuration: conf_data
 )
 
-phosphor_dbus_interfaces = dependency('phosphor-dbus-interfaces')
-sdbusplus = dependency('sdbusplus')
-sdeventplus = dependency('sdeventplus')
+phosphor_dbus_interfaces = dependency(
+  'phosphor-dbus-interfaces',
+  fallback: ['phosphor-dbus-interfaces', 'phosphor_dbus_interfaces_dep'],
+)
+sdbusplus = dependency(
+  'sdbusplus',
+  fallback: ['sdbusplus', 'sdbusplus_dep'],
+)
+sdeventplus = dependency(
+  'sdeventplus',
+  fallback: ['sdeventplus', 'sdeventplus_dep'],
+)
 systemd = dependency('systemd')
+
+cpp = meson.get_compiler('cpp')
+
+if cpp.has_header('nlohmann/json.hpp')
+  nlohmann_json = declare_dependency()
+else
+  subproject('nlohmann-json')
+  nlohmann_json = declare_dependency(
+    include_directories: [
+      'subprojects/nlohmann-json/single_include',
+      'subprojects/nlohmann-json/single_include/nlohmann',
+    ]
+  )
+endif
+
+if cpp.has_header('CLI/CLI.hpp')
+  CLI11_dep = declare_dependency()
+else
+  CLI11_dep = dependency(
+    'CLI11',
+    fallback: [ 'CLI11', 'CLI11_dep' ],
+  )
+endif
+
+if get_option('oe-sdk').enabled()
+  # Setup OE SYSROOT
+  OECORE_TARGET_SYSROOT = run_command('sh', '-c', 'echo $OECORE_TARGET_SYSROOT').stdout().strip()
+  if OECORE_TARGET_SYSROOT == ''
+      error('Unable to get $OECORE_TARGET_SYSROOT, check your environment.')
+  endif
+  message('OE_SYSROOT: ' + OECORE_TARGET_SYSROOT)
+  rpath = ':'.join([OECORE_TARGET_SYSROOT + '/lib', OECORE_TARGET_SYSROOT + '/usr/lib'])
+  ld_so = run_command('sh', '-c', 'find ' + OECORE_TARGET_SYSROOT + '/lib/ld-*.so | sort -r -n | head -n1').stdout().strip()
+  dynamic_linker = ['-Wl,-dynamic-linker,' + ld_so]
+else
+  dynamic_linker = []
+endif
+
+if get_option('tests').enabled()
+    gtest = dependency('gtest', main: true, disabler: true, required: false)
+    gmock = dependency('gmock', disabler: true, required: false)
+    if not gtest.found() or not gmock.found()
+        gtest_proj = import('cmake').subproject('googletest', required: false)
+        if gtest_proj.found()
+            gtest = declare_dependency(
+                dependencies: [
+                    dependency('threads'),
+                    gtest_proj.dependency('gtest'),
+                    gtest_proj.dependency('gtest_main'),
+                ]
+            )
+            gmock = gtest_proj.dependency('gmock')
+        else
+            assert(
+                not get_option('tests').enabled(),
+                'Googletest is required if tests are enabled'
+            )
+        endif
+    endif
+endif
 
 subdir('libpldm')
 
@@ -63,8 +135,9 @@ libpldmutils = library(
   'common/utils.cpp',
   version: meson.project_version(),
   dependencies: [
-      libpldm,
+      libpldm_dep,
       phosphor_dbus_interfaces,
+      nlohmann_json,
       sdbusplus,
   ],
   install: true,
@@ -74,17 +147,22 @@ libpldmutils = library(
 libpldmutils = declare_dependency(
   include_directories: include_directories(libpldmutils_headers),
   link_with: libpldmutils)
-subdir('libpldmresponder')
 
 deps = [
-  libpldm,
+  libpldm_dep,
   libpldmutils,
-  libpldmresponder,
-  libpldmutils,
+  nlohmann_json,
   sdbusplus,
   sdeventplus,
-  phosphor_dbus_interfaces
+  phosphor_dbus_interfaces,
 ]
+
+if get_option('libpldmresponder').enabled()
+subdir('libpldmresponder')
+deps += [
+  libpldmresponder
+]
+endif
 
 executable(
   'pldmd',
@@ -92,15 +170,14 @@ executable(
   'pldmd/dbus_impl_requester.cpp',
   'pldmd/instance_id.cpp',
   'pldmd/dbus_impl_pdr.cpp',
-  'host-bmc/dbus_to_host_effecters.cpp',
   implicit_include_directories: false,
   dependencies: deps,
   install: true,
   install_dir: get_option('bindir'))
 
-systemd_system_unit_dir = systemd.get_pkgconfig_variable(
-    'systemdsystemunitdir',
-    define_variable: ['prefix', get_option('prefix')])
+systemd_system_unit_dir = systemd.get_variable(
+        pkgconfig: 'systemdsystemunitdir',
+        pkgconfig_define: ['prefix', get_option('prefix')])
 
 configure_file(
   copy: true,
@@ -125,16 +202,18 @@ subdir('pldmtool')
 
 subdir('configurations')
 
-if get_option('tests').enabled()
-  subdir('test')
-endif
-
 if get_option('utilities').enabled()
   subdir('utilities')
 endif
 
 if get_option('softoff').enabled()
   subdir('softoff')
+endif
+
+if get_option('tests').enabled()
+  subdir('common/test')
+  subdir('host-bmc/test')
+  subdir('test')
 endif
 
 endif # pldm-only

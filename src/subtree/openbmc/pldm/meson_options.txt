@@ -4,6 +4,7 @@ option('oe-sdk', type: 'feature', description: 'Enable OE SDK')
 option('oem-ibm', type: 'feature', description: 'Enable IBM OEM PLDM')
 option('requester-api', type: 'feature', description: 'Enable libpldm requester API', value: 'enabled')
 option('utilities', type: 'feature', description: 'Enable debug utilities', value: 'enabled')
+option('libpldmresponder', type: 'feature', description: 'Enable libpldmresponder', value: 'enabled')
 
 option('libpldm-only', type: 'feature', description: 'Only build libpldm', value: 'disabled')
 option('oem-ibm-dma-maxsize', type: 'integer', min:4096, max: 16773120, description: 'OEM-IBM: max DMA size', value: 8384512) #16MB - 4K

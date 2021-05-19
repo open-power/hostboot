@@ -80,7 +80,7 @@ class Handler : public oem_platform::Handler
      * @return platformHandler->getNextEffecterId() - returns the
      *             effecter ID from the platform handler
      */
-    uint16_t getNextEffecterId()
+    virtual uint16_t getNextEffecterId()
     {
         return platformHandler->getNextEffecterId();
     }
@@ -90,7 +90,7 @@ class Handler : public oem_platform::Handler
      * @return platformHandler->getNextSensorId() - returns the
      *             Sensor ID from the platform handler
      */
-    uint16_t getNextSensorId()
+    virtual uint16_t getNextSensorId()
     {
         return platformHandler->getNextSensorId();
     }

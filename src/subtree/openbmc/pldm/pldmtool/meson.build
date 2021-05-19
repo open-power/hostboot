@@ -20,6 +20,13 @@ executable(
   sources,
   implicit_include_directories: false,
   include_directories: include_directories(libpldm_headers),
-  dependencies: [libpldm, libpldmutils, sdbusplus],
+  dependencies: [
+    CLI11_dep,
+    libpldm_dep,
+    libpldmutils,
+    nlohmann_json,
+    phosphor_dbus_interfaces,
+    sdbusplus,
+  ],
   install: true,
   install_dir: get_option('bindir'))

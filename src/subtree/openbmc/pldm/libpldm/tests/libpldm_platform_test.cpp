@@ -1862,3 +1862,175 @@ TEST(GetSensorReading, testBadDecodeResponse)
 
     EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
 }
+
+TEST(SetEventReceiver, testGoodEncodeRequest)
+{
+    uint8_t eventMessageGlobalEnable =
+        PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE;
+    uint8_t transportProtocolType = PLDM_TRANSPORT_PROTOCOL_TYPE_MCTP;
+    uint8_t eventReceiverAddressInfo = 0x08;
+    uint16_t heartbeatTimer = 0x78;
+
+    std::vector<uint8_t> requestMsg(hdrSize +
+                                    PLDM_SET_EVENT_RECEIVER_REQ_BYTES);
+    auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
+
+    auto rc = encode_set_event_receiver_req(
+        0, eventMessageGlobalEnable, transportProtocolType,
+        eventReceiverAddressInfo, heartbeatTimer, request);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    struct pldm_set_event_receiver_req* req =
+        reinterpret_cast<struct pldm_set_event_receiver_req*>(request->payload);
+    EXPECT_EQ(eventMessageGlobalEnable, req->event_message_global_enable);
+    EXPECT_EQ(transportProtocolType, req->transport_protocol_type);
+    EXPECT_EQ(eventReceiverAddressInfo, req->event_receiver_address_info);
+    EXPECT_EQ(heartbeatTimer, le16toh(req->heartbeat_timer));
+}
+
+TEST(SetEventReceiver, testBadEncodeRequest)
+{
+    uint8_t eventMessageGlobalEnable =
+        PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE;
+    uint8_t transportProtocolType = PLDM_TRANSPORT_PROTOCOL_TYPE_MCTP;
+    uint8_t eventReceiverAddressInfo = 0x08;
+    uint16_t heartbeatTimer = 0;
+
+    std::vector<uint8_t> requestMsg(hdrSize +
+                                    PLDM_SET_EVENT_RECEIVER_REQ_BYTES);
+    auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
+
+    auto rc = encode_set_event_receiver_req(
+        0, eventMessageGlobalEnable, transportProtocolType,
+        eventReceiverAddressInfo, heartbeatTimer, request);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}
+
+TEST(SetEventReceiver, testGoodDecodeResponse)
+{
+    std::array<uint8_t, hdrSize + PLDM_SET_EVENT_RECEIVER_RESP_BYTES>
+        responseMsg{};
+
+    uint8_t retcompletion_code = 0;
+    responseMsg[hdrSize] = PLDM_SUCCESS;
+
+    auto response = reinterpret_cast<pldm_msg*>(responseMsg.data());
+    auto rc = decode_set_event_receiver_resp(
+        response, responseMsg.size() - sizeof(pldm_msg_hdr),
+        &retcompletion_code);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(PLDM_SUCCESS, retcompletion_code);
+}
+
+TEST(SetEventReceiver, testBadDecodeResponse)
+{
+    std::array<uint8_t, hdrSize + PLDM_SET_EVENT_RECEIVER_RESP_BYTES>
+        responseMsg{};
+    uint8_t retcompletion_code = 0;
+    auto response = reinterpret_cast<pldm_msg*>(responseMsg.data());
+
+    auto rc = decode_set_event_receiver_resp(
+        response, responseMsg.size() - sizeof(pldm_msg_hdr), NULL);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_set_event_receiver_resp(
+        nullptr, responseMsg.size() - sizeof(pldm_msg_hdr),
+        &retcompletion_code);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}
+
+TEST(SetEventReceiver, testGoodEncodeResponse)
+{
+    std::array<uint8_t,
+               sizeof(pldm_msg_hdr) + PLDM_SET_EVENT_RECEIVER_RESP_BYTES>
+        responseMsg{};
+    auto response = reinterpret_cast<pldm_msg*>(responseMsg.data());
+    uint8_t completionCode = 0;
+
+    auto rc = encode_set_event_receiver_resp(0, PLDM_SUCCESS, response);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(completionCode, response->payload[0]);
+}
+
+TEST(SetEventReceiver, testBadEncodeResponse)
+{
+    auto rc = encode_set_event_receiver_resp(0, PLDM_SUCCESS, NULL);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}
+
+TEST(SetEventReceiver, testGoodDecodeRequest)
+{
+
+    std::array<uint8_t, hdrSize + PLDM_SET_EVENT_RECEIVER_REQ_BYTES>
+        requestMsg{};
+
+    uint8_t eventMessageGlobalEnable =
+        PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE;
+    uint8_t transportProtocolType = PLDM_TRANSPORT_PROTOCOL_TYPE_MCTP;
+    uint8_t eventReceiverAddressInfo = 0x08;
+    uint16_t heartbeatTimer = 0x78;
+
+    auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
+    struct pldm_set_event_receiver_req* req =
+        reinterpret_cast<struct pldm_set_event_receiver_req*>(request->payload);
+
+    req->event_message_global_enable = eventMessageGlobalEnable;
+    req->transport_protocol_type = transportProtocolType;
+    req->event_receiver_address_info = eventReceiverAddressInfo;
+    req->heartbeat_timer = htole16(heartbeatTimer);
+
+    uint8_t reteventMessageGlobalEnable;
+    uint8_t rettransportProtocolType;
+    uint8_t reteventReceiverAddressInfo;
+    uint16_t retheartbeatTimer;
+    auto rc = decode_set_event_receiver_req(
+        request, requestMsg.size() - hdrSize, &reteventMessageGlobalEnable,
+        &rettransportProtocolType, &reteventReceiverAddressInfo,
+        &retheartbeatTimer);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(eventMessageGlobalEnable, reteventMessageGlobalEnable);
+    EXPECT_EQ(transportProtocolType, rettransportProtocolType);
+    EXPECT_EQ(eventReceiverAddressInfo, reteventReceiverAddressInfo);
+    EXPECT_EQ(heartbeatTimer, retheartbeatTimer);
+}
+
+TEST(SetEventReceiver, testBadDecodeRequest)
+{
+    std::array<uint8_t, hdrSize + PLDM_SET_EVENT_RECEIVER_REQ_BYTES>
+        requestMsg{};
+
+    auto rc = decode_set_event_receiver_req(NULL, requestMsg.size() - hdrSize,
+                                            NULL, NULL, NULL, NULL);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    uint8_t eventMessageGlobalEnable =
+        PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE;
+    uint8_t transportProtocolType = PLDM_TRANSPORT_PROTOCOL_TYPE_MCTP;
+    uint8_t eventReceiverAddressInfo = 0x08;
+    uint16_t heartbeatTimer = 0x78;
+
+    auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
+    struct pldm_set_event_receiver_req* req =
+        reinterpret_cast<struct pldm_set_event_receiver_req*>(request->payload);
+
+    req->event_message_global_enable = eventMessageGlobalEnable;
+    req->transport_protocol_type = transportProtocolType;
+    req->event_receiver_address_info = eventReceiverAddressInfo;
+    req->heartbeat_timer = htole16(heartbeatTimer);
+
+    uint8_t reteventMessageGlobalEnable;
+    uint8_t rettransportProtocolType;
+    uint8_t reteventReceiverAddressInfo;
+    uint16_t retheartbeatTimer;
+    rc = decode_set_event_receiver_req(
+        request, requestMsg.size() - hdrSize - 1, &reteventMessageGlobalEnable,
+        &rettransportProtocolType, &reteventReceiverAddressInfo,
+        &retheartbeatTimer);
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}

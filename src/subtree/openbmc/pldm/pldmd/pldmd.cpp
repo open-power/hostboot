@@ -4,18 +4,8 @@
 #include "libpldm/platform.h"
 
 #include "common/utils.hpp"
-#include "dbus_impl_pdr.hpp"
 #include "dbus_impl_requester.hpp"
-#include "host-bmc/dbus_to_event_handler.hpp"
-#include "host-bmc/dbus_to_host_effecters.hpp"
-#include "host-bmc/host_pdr_handler.hpp"
 #include "invoker.hpp"
-#include "libpldmresponder/base.hpp"
-#include "libpldmresponder/bios.hpp"
-#include "libpldmresponder/fru.hpp"
-#include "libpldmresponder/oem_handler.hpp"
-#include "libpldmresponder/platform.hpp"
-#include "xyz/openbmc_project/PLDM/Event/server.hpp"
 
 #include <err.h>
 #include <getopt.h>
@@ -41,6 +31,19 @@
 #include <string>
 #include <vector>
 
+#ifdef LIBPLDMRESPONDER
+#include "dbus_impl_pdr.hpp"
+#include "host-bmc/dbus_to_event_handler.hpp"
+#include "host-bmc/dbus_to_host_effecters.hpp"
+#include "host-bmc/host_pdr_handler.hpp"
+#include "libpldmresponder/base.hpp"
+#include "libpldmresponder/bios.hpp"
+#include "libpldmresponder/fru.hpp"
+#include "libpldmresponder/oem_handler.hpp"
+#include "libpldmresponder/platform.hpp"
+#include "xyz/openbmc_project/PLDM/Event/server.hpp"
+#endif
+
 #ifdef OEM_IBM
 #include "libpldmresponder/file_io.hpp"
 #include "libpldmresponder/oem_ibm_handler.hpp"
@@ -48,11 +51,11 @@
 
 constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
 
-using namespace pldm::responder;
 using namespace pldm;
 using namespace sdeventplus;
 using namespace sdeventplus::source;
-using namespace pldm::state_sensor;
+using namespace pldm::responder;
+using namespace pldm::utils;
 
 static Response processRxMsg(const std::vector<uint8_t>& requestMsg,
                              Invoker& invoker, dbus_api::Requester& requester)
@@ -152,14 +155,18 @@ int main(int argc, char** argv)
     }
 
     auto event = Event::get_default();
+    auto& bus = pldm::utils::DBusHandler::getBus();
+    dbus_api::Requester dbusImplReq(bus, "/xyz/openbmc_project/pldm");
+    Invoker invoker{};
+
+#ifdef LIBPLDMRESPONDER
+    using namespace pldm::state_sensor;
     std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> pdrRepo(
         pldm_pdr_init(), pldm_pdr_destroy);
     std::unique_ptr<pldm_entity_association_tree,
                     decltype(&pldm_entity_association_tree_destroy)>
         entityTree(pldm_entity_association_tree_init(),
                    pldm_entity_association_tree_destroy);
-    auto& bus = pldm::utils::DBusHandler::getBus();
-    dbus_api::Requester dbusImplReq(bus, "/xyz/openbmc_project/pldm");
     std::unique_ptr<HostPDRHandler> hostPDRHandler;
     std::unique_ptr<pldm::host_effecters::HostEffecterParser>
         hostEffecterParser;
@@ -178,8 +185,6 @@ int main(int argc, char** argv)
         dbusToPLDMEventHandler =
             std::make_unique<DbusToPLDMEvent>(sockfd, hostEID, dbusImplReq);
     }
-
-    Invoker invoker{};
     std::unique_ptr<oem_platform::Handler> oemPlatformHandler{};
 
 #ifdef OEM_IBM
@@ -215,6 +220,10 @@ int main(int argc, char** argv)
 
     invoker.registerHandler(PLDM_PLATFORM, std::move(platformHandler));
     invoker.registerHandler(PLDM_FRU, std::move(fruHandler));
+    dbus_api::Pdr dbusImplPdr(bus, "/xyz/openbmc_project/pldm", pdrRepo.get());
+    sdbusplus::xyz::openbmc_project::PLDM::server::Event dbusImplEvent(
+        bus, "/xyz/openbmc_project/pldm");
+#endif
 
     pldm::utils::CustomFD socketFd(sockfd);
 
@@ -242,9 +251,6 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    dbus_api::Pdr dbusImplPdr(bus, "/xyz/openbmc_project/pldm", pdrRepo.get());
-    sdbusplus::xyz::openbmc_project::PLDM::server::Event dbusImplEvent(
-        bus, "/xyz/openbmc_project/pldm");
     auto callback = [verbose, &invoker, &dbusImplReq](IO& io, int fd,
                                                       uint32_t revents) {
         if (!(revents & EPOLLIN))

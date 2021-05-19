@@ -160,8 +160,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg,
-                                         size_t payload_length)
+					 struct pldm_msg *msg)
 {
 	struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
@@ -179,10 +178,6 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 	    field == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
-
-    if (payload_length < PLDM_SET_STATE_EFFECTER_STATES_REQ_BYTES ) {
-        return PLDM_ERROR_INVALID_LENGTH;
-    }
 
 	struct pldm_set_state_effecter_states_req *request =
 	    (struct pldm_set_state_effecter_states_req *)msg->payload;
@@ -1536,4 +1531,125 @@ int decode_get_sensor_reading_req(const struct pldm_msg *msg,
 	*rearm_event_state = request->rearm_event_state;
 
 	return PLDM_SUCCESS;
+}
+
+int encode_set_event_receiver_req(uint8_t instance_id,
+				  uint8_t event_message_global_enable,
+				  uint8_t transport_protocol_type,
+				  uint8_t event_receiver_address_info,
+				  uint16_t heartbeat_timer,
+				  struct pldm_msg *msg)
+{
+	struct pldm_header_info header = {0};
+	int rc = PLDM_SUCCESS;
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	header.msg_type = PLDM_REQUEST;
+	header.instance = instance_id;
+	header.pldm_type = PLDM_PLATFORM;
+	header.command = PLDM_SET_EVENT_RECEIVER;
+
+	if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
+		return rc;
+	}
+
+	struct pldm_set_event_receiver_req *request =
+	    (struct pldm_set_event_receiver_req *)msg->payload;
+	request->event_message_global_enable = event_message_global_enable;
+
+	if (transport_protocol_type != PLDM_TRANSPORT_PROTOCOL_TYPE_MCTP) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+	request->transport_protocol_type = transport_protocol_type;
+	request->event_receiver_address_info = event_receiver_address_info;
+
+	if (event_message_global_enable ==
+	    PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE) {
+		if (heartbeat_timer == 0) {
+			return PLDM_ERROR_INVALID_DATA;
+		}
+		request->heartbeat_timer = htole16(heartbeat_timer);
+	}
+
+	return PLDM_SUCCESS;
+}
+
+int decode_set_event_receiver_resp(const struct pldm_msg *msg,
+				   size_t payload_length,
+				   uint8_t *completion_code)
+{
+	if (msg == NULL || completion_code == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	*completion_code = msg->payload[0];
+	if (PLDM_SUCCESS != *completion_code) {
+		return PLDM_SUCCESS;
+	}
+
+	if (payload_length > PLDM_SET_EVENT_RECEIVER_RESP_BYTES) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	return PLDM_SUCCESS;
+}
+
+int decode_set_event_receiver_req(const struct pldm_msg *msg,
+				  size_t payload_length,
+				  uint8_t *event_message_global_enable,
+				  uint8_t *transport_protocol_type,
+				  uint8_t *event_receiver_address_info,
+				  uint16_t *heartbeat_timer)
+
+{
+	if (msg == NULL || event_message_global_enable == NULL ||
+	    transport_protocol_type == NULL ||
+	    event_receiver_address_info == NULL || heartbeat_timer == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != PLDM_SET_EVENT_RECEIVER_REQ_BYTES) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_set_event_receiver_req *request =
+	    (struct pldm_set_event_receiver_req *)msg->payload;
+
+	if ((*event_message_global_enable ==
+	     PLDM_EVENT_MESSAGE_GLOBAL_ENABLE_ASYNC_KEEP_ALIVE) &&
+	    (*heartbeat_timer == 0)) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	*event_message_global_enable = request->event_message_global_enable,
+	*transport_protocol_type = request->transport_protocol_type,
+	*event_receiver_address_info = request->event_receiver_address_info,
+	*heartbeat_timer = le16toh(request->heartbeat_timer);
+
+	return PLDM_SUCCESS;
+}
+
+int encode_set_event_receiver_resp(uint8_t instance_id, uint8_t completion_code,
+				   struct pldm_msg *msg)
+
+{
+	struct pldm_header_info header = {0};
+	int rc = PLDM_SUCCESS;
+
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	msg->payload[0] = completion_code;
+
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_PLATFORM;
+	header.command = PLDM_SET_EVENT_RECEIVER;
+
+	rc = pack_pldm_header(&header, &(msg->hdr));
+
+	return rc;
 }

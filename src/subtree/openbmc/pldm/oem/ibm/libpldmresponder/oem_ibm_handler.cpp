@@ -146,7 +146,7 @@ int pldm::responder::oem_ibm_platform::Handler::
     return rc;
 }
 
-void buildAllCodeUpdateEffecterPDR(platform::Handler* platformHandler,
+void buildAllCodeUpdateEffecterPDR(oem_ibm_platform::Handler* platformHandler,
                                    uint16_t entityType, uint16_t entityInstance,
                                    uint16_t stateSetID, pdr_utils::Repo& repo)
 {
@@ -197,7 +197,7 @@ void buildAllCodeUpdateEffecterPDR(platform::Handler* platformHandler,
     repo.addRecord(pdrEntry);
 }
 
-void buildAllCodeUpdateSensorPDR(platform::Handler* platformHandler,
+void buildAllCodeUpdateSensorPDR(oem_ibm_platform::Handler* platformHandler,
                                  uint16_t entityType, uint16_t entityInstance,
                                  uint16_t stateSetID, pdr_utils::Repo& repo)
 {
@@ -249,31 +249,31 @@ void buildAllCodeUpdateSensorPDR(platform::Handler* platformHandler,
 void pldm::responder::oem_ibm_platform::Handler::buildOEMPDR(
     pdr_utils::Repo& repo)
 {
-    buildAllCodeUpdateEffecterPDR(
-        platformHandler, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE, ENTITY_INSTANCE_0,
-        PLDM_OEM_IBM_BOOT_STATE, repo);
-    buildAllCodeUpdateEffecterPDR(
-        platformHandler, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE, ENTITY_INSTANCE_1,
-        PLDM_OEM_IBM_BOOT_STATE, repo);
-    buildAllCodeUpdateEffecterPDR(
-        platformHandler, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE, ENTITY_INSTANCE_0,
-        PLDM_OEM_IBM_FIRMWARE_UPDATE_STATE, repo);
-    buildAllCodeUpdateEffecterPDR(platformHandler, PLDM_ENTITY_SYSTEM_CHASSIS,
+    buildAllCodeUpdateEffecterPDR(this, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE,
+                                  ENTITY_INSTANCE_0, PLDM_OEM_IBM_BOOT_STATE,
+                                  repo);
+    buildAllCodeUpdateEffecterPDR(this, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE,
+                                  ENTITY_INSTANCE_1, PLDM_OEM_IBM_BOOT_STATE,
+                                  repo);
+    buildAllCodeUpdateEffecterPDR(this, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE,
+                                  ENTITY_INSTANCE_0,
+                                  PLDM_OEM_IBM_FIRMWARE_UPDATE_STATE, repo);
+    buildAllCodeUpdateEffecterPDR(this, PLDM_ENTITY_SYSTEM_CHASSIS,
                                   ENTITY_INSTANCE_0,
                                   PLDM_OEM_IBM_SYSTEM_POWER_STATE, repo);
 
-    buildAllCodeUpdateSensorPDR(
-        platformHandler, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE, ENTITY_INSTANCE_0,
-        PLDM_OEM_IBM_BOOT_STATE, repo);
-    buildAllCodeUpdateSensorPDR(
-        platformHandler, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE, ENTITY_INSTANCE_1,
-        PLDM_OEM_IBM_BOOT_STATE, repo);
-    buildAllCodeUpdateSensorPDR(
-        platformHandler, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE, ENTITY_INSTANCE_0,
-        PLDM_OEM_IBM_FIRMWARE_UPDATE_STATE, repo);
-    buildAllCodeUpdateSensorPDR(
-        platformHandler, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE, ENTITY_INSTANCE_0,
-        PLDM_OEM_IBM_VERIFICATION_STATE, repo);
+    buildAllCodeUpdateSensorPDR(this, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE,
+                                ENTITY_INSTANCE_0, PLDM_OEM_IBM_BOOT_STATE,
+                                repo);
+    buildAllCodeUpdateSensorPDR(this, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE,
+                                ENTITY_INSTANCE_1, PLDM_OEM_IBM_BOOT_STATE,
+                                repo);
+    buildAllCodeUpdateSensorPDR(this, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE,
+                                ENTITY_INSTANCE_0,
+                                PLDM_OEM_IBM_FIRMWARE_UPDATE_STATE, repo);
+    buildAllCodeUpdateSensorPDR(this, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE,
+                                ENTITY_INSTANCE_0,
+                                PLDM_OEM_IBM_VERIFICATION_STATE, repo);
     auto sensorId = findStateSensorId(
         repo.getPdr(), 0, PLDM_OEM_IBM_ENTITY_FIRMWARE_UPDATE,
         ENTITY_INSTANCE_0, 0, PLDM_OEM_IBM_VERIFICATION_STATE);
