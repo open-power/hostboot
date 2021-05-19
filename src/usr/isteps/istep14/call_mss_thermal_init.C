@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,11 +162,10 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
                            l_chipId,
                            TRACE_ERR_ARGS(l_err) );
 
-                // Capture error, commit and continue, do not break out here.
-                // Continue here and consolidate all the errors that might
-                // occur in a batch before bailing. This will facilitate in the
-                // efficiency of the reconfig loop.
-                captureError(l_err, io_iStepError, HWPF_COMP_ID, l_ocmbTarget);
+                // We don't want to fail the IPL due to problems setting
+                //  up the temperature sensors on the DIMM, so just commit
+                //  the log here.
+                errlCommit(l_err, ISTEP_COMP_ID);
             }
             else
             {
