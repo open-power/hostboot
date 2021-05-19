@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -251,7 +251,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     }
 
 #ifndef __HOSTBOOT_MODULE
-    FAPI_DBG("p10_extract_sbe_rc: Reading CBS Status register");
+    FAPI_INF("p10_extract_sbe_rc: Reading CBS Status register");
     FAPI_TRY(getCfamRegister(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI, l_data32));
 
     if(!(l_data32.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_VDN_PGOOD>()))
@@ -266,7 +266,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     if(i_set_sdb)
     {
         // Applying SDB setting required in usecase 1 & 3 only
-        FAPI_DBG("p10_extract_sbe_rc: Setting chip in SDB mode");
+        FAPI_INF("p10_extract_sbe_rc: Setting chip in SDB mode");
         l_data32.flush<0>();
         FAPI_TRY(getCfamRegister(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS_FSI, l_data32));
         l_data32.setBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE>();
@@ -274,12 +274,12 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     }
 
     // XSR and IAR
-    FAPI_DBG("p10_extract_sbe_rc : Reading PPE_XIDBGPRO");
+    FAPI_INF("p10_extract_sbe_rc : Reading PPE_XIDBGPRO");
     FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO, l_data64_dbgpro));
     l_data64_dbgpro.extractToRight(l_data32_iar, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_IAR,
                                    (scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_IAR_LEN + 2)); //To get 32 bits of address
-    FAPI_DBG("p10_extract_sbe_rc : PPE_XIDBGPRO : %" PRIx64 "", l_data64_dbgpro);
-    FAPI_DBG("p10_extract_sbe_rc : SBE IAR : %#08lX", l_data32_iar);
+    FAPI_INF("p10_extract_sbe_rc : PPE_XIDBGPRO : %" PRIx64 "", l_data64_dbgpro);
+    FAPI_INF("p10_extract_sbe_rc : SBE IAR : %#08lX", l_data32_iar);
 
     l_data32_curr_iar = l_data32_iar;
 
@@ -300,15 +300,15 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     if(l_ppe_halt_state)
     {
         // ------- LEVEL 0 ------ //
-        FAPI_DBG("p10_extract_sbe_rc : Reading PU_PPE_XIRAMDBG");
+        FAPI_INF("p10_extract_sbe_rc : Reading PU_PPE_XIRAMDBG");
         FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMDBG, l_data64_ramdbg));
         l_data32.flush<0>();
         l_data64_ramdbg.extractToRight(l_data32, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMDBG_PPE_XIRAMRA_SPRG0,
                                        scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMDBG_PPE_XIRAMRA_SPRG0_LEN);
         ppe_dbg_loc = l_data32;
-        FAPI_DBG("p10_extract_sbe_rc : Data present in SPRG0 is %#010lX" , ppe_dbg_loc);
+        FAPI_INF("p10_extract_sbe_rc : Data present in SPRG0 is %#010lX" , ppe_dbg_loc);
 
-        FAPI_DBG("p10_extract_sbe_rc : Reading PU_PPE_XIDBGINF");
+        FAPI_INF("p10_extract_sbe_rc : Reading PU_PPE_XIDBGINF");
         FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGINF, l_data64_dbginf));
         l_data64_dbginf.extractToRight(l_data32_srr0, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGINF_SRR0,
                                        scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGINF_SRR0_LEN + 2);
@@ -317,12 +317,12 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
         if ((PIBMEM_MIN_RANGE <= ppe_dbg_loc) && (ppe_dbg_loc <= PIBMEM_MAX_RANGE))
         {
-            FAPI_DBG("p10_extract_sbe_rc : SPRG0 has address with in PIBMEM range");
+            FAPI_INF("p10_extract_sbe_rc : SPRG0 has address with in PIBMEM range");
             pibmem_dbg_loc = (((ppe_dbg_loc - PIBMEM_ADDR_OFFSET) >> 3) + PIBMEM_SCOM_OFFSET);
 
             for(uint32_t i = 0; i <= NUM_OF_LOCATION; i++)
             {
-                FAPI_DBG("p10_extract_sbe_rc : PIBMEM address location fetching data from:%#010lX", (pibmem_dbg_loc + i));
+                FAPI_INF("p10_extract_sbe_rc : PIBMEM address location fetching data from:%#010lX", (pibmem_dbg_loc + i));
                 l_data32.flush<0>();
                 l_data32 = pibmem_dbg_loc + i;
                 FAPI_TRY(getScom(i_target_chip, l_data32, l_data64_dbg[i]));
@@ -344,12 +344,12 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             if((l_data64_dbg[0].getBit<31>()) && (l_data32_magicbyte == 0xA5))
             {
-                FAPI_DBG("p10_extract_sbe_rc : Valid Bit is set & MagicByte matches");
+                FAPI_INF("p10_extract_sbe_rc : Valid Bit is set & MagicByte matches");
                 l_pibmem_saveoff = true;
 
                 l_data32.flush<0>();
                 l_data64_dbg[0].extractToRight(l_data32, 0, 16);
-                FAPI_DBG("p10_extract_sbe_rc : Structure Version : %#06lX", l_data32);
+                FAPI_INF("p10_extract_sbe_rc : Structure Version : %#06lX", l_data32);
 
                 l_data64_dbg[0].extractToRight(l_data32_srr0, 32, 32);
                 l_data64_dbg[1].extractToRight(l_data32_srr1,  0, 32);
@@ -404,23 +404,23 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 //-- Ramming SRR0
                 // SPR to R0
                 l_raminstr.flush<0>().insertFromRight(ppe_get_inst_mfspr(0, l_addr_srr0), 0, 32);
-                FAPI_DBG("ppe_get_inst_mfspr(R0, %5d): %" PRIx64 " ", l_addr_srr0, l_raminstr );
+                FAPI_INF("ppe_get_inst_mfspr(R0, %5d): %" PRIx64 " ", l_addr_srr0, l_raminstr );
                 FAPI_TRY(pollHaltStateDone(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIXCR));
                 FAPI_TRY(fapi2::putScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR, l_raminstr));
                 // R0 to SPRG0
                 l_raminstr.flush<0>().insertFromRight(ppe_get_inst_mtspr(0, SPRG0), 0, 32);
-                FAPI_DBG(": ppe_getMtsprInstruction(R0, SPRG0): %" PRIx64 " " , l_raminstr );
+                FAPI_INF(": ppe_getMtsprInstruction(R0, SPRG0): %" PRIx64 " " , l_raminstr );
                 FAPI_TRY(RAMReadDone(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIXCR, l_raminstr, l_data32_srr0));
             */
             //-- Ramming SRR1
             // SPR to R0
             l_raminstr.flush<0>().insertFromRight(ppe_get_inst_mfspr(0, l_addr_srr1), 0, 32);
-            FAPI_DBG("ppe_get_inst_mfspr(R0, %5d): %" PRIx64 " ", l_addr_srr0, l_raminstr );
+            FAPI_INF("ppe_get_inst_mfspr(R0, %5d): %" PRIx64 " ", l_addr_srr0, l_raminstr );
             FAPI_TRY(pollHaltStateDone(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIXCR));
             FAPI_TRY(fapi2::putScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR, l_raminstr));
             // R0 to SPRG0
             l_raminstr.flush<0>().insertFromRight(ppe_get_inst_mtspr(0, SPRG0), 0, 32);
-            FAPI_DBG(": ppe_getMtsprInstruction(R0, SPRG0): %" PRIx64 " " , l_raminstr );
+            FAPI_INF(": ppe_getMtsprInstruction(R0, SPRG0): %" PRIx64 " " , l_raminstr );
             FAPI_TRY(RAMReadDone(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIXCR, l_raminstr, l_data32_srr1));
             //Reading LFR
             FAPI_TRY(LocalRegRead(i_target_chip , 0x2040 , l_data64_loc_lfr));
@@ -490,37 +490,37 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         //Extract TRAP
         if(l_data64_dbgpro.getBit<scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_XSR_TRAP>())
         {
-            FAPI_DBG("p10_extract_sbe_rc : TRAP Instruction Debug Event Occured");
+            FAPI_INF("p10_extract_sbe_rc : TRAP Instruction Debug Event Occured");
         }
 
         //Extract IAC
         if(l_data64_dbgpro.getBit<scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_XSR_IAC>())
         {
-            FAPI_DBG("p10_extract_sbe_rc : Instruction Address Compare Debug Event Occured");
+            FAPI_INF("p10_extract_sbe_rc : Instruction Address Compare Debug Event Occured");
         }
 
         //Extract DACR
         if(l_data64_dbgpro.getBit<scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_XSR_RDAC>())
         {
-            FAPI_DBG("p10_extract_sbe_rc : Data Address Compare (Read) Debug Event Occured");
+            FAPI_INF("p10_extract_sbe_rc : Data Address Compare (Read) Debug Event Occured");
         }
 
         //Extract DACW
         if(l_data64_dbgpro.getBit<scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_XSR_WDAC>())
         {
-            FAPI_DBG("p10_extract_sbe_rc : Data Address Compare (Write) Debug Event Occured");
+            FAPI_INF("p10_extract_sbe_rc : Data Address Compare (Write) Debug Event Occured");
         }
 
         //Extract WS
         if(l_data64_dbgpro.getBit<scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_NULL_MSR_WE>())
         {
-            FAPI_DBG("p10_extract_sbe_rc : In WAIT STATE");
+            FAPI_INF("p10_extract_sbe_rc : In WAIT STATE");
         }
 
         //Extract EP
         if(l_data64_dbgpro.getBit<scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_XSR_EP>())
         {
-            FAPI_DBG("p10_extract_sbe_rc : Maskable Event Pending");
+            FAPI_INF("p10_extract_sbe_rc : Maskable Event Pending");
         }
 
         //Extract MFE
@@ -536,7 +536,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         MCS = l_data32;
 
         // IR and EDR
-        FAPI_DBG("p10_extract_sbe_rc : Reading PPE_XIRAMEDR");
+        FAPI_INF("p10_extract_sbe_rc : Reading PPE_XIRAMEDR");
         FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR, l_data64));
         l_data64.extractToRight(l_data32_ir, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_GA_IR,
                                 scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIRAMEDR_GA_IR_LEN);
@@ -574,7 +574,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 if(!l_is_ndd1)
                 {
                     fapi2::buffer<uint8_t> l_sbe_code_state;
-                    FAPI_DBG("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
+                    FAPI_INF("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
 
                     if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
                     {
@@ -610,7 +610,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
                 fapi2::buffer<uint8_t> l_sbe_code_state;
                 bool l_sbe_booted = false;
-                FAPI_DBG("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
+                FAPI_INF("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
 
                 if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
                 {
@@ -777,17 +777,17 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
         if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
         {
-            FAPI_DBG("p10_extract_sbe_rc : IAR contains OTPROM address");
+            FAPI_INF("p10_extract_sbe_rc : IAR contains OTPROM address");
             otprom_addr_range = true;
         }
         else if((PIBMEM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= PIBMEM_MAX_RANGE))
         {
-            FAPI_DBG("p10_extract_sbe_rc : IAR contains PIBMEM address");
+            FAPI_INF("p10_extract_sbe_rc : IAR contains PIBMEM address");
             pibmem_addr_range = true;
         }
         else if((BSEEPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= MSEEPROM_MAX_RANGE))
         {
-            FAPI_DBG("p10_extract_sbe_rc : IAR contains SEEPROM address");
+            FAPI_INF("p10_extract_sbe_rc : IAR contains SEEPROM address");
             seeprom_addr_range = true;
 
             if((BSEEPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= BSEEPROM_MAX_RANGE))
@@ -814,9 +814,9 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         {
             if(i_unsecure_mode)
             {
-                FAPI_DBG("p10_extract_sbe_rc : Reading OTPROM status register");
+                FAPI_INF("p10_extract_sbe_rc : Reading OTPROM status register");
                 FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_OTP_OTPC_M_STATUS_REGISTER, l_data64));
-                FAPI_DBG("p10_extract_sbe_rc : OTPROM status : %" PRIx64 "", l_data64);
+                FAPI_INF("p10_extract_sbe_rc : OTPROM status : %" PRIx64 "", l_data64);
 
                 if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIB_OTP_OTPC_M_STATUS_REGISTER_ADDR_NVLD>())
                 {
@@ -871,9 +871,9 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             // the OTPROM is write-once at mfg test, so addresses should remain fixed in this code
 
             //-- MIB External Interface SIB Info
-            FAPI_DBG("p10_extract_sbe_rc : Reading MIB SIB Info register");
+            FAPI_INF("p10_extract_sbe_rc : Reading MIB SIB Info register");
             FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_MIB_XISIB, l_data64_mib_sib_info));
-            FAPI_DBG("p10_extract_sbe_rc : MIB SIB Info : %" PRIx64 "", l_data64_mib_sib_info);
+            FAPI_INF("p10_extract_sbe_rc : MIB SIB Info : %" PRIx64 "", l_data64_mib_sib_info);
 
             l_data32.flush<0>();
             l_data64_mib_sib_info.extractToRight(l_data32, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_MIB_XISIB_RSP_INFO,
@@ -902,9 +902,9 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
         if(pibmem_addr_range && l_inst_mchk) // PIBMEM status register read is allowed in both Secure & NonSecure mode
         {
-            FAPI_DBG("p10_extract_sbe_rc : Reading PIBMEM status register");
+            FAPI_INF("p10_extract_sbe_rc : Reading PIBMEM status register");
             FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG, l_data64));
-            FAPI_DBG("p10_extract_sbe_rc : PIBMEM status : %" PRIx64 "", l_data64);
+            FAPI_INF("p10_extract_sbe_rc : PIBMEM status : %" PRIx64 "", l_data64);
 
             if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_ADDR_INVALID_PIB>())
             {
@@ -1192,9 +1192,9 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
 
             //-- MIB External Interface SIB Info
-            FAPI_DBG("p10_extract_sbe_rc : Reading MIB SIB Info register");
+            FAPI_INF("p10_extract_sbe_rc : Reading MIB SIB Info register");
             FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_MIB_XISIB, l_data64_mib_sib_info));
-            FAPI_DBG("p10_extract_sbe_rc : MIB SIB Info : %" PRIx64 "", l_data64_mib_sib_info);
+            FAPI_INF("p10_extract_sbe_rc : MIB SIB Info : %" PRIx64 "", l_data64_mib_sib_info);
 
             l_data32.flush<0>();
             l_data64_mib_sib_info.extractToRight(l_data32, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_MIB_XISIB_RSP_INFO,
@@ -1276,17 +1276,17 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         {
             if((OTPROM_MIN_RANGE <= l_data32_edr) && (l_data32_edr <= OTPROM_MAX_RANGE))
             {
-                FAPI_DBG("p10_extract_sbe_rc : EDR contains OTPROM address");
+                FAPI_INF("p10_extract_sbe_rc : EDR contains OTPROM address");
                 otprom_data_range = true;
             }
             else if((PIBMEM_MIN_RANGE <= l_data32_edr) && (l_data32_edr <= PIBMEM_MAX_RANGE))
             {
-                FAPI_DBG("p10_extract_sbe_rc : EDR contains PIBMEM address");
+                FAPI_INF("p10_extract_sbe_rc : EDR contains PIBMEM address");
                 pibmem_data_range = true;
             }
             else if((BSEEPROM_MIN_RANGE <= l_data32_edr) && (l_data32_edr <= MSEEPROM_MAX_RANGE))
             {
-                FAPI_DBG("p10_extract_sbe_rc : EDR contains SEEPROM address");
+                FAPI_INF("p10_extract_sbe_rc : EDR contains SEEPROM address");
                 seeprom_data_range = true;
 
                 if((BSEEPROM_MIN_RANGE <= l_data32_edr) && (l_data32_edr <= BSEEPROM_MAX_RANGE))
@@ -1301,15 +1301,15 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
             else
             {
-                FAPI_DBG("p10_extract_sbe_rc : EDR contains out of scope address = %08lX", l_data32_edr);
+                FAPI_INF("p10_extract_sbe_rc : EDR contains out of scope address = %08lX", l_data32_edr);
             }
 
             if(otprom_data_range || seeprom_data_range) // SIB Info is valid only for Otprom & Seeprom data
             {
                 //-- MIB External Interface SIB Info
-                FAPI_DBG("p10_extract_sbe_rc : Reading MIB SIB Info register");
+                FAPI_INF("p10_extract_sbe_rc : Reading MIB SIB Info register");
                 FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_MIB_XISIB, l_data64_mib_sib_info));
-                FAPI_DBG("p10_extract_sbe_rc : MIB SIB Info : %" PRIx64 "", l_data64_mib_sib_info);
+                FAPI_INF("p10_extract_sbe_rc : MIB SIB Info : %" PRIx64 "", l_data64_mib_sib_info);
 
                 l_data32.flush<0>();
                 l_data64_mib_sib_info.extractToRight(l_data32, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_MIB_XISIB_RSP_INFO,
@@ -1341,9 +1341,9 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             if(pibmem_data_range && l_data_mchk) // PIBMEM status register read is allowed in both Secure & NonSecure mode
             {
-                FAPI_DBG("p10_extract_sbe_rc : Reading PIBMEM status register");
+                FAPI_INF("p10_extract_sbe_rc : Reading PIBMEM status register");
                 FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG, l_data64));
-                FAPI_DBG("p10_extract_sbe_rc : PIBMEM status : %" PRIx64 "", l_data64);
+                FAPI_INF("p10_extract_sbe_rc : PIBMEM status : %" PRIx64 "", l_data64);
 
                 if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_ADDR_INVALID_PIB>())
                 {
@@ -1442,7 +1442,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             if(pibmem_data_range)
             {
                 //-- MIB External Interface MEM Info
-                FAPI_DBG("p10_extract_sbe_rc : Reading MIB MEM Info register");
+                FAPI_INF("p10_extract_sbe_rc : Reading MIB MEM Info register");
                 FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_MIB_XIMEM, l_data64_mib_mem_info));
                 FAPI_INF("p10_extract_sbe_rc : MIB MEM Info : %" PRIx64 "", l_data64_mib_mem_info);
 
@@ -1722,9 +1722,39 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
         }
 
-        //Unknown
+        //Unknown error - recovery action based on sbe state.
         FAPI_ERR("Halted due to unknown error at IAR location %08lX", l_data32_iar);
-        o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+
+        fapi2::buffer<uint8_t> l_sbe_code_state;
+        bool l_sbe_booted = false;
+        FAPI_INF("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
+
+        if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
+        {
+            FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG, l_data64));
+            l_data64.extractToRight(l_sbe_code_state, 30, 2);
+            l_sbe_booted = l_data64.getBit<0>();
+        }
+        else
+        {
+            FAPI_TRY(getCfamRegister(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI, l_data32));
+            l_data32.extractToRight(l_sbe_code_state, 30, 2);
+            l_sbe_booted = l_data32.getBit<0>();
+        }
+
+        if(l_sbe_code_state < 0x9)
+        {
+            o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
+        }
+        else if(l_sbe_code_state < 0xB)
+        {
+            o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+        }
+        else if((l_sbe_code_state == 0xB) && (!l_sbe_booted))
+        {
+            o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+        }
+
         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_UNKNOWN_ERROR()
                     .set_TARGET_CHIP(i_target_chip), "SBE halted due to unknown error");
     }
