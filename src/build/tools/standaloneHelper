@@ -145,16 +145,16 @@ generate_sbe_image()
 
     mkdir -p "$PROJECT_ROOT/standalone/imghash"
     HBIBL_HASH_FILE="$PROJECT_ROOT/standalone/imghash/hbibl.bin.hash"
-    SBE_SEEPROM_IMG=${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
-    SBE_MEASUREMENT_IMG=${PROJECT_ROOT}/standalone/simics/sbe_measurement_p10.bin.ecc
-    SBE_OTPROM_IMG=${PROJECT_ROOT}/standalone/simics/sbe_otprom_p10.bin
-    SBE_SEEPROM_IMAGE_DD1=${PROJECT_ROOT}/standalone/pnor/sbe_seeprom_DD1.bin
+    SBE_SEEPROM_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_seeprom_p10.bin.ecc
+    SBE_MEASUREMENT_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_measurement_p10.bin.ecc
+    SBE_OTPROM_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_otprom_p10.bin
+    SBE_SEEPROM_IMAGE_DD1=${PROJECT_ROOT}/src/build/tools/extern/ppe/images/sbe_seeprom_DD1.bin
 
     if ! diff "$HBIBL_HASH_FILE" <(hash_file "$PROJECT_ROOT/img/hbibl.bin") &>/dev/null \
-    || [ ! -f "$SBE_SEEPROM_IMG" ] \
-    || [ ! -f "$SBE_MEASUREMENT_IMG" ] \
-    || [ ! -f "$SBE_OTPROM_IMG" ] \
-    || [ ! -f "$SBE_SEEPROM_IMAGE_DD1" ]
+        || [ ! -f "$SBE_SEEPROM_IMG" ] \
+        || [ ! -f "$SBE_MEASUREMENT_IMG" ] \
+        || [ ! -f "$SBE_OTPROM_IMG" ] \
+        || [ ! -f "$SBE_SEEPROM_IMAGE_DD1" ]
     then
         echo -e "\n\nGenerating SBE image..."
 
@@ -166,6 +166,16 @@ generate_sbe_image()
     else
         echo 'SBE image is already up to date.'
     fi
+
+    if [ ! -f "$SBE_SEEPROM_IMG" ] \
+        || [ ! -f "$SBE_MEASUREMENT_IMG" ] \
+        || [ ! -f "$SBE_OTPROM_IMG" ] \
+        || [ ! -f "$SBE_SEEPROM_IMAGE_DD1" ]
+    then
+        echo "SBE build did not create one or more artifacts"
+        echo "Check paths: $SBE_SEEPROM_IMG $SBE_MEASUREMENT_IMG $SBE_OTPROM_IMG $SBE_SEEPROM_IMAGE_DD1"
+        exit 1
+    fi
 }
 
 # Build the HCODE image inside the EKB repo
@@ -173,6 +183,10 @@ generate_hcode_image()
 {
     EKB_DIR=${PROJECT_ROOT}/src/build/tools/extern/ekb
     HCODE_IMAGE=${EKB_DIR}/output/images/hw_image/p10.hw_image.bin
+
+    if [[ "$HB_FAST_PRIME" ]] ; then
+        HB_SKIP_GEN_HCODE=1
+    fi
 
     # Only [re]generate the HCODE image if the user hasn't asked us not to or
     # the HCODE image hasn't been built already.
@@ -193,7 +207,7 @@ generate_hcode_image()
         exit'
         cd ${PROJECT_ROOT}
     else
-        echo 'Skipping HCODE generating because HB_SKIP_GEN_HCODE is set.'
+        echo 'Skipping HCODE generation because HB_SKIP_GEN_HCODE is set.'
     fi
 
     cp "$HCODE_IMAGE" ${PROJECT_ROOT}/standalone/staging/p10.hw_image.bin

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -32,8 +32,10 @@ FFSTOOLS := ecc/ecc fpart/fpart fcp/fcp
 .PHONY : all-ffs-tools
 all-ffs-tools: $(FFSTOOLS)
 
-$(FFSTOOLS):toolsconfig
+configure:
 	autoreconf -i
 	./configure
-	make -B
+
+$(FFSTOOLS):toolsconfig configure
+	make -B -j$(nproc)
 	echo "building ffs - complete"
