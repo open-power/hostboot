@@ -162,13 +162,22 @@ fapi2::ReturnCode issue_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_targe
     using namespace scomt::mc;
     fapi2::buffer<uint64_t> l_scomData;
 
+    // sync type to use
+    uint8_t l_sync_type = 0;  // 0x0 = sync all
+
     // -------------------------------------------------------------------
-    // Issue sync command - set to a 1
+    // Issue sync command - toggle sync go bit with sync all sync type
+    //     Do this quickly to minimize window of OCC overwriting values at runtime
+    //     This sequence will work if HWP is run during IPL or at runtime
     // -------------------------------------------------------------------
-    // Set GO bit
+    // Toggle GO bit and set sync type
     FAPI_TRY(PREP_SCOMFIR_MCSYNC(i_target));
     FAPI_TRY(GET_SCOMFIR_MCSYNC(i_target, l_scomData),
              "Failed GET_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
+    CLEAR_SCOMFIR_MCSYNC_SYNC_GO(l_scomData);
+    FAPI_TRY(PUT_SCOMFIR_MCSYNC(i_target, l_scomData),
+             "Failed PUT_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
+    SET_SCOMFIR_MCSYNC_SYNC_TYPE(l_sync_type, l_scomData);
     SET_SCOMFIR_MCSYNC_SYNC_GO(l_scomData);
     FAPI_TRY(PUT_SCOMFIR_MCSYNC(i_target, l_scomData),
              "Failed PUT_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
