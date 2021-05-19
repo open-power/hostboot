@@ -188,7 +188,6 @@ p10_hcd_corecache_power_control(
         FAPI_TRY( HCD_PUTMMIO_S( i_target, HCD_CPMS_PFETCNTL_OR[l_isL3],
                                  SCOM_LOAD32H( HCD_PFET_SEQ_STATES[l_isON][l_isVCS] ) ) );
 
-
         FAPI_DBG("Poll for PFET senses to be proper in PFETSTAT[]");
         l_timeout = HCD_CORECACHE_POW_CTRL_POLL_TIMEOUT_HW_NS /
                     HCD_CORECACHE_POW_CTRL_POLL_DELAY_HW_NS;
@@ -251,8 +250,12 @@ p10_hcd_corecache_power_control(
         }
         while( (--l_timeout) != 0 );
 
+#if defined(POWER10_DD_LEVEL) && POWER10_DD_LEVEL == 10
+
         if( l_isVCS == 0 || l_isL3 == 1 )
         {
+#endif
+
             HCD_ASSERT( (
 #ifdef USE_RUNN
                             l_attr_runn_mode ?
@@ -269,8 +272,10 @@ p10_hcd_corecache_power_control(
                         set_CORE_TARGET, i_target,
                         "ERROR: Core/Cache PFET Control Timeout");
 
+#if defined(POWER10_DD_LEVEL) && POWER10_DD_LEVEL == 10
         }
 
+#endif
 
         FAPI_DBG("Reset PFET Sequencer State via PFETCNTL[0,1/2,3]");
         FAPI_TRY( HCD_PUTMMIO_S( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], SCOM_LOAD32H( HCD_PFET_SEQ_STATES[1][l_isVCS] ) ) );
