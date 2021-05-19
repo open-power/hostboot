@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,8 +118,8 @@ p10_ocmb_enable(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 
         FAPI_TRY(PUT_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL7_RW(i_target, l_scom_buf));
 
-        //100 microseconds
-        fapi2::delay(100000, 10000);
+        //Wait 500 milliseconds - anything much less seems to lead to SPI issues in Explorer
+        fapi2::delay(500 * 1000000, 10000);
 
         // Toggle the reset signal
         FAPI_TRY(GET_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_RW(i_target, l_scom_buf));
