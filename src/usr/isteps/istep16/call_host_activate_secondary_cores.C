@@ -78,8 +78,9 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
                "call_host_activate_secondary_cores entry" );
 
     //track boot group/chip/core (no threads)
-    const uint64_t l_bootPIR_wo_thread
-        = PIR_t(task_getcpuid()).word & ~PIR_t::THREAD_MASK;
+    const uint64_t l_bootPIR = PIR_t(task_getcpuid()).word;
+    const uint64_t l_bootPIR_wo_thread =
+        (l_bootPIR & ~PIR_t::THREAD_MASK);
 
     TargetHandleList l_cores;
     getAllChiplets(l_cores, TYPE_CORE);
@@ -284,16 +285,30 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
                 break;
             }
 
-            // Save off original checkstop values and override them
-            // to disable core xstops and enable sys xstops.
-            l_errl = HBPM::core_checkstop_helper_hwp(l_core, true);
-            if (l_errl)
+
+            // Skip calling a second time on boot's fused core
+            // This was already called in 16.1 for the fused core
+            if ( !is_fused_mode() ||
+                 ((l_bootPIR & ~PIR_t::THREAD_MASK_FUSED) != (pir & ~PIR_t::THREAD_MASK_FUSED)) )
+            {
+                // Save off original checkstop values and override them
+                // to disable core xstops and enable sys xstops.
+                l_errl = HBPM::core_checkstop_helper_hwp(l_core, true);
+                if (l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "core_checkstop_helper_hwp on core 0x%08X ERROR: returning.",
+                            get_huid(l_core));
+                    l_stepError.addErrorDetails(l_errl);
+                    errlCommit(l_errl, HWPF_COMP_ID);
+                    break;
+                }
+            }
+            else
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "core_checkstop_helper_hwp on master ERROR: returning.");
-                l_stepError.addErrorDetails(l_errl);
-                errlCommit(l_errl, HWPF_COMP_ID);
-                break;
+                    "Already enabled sys xstops on fused boot core 0x%08X",
+                    get_huid(l_core));
             }
         }
 

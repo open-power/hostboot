@@ -1341,7 +1341,8 @@ errlHndl_t core_checkstop_helper_hwp( const TARGETING::Target* i_core_target,
                             bool i_override_restore)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ENTER_MRK
-               "core_checkstop_helper_hwp");
+               "core_checkstop_helper_hwp(core huid: 0x%08X, override_restore: %d)",
+               TARGETING::get_huid(i_core_target), i_override_restore );
 
     errlHndl_t l_errl = NULL;
     TARGETING::Target* l_sys = NULL;
