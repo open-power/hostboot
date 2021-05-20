@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <lib/plug_rules/exp_plug_rules.H>
 #include <mss_explorer_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 
 namespace mss
@@ -153,37 +154,26 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Plug rule for no mixing DIMM size
+/// @brief Plug rule helper for no mixing DIMM size
 /// @param[in] i_target omic target
 /// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @param[in] i_ignore_dimm_size_mix_plug_rule a uint8_t plug rule var
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @note This function will commit error logs representing the mixing failure
+/// @note This function will commit error logs representing the mixing failure and make UT'ing the attr easy
 ///
-fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
-                                   const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds)
+fapi2::ReturnCode dimm_size_mixing_helper(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+        const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds,
+        const uint8_t i_ignore_dimm_size_mix_plug_rule)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    uint8_t l_ignore_dimm_size_mix_plug_rule = 0;
-    constexpr uint8_t MAX_DIMM_PER_OMIC = 2;
 
-    // If there are one or fewer DIMM's, we can just get out.
-    if (i_kinds.size() < MAX_DIMM_PER_OMIC)
+    if(i_ignore_dimm_size_mix_plug_rule == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_DIMM_SIZE_MIX_YES)
     {
-        FAPI_INF("Skipping dimm size mixing plug rule check on %s because it doesn't have 2 DIMMS", mss::c_str(i_target));
+        FAPI_INF("%s Attribute set to ignore DIMM size mixing plug rule checking", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // get the ignore plug attr
-    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules_dimm_size_mix(l_ignore_dimm_size_mix_plug_rule) );
-
-    if(l_ignore_dimm_size_mix_plug_rule == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_DIMM_SIZE_MIX_YES)
-    {
-        FAPI_INF("%s Attribute set to ignore dimm size mixing plug rule checking", mss::c_str(i_target));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    //If we have 1 or 0 DIMMs on the port, we don't care
-
+    // Check for difference in size on the 2 DIMMs'; if different then exit out with an error
     FAPI_ASSERT( (i_kinds[1].iv_size <= i_kinds[0].iv_size),
                  fapi2::MSS_PLUG_RULES_INVALID_DIMM_SIZE_MIX()
                  .set_SMALLER_DIMM_TARGET(i_kinds[0].iv_target)
@@ -203,6 +193,132 @@ fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>&
                  .set_OMIC_TARGET(i_target),
                  "%s has two different sizes of DIMM installed of size %d and of size %d. Cannot mix DIMM sizes on OMIC channel pair",
                  mss::c_str(i_target), i_kinds[0].iv_size, i_kinds[1].iv_size );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
+/// @brief Plug rule for no mixing DIMM size
+/// @param[in] i_target omic target
+/// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will commit error logs representing the mixing failure
+///
+fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                                   const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_ignore_dimm_size_mix_plug_rule = 0;
+    constexpr uint8_t MAX_DIMM_PER_OMIC = 2;
+
+    // If there are one or fewer DIMM's, we can just get out.
+    if (i_kinds.size() < MAX_DIMM_PER_OMIC)
+    {
+        FAPI_INF("Skipping DIMM size mixing plug rule check on %s because it doesn't have 2 DIMMS", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Get the ignore plug attr
+    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules_dimm_size_mix(l_ignore_dimm_size_mix_plug_rule) );
+
+    // Helper function so that the attribute can be UT'ed
+    FAPI_TRY(dimm_size_mixing_helper(i_target, i_kinds, l_ignore_dimm_size_mix_plug_rule));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Plug rule helper for no mixing DIMM height
+/// @param[in] i_target omic target
+/// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @param[in] i_ignore_dimm_height_mix_plug_rule a uint8_t plug rule var
+/// @param[in] i_mrw_height_plug_rule a uint8_t mrw plug rule var
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will commit error logs representing the mixing failure and make UT'ing the attrs easy
+///
+fapi2::ReturnCode dimm_height_mixing_helper(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+        const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds,
+        const uint8_t i_ignore_dimm_height_mix_plug_rule,
+        const uint8_t i_mrw_height_plug_rule)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Check for the height plug rule
+    if(i_ignore_dimm_height_mix_plug_rule == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_DIMM_HEIGHT_MIX_YES)
+    {
+        FAPI_INF("%s Attribute set to ignore DIMM height mixing plug rule checking", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Check for the mrw height plug rule
+    if (i_mrw_height_plug_rule == fapi2::ENUM_ATTR_MSS_MRW_DIMM_HEIGHT_MIXING_POLICY_ALLOWED)
+    {
+        FAPI_INF("%s System policy allows DIMM height mixing", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Check for difference in heights on the 2 DIMMs'; if different then exit out with an error
+    FAPI_ASSERT( (i_kinds[1].iv_module_height <= i_kinds[0].iv_module_height),
+                 fapi2::MSS_PLUG_RULES_INVALID_DIMM_HEIGHT_MIX()
+                 .set_SMALLER_DIMM_TARGET(i_kinds[0].iv_target)
+                 .set_LARGER_DIMM_TARGET(i_kinds[1].iv_target)
+                 .set_SMALLER_DIMM_HEIGHT(i_kinds[0].iv_module_height)
+                 .set_LARGER_DIMM_HEIGHT(i_kinds[1].iv_module_height)
+                 .set_OMIC_TARGET(i_target),
+                 "%s has two different heights of DIMM installed of height %d  and of height %d. Cannot mix DIMM height on OMIC channel pair",
+                 mss::c_str(i_target), i_kinds[1].iv_module_height, i_kinds[0].iv_module_height );
+
+    FAPI_ASSERT( (i_kinds[0].iv_module_height <= i_kinds[1].iv_module_height),
+                 fapi2::MSS_PLUG_RULES_INVALID_DIMM_HEIGHT_MIX()
+                 .set_SMALLER_DIMM_TARGET(i_kinds[1].iv_target)
+                 .set_LARGER_DIMM_TARGET(i_kinds[0].iv_target)
+                 .set_SMALLER_DIMM_HEIGHT(i_kinds[1].iv_module_height)
+                 .set_LARGER_DIMM_HEIGHT(i_kinds[0].iv_module_height)
+                 .set_OMIC_TARGET(i_target),
+                 "%s has two different heights of DIMM installed of height %d and of height %d. Cannot mix DIMM height on OMIC channel pair",
+                 mss::c_str(i_target), i_kinds[0].iv_module_height, i_kinds[1].iv_module_height );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Plug rule for no mixing DIMM height
+/// @param[in] i_target omic target
+/// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will commit error logs representing the mixing failure
+///
+fapi2::ReturnCode dimm_height_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                                     const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_ignore_dimm_height_mix_plug_rule = 0;
+    uint8_t l_mrw_height_plug_rule = 0;
+    constexpr uint8_t MAX_DIMM_PER_OMIC = 2;
+
+    // If there are one or fewer DIMM's, we can just get out.
+    if (i_kinds.size() < MAX_DIMM_PER_OMIC)
+    {
+        FAPI_INF("Skipping DIMM height mixing plug rule check on %s because it doesn't have 2 DIMMS", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Get the ignore plug attr
+    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules_dimm_height_mix(l_ignore_dimm_height_mix_plug_rule) );
+
+    // Get the MRW ignore plug rule attr
+    FAPI_TRY(mss::attr::get_mrw_dimm_height_plug_rule(l_mrw_height_plug_rule));
+
+    // Helper function so that the attributes can be UT'ed
+    FAPI_TRY(dimm_height_mixing_helper(i_target, i_kinds, l_ignore_dimm_height_mix_plug_rule, l_mrw_height_plug_rule));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -237,6 +353,8 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARG
     // Checking the plug rule for dimm size mix
     FAPI_TRY( dimm_size_mixing( l_omic, l_kinds ) );
 
+    // Checking the plug rule for dimm height mix
+    FAPI_TRY( dimm_height_mixing( l_omic, l_kinds ) );
 
 fapi_try_exit:
     return fapi2::current_err;

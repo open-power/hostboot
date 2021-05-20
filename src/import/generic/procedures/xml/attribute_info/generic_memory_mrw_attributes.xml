@@ -786,4 +786,17 @@
     <mssAccessorName>mrw_ocmb_reset_group</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_MRW_DIMM_HEIGHT_MIXING_POLICY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      System specific DIMM height mixing plug rule
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum> NOT_ALLOWED = 0, ALLOWED = 1 </enum>
+    <default> NOT_ALLOWED </default>
+    <mssAccessorName>mrw_dimm_height_plug_rule</mssAccessorName>
+  </attribute>
+
 </attributes>

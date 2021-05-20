@@ -439,6 +439,20 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MEM_IGNORE_PLUG_RULES_DIMM_HEIGHT_MIX</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Set to YES if you want to ignore the DIMM height plug rules. Sometimes
+      this maybe required for characterization testing or on a test board.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>NO = 0, YES = 1</enum>
+    <mssAccessorName>ignore_mem_plug_rules_dimm_height_mix</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_OMI_DL_PREIPL_PRBS_TIME</id>
     <targetType>TARGET_TYPE_OMI</targetType>
     <description>

@@ -205,6 +205,7 @@ class kind
         /// @param[in] i_hybrid, default not hybrid
         /// @param[in] i_hybrid_memory_type, defult none
         /// @param[in] i_rcd_mfgid dimm register and data buffer manufacturer id, default 0
+        /// @param[in] i_module_height dimm height default 0
         /// @note can't be constexpr as fapi2::Target doesn't have a constexpr ctor.
         ///
         kind( const uint8_t i_master_ranks,
