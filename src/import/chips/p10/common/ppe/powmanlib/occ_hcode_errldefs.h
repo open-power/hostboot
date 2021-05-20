@@ -22,7 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 // @file  occ_hcode_errldefs.h
 // @brief Error log structures owned by OCC Firmware and also used by
 //        PGPE, XPGE and QME HCode, to use the TMGT-OCC Error Logging
@@ -212,8 +211,11 @@ struct ErrlUserDetails
     uint64_t    iv_timeStamp;           // Time Stamp
     union
     {
-        uint16_t    iv_occId: 8;        // OCC ID
-        uint16_t    iv_occRole: 8;      // OCC Role
+        struct
+        {
+            uint8_t    iv_occId;        // OCC ID
+            uint8_t    iv_occRole;      // OCC Role
+        };
         uint16_t    iv_ppeId;           // PPE Instance in Chip
     };
     union
