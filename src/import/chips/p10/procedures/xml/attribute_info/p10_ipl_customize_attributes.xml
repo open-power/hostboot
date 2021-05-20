@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -59,4 +59,26 @@
     <mrwHide/>
   </attribute>
   <!-- ********************************************************************** -->
+  <attribute>
+    <id>ATTR_SBE_CUST_FORCE_MVPD_ONLY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Drives whether to update ATTR_PG independently of
+      ATTR_PG_MVPD or to update ATTR_PG equal to ATTR_PG_MVPD during SBE
+      customization.  For systems with a service processor that always
+      communicates guarded targets to the SBE via scratch registers, set
+      ATTR_PG_MVPD and ATTR_PG equal to each other to avoid extraneous SBE
+      updates when a target is guarded, otherwise update them independently and
+      potentially go through another SBE update.
+
+      0x00: Update ATTR_PG (based on target functional state) and ATTR_PG_MVPD
+          independently of each other
+      0x01: Update ATTR_PG with the value of ATTR_PG_MVPD
+    </description>
+    <valueType>uint8</valueType>
+    <default>0x01</default>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+
 </attributes>

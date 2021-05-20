@@ -361,9 +361,24 @@ fapi2::ReturnCode writePG(
 
     FAPI_DBG ("writePG Entering...");
 
-    // fill in ATTR_PG from platform attribute state
-    FAPI_DBG("Updating ATTR_PG...")
+    // This attribute drives whether to update ATTR_PG independently of
+    // ATTR_PG_MVPD or to update ATTR_PG equal to ATTR_PG_MVPD during SBE
+    // customization.  For systems with a service processor that always
+    // communicates guarded targets to the SBE via scratch registers, set
+    // ATTR_PG_MVPD and ATTR_PG equal to each other to avoid extraneous SBE
+    // updates when a target is guarded, otherwise update them independently and
+    // incur a performance penalty
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_SBE_CUST_FORCE_MVPD_ONLY_Type pgIsPgMvpd = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SBE_CUST_FORCE_MVPD_ONLY, FAPI_SYSTEM, pgIsPgMvpd),
+             "Error from FAPI_ATTR_GET (ATTR_SBE_CUST_FORCE_MVPD_ONLY)" );
+
+    // Fill in ATTR_PG from platform attribute state, if asked to fill out
+    // ATTR_PG (based on functional chiplets) independently from ATTR_PG_MVPD
+    if(!pgIsPgMvpd)
     {
+        FAPI_DBG("Updating ATTR_PG independently of ATTR_PG_MVPD");
+
         // Make all chiplets "not good", excepting standby/FSI (chiplet ID=0)
         FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, STANDBY_PG_VAL),
                   "Error (1)) from p9_xip_set_element (ATTR_PG idx %d)", l_pg_idx );
@@ -405,9 +420,18 @@ fapi2::ReturnCode writePG(
         }
     }
 
-    // fill in ATTR_PG_MVPD from MVPD query
-    FAPI_DBG("Updating ATTR_PG_MVPD...")
+    // Fill in ATTR_PG_MVPD from MVPD query, and if requested, populate ATTR_PG
+    // with same value
     {
+        if(pgIsPgMvpd)
+        {
+            FAPI_DBG("Updating ATTR_PG_MVPD -and- forcing ATTR_PG to same value...");
+        }
+        else
+        {
+            FAPI_DBG("Updating ATTR_PG_MVPD...");
+        }
+
         uint32_t       sizeMvpdPGField = 0;
         const uint8_t  MVPD_PG_KWD_VER1 = 0x01;
         const uint8_t  MVPD_PG_KWD_VER1_SIZE = 193;
@@ -459,8 +483,15 @@ fapi2::ReturnCode writePG(
             // Update the image
             FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG_MVPD", l_pg_idx, l_pg_mvpd_data),
                       "Error (2) from p9_xip_set_element (ATTR_PG_MVPD idx %d)", l_pg_idx );
-
             FAPI_DBG("Write data for chiplet %d, PG MVPD = %08X", l_pg_idx, l_pg_mvpd_data);
+
+            if(pgIsPgMvpd)
+            {
+                const auto l_pg_data = l_pg_mvpd_data;
+                FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, l_pg_data),
+                          "Error (2) from p9_xip_set_element (ATTR_PG idx %d)", l_pg_idx);
+                FAPI_DBG("Write data for chiplet %d, PG = %08X", l_pg_idx, l_pg_data);
+            }
         }
     }
 
