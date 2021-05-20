@@ -26,6 +26,7 @@
 <!-- ******************************************************************** -->
 <registerFfdc>
   <id>REG_FFDC_P10_FBC_TDM_UTILS_DL_STATUS</id>
+  <scomRegister>scomt::iohs::DLP_FIR_REG_RW</scomRegister>
   <scomRegister>scomt::iohs::DLP_CONFIG</scomRegister>
   <scomRegister>scomt::iohs::DLP_CONTROL</scomRegister>
   <scomRegister>scomt::iohs::DLP_PHY_CONFIG</scomRegister>
