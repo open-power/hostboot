@@ -88,30 +88,40 @@ enum MemoryError_t
 };
 
 
-/** Common return codes for scom_read, scom_write. */
+/** Common return codes */
 
+/*** Return codes for scom_write(), scom_read() */
 /* RC for a piberr is equal to 0x1000 plus the pib error value,
    made into a negative */
-#define HBRT_RC_PIBERR_MASK            ((int)(0x0u - 0x1007u))  /* 0xFFFF_EFF9 */
+#define HBRT_RC_PIBERR_MASK            ((int)(0x0u - 0x1007u))  /* 0xFFFF_EFF9 = -4096 */
 
-#define HBRT_RC_PIBERR_001_BUSY        ((int)(0x0u - 0x1001u))  /* 0xFFFF_EFFF */
-#define HBRT_RC_PIBERR_010_OFFLINE     ((int)(0x0u - 0x1002u))  /* 0xFFFF_EFFE */
-#define HBRT_RC_PIBERR_011_PGOOD       ((int)(0x0u - 0x1003u))  /* 0xFFFF_EFFD */
-#define HBRT_RC_PIBERR_100_INVALIDADDR ((int)(0x0u - 0x1004u))  /* 0xFFFF_EFFC */
-#define HBRT_RC_PIBERR_101_CLOCKERR    ((int)(0x0u - 0x1005u))  /* 0xFFFF_EFFB */
-#define HBRT_RC_PIBERR_110_PARITYERR   ((int)(0x0u - 0x1006u))  /* 0xFFFF_EFFA */
-#define HBRT_RC_PIBERR_111_TIMEOUT     ((int)(0x0u - 0x1007u))  /* 0xFFFF_EFF9 */
+#define HBRT_RC_PIBERR_001_BUSY        ((int)(0x0u - 0x1001u))  /* 0xFFFF_EFFF = -4097 */
+#define HBRT_RC_PIBERR_010_OFFLINE     ((int)(0x0u - 0x1002u))  /* 0xFFFF_EFFE = -4098 */
+#define HBRT_RC_PIBERR_011_PGOOD       ((int)(0x0u - 0x1003u))  /* 0xFFFF_EFFD = -4099 */
+#define HBRT_RC_PIBERR_100_INVALIDADDR ((int)(0x0u - 0x1004u))  /* 0xFFFF_EFFC = -4100 */
+#define HBRT_RC_PIBERR_101_CLOCKERR    ((int)(0x0u - 0x1005u))  /* 0xFFFF_EFFB = -4101 */
+#define HBRT_RC_PIBERR_110_PARITYERR   ((int)(0x0u - 0x1006u))  /* 0xFFFF_EFFA = -4102 */
+#define HBRT_RC_PIBERR_111_TIMEOUT     ((int)(0x0u - 0x1007u))  /* 0xFFFF_EFF9 = -4103 */
 
 /* Memory channel failure caused an error out to buffer chip. */
-#define HBRT_RC_CHANNEL_FAILURE        ((int)(0x0u - 0x1008u))  /* 0xFFFF_EFF8 */
+#define HBRT_RC_CHANNEL_FAILURE        ((int)(0x0u - 0x1008u))  /* 0xFFFF_EFF8 = -4104 */
 
+/*** Return codes for firmware_request() */
+/** HBRT_FW_MSG_HBRT_FSP_REQ */
+/* FSP failed due to a a reset/reload. */
+#define HBRT_RC_FSPDEAD                ((int)(0x0u - 0x2001u))  /* 0xFFFF_DFFF = -8193 */
+
+/** HBRT_FW_MSG_TYPE_MCTP_SEND, HBRT_FW_MSG_TYPE_MCTP_RECEIVE */
 /* Hypervisor did not have an MCTP packet ready for HBRT to consume */
-#define HBRT_RC_NO_MCTP_PACKET         ((int)(0x0u - 0x1009u))  /* 0xFFFF_EFF7 */
+#define HBRT_RC_NO_MCTP_PACKET         ((int)(0x0u - 0x1009u))  /* 0xFFFF_EFF7 = -4105 */
 
-/* Any host-specific RCs will be this value or bigger */
-#define HBRT_RC_NEXT_OPEN_RC           ((int)(0x0u - 0x100Au))  /* 0xFFF_EFF6 */
+/*** Return codes for wakeup() */
+/* Core where wakeup was attempted is checkstopped */
+#define HBRT_RC_WAKEUP_INVALID_ON_CORE_XSTOP  ((int)(0x0u - 0x3001u))  /* 0xFFFF_CFFF = -12289 */
 
-/** End return codes for scom_read, scom_write. */
+/*** Return codes for i2c_read(), i2c_write() */
+/* Atomic I2C Lock is held */
+#define HBRT_RC_I2C_LOCKED             ((int)(0x0u - 0x4001u))  /* 0xFFFF_BFFF = -16385 */
 
 
 /**
@@ -202,17 +212,8 @@ enum MemoryError_t
 /* PHYP fixes */
 #define HBRT_CAPS_SET2_PHYP    2
 
-/* FSP failed due to a a reset/reload. Only applicable when
- * hostInterfaces::hbrt_fw_msg::io_type is set to
- * HBRT_FW_MSG_HBRT_FSP_REQ
- */
-#define HBRT_RC_FSPDEAD       -8193    //0x2001
-
 /* FSP failed due to a a reset/reload */
 #define HBRT_FW_REQUEST_RETRIES  1
-
-/* Defined Return Codes for wakeup() */
-#define HBRT_RC_WAKEUP_INVALID_ON_CORE_XSTOP      -12289   /* -0x3001 */
 
 
 /** @typedef hostInterfaces_t

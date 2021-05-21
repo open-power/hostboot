@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@
 namespace I2C
 {
 
-#ifndef __HOSTBOOT_RUNTIME
 /**
  * @enum i2cProcessType
  *
@@ -117,6 +116,7 @@ inline i2cEngineSelect i2cEngineToEngineSelect(const uint8_t i_engine)
     return static_cast<i2cEngineSelect>(0x80 >> i_engine);
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 /**
  * @brief This function will handle everything required to reset a target's
  *        "active" I2C master engine.
@@ -292,6 +292,20 @@ struct DeviceInfo_t
  */
 void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                     std::vector<DeviceInfo_t>& o_deviceInfo );
+
+
+/**
+ * @brief This function forcefully releases the I2C Atomic Lock
+ *        from its current owner.
+ *
+ * @param[in] i_target - I2C Master Target device
+ * @param[in] i_engine - I2C Engine to unlock
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t forceClearAtomicLock( TARGETING::Target * i_target,
+                                 i2cEngineSelect i_engine );
 
 };  // end namespace I2C
 

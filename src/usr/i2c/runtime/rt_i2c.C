@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,9 @@
 #include <i2c/i2creasoncodes.H>
 #include <runtime/interface.h>
 #include <targeting/runtime/rt_targeting.H>
+#include <i2c/i2c.H>
+#include <i2c/i2cif.H>
+#include <sbeio/sbe_retry_handler.H>
 #include "../errlud_i2c.H"
 
 // ----------------------------------------------
@@ -91,12 +94,15 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     args.engine = va_arg( i_args, uint64_t );
     args.devAddr = va_arg( i_args, uint64_t );
 
-    // i2c addresses are 7 bits so shift that right 1 bit
-    args.devAddr >>= 1;
-
     // These are additional parms in the case an offset is passed in
     // via va_list, as well
     args.offset_length = va_arg( i_args, uint64_t);
+
+    TRACFCOMP(g_trac_i2c,
+              "rt_i2c: i2cPerformOp for %.8X"
+              TRACE_I2C_ADDR_FMT,
+              TARGETING::get_huid(i_target),
+              TRACE_I2C_ADDR_ARGS(args));
 
     uint32_t offset = 0;
     if ( args.offset_length != 0 )
@@ -124,7 +130,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                 args.port, args.engine, args.devAddr);
             /*@
             * @errortype
-            * @moduleid     I2C_PERFORM_OP
+            * @moduleid     RT_I2C_PERFORM_OP
             * @reasoncode   I2C_RUNTIME_INVALID_OFFSET_LENGTH
             * @userdata1    Offset length
             * @userdata2[0:31]  Operation Type
@@ -132,7 +138,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
             * @devdesc      I2C offset length is invalid
             */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                          I2C_PERFORM_OP,
+                                          RT_I2C_PERFORM_OP,
                                           I2C_RUNTIME_INVALID_OFFSET_LENGTH,
                                           args.offset_length,
                                           TWO_UINT32_TO_UINT64(i_opType,
@@ -144,13 +150,43 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         }
     }
 
-    int rc = 0;
+    int host_rc = 0;
     bool l_host_if_enabled = true;
     TARGETING::rtChipId_t proc_id = 0;
 
+    // Check for Master Sentinel chip
+    if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target )
+    {
+        TRACFCOMP( g_trac_i2c,
+                   ERR_MRK"i2cPerformOp() - Cannot target Master Sentinel "
+                   "Chip for an I2C Operation!" );
+
+        /*@
+         * @errortype
+         * @reasoncode     I2C_MASTER_SENTINEL_TARGET
+         * @severity       ERRORLOG_SEV_UNRECOVERABLE
+         * @moduleid       RT_I2C_PERFORM_OP
+         * @userdata1      Operation Type requested
+         * @userdata2      <UNUSED>
+         * @devdesc        Master Sentinel chip was used as a target for an
+         *                 I2C operation.  This is not permitted.
+         * @custdesc       Internal firmware error
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       RT_I2C_PERFORM_OP,
+                                       I2C_MASTER_SENTINEL_TARGET,
+                                       i_opType,
+                                       0x0,
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+        err->collectTrace( I2C_COMP_NAME, 256);
+
+        return err;
+    }
+
     // Convert target to proc id
     err = TARGETING::getRtTarget( i_target,
-                                proc_id);
+                                  proc_id);
     if(err)
     {
         return err;
@@ -162,94 +198,223 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     proc_engine_port |= (uint64_t)(args.engine) << HBRT_I2C_MASTER_ENGINE_SHIFT;
     proc_engine_port |= (uint64_t)(args.port) << HBRT_I2C_MASTER_PORT_SHIFT;
 
-    // Send I2C op to host interface
-    if(i_opType == DeviceFW::READ)
+    // PHYP/OPAL expect the 7-bit device address to be right-justified (we
+    // left-justify it in Hostboot)
+    args.devAddr >>= 1;
+
+    // Potentially loop if someone else (SBE) is holding the atomic lock
+    constexpr size_t MAX_I2C_LOCK_RETRIES = 10;
+    for( size_t l_retries = 0; l_retries <= MAX_I2C_LOCK_RETRIES; l_retries++ )
     {
-        if(g_hostInterfaces->i2c_read != NULL)
+        // Send I2C op to host interface
+        if(i_opType == DeviceFW::READ)
         {
-            rc = g_hostInterfaces->i2c_read
-                    (
-                        proc_engine_port,   // Master Chip/Engine/Port
-                        args.devAddr,       // Dev Addr
-                        args.offset_length, // Offset size
-                        offset,             // Offset
-                        io_buflen,          // Buffer length
-                        io_buffer           // Buffer
-                    );
+            if(g_hostInterfaces->i2c_read != NULL)
+            {
+                host_rc = g_hostInterfaces->i2c_read
+                  (
+                   proc_engine_port,   // Master Chip/Engine/Port
+                   args.devAddr,       // Dev Addr
+                   args.offset_length, // Offset size
+                   offset,             // Offset
+                   io_buflen,          // Buffer length
+                   io_buffer           // Buffer
+                   );
+            }
+            else
+            {
+                TRACFCOMP(g_trac_i2c,
+                          ERR_MRK"Hypervisor I2C read interface not linked");
+                l_host_if_enabled = false;
+            }
+        }
+        else if (i_opType == DeviceFW::WRITE)
+        {
+            if(g_hostInterfaces->i2c_write != NULL)
+            {
+                host_rc = g_hostInterfaces->i2c_write
+                  (
+                   proc_engine_port,   // Master Chip/Engine/Port
+                   args.devAddr,       // Dev Addr
+                   args.offset_length, // Offset size
+                   offset,             // Offset
+                   io_buflen,          // Buffer length
+                   io_buffer           // Buffer
+                   );
+            }
+            else
+            {
+                TRACFCOMP(g_trac_i2c,
+                          ERR_MRK"Hypervisor I2C write interface not linked");
+                l_host_if_enabled = false;
+            }
         }
         else
         {
-            TRACFCOMP(g_trac_i2c,
-                ERR_MRK"Hypervisor I2C read interface not linked");
-            l_host_if_enabled = false;
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cPerformOp() - "
+                       "Unsupported Op/Offset-Type Combination=%d/%d",
+                       i_opType, args.offset_length );
+            uint64_t userdata2 = args.offset_length;
+            userdata2 = (userdata2 << 16) | args.port;
+            userdata2 = (userdata2 << 16) | args.engine;
+            userdata2 = (userdata2 << 16) | args.devAddr;
+
+            /*@
+             * @errortype
+             * @reasoncode       I2C_INVALID_OP_TYPE
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @moduleid         RT_I2C_PERFORM_OP
+             * @userdata1        i_opType
+             * @userdata2[0:15]  Offset Length
+             * @userdata2[16:31] Master Port
+             * @userdata2[32:47] Master Engine
+             * @userdata2[48:63] Slave Device Address
+             * @devdesc          Invalid operation type.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           I2C_PERFORM_OP,
+                                           I2C_INVALID_OP_TYPE,
+                                           i_opType,
+                                           userdata2,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+            err->collectTrace( I2C_COMP_NAME, 256);
+
+            // No Operation performed, so can break and skip the section
+            // that handles operation errors
+            break;
         }
-    }
-    else if (i_opType == DeviceFW::WRITE)
-    {
-        if(g_hostInterfaces->i2c_write != NULL)
+
+        if(!l_host_if_enabled)
         {
-            rc = g_hostInterfaces->i2c_write
-                    (
-                        proc_engine_port,   // Master Chip/Engine/Port
-                        args.devAddr,       // Dev Addr
-                        args.offset_length, // Offset size
-                        offset,             // Offset
-                        io_buflen,          // Buffer length
-                        io_buffer           // Buffer
-                    );
+            /*@
+             * @errortype
+             * @moduleid     I2C_PERFORM_OP
+             * @reasoncode   I2C_RUNTIME_INTERFACE_ERR
+             * @userdata1    0
+             * @userdata2    Op type
+             * @devdesc      I2C read/write interface not linked.
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                          I2C_PERFORM_OP,
+                                          I2C_RUNTIME_INTERFACE_ERR,
+                                          0,
+                                          i_opType);
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
+            break;
         }
-        else
+
+        // Jump out of the retry loop if there is no error
+        if( 0 == host_rc )
+        {
+            break;
+        }
+        // Check if we need to handle a lock issue
+        else if( HBRT_RC_I2C_LOCKED == host_rc )
         {
             TRACFCOMP(g_trac_i2c,
-                ERR_MRK"Hypervisor I2C write interface not linked");
-            l_host_if_enabled = false;
+                      "I2C Engine is locked for %.8X (retry %d)"
+                      TRACE_I2C_ADDR_FMT,
+                      TARGETING::get_huid(i_target),
+                      l_retries,
+                      TRACE_I2C_ADDR_ARGS(args));
+
+            // If we've already tried a few times, make one more attempt
+            //  by resetting the SBE.  Note that the lock is taken
+            //  back as part of reset logic.
+            if( l_retries == MAX_I2C_LOCK_RETRIES-1 )
+            {
+                TRACFCOMP(g_trac_i2c,
+                          ERR_MRK"Ran out of retries, giving up");
+
+                // reset the SBE
+                // Get the SBE Retry Handler
+                SBEIO::SbeRetryHandler l_SBEobj =
+                  SBEIO::SbeRetryHandler(SBEIO::SbeRetryHandler::
+                           SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                           0); //no plid to pass in
+
+                //Attempt to recover the SBE
+                l_SBEobj.main_sbe_handler(i_target);
+                if (l_SBEobj.isSbeAtRuntime())
+                {
+                    TRACFCOMP(g_trac_i2c, "SBE Restarted successfully");
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_i2c, "SBE restart failed");
+                }
+                // We don't actually care if the SBE recovered in
+                //  this logic
+
+                // One more try
+                continue;
+            }
+
+            // Check if the SBE is dead
+            //E0005 = Bit 0 indicates whether SBE is running or halted. 0 - running, 1 - halted.
+            // Read the PPE External Interface DBGPRO reg
+            uint64_t l_sbereg = 0;
+            size_t l_scomsize = sizeof(l_sbereg);
+            err = DeviceFW::deviceOp( DeviceFW::READ,
+                                      i_target,
+                                      &l_sbereg,
+                                      l_scomsize,
+                                      DEVICE_SCOM_ADDRESS(0x000E0005) );
+            if ( err )
+            {
+                // the scom error is somewhat secondary to the i2c op
+                //  we are trying to do, so just commit it as info
+                //  and fall out to fail the i2c operation itself
+                TRACFCOMP(g_trac_i2c,
+                          ERR_MRK"Could not do scom to read SBE state");
+                err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                break;
+            }
+
+            if( l_sbereg & 0x800000000000 )
+            {
+                TRACFCOMP(g_trac_i2c,
+                          INFO_MRK"SBE is halted, taking the lock back");
+                err = forceClearAtomicLock(i_target,
+                             i2cEngineToEngineSelect(args.engine));
+                if( err )
+                {
+                    TRACFCOMP(g_trac_i2c,
+                              ERR_MRK"Error trying to force the atomic lock");
+                    break;
+                }
+            }
         }
-    }
+        // Unrecognized error
+        else if(host_rc)
+        {
+            // convert rc to error log
+            /*@
+             * @errortype
+             * @moduleid     I2C_PERFORM_OP
+             * @reasoncode   I2C_RUNTIME_ERR
+             * @userdata1    Hypervisor return code
+             * @userdata2    Op type
+             * @devdesc      I2C access error
+             * @custdesc     Hardware access error
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                          I2C_PERFORM_OP,
+                                          I2C_RUNTIME_ERR,
+                                          host_rc,
+                                          i_opType);
 
-    if(!l_host_if_enabled)
-    {
-        /*@
-         * @errortype
-         * @moduleid     I2C_PERFORM_OP
-         * @reasoncode   I2C_RUNTIME_INTERFACE_ERR
-         * @userdata1    0
-         * @userdata2    Op type
-         * @devdesc      I2C read/write interface not linked.
-         */
-        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                      I2C_PERFORM_OP,
-                                      I2C_RUNTIME_INTERFACE_ERR,
-                                      0,
-                                      i_opType);
+            err->addHwCallout(i_target,
+                              HWAS::SRCI_PRIORITY_LOW,
+                              HWAS::NO_DECONFIG,
+                              HWAS::GARD_NULL);
+            break;
+        }
 
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_HIGH);
-    }
-
-    if(rc)
-    {
-        // convert rc to error log
-        /*@
-         * @errortype
-         * @moduleid     I2C_PERFORM_OP
-         * @reasoncode   I2C_RUNTIME_ERR
-         * @userdata1    Hypervisor return code
-         * @userdata2    Op type
-         * @devdesc      I2C access error
-         */
-        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                      I2C_PERFORM_OP,
-                                      I2C_RUNTIME_ERR,
-                                      rc,
-                                      i_opType);
-
-        err->addHwCallout(i_target,
-                          HWAS::SRCI_PRIORITY_LOW,
-                          HWAS::NO_DECONFIG,
-                          HWAS::GARD_NULL);
-
-        // Note: no trace buffer available at runtime
-    }
+    } //i2c retry loop
 
     // If there is an error, add parameter info to log
     if ( err != NULL )
@@ -260,6 +425,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                          i_accessType,
                          args  )
                        .addToLog(err);
+        err->collectTrace(I2C_COMP_NAME);
     }
 
     TRACDCOMP( g_trac_i2c,

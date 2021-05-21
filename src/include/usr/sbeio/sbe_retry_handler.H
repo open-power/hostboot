@@ -33,8 +33,8 @@
 #define __SBE_RETRY_HANDLER_H
 
 #include <isteps/hwpisteperror.H>
-#include <p10_get_sbe_msg_register.H>
 #include <p10_extract_sbe_rc.H>
+#include <p10_sbe_ext_defs.H>
 #include <sys/time.h>
 #include <sbe/sbe_update.H>
 

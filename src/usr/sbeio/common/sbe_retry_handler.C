@@ -65,6 +65,7 @@
 #include <vpd/mvpdenums.H>
 #include <sbeio/sbe_retry_handler.H>
 #include <secureboot/service.H>
+#include <i2c/i2cif.H>
 
 #include <devicefw/driverif.H>
 #include <plat_utils.H>
@@ -492,7 +493,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                 // up in a endless loop
                 break;
             }
-            // Look at the sbeRestartMethd instance variable to determine which method
+            // Look at the sbeRestartMethod instance variable to determine which method
             // we will use to attempt the restart. In general during IPL time we will
             // attempt CBS, during runtime we will want to use HRESET.
             // OPTION 3 - ATTEMPT START_CBS on THIS SIDE
@@ -588,8 +589,10 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                 // For now we only use p10_start_cbs if we fail to boot the slave SBE
                 // on our initial attempt, the bool param is true we are telling the
                 // HWP that we are starting up the SBE which is true in this case
-                FAPI_INVOKE_HWP(l_errl, p10_start_cbs,
-                                l_fapi2_proc_target, true);
+                FAPI_INVOKE_HWP( l_errl,
+                                 p10_start_cbs,
+                                 l_fapi2_proc_target,
+                                 true );
 
                 if(l_errl)
                 {
@@ -652,18 +655,10 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
 
                 SBE_TRACF("Invoking p10_sbe_hreset HWP on processor %.8X", get_huid(i_target));
 
-                // We cannot use FAPI_INVOKE in this case because it is possible
-                // we are handling a HWP fail. If we attempted to use FAPI_INVOKE
-                // while we are already inside a FAPI_INVOKE call then we can
-                // end up in an endless wait on the fapi mutex lock
-                fapi2::ReturnCode l_rc;
-
                 // For now we only use HRESET during runtime
-                FAPI_EXEC_HWP(l_rc, p10_sbe_hreset,
-                                l_fapi2_proc_target);
-
-                l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-
+                FAPI_INVOKE_HWP( l_errl,
+                                 p10_sbe_hreset,
+                                 l_fapi2_proc_target );
                 if(l_errl)
                 {
                     SBE_TRACF("ERROR: call p10_sbe_hreset, PLID=0x%x",
@@ -687,6 +682,18 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target, bool i_sbe
                     // we will assume that no future retry actions
                     // will work so we will exit
                     break;
+                }
+
+                // Need to make sure the SBE didn't die with the I2C lock held
+                l_errl = I2C::forceClearAtomicLock(i_target,
+                                                   I2C::I2C_ENGINE_SELECT_ALL);
+                if(l_errl)
+                {
+                    SBE_TRACF("ERROR: I2C::forceClearAtomicLock() failed, committing log as info" );
+                    // commit as informational since it is possible nothing
+                    //  bad will happen, we'll catch a hard fail elsewhere
+                    l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    errlCommit( l_errl, SBEIO_COMP_ID);
                 }
             }
 
@@ -1179,7 +1186,6 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     SBE_TRACF(ENTER_MRK "sbe_run_extract_rc()");
 
     errlHndl_t l_errl = nullptr;
-    fapi2::ReturnCode l_rc;
 
     // Setup for the HWP
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
@@ -1192,17 +1198,12 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     P10_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
         P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
 
-    // TODO RTC: 190528 Force FAPI_INVOKE_HWP to call FAPI_EXEC_HWP when FAPI_INVOKE
-    //          is blocked by mutex
-    // Note that it's possible we are calling this while we are already inside
-    // of a FAPI_INVOKE_HWP call. This might cause issue w/ current_err
-    // but unsure how to get around it.
-    FAPI_EXEC_HWP(l_rc, p10_extract_sbe_rc, l_fapi2ProcTarget,
-                  l_ret, iv_useSDB, iv_secureModeDisabled);
+    FAPI_INVOKE_HWP( l_errl,
+                     p10_extract_sbe_rc, l_fapi2ProcTarget,
+                     l_ret, iv_useSDB, iv_secureModeDisabled);
 
     // Convert the returnCode into an UNRECOVERABLE error log which we will
     // associate w/ the caller's errlog via plid
-    l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     this->iv_currentAction = l_ret;
     SBE_TRACF("sbe_run_extract_rc p10_extract_sbe_rc returned iv_currentAction=%d", this->iv_currentAction);
 

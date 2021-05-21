@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,7 @@ enum i2cModuleId
     I2C_ACCESS_MUX                      = 0x11,
     I2C_GENERIC_PRES_DETECT             = 0x12,
     I2C_BAD_PEC_BYTE_ERROR              = 0x13,
+    RT_I2C_PERFORM_OP                   = 0x14,
 };
 
 /**

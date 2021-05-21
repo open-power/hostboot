@@ -85,15 +85,8 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 
 #define MAX_NACK_RETRIES 3
 #define PAGE_OPERATION 0xffffffff  // Special value use to determine type of op
-#define P10_ENGINE_SCOM_OFFSET 0x1000
 constexpr uint64_t FSI_BUS_SPEED_MHZ = 133; //FSI runs at 133MHz
 
-// Derived from ATTR_I2C_BUS_SPEED_ARRAY[engine][port] attribute
-#define I2C_BUS_ATTR_MAX_ENGINE                                     \
-    I2C_BUS_MAX_ENGINE(TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type{})
-#define I2C_BUS_ATTR_MAX_PORT                                       \
-    I2C_BUS_MAX_PORT(TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type{})
-#define FSI_MODE_MAX_PORT 18 // Engine A has 18 ports
 
 // ----------------------------------------------
 
@@ -5857,5 +5850,6 @@ void addHwCalloutsI2c(errlHndl_t i_err,
                                i_args.devAddr,
                                HWAS::SRCI_PRIORITY_HIGH);
 }
+
 
 } // end namespace I2C

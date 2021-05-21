@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -24,3 +24,4 @@
 # IBM_PROLOG_END_TAG
 # common objects with runtime
 OBJS += errlud_i2c.o
+OBJS += i2c_utils.o
