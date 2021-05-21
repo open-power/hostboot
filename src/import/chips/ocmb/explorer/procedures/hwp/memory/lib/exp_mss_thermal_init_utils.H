@@ -323,6 +323,12 @@ namespace check
 fapi2::ReturnCode sensor_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                   const host_fw_response_struct& i_rsp);
 
+///
+/// @brief Logs a return code as recovered if it is a temperature sensor RC
+/// @param[in,out] io_rc the RC
+/// @note Only logs RC_MSS_EXP_SENSOR_CACHE_ENABLE_FAILED
+///
+void log_sensor_cache_errors(fapi2::ReturnCode& io_rc);
 } // ns check
 
 } // ns exp

@@ -93,6 +93,13 @@ fapi2::ReturnCode sensor_interval_read(
     }
 
 fapi_try_exit:
+
+    // If we have a failing sensor response code, then log it as recovered
+    // We do not want to exit an IPL or deconfigure a DIMM for a bad temperature sensor
+    // Note: we are doing our error logging here rather than in check::sensor_response
+    //       to allow check::sensor_response to return the RC for unit testing purposes
+    mss::exp::check::log_sensor_cache_errors(fapi2::current_err);
+
     return fapi2::current_err;
 }
 
@@ -561,6 +568,20 @@ fapi2::ReturnCode sensor_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Logs a return code as recovered if it is a temperature sensor RC
+/// @param[in,out] io_rc the RC
+/// @note Only logs RC_MSS_EXP_SENSOR_CACHE_ENABLE_FAILED
+///
+void log_sensor_cache_errors(fapi2::ReturnCode& io_rc)
+{
+    if(uint64_t(fapi2::RC_MSS_EXP_SENSOR_CACHE_ENABLE_FAILED) == uint64_t(io_rc))
+    {
+        fapi2::logError(io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        io_rc = fapi2::FAPI2_RC_SUCCESS;
+    }
 }
 
 } // ns check
