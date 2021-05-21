@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2021
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -26,7 +26,15 @@
 ROOTPATH = ../../..
 MODULE = lpc
 
-OBJS = lpcdd.o
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
+
+OBJS = lpcdd.o lpcxscom.o
 
 SUBDIRS = test.d
 

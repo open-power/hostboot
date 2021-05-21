@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -43,7 +43,6 @@ typedef uint64_t LPCBase_t;
  *  @brief  LPC Device Driver Class
  *     Provides access to the LPC bus for a specific Processor
  */
-
 class LpcDD
 {
   public:
@@ -58,7 +57,7 @@ class LpcDD
      *
      * @return Error from operation
      */
-    errlHndl_t readLPC(LPC::TransType i_type,
+    virtual errlHndl_t readLPC(LPC::TransType i_type,
                        uint32_t i_address,
                        void* o_buffer,
                        size_t& io_buflen);
@@ -74,7 +73,7 @@ class LpcDD
      *
      * @return Error from operation
      */
-    errlHndl_t writeLPC(LPC::TransType i_type,
+    virtual errlHndl_t writeLPC(LPC::TransType i_type,
                         uint32_t i_address,
                         const void* i_buffer,
                         size_t& io_buflen);
@@ -84,7 +83,7 @@ class LpcDD
      *
      * @return Error log if error found
      */
-    errlHndl_t checkForLpcErrors();
+    virtual errlHndl_t checkForLpcErrors();
 
     /**
      * @brief Enums for different levels of resetting PNOR communication levels
@@ -105,7 +104,7 @@ class LpcDD
      *
      * @return errlHndl_t  NULL on success, else error log
      */
-    errlHndl_t hwReset( ResetLevels i_resetLevel );
+    virtual errlHndl_t hwReset( ResetLevels i_resetLevel );
 
     /**
      * @brief Get the target associated with this dd instance
@@ -170,9 +169,99 @@ class LpcDD
     /**
      * @brief Destructor
      */
-    ~LpcDD();
+    virtual ~LpcDD();
+
+    /**
+     * @brief LPC complex register addresses.  These addresses are expressed as
+     *     relative to the start of the OPB space (i.e. do not include base
+     *     address of that space or any chip-relative addressing)
+     */
+    enum LPC_REGS
+    {
+        // OPB Master (4 bytes accesses)
+        OPBM_ACCUM_STATUS_REG            = 0x0000,
+        OPBM_ACCUM_STATUS_INT_ENABLE_REG = 0x0004,
+        OPBM_CONTROL_REG                 = 0x0008,
+        OPBM_IOMUX_CONTROL_REG           = 0x000C,
+        OPBM_TRACE_00_REG                = 0x0010,
+        OPBM_TRACE_01_REG                = 0x0014,
+        OPBM_TRACE_02_REG                = 0x0018,
+        OPBM_TRACE_03_REG                = 0x001C,
+        OPBM_TRACE_04_REG                = 0x0020,
+        OPBM_TRACE_05_REG                = 0x0024,
+        OPBM_TRACE_06_REG                = 0x0028,
+        OPBM_TRACE_07_REG                = 0x002C,
+        OPBM_TRACE_08_REG                = 0x0030,
+        OPBM_TRACE_09_REG                = 0x0034,
+        OPBM_BUF_ERR_INJECT_REG          = 0x0038,
+        OPBM_TIMEOUT_VALUE_REG           = 0x0040,
+        OPBM_ACCUM_STATUS_ERR_INJECT_REG = 0x0048,
+        OPBM_ACTUAL_STATUS_REG           = 0x004C,
+        OPBM_INT_REG                     = 0x0050,
+        OPBM_INT_ENABLE_REG              = 0x0054,
+        OPBM_INT_POLARITY_REG            = 0x0058,
+        OPBM_INT_INPUTS_REG              = 0x005C,
+
+        // OPB Arbiter (1 byte accesses)
+        OPB_ARB_PRIORITY_REG             = 0x1000,
+        OPB_ARB_CONTROL_REG              = 0x1001,
+        OPB_ARB_REVISION_ID_0_REG        = 0x1004,
+        OPB_ARB_REVISION_ID_1_REG        = 0x1005,
+        OPB_ARB_REVISION_ID_2_REG        = 0x1006,
+        OPB_ARB_REVISION_ID_3_REG        = 0x1007,
+
+        // LPCHC (4 byte accesses)
+        LPCHC_BASE_ADDR_0_INT_REG        = 0x2000,
+        LPCHC_BASE_ADDR_1_IO_REG         = 0x2004,
+        LPCHC_BASE_ADDR_2_MEM_REG        = 0x2008,
+        LPCHC_BASE_ADDR_3_FW_REG         = 0x200C,
+        LPCHC_MEM_SEGMENT_REG            = 0x2020,
+        LPCHC_FW_SEGMENT_REG             = 0x2024,
+        LPCHC_FW_READ_ACCESS_SIZE_REG    = 0x2028,
+        LPCHC_SYNC_CYCLE_CNT_REG         = 0x202C,
+        LPCHC_LPCIRQSER_CONTROL_REG      = 0x2030,
+        LPCHC_LPCIRQ_MASK_REG            = 0x2034,
+        LPCHC_LPCIRQ_STATUS_REG          = 0x2038,
+        LPCHC_ERROR_ADDR_REG             = 0x2040,
+        LPCHC_LPC_BUS_MASTER_GRANT_REG   = 0x2050,
+        LPCHC_LPC_BUS_MASTER_DATA_REG    = 0x2054,
+        LPCHC_LPC_BUS_MASTER_ADDR_REG    = 0x2058,
+        LPCHC_LPC_BUS_MASTER_SYNC_REG    = 0x205C,
+        LPCHC_WATERMARK_REG              = 0x20F0,
+        LPCHC_LPC_BUS_ABORT_CYCLE_REG    = 0x20F8,
+        LPCHC_RESET_REG                  = 0x20FC,
+    };
 
   protected:
+
+    /**
+     *  @brief Returns whether address in LPC error space is part of the OPB
+     *      Arbiter
+     *
+     *  @param[in] i_addr Address, relative to LPC error space, to check
+     *
+     *  @return bool Indicating whether address is in OPB Arbiter space or not
+     */
+    bool opbArbiterRange(uint64_t i_addr) const;
+
+    /**
+     *  @brief Returns whether address in LPC error space is part of the OPB
+     *      Master
+     *
+     *  @param[in] i_addr Address, relative to LPC error space, to check
+     *
+     *  @return bool Indicating whether address is in OPB Master space or not
+     */
+    bool opbMasterRange(uint64_t i_addr) const;
+
+    /**
+     *  @brief Returns whether address in LPC error space is part of the LPCHC
+     *
+     *  @param[in] i_addr Address, relative to LPC error space, to check
+     *
+     *  @return bool Indicating whether address is in LPCHC space or not
+     */
+    bool lpchcRange(uint64_t i_addr) const;
 
     /**
      *
@@ -245,7 +334,39 @@ class LpcDD
                          const void* i_buffer,
                          size_t& io_buflen);
 
+  protected:
+
+    /**
+     * @brief Processor target associated with the LPC Master
+     */
+    TARGETING::Target* iv_proc;
+
+    /**
+     * @brief Marker to avoid infinite recursion in error handlers
+     */
+    bool iv_ffdcActive;
+
+    /**
+     * @brief Indicates if class is currently doing a RESET procedure
+     */
+    bool iv_resetActive;
+    /**
+     * @brief Indicates recovery from an error has failed
+     */
+    bool iv_errorRecoveryFailed;
+
+    /**
+     * @brief Number of times recovered from an error
+     */
+    uint32_t iv_errorHandledCount;
+
+    /**
+     * @brief Pointer to mutex in use
+     */
+    mutex_t* ivp_mutex;
+
   private:
+
     /**
      * @brief Mutex to prevent concurrent LPC accesses to the master
      */
@@ -259,41 +380,10 @@ class LpcDD
     mutex_t iv_mutex;
 
     /**
-     * @brief Pointer to mutex in use
+     * @brief Virtual Address of the begining of LPC address space
      */
-    mutex_t* ivp_mutex;
-
-    /**
-     * @brief Processor target associated with the LPC Master
-     */
-    TARGETING::Target* iv_proc;
-
-    /**
-     * @brief Marker to avoid infinite recursion in error handlers
-     */
-    bool iv_ffdcActive;
-
-    /**
-     * @brief Number of times recovered from an error
-     */
-    uint32_t iv_errorHandledCount;
-
-    /**
-     * @brief Indicates recovery from an error has failed
-     */
-    bool iv_errorRecoveryFailed;
-
-    /**
-     * @brief Indicates if class is currently doing a RESET procedure
-     */
-    bool iv_resetActive;
-
-    /**
-    * @brief Virtual Address of the begining of LPC address space
-    */
     uint64_t iv_lpcBaseAddr;
 
 };
-
 
 #endif

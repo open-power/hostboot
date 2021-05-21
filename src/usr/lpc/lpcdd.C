@@ -39,7 +39,7 @@
 #include <errl/errlentry.H>
 #include <targeting/common/targetservice.H>
 #include <errl/errlmanager.H>
-#include "lpcdd.H"
+#include "lpcxscom.H"
 #include <lpc/lpc_const.H>
 #include <sys/time.h>
 #include <lpc/lpc_reasoncodes.H>
@@ -51,6 +51,17 @@
 #include <arch/memorymap.H>
 #include <util/misc.H>
 #include <errl/errlreasoncodes.H>
+#include <fapiPlatTrace.H>
+#include <fapi2/plat_target.H>
+#include <fapi2/target.H>
+#include <p10_scom_proc.H>
+#include <p10_lpc_utils.H>
+#include <algorithm>
+#include <fapi2/plat_hwp_invoker.H>
+#include <p10_sbe_lpc_init.H>
+#include <errl/errludtarget.H>
+
+namespace S=scomt::proc;
 
 trace_desc_t* g_trac_lpc;
 TRAC_INIT( & g_trac_lpc, LPC_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -69,6 +80,7 @@ static LpcDD* g_altLpcDD = nullptr;
 
 namespace LPC
 {
+
 /**
  * @brief Performs an LPC Read Operation
  *
@@ -352,7 +364,7 @@ errlHndl_t create_altmaster_objects( bool i_create,
                 break;
             }
 
-            g_altLpcDD = new LpcDD( i_proc );
+            g_altLpcDD = new XscomLpc( i_proc );
         }
         else
         {
@@ -369,19 +381,6 @@ errlHndl_t create_altmaster_objects( bool i_create,
     } while(0);
 
     return l_err;
-}
-
-
-/**
- * @brief Block/unblock all LPC operations
- * @param[in] i_block  true: block ops, false: allow ops
- *
- */
-void block_lpc_ops( bool i_block )
-{
-    // Note: this is ignoring the alt-master because the usecase for
-    //  this function is only applicable for DD1
-    Singleton<LpcDD>::instance().lock(i_block);
 }
 
 /**
@@ -401,7 +400,6 @@ uint64_t get_lpc_virtual_bar( void )
     return (l_LpcDD.getLPCBaseAddr() - l_LpcDD.getLPCStartAddr());
 }
 
-
 }; //namespace LPC
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -410,20 +408,21 @@ uint64_t get_lpc_virtual_bar( void )
 mutex_t LpcDD::cv_mutex = MUTEX_INITIALIZER;
 
 LpcDD::LpcDD( TARGETING::Target* i_proc )
-: ivp_mutex(NULL)
-,iv_proc(i_proc)
+: iv_proc(i_proc)
 ,iv_ffdcActive(false)
-,iv_errorHandledCount(0)
-,iv_errorRecoveryFailed(false)
 ,iv_resetActive(false)
+,iv_errorRecoveryFailed(false)
+,iv_errorHandledCount(0)
+,ivp_mutex(nullptr)
 {
-    TRACFCOMP(g_trac_lpc, "LpcDD::LpcDD> " );
+    TRACFCOMP(g_trac_lpc, ENTER_MRK "LpcDD::LpcDD" );
     mutex_init( &iv_mutex );
-    LPCBase_t baseAddr;
+    LPCBase_t baseAddr = 0;
 
     if( i_proc == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
     {
         ivp_mutex = &cv_mutex;
+
         //Retrieve the LPC phys base from the bootloader/hostboot data manager
         baseAddr = g_BlToHbDataManager.getLpcBAR() + LPC_ADDR_START;
     }
@@ -455,13 +454,15 @@ LpcDD::LpcDD( TARGETING::Target* i_proc )
         errlCommit(l_errl, LPC_COMP_ID);
     }
     **/
+    TRACFCOMP(g_trac_lpc, EXIT_MRK "LpcDD::LpcDD");
 }
 
 LpcDD::~LpcDD()
 {
+    TRACFCOMP(g_trac_lpc, ENTER_MRK "LpcDD::~LpcDD");
     mutex_destroy( &iv_mutex );
+    TRACFCOMP(g_trac_lpc, EXIT_MRK "LpcDD::~LpcDD");
 }
-
 
 /**
  * @brief Reset hardware to get into clean state
@@ -493,6 +494,7 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                     {// Nothing to do here, so just break
                         break;
                     }
+
 /*   @todo - RTC:179179
                   case RESET_INIT:
                     {
@@ -950,6 +952,24 @@ errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
     } while(0);
 
     return l_err;
+}
+
+bool LpcDD::opbArbiterRange(const uint64_t i_addr) const
+{
+    return (   (i_addr >= 0x1000)
+            && (i_addr <= 0x1FFF) );
+}
+
+bool LpcDD::opbMasterRange(const uint64_t i_addr) const
+{
+    return (   (i_addr >= 0x0000)
+            && (i_addr <= 0x0FFC) );
+}
+
+bool LpcDD::lpchcRange(const uint64_t i_addr) const
+{
+    return (   (i_addr >= 0x2000)
+            && (i_addr <= 0x2FFC) );
 }
 
 /**

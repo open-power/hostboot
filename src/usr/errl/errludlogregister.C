@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,6 +145,7 @@ void ErrlUserDetailsLogRegister::readRegister(
         // two parameters
         case DeviceFW::MVPD:        // userif.H
         case DeviceFW::EEPROM:      // driverif.H
+        case DeviceFW::LPC:         // userif.H
         {
             numAddressArgs = 2;
             break;
@@ -233,6 +234,7 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         // two parameters
         case DeviceFW::MVPD:        // userif.H
         case DeviceFW::EEPROM:      // driverif.H
+        case DeviceFW::LPC:         // userif.H
         {
             numAddressArgs = 2;
             break;

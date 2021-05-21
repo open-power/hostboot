@@ -162,7 +162,7 @@ class errludP_errl:
                     addrParams.append("EEPROM chip number")
                 elif accessValue == 10: #DeviceFW::LPC
                     numArgs = 2
-                    d["Ranges"]="0=IO,1=MEM,2=FW,3=REG,4=ABS"
+                    d["Ranges"]="0=IO,1=MEM,2=FW,3=REG,4=ABS,5=ERR"
                     addrParams.append("Range")
                     addrParams.append("Addr")
                 elif accessValue == 23: #DeviceFW::XSCOM

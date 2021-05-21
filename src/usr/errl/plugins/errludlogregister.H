@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] YADRO                                                              */
@@ -149,7 +149,7 @@ public:
                     case DeviceFW::LPC:     // driverif.H
                         i_parser.PrintString("AccessType", "DeviceFW::LPC");
                         i_parser.PrintString("Ranges",
-                                             "0=IO,1=MEM,2=FW,3=REG,4=ABS");
+                                             "0=IO,1=MEM,2=FW,3=REG,4=ABS,5=ERR");
                         numArgs = 2;
                         addrParams.push_back("  Range");
                         addrParams.push_back("  Addr");
