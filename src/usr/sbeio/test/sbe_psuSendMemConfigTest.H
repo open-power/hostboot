@@ -246,6 +246,16 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
             l_MemConfigAlloc = sbeMalloc(sizeof(SbePsu::MemConfigData_t), l_sbeMemAlloc);
             // memset the virtual address to zeros to assure data buffer properly initialized
             memset(l_sbeMemAlloc, 0, sizeof(SbePsu::MemConfigData_t));
+
+            // SBE consumes a physical address
+            // Assumed the virtual pages returned by malloc are backed by contiguous physical pages
+
+            TRACFCOMP(g_trac_sbeio, "psuSendSbeMemConfig: SBE indirect data at address 0x%lx "
+                "l_sbeMemAlloc=0x%X sizeof(MemConfigData_t)=0x%X",
+                l_MemConfigAlloc.physAddr, l_sbeMemAlloc, sizeof(SbePsu::MemConfigData_t));
+
+            l_psuCommand.cd7_sendMemConfig_DataAddr = l_MemConfigAlloc.physAddr;
+
             uint32_t l_total_mem_targets_processed = 0;
             uint32_t l_current_targets_processed = 0;
             l_current_targets_processed = getMemConfigInfo(l_procTarget, CLASS_NA,

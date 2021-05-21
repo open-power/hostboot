@@ -72,7 +72,6 @@ errlHndl_t psuSendSbeMemConfig(const TargetHandle_t i_pProc)
                             get_huid(i_pProc) );
 
     //Allocate and align memory due to SBE requirements
-    uint64_t l_alignedMemConfigPhysAddr = 0;
     void* l_sbeMemAlloc = nullptr;
     SBEIO::sbeAllocationHandle_t l_MemConfigAlloc { };
     do
@@ -91,32 +90,12 @@ errlHndl_t psuSendSbeMemConfig(const TargetHandle_t i_pProc)
 
         // SBE consumes a physical address
         // Assumed the virtual pages returned by malloc() are backed by contiguous physical pages
-        l_alignedMemConfigPhysAddr = mm_virt_to_phys(l_sbeMemAlloc);
-        if ( static_cast<int>(l_alignedMemConfigPhysAddr) == -EFAULT )
-        {
-            TRACFCOMP(g_trac_sbeio, "psuSendSbeMemConfig: mm_virt_to_phys_failed");
-            /*
-             * @errortype        ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SBEIO_PSU
-             * @reasoncode       SBEIO_PSU_INVALID_MM_VIRT_TO_PHYS
-             * @userdata1        The PROC Target HUID
-             * @userdata2        l_sbeMemAlloc
-             * @devdesc          Memory management unable to map virtual to physical
-             * @custdesc         A software error occurred during system boot
-             */
-            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                             SBEIO_PSU,
-                                             SBEIO_PSU_INVALID_MM_VIRT_TO_PHYS,
-                                             get_huid(i_pProc),
-                                             reinterpret_cast<uint64_t>(l_sbeMemAlloc),
-                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-             break;
-        }
+
         TRACFCOMP(g_trac_sbeio, "psuSendSbeMemConfig: SBE indirect data at address 0x%lx "
             "l_sbeMemAlloc=0x%X sizeof(MemConfigData_t)=0x%X",
-            l_alignedMemConfigPhysAddr, l_sbeMemAlloc, sizeof(SbePsu::MemConfigData_t));
+            l_MemConfigAlloc.physAddr, l_sbeMemAlloc, sizeof(SbePsu::MemConfigData_t));
 
-        l_psuCommand.cd7_sendMemConfig_DataAddr = l_alignedMemConfigPhysAddr;
+        l_psuCommand.cd7_sendMemConfig_DataAddr = l_MemConfigAlloc.physAddr;
 
         // Populate the indirect memory buffer to pass in the PSU command message
         // sbeMalloc'd aligned buffer structure packed (MemConfigData_t)
