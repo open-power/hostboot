@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -83,8 +83,12 @@
     <ffdc>MC_PORT</ffdc>
     <ffdc>MC_PORT_SIZE</ffdc>
     <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
       <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <callout>
         <procedure>CODE</procedure>
@@ -105,8 +109,12 @@
     <ffdc>REQUESTED_MEM_SIZE</ffdc>
     <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
     <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
 </hwpError>
 
@@ -122,8 +130,12 @@
     <ffdc>REQUESTED_MEM_SIZE</ffdc>
     <ffdc>AVAIL_MEM_SIZE</ffdc>
     <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
 </hwpError>
 
@@ -206,8 +218,12 @@
     <ffdc>MAX_REGION_IDX</ffdc>
     <ffdc>MAX_REGION_SIZE</ffdc>
     <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
 </hwpError>
 
