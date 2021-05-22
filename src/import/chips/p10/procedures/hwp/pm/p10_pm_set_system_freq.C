@@ -255,12 +255,15 @@ fapi2::ReturnCode pm_set_frequency(
 
                         if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
                         {
-                            FAPI_ASSERT_NOEXIT(false,
-                                fapi2::PSTATE_PB_UT_FREQ_MISMATCH()
-                                .set_CHIP_TARGET(l_proc_target)
-                                .set_UT_FREQ(l_vpd_ut_freq)
-                                .set_COMPAT_FREQ(l_sys_compat_freq_mhz),
-                                "The UltraTurbo frequencies need to be compatabile");
+                            if (!fapi2::is_platform<fapi2::PLAT_CRONUS>())
+                            {
+                                FAPI_ASSERT_NOEXIT(false,
+                                    fapi2::PSTATE_PB_UT_FREQ_MISMATCH()
+                                    .set_CHIP_TARGET(l_proc_target)
+                                    .set_UT_FREQ(l_vpd_ut_freq)
+                                    .set_COMPAT_FREQ(l_sys_compat_freq_mhz),
+                                    "The UltraTurbo frequencies need to be compatabile");
+                            }
                         }
                         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                         break;

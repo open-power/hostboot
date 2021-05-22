@@ -3042,25 +3042,31 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                     {
                         if (i_biased_state)
                         {
-                            FAPI_ASSERT_NOEXIT(false,
-                                    fapi2::PSTATE_PB_BIASED_POUNDV_ZERO_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_CHIPLET_NUMBER(l_chiplet_num)
-                                    .set_BUCKET(iv_poundV_bucket_id)
-                                    .set_POINT(i)
-                                    POUNDV_POINTS_PRINT(i,A),
-                                    "Pstate Parameter Block Biased #V Zero contents error being logged");
+                            if (!fapi2::is_platform<fapi2::PLAT_CRONUS>())
+                            {
+                                FAPI_ASSERT_NOEXIT(false,
+                                        fapi2::PSTATE_PB_BIASED_POUNDV_ZERO_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                        .set_CHIP_TARGET(iv_procChip)
+                                        .set_CHIPLET_NUMBER(l_chiplet_num)
+                                        .set_BUCKET(iv_poundV_bucket_id)
+                                        .set_POINT(i)
+                                        POUNDV_POINTS_PRINT(i,A),
+                                        "Pstate Parameter Block Biased #V Zero contents error being logged");
+                            }
                         }
                         else
                         {
-                            FAPI_ASSERT_NOEXIT(false,
-                                    fapi2::PSTATE_PB_POUNDV_ZERO_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                    .set_CHIP_TARGET(iv_procChip)
-                                    .set_CHIPLET_NUMBER(l_chiplet_num)
-                                    .set_BUCKET(iv_poundV_bucket_id)
-                                    .set_POINT(i)
-                                    POUNDV_POINTS_PRINT(i,A),
-                                    "Pstate Parameter Block #V Zero contents error being logged");
+                            if (!fapi2::is_platform<fapi2::PLAT_CRONUS>())
+                            {
+                                FAPI_ASSERT_NOEXIT(false,
+                                        fapi2::PSTATE_PB_POUNDV_ZERO_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                        .set_CHIP_TARGET(iv_procChip)
+                                        .set_CHIPLET_NUMBER(l_chiplet_num)
+                                        .set_BUCKET(iv_poundV_bucket_id)
+                                        .set_POINT(i)
+                                        POUNDV_POINTS_PRINT(i,A),
+                                        "Pstate Parameter Block #V Zero contents error being logged");
+                            }
                         }
                     }
                     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -5137,7 +5143,7 @@ void PlatPmPPB::compute_PStateV_I_slope(
                 !(iv_operating_points[pt_set][CF5].pstate) ||
                 !(iv_operating_points[pt_set][CF6].pstate)    )
         {
-            FAPI_ERR("Non-UltraTurbo PSTATE value shouldn't be zero for %s", vpdSetStr[pt_set]);
+            FAPI_INF("Non-UltraTurbo PSTATE value shouldn't be zero for %s", vpdSetStr[pt_set]);
             return;
         }
 
@@ -6034,11 +6040,14 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
 
         if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
         {
-            FAPI_ASSERT_NOEXIT(false,
-                    fapi2::PSTATE_PB_PSTATE0_FREQ_NOT_SET(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                    .set_CHIP_TARGET(iv_procChip)
-                    .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
-                    "Pstate Parameter Block Pstate0 reference frequency not set");
+            if (!fapi2::is_platform<fapi2::PLAT_CRONUS>())
+            {
+            	FAPI_ASSERT_NOEXIT(false,
+            	        fapi2::PSTATE_PB_PSTATE0_FREQ_NOT_SET(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+            	        .set_CHIP_TARGET(iv_procChip)
+            	        .set_SYSTEM_PSTATE0_FREQ_KHZ(iv_reference_frequency_khz),
+            	        "Pstate Parameter Block Pstate0 reference frequency not set");
+            }
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
 
