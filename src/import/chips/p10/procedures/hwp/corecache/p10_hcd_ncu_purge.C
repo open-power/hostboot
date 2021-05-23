@@ -97,9 +97,9 @@ p10_hcd_ncu_purge(
     {
 
 #ifdef __PPE_QME
-
+#ifdef USE_ABORT
         qme_ncu_purge_abort_detect();
-
+#endif
 #endif
 
         FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );

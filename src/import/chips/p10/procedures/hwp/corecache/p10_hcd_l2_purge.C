@@ -100,6 +100,7 @@ p10_hcd_l2_purge(
 
 #ifdef __PPE_QME
 
+#ifdef USE_CATCHUP
         fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > l_chip =
             i_target.getParent< fapi2::TARGET_TYPE_PROC_CHIP >();
         uint32_t l_core_select = 0;
@@ -113,9 +114,10 @@ p10_hcd_l2_purge(
 
         l_target = l_chip.getMulticast<fapi2::MULTICAST_AND>(fapi2::MCGROUP_GOOD_EQ,
                    static_cast<fapi2::MulticastCoreSelect>(l_core_select));
-
+#endif
+#ifdef USE_ABORT
         qme_l2_purge_abort_detect();
-
+#endif
         FAPI_TRY( HCD_GETMMIO_C( l_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
 #else
 
