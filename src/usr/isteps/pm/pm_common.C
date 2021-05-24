@@ -32,10 +32,6 @@
 #include    <errl/errlreasoncodes.H>
 #include    <errl/errludtarget.H>
 
-// attn/prd call
-#include    <runtime/attnsvc.H>
-
-
 #include    <sys/misc.h>
 #include    <sys/mm.h>
 #include    <sys/time.h>
@@ -72,6 +68,7 @@
 #include <p10_pm_pba_bar_config.H>
 #include <p10_pm_start.H>
 #include <p10_pm_halt.H>
+#include <p10_pm_callout.H>
 #include <p10_hcode_image_build.H>
 #include <p10_infrastruct_help.H>
 #include <p10_hcode_image_defines.H>
@@ -112,6 +109,15 @@ namespace HBPM
     std::shared_ptr<UtilLidMgr> g_pOccLidMgr (nullptr);
     std::shared_ptr<UtilLidMgr> g_pHcodeLidMgr (nullptr);
     std::shared_ptr<UtilLidMgr> g_pRingOvdLidMgr (nullptr);
+
+
+    /**
+     *  @brief Call p10_pm_callout and handle returned data
+     *  @param[in]  i_proc_target  Processor target
+     *  @param[in]  i_homer_vaddr  Pointer to local HOMER memory
+     */
+    void callPmCallout( TARGETING::Target* i_proc_target,
+                        void* i_homer_vaddr );
 
     /**
      *  @brief Convert HOMER physical address space to a vitual address.
@@ -873,7 +879,6 @@ namespace HBPM
         ScopedHomerMapper l_homerMapper(i_target);
 
         // cast OUR type of target to a FAPI type of target.
-        // figure out homer offsets
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapiTarg(i_target);
 
@@ -947,36 +952,16 @@ namespace HBPM
                        "resetPMComplex: p10_pm_halt succeeded "
                        "HUID=0x%08X", get_huid(i_target) );
 
-#ifdef __HOSTBOOT_RUNTIME
-
-            // Explicitly call ATTN before exiting to ensure PRD handles
-            // LFIR before TMGT triggers PM Complex Init, but only if
-            // we aren't already in the middle of handling a core checkstop
+            // Explicitly call pm_callout before exiting to ensure we
+            // gather all of the data before reloading the PM complex.
             if( HB_INITIATED_PM_RESET_IN_PROGRESS != l_chipResetState )
             {
                 // set ATTR_HB_INITIATED_PM_RESET to IN_PROGRESS to avoid recursion
                 i_target->setAttr<ATTR_HB_INITIATED_PM_RESET>
                                 (HB_INITIATED_PM_RESET_IN_PROGRESS);
 
-                l_errl = ATTN::Service::getGlobalInstance()->
-                            handleAttentions( i_target );
-
-                // set ATTR_HB_INITIATED_PM_RESET back to the original value
-                i_target->setAttr<ATTR_HB_INITIATED_PM_RESET>
-                  (l_chipResetState);
-
-                if(l_errl)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              ERR_MRK"resetPmComplex: service::handleAttentions returned error EID 0x%08x for RtProc: 0x%08X; committing the error and continuing.",
-                              l_errl->eid(), get_huid(i_target));
-                    l_errl->collectTrace(PRDF_COMP_NAME);
-                    errlCommit(l_errl, PRDF_COMP_ID);
-                    break;
-                }
+                callPmCallout( i_target, l_homerVAddr );
             }
-
-#endif
 
         } while(0);
 
@@ -986,6 +971,80 @@ namespace HBPM
 
         return l_errl;
     } // resetPMComplex
+
+    /**
+     *  @brief Call p10_pm_callout and handle returned data
+     */
+    void callPmCallout( TARGETING::Target* i_proc_target,
+                        void* i_homer_vaddr )
+    {
+        errlHndl_t l_errl = nullptr;
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+          l_fapiTarg(i_proc_target);
+        fapi2::buffer<uint32_t> l_deadCores;
+        std::vector<StopErrLogSectn> l_ffdcList;
+        RasAction l_rasAction = NO_CALLOUT;
+
+        FAPI_INVOKE_HWP(l_errl,
+                        p10_pm_callout,
+                        i_homer_vaddr,
+                        l_fapiTarg,
+                        l_deadCores,
+                        l_ffdcList,
+                        l_rasAction);
+        if(!l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      INFO_MRK"callPmCallout: p10_pm_callout returned no RC action=%d, deadcores=%.8X",
+                      l_rasAction,
+                      static_cast<uint32_t>(l_deadCores));
+            return;
+        }
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  INFO_MRK"callPmCallout: p10_pm_callout returned action=%d, deadcores=%.8X",
+                  l_rasAction,
+                  static_cast<uint32_t>(l_deadCores));
+        if( NO_CALLOUT == l_rasAction )
+        {
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        }
+        else //commit the log as visible error since it includes callouts
+        {
+            // add all cores in deadcore list as LOW callouts
+            //  to the returned error log
+            if( (l_rasAction == CORE_CALLOUT)
+                && l_deadCores.getBit(0,32) ) //any bits set
+            {
+                TargetHandleList l_childCores;;
+                getChildChiplets( l_childCores,
+                                  i_proc_target,
+                                  TARGETING::TYPE_CORE );
+                for( auto core : l_childCores )
+                {
+                    auto l_corenum =
+                      core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                    if( l_deadCores.getBit(l_corenum) )
+                    {
+                        l_errl->addHwCallout( core,
+                                              HWAS::SRCI_PRIORITY_HIGH,
+                                              HWAS::NO_DECONFIG,
+                                              HWAS::GARD_NULL );
+                    }
+                }
+            }
+        }
+
+        // Add FFDC sections
+        for( auto & ffdcSctn : l_ffdcList )
+        {
+            l_errl->addFFDC( HWPF_COMP_ID, ffdcSctn.iv_pBufPtr,
+                             ffdcSctn.iv_bufSize, ffdcSctn.iv_subsec,
+                             ERRORLOG::ERRL_UDT_NOFORMAT ); // parser ignores data
+        }
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit(l_errl, ISTEP_COMP_ID);
+    }
 
 
     /**

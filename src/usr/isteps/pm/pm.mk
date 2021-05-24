@@ -103,6 +103,7 @@ OBJS += p10_setup_runtime_wakeup_mode.o
 OBJS += p10_qme_customize.o
 OBJS += p10_check_proc_config.o
 OBJS += p10_core_checkstop_handler.o
+OBJS += p10_pm_callout.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH}
