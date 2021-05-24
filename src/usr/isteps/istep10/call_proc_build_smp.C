@@ -832,22 +832,15 @@ void* call_proc_build_smp (void *io_pArgs)
     // e) get all the measurements/extend to TPM, etc
     // f) HRESET secondary SBEs and bring them back up
 
-    // TODO RTC:268503 - remove by GA as all SBEs will support halt
-    TARGETING::ATTR_SBE_FIFO_CAPABILITIES_type l_sbe_capabilities = {};
-
     do
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_proc_build_smp entry" );
 
-        errlHndl_t  l_errl  =   nullptr;
-        TargetHandleList l_cpuTargetList;
+        errlHndl_t l_errl = nullptr;
+        TargetHandleList l_cpuTargetList,
+                         l_secondaryProcsList;  // all secondary/non-boot procs
 
-        TargetHandleList l_secondaryProcsList;  // all secondary/non-boot procs
-
-        // TODO RTC:268503 - change l_procSupportHalt to l_secondaryProcsList
-        //                   since all should support HALT by GA
-        TargetHandleList l_procsSupportHalt;    // procs with halt-capable SBE
         getAllChips(l_cpuTargetList, TYPE_PROC);
 
         //  Identify the boot processor
@@ -885,34 +878,6 @@ void* call_proc_build_smp (void *io_pArgs)
                 // include all secondary processors
                 l_secondaryProcsList.push_back(curproc);
 
-                ////////////
-                // TODO RTC:268503 - remove capabilites check by GA
-                // check capabilites to see if HALT is supported
-                if (curproc->tryGetAttr<TARGETING::ATTR_SBE_FIFO_CAPABILITIES>(l_sbe_capabilities))
-                {
-                    if ((l_sbe_capabilities[SBEIO::SBE_CAPABILITY_HALT_OFFSET] & SBEIO::SBE_CMD_HALT_SUPPORTED)
-                         == SBEIO::SBE_CMD_HALT_SUPPORTED)
-                    {
-                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "HALT supported for proc 0x%08X SBE",
-                            TARGETING::get_huid(curproc));
-                        // include just halt-capable procs/sbe
-                        l_procsSupportHalt.push_back(curproc);
-                    }
-                    else
-                    {
-                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "HALT NOT supported for proc 0x%08X SBE - read 0x%08X at offset %d",
-                            TARGETING::get_huid(curproc), l_sbe_capabilities[SBEIO::SBE_CAPABILITY_HALT_OFFSET], SBEIO::SBE_CAPABILITY_HALT_OFFSET);
-                    }
-                }
-                else
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "HALT NOT supported for proc 0x%08X SBE",
-                            TARGETING::get_huid(curproc));
-                }
-                //////////////
             }
         }
 
@@ -950,7 +915,7 @@ void* call_proc_build_smp (void *io_pArgs)
         }
 
         // Mask appropriate bits to prevent PRDF handling of SBE halt
-        preventPRDHaltHandling(l_procsSupportHalt, l_StepError);
+        preventPRDHaltHandling(l_secondaryProcsList, l_StepError);
         if (!l_StepError.isNull())
         {
             // NOTE: no need to try to re-enable PRD halt handling on
@@ -960,7 +925,7 @@ void* call_proc_build_smp (void *io_pArgs)
         }
 
         // b) halt all non-boot chip SBEs
-        for (auto l_proc : l_procsSupportHalt)
+        for (auto l_proc : l_secondaryProcsList)
         {
             // send halt request
             l_errl = SBEIO::sendSecondarySbeHaltRequest(l_proc);
@@ -1048,7 +1013,7 @@ void* call_proc_build_smp (void *io_pArgs)
         }
 
         // f) HRESET SBEs and bring them back up
-        for (auto l_proc : l_procsSupportHalt)
+        for (auto l_proc : l_secondaryProcsList)
         {
             // Clear FIFO and perform hreset to secondary SBE
             recoverSBE(l_proc, l_StepError);
@@ -1101,7 +1066,7 @@ void* call_proc_build_smp (void *io_pArgs)
         }
 
         // re-enable PRD to handle SBE Halt
-        enablePRDHaltHandling(l_procsSupportHalt, l_StepError);
+        enablePRDHaltHandling(l_secondaryProcsList, l_StepError);
         if (!l_StepError.isNull())
         {
             // break out on istep failure
