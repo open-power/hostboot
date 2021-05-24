@@ -941,6 +941,7 @@ fapi2::ReturnCode iodlr_pgated_validation(
     uint8_t l_mc_unit_pos = 0;
     uint8_t l_pau_unit_pos = 0;
     uint8_t l_pec_unit_pos = 0;
+    uint8_t l_phb_unit_pos = 0;
     uint8_t l_iohs_unit_pos = 0;
     uint8_t l_omi_unit_pos = 0;
     uint32_t l_ocb_length_act = 0;
@@ -1071,15 +1072,15 @@ fapi2::ReturnCode iodlr_pgated_validation(
                         l_sub_speed_type_base = AXO_BASE_32G;
                     }
 
-                    g_link_data[(l_iohs_unit_pos * iohs_pos) + OPT0_AX0].io_magic = htobe32(0x414C4E4B);
-                    g_link_data[(l_iohs_unit_pos * iohs_pos) + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[(l_iohs_unit_pos * iohs_pos) + OPT0_AX0].base_power_mw = htobe32(
+                    g_link_data[iohs_pos + OPT0_AX0].io_magic = htobe32(0x414C4E4B);
+                    g_link_data[iohs_pos + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
+                    g_link_data[iohs_pos + OPT0_AX0].base_power_mw = htobe32(
                                 link_powers[l_sub_speed_type].power_mw[DISABLED] +
                                 link_powers[l_sub_speed_type_base].power_mw[DISABLED]);
 
-                    g_link_data[(l_iohs_unit_pos * iohs_pos) + 1 + OPT0_AX0].io_magic = htobe32(0x414C4E4B);
-                    g_link_data[(l_iohs_unit_pos * iohs_pos) + 1 + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[(l_iohs_unit_pos * iohs_pos) + 1 + OPT0_AX0].base_power_mw =
+                    g_link_data[iohs_pos + 1 + OPT0_AX0].io_magic = htobe32(0x414C4E4B);
+                    g_link_data[iohs_pos + 1 + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
+                    g_link_data[iohs_pos + 1 + OPT0_AX0].base_power_mw =
                         htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] +
                                 link_powers[l_sub_speed_type_base].power_mw[DISABLED]);
                 }
@@ -1225,9 +1226,19 @@ fapi2::ReturnCode iodlr_pgated_validation(
             g_cntrlr_data[l_pec_unit_pos + PEC0].io_magic = htobe32(0x50434E54);
             g_cntrlr_data[l_pec_unit_pos + PEC0].sub_type = htobe16(G4_25G);
             g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw = htobe16(link_powers[G4_25G].power_mw[PGATED]);
-            g_link_data[l_pec_unit_pos + PEC0].io_magic = htobe32(0x504C4E4B);
-            g_link_data[l_pec_unit_pos + PEC0].sub_type = htobe16(G4_25G);
-            g_link_data[l_pec_unit_pos + PEC0].base_power_mw = htobe16(link_powers[G4_25G].power_mw[DISABLED]);
+
+            for (const auto l_phb_target : l_pec_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_PRESENT))
+            {
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                        l_phb_target,
+                                        l_phb_unit_pos),
+                          "Error getting fapi2::ATTR_CHIP_UNIT_POS");
+
+
+                g_link_data[l_phb_unit_pos + PCI0_0].io_magic = htobe32(0x504C4E4B);
+                g_link_data[l_phb_unit_pos + PCI0_0].sub_type = htobe16(G4_25G);
+                g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe16(link_powers[G4_25G].power_mw[DISABLED]);
+            }
 
         } //end of PEC
 

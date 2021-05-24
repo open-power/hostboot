@@ -130,77 +130,77 @@ typedef enum
 
 typedef enum
 {
-    NONE,
-    EMO01,
-    EMO23,
-    EMO45,
-    EMO67,
-    PAU0,
-    Reserved1,
-    Reserved2,
-    PAU3,
-    PAU4,
-    PAU5,
-    PAU6,
-    PAU7,
-    PEC0,
-    PEC1,
-    NUM_IO_CNTRLS,
+    NONE,      //0
+    EMO01,     //1
+    EMO23,     //2
+    EMO45,     //3
+    EMO67,     //4
+    PAU0,      //5
+    Reserved1, //6
+    Reserved2, //7
+    PAU3,      //8
+    PAU4,      //9
+    PAU5,      //10
+    PAU6,      //11
+    PAU7,      //12
+    PEC0,      //13
+    PEC1,      //14
+    NUM_IO_CNTRLS,  //15
 } io_controllers;
 
 typedef enum
 {
-    MC00_OMI0,
-    MC00_OMI1,
-    MC01_OMI0,
-    MC01_OMI1,
-    MC10_OMI0,
-    MC10_OMI1,
-    MC11_OMI0,
-    MC11_OMI1,
-    MC20_OMI0,
-    MC20_OMI1,
-    MC21_OMI0,
-    MC21_OMI1,
-    MC30_OMI0,
-    MC30_OMI1,
-    MC31_OMI0,
-    MC31_OMI1,
-    PCI0_0,
-    PCI0_1,
-    PCI0_2,
-    PCI1_0,
-    PCI1_1,
-    PCI1_2,
-    OPT0_AX0,
-    OPT0_AX1,
-    OPT1_AX0,
-    OPT1_AX1,
-    OPT2_AX0,
-    OPT2_AX1,
-    OPT3_AX0,
-    OPT3_AX1,
-    OPT4_AX0,
-    OPT4_AX1,
-    OPT5_AX0,
-    OPT5_AX1,
-    OPT6_AX0,
-    OPT6_AX1,
-    OPT7_AX0,
-    OPT7_AX1,
-    OPT0_O0,
-    OPT0_O1,
-    OPT3_O0,
-    OPT3_O1,
-    OPT4_O0,
-    OPT4_O1,
-    OPT5_O0,
-    OPT5_O1,
-    OPT6_O0,
-    OPT6_O1,
-    OPT7_O0,
-    OPT7_O1,
-    NUMBER_OF_IO_LINKS,
+    MC00_OMI0, //0
+    MC00_OMI1, //1
+    MC01_OMI0, //2
+    MC01_OMI1, //3
+    MC10_OMI0, //4
+    MC10_OMI1, //5
+    MC11_OMI0, //6
+    MC11_OMI1, //7
+    MC20_OMI0, //8
+    MC20_OMI1, //9
+    MC21_OMI0, //10
+    MC21_OMI1, //11
+    MC30_OMI0, //12
+    MC30_OMI1, //13
+    MC31_OMI0, //14
+    MC31_OMI1, //15
+    PCI0_0,    //16
+    PCI0_1,    //17
+    PCI0_2,    //18
+    PCI1_0,    //19
+    PCI1_1,    //20
+    PCI1_2,    //21
+    OPT0_AX0,  //22
+    OPT0_AX1,  //23
+    OPT1_AX0,  //24
+    OPT1_AX1,  //25
+    OPT2_AX0,  //26
+    OPT2_AX1,  //27
+    OPT3_AX0,  //28
+    OPT3_AX1,  //29
+    OPT4_AX0,  //30
+    OPT4_AX1,  //31
+    OPT5_AX0,  //32
+    OPT5_AX1,  //33
+    OPT6_AX0,  //34
+    OPT6_AX1,  //35
+    OPT7_AX0,  //36
+    OPT7_AX1,  //37
+    OPT0_O0,   //38
+    OPT0_O1,   //39
+    OPT3_O0,   //40
+    OPT3_O1,   //41
+    OPT4_O0,   //42
+    OPT4_O1,   //43
+    OPT5_O0,   //44
+    OPT5_O1,   //45
+    OPT6_O0,   //46
+    OPT6_O1,   //47
+    OPT7_O0,   //48
+    OPT7_O1,   //49
+    NUMBER_OF_IO_LINKS, //50
 } link_controllers;
 
 
