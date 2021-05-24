@@ -40,6 +40,7 @@
 #include <lib/workarounds/p10_omi_workarounds.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mss_log_utils.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <lib/p10_attribute_accessors_manual.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <mss_generic_attribute_getters.H>
@@ -295,9 +296,11 @@ fapi2::ReturnCode setup_mc_config1(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& 
     uint8_t l_sim = 0;
     uint8_t l_edpl_disable = 0;
     bool l_mnfg_screen_test = false;
+    bool l_mfg_thresholds = false;
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
     FAPI_TRY(mss::attr::get_mss_omi_edpl_disable(l_edpl_disable));
     FAPI_TRY(mss::check_omi_mfg_screen_edpl_setting(l_mnfg_screen_test));
+    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
 
     FAPI_TRY(scomt::omi::PREP_CONFIG1(i_target));
 
@@ -368,7 +371,7 @@ fapi2::ReturnCode setup_mc_config1(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& 
 
     // CFG_DL0_EDPL_TIME: dl0 edpl time window
     scomt::omi::SET_CONFIG1_EDPL_TIME(mss::omi::edpl_time_win::EDPL_TIME_WIN_16MS, l_val);
-    setup_mfg_test_edpl_time(i_target, l_edpl_disable, l_mnfg_screen_test, l_val);
+    setup_mfg_test_edpl_time(i_target, l_edpl_disable, l_mnfg_screen_test, l_mfg_thresholds, l_val);
 
     scomt::omi::SET_CONFIG1_EDPL_THRESHOLD(mss::omi::edpl_err_thres::EDPL_ERR_THRES_16, l_val);
 
@@ -425,12 +428,14 @@ fapi_try_exit:
 /// @param[in] i_target the TARGET_TYPE_OMI to operate on
 /// @param[in] i_edpl_disable value from ATTR_MSS_OMI_EDPL_DISABLE
 /// @param[in] i_mnfg_screen_test value from check_omi_mfg_screen_edpl_setting
+/// @param[in] i_mfg_thresholds value of MNFG_THRESHOLDS flag
 /// @param[in,out] io_data the register data to work on
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 void setup_mfg_test_edpl_time(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
                               const uint8_t i_edpl_disable,
                               const bool i_mnfg_screen_test,
+                              const bool i_mfg_thresholds,
                               fapi2::buffer<uint64_t>& io_data)
 {
     // CFG_DL0_EDPL_TIME: set EDPL for 'no time window', so the counters will keep accumulating
@@ -439,6 +444,11 @@ void setup_mfg_test_edpl_time(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_tar
     {
         FAPI_DBG("%s Setting CONFIG1_EDPL_TIME to 'no time window' for MFG test", mss::c_str(i_target));
         scomt::omi::SET_CONFIG1_EDPL_TIME(mss::omi::edpl_time_win::EDPL_TIME_WIN_NO, io_data);
+    }
+    else if (i_mfg_thresholds)
+    {
+        FAPI_DBG("%s Setting CONFIG1_EDPL_TIME to 64s for MFG_THRESHOLDS test", mss::c_str(i_target));
+        scomt::omi::SET_CONFIG1_EDPL_TIME(mss::omi::edpl_time_win::EDPL_TIME_WIN_64S, io_data);
     }
 }
 
