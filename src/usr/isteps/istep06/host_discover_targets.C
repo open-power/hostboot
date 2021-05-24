@@ -451,6 +451,35 @@ void* host_discover_targets( void *io_pArgs )
     // This flag guards later portions of the PDR exchange (we don't want to do
     // subsequent steps if earlier steps failed).
     bool pdr_exchange_failed = false;
+
+    /* First step of the PDR exchange is to fetch remote PDRs and then cache
+     * remote FRU VPD. Presence detection depends on this data. */
+
+    do
+    {
+        l_err = fetch_remote_pdrs();
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to fetch PDRs from the BMC");
+
+            pdr_exchange_failed = true;
+            captureError(l_err, l_stepError, ISTEP_COMP_ID);
+            break;
+        }
+
+        l_err = PLDM::cacheRemoteFruVpd();
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to cache remote FRU info from the BMC");
+
+            captureError(l_err, l_stepError, ISTEP_COMP_ID);
+            break;
+        }
+    } while (false);
+
 #endif
 
     if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
@@ -512,66 +541,33 @@ void* host_discover_targets( void *io_pArgs )
         l_err = EEPROM::cacheEECACHEPartition();
 #endif
 
-#ifdef CONFIG_PLDM
-        /* First step of the PDR exchange is to fetch remote PDRs and then cache
-         * remote FRU VPD. Presence detection depends on this data. */
-
-        if (!l_err)
-        {
-            do
-            {
-                l_err = fetch_remote_pdrs();
-
-                if (l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              ERR_MRK"Failed to fetch PDRs from the BMC");
-
-                    pdr_exchange_failed = true;
-                    captureError(l_err, l_stepError, ISTEP_COMP_ID);
-                    break;
-                }
-
-                l_err = PLDM::cacheRemoteFruVpd();
-                if (l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              ERR_MRK"Failed to cache remote FRU info from the BMC");
-
-                    captureError(l_err, l_stepError, ISTEP_COMP_ID);
-                    break;
-                }
-            } while (false);
-        }
-#endif
-
         if(nullptr == l_err)
         {
             HWAS::HWASDiscovery l_HWASDiscovery;
             l_err = l_HWASDiscovery.discoverTargets();
         }
+    }
 
 #ifdef CONFIG_PLDM
-        /* Second step of the PDR exchange is to add local PDRs and notify the
-         * BMC that we have done so. This will cause them to fetch the new PDRs
-         * from us. This has to be done after presence detection. */
+    /* Second step of the PDR exchange is to add local PDRs and notify the
+     * BMC that we have done so. This will cause them to fetch the new PDRs
+     * from us. This has to be done after presence detection. */
 
-        // TODO RTC: 208841 Determine why BMC is not doing its part of pdr exchange
-        if (!l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() && !pdr_exchange_failed && !l_err)
+    if (!pdr_exchange_failed && !l_err)
+    {
+        l_err = exchange_pdrs();
+
+        if (l_err)
         {
-            l_err = exchange_pdrs();
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to exchange PDRs with the BMC");
 
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"Failed to exchange PDRs with the BMC");
-
-                pdr_exchange_failed = true;
-                captureError(l_err, l_stepError, ISTEP_COMP_ID);
-            }
+            pdr_exchange_failed = true;
+            captureError(l_err, l_stepError, ISTEP_COMP_ID);
         }
-#endif
     }
+#endif
+
 
 #if (defined(CONFIG_MEMVPD_READ_FROM_HW)&&defined(CONFIG_MEMVPD_READ_FROM_PNOR))
     // Now that all targets have completed presence detect and vpd access,
@@ -685,8 +681,7 @@ void* host_discover_targets( void *io_pArgs )
     }
 
 #if CONFIG_PLDM
-    // TODO RTC: 208841 Determine why BMC is not doing its part of pdr exchange
-    if (!l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() && !pdr_exchange_failed)
+    if (!pdr_exchange_failed)
     {
         l_err = finish_pdr_exchange();
 
