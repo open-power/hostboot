@@ -804,12 +804,14 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
                 FAPI_ASSERT(false,
                             fapi2::P10_FAB_IOVALID_DL_HALF_NOT_TRAINED_RETRAIN_NONE_ERR()
                             .set_LOC_ENDP_TARGET(i_loc_endp_target)
-                            .set_LOC_IOLINK_TARGET(l_dl_fail_evn ? l_loc_evn_iolink_target : l_loc_odd_iolink_target)
+                            .set_LOC_IOLINK_TARGET((l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY) ? l_loc_evn_iolink_target :
+                                                   l_loc_odd_iolink_target)
                             .set_LOC_LINK_TRAIN(l_loc_link_train)
                             .set_LOC_LINK_TRAIN_NEXT(l_loc_link_train_next)
                             .set_LOC_IOLINK_EVN_FAIL(l_dl_fail_evn)
                             .set_LOC_IOLINK_ODD_FAIL(l_dl_fail_odd)
-                            .set_REM_IOLINK_TARGET(l_dl_fail_evn ? l_rem_evn_iolink_target : l_rem_odd_iolink_target),
+                            .set_REM_IOLINK_TARGET((l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY) ? l_rem_evn_iolink_target :
+                                                   l_rem_odd_iolink_target),
                             "Half-width link DL training did not complete successfully, no retry possible!");
             }
         }
