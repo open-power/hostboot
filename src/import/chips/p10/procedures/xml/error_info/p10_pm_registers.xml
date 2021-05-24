@@ -456,6 +456,26 @@
   </registerFfdc>
   <!-- *********************************************************************** -->
   <registerFfdc>
+    <id>QME_FFDC_REGISTERS</id>
+    <scomRegister>scomt::eq::QME_FLAGS_RW</scomRegister>
+    <scomRegister>scomt::eq::QME_LFIR_RW</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIXCR</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIRAMDBG</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIRAMEDR</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIDBGPRO</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIDBGINF</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR0</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR2</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR4</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR6</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR8</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDRX</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR28</scomRegister>
+    <scomRegister>scomt::eq::QME_SCOM_XIVDR30</scomRegister>
+    <scomRegister>scomt::eq::QME_SCDR</scomRegister>
+  </registerFfdc>
+  <!-- *********************************************************************** -->
+  <registerFfdc>
     <id>CHECK_MASTER_STOP15_FFDC_REGS_EC</id>
     <scomRegister>scomt::c::QME_SSH_SRC</scomRegister>
     <scomRegister>scomt::c::QME_SCSR</scomRegister>

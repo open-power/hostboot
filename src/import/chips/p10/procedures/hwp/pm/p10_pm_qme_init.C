@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -466,16 +466,18 @@ fapi2::ReturnCode qme_init(
                                        eq,
                                        eq_pos),
                          "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
-                FAPI_ERR( "QME %d Halted", eq_pos);
+                FAPI_ERR( "QME %d Halted IAR %08X %08X", eq_pos, l_xsr, l_xsr >> 32);
+                FAPI_ASSERT(false,
+                            fapi2::QME_START_HALTED()
+                            .set_CHIP(i_target)
+                            .set_EQ_TARGET(eq)
+                            .set_EQ_POS(eq_pos)
+                            .set_OCC_FLAG_REG_VAL( l_qme_flag )
+                            .set_XSR_REG_VAL( l_xsr ),
+                            "QME start halted");
             }
         }
 
-        FAPI_ASSERT(false,
-                    fapi2::QME_START_HALTED()
-                    .set_CHIP(i_target)
-                    .set_OCC_FLAG_REG_VAL( l_qme_flag )
-                    .set_XSR_REG_VAL( l_xsr ),
-                    "QME start halted");
     }
 
     //Clear STOP_OVERRIDE_MODE and ACTIVE_MASK , so that QME is ready for

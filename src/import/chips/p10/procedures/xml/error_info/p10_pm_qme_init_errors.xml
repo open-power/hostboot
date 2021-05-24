@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -99,23 +99,16 @@
     </description>
 
     <ffdc>CHIP</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EQ_POS</ffdc>
     <ffdc>OCC_FLAG_REG_VAL</ffdc>
     <ffdc>XSR_REG_VAL</ffdc>
 
-    <!-- <collectFfdc>p10_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
-
     <collectRegisterFfdc>
       <id>QME_FFDC_REGISTERS</id>
-      <target>CHIP</target>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>EQ_TARGET</target>
+      <targetType>TARGET_TYPE_EQ</targetType>
     </collectRegisterFfdc>
-
-    <collectRegisterFfdc>
-      <id>PBA_FFDC_BASIC_REGISTERS</id>
-      <target>CHIP</target>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    </collectRegisterFfdc>
-    -->
 
     <callout>
       <procedure>CODE</procedure>
