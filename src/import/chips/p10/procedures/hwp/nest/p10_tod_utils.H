@@ -186,8 +186,19 @@ const uint32_t TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_3  = 0x3;
 const uint32_t TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_4  = 0x4;
 const uint32_t TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_3F = 0x3F;
 
-// TOD_LOAD_REG register field definitions
-const uint64_t P10_TOD_LOAD_REG_LOAD_VALUE    = 0x00000000000003FFULL;
+// TOD_LOAD_REG register field definitions.
+// See Table 1.4.1: TOD counter load value for different SYNC boundary in TOD Specification
+// for an explanation of this value bits[50:59]
+const uint64_t P10_TOD_LOAD_REG_LOAD_VALUE_SYNC  = 0x00000000000003FFULL;
+// TOD starting value bits[0:49] in Table 1.4.1 from TOD specification
+// This is the starting TOD value for all TOD nodes.
+// Approximately 35 minutes @ 32Mhz TOD clocks.
+// This is the amount of time allotted between the TTYPE_5, when the TOD Slave Value
+// counters start incrementing, and the START_TOD when the TOD Master FSM is put into
+// the Running State, and the TOD Master transmits its TOD Value over to the Slaves.
+const uint64_t P10_TOD_LOAD_REG_LOAD_VALUE_START = 0x0000001000000000ULL;
+const uint64_t P10_TOD_LOAD_REG_LOAD_VALUE = (P10_TOD_LOAD_REG_LOAD_VALUE_START | P10_TOD_LOAD_REG_LOAD_VALUE_SYNC);
+
 // Bit which causes TOD FSM to transition out of the Not Set state to the Stopped state
 const uint64_t P10_TOD_LOAD_REG_START_TOD     = 0x0000000000000001ULL;
 

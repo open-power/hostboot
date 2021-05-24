@@ -60,6 +60,14 @@ using namespace scomt::c;
 // Implement workaround for P10 defect HW527708.
 const bool IMPLEMENT_HW527708_WORKAROUND = true;
 
+// This is the number of Sync pulse periods which will be added to the
+// current Master TOD Value register and placed into the TOD Timer registers.
+// From the VHDL comments for the receipt of a TTYPE_4:
+//    "TOD was sent via fabric on sync_2x boundary and is now waiting on sync to be
+//     started on sync_1x+sync_1x boundary."
+// A value of 2 works here, but I used 4 in case of any unexpected corner cases.
+const uint32_t P10_TOD_TIMER_SYNC_WAIT_PERIOD = 4;
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -318,29 +326,23 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// @brief Distribute synchronization signal to SS PLL using
+/// @brief Setup the TOD Value registers to distribute synchronization signal to SS PLL using
 ///        TOD network
 /// @param[in] i_tod_node Reference to TOD topology
-/// @param[in] i_is_simulation True if simulation, else false
 /// @return FAPI2_RC_SUCCESS if TOD sync is succesful else error
-fapi2::ReturnCode sync_spread(
-    const tod_topology_node* i_tod_node,
-    const bool i_is_simulation)
+fapi2::ReturnCode sync_spread_setup(
+    const tod_topology_node* i_tod_node)
 {
-    FAPI_DBG("Start");
-
-    // in TOD counts of 32Mhz clock; needs to account for SCOM latency
-    // and number of chips to be started in sync
-    const uint64_t P10_TOD_SSCG_START_DELAY = ((i_is_simulation) ? (0x100) : (0x1000000));
-
+    fapi2::buffer<uint64_t> l_steps_per_sync = 0;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets;
-    get_targets(i_tod_node, 0, l_targets);
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_master_chip;
     fapi2::buffer<uint64_t> l_tod_value_reg_tod_value;
     fapi2::buffer<uint64_t> l_tod_value_reg;
     fapi2::buffer<uint64_t> l_tod_timer_data;
-    uint64_t l_poll_cycle_delay = 0;
 
+    FAPI_DBG("Start");
+
+    get_targets(i_tod_node, 0, l_targets);
     FAPI_ASSERT(l_targets.size(),
                 fapi2::P10_TOD_SETUP_NULL_NODE(),
                 "Null node or target passed into function!");
@@ -353,19 +355,51 @@ fapi2::ReturnCode sync_spread(
     // Get Internal path Time-of-day register value
     GET_TOD_VALUE_REG_TOD_VALUE(l_tod_value_reg, l_tod_value_reg_tod_value);
 
-    // Write value > tod_value to TOD Timer Register and enable timers
+    // Get the number of Steps per Sync
+    FAPI_TRY(p10_tod_steps_per_sync(i_tod_node, l_steps_per_sync));
+
+    // Set the Timer registers in the future to fire their status bits simultaneously
+    // on all chips.
     for (auto l_chip : l_targets)
     {
         FAPI_TRY(PREP_TOD_TIMER_REG(l_chip));
-        SET_TOD_TIMER_REG_VALUE(l_tod_value_reg_tod_value + P10_TOD_SSCG_START_DELAY, l_tod_timer_data);
+        SET_TOD_TIMER_REG_VALUE(l_tod_value_reg_tod_value + P10_TOD_TIMER_SYNC_WAIT_PERIOD * l_steps_per_sync,
+                                l_tod_timer_data);
         SET_TOD_TIMER_REG_ENABLE0(l_tod_timer_data);
         SET_TOD_TIMER_REG_ENABLE1(l_tod_timer_data);
         FAPI_TRY(PUT_TOD_TIMER_REG(l_chip, l_tod_timer_data),
                  "Error from PUT_TOD_TIMER_REG");
     }
 
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// @brief Check setup of the TOD Value registers to distribute synchronization signal to SS PLL using
+///        TOD network
+/// @param[in] i_tod_node Reference to TOD topology
+/// @param[in] i_is_simulation True if simulation, else false
+/// @return FAPI2_RC_SUCCESS if TOD sync is succesful else error
+fapi2::ReturnCode sync_spread_check(
+    const tod_topology_node* i_tod_node,
+    const bool i_is_simulation)
+{
+    uint64_t l_poll_cycle_delay = 0;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets;
+    fapi2::buffer<uint64_t> l_tod_value_reg;
+    fapi2::buffer<uint64_t> l_tod_timer_data;
+    fapi2::buffer<uint64_t> l_steps_per_sync = 0;
+
+    FAPI_DBG("Start");
+
+    get_targets(i_tod_node, 0, l_targets);
+
+    // Get the number of Steps per Sync
+    FAPI_TRY(p10_tod_steps_per_sync(i_tod_node, l_steps_per_sync));
+
     FAPI_TRY(p10_tod_polling_delay(i_is_simulation,
-                                   2 * P10_TOD_SSCG_START_DELAY,  // Wait twice the expected delay before declaring timeout
+                                   2 * P10_TOD_TIMER_SYNC_WAIT_PERIOD * l_steps_per_sync,  // Wait twice the expected delay before declaring timeout
                                    P10_TOD_UTIL_TIMEOUT_COUNT,
                                    l_poll_cycle_delay));
 
@@ -409,9 +443,11 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
 /// @brief Helper function for p10_tod_init
 /// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
 /// @param[in] i_is_simulation True if simulation, else false
+/// @param[in] i_disable_tod_sync_spread True if disable Sync Spread, else false
 /// @param[out] o_failingTodProc Pointer to the fapi target, will be populated
 ///             with processor target unable to receive proper signals from OSC,
 ///              or the processor target where the TOD secondary topology failed.
@@ -424,6 +460,7 @@ fapi_try_exit:
 fapi2::ReturnCode init_tod_node(
     const tod_topology_node* i_tod_node,
     const bool i_is_simulation,
+    const bool i_disable_tod_sync_spread,
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* o_failingTodProc,
     bool& o_secondary_topology_failed)
 {
@@ -497,12 +534,21 @@ fapi2::ReturnCode init_tod_node(
         // Load-TOD:
         // Initiate a TTYPE-4 from the TOD master:
         // TOD_TX_TTYPE_4_REG(@0x15)[00] = 0b1
+        // The TTYPE_4 is not sent out from the Master until the Master TOD FSM
+        // is in the 'Running' State, which happens during the SCOM write to the
+        // TOD_START register below.
         FAPI_DBG("Master: Send local Chip TOD value to all Chip TODs");
         FAPI_TRY(PREP_TOD_TX_TTYPE_4_REG(l_target));
         l_data.flush<0>();
         SET_TOD_TX_TTYPE_4_REG_TX_TTYPE_4_TRIGGER(l_data);
         FAPI_TRY(PUT_TOD_TX_TTYPE_4_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_TX_TTYPE_4_REG");
+
+        // Setup the TOD Timer registers for sync_spread.
+        if (i_disable_tod_sync_spread == 0)
+        {
+            FAPI_TRY(sync_spread_setup(i_tod_node), "Error from sync_spread_setup!");
+        }
 
         FAPI_DBG("Master: Chip TOD start_tod (switch local Chip TOD to 'Running' state)");
         FAPI_TRY(PREP_TOD_START_REG(l_target));
@@ -640,7 +686,11 @@ fapi2::ReturnCode init_tod_node(
          l_child != (i_tod_node->i_children).end();
          ++l_child)
     {
-        FAPI_TRY(init_tod_node(*l_child, i_is_simulation, o_failingTodProc, o_secondary_topology_failed),
+        FAPI_TRY(init_tod_node(*l_child,
+                               i_is_simulation,
+                               i_disable_tod_sync_spread,
+                               o_failingTodProc,
+                               o_secondary_topology_failed),
                  "Failure configuring downstream node!");
     }
 
@@ -743,14 +793,18 @@ fapi2::ReturnCode p10_tod_init(
              "Error from p10_tod_clear_error_reg!");
 
     // Start configuring each node; (init_tod_node will recurse on each child)
-    FAPI_TRY(init_tod_node(i_tod_node, l_attr_is_simulation, o_failingTodProc, l_secondary_topology_failed),
+    FAPI_TRY(init_tod_node(i_tod_node,
+                           l_attr_is_simulation,
+                           l_disable_tod_sync_spread,
+                           o_failingTodProc,
+                           l_secondary_topology_failed),
              "Error from init_tod_node!");
 
     // sync spread across chips in topology
     if (l_disable_tod_sync_spread == 0)
     {
-        FAPI_TRY(sync_spread(i_tod_node, l_attr_is_simulation),
-                 "Error from sync_spread!");
+        FAPI_TRY(sync_spread_check(i_tod_node, l_attr_is_simulation),
+                 "Error from sync_spread_check!");
     }
 
     // Notify the QMEs in each node that TOD setup is complete;
