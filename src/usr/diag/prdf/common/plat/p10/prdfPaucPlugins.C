@@ -325,6 +325,172 @@ PLUGIN_CRC_ROOT_CAUSE( 19 );
 PLUGIN_CRC_ROOT_CAUSE( 22 );
 PLUGIN_CRC_ROOT_CAUSE( 23 );
 
+/**
+ * @brief  Helper function for setting the per-lane-mask_regs as needed for
+ *         clearing PAU_PHY_FIR[22]
+ * @param  i_omic An OMIC
+ * @param  io_sc  The step code data struct.
+ * @param  i_omi  The omi/dl we need to check (0:1).
+ */
+void __setPerLaneMaskRegs( ExtensibleChip * i_omic,
+                           STEP_CODE_DATA_STRUCT & io_sc,
+                           uint8_t i_omi )
+{
+    #define PRDF_FUNC "[p10_pauc::__setPerLaneMaskRegs] "
+
+    PRDF_ASSERT(nullptr != i_omic);
+    PRDF_ASSERT(TYPE_OMIC == i_omic->getType());
+
+    #ifdef __HOSTBOOT_MODULE
+
+    // Get the corresponding OMI
+    TargetHandle_t omi = getConnectedChild(i_omic->getTrgt(), TYPE_OMI, i_omi);
+
+    char regName[64];
+    sprintf( regName, "DL%x_STATUS_REGISTER", i_omi );
+
+    // Identify the 4 disabled lanes on the corresponding OMI by reading
+    // the DL0_STATUS_REGISTER, where bit56=lane0...bit63=lane7
+    SCAN_COMM_REGISTER_CLASS * dl_status = i_omic->getRegister( regName );
+    if ( SUCCESS != dl_status->Read() )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to read %s on OMIC 0x%08x",
+                  regName, i_omic->getHuid() );
+        return;
+    }
+
+    std::vector<uint64_t> failedLanes;
+
+    // Push back the addresses of the per-lane-mask regs for each failed lane
+    if ( dl_status->IsBitSet(56) ) // lane0 failed
+    {
+        failedLanes.push_back(0x8003D04010012C3F);
+    }
+    if ( dl_status->IsBitSet(57) ) // lane1 failed
+    {
+        failedLanes.push_back(0x8003D04110012C3F);
+    }
+    if ( dl_status->IsBitSet(58) ) // lane2 failed
+    {
+        failedLanes.push_back(0x8003D04210012C3F);
+    }
+    if ( dl_status->IsBitSet(59) ) // lane3 failed
+    {
+        failedLanes.push_back(0x8003D04310012C3F);
+    }
+    if ( dl_status->IsBitSet(60) ) // lane4 failed
+    {
+        failedLanes.push_back(0x8003D04410012C3F);
+    }
+    if ( dl_status->IsBitSet(61) ) // lane5 failed
+    {
+        failedLanes.push_back(0x8003D04510012C3F);
+    }
+    if ( dl_status->IsBitSet(62) ) // lane6 failed
+    {
+        failedLanes.push_back(0x8003D04610012C3F);
+    }
+    if ( dl_status->IsBitSet(63) ) // lane7 failed
+    {
+        failedLanes.push_back(0x8003D04710012C3F);
+    }
+
+    BitStringBuffer data(64);
+
+    // For each of the 4 corresponding per-lane-mask-regs,
+    // set bit 50: RX_RUN_LANE_DL_MASK = 1
+    for ( const auto & laneReg : failedLanes )
+    {
+        if ( SUCCESS != getScom( omi, data, laneReg ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read 0x%16llx from OMI 0x%08x",
+                      laneReg, getHuid(omi) );
+            continue;
+        }
+
+        data.setBit(50);
+
+        if ( SUCCESS != putScom( omi, data, laneReg ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to write 0x%16llx from OMI 0x%08x",
+                      laneReg, getHuid(omi) );
+            continue;
+        }
+    }
+    #endif
+
+    #undef PRDF_FUNC
+}
+
+/**
+ * @brief  Plugin for special handling to clear PAU_PHY_FIR[22] - PPE code
+ *         recal not run.
+ * @param  i_chip A PAUC chip
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS always.
+ */
+int32_t clearPpeCodeRecalNotRun( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[p10_pauc::clearPpeCodeRecalNotRun] "
+
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_PAUC == i_chip->getType());
+
+    #ifdef __HOSTBOOT_MODULE
+
+    // If we are at threshold, we won't be clearing the bit, only masking,
+    // so just return SUCCESS
+    if ( io_sc.service_data->IsAtThreshold() )
+    {
+        return SUCCESS;
+    }
+
+    // Loop through the OMICs connected to this PAUC to check whether any have
+    // MC_OMI_DL_FIR[5] x4 mode set and unmasked
+    for ( const auto & omic : getConnectedChildren(i_chip, TYPE_OMIC) )
+    {
+        SCAN_COMM_REGISTER_CLASS * mc_omi_dl_fir =
+            omic->getRegister("MC_OMI_DL_FIR");
+
+        SCAN_COMM_REGISTER_CLASS * mask =
+            omic->getRegister("MC_OMI_DL_FIR_MASK");
+
+        if ( SUCCESS == mc_omi_dl_fir->Read() && SUCCESS == mask->Read() )
+        {
+            if ( mc_omi_dl_fir->IsBitSet(5) && !mask->IsBitSet(5) )
+            {
+                __setPerLaneMaskRegs( omic, io_sc, 0 );
+            }
+            if ( mc_omi_dl_fir->IsBitSet(25) && !mask->IsBitSet(25) )
+            {
+                __setPerLaneMaskRegs( omic, io_sc, 1 );
+            }
+        }
+    }
+
+    // Clear bit 16 of the PHY_LOCAL_SRAM_DATA register
+    SCAN_COMM_REGISTER_CLASS * phy_local_sram_data =
+        i_chip->getRegister("PHY_LOCAL_SRAM_DATA");
+
+    if ( SUCCESS == phy_local_sram_data->Read() )
+    {
+        phy_local_sram_data->ClearBit(16);
+        if ( SUCCESS != phy_local_sram_data->Write() )
+        {
+            PRDF_ERR(PRDF_FUNC "Failure to write PHY_LOCAL_SRAM_DATA register");
+        }
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Failure to read PHY_LOCAL_SRAM_DATA register" );
+    }
+    #endif
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( p10_pauc, clearPpeCodeRecalNotRun );
+
 } // end namespace p10_pauc
 
 } // end namespace PRDF

@@ -120,3 +120,10 @@
         scomaddr    0x10012c05;
         capture     group default;
     };
+
+    register PHY_LOCAL_SRAM_DATA
+    {
+        name        "PPE Local SRAM Data Register";
+        scomaddr    0x10012C0E;
+        capture     group default;
+    };

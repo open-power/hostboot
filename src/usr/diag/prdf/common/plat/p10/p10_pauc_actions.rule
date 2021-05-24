@@ -187,6 +187,7 @@ actionclass level2_th_32perDay_CrcRoot22
 {
     level2_th_32perDay;
     funccall("CrcRootCause_22"); # must be called after threshold
+    funccall("clearPpeCodeRecalNotRun"); # must be called after threshold
 };
 
 actionclass level2_th_1_CrcRoot23
