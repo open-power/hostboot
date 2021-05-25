@@ -107,6 +107,20 @@ namespace PLDM
                               std::vector<uint8_t>& io_attr_table,
                               TARGETING::ATTR_USB_SECURITY_type &o_usb_security);
 
+   /** @brief Retrieve the current value of the hb_mirror_mem
+    *         PLDM bios attribute and return the value converted
+    *         to a ATTR_PAYLOAD_IN_MIRROR_MEM_type.
+    *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
+    * @param[out]    o_mirror_mem     If no error occurs will contain the value
+    *                                 for hb_mirror_mem translated
+    *                                 to terms of ATTR_PAYLOAD_IN_MIRROR_MEM_type.
+    */
+    errlHndl_t getMirrorMemory(std::vector<uint8_t>& io_string_table,
+                               std::vector<uint8_t>& io_attr_table,
+                               TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type &o_mirror_mem);
+
     /** @brief Retrieve the current value of the hb_huge_page_size
     *          PLDM bios attribute and return the value converted
     *          to a ATTR_HUGE_PAGE_SIZE_type.

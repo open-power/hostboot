@@ -68,6 +68,7 @@ const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[] = "hb_power_limit_in_watts
 const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[] = "hb_secure_ver_lockin_enabled";
 
 const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[] = "pvm_fw_boot_side";
+const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[] = "hb_mirror_memory_mode_current";
 
 // Possible Values
 const char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
@@ -84,6 +85,9 @@ const std::vector<const char*> POSSIBLE_HYP_VALUE_STRINGS = {PLDM_BIOS_HB_OPAL_S
 
 const std::vector<const char*> POSSIBLE_HB_DEBUG_CONSOLE_STRINGS = {PLDM_BIOS_ENABLED_STRING,
                                                                     PLDM_BIOS_DISABLED_STRING};
+
+const std::vector<const char*> POSSIBLE_HB_MIRROR_MEM_STRINGS = {PLDM_BIOS_ENABLED_STRING,
+                                                                 PLDM_BIOS_DISABLED_STRING};
 
 const std::vector<const char*> POSSIBLE_HB_MEM_REGION_SIZE_STRINGS = {PLDM_BIOS_128_MB_STRING,
                                                                       PLDM_BIOS_256_MB_STRING};
@@ -1348,6 +1352,72 @@ errlHndl_t getUsbSecurity(
     }
 
     o_usbSecurity = static_cast<TARGETING::ATTR_USB_SECURITY_type>(l_attr_val);
+
+    } while(0);
+
+    return errl;
+}
+
+errlHndl_t getMirrorMemory(
+        std::vector<uint8_t>& io_string_table,
+        std::vector<uint8_t>& io_attr_table,
+        TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type &o_mirrorMem)
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+
+    // Enable Attribute
+    std::vector<char> decoded_value;
+
+    errl = getDecodedEnumAttr(io_string_table,
+                              io_attr_table,
+                              PLDM_BIOS_HB_MIRROR_MEMORY_STRING,
+                              POSSIBLE_HB_MIRROR_MEM_STRINGS,
+                              decoded_value);
+
+    if (errl)
+    {
+        PLDM_ERR("Failed to lookup value for %s",
+                 PLDM_BIOS_HB_MIRROR_MEMORY_STRING);
+        break;
+    }
+
+    if (strncmp(decoded_value.data(), PLDM_BIOS_DISABLED_STRING, decoded_value.size()) == 0)
+    {
+        o_mirrorMem = static_cast<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type>(false);
+        PLDM_INF("Memory Mirror disabled by BMC PLDM BIOS attribute");
+    }
+    else if (strncmp(decoded_value.data(), PLDM_BIOS_ENABLED_STRING, decoded_value.size()) == 0)
+    {
+        o_mirrorMem = static_cast<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type>(true);
+        PLDM_INF("Memory Mirror enabled by BMC PLDM BIOS attribute");
+    }
+    else
+    {
+        // print the entire buffer
+        PLDM_INF_BIN("Unexpected string : ",decoded_value.data(), decoded_value.size());
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_GET_MIRROR_MEMORY
+          * @reasoncode RC_UNSUPPORTED_TYPE
+          * @userdata1  Unused
+          * @userdata2  Unused
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_GET_MIRROR_MEMORY,
+                             RC_UNSUPPORTED_TYPE,
+                             0,
+                             0,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_MIRROR_MEMORY_STRING).addToLog(errl);
+        ErrlUserDetailsString(decoded_value.data()).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        break;
+    }
 
     } while(0);
 

@@ -163,6 +163,50 @@ errlHndl_t getAndSetUsbSecurityFromBmcBios(std::vector<uint8_t>& io_string_table
     return l_errl;
 }
 
+/*
+ * @brief Retrieve the Mirror Memory State from the BMC BIOS and set the system
+ *        attribute ATTR_PAYLOAD_IN_MIRROR_MEM to the retrieved value, if no error occurred.
+ *        If an error occurs retrieving the BMC BIOS, then the attribute is left as is.
+ *
+ * @param[in,out] io_string_table  See brief in file hb_bios_attrs.H
+ * @param[in,out] io_attr_table    See brief in file hb_bios_attrs.H
+ * @param[in]     i_sys            System target handle
+ *
+ * @return Error if failed to retrieve the mirror memory value, otherwise nullptr
+ */
+errlHndl_t getAndSetMirrorMemoryFromBmcBios(std::vector<uint8_t>& io_string_table,
+                                            std::vector<uint8_t>& io_attr_table,
+                                            TARGETING::TargetHandle_t i_sys)
+{
+    // Create a variable to hold the retrieved Mirror Memory value from the BMC BIOS
+    TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type l_mirrorMemory(0);
+
+    // Get the Mirror Memory from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getMirrorMemory(io_string_table, io_attr_table,
+                                              l_mirrorMemory);
+
+    if (unlikely(l_errl != nullptr))
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                  "getAndSetMirrorMemoryFromBmcBios(): An error occurred getting "
+                  "Mirror Memory value from the BMC BIOS. Leaving the system "
+                  "attribute ATTR_PAYLOAD_IN_MIRROR_MEM at its current value %d",
+                  i_sys->getAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>());
+    }
+    else
+    {
+        // Set the system attribute ATTR_PAYLOAD_IN_MIRROR_MEM to the retrieved value
+        i_sys->setAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>(l_mirrorMemory);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                  "getAndSetMirrorMemoryFromBmcBios(): Succeeded in getting the BMC "
+                  "BIOS Mirror Memory value %d and setting the attribute "
+                  "ATTR_PAYLOAD_IN_MIRROR_MEM",
+                  l_mirrorMemory);
+    }
+
+    return l_errl;
+}
+
 errlHndl_t getAndSetPLDMBiosAttrs()
 {
     errlHndl_t errl = nullptr;
@@ -370,15 +414,25 @@ errlHndl_t getAndSetPLDMBiosAttrs()
 
         sys->setAttr<TARGETING::ATTR_HYPERVISOR_IPL_SIDE>(bootside);
 
-    // Retrieve the Usb Security value from the BMC bios and set the
-    // system attribute ATTR_USB_SECURITY to that value.
-    errl = getAndSetUsbSecurityFromBmcBios(bios_string_table, bios_attr_table, sys);
-    if (errl)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "
+        // Retrieve the Usb Security value from the BMC bios and set the
+        // system attribute ATTR_USB_SECURITY to that value.
+        errl = getAndSetUsbSecurityFromBmcBios(bios_string_table, bios_attr_table, sys);
+        if (errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: "
                   "getAndSetUsbSecurityFromBmcBios failed to get and then set the security state");
-        errlCommit(errl, ISTEP_COMP_ID);
-    }
+            errlCommit(errl, ISTEP_COMP_ID);
+        }
+
+        // Retrieve the Mirror Memory value from the BMC bios and set the
+        // system attribute ATTR_PAYLOAD_IN_MIRROR_MEM to that value.
+        errl = getAndSetMirrorMemoryFromBmcBios(bios_string_table, bios_attr_table, sys);
+        if (errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs : "
+                  "getAndSetMirrorMemoryFromBmcBios failed to get and then set the memory mirror value");
+            errlCommit(errl, ISTEP_COMP_ID);
+        }
 
     TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY_type l_lockinPolicy = false;
     errl = PLDM::getSecVerLockinEnabled(bios_string_table, bios_attr_table, l_lockinPolicy);

@@ -87,6 +87,7 @@ namespace PLDM
         MOD_GET_SEC_VER_LOCKIN_ENABLED               = 0x2E, // getSecVerLockinEnabled
         MOD_SET_BIOS_ATTR_BY_HANDLE                  = 0x2F, // setBiosAttrByHandle
         MOD_GET_BIOS_SIDE                            = 0x30, // get_pldm_bootside
+        MOD_GET_MIRROR_MEMORY                        = 0x31, // getMirrorMemory
     };
 
     enum PLDMReasonCode
