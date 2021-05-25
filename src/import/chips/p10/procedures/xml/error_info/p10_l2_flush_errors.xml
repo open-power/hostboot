@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,31 +26,10 @@
   <!-- ********************************************************************* -->
   <registerFfdc>
     <id>REG_FFDC_PROC_L2_REGISTERS</id>
- <!--   <scomRegister>scomt::c::L2_L2MISC_L2CERRS_FIR_MASK_REG_RW</scomRegister>
+    <scomRegister>scomt::c::L2_L2MISC_L2CERRS_FIR_MASK_REG_RW</scomRegister>
     <scomRegister>scomt::c::L2_L2MISC_L2CERRS_PRD_PURGE_CMD_REG</scomRegister>
-    <scomRegister>scomt::c::L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG</scomRegister> -->
+    <scomRegister>scomt::c::L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG</scomRegister>
   </registerFfdc>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_P10_L2_FLUSH_PURGE_REQ_OUTSTANDING</rc>
-    <ffdc>TARGET</ffdc>
-    <ffdc>COUNT_THRESHOLD</ffdc>
-    <ffdc>CMD_REG</ffdc>
-    <description>A previous L2 purge request has not finished</description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_L2_REGISTERS</id>
-      <target>TARGET</target>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    </collectRegisterFfdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>LOW</priority>
-    </callout>
-  </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_P10_PURGE_CMD_REG_ERR</rc>
@@ -63,7 +42,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_L2_REGISTERS</id>
       <target>TARGET</target>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <targetType>TARGET_TYPE_CORE</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -91,7 +70,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_L2_REGISTERS</id>
       <target>TARGET</target>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <targetType>TARGET_TYPE_CORE</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
