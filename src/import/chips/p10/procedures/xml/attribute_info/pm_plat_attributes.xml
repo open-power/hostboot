@@ -1205,7 +1205,7 @@
         ON=1,
         OFF_SKIP_DD=2
     </enum>
-    <default>ON</default>
+    <default>OFF</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -1233,7 +1233,7 @@
         OFF=0,
         ON=1
     </enum>
-    <default>OFF</default>
+    <default>ON</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -1261,7 +1261,7 @@
         OFF=0,
         ON=1
     </enum>
-    <default>OFF</default>
+    <default>ON</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
