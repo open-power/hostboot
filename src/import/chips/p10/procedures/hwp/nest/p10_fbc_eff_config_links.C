@@ -336,10 +336,13 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
     FAPI_DBG("Start");
 
     uint8_t l_loc_link_en[P10_FBC_UTILS_MAX_LINKS] = { fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE };
-    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE;
+    uint8_t l_rem_link_en[P10_FBC_UTILS_MAX_LINKS] = { fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE };
+    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_loc_link_train = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE;
+    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_rem_link_train = fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE;
     fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_active = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE;
     fapi2::ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_Type l_bus_width = { fapi2::ENUM_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_2_BYTE };
-    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_sublinks[P10_FBC_UTILS_MAX_LINKS];
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_loc_sublinks[P10_FBC_UTILS_MAX_LINKS];
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_sublinks[P10_FBC_UTILS_MAX_LINKS];
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_loc_proc_target = i_loc_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_rem_proc_target;
 
@@ -347,8 +350,8 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
     FAPI_TRY(p10_fbc_eff_config_links_query_link_en(
                  i_loc_target,
                  l_loc_link_en,
-                 l_sublinks,
-                 l_link_train,
+                 l_loc_sublinks,
+                 l_loc_link_train,
                  l_bus_width),
              "Error from p10_fbc_eff_config_links_query_link_en (local)");
 
@@ -373,7 +376,7 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
             // expect it to be valid based on logic in p10_fbc_eff_config_links_query_link_en()
             fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_rem_sublink_target;
             fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_target;
-            FAPI_TRY(l_sublinks[l_loc_link_id].getOtherEnd(l_rem_sublink_target),
+            FAPI_TRY(l_loc_sublinks[l_loc_link_id].getOtherEnd(l_rem_sublink_target),
                      "Error from getOtherEnd");
             l_rem_target = l_rem_sublink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
             l_rem_proc_target = l_rem_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
@@ -381,6 +384,29 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
             // obtain remote link id
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_rem_target, o_rem_link_id[l_loc_link_id]),
                      "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+            // obtain remote link id
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_rem_target, o_rem_link_id[l_loc_link_id]),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+            // verify that remote link end is also enabled, otherwise assert that
+            // local link is also not enabled. avoid directly qualifying the local link
+            // enable with the remote endpoint state since this can be problematic for
+            // links with lane swap where one link end may have even-only trained, while
+            // the remote end may have odd-only trained
+            FAPI_TRY(p10_fbc_eff_config_links_query_link_en(
+                         l_rem_target,
+                         l_rem_link_en,
+                         l_rem_sublinks,
+                         l_rem_link_train,
+                         l_bus_width),
+                     "Error from p10_fbc_eff_config_links_query_link_en (remote)");
+
+            if(l_rem_link_en[o_rem_link_id[l_loc_link_id]] == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
+            {
+                o_loc_link_en[l_loc_link_id] = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
+                continue;
+            }
 
             // obtain remote fbc id
             FAPI_TRY(p10_fbc_eff_config_links_rem_fbc_id(
@@ -405,7 +431,7 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
     }
 
     // update attributes for physical link
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_LINK_TRAIN, i_loc_target, l_link_train),
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_LINK_TRAIN, i_loc_target, l_loc_link_train),
              "Error from FAPI_ATTR_SET (ATTR_IOHS_LINK_TRAIN)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, i_loc_target, l_link_active),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
