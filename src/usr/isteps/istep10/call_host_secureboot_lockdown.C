@@ -70,17 +70,436 @@
 #include <i2c/i2c.H>
 #include <i2c/i2c_common.H>
 
+#include <spi/spi.H>
+#include <sbeio/sbeioif.H>
+#include <sbeio/sbe_utils.H>
+#include <sbeio/sbe_retry_handler.H>
+#include <sys/misc.h>
+
+#include "call_proc_build_smp.H"
+
+using   namespace   ISTEP_ERROR;
+using   namespace   ISTEP;
 using   namespace   TARGETING;
+using   namespace   ERRORLOG;
+using   namespace   SBEIO;
 
 namespace ISTEP_10
 {
+
+/**
+ * @brief XSCOM TPM measurements for the secondary chips
+ *        1. Validates PCR6 security state values matches between all SBEs
+ *        2. Mismatch will cause primary TPM to be poisoned,
+ *           indicating we are in an invalid security state
+ *        3. Extend all measurements (except PCR6) from secondary/alternate
+ *           procs to TPM and append to log
+ *
+ * @param[in] i_primaryProc    - primary sentinal processor target
+ * @param[in] i_secondaryProcs - secondary/alternate processor targets
+ * @param[in/out] io_StepError - istep failure errors will be added to this
+ */
+
+void retrieveAndExtendSecondaryMeasurements(
+                            const TargetHandle_t i_primaryProc,
+                            const TargetHandleList& i_secondaryProcs,
+                            IStepError & io_StepError )
+{
+    errlHndl_t  l_errl  =   nullptr;
+    bool l_poison_tpm = false;
+
+    // structure to report what mismatched
+    typedef union {
+      uint8_t full_reason;
+      struct
+      {
+        uint8_t rsvd          : 5;
+        uint8_t PCR6_regs_0   : 1; // SBE Security State - PCR6 version
+        uint8_t PCR6_regs_1   : 1; // HW Key Hash- PCR6 version
+        uint8_t PCR6_regs_4_7 : 1; // Hash of SBE Secureboot Validation Image
+      } PACKED;
+    } mismatch_reason_t;
+
+    // TPM to log/extend measurements (or potentially poison)
+    Target* l_primaryTpm = nullptr;
+
+    // measurement data
+    TRUSTEDBOOT::TPM_sbe_measurements_regs_grouped l_primarySbeMeasuredGroups;
+    TRUSTEDBOOT::TPM_sbe_measurements_regs_grouped l_secondarySbeMeasuredGroups;
+
+    uint32_t poison_eid = 0; // EID of error that caused poisoning of TPM
+
+    do {
+    // TPM to log/extend measurements (or potentially poison)
+    TRUSTEDBOOT::getPrimaryTpm(l_primaryTpm);
+    auto l_tpmHwasState = l_primaryTpm->getAttr<ATTR_HWAS_STATE>();
+
+    // grab primary values first
+    l_errl = TRUSTEDBOOT::groupSbeMeasurementRegs(i_primaryProc, l_primarySbeMeasuredGroups);
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+           ERR_MRK"ERROR : retrieveAndExtendSecondaryMeasurements: "
+           "groupSbeMeasurementRegs returned error for 0x%.8X primary processor "
+           TRACE_ERR_FMT,
+           get_huid(i_primaryProc),
+           TRACE_ERR_ARGS(l_errl) );
+        // this indicates XSCOM failure on primary processor so make this fatal
+        forceProcDelayDeconfigCallout(i_primaryProc, l_errl);
+        captureError(l_errl, io_StepError, ISTEP_COMP_ID, i_primaryProc);
+        break;
+    }
+
+    // secondary chips
+    for ( auto curproc : i_secondaryProcs)
+    {
+        l_errl = TRUSTEDBOOT::groupSbeMeasurementRegs(curproc, l_secondarySbeMeasuredGroups);
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               ERR_MRK"ERROR : retrieveAndExtendSecondaryMeasurements: "
+               "groupSbeMeasurementRegs returned error for 0x%.8X processor "
+               TRACE_ERR_FMT,
+               get_huid(curproc),
+               TRACE_ERR_ARGS(l_errl) );
+            forceProcDelayDeconfigCallout(curproc, l_errl);
+            captureError(l_errl, io_StepError, ISTEP_COMP_ID, curproc);
+            continue;
+        }
+
+        mismatch_reason_t l_mismatch = {0};
+        // compare PCR6 for mismatch - register 0/security state
+        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_0,
+                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_0,
+                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE))
+        {
+            l_mismatch.PCR6_regs_0 = 1;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"Mismatch found: 0x%08X processor PCR6 register 0/security state",
+                get_huid(curproc) );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 0/security state",
+                l_primarySbeMeasuredGroups.sbe_measurement_regs_0,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 0/security state",
+                l_secondarySbeMeasuredGroups.sbe_measurement_regs_0,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE );
+        }
+        // compare PCR6 for mismatch - register 1/HW key hash
+        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_1,
+                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_1,
+                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE))
+        {
+            l_mismatch.PCR6_regs_1 = 1;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"Mismatch found: 0x%08X processor PCR6 register 1/HW key hash",
+                get_huid(curproc) );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 1/HW key hash",
+                l_primarySbeMeasuredGroups.sbe_measurement_regs_1,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 1/HW key hash",
+                l_secondarySbeMeasuredGroups.sbe_measurement_regs_1,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE );
+        }
+        // compare PCR6 for mismatch - registers 4 to 7/Hash of SBE secureboot validation image
+        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_4_7,
+                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_4_7,
+                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE))
+        {
+            l_mismatch.PCR6_regs_4_7 = 1;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"Mismatch found: 0x%08X processor PCR6 registers 4-7/SBE secureboot validation image",
+                get_huid(curproc) );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 4-7/SBE secureboot validation image",
+                l_primarySbeMeasuredGroups.sbe_measurement_regs_4_7,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 4-7/SBE secureboot validation image",
+                l_secondarySbeMeasuredGroups.sbe_measurement_regs_4_7,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
+        }
+
+        if (l_mismatch.full_reason != 0)
+        {
+            l_poison_tpm = true;
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                "creating error for mismatch (0x%.08X) on proc 0x%.8X",
+                l_mismatch.full_reason, get_huid(curproc) );
+
+            /*@
+             * @errortype
+             * @moduleid   MOD_RETRIEVE_EXTEND_SECONDARY_MEASUREMENTS
+             * @reasoncode RC_PCR6_MISMATCH_DETECTED
+             * @userdata1  Huid of secondary processor
+             * @userdata2  Mismatch found (bitwise 0x02 = PCR6 0, 0x01 = PCR6 4-7)
+             * @devdesc    Unable to confirm PCR6 match between primary and secondary SBE
+             * @custdesc   Platform security problem detected
+             */
+            l_errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                             MOD_RETRIEVE_EXTEND_SECONDARY_MEASUREMENTS,
+                                             RC_PCR6_MISMATCH_DETECTED,
+                                             get_huid(curproc),
+                                             l_mismatch.full_reason);
+            l_errl->addHwCallout( curproc,
+                                  HWAS::SRCI_PRIORITY_HIGH,
+                                  HWAS::NO_DECONFIG,
+                                  HWAS::GARD_NULL );
+            if (!SECUREBOOT::enabled())
+            {
+              TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "retrieveAndExtendSecondaryMeasurements: security is off, "
+                  "so just log the PCR6 Mismatch (EID: 0x%08X) as informational",
+                  l_errl->eid() );
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            }
+            poison_eid = l_errl->eid();
+            l_errl->collectTrace(ISTEP_COMP_NAME);
+            SECUREBOOT::addSecurityRegistersToErrlog(l_errl);
+
+            // allow the istep to continue for just a mismatch error
+            errlCommit(l_errl, ISTEP_COMP_ID);
+        }
+
+        // primaryTpm must be functional to log/extend measurements
+        if (l_tpmHwasState.functional)
+        {
+            // log and extend measurements (good or mismatched ones)
+            l_errl = TRUSTEDBOOT::logSbeMeasurementRegs(l_primaryTpm, curproc, l_secondarySbeMeasuredGroups, true);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK"retrieveAndExtendSecondaryMeasurements: "
+                    "log/extend measurements for 0x%08X processor SBE",
+                    get_huid(curproc));
+                forceProcDelayDeconfigCallout(curproc, l_errl);
+                captureError(l_errl, io_StepError, ISTEP_COMP_ID, curproc);
+            }
+        }
+
+        if (poison_eid)
+        {
+            // If not already compromised, set to this poison_eid
+            if (!curproc->getAttr<ATTR_SBE_COMPROMISED_EID>())
+            {
+                // update attribute with EID of poisoning reason
+                curproc->setAttr<ATTR_SBE_COMPROMISED_EID>(poison_eid);
+            }
+            // clear it out for next secondary processor
+            poison_eid = 0;
+        }
+    } // secondary chip loop
+    } while (0);
+
+    if(l_poison_tpm)
+    {
+        poisonPrimaryTpm();
+    }
+}
+
+
+/**
+ * @brief Clear FIFO and perform HRESET to secondary processor SBE
+ * @param[in] i_secProc - secondary processor target
+ * @param[in/out] io_StepError - failure errors will be added to this
+ */
+void recoverSBE( Target * i_secProc, IStepError & io_StepError )
+{
+    errlHndl_t l_errl = nullptr;
+    bool spiLockAcquired = false;
+
+    do {
+    // Prevent HB SPI operations to this non-boot/secondary processor during SBE boot
+    l_errl = SPI::spiLockProcessor(i_secProc, true);
+    if (l_errl)
+    {
+        // This would be a firmware bug that would be hard to
+        // find later so terminate with this failure
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "recoverSBE(): ERROR : SPI lock failed to target %.8X "
+                  TRACE_ERR_FMT,
+                  get_huid(i_secProc),
+                  TRACE_ERR_ARGS(l_errl));
+        forceProcDelayDeconfigCallout(i_secProc, l_errl);
+        captureError(l_errl, io_StepError, ISTEP_COMP_ID, i_secProc);
+        break;
+    }
+    spiLockAcquired = true;
+
+    // Clear FIFO via reset
+    l_errl = sendFifoReset(i_secProc);
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "recoverSBE(): ERROR : call sendFifoReset target %.8X "
+               TRACE_ERR_FMT,
+               get_huid(i_secProc),
+               TRACE_ERR_ARGS(l_errl) );
+        forceProcDelayDeconfigCallout(i_secProc, l_errl);
+        captureError(l_errl, io_StepError, ISTEP_COMP_ID, i_secProc);
+        break;
+    }
+
+    // Perform hreset to secondary SBE
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "recoverSBE(): perform hreset to secondary SBE on target %.8X",
+               get_huid(i_secProc) );
+    //Note no PLID passed in
+    SbeRetryHandler l_SBEobj = SbeRetryHandler(
+            SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
+
+    l_SBEobj.setSbeRestartMethod(SbeRetryHandler::
+                                 SBE_RESTART_METHOD::HRESET);
+
+    l_SBEobj.setInitialPowerOn(false);
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "recoverSBE(): run hreset now" );
+    bool haltStateExpected = true;
+    l_SBEobj.main_sbe_handler(i_secProc, haltStateExpected);
+
+    // We will judge whether or not the SBE had a successful
+    // boot if it made it to runtime
+    if(l_SBEobj.isSbeAtRuntime())
+    {
+        // Set the SBE started attribute
+        i_secProc->setAttr<ATTR_SBE_IS_STARTED>(1);
+
+        // Switch to using SBE SCOM
+        ScomSwitches l_switches =
+            i_secProc->getAttr<ATTR_SCOM_SWITCHES>();
+        ScomSwitches l_switches_before = l_switches;
+
+        // Turn on SBE SCOM and turn off FSI SCOM.
+        l_switches.useFsiScom = 0;
+        l_switches.useSbeScom = 1;
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                  "recoverSBE(): hreset of SBE succeeded - changing SCOM"
+                  " switches from 0x%.2X to 0x%.2X for proc 0x%.8X",
+                  l_switches_before,
+                  l_switches,
+                  get_huid(i_secProc) );
+        i_secProc->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+    }
+    else
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"recoverSBE(): FAILURE : SMP SECUREBOOT "
+                  "SBE for proc 0x%.8X did not reach runtime",
+                  get_huid(i_secProc));
+        /*@
+         * @errortype
+         * @reasoncode RC_FAILED_SBE_HRESET
+         * @severity   ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_RECOVER_SBE
+         * @userdata1  HUID of proc that failed to boot its SBE
+         * @userdata2  Unused
+         * @devdesc    Failed to boot a secondary SBE
+         * @custdesc   Processor Error
+         */
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                               MOD_RECOVER_SBE,
+                               RC_FAILED_SBE_HRESET,
+                               get_huid(i_secProc),
+                               0);
+        l_errl->collectTrace("ISTEPS_TRACE", 256);
+        l_errl->addHwCallout( i_secProc,
+                              HWAS::SRCI_PRIORITY_HIGH,
+                              HWAS::DELAYED_DECONFIG,
+                              HWAS::GARD_NULL );
+        captureError(l_errl, io_StepError, ISTEP_COMP_ID, i_secProc);
+    }
+
+    } while (0);
+
+    // always try to put back into a good state
+    if (spiLockAcquired)
+    {
+        // Enable HB SPI operations to this secondary processor after SBE boot
+        l_errl = SPI::spiLockProcessor(i_secProc, false);
+        if (l_errl)
+        {
+            // This would be a firmware bug that would be hard to
+            // find later so terminate with this failure
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"recoverSBE(): ERROR : SPI unlock failed to target %.8X "
+                      TRACE_ERR_FMT,
+                      get_huid(i_secProc),
+                      TRACE_ERR_ARGS(l_errl));
+            forceProcDelayDeconfigCallout(i_secProc, l_errl);
+            captureError(l_errl, io_StepError, ISTEP_COMP_ID, i_secProc);
+        }
+    }
+} // end recoverSBE()
+
+
+/**
+ * @brief Enable PRD handling of SBE halted again
+ *        - clear potential halt FIR
+ *        - Unmask TP_LOCAL_FIR[33] - SBE - PPE in halted state
+ *
+ * @param[in] i_secondaryProcs - secondary/alternate processor targets
+ * @param[in/out] io_StepError - istep failure errors will be added to this
+ */
+void enablePRDHaltHandling(const TargetHandleList& i_secondaryProcs,
+                           IStepError & io_StepError)
+{
+    errlHndl_t errl = nullptr;
+
+    for (auto proc : i_secondaryProcs)
+    {
+        // write 0xffffffffbfffffff to 0x01040101 (FIR atomic AND) to clear the FIR
+        uint64_t local_fir_mask = ~TP_LOCAL_FIR_SBE_PPE_HALTED_STATE;
+        size_t local_fir_mask_size = sizeof(local_fir_mask);
+        errl = deviceWrite(proc,
+                          &local_fir_mask,
+                          local_fir_mask_size,
+                          DEVICE_SCOM_ADDRESS(scomt::proc::TP_TPCHIP_TPC_LOCAL_FIR_WO_AND));
+
+        if (errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to clear TP_LOCAL_FIR[33] on 0x%8X processor",
+                      " tried to write 0x%016llX to SCOM address 0x%.8X",
+                      get_huid(proc), local_fir_mask,
+                      scomt::proc::TP_TPCHIP_TPC_LOCAL_FIR_WO_AND);
+
+            forceProcDelayDeconfigCallout(proc, errl);
+
+            // Capture error and continue to the next chip
+            captureError(errl, io_StepError, ISTEP_COMP_ID, proc);
+            continue;
+        }
+
+        // write 0xffffffffbfffffff to 0x01040104 (mask atomic AND) to clear the mask
+        local_fir_mask = ~TP_LOCAL_FIR_SBE_PPE_HALTED_STATE;
+        local_fir_mask_size = sizeof(local_fir_mask);
+        errl = deviceWrite(proc,
+                          &local_fir_mask,
+                          local_fir_mask_size,
+                          DEVICE_SCOM_ADDRESS(scomt::proc::TP_TPCHIP_TPC_EPS_FIR_LOCAL_MASK_WO_AND));
+
+        if (errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to unmask TP_LOCAL_FIR[33] on 0x%8X processor,"
+                      " tried to write 0x%016llX to SCOM address 0x%.8X",
+                      get_huid(proc), local_fir_mask,
+                      scomt::proc::TP_TPCHIP_TPC_EPS_FIR_LOCAL_MASK_WO_AND);
+
+            forceProcDelayDeconfigCallout(proc, errl);
+            // Capture error and continue to the next chip
+            captureError(errl, io_StepError, ISTEP_COMP_ID, proc);
+        }
+    }
+}
+
 
 void* call_host_secureboot_lockdown (void *io_pArgs)
 {
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 ENTER_MRK"call_host_secureboot_lockdown");
 
-    ISTEP_ERROR::IStepError l_istepError;
+    IStepError l_istepError;
 #ifndef CONFIG_VPO_COMPILE
     errlHndl_t l_err = nullptr;
 
@@ -100,7 +519,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                   TRACE_ERR_FMT,
                   TRACE_ERR_ARGS(l_err));
         l_istepError.addErrorDetails(l_err);
-        TARGETING::Target * backup_tpm = nullptr;
+        Target * backup_tpm = nullptr;
         TRUSTEDBOOT::getBackupTpm(backup_tpm);
         assert(backup_tpm != nullptr, "call_host_secureboot_lockdown: poisonBackupTpm returned an error when no backup tpm available");
         // tpmMarkFailed will ensure there is at minimum a deconfig callout for the backup
@@ -108,19 +527,19 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
         TRUSTEDBOOT::tpmMarkFailed(backup_tpm, l_err);
     }
 
-    TARGETING::TargetHandleList l_procList;
-    getAllChips(l_procList,TARGETING::TYPE_PROC);
+    TargetHandleList l_procList;
+    getAllChips(l_procList,TYPE_PROC);
 
 
 #ifdef CONFIG_SECUREBOOT
 
-    TARGETING::TargetHandleList l_tpmList;
-    TARGETING::Target* boot_proc = nullptr;
+    TargetHandleList l_tpmList;
+    Target* boot_proc = nullptr;
     if(SECUREBOOT::enabled())
     {
-        getAllChips(l_tpmList,TARGETING::TYPE_TPM,false);
+        getAllChips(l_tpmList,TYPE_TPM,false);
 
-        l_err = TARGETING::targetService().queryMasterProcChipTargetHandle(boot_proc);
+        l_err = targetService().queryMasterProcChipTargetHandle(boot_proc);
         if(l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -143,10 +562,10 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
         // in production an informational log will be committed instead.
         l_err = SECUREBOOT::verifyMeasurementSeepromSecurity(l_proc);
 
-        if (l_err && l_err->sev() != ERRORLOG::ERRL_SEV_UNRECOVERABLE)
+        if (l_err && l_err->sev() != ERRL_SEV_UNRECOVERABLE)
         {
             // Just commit the error since we're not in mfg mode.
-            ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+            errlCommit(l_err, ISTEP_COMP_ID);
         }
         else if (l_err)
         {
@@ -167,13 +586,13 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
             bool l_protectTpm = true; // Stage 0 assumption
             for (auto itpm : l_tpmList)
             {
-                auto l_physPath = l_proc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+                auto l_physPath = l_proc->getAttr<ATTR_PHYS_PATH>();
 
-                auto l_tpmInfo = itpm->getAttr<TARGETING::ATTR_SPI_TPM_INFO>();
+                auto l_tpmInfo = itpm->getAttr<ATTR_SPI_TPM_INFO>();
 
                 if (l_tpmInfo.spiMasterPath == l_physPath) // Stage 1 check
                 {
-                    auto hwasState = itpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                    auto hwasState = itpm->getAttr<ATTR_HWAS_STATE>();
 
                     if (hwasState.functional == true) // Stage 2 check
                     {
@@ -188,31 +607,31 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
             {
                 uint8_t l_set_protectTpm = 1;
                 l_proc->setAttr<
-                    TARGETING::ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM
+                    ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM
                                                                     >(l_set_protectTpm);
             }
 
             // Check for compromised SBE security
-            uint32_t l_sbe_compromised_eid = l_proc->getAttr<TARGETING::ATTR_SBE_COMPROMISED_EID>();
+            uint32_t l_sbe_compromised_eid = l_proc->getAttr<ATTR_SBE_COMPROMISED_EID>();
             if (l_sbe_compromised_eid)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     ERR_MRK"call_host_secureboot_lockdown: Found compromised SBE"
                     " for Proc HUID 0x%08x - see EID 0x%08X for more details",
-                    TARGETING::get_huid(l_proc), l_sbe_compromised_eid );
+                    get_huid(l_proc), l_sbe_compromised_eid );
                 /*@
                  * @errortype
-                 * @moduleid   ISTEP::MOD_CALL_HOST_SECUREBOOT_LOCKDOWN
-                 * @reasoncode ISTEP::RC_SBE_COMPROMISED
+                 * @moduleid   MOD_CALL_HOST_SECUREBOOT_LOCKDOWN
+                 * @reasoncode RC_SBE_COMPROMISED
                  * @userdata1  Huid of processor with compromised SBE
                  * @userdata2  EID with more details of why compromised
                  * @devdesc    SBE security compromise detected in 10.1 and not resolved
                  * @custdesc   Platform security problem detected
                  */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                ISTEP::MOD_CALL_HOST_SECUREBOOT_LOCKDOWN,
-                                                ISTEP::RC_SBE_COMPROMISED,
-                                                TARGETING::get_huid(l_proc),
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                                MOD_CALL_HOST_SECUREBOOT_LOCKDOWN,
+                                                RC_SBE_COMPROMISED,
+                                                get_huid(l_proc),
                                                 l_sbe_compromised_eid);
 
                 // Note: secureboot is enabled, so deconfig
@@ -244,8 +663,8 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
             // For boot proc read from attribute that was saved off at the start of the IPL
             if (l_proc == boot_proc)
             {
-                const auto l_scratchRegs = TARGETING::UTIL::assertGetToplevelTarget()->
-                                             getAttrAsStdArr<TARGETING::ATTR_MASTER_MBOX_SCRATCH>();
+                const auto l_scratchRegs = UTIL::assertGetToplevelTarget()->
+                                             getAttrAsStdArr<ATTR_MASTER_MBOX_SCRATCH>();
 
                 // MboxScratch11_t::REG_IDX is a uint32_t
                 scratch_reg_value = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch11_t::REG_IDX];
@@ -266,7 +685,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                               "(0x%X) failed for Proc HUID 0x%08x "
                               TRACE_ERR_FMT,
                               INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR,
-                              TARGETING::get_huid(l_proc),
+                              get_huid(l_proc),
                               TRACE_ERR_ARGS(l_err));
 
                     // Among other things, this will add the proc target to the log
@@ -295,13 +714,13 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                           "(addr=0x%X) for Proc HUID 0x%08X: data = 0x%.8X (mask = 0x%.8X)"
                           TRACE_ERR_FMT,
                           INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR,
-                          TARGETING::get_huid(l_proc), scratch_reg_value, scratch_reg_mask,
+                          get_huid(l_proc), scratch_reg_value, scratch_reg_mask,
                           TRACE_ERR_ARGS(l_err));
 
                /*@
                  * @errortype
-                 * @moduleid         ISTEP::MOD_SECUREBOOT_LOCKDOWN
-                 * @reasoncode       ISTEP::RC_SBE_REPORTED_FFDC
+                 * @moduleid         MOD_SECUREBOOT_LOCKDOWN
+                 * @reasoncode       RC_SBE_REPORTED_FFDC
                  * @userdata1        HUID of Processor Target target
                  * @userdata2[0:31]  Scratch Register Data
                  * @userdata2[32:63] Scratch Register Mask
@@ -309,10 +728,10 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                  * @custdesc         A problem occurred during the IPL of the
                  *                   system and the system will reboot.
                  */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                ISTEP::MOD_SECUREBOOT_LOCKDOWN,
-                                ISTEP::RC_SBE_REPORTED_FFDC,
-                                TARGETING::get_huid(l_proc),
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                MOD_SECUREBOOT_LOCKDOWN,
+                                RC_SBE_REPORTED_FFDC,
+                                get_huid(l_proc),
                                 TWO_UINT32_TO_UINT64(scratch_reg_value,
                                                      scratch_reg_mask));
 
@@ -322,7 +741,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                                      HWAS::GARD_NULL );
 
                 // Add the register to the log
-                ERRORLOG::ErrlUserDetailsLogRegister(l_proc,
+                ErrlUserDetailsLogRegister(l_proc,
                               &scratch_reg_value,
                               sizeof(scratch_reg_value),
                               DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch11_t::REG_ADDR))
@@ -436,12 +855,12 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                           TRACE_ERR_FMT, TARGETING::get_huid(l_proc),
                           TRACE_ERR_ARGS(l_err));
                 l_istepError.addErrorDetails(l_err);
-                ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+                errlCommit(l_err, ISTEP_COMP_ID);
                 // Try to run the HWP on all procs regardless of error.
             }
 
             // Lock OPAL keystore if in PHyp boot
-            if (TARGETING::is_phyp_load())
+            if (is_phyp_load())
             {
                 l_err = SECUREBOOT::setSecuritySwitchBits({ SECUREBOOT::ProcSecurity::KsOpalBank0WrLock,
                     SECUREBOOT::ProcSecurity::KsOpalBank0RdLock,
@@ -455,10 +874,10 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_host_secureboot_lockdown: "
                         "Cannot lock OPAL keystore on PROC 0x%08x ",
-                        TRACE_ERR_FMT, TARGETING::get_huid(l_proc),
+                        TRACE_ERR_FMT, get_huid(l_proc),
                         TRACE_ERR_ARGS(l_err));
                     l_istepError.addErrorDetails(l_err);
-                    ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+                    errlCommit(l_err, ISTEP_COMP_ID);
                 }
             }
             else
@@ -472,10 +891,10 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_host_secureboot_lockdown: "
                         "Cannot lock PHyp keystore on PROC 0x%08x ",
-                        TRACE_ERR_FMT, TARGETING::get_huid(l_proc),
+                        TRACE_ERR_FMT, get_huid(l_proc),
                         TRACE_ERR_ARGS(l_err));
                     l_istepError.addErrorDetails(l_err);
-                    ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+                    errlCommit(l_err, ISTEP_COMP_ID);
                 }
             }
         } // end of SECUREBOOT::enabled() check
@@ -490,6 +909,136 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     SECUREBOOT::validateSecuritySettings();
 #endif
 
+    // All secondary/non-boot procs
+    TargetHandleList l_secondaryProcsList;
+
+    // Identify the boot processor
+    Target * l_bootProc =   nullptr;
+    Target * l_bootNode =   nullptr;
+    bool l_onlyFunctional = true; // Make sure bootproc is functional
+    l_err = targetService().queryMasterProcChipTargetHandle(
+                                                l_bootProc,
+                                                l_bootNode,
+                                                l_onlyFunctional);
+    if(l_err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR : call_host_secureboot_lockdown: "
+                    "queryMasterProcChipTargetHandle() "
+                    TRACE_ERR_FMT,
+                    TRACE_ERR_ARGS(l_err) );
+        captureError(l_err, l_istepError, ISTEP_COMP_ID);
+        break;
+    }
+
+    // Build list of secondary/non-boot processors too
+    for (const auto & curproc: l_procList)
+    {
+        if (curproc != l_bootProc)
+        {
+            l_secondaryProcsList.push_back(curproc);
+        }
+    }
+
+    // get all the measurements/extend to TPM and check
+    //    Note: this uses XSCOM to do the readings
+    retrieveAndExtendSecondaryMeasurements(l_bootProc,
+                                           l_secondaryProcsList,
+                                           l_istepError);
+    if (!l_istepError.isNull())
+    {
+        // break out on istep failure
+        break;
+    }
+
+    // HRESET SBEs and bring them back up
+    for (auto l_proc : l_secondaryProcsList)
+    {
+        // Don't restart compromised secondary SBEs
+        if (l_proc->getAttr<ATTR_SBE_COMPROMISED_EID>())
+        {
+            continue;
+        }
+
+        // Clear FIFO and perform hreset to secondary SBE
+        recoverSBE(l_proc, l_istepError);
+
+        // recoverSBE will set useSbeScom if successful, so
+        // change to XSCOM if the proc chips supports it
+        if (l_proc->getAttr<ATTR_PRIMARY_CAPABILITIES>()
+            .supportsXscom)
+        {
+            ScomSwitches l_switches =
+                l_proc->getAttr<ATTR_SCOM_SWITCHES>();
+
+            // If Xscom is not already enabled.
+            if ((l_switches.useXscom != 1) || (l_switches.useSbeScom != 0))
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "After hreset, switching back to useXscom from 0x%.2X for proc 0x%.8X",
+                        l_switches,
+                        get_huid(l_proc));
+
+                l_switches.useSbeScom = 0;
+                l_switches.useXscom = 1;
+
+                // Turn off SBE scom and turn on Xscom.
+                l_proc->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+            }
+        }
+    }
+    if (!l_istepError.isNull())
+    {
+        // break out on istep failure
+        break;
+    }
+
+    // re-enable PRD to handle SBE Halt
+    enablePRDHaltHandling(l_secondaryProcsList, l_istepError);
+    if (!l_istepError.isNull())
+    {
+        // break out on istep failure
+        break;
+    }
+
+    for (auto l_proc_target : l_secondaryProcsList)
+    {
+        // Now that the SMP is connected, it's possible to establish
+        // untrusted memory windows for non-boot processor SBEs.  Open
+        // up the Hostboot read-only memory range for each one to allow
+        // Hostboot dumps / attention handling via any processor chip.
+
+        // Don't open window for secondary SBEs not started
+        if (!l_proc_target->getAttr<ATTR_SBE_IS_STARTED>())
+        {
+            continue;
+        }
+
+        const auto hbHrmor = cpu_spr_value(CPU_SPR_HRMOR);
+        l_err = openUnsecureMemRegion( hbHrmor,
+                                       VMM_MEMORY_SIZE,
+                                       false, // False = read-only
+                                       l_proc_target);
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        ERR_MRK "Failed attempting to open Hostboot's "
+                        "VMM region in SBE of non-boot processor chip "
+                        "with HUID=0x%08X.  Requested address=0x%016llX, "
+                        "size=0x%08X",
+                        get_huid(l_proc_target),
+                        hbHrmor, VMM_MEMORY_SIZE);
+
+            captureError(l_err, l_istepError, HWPF_COMP_ID, l_proc_target);
+        }
+    }
+
+    if (!l_istepError.isNull())
+    {
+        // break out on istep failure
+        break;
+    }
+
 #ifdef CONFIG_PHYS_PRES_PWR_BUTTON
     // Check to see if a Physical Presence Window should be opened,
     // and if so, open it.  This could result in the system being shutdown
@@ -503,7 +1052,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                    TRACE_ERR_FMT,
                    TRACE_ERR_ARGS(l_err));
         l_istepError.addErrorDetails(l_err);
-        ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+        errlCommit(l_err, ISTEP_COMP_ID);
         break;
     }
 #endif

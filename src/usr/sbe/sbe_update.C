@@ -2128,14 +2128,18 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                           "determining which seeprom we booted on. Exiting function");
                 break;
             }
-            bool l_sideZeroActive = (tmp_cur_side == SBE_SEEPROM0);
 
             /*******************************************/
             /*  Get SEEPROM 0 SBE Version Information  */
             /*******************************************/
 
-            // If the current boot seeprom is side 0 then attempt read via chipOp
-            if (l_sideZeroActive)
+            bool l_sideZeroActive = (tmp_cur_side == SBE_SEEPROM0);
+            ATTR_SBE_IS_STARTED_type l_sbeStarted =
+                io_sbeState.target->getAttr<ATTR_SBE_IS_STARTED>();
+
+            // If the current boot seeprom is side 0
+            // and the SBE is started then attempt read via chipOp
+            if (l_sideZeroActive && l_sbeStarted)
             {
                 l_err = getSeepromSideVersionViaChipOp(io_sbeState.target,
                                                        io_sbeState.seeprom_0_ver);
@@ -2162,7 +2166,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             // else side 0 is not active (boot side is 1), try reading side 0 via SPI
             else
             {
-
                 l_err = getSeepromSideVersionViaSPI(io_sbeState.target,
                                             EEPROM::SBE_PRIMARY,
                                             io_sbeState.seeprom_0_ver,
@@ -2183,13 +2186,13 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                         sizeof(sbeSeepromVersionInfo_t));
             }
 
-
             /*******************************************/
             /*  Get SEEPROM 1 SBE Version Information  */
             /*******************************************/
 
-            //If side 1 is active boot side, then attempt read via chipOp
-            if (!l_sideZeroActive)
+            // If the current boot seeprom is side 1
+            // and the SBE is started then attempt read via chipOp
+            if (!l_sideZeroActive && l_sbeStarted)
             {
                 l_err = getSeepromSideVersionViaChipOp(io_sbeState.target,
                                                        io_sbeState.seeprom_1_ver);
@@ -3584,15 +3587,24 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             TRACDBIN(g_trac_sbe,"updateSeepromSide()-start of IMG - ECC",
                      reinterpret_cast<void*>(SBE_ECC_IMG_VADDR), 0x80);
 
+            ATTR_SBE_IS_STARTED_type l_sbeStarted =
+                io_sbeState.target->getAttr<ATTR_SBE_IS_STARTED>();
 
-            //Quiesce the SBE before writing current SBE
-            if ( ( ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY )
-                   &&
-                   ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) )
-                 ||
-                 ( ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_BACKUP )
-                   &&
-                   ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1 ) ) )
+            // Quiesce the SBE before writing current SBE,
+            // skip if the sbe is not started
+            if( !l_sbeStarted )
+            {
+                TRACFCOMP( g_trac_sbe,
+                    "updateSeepromSide() skipping quiesce, SBE not started");
+            }
+            else if
+                ( ( ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY )
+                    &&
+                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) )
+                  ||
+                  ( ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_BACKUP )
+                    &&
+                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1 ) ) )
             {
                 err = SBEIO::sendPsuQuiesceSbe(io_sbeState.target);
 
@@ -6265,14 +6277,20 @@ errlHndl_t getSecuritySettingsFromSbeImage(
     errlHndl_t err = nullptr;
     sbeSectionSbSettings_t sb_settings;
 
+
+    // Only useChipOp if the sbe is started
     // if i_image_ptr == nullptr, then read from SBE Seeprom;
     //   if i_seepom matches i_bootSide then read from SEEPROM via ChipOp
     //   else read from SEEPROM via SPI
     // if i_image_ptr != nullptr, then read from memory at i_image_ptr
-    bool l_useChipOp = (((i_bootSide == SBE_SEEPROM0) &&
+    bool l_useChipOp = false;
+    if (i_target->getAttr<ATTR_SBE_IS_STARTED>())
+    {
+        l_useChipOp = (((i_bootSide == SBE_SEEPROM0) &&
                          (i_seeprom == EEPROM::SBE_PRIMARY)) ||
                         ((i_bootSide == SBE_SEEPROM1) &&
                         (i_seeprom == EEPROM::SBE_BACKUP)));
+    }
 
     TRACFCOMP( g_trac_sbe, ENTER_MRK"getSecuritySettingsFromSbeImage: "
                "i_target=0x%X, i_seeprom=%d, i_image_ptr=%p: "
