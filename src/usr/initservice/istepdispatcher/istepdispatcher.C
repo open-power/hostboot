@@ -1515,12 +1515,12 @@ void IStepDispatcher::waitForSyncPoint()
 
         // Wait for the condition variable to be signalled
         mutex_lock(&iv_mutex);
-        while((!iv_syncPointReached) && (!iv_shutdown))
+        while((!iv_syncPointReached) && (!iv_shutdown) && (!iv_futureShutdown))
         {
             sync_cond_wait(&iv_cond, &iv_mutex);
         }
         // If shutdown request has been received from the FSP
-        if (iv_shutdown)
+        if (iv_shutdown || iv_futureShutdown)
         {
             mutex_unlock(&iv_mutex);
             shutdownDuringIpl();
@@ -1814,11 +1814,9 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 
     if (istep == 0 && substep == 0)
     {
-        //Immediate shutdown - Set iv_shutdown and signal any IStep waiting for
-        //    a sync point
+        //Immediate shutdown - Set iv_shutdown (signal will be done below)
         mutex_lock(&iv_mutex);
         iv_shutdown = true;
-        sync_cond_broadcast(&iv_cond);
         mutex_unlock(&iv_mutex);
     }
     else
@@ -1871,12 +1869,20 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
         io_pMsg = NULL;
     }
 
-    if (iv_istepMode)
+    if (iv_istepMode || iv_syncPointReached)
     {
-        TRACFCOMP(g_trac_initsvc, INFO_MRK"ShutdownMsg received in istepMode,"
-                                  " call shutdownDuringIPL() directly");
+        TRACFCOMP(g_trac_initsvc,
+                  INFO_MRK"ShutdownMsg received %s,"
+                  " call shutdownDuringIPL() directly",
+                  iv_istepMode ? "while in istep mode" : "after sync point has been reached");
         shutdownDuringIpl();
     }
+
+    // Wake up any thread that might be waiting on a sync point so it will
+    //  re-evaluate the new state of the world
+    mutex_lock(&iv_mutex);
+    sync_cond_broadcast(&iv_cond);
+    mutex_unlock(&iv_mutex);
 
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleShutdownMsg");
 }
