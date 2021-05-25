@@ -1838,6 +1838,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DDS_NOT_SUPPORTED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Disable DDSs if EC = 10
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_DYN_CORE_LPAR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>

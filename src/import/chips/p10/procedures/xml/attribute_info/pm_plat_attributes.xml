@@ -1012,7 +1012,7 @@
         OFF = 0x00,
         ON = 0x01
     </enum>
-    <default>ON</default>
+    <default>OFF</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -1215,8 +1215,8 @@
     <id>ATTR_SYSTEM_WOV_OVERV_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-    Disables Workload Optimized Voltage (WOV) undervolting algorithms which
-    voltage below the value calculated from VPD.
+    Disables Workload Optimized Voltage (WOV) overvolting algorithms to compensate
+    for work-load induced droops.
 
     OFF: Will enable WOV overvolting given all validity check pass. If validity
     WOV overvolting will be disabled for the present IPL.
@@ -1606,7 +1606,7 @@
         WARN = 2,
         OFF  = 3
     </enum>
-    <default>WARN</default>
+    <default>INFO</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>

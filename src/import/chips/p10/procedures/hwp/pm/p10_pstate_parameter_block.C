@@ -1837,6 +1837,7 @@ void PlatPmPPB::attr_init( void )
 
     //TBD
     //PPB_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
+    PPB_GET_ATTR(ATTR_CHIP_EC_FEATURE_DDS_NOT_SUPPORTED,    iv_procChip, attr_dd_dds_not_supported);
 
     // WOV attributes
     PPB_GET_ATTR(ATTR_WOV_UNDERV_STEP_INCR_10THPCT,         iv_procChip,  attr_wov_underv_step_incr_pct);
@@ -3444,7 +3445,7 @@ bool PlatPmPPB::is_resclk_enabled()
 {
     if (iv_attrs.attr_resclk_disable && iv_resclk_enabled)
     {
-        FAPI_DBG(">>> Reslck disabled due to system attribute control.")
+        FAPI_INF(">>> Resclk disabled due to system attribute control.")
         iv_resclk_enabled = false;
     }
     return iv_resclk_enabled;
@@ -3457,7 +3458,12 @@ bool PlatPmPPB::is_dds_enabled()
 {
     if (iv_attrs.attr_system_dds_disable && iv_dds_enabled)
     {
-        FAPI_DBG(">>> DDS disabled due to system attribute control.")
+        FAPI_INF(">>> DDS disabled due to system attribute control.")
+        iv_dds_enabled = false;
+    }
+    else if (iv_attrs.attr_dd_dds_not_supported)
+    {
+        FAPI_INF(">>> DDS disabled due to unsupported EC level.")
         iv_dds_enabled = false;
     }
 
