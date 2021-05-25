@@ -110,6 +110,8 @@ void FruImpl::buildFRUTable()
     }
 
     pldm_entity_association_pdr_add(entityTree, pdrRepo, false);
+    // save a copy of bmc's entity association tree
+    pldm_entity_association_tree_copy_root(entityTree, bmcEntityTree);
 
     if (table.size())
     {

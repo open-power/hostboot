@@ -57,11 +57,14 @@ class FruImpl
      *                          for PLDM FRU
      *  @param[in] pdrRepo - opaque pointer to PDR repository
      *  @param[in] entityTree - opaque pointer to the entity association tree
+     *  @param[in] bmcEntityTree - opaque pointer to bmc's entity association
+     *                             tree
      */
     FruImpl(const std::string& configPath, pldm_pdr* pdrRepo,
-            pldm_entity_association_tree* entityTree) :
+            pldm_entity_association_tree* entityTree,
+            pldm_entity_association_tree* bmcEntityTree) :
         parser(configPath),
-        pdrRepo(pdrRepo), entityTree(entityTree)
+        pdrRepo(pdrRepo), entityTree(entityTree), bmcEntityTree(bmcEntityTree)
     {}
 
     /** @brief Total length of the FRU table in bytes, this excludes the pad
@@ -159,6 +162,7 @@ class FruImpl
     fru_parser::FruParser parser;
     pldm_pdr* pdrRepo;
     pldm_entity_association_tree* entityTree;
+    pldm_entity_association_tree* bmcEntityTree;
 
     std::map<dbus::ObjectPath, pldm_entity_node*> objToEntityNode{};
 
@@ -187,8 +191,9 @@ class Handler : public CmdHandler
 
   public:
     Handler(const std::string& configPath, pldm_pdr* pdrRepo,
-            pldm_entity_association_tree* entityTree) :
-        impl(configPath, pdrRepo, entityTree)
+            pldm_entity_association_tree* entityTree,
+            pldm_entity_association_tree* bmcEntityTree) :
+        impl(configPath, pdrRepo, entityTree, bmcEntityTree)
     {
         handlers.emplace(PLDM_GET_FRU_RECORD_TABLE_METADATA,
                          [this](const pldm_msg* request, size_t payloadLength) {

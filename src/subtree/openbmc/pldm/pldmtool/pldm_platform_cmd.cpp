@@ -112,6 +112,7 @@ class GetPDR : public CommandInterface
         {PLDM_ENTITY_VIRTUAL_MACHINE_MANAGER, "Virtual Machine Manager"},
         {PLDM_ENTITY_SYSTEM_CHASSIS, "System chassis (main enclosure)"},
         {PLDM_ENTITY_SYS_BOARD, "System Board"},
+        {PLDM_ENTITY_DRIVE_BACKPLANE, "Drive backplane"},
         {PLDM_ENTITY_MEMORY_MODULE, "Memory Module"},
         {PLDM_ENTITY_PROC_MODULE, "Processor Module"},
         {PLDM_ENTITY_CHASSIS_FRONT_PANEL_BOARD,
@@ -120,7 +121,13 @@ class GetPDR : public CommandInterface
         {PLDM_ENTITY_PROC, "Processor"},
         {PLDM_ENTITY_MGMT_CONTROLLER, "Management Controller"},
         {PLDM_ENTITY_CONNECTOR, "Connector"},
+        {PLDM_ENTITY_FAN, "Fan"},
+        {PLDM_ENTITY_SOLID_STATE_SRIVE, "Solid State Drive"},
         {PLDM_ENTITY_POWER_SUPPLY, "Power Supply"},
+        {PLDM_ENTITY_MEMORY_CHIP, "Memory chip"},
+        {PLDM_ENTITY_REAL_TIME_CLOCK, "Real Time Clock (RTC)"},
+        {PLDM_ENTITY_SLOT, "Slot"},
+        {PLDM_ENTITY_CABLE, "Cable (electrical or optical)"},
         {11521, "System (logical)"},
     };
 

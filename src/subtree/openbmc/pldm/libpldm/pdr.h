@@ -305,6 +305,29 @@ pldm_entity_node *
 pldm_entity_association_tree_find(pldm_entity_association_tree *tree,
 				  pldm_entity *entity);
 
+/** @brief Create a copy of an existing entity association tree
+ *
+ *  @param[in] org_tree - pointer to source tree
+ *  @param[in/out] new_tree - pointer to destination tree
+ */
+void pldm_entity_association_tree_copy_root(
+    pldm_entity_association_tree *org_tree,
+    pldm_entity_association_tree *new_tree);
+
+/** @brief Destroy all the nodes of the entity association tree
+ *
+ *  @param[in] tree - pointer to entity association tree
+ */
+void pldm_entity_association_tree_destroy_root(
+    pldm_entity_association_tree *tree);
+
+/** @brief Check whether the entity association tree is empty
+ *
+ *  @param[in] tree - pointer to entity association tree
+ *  @return bool, true if tree is empty
+ */
+bool pldm_is_empty_entity_assoc_tree(pldm_entity_association_tree *tree);
+
 /** @brief Extract entities from entity association PDR
  *
  *  @param[in] pdr - entity association PDR

@@ -694,6 +694,45 @@ pldm_entity_association_tree_find(pldm_entity_association_tree *tree,
 	return node;
 }
 
+static void entity_association_tree_copy(pldm_entity_node *org_node,
+					 pldm_entity_node **new_node)
+{
+	if (org_node == NULL) {
+		return;
+	}
+	*new_node = malloc(sizeof(pldm_entity_node));
+	(*new_node)->entity = org_node->entity;
+	(*new_node)->association_type = org_node->association_type;
+	(*new_node)->first_child = NULL;
+	(*new_node)->next_sibling = NULL;
+	entity_association_tree_copy(org_node->first_child,
+				     &((*new_node)->first_child));
+	entity_association_tree_copy(org_node->next_sibling,
+				     &((*new_node)->next_sibling));
+}
+
+void pldm_entity_association_tree_copy_root(
+    pldm_entity_association_tree *org_tree,
+    pldm_entity_association_tree *new_tree)
+{
+	new_tree->last_used_container_id = org_tree->last_used_container_id;
+	entity_association_tree_copy(org_tree->root, &(new_tree->root));
+}
+
+void pldm_entity_association_tree_destroy_root(
+    pldm_entity_association_tree *tree)
+{
+	assert(tree != NULL);
+	entity_association_tree_destroy(tree->root);
+	tree->last_used_container_id = 0;
+	tree->root = NULL;
+}
+
+bool pldm_is_empty_entity_assoc_tree(pldm_entity_association_tree *tree)
+{
+	return ((tree->root == NULL) ? true : false);
+}
+
 void pldm_entity_association_pdr_extract(const uint8_t *pdr, uint16_t pdr_len,
 					 size_t *num_entities,
 					 pldm_entity **entities)

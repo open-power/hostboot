@@ -89,6 +89,7 @@ class HostPDRHandler
                             sdeventplus::Event& event, pldm_pdr* repo,
                             const std::string& eventsJsonsDir,
                             pldm_entity_association_tree* entityTree,
+                            pldm_entity_association_tree* bmcEntityTree,
                             Requester& requester, bool verbose = false);
 
     /** @brief fetch PDRs from host firmware. See @class.
@@ -173,8 +174,12 @@ class HostPDRHandler
     pldm_pdr* repo;
 
     StateSensorHandler stateSensorHandler;
-    /** @brief Pointer to BMC's entity association tree */
+    /** @brief Pointer to BMC's and Host's entity association tree */
     pldm_entity_association_tree* entityTree;
+
+    /** @brief Pointer to BMC's entity association tree */
+    pldm_entity_association_tree* bmcEntityTree;
+
     /** @brief reference to Requester object, primarily used to access API to
      *  obtain PLDM instance id.
      */

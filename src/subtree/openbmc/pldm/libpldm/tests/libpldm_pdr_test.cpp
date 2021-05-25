@@ -1171,6 +1171,47 @@ TEST(EntityAssociationPDR, testFind)
     pldm_entity_association_tree_destroy(tree);
 }
 
+TEST(EntityAssociationPDR, testCopyTree)
+{
+    pldm_entity entities[4]{};
+    entities[0].entity_type = 1;
+    entities[1].entity_type = 2;
+    entities[2].entity_type = 2;
+    entities[3].entity_type = 3;
+
+    auto orgTree = pldm_entity_association_tree_init();
+    auto newTree = pldm_entity_association_tree_init();
+    auto l1 = pldm_entity_association_tree_add(orgTree, &entities[0], nullptr,
+                                               PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_NE(l1, nullptr);
+    auto l2a = pldm_entity_association_tree_add(
+        orgTree, &entities[1], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_NE(l2a, nullptr);
+    auto l2b = pldm_entity_association_tree_add(
+        orgTree, &entities[2], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_NE(l2b, nullptr);
+    auto l2c = pldm_entity_association_tree_add(
+        orgTree, &entities[3], l1, PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+    EXPECT_NE(l2c, nullptr);
+    size_t orgNum{};
+    pldm_entity* orgOut = nullptr;
+    pldm_entity_association_tree_visit(orgTree, &orgOut, &orgNum);
+    EXPECT_EQ(orgNum, 4u);
+
+    pldm_entity_association_tree_copy_root(orgTree, newTree);
+    size_t newNum{};
+    pldm_entity* newOut = nullptr;
+    pldm_entity_association_tree_visit(newTree, &newOut, &newNum);
+    EXPECT_EQ(newNum, orgNum);
+    EXPECT_EQ(newOut[0].entity_type, 1u);
+    EXPECT_EQ(newOut[0].entity_instance_num, 1u);
+    EXPECT_EQ(newOut[0].entity_container_id, 0u);
+    free(orgOut);
+    free(newOut);
+    pldm_entity_association_tree_destroy(orgTree);
+    pldm_entity_association_tree_destroy(newTree);
+}
+
 TEST(EntityAssociationPDR, testExtract)
 {
     std::vector<uint8_t> pdr{};

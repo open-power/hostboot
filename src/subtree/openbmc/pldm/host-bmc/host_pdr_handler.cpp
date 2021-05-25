@@ -25,11 +25,12 @@ HostPDRHandler::HostPDRHandler(int mctp_fd, uint8_t mctp_eid,
                                sdeventplus::Event& event, pldm_pdr* repo,
                                const std::string& eventsJsonsDir,
                                pldm_entity_association_tree* entityTree,
+                               pldm_entity_association_tree* bmcEntityTree,
                                Requester& requester, bool verbose) :
     mctp_fd(mctp_fd),
     mctp_eid(mctp_eid), event(event), repo(repo),
     stateSensorHandler(eventsJsonsDir), entityTree(entityTree),
-    requester(requester), verbose(verbose)
+    bmcEntityTree(bmcEntityTree), requester(requester), verbose(verbose)
 {
     fs::path hostFruJson(fs::path(HOST_JSONS_DIR) / fruJson);
     if (fs::exists(hostFruJson))
@@ -69,7 +70,8 @@ HostPDRHandler::HostPDRHandler(int mctp_fd, uint8_t mctp_eid,
         pldm::utils::DBusHandler::getBus(),
         propertiesChanged("/xyz/openbmc_project/state/host0",
                           "xyz.openbmc_project.State.Host"),
-        [this, repo](sdbusplus::message::message& msg) {
+        [this, repo, entityTree,
+         bmcEntityTree](sdbusplus::message::message& msg) {
             DbusChangedProps props{};
             std::string intf;
             msg.read(intf, props);
@@ -81,6 +83,9 @@ HostPDRHandler::HostPDRHandler(int mctp_fd, uint8_t mctp_eid,
                 if (propVal == "xyz.openbmc_project.State.Host.HostState.Off")
                 {
                     pldm_pdr_remove_remote_pdrs(repo);
+                    pldm_entity_association_tree_destroy_root(entityTree);
+                    pldm_entity_association_tree_copy_root(bmcEntityTree,
+                                                           entityTree);
                     this->sensorMap.clear();
                 }
             }

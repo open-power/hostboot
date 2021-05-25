@@ -167,6 +167,10 @@ int main(int argc, char** argv)
                     decltype(&pldm_entity_association_tree_destroy)>
         entityTree(pldm_entity_association_tree_init(),
                    pldm_entity_association_tree_destroy);
+    std::unique_ptr<pldm_entity_association_tree,
+                    decltype(&pldm_entity_association_tree_destroy)>
+        bmcEntityTree(pldm_entity_association_tree_init(),
+                      pldm_entity_association_tree_destroy);
     std::unique_ptr<HostPDRHandler> hostPDRHandler;
     std::unique_ptr<pldm::host_effecters::HostEffecterParser>
         hostEffecterParser;
@@ -177,7 +181,7 @@ int main(int argc, char** argv)
     {
         hostPDRHandler = std::make_unique<HostPDRHandler>(
             sockfd, hostEID, event, pdrRepo.get(), EVENTS_JSONS_DIR,
-            entityTree.get(), dbusImplReq, verbose);
+            entityTree.get(), bmcEntityTree.get(), dbusImplReq, verbose);
         hostEffecterParser =
             std::make_unique<pldm::host_effecters::HostEffecterParser>(
                 &dbusImplReq, sockfd, pdrRepo.get(), dbusHandler.get(),
@@ -203,7 +207,7 @@ int main(int argc, char** argv)
     invoker.registerHandler(PLDM_BIOS, std::make_unique<bios::Handler>(
                                            sockfd, hostEID, &dbusImplReq));
     auto fruHandler = std::make_unique<fru::Handler>(
-        FRU_JSONS_DIR, pdrRepo.get(), entityTree.get());
+        FRU_JSONS_DIR, pdrRepo.get(), entityTree.get(), bmcEntityTree.get());
     // FRU table is built lazily when a FRU command or Get PDR command is
     // handled. To enable building FRU table, the FRU handler is passed to the
     // Platform handler.
