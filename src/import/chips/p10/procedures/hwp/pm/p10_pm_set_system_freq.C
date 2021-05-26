@@ -208,14 +208,16 @@ fapi2::ReturnCode pm_set_frequency(
             fapi2::voltageBucketData_t* p_poundV_data = &l_poundV_data;
             FAPI_TRY(wof_apply_overrides(l_proc_target, p_poundV_data));
 #endif
-
-            l_pstate0_freq = htobe16(l_poundV_data.operating_pts[CF7].core_frequency);
-            l_vpd_ut_freq  = htobe16(l_poundV_data.other_info.VddUTCoreFreq);
-
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_BIAS,
                         i_sys_target,
                         attr_freq_bias_0p5pct),
                     "Error from FAPI_ATTR_GET for attribute ATTR_FREQ_BIAS");
+
+            l_pstate0_freq = bias_adjust_mhz(htobe16(l_poundV_data.operating_pts[CF7].core_frequency),
+                                               attr_freq_bias_0p5pct);
+            l_vpd_ut_freq  = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddUTCoreFreq),
+                                               attr_freq_bias_0p5pct);
+
 
             l_fmax_freq     = bias_adjust_mhz(htobe16(l_poundV_data.other_info.VddFmxCoreFreq),
                                               attr_freq_bias_0p5pct);
@@ -237,7 +239,7 @@ fapi2::ReturnCode pm_set_frequency(
 
             if (l_vpd_ut_freq > l_sys_compat_freq_mhz)
             {
-                if (l_sys_compat_freq_mhz == 0)
+                if (l_sys_compat_freq_mhz == 0 || attr_freq_bias_0p5pct)
                 {
                     l_sys_compat_freq_mhz = l_vpd_ut_freq;
                     FAPI_INF("Setting Compatibilty frequency to UT of %04d (0x%04X)",
