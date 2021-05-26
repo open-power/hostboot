@@ -248,9 +248,7 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 
             l_reconfigLoop = true;
             l_reconfigReg |= SCRATCH1_MASK | SCRATCH2_MASK;
-        }
-        else
-        {
+
             // Update the SBE and reconfig
             ATTR_FORCE_SBE_UPDATE_type l_sbe_update = l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>();
             updateProcessorSbeSeeproms(l_sys, l_sbe_update, io_StepError, HWPF_COMP_ID );
