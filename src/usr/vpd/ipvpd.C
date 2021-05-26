@@ -4346,6 +4346,10 @@ IpVpdFacade::checkEccDataValidationReturnCode(
     // Get a copy of the target huid, once, for tracing/logging purposes
     auto l_targetHuid = TARGETING::get_huid(i_target);
 
+    // Make a 4-byte hex version of the ASCII record name for logging
+    uint32_t l_recordNameHex = 0;
+    memcpy( &l_recordNameHex, i_recordName, 4 );
+
     if ( VPD_ECC_WRONG_ECC_SIZE    == i_eccDataValidationReturnCode  ||
          VPD_ECC_WRONG_BUFFER_SIZE == i_eccDataValidationReturnCode     )
     {
@@ -4363,8 +4367,7 @@ IpVpdFacade::checkEccDataValidationReturnCode(
          * @moduleid         VPD::VPD_IPVPD_ECC_DATA_CHECK
          * @reasoncode       VPD::VPD_ECC_DATA_ECC_SIZE_ISSUE
          * @userdata1[00:31] HUID of target
-         * @userdata1[32:47] Record to validate ECC data for
-         * @userdata1[48:63] Error code returned from call to vpdecc_check_data
+         * @userdata1[32:63] Record to validate ECC data for (ASCII)
          * @userdata2[00:15] Record data offset
          * @userdata2[16:31] Record data length
          * @userdata2[32:47] ECC data offset
@@ -4378,9 +4381,7 @@ IpVpdFacade::checkEccDataValidationReturnCode(
                             VPD::VPD_ECC_DATA_ECC_SIZE_ISSUE,
                             TWO_UINT32_TO_UINT64(
                                 l_targetHuid,
-                                TWO_UINT16_TO_UINT32(
-                                    i_args.record,
-                                    i_eccDataValidationReturnCode ) ),
+                                l_recordNameHex ),
                             FOUR_UINT16_TO_UINT64(
                                 i_recordOffset,
                                 i_recordLength,
@@ -4403,8 +4404,7 @@ IpVpdFacade::checkEccDataValidationReturnCode(
          * @moduleid         VPD::VPD_IPVPD_ECC_DATA_CHECK
          * @reasoncode       VPD::VPD_ECC_DATA_UNCORRECTABLE_DATA
          * @userdata1[00:31] HUID of target
-         * @userdata1[32:47] Record to validate ECC data for
-         * @userdata1[48:63] Error code returned from call to vpdecc_check_data
+         * @userdata1[32:63] Record to validate ECC data for (ASCII)
          * @userdata2[00:15] Record data offset
          * @userdata2[16:31] Record data length
          * @userdata2[32:47] ECC data offset
@@ -4418,9 +4418,7 @@ IpVpdFacade::checkEccDataValidationReturnCode(
                             VPD::VPD_ECC_DATA_UNCORRECTABLE_DATA,
                             TWO_UINT32_TO_UINT64(
                                 l_targetHuid,
-                                TWO_UINT16_TO_UINT32(
-                                    i_args.record,
-                                    i_eccDataValidationReturnCode ) ),
+                                l_recordNameHex ),
                             FOUR_UINT16_TO_UINT64(
                                 i_recordOffset,
                                 i_recordLength,
@@ -4442,8 +4440,7 @@ IpVpdFacade::checkEccDataValidationReturnCode(
          * @moduleid         VPD::VPD_IPVPD_ECC_DATA_CHECK
          * @reasoncode       VPD::VPD_ECC_DATA_CORRECTABLE_DATA
          * @userdata1[00:31] HUID of target
-         * @userdata1[32:47] Record to validate ECC data for
-         * @userdata1[48:63] Error code returned from call to vpdecc_check_data
+         * @userdata1[32:63] Record to validate ECC data for (ASCII)
          * @userdata2[00:15] Record data offset
          * @userdata2[16:31] Record data length
          * @userdata2[32:47] ECC data offset
@@ -4457,9 +4454,7 @@ IpVpdFacade::checkEccDataValidationReturnCode(
                             VPD::VPD_ECC_DATA_CORRECTABLE_DATA,
                             TWO_UINT32_TO_UINT64(
                                 l_targetHuid,
-                                TWO_UINT16_TO_UINT32(
-                                    i_args.record,
-                                    i_eccDataValidationReturnCode ) ),
+                                l_recordNameHex ),
                             FOUR_UINT16_TO_UINT64(
                                 i_recordOffset,
                                 i_recordLength,
@@ -4482,8 +4477,7 @@ IpVpdFacade::checkEccDataValidationReturnCode(
          * @moduleid         VPD::VPD_IPVPD_ECC_DATA_CHECK
          * @reasoncode       VPD::VPD_ECC_DATA_UNKNOWN_FAILURE
          * @userdata1[00:31] HUID of target
-         * @userdata1[32:47] Record to validate ECC data for
-         * @userdata1[48:63] Error code returned from call to vpdecc_check_data
+         * @userdata1[32:63] Record to validate ECC data for (ASCII)
          * @userdata2[00:15] Record data offset
          * @userdata2[16:31] Record data length
          * @userdata2[32:47] ECC data offset
@@ -4497,9 +4491,7 @@ IpVpdFacade::checkEccDataValidationReturnCode(
                             VPD::VPD_ECC_DATA_UNKNOWN_FAILURE,
                             TWO_UINT32_TO_UINT64(
                                 l_targetHuid,
-                                TWO_UINT16_TO_UINT32(
-                                    i_args.record,
-                                    i_eccDataValidationReturnCode ) ),
+                                l_recordNameHex ),
                             FOUR_UINT16_TO_UINT64(
                                 i_recordOffset,
                                 i_recordLength,
@@ -4516,6 +4508,17 @@ IpVpdFacade::checkEccDataValidationReturnCode(
                     i_recordName, l_targetHuid, i_recordOffset, i_recordLength,
                     i_eccOffset, i_eccLength );
     }
+
+    // Add a HW callout here so we get it even if we commit as RECOVERED later
+    if( l_err )
+    {
+        l_err->addHwCallout( i_target,
+                             HWAS::SRCI_PRIORITY_MED,
+                             HWAS::NO_DECONFIG,
+                             HWAS::GARD_NULL );
+        l_err->collectTrace( VPD_COMP_NAME, 256 );
+    }
+
 
     return l_err;
 } // checkEccDataValidationReturnCode
