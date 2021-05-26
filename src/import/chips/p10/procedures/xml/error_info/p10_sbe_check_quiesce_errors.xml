@@ -41,6 +41,7 @@
     <ffdc>PAU_TARGET</ffdc>
     <ffdc>STATUS_ADDR</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <ffdc>MISC_CONFIG2_DATA</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
