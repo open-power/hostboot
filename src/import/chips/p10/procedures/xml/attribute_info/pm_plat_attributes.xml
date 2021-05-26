@@ -2791,7 +2791,7 @@
         OFF=0,
         ON=1
     </enum>
-    <initToOne/>
+    <default>ON</default>
     <overrideOnly/>
     <group>mma</group>
   </attribute>
