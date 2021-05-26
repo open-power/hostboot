@@ -924,9 +924,6 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         PRDF_ERR( PRDF_FUNC "dqBitmap.setSymbol failed." );
                         break;
                     }
-
-                    // Make the error log predictive.
-                    io_sc.service_data->setServiceCall();
                 }
                 else
                 {
