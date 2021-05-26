@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,88 @@ static const uint32_t MISC_FENCE_STATE_2 = 2;
 static const uint32_t MISC_FENCE_STATE_3 = 3;
 static const uint32_t MISC_FENCE_STATE_4 = 4;
 //<< [MISC_FENCE_STATE]
+// pau/reg00009.H
+
+//>> [CS_CTL_MISC_CONFIG2]
+static const uint64_t CS_CTL_MISC_CONFIG2 = 0x10010982ull;
+
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK0_OCAPI_MODE = 0;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK1_OCAPI_MODE = 1;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK2_OCAPI_MODE = 2;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK3_OCAPI_MODE = 3;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK4_OCAPI_MODE = 4;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK0_NVLINK_MODE = 5;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK1_NVLINK_MODE = 6;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK2_NVLINK_MODE = 7;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK3_NVLINK_MODE = 8;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK4_NVLINK_MODE = 9;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK0_OCAPI_4 = 10;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK0_OCAPI_4 = 10;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK1_OCAPI_4 = 11;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK1_OCAPI_4 = 11;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK2_OCAPI_4 = 12;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK2_OCAPI_4 = 12;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK3_OCAPI_4 = 13;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK3_OCAPI_4 = 13;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK4_OCAPI_4 = 14;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK4_OCAPI_4 = 14;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK0_OCAPI_C2 = 15;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK1_OCAPI_C2 = 16;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK2_OCAPI_C2 = 17;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK3_OCAPI_C2 = 18;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK4_OCAPI_C2 = 19;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK0_OCAPI_AMO = 20;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK0_OCAPI_AMO = 20;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK1_OCAPI_AMO = 21;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK1_OCAPI_AMO = 21;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK2_OCAPI_AMO = 22;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK2_OCAPI_AMO = 22;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK3_OCAPI_AMO = 23;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK3_OCAPI_AMO = 23;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK4_OCAPI_AMO = 24;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_BRK4_OCAPI_AMO = 24;
+static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK0 = 25;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK0 = 25;
+static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK1 = 26;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK1 = 26;
+static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK2 = 27;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK2 = 27;
+static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK3 = 28;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK3 = 28;
+static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK4 = 29;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_WRITE_MEM_OS_BIT_BRK4 = 29;
+static const uint32_t CS_CTL_MISC_CONFIG2_GENID_SYNC_SCOPE = 30;
+static const uint32_t CS_CTL_MISC_CONFIG2_GENID_SYNC_SCOPE_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_GENID_SYNC_SCOPE = 30;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_GENID_SYNC_SCOPE_LEN = 2;
+static const uint32_t CS_CTL_MISC_CONFIG2_GENID_SYNC_FORCE_RCMD0 = 32;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_GENID_SYNC_FORCE_RCMD0 = 32;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK0_IMP_TAGS_MODE_ENABLE = 33;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK1_IMP_TAGS_MODE_ENABLE = 34;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK2_IMP_TAGS_MODE_ENABLE = 35;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK3_IMP_TAGS_MODE_ENABLE = 36;
+static const uint32_t CS_CTL_MISC_CONFIG2_BRK4_IMP_TAGS_MODE_ENABLE = 37;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED = 38;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_CP_2CRED = 38;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED = 39;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_GP_2CRED = 39;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED = 40;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_SP_2CRED = 40;
+static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK = 41;
+// ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG2_ENABLE_PB_BACK2BACK = 41;
+static const uint32_t CS_CTL_MISC_CONFIG2_2_RESERVED1 = 42;
+static const uint32_t CS_CTL_MISC_CONFIG2_2_RESERVED1_LEN = 6;
+static const uint32_t P10_20_CS_CTL_MISC_CONFIG2_DISABLE_HW531747_CAS_T_IMP_TAGS = 42; // p10:20,
+static const uint32_t P10_20_CS_CTL_MISC_CONFIG2_DISABLE_HW539321_SM_REQIN_CREDIT_DROP = 43; // p10:20,
+static const uint32_t P10_20_CS_CTL_MISC_CONFIG2_DISABLE_HW539464_BACK_TO_SYNC_DONE = 44; // p10:20,
+static const uint32_t P10_20_CS_CTL_MISC_CONFIG2_ENABLE_HW549830_MI_RETRY_NON_CP = 45; // p10:20,
+static const uint32_t P10_20_CS_CTL_MISC_CONFIG2_DISABLE_HW551717_ZERO_CO_FIELD = 46; // p10:20,
+static const uint32_t P10_20_CS_CTL_MISC_CONFIG2_2_RESERVED1 = 47; // p10:20,
+static const uint32_t CS_CTL_MISC_CONFIG2_GENID_RATE_INC = 48;
+static const uint32_t CS_CTL_MISC_CONFIG2_GENID_RATE_INC_LEN = 8;
+static const uint32_t CS_CTL_MISC_CONFIG2_GENID_RATE_DEC = 56;
+static const uint32_t CS_CTL_MISC_CONFIG2_GENID_RATE_DEC_LEN = 8;
+//<< [CS_CTL_MISC_CONFIG2]
 // pau/reg00009.H
 
 //>>THE END<<
