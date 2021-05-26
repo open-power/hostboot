@@ -437,26 +437,38 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
         if ( ( (K_PARENT == fapi2::TARGET_TYPE_EQ)  ||
                (K_PARENT == (fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST)) ) &&
              (T_SELF == (fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST)) )
-            {
+        {
                 TARGETING::getParentAffinityTargetsByState(
-                l_parentList,
-                FAPI_TO_HBTARG(this),
-                TARGETING::CLASS_NA,
-                requiredPType,
-                TARGETING::UTIL_FILTER_ALL);
-            }
-        // When performing multicast getParent on target proc looking
-        // for parent proc.
+                    l_parentList,
+                    FAPI_TO_HBTARG(this),
+                    TARGETING::CLASS_NA,
+                    requiredPType,
+                    TARGETING::UTIL_FILTER_ALL);
+        }
         else
         {
             TARGETING::Target* l_target = FAPI_TO_HBTARG(this);
             assert(l_target != nullptr, "platform target handle is nullptr");
             TARGETING::TYPE requiredCType =
                 l_target->getAttr<TARGETING::ATTR_TYPE>();
-            if (requiredCType == TARGETING::TYPE_PROC &&
-                requiredPType == TARGETING::TYPE_PROC)
+            if (requiredPType == TARGETING::TYPE_PROC)
             {
-                l_parentList.push_back(this->get());
+                // When performing multicast getParent on target proc looking
+                // for parent proc.
+                if (requiredCType == TARGETING::TYPE_PROC)
+                {
+                    l_parentList.push_back(this->get());
+                }
+                else
+                {
+                    // cover any multicast child (ie TYPE_CORE) to parent proc
+                    TARGETING::getParentAffinityTargetsByState(
+                        l_parentList,
+                        l_target,
+                        TARGETING::CLASS_NA,
+                        requiredPType,
+                        TARGETING::UTIL_FILTER_ALL);
+                }
             }
         } // if ( ( (K_PARENT == fapi2::TARGET_TYPE_EQ) ... else ...
     }
@@ -500,8 +512,9 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
                 TARGETING::UTIL_FILTER_ALL);
         }
     } // if ((T_SELF & TARGET_TYPE_MULTICAST) != 0) ... else ...
-    assert(l_parentList.size() == 1, "Found %d parents of the same type. Target HUID %x ,\
-        looking for parents of type %x", l_parentList.size(), TARGETING::get_huid(this->get()) , requiredPType);
+    assert(l_parentList.size() == 1, "Found %d parents of the same type. Target HUID %x isMulticast %d,\
+        looking for parents of type %x", l_parentList.size(), TARGETING::get_huid(this->get()),
+        (((T_SELF & TARGET_TYPE_MULTICAST)==0)?0:1), requiredPType);
 
     TARGETING::Target * l_parentTarget = l_parentList[0];
 
