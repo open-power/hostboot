@@ -131,13 +131,6 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                                             "only an update to the runtime cache was requested");
             break;
         }
-        else
-        {
-            // In general, all writes to EEPROM during HBRT are not allowed
-            break;
-
-        }
-
 #endif
 
         if ((nullptr == g_hostInterfaces) ||

@@ -468,12 +468,6 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
                                                "cache was requested");
             break;
         }
-        else
-        {
-            // In general, all writes to EEPROM during HBRT are not allowed
-            break;
-
-        }
 #endif
 
         // Read Attributes needed to complete the operation
