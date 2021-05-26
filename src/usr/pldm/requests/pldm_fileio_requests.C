@@ -229,7 +229,6 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
 
     struct pldm_read_write_file_by_type_req l_req
     {
-        // Currently BMC is hardcoded to use the TEMP side
         .file_type = bootside,
         .file_handle = i_fileHandle,
         .offset = i_offset,

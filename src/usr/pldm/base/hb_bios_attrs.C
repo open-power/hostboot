@@ -49,6 +49,8 @@
 // sys target
 #include <targeting/common/targetservice.H>
 
+// BMC Console tracing
+#include <console/consoleif.H>
 
 namespace PLDM {
 
@@ -64,7 +66,7 @@ const char PLDM_BIOS_HB_USB_SECURITY_STRING[] = "hb_usb_security";
 const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[] = "hb_power_limit_enable";
 const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[] = "hb_power_limit_in_watts";
 
-const char PLDM_BIOS_PVM_FW_BOOT_SIDE[] = "pvm_fw_boot_side";
+const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[] = "pvm_fw_boot_side";
 
 // Possible Values
 constexpr char PLDM_BIOS_HB_OPAL_STRING[] = "OPAL";
@@ -1148,12 +1150,12 @@ errlHndl_t getBootside(std::vector<uint8_t>                     & io_string_tabl
 
     errl = systemEnumAttrLookup(io_string_table,
                                 io_attr_table,
-                                PLDM_BIOS_PVM_FW_BOOT_SIDE,
+                                PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING,
                                 cur_val_string_entry_ptr);
     if(errl)
     {
-      PLDM_ERR("Failed to lookup value for %s", PLDM_BIOS_PVM_FW_BOOT_SIDE);
-      break;
+        PLDM_ERR("Failed to lookup value for %s", PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING);
+        break;
     }
     // Find the longest string that we will accept as a
     // possible value for the a given PLDM BIOS attribute
@@ -1166,7 +1168,7 @@ errlHndl_t getBootside(std::vector<uint8_t>                     & io_string_tabl
                          find_maxstrlen) + 1;
 
     // Ensure max_possible_value_length is larger than the extra
-    // extra byte we added to account for the null terminator.
+    // byte we added to account for the null terminator.
     // This assert forces the constexpr to be evaluated at
     // compile-time
     static_assert(max_possible_value_length > 1);
@@ -1179,11 +1181,13 @@ errlHndl_t getBootside(std::vector<uint8_t>                     & io_string_tabl
     if(strncmp(translated_string, PLDM_BIOS_PERM_STRING, max_possible_value_length) == 0)
     {
         PLDM_INF("Booting from %s side!", PLDM_BIOS_PERM_STRING);
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Booting from %s side.", PLDM_BIOS_PERM_STRING);
         o_bootside = TARGETING::HYPERVISOR_IPL_SIDE_PERM;
     }
     else if(strncmp(translated_string, PLDM_BIOS_TEMP_STRING, max_possible_value_length) == 0)
     {
         PLDM_INF("Booting from %s side!", PLDM_BIOS_TEMP_STRING);
+        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Booting from %s side.", PLDM_BIOS_TEMP_STRING);
         o_bootside = TARGETING::HYPERVISOR_IPL_SIDE_TEMP;
     }
     else
