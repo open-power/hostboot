@@ -65,6 +65,11 @@ This register is **read-only**. To clear clock errors, PRD must toggle (set
 high, then set low) the corresponding bits in `ROOT_CTRL5[6:7]`. Note that this
 will clear the corresponding bits in `RCS_SENSE_1[0:3]` and `RCS_SENSE_1[16]`.
 
+### `ROOT_CTRL3` [00050013][]: Root Control 3 register
+
+When transient error recovery fails, PRD will use this register to enable the
+alternate ref clock mode. See details below.
+
 ### `ROOT_CTRL5` [00050015][]: Root Control 5 register
 
 As referenced above, this is used to clear errors in the `RCS_SENSE_1` register.
@@ -187,6 +192,14 @@ else
     }
 }
 ```
+
+## RCS Transient Error Recovery
+
+Some failover events could be caused by transient soft errors. When PRD detects
+an RCS OSC error, it will call the `p10_rcs_transient_check` HWP which will
+determine if the error was transient or a hard failure. On the event of a hard
+failure, PRD will enable the alternate ref clock mode by setting bit 3 (OSC 0)
+or bit 7 (OSC 0) in the `ROOT_CTRL3` register.
 
 ## Thresholding
 

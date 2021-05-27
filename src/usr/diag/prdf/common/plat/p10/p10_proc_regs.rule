@@ -562,6 +562,13 @@
         capture     group pll_ffdc;
     };
 
+    register ROOT_CTRL3
+    {
+        name        "TP Chiplet ROOT CONTROL 3 register";
+        scomaddr    0x00050013;
+        capture     group pll_ffdc;
+    };
+
     register ROOT_CTRL5
     {
         name        "TP Chiplet ROOT CONTROL 5 register";

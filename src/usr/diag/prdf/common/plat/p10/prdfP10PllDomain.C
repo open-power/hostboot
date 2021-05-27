@@ -287,6 +287,19 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
 
         #undef TMP_FUNC
 
+        #ifdef __HOSTBOOT_MODULE
+        // For RCS OSC errors, we must immediately handle transient clock error
+        // recovery.
+        if (errTypes.query(PllErrTypes::RCS_OSC_ERROR_0))
+        {
+            PlatServices::rcsTransientErrorRecovery(chip, 0);
+        }
+        if (errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
+        {
+            PlatServices::rcsTransientErrorRecovery(chip, 1);
+        }
+        #endif
+
         // Special cases for types that could have downstream effects.
         if (errTypes.query(PllErrTypes::PLL_UNLOCK_0   ) ||
             errTypes.query(PllErrTypes::PLL_UNLOCK_1   ) ||

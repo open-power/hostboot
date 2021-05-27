@@ -68,6 +68,8 @@
 #include <exp_deploy_row_repairs.H>
 #include <plat_hwp_invoker.H>
 
+#include <p10_rcs_transient_check.H>
+
 #ifdef CONFIG_NVDIMM
 #include <nvdimm.H>
 #endif
@@ -1002,6 +1004,41 @@ void deadmanTimerFFDC( TargetHandle_t  i_target, STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->SetCallout( i_target, MRU_MED );
     io_sc.service_data->SetThresholdMaskId(0);
 } // end deadmanTimerFFDC
+
+//##############################################################################
+//##                       RCS/PLL/Clock functions
+//##############################################################################
+
+void rcsTransientErrorRecovery(ExtensibleChip* i_chip, uint32_t i_clkPos)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapiTrgt{i_chip->getTrgt()};
+
+    // Check for RCS transient errors.
+    errlHndl_t errl = nullptr;
+    bool transientError = false;
+    FAPI_INVOKE_HWP(errl, p10_rcs_transient_check, fapiTrgt, i_clkPos,
+                    transientError);
+    if (nullptr != errl)
+    {
+        PRDF_ERR("p10_rcs_transient_check(0x%08x, %d) failed",
+                 i_chip->getHuid(), i_clkPos);
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+    }
+    else
+    {
+        // Check for hard errors. If so, set the alternate ref clock signal.
+        if (!transientError)
+        {
+            // Set ROOT_CTRL3 bit 3 (OCS0) or bit 7 (OSC1)
+            SCAN_COMM_REGISTER_CLASS* reg = i_chip->getRegister("ROOT_CTRL3");
+            if (SUCCESS == reg->Read())
+            {
+                reg->SetBit((0 == i_clkPos) ? 3 : 7);
+                reg->Write();
+            }
+        }
+    }
+}
 
 //------------------------------------------------------------------------------
 

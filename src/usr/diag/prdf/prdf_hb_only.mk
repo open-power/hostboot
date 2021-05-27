@@ -212,6 +212,8 @@ prd_obj_no_sim += exp_mrs04.o
 prd_obj_no_sim += exp_bad_dq_bitmap_funcs.o
 prd_obj_no_sim += exp_fir.o
 prd_obj_no_sim += mrs_load_ddr4_explorer.o
+prd_obj_no_sim += p10_rcs_transient_check.o
+prd_obj_no_sim += p10_perv_sbe_cmn.o # required by p10_rcs_transient_check
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the
