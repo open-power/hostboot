@@ -135,14 +135,6 @@ errlHndl_t psuSendSbeMemConfig(const TargetHandle_t i_pProc)
             break;
         }
 
-        // POPULATED DUMP of indirect BUFFER
-        SBE_TRACFBIN("POPULATED l_sbeMemAlloc:",
-                     l_sbeMemAlloc, sizeof(SbePsu::MemConfigData_t));
-
-        // DUMP out PSU COMMAND BUFFER
-        SBE_TRACFBIN("Send Memory Config full command:",
-                     &l_psuCommand, sizeof(l_psuCommand));
-
         // Create a PSU response message
         SbePsu::psuResponse l_psuResponse;
 
@@ -156,20 +148,21 @@ errlHndl_t psuSendSbeMemConfig(const TargetHandle_t i_pProc)
                         SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                         SbePsu::SBE_MEM_CONFIG_REQ_USED_REGS,
                         SbePsu::SBE_MEM_CONFIG_RSP_USED_REGS,
-                        SbePsu::COMMAND_SUPPORT_OPTIONAL, // No error when operation is unsupported
+                        SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_INFORMATIONAL },
                         &command_unsupported);
+        if ( command_unsupported )
+        {
+            // Traces have already been logged
+            TRACFCOMP( g_trac_sbeio, ERR_MRK"psuSendSbeMemConfig: ERROR: SBE firmware "
+                       "does not support PSU sending Memory configuration information" );
+            errlCommit(l_err, SBEIO_COMP_ID);
+            break;
+        }
 
         if (l_err)
         {
             TRACFCOMP( g_trac_sbeio, ERR_MRK"psuSendSbeMemConfig: ERROR: "
                        "Call to performPsuChipOp failed, error returned" );
-
-            break;
-        }
-        else if ( command_unsupported )
-        {
-            TRACFCOMP( g_trac_sbeio, ERR_MRK"psuSendSbeMemConfig: ERROR: SBE firmware "
-                       "does not support PSU sending Memory configuration information" );
 
             break;
         }
@@ -349,7 +342,8 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
              * @errortype        ERRL_SEV_INFORMATIONAL
              * @moduleid         SBEIO_PSU
              * @reasoncode       SBEIO_PSU_COUNT_UNEXPECTED
-             * @userdata1        The PROC Target HUID
+             * @userdata1[00:31] The PROC Target HUID
+             * @userdata1[32:63] l_TargetList.size MAX
              * @userdata2[00:31] i_type TYPE_PMIC TYPE_GENERIC_I2C_DEVICE TYPE_OCMB_CHIP
              * @userdata2[32:63] l_max  How many of the TYPE we expected as MAX
              * @devdesc          Unexpected counts during getMemConfigInfo
@@ -358,7 +352,9 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
             errlHndl_t l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                              SBEIO_PSU,
                                              SBEIO_PSU_COUNT_UNEXPECTED,
-                                             get_huid(i_pProc),
+                                             TWO_UINT32_TO_UINT64(
+                                                         get_huid(i_pProc),
+                                                         l_TargetList.size() ),
                                              TWO_UINT32_TO_UINT64(
                                                          i_type,
                                                          l_max ),

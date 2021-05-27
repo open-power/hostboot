@@ -560,14 +560,6 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
                 }
             } // for ( const auto l_ocmbTarget: l_ocmbTargetList )
 
-        // POPULATED DUMP of indirect BUFFER
-        SBE_TRACFBIN("POPULATED l_sbeMemAlloc MATCH ME to POPULATED l_i2c_telemetry_data:",
-                     l_sbeMemAlloc, sizeof(SbePsu::MemConfigData_t));
-
-        // DUMP out PSU COMMAND BUFFER
-        SBE_TRACFBIN("Send Memory Config full command:",
-                     &l_psuCommand, sizeof(l_psuCommand));
-
         // Create a PSU response message
         SbePsu::psuResponse l_psuResponse;
         bool command_unsupported =false;

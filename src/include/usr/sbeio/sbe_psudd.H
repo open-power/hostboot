@@ -331,8 +331,6 @@ class SbePsu
             // after sending the OCMB updates
             SBE_RSP_SEND_OCMB_CONFIG_REGS  = 0x01,
             // The maximum number of OCMB config info the PSU command can handle
-            SBE_OCMB_CONFIG_MAX_NUMBER_OF_PORTS = 16, // @TODO RTC:261634 will remove this one
-            // The maximum number of OCMB config info the PSU command can handle
             SBE_OCMB_CONFIG_MAX_NUMBER = 16,
             // The maximum number of PMIC config info the PSU command can handle
             SBE_PMIC_CONFIG_MAX_NUMBER = 64,

@@ -224,29 +224,6 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
     // Loop thru the list of processors and send Memory config info to SBE
     for (auto &l_procTarget: functionalProcChipList)
     {
-        // @TODO RTC:261634 Remove this, only use new psuSendSbeMemConfig below
-        l_errl = SBEIO::psuSendSbeOcmbConfig(l_procTarget);
-
-        if (l_errl)
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      ERR_MRK"ERROR : call_ocmb_check_for_ready HWP(): "
-                      "psuSendSbeOcmbConfig failed for target 0x%.08X."
-                      TRACE_ERR_FMT,
-                      get_huid(l_procTarget),
-                      TRACE_ERR_ARGS(l_errl));
-
-            // Commit the error and not fail this istep due to this failure
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
-        else
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      INFO_MRK"SUCCESS : call_ocmb_check_for_ready HWP(): "
-                      "psuSendSbeOcmbConfig completed ok for target 0x%.08X.",
-                      get_huid(l_procTarget));
-        }
-
         l_errl = SBEIO::psuSendSbeMemConfig(l_procTarget);
 
         if (l_errl)

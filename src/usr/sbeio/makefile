@@ -55,8 +55,6 @@ OBJS += sbe_exitCacheContained.o
 OBJS += p10_extract_sbe_rc.o
 OBJS += p10_ppe_utils.o
 OBJS += p10_ppe_common.o
-// @TODO RTC:261634 Remove sbe_psuSendOcmbConfig.o
-OBJS += sbe_psuSendOcmbConfig.o
 OBJS += sbe_psuSyncFabTopoIdTable.o
 OBJS += sbe_halt.o
 OBJS += sbe_psuSendMemConfig.o
