@@ -39,7 +39,6 @@
 #include <targeting/common/targetservice.H>
 #include <isteps/pm/scopedHomerMapper.H>
 
-#include <ipmi/ipmisensor.H>
 #include <sys/time.h>
 #include <console/consoleif.H>
 
@@ -213,45 +212,6 @@ namespace HTMGT
             {
                 TMGT_INF("getPowerLimit: active %d limit 0x%X", active, limit);
             }
-#endif
-
-#if 0
-#ifdef CONFIG_BMC_IPMI
-            err = SENSOR::getUserPowerLimit(limit, active);
-            if (err)
-            {
-                const uint32_t saved_power_limit =
-                    sys->getAttr<ATTR_HTMGT_SAVED_POWER_LIMIT>();
-                if (saved_power_limit & BMC_LIMIT_WAS_READ)
-                {
-                    // Attribute has been written since the power on,
-                    //     use the saved limit/active.
-                    limit = saved_power_limit & 0x0000FFFF;
-                    active = (saved_power_limit >> 16) & 0x00FF;
-                    TMGT_INF("SENSOR::getUserPowerLimit failed with rc=0x%04X. "
-                             "Using prior values: limit %dW, active: %c",
-                             err->reasonCode(), limit, active?'Y':'N');
-                }
-                else
-                {
-                    TMGT_ERR("sendOccUserPowerCap: Error getting user "
-                             "power limit from BMC, rc=0x%04X",
-                             err->reasonCode());
-                    break;
-                }
-
-            }
-            else
-            {
-                // Write attribute with power limit and state
-                TMGT_INF("SENSOR::getUserPowerLimit returned %dW, active: %c",
-                         limit, active?'Y':'N');
-                const uint32_t saved_limit = BMC_LIMIT_WAS_READ |
-                    ((active?0x01:0x00) << 16) | limit;
-                sys->setAttr<TARGETING::ATTR_HTMGT_SAVED_POWER_LIMIT>
-                    (saved_limit);
-            }
-#endif
 #endif
 
             if (active)
