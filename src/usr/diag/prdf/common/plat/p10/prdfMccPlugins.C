@@ -99,6 +99,10 @@ int32_t analyzeConnectedOcmb( ExtensibleChip * i_chip,
 {
     int32_t o_rc = SUCCESS;
     ExtensibleChip * ocmb = getConnectedChild( i_chip, TYPE_OCMB_CHIP, i_pos );
+    if (nullptr == ocmb)
+    {
+        return PRD_UNRESOLVED_CHIP_CONNECTION;
+    }
 
     o_rc = ocmb->Analyze( io_sc,
                           io_sc.service_data->getSecondaryAttnType() );
