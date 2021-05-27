@@ -106,10 +106,19 @@ p10_hcd_core_stopgrid(
     // this hwp is shared stop2,3,11 path
     FAPI_TRY( p10_hcd_mma_stopclocks( i_target ) );
 
+    // PowerON_Dis = 0 and PowerOFF_Dis = 0 do poweroff mma     as in dynamic
+    // PowerON_Dis = 0 and PowerOFF_Dis = 1 do not poweroff mma as not in dynamic
+    // PowerON_Dis = 1 and PowerOFF_Dis = 0 do poweroff mma     as in dynamic
+    // PowerON_Dis = 1 and PowerOFF_Dis = 1 do not poweroff mma as not in dynamic
     if( !l_attr_mma_poweroff_disable )
     {
         //also shutdown mma power here as for WOF benefit
         //only do so when dynamic mode is enabled
+        //
+        //yes dynamic mode turn off mma power in stop2
+        //no need to power off mma in either mma off mode(already off)
+        //or static mma mode, as mma needs to remain alive
+        //or in sync with stop in such case stop2 only stopclock mma above
         FAPI_TRY( p10_hcd_mma_poweroff( i_target ) );
     }
 
