@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -44,6 +44,20 @@
   </description>
   <valueType>uint32</valueType>
   <default>0xFFFFFFFF</default>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ECO_MODE</id>
+  <targetType>TARGET_TYPE_CORE</targetType>
+  <description>
+    Dictates whether core target should be configured as an extended cache only
+      DISABLED - core + MMA/L2/L3 enabled, target supports instruction execution
+      ENABLED - only L3 enabled, target supports extended cache operation only
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLED = 0x0, ENABLED = 0x1</enum>
+  <default>DISABLED</default>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
