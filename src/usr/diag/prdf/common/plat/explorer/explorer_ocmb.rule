@@ -1019,7 +1019,7 @@ rule rRDFFIR
 
 group gRDFFIR
     filter singlebit,
-           cs_root_cause(13,14,15,16,17,33,35,36,37,43,44,47,48)
+           cs_root_cause(13,14,15,16,17,33,36,37,43,44,47,48)
 {
     /** RDFFIR[0]
      *  Mainline read MPE on rank 0
@@ -1099,7 +1099,7 @@ group gRDFFIR
     /** RDFFIR[15]
      *  Mainline read RCD
      */
-    (rRDFFIR, bit(15)) ? rdf_rcd_parity_error_UERE;
+    (rRDFFIR, bit(15)) ? mem_port_th_1_UERE;
 
     /** RDFFIR[16]
      *  Mainline read IAUE
@@ -1114,7 +1114,7 @@ group gRDFFIR
     /** RDFFIR[18]
      *  Mainline read IRCD
      */
-    (rRDFFIR, bit(18)) ? defaultMaskedError;
+    (rRDFFIR, bit(18)) ? mem_port_th_32perDay;
 
     /** RDFFIR[19]
      *  Mainline read IMPE
@@ -1164,7 +1164,7 @@ group gRDFFIR
     /** RDFFIR[35]
      *  Maintenance RCD
      */
-    (rRDFFIR, bit(35)) ? rdf_rcd_parity_error_UERE;
+    (rRDFFIR, bit(35)) ? mem_port_th_1;
 
     /** RDFFIR[36]
      *  Maintenance IAUE
@@ -1179,7 +1179,7 @@ group gRDFFIR
     /** RDFFIR[38]
      *  Maintenance  IRCD
      */
-    (rRDFFIR, bit(38)) ? defaultMaskedError;
+    (rRDFFIR, bit(38)) ? mem_port_th_32perDay;
 
     /** RDFFIR[39]
      *  Maintenance IMPE
