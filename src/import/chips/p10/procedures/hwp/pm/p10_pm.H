@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@ extern const char* PM_FLOW_MODE_NAME[];
         "PM_SETUP_ALL",         \
         "PM_RESET_SOFT",        \
         "PM_INIT_SOFT",         \
-        "PM_INIT_SPECIAL"       \
+        "PM_INIT_SPECIAL",      \
         "PM_START_RUNTIME"      \
     }
 
