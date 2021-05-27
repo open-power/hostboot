@@ -156,17 +156,6 @@
           <persistency>volatile</persistency>
     </attribute>
 
-    <!-- The global tag is required to make ServerWiz2 work -->
-    <attribute>
-        <id>ATTR_PBAX_GROUPID</id>
-        <global/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_PBAX_CHIPID</id>
-        <global/>
-    </attribute>
-
     <attribute>
           <id>ATTR_IOHS_CONFIG_MODE</id>
           <global/>
@@ -193,37 +182,281 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_MRW_OCMB_RESET_GROUP</id>
-        <global/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_PROC_FABRIC_TOPOLOGY_ID</id>
-        <global/>
-    </attribute>
-
-    <!-- End SW2 globals -->
-
-    <attribute>
           <id>ATTR_MNFG_FLAGS</id>
           <default>0x0000000000000000</default>
           <writeable/>
      </attribute>
 
-    <!-- We always use the non-flipped mirroring policy -->
     <attribute>
-          <id>ATTR_MEM_MIRROR_PLACEMENT_POLICY</id>
-          <default>NORMAL</default>
+          <id>ATTR_BOOT_FREQ_MHZ</id>
+          <default>2400</default>
      </attribute>
 
-    <!-- We are Hostboot so we are always in HB_IPL phase -->
+    <attribute>
+          <id>ATTR_MSS_INTERLEAVE_ENABLE</id>
+          <default>0xAF</default>
+          <writeable/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_SUPPORTED_FREQ</id>
+          <default>1866,2133,2400,2667</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MEMVPD_POS</id>
+          <default>0xFF</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+          <default>0xffffe000000006a4,0,0,0,0,0,0,0,0,0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MEM_MIRROR_PLACEMENT_POLICY</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL</id>
+          <default>0x00002328</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_VDDR_OVERIDE_SPD</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_POWER_CONTROL_REQUESTED</id>
+          <default>OFF</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED</id>
+          <default>OFF</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_1x</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_2x</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_3x</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_4x</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_5x</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_6x</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_7x</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_8x</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_9x</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_Ax</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_EFF_DIMM_DDR4_RC_Bx</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MAX_ALLOWED_DIMM_FREQ</id>
+          <default>2400,2400,2400,2400,2400</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_VCS_I2C_BUSNUM</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_STOP5_DISABLE</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_FAPI_POS</id>
+          <default>0xFFFFFFFF</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_I2C_BUS_DIV_REF</id>
+          <default>0x0003</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_NEST_PLL_BUCKET</id>
+          <default>0x05</default>
+          <writeable/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_BOOT_FREQ_MULT</id>
+          <default>150</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MB_BIT_RATE_DIVISOR_REFCLK</id>
+          <default>133</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_FABRIC_SYSTEM_ID</id>
+          <default>0</default>
+     </attribute>
+
     <attribute>
           <id>ATTR_SYSTEM_IPL_PHASE</id>
           <default>HB_IPL</default>
           <persistency>volatile</persistency>
      </attribute>
 
-    <!-- In FW boots we can use hardcoded BAR values -->
+    <!-- TODO RTC:244307 Revisit ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE
+         when #V data for MVPD available -->
+    <attribute>
+        <id>ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE</id>
+        <default>0</default>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_FABRIC_A_BUS_WIDTH</id>
+          <default>4_BYTE</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_FABRIC_X_BUS_WIDTH</id>
+          <default>4_BYTE</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_FABRIC_CCSM_MODE</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_OPTICS_CONFIG_MODE</id>
+          <default>NV</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_FABRIC_SMP_OPTICS_MODE</id>
+          <default>OPTICS_IS_X_BUS</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_FABRIC_CAPI_MODE</id>
+          <default>OFF</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_PCIE_PCS_RX_PK_INIT</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_PCIE_PCS_RX_INIT_GAIN</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_PCIE_PCS_RX_SIGDET_LVL</id>
+          <default>0x0B</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_PCIE_PCS_RX_ROT_RST_FW</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_IO_XBUS_TX_FFE_PRECURSOR</id>
+          <default>6</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_POUNDV_BUCKET_NUM_OVERRIDE</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_POUNDV_BUCKET_NUM</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
+          <default>0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
+          <default>1</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS</id>
+          <default>0x00000200</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_TEMP_REFRESH_RANGE</id>
+          <default>1</default>
+     </attribute>
+
     <attribute>
           <id>ATTR_PROC_FSP_BAR_ENABLE</id>
           <default>0</default>
@@ -255,6 +488,48 @@
      </attribute>
 
     <attribute>
+          <id>ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x0000030203000000</default>
+          <no_export/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU_PHY0_BAR_ENABLE</id>
+          <default>0</default>
+          <no_export/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU_PHY0_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x0000030201200000</default>
+          <no_export/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU_PHY1_BAR_ENABLE</id>
+          <default>0</default>
+          <no_export/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU_PHY1_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x0000030201400000</default>
+          <no_export/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU_MMIO_BAR_ENABLE</id>
+          <default>0</default>
+          <no_export/>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x0000030200000000</default>
+          <no_export/>
+     </attribute>
+
+    <attribute>
           <id>ATTR_PROC_NX_RNG_BAR_ENABLE</id>
           <default>1</default>
           <no_export/>
@@ -266,13 +541,20 @@
           <no_export/>
      </attribute>
 
-    <!-- End BAR setup -->
+    <attribute>
+          <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id>
+          <default>0x000006A4</default>
+     </attribute>
 
-    <!-- We require a minimum of 4 viable smallcores -->
     <attribute>
           <id>ATTR_SBE_IMAGE_MINIMUM_VALID_ECS</id>
-          <default>4</default>
+          <default>2</default>
      </attribute>
+
+    <attribute>
+          <id>ATTR_SBE_SYS_CONFIG</id>
+          <default>0x0</default>
+    </attribute>
 
     <attribute>
           <!-- Control this value completely inside of Hostboot
@@ -282,22 +564,111 @@
           <no_export/>
     </attribute>
 
-    <!-- P10 SBE SEEPROM space limited to 500KB -->
+    <attribute>
+          <id>ATTR_MSS_MRW_PWR_INTERCEPT</id>
+          <default>0xffffe00002CC03AE,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0</default>
+     </attribute>
+
+    <attribute>
+          <id>ATTR_MSS_MRW_PWR_SLOPE</id>
+          <default>0xffffe00003FD0546,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0</default>
+     </attribute>
+
     <attribute>
           <id>ATTR_MAX_SBE_SEEPROM_SIZE</id>
           <default>0x80000</default>
-          <no_export/>
      </attribute>
 
-    <!-- Written by HWSV -->
+    <attribute>
+          <id>ATTR_SYSTEM_RESCLK_DISABLE</id>
+          <default>0x00</default>
+          <writeable/>
+    </attribute>
+
     <attribute>
           <id>ATTR_BACKUP_SEEPROM_SELECT</id>
           <writeable/>
     </attribute>
 
     <attribute>
-          <id>ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT</id>
+          <id>I2C_BUS_DIV_REF</id>
+          <default>0x0003</default>
           <writeable/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_XSCOM_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x3FC00000000</default>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_ISDIMM_MBVPD_INDEX</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_EFF_FABRIC_GROUP_ID</id>
+          <writeable/>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_EFF_FABRIC_CHIP_ID</id>
+          <writeable/>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_MEMVPD_POS</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_EI_BUS_TX_LANE_INVERT</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_DEVICE_ID</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PROC_PCIE_IOP_SWAP</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_SBE_MEASUREMENT_SEEPROM_VERSION</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_SBE_MINIMUM_SECURE_VERSION</id>
+          <no_export/>
     </attribute>
 
     <attribute>
@@ -326,18 +697,93 @@
           <writeable/>
     </attribute>
 
-    <!-- We control this based on context -->
+    <attribute>
+          <id>ATTR_BOOT_FLAGS</id>
+          <writeable/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_EC_GARD</id>
+          <writeable/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_EQ_GARD</id>
+          <writeable/>
+    </attribute>
+
     <attribute>
           <id>ATTR_PM_MALF_ALERT_ENABLE</id>
           <writeable/>
           <no_export/>
     </attribute>
 
-    <!-- We control this based on context -->
     <attribute>
           <id>ATTR_PM_RESET_FFDC_ENABLE</id>
           <writeable/>
           <no_export/>
+    </attribute>
+
+    <attribute><id>ATTR_CEN_MSS_VREF_CAL_CNTL</id><no_export/></attribute>
+
+
+    <attribute><id>ATTR_CEN_MSS_ALLOW_SINGLE_PORT</id><default>FALSE</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING</id><default>0x01,0x00,0x01,0x00</default></attribute>
+
+    <attribute><id>ATTR_CEN_MRW_POWER_CONTROL_REQUESTED</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_MAX_DRAM_DATABUS_UTIL</id><default>0x000015f9</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR</id><default>0x00000200</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_WR_VREF_CHECK_VREF_STEP_SIZE</id><default>0x08</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_THERMAL_MEMORY_POWER_LIMIT</id><default>0x00000d2f</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id><default>0x00000f29</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id><default>0x00000d79</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id><default>0x04</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_STRICT_MBA_PLUG_RULE_CHECKING</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id><default>0x02</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id><default>0x01</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id><default>0x00000060</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id><default>0x00000020</default></attribute>
+
+    <attribute><id>ATTR_CEN_VPD_DRV_IMP_DQ_DQS</id><default>OHM34_FFE0,OHM34_FFE0</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_SLEW_RATE_DQ_DQS</id><default>0x03,0x03</default></attribute>
+    <attribute><id>ATTR_CEN_EFF_CEN_DRV_IMP_DQ_DQS</id><default>OHM34_FFE0,OHM34_FFE0</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_SLEW_RATE_CNTL</id><default>0x03,0x03</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_DRV_IMP_CNTL</id><default>0x28,0x28</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_SLEW_RATE_ADDR</id><default>0x03,0x03</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_DRV_IMP_ADDR</id><default>0x28,0x28</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_SLEW_RATE_CLK</id><default>0x03,0x03</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_DRV_IMP_CLK</id><default>0x28,0x28</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_SLEW_RATE_SPCKE</id><default>0x03,0x03</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_DRV_IMP_SPCKE</id><default>0x28,0x28</default></attribute>
+    <attribute>
+        <id>ATTR_CEN_MCBIST_USER_BANK</id>
+        <default>0x2</default>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_MRW_MEMDIAGS_BCMODE</id>
+        <no_export/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_DMI_INBAND_BAR_ENABLE</id>
+        <default>0x1</default>
+        <no_export/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <no_export/>
     </attribute>
 
     <!-- HWSV needs to write this based on system usage in some cases -->
@@ -346,7 +792,29 @@
         <writeable/>
     </attribute>
 
-    <!-- We control this based on context -->
+    <!-- Delete the redundant values from SW2 -->
+    <attribute><id>MBA_PORT</id><no_export/></attribute>
+    <attribute><id>MBA_DIMM</id><no_export/></attribute>
+
+    <attribute>
+        <id>ATTR_PBAX_GROUPID</id>
+        <global/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_PBAX_CHIPID</id>
+        <global/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_CEN_MSS_CACHE_ENABLE</id>
+        <no_export/>
+        <default>0x1</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_LINK_TRAIN</id>
+        <writeable/>
+    </attribute>
     <attribute>
         <id>ATTR_SKIP_WAKEUP</id>
         <persistency>volatile-zeroed</persistency>
@@ -372,6 +840,16 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
+        <persistency>non-volatile</persistency>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ</id>
+        <persistency>non-volatile</persistency>
+    </attribute>
+
+    <attribute>
         <id>ATTR_FREQ_CORE_CEILING_MHZ</id>
         <persistency>non-volatile</persistency>
     </attribute>
@@ -388,7 +866,6 @@
 
     <!-- End FSP nonvolatile overrides -->
 
-    <!-- Set based on current system configuration -->
     <attribute>
        <id>ATTR_LPC_CONSOLE_CNFG</id>
        <writeable/>
@@ -401,19 +878,23 @@
         <persistency>volatile-zeroed</persistency>
     </attribute>
 
-    <!-- Hostboot sets this to match system mirroring policy -->
+    <attribute>
+        <id>ATTR_EI_BUS_TX_MSBSWAP</id>
+        <global/>
+    </attribute>
     <attribute>
         <id>ATTR_MRW_HW_MIRRORING_ENABLE</id>
         <writeable/>
     </attribute>
-
-    <!-- Explicitly computed by MRW parsing scripts -->
     <attribute>
         <id>ATTR_REL_POS</id>
         <no_export/>
     </attribute>
+    <attribute>
+        <id>ATTR_PROC_PCIE_IOP_SWAP</id>
+        <writeable/>
+    </attribute>
 
-    <!-- Set during IPL by Hostboot -->
     <attribute>
         <id>ATTR_UNSECURE_HOMER_ADDRESS</id>
         <writeable/>
@@ -426,36 +907,42 @@
         <no_export/>
         <default>FULL_DIMM</default>
     </attribute>
-
+    <attribute>
+        <id>ATTR_PROC_FABRIC_TOPOLOGY_ID</id>
+        <global/>
+    </attribute>
     <attribute>
         <id>ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE</id>
         <persistency>volatile</persistency><!-- needs non-zero default -->
     </attribute>
-
-    <!-- seems funky... -->
+    <attribute>
+        <id>ATTR_FREQ_PB_MHZ_POUNDV_FALLBACK</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
     <attribute>
         <id>ATTR_RVRM_VID</id>
         <persistency>volatile-zeroed</persistency>
     </attribute>
-
-    <!-- seems funky... -->
     <attribute>
         <id>ATTR_BOOT_VOLTAGE_BIAS_0P5PCT</id>
         <persistency>volatile-zeroed</persistency>
     </attribute>
-
-    <!-- Needs a nonzero default -->
+    <attribute>
+        <id>ATTR_XGPE_PM_SUSPEND_DISABLE</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
     <attribute>
         <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>
         <persistency>volatile</persistency>
     </attribute>
-
-    <!-- Set by Hostboot based on configuration -->
+    <attribute>
+        <id>ATTR_FUSED_CORE_MODE</id>
+        <writeable/>
+    </attribute>
     <attribute>
         <id>ATTR_SMF_CONFIG</id>
         <writeable/>
     </attribute>
-
     <!-- OCMB Endianess attributes -->
     <attribute>
         <id>ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN</id>
@@ -476,20 +963,19 @@
         <id>ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL</id>
         <no_export/>
     </attribute>
-    <!-- End OCMB Endianess attributes -->
-
-    <!-- Hostboot owns the default value -->
     <attribute>
         <id>ATTR_UNSECURE_HOMER_SIZE</id>
         <default>0x1000</default>
     </attribute>
 
-    <!-- Set by Hostboot during IPL -->
     <attribute>
         <id>ATTR_PROC_PCIE_PHB_ACTIVE</id>
         <writeable/>
     </attribute>
-
+    <attribute>
+        <id>ATTR_MSS_MRW_OCMB_RESET_GROUP</id>
+        <global/>
+    </attribute>
     <attribute>
         <!-- We never want to enable Checkstops for special attentions -->
         <id>ATTR_XSTOP_ON_SPATTN</id>
@@ -497,14 +983,32 @@
         <default>DISABLED</default>
         <no_export/>
     </attribute>
-
-    <!-- Same value for all systems -->
     <attribute>
         <id>ATTR_CORE_LPAR_MODE_POLICY</id>
         <no_export/>
     </attribute> 
+    <attribute>
+        <id>ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT</id>
+        <writeable/>
+    </attribute>
 
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
+
+    <!-- Temporary hacks to get around a CI coreq issue -->
+    <attribute>
+        <id>ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE</id>
+        <writeable/>
+    </attribute>
+    <attribute>
+        <id>ATTR_MSS_EXP_OMI_CDR_OFFSET</id>
+        <writeable/>
+    </attribute>
+    <attribute>
+        <id>ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK</id>
+        <writeable/>
+    </attribute>
+
+
 </attributes>

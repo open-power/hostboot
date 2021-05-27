@@ -1422,9 +1422,10 @@
           BOOT_CONFIG0 command.
       </description>
       <valueType>uint8</valueType>
-      <initToZero></initToZero>
       <enum>NONE = 0</enum>
-      <writeable/>
+      <default>0x20</default>
+      <platInit/>
+      <overrideOnly/>
       <mssAccessorName>exp_omi_cdr_bw_override</mssAccessorName>
     </attribute>
 
@@ -1436,8 +1437,9 @@
           BOOT_CONFIG0 command. This is a signed two's complement value.
       </description>
       <valueType>uint8</valueType>
-      <initToZero></initToZero>
-      <writeable/>
+      <default>0x02</default>
+      <platInit/>
+      <overrideOnly/>
       <mssAccessorName>exp_omi_cdr_offset</mssAccessorName>
     </attribute>
 
@@ -1452,7 +1454,8 @@
       </description>
       <valueType>uint8</valueType>
       <default>0xFF</default>
-      <writeable/>
+      <platInit/>
+      <overrideOnly/>
       <mssAccessorName>exp_omi_cdr_offset_lane_mask</mssAccessorName>
     </attribute>
 
