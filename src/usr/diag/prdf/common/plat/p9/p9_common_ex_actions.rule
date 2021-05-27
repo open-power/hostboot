@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -47,7 +47,7 @@ actionclass l3_dir_ce
 
 actionclass l3_lru_parity_error
 {
-    threshold32pday;
+    self_th_32perDay;
     funccall("cacheCeWorkaround");
 };
 
