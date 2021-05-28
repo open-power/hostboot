@@ -775,24 +775,32 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
         FAPI_TRY(fapi2::putScom(i_target, NEST_DPLL_FREQ, l_data64),
                  "ERROR: Failed to write for EQ_QPPM_DPLL_FREQ");
 
+        //Need to skip dpll lock stat for sim mode
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        fapi2::ATTR_IS_SIMULATION_Type l_sim_env;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_sim_env),
+                 "Error from FAPI_ATTR_GET (ATTR_IS_SIMULATION)");
 
-        do
+        if (!l_sim_env)
         {
-            FAPI_TRY(fapi2::getScom(i_target, NEST_DPLL_STAT, l_data64),
-                     "ERROR: Failed to read for EQ_QPPM_DPLL_STAT");
-            // fapi2::delay takes ns as the arg
-            fapi2::delay(DPLL_POLLTIME_MS * 1000 * 1000, DPLL_POLLTIME_MCYCLES * 1000 * 1000);
-        }
-        while((l_data64.getBit<TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_STAT_UPDATE_COMPLETE>() != 1 ||
-               (l_data64.getBit<TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_STAT_LOCK>() != 1)) &&
-              (--l_timeout_counter != 0));
+            do
+            {
+                FAPI_TRY(fapi2::getScom(i_target, NEST_DPLL_STAT, l_data64),
+                         "ERROR: Failed to read for EQ_QPPM_DPLL_STAT");
+                // fapi2::delay takes ns as the arg
+                fapi2::delay(DPLL_POLLTIME_MS * 1000 * 1000, DPLL_POLLTIME_MCYCLES * 1000 * 1000);
+            }
+            while((l_data64.getBit<TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_STAT_UPDATE_COMPLETE>() != 1 ||
+                   (l_data64.getBit<TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_STAT_LOCK>() != 1)) &&
+                  (--l_timeout_counter != 0));
 
-        FAPI_ASSERT(l_timeout_counter != 0,
-                    fapi2::PM_DPLL_FREQ_UPDATE_FAIL()
-                    .set_CHIP_TARGET(i_target)
-                    .set_DPLL_FREQ(i_safe_mode_dpll_value)
-                    .set_DPLL_STAT(l_data64),
-                    "update dpll freq fail");
+            FAPI_ASSERT(l_timeout_counter != 0,
+                        fapi2::PM_DPLL_FREQ_UPDATE_FAIL()
+                        .set_CHIP_TARGET(i_target)
+                        .set_DPLL_FREQ(i_safe_mode_dpll_value)
+                        .set_DPLL_STAT(l_data64),
+                        "update dpll freq fail");
+        }
 
 
         // clear sticky PLL unlock indicator before unmasking reporting
