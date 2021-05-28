@@ -148,9 +148,6 @@ fapi2::ReturnCode pm_set_frequency(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NOMINAL_FREQ_MHZ,
                 i_sys_target, l_sys_nominal_freq_mhz));
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
-                i_sys_target, l_poundv_static_data));
-
         // RTC: 269377
         // FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_FMAX_ENABLE,
         //        i_sys_target, l_fmax_enable));
@@ -179,14 +176,32 @@ fapi2::ReturnCode pm_set_frequency(
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V,
                         l_proc_target, l_chip_static_pound_v));
 
-            if (l_chip_static_pound_v && !l_poundv_static_data)
+            // if static data is needed, set the enable
+            if (l_chip_static_pound_v)
             {
-                l_poundv_static_data = 1;
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
+                l_poundv_static_data = 0x1;
+                 FAPI_INF("EC level requiring static #V data detected.  Setting ATTR_POUND_V_STATIC_DATA_ENABLE");
+            }
+
+            // Write the enable out
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
                             i_sys_target,
                             l_poundv_static_data),
                         "Error from FAPI_ATTR_SET for attribute ATTR_POUND_V_STATIC_DATA_ENABLE");
-            }
+
+            // Read back to pick up any override
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_V_STATIC_DATA_ENABLE,
+                            i_sys_target,
+                            l_poundv_static_data));
+
+//             if (l_chip_static_pound_v)
+//             {
+//                 FAPI_ASSERT_NOEXIT(l_poundv_static_data,
+//                         fapi2::PM_STATIC_POUNDV_EC_MISMATCH()
+//                         .set_CHIP_TARGET(l_proc_target),
+//                         "A chip that shouldn't consume external VPD has been detected but an "
+//                         "ATTR_CHIP_EC_FEATURE_STATIC_POUND_V override is in place to allow it");
+//             }
 
             if (l_poundv_static_data)
             {

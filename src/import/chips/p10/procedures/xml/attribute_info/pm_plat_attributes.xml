@@ -799,12 +799,11 @@
     Platform default:OFF
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
     <enum>
         OFF = 0x00,
         ON = 0x01
     </enum>
-    <initToZero/>
+<!--    <initToZero/> -->
     <writeable/>
     <group>debug</group>
   </attribute>

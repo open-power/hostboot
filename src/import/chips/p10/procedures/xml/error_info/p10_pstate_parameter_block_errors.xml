@@ -608,7 +608,7 @@
   <hwpError>
     <rc>RC_PSTATE_PB_UT_FREQ_MISMATCH</rc>
     <description>The UltraTurbo frequency for this part does not match the others
-    in the system. This indicates the parts from different sorts may be plugged 
+    in the system. This indicates the parts from different sorts may be plugged
     into the machine.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -631,6 +631,24 @@
     </description>
     <ffdc>LOCAL_UT_FREQ</ffdc>
     <ffdc>SYSTEM_UT_FREQ</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_STATIC_POUNDV_EC_MISMATCH</rc>
+    <description>
+    A mismatch in chips in the system has been detected whereby static #V is
+    required but an attribute override to ATTR_CHIP_EC_FEATURE_STATIC_POUND_V
+    is preventing it.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
