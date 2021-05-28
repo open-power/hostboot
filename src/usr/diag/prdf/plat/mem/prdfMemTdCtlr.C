@@ -368,8 +368,13 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     #endif
 
     // Get the buffer length (header + TD queue)
-    uint32_t hdrLen = TD_CTLR_DATA::v2_HEADER;
-    uint32_t entLen = TD_CTLR_DATA::v2_ENTRY;
+    uint32_t hdrLen = TD_CTLR_DATA::v1_HEADER;
+    uint32_t entLen = TD_CTLR_DATA::v1_ENTRY;
+    if ( TD_CTLR_DATA::VERSION_2 == version )
+    {
+        hdrLen = TD_CTLR_DATA::v2_HEADER;
+        entLen = TD_CTLR_DATA::v2_ENTRY;
+    }
 
     uint32_t bitLen = hdrLen + queueCount * entLen;
 
@@ -404,7 +409,11 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     bsb.setFieldJustify( pos, 4, curType    ); pos+=4;
     bsb.setFieldJustify( pos, 4, queueCount ); pos+=4;
 
-    bsb.setFieldJustify( pos, 2, curPort ); pos+=2;
+    // port is only for VERSION_2
+    if ( TD_CTLR_DATA::VERSION_2 == version )
+    {
+        bsb.setFieldJustify( pos, 2, curPort ); pos+=2;
+    }
 
     //##########################################################################
     // TD Queue

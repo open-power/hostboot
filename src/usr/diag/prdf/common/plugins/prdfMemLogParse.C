@@ -694,6 +694,7 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
                 default       : curType_str = "???"; break;
             }
 
+            // port is only for VERSION_2
             char curPort_str[DATA_SIZE] = "";
             if ( TD_CTLR_DATA::VERSION_2 == version )
             {
@@ -720,6 +721,7 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
             uint8_t itSrnk = bs.getFieldJustify( pos, 3 ); pos+=3;
             uint8_t itType = bs.getFieldJustify( pos, 4 ); pos+=4;
 
+            // port is only for VERSION_2
             uint8_t itPort = 0;
             if ( TD_CTLR_DATA::VERSION_2 == version )
             {
