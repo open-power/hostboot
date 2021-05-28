@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,6 +121,7 @@ p10_query_core_stop_state(
     // If not, something is off.
     FAPI_ASSERT( (((l_stop_actual_level == 2)   && (i_expected_stop_level == 2)) ||
                   ((l_stop_actual_level == 3)   && (i_expected_stop_level >= 3)  && (i_expected_stop_level < 11)) ||
+                  ((l_stop_actual_level == 6)   && (i_expected_stop_level == 6)) ||
                   (((l_stop_actual_level == 11) || (l_stop_actual_level == 15))  && (i_expected_stop_level >= 11))),
                  fapi2::EXPECTED_STOP_LEVEL_NOT_REACHED()
                  .set_ACTUAL_STOP_LEVEL(l_stop_actual_level)

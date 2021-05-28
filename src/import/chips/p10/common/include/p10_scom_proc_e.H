@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -531,6 +531,16 @@ static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_PIB_RCV_BUFFER1_REGISTER_DMA_PIB_
 static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_PIB_RCV_BUFFER1_REGISTER_DMA_PIB_RCV_BUF1_REG_DATA1_LEN = 32;
 //<< [TP_TPVSB_FSI_W_SHIFT_DMA_PIB_RCV_BUFFER1_REGISTER]
 // proc/reg00074.H
+
+//>> [TP_TPCHIP_OCC_OCI_OCB_OCCFLG6]
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_RW = 0x0006c0beull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_WO_CLEAR = 0x0006c0bfull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_WO_OR = 0x0006c0c0ull;
+
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_OCB_OCI_OCCFLG6_OCC_FLAGS = 0;
+static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_OCB_OCI_OCCFLG6_OCC_FLAGS_LEN = 32;
+//<< [TP_TPCHIP_OCC_OCI_OCB_OCCFLG6]
+// proc/reg00072.H
 
 //>>THE END<<
 

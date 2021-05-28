@@ -153,7 +153,55 @@ fapi_try_exit:
 
 }
 
-/// @brief Update the CCSR for cores
+
+//-----------------------------------------------------------------------------
+/// @brief Check for cache only cores
+///
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+inline
+fapi2::ReturnCode check_cache_only(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
+    bool& o_cache_only)
+{
+    using namespace scomt::eq;
+    using namespace scomt::proc;
+
+    fapi2::buffer<uint64_t> l_data64;
+
+    fapi2::ATTR_ECO_MODE_Type l_attr_eco_mode;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, i_core_target, l_attr_eco_mode));
+
+    if (l_attr_eco_mode)
+    {
+        FAPI_DBG("cache only core detected");
+        o_cache_only = true;
+
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               i_core_target,
+                               l_core_num));
+
+        // Tell the QMEs about this cache only core
+        auto l_eq_target = i_core_target.getParent<fapi2::TARGET_TYPE_EQ>();
+        l_data64.flush<0>().setBit(28 + (l_core_num % 4));
+        FAPI_TRY(fapi2::putScom(l_eq_target, QME_SCRB_WO_OR, l_data64));
+        FAPI_DBG("Write QME Scratach B OR with 0x%16llX", l_data64);
+
+        // Tell the OCC about this cache only core
+        auto l_proc_target = i_core_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+        l_data64.flush<0>().setBit(l_core_num);
+        FAPI_TRY(fapi2::putScom(l_proc_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_WO_OR, l_data64));
+        FAPI_DBG("Write OCC Flag6 OR with 0x%16llX", l_data64);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("< check_cache_only...");
+    return fapi2::current_err;
+}
+
+
+
+/// @brief Update the CCSR for configured cores and necessary registers for cache only cores
 ///
 /// @param[in]     i_target   Reference to TARGET_TYPE_PROC_CHIP target
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
@@ -164,8 +212,10 @@ static fapi2::ReturnCode update_ec_config(
 
     uint8_t l_present_core_unit_pos;
     uint8_t l_functional_core_unit_pos;
+    fapi2::buffer<uint64_t> l_data64 = 0;
     fapi2::buffer<uint64_t> l_core_config = 0;
     fapi2::buffer<uint64_t> l_pg_config = 0;
+    fapi2::buffer<uint64_t> l_eco_config = 0;
 
     auto l_core_present_vector =
         i_target.getChildren<fapi2::TARGET_TYPE_CORE>
@@ -207,12 +257,10 @@ static fapi2::ReturnCode update_ec_config(
 
                 auto l_eq = core_functional_it.getParent<fapi2::TARGET_TYPE_EQ>();
 
-                l_present_core_unit_pos = l_present_core_unit_pos % 4;
-
                 //Update the pg bits
-                l_pg_config.flush<0>().setBit(l_present_core_unit_pos + CL2_START_POSITION); //ecl2
-                l_pg_config.setBit(l_present_core_unit_pos + L3_START_POSITION); //l3
-                l_pg_config.setBit(l_present_core_unit_pos + MMA_START_POSITION); //mma
+                l_pg_config.flush<0>().setBit((l_present_core_unit_pos % 4) + CL2_START_POSITION); //ecl2
+                l_pg_config.setBit((l_present_core_unit_pos % 4) + L3_START_POSITION); //l3
+                l_pg_config.setBit((l_present_core_unit_pos % 4) + MMA_START_POSITION); //mma
 
                 //setting Region Partial Good bits
                 FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL2_WO_OR, l_pg_config));
@@ -220,15 +268,34 @@ static fapi2::ReturnCode update_ec_config(
                 // Clear Power Gate/DFT fence
                 FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL5_WO_CLEAR, l_pg_config));
 
+                // Determine if an ECO core is indicated
+                fapi2::ATTR_ECO_MODE_Type l_attr_eco_mode;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, core_functional_it, l_attr_eco_mode));
+
+                if (l_attr_eco_mode)
+                {
+                    l_eco_config.setBit(l_present_core_unit_pos);
+
+                    // Tell the QME about this cache only core
+                    l_data64.flush<0>().setBit(28 + (l_present_core_unit_pos % 4));
+                    FAPI_TRY(fapi2::putScom(l_eq, QME_SCRB_WO_OR, l_data64));
+                }
+
                 break;
             }  // Current core
         } // Functional core loop
     }  // Present core loop
 
-    // Write the recalculated OCC Core Configuration Status Register
-    FAPI_INF("  Writing OCC CCSR");
+    // Write the recalculated OCC CCSR and Flag6 for ECO cores
+
+    l_data64.flush<1>();
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_CCSR_WO_CLEAR, l_data64));
+    FAPI_INF("  Writing OCC CCSR:  0x%16llX", l_core_config)
     FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_CCSR_RW, l_core_config));
 
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_WO_CLEAR, l_data64));
+    FAPI_INF("  Writing OCC Flag 6 with ECO configuration:  0x%16llX", l_eco_config);
+    FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG6_WO_OR, l_eco_config));
 
 fapi_try_exit:
     FAPI_INF("<< update_ec_config...");

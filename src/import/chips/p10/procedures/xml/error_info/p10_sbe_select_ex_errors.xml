@@ -95,8 +95,10 @@
     <ffdc>ATTR_BACKING_CACHES_NUM</ffdc>
     <ffdc>ACTIVE_CORES_NUM</ffdc>
     <ffdc>BACKING_CACHES_NUM</ffdc>
+    <ffdc>ECO_CACHES_NUM</ffdc>
     <ffdc>ACTIVE_CORES_VEC</ffdc>
     <ffdc>BACKING_CACHES_VEC</ffdc>
+    <ffdc>ECO_CORES_VEC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>LOW</priority>
@@ -133,7 +135,62 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
+    <rc>RC_SBE_SELECT_EX_ECO_CACHE_CONTAINED_CONFIG_ERROR</rc>
+    <description>No ECO cores are expected to be configured in cache contained mode
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>ECO_VEC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_ECO_CHIP_CONTAINED_CONFIG_ERROR</rc>
+    <description>ECO core configured which is not a backing cache in chip contained mode
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>CORE_NUM</ffdc>
+    <ffdc>ACTIVE_VEC</ffdc>
+    <ffdc>BACKING_VEC</ffdc>
+    <ffdc>ECO_VEC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_ACTIVE_ECO_ERROR</rc>
+    <description>Core configuration needed cannot be satisfied.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>CORE_CONFIG</ffdc>
+    <ffdc>ATTR_ACTIVE_CORES_NUM</ffdc>
+    <ffdc>ATTR_BACKING_CACHES_NUM</ffdc>
+    <ffdc>ACTIVE_CORES_NUM</ffdc>
+    <ffdc>BACKING_CACHES_NUM</ffdc>
+    <ffdc>ECO_CACHES_NUM</ffdc>
+    <ffdc>ACTIVE_CORES_VEC</ffdc>
+    <ffdc>BACKING_CACHES_VEC</ffdc>
+    <ffdc>ECO_CORES_VEC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
     <rc>RC_SBE_SELECT_EX_FORCE_FUSED_CORES_DISABLED</rc>
     <description>Forcing fused core mode has been disabled via eFuses</description>
   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
