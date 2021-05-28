@@ -432,9 +432,8 @@ namespace HTMGT
         const PLDM::occ_state new_state = ((i_enabled == true) ?
                                            PLDM::occ_state_in_service :
                                            PLDM::occ_state_stopped);
-        TARGETING::ConstTargetHandle_t procTarget =
-            TARGETING::getParentChip(iv_target);
-        pError = PLDM::sendOccStateChangedEvent(procTarget, new_state);
+
+        pError = PLDM::sendOccStateChangedEvent(iv_target, new_state);
 #endif
         return pError;
     }

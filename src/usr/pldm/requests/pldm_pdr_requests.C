@@ -575,9 +575,23 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
     return errl;
 }
 
-errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_proc_target,
+errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_occ_target,
                                     const occ_state i_new_state)
 {
+    using namespace TARGETING;
+
+    assert(i_occ_target->getAttr<ATTR_TYPE>() == TYPE_OCC,
+           "Invalid target type passed to sendOccStateChangedEvent: Expected TYPE_OCC (0x%x), "
+           "got %s (0x%x), HUID 0x%08x",
+           TYPE_OCC,
+           attrToString<ATTR_TYPE>(i_occ_target->getAttr<ATTR_TYPE>()),
+           i_occ_target->getAttr<ATTR_TYPE>(),
+           get_huid(i_occ_target));
+
+    assert(i_occ_target->getAttr<TARGETING::ATTR_PLDM_SENSOR_INFO>().sensor_id != 0,
+           "Sensor ID for OCC target HUID=0x%08x has not been assigned",
+           get_huid(i_occ_target));
+
     // The OCC sensors only have one state associated with them, and it is at
     // index 0.
     constexpr int OCC_STATE_SENSOR_INDEX = 0;
@@ -597,7 +611,7 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_proc_target
                i_new_state);
     }
 
-    return sendSensorStateChangedEvent(i_proc_target->getAttr<TARGETING::ATTR_ORDINAL_ID>(),
+    return sendSensorStateChangedEvent(i_occ_target->getAttr<TARGETING::ATTR_PLDM_SENSOR_INFO>().sensor_id,
                                        OCC_STATE_SENSOR_INDEX,
                                        new_occ_state);
 }
