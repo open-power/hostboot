@@ -54,6 +54,7 @@
 #include <sbeio/sbeioif.H>
 #include <util/misc.H>
 #include <sys/time.h>
+#include <time.h>
 
 //  HWP call support
 #include <exp_check_for_ready.H>
@@ -85,6 +86,14 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
             l_proc_iter != functionalProcChipList.end();
             ++l_proc_iter)
     {
+        // For each loop on an OCMB below, multiply the timeout chunk
+        size_t loop_multiplier = 1;
+
+        // Keep track of overall time
+        size_t l_maxTime_secs = 0;
+        timespec_t l_preLoopTime = {};
+        timespec_t l_ocmbCurrentTime = {};
+        clock_gettime(CLOCK_MONOTONIC, &l_preLoopTime);
 
         TargetHandleList l_functionalOcmbChipList;
         getChildAffinityTargets( l_functionalOcmbChipList,
@@ -102,64 +111,96 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
             fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>
                                     l_fapi_ocmb_target(l_ocmb);
 
-            // Keeping this loop in here just in case we need it later
-            uint8_t NUM_LOOPS = 1;
-            if( Util::isSimicsRunning() )
-            {
-                NUM_LOOPS = 1;
-            }
-
-            // Save the original timeout (to be restored after
-            // exp_check_for_ready
-            const auto original_timeout
+            // Save the original timeout (to be restored after exp_check_for_ready)
+            // Units for the attribute are milliseconds; the value returned is > 1 second
+            const auto original_timeout_ms
                 = l_ocmb->getAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>();
 
-            // Break the timeout into small chunks. This is a hack to avoid
-            // running out of memory in the polling code.
-            const ATTR_MSS_CHECK_FOR_READY_TIMEOUT_type timeout_chunk_size = 10;
+            // Calculate MAX Wait Time - Round up on seconds
+            // - ATTR_MSS_CHECK_FOR_READY_TIMEOUT in msec (see exp_attributes.xml)
+            // - This assumes that all of the OCMBs on a processor were started at the same time
+            //   and that they all have the same original_timeout value
+            // - The calculation is as follows:
+            // 1) Start with the 'seconds' value of the pre-loop time
+            // 2) Add *double* the 'seconds' amount of the original timeout value
+            //    -- the *double* is just to be on the safe side, as we're only dealing with
+            //       seconds and not minutes here
+            // 3) Add 3 to round up for the nanoseconds of (1) and double the milliseconds of (2)
+            if (l_maxTime_secs == 0)
+            {
+                // If not set yet, then set it here:
+                l_maxTime_secs = l_preLoopTime.tv_sec
+                                 + (2 * (original_timeout_ms / MS_PER_SEC))
+                                 + 3;
+            }
 
             // exp_check_for_ready will read this attribute to know how long to
             // poll. If this number is too large and we get too many I2C error
             // logs between calls to FAPI_INVOKE_HWP, we will run out of memory.
-            l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(timeout_chunk_size);
+            // So break the original timeout into smaller timeouts.
+            // This will not affect how the loop below will use l_maxTime_secs to look for a timouts
+            const ATTR_MSS_CHECK_FOR_READY_TIMEOUT_type smaller_timeout_ms = 10 * loop_multiplier++;
+            l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(smaller_timeout_ms);
 
-            for(uint8_t i = 0; i < NUM_LOOPS; i++)
+            TRACFCOMP(g_trac_isteps_trace,"exp_check_for_ready: For OCMB 0x%X: "
+                      "original_timeout_ms = %d, smaller_timeout_ms = %d, "
+                      "l_preLoopTime.tv_sec = %lu l_maxTime_secs = %lu",
+                      get_huid(l_ocmb), original_timeout_ms, smaller_timeout_ms,
+                      l_preLoopTime.tv_sec, l_maxTime_secs);
+
+            // Variable used to track attempting one more time after max time has
+            // been succeeded
+            bool l_one_more_try = false;
+
+            // Retry exp_check_for_ready as many times as it takes to either
+            // succeed or time out
+            while (true)
             {
-                // Retry exp_check_for_ready as many times as it takes to either
-                // succeed or time out (in timeout_chunk_size-duration attempts)
-                for (size_t timeout_counter = 0;
-                     timeout_counter < original_timeout;
-                     timeout_counter += timeout_chunk_size)
+                // Delete the log from the previous iteration
+                if( l_errl )
                 {
-                    // Delete the log from the previous iteration
-                    if( l_errl )
+                    delete l_errl;
+                    l_errl = nullptr;
+                }
+
+                FAPI_INVOKE_HWP(l_errl,
+                                exp_check_for_ready,
+                                l_fapi_ocmb_target);
+
+                // On success, quit retrying.
+                if (!l_errl)
+                {
+                    break;
+                }
+
+                clock_gettime(CLOCK_MONOTONIC, &l_ocmbCurrentTime);
+                if (l_ocmbCurrentTime.tv_sec > l_maxTime_secs)
+                {
+                    if (l_one_more_try == false)
                     {
-                        delete l_errl;
-                        l_errl = nullptr;
+                        // Do one more attempt just to be safe
+                        l_one_more_try = true;
+                        TRACFCOMP(g_trac_isteps_trace,"exp_check_for_ready "
+                                  "Setting 'one more try' (%d) based on times: "
+                                  "l_ocmbCurrentTime.tv_sec = %lu, l_maxTime_secs = %lu",
+                                  l_one_more_try, l_ocmbCurrentTime.tv_sec, l_maxTime_secs);
+
                     }
-
-                    // Catch the last iteration in the case where
-                    // original_timeout is not evenly divisible by
-                    // timeout_chunk_size.
-                    const size_t chunk_size = original_timeout - timeout_counter;
-                    if (chunk_size < timeout_chunk_size)
+                    else
                     {
-                        l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(chunk_size);
-                    }
-
-                    FAPI_INVOKE_HWP(l_errl,
-                                    exp_check_for_ready,
-                                    l_fapi_ocmb_target);
-
-                    // On success, quit retrying.
-                    if (!l_errl)
-                    {
+                        // Already done "one more try" so just break
+                        TRACFCOMP(g_trac_isteps_trace,"exp_check_for_ready "
+                                  "Breaking as 'one more try' (%d) was already set. "
+                                  "l_ocmbCurrentTime.tv_sec = %lu, l_maxTime_secs = %lu",
+                                  l_one_more_try, l_ocmbCurrentTime.tv_sec, l_maxTime_secs);
                         break;
                     }
                 }
-            }
 
-            l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(original_timeout);
+            } // end of timeout loop
+
+            // Restore original timeout value
+            l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(original_timeout_ms);
 
             if (l_errl)
             {
@@ -214,8 +255,9 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                     // Capture error and continue to next OCMB
                     captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
                 }
-            }
-        }
+            } // End of if/else l_errl
+
+        } // End of OCMB Loop
 
         // Grab informational Explorer logs (early IPL = true)
         EXPSCOM::createExplorerLogs(l_functionalOcmbChipList, true);

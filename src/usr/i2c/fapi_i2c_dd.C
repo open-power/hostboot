@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -278,7 +278,7 @@ errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
                 else // no more retries: trace and break
                 {
                     TRACFCOMP( g_trac_i2c, ERR_MRK"fapiI2cPerformOp(): "
-                       "Error rc=0x%X, eid=%d, tgt=0x%X. No More "
+                       "Error rc=0x%X, eid=0x%X, tgt=0x%X. No More "
                        "Retries (retry/MAX=%d/%d). Returning Error",
                        l_err->reasonCode(), l_err->eid(),
                        TARGETING::get_huid(i_target),

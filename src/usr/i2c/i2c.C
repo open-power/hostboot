@@ -665,7 +665,7 @@ void i2cHandleError( TARGETING::Target * i_target,
         if( err_reset )
         {
             // 2 error logs, so commit the reset log here
-            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cCommonOp() - "
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cHandleError() - "
                     "Previous error (rc=0x%X, eid=0x%X) before "
                     "i2cReset() failed.  Committing reset error "
                     "(rc=0x%X, eid=0x%X) and returning original error",
@@ -910,13 +910,13 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
             uint8_t * l_zeroBuffer = static_cast<uint8_t*>(malloc(l_zeroBuflen));
             memset(l_zeroBuffer, 0, l_zeroBuflen);
 
-            TRACUCOMP(g_trac_i2c,"i2cPageSwitchOp args! \n"
-                    "misc_args_t: port:%d / engine: %d: devAddr: %x: skip_mode_step(%d):\n"
-                    "with_stop(%d): read_not_write(%d): bus_speed: %d: bit_rate_divisor: %d:\n"
+            TRACUCOMP(g_trac_i2c,"i2cPageSwitchOp args! "
+                    "misc_args_t: port:%d / engine: %d: devAddr: %x: skip_mode_step(%d): "
+                    "with_stop(%d): read_not_write(%d): "
                     "polling_interval_ns: %d: timeout_count: %d: offset_length: %d, ",
                     i_args.port, i_args.engine, i_args.devAddr, i_args.skip_mode_setup,
-                    i_args.with_stop, i_args.read_not_write, i_args.bus_speed,
-                    i_args.bit_rate_divisor, i_args.polling_interval_ns, i_args.timeout_count,
+                    i_args.with_stop, i_args.read_not_write,
+                    i_args.polling_interval_ns, i_args.timeout_count,
                     i_args.offset_length);
 
             // Printing mux info separately, if combined, nothing is displayed
@@ -4314,7 +4314,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
             cmd.value = 0x0ull;
             cmd.with_stop = 1;
 
-            TRACFCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
+            TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
                       "cmd: 0x%016llx",
                       cmd.value );
 
