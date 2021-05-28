@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@ const std::map<OCC_RESET_REASON, HTMGT::occResetReason>g_PMComplexResetReasonMap
     {
         {OCC_RESET_REASON_ERROR, HTMGT::OCC_RESET_REASON_ERROR},
         {OCC_RESET_REASON_CODE_UPDATE, HTMGT::OCC_RESET_REASON_CODE_UPDATE},
+        {OCC_RESET_REASON_CANCEL_CODE_UPDATE, HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE},
         // FIXME RTC: 214351 TMGT_REQUEST currently doesn't map
         {OCC_RESET_REASON_TMGT_REQUEST, HTMGT::OCC_RESET_REASON_NONE},
         {OCC_RESET_REASON_NA, HTMGT::OCC_RESET_REASON_NONE},

@@ -51,11 +51,13 @@
 #include "generic_hbrt_fsp_message.H"
 
 /* An enum governing the reason for resetting OCC/PM Complex */
+// https://ibm.ent.box.com/notes/494963476721
 enum OCC_RESET_REASON
 {
     OCC_RESET_REASON_ERROR             = 0x00,
     OCC_RESET_REASON_CODE_UPDATE       = 0x01,
     OCC_RESET_REASON_TMGT_REQUEST      = 0x02,
+    OCC_RESET_REASON_CANCEL_CODE_UPDATE= 0x03,
     OCC_RESET_REASON_NA                = 0xFF,
 };
 

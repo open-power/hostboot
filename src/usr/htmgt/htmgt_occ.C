@@ -222,6 +222,11 @@ namespace HTMGT
             TMGT_INF("resetPrep(): WOF reset requested. Reset Count = %d",
                      iv_wofResetCount );
         }
+        else if(iv_resetReason == HTMGT::OCC_RESET_REASON_CODE_UPDATE ||
+                iv_resetReason == HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE)
+        {
+            cmdData[1] = OCC_RESET_NON_FAILURE;
+        }
         else
         {
             cmdData[1] = OCC_RESET_FAIL_THIS_OCC;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,6 +88,7 @@ namespace HTMGT
         OCC_RESET_REASON_ATTR_CHANGE       = 0x0B,
         OCC_RESET_REASON_WOF_RESET         = 0x0C,
         OCC_RESET_REASON_CHECKPOINT_FAIL   = 0x0D,
+        OCC_RESET_REASON_CANCEL_CODE_UPDATE= 0x0E,
         OCC_RESET_REASON_POWER_OFF         = 0xFF,
     };
 

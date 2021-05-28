@@ -600,9 +600,13 @@ namespace HTMGT
                     {
                         occ->iv_resetReason = i_reason;
                     }
-                    if(occ->getTarget() == i_failedOccTarget)
+                    if ((i_reason != HTMGT::OCC_RESET_REASON_CODE_UPDATE) &&
+                        (i_reason != HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE))
                     {
-                        occ->failed(true);
+                        if(occ->getTarget() == i_failedOccTarget)
+                        {
+                            occ->failed(true);
+                        }
                     }
 
                     if (false == i_skipComm)
@@ -641,6 +645,12 @@ namespace HTMGT
                     {
                         i_skipCountIncrement = true;
                     }
+                }
+
+                if((i_reason == HTMGT::OCC_RESET_REASON_CODE_UPDATE) ||
+                        (i_reason == HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE))
+                {
+                    i_skipCountIncrement = true;
                 }
 
                 if ((false == i_skipCountIncrement) && (false == _occFailed()))
@@ -723,22 +733,31 @@ namespace HTMGT
                         occ->postResetClear();
                     }
 
-                    //get parent proc chip.
-                    TARGETING::Target* l_proc_target = NULL;
-
-                    //Reload OCC on this processor chip.
-                    TMGT_INF("_resetOccs: Calling loadAndStartPMAll");
-                    err = HBPM::loadAndStartPMAll(HBPM::PM_RELOAD,
-                                                  l_proc_target);
-                    if(err)
+                    // Don't restart OCC's on CODE UPDATE
+                    if(i_reason != HTMGT::OCC_RESET_REASON_CODE_UPDATE )
                     {
-                        TMGT_ERR("_resetOCCs: loadAndStartPMAll failed. ");
-                        err->collectTrace(HTMGT_COMP_NAME);
-                        processOccStartStatus(false, l_proc_target);
+
+                        //get parent proc chip.
+                        TARGETING::Target* l_proc_target = NULL;
+
+                        //Reload OCC on this processor chip.
+                        TMGT_INF("_resetOccs: Calling loadAndStartPMAll");
+                        err = HBPM::loadAndStartPMAll(HBPM::PM_RELOAD,
+                                                      l_proc_target);
+                        if(err)
+                        {
+                            TMGT_ERR("_resetOCCs: loadAndStartPMAll failed. ");
+                            err->collectTrace(HTMGT_COMP_NAME);
+                            processOccStartStatus(false, l_proc_target);
+                        }
+                        else
+                        {
+                            processOccStartStatus(true, l_proc_target);
+                        }
                     }
                     else
                     {
-                        processOccStartStatus(true, l_proc_target);
+                        TMGT_INF("_resetOccs: OCC load being skipped due to code update");
                     }
                 }
                 else if (!err) // Reset Threshold reached and no other err
