@@ -412,7 +412,9 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 ////////    wfth_print
 ///////////////////////////////////////////////////////////
-void wfth_print(WofTablesHeader_t* i_wfth)
+void wfth_print(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+    WofTablesHeader_t* i_wfth)
 {
 
     FAPI_DBG("i_wfth  addr = %p size = %d",
@@ -441,8 +443,12 @@ void wfth_print(WofTablesHeader_t* i_wfth)
 #define WFTH_PRINTS(_member) \
     FAPI_INF("%-25s = %s", #_member, i_wfth->_member);
 
+    const uint32_t BUFFSIZE = 64;
+    char  l_proc_str[BUFFSIZE];
+    fapi2::toString(i_proc_target, l_proc_str, BUFFSIZE);
+
     FAPI_INF("---------------------------------------------------------------------------------------");
-    FAPI_INF("WOF Table Header");
+    FAPI_INF("WOF Table Header - %s", l_proc_str);
     FAPI_INF("---------------------------------------------------------------------------------------");
 
     WFTH_PRINTS       (magic_number.text     );
@@ -529,7 +535,7 @@ fapi2::ReturnCode wof_validate_header(
         WofTablesHeader_t* p_wfth;
         p_wfth = reinterpret_cast<WofTablesHeader_t*>(l_wof_table_data);
 
-        wfth_print(p_wfth);
+        wfth_print(i_proc_target, p_wfth);
 
         bool l_wof_header_data_state = 1;
         VALIDATE_WOF_HEADER_DATA(
@@ -926,9 +932,15 @@ fapi_try_exit:
 ////////  print_voltage_bucket
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode print_voltage_bucket(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
     fapi2::voltageBucketData_t* o_poundV_data)
 {
-    FAPI_INF(">> print_voltage_bucket");
+
+    const uint32_t BUFFSIZE = 64;
+    char  l_proc_str[BUFFSIZE];
+    fapi2::toString(i_proc_target, l_proc_str, BUFFSIZE);
+
+    FAPI_INF(">> print_voltage_bucket - %s", l_proc_str);
 
 #define PRINT_BKT_PT_16(_member, _pt) \
     FAPI_INF("    Pt %d  %-20s = 0x%04x (%4d)", _pt, #_member,  \

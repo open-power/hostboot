@@ -165,7 +165,12 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                            uint8_t* o_buf,
                            uint32_t& io_size)
 {
-    FAPI_DBG("> p10_pstate_parameter_block");
+
+    const uint32_t BUFFSIZE = 64;
+    char  l_proc_str[BUFFSIZE];
+    fapi2::toString(i_target, l_proc_str, BUFFSIZE);
+
+    FAPI_INF("> p10_pstate_parameter_block - %s", l_proc_str);
 
     PlatPmPPB *l_pmPPB = new PlatPmPPB(i_target);
     GlobalPstateParmBlock_t *l_globalppb = new GlobalPstateParmBlock_t;
@@ -262,8 +267,8 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         FAPI_TRY(l_pmPPB->set_global_feature_attributes());
 
         // Put out the Parmater Blocks to the trace
-        gppb_print((l_globalppb));
-        oppb_print((&l_occppb));
+        gppb_print(i_target, l_globalppb);
+        oppb_print(i_target, &l_occppb);
         print_offsets();
 
         // Populate Global,local and OCC parameter blocks into Pstate super structure
@@ -275,7 +280,7 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 fapi_try_exit:
     delete l_pmPPB;
     delete l_globalppb;
-    FAPI_DBG("< p10_pstate_parameter_block");
+    FAPI_INF("< p10_pstate_parameter_block");
     return fapi2::current_err;
 }
 // END OF PSTATE PARAMETER BLOCK function
@@ -283,7 +288,9 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 ////////    gppb_print
 ///////////////////////////////////////////////////////////
-void gppb_print(GlobalPstateParmBlock_t* i_gppb)
+void gppb_print(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    GlobalPstateParmBlock_t* i_gppb)
 {
     static const uint32_t   BUFFSIZE = 512;
     char                    l_buffer[BUFFSIZE];
@@ -295,9 +302,11 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
     char vlt_str[][4] = {"VDD","VCS"};
     uint32_t        s;
 
+    fapi2::toString(i_target, l_buffer, BUFFSIZE);
+
     // Put out the endian-corrected scalars
     FAPI_INF("---------------------------------------------------------------------------------------");
-    FAPI_INF("Global Pstate Parameter Block");
+    FAPI_INF("Global Pstate Parameter Block - %s", l_buffer);
     FAPI_INF("---------------------------------------------------------------------------------------");
 
 //    strcpy(l_buffer,"");
@@ -357,7 +366,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
     }
 
     // -------------------
-    FAPI_INF("Operating Points(Raw):     Freq(MHz)         VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     IDRDC(10mA)");
+    FAPI_INF("Operating Points(Raw):     Freq(MHz)         VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     ICRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
@@ -384,7 +393,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
     }
 
     // -------------------
-    FAPI_INF("Operating Points(Raw):     Freq(MHz)    VDD_vmin(mV)  IDD_POW(10mA) CORE_POWR_TEMP(0.5C)");
+    FAPI_INF("Operating Points(Raw):     Freq(MHz)      VDD_vmin(mV)     RTTAC(10mA)     RTTDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
@@ -464,7 +473,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
     }
 
     // -------------------
-    FAPI_INF("Operating Points(Biased):  Freq(MHz)    VDD_vmin(mV)  IDD_POW(10mA) CORE_POWR_TEMP(0.5C)");
+    FAPI_INF("Operating Points(Biased):  Freq(MHz)      VDD_vmin(mV)     RTTAC(10mA)     RTTDC(10mA)");;
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
@@ -1129,7 +1138,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                 revle32(io_globalppb->dpll_pstate0_value));
 
         //Set PGPE Flags
-        io_globalppb->pgpe_flags[PGPE_FLAG_RESCLK_ENABLE] = iv_resclk_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_RESCLK_ENABLE] = is_resclk_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_CURRENT_READ_DISABLE] = iv_attrs.attr_system_current_read_disable;
         io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = !is_ocs_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_ENABLE] = iv_wof_enabled;
@@ -1435,7 +1444,9 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 ////////    oppb_print
 ///////////////////////////////////////////////////////////
-void oppb_print(OCCPstateParmBlock_t* i_oppb)
+void oppb_print(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    OCCPstateParmBlock_t* i_oppb)
 {
     static const uint32_t   BUFFSIZE = 256;
     char                    l_buffer[BUFFSIZE];
@@ -1443,16 +1454,17 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     const char*     pv_op_str[NUM_OP_POINTS] = PV_OP_STR;
 
     // Put out the endian-corrected scalars
+    fapi2::toString(i_target, l_buffer, BUFFSIZE);
 
     FAPI_INF("---------------------------------------------------------------------------------------");
-    FAPI_INF("OCC Pstate Parameter Block");
+    FAPI_INF("OCC Pstate Parameter Block - %s", l_buffer);
     FAPI_INF("---------------------------------------------------------------------------------------");
 
     FAPI_INF("Operating Points(biased):  Freq(MHz)     VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
-        sprintf (l_temp_buffer, "  %-18s : ",pv_op_str[i]);
+        sprintf (l_temp_buffer, "  %-20s : ",pv_op_str[i]);
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
@@ -1474,7 +1486,7 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
-        sprintf (l_temp_buffer, "  %-18s : ",pv_op_str[i]);
+        sprintf (l_temp_buffer, "  %-20s : ",pv_op_str[i]);
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
@@ -1493,11 +1505,11 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
         FAPI_INF("%s", l_buffer);
     }
 
-    FAPI_INF("Operating Points(biased):  Freq(MHz)     VDD_vmin(mV)  IDD_POW(10mA)");
+    FAPI_INF("Operating Points(Biased):  Freq(MHz)      VDD_vmin(mV)     RTTAC(10mA)     RTTAC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
-        sprintf (l_temp_buffer, "  %-18s : ",pv_op_str[i]);
+        sprintf (l_temp_buffer, "  %-20s : ",pv_op_str[i]);
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
@@ -2465,7 +2477,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         }
 
         FAPI_INF("Raw #V pre-overrides");
-        FAPI_TRY(print_voltage_bucket(p_poundV_data));
+        FAPI_TRY(print_voltage_bucket(iv_procChip, p_poundV_data));
 
         // Apply WOF Table Overrides as applicable
         FAPI_INF("> Applying WOF Overrides");
@@ -2570,14 +2582,14 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             l_buffer_inc += 1;
 
             //rt_tdp_ac_10ma
-            iv_attr_mvpd_poundV_raw[i].rt_tdp_ac_10ma = (uint32_t) *l_buffer_inc;
+            iv_attr_mvpd_poundV_raw[i].rt_tdp_ac_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
             FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].rt_tdp_ac_10ma,
                     iv_attr_mvpd_poundV_raw[i].rt_tdp_ac_10ma);
 
             l_buffer_inc += 2;
 
             //rt_tdp_dc_10ma
-            iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma = (uint32_t) *l_buffer_inc;
+            iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
             FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma,
                     iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma);
 
@@ -3995,8 +4007,8 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("    %-30s : %02d", "Good cores per Cache45", i_iddqt->good_normal_cores_per_EQs[2]);
     FAPI_INF("    %-30s : %02d", "Good cores per Cache67", i_iddqt->good_normal_cores_per_EQs[3]);
 
-    FAPI_INF("  %-26s : %d", "MMA state", i_iddqt->mma_not_active);
-    FAPI_INF("  %-26s : %d", "MMA leakage percent", i_iddqt->mma_off_leakage_pct);
+    FAPI_INF("  %-32s : %d", "MMA state", i_iddqt->mma_not_active);
+    FAPI_INF("  %-32s : %d", "MMA leakage percent", i_iddqt->mma_off_leakage_pct);
 
     // All IQ IDDQ measurements are at 5mA resolution. The OCC wants to
     // consume these at 1mA values.  thus, all values are multiplied by
@@ -6127,7 +6139,7 @@ fapi2::ReturnCode PlatPmPPB::set_wof_override_flags(
         //    member alignment. Thus, the keyword data is processed as a byte stream.
 
         FAPI_INF("Raw #V post-overrides");
-        FAPI_TRY(print_voltage_bucket(i_poundV_data));
+        FAPI_TRY(print_voltage_bucket(iv_procChip, i_poundV_data));
     }while(0);
 
 

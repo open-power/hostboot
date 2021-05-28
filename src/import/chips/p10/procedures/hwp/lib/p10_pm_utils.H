@@ -130,6 +130,7 @@ fapi2::ReturnCode wof_apply_overrides(
 /// @param[in]    o_poundV_data Pointer to structure
 /// ----------------------------------------------------------------------------
 fapi2::ReturnCode print_voltage_bucket(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
     fapi2::voltageBucketData_t* o_poundV_data);
 
 #endif  // __PM_UTILS_H__

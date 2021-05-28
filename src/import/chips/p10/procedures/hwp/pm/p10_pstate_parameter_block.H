@@ -852,7 +852,9 @@ extern "C"
     /// @return void
     /// -------------------------------------------------------------------
     void
-    gppb_print(GlobalPstateParmBlock_t* i_gppb);
+    gppb_print(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        GlobalPstateParmBlock_t* i_gppb);
 
     /// -------------------------------------------------------------------
     /// @brief  Print a OCCPstateParameterBlock structure on a given stream
@@ -860,7 +862,9 @@ extern "C"
     /// @return void
     /// -------------------------------------------------------------------
     void
-    oppb_print(OCCPstateParmBlock_t* i_oppb);
+    oppb_print(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        OCCPstateParmBlock_t* i_oppb);
 
     /// -------------------------------------------------------------------
     /// @brief  Print offsets of PstateSuperStructure contents
@@ -883,7 +887,9 @@ extern "C"
     /// @return void
     /// -------------------------------------------------------------------
     void
-    wfth_print(WofTablesHeader_t* i_wfth);
+    wfth_print(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        WofTablesHeader_t* i_wfth);
 
     /// -------------------------------------------------------------------
     /// @brief Populate Pstate super structure from VPD data
@@ -894,8 +900,9 @@ extern "C"
     /// @return   FAPI2::SUCCESS
     /// -------------------------------------------------------------------
     fapi2::ReturnCode
-    p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                                PstateSuperStructure* io_pss, uint8_t* o_buf, uint32_t& io_size);
+    p10_pstate_parameter_block(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        PstateSuperStructure* io_pss, uint8_t* o_buf, uint32_t& io_size);
 
 } // extern C
 
