@@ -259,16 +259,13 @@ void processCallout(errlHndl_t &io_errl,
             {
                 errlHndl_t errl = nullptr;
 
-                // TODO RTC 94872 - Uncomment this later after the FSP team
-                // implements it.
-                //
-                // errl = platHandleI2cDeviceCallout(
-                //                        i2cMaster,
-                //                        pCalloutUD->engine,
-                //                        pCalloutUD->port,
-                //                        pCalloutUD->address,
-                //                        pCalloutUD->priority,
-                //                        io_errl);
+                errl = platHandleI2cDeviceCallout(
+                                        i2cMaster,
+                                        pCalloutUD->engine,
+                                        pCalloutUD->port,
+                                        pCalloutUD->address,
+                                        pCalloutUD->priority,
+                                        io_errl);
                 if (errl)
                 {
                     HWAS_ERR("processCallout: error from platHandleI2cDeviceCallout");
