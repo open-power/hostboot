@@ -199,6 +199,7 @@ HCD_HDR_UINT32( iv_wofTableOffset,      0);
 HCD_HDR_UINT32( iv_wofTableLength,      0);
 HCD_HDR_UINT32( iv_deepOptraceOffset,   0);
 HCD_HDR_UINT32( iv_deepOptraceLength,   0);
+HCD_HDR_UINT32( iv_pgpeBaseAddress,     0);
 
 #ifdef __ASSEMBLER__
 .endm
@@ -270,6 +271,7 @@ HCD_HDR_UINT32( iv_xgpeHcodeOffset,     0);
 HCD_HDR_UINT32( iv_xgpeHcodeLength,     0);
 HCD_HDR_UINT32( iv_xgpeBootProgCode,    0);
 HCD_HDR_UINT32( iv_xgpeSramSize,        0);
+HCD_HDR_UINT32( iv_xgpeBaseAddress,     0);
 HCD_HDR_PAD(XPMR_HEADER_SIZE);
 #ifdef __ASSEMBLER__
 .endm
@@ -434,8 +436,8 @@ typedef struct
     uint8_t iv_ppmrHeader[PPMR_HEADER_SIZE];
     uint8_t iv_bootCopier[PGPE_BOOT_COPIER_SIZE];
     uint8_t iv_bootLoader[PGPE_BOOT_LOADER_SIZE];
-    uint8_t iv_pgpeSramRegion[OCC_SRAM_PGPE_REGION_SIZE];
-    uint8_t iv_reserve1[OCC_PSTATE_PARAM_BLOCK_PPMR_OFFSET - (PPMR_BOOT_REGION + OCC_SRAM_PGPE_REGION_SIZE)];
+    uint8_t iv_pgpeSramRegion[OCC_SRAM_PGPE_REVISED_REGION_SIZE];
+    uint8_t iv_reserve1[OCC_PSTATE_PARAM_BLOCK_PPMR_OFFSET - (PPMR_BOOT_REGION + OCC_SRAM_PGPE_REVISED_REGION_SIZE)];
     uint8_t iv_occPstateParamBlock[OCC_PSTATE_PARAM_BLOCK_REGION_SIZE];
     uint8_t iv_pstateTable[PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE];
     uint8_t iv_reserve2[PPMR_RESERVE_PSTATE_TABLE_TO_WOF];
@@ -450,7 +452,7 @@ typedef struct
     uint8_t iv_xpmrHeader[XPMR_HEADER_SIZE];
     uint8_t iv_bootCopier[XGPE_BOOT_COPIER_LENGTH];
     uint8_t iv_bootLoader[XGPE_BOOT_LOADER_LENGTH];
-    uint8_t iv_xgpeSramRegion[XGPE_SRAM_SIZE];
+    uint8_t iv_xgpeSramRegion[XGPE_REVISED_SRAM_SIZE];
 } XPMRLayout_t;
 
 /**

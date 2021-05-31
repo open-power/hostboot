@@ -81,6 +81,8 @@ enum
     QME_SRAM_OPT_VER    =   0x514d455f5f312e31ull,
     QME_SRAM_MAGIC_WORD =   0x514d455f5f312e30ull,
     QME_VER_BASE_ASCII  =   0x514d455f5f312e30ull,
+    XGPE_RELOC_BASE     =   0xfff34000,
+    XGPE_MAGIC_NUM_48K  =   0x584750455f312e31ull,  //XGPE__1.1
 };
 
 /**
@@ -762,6 +764,7 @@ fapi2::ReturnCode buildXpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
 
     //XGPE SRAM
     l_pXpmrHdr->iv_xgpeSramSize     =   l_sectn.iv_sectnLength;
+
     i_xpmrBuildRecord.dumpBuildRecord();
 
 #ifndef __HOSTBOOT_MODULE
@@ -2127,6 +2130,19 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
     l_pXpmrHdr->iv_xpmrMagicWord    =   htobe64(XPMR_MAGIC_NUMBER);
     pXgpeHeader->g_xgpe_magicWord   =   htobe64(XGPE_MAGIC_NUMBER);
 
+    if( pXgpeHeader->g_xgpe_magicWord == htobe64(XGPE_MAGIC_NUM_48K) )
+    {
+        //If magic word has been changed through an HCODE commit, move 
+        //to new OCC SRAM sharing scheme of PGPE and XGPE.
+        l_pXpmrHdr->iv_xgpeBaseAddress  =   htobe32(XGPE_RELOC_BASE);
+    }
+    else
+    {
+        l_pXpmrHdr->iv_xgpeBaseAddress  =  htobe32(XGPE_SRAM_BASE_ADDR);
+    }
+
+    FAPI_INF( "XGPE SRAM Base Address    0x%08x", htobe32(l_pXpmrHdr->iv_xgpeBaseAddress) );
+
     FAPI_INF( "<< populateMagicWord" );
     return fapi2::current_err;
 }
@@ -2364,6 +2380,9 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     l_pPpmrHdr->iv_deepOptraceOffset =  l_sectn.iv_sectnOffset;
     l_pPpmrHdr->iv_deepOptraceLength =  l_sectn.iv_sectnLength;
 
+    //Init start address of PGPE Image
+    l_pPpmrHdr->iv_pgpeBaseAddress   =   htobe32(PGPE_SRAM_BASE_ADDR);
+
     i_ppmrBuildRecord.dumpBuildRecord();
 
 #ifndef __HOSTBOOT_MODULE
@@ -2401,6 +2420,7 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     FAPI_DBG( "WOF Table Length           0x%08x", htobe32(l_pPpmrHdr->iv_wofTableLength));
     FAPI_DBG( "Deep Op Trace Offset       0x%08x", htobe32(l_pPpmrHdr->iv_deepOptraceOffset));
     FAPI_DBG( "Deep Op Trace Length       0x%08x", htobe32(l_pPpmrHdr->iv_deepOptraceLength));
+    FAPI_DBG( "PGPE SRAM Base Address     0x%08x", htobe32(l_pPpmrHdr->iv_pgpeBaseAddress));
 
     FAPI_DBG( "==========================================================" );
 #endif
@@ -2673,13 +2693,13 @@ fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncMode
 
     l_imageSize     =   htobe32 (l_pXpmrHdr->iv_xgpeSramSize );
 
-    FAPI_ASSERT( ( l_imageSize <= XGPE_SRAM_SIZE ),
+    FAPI_ASSERT( ( l_imageSize <= XGPE_REVISED_SRAM_SIZE ),
                  fapi2::XGPE_IMG_EXCEED_SRAM_SIZE()
                  .set_BAD_IMG_SIZE( l_imageSize )
-                 .set_MAX_XGPE_IMG_SIZE_ALLOWED(XGPE_SRAM_SIZE)
+                 .set_MAX_XGPE_IMG_SIZE_ALLOWED( XGPE_REVISED_SRAM_SIZE )
                  .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
                  "XGPE Image Size Check Failed Actual 0x%08x Max Allowed 0x%08x",
-                 l_imageSize, XGPE_SRAM_SIZE );
+                 l_imageSize, XGPE_REVISED_SRAM_SIZE );
 
     FAPI_INF( "----- XGPE Image Check Success -----" );
 
@@ -2742,13 +2762,13 @@ fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncMode
 
     l_imageSize     =   htobe32( l_pPpmrHdr->iv_sramSize );
 
-    FAPI_ASSERT( ( l_imageSize +  PGPE_OCC_SHARED_SRAM_SIZE + PGPE_SRAM_BOOT_REGION  <= OCC_SRAM_PGPE_REGION_SIZE ),
+    FAPI_ASSERT( ( l_imageSize +  PGPE_OCC_SHARED_SRAM_SIZE + PGPE_SRAM_BOOT_REGION  <= OCC_SRAM_PGPE_REVISED_REGION_SIZE ),
                  fapi2::PGPE_IMG_EXCEED_SRAM_SIZE()
                  .set_BAD_IMG_SIZE( l_imageSize )
-                 .set_MAX_PGPE_IMG_SIZE_ALLOWED(OCC_SRAM_PGPE_REGION_SIZE)
+                 .set_MAX_PGPE_IMG_SIZE_ALLOWED( OCC_SRAM_PGPE_REVISED_REGION_SIZE )
                  .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
                  "PGPE Image Size Check Failed Actual 0x%08x Max Allowed 0x%08x",
-                 l_imageSize, OCC_SRAM_PGPE_REGION_SIZE );
+                 l_imageSize, OCC_SRAM_PGPE_REVISED_REGION_SIZE );
 
     FAPI_INF( "----- PGPE Image Check Success -----" );
 
