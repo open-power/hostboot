@@ -118,6 +118,24 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
         // want to diagnose the problem
         l_SBEobj.setInitialPowerOn(true);
 
+        // Enable HB SPI operations to this slave processor before
+        // checking for success because we may end up doing SPI
+        // operations (writing MVPD) as part of the recovery.
+        l_errl = SPI::spiLockProcessor(l_cpu_target, false);
+        if (l_errl)
+        {
+            // This would be a firmware bug that would be hard to
+            // find later so terminate with this failure
+            TRACFCOMP(g_trac_isteps_trace,
+                      "ERROR : SPI unlock failed to target %.8X"
+                      TRACE_ERR_FMT,
+                      get_huid(l_cpu_target),
+                      TRACE_ERR_ARGS(l_errl));
+            captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+            break;
+        }
+
+        // Poll for SBE boot complete
         l_SBEobj.main_sbe_handler(l_cpu_target);
 
         // We will judge whether or not the SBE had a successful
@@ -231,20 +249,6 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
                   TARGETING::get_huid(l_cpu_target) );
 
 **/
-        // Enable HB SPI operations to this slave processor after SBE boot
-        l_errl = SPI::spiLockProcessor(l_cpu_target, false);
-        if (l_errl)
-        {
-            // This would be a firmware bug that would be hard to
-            // find later so terminate with this failure
-            TRACFCOMP(g_trac_isteps_trace,
-                      "ERROR : SPI unlock failed to target %.8X"
-                      TRACE_ERR_FMT,
-                      get_huid(l_cpu_target),
-                      TRACE_ERR_ARGS(l_errl));
-            captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
-            break;
-        }
         // Need to switch SPI control register back to FSI_ACCESS mode
         // since SBE will flip the access mode into PIB_ACCESS
         l_errl = SPI::spiSetAccessMode(l_cpu_target, SPI::FSI_ACCESS);
