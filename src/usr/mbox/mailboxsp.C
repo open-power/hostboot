@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -98,7 +98,7 @@ MailboxSp::MailboxSp()
         iv_reclaim_sent_cnt(0),
         iv_reclaim_rsp_cnt(0)
 {
-    mutex_init(&iv_sendq_mutex);
+    recursive_mutex_init(&iv_sendq_mutex);
     // mailbox target
     TARGETING::targetService().masterProcChipTargetHandle(iv_trgt);
 }
@@ -703,9 +703,9 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
         }
         else
         {
-            mutex_lock(&iv_sendq_mutex);
+            recursive_mutex_lock(&iv_sendq_mutex);
             iv_sendq.push_back(mbox_msg);
-            mutex_unlock(&iv_sendq_mutex);
+            recursive_mutex_unlock(&iv_sendq_mutex);
             TRACFCOMP(g_trac_mbox,"I>Mailbox suspending or suspended.");
             trace_msg("QUEUED",mbox_msg);
         }
@@ -716,7 +716,7 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
 // Note: When called due to an ACK or retry, iv_rts should be true.
 void MailboxSp::send_msg(mbox_msg_t * i_msg)
 {
-    mutex_lock(&iv_sendq_mutex);
+    recursive_mutex_lock(&iv_sendq_mutex);
     if(i_msg)
     {
         iv_sendq.push_back(*i_msg);
@@ -729,7 +729,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
     //
     if(!iv_rts || iv_dma_pend || iv_sendq.size() == 0)
     {
-        mutex_unlock(&iv_sendq_mutex);
+        recursive_mutex_unlock(&iv_sendq_mutex);
         return;
     }
 
@@ -822,9 +822,11 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                      * @moduleid        MOD_MBOXSRV_SENDMSG
                      * @reasoncode      RC_INVALID_DMA_LENGTH
                      * @userdata1       DMA length requested
-                     * @userdata2       queue_id
+                     * @userdata2[00:31] message type
+                     * @userdata2[32:63] queue_id
                      * @devdesc         Failed to allocate a DMA buffer.
                      *                  Message dropped.
+                     * @custdesc        Internal firmware error during IPL
                      */
                     err = new ERRORLOG::ErrlEntry
                         (
@@ -832,7 +834,9 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                          MBOX::MOD_MBOXSRV_SENDMSG,
                          MBOX::RC_INVALID_DMA_LENGTH,      //  reason Code
                          dma_size,                         // DMA data len
-                         iv_msg_to_send.msg_queue_id,      // MSG queueid
+                         TWO_UINT32_TO_UINT64(
+                             iv_msg_to_send.msg_payload.type,
+                             iv_msg_to_send.msg_queue_id),      // MSG queueid
                          true //Add HB Software Callout
                         );
 
@@ -919,7 +923,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
         }
     }
 
-    mutex_unlock(&iv_sendq_mutex);
+    recursive_mutex_unlock(&iv_sendq_mutex);
     return;
 }
 
