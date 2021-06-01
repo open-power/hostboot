@@ -126,26 +126,40 @@ fapi_try_exit:
 fapi2::ReturnCode verify_ec_hw_state(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_INF (">>verify_hw_state");
-    uint8_t l_core_unit_pos;
-
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE> >l_core_list;
-    FAPI_TRY(getDeconfiguredTargets(i_target, l_core_list));
-
-    for (auto l_core : l_core_list)
+    do
     {
+        //this doesn't need to be called for mpipl
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        fapi2::ATTR_IS_MPIPL_Type l_mpipl;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_mpipl));
 
-        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
-                                l_core,
-                                l_core_unit_pos));
-        FAPI_INF("Core present but non functional %d",
-                 l_core_unit_pos);
+        if (l_mpipl)
+        {
+            break;
+        }
 
-        //Check the clock state and power state
-// RTC 249759: temporarily enable deconfigured cores/L3 to check for PFET state
-        FAPI_TRY(powerdown_deconfigured_cl2_l3(l_core, l_core_unit_pos));
+        FAPI_INF (">>verify_hw_state");
+        uint8_t l_core_unit_pos;
 
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE> >l_core_list;
+        FAPI_TRY(getDeconfiguredTargets(i_target, l_core_list));
+
+        for (auto l_core : l_core_list)
+        {
+
+            FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                    l_core,
+                                    l_core_unit_pos));
+            FAPI_INF("Core present but non functional %d",
+                     l_core_unit_pos);
+
+            //Check the clock state and power state
+            // RTC 249759: temporarily enable deconfigured cores/L3 to check for PFET state
+            FAPI_TRY(powerdown_deconfigured_cl2_l3(l_core, l_core_unit_pos));
+
+        }
     }
+    while(0);
 
 fapi_try_exit:
     FAPI_INF("<< verify_hw_state...");
