@@ -68,6 +68,7 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_reg_data;
 
     // Create registers and check success for MCBISTFIR and SRQFIR and RDFFIR
     mss::fir::reg<EXPLR_MCBIST_MCBISTFIRQ> l_exp_mcbist_reg(i_target, l_rc1);
@@ -78,13 +79,20 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_SRQ_SRQFIRQ 0x%08X", EXPLR_SRQ_SRQFIRQ);
     FAPI_TRY(l_rc3, "unable to create fir::reg for EXPLR_RDF_FIR 0x%08X", EXPLR_RDF_FIR);
 
+    // Set this to mask off missing dfi_rddata_valid from triggering EXPLR_RDF_FIR_RDDATA_VALID_ERROR
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_RDF_MASK1, l_reg_data));
+    l_reg_data.setBit<EXPLR_RDF_MASK1_MISSING_RDDATA_VALID>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_RDF_MASK1, l_reg_data));
+
     // Write MCBISTFIR register per Explorer unmask spec
     FAPI_TRY(l_exp_mcbist_reg.attention<EXPLR_MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
              .write());
 
     // Write RDF FIR register per Explorer unmask spec
     FAPI_TRY(l_exp_rdf_reg.recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_AUE>()
+             .recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_RCD>()
              .recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_IAUE>()
+             .recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_IRCD>()
              .recoverable_error<EXPLR_RDF_FIR_RDDATA_VALID_ERROR>()
              .recoverable_error<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_STATUS>()
              .recoverable_error<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_RECOVERABLE>()
@@ -539,8 +547,10 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     // Write remainder of RDF FIR mask per Explorer unmask spec
     FAPI_TRY(l_exp_rdf_fir_reg.checkstop<EXPLR_RDF_FIR_MAINLINE_AUE>()
              .recoverable_error<EXPLR_RDF_FIR_MAINLINE_UE>()
+             .recoverable_error<EXPLR_RDF_FIR_MAINLINE_RCD>()
              .checkstop<EXPLR_RDF_FIR_MAINLINE_IAUE>()
              .recoverable_error<EXPLR_RDF_FIR_MAINLINE_IUE>()
+             .recoverable_error<EXPLR_RDF_FIR_MAINLINE_IRCD>()
              .checkstop_nomask<EXPLR_RDF_FIR_MAINTENANCE_AUE>()
              .checkstop_nomask<EXPLR_RDF_FIR_MAINTENANCE_IAUE>()
              .write(), "Failed to write RDF FIR mask and action regs for %s", mss::c_str(i_target));
