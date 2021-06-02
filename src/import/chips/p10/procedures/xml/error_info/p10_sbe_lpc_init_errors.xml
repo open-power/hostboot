@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -81,12 +81,5 @@
     <deconfigure>
       <target>TARGET_CHIP</target>
     </deconfigure>
-  </hwpError>
-  <hwpError>
-    <rc>RC_LPC_REGISTERS</rc>
-    <description>LPC register dump</description>
-    <buffer>OPB_MST_REGS</buffer>
-    <buffer>OPB_ARB_REGS</buffer>
-    <buffer>LPC_HC_REGS</buffer>
   </hwpError>
 </hwpErrors>

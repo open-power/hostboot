@@ -27,6 +27,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_STATIC_POWER_GATING_PFET_CNFG_ERR</rc>
     <description>
       Procedure: p10_sbe_tp_chiplet_reset

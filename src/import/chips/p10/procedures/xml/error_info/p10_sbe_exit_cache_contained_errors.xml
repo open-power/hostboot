@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,6 +25,7 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_EXIT_CACHE_CONTAINED_ACTIVE_BACKING_OVERLAP_ERR</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>ACTIVE_CORES</ffdc>
@@ -36,6 +37,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_EXIT_CACHE_CONTAINED_MULTIPLE_MASTER_ERR</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>MASTER_CORE</ffdc>
@@ -47,6 +49,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_EXIT_CACHE_CONTAINED_NO_MASTER_ERR</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>MASTER_CORE_NUM</ffdc>
@@ -57,6 +60,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_EXIT_CACHE_CONTAINED_NO_MASTER_PAIR_ERR</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>MASTER_CORE_NUM</ffdc>
@@ -67,6 +71,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_EXIT_CACHE_CONTAINED_THREAD_STOP_ERR</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>THREAD_NUM</ffdc>

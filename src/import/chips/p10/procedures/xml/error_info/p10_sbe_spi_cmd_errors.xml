@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,6 +25,7 @@
 <hwpErrors>
     <!-- *****************************************************************-->
     <hwpError>
+        <sbeError/>
         <rc>RC_SBE_SPI_INVALID_PORT_MULTIPLEX_SET</rc>
         <description>
             Procedure: Error calling p10_sbe_spi_cmd HWP
@@ -41,6 +42,7 @@
     </hwpError>
     <!-- *****************************************************************-->
     <hwpError>
+        <sbeError/>
         <rc>RC_SBE_SPI_CMD_STATUS_REG_UNSUPPORTED_STATE</rc>
         <description>
             The SPI status register state bits check validation failed.
@@ -57,6 +59,7 @@
     </hwpError>
     <!-- *****************************************************************-->
     <hwpError>
+        <sbeError/>
         <rc>RC_SBE_SPI_HANG_TIMEOUT</rc>
         <description>
             Procedure: Error calling p10_sbe_spi_cmd HWP

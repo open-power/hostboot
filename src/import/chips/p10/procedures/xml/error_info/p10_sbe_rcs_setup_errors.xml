@@ -28,6 +28,7 @@
 <hwpErrors>
  <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_RCS_CLOCK_ERR</rc>
       <description> RCS clock error </description>
       <ffdc>READ_SNS1LTH</ffdc>
@@ -35,6 +36,7 @@
    </hwpError>
  <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_RCS_PLL_LOCK_ERR</rc>
       <description> RCS pll not locked </description>
       <ffdc>TP_PLL_LOCK_REG</ffdc>
@@ -42,6 +44,7 @@
    </hwpError>
  <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_RCS_FPLL_DESKEW_ERR</rc>
       <description> Error in caliberating the deskew for RCS FPLL </description>
       <ffdc>READ_SNS1LTH</ffdc>
@@ -49,6 +52,7 @@
    </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_RCS_FPLL_DESKEW_ERR_A</rc>
       <description> Error in caliberating the deskew for RCS FPLL A-Side</description>
       <ffdc>READ_SNS1LTH</ffdc>
@@ -56,6 +60,7 @@
    </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_RCS_FPLL_DESKEW_ERR_B</rc>
       <description> Error in caliberating the deskew for RCS FPLL B-Side</description>
       <ffdc>READ_SNS1LTH</ffdc>

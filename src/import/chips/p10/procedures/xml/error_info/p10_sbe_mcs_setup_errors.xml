@@ -25,6 +25,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_MCS_SETUP_NO_MC_FOUND_ERR</rc>
     <description>
       There is no functional MCS/MI unit target configured on the master chip

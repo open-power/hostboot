@@ -26,6 +26,7 @@
 <hwpErrors>
    <!-- ******************************************************************** -->
    <hwpError>
+     <sbeError/>
      <rc>RC_KVREF_CAL_NOT_DONE_ERR</rc>
      <description>Precision reference voltage calibration not done</description>
      <ffdc>PERV_TP_KVREF_AND_VMEAS_MODE_STATUS_REG</ffdc>

@@ -25,6 +25,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PCB_CLOCK_ALIGNMENT_ERROR</rc>
     <description>
       Procedure: p10_sbe_tp_switch_gears
