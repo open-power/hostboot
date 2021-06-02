@@ -25,6 +25,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_SCOMINIT_XSCOM_BAR_ATTR_ERR</rc>
     <description>
       Procedure: p10_sbe_scominit
@@ -44,6 +45,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_SCOMINIT_LPC_BAR_ATTR_ERR</rc>
     <description>
       Procedure: p10_sbe_scominit
@@ -63,6 +65,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_SCOMINIT_FABRIC_BROADCAST_ATTR_ERR</rc>
     <description>
       Procedure: p10_sbe_scominit
