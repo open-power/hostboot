@@ -445,6 +445,34 @@ typedef struct
     uint32_t step_size_mv[RUNTIME_RAILS];
 } VRMParms_t;
 
+/// Voltage Regulation Module (VRM) Control Settings
+typedef struct
+{
+    /// Time between ext VRM detects write voltage cmd and when voltage begins to move
+    uint32_t transition_start_ns[RUNTIME_RAILS];
+
+    /// Transition rate for an increasing voltage excursion
+    uint32_t transition_rate_inc_uv_per_us[RUNTIME_RAILS];
+
+    /// Transition rate for an decreasing voltage excursion
+    uint32_t transition_rate_dec_uv_per_us[RUNTIME_RAILS];
+
+    /// Delay to account for rail settling
+    uint32_t stabilization_time_us[RUNTIME_RAILS];
+
+    /// External VRM transition step size
+    uint32_t step_size_mv[RUNTIME_RAILS];
+
+    /// Current Scaling Factor
+    /// Integer scaling needed on current read from VRMs
+    /// Indexes:
+    ///   0: VDD
+    ///   1: VCS
+    ///   2: VDN
+    uint8_t                 current_scaling_factor[3];
+} VRMParms_v1_t;
+
+
 
 /// @todo Need to define the DDS control block
 
@@ -622,27 +650,29 @@ typedef struct
 // __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_t;
 
+#define NUM_VPD_PTS_SET_V1 2
+
 //Operating Points, Slopes, and Biases
 typedef struct
 {
     /// Precalculated VPD Slopes
     /// All are in 4.12 decimal form into uint16_t integer value
-    uint16_t    ps_voltage_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t    voltage_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t    ps_ac_current_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t    ps_dc_current_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t    ac_current_ps_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t    dc_current_ps_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t    ps_ac_current_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t    ps_dc_current_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t    ac_current_ps_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t    dc_current_ps_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_voltage_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
+    uint16_t    voltage_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_ac_current_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_dc_current_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
+    uint16_t    ac_current_ps_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
+    uint16_t    dc_current_ps_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_ac_current_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_dc_current_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
+    uint16_t    ac_current_ps_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
+    uint16_t    dc_current_ps_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET_V1][VPD_NUM_SLOPES_REGION];
 } PoundVSlopes_t;
 
 typedef struct
 {
-    uint16_t    ps_dds_delay_slopes[NUM_VPD_PTS_SET][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
-    uint8_t     ps_dds_slopes[NUM_POUNDW_DDS_FIELDS][NUM_VPD_PTS_SET][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_dds_delay_slopes[NUM_VPD_PTS_SET_V1][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
+    uint8_t     ps_dds_slopes[NUM_POUNDW_DDS_FIELDS][NUM_VPD_PTS_SET_V1][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
 } PoundWSlopes_t;
 
 typedef struct
@@ -684,6 +714,7 @@ typedef struct
 //WOF
 typedef struct
 {
+    //\TODO To Be deleted
     uint32_t core_on_ratio_vdd;
     uint32_t l3_on_ratio_vdd;
     uint32_t mma_on_ratio_vdd;
@@ -691,6 +722,11 @@ typedef struct
     uint32_t l3_on_ratio_vcs;
     uint32_t vdd_vratio_weight;
     uint32_t vcs_vratio_weight;
+    //\TODO To Be deleted
+
+    /// WOF vratio attributes
+    uint16_t vratio_vdd_64ths[NUM_WOF_VRATIO_PCT];
+    uint16_t vratio_vcs_64ths[NUM_WOF_VRATIO_PCT];
 } GlobalPstateParmBlockWOF_t;
 
 typedef struct
@@ -799,14 +835,14 @@ typedef struct
     SysPowerDistParms_t vdd_sysparm;
     SysPowerDistParms_t vcs_sysparm;
     SysPowerDistParms_t vdn_sysparm;
-    VRMParms_t          ext_vrm_parms;
+    VRMParms_v1_t       ext_vrm_parms;
 
     //Operating points, Slopes and Biases
     /// VPD operating points are biased but without load-line correction.
     // Frequencies are in MHz, voltages are specified in units of 1mV, currents
     /// are specified in units of 10mA, and temperatures are specified in 0.5
     /// degrees C.
-    PoundVOpPoint_t     operating_points_set[NUM_VPD_PTS_SET][NUM_PV_POINTS];
+    PoundVOpPoint_t     operating_points_set[NUM_VPD_PTS_SET_V1][NUM_PV_POINTS];
 
     PoundVBias_t        poundv_biases_0p05pct;  // Values in 0.5%
 
@@ -827,7 +863,7 @@ typedef struct
     PoundWEntry_TgtActBin_t dds_tgt_act_bin[NUM_PV_POINTS][MAXIMUM_CORES];
 
     /// #W Other (DDS Data)
-    PoundWOther_t   dds_other;
+    PoundWOtherPadded_t dds_other;
 
     /// #W VDD Calibration(DDS Data)
     vdd_calibration         vdd_cal[NUM_PV_POINTS];
@@ -840,7 +876,6 @@ typedef struct
 
     //WOV
     GlobalPstateParmBlockWOV_t wov;
-
 // __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_v1_t;
 
