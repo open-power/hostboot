@@ -323,7 +323,7 @@ RUNTIME_MODULES += fapi2_rt      # ~/src/usr/fapi2/runtime/
 RUNTIME_MODULES += fsi_rt        # ~/src/usr/fsi/runtime/ - no runtime test
 RUNTIME_MODULES += fsiscom_rt    # ~/src/usr/fsiscom/runtime/ - no runtime test
 RUNTIME_MODULES += imageprocs_rt # ~/src/usr/imageprocs/runtime/ - no runtime test
-RUNTIME_MODULES += i2c_rt        # ~/src/usr/i2c/runtime/ - no runtime test
+RUNTIME_MODULES += i2c_rt        # ~/src/usr/i2c/runtime/
 RUNTIME_MODULES += mmio_rt       # ~/src/usr/mmio/runtime/ - no runtime test
 RUNTIME_MODULES += scom_rt       # ~/src/usr/scom/runtime/
 RUNTIME_MODULES += vpd_rt        # ~/src/usr/vpd/runtime/
@@ -376,6 +376,7 @@ RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_BMC_IPMI),testipmi_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),testmctp_rt) # ~/src/usr/mctp/runtime/
+RUNTIME_TESTCASE_MODULES += testi2c_rt
 endif
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic

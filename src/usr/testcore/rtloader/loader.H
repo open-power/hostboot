@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,6 +148,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->unmap_phys_mem = rt_unmap_phys_mem;
                 intf->map_phys_mem = rt_map_phys_mem;
                 intf->nanosleep = rt_nanosleep;
+                intf->i2c_read = rt_i2c_read;
+                intf->i2c_write = rt_i2c_write;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -1225,6 +1227,128 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return retVal;
         }
 
+        //--------------------------------------------------------------------
+        static int rt_i2c_read( uint64_t i_master, uint16_t i_devAddr,
+                                uint32_t i_offsetSize, uint32_t i_offset,
+                                uint32_t i_length, void* o_data )
+        {
+            int l_rc = 0;
+
+            // just pass the operation down into the base HB code
+
+            /* pull apart the proc/engine/port
+             *  @param[in] i_master     chip, engine and port packed into
+             *                          a single 64-bit argument
+             *                          chip includes ID type, see defines at top
+             *    ---------------------------------------------------
+             *    |         chip         |  reserved  |  eng | port |
+             *    |         (32)         |    (16)    |  (8) | (8)  |
+             *    ---------------------------------------------------
+             */
+            uint32_t l_chip = (HBRT_I2C_MASTER_CHIP_MASK & i_master) >> 32;
+            uint32_t l_engine = (HBRT_I2C_MASTER_ENGINE_MASK & i_master) >> 8;
+            uint32_t l_port = (HBRT_I2C_MASTER_PORT_MASK & i_master);
+            TARGETING::Target* l_chipTarg = get_target_for_hbrt_id(l_chip);
+            uint32_t l_offset = i_offset << (sizeof(i_offset)-i_offsetSize);
+            size_t l_length = i_length;
+            // PHYP/OPAL expet the 7-bits to be left-justified,
+            //  HB input is right-justified
+            uint16_t l_devAddr = i_devAddr << 1;
+
+            TRACFCOMP(g_trac_hbrt,
+                      "rt_i2c_read: l_chip=%d(%.8X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=%.2X",
+                      l_chip, TARGETING::get_huid(l_chipTarg),
+                      l_engine, l_port, l_offset, l_devAddr);
+
+            errlHndl_t l_err = deviceOp( DeviceFW::READ,
+                                  l_chipTarg,
+                                  o_data,
+                                  l_length,
+                                  DEVICE_I2C_ADDRESS_OFFSET(l_port,
+                                     l_engine,
+                                     l_devAddr,
+                                     i_offsetSize,
+                                     reinterpret_cast<uint8_t*>(&l_offset),
+                                     I2C_MUX::NOT_APPLICABLE,
+                                     nullptr) );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_hbrt,
+                          "rt_i2c_read: error from DeviceFW::READ");
+                errlCommit (l_err, CXXTEST_COMP_ID);
+                l_rc = -999;
+            }
+
+            return l_rc;
+        }
+
+        //--------------------------------------------------------------------
+        static int rt_i2c_write( uint64_t i_master, uint16_t i_devAddr,
+                                 uint32_t i_offsetSize, uint32_t i_offset,
+                                 uint32_t i_length, void* i_data )
+        {
+            int l_rc = 0;
+
+            // just pass the operation down into the base HB code
+
+            /* pull apart the proc/engine/port
+             *  @param[in] i_master     chip, engine and port packed into
+             *                          a single 64-bit argument
+             *                          chip includes ID type, see defines at top
+             *    ---------------------------------------------------
+             *    |         chip         |  reserved  |  eng | port |
+             *    |         (32)         |    (16)    |  (8) | (8)  |
+             *    ---------------------------------------------------
+             */
+            uint32_t l_chip = (HBRT_I2C_MASTER_CHIP_MASK & i_master) >> 32;
+            uint32_t l_engine = (HBRT_I2C_MASTER_ENGINE_MASK & i_master) >> 8;
+            uint32_t l_port = (HBRT_I2C_MASTER_PORT_MASK & i_master);
+            TARGETING::Target* l_chipTarg = get_target_for_hbrt_id(l_chip);
+            uint32_t l_offset = i_offset << (sizeof(i_offset)-i_offsetSize);
+            size_t l_length = i_length;
+            // PHYP/OPAL expet the 7-bits to be left-justified,
+            //  HB input is right-justified
+            uint16_t l_devAddr = i_devAddr << 1;
+
+            TRACFCOMP(g_trac_hbrt,
+                      "rt_i2c_write: l_chip=%d(%.8X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=%.2X",
+                      l_chip, TARGETING::get_huid(l_chipTarg),
+                      l_engine, l_port, l_offset, l_devAddr);
+
+            // Look for special parms to test i2c lock path
+            if( i_offset == 1234 )
+            {
+                TRACFCOMP(g_trac_hbrt,
+                          "rt_i2c_write: Forcing Lock Path");
+                return HBRT_RC_I2C_LOCKED;
+            }
+
+
+            errlHndl_t l_err = deviceOp( DeviceFW::WRITE,
+                                  l_chipTarg,
+                                  i_data,
+                                  l_length,
+                                  DEVICE_I2C_ADDRESS_OFFSET( l_port,
+                                     l_engine,
+                                     l_devAddr,
+                                     i_offsetSize,
+                                     reinterpret_cast<uint8_t*>(&l_offset),
+                                     I2C_MUX::NOT_APPLICABLE,
+                                     nullptr) );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_hbrt,
+                          "rt_i2c_write: error from DeviceFW::WRITE");
+                errlCommit (l_err, CXXTEST_COMP_ID);
+                l_rc = -999;
+            }
+
+            return l_rc;
+        }
+
+
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
         static uint64_t cv_hb_data_addr;
         static uint64_t cv_comm_addr;
         static uint64_t cv_comm_phys_addr;

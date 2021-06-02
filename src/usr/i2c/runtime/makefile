@@ -27,6 +27,7 @@
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = i2c_rt
+SUBDIRS += test.d
 
 # needed to pull in sbe_retry_handler
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2

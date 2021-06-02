@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/i2c/test/makefile $
+# $Source: src/usr/i2c/runtime/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2021
 # [+] International Business Machines Corp.
 #
 #
@@ -22,10 +22,12 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
+ROOTPATH = ../../../../..
 
-MODULE = testi2c
+HOSTBOOT_RUNTIME = 1
+MODULE = testi2c_rt
 
-TESTS += i2ctest.H i2ctest_common.H
+TESTS += i2ctest_rt.H
+TESTS += ../../test/i2ctest_common.H
 
 include ${ROOTPATH}/config.mk
