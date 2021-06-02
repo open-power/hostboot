@@ -3193,6 +3193,26 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
                 break;
             }
 
+            // Update the FSP's cache of the ECC data as well
+            VPD::VpdWriteMsg_t msgdata;
+            msgdata.offset = l_eccOffset;
+
+            l_err = VPD::sendMboxWriteMsg( l_eccLength,
+                                           l_eccData,
+                                           i_target,
+                                           iv_vpdMsgType,
+                                           msgdata );
+
+            if ( l_err )
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::updateRecordEccData(): "
+                    "Error with call to VPD::sendMboxWriteMsg for target(0x%.8X) "
+                    "failed to update the FSP's cache of ECC data for record(%s) at "
+                    "ECC offset(0x%.4x) with ECC length(0x%.4x)",
+                    TARGETING::get_huid(i_target), l_recordName, l_eccOffset, l_eccLength );
+                break;
+            }
+
             TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::updateRecordEccData(): "
                     "Success with call to DeviceFW::deviceOp(WRITE) for target(0x%.8X) "
                     "succeeded in updating the ECC data for record(%s) at ECC offset(0x%.4x) "
