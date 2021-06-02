@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -229,6 +229,7 @@ actionclass level2_th_1_SUE  { level2_th_1; SueSeen;   };
 actionclass level2_th_1_UERE { level2_th_1; SueSource; };
 actionclass self_th_1_SUE    { self_th_1;   SueSeen;   };
 actionclass self_th_1_UERE   { self_th_1;   SueSource; };
+actionclass parent_proc_th_1_UERE { parent_proc_th_1; SueSource; };
 
 ################################################################################
 #                               Dump Types                                     #

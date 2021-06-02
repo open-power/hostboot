@@ -72,11 +72,6 @@ actionclass l2_dir_ce
     threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L2_DIR_CES) );
 };
 
-actionclass l2_power_bus_ce
-{
-    TBDDefaultCallout;
-};
-
 actionclass core_recovery_workaround
 {
     try( analyze(connected(TYPE_CORE, 0)),

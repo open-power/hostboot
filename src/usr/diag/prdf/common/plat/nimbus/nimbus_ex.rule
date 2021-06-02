@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -347,14 +347,14 @@ group gL2FIR
     (rL2FIR, bit(18)) ? self_M_level2_L_th_1;
 
     /** L2FIR[19]
-     *  Rc or NCU Pb data CE error
+     *  RC or NCU PB data CE error
      */
-    (rL2FIR, bit(19)) ? l2_power_bus_ce;
+    (rL2FIR, bit(19)) ? parent_proc_th_32perDay;
 
     /** L2FIR[20]
-     *  RC or NCU Pb data UE error
+     *  RC or NCU PB data UE error
      */
-    (rL2FIR, bit(20)) ? self_th_1_UERE;
+    (rL2FIR, bit(20)) ? parent_proc_th_1_UERE;
 
     /** L2FIR[21]
      *  RC or NCU PB data SUE detected
