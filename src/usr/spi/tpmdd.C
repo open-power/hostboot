@@ -383,20 +383,16 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
             }
             // else, check the Security Switch Register and see if the SPI Driver's
             // TPM Deconfig Protect bit is set.
-            // If it is set, then use the presence value that the service processor found
             else
             {
                 pError = TRUSTEDBOOT::checkTdpBit(i_pTpm);
                 if(pError)
                 {
-                    // Will evaluate this situation later in the IPL.
-                    // For now use the presence value that the service processor found.
-                    const auto sp_presence =
-                      i_pTpm->getAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>();
-                    present =
-                      sp_presence == TARGETING::FOUND_PRESENT_BY_SP_FOUND ? true : false;
-                    TRACFCOMP(g_trac_tpmdd,INFO_MRK"tpmPresence: TPM Deconfigure Protect (TDP) bit is set in the status register. Using the SP's TPM presence state (%s functional)",
-                              present ? "" : "not");
+                    // TDP bit is set, we have no access to TPM so it is not present from Hostboot perspective.
+                    // if it is truely present FSP presence mismatch check will catch this situation later on
+                    // after presence detection which is what we want.
+                    present = false;
+                    TRACFCOMP(g_trac_tpmdd,INFO_MRK"tpmPresence: TPM Deconfigure Protect (TDP) bit is set in the status register. Host will assume this TPM is not present.");
                     TRUSTEDBOOT::addTpmFFDC(i_pTpm, pError);
                     break;
                 }
