@@ -689,7 +689,6 @@ add_plat_features_rt(
     fapi2::ATTR_SMF_CONFIG_Type l_attr_smf_config;
     fapi2::ATTR_SYSTEM_MMA_POWERON_DISABLE_Type l_attr_system_mma_poweron_disable;
     fapi2::ATTR_MRW_L2_INCREASE_JITTER_Type l_attr_mrw_l2_increase_jitter;
-    fapi2::ATTR_MRW_CONVERT_DCBZ_TO_RWITM_Type l_attr_mrw_convert_dcbz_to_rwitm;
     fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG,
@@ -703,10 +702,6 @@ add_plat_features_rt(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_L2_INCREASE_JITTER,
                            i_target_sys,
                            l_attr_mrw_l2_increase_jitter));
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_CONVERT_DCBZ_TO_RWITM,
-                           i_target_sys,
-                           l_attr_mrw_convert_dcbz_to_rwitm));
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
                            i_target_sys,
@@ -728,11 +723,6 @@ add_plat_features_rt(
         if (l_attr_mrw_l2_increase_jitter == fapi2::ENUM_ATTR_MRW_L2_INCREASE_JITTER_TRUE)
         {
             FAPI_TRY(set_bit(i_bvec, L2RC_HIGH_JITTER, "L2RC_HIGH_JITTER"));
-        }
-
-        if (l_attr_mrw_convert_dcbz_to_rwitm == fapi2::ENUM_ATTR_MRW_CONVERT_DCBZ_TO_RWITM_TRUE)
-        {
-            FAPI_TRY(set_bit(i_bvec, CONVERT_DCBZ_TO_RWITM, "CONVERT_DCBZ_TO_RWITM"));
         }
 
         // by default, escalate core->system checkstop in Cronus
