@@ -46,6 +46,7 @@
 #include <p10_scom_proc_7.H>
 #include <p10_scom_proc_5.H>
 #include <p10_scom_eq_6.H>
+#include <p10_scom_eq_8.H>
 #include <p10_scom_eq_a.H>
 #include <p10_scom_proc.H>
 #include <p10_scom_c.H>
@@ -105,10 +106,10 @@ class CoreAction
         //@return   fapi2 return code.
         fapi2::ReturnCode updateCoreConfigState( );
 
-        //@brief    configure the dead core for dump
+        //@brief    configure the dead core for QME's operation and dump.
         //@param[in]    i_coreTgt   fapi2 target for dead core.
         //@return       fapi2 return code.
-        fapi2::ReturnCode configDeadCoresForDump( );
+        fapi2::ReturnCode configDeadCoresForQmeAndDump( );
 
         //@brief populates input buffer with a bit vector of dead cores.
         void getDeadCoreVector( fapi2::buffer <uint32_t>& o_deadCoreVectBuf );
@@ -138,7 +139,8 @@ fapi2::ReturnCode CoreAction::clearDeadCorePcbInt( )
 
 //--------------------------------------------------------------------------------------------------------
 
-fapi2::ReturnCode CoreAction::configDeadCoresForDump( )
+
+fapi2::ReturnCode CoreAction::configDeadCoresForQmeAndDump( )
 {
 
     auto l_eqList   =   iv_procChipTgt.getChildren< fapi2::TARGET_TYPE_EQ >( fapi2::TARGET_STATE_FUNCTIONAL );
@@ -146,6 +148,7 @@ fapi2::ReturnCode CoreAction::configDeadCoresForDump( )
     fapi2::buffer< uint64_t > l_chipletCtrl1;
     fapi2::buffer< uint64_t > l_chipletCtrl3;
     fapi2::buffer< uint64_t > l_data;
+    fapi2::buffer< uint64_t > l_qmeScratchRegA;
     uint32_t l_regionPos = 0;
     uint8_t  l_corePos   = 0;
 
@@ -155,6 +158,7 @@ fapi2::ReturnCode CoreAction::configDeadCoresForDump( )
         uint64_t l_pfetStatus   =   0;
         l_chipletCtrl1.flush< 0 >();
         l_chipletCtrl3.flush< 0 >();
+        l_qmeScratchRegA.flush< 0 >();
 
         for( auto l_core : l_coreList )
         {
@@ -165,6 +169,7 @@ fapi2::ReturnCode CoreAction::configDeadCoresForDump( )
             {
                 l_regionPos     =   l_corePos % 4;
                 l_pfetStatus    =   0;
+                l_qmeScratchRegA.setBit( l_corePos % 4 );
 
                 //Read the power status of EL
                 FAPI_TRY(scomt::c::GET_CPMS_CL2_PFETSTAT(l_core, l_data));
@@ -219,7 +224,9 @@ fapi2::ReturnCode CoreAction::configDeadCoresForDump( )
 
         FAPI_TRY( fapi2::putScom( l_eq, scomt::eq::CPLT_CTRL1_WO_CLEAR, l_chipletCtrl1 ));
         FAPI_TRY( fapi2::putScom( l_eq, scomt::eq::CPLT_CTRL3_WO_OR, l_chipletCtrl3 ));
-        FAPI_INF( "Chiplet Ctrl1 0x%016lx Chiplet Ctrl3 0x%016lx\n", l_chipletCtrl1, l_chipletCtrl3 );
+        FAPI_TRY( fapi2::putScom( l_eq, scomt::eq::QME_SCRA_WO_OR, l_qmeScratchRegA ) );
+        FAPI_INF( "Chiplet Ctrl1 0x%016lx Chiplet Ctrl3 0x%016lx\n Scratch Reg A 0x%016lx",
+                  l_chipletCtrl1, l_chipletCtrl3, l_qmeScratchRegA );
 
     } //for ( l_eq
 
@@ -298,7 +305,12 @@ fapi2::ReturnCode CoreAction :: clearPmMalFuncRegs( )
               "Failed To Write OCC Flag2 Register" );
 
 fapi_try_exit:
-    fapi2::current_err  =  l_rcTemp;
+
+    if( l_rcTemp != fapi2::FAPI2_RC_SUCCESS )
+    {
+        fapi2::current_err  =  l_rcTemp;
+    }
+
     return fapi2::current_err;
 }
 //--------------------------------------------------------------------------------------------------------
@@ -338,7 +350,7 @@ extern "C"
         FAPI_TRY( l_coreActn.updateCoreConfigState(),
                   "Failed To Update Core Configuration" );
 
-        FAPI_TRY( l_coreActn.configDeadCoresForDump(),
+        FAPI_TRY( l_coreActn.configDeadCoresForQmeAndDump(),
                   "Failed To Config Cores For Dump" );
 
         l_coreActn.getDeadCoreVector( o_deadCores ); //retrieve Phyp generated dead core vector
