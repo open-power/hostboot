@@ -188,6 +188,7 @@ void* call_host_ipl_complete(void* const io_pArgs)
         sys->setAttr<ATTR_HDAT_HBRT_SECTION_SIZE>(l_secSize);
 
         // populate PHYP ATTN Area Attributes with values
+        const auto l_nodeTgt = TARGETING::UTIL::getCurrentNodeTarget();
         if (INITSERVICE::spBaseServicesEnabled() && is_phyp_load())
         {
             // calculate absolute address for PHYP SP ATTN areas
@@ -195,8 +196,6 @@ void* call_host_ipl_complete(void* const io_pArgs)
 
             const auto spAttnArea1Addr = l_abs;
             const auto spAttnArea2Addr = l_abs + PHYP_ATTN_AREA_1_SIZE;
-
-            const auto l_nodeTgt = TARGETING::UTIL::getCurrentNodeTarget();
 
             l_nodeTgt->setAttr<ATTR_ATTN_AREA_1_ADDR>(spAttnArea1Addr);
             l_nodeTgt->setAttr<ATTR_ATTN_AREA_2_ADDR>(spAttnArea2Addr);
@@ -208,9 +207,12 @@ void* call_host_ipl_complete(void* const io_pArgs)
         }
 
         // Clear ATTR_KEY_CLEAR_REQUEST before sync.
-        // Any Key Clear Request should have already been saved in ATTR_KEY_CLEAR_REQUEST_HB
+        // - Any Key Clear Request should have already been saved in ATTR_KEY_CLEAR_REQUEST_HB
+        // - Clear attribute at System and Node Level for now.  HWSV will handle
+        //   any discrepancies of the attribute between the nodes
         auto keyClearRequests = KEY_CLEAR_REQUEST_NONE;
         sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
+        l_nodeTgt->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
 
 #ifdef CONFIG_PLDM
         PLDM::thePdrManager().sendAllFruFunctionalStates();
