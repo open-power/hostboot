@@ -220,6 +220,13 @@ fapi2::ReturnCode pm_set_frequency(
             }
 
 #ifndef FIPSODE
+            if ((l_poundV_data.static_rails.modelDataFlag & 0x1) == 0x1)
+            {
+                fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled =
+                    (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_ENABLED,
+                            l_proc_target, l_wof_enabled));
+            }
             fapi2::voltageBucketData_t* p_poundV_data = &l_poundV_data;
             FAPI_TRY(wof_apply_overrides(l_proc_target, p_poundV_data));
 #endif

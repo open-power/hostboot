@@ -2929,6 +2929,12 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE_Type");
             FAPI_INF("Running TDP current mark checking under Lab controls = %d", l_pdv_tdp_current_mode);
 #endif
+            if ((iv_pdv_model_data & 0x01) == 0x01)
+            {
+                FAPI_INF("WOF will be disabled as model_data field indicates not a sorted part");
+                disable_wof();
+                disable_dds();
+            }
 
             if (l_pdv_tdp_current_mode != fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_OFF )
             {
