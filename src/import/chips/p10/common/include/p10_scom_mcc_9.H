@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,27 @@ static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_PERSISTANT_INJ = 21;
 static const uint32_t WRITE_WRTCFG_RESERVED_22_31 = 22;
 static const uint32_t WRITE_WRTCFG_RESERVED_22_31_LEN = 10;
 //<< [WRITE_WRTCFG]
+// mcc/reg00009.H
+
+//>> [ATCL_CL_CLSCOM_MCAMOC]
+static const uint64_t ATCL_CL_CLSCOM_MCAMOC = 0x0c010c25ull;
+
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN = 0;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0 = 1;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1 = 2;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC = 3;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLISION_RULES = 4;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLISION_RULES_LEN = 25;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT = 29;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT_LEN = 3;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO = 32;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47 = 33;
+static const uint32_t ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47_LEN = 15;
+static const uint32_t P10_20_ATCL_CL_CLSCOM_MCAMOC_SUBCH_FAIR_COUNT_P10D20 = 33; // p10:20,
+static const uint32_t P10_20_ATCL_CL_CLSCOM_MCAMOC_SUBCH_FAIR_COUNT_P10D20_LEN = 5;
+static const uint32_t P10_20_ATCL_CL_CLSCOM_MCAMOC_CMDLIST_DEBUG_SEL_P10D20 = 38; // p10:20,
+static const uint32_t P10_20_ATCL_CL_CLSCOM_MCAMOC_CMDLIST_DEBUG_SEL_P10D20_LEN = 10;
+//<< [ATCL_CL_CLSCOM_MCAMOC]
 // mcc/reg00009.H
 
 //>>THE END<<
