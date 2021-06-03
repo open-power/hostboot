@@ -84,12 +84,16 @@ uint32_t VcmEvent<T>::handlePhaseComplete( const uint32_t & i_eccAttns,
                 // Only need to call verified on the first mce we hit
                 if ( 1 == iv_mceCount )
                 {
-                    o_rc = verified( io_sc );
-                    if ( SUCCESS != o_rc )
+                    // If row repair is not supported, call verified
+                    if ( !iv_rowRepairEnabled )
                     {
-                        PRDF_ERR( PRDF_FUNC "verified() failed on 0x%08x",
-                                  iv_chip->getHuid() );
-                        break;
+                        o_rc = verified( io_sc );
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "verified() failed on 0x%08x",
+                                      iv_chip->getHuid() );
+                            break;
+                        }
                     }
                 }
 
@@ -282,6 +286,17 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::rowRepair( STEP_CODE_DATA_STRUCT & io_sc,
             // If the port, dimm, master rank has previous row repair in VPD
             if ( l_rowRepair.isValid() )
             {
+                // No need to continue scrubbing, VCM verified, VCM done
+                o_done = true;
+
+                o_rc = verified( io_sc );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "verified() failed on 0x%08x",
+                              iv_chip->getHuid() );
+                    break;
+                }
+
                 // If previous repair for same DRAM
                 if ( l_rowRepair.getRowRepairDram() ==
                      iv_mark.getSymbol().getDramSpareAdjusted() )
@@ -304,9 +319,6 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::rowRepair( STEP_CODE_DATA_STRUCT & io_sc,
                     // Signature: "VCM: verified: previous PPR on same DRAM"
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
                         PRDFSIG_VcmVerSameDram );
-
-                    // No need to continue scrubbing, VCM verified, VCM done
-                    o_done = true;
                 }
                 // Else if previous repair for different DRAM
                 else
@@ -321,9 +333,6 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::rowRepair( STEP_CODE_DATA_STRUCT & io_sc,
                     // different DRAM"
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
                         PRDFSIG_VcmVerDiffDram );
-
-                    // No need to continue scrubbing, VCM verified, VCM done
-                    o_done = true;
                 }
             }
             // Else if no previous row repair
@@ -353,6 +362,14 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::rowRepair( STEP_CODE_DATA_STRUCT & io_sc,
             // Since at least 2 bad rows, don't bother with row repair
             // No need to continue scrubbing, VCM verified, VCM done
             o_done = true;
+
+            o_rc = verified( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "verified() failed on 0x%08x",
+                          iv_chip->getHuid() );
+                break;
+            }
 
             // Signature: "VCM: verified: second MCE"
             io_sc.service_data->setSignature( iv_chip->getHuid(),
