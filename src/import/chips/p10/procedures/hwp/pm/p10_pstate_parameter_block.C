@@ -2083,7 +2083,7 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
 {
     fapi2::ReturnCode l_rc;
 
-    const uint32_t  VDN_SORT_ADJUST_MV = 50;   // work-around for early sorted parts
+    const uint32_t  VDN_SORT_ADJUST_MV = 0;   // work-around for early sorted parts;
     uint32_t        l_vdn_adjust_mv = 0;
     bool            b_vdn_allow_uplift = true;
 
