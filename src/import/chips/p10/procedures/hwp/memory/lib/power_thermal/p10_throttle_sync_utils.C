@@ -123,6 +123,9 @@ fapi2::ReturnCode setup_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_targe
     const mss::states l_enable_sync_in = i_primary ? mss::states::OFF : mss::states::ON;
     fapi2::buffer<uint64_t> l_scomData;
 
+    // sync type to use
+    static constexpr uint8_t SYNC_ALL = 0;  // 0x0 = sync all
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_THROTTLE_SYNC_HW550549,
                            mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
                            l_ec_workaround),
@@ -138,12 +141,13 @@ fapi2::ReturnCode setup_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_targe
     // -------------------------------------------------------------------
     // 2. Setup MCSYNC register. Do not initiate a sync yet!
     // -------------------------------------------------------------------
-    // Set GO bit
+    // Set sync_go, sync_in, and sync_type
     FAPI_TRY(PREP_SCOMFIR_MCSYNC(i_target));
     FAPI_TRY(GET_SCOMFIR_MCSYNC(i_target, l_scomData),
              "Failed GET_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
     CLEAR_SCOMFIR_MCSYNC_SYNC_GO(l_scomData);
     SET_SCOMFIR_MCSYNC_EN_SYNC_IN(l_enable_sync_in, l_scomData);
+    SET_SCOMFIR_MCSYNC_SYNC_TYPE(SYNC_ALL, l_scomData);
     FAPI_TRY(PUT_SCOMFIR_MCSYNC(i_target, l_scomData),
              "Failed PUT_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
 
@@ -162,22 +166,13 @@ fapi2::ReturnCode issue_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_targe
     using namespace scomt::mc;
     fapi2::buffer<uint64_t> l_scomData;
 
-    // sync type to use
-    uint8_t l_sync_type = 0;  // 0x0 = sync all
-
     // -------------------------------------------------------------------
-    // Issue sync command - toggle sync go bit with sync all sync type
-    //     Do this quickly to minimize window of OCC overwriting values at runtime
-    //     This sequence will work if HWP is run during IPL or at runtime
+    // Issue sync command - set to a 1
     // -------------------------------------------------------------------
-    // Toggle GO bit and set sync type
+    // Set GO bit
     FAPI_TRY(PREP_SCOMFIR_MCSYNC(i_target));
     FAPI_TRY(GET_SCOMFIR_MCSYNC(i_target, l_scomData),
              "Failed GET_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
-    CLEAR_SCOMFIR_MCSYNC_SYNC_GO(l_scomData);
-    FAPI_TRY(PUT_SCOMFIR_MCSYNC(i_target, l_scomData),
-             "Failed PUT_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
-    SET_SCOMFIR_MCSYNC_SYNC_TYPE(l_sync_type, l_scomData);
     SET_SCOMFIR_MCSYNC_SYNC_GO(l_scomData);
     FAPI_TRY(PUT_SCOMFIR_MCSYNC(i_target, l_scomData),
              "Failed PUT_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
