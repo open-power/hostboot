@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -87,17 +87,17 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
-        <description>Guard Data (20K)</description>
+        <description>Guard Data (128K)</description>
         <eyeCatch>GUARD</eyeCatch>
         <physicalOffset>0x2C000</physicalOffset>
-        <physicalRegionSize>0x5000</physicalRegionSize>
+        <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>
     <section>
         <description>Eeprom Cache (2056KB)</description>
         <eyeCatch>EECACHE</eyeCatch>
-        <physicalOffset>0x31000</physicalOffset>
+        <physicalOffset>0x4C000</physicalOffset>
         <physicalRegionSize>0x202000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
