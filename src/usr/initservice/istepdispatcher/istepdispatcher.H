@@ -575,6 +575,16 @@ private:
      */
     void istepPauseSet(uint8_t i_step, uint8_t i_substep);
 
+    /**
+     * @brief A helper function to wait the specified amount of time.
+     *        The function sends regular heartbeats while it waits (only
+     *        if PLDM is enalbed). To wait an infinite amount of time,
+     *        pass ISTEP_PAUSE_SET_INFINITE as a parameter.
+     *
+     * @param[in] i_waitSec the amount of time (in seconds) to wait.
+     *            Pass ISTEP_PAUSE_SET_INFINITE to wait forever.
+     */
+    void doWait(uint16_t i_waitSec);
 };
 } // namespace
 

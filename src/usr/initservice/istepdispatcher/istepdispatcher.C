@@ -3065,6 +3065,65 @@ void IStepDispatcher::reconfigLoopInduce(TARGETING::Target* i_pDeconfigTarget,
 #endif // CONFIG_RECONFIG_LOOP_TESTS_ENABLE
 
 // ----------------------------------------------------------------------------
+// IStepDispatcher::doWait
+// ----------------------------------------------------------------------------
+void IStepDispatcher::doWait(uint16_t i_waitSec)
+{
+    // If infinite pause is set then hang in a tight loop indefinitely.
+    // This is a permanent stop that cannot be resumed via any command.
+    if(i_waitSec == ISTEP_PAUSE_SET_INFINITE)
+    {
+        TRACFCOMP(g_trac_initsvc, INFO_MRK"doWait: pauseLen=0x%02X, Permanent pause enabled.",
+                  i_waitSec);
+#ifdef CONFIG_CONSOLE
+        CONSOLE::displayf(CONSOLE::VUART1, NULL, "doWait: pauseLen=0x%02X, Permanent pause enabled.",
+                          i_waitSec);
+        CONSOLE::flush();
+#endif
+        while(1)
+        {
+#ifdef CONFIG_PLDM
+            // Continuously send out heartbeats while we're waiting.
+            // Send heartbeats in intervals of min watchdog timeout / 2 so that
+            // there is enough time for processing and propagation of the message
+            // to BMC.
+            sendProgressCode();
+            nanosleep(PLDM::HB_MIN_WATCHDOG_TIMEOUT_SEC / 2,0);
+#else
+            nanosleep(1,0);
+#endif
+        }
+    }
+    // Otherwise sleep for the requested number of seconds
+    else
+    {
+#ifdef CONFIG_PLDM
+        // Send heartbeats in intervals of min watchdog timeout / 2 so that
+        // there is enough time for processing and propagation of the message
+        // to BMC.
+        if(i_waitSec > (PLDM::HB_MIN_WATCHDOG_TIMEOUT_SEC / 2))
+        {
+            uint16_t l_totalElapsed = 0;
+            // Send heartbeats at regular intervals while we wait
+            while(l_totalElapsed < i_waitSec)
+            {
+                sendProgressCode();
+                auto l_sleepAmtSec = (i_waitSec - l_totalElapsed) > (PLDM::HB_MIN_WATCHDOG_TIMEOUT_SEC / 2) ?
+                                     (PLDM::HB_MIN_WATCHDOG_TIMEOUT_SEC / 2) :
+                                     (i_waitSec - l_totalElapsed);
+                nanosleep(l_sleepAmtSec, 0);
+                l_totalElapsed += l_sleepAmtSec;
+            }
+        }
+        else
+#endif
+        {
+            nanosleep(i_waitSec, 0);
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
 // IStepDispatcher::istepPauseSet()
 // ----------------------------------------------------------------------------
 void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
@@ -3103,40 +3162,17 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
                         l_p_pauseCfg->bpTagInfo
                         );
 
-            // TODO RTC: 250776 Disable the watchdog
-
             // If full stop is requested then send breakpoint message to FSP.
             // This stop can be resumed via external command from FSP.
             if(l_p_pauseCfg->fullStopEn)
             {
                 iStepBreakPoint(l_p_pauseCfg->bpTagInfo);
             }
-            // If infinite pause is set then hang in a tight loop indefinitely.
-            // This is a permanent stop that cannot be resumed via any command.
-            else if(l_p_pauseCfg->pauseLen == ISTEP_PAUSE_SET_INFINITE)
-            {
-                TRACFCOMP(g_trac_initsvc, INFO_MRK"istepPauseSet: "
-                        "pauseLen=0x%02X, Permanent pause enabled.",
-                        l_p_pauseCfg->pauseLen
-                        );
-
-#ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(CONSOLE::VUART1, NULL, "istepPauseSet: "
-                        "pauseLen=0x%02X, Permanent pause enabled.",
-                        l_p_pauseCfg->pauseLen
-                        );
-                CONSOLE::flush();
-#endif
-                while(1)
-                {
-                    nanosleep(1,0);
-                }
-            }
-            // Otherwise sleep for the requested number of seconds
             else
             {
-                nanosleep(l_p_pauseCfg->pauseLen,0);
+                doWait(l_p_pauseCfg->pauseLen);
             }
+            // Send one last hearbeat before returning
             sendProgressCode();
         }
     }
