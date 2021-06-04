@@ -44,7 +44,6 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
-#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
@@ -74,7 +73,6 @@ extern "C"
         uint32_t l_omi_freq = 0;
         uint8_t l_is_apollo = 0;
         bool l_mnfg_screen_test = false;
-        bool l_mfg_thresholds = false;
         fapi2::ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE_Type l_cdr_bw_override = 0;
         fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET_Type l_cdr_offset = 0;
         fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK_Type l_cdr_offset_lane_mask = 0;
@@ -98,7 +96,6 @@ extern "C"
 
         FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
         FAPI_TRY(mss::exp::check_omi_mfg_screen_edpl_setting(l_mnfg_screen_test));
-        FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
 
         // Send downstream PRBS pattern from host
         if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
@@ -236,8 +233,7 @@ extern "C"
             // Set the EDPL according the attribute
             FAPI_TRY(mss::exp::omi::read_dlx_config1(i_target, l_dlx_config1_data));
             mss::exp::omi::set_edpl_enable_bit(l_dlx_config1_data, !l_edpl_disable);
-            mss::exp::omi::setup_edpl_time_window(l_dlx_config1_data, !l_edpl_disable, l_mnfg_screen_test, l_mfg_thresholds);
-            mss::exp::omi::setup_edpl_threshold(l_dlx_config1_data, l_mfg_thresholds);
+            mss::exp::omi::setup_edpl_time_window(l_dlx_config1_data, !l_edpl_disable, l_mnfg_screen_test);
             FAPI_TRY(mss::exp::omi::write_dlx_config1(i_target, l_dlx_config1_data));
             FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
         }

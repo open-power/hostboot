@@ -126,17 +126,15 @@ void override_omi_crc_firs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i
 /// @param[in] i_target the OCMB_CHIP target of the MC_OMI fir
 /// @param[in] i_omi_crc_dd1_wkrnd value from ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS
 /// @param[in] i_omi_mfg_screen_crc value from check_omi_mfg_screen_crc_setting
-/// @param[in] i_mfg_thresholds value of MNFG_THRESHOLDS flag
 /// @param[in,out] io_exp_dlx_omi_fir_reg the MC_OMI_FIR register instance
 ///
 void omi_crc_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                              const bool i_omi_crc_dd1_wkrnd,
                              const bool i_omi_mfg_screen_crc,
-                             const bool i_mfg_thresholds,
                              mss::fir::reg<EXPLR_DLX_MC_OMI_FIR_REG>& io_exp_dlx_omi_fir_reg )
 {
     // Set up MNFG OMI screen settings
-    if ((i_omi_mfg_screen_crc) || (i_mfg_thresholds))
+    if (i_omi_mfg_screen_crc)
     {
         FAPI_DBG("%s Setting MC_OMI_FIR CRC FIR to masked for MFG test", mss::c_str(i_target));
         io_exp_dlx_omi_fir_reg.remask<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>();
@@ -159,17 +157,15 @@ void omi_crc_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
 /// @param[in] i_target the OCMB_CHIP target of the MC_OMI fir
 /// @param[in] i_omi_edpl_dd1_wkrnd value from ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS
 /// @param[in] i_omi_mfg_screen_edpl value from check_omi_mfg_screen_edpl_setting
-/// @param[in] i_mfg_thresholds value of MNFG_THRESHOLDS flag
 /// @param[in,out] io_exp_dlx_omi_fir_reg the MC_OMI_FIR register instance
 ///
 void omi_edpl_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                               const bool i_omi_edpl_dd1_wkrnd,
                               const bool i_omi_mfg_screen_edpl,
-                              const bool i_mfg_thresholds,
                               mss::fir::reg<EXPLR_DLX_MC_OMI_FIR_REG>& io_exp_dlx_omi_fir_reg )
 {
     // Set up MNFG OMI screen settings
-    if ((i_omi_mfg_screen_edpl) || (i_mfg_thresholds))
+    if (i_omi_mfg_screen_edpl)
     {
         FAPI_DBG("%s Setting MC_OMI_FIR EDPL FIR to masked for MFG test", mss::c_str(i_target));
         io_exp_dlx_omi_fir_reg.remask<EXPLR_DLX_MC_OMI_FIR_REG_DL0_EDPL>();

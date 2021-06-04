@@ -180,7 +180,6 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
     fapi2::buffer<uint64_t> l_reg_data;
     bool l_mnfg_screen_test_crc = false;
     bool l_mnfg_screen_test_edpl = false;
-    bool l_mfg_thresholds = false;
 
     mss::fir::reg<EXPLR_MMIO_MFIR> l_exp_mmio_mfir_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_TLXT_TLXFIRQ> l_exp_tlxt_fir_reg(i_target, l_rc2);
@@ -211,7 +210,6 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
     // check for mnfg OMI screen settings
     FAPI_TRY(mss::exp::check_omi_mfg_screen_crc_setting(l_mnfg_screen_test_crc));
     FAPI_TRY(mss::exp::check_omi_mfg_screen_edpl_setting(l_mnfg_screen_test_edpl));
-    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
 
     FAPI_TRY(mss::attr::get_exp_intr_mask_disable(i_target, l_intr_mask_disable));
 
@@ -263,12 +261,10 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
     exp::workarounds::fir::omi_crc_after_omi_init(i_target,
             l_omi_crc_dd1_mask,
             l_mnfg_screen_test_crc,
-            l_mfg_thresholds,
             l_exp_dlx_omi_fir_reg);
     exp::workarounds::fir::omi_edpl_after_omi_init(i_target,
             l_omi_edpl_dd1_mask,
             l_mnfg_screen_test_edpl,
-            l_mfg_thresholds,
             l_exp_dlx_omi_fir_reg);
 
     // Setup MC OMI FIR unmasks per spec

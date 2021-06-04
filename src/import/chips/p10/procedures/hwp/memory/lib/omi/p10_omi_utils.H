@@ -101,14 +101,12 @@ fapi2::ReturnCode setup_mc_error_action(const fapi2::Target<fapi2::TARGET_TYPE_O
 /// @param[in] i_target the TARGET_TYPE_OMI to operate on
 /// @param[in] i_edpl_disable value from ATTR_MSS_OMI_EDPL_DISABLE
 /// @param[in] i_mnfg_screen_test value from check_omi_mfg_screen_edpl_setting
-/// @param[in] i_mfg_thresholds value of MNFG_THRESHOLDS flag
 /// @param[in,out] io_data the register data to work on
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 void setup_mfg_test_edpl_time(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
                               const uint8_t i_edpl_disable,
                               const bool i_mnfg_screen_test,
-                              const bool i_mfg_thresholds,
                               fapi2::buffer<uint64_t>& io_data);
 
 ///
