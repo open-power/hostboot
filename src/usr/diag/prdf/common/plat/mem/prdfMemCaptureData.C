@@ -474,6 +474,9 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     // Add DRAM repairs data from VPD.
     captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd );
 
+    // Add Row Repair data from VPD
+    captureRowRepairVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd );
+
     // Add IUE counts to capture data.
     captureIueCounts<OcmbDataBundle*>( ocmbTrgt, db, cd );
 
