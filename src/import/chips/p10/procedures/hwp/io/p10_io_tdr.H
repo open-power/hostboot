@@ -55,12 +55,12 @@ extern "C"
 /// @param[in] i_iolink_target      IOLINK target to get thread id for
 /// @param[in] i_lanes              Lanes to run TDR on
 /// @param[out] o_status            Status of the net (Open, Short, Good)
-/// @param[out] o_length_inches     Length from TX to open
+/// @param[out] o_length_mm         Length from TX to open (in mm)
 /// @return FAPI_RC_SUCCESS if arguments are valid
     fapi2::ReturnCode p10_io_tdr(
         const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_iolink_target,
         const std::vector<uint32_t>& i_lanes,
         std::vector<uint32_t>& o_status,
-        std::vector<uint32_t>& o_length_inches);
+        std::vector<uint32_t>& o_length_mm);
 
 } // extern "C"

@@ -46,6 +46,8 @@ fapi2::ReturnCode p10_io_tdr_sample_point(const fapi2::Target<fapi2::TARGET_TYPE
 fapi2::ReturnCode p10_io_tdr_diagnose(const uint32_t, const uint32_t, uint32_t&);
 fapi2::ReturnCode p10_io_tdr_find_horizontal_crossing(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&, const uint32_t,
         const uint32_t, const uint32_t, const uint32_t, const uint32_t, uint32_t&);
+fapi2::ReturnCode p10_io_tdr_find_short_crossing(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&, const uint32_t,
+        const uint32_t, const uint32_t, const uint32_t, bool, uint32_t&);
 fapi2::ReturnCode p10_io_tdr_get_capt_val(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&, const uint64_t, uint32_t&);
 fapi2::ReturnCode p10_io_tdr_set_pulse_offset(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&, const uint32_t);
 
@@ -65,25 +67,26 @@ enum TdrResult
 /// @param[in] i_iolink_target      IOLINK target to get thread id for
 /// @param[in] i_lanes              Lanes to run TDR on
 /// @param[out] o_status            Status of the net (Open, Short, Good)
-/// @param[out] o_length_inches     Length from TX to open
+/// @param[out] o_length_mm         Length from TX to open (in mm)
 /// @return FAPI_RC_SUCCESS if arguments are valid
 fapi2::ReturnCode p10_io_tdr(
     const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_iolink_target,
     const std::vector<uint32_t>& i_lanes,
     std::vector<uint32_t>& o_status,
-    std::vector<uint32_t>& o_length_inches)
+    std::vector<uint32_t>& o_length_mm)
 {
     FAPI_DBG("Begin TDR Isolation");
 
     const uint32_t c_pulse_width = 100;
-    const uint32_t c_fs_per_inch = 165000; // 4ns / (39.37inch/meter) = 101599
+    // const uint32_t c_fs_per_inch = 165000; // 4ns / (39.37inch/meter) = 101599
+    const float c_fs_per_mm = 6496;  //165000 / 25.4
 
     uint32_t min_offset = 0;
     uint32_t max_offset = 0;
     uint32_t l_lane_translate = 0;                 // lane index value
     uint32_t tdr_offset_width = 0;
     uint32_t o_length_ui = 0;
-    uint32_t c_fs_per_ui = 0;
+    float c_fs_per_ui = 0;
 
     int32_t base_point_y1 = 0;
     int32_t base_point_y2 = 0;
@@ -105,7 +108,7 @@ fapi2::ReturnCode p10_io_tdr(
     fapi2::toString(i_iolink_target, l_tgt_str, sizeof(l_tgt_str));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_iolink_target, l_iolink_num),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-    // FAPI_DBG("IOLINK Target: %s   (unit): %d", l_tgt_str, l_iolink_num);
+    FAPI_DBG("IOLINK Target: %s   (unit): %d", l_tgt_str, l_iolink_num);
 
     // check the IOHS frequency
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_IOHS_LINK_MHZ, l_iohs_target, l_iohs_freq),
@@ -159,7 +162,8 @@ fapi2::ReturnCode p10_io_tdr(
     // loop through each of the specified lanes
     for(uint32_t l_index = 0; l_index < i_lanes.size(); l_index++)
     {
-        // add a lane translation function here
+        // reset the length to 0 for each lane
+        o_length_ui = 0;
 
         // loop through each of the 2 phases
         for(uint32_t l_phase = 0; l_phase < 2; l_phase++)
@@ -228,6 +232,59 @@ fapi2::ReturnCode p10_io_tdr(
                     }
 
                 case TdrResult::Short:
+                    {
+                        FAPI_DBG("TDR Short found");
+                        uint32_t x1_crossing = 0;
+                        uint32_t x2_crossing = 0;
+                        int32_t dacval = 0;
+                        int32_t dacmin = 255;
+                        int32_t dacmax = 0;
+                        int32_t middac = 0;
+
+                        // first we have to scan the entire waveform from 1/4 offset to 3/4 offset for the max/min values
+                        for (uint32_t soffset = min_offset; soffset <= max_offset; soffset++ )
+                        {
+                            FAPI_TRY(p10_io_tdr_sample_point(l_iohs_target, soffset, (i_lanes[l_index] + l_lane_translate), dacval));
+                            dacmin = (dacval < dacmin) ? dacval : dacmin;
+                            dacmax = (dacval > dacmax) ? dacval : dacmax;
+                        }
+
+                        middac = (dacmax - dacmin) / 2;
+
+                        // search from min offset to the right
+                        FAPI_TRY( p10_io_tdr_find_short_crossing(
+                                      l_iohs_target,
+                                      l_phase,
+                                      ( dacmin + middac) ,
+                                      (i_lanes[l_index] + l_lane_translate),
+                                      min_offset,
+                                      true,
+                                      x1_crossing ) );
+                        // search from max offset to the left
+                        FAPI_TRY( p10_io_tdr_find_short_crossing(
+                                      l_iohs_target,
+                                      l_phase,
+                                      ( dacmin + middac) ,
+                                      (i_lanes[l_index] + l_lane_translate),
+                                      max_offset,
+                                      false,
+                                      x2_crossing ) );
+
+                        if(l_tdr_dd2)       // if true, this is dd2
+                        {
+                            o_length_ui = (x1_crossing > x2_crossing) ? ((x1_crossing - x2_crossing) / 2) : ((x2_crossing - x1_crossing) / 2);
+                        }
+                        else
+                        {
+                            o_length_ui = (x1_crossing > x2_crossing) ? ((x1_crossing - x2_crossing) / 4) : ((x2_crossing - x1_crossing) / 4);
+                        }
+
+                        FAPI_DBG( "TDR Result:: Short Fault: %d UI from Driver.", o_length_ui );
+                        loopExit = true;    // if we find an short, no need to run the next phase
+                        break;
+                    }
+
+
                 case TdrResult::ShortToGnd:
                 case TdrResult::ShortToVdd:
                     {
@@ -242,7 +299,7 @@ fapi2::ReturnCode p10_io_tdr(
         }
 
         // convert UI into inches
-        o_length_inches[l_index] = (o_length_ui * c_fs_per_ui) / c_fs_per_inch;
+        o_length_mm[l_index] = (o_length_ui * c_fs_per_ui) / c_fs_per_mm;
     }
 
 
@@ -310,7 +367,7 @@ fapi2::ReturnCode p10_io_tdr_get_tdr_offsets(const fapi2::Target<fapi2::TARGET_T
     uint32_t tx_mode = 16;          // 16to1 mode is always set for Abus
     fapi2::buffer<uint64_t> l_mode1_data = 0;
 
-    o_tdr_width = 8 * tx_mode * i_pw;
+    o_tdr_width = 4 * tx_mode * i_pw;
     FAPI_DBG("TDR Offset width: %d", o_tdr_width);
 
 fapi_try_exit:
@@ -353,10 +410,15 @@ fapi2::ReturnCode p10_io_tdr_sample_point(const fapi2::Target<fapi2::TARGET_TYPE
     while( loop_count < DAC_MAX )
     {
         // If dac is outside of acceptable range assert error
-        FAPI_ASSERT((o_dac < DAC_MAX) || (o_dac > DAC_MIN),
+        FAPI_ASSERT((o_dac < DAC_MAX),
                     fapi2::P10_IO_TDR_DAC_RANGE_ERROR()
                     .set_TARGET(i_target),
-                    "The DAC calibrated outside of the acceptable range");
+                    "The DAC calibrated above of the max DAC range");
+        // If dac is outside of acceptable range assert error
+        FAPI_ASSERT((o_dac > DAC_MIN),
+                    fapi2::P10_IO_TDR_DAC_RANGE_ERROR()
+                    .set_TARGET(i_target),
+                    "The DAC calibrated below of the min DAC range");
 
         direction[1] = direction[0];
 
@@ -427,7 +489,7 @@ fapi2::ReturnCode p10_io_tdr_diagnose(const uint32_t i_bp1,
     // difference > 3/4 * MAX
     uint32_t diff = (i_bp1 > i_bp2) ? i_bp1 - i_bp2 : i_bp2 - i_bp1;
 
-    if(diff > ((7 * MAX) / 10))
+    if(diff > ((3 * MAX) / 5))
     {
         o_result = TdrResult::Open;
     }
@@ -537,6 +599,86 @@ fapi2::ReturnCode p10_io_tdr_find_horizontal_crossing(const fapi2::Target<fapi2:
 
 fapi_try_exit:
     FAPI_DBG("End TDR Find Horizontal Crossing");
+    return fapi2::current_err;
+}
+
+/// @brief Find where the TDR pulse crosses the specified Dac value
+/// @param[in] i_target             IOHS Target
+/// @param[in] i_phase              TDR phase (N:0, P:1)
+/// @param[in] i_dac                check for crossing at this Dac value
+/// @param[in] i_lane               lane to check
+/// @param[in] i_x_min              min x offset
+/// @param[out] o_offset            offset where TDR crosses the selected Dac
+/// @return FAPI_RC_SUCCESS if arguments are valid
+fapi2::ReturnCode p10_io_tdr_find_short_crossing(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+        const uint32_t i_phase,
+        const uint32_t i_dac,
+        const uint32_t i_lane,
+        const uint32_t i_x_offset,
+        bool i_direction,
+        uint32_t& o_offset)
+{
+
+    using namespace scomt::iohs;
+    fapi2::buffer<uint64_t> l_cntl4_data = 0;
+    // uint32_t x_vals[1] = {i_x_min};
+    // uint32_t y_vals[2] = {0,0};
+    // uint32_t counter = 2;       // the first 2 offsets read before the while loop
+    uint32_t current_x = i_x_offset;
+    uint32_t current_y = 0;
+    uint32_t prev_y = 0;
+    int32_t step = 0;
+
+    step = (i_direction) ? 1 : -1;      // increment/decrement determined by which way we are scanning
+
+
+    // char l_iohs_target[fapi2::MAX_ECMD_STRING_LEN];
+    // fapi2::toString(i_target, l_iohs_target, sizeof(l_iohs_target));
+
+    // set TDR Dac and phase sel
+    FAPI_DBG("Short Crossing - Setting (TDR Dac/Phase): (%d / %d)", i_dac, i_phase);
+    FAPI_TRY(GET_IOO_TX0_TXCTL_CTL_REGS_TX_CNTL4_PG(i_target, l_cntl4_data));
+    SET_IOO_TX0_TXCTL_CTL_REGS_TX_CNTL4_PG_DAC_CNTL(i_dac, l_cntl4_data);
+    SET_IOO_TX0_TXCTL_CTL_REGS_TX_CNTL4_PG_PHASE_SEL(i_phase, l_cntl4_data);
+    FAPI_TRY(PUT_IOO_TX0_TXCTL_CTL_REGS_TX_CNTL4_PG(i_target, l_cntl4_data));
+
+    // set TDR pulse offset
+    FAPI_DBG("Short Crossing - Setting TDR Pulse Offset: %d", current_x);
+    FAPI_TRY(p10_io_tdr_set_pulse_offset(i_target, current_x));
+    FAPI_TRY(p10_io_tdr_get_capt_val(i_target, i_lane, current_y));
+    prev_y = current_y;
+
+    // Check xMax horizontal crossing
+    // set TDR pulse offset
+    // FAPI_DBG("Short Crossing - Setting TDR Pulse Offset: %d", (x_vals[0]+1));
+    // FAPI_TRY(p10_io_tdr_set_pulse_offset(i_target, (x_vals[0]+1)));
+    // FAPI_TRY(p10_io_tdr_get_capt_val(i_target, i_lane, y_vals[1]));
+
+    // FAPI_DBG("y_vals[0]: %d   y_vals[1]: %d", current_y, prev_y);
+
+    // If the two y_vals are the same, assert error
+    // FAPI_ASSERT(y_vals[0] != y_vals[1],
+    //             fapi2::P10_IO_TDR_EDGE_ERROR()
+    //             .set_TARGET(i_target),
+    //             "There is no horizontal edge crossing for this short");
+
+    while( ( current_y == prev_y )  )
+    {
+        current_x = current_x + step;
+        FAPI_TRY(p10_io_tdr_set_pulse_offset(i_target, current_x));
+        FAPI_TRY(p10_io_tdr_get_capt_val( i_target, i_lane, current_y ) );
+
+        FAPI_DBG("(%05d,%d (%d))",
+                 current_x, current_y, prev_y );
+
+
+    }
+
+    o_offset = current_x;
+
+
+fapi_try_exit:
+    FAPI_DBG("End TDR Find Short Crossing");
     return fapi2::current_err;
 }
 
