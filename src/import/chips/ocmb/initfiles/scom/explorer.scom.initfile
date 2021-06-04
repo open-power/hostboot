@@ -211,7 +211,7 @@ define def_RD_PREAMBLE       =  (MP.ATTR_MEM_SI_DRAM_PREAMBLE[0][0] & 0x10) >> 4
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRDM_DLY [when=S] {      # BL/2+rank_switch
   spyv;
-  4 + def_RANK_SWITCH_TCK;
+  10; # Update per performance and design teams. First pass
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRSMSR_DLY [when=S] {    # tccd_s
@@ -231,7 +231,7 @@ ispy  MB_SIM.SRQ.MBA_TMR0Q_RROP_DLY [when=S] {      # tccd_l
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WWDM_DLY [when=S] {      # BL/2+rank_switch
   spyv;
-  4 + def_RANK_SWITCH_TCK;
+  10; # Update per performance and design teams. First pass
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_WWSMSR_DLY [when=S] {    # tccd_s
@@ -334,10 +334,8 @@ ispy  MB_SIM.SRQ.MBA_TMR1Q_TRRD_SBG [when=S] {
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
-  spyv, expr;
-  11,                                 (def_MEM_EFF_FREQ_EQ_2666==1);
-  12,                                 (def_MEM_EFF_FREQ_EQ_2933==1);
-  13,                                (def_MEM_EFF_FREQ_EQ_3200==1);
+  spyv;
+  0; # Updates per the performance and design teams. First pass
 }
 
 
@@ -882,7 +880,7 @@ ispy MB_SIM.SRQ.MBA_FARB5Q_CFG_CCS_ADDR_MUX_SEL [when=S] {
 
 ispy MB_SIM.SRQ.MBA_RRQ0Q_CFG_RRQ_ACT_NUM_READS_PENDING [when=S] {
   spyv;
-  0b1000;  #decimal value is 8, Big endian format
+  0b0000;  #decimal value is 0, Big endian format. Updates per peformance/design teams - first pass
 }
 
 ispy MB_SIM.SRQ.MBA_WRQ0Q_CFG_WRQ_ACT_NUM_WRITES_PENDING [when=S] {
