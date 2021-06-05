@@ -49,6 +49,20 @@ static const uint32_t CTL_REGS_TX_CNTL4_PG_PHASE_SEL = 57;
 //<< [CTL_REGS_TX_CNTL4_PG]
 // omic/reg00006.H
 
+//>> [CTL_REGS_RX_MODE16_PG]
+static const uint64_t CTL_REGS_RX_MODE16_PG = 0x8008804010012c3full;
+
+static const uint32_t CTL_REGS_RX_MODE16_PG_INC_DEC_AMT0 = 48;
+static const uint32_t CTL_REGS_RX_MODE16_PG_INC_DEC_AMT0_LEN = 3;
+static const uint32_t CTL_REGS_RX_MODE16_PG_THRESH1 = 51;
+static const uint32_t CTL_REGS_RX_MODE16_PG_THRESH1_LEN = 5;
+static const uint32_t CTL_REGS_RX_MODE16_PG_INC_DEC_AMT1 = 56;
+static const uint32_t CTL_REGS_RX_MODE16_PG_INC_DEC_AMT1_LEN = 3;
+static const uint32_t CTL_REGS_RX_MODE16_PG_THRESH2 = 59;
+static const uint32_t CTL_REGS_RX_MODE16_PG_THRESH2_LEN = 5;
+//<< [CTL_REGS_RX_MODE16_PG]
+// omic/reg00006.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -33,7 +33,7 @@
   <sbeError/>
   <rc>RC_P10_SMP_LINK_FIRS_IOHS_NOT_SMP</rc>
   <description>
-    The requested IOHS target is not figured as an SMP link.
+    The requested IOHS target is not configured as an SMP link.
     This is a pre-requisite to setup the related FIR registers.
   </description>
   <ffdc>PROC_TARGET</ffdc>

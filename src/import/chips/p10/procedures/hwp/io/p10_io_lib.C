@@ -32,31 +32,24 @@
 /// *HW Consumed by  : HB
 ///-----------------------------------------------------------------------------
 
-#include <fapi2.H>
-#include <vector>
-#include <utils.H>
+#include <p10_io_lib.H>
 #include <p10_scom_omi.H>
 #include <p10_scom_omic.H>
+#include <p10_io_ppe_lib.H>
+#include <p10_io_ppe_regs.H>
 
 //------------------------------------------------------------------------------
 // Consts
 //------------------------------------------------------------------------------
-static const int P10_IO_LIB_NUMBER_OF_IOHS_LANES = 18;
-static const int P10_IO_LIB_50G_IOHS_LANES[] = { 0, 2, 4, 6, 8, 9, 11, 15, 17 };
-
-static const int P10_IO_LIB_NUMBER_OF_OMI_LANES = 8;
-static const int P10_IO_LIB_NUMBER_OF_OMIC_LANES = 2 * P10_IO_LIB_NUMBER_OF_OMI_LANES;
-
-static const int P10_IO_LIB_NUMBER_OF_IOHS_THREADS = 2;
-static const int P10_IO_LIB_NUMBER_OF_OMIC_THREADS = 2;
-static const int P10_IO_LIB_NUMBER_OF_THREADS = P10_IO_LIB_NUMBER_OF_IOHS_THREADS + P10_IO_LIB_NUMBER_OF_OMIC_THREADS;
-
-static const uint64_t P10_IO_LIB_FREQ_ADJUST_LT_25G = 0x01;
-static const uint64_t P10_IO_LIB_FREQ_ADJUST_GE_25G = 0x0D;
 //------------------------------------------------------------------------------
 // Functions
 //------------------------------------------------------------------------------
-
+class p10_io_lib : public p10_io_ppe_cache_proc
+{
+    public:
+        fapi2::ReturnCode clear_error_valid(
+            const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target);
+};
 
 /// @brief Determines the thread number for the given iohs target
 /// @param[in] i_iohs_target    IOHS target to get thread id for
@@ -408,6 +401,37 @@ fapi2::ReturnCode p10_io_omi_poll_init_done(const fapi2::Target<fapi2::TARGET_TY
                 fapi2::P10_IO_OMI_POLL_INIT_DONE_TIMEOUT_ERROR()
                 .set_TARGET(i_omi_target),
                 "Timeout waiting on io init done to complete");
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+/// @brief Cleared PPE Error Valid
+/// @param[in] i_pauc_target    PAUC target
+/// @return FAPI_RC_SUCCESS if arguments are valid
+fapi2::ReturnCode p10_io_clear_error_valid(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target)
+{
+    FAPI_DBG("Begin");
+    p10_io_lib l_proc;
+    FAPI_TRY(l_proc.clear_error_valid(i_pauc_target));
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// @brief Cleared PPE Error Valid
+/// @param[in] i_pauc_target    PAUC target
+/// @return FAPI_RC_SUCCESS if arguments are valid
+fapi2::ReturnCode p10_io_lib::clear_error_valid(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target)
+{
+    FAPI_DBG("Begin");
+    FAPI_TRY(p10_io_ppe_ppe_error_valid.putData(i_pauc_target, 0, true));
+
+    FAPI_TRY(p10_io_ppe_img_regs.flush());
+
+
 fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;

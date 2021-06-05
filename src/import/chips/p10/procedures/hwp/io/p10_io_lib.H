@@ -152,4 +152,12 @@ fapi2::ReturnCode p10_io_omi_put_pl_regs(const fapi2::Target<fapi2::TARGET_TYPE_
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_io_omi_poll_init_done(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi_target);
 
+///
+/// @brief Clear IO Valid
+///
+/// @param[in] i_pauc_target PAUC target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_clear_error_valid(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target);
+
 #endif

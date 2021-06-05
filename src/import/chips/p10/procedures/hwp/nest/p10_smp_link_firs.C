@@ -295,10 +295,10 @@ fapi2::ReturnCode p10_smp_link_firs_clear(
 
     FAPI_DBG("Clearing PHY FIR register");
 
-    FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_REG_RW(i_pauc_target),
-             "Error from prepScom (PHY_SCOM_MAC_FIR_REG_RW)");
-    FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_REG_RW(i_pauc_target, ~firs_btm.PHY_FIR[i_iohs_pos]),
-             "Error from putScom (PHY_SCOM_MAC_FIR_REG_RW)");
+    FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_REG_WO_AND(i_pauc_target),
+             "Error from prepScom (PHY_SCOM_MAC_FIR_REG_WO_AND)");
+    FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_REG_WO_AND(i_pauc_target, ~firs_btm.PHY_FIR[i_iohs_pos]),
+             "Error from putScom (PHY_SCOM_MAC_FIR_REG_WO_AND)");
 
     FAPI_DBG("Clearing FBC TL FIR register");
     l_ptl_clear = ~firs_btm.PTL_FIR[i_sublink];
