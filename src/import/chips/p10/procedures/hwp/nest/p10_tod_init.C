@@ -649,8 +649,14 @@ fapi2::ReturnCode qme_tod_notify(
         for (const auto& l_core_target :
              l_target.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL) )
         {
-            l_data64.flush<0>().setBit<1>();
-            FAPI_TRY( putScom( l_core_target, EC_PC_TFX_SM, l_data64 ) );
+            fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core_target, l_eco_mode));
+
+            if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED)
+            {
+                l_data64.flush<0>().setBit<1>();
+                FAPI_TRY( putScom( l_core_target, EC_PC_TFX_SM, l_data64 ) );
+            }
         }
     }
 

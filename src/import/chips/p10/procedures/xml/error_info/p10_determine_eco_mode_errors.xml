@@ -22,9 +22,11 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hw/ppe, hostboot, hwsv                                  -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_DETERMINE_ECO_MODE_TARGET_STATE_ERR</rc>
     <description>
       Procedure: p10_determine_eco_mode
@@ -43,6 +45,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_DETERMINE_ECO_MODE_PG_ERR</rc>
     <description>
       Procedure: p10_determine_eco_mode

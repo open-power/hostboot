@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p10_sbe_purge_hb.H
+/// @file p10_sbe_purge_hb.C
 /// @brief Purges active/backing caches and resets contained mode
 ///        configuration, as part of HB cache contained
 ///        exit sequence
@@ -62,10 +62,21 @@ p10_sbe_purge_hb(
         fapi2::buffer<uint64_t> l_lco_target_id_ctl_reg = 0;
         fapi2::buffer<uint64_t> l_l3_fir_mask_or_reg = 0;
         fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                l_core_target,
                                l_core_num),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, active)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE,
+                               l_core_target,
+                               l_eco_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_ECO_MODE, active)");
+
+        FAPI_ASSERT(l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED,
+                    fapi2::P10_SBE_PURGE_HB_ECO_MODE_ERR()
+                    .set_TARGET(l_core_target),
+                    "Core %d is marked as ECO, but is in set of active cores!",
+                    l_core_num);
 
         FAPI_EXEC_HWP(l_rc,
                       p10_l2_flush,
@@ -109,10 +120,21 @@ p10_sbe_purge_hb(
         fapi2::buffer<uint64_t> l_lco_target_id_ctl_reg = 0;
         fapi2::buffer<uint64_t> l_l3_fir_mask_or_reg = 0;
         fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                l_core_target,
                                l_core_num),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, backing)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE,
+                               l_core_target,
+                               l_eco_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_ECO_MODE, backing)");
+
+        FAPI_ASSERT(l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED,
+                    fapi2::P10_SBE_PURGE_HB_ECO_MODE_ERR()
+                    .set_TARGET(l_core_target),
+                    "Core %d is marked as ECO, but is in set of backing caches!",
+                    l_core_num);
 
         // mask L3 FIR tracking contained mode violations
         FAPI_TRY(PREP_L3_MISC_L3CERRS_FIR_REG_RW(l_core_target));

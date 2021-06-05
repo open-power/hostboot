@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,11 +57,23 @@ p10_sbe_stop_hb(
     for (auto l_core_target : i_active_core_targets)
     {
         fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                l_core_target,
                                l_core_num),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE,
+                               l_core_target,
+                               l_eco_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_ECO_MODE)");
+
+        FAPI_ASSERT(l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED,
+                    fapi2::P10_SBE_STOP_HB_ECO_MODE_ERR()
+                    .set_TARGET(l_core_target),
+                    "Core %d is marked as ECO, but is in set of active cores!",
+                    l_core_num);
 
         for (auto l_thread_num = 0; l_thread_num < MAX_NUM_OF_THREADS; l_thread_num++)
         {

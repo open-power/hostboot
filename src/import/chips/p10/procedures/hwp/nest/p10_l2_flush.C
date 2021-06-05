@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,11 +154,21 @@ fapi2::ReturnCode p10_l2_flush(
     const p10core::purgeData_t& i_purgeData)
 {
     fapi2::buffer<uint64_t> l_cmdReg;
+    fapi2::ATTR_ECO_MODE_Type l_eco_mode = fapi2::ENUM_ATTR_ECO_MODE_DISABLED;
 
     FAPI_DBG("Entering p10_l2_flush: i_purgeData [iv_cmdType: 0x%x] "
              "[iv_cmdMem : 0x%x] [iv_cmdBank: 0x%x] [iv_cmdCGC : 0x%x]",
              i_purgeData.iv_cmdType, i_purgeData.iv_cmdMem,
              i_purgeData.iv_cmdBank, i_purgeData.iv_cmdCGC);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, i_target, l_eco_mode),
+             "Error from FAPI_ATTR_GET (ATTR_ECO_MODE)");
+
+    if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+    {
+        FAPI_INF("Skipping purge on ECO target");
+        goto fapi_try_exit;
+    }
 
     FAPI_TRY(purgeCompleteCheck(i_target, 0, l_cmdReg), // 0 = no wait
              "Error returned from purgeCompleteCheck call");

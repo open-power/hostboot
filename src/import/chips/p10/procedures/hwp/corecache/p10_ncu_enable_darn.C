@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,17 @@ fapi2::ReturnCode p10_ncu_enable_darn(
 
     fapi2::buffer<uint64_t> l_darn_bar;
     uint64_t l_nx_rng_bar;
+
+    // skip enablement on an ECO target -- the RNG will never be used
+    // as the core will never be running instructions
+    fapi2::ATTR_ECO_MODE_Type l_eco_mode = fapi2::ENUM_ATTR_ECO_MODE_DISABLED;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, i_core_target, l_eco_mode));
+
+    if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+    {
+        FAPI_INF("Skipping enablement on ECO core target");
+        goto fapi_try_exit;
+    }
 
     // query attributes on chip hosting RNG we want this core to
     // target

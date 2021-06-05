@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -415,6 +415,24 @@ extern "C" {
                                l_chtmType),
                  "p10_htm_start: Error getting ATTR_CHTM_TRACE_TYPE, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
+
+        // skip core if in ECO mode
+        for (auto l_core : l_coreChiplets)
+        {
+            fapi2::ATTR_ECO_MODE_Type l_eco_mode = fapi2::ENUM_ATTR_ECO_MODE_DISABLED;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core, l_corePos),
+                     "Error getting ATTR_CHIP_UNIT_POS");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core, l_eco_mode),
+                     "Error from FAPI_ATTR_GET (ATTR_ECO_MODE)");
+
+            if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+            {
+                FAPI_INF("p10_htm_start: HTM unsupported for ECO mode target, skipping core %u", l_corePos);
+                l_chtmType[l_corePos] = fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE;
+            }
+        }
+
         FAPI_INF("p10_htm_start: CHTM type:");
 
         for (uint8_t ii = 0; ii < NUM_CHTM_ENGINES; ii++)

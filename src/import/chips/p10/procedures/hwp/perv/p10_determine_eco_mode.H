@@ -34,6 +34,8 @@
 /// *HWP Consumed by: HB,SBE,HWSV
 ///
 
+// EKB-Mirror-To: hw/ppe, hostboot, hwsv
+
 #ifndef _P10_DETERMINE_ECO_MODE_H_
 #define _P10_DETERMINE_ECO_MODE_H_
 

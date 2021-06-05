@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,11 +119,28 @@ p10_sbe_exit_cache_contained_validate_core_inputs(
     for (auto& l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL))
     {
         fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                l_core_target,
                                l_core_num),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE,
+                               l_core_target,
+                               l_eco_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_ECO_MODE)");
+
+        FAPI_ASSERT(l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED ||
+                    (!l_active_cores.getBit(l_core_num) &&
+                     !l_backing_caches.getBit(l_core_num)),
+                    fapi2::P10_SBE_EXIT_CACHE_CONTAINED_ECO_MODE_ERR()
+                    .set_TARGET(i_target)
+                    .set_ACTIVE_CORES(l_active_cores)
+                    .set_BACKING_CACHES(l_backing_caches)
+                    .set_ECO_FOUND(l_core_num),
+                    "Core %d is marked as ECO, but is in set of active cores and backing caches!",
+                    l_core_num);
 
         FAPI_ASSERT(!(l_active_cores.getBit(l_core_num) &&
                       l_backing_caches.getBit(l_core_num)),

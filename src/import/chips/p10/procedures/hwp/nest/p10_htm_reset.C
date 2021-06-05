@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -268,12 +268,25 @@ fapi2::ReturnCode p10_htm_reset(
 
     for (auto l_core : l_coreChiplets)
     {
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode = fapi2::ENUM_ATTR_ECO_MODE_DISABLED;
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core, l_corePos),
                  "Error getting ATTR_CHIP_UNIT_POS");
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core, l_eco_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_ECO_MODE)");
+
+        // skip core if in ECO mode
+        if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+        {
+            l_chtmType[l_corePos] = fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE;
+            FAPI_INF("p10_htm_reset: HTM unsupported for ECO mode target, skipping core %u", l_corePos);
+            continue;
+        }
+
         if (l_chtmType[l_corePos] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW)
         {
-            FAPI_INF("IMA cHTM trace type does not allow resets, skipping on core %u", l_corePos);
+            FAPI_INF("p10_htm_reset: IMA cHTM trace type does not allow resets, skipping on core %u", l_corePos);
             continue;
         }
 

@@ -23,6 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+  <!-- ********************************************************************* -->
    <hwpError>
     <sbeError/>
     <rc>RC_PM_BACKING_CACHEPOWER_DOWN_FAILED</rc>
@@ -42,6 +43,19 @@
     <callout>
       <target>CHIP_TARGET</target>
        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+   <hwpError>
+    <sbeError/>
+    <rc>RC_PM_BACKING_CACHEPOWER_DOWN_ECO_ERR</rc>
+    <description>Backing cache unexpectedly configured in ECO mode
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->

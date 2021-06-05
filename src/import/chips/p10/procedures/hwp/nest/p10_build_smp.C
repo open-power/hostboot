@@ -872,50 +872,49 @@ fapi2::ReturnCode p10_build_smp_topo_tables(
 
 #ifdef __HOSTBOOT_MODULE
             // L2/L3/NCU: update only for Hostboot execution
+            // this code runs in Hostboot only to ensure that the set of active cores is updated with an
+            // accurate view of the drawer-contained SMP before we extend the topology (PHASE1).  the full system level
+            // view will be installed via the STOP image, so we don't need handling for the PHASE2 SMP build case
+            // here
             {
                 // build set of cores to update depending on build SMP call
-                std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>> l_cores_to_update;
                 fapi2::ATTR_PROC_SBE_MASTER_CHIP_Type l_sbe_master_chip;
                 FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, *(p_iter->second.target), l_sbe_master_chip));
 
-                for (const auto& c : (*(p_iter->second.target)).getChildren<fapi2::TARGET_TYPE_CORE>())
+                if ((i_op == SMP_ACTIVATE_PHASE1) &&
+                    (l_sbe_master_chip == fapi2::ENUM_ATTR_PROC_SBE_MASTER_CHIP_TRUE))
                 {
-                    fapi2::ATTR_CHIP_UNIT_POS_Type l_attr_chip_unit_pos;
-                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, c, l_attr_chip_unit_pos));
-
-                    if ((i_op == SMP_ACTIVATE_PHASE1) &&
-                        (l_sbe_master_chip == fapi2::ENUM_ATTR_PROC_SBE_MASTER_CHIP_TRUE))
+                    for (const auto& c : (*(p_iter->second.target)).getChildren<fapi2::TARGET_TYPE_CORE>())
                     {
-                        // limit update to set of active cores/backing caches on primary chip, which
-                        // should all be accessible... active/backing attributes do not currently get pushed
-                        // up from SBE -> HB so we need to determine empirically from HW
-                        // (code here looks at EQ clock region state)
-                        fapi2::Target<fapi2::TARGET_TYPE_EQ> l_eq = c.getParent<fapi2::TARGET_TYPE_EQ>();
-                        fapi2::buffer<uint64_t> l_eq_clock_status;
-                        FAPI_TRY(fapi2::getScom(l_eq, CLOCK_STAT_SL, l_eq_clock_status));
-
-                        // unit5 = l30
-                        // unit6 = l31
-                        // unit7 = l32
-                        // unit8 = l33
-                        // value of 0b0 indicates clocks are running
-                        if (!l_eq_clock_status.getBit(CLOCK_STAT_SL_UNIT5_SL + (l_attr_chip_unit_pos % 4)))
+                        fapi2::ATTR_CHIP_UNIT_POS_Type l_attr_chip_unit_pos;
+                        fapi2::ATTR_ECO_MODE_Type l_eco_mode = fapi2::ENUM_ATTR_ECO_MODE_DISABLED;
+                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, c, l_eco_mode));
+                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, c, l_attr_chip_unit_pos));
+                        FAPI_ASSERT(l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED,
+                                    fapi2::P10_BUILD_SMP_INVALID_ECO_TARGET()
+                                    .set_CORE_TARGET(c),
+                                    "ECO target found but not expected in set of active cores, backing caches");
                         {
-                            l_cores_to_update.push_back(c);
+                            // limit update to set of active cores/backing caches on primary chip, which
+                            // should all be accessible... active/backing attributes do not currently get pushed
+                            // up from SBE -> HB so we need to determine empirically from HW
+                            // (code here looks at EQ clock region state)
+                            fapi2::Target<fapi2::TARGET_TYPE_EQ> l_eq = c.getParent<fapi2::TARGET_TYPE_EQ>();
+                            fapi2::buffer<uint64_t> l_eq_clock_status;
+                            FAPI_TRY(fapi2::getScom(l_eq, CLOCK_STAT_SL, l_eq_clock_status));
+
+                            // unit5 = l30
+                            // unit6 = l31
+                            // unit7 = l32
+                            // unit8 = l33
+                            // value of 0b0 indicates clocks are running
+                            if (!l_eq_clock_status.getBit(CLOCK_STAT_SL_UNIT5_SL + (l_attr_chip_unit_pos % 4)))
+                            {
+                                FAPI_TRY(topo::set_topology_id_tables_cache(c),
+                                         "Error from topo::set_topology_id_tables_cache");
+                            }
                         }
                     }
-                    else if (i_op == SMP_ACTIVATE_PHASE2)
-                    {
-                        // update all cores
-                        l_cores_to_update.push_back(c);
-                    }
-                }
-
-                // perform live update via SCOM
-                for (const auto& c : l_cores_to_update)
-                {
-                    FAPI_TRY(topo::set_topology_id_tables_cache(c),
-                             "Error from topo::set_topology_id_tables_cache");
                 }
             }
 #endif

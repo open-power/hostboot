@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1391,13 +1391,19 @@ extern "C" {
             //   - Other CHTM trace types are not supported until DD2.0.
             //     ATTR_CHTM_TRACE_TYPE should be DISABLE for 1.0.
 
+            fapi2::ATTR_ECO_MODE_Type l_eco_mode = fapi2::ENUM_ATTR_ECO_MODE_DISABLED;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, l_core, l_eco_mode),
+                     "Error from FAPI_ATTR_GET (ATTR_ECO_MODE)");
+
             // Get the core position
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core, l_corePos),
                      "Error getting ATTR_CHIP_UNIT_POS");
 
-            // Skip if CHTM is disable on this core
-            if (l_chtmType[l_corePos] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE)
+            // Skip if ECO or if CHTM is disabled on this core
+            if ((l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED) ||
+                (l_chtmType[l_corePos] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE))
             {
+                FAPI_INF("p10_htm_setup: HTM is disabled or unsupported, skipping core %u", l_corePos);
                 continue;
             }
 

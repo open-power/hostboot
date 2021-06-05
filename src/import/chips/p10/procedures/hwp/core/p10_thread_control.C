@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -212,6 +212,18 @@ fapi2::ReturnCode p10_thread_control(
     // Output state is only valid for PTC_CMD_QUERY command
     o_state = 0;
 
+    // do not honor any request to manipulate threads on ECO core target,
+    // represent state as "stopped"
+    fapi2::ATTR_ECO_MODE_Type l_eco_mode = fapi2::ENUM_ATTR_ECO_MODE_DISABLED;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, i_target, l_eco_mode));
+
+    if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+    {
+        o_state = THREAD_STATE_STOP;
+        FAPI_INF("p10_thread_control : Ignoring command on ECO core");
+        goto fapi_try_exit;
+    }
+
     switch(i_command)
     {
         case PTC_CMD_SRESET:
@@ -395,7 +407,7 @@ fapi2::ReturnCode p10_thread_control_sreset(
         fapi2::buffer<uint64_t> l_mode_data;
 
         FAPI_TRY(fapi2::getScom(i_target, scomt::c::EC_PC_THRCTL_TCTLCOM_RAS_MODEREG, l_mode_data),
-                 "p10_thread_control_step: getScom error when reading "
+                 "p10_thread_control_sreset: getScom error when reading "
                  "ras_modreg for threads 0x%x", i_threads);
         l_mode_data.clearBit<EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_FENCE_INTERRUPTS>();
         FAPI_TRY(fapi2::putScom(i_target, scomt::c::EC_PC_THRCTL_TCTLCOM_RAS_MODEREG, l_mode_data),

@@ -26,6 +26,36 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
+    <rc>RC_P10_SBE_EXIT_CACHE_CONTAINED_ECO_MODE_ERR</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ACTIVE_CORES</ffdc>
+    <ffdc>BACKING_CACHES</ffdc>
+    <ffdc>ECO_FOUND</ffdc>
+    <description>
+      Unexpected ECO mode cache found in set of active cores or backing caches
+    </description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_SBE_PURGE_HB_ECO_MODE_ERR</rc>
+    <ffdc>TARGET</ffdc>
+    <description>
+      Unexpected ECO mode cache found in set of active cores or backing caches
+    </description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_SBE_STOP_HB_ECO_MODE_ERR</rc>
+    <ffdc>TARGET</ffdc>
+    <description>
+      Unexpected ECO mode cache found in set of active cores or backing caches
+    </description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
     <rc>RC_P10_SBE_EXIT_CACHE_CONTAINED_ACTIVE_BACKING_OVERLAP_ERR</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>ACTIVE_CORES</ffdc>

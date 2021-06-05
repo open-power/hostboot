@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,15 @@ fapi2::ReturnCode p10_sbe_instruct_start(
 {
     fapi2::buffer<uint64_t> l_ras_status;
     uint64_t l_thread_state;
+    fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+
     FAPI_DBG("Entering ...");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, i_target, l_eco_mode));
+    FAPI_ASSERT(l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED,
+                fapi2::P10_SBE_INSTRUCT_START_MASTER_CORE_ECO_MODE()
+                .set_TARGET(i_target),
+                "Master core target not expected to be in ECO mode!");
 
     FAPI_INF("Starting instruction using thread mask: 0x%X",
              static_cast<uint8_t>(i_thread_mask));

@@ -286,4 +286,17 @@
   </callout>
 </hwpError>
 <!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_BUILD_SMP_INVALID_ECO_TARGET</rc>
+  <description>
+    Found ECO target in set of active cores, backing caches whne performing
+    phase1 topology table update
+  </description>
+  <ffdc>CORE_TARGET</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
 </hwpErrors>
