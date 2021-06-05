@@ -56,11 +56,23 @@
 </registerFfdc>
 <!-- ******************************************************************** -->
 <hwpError>
-  <rc>RC_P10_FBC_TDM_UTILS_REM_ENDP_TARGET_ERR</rc>
+  <rc>RC_P10_FBC_TDM_UTILS_LOC_ENDP_TARGET_ERR</rc>
   <description>
-    No remote endpoint target found for given local link endpoint.
+    Local endpoint target has no iolink children targets
   </description>
   <ffdc>LOC_ENDP_TARGET</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_TDM_UTILS_REM_IOLINK_TARGET_ERR</rc>
+  <description>
+    No remote iolink target found for given local link iolink target
+  </description>
+  <ffdc>LOC_IOLINK_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

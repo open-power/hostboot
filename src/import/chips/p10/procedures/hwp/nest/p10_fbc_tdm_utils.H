@@ -201,6 +201,18 @@ extern "C"
         const bool i_even_not_odd);
 
 ///
+/// @brief Cleanup Recal
+///
+/// @param[in] i_target         Reference to IOHS endpoint target
+/// @param[in] i_even_not_odd   Identify half-link to target (true=even,false=odd)
+///
+/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p10_fbc_tdm_utils_recal_cleanup(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+        const bool i_even_not_odd);
+
+///
 /// @brief Restart calibration
 ///
 /// @param[in] i_target         Reference to IOHS endpoint target

@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p10_iohs_reset.H
-/// @brief Reset the omi phy
+/// @brief Reset the iohs phy
 ///-----------------------------------------------------------------------------
 /// *HW HW Maintainer: Chris Steffen <cwsteffen@us.ibm.com>
 /// *HW FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
@@ -47,13 +47,32 @@ extern "C"
 {
 
 ///
-/// @brief Reset the OMI phy
+/// @brief Reset the IOHS Half phy
 ///
-/// @param[in] i_target Chip target to reset
+/// @param[in] i_target IOHS target to reset
 /// @param[in] i_half odd/even/both
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode p10_iohs_reset(
         const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target, const uint8_t i_half);
+
+///
+/// @brief Reset the IOHS Half phy
+///
+/// @param[in] i_target IOHS target to reset
+/// @param[in] i_half odd/even/both
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_iohs_init(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target, const uint8_t i_half);
+
+///
+/// @brief Reset the IOLINK phy -- keeps the iolink in reset
+///
+/// @param[in] i_target Iolink target to reset
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_iolink_reset(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_iolink);
 
 } // extern "C"

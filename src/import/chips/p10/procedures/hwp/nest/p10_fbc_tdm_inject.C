@@ -36,7 +36,9 @@
 //------------------------------------------------------------------------------
 #include <p10_fbc_tdm_inject.H>
 #include <p10_fbc_tdm_utils.H>
-#include <p10_io_power.H>
+#include <p10_iohs_reset.H>
+#include <p10_io_lib.H>
+#include <p10_scom_iohs.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -72,35 +74,21 @@ fapi2::ReturnCode p10_fbc_tdm_enter(
 {
     FAPI_DBG("Start");
 
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_target;
-    fapi2::ATTR_CHIP_EC_FEATURE_HW532820_Type l_hw532820;
-    l_proc_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW532820, l_proc_target, l_hw532820));
 
     // Note that RESET is either a soft reset (when link is up)
     // or hard reset (when link is down) and would also deassert
     // link_up, whereas ENTER_TDM would leave link_up asserted.
     // RESET would be the ideal command here, except HW532820
     // prevents us from using it.
-    if (l_hw532820)
-    {
-        // input parameter specifies link half we want to become
-        // non-functional; command is sent to partner link which we
-        // want to remain functional in this case
-        FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
-                     i_target,
-                     !i_even_not_odd,
-                     p10_fbc_tdm_utils_dl_cmd_t::ENTER_TDM),
-                 "Error from p10_fbc_tdm_utils_dl_send_command (ENTER_TDM)");
-    }
-    else
-    {
-        FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
-                     i_target,
-                     i_even_not_odd,
-                     p10_fbc_tdm_utils_dl_cmd_t::RESET),
-                 "Error from p10_fbc_tdm_utils_dl_send_command (RESET)");
-    }
+
+    // input parameter specifies link half we want to become
+    // non-functional; command is sent to partner link which we
+    // want to remain functional in this case
+    FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
+                 i_target,
+                 !i_even_not_odd,
+                 p10_fbc_tdm_utils_dl_cmd_t::ENTER_TDM),
+             "Error from p10_fbc_tdm_utils_dl_send_command (ENTER_TDM)");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -168,6 +156,24 @@ fapi2::ReturnCode p10_fbc_tdm_inject_confirm_half(
     FAPI_DBG("Start");
 
     bool l_link_down = false;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_iolink_even;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_iolink_odd;
+
+    for (auto l_iolink : i_target.getChildren<fapi2::TARGET_TYPE_IOLINK>())
+    {
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_pos;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iolink, l_unit_pos))
+        {
+            if ((l_unit_pos % 2) == 0)
+            {
+                l_iolink_even = l_iolink;
+            }
+            else
+            {
+                l_iolink_odd = l_iolink;
+            }
+        }
+    }
 
     for (uint32_t i = 0; i < P10_FBC_TDM_INJECT_TDM_TRANSITION_MAX_WAIT_POLLS; i++)
     {
@@ -192,7 +198,8 @@ fapi2::ReturnCode p10_fbc_tdm_inject_confirm_half(
                 fapi2::P10_FBC_TDM_INJECT_POST_CONDITION_ERR()
                 .set_IOHS_TARGET(i_target)
                 .set_PAUC_TARGET(i_target.getParent<fapi2::TARGET_TYPE_PAUC>())
-                .set_EVEN_NOT_ODD(i_even_not_odd),
+                .set_EVEN_NOT_ODD(i_even_not_odd)
+                .set_IOLINK_TARGET((i_even_not_odd) ? (l_iolink_even) : (l_iolink_odd)),
                 "Link is not running in half-width mode!");
 
 fapi_try_exit:
@@ -213,19 +220,19 @@ fapi2::ReturnCode p10_fbc_tdm_recal_stop(
     const bool i_even_not_odd)
 {
     FAPI_DBG("Start");
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_target;
-    fapi2::ATTR_CHIP_EC_FEATURE_HW532820_Type l_hw532820;
-    l_proc_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    //fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_target;
+    //fapi2::ATTR_CHIP_EC_FEATURE_HW532820_Type l_hw532820;
+    //l_proc_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
+
+    //FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW532820, l_proc_target, l_hw532820));
+
+    //if (l_hw532820)
+    //{
     FAPI_TRY(p10_fbc_tdm_utils_recal_stop(i_target, i_even_not_odd));
-
     // call twice to avoid window condition on DD1
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW532820, l_proc_target, l_hw532820));
-
-    if (l_hw532820)
-    {
-        FAPI_TRY(p10_fbc_tdm_utils_recal_stop(i_target, i_even_not_odd));
-    }
+    FAPI_TRY(p10_fbc_tdm_utils_recal_stop(i_target, i_even_not_odd));
+    //}
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -328,19 +335,19 @@ fapi_try_exit:
 ///
 /// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode p10_fbc_tdm_phy_powerdown(
+fapi2::ReturnCode p10_fbc_tdm_phy_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
     const bool i_even_not_odd)
 {
     FAPI_DBG("Start");
 
-    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_iolink_pdwn;
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_iolink_reset;
 
-    FAPI_TRY(p10_fbc_tdm_utils_get_iolink(i_target, i_even_not_odd, l_iolink_pdwn),
+    FAPI_TRY(p10_fbc_tdm_utils_get_iolink(i_target, i_even_not_odd, l_iolink_reset),
              "Error from p10_fbc_tdm_utils_get_iolink");
 
-    FAPI_TRY(p10_io_iolink_power(l_iolink_pdwn, false),
-             "Error from p10_io_iohs_power");
+    FAPI_TRY(p10_iolink_reset(l_iolink_reset),
+             "Error from p10_iolink_reset");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -375,7 +382,8 @@ fapi2::ReturnCode p10_fbc_tdm_inject(
         p10_fbc_tdm_recal_stop,
         p10_fbc_tdm_confirm_recal_stop,
         p10_fbc_tdm_partial_reset,
-        p10_fbc_tdm_phy_powerdown
+        p10_fbc_tdm_partial_reset,
+        p10_fbc_tdm_phy_reset
     };
 
     // validate input target

@@ -60,6 +60,7 @@
   <ffdc>IOHS_TARGET</ffdc>
   <ffdc>PAUC_TARGET</ffdc>
   <ffdc>EVEN_NOT_ODD</ffdc>
+  <ffdc>IOLINK_TARGET</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_P10_FBC_TDM_UTILS_DL_STATUS</id>
     <targetType>TARGET_TYPE_IOHS</targetType>
@@ -71,7 +72,7 @@
     <target>PAUC_TARGET</target>
   </collectRegisterFfdc>
   <callout>
-    <target>IOHS_TARGET</target>
+    <target>IOLINK_TARGET</target>
     <priority>HIGH</priority>
   </callout>
 </hwpError>

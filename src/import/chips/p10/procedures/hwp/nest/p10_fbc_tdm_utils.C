@@ -36,6 +36,7 @@
 #include <p10_fbc_tdm_utils.H>
 #include <p10_smp_link_firs.H>
 #include <p10_io_iohs_poll_recal.H>
+#include <p10_io_lib.H>
 #include <p10_scom_iohs.H>
 #include <p10_scom_pauc.H>
 
@@ -94,7 +95,10 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_mask(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
     const bool i_even_not_odd)
 {
+    using namespace scomt::pauc;
     FAPI_DBG("Start");
+    fapi2::buffer<uint64_t> l_data = 0;
+    auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
 
     fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_unit;
     sublink_t l_sublink_opt;
@@ -108,6 +112,13 @@ fapi2::ReturnCode p10_fbc_tdm_utils_fir_mask(
 
     FAPI_TRY(p10_smp_link_firs(i_target, l_sublink_opt, action_t::INACTIVE, false),
              "Error from p10_smp_link_firs");
+
+    // additionally mask RECAL_NOT_RUN (not covered by p10_smp_link_firs, which only touches
+    // link specific bits)
+    FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc_target));
+    SET_PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK(l_data);
+    FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_MASK_REG_WO_OR(l_pauc_target));
+    FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_MASK_REG_WO_OR(l_pauc_target, l_data));
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -260,13 +271,20 @@ fapi2::ReturnCode p10_fbc_tdm_utils_validate_targets(
     FAPI_DBG("Start");
 
     // verify link configuration
-    l_loc_iolink_target = i_target.getChildren<fapi2::TARGET_TYPE_IOLINK>().front();
+    auto l_loc_iolink_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOLINK>();
+
+    FAPI_ASSERT(l_loc_iolink_targets.size() != 0,
+                fapi2::P10_FBC_TDM_UTILS_LOC_ENDP_TARGET_ERR()
+                .set_LOC_ENDP_TARGET(i_target),
+                "No IOLINK targets found for given local link endpoint!");
+
+    l_loc_iolink_target = l_loc_iolink_targets.front();
     l_rc = l_loc_iolink_target.getOtherEnd(l_rem_iolink_target);
 
     FAPI_ASSERT(!l_rc,
-                fapi2::P10_FBC_TDM_UTILS_REM_ENDP_TARGET_ERR()
-                .set_LOC_ENDP_TARGET(i_target),
-                "No remote endpoint target found for given local link endpoint!");
+                fapi2::P10_FBC_TDM_UTILS_REM_IOLINK_TARGET_ERR()
+                .set_LOC_IOLINK_TARGET(l_loc_iolink_target),
+                "No remote iolink target found for given local link iolink target!");
 
     l_rem_target = l_rem_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
 
@@ -353,6 +371,16 @@ fapi2::ReturnCode p10_fbc_tdm_utils_dl_send_command(
 
     FAPI_TRY(GET_DLP_CONTROL(i_target, l_dl_control_data));
 
+    if (i_command == p10_fbc_tdm_utils_dl_cmd_t::PART_RESET)
+    {
+        (i_even_not_odd) ?
+        CLEAR_DLP_CONTROL_0_STARTUP(l_dl_control_data) :
+        CLEAR_DLP_CONTROL_1_STARTUP(l_dl_control_data);
+        (i_even_not_odd) ?
+        CLEAR_DLP_CONTROL_0_PHY_TRAINING(l_dl_control_data) :
+        CLEAR_DLP_CONTROL_1_PHY_TRAINING(l_dl_control_data);
+    }
+
     (i_even_not_odd) ?
     SET_DLP_CONTROL_0_COMMAND(i_command, l_dl_control_data) :
     SET_DLP_CONTROL_1_COMMAND(i_command, l_dl_control_data);
@@ -382,7 +410,7 @@ fapi2::ReturnCode p10_fbc_tdm_utils_recal_stop(
              "Error from getScom (DLP_CONFIG)");
     SET_DLP_CONFIG_DISABLE_RECAL_START(l_dl_config_data);
     FAPI_TRY(PUT_DLP_CONFIG(i_target, l_dl_config_data),
-             "Error from puScom (DLP_CONFIG)");
+             "Error from putScom (DLP_CONFIG)");
 
     // send command via DL state machine
     FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
@@ -428,6 +456,7 @@ fapi2::ReturnCode p10_fbc_tdm_utils_recal_restart(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
     const bool i_even_not_odd)
 {
+    using namespace scomt::pauc;
     FAPI_DBG("Start");
 
     // send command via DL state machine
@@ -444,6 +473,46 @@ fapi2::ReturnCode p10_fbc_tdm_utils_recal_restart(
                  p10_fbc_tdm_utils_dl_cmd_t::START_RECAL),
              "Error from p10_fbc_tdm_utils_dl_send_command (%s)",
              (!i_even_not_odd) ? ("odd") : ("even"));
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_fbc_tdm_utils_recal_cleanup
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_fbc_tdm_utils_recal_cleanup(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    const bool i_even_not_odd)
+{
+    using namespace scomt;
+    using namespace scomt::pauc;
+    FAPI_DBG("Start");
+
+    // The delay must be longer than the time to recal 17/18 lanes.  We expect this to be less
+    //   than 500ms, but we put in an extra 100ms buffer.  This is a long delay, but I
+    //   don't expect this to be a problem as it is only running the Abus CCM rcovery case.
+    const uint32_t c_ns_delay        = 1000000000;
+    const uint32_t c_sim_cycle_delay = 10000;
+    fapi2::buffer<uint64_t> l_data64(0x0);
+    auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+
+
+    FAPI_TRY(fapi2::delay(c_ns_delay, c_sim_cycle_delay),
+             "Error from fapi2 delay while waiting for dl transition to recal start to complete");
+
+    // re-enable error reporting for RECAL_NOT_RUN
+    // clear FIR bit
+    FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_REG_WO_AND(l_pauc_target));
+    CLEAR_PHY_SCOM_MAC_FIR_REG_PPE_CODE_RECAL_NOT_RUN(l_data64);
+    FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_REG_WO_AND(l_pauc_target, l_data64));
+    //// clear FIR mask bit
+    //FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_MASK_REG_WO_AND(l_pauc_target));
+    //FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_MASK_REG_WO_AND(l_pauc_target, l_data64));
+
+    // clear IO PPE error valid state
+    FAPI_TRY(p10_io_clear_error_valid(l_pauc_target));
 
 fapi_try_exit:
     FAPI_DBG("End");
