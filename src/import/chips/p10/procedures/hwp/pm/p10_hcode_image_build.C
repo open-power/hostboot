@@ -799,8 +799,11 @@ fapi2::ReturnCode setIOAttr(CONST_FAPI2_PROC& i_procTgt,
                             Homerlayout_t* i_pChipHomer)
 {
     uint16_t attrTemp16 =  0;
+    uint32_t attrTemp32 =  1000;
     uint64_t attrTemp64 =  0;
     uint8_t  attrTemp8  =  0;
+    uint16_t attrArrayTemp[] = {1721,2482,0,0};
+
     XgpeHeader_t * pXgpeHeader   =
         ( XgpeHeader_t *) &i_pChipHomer->iv_xpmrRegion.iv_xgpeSramRegion[XGPE_INT_VECTOR_SIZE];
 
@@ -851,6 +854,27 @@ fapi2::ReturnCode setIOAttr(CONST_FAPI2_PROC& i_procTgt,
               "Error from FAPI_ATTR_GET for ATTR_WOF_TDP_IO_INDEX" );
     pXgpeHeader->g_xgpe_wofTdpIoIndex  =  attrTemp8;
 
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_VIO_SET_POINT_MV, i_procTgt, attrTemp32),
+              "Error from FAPI_ATTR_GET for ATTR_VIO_SET_POINT_MV" );
+
+    if ( !attrTemp32 )
+    {
+        attrTemp32 = 1000;
+    }
+
+    pXgpeHeader->g_xgpe_vioVoltage =  (uint16_t)attrTemp32;
+
+    //Index 0 = VIO_1V
+    //Index 1 = VIO_0P9V
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_WOF_IO_BASE_POWER_0P01W, i_procTgt, attrArrayTemp),
+              "Error from FAPI_ATTR_GET for ATTR_WOF_IO_BASE_POWER_0P01W" );
+
+    pXgpeHeader->g_xgpe_wofIoBase =  attrArrayTemp[0];
+    if ( attrTemp32 < 1000 )
+    {
+        pXgpeHeader->g_xgpe_wofIoBase =  attrArrayTemp[1];
+    }
+
 #ifndef __HOSTBOOT_MODULE
     pXgpeHeader->g_xgpe_ioStart             =  htobe16(pXgpeHeader->g_xgpe_ioStart);
     pXgpeHeader->g_xgpe_ioStep              =  htobe16(pXgpeHeader->g_xgpe_ioStep);
@@ -868,6 +892,8 @@ fapi2::ReturnCode setIOAttr(CONST_FAPI2_PROC& i_procTgt,
     FAPI_INF( "XGPE Ground Controller       0x%04x", htobe16( pXgpeHeader->g_xgpe_groundedCtrls ) );
     FAPI_INF( "XGPE Power Mode              0x%02x", pXgpeHeader->g_xgpe_wofIoPowMode );
     FAPI_INF( "XGPE WOF TDP IO Index        0x%08x", pXgpeHeader->g_xgpe_wofTdpIoIndex );
+    FAPI_INF( "XGPE VIO Voltage             0x%08x", htobe32( pXgpeHeader->g_xgpe_vioVoltage ) );
+    FAPI_INF( "XGPE WOF IO Base             0x%04x", htobe16( pXgpeHeader->g_xgpe_wofIoBase ) );
     FAPI_DBG( "==========================================================" );
 #endif
 

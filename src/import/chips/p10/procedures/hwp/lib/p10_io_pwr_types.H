@@ -59,28 +59,32 @@ typedef enum
 
 typedef enum
 {
-    OMI_25G_0,
-    OMI_25G_1,
-    OMI_32G,
-    AX_25G_0,
-    AX_25G_1,
-    AX_32G,
-    OC_25G_0,
-    OC_25G_1,
-    OC_32G,
-    AXO_BASE_25G_0,
-    AXO_BASE_25G_1,
-    AXO_BASE_32G,
-    G5_25G,
-    G5_32G,
-    G4_25G,
-    G4_32G,
-    G3_25G,
-    G3_32G,
-    G2_25G,
-    G2_32G,
-    G1_25G,
-    G1_32G,
+    OMI_25G_VIO_PT_9V,
+    OMI_32G_VIO_PT_9V,
+    OMI_25G_VIO_1V,
+    OMI_32G_VIO_1V,
+    AX_25G_VIO_PT_9V,
+    AX_32G_VIO_PT_9V,
+    AX_25G_VIO_1V,
+    AX_32G_VIO_1V,
+    OC_25G_VIO_PT_9V,
+    OC_32G_VIO_PT_9V,
+    OC_25G_VIO_1V,
+    OC_32G_VIO_1V,
+    AX_BASE_25G_VIO_PT_9V,
+    AX_BASE_32G_VIO_PT_9V,
+    AX_BASE_25G_VIO_1V,
+    AX_BASE_32G_VIO_1V,
+    G5_32G_VIO_PT_9V,
+    G4_32G_VIO_PT_9V,
+    G3_32G_VIO_PT_9V,
+    G2_32G_VIO_PT_9V,
+    G1_32G_VIO_PT_9V,
+    G5_32G_VIO_1V,
+    G4_32G_VIO_1V,
+    G3_32G_VIO_1V,
+    G2_32G_VIO_1V,
+    G1_32G_VIO_1V,
     NUM_OF_IO_TYPES_SPEED,
 } io_sub_type_speed_t;
 
@@ -195,16 +199,16 @@ typedef enum
     OPT2_O0,   //42
     OPT2_O1,   //43
     OPT3_O0,   //44
-    OPT3_O1,   //46
-    OPT4_O0,   //47
-    OPT4_O1,   //48
-    OPT5_O0,   //49
-    OPT5_O1,   //50
-    OPT6_O0,   //51
-    OPT6_O1,   //52
-    OPT7_O0,   //53
-    OPT7_O1,   //54
-    NUMBER_OF_IO_LINKS, //55
+    OPT3_O1,   //45
+    OPT4_O0,   //46
+    OPT4_O1,   //47
+    OPT5_O0,   //48
+    OPT5_O1,   //49
+    OPT6_O0,   //50
+    OPT6_O1,   //51
+    OPT7_O0,   //52
+    OPT7_O1,   //53
+    NUMBER_OF_IO_LINKS, //54
 } link_controllers;
 
 
@@ -213,7 +217,7 @@ typedef struct
     io_pwr_types_t  type;                       // IO power type
     io_sub_types_t  subtype;                    // IO power subtype (PCIE gen; DL type)
     uint8_t         speed;                      // Speed of the lanes (25, 32)
-    uint16_t        vdn_mv;                     // VDN voltage
+    uint16_t        vio_mv;                     // VIO voltage
     uint8_t         ac_lanes;                   // Number of AC lanes
     uint16_t        power_mw[NUM_OF_IO_PWRS];   // Total IO power types that comprise a link type
     uint16_t        max_min_delta;              // Maximum to minimum
@@ -229,15 +233,16 @@ typedef struct
     uint32_t io_magic;
     uint32_t io_pwr_gated_cntrlrs;
     uint64_t io_disable_links;
+    uint64_t io_active_links;
 } io_static_lnks_cntrls;
 
 
 
 typedef struct
 {
-    uint32_t io_magic;
-    uint16_t  sub_type;
-    uint16_t base_power_mw;
+//    uint32_t io_magic;
+    uint32_t  sub_type;
+    uint32_t base_power_mw;
 #if 0
     uint32_t ct_address;  // Activity Proxy Control Address
     uint32_t sm_address;  // Activity Proxy Sample Address
@@ -248,9 +253,9 @@ typedef struct
 
 typedef struct
 {
-    uint32_t io_magic;
-    uint16_t  sub_type;
-    uint16_t base_power_mw;  // only applies to A/X and OC links
+//   uint32_t io_magic;
+    uint32_t  sub_type;
+    uint32_t base_power_mw;  // only applies to A/X and OC links
 #if 0
     uint32_t ct_address;  // Activity Proxy Control Address
     uint32_t sm_address;  // Activity Proxy Sample Address
