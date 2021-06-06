@@ -89,16 +89,16 @@ static const uint32_t INTERRUPT_SRC_MASK_REG = 0xFFFFFFFF;
 #define FREEZE_PROXY            11
 
 uint64_t g_io_pow_gated_cntrlr = 0;
-uint16_t g_io_omi_cntrlr_link = 0;
+uint64_t g_io_omi_cntrlr_link = 0;
 #ifndef __PPE__
 static uint32_t TP_TPCHIP_TPC_CPLT_CTRL5_RW = 0x01000005;
 controller_entry_t g_cntrlr_data[NUM_IO_CNTRLS];
 link_entry_t g_link_data[NUMBER_OF_IO_LINKS];
 uint8_t  g_io_iohs_sub_type = 0;
 uint8_t  g_io_pcie_sub_type = 0;
-uint8_t  g_io_pci_cntrlr_link = 0;
-uint16_t g_io_iohs_ax_cntrlr_link = 0;
-uint16_t g_io_iohs_oc_cntrlr_link = 0;
+uint64_t  g_io_pci_cntrlr_link = 0;
+uint64_t g_io_iohs_ax_cntrlr_link = 0;
+uint64_t g_io_iohs_oc_cntrlr_link = 0;
 uint64_t g_io_lnk_disable_cntrlr = 0;
 
 //static uint32_t g_iohs_ax_apsr_reg[] = {0x18011039, 0x1801103D};
@@ -108,6 +108,8 @@ static uint32_t g_omi_even_apcr_reg[] = {0x0C011430, 0x0C011438}; //MC00, MC10, 
 //static uint32_t g_omi_odd_apcr_reg[]  = {0x0C011830, 0x0C011838}; //MC01, MC11, MC21, MC31
 static uint32_t g_omi_even_apor_reg[] = {0x0c011432, 0x0C01143a}; //MC01, MC11, MC21, MC31
 //static uint32_t g_omi_odd_apor_reg[]  = {0x0c011832, 0x0C01183a}; //MC01, MC11, MC21, MC31
+static uint32_t g_pcie_pasr_reg[] = {0x08010913};
+static uint32_t g_pcie_past_reg[] = {0x08010915};
 #endif
 
 #define HALT    2
@@ -127,6 +129,7 @@ fapi2::ReturnCode omi_iodlr_static_config(
 
 fapi2::ReturnCode pec_iodlr_static_config(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
 fapi2::ReturnCode iohs_iodlr_static_config(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 // -----------------------------------------------------------------------------
@@ -541,6 +544,18 @@ fapi2::ReturnCode p10_pm_iodlr_static_config(
         }
 
 #endif
+        fapi2::ATTR_CHIP_EC_FEATURE_WOF_STATIC_IO_POWER_Type l_wof_io_state;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_WOF_STATIC_IO_POWER,
+                               i_target, l_wof_io_state),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_WOF_STATIC_IO_POWER)");
+
+        if (!l_wof_io_state)
+        {
+            FAPI_INF("We skip io powr computation for DD1");
+            break;
+        }
+
 
         g_io_pow_gated_cntrlr = 0;
         g_io_omi_cntrlr_link = 0;
@@ -571,17 +586,113 @@ fapi_try_exit:
 fapi2::ReturnCode pec_iodlr_static_config(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+#ifndef __PPE__
     fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::ATTR_WOF_IO_POWER_MODE_Type l_wof_pwr_mode;
     FAPI_IMP(">>> pec_iodlr_static_config");
+    uint8_t l_pec_unit_pos = 0;
+    uint8_t l_phb_unit_pos = 0;
+    uint32_t l_attr_vio_boot_vlt = 0;
+    uint32_t l_sub_type = 0;
+    uint32_t l_pci_gen_info = 0;
 
     do
     {
-        //TODO need to update some code here that runs only on DD2
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_VIO_SET_POINT_MV,
+                                i_target,
+                                l_attr_vio_boot_vlt),
+                  "Error getting ATTR_VIO_SET_POINT_MV");
+
+        //If VIO is 0 from attr, then will set to 1V
+        if ( !l_attr_vio_boot_vlt)
+        {
+            l_attr_vio_boot_vlt = 1000;
+        }
+
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_WOF_IO_POWER_MODE,
+                                i_target,
+                                l_wof_pwr_mode),
+                  "Error getting ATTR_WOF_IO_POWER_MODE");
+
+        for (auto l_pec_target : i_target.getChildren<fapi2::TARGET_TYPE_PEC>(fapi2::TARGET_STATE_FUNCTIONAL))
+        {
+            //Bits defined in gnd_cntrlr
+            //13  PEC0
+            //14  PEC0
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                    l_pec_target,
+                                    l_pec_unit_pos),
+                      "Error getting fapi2::ATTR_CHIP_UNIT_POS");
+
+
+            for (const auto l_phb_target : l_pec_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_PRESENT))
+            {
+                FAPI_TRY(getScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
+
+                l_data64.setBit<LINK_POPULATED_BIT>();
+
+                if (l_wof_pwr_mode == fapi2::ENUM_ATTR_WOF_IO_POWER_MODE_STATIC)
+                {
+                    l_data64.setBit<FREEZE_PROXY>();
+                }
+
+                //If enable bit is not set just update
+                //link type and populate bits
+                if (!l_data64.getBit<DL_ENABLE_BIT>())
+                {
+                    FAPI_TRY(putScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
+                    continue;
+                }
+
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                        l_phb_target,
+                                        l_phb_unit_pos),
+                          "Error getting fapi2::ATTR_CHIP_UNIT_POS");
+
+                g_io_pci_cntrlr_link |= BIT64(l_phb_unit_pos);
+
+
+
+
+                FAPI_TRY(putScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
+
+                //We read PAST register to find the PCIE Generation
+                //001: GEN1
+                //010: GEN2
+                //011: GEN3
+                //100: GEN4
+                //101: GEN5
+                FAPI_TRY(getScom(l_phb_target, g_pcie_past_reg[0], l_data64));
+                l_data64.extractToRight<uint32_t>(l_pci_gen_info, 5, 3);
+
+                FAPI_INF("PCI GEN info %d", l_pci_gen_info);
+
+                if ( l_attr_vio_boot_vlt >= 1000)
+                {
+                    l_sub_type = G5_32G_VIO_1V + (5 - l_pci_gen_info % 5);
+                }
+                else
+                {
+                    l_sub_type = G5_32G_VIO_PT_9V + (5 - l_pci_gen_info % 5);
+                }
+
+
+                g_link_data[l_phb_unit_pos + PCI0_0].sub_type = htobe32(l_sub_type);
+                g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe32(link_powers[l_sub_type].power_mw[FULL]);
+                FAPI_INF("PCIE g_link_data[%d] = %08x", l_phb_unit_pos + PCI0_0,
+                         htobe32(g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw));
+            }
+
+        }
+
+        FAPI_INF("g_io_pci_cntrlr_link %08x", g_io_pci_cntrlr_link >> 32);
 
     }
     while(0);
 
-//:wqafapi_try_exit:
+fapi_try_exit:
+#endif
     FAPI_IMP("<<< pec_iodlr_static_config");
     return fapi2::current_err;
 }
@@ -600,21 +711,26 @@ fapi2::ReturnCode iohs_iodlr_static_config(
     fapi2::ATTR_FREQ_IOHS_LINK_MHZ_Type l_iohs_freq;
     fapi2::ATTR_FREQ_OMI_MHZ_Type l_omi_freq;
     fapi2::ATTR_WOF_IO_POWER_MODE_Type l_wof_pwr_mode;
-    uint32_t l_attr_boot_vlt[4];
+    uint32_t l_attr_vio_boot_vlt = 0;
     uint8_t l_iohs_unit_pos = 0;
     uint32_t l_speed = 0;
     io_sub_type_speed_t l_sub_speed_type;
-    io_sub_type_speed_t l_sub_speed_type_base = AXO_BASE_25G_0;
     uint16_t l_total_half_wght = 0;
     uint16_t l_total_qtr_wght = 0;
     uint32_t iohs_pos = 0;
 
     do
     {
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BOOT_VOLTAGE,
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_VIO_SET_POINT_MV,
                                 i_target,
-                                l_attr_boot_vlt),
-                  "Error getting ATTR_BOOT_VOLTAGE");
+                                l_attr_vio_boot_vlt),
+                  "Error getting ATTR_VIO_SET_POINT_MV");
+
+        //If VIO is 0 from attr, then will set to 1V
+        if (!l_attr_vio_boot_vlt)
+        {
+            l_attr_vio_boot_vlt = 1000;
+        }
 
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ,
                                 i_target,
@@ -646,6 +762,9 @@ fapi2::ReturnCode iohs_iodlr_static_config(
 
             iohs_pos = l_iohs_unit_pos * 2;
 
+            uint8_t ax_lane_width = 0;
+            uint8_t ax_prev_cnt = 0;
+
             for (uint8_t x = 0; x < 2; x++)
             {
                 FAPI_TRY(getScom(l_iohs_target, g_iohs_ax_apcr_reg[x], l_data64));
@@ -670,13 +789,11 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                 if (l_iohs_config == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX ||
                     l_iohs_config == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
                 {
-                    l_sub_speed_type = (l_speed == 3 && l_attr_boot_vlt[2] >= 800) ? AX_25G_1 : AX_25G_0;
-                    l_sub_speed_type_base = (l_speed == 3 && l_attr_boot_vlt[2] >= 800) ? AXO_BASE_25G_0 : AXO_BASE_25G_1;
+                    l_sub_speed_type = (l_speed == 3 && l_attr_vio_boot_vlt >= 1000) ? AX_25G_VIO_1V : AX_25G_VIO_PT_9V;
 
                     if (l_speed == 4)
                     {
-                        l_sub_speed_type = AX_32G;
-                        l_sub_speed_type_base = AXO_BASE_32G;
+                        l_sub_speed_type = l_attr_vio_boot_vlt >= 1000 ? AX_32G_VIO_1V : AX_32G_VIO_PT_9V;
                     }
 
                     l_data64.insertFromRight(l_speed, LINK_TYPE_BIT, LINK_TYPE_BIT_LEN);
@@ -684,11 +801,11 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                 else
                 {
                     l_speed += 2; //OC 5:25G, 6:32G
-                    l_sub_speed_type = (l_speed == 5 && l_attr_boot_vlt[2] >= 800) ? OC_25G_1 : OC_25G_0;
+                    l_sub_speed_type = (l_speed == 5 && l_attr_vio_boot_vlt >= 1000) ? OC_25G_VIO_1V : OC_25G_VIO_PT_9V;
 
                     if (l_speed == 6)
                     {
-                        l_sub_speed_type = OC_32G;
+                        l_sub_speed_type = l_attr_vio_boot_vlt >= 1000 ? OC_32G_VIO_1V : OC_32G_VIO_PT_9V;
                     }
 
                     l_data64.insertFromRight(l_speed, LINK_TYPE_BIT, LINK_TYPE_BIT_LEN);
@@ -701,27 +818,75 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                     FAPI_TRY(putScom(l_iohs_target, g_iohs_ax_apcr_reg[x], l_data64));
                     continue;
                 }
-
-                if ( l_sub_speed_type != OC_32G)
+                else
                 {
-                    l_total_half_wght = link_powers[l_sub_speed_type].half_weight +
-                                        link_powers[l_sub_speed_type_base].half_weight;
+                    ax_lane_width += 9;
+                }
 
-                    l_total_qtr_wght = link_powers[l_sub_speed_type].qtr_weight +
-                                       link_powers[l_sub_speed_type_base].qtr_weight;
+                if ( l_sub_speed_type < OC_25G_VIO_PT_9V)
+                {
+                    l_total_half_wght = link_powers[l_sub_speed_type].half_weight;
 
-                    g_io_iohs_ax_cntrlr_link |= BIT16((l_iohs_unit_pos * iohs_pos) + x);
+                    l_total_qtr_wght = link_powers[l_sub_speed_type].qtr_weight;
+
+                    g_io_iohs_ax_cntrlr_link |= BIT64(iohs_pos + x);
+
+                    g_link_data[iohs_pos + x + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
+
+                    if ( ax_lane_width == 9)
+                    {
+                        ax_prev_cnt = iohs_pos + x + OPT0_AX0;
+                        g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[HALF]);
+                    }
+                    else
+                    {
+                        g_link_data[ax_prev_cnt].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                        g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                    }
+
+                    FAPI_INF("AX0 g_link_data[%d] = %08x", iohs_pos + OPT0_AX0, htobe32(g_link_data[iohs_pos + OPT0_AX0].base_power_mw));
+
+
                 }
                 else
                 {
+                    if (l_iohs_unit_pos == 1 ||
+                        l_iohs_unit_pos == 2)
+                    {
+                        FAPI_INF("Skip as we are in OC configuration %d", l_iohs_unit_pos);
+                        continue;
+                    }
+
                     l_total_half_wght = link_powers[l_sub_speed_type].half_weight;
 
                     l_total_qtr_wght = link_powers[l_sub_speed_type].qtr_weight;
 
                     if ( l_iohs_unit_pos != 1 && l_iohs_unit_pos != 2)
                     {
-                        g_io_iohs_oc_cntrlr_link |= BIT16((l_iohs_unit_pos * iohs_pos) + x);
+                        g_io_iohs_oc_cntrlr_link |= BIT64((iohs_pos) + x);
                     }
+
+                    uint8_t index = iohs_pos;
+                    g_link_data[index + x + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
+
+                    if (ax_lane_width == 9)
+                    {
+                        ax_prev_cnt = index + x + OPT0_O0;
+                        g_link_data[index + x + OPT0_O0].base_power_mw =
+                            htobe32(link_powers[l_sub_speed_type].power_mw[HALF]);
+                    }
+                    else
+                    {
+                        g_link_data[ax_prev_cnt].base_power_mw =
+                            htobe32(link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                        g_link_data[index + x + OPT0_O0].base_power_mw =
+                            htobe32(link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                    }
+
+                    FAPI_INF("OC0 g_link_data[%d] = %08x", index + OPT0_O0, htobe32(g_link_data[index + OPT0_O0].base_power_mw));
                 }
 
                 l_data64.insertFromRight(l_total_half_wght, DIV2_WEIGHT_BIT, DIV2_WEIGHT_BIT_LEN);
@@ -732,6 +897,9 @@ fapi2::ReturnCode iohs_iodlr_static_config(
 
 
         } //end of iohs target
+
+        FAPI_INF("g_io_iohs_ax_cntrlr_link %08x", g_io_iohs_ax_cntrlr_link >> 32);
+        FAPI_INF("g_io_iohs_oc_cntrlr_link %08x", g_io_iohs_oc_cntrlr_link >> 32);
     }
     while(0);
 
@@ -753,17 +921,27 @@ fapi2::ReturnCode omi_iodlr_static_config(
     FAPI_IMP(">>> omi_iodlr_static_config");
     fapi2::ATTR_FREQ_OMI_MHZ_Type l_omi_freq;
     fapi2::ATTR_WOF_IO_POWER_MODE_Type l_wof_pwr_mode;
-    uint32_t l_attr_boot_vlt[4];
+    uint32_t l_attr_vio_boot_vlt = 0;
     uint32_t l_speed = 0;
+    uint32_t apcr_address = 0;
+    uint32_t apor_address = 0;
+    uint8_t l_omic_pos = 0;
+    uint8_t x = 0;
     io_sub_type_speed_t l_sub_speed_type;
     io_link_powers_data_t* l_link_power;
 
     do
     {
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BOOT_VOLTAGE,
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_VIO_SET_POINT_MV,
                                 i_target,
-                                l_attr_boot_vlt),
-                  "Error getting ATTR_BOOT_VOLTAGE");
+                                l_attr_vio_boot_vlt),
+                  "Error getting ATTR_VIO_SET_POINT_MV");
+
+        //If VIO is 0 from attr, then will set to 1V
+        if (!l_attr_vio_boot_vlt)
+        {
+            l_attr_vio_boot_vlt = 1000;
+        }
 
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ,
                                 i_target,
@@ -777,34 +955,26 @@ fapi2::ReturnCode omi_iodlr_static_config(
 
         if (l_omi_freq < 25600)
         {
-            l_speed = 1; //OMI 25G
-            l_sub_speed_type = OMI_25G_0;
+            l_sub_speed_type = OMI_25G_VIO_PT_9V;
 
-            if (l_attr_boot_vlt[2] >= 800)
+            if (l_attr_vio_boot_vlt >= 1000)
             {
-                l_sub_speed_type = OMI_25G_1;
+                l_sub_speed_type = OMI_25G_VIO_1V;
             }
         }
         else
         {
-            l_speed = 2; //OMI 32G
-            l_sub_speed_type = OMI_32G;
+            l_sub_speed_type = OMI_32G_VIO_PT_9V;
+
+            if (l_attr_vio_boot_vlt >= 1000)
+            {
+                l_sub_speed_type = OMI_32G_VIO_1V;
+            }
         }
 
-        //OMI even target
-        for (const auto l_omi_target :
-             i_target.getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_FUNCTIONAL))
+        for (const auto l_omic_target :
+             i_target.getChildren<fapi2::TARGET_TYPE_OMIC>(fapi2::TARGET_STATE_FUNCTIONAL))
         {
-            fapi2::ATTR_CHIP_UNIT_POS_Type l_omi_pos;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                   l_omi_target,
-                                   l_omi_pos),
-                     "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
-
-
-            auto l_omic_target  = l_omi_target.getParent<fapi2::TARGET_TYPE_OMIC>();
-
-            uint8_t l_omic_pos = 0;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                    l_omic_target,
                                    l_omic_pos),
@@ -812,14 +982,24 @@ fapi2::ReturnCode omi_iodlr_static_config(
 
             FAPI_IMP("OMIC position %d", l_omic_pos);
 
-            if (l_omic_pos % 2)
-            {
-                continue;
-            }
+            uint8_t omi_lane_width = 0;
+            uint8_t omi_prev_cnt = 0;
 
-            for (uint8_t x = 0; x < 2; x++)
+            for (const auto l_omi_target :
+                 l_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_FUNCTIONAL))
             {
-                FAPI_TRY(getScom(l_omic_target, g_omi_even_apcr_reg[x], l_data64));
+                fapi2::ATTR_CHIP_UNIT_POS_Type l_omi_pos;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                       l_omi_target,
+                                       l_omi_pos),
+                         "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
+
+                x = l_omi_pos % 2;
+
+                apcr_address  = g_omi_even_apcr_reg[x];
+                apor_address  = g_omi_even_apor_reg[x];
+
+                FAPI_TRY(getScom(l_omic_target, apcr_address, l_data64));
 
                 l_data64.setBit<LINK_POPULATED_BIT>();
 
@@ -827,7 +1007,7 @@ fapi2::ReturnCode omi_iodlr_static_config(
                 if (l_wof_pwr_mode == fapi2::ENUM_ATTR_WOF_IO_POWER_MODE_STATIC)
                 {
                     l_data64.setBit<FREEZE_PROXY>();
-                    FAPI_TRY(putScom(l_omic_target, g_omi_even_apor_reg[x], 0xFFFFFFF0FFFFFFF0));
+                    FAPI_TRY(putScom(l_omic_target, apor_address, 0xFFFFFFF0FFFFFFF0));
                 }
 
                 l_data64.insertFromRight(l_speed, LINK_TYPE_BIT, LINK_TYPE_BIT_LEN);
@@ -836,8 +1016,12 @@ fapi2::ReturnCode omi_iodlr_static_config(
                 //link type and populate bits
                 if (!l_data64.getBit<DL_ENABLE_BIT>())
                 {
-                    FAPI_TRY(putScom(l_omic_target, g_omi_even_apcr_reg[x], l_data64));
+                    FAPI_TRY(putScom(l_omic_target, apcr_address, l_data64));
                     continue;
+                }
+                else
+                {
+                    omi_lane_width += 8;
                 }
 
                 l_link_power = &link_powers[l_sub_speed_type];
@@ -845,74 +1029,29 @@ fapi2::ReturnCode omi_iodlr_static_config(
                 l_data64.insertFromRight(l_link_power->half_weight, DIV2_WEIGHT_BIT, DIV2_WEIGHT_BIT_LEN);
                 l_data64.insertFromRight(l_link_power->qtr_weight, DIV4_WEIGHT_BIT, DIV4_WEIGHT_BIT_LEN);
 
-                FAPI_TRY(putScom(l_omic_target, g_omi_even_apcr_reg[x], l_data64));
+                FAPI_TRY(putScom(l_omic_target, apcr_address, l_data64));
 
                 //link power is enabled
-                g_io_omi_cntrlr_link |= BIT16(l_omi_pos);
-            }
-        }//end of omi even target
+                g_io_omi_cntrlr_link |= BIT64(l_omi_pos);
+                g_link_data[l_omi_pos + MC00_OMI0].sub_type = htobe32(l_sub_speed_type);
 
-
-        //OMI odd target
-        for (const auto l_omi_target :
-             i_target.getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_FUNCTIONAL))
-        {
-            fapi2::ATTR_CHIP_UNIT_POS_Type l_omi_pos;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                   l_omi_target,
-                                   l_omi_pos),
-                     "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
-
-
-            uint8_t l_omic_pos = 0;
-            auto l_omic_target  = l_omi_target.getParent<fapi2::TARGET_TYPE_OMIC>();
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                   l_omic_target,
-                                   l_omic_pos),
-                     "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
-
-            FAPI_IMP("MC perv position %d", l_omic_pos);
-
-            if (!(l_omic_pos % 2))
-            {
-                continue;
-            }
-
-
-            for (uint8_t x = 0; x < 2; x++)
-            {
-                FAPI_TRY(getScom(l_omic_target, g_omi_even_apcr_reg[x], l_data64));
-
-                l_data64.setBit<LINK_POPULATED_BIT>();
-
-                l_data64.insertFromRight(l_speed, LINK_TYPE_BIT, LINK_TYPE_BIT_LEN);
-
-                if (l_wof_pwr_mode == fapi2::ENUM_ATTR_WOF_IO_POWER_MODE_STATIC)
+                if ( omi_lane_width == 8)
                 {
-                    l_data64.setBit<FREEZE_PROXY>();
-                    FAPI_TRY(putScom(l_omic_target, g_omi_even_apor_reg[x], 0xFFFFFFF0FFFFFFF0));
+                    omi_prev_cnt = l_omi_pos + MC00_OMI0;
+                    g_link_data[l_omi_pos + MC00_OMI0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[HALF]);
+                }
+                else
+                {
+                    g_link_data[omi_prev_cnt].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                    g_link_data[l_omi_pos + MC00_OMI0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
                 }
 
-                //If enable bit is not set just update
-                //link type and populate bits
-                if (!l_data64.getBit<DL_ENABLE_BIT>())
-                {
-                    FAPI_TRY(putScom(l_omic_target, g_omi_even_apcr_reg[x], l_data64));
-                    continue;
-                }
-
-                l_link_power = &link_powers[l_sub_speed_type];
-
-                l_data64.insertFromRight(l_link_power->half_weight, DIV2_WEIGHT_BIT, DIV2_WEIGHT_BIT_LEN);
-                l_data64.insertFromRight(l_link_power->qtr_weight, DIV4_WEIGHT_BIT, DIV4_WEIGHT_BIT_LEN);
-
-                FAPI_TRY(putScom(l_omic_target, g_omi_even_apcr_reg[x], l_data64));
-
-                //link power is enabled
-                g_io_omi_cntrlr_link |= BIT16(l_omi_pos);
+                FAPI_INF("OMI g_link_data[%d] = %08x", l_omi_pos + MC00_OMI0,
+                         htobe32(g_link_data[l_omi_pos + MC00_OMI0].base_power_mw));
             }
-        } //end of omi odd target
+        }//end of omic
 
+        FAPI_INF("g_io_omi_cntrlr_link %08x", g_io_omi_cntrlr_link >> 32);
 
     }
     while(0);
@@ -937,7 +1076,7 @@ fapi2::ReturnCode iodlr_pgated_validation(
     fapi2::ATTR_IO_GROUNDED_LINKS_Type l_gnd_links;
     io_static_lnks_cntrls l_static_data;
     fapi2::ATTR_FREQ_OMI_MHZ_Type l_omi_freq;
-    uint32_t l_attr_boot_vlt[4];
+    uint32_t l_attr_vio_boot_vlt = 1000;
     uint8_t l_mc_unit_pos = 0;
     uint8_t l_pau_unit_pos = 0;
     uint8_t l_pec_unit_pos = 0;
@@ -950,16 +1089,21 @@ fapi2::ReturnCode iodlr_pgated_validation(
     uint16_t l_pwr_gated_cntrlrs = 0;
     uint16_t l_mc_cntrlr = 0;
     uint16_t l_pec_cntrlr = 0;
-    io_sub_type_speed_t l_sub_speed_type = AXO_BASE_25G_0;
-    io_sub_type_speed_t l_sub_speed_type_base = AXO_BASE_25G_0;
+    io_sub_type_speed_t l_sub_speed_type = NUM_OF_IO_TYPES_SPEED;
 
     do
     {
         memset(&l_static_data, 0, sizeof(l_static_data));
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BOOT_VOLTAGE,
+
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_VIO_SET_POINT_MV,
                                 i_target,
-                                l_attr_boot_vlt),
-                  "Error getting ATTR_BOOT_VOLTAGE");
+                                l_attr_vio_boot_vlt),
+                  "Error getting ATTR_VIO_SET_POINT_MV");
+
+        if (!l_attr_vio_boot_vlt)
+        {
+            l_attr_vio_boot_vlt = 1000;
+        }
 
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ,
                                 i_target,
@@ -978,9 +1122,24 @@ fapi2::ReturnCode iodlr_pgated_validation(
                   "Error getting ATTR_IO_GROUNDED_LINKS");
 
         l_static_data.io_magic = htobe32(0x53540000);
-        l_static_data.io_disable_links = htobe64(l_gnd_links & ~(g_io_omi_cntrlr_link | (g_io_pci_cntrlr_link >> 16)
-                                         | (g_io_iohs_ax_cntrlr_link >> 24 ) | (g_io_iohs_oc_cntrlr_link > 40)));
+        l_static_data.io_disable_links = 0;
+        l_static_data.io_disable_links = (l_gnd_links & ~(g_io_omi_cntrlr_link | (g_io_pci_cntrlr_link >> 16)
+                                          | (g_io_iohs_ax_cntrlr_link >> 22 ) | (g_io_iohs_oc_cntrlr_link >> 38)));
 
+        FAPI_INF("l_static_data.io_disable_links %08x %08x", l_static_data.io_disable_links >> 32,
+                 l_static_data.io_disable_links);
+
+        l_static_data.io_disable_links = htobe64(l_static_data.io_disable_links);
+
+        l_static_data.io_active_links = 0;
+
+        l_static_data.io_active_links = (g_io_omi_cntrlr_link | (g_io_pci_cntrlr_link >> 16)
+                                         | (g_io_iohs_ax_cntrlr_link >> 22 ) | (g_io_iohs_oc_cntrlr_link >> 38));
+
+        FAPI_INF("l_static_data.io_active_links %08x %08x", l_static_data.io_active_links >> 32,
+                 l_static_data.io_active_links);
+
+        l_static_data.io_active_links = htobe64(l_static_data.io_active_links);
 
 
         //Read the CPLT_CTRL5 register to check the power gated bitstate
@@ -1063,52 +1222,52 @@ fapi2::ReturnCode iodlr_pgated_validation(
                 if (l_iohs_config == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX ||
                     l_iohs_config == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
                 {
-                    l_sub_speed_type = (l_speed == 3 && l_attr_boot_vlt[2] >= 800) ? AX_25G_1 : AX_25G_0;
-                    l_sub_speed_type_base = (l_speed == 3 && l_attr_boot_vlt[2] >= 800) ? AXO_BASE_25G_0 : AXO_BASE_25G_1;
+                    l_sub_speed_type = (l_speed == 3 && l_attr_vio_boot_vlt >= 1000) ? AX_25G_VIO_1V : AX_25G_VIO_PT_9V;
 
                     if (l_speed == 4)
                     {
-                        l_sub_speed_type = AX_32G;
-                        l_sub_speed_type_base = AXO_BASE_32G;
+                        l_sub_speed_type = l_attr_vio_boot_vlt >= 1000 ? AX_32G_VIO_1V : AX_32G_VIO_PT_9V;
                     }
 
-                    g_link_data[iohs_pos + OPT0_AX0].io_magic = htobe32(0x414C4E4B);
                     g_link_data[iohs_pos + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[iohs_pos + OPT0_AX0].base_power_mw = htobe32(
-                                link_powers[l_sub_speed_type].power_mw[DISABLED] +
-                                link_powers[l_sub_speed_type_base].power_mw[DISABLED]);
+                    g_link_data[iohs_pos + OPT0_AX0].base_power_mw += htobe32(
+                                link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
 
-                    g_link_data[iohs_pos + 1 + OPT0_AX0].io_magic = htobe32(0x414C4E4B);
                     g_link_data[iohs_pos + 1 + OPT0_AX0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[iohs_pos + 1 + OPT0_AX0].base_power_mw =
-                        htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] +
-                                link_powers[l_sub_speed_type_base].power_mw[DISABLED]);
+                    g_link_data[iohs_pos + 1 + OPT0_AX0].base_power_mw +=
+                        htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
                 }
                 else
                 {
+                    if (l_iohs_unit_pos == 1 ||
+                        l_iohs_unit_pos == 2)
+                    {
+                        FAPI_INF("Skip as we are in OC configuration %d", iohs_pos);
+                        continue;
+                    }
+
                     l_speed += 2; //OC 5:25G, 6:32G
-                    l_sub_speed_type = (l_speed == 5 && l_attr_boot_vlt[2] >= 800) ? OC_25G_1 : OC_25G_0;
+                    l_sub_speed_type = (l_speed == 5 && l_attr_vio_boot_vlt >= 1000) ? OC_25G_VIO_1V : OC_25G_VIO_PT_9V;
 
                     if (l_speed == 6)
                     {
-                        l_sub_speed_type = OC_32G;
+                        l_sub_speed_type = l_attr_vio_boot_vlt >= 1000 ? OC_32G_VIO_1V : OC_32G_VIO_PT_9V;
                     }
 
-
-                    g_link_data[iohs_pos + OPT0_O0].io_magic = htobe32(0x4F4C4E4B);
                     g_link_data[iohs_pos + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[iohs_pos + OPT0_O0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED]);
-                    g_link_data[iohs_pos + 1 + OPT0_O0].io_magic = htobe32(0x4F4C4E4B);
+                    g_link_data[iohs_pos + OPT0_O0].base_power_mw += htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+
                     g_link_data[iohs_pos + 1 + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[iohs_pos + 1 + OPT0_O0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED]);
+                    g_link_data[iohs_pos + 1 + OPT0_O0].base_power_mw += htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
                 }
 
             }
 
-            g_cntrlr_data[l_pau_unit_pos + PAU0].io_magic = htobe32(0x41434E54);
-            g_cntrlr_data[l_pau_unit_pos + PAU0].sub_type = htobe16(l_sub_speed_type);
-            g_cntrlr_data[l_pau_unit_pos + PAU0].base_power_mw = htobe16(link_powers[l_sub_speed_type].power_mw[PGATED] +
-                    link_powers[l_sub_speed_type_base].power_mw[PGATED]);
+            if ( l_sub_speed_type != NUM_OF_IO_TYPES_SPEED)
+            {
+                g_cntrlr_data[l_pau_unit_pos + PAU0].sub_type = htobe32(l_sub_speed_type);
+                g_cntrlr_data[l_pau_unit_pos + PAU0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[PGATED]);
+            }
         }//end of PAU
 
         FAPI_INF("PAU l_static_data.io_pwr_gated_cntrlrs %08x ", l_static_data.io_pwr_gated_cntrlrs);
@@ -1117,16 +1276,21 @@ fapi2::ReturnCode iodlr_pgated_validation(
 
         if (l_omi_freq < 25600)
         {
-            l_sub_speed_type = OMI_25G_0;
+            l_sub_speed_type = OMI_25G_VIO_PT_9V;
 
-            if (l_attr_boot_vlt[2] >= 800)
+            if (l_attr_vio_boot_vlt >= 1000)
             {
-                l_sub_speed_type = OMI_25G_1;
+                l_sub_speed_type = OMI_25G_VIO_1V;
             }
         }
         else
         {
-            l_sub_speed_type = OMI_32G;
+            l_sub_speed_type = OMI_32G_VIO_PT_9V;
+
+            if (l_attr_vio_boot_vlt >= 1000)
+            {
+                l_sub_speed_type = OMI_32G_VIO_1V;
+            }
         }
 
         //Pgated calculation
@@ -1168,9 +1332,8 @@ fapi2::ReturnCode iodlr_pgated_validation(
             //03  EMO45
             //04  EMO67
 
-            g_cntrlr_data[l_mc_unit_pos + EMO01].io_magic = htobe32(0x45434E54);
-            g_cntrlr_data[l_mc_unit_pos + EMO01].sub_type = htobe16(l_sub_speed_type);
-            g_cntrlr_data[l_mc_unit_pos + EMO01].base_power_mw = htobe16(link_powers[l_sub_speed_type].power_mw[PGATED]);
+            g_cntrlr_data[l_mc_unit_pos + EMO01].sub_type = htobe32(l_sub_speed_type);
+            g_cntrlr_data[l_mc_unit_pos + EMO01].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[PGATED]);
 
             for (const auto l_omi_target : l_mc_target.getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_PRESENT))
             {
@@ -1179,9 +1342,9 @@ fapi2::ReturnCode iodlr_pgated_validation(
                                         l_omi_target,
                                         l_omi_unit_pos),
                           "Error getting fapi2::ATTR_CHIP_UNIT_POS");
-                g_link_data[l_omi_unit_pos + MC00_OMI0].io_magic = htobe32(0x4D4C4E4B);
-                g_link_data[l_omi_unit_pos + MC00_OMI0].sub_type = htobe16(l_sub_speed_type);
-                g_link_data[l_omi_unit_pos + MC00_OMI0].base_power_mw = htobe16(link_powers[l_sub_speed_type].power_mw[DISABLED]);
+                FAPI_IMP("MC position %d %d", l_mc_unit_pos, l_omi_unit_pos);
+                g_link_data[l_omi_unit_pos + MC00_OMI0].sub_type = htobe32(l_sub_speed_type);
+                g_link_data[l_omi_unit_pos + MC00_OMI0].base_power_mw += htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
             }
         }//end of MC
 
@@ -1222,9 +1385,8 @@ fapi2::ReturnCode iodlr_pgated_validation(
                 continue; //not power gated
             }
 
-            g_cntrlr_data[l_pec_unit_pos + PEC0].io_magic = htobe32(0x50434E54);
-            g_cntrlr_data[l_pec_unit_pos + PEC0].sub_type = htobe16(G4_25G);
-            g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw = htobe16(link_powers[G4_25G].power_mw[PGATED]);
+            g_cntrlr_data[l_pec_unit_pos + PEC0].sub_type = htobe32(G4_32G_VIO_1V);
+            g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw = htobe32(link_powers[G4_32G_VIO_1V].power_mw[PGATED]);
 
             for (const auto l_phb_target : l_pec_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_PRESENT))
             {
@@ -1234,9 +1396,8 @@ fapi2::ReturnCode iodlr_pgated_validation(
                           "Error getting fapi2::ATTR_CHIP_UNIT_POS");
 
 
-                g_link_data[l_phb_unit_pos + PCI0_0].io_magic = htobe32(0x504C4E4B);
-                g_link_data[l_phb_unit_pos + PCI0_0].sub_type = htobe16(G4_25G);
-                g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe16(link_powers[G4_25G].power_mw[DISABLED]);
+                g_link_data[l_phb_unit_pos + PCI0_0].sub_type = htobe32(G4_32G_VIO_1V);
+                g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw += htobe32(link_powers[G4_32G_VIO_1V].power_mw[DISABLED]);
             }
 
         } //end of PEC
@@ -1246,6 +1407,7 @@ fapi2::ReturnCode iodlr_pgated_validation(
         l_static_data.io_pwr_gated_cntrlrs = htobe32(l_static_data.io_pwr_gated_cntrlrs);
 
         FAPI_INF("l_static_data.io_pwr_gated_cntrlrs %08x ", l_static_data.io_pwr_gated_cntrlrs);
+
         uint32_t xgpe_sram_base_addr = XGPE_SRAM_IO_OFFSET_ADDR;
 
 
@@ -1287,6 +1449,10 @@ fapi2::ReturnCode iodlr_pgated_validation(
                                                l_ocb_length_act,
                                                (uint8_t*)g_link_data));
         FAPI_INF("Actual length %08X %08x after writing link data", xgpe_sram_base_addr, l_ocb_length_act);
+
+
+        FAPI_INF("  Set XGPE_IODLR_ACTIVE in OCC Flag3 Register...");
+        FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_OR, BIT64(p10hcd::XGPE_IODLR_ACTIVE)));
 
     }
     while(0);

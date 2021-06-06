@@ -2025,5 +2025,23 @@
       </chip>
     </chipEcFeature>
   </attribute>
+
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_WOF_STATIC_IO_POWER</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    We support WOF static io power from dd2 onwards
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
   <!-- ******************************************************************** -->
 </attributes>

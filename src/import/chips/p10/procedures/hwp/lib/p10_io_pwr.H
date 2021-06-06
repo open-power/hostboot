@@ -22,7 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// EKB-Mirror-To: hostboot
 #ifndef __P10_IO_PWR_H__
 #define __P10_IO_PWR_H__
 
@@ -36,356 +35,377 @@ static io_link_powers_data_t link_powers[] =
         PWR_OMI,                    // IO Power Type
         OMI,                        // Sub Type
         S_25G,                        // Speed
-        650,                       // VDN
+        900,                        // VIO
         16,                         // #AC lanes
         {
             // power_mv
-            6365,                   // Full Width  mv
-            4323,                   // 1/2 Width  mv
-            4261,                   // 1/4 Width  mv
-            4199,                   // 1Lane  mv
-            1120,                   // Disable  mv
+            2636,                   // Full Width  mv
+            1800,                   // 1/2 Width  mv
+            1698,                   // 1/4 Width  mv
+            1596,                   // 1Lane  mv
+            687,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        5245,                       // Max to Min  mv
-        860,                        // PLSF  mv
-        0xDC,                       // PSLF encode
+        1948,                       // Max to Min  mv
+        677,                        // PLSF  mv
+        0xAD,                       // PSLF encode
         0x9,                        // 1/2 Width
-        0x9,                        // 1/4 Width
-    },
-    {
-        PWR_OMI,                    // IO Power Type
-        OMI,                        // Sub Type
-        S_25G,                        // Speed
-        800,                        // VDN
-        16,                         // #AC lanes
-        {
-            // power_mv
-            6854,                   // Full Width  mv
-            4774,                   // 1/2 Width  mv
-            4674,                   // 1/4 Width  mv
-            4574,                   // 1Lane  mv
-            1457,                   // Disable  mv
-            20,                     // Pgated  mv
-        },
-        5397,                       // Max to Min  mv
-        885,                        // PLSF  mv
-        0xE2,                       // PSLF encode
-        0x9,                        // 1/2 Width
-        0x9,                        // 1/4 Width
+        0x8,                        // 1/4 Width
     },
     {
         PWR_OMI,                    // IO Power Type
         OMI,                        // Sub Type
         S_32G,                        // Speed
-        800,                        // VDN
+        900,                        // VIO
         16,                         // #AC lanes
         {
             // power_mv
-            7827,                   // Full Width  mv
-            5476,                   // 1/2 Width  mv
-            5352,                   // 1/4 Width  mv
-            5228,                   // 1Lane  mv
-            1733,                   // Disable  mv
-            32,                     // Pgated  mv
+            2998,                   // Full Width  mv
+            2044,                   // 1/2 Width  mv
+            1917,                   // 1/4 Width  mv
+            1791,                   // 1Lane  mv
+            777,                    // Disable  mv
+            20,                     // Pgated  mv
         },
-        6093,                       // Max to Min  mv
+        2221,                       // Max to Min  mv
+        771,                        // PLSF  mv
+        0xC5,                       // PSLF encode
+        0x9,                        // 1/2 Width
+        0x8,                        // 1/4 Width
+    },
+    {
+        PWR_OMI,                    // IO Power Type
+        OMI,                        // Sub Type
+        S_25G,                        // Speed
+        1000,                          // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            3098,                   // Full Width  mv
+            2060,                   // 1/2 Width  mv
+            1959,                   // 1/4 Width  mv
+            1857,                   // 1Lane  mv
+            704,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        2394,                       // Max to Min  mv
+        831,                        // PLSF  mv
+        0xD4,                       // PSLF encode
+        0x8,                        // 1/2 Width
+        0x8,                        // 1/4 Width
+    },
+    {
+        PWR_OMI,                    // IO Power Type
+        OMI,                        // Sub Type
+        S_32G,                        // Speed
+        1000,                          // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            3513,                   // Full Width  mv
+            2332,                   // 1/2 Width  mv
+            2205,                   // 1/4 Width  mv
+            2078,                   // 1Lane  mv
+            794,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        2719,                       // Max to Min  mv
+        944,                        // PLSF  mv
+        0xF1,                       // PSLF encode
+        0x8,                        // 1/2 Width
+        0x8,                        // 1/4 Width
+    },
+    {
+        PWR_AX,                     // IO Power Type
+        AX,                         // Sub Type
+        S_25G,                        // Speed
+        900,                        // VIO
+        18,                         // #AC lanes
+        {
+            // power_mv
+            1984,                   // Full Width  mv
+            1155,                   // 1/2 Width  mv
+            786,                    // 1/4 Width  mv
+            786,                    // 1Lane  mv
+            151,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        1832,                       // Max to Min  mv
+        636,                        // PLSF  mv
+        0xA2,                       // PSLF encode
+        0x8,                        // 1/2 Width
+        0x5,                        // 1/4 Width
+    },
+    {
+        PWR_AX,                     // IO Power Type
+        AX,                         // Sub Type
+        S_32G,                        // Speed
+        900,                        // VIO
+        18,                         // #AC lanes
+        {
+            // power_mv
+            2258,                   // Full Width  mv
+            1306,                   // 1/2 Width  mv
+            883,                    // 1/4 Width  mv
+            883,                    // 1Lane  mv
+            169,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        2089,                       // Max to Min  mv
+        725,                        // PLSF  mv
+        0xB9,                       // PSLF encode
+        0x8,                        // 1/2 Width
+        0x5,                        // 1/4 Width
+    },
+    {
+        PWR_AX,                     // IO Power Type
+        AX,                         // Sub Type
+        S_25G,                        // Speed
+        1000,                          // VIO
+        18,                         // #AC lanes
+        {
+            // power_mv
+            2494,                   // Full Width  mv
+            1439,                   // 1/2 Width  mv
+            970,                    // 1/4 Width  mv
+            970,                    // 1Lane  mv
+            169,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        2325,                       // Max to Min  mv
+        807,                        // PLSF  mv
+        0xCE,                       // PSLF encode
+        0x8,                        // 1/2 Width
+        0x5,                        // 1/4 Width
+    },
+    {
+        PWR_AX,                     // IO Power Type
+        AX,                         // Sub Type
+        S_32G,                        // Speed
+        1000,                          // VIO
+        18,                         // #AC lanes
+        {
+            // power_mv
+            2835,                   // Full Width  mv
+            1625,                   // 1/2 Width  mv
+            1087,                   // 1/4 Width  mv
+            1087,                   // 1Lane  mv
+            186,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        2649,                       // Max to Min  mv
+        920,                        // PLSF  mv
+        0xEB,                       // PSLF encode
+        0x8,                        // 1/2 Width
+        0x5,                        // 1/4 Width
+    },
+    {
+        PWR_OC,                     // IO Power Type
+        OC,                         // Sub Type
+        S_25G,                        // Speed
+        900,                        // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            2880,                   // Full Width  mv
+            2009,                   // 1/2 Width  mv
+            1876,                   // 1/4 Width  mv
+            1742,                   // 1Lane  mv
+            831,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        2049,                       // Max to Min  mv
+        711,                        // PLSF  mv
+        0xB6,                       // PSLF encode
+        0x9,                        // 1/2 Width
+        0x8,                        // 1/4 Width
+    },
+    {
+        PWR_OC,                     // IO Power Type
+        OC,                         // Sub Type
+        S_32G,                        // Speed
+        900,                        // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            3335,                   // Full Width  mv
+            2323,                   // 1/2 Width  mv
+            2157,                   // 1/4 Width  mv
+            1991,                   // 1Lane  mv
+            960,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        2375,                       // Max to Min  mv
+        825,                        // PLSF  mv
+        0xD2,                       // PSLF encode
+        0x9,                        // 1/2 Width
+        0x8,                        // 1/4 Width
+    },
+    {
+        PWR_OC,                     // IO Power Type
+        OC,                         // Sub Type
+        S_25G,                        // Speed
+        1000,                          // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            3340,                   // Full Width  mv
+            2269,                   // 1/2 Width  mv
+            2135,                   // 1/4 Width  mv
+            2002,                   // 1Lane  mv
+            848,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        2491,                       // Max to Min  mv
+        865,                        // PLSF  mv
+        0xDD,                       // PSLF encode
+        0x9,                        // 1/2 Width
+        0x8,                        // 1/4 Width
+    },
+    {
+        PWR_OC,                     // IO Power Type
+        OC,                         // Sub Type
+        S_32G,                        // Speed
+        1000,                          // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            3855,                   // Full Width  mv
+            2613,                   // 1/2 Width  mv
+            2448,                   // 1/4 Width  mv
+            2282,                   // 1Lane  mv
+            977,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        2878,                       // Max to Min  mv
         1000,                       // PLSF  mv
         0xFF,                       // PSLF encode
         0x9,                        // 1/2 Width
-        0x9,                        // 1/4 Width
+        0x8,                        // 1/4 Width
     },
     {
-        PWR_AX,                     // IO Power Type
-        AX,                         // Sub Type
+        PWR_AXO_Base,               // IO Power Type
+        AXO_Base,                   // Sub Type
         S_25G,                        // Speed
-        650,                       // VDN
-        18,                         // #AC lanes
+        900,                        // VIO
+        16,                         // #AC lanes
         {
             // power_mv
-            3255,                   // Full Width  mv
-            1976,                   // 1/2 Width  mv
-            1408,                   // 1/4 Width  mv
-            1408,                   // 1Lane  mv
-            327,                    // Disable  mv
-            0,                      // Pgated  mv
+            537,                    // Full Width  mv
+            456,                    // 1/2 Width  mv
+            375,                    // 1/4 Width  mv
+            294,                    // 1Lane  mv
+            294,                    // Disable  mv
+            20,                     // Pgated  mv
         },
-        2927,                       // Max to Min  mv
-        480,                        // PLSF  mv
-        0x7B,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x6,                        // 1/4 Width
+        242,                        // Max to Min  mv
+        84,                         // PLSF  mv
+        0x15,                       // PSLF encode
+        0xA,                        // 1/2 Width
+        0x5,                        // 1/4 Width
     },
     {
-        PWR_AX,                     // IO Power Type
-        AX,                         // Sub Type
-        S_25G,                        // Speed
-        800,                        // VDN
-        18,                         // #AC lanes
-        {
-            // power_mv
-            3255,                   // Full Width  mv
-            1976,                   // 1/2 Width  mv
-            1408,                   // 1/4 Width  mv
-            1408,                   // 1Lane  mv
-            327,                    // Disable  mv
-            0,                      // Pgated  mv
-        },
-        2927,                       // Max to Min  mv
-        480,                        // PLSF  mv
-        0x7B,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x6,                        // 1/4 Width
-    },
-    {
-        PWR_AX,                     // IO Power Type
-        AX,                         // Sub Type
+        PWR_AXO_Base,               // IO Power Type
+        AXO_Base,                   // Sub Type
         S_32G,                        // Speed
-        800,                        // VDN
-        18,                         // #AC lanes
-        {
-            // power_mv
-            3665,                   // Full Width  mv
-            2224,                   // 1/2 Width  mv
-            1583,                   // 1/4 Width  mv
-            1583,                   // 1Lane  mv
-            376,                    // Disable  mv
-            0,                      // Pgated  mv
-        },
-        3289,                       // Max to Min  mv
-        539,                        // PLSF  mv
-        0x8A,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x6,                        // 1/4 Width
-    },
-    {
-        PWR_OC,                     // IO Power Type
-        OC,                         // Sub Type
-        S_25G,                        // Speed
-        650,                       // VDN
+        900,                        // VIO
         16,                         // #AC lanes
         {
             // power_mv
-            3886,                   // Full Width  mv
-            2648,                   // 1/2 Width  mv
-            2546,                   // 1/4 Width  mv
-            2444,                   // 1Lane  mv
-            834,                    // Disable  mv
-            0,                      // Pgated  mv
+            641,                    // Full Width  mv
+            541,                    // 1/2 Width  mv
+            440,                    // 1/4 Width  mv
+            340,                    // 1Lane  mv
+            340,                    // Disable  mv
+            20,                     // Pgated  mv
         },
-        3051,                       // Max to Min  mv
-        500,                        // PLSF  mv
-        0x80,                       // PSLF encode
-        0x9,                        // 1/2 Width
-        0x8,                        // 1/4 Width
+        300,                        // Max to Min  mv
+        104,                        // PLSF  mv
+        0x1B,                       // PSLF encode
+        0xA,                        // 1/2 Width
+        0x5,                        // 1/4 Width
     },
     {
-        PWR_OC,                     // IO Power Type
-        OC,                         // Sub Type
+        PWR_AXO_Base,               // IO Power Type
+        AXO_Base,                   // Sub Type
         S_25G,                        // Speed
-        800,                        // VDN
+        1000,                          // VIO
         16,                         // #AC lanes
         {
             // power_mv
-            4447,                   // Full Width  mv
-            3146,                   // 1/2 Width  mv
-            2982,                   // 1/4 Width  mv
-            2817,                   // 1Lane  mv
-            1145,                   // Disable  mv
-            0,                      // Pgated  mv
+            537,                    // Full Width  mv
+            456,                    // 1/2 Width  mv
+            375,                    // 1/4 Width  mv
+            294,                    // 1Lane  mv
+            294,                    // Disable  mv
+            20,                     // Pgated  mv
         },
-        3301,                       // Max to Min  mv
-        541,                        // PLSF  mv
-        0x8A,                       // PSLF encode
-        0x9,                        // 1/2 Width
-        0x8,                        // 1/4 Width
+        242,                        // Max to Min  mv
+        84,                         // PLSF  mv
+        0x15,                       // PSLF encode
+        0xA,                        // 1/2 Width
+        0x5,                        // 1/4 Width
     },
     {
-        PWR_OC,                     // IO Power Type
-        OC,                         // Sub Type
+        PWR_AXO_Base,               // IO Power Type
+        AXO_Base,                   // Sub Type
         S_32G,                        // Speed
-        800,                        // VDN
+        1000,                          // VIO
         16,                         // #AC lanes
         {
             // power_mv
-            5179,                   // Full Width  mv
-            3693,                   // 1/2 Width  mv
-            3489,                   // 1/4 Width  mv
-            3285,                   // 1Lane  mv
-            1392,                   // Disable  mv
-            0,                      // Pgated  mv
+            641,                    // Full Width  mv
+            541,                    // 1/2 Width  mv
+            440,                    // 1/4 Width  mv
+            340,                    // 1Lane  mv
+            340,                    // Disable  mv
+            20,                     // Pgated  mv
         },
-        3786,                       // Max to Min  mv
-        621,                        // PLSF  mv
-        0x9E,                       // PSLF encode
-        0x9,                        // 1/2 Width
-        0x8,                        // 1/4 Width
-    },
-    {
-        PWR_AXO_Base,             // IO Power Type
-        AXO_Base,                 // Sub Type
-        S_25G,                        // Speed
-        650,                       // VDN
-        16,                         // #AC lanes
-        {
-            // power_mv
-            464,                    // Full Width  mv
-            394,                    // 1/2 Width  mv
-            325,                    // 1/4 Width  mv
-            256,                    // 1Lane  mv
-            186,                    // Disable  mv
-            87,                     // Pgated  mv
-        },
-        277,                        // Max to Min  mv
-        45,                         // PLSF  mv
-        0x0C,                       // PSLF encode
-        0xB,                        // 1/2 Width
-        0x8,                        // 1/4 Width
-    },
-    {
-        PWR_AXO_Base,             // IO Power Type
-        AXO_Base,                 // Sub Type
-        S_25G,                        // Speed
-        800,                        // VDN
-        16,                         // #AC lanes
-        {
-            // power_mv
-            748,                    // Full Width  mv
-            636,                    // 1/2 Width  mv
-            524,                    // 1/4 Width  mv
-            413,                    // 1Lane  mv
-            301,                    // Disable  mv
-            126,                    // Pgated  mv
-        },
-        447,                        // Max to Min  mv
-        73,                         // PLSF  mv
-        0x13,                       // PSLF encode
-        0xB,                        // 1/2 Width
-        0x8,                        // 1/4 Width
-    },
-    {
-        PWR_AXO_Base,             // IO Power Type
-        AXO_Base,                 // Sub Type
-        S_32G,                        // Speed
-        800,                        // VDN
-        16,                         // #AC lanes
-        {
-            // power_mv
-            929,                    // Full Width  mv
-            790,                    // 1/2 Width  mv
-            651,                    // 1/4 Width  mv
-            513,                    // 1Lane  mv
-            374,                    // Disable  mv
-            126,                    // Pgated  mv
-        },
-        555,                        // Max to Min  mv
-        91,                         // PLSF  mv
-        0x17,                       // PSLF encode
-        0xB,                        // 1/2 Width
-        0x8,                        // 1/4 Width
-    },
-    {
-        PWR_PCIE_IO,              // IO Power Type
-        G5,                         // Sub Type
-        S_25G,                        // Speed
-        650,                       // VDN
-        8,                          // #AC lanes
-        {
-            // power_mv
-            3944,                   // Full Width  mv
-            3944,                   // 1/2 Width  mv
-            2567,                   // 1/4 Width  mv
-            1069,                   // 1Lane  mv
-            721,                    // Disable  mv
-            207,                    // Pgated  mv
-        },
-        3222,                       // Max to Min  mv
-        528,                        // PLSF  mv
-        0x87,                       // PSLF encode
-        0xF,                        // 1/2 Width
-        0x9,                        // 1/4 Width
+        300,                        // Max to Min  mv
+        104,                        // PLSF  mv
+        0x1B,                       // PSLF encode
+        0xA,                        // 1/2 Width
+        0x5,                        // 1/4 Width
     },
     {
         PWR_PCIE_IO,              // IO Power Type
         G5,                         // Sub Type
         S_32G,                        // Speed
-        800,                        // VDN
+        900,                        // VIO
         8,                          // #AC lanes
         {
             // power_mv
-            4552,                   // Full Width  mv
-            4552,                   // 1/2 Width  mv
-            3077,                   // 1/4 Width  mv
-            1481,                   // 1Lane  mv
-            1035,                   // Disable  mv
-            207,                    // Pgated  mv
+            4014,                   // Full Width  mv
+            4014,                   // 1/2 Width  mv
+            2560,                   // 1/4 Width  mv
+            1198,                   // 1Lane  mv
+            827,                    // Disable  mv
+            105,                    // Pgated  mv
         },
-        3516,                       // Max to Min  mv
-        577,                        // PLSF  mv
-        0x93,                       // PSLF encode
+        3186,                       // Max to Min  mv
+        1107,                       // PLSF  mv
+        0x0,                        // PSLF encode
         0xF,                        // 1/2 Width
-        0x9,                        // 1/4 Width
-    },
-    {
-        PWR_PCIE_IO,              // IO Power Type
-        G4,                         // Sub Type
-        S_25G,                        // Speed
-        650,                       // VDN
-        16,                         // #AC lanes
-        {
-            // power_mv
-            4813,                   // Full Width  mv
-            2808,                   // 1/2 Width  mv
-            1784,                   // 1/4 Width  mv
-            1054,                   // 1Lane  mv
-            721,                    // Disable  mv
-            207,                    // Pgated  mv
-        },
-        4092,                       // Max to Min  mv
-        671,                        // PLSF  mv
-        0xAB,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x4,                        // 1/4 Width
+        0x8,                        // 1/4 Width
     },
     {
         PWR_PCIE_IO,              // IO Power Type
         G4,                         // Sub Type
         S_32G,                        // Speed
-        800,                        // VDN
+        900,                        // VIO
         16,                         // #AC lanes
         {
             // power_mv
-            5483,                   // Full Width  mv
-            3390,                   // 1/2 Width  mv
-            2277,                   // 1/4 Width  mv
-            1458,                   // 1Lane  mv
-            1035,                   // Disable  mv
-            207,                    // Pgated  mv
+            4738,                   // Full Width  mv
+            2911,                   // 1/2 Width  mv
+            1938,                   // 1/4 Width  mv
+            1177,                   // 1Lane  mv
+            827,                    // Disable  mv
+            105,                    // Pgated  mv
         },
-        4447,                       // Max to Min  mv
-        729,                        // PLSF  mv
-        0xBA,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x4,                        // 1/4 Width
-    },
-    {
-        PWR_PCIE_IO,              // IO Power Type
-        G3,                         // Sub Type
-        S_25G,                        // Speed
-        650,                       // VDN
-        16,                         // #AC lanes
-        {
-            // power_mv
-            3925,                   // Full Width  mv
-            2350,                   // 1/2 Width  mv
-            1548,                   // 1/4 Width  mv
-            1040,                   // 1Lane  mv
-            721,                    // Disable  mv
-            207,                    // Pgated  mv
-        },
-        3204,                       // Max to Min  mv
-        525,                        // PLSF  mv
-        0x86,                       // PSLF encode
+        3911,                       // Max to Min  mv
+        1359,                       // PLSF  mv
+        0x0,                        // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
     },
@@ -393,83 +413,41 @@ static io_link_powers_data_t link_powers[] =
         PWR_PCIE_IO,              // IO Power Type
         G3,                         // Sub Type
         S_32G,                        // Speed
-        800,                        // VDN
+        900,                        // VIO
         16,                         // #AC lanes
         {
             // power_mv
-            4560,                   // Full Width  mv
-            2905,                   // 1/2 Width  mv
-            2022,                   // 1/4 Width  mv
-            1434,                   // 1Lane  mv
-            1035,                   // Disable  mv
-            207,                    // Pgated  mv
+            3876,                   // Full Width  mv
+            2630,                   // 1/2 Width  mv
+            1807,                   // 1/4 Width  mv
+            1254,                   // 1Lane  mv
+            895,                    // Disable  mv
+            174,                    // Pgated  mv
         },
-        3524,                       // Max to Min  mv
-        578,                        // PLSF  mv
-        0x93,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x4,                        // 1/4 Width
-    },
-    {
-        PWR_PCIE_IO,              // IO Power Type
-        G2,                         // Sub Type
-        S_25G,                        // Speed
-        650,                       // VDN
-        16,                         // #AC lanes
-        {
-            // power_mv
-            3303,                   // Full Width  mv
-            2031,                   // 1/2 Width  mv
-            1385,                   // 1/4 Width  mv
-            1033,                   // 1Lane  mv
-            721,                    // Disable  mv
-            207,                    // Pgated  mv
-        },
-        2581,                       // Max to Min  mv
-        423,                        // PLSF  mv
-        0x6C,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x4,                        // 1/4 Width
+        2980,                       // Max to Min  mv
+        1035,                       // PLSF  mv
+        0x0,                        // PSLF encode
+        0x9,                        // 1/2 Width
+        0x5,                        // 1/4 Width
     },
     {
         PWR_PCIE_IO,              // IO Power Type
         G2,                         // Sub Type
         S_32G,                        // Speed
-        800,                        // VDN
+        900,                        // VIO
         16,                         // #AC lanes
         {
             // power_mv
-            3919,                   // Full Width  mv
-            2573,                   // 1/2 Width  mv
-            1851,                   // 1/4 Width  mv
-            1423,                   // 1Lane  mv
-            1035,                   // Disable  mv
-            207,                    // Pgated  mv
+            3608,                   // Full Width  mv
+            2313,                   // 1/2 Width  mv
+            1643,                   // 1/4 Width  mv
+            1243,                   // 1Lane  mv
+            895,                    // Disable  mv
+            174,                    // Pgated  mv
         },
-        2883,                       // Max to Min  mv
-        473,                        // PLSF  mv
-        0x79,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x4,                        // 1/4 Width
-    },
-    {
-        PWR_PCIE_IO,              // IO Power Type
-        G1,                         // Sub Type
-        S_25G,                        // Speed
-        650,                       // VDN
-        16,                         // #AC lanes
-        {
-            // power_mv
-            2987,                   // Full Width  mv
-            1866,                   // 1/2 Width  mv
-            1299,                   // 1/4 Width  mv
-            1025,                   // 1Lane  mv
-            721,                    // Disable  mv
-            207,                    // Pgated  mv
-        },
-        2265,                       // Max to Min  mv
-        371,                        // PLSF  mv
-        0x5F,                       // PSLF encode
+        2712,                       // Max to Min  mv
+        942,                        // PLSF  mv
+        0xF0,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
     },
@@ -477,20 +455,125 @@ static io_link_powers_data_t link_powers[] =
         PWR_PCIE_IO,              // IO Power Type
         G1,                         // Sub Type
         S_32G,                        // Speed
-        800,                        // VDN
+        900,                        // VIO
         16,                         // #AC lanes
         {
             // power_mv
-            3586,                   // Full Width  mv
-            2394,                   // 1/2 Width  mv
-            1756,                   // 1/4 Width  mv
-            1411,                   // 1Lane  mv
-            1035,                   // Disable  mv
-            207,                    // Pgated  mv
+            3301,                   // Full Width  mv
+            2149,                   // 1/2 Width  mv
+            1555,                   // 1/4 Width  mv
+            1232,                   // 1Lane  mv
+            895,                    // Disable  mv
+            174,                    // Pgated  mv
         },
-        2550,                       // Max to Min  mv
-        418,                        // PLSF  mv
-        0x6B,                       // PSLF encode
+        2405,                       // Max to Min  mv
+        835,                        // PLSF  mv
+        0xD5,                       // PSLF encode
+        0x8,                        // 1/2 Width
+        0x4,                        // 1/4 Width
+    },
+    {
+        PWR_PCIE_IO,              // IO Power Type
+        G5,                         // Sub Type
+        S_32G,                        // Speed
+        1000,                          // VIO
+        8,                          // #AC lanes
+        {
+            // power_mv
+            4014,                   // Full Width  mv
+            4014,                   // 1/2 Width  mv
+            2560,                   // 1/4 Width  mv
+            1198,                   // 1Lane  mv
+            827,                    // Disable  mv
+            105,                    // Pgated  mv
+        },
+        3186,                       // Max to Min  mv
+        1107,                       // PLSF  mv
+        0x0,                        // PSLF encode
+        0xF,                        // 1/2 Width
+        0x8,                        // 1/4 Width
+    },
+    {
+        PWR_PCIE_IO,              // IO Power Type
+        G4,                         // Sub Type
+        S_32G,                        // Speed
+        1000,                          // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            4738,                   // Full Width  mv
+            2911,                   // 1/2 Width  mv
+            1938,                   // 1/4 Width  mv
+            1177,                   // 1Lane  mv
+            827,                    // Disable  mv
+            105,                    // Pgated  mv
+        },
+        3911,                       // Max to Min  mv
+        1359,                       // PLSF  mv
+        0x0,                        // PSLF encode
+        0x8,                        // 1/2 Width
+        0x4,                        // 1/4 Width
+    },
+    {
+        PWR_PCIE_IO,              // IO Power Type
+        G3,                         // Sub Type
+        S_32G,                        // Speed
+        1000,                          // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            3876,                   // Full Width  mv
+            2630,                   // 1/2 Width  mv
+            1807,                   // 1/4 Width  mv
+            1254,                   // 1Lane  mv
+            895,                    // Disable  mv
+            174,                    // Pgated  mv
+        },
+        2980,                       // Max to Min  mv
+        1035,                       // PLSF  mv
+        0x0,                        // PSLF encode
+        0x9,                        // 1/2 Width
+        0x5,                        // 1/4 Width
+    },
+    {
+        PWR_PCIE_IO,              // IO Power Type
+        G2,                         // Sub Type
+        S_32G,                        // Speed
+        1000,                          // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            3608,                   // Full Width  mv
+            2313,                   // 1/2 Width  mv
+            1643,                   // 1/4 Width  mv
+            1243,                   // 1Lane  mv
+            895,                    // Disable  mv
+            174,                    // Pgated  mv
+        },
+        2712,                       // Max to Min  mv
+        942,                        // PLSF  mv
+        0xF0,                       // PSLF encode
+        0x8,                        // 1/2 Width
+        0x4,                        // 1/4 Width
+    },
+    {
+        PWR_PCIE_IO,              // IO Power Type
+        G1,                         // Sub Type
+        S_32G,                        // Speed
+        1000,                          // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            3301,                   // Full Width  mv
+            2149,                   // 1/2 Width  mv
+            1555,                   // 1/4 Width  mv
+            1232,                   // 1Lane  mv
+            895,                    // Disable  mv
+            174,                    // Pgated  mv
+        },
+        2405,                       // Max to Min  mv
+        835,                        // PLSF  mv
+        0xD5,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
     },
