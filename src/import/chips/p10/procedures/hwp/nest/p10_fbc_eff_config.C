@@ -53,35 +53,35 @@ const uint8_t NUM_EPSILON_WRITE_TIERS = 2;
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR disabled/half
 // Product offerings: Rainier (low-end with DCMs)
-const uint32_t EPSILON_2588_R_T0_LE[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_2588_R_T1_LE[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_2588_R_T2_LE[] = { 300, 318, 342, 376, 427 };
-const uint32_t EPSILON_2588_W_T0_LE[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2588_W_T1_LE[] = { 207, 212, 219, 228, 243 };
+const uint32_t EPSILON_2588_R_T0_LE[] = {  10,  10,  10,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2588_R_T1_LE[] = {  10,  10,  10,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2588_R_T2_LE[] = { 300, 318, 318, 342, 342, 376, 376, 427, 427 };
+const uint32_t EPSILON_2588_W_T0_LE[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_2588_W_T1_LE[] = { 207, 212, 212, 219, 219, 228, 228, 243, 243 };
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR quarter-width
 // Product offerings: Rainier (low-end with DCMs)
-const uint32_t EPSILON_2588_R_T0_LQ[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_2588_R_T1_LQ[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_2588_R_T2_LQ[] = { 375, 393, 417, 451, 502 };
-const uint32_t EPSILON_2588_W_T0_LQ[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2588_W_T1_LQ[] = { 282, 287, 294, 303, 318 };
+const uint32_t EPSILON_2588_R_T0_LQ[] = {  10,  10,  10,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2588_R_T1_LQ[] = {  10,  10,  10,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2588_R_T2_LQ[] = { 375, 393, 393, 417, 417, 451, 451, 502, 502 };
+const uint32_t EPSILON_2588_W_T0_LQ[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_2588_W_T1_LQ[] = { 282, 287, 287, 294, 294, 303, 303, 318, 318 };
 
 // Mid-range Epsilons (8 chips/group, 1 group)
 // Product offerings: Everest (mid-range with DCMs), Denali Flat-8
-const uint32_t EPSILON_2588_R_T0_MR[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_2588_R_T1_MR[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_2588_R_T2_MR[] = { 293, 307, 327, 354, 394 };
-const uint32_t EPSILON_2588_W_T0_MR[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2588_W_T1_MR[] = { 156, 154, 151, 147, 142 };
+const uint32_t EPSILON_2588_R_T0_MR[] = {  10,  10,  10,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2588_R_T1_MR[] = {  10,  10,  10,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2588_R_T2_MR[] = { 293, 307, 307, 327, 327, 354, 354, 394, 394 };
+const uint32_t EPSILON_2588_W_T0_MR[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_2588_W_T1_MR[] = { 156, 154, 154, 151, 151, 147, 147, 142, 142 };
 
 // High-end Epsilons (4 chips/group, 4 groups)
 // Product offerings: Denali (high-end with SCMs)
-const uint32_t EPSILON_2588_R_T0_HE[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_2588_R_T1_HE[] = { 304, 322, 346, 380, 431 };
-const uint32_t EPSILON_2588_R_T2_HE[] = { 526, 559, 604, 665, 758 };
-const uint32_t EPSILON_2588_W_T0_HE[] = { 197, 202, 209, 219, 233 };
-const uint32_t EPSILON_2588_W_T1_HE[] = { 401, 422, 450, 490, 550 };
+const uint32_t EPSILON_2588_R_T0_HE[] = {  10,  10,  10,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2588_R_T1_HE[] = { 304, 322, 322, 346, 346, 380, 380, 431, 431 };
+const uint32_t EPSILON_2588_R_T2_HE[] = { 526, 559, 559, 604, 604, 665, 665, 758, 758 };
+const uint32_t EPSILON_2588_W_T0_HE[] = { 197, 202, 202, 209, 209, 219, 219, 233, 233 };
+const uint32_t EPSILON_2588_W_T1_HE[] = { 401, 422, 422, 450, 450, 490, 490, 550, 550 };
 
 //
 // PAU: 2133 MHz
@@ -89,35 +89,35 @@ const uint32_t EPSILON_2588_W_T1_HE[] = { 401, 422, 450, 490, 550 };
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR disabled/half
 // Product offerings: Rainier (low-end with DCMs)
-const uint32_t EPSILON_2133_R_T0_LE[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_2133_R_T1_LE[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_2133_R_T2_LE[] = { 270, 285, 305, 333, 375 };
-const uint32_t EPSILON_2133_W_T0_LE[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2133_W_T1_LE[] = { 193, 198, 203, 211, 223 };
+const uint32_t EPSILON_2133_R_T0_LE[] = {   9,   9,   9,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2133_R_T1_LE[] = {   9,   9,   9,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2133_R_T2_LE[] = { 270, 285, 285, 305, 305, 333, 333, 375, 375 };
+const uint32_t EPSILON_2133_W_T0_LE[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_2133_W_T1_LE[] = { 193, 198, 198, 203, 203, 211, 211, 223, 223 };
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR quarter-width
 // Product offerings: Rainier (low-end with DCMs)
-const uint32_t EPSILON_2133_R_T0_LQ[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_2133_R_T1_LQ[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_2133_R_T2_LQ[] = { 375, 393, 417, 451, 502 };
-const uint32_t EPSILON_2133_W_T0_LQ[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2133_W_T1_LQ[] = { 282, 287, 294, 303, 318 };
+const uint32_t EPSILON_2133_R_T0_LQ[] = {  10,  10,  10,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2133_R_T1_LQ[] = {  10,  10,  10,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2133_R_T2_LQ[] = { 375, 393, 393, 417, 417, 451, 451, 502, 502 };
+const uint32_t EPSILON_2133_W_T0_LQ[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_2133_W_T1_LQ[] = { 282, 287, 287, 294, 294, 303, 303, 318, 318 };
 
 // Mid-range Epsilons (8 chips/group, 1 group)
 // Product offerings: Everest (mid-range with DCMs), Denali Flat-8
-const uint32_t EPSILON_2133_R_T0_MR[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_2133_R_T1_MR[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_2133_R_T2_MR[] = { 265, 277, 293, 315, 349 };
-const uint32_t EPSILON_2133_W_T0_MR[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2133_W_T1_MR[] = { 152, 150, 148, 145, 140 };
+const uint32_t EPSILON_2133_R_T0_MR[] = {   9,   9,   9,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2133_R_T1_MR[] = {   9,   9,   9,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2133_R_T2_MR[] = { 265, 277, 277, 293, 293, 315, 315, 349, 349 };
+const uint32_t EPSILON_2133_W_T0_MR[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_2133_W_T1_MR[] = { 152, 150, 150, 148, 148, 145, 145, 140, 140 };
 
 // High-end Epsilons (4 chips/group, 4 groups)
 // Product offerings: Denali (high-end with SCMs)
-const uint32_t EPSILON_2133_R_T0_HE[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_2133_R_T1_HE[] = { 274, 289, 309, 337, 379 };
-const uint32_t EPSILON_2133_R_T2_HE[] = { 470, 497, 534, 584, 661 };
-const uint32_t EPSILON_2133_W_T0_HE[] = { 186, 190, 196, 204, 216 };
-const uint32_t EPSILON_2133_W_T1_HE[] = { 365, 382, 406, 439, 488 };
+const uint32_t EPSILON_2133_R_T0_HE[] = {   9,   9,   9,  10,  10,  10,  10,  11,  11 };
+const uint32_t EPSILON_2133_R_T1_HE[] = { 274, 289, 289, 309, 309, 337, 337, 379, 379 };
+const uint32_t EPSILON_2133_R_T2_HE[] = { 470, 497, 497, 534, 534, 584, 584, 661, 661 };
+const uint32_t EPSILON_2133_W_T0_HE[] = { 186, 190, 190, 196, 196, 204, 204, 216, 216 };
+const uint32_t EPSILON_2133_W_T1_HE[] = { 365, 382, 382, 406, 406, 439, 439, 488, 488 };
 
 //
 // PAU: 2050 MHz
@@ -125,35 +125,35 @@ const uint32_t EPSILON_2133_W_T1_HE[] = { 365, 382, 406, 439, 488 };
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR disabled/half
 // Product offerings: Rainier (low-end with DCMs)
-const uint32_t EPSILON_2050_R_T0_LE[] = {   9,   9,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T1_LE[] = {   9,   9,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T2_LE[] = { 265, 279, 298, 325, 366 };
-const uint32_t EPSILON_2050_W_T0_LE[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2050_W_T1_LE[] = { 192, 195, 200, 208, 219 };
+const uint32_t EPSILON_2050_R_T0_LE[] = {   9,   9,   9,   9,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T1_LE[] = {   9,   9,   9,   9,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T2_LE[] = { 265, 272, 279, 289, 298, 312, 325, 345, 366 };
+const uint32_t EPSILON_2050_W_T0_LE[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_2050_W_T1_LE[] = { 191, 193, 195, 198, 200, 204, 208, 214, 219 };
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR quarter-width
 // Product offerings: Rainier (low-end with DCMs)
-const uint32_t EPSILON_2050_R_T0_LQ[] = {   9,   9,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T1_LQ[] = {   9,   9,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T2_LQ[] = { 325, 340, 359, 386, 426 };
-const uint32_t EPSILON_2050_W_T0_LQ[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2050_W_T1_LQ[] = { 251, 256, 261, 268, 280 };
+const uint32_t EPSILON_2050_R_T0_LQ[] = {   9,   9,   9,  10,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T1_LQ[] = {   9,   9,   9,  10,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T2_LQ[] = { 325, 340, 340, 359, 359, 386, 386, 426, 426 };
+const uint32_t EPSILON_2050_W_T0_LQ[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_2050_W_T1_LQ[] = { 251, 256, 256, 261, 261, 268, 268, 280, 280 };
 
 // Mid-range Epsilons (8 chips/group, 1 group)
 // Product offerings: Everest (mid-range with DCMs), Denali Flat-8
-const uint32_t EPSILON_2050_R_T0_MR[] = {   9,   9,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T1_MR[] = {   9,   9,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T2_MR[] = { 260, 272, 287, 308, 340 };
-const uint32_t EPSILON_2050_W_T0_MR[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2050_W_T1_MR[] = { 151, 150, 147, 144, 140 };
+const uint32_t EPSILON_2050_R_T0_MR[] = {   9,   9,   9,  10,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T1_MR[] = {   9,   9,   9,  10,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T2_MR[] = { 260, 266, 272, 279, 287, 298, 308, 324, 340 };
+const uint32_t EPSILON_2050_W_T0_MR[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_2050_W_T1_MR[] = { 151, 150, 150, 148, 147, 146, 144, 142, 140 };
 
 // High-end Epsilons (4 chips/group, 4 groups)
 // Product offerings: Denali (high-end with SCMs)
-const uint32_t EPSILON_2050_R_T0_HE[] = {   9,   9,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T1_HE[] = { 269, 283, 303, 329, 370 };
-const uint32_t EPSILON_2050_R_T2_HE[] = { 460, 486, 521, 570, 643 };
-const uint32_t EPSILON_2050_W_T0_HE[] = { 184, 188, 194, 201, 212 };
-const uint32_t EPSILON_2050_W_T1_HE[] = { 358, 375, 398, 429, 476 };
+const uint32_t EPSILON_2050_R_T0_HE[] = {   9,   9,   9,  10,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T1_HE[] = { 269, 276, 283, 293, 303, 316, 329, 347, 370 };
+const uint32_t EPSILON_2050_R_T2_HE[] = { 460, 473, 486, 503, 521, 545, 570, 602, 643 };
+const uint32_t EPSILON_2050_W_T0_HE[] = { 184, 186, 188, 191, 194, 197, 201, 206, 212 };
+const uint32_t EPSILON_2050_W_T1_HE[] = { 358, 367, 375, 386, 398, 413, 429, 450, 476 };
 
 // LCO constants
 const uint8_t MAX_L3_TARGETS = 32;
@@ -205,6 +205,11 @@ void p10_fbc_eff_config_guardband_epsilon(
         else
         {
             io_target_value -= l_delta;
+        }
+
+        if (io_target_value)
+        {
+            io_target_value += 1;
         }
     }
 
@@ -616,30 +621,50 @@ fapi2::ReturnCode p10_fbc_eff_config_freq_attrs(void)
                 l_freq_floor, l_freq_ceiling);
 
     // determine table index based on core floor/ceiling frequency ratio
-    // breakpoint ratio: floor 4.0, ceiling 4.0 (floor::ceiling ratio = 8/8)
-    if ((8 * l_freq_floor) >= (8 * l_freq_ceiling))
+    // breakpoint ratio: floor 4.0, ceiling 4.0 (floor::ceiling ratio = 16/16)
+    if ((16 * l_freq_floor) >= (16 * l_freq_ceiling))
     {
-        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_8_8;
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_16_16;
     }
-    // breakpoint ratio: floor 3.5, ceiling 4.0 (floor::ceiling ratio = 7/8)
-    else if ((8 * l_freq_floor) >= (7 * l_freq_ceiling))
+    // breakpoint ratio: floor 3.75, ceiling 4.0 (floor::ceiling ratio = 15/16)
+    else if ((16 * l_freq_floor) >= (15 * l_freq_ceiling))
     {
-        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_7_8;
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_15_16;
     }
-    // breakpoint ratio: floor 3.0, ceiling 4.0 (floor::ceiling ratio = 6/8)
-    else if ((8 * l_freq_floor) >= (6 * l_freq_ceiling))
+    // breakpoint ratio: floor 3.5, ceiling 4.0 (floor::ceiling ratio = 14/16)
+    else if ((16 * l_freq_floor) >= (14 * l_freq_ceiling))
     {
-        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_6_8;
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_14_16;
     }
-    // breakpoint ratio: floor 2.5, ceiling 4.0 (floor::ceiling ratio = 5/8)
-    else if ((8 * l_freq_floor) >= (5 * l_freq_ceiling))
+    // breakpoint ratio: floor 3.25, ceiling 4.0 (floor::ceiling ratio = 13/16)
+    else if ((16 * l_freq_floor) >= (13 * l_freq_ceiling))
     {
-        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_5_8;
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_13_16;
     }
-    // breakpoint ratio: floor 2.0, ceiling 4.0 (floor::ceiling ratio = 4/8)
-    else if (8 * l_freq_floor >= 4 * l_freq_ceiling)
+    // breakpoint ratio: floor 3.0, ceiling 4.0 (floor::ceiling ratio = 12/16)
+    else if ((16 * l_freq_floor) >= (12 * l_freq_ceiling))
     {
-        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_4_8;
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_12_16;
+    }
+    // breakpoint ratio: floor 2.75, ceiling 4.0 (floor::ceiling ratio = 11/16)
+    else if ((16 * l_freq_floor) >= (11 * l_freq_ceiling))
+    {
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_11_16;
+    }
+    // breakpoint ratio: floor 2.5, ceiling 4.0 (floor::ceiling ratio = 10/16)
+    else if ((16 * l_freq_floor) >= (10 * l_freq_ceiling))
+    {
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_10_16;
+    }
+    // breakpoint ratio: floor 2.25, ceiling 4.0 (floor::ceiling ratio = 9/16)
+    else if ((16 * l_freq_floor) >= (9 * l_freq_ceiling))
+    {
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_09_16;
+    }
+    // breakpoint ratio: floor 2.0, ceiling 4.0 (floor::ceiling ratio = 8/16)
+    else if ((16 * l_freq_floor) >= (8 * l_freq_ceiling))
+    {
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_08_16;
     }
     // Under-range, raise error
     else

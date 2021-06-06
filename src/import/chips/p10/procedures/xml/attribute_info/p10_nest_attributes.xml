@@ -666,11 +666,15 @@
   </description>
   <valueType>uint8</valueType>
   <enum>
-    RATIO_8_8 = 0x0,
-    RATIO_7_8 = 0x1,
-    RATIO_6_8 = 0x2,
-    RATIO_5_8 = 0x3,
-    RATIO_4_8 = 0x4
+    RATIO_16_16 = 0x0,
+    RATIO_15_16 = 0x1,
+    RATIO_14_16 = 0x2,
+    RATIO_13_16 = 0x3,
+    RATIO_12_16 = 0x4,
+    RATIO_11_16 = 0x5,
+    RATIO_10_16 = 0x6,
+    RATIO_09_16 = 0x7,
+    RATIO_08_16 = 0x8
   </enum>
   <writeable/>
 </attribute>
