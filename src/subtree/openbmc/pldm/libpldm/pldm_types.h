@@ -31,6 +31,28 @@ typedef struct pldm_version {
 typedef uint8_t bool8_t;
 
 typedef union {
+	uint16_t value;
+	struct {
+		uint8_t bit0 : 1;
+		uint8_t bit1 : 1;
+		uint8_t bit2 : 1;
+		uint8_t bit3 : 1;
+		uint8_t bit4 : 1;
+		uint8_t bit5 : 1;
+		uint8_t bit6 : 1;
+		uint8_t bit7 : 1;
+		uint8_t bit8 : 1;
+		uint8_t bit9 : 1;
+		uint8_t bit10 : 1;
+		uint8_t bit11 : 1;
+		uint8_t bit12 : 1;
+		uint8_t bit13 : 1;
+		uint8_t bit14 : 1;
+		uint8_t bit15 : 1;
+	} __attribute__((packed)) bits;
+} bitfield16_t;
+
+typedef union {
 	uint32_t value;
 	struct {
 		uint8_t bit0 : 1;

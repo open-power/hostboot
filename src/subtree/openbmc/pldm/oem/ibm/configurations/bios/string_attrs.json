@@ -69,6 +69,16 @@
          "default_string" : "00000000000000000000000000000000",
          "helpText" : "Specifies the configuration flags used by manufacturing, requires a reboot for a change to be applied.",
          "displayName" : "Manufacturing Flags"
+      },
+      {
+         "attribute_name" : "hb_lid_ids",
+         "string_type" : "ASCII",
+         "minimum_string_length" : 0,
+         "maximum_string_length" : 512,
+         "default_string_length" : 0,
+         "default_string" : "",
+         "helpText" : "Provides the host a mapping of the lid IDs to human readable names.",
+         "displayName" : "Hostboot Lid IDs"
       }
     ]
 }

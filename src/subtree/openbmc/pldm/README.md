@@ -90,6 +90,9 @@ The `pldm/meson.build` and the corresponding source file(s) will need to
 incorporate the logic of adding its mapped compiler flag to allow conditional
 compilation of the code.
 
+## pldmtool
+For more information on pldmtool please refer to plmdtool/README.md.
+
 ## TODO
 Consider hosting libpldm above in a repo of its own, probably even outside the
 OpenBMC project? A separate repo would enable something like git submodule.

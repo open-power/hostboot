@@ -51,7 +51,7 @@ void FruParser::setupDefaultDBusLookup()
         {"xyz.openbmc_project.Inventory.Item.Vrm", 123},
         {"xyz.openbmc_project.Inventory.Item.Cpu", 135},
         {"xyz.openbmc_project.Inventory.Item.Bmc", 137},
-        {"xyz.openbmc_project.Inventory.Item.Dimm", 142},
+        {"xyz.openbmc_project.Inventory.Item.Dimm", 66},
         {"xyz.openbmc_project.Inventory.Item.Tpm", 24576},
         {"xyz.openbmc_project.Inventory.Item.System", 11521},
     };

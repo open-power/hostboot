@@ -107,44 +107,223 @@ class GetPDR : public CommandInterface
 
   private:
     const std::map<pldm::pdr::EntityType, std::string> entityType = {
-        {PLDM_ENTITY_COMM_CHANNEL, "Communication Channel"},
+        {PLDM_ENTITY_UNSPECIFIED, "Unspecified"},
+        {PLDM_ENTITY_OTHER, "Other"},
+        {PLDM_ENTITY_NETWORK, "Network"},
+        {PLDM_ENTITY_GROUP, "Group"},
+        {PLDM_ENTITY_REMOTE_MGMT_COMM_DEVICE,
+         "Remote Management Communication Device"},
+        {PLDM_ENTITY_EXTERNAL_ENVIRONMENT, "External Environment"},
+        {PLDM_ENTITY_COMM_CHANNEL, " Communication Channel"},
+        {PLDM_ENTITY_TERMINUS, "PLDM Terminus"},
+        {PLDM_ENTITY_PLATFORM_EVENT_LOG, " Platform Event Log"},
+        {PLDM_ENTITY_KEYPAD, "keypad"},
+        {PLDM_ENTITY_SWITCH, "Switch"},
+        {PLDM_ENTITY_PUSHBUTTON, "Pushbutton"},
+        {PLDM_ENTITY_DISPLAY, "Display"},
+        {PLDM_ENTITY_INDICATOR, "Indicator"},
+        {PLDM_ENTITY_SYS_MGMT_SW, "System Management Software"},
         {PLDM_ENTITY_SYS_FIRMWARE, "System Firmware"},
+        {PLDM_ENTITY_OPERATING_SYS, "Operating System"},
         {PLDM_ENTITY_VIRTUAL_MACHINE_MANAGER, "Virtual Machine Manager"},
+        {PLDM_ENTITY_OS_LOADER, "OS Loader"},
+        {PLDM_ENTITY_DEVICE_DRIVER, "Device Driver"},
+        {PLDM_ENTITY_MGMT_CONTROLLER_FW, "Management Controller Firmware"},
         {PLDM_ENTITY_SYSTEM_CHASSIS, "System chassis (main enclosure)"},
+        {PLDM_ENTITY_SUB_CHASSIS, "Sub-chassis"},
+        {PLDM_ENTITY_DISK_DRIVE_BAY, "Disk Drive Bay"},
+        {PLDM_ENTITY_PERIPHERAL_BAY, "Peripheral Bay"},
+        {PLDM_ENTITY_DEVICE_BAY, "Device bay"},
+        {PLDM_ENTITY_DOOR, "Door"},
+        {PLDM_ENTITY_ACCESS_PANEL, "Access Panel"},
+        {PLDM_ENTITY_COVER, "Cover"},
+        {PLDM_ENTITY_BOARD, "Board"},
+        {PLDM_ENTITY_CARD, "Card"},
+        {PLDM_ENTITY_MODULE, "Module"},
+        {PLDM_ENTITY_SYS_MGMT_MODULE, "System management module"},
         {PLDM_ENTITY_SYS_BOARD, "System Board"},
-        {PLDM_ENTITY_DRIVE_BACKPLANE, "Drive backplane"},
+        {PLDM_ENTITY_MEMORY_BOARD, "Memory Board"},
         {PLDM_ENTITY_MEMORY_MODULE, "Memory Module"},
         {PLDM_ENTITY_PROC_MODULE, "Processor Module"},
+        {PLDM_ENTITY_ADD_IN_CARD, "Add-in Card"},
         {PLDM_ENTITY_CHASSIS_FRONT_PANEL_BOARD,
-         "Chassis front panel board (control panel)"},
-        {PLDM_ENTITY_POWER_CONVERTER, "Power converter"},
-        {PLDM_ENTITY_PROC, "Processor"},
-        {PLDM_ENTITY_MGMT_CONTROLLER, "Management Controller"},
-        {PLDM_ENTITY_CONNECTOR, "Connector"},
+         "Chassis front panel board(control panel)"},
+        {PLDM_ENTITY_BACK_PANEL_BOARD, "Back panel board"},
+        {PLDM_ENTITY_POWER_MGMT, "Power management board"},
+        {PLDM_ENTITY_POWER_SYS_BOARD, "Power system board"},
+        {PLDM_ENTITY_DRIVE_BACKPLANE, "Drive backplane"},
+        {PLDM_ENTITY_SYS_INTERNAL_EXPANSION_BOARD,
+         "System internal expansion board"},
+        {PLDM_ENTITY_OTHER_SYS_BOARD, "Other system board"},
+        {PLDM_ENTITY_CHASSIS_BACK_PANEL_BOARD, "Chassis back panel board"},
+        {PLDM_ENTITY_PROCESSING_BLADE, "Processing blade"},
+        {PLDM_ENTITY_CONNECTIVITY_SWITCH, "Connectivity switch"},
+        {PLDM_ENTITY_PROC_MEMORY_MODULE, "Processor/Memory Module"},
+        {PLDM_ENTITY_IO_MODULE, "I/O Module"},
+        {PLDM_ENTITY_PROC_IO_MODULE, "Processor I/O Module"},
+        {PLDM_ENTITY_COOLING_DEVICE, "Cooling device"},
+        {PLDM_ENTITY_COOLING_SUBSYSTEM, "Cooling subsystem"},
+        {PLDM_ENTITY_COOLING_UNIT, "Cooling Unit"},
         {PLDM_ENTITY_FAN, "Fan"},
+        {PLDM_ENTITY_PELTIER_COOLING_DEVICE, "Peltier Cooling Device"},
+        {PLDM_ENTITY_LIQUID_COOLING_DEVICE, "Liquid Cooling Device"},
+        {PLDM_ENTITY_LIQUID_COOLING_SUBSYSTEM, "Liquid Colling Subsystem"},
+        {PLDM_ENTITY_OTHER_STORAGE_DEVICE, "Other Storage Device"},
+        {PLDM_ENTITY_FLOPPY_DRIVE, "Floppy Drive"},
+        {PLDM_ENTITY_FIXED_DISK_HARD_DRIVE, "Hard Drive"},
+        {PLDM_ENTITY_CD_DRIVE, "CD Drive"},
+        {PLDM_ENTITY_CD_DVD_DRIVE, "CD/DVD Drive"},
+        {PLDM_ENTITY_OTHER_SILICON_STORAGE_DEVICE,
+         "Other Silicon Storage Device"},
         {PLDM_ENTITY_SOLID_STATE_SRIVE, "Solid State Drive"},
-        {PLDM_ENTITY_POWER_SUPPLY, "Power Supply"},
-        {PLDM_ENTITY_MEMORY_CHIP, "Memory chip"},
+        {PLDM_ENTITY_POWER_SUPPLY, "Power supply"},
+        {PLDM_ENTITY_BATTERY, "Battery"},
+        {PLDM_ENTITY_SUPER_CAPACITOR, "Super Capacitor"},
+        {PLDM_ENTITY_POWER_CONVERTER, "Power Converter"},
+        {PLDM_ENTITY_DC_DC_CONVERTER, "DC-DC Converter"},
+        {PLDM_ENTITY_AC_MAINS_POWER_SUPPLY, "AC mains power supply"},
+        {PLDM_ENTITY_DC_MAINS_POWER_SUPPLY, "DC mains power supply"},
+        {PLDM_ENTITY_PROC, "Processor"},
+        {PLDM_ENTITY_CHIPSET_COMPONENT, "Chipset Component"},
+        {PLDM_ENTITY_MGMT_CONTROLLER, "Management Controller"},
+        {PLDM_ENTITY_PERIPHERAL_CONTROLLER, "Peripheral Controller"},
+        {PLDM_ENTITY_SEEPROM, "SEEPROM"},
+        {PLDM_ENTITY_NVRAM_CHIP, "NVRAM Chip"},
+        {PLDM_ENTITY_FLASH_MEMORY_CHIP, "FLASH Memory chip"},
+        {PLDM_ENTITY_MEMORY_CHIP, "Memory Chip"},
+        {PLDM_ENTITY_MEMORY_CONTROLLER, "Memory Controller"},
+        {PLDM_ENTITY_NETWORK_CONTROLLER, "Network Controller"},
+        {PLDM_ENTITY_IO_CONTROLLER, "I/O Controller"},
+        {PLDM_ENTITY_SOUTH_BRIDGE, "South Bridge"},
         {PLDM_ENTITY_REAL_TIME_CLOCK, "Real Time Clock (RTC)"},
+        {PLDM_ENTITY_FPGA_CPLD_DEVICE, "FPGA/CPLD Configurable Logic Device"},
+        {PLDM_ENTITY_OTHER_BUS, "Other Bus"},
+        {PLDM_ENTITY_SYS_BUS, "System Bus"},
+        {PLDM_ENTITY_I2C_BUS, "I2C Bus"},
+        {PLDM_ENTITY_SMBUS_BUS, "SMBus Bus"},
+        {PLDM_ENTITY_SPI_BUS, "SPI Bus"},
+        {PLDM_ENTITY_PCI_BUS, "PCI Bus"},
+        {PLDM_ENTITY_PCI_EXPRESS_BUS, "PCI Express Bus"},
+        {PLDM_ENTITY_PECI_BUS, "PECI Bus"},
+        {PLDM_ENTITY_LPC_BUS, "LPC Bus"},
+        {PLDM_ENTITY_USB_BUS, "USB Bus"},
+        {PLDM_ENTITY_FIREWIRE_BUS, "FireWire Bus"},
+        {PLDM_ENTITY_SCSI_BUS, "SCSI Bus"},
+        {PLDM_ENTITY_SATA_SAS_BUS, "SATA/SAS Bus"},
+        {PLDM_ENTITY_PROC_FRONT_SIDE_BUS, "Processor/Front-side Bus"},
+        {PLDM_ENTITY_INTER_PROC_BUS, "Inter-processor Bus"},
+        {PLDM_ENTITY_CONNECTOR, "Connector"},
         {PLDM_ENTITY_SLOT, "Slot"},
-        {PLDM_ENTITY_CABLE, "Cable (electrical or optical)"},
-        {11521, "System (logical)"},
-    };
+        {PLDM_ENTITY_CABLE, "Cable(electrical or optical)"},
+        {PLDM_ENTITY_INTERCONNECT, "Interconnect"},
+        {PLDM_ENTITY_PLUG, "Plug"},
+        {PLDM_ENTITY_SOCKET, "Socket"},
+        {PLDM_ENTITY_SYSTEM_LOGICAL, "System (Logical)"}};
 
     const std::map<uint16_t, std::string> stateSet = {
         {PLDM_STATE_SET_HEALTH_STATE, "Health State"},
         {PLDM_STATE_SET_AVAILABILITY, "Availability"},
+        {PLDM_STATE_SET_PREDICTIVE_CONDITION, "Predictive Condition"},
+        {PLDM_STATE_SET_REDUNDANCY_STATUS, "Redundancy Status"},
+        {PLDM_STATE_SET_HEALTH_REDUNDANCY_TREND, "Health/Redundancy Trend"},
+        {PLDM_STATE_SET_GROUP_RESOURCE_LEVEL, "Group Resource Level"},
+        {PLDM_STATE_SET_REDUNDANCY_ENTITY_ROLE, "Redundancy Entity Role"},
         {PLDM_STATE_SET_OPERATIONAL_STATUS, "Operational Status"},
+        {PLDM_STATE_SET_OPERATIONAL_STRESS_STATUS, "Operational Stress Status"},
+        {PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS, "Operational Fault Status"},
         {PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS,
          "Operational Running Status"},
+        {PLDM_STATE_SET_OPERATIONAL_CONNECTION_STATUS,
+         "Operational Connection Status"},
         {PLDM_STATE_SET_PRESENCE, "Presence"},
+        {PLDM_STATE_SET_PERFORMANCE, "Performance"},
         {PLDM_STATE_SET_CONFIGURATION_STATE, "Configuration State"},
+        {PLDM_STATE_SET_CHANGED_CONFIGURATION, "Changed Configuration"},
+        {PLDM_STATE_SET_IDENTIFY_STATE, "Identify State"},
+        {PLDM_STATE_SET_VERSION, "Version"},
+        {PLDM_STATE_SET_ALARM_STATE, "Alarm State"},
+        {PLDM_STATE_SET_DEVICE_INITIALIZATION, "Device Initialization"},
+        {PLDM_STATE_SET_THERMAL_TRIP, "Thermal Trip"},
+        {PLDM_STATE_SET_HEARTBEAT, "Heartbeat"},
         {PLDM_STATE_SET_LINK_STATE, "Link State"},
+        {PLDM_STATE_SET_SMOKE_STATE, "Smoke State"},
+        {PLDM_STATE_SET_HUMIDITY_STATE, "Humidity State"},
+        {PLDM_STATE_SET_DOOR_STATE, "Door State"},
+        {PLDM_STATE_SET_SWITCH_STATE, "Switch State"},
+        {PLDM_STATE_SET_LOCK_STATE, "Lock State"},
+        {PLDM_STATE_SET_PHYSICAL_SECURITY, "Physical Security"},
+        {PLDM_STATE_SET_DOCK_AUTHORIZATION, "Dock Authorization"},
+        {PLDM_STATE_SET_HW_SECURITY, "Hardware Security"},
+        {PLDM_STATE_SET_PHYSICAL_COMM_CONNECTION,
+         "Physical Communication Connection"},
+        {PLDM_STATE_SET_COMM_LEASH_STATUS, "Communication Leash Status"},
+        {PLDM_STATE_SET_FOREIGN_NW_DETECTION_STATUS,
+         "Foreign Network Detection Status"},
+        {PLDM_STATE_SET_PASSWORD_PROTECTED_ACCESS_SECURITY,
+         "Password-Protected Access Security"},
+        {PLDM_STATE_SET_SECURITY_ACCESS_PRIVILEGE_LEVEL,
+         "Security Access –PrivilegeLevel"},
+        {PLDM_STATE_SET_SESSION_AUDIT, "PLDM Session Audit"},
         {PLDM_STATE_SET_SW_TERMINATION_STATUS, "Software Termination Status"},
+        {PLDM_STATE_SET_STORAGE_MEDIA_ACTIVITY, "Storage Media Activity"},
         {PLDM_STATE_SET_BOOT_RESTART_CAUSE, "Boot/Restart Cause"},
+        {PLDM_STATE_SET_BOOT_RESTART_REQUEST, "Boot/Restart Request"},
+        {PLDM_STATE_SET_ENTITY_BOOT_STATUS, "Entity Boot Status"},
+        {PLDM_STATE_SET_BOOT_ERROR_STATUS, "Boot ErrorStatus"},
         {PLDM_STATE_SET_BOOT_PROGRESS, "Boot Progress"},
-        {PLDM_STATE_SET_SYSTEM_POWER_STATE, "System Power State"},
-    };
+        {PLDM_STATE_SET_SYS_FIRMWARE_HANG, "System Firmware Hang"},
+        {PLDM_STATE_SET_POST_ERRORS, "POST Errors"},
+        {PLDM_STATE_SET_LOG_FILL_STATUS, "Log Fill Status"},
+        {PLDM_STATE_SET_LOG_FILTER_STATUS, "Log Filter Status"},
+        {PLDM_STATE_SET_LOG_TIMESTAMP_CHANGE, "Log Timestamp Change"},
+        {PLDM_STATE_SET_INTERRUPT_REQUESTED, "Interrupt Requested"},
+        {PLDM_STATE_SET_INTERRUPT_RECEIVED, "Interrupt Received"},
+        {PLDM_STATE_SET_DIAGNOSTIC_INTERRUPT_REQUESTED,
+         "Diagnostic Interrupt Requested"},
+        {PLDM_STATE_SET_DIAGNOSTIC_INTERRUPT_RECEIVED,
+         "Diagnostic Interrupt Received"},
+        {PLDM_STATE_SET_IO_CHANNEL_CHECK_NMI_REQUESTED,
+         "I/O Channel Check NMI Requested"},
+        {PLDM_STATE_SET_IO_CHANNEL_CHECK_NMI_RECEIVED,
+         "I/O Channel Check NMI Received"},
+        {PLDM_STATE_SET_FATAL_NMI_REQUESTED, "Fatal NMI Requested"},
+        {PLDM_STATE_SET_FATAL_NMI_RECEIVED, "Fatal NMI Received"},
+        {PLDM_STATE_SET_SOFTWARE_NMI_REQUESTED, "Software NMI Requested"},
+        {PLDM_STATE_SET_SOFTWARE_NMI_RECEIVED, "Software NMI Received"},
+        {PLDM_STATE_SET_SMI_REQUESTED, "SMI Requested"},
+        {PLDM_STATE_SET_SMI_RECEIVED, "SMI Received"},
+        {PLDM_STATE_SET_PCI_PERR_REQUESTED, "PCI PERR Requested"},
+        {PLDM_STATE_SET_PCI_PERR_RECEIVED, "PCI PERR Received"},
+        {PLDM_STATE_SET_PCI_SERR_REQUESTED, "PCI SERR Requested "},
+        {PLDM_STATE_SET_PCI_SERR_RECEIVED, "PCI SERR Received"},
+        {PLDM_STATE_SET_BUS_ERROR_STATUS, "Bus Error Status"},
+        {PLDM_STATE_SET_WATCHDOG_STATUS, "Watchdog Status"},
+        {PLDM_STATE_SET_POWER_SUPPLY_STATE, "Power Supply State"},
+        {PLDM_STATE_SET_DEVICE_POWER_STATE, "Device Power State"},
+        {PLDM_STATE_SET_ACPI_POWER_STATE, "ACPI Power State"},
+        {PLDM_STATE_SET_BACKUP_POWER_SOURCE, "Backup Power Source"},
+        {PLDM_STATE_SET_SYSTEM_POWER_STATE, "System Power State "},
+        {PLDM_STATE_SET_BATTERY_ACTIVITY, "Battery Activity"},
+        {PLDM_STATE_SET_BATTERY_STATE, "Battery State"},
+        {PLDM_STATE_SET_PROC_POWER_STATE, "Processor Power State"},
+        {PLDM_STATE_SET_POWER_PERFORMANCE_STATE, "Power-Performance State"},
+        {PLDM_STATE_SET_PROC_ERROR_STATUS, "Processor Error Status"},
+        {PLDM_STATE_SET_BIST_FAILURE_STATUS, "BIST FailureStatus"},
+        {PLDM_STATE_SET_IBIST_FAILURE_STATUS, "IBIST FailureStatus"},
+        {PLDM_STATE_SET_PROC_HANG_IN_POST, "Processor Hang in POST"},
+        {PLDM_STATE_SET_PROC_STARTUP_FAILURE, "Processor Startup Failure"},
+        {PLDM_STATE_SET_UNCORRECTABLE_CPU_ERROR, "Uncorrectable CPU Error"},
+        {PLDM_STATE_SET_MACHINE_CHECK_ERROR, "Machine Check Error"},
+        {PLDM_STATE_SET_CORRECTED_MACHINE_CHECK, "Corrected Machine Check"},
+        {PLDM_STATE_SET_CACHE_STATUS, "Cache Status"},
+        {PLDM_STATE_SET_MEMORY_ERROR_STATUS, "Memory Error Status"},
+        {PLDM_STATE_SET_REDUNDANT_MEMORY_ACTIVITY_STATUS,
+         "Redundant Memory Activity Status"},
+        {PLDM_STATE_SET_ERROR_DETECTION_STATUS, "Error Detection Status"},
+        {PLDM_STATE_SET_STUCK_BIT_STATUS, "Stuck Bit Status"},
+        {PLDM_STATE_SET_SCRUB_STATUS, "Scrub Status"},
+        {PLDM_STATE_SET_SLOT_OCCUPANCY, "Slot Occupancy"},
+        {PLDM_STATE_SET_SLOT_STATE, "Slot State"}};
 
     const std::array<std::string_view, 4> sensorInit = {
         "noInit", "useInitPDR", "enableSensor", "disableSensor"};
@@ -181,15 +360,43 @@ class GetPDR : public CommandInterface
         {PLDM_OEM_PDR, "OEM PDR"},
     };
 
+    bool isLogicalBitSet(const uint16_t entity_type)
+    {
+        return entity_type & 0x8000;
+    }
+
+    uint16_t getEntityTypeForLogicalEntity(const uint16_t logical_entity_type)
+    {
+        return logical_entity_type & 0x7FFF;
+    }
+
     std::string getEntityName(pldm::pdr::EntityType type)
     {
+        uint16_t entityNumber = type;
+        std::string entityName = "[Physical] ";
+
+        if (isLogicalBitSet(type))
+        {
+            entityName = "[Logical] ";
+            entityNumber = getEntityTypeForLogicalEntity(type);
+        }
+
         try
         {
-            return entityType.at(type);
+            return entityName + entityType.at(entityNumber);
         }
         catch (const std::out_of_range& e)
         {
-            return std::to_string(static_cast<unsigned>(type)) + "(OEM)";
+            if (type >= PLDM_OEM_ENTITY_TYPE_START &&
+                type <= PLDM_OEM_ENTITY_TYPE_END)
+            {
+
+                return entityName +
+                       std::to_string(static_cast<unsigned>(entityNumber)) +
+                       "(OEM)";
+            }
+
+            return std::to_string(static_cast<unsigned>(entityNumber));
         }
     }
 

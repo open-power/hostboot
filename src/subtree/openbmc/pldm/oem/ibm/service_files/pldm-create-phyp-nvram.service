@@ -4,7 +4,7 @@ ConditionPathExists=!/var/lib/pldm/PHYP-NVRAM
 
 [Service]
 ExecStart=/bin/mkdir -p /var/lib/pldm/
-ExecStart=/bin/dd if=/dev/zero of=/var/lib/pldm/PHYP-NVRAM bs=1024 count=17452
+ExecStart=/bin/dd if=/dev/zero of=/var/lib/pldm/PHYP-NVRAM bs=1024 count=145408
 Type=oneshot
 RemainAfterExit=no
 

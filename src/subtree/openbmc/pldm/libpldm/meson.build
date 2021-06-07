@@ -9,7 +9,8 @@ headers = [
   'state_set.h',
   'fru.h',
   'utils.h',
-  'pdr.h'
+  'pdr.h',
+  'firmware_update.h'
 ]
 
 sources = [
@@ -19,7 +20,8 @@ sources = [
   'bios_table.c',
   'fru.c',
   'utils.c',
-  'pdr.c'
+  'pdr.c',
+  'firmware_update.c'
 ]
 
 libpldm_headers = ['.', '..']
