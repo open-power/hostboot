@@ -380,6 +380,16 @@ errlHndl_t getAndSetPLDMBiosAttrs()
         errlCommit(errl, ISTEP_COMP_ID);
     }
 
+    TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY_type l_lockinPolicy = false;
+    errl = PLDM::getSecVerLockinEnabled(bios_string_table, bios_attr_table, l_lockinPolicy);
+    if(errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "getAndSetPLDMBiosAttrs: could not get the secureboot version lockin policy from BMC");
+        errlCommit(errl, ISTEP_COMP_ID);
+        l_lockinPolicy = false;
+    }
+    sys->setAttr<TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY>(l_lockinPolicy);
+
     }while(0);
 
     return errl;

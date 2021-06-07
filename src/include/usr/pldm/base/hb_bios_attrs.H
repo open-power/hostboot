@@ -217,6 +217,19 @@ namespace PLDM
                            std::vector<uint8_t>                     & io_attr_table,
                            TARGETING::ATTR_HYPERVISOR_IPL_SIDE_type & o_bootside);
 #endif
+
+    /** @brief Retrieve the value of the secure version lockin enabled attribute
+     *         from the BMC.
+     *
+     * @param[in,out] io_string_table  See brief at the top of this file.
+     * @param[in,out] io_attr_table    See brief at the top of this file.
+     * @param[out] o_lockinEnabled whether the secure version lockin is enabled.
+     *
+     * @return nullptr on success; non-nullptr on error.
+     */
+    errlHndl_t getSecVerLockinEnabled(std::vector<uint8_t>& io_string_table,
+                                      std::vector<uint8_t>& io_attr_table,
+                                      TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY_type& o_lockinEnabled);
 }
 
 #endif

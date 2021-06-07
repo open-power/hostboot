@@ -84,6 +84,7 @@ namespace PLDM
         MOD_RESET_WATCHDOG_TIMER                     = 0x2B, // resetWatchdogTimer
         MOD_PLDM_SHUTDOWN                            = 0x2C, // requestSoftPowerOff
         MOD_HANDLE_GRACEFUL_SHUTDOWN_REQUEST         = 0x2D, // handleGracefulShutdownRequest
+        MOD_GET_SEC_VER_LOCKIN_ENABLED               = 0x2E, // getSecVerLockinEnabled
     };
 
     enum PLDMReasonCode
