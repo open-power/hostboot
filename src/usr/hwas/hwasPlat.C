@@ -1081,23 +1081,6 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             continue;
         }
 
-        if (present == true)
-        {
-            HWAS_INF( "pTarget %.8X - detected present",
-                pTarget->getAttr<ATTR_HUID>());
-
-            // advance to next entry in the list
-            pTarget_it++;
-        }
-        else
-        {   // chip not present -- remove from list
-            HWAS_INF( "pTarget %.8X - no presence",
-                pTarget->getAttr<ATTR_HUID>());
-
-            // erase this target, and 'increment' to next
-            pTarget_it = io_targets.erase(pTarget_it);
-        }
-
 #if defined(CONFIG_SUPPORT_EEPROM_CACHING) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)
         // pulling the data from the eeprom can be very slow so be sure to
         //  indicate we're still making progress
@@ -1176,6 +1159,26 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             }
 
             //otherwise, do nothing.
+        }
+
+        // Evaluate presence status, if we determine the target
+        // to not be present at the end of this loop then remove
+        // it from the list and continue to the next target.
+        if (present == true)
+        {
+            HWAS_INF( "pTarget %.8X - detected present",
+                pTarget->getAttr<ATTR_HUID>());
+
+            // advance to next entry in the list
+            pTarget_it++;
+        }
+        else
+        {   // chip not present -- remove from list
+            HWAS_INF( "pTarget %.8X - no presence",
+                pTarget->getAttr<ATTR_HUID>());
+
+            // erase this target, and 'increment' to next
+            pTarget_it = io_targets.erase(pTarget_it);
         }
 
     } // for pTarget_it
