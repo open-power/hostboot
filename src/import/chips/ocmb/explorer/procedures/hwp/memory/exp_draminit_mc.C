@@ -99,9 +99,6 @@ extern "C"
         // Enable ecc checking
         FAPI_TRY( mss::enable_read_ecc<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 
-        // Apply marks from OCMB VPD
-        FAPI_TRY(mss::apply_mark_store(i_target), "%s Failed apply_mark_store", mss::c_str(i_target));
-
         // Unmask registers after draminit_mc
         FAPI_TRY(mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target));
 

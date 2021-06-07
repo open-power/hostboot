@@ -139,20 +139,6 @@
         <mssAccessorName>ocmb_half_dimm_mode_override</mssAccessorName>
     </attribute>
 
-    <attribute>
-        <id>ATTR_MSS_MEM_MVPD_FWMS</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Mark store records from OCMB VPD. The array dimension is [port][mark].
-          Explorer only has one port so only [0][mark] is used in explorer.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <array> 8 </array>
-        <mssAccessorName>mvpd_fwms</mssAccessorName>
-    </attribute>
-
     <!-- user_input_msdg attribute overrides start -->
     <attribute>
         <id>ATTR_MEM_EXP_INIT_VREF_DQ</id>

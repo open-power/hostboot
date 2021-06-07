@@ -549,39 +549,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Apply mark store bits from module VPD
-/// @tparam MC the memory controller type
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
-/// @param[in] i_target A target representing a port
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode apply_mark_store( const fapi2::Target<T>& i_target )
-{
-    FAPI_INF("Enable marks from MVPD %s", mss::c_str(i_target));
-
-    uint32_t l_fwms[MARK_STORE_COUNT];
-
-    FAPI_TRY( mss::mvpd_fwms<MC>(i_target, l_fwms) );
-
-    for (size_t l_mark = 0; l_mark < MARK_STORE_COUNT; ++l_mark)
-    {
-        if (l_fwms[l_mark] != 0)
-        {
-            fapi2::buffer<uint64_t> l_fwms_data;
-            // This assumes the attribute contents are in the same format as the register fields,
-            // ending just before the EXIT_1 bit
-            l_fwms_data.insertFromRight < TT::FWMS0_MARK, TT::FWMS0_EXIT_1 - TT::FWMS0_MARK + 1 > (l_fwms[l_mark]);
-            FAPI_TRY( mss::putScom(i_target, TT::FWMS_REG + l_mark, l_fwms_data) );
-        }
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Configures the write reorder queue bit
 /// @tparam MC the memory controller type
 /// @tparam T, the mc
