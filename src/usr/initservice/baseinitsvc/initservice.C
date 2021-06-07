@@ -967,6 +967,7 @@ void InitService::_doShutdown(uint64_t i_status,
     }
 
     TRACFCOMP(g_trac_initsvc,"Do post mem flush callbacks");
+
     // send message to registered services who asked for a
     // post memory flush callback - starting at the highest priority
     for(EventRegistry_t::iterator i = std::find_if(iv_regMsgQ.begin(),

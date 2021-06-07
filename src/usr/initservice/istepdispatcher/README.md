@@ -1,4 +1,4 @@
-# Booting and Rebooting
+# Booting, Rebooting and Shutting Down
 
 
 ### Common Terms / Acronyms
@@ -83,4 +83,31 @@ On FSP boxes, Hostboot will shutdown and TI with a unique reasoncode (RC) indica
 ### BMC
 On BMC systems, Hostboot will request a graceful reboot to trigger a deep reconfig loop.  The BMC's bootcount (counts down to zero) will be explicitly incremented before this is requested to ensure we don't trigger the reboot limit.
 
+## Graceful shutdown
 
+There are several situations where Hostboot needs to completely shut down that do not have their origins in an error or fault in the system. These are:
+
+1. For a Secure Boot Key Transition (shutdown happens after an SBE update)
+2. For Physical Presence Detection (system shuts down and waits for a manual power-on)
+3. When the SP/BMC requests a shutdown while the host is IPLing (can happen because of user input or other reasons)
+
+The shutdown in the first two scenarios is initiated by Hostboot itself. Hostboot invokes the requestSoftPowerOff function which quiesces the host. (The host is said to be "quiesced" when Hostboot has reached a state where power to the host can safely be cut; HB will terminate certain tasks, flush dirty pages to backing storage, stop making or accepting requests for certain resources, etc. in preparation for the poweroff.)
+
+The third scenario is initiated by the service processor (SP) using either an FSI mailbox message or a PLDM message, depending on whether the system is managed by an FSP or an eBMC.
+
+### eBMC systems
+
+On eBMC systems, a graceful shutdown can be triggered by sending Hostboot a PLDM SetStateEffecterStates request directed at the host's Graceful Shutdown effecter. Hostboot will respond to the message immediately and begin the shutdown sequence.
+
+At the end of a graceful shutdown when the host is quiesced (no matter who requests it), Hostboot will send a PLDM event to the BMC to notify it that the host shutdown is complete and power to the chassis can safely be turned off. This only works after the PDR exchange has completed; attempting to perform a graceful shutdown before this point will cause an error to be logged, and the shutdown status will be set to "error."
+
+### Shutdown path restrictions
+
+The further the host progresses down the shutdown path, the fewer resources are available. For example, once dirty PNOR pages have been flushed to backing storage, no more PNOR requests should be made by the system. Code in the final shutdown path has to be written to take these restrictions into account. Here is an incomplete list of things that code in the shutdown path should take care to avoid:
+
+1. Do not execute code that resides in the HB Extended Image (HBI), because this could cause PNOR pages to be fetched. Only HB Base (HBB) code can be safely executed, because this code is never paged out.
+2. Do not access attributes. Even accessing volatile attributes could cause parts of the attribute data structures to be paged in via PNOR (if the HBD section is built as pageable).
+3. Do not commit error logs. They will not be sent to the SP because PNOR pages will have already been flushed and the error log manager service will already have been shut down.
+4. Do not do anything that requires interrupts.
+
+Documentation on the stages of shutdown can be found at src/usr/initservice/README.md.

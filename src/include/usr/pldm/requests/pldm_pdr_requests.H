@@ -88,6 +88,21 @@ errlHndl_t sendSensorStateChangedEvent(sensor_id_t i_sensor_id,
                                        uint8_t i_sensor_offset,
                                        sensor_state_t i_sensor_state);
 
+/* @brief Send a Platform Event Message indicating a "Sensor State Changed"
+ *        event to the BMC.
+ *
+ * @param[in] i_sensor_id      ID of the aggregate sensor that changed
+ * @param[in] i_sensor_offset  Offset of the sensor within the aggregate sensor
+ *                             that changed
+ * @param[in] i_sensor_state   New state of the sensor
+ * @param[in] i_terminus_id    ID of the terminus sending the event.
+ * @return errlHndl_t          Error if any, otherwise nullptr.
+ */
+errlHndl_t sendSensorStateChangedEvent(sensor_id_t i_sensor_id,
+                                       uint8_t i_sensor_offset,
+                                       sensor_state_t i_sensor_state,
+                                       terminus_id_t i_terminus_id);
+
 enum occ_state : sensor_state_t
 {
     occ_state_stopped,

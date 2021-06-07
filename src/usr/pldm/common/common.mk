@@ -51,22 +51,22 @@ PLDM_BASE_COMMON_OBJS += pldm_bios_attr_requests.o
 PLDM_BASE_COMMON_OBJS += pldm_tid_requests.o
 PLDM_BASE_COMMON_OBJS += file_io.o
 PLDM_BASE_COMMON_OBJS += pldm_fileio_requests.o
+PLDM_BASE_COMMON_OBJS += pldm_pdr_requests.o
+PLDM_BASE_COMMON_OBJS += platform.o
 
 PLDM_EXTENDED_COMMON_OBJS += fru.o
-PLDM_EXTENDED_COMMON_OBJS += platform.o
 
 PLDM_EXTENDED_COMMON_OBJS += pdr.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru_requests.o
-PLDM_EXTENDED_COMMON_OBJS += pldm_pdr_requests.o
 
 PLDM_EXTENDED_COMMON_OBJS += hb_fru.o
 PLDM_EXTENDED_COMMON_OBJS += hb_pdrs.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_responder.o
 PLDM_EXTENDED_COMMON_OBJS += pdr_manager.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru.o
-PLDM_EXTENDED_COMMON_OBJS += pldm_monitor_control_responders.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru_data_responders.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_watchdog.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_monitor_control_responders.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need

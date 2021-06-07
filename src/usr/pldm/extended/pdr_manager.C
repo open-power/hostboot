@@ -168,6 +168,17 @@ bool PdrManager::findPdr(pdr_handle_t& io_record_handle,
     return found;
 }
 
+/* @brief Find a Terminus Locator PDR associated with Hostboot
+ *
+ * @param[in] i_repo  The PDR repository to search
+ * @param[in] i_lock  Reference to a lock on PDR repository. The
+ *                    caller must have exclusive access to the PDR
+ *                    repository prior to calling this function.
+ * @return The pointer to the Terminus Locator PDR structure if
+ *         it is found in the PDR repo, or nullptr if not found
+ */
+pldm_terminus_locator_pdr* findHBTerminusLocatorPdr(const pldm_pdr* i_repo, const mutex_lock_t& i_lock);
+
 errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
 {
     errlHndl_t l_errl = nullptr;
@@ -177,7 +188,7 @@ errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
     // the operations on the PDR repo
     {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
-    pldm_terminus_locator_pdr* l_terminus_locator_pdr = findHBTerminusLocatorPdr();
+    pldm_terminus_locator_pdr* l_terminus_locator_pdr = findHBTerminusLocatorPdr(iv_pdr_repo.get(), lock);
     if(!l_terminus_locator_pdr)
     {
         /*@
@@ -211,7 +222,7 @@ errlHndl_t PdrManager::invalidateHBTerminusLocatorPdr()
     return l_errl;
 }
 
-pldm_terminus_locator_pdr* PdrManager::findHBTerminusLocatorPdr()
+pldm_terminus_locator_pdr* findHBTerminusLocatorPdr(const pldm_pdr* const i_repo, const mutex_lock_t& i_lock)
 {
     const pldm_pdr_record* l_curr_record = nullptr;
     pldm_terminus_locator_pdr* l_hb_pdr = nullptr;
@@ -221,7 +232,7 @@ pldm_terminus_locator_pdr* PdrManager::findHBTerminusLocatorPdr()
         uint8_t* l_record_data = nullptr;
         uint32_t l_record_size = 0;
 
-        l_curr_record = pldm_pdr_find_record_by_type(iv_pdr_repo.get(),
+        l_curr_record = pldm_pdr_find_record_by_type(i_repo,
                                                      PLDM_TERMINUS_LOCATOR_PDR,
                                                      l_curr_record,
                                                      &l_record_data,
@@ -229,7 +240,7 @@ pldm_terminus_locator_pdr* PdrManager::findHBTerminusLocatorPdr()
         if(l_curr_record)
         {
             auto l_terminus_locator_record = reinterpret_cast<pldm_terminus_locator_pdr*>(l_record_data);
-            if(le16toh(l_terminus_locator_record->terminus_handle) == hostbootTerminusId())
+            if(le16toh(l_terminus_locator_record->terminus_handle) == PdrManager::hostbootTerminusId())
             {
                 // We found the HB terminus locator; return it.
                 l_hb_pdr = l_terminus_locator_record;
@@ -240,9 +251,8 @@ pldm_terminus_locator_pdr* PdrManager::findHBTerminusLocatorPdr()
     return l_hb_pdr;
 }
 
-// find the State Effecter PDR used to control the software state, this is used
-// for hostboot to trigger a graceful reboot.
-errlHndl_t PdrManager::findTerminationStatusEffecterId(uint16_t &o_effecter_id)
+errlHndl_t PdrManager::findStateEffecterId(const pldm_state_set_ids i_state_set_id,
+                                           uint16_t &o_effecter_id)
 {
     errlHndl_t errl = nullptr;
     const auto lock = scoped_mutex_lock(iv_access_mutex);
@@ -266,11 +276,13 @@ errlHndl_t PdrManager::findTerminationStatusEffecterId(uint16_t &o_effecter_id)
             auto possible_states =
               reinterpret_cast<state_sensor_possible_states*>(cur_state_effecter_pdr->possible_states);
 
-            if(le16toh(possible_states->state_set_id) == PLDM_STATE_SET_SW_TERMINATION_STATUS)
+            if(le16toh(possible_states->state_set_id) == i_state_set_id)
             {
-                // We found the HB SW Termination Status pdr; return its effecter id.
+
+                // We found the pdr; return its effecter id.
                 o_effecter_id = le16toh(cur_state_effecter_pdr->effecter_id);
                 termination_pdr_found = true;
+
                 break;
             }
         }
@@ -284,7 +296,7 @@ errlHndl_t PdrManager::findTerminationStatusEffecterId(uint16_t &o_effecter_id)
          * @reasoncode RC_INVALID_EFFECTER_ID
          * @userdata1  The total number of PDRs that PDR Manager is aware of.
          * @userdata2[0:31]  PLDM_STATE_EFFECTER_PDR enum value
-         * @userdata2[32:63] PLDM_STATE_SET_SW_TERMINATION_STATUS enum value
+         * @userdata2[32:63] State set being searched for
          * @devdesc    Software problem, could not find SW Termination PDR.
          * @custdesc   A software error occurred during system boot.
          */
@@ -293,8 +305,9 @@ errlHndl_t PdrManager::findTerminationStatusEffecterId(uint16_t &o_effecter_id)
                              RC_INVALID_EFFECTER_ID,
                              PLDM::thePdrManager().pdrCount(),
                              TWO_UINT32_TO_UINT64(PLDM_STATE_EFFECTER_PDR,
-                                                  PLDM_STATE_SET_SW_TERMINATION_STATUS),
+                                                  i_state_set_id),
                              ErrlEntry::ADD_SW_CALLOUT);
+        addBmcErrorCallouts(errl);
     }
     return errl;
 }
@@ -642,7 +655,9 @@ void generateTerminusLocatorPDR(pldm_terminus_locator_pdr* const i_pdr)
 
 void PdrManager::addTerminusLocatorPDR()
 {
-    pldm_terminus_locator_pdr l_pdr;
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+
+    pldm_terminus_locator_pdr l_pdr = { };
 
     generateTerminusLocatorPDR(&l_pdr);
     pldm_pdr_add(iv_pdr_repo.get(),
@@ -696,7 +711,8 @@ const state_query_handler_t handlers[] =
     { nullptr, nullptr },                               // STATE_QUERY_HANDLER_NONE
     { handleFunctionalStateSensorGetRequest, nullptr }, // STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR
     { handleOccStateSensorGetRequest,                   // STATE_QUERY_HANDLER_OCC_STATE_QUERY
-      handleOccSetStateEffecterRequest }
+      handleOccSetStateEffecterRequest },
+    { nullptr, handleGracefulShutdownRequest }          // STATE_QUERY_HANDLER_GRACEFUL_SHUTDOWN
 };
 
 state_query_handler_t get_state_handler(PdrManager::state_query_handler_id_t i_id)

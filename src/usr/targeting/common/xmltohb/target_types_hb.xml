@@ -363,6 +363,12 @@
       <id>PDA_THREAD_REG_STATE_ENTRY_FORMAT</id>
     </attribute>
     <attribute>
+      <id>PLDM_EFFECTER_INFO</id>
+    </attribute>
+    <attribute>
+      <id>PLDM_SENSOR_INFO</id>
+    </attribute>
+    <attribute>
       <id>SBE_ARCH_DUMP_ADDR</id>
     </attribute>
   </targetTypeExtension>

@@ -38,6 +38,7 @@
 #include <pldm/pldm_response.H>
 #include "../common/pldmtrace.H"
 #include <pldm/extended/pldm_watchdog.H>
+#include <pldm/base/pldm_shutdown.H>
 
 // Targeting
 #include <targeting/common/utilFilter.H>
@@ -52,11 +53,21 @@
 // PdrManager
 #include <pldm/extended/pdr_manager.H>
 
+// Initservice
+#include <initservice/taskargs.H>
+#include <initservice/initserviceif.H>
+#include <initservice/istepdispatcherif.H>
+
 // Misc
 #include <errl/errlmanager.H>
 #include <runtime/interface.h>
 #include <htmgt/htmgt.H>
 #include <initservice/istepdispatcherif.H>
+#include <arch/ppc.H>
+#include <sys/misc.h>
+
+// Standard library
+#include <memory>
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -410,6 +421,47 @@ errlHndl_t handleOccStateSensorGetRequest(TARGETING::Target* i_occ,
 #endif
 
     PLDM_INF(EXIT_MRK"handleOccStateSensorGetRequest");
+
+    return errl;
+}
+
+errlHndl_t handleGracefulShutdownRequest(Target* const i_sys,
+                                         const msg_q_t i_msgQ,
+                                         const pldm_msg* const i_msg,
+                                         const size_t i_payload_len,
+                                         const pldm_set_state_effecter_states_req& i_req)
+{
+    PLDM_INF(ENTER_MRK"handleGracefulShutdownRequest");
+
+    errlHndl_t errl = nullptr;
+
+#ifdef __HOSTBOOT_RUNTIME
+    PLDM_ERR("handleGracefulShutdownRequest: Received graceful shutdown request at runtime");
+    send_cc_only_response(i_msgQ, i_msg, PLDM_ERROR_NOT_READY);
+
+    /*@
+     * @errortype  ERRL_SEV_UNRECOVERABLE
+     * @moduleid   MOD_HANDLE_GRACEFUL_SHUTDOWN_REQUEST
+     * @reasoncode RC_NOT_READY
+     * @devdesc    Software problem, graceful shutdown requested by BMC at runtime
+     * @custdesc   A software error occurred during runtime
+     */
+    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                         MOD_HANDLE_GRACEFUL_SHUTDOWN_REQUEST,
+                         RC_NOT_READY,
+                         0,
+                         0,
+                         ErrlEntry::NO_SW_CALLOUT);
+
+    addBmcErrorCallouts(errl);
+#else
+    PLDM_INF("handleGracefulShutdownRequest: Received graceful shutdown request");
+    send_cc_only_response(i_msgQ, i_msg, PLDM_SUCCESS);
+
+    PLDM::requestSoftPowerOff();
+#endif
+
+    PLDM_INF(EXIT_MRK"handleGracefulShutdownRequest");
 
     return errl;
 }

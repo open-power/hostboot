@@ -460,6 +460,15 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
                                        const uint8_t i_sensor_offset,
                                        const sensor_state_t i_sensor_state)
 {
+    return sendSensorStateChangedEvent(i_sensor_id, i_sensor_offset, i_sensor_state, thePdrManager().
+                                       hostbootTerminusId());
+}
+
+errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
+                                       const uint8_t i_sensor_offset,
+                                       const sensor_state_t i_sensor_state,
+                                       const terminus_id_t i_terminus_id)
+{
     PLDM_ENTER("sendSensorStateChangedEvent (sensor id = %d, offset = %d, state = %d)",
                i_sensor_id, i_sensor_offset, i_sensor_state);
 
@@ -515,7 +524,7 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
              encode_platform_event_message_req,
              DEFAULT_INSTANCE_ID,
              DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
-             thePdrManager().hostbootTerminusId(),
+             i_terminus_id,
              PLDM_SENSOR_EVENT,
              event_data_bytes.data(),
              event_data_bytes.size());
@@ -743,11 +752,34 @@ errlHndl_t sendSetStateEffecterStatesRequest(
     return errl;
 }
 
+errlHndl_t sendGracefulShutdownRequest()
+{
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        uint16_t power_effecter_id = 0;
+        errl = thePdrManager().findStateEffecterId(PLDM_STATE_SET_SW_TERMINATION_STATUS, power_effecter_id);
+
+        if (errl)
+        {
+            break;
+        }
+
+        std::vector<set_effecter_state_field> fields_to_set;
+        fields_to_set.push_back({ set_request::PLDM_REQUEST_SET, PLDM_SW_TERM_GRACEFUL_SHUTDOWN });
+        errl = sendSetStateEffecterStatesRequest(power_effecter_id, fields_to_set);
+    } while (false);
+
+    return errl;
+}
+
 errlHndl_t sendGracefulRestartRequest()
 {
     uint16_t sw_term_effecter_id = 0;
     errlHndl_t err =
-        thePdrManager().findTerminationStatusEffecterId(sw_term_effecter_id);
+        thePdrManager().findStateEffecterId(PLDM_STATE_SET_SW_TERMINATION_STATUS,
+                                            sw_term_effecter_id);
 
     if(!err)
     {

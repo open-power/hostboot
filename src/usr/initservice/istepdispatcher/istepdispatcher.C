@@ -1868,35 +1868,13 @@ void IStepDispatcher::requestReboot(const char* i_reason)
             TRACFCOMP(g_trac_initsvc, ERR_MRK"IStepDispatcher::requestReboot(): Could not request PLDM reboot");
             errlCommit(l_errl, INITSVC_COMP_ID);
         }
-#elif defined (CONFIG_BMC_IPMI)
-        // Send an IPMI reboot message to the BMC
-        (void)IPMI::initiateReboot();
 #else
-        // Non-PLDM and non-IPMI shutdown
+        // Non-PLDM shutdown
         shutdownDuringIpl();
 #endif
     }
 }
 
-#ifdef CONFIG_BMC_IPMI
-void IStepDispatcher::requestPowerOff()
-{
-    // Always stop dispatching isteps before calling for the power off
-    INITSERVICE::stopIpl();
-
-    // Send a power off message to the BMC
-    (void)IPMI::initiatePowerOff();
-}
-
-void IStepDispatcher::requestSoftPowerOff()
-{
-    // Always stop dispatching isteps before calling for the power off
-    INITSERVICE::stopIpl();
-
-    // Send a soft power off message to the BMC
-    (void)IPMI::initiateSoftPowerOff();
-}
-#endif
 // ----------------------------------------------------------------------------
 // IStepDispatcher::shutdownDuringIpl()
 // ----------------------------------------------------------------------------
@@ -2805,18 +2783,6 @@ void requestReboot(const char* i_reason)
 {
     IStepDispatcher::getTheInstance().requestReboot(i_reason);
 }
-
-#ifdef CONFIG_BMC_IPMI
-void requestPowerOff()
-{
-    IStepDispatcher::getTheInstance().requestPowerOff();
-}
-
-void requestSoftPowerOff()
-{
-    IStepDispatcher::getTheInstance().requestSoftPowerOff();
-}
-#endif
 
 
 // ----------------------------------------------------------------------------

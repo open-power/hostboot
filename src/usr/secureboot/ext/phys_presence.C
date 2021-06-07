@@ -47,6 +47,7 @@
 #include "../common/securetrace.H"
 #include <gpio/gpioif.H>
 #include <pnor/pnorif.H>
+#include <pldm/base/pldm_shutdown.H>
 
 using namespace TARGETING;
 using namespace GPIO;
@@ -685,12 +686,12 @@ errlHndl_t handlePhysPresenceWindow(void)
 #endif
 
     // Power Off the System
-#ifdef CONFIG_BMC_IPMI
+#ifdef CONFIG_PLDM
     // Initiate a graceful power off
     SB_INF("handlePhysPresenceWindow: Opened Physical Presence Detection Window. "
            "System Will Power Off and Wait For Manual Power On");
-    INITSERVICE::requestSoftPowerOff();
-#else //non-IPMI
+    PLDM::requestSoftPowerOff();
+#else //non-PLDM
     SB_INF("handlePhysPresenceWindow: Opened Physical Presence Detection Window. "
            "Calling INITSERVICE::doShutdown() with "
            "RC_PHYS_PRES_WINDOW_OPENED_SHUTDOWN = 0x%08X",

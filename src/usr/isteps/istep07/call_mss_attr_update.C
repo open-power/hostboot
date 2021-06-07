@@ -80,6 +80,7 @@
 #include <arch/memorymap.H>
 #include <util/misc.H> // Util::isSimicsRunning
 #include <pldm/requests/pldm_pdr_requests.H>
+#include <pldm/base/pldm_shutdown.H>
 
 //#define TRACUCOMP(args...) TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -719,7 +720,6 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 #if defined(CONFIG_PLDM) or defined(CONFIG_BMC_IPMI)
         // Explicitly for a devtree sync because we don't currently
         //  go through a shutdown when we send a reboot request
-        // Remove with RTC:259366 ?
         TARGETING::AttrRP::syncAllAttributesToSP();
 
         // Initiate a graceful power cycle

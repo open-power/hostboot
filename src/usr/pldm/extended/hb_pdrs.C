@@ -202,6 +202,38 @@ errlHndl_t addOccStateControlPdrs(PdrManager& io_pdrman)
     return errl;
 }
 
+/* @brief Add the state effecter and sensor PDRs for graceful shutdown
+ * functionality.
+ *
+ * @param[in/out] io_pdrman  The PDR manager to add to
+ * @return errlHndl_t        Error if any, otherwise nullptr
+ */
+errlHndl_t addSystemStateControlPdrs(PdrManager& io_pdrman)
+{
+    const uint16_t CONTAINER_ID_TOPLEVEL = 0;
+
+    pldm_entity chassis =
+    {
+        .entity_type = ENTITY_TYPE_CHASSIS,
+        .entity_instance_num = 1, // There's only one chassis
+        .entity_container_id = CONTAINER_ID_TOPLEVEL
+    };
+
+    io_pdrman.addStateEffecterPdr(UTIL::assertGetToplevelTarget(),
+                                  chassis,
+                                  PLDM_STATE_SET_SW_TERMINATION_STATUS,
+                                  enum_bit(PLDM_SW_TERM_GRACEFUL_SHUTDOWN_REQUESTED),
+                                  PdrManager::STATE_QUERY_HANDLER_GRACEFUL_SHUTDOWN);
+
+    io_pdrman.addStateSensorPdr(UTIL::assertGetToplevelTarget(),
+                                chassis,
+                                PLDM_STATE_SET_SW_TERMINATION_STATUS,
+                                enum_bit(PLDM_SW_TERM_GRACEFUL_SHUTDOWN),
+                                PdrManager::STATE_QUERY_HANDLER_NONE);
+
+    return nullptr;
+}
+
 errlHndl_t addFruInventoryPdrs(PdrManager& io_pdrman)
 {
     errlHndl_t errl = nullptr;
@@ -297,12 +329,9 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
     addEntityAssociationAndFruRecordSetPdrs(io_pdrman,
                                             io_pdrman.hostbootTerminusId());
 
-    errl = addOccStateControlPdrs(io_pdrman);
-
-    if (!errl)
-    {
-        errl = addFruInventoryPdrs(io_pdrman);
-    }
+    errl = addSystemStateControlPdrs(io_pdrman);
+    errl || (errl = addOccStateControlPdrs(io_pdrman));
+    errl || (errl = addFruInventoryPdrs(io_pdrman));
 
     io_pdrman.addTerminusLocatorPDR();
 

@@ -109,6 +109,21 @@ errlHndl_t handleOccSetStateEffecterRequest(TARGETING::Target* i_occ,
                                             size_t i_payload_len,
                                             const pldm_set_state_effecter_states_req& i_req);
 
+/* @brief Handler for Set State Effecter requests for graceful shutdown.
+ *
+ * @param[in] i_sys          System target
+ * @param[in] i_msgQ         Handle to MCTP outbound request message queue
+ * @param[in] i_msg          PLDM message received
+ * @param[in] i_payload_len  Length of PLDM message payload
+ * @param[in] i_req          Decoded PLDM request.
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handleGracefulShutdownRequest(TARGETING::Target* i_sys,
+                                         msg_q_t i_msgQ,
+                                         const pldm_msg* i_msg,
+                                         size_t i_payload_len,
+                                         const pldm_set_state_effecter_states_req& i_req);
+
 /* @brief Handler for Get State Sensor Readings requests for FRU functional state sensors.
  *
  * @param[in] i_target       The FRU target for the sensor.

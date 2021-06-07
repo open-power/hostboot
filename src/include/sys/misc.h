@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,7 @@ enum ShutdownStatus
     SHUTDOWN_STATUS_ISTEP_FAILED        = 0x01230002,
     SHUTDOWN_STATUS_EXTINITSVC_FAILED   = 0x01230003,
     SHUTDOWN_STATUS_INITSVC_FAILED      = 0x01230004,
+    SHUTDOWN_STATUS_PLDM_NOTI_FAILED    = 0x01230005,
 };
 
 /**

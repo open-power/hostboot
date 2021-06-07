@@ -80,8 +80,10 @@ namespace PLDM
         MOD_FIND_TERMINATION_STATUS_ID               = 0x27, // findTerminationStatusEffecterId
         MOD_GET_POWER_LIMIT                          = 0x28, // getPowerLimit
         MOD_HANDLE_OCC_STATE_SENSOR_GET_REQUEST      = 0x29, // handleOccStateSensorGetRequest
-        MOD_HANDLE_SET_EVENT_RECEIVER                = 0x2a, // handleSetEventReceiverRequest
-        MOD_RESET_WATCHDOG_TIMER                     = 0x2b, // resetWatchdogTimer
+        MOD_HANDLE_SET_EVENT_RECEIVER                = 0x2A, // handleSetEventReceiverRequest
+        MOD_RESET_WATCHDOG_TIMER                     = 0x2B, // resetWatchdogTimer
+        MOD_PLDM_SHUTDOWN                            = 0x2C, // requestSoftPowerOff
+        MOD_HANDLE_GRACEFUL_SHUTDOWN_REQUEST         = 0x2D, // handleGracefulShutdownRequest
     };
 
     enum PLDMReasonCode

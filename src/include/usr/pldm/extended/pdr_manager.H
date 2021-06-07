@@ -45,6 +45,7 @@
 // libpldm
 #include <openbmc/pldm/libpldm/pdr.h>
 #include <openbmc/pldm/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/state_set.h>
 
 // Misc
 #include <sys/sync.h>
@@ -200,6 +201,8 @@ public:
         STATE_QUERY_HANDLER_NONE = 0,
         STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR = 1,
         STATE_QUERY_HANDLER_OCC_STATE_QUERY = 2,
+        STATE_QUERY_HANDLER_OCC_STATE_EFFECTER = 3,
+        STATE_QUERY_HANDLER_GRACEFUL_SHUTDOWN = 4,
         STATE_QUERY_HANDLER_INVALID = 0xFF
     };
 
@@ -313,15 +316,19 @@ public:
      */
     void addTerminusLocatorPDR();
 
-    /** @brief Find the effect id for the Terminus Status State Effecter
+    /** @brief Find the ID of an effecter that operates with the given state set
+     * ID. If there are multiple effecters that operate with the given ID, any
+     * of them may be returned.
      *
-     * @param[out] o_effecter_id will be set to be effecter id for termination status
-     *                           state effecter. If errorlog is set this value is invalid.
+     * @param[in]  i_state_set_id  The state set ID to search for.
+     * @param[out] o_effecter_id   ID of the effecter for the given state set. If
+     *                             errorlog is set this value is invalid.
      *
-     * @return Errorlog if a termination status effecter id was not found,
-     *         otherwise will be nullptr.
+     * @return Errorlog if the effecter id was not found, otherwise will be
+     *         nullptr.
      */
-    errlHndl_t findTerminationStatusEffecterId(uint16_t &o_effecter_id);
+    errlHndl_t findStateEffecterId(const pldm_state_set_ids i_state_set_id,
+                                   uint16_t &o_effecter_id);
 
 private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> iv_pdr_repo;
@@ -335,13 +342,6 @@ private:
     // Holds a msg_q_t
     std::shared_ptr<void> iv_bmc_repo_changed_event_q;
 #endif
-
-    /* @brief Find a Terminus Locator PDR associated with Hostboot
-     *
-     * @return The pointer to the Terminus Locator PDR structure if
-     *         it is found in the PDR repo, or nullptr if not found
-     */
-    pldm_terminus_locator_pdr* findHBTerminusLocatorPdr();
 
     /* This monotonically increasing value is used to assign sensor/effecter IDs, and the IDs are stored in
      * attributes, along with a state_query_handler_id_t value, to record how to handle PLDM sensor/effecter

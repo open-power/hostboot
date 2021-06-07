@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Maxim Polyakov                                                     */
@@ -413,22 +413,6 @@ namespace IPMI
      * (max message for the transport - the header size)
      */
     size_t max_buffer(void);
-
-    /**
-     *  @brief Initiate a graceful reboot sequence via the IPMI resource
-     *    provider
-     */
-    void initiateReboot();
-
-    /**
-     *  @brief Initiate a power off sequence via the IPMI resource provider
-     */
-    void initiatePowerOff();
-
-    /**
-     *  @brief Initiate a soft power off sequence via the IPMI resource provider
-     */
-    void initiateSoftPowerOff();
 
     /**
      * Structure to return BMC/IPMI information in

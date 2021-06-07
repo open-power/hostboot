@@ -67,6 +67,7 @@
 #include <initservice/initsvcreasoncodes.H>
 #include <sys/time.h>
 #include <pldm/requests/pldm_pdr_requests.H>
+#include <pldm/base/pldm_shutdown.H>
 #include <errlud_secure.H>
 
 #ifdef CONFIG_BMC_IPMI
@@ -6103,14 +6104,11 @@ errlHndl_t sbeDoReboot( void )
         if(g_do_hw_keys_hash_transition)
         {
 #ifdef CONFIG_PLDM
-            // TODO RTC: 259366 the PLDM equivalent of
-            // INITSERVICE::requestPowerOff() goes here.
-#elif defined(CONFIG_BMC_IPMI)
-            // Initiate a graceful power off
             TRACFCOMP(g_trac_sbe,
                 INFO_MRK"sbeDoReboot(): Performing Secure Boot key transition. "
                 "Requesting power off");
-            INITSERVICE::requestPowerOff();
+
+            PLDM::requestSoftPowerOff();
 #endif
         }
         else

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -261,19 +261,5 @@ class IpmiRP
     IpmiRP& operator=(const IpmiRP&);
     IpmiRP(const IpmiRP&);
 };
-
-namespace IPMI
-{
-    /**
-     *  @brief Initiate generic IPMI shutdown/reboot request via the IPMI
-     *      resource provider
-     *
-     *  @param[in] i_msgType IPMI message type indicating the shutdown or reboot
-     *    to request.  Asserts if not a valid shutdown or reboot message type as
-     *    determined by IPMI::validShutdownRebootMsgType().
-     */
-    void initiateShutdownOrReboot(IPMI::msg_type i_msgType);
-
-} // End IPMI namespace
 
 #endif

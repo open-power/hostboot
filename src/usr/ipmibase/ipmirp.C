@@ -1052,34 +1052,6 @@ namespace IPMI
         return err;
     }
 
-    void initiateShutdownOrReboot(const IPMI::msg_type i_msgType)
-    {
-        const auto valid = IPMI::validShutdownRebootMsgType(i_msgType);
-        assert(valid,"BUG! IPMI message type of 0x%08X is not a valid shutdown "
-            "or reboot type",i_msgType);
-        static auto mq = Singleton<IpmiRP>::instance().msgQueue();
-        auto pMsg = msg_allocate();
-        assert(pMsg != nullptr,"BUG! msg_allocate returned nullptr.");
-        pMsg->type = i_msgType;
-        auto rc = msg_send(mq,pMsg);
-        assert(!rc,"BUG! msg_send failed with rc of %d",rc);
-    }
-
-    void initiateReboot()
-    {
-        (void)initiateShutdownOrReboot(MSG_STATE_INITIATE_POWER_CYCLE);
-    }
-
-    void initiatePowerOff()
-    {
-        (void)initiateShutdownOrReboot(MSG_STATE_GRACEFUL_SHUTDOWN);
-    }
-
-    void initiateSoftPowerOff()
-    {
-        (void)initiateShutdownOrReboot(MSG_STATE_INITIATE_SOFT_POWER_OFF);
-    }
-
     ///
     /// @brief  Maximum buffer for data (max xport - header)
     ///
