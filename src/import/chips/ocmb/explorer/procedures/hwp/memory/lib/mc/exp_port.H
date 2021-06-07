@@ -168,21 +168,6 @@ class portTraits< mss::mc_type::EXPLORER >
         };
 };
 
-///
-/// @brief ATTR_MSS_MEM_MVPD_FWMS getter
-/// @param[in] const ref to the TARGET_TYPE_OCMB_CHIP
-/// @param[out] uint32_t&[] array reference to store the value
-/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
-/// @note  Mark store records from OCMB VPD. The array dimension is [port][mark]. Explorer
-/// only has one port so only [0][mark] is used in explorer.
-///
-template<>
-inline fapi2::ReturnCode mvpd_fwms< mss::mc_type::EXPLORER >(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    uint32_t (&o_array)[mss::MARK_STORE_COUNT])
-{
-    return mss::attr::get_mvpd_fwms(i_target, o_array);
-}
 
 /// @brief Get the attributes for the reorder queue setting
 /// @param[in] const ref to the mc target
