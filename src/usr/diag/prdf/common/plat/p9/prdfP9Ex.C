@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -201,6 +201,22 @@ PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, cacheCeWorkaround );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, cacheCeWorkaround );
 PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, cacheCeWorkaround );
 
+//##############################################################################
+//##                       Line Delete Functions
+//##############################################################################
+
+// IMPORTANT NOTE ABOUT APPLYING LINE DELETES:
+// In legacy iterations of the line delete design, thresholding would be done
+// on a per address basis. The fundamental problem is that the address captured
+// for a CE is not locked and could change any number of times before PRD has
+// had a chance to analyze the first CE. In order to be accurate, the design
+// ended being very complicated and hard to test. Since at least P9, we have
+// changed the design to be a "poor man's" line delete where a line delete is
+// issued when the CE theshold is reached regardless of the addresses that are
+// reported. It has been observed in the field that single bit fails are almost
+// all on the same address, which is what allows us to get away with this
+// simpler design.
+
 /**
  * @brief Adds L2 Line Delete/Column Repair FFDC to an SDC.
  * @param i_exChip An ex chip.
@@ -383,36 +399,42 @@ PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L3UE );
  */
 int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-#if defined(__HOSTBOOT_RUNTIME) || defined(ESW_SIM_COMPILE)
+    #ifdef __HOSTBOOT_RUNTIME
 
-    do {
-        P9ExDataBundle * l_bundle = getExDataBundle(i_chip);
-        uint16_t l_maxLineDelAllowed = 0;
-        int32_t l_rc = SUCCESS;
+    P9ExDataBundle* l_bundle = getExDataBundle(i_chip);
+    auto trgt = i_chip->getTrgt();
+    auto huid = i_chip->getHuid();
 
-#ifdef __HOSTBOOT_RUNTIME
+    // FFDC will be collected throughout function and added to SDC at the end.
+    LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
+
+    // Get the maximum number of line deletes allowed and add to FFDC.
+    uint16_t l_maxLineDelAllowed = mfgMode()
+            ? getSystemTarget()->getAttr<ATTR_MNFG_TH_P8EX_L2_LINE_DELETES>()
+            : getSystemTarget()->getAttr<ATTR_FIELD_TH_P8EX_L2_LINE_DELETES>();
+
+    ldcrffdc.L2LDMaxAllowed = l_maxLineDelAllowed;
+
+    do
+    {
         p9_l2err_extract_err_data errorAddr =
             { L2ERR_CE_UE, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
         // Get failing location from trace array
-        l_rc = extractL2Err( i_chip->getTrgt(), true, errorAddr );
-        if (SUCCESS != l_rc)
+        if (SUCCESS != extractL2Err(trgt, true, errorAddr))
         {
-            PRDF_ERR( "[L2CE] HUID: 0x%08x extractL2Err failed",
-                      i_chip->GetId());
+            PRDF_ERR("[L2CE] HUID: 0x%08x extractL2Err failed", huid);
             break;
         }
 
         PRDF_TRAC( "[L2CE] HUID: 0x%08x Error data: member=%d dw=%d "
                    "bank=%d macro=%d ow_select=%x bitline=%x is_top_sa=%x "
                    "is_left_sa=%x addr=%x",
-                   i_chip->GetId(), errorAddr.member, errorAddr.dw,
+                   huid, errorAddr.member, errorAddr.dw,
                    errorAddr.bank, errorAddr.macro, errorAddr.ow_select,
                    errorAddr.bitline, errorAddr.is_top_sa,
                    errorAddr.is_left_sa, errorAddr.address );
 
-        LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
-        ldcrffdc.L2LDcnt        = l_bundle->iv_L2LDCount;
         ldcrffdc.L2errMember    = errorAddr.member;
         ldcrffdc.L2errDW        = errorAddr.dw;
         ldcrffdc.L2errMacro     = errorAddr.macro;
@@ -422,67 +444,57 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         ldcrffdc.L2errIsTopSA   = errorAddr.is_top_sa;
         ldcrffdc.L2errIsLeftSA  = errorAddr.is_left_sa;
         ldcrffdc.L2errAddress   = errorAddr.address;
-        addL2LdCrFfdc( i_chip, io_sc, ldcrffdc );
-#endif
-        if (mfgMode())
-            l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_MNFG_TH_P8EX_L2_LINE_DELETES>();
-        else
-            l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_FIELD_TH_P8EX_L2_LINE_DELETES>();
 
-        // Ensure we're still allowed to issue repairs
-        if (l_bundle->iv_L2LDCount >= l_maxLineDelAllowed)
+        // Increment the CE count and determine if a line delete is needed.
+        // IMPORTANT: Yes, we are actually passing the line delete count as the
+        // "address" parameter of this function. See the notice above regarding
+        // the thesholding for the "poor man's" line delete design.
+        if (!l_bundle->iv_L2CETable->addAddress(l_bundle->iv_L2LDCount, io_sc))
         {
-            PRDF_TRAC( "[L2CE] HUID: 0x%08x No more repairs allowed",
-                       i_chip->GetId());
-
-            // MFG wants to be able to ignore these errors
-            // If they have LD  allowed set to 0, wait for
-            // predictive threshold
-            if (!mfgMode() ||
-                l_maxLineDelAllowed != 0 )
-            {
-                io_sc.service_data->SetThresholdMaskId(0);
-            }
-            break;
+            break; // no line delete on this CE, nothing more to do
         }
 
-        // Add to CE table and Check if we need to issue a repair on this CE
-        if (l_bundle->iv_L2CETable->addAddress(l_bundle->iv_L2LDCount,
-                                               io_sc) == false)
+        // A line delete is required. Before continuing, there is a special case
+        // for manufacturing where we don't want to check the line delete
+        // threshold if the max allowed is 0. Instead, report this as a CE and
+        // let the rule code threholding kick in.
+        if (mfgMode() && (0 == l_maxLineDelAllowed))
         {
-            // No action required on this CE, we're waiting for additional
-            // errors before applying a line delete
-            break;
+            break; // nothing more to do
         }
 
-        // Execute the line delete
-        PRDF_TRAC( "[L2CE] HUID: 0x%08x apply directed line delete",
-                        i_chip->GetId());
-#ifdef __HOSTBOOT_RUNTIME
-        l_rc = l2LineDelete(i_chip->getTrgt(), errorAddr);
-#endif
-        if (SUCCESS != l_rc)
-        {
-            PRDF_ERR( "[L2CE] HUID: 0x%08x l2LineDelete failed",
-                      i_chip->GetId());
-            // Set signature to indicate L2 Line Delete failed
-            io_sc.service_data->SetErrorSig(
-                            PRDFSIG_P9EX_L2CE_LD_FAILURE);
-        }
-        else
-        {
-            l_bundle->iv_L2LDCount++;
+        PRDF_INF("[L2CE] HUID: 0x%08x applying line delete", huid);
 
-            // Set signature to indicate L2 Line Delete issued
-            io_sc.service_data->SetErrorSig(
-                                PRDFSIG_P9EX_L2CE_LD_ISSUED);
+        if (SUCCESS != l2LineDelete(trgt, errorAddr))
+        {
+            PRDF_ERR("[L2CE] HUID: 0x%08x l2LineDelete failed", huid);
+            io_sc.service_data->SetErrorSig(PRDFSIG_P9EX_L2CE_LD_FAILURE);
+            io_sc.service_data->SetThresholdMaskId(0);
+            break; // nothing more to do
+        }
+
+        // The line delete was successful applied.
+        l_bundle->iv_L2LDCount++;
+        io_sc.service_data->SetErrorSig(PRDFSIG_P9EX_L2CE_LD_ISSUED);
+
+        // Check if the line delete threshold has been reached.
+        if (l_maxLineDelAllowed <= l_bundle->iv_L2LDCount)
+        {
+            PRDF_INF("[L2CE] HUID: 0x%08x line delete threshold reached", huid);
+            io_sc.service_data->SetThresholdMaskId(0);
+            break; // nothing more to do
         }
 
     } while(0);
 
-#endif
+    // The line delete count may, or may not, have been updated. Regardless, add
+    // the latest value to the FFDC.
+    ldcrffdc.L2LDcnt = l_bundle->iv_L2LDCount;
+
+    // Finally, add the FFDC to the SDC.
+    addL2LdCrFfdc(i_chip, io_sc, ldcrffdc);
+
+    #endif // __HOSTBOOT_RUNTIME
 
     return SUCCESS;
 
@@ -497,83 +509,53 @@ PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L2CE );
  * @param io_sc Step Code data struct
  * @return PRD return code
  */
-int32_t L3CE( ExtensibleChip * i_chip,
-                           STEP_CODE_DATA_STRUCT & io_sc )
+int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
+    #ifdef __HOSTBOOT_RUNTIME
 
-#if defined(__HOSTBOOT_RUNTIME) || defined(ESW_SIM_COMPILE)
+    P9ExDataBundle* l_bundle = getExDataBundle(i_chip);
+    auto trgt = i_chip->getTrgt();
+    auto huid = i_chip->getHuid();
 
-    do {
-        P9ExDataBundle * l_bundle = getExDataBundle(i_chip);
-        uint16_t l_maxLineDelAllowed = 0;
+    // FFDC will be collected throughout function and added to SDC at the end.
+    LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
+
+    // Get the maximum number of line deletes allowed and add to FFDC.
+    uint16_t l_maxLineDelAllowed = mfgMode()
+            ? getSystemTarget()->getAttr<ATTR_MNFG_TH_P8EX_L3_LINE_DELETES>()
+            : getSystemTarget()->getAttr<ATTR_FIELD_TH_P8EX_L3_LINE_DELETES>();
+
+    ldcrffdc.L3LDMaxAllowed = l_maxLineDelAllowed;
+
+    do
+    {
         uint16_t curMem = 0xFFFF;
-        int32_t l_rc = SUCCESS;
 
-#ifdef __HOSTBOOT_RUNTIME
         p9_l3err_extract_err_data errorAddr =
             { L3ERR_CE_UE, 0, 0, 0, 0, 0, 0 };
 
         // Get failing location from trace array
-        l_rc = extractL3Err( i_chip->getTrgt(), errorAddr );
-        if (SUCCESS != l_rc)
+        if (SUCCESS != extractL3Err(trgt, errorAddr))
         {
-            PRDF_ERR( "[L3CE] HUID: 0x%08x extractL3Err failed",
-                      i_chip->GetId());
+            PRDF_ERR("[L3CE] HUID: 0x%08x extractL3Err failed", huid);
             break;
         }
 
         PRDF_TRAC( "[L3CE] HUID: 0x%08x Error data: member=%d dw=%d "
                    "bank=%d dataout=%d hashed addr=%x cache addr=%x",
-                   i_chip->GetId(), errorAddr.member, errorAddr.dw,
+                   huid, errorAddr.member, errorAddr.dw,
                    errorAddr.bank, errorAddr.dataout,
                    errorAddr.hashed_real_address_45_56,
                    errorAddr.cache_read_address );
 
-        LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
-        ldcrffdc.L3LDcnt           = l_bundle->iv_L3LDCount;
         ldcrffdc.L3errMember       = errorAddr.member;
         ldcrffdc.L3errDW           = errorAddr.dw;
         ldcrffdc.L3errBank         = errorAddr.bank;
         ldcrffdc.L3errDataOut      = errorAddr.dataout;
         ldcrffdc.L3errHshAddress   = errorAddr.hashed_real_address_45_56;
         ldcrffdc.L3errCacheAddress = errorAddr.cache_read_address;
-        addL3LdCrFfdc( i_chip, io_sc, ldcrffdc );
 
         curMem = errorAddr.member;
-#endif
-
-        if (mfgMode())
-            l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_MNFG_TH_P8EX_L3_LINE_DELETES>();
-        else
-            l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_FIELD_TH_P8EX_L3_LINE_DELETES>();
-
-        // Ensure we're still allowed to issue repairs
-        if (l_bundle->iv_L3LDCount >= l_maxLineDelAllowed)
-        {
-            PRDF_TRAC( "[L3CE] HUID: 0x%08x No more repairs allowed",
-                       i_chip->GetId());
-
-            // MFG wants to be able to ignore these errors
-            // If they have LD  allowed set to 0, wait for
-            // predictive threshold
-            if (!mfgMode() ||
-                l_maxLineDelAllowed != 0 )
-            {
-                io_sc.service_data->SetThresholdMaskId(0);
-            }
-            break;
-        }
-
-        // Add to CE table and Check if we need to issue a repair on this CE
-        if (l_bundle->iv_L3CETable->addAddress(l_bundle->iv_L3LDCount,
-                                               io_sc) == false)
-        {
-            // No action required on this CE, we're waiting for additional
-            // errors before applying a line delete
-            break;
-        }
 
         // Check for multi-bitline fail
         Timer curTime = io_sc.service_data->GetTOE();
@@ -585,26 +567,41 @@ int32_t L3CE( ExtensibleChip * i_chip,
         {
             // We have multiple bit lines failing within a 24 hour period
             // Make this predictive
-            PRDF_TRAC( "[L3CE] HUID: 0x%08x Multi-bitline fail detected",
-                       i_chip->GetId() );
+            PRDF_INF("[L3CE] HUID: 0x%08x Multi-bitline fail detected", huid);
+            io_sc.service_data->SetErrorSig(PRDFSIG_P9EX_L3CE_MBF_FAIL);
             io_sc.service_data->SetThresholdMaskId(0);
-            io_sc.service_data->SetErrorSig( PRDFSIG_P9EX_L3CE_MBF_FAIL );
-            break;
+            break; // nothing more to do
         }
 
         // Update saved bitline data
         l_bundle->iv_prevMember = curMem;
         l_bundle->iv_blfTimeout = curTime + Timer::SEC_IN_DAY;
 
+        // Increment the CE count and determine if a line delete is needed.
+        // IMPORTANT: Yes, we are actually passing the line delete count as the
+        // "address" parameter of this function. See the notice above regarding
+        // the thesholding for the "poor man's" line delete design.
+        if (!l_bundle->iv_L3CETable->addAddress(l_bundle->iv_L3LDCount, io_sc))
+        {
+            break; // no line delete on this CE, nothing more to do
+        }
+
+        // A line delete is required. Before continuing, there is a special case
+        // for manufacturing where we don't want to check the line delete
+        // threshold if the max allowed is 0. Instead, report this as a CE and
+        // let the rule code threholding kick in.
+        if (mfgMode() && (0 == l_maxLineDelAllowed))
+        {
+            break; // nothing more to do
+        }
+
         // Execute the line delete
+        int32_t l_rc = SUCCESS;
         if ( MODEL_NIMBUS != getChipModel(i_chip->getTrgt()) ||
              0x10         != getChipLevel(i_chip->getTrgt()) )
         {
-            PRDF_TRAC( "[L3CE] HUID: 0x%08x apply directed line delete",
-                        i_chip->GetId());
-#ifdef __HOSTBOOT_RUNTIME
-            l_rc = l3LineDelete(i_chip->getTrgt(), errorAddr);
-#endif
+            PRDF_INF("[L3CE] HUID: 0x%08x applying line delete", huid);
+            l_rc = l3LineDelete(trgt, errorAddr);
         }
         else
         {
@@ -622,24 +619,34 @@ int32_t L3CE( ExtensibleChip * i_chip,
 
         if (SUCCESS != l_rc)
         {
-            PRDF_ERR( "[L3CE] HUID: 0x%08x l3LineDelete failed",
-                      i_chip->GetId());
-            // Set signature to indicate L3 Line Delete failed
-            io_sc.service_data->SetErrorSig(
-                            PRDFSIG_P9EX_L3CE_LD_FAILURE);
+            PRDF_ERR("[L3CE] HUID: 0x%08x l3LineDelete failed", huid);
+            io_sc.service_data->SetErrorSig(PRDFSIG_P9EX_L3CE_LD_FAILURE);
+            io_sc.service_data->SetThresholdMaskId(0);
+            break; // nothing more to do
         }
-        else
-        {
-            l_bundle->iv_L3LDCount++;
 
-            // Set signature to indicate L3 Line Delete issued
-            io_sc.service_data->SetErrorSig(
-                                PRDFSIG_P9EX_L3CE_LD_ISSUED);
+        // The line delete was successful applied.
+        l_bundle->iv_L3LDCount++;
+        io_sc.service_data->SetErrorSig(PRDFSIG_P9EX_L3CE_LD_ISSUED);
+
+        // Check if the line delete threshold has been reached.
+        if (l_maxLineDelAllowed <= l_bundle->iv_L3LDCount)
+        {
+            PRDF_INF("[L3CE] HUID: 0x%08x line delete threshold reached", huid);
+            io_sc.service_data->SetThresholdMaskId(0);
+            break; // nothing more to do
         }
 
     } while(0);
 
-#endif
+    // The line delete count may, or may not, have been updated. Regardless, add
+    // the latest value to the FFDC.
+    ldcrffdc.L3LDcnt = l_bundle->iv_L3LDCount;
+
+    // Finally, add the FFDC to the SDC.
+    addL3LdCrFfdc(i_chip, io_sc, ldcrffdc);
+
+    #endif // __HOSTBOOT_RUNTIME
 
     return SUCCESS;
 
