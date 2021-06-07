@@ -236,7 +236,7 @@ int32_t extractL3Err( TargetHandle_t i_coreTgt, bool i_ce,
                                     P10_TRACEARRAY_BITS_PER_ROW);
     proc_gettracearray_args args;
 
-    args.trace_bus = PROC_TB_L3_0;
+    args.trace_bus = PROC_TB_L3_1;
     args.stop_pre_dump = true;
     args.ignore_mux_setting = false;
     args.collect_dump = true;
