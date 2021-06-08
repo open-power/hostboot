@@ -51,7 +51,6 @@
 #include <fapi2_attribute_service.H>
 #include <util/utilmbox_scratch.H>
 #include <fapi2/plat_utils.H>
-#include    <kernel/console.H>  
 #include <secureboot/service.H>
 
 namespace fapi2
@@ -680,17 +679,19 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
     uint32_t l_targetCount = 0;
     iv_syncTank.clearAllAttributes();
 
+    namespace T = TARGETING;
+
     //Walk through all HB targets and see if there is a matching FAPI target
     //If so then get the list of ATTR for FAPI target and add to sync list
-    for (TARGETING::TargetIterator target = TARGETING::targetService().begin();
-         target != TARGETING::targetService().end();
+    for (T::TargetIterator target = T::targetService().begin();
+         target != T::targetService().end();
          ++target)
     {
         // Get the Target pointer
-        TARGETING::Target * l_pTarget = *target;
+        T::Target * l_pTarget = *target;
 
         //Get FAPI target
-        TARGETING::TYPE l_type = l_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+        T::TYPE l_type = l_pTarget->getAttr<T::ATTR_TYPE>();
         fapi2::TargetType l_fType = convertTargetingTypeToFapi2(l_type);
 
         if(l_fType == fapi2::TARGET_TYPE_NONE)
@@ -707,22 +708,22 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
             }
 
             //Now look for specific pos (if set)
-            if((i_fapiPos != TARGETING::FAPI_POS_NA) && // specific pos
-               (i_fapiPos != l_pTarget->getAttr<TARGETING::ATTR_FAPI_POS>()))
+            if((i_fapiPos != T::FAPI_POS_NA) && // specific pos
+               (i_fapiPos != l_pTarget->getAttr<T::ATTR_FAPI_POS>()))
             {
                 continue;
             }
         }
 
         //skip if not functional
-        if(l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional
+        if(l_pTarget->getAttr<T::ATTR_HWAS_STATE>().functional
            != true)
         {
             continue;
         }
 
-        TARGETING::EntityPath phys_path_ptr =
-          l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        T::EntityPath phys_path_ptr =
+          l_pTarget->getAttr<T::ATTR_PHYS_PATH>();
         uint32_t l_fTypeBitPos = 0x0; //default to TARGET_TYPE_NONE
         for(uint32_t i=0; i < 64 /*bits per dword*/; i++)
         {
@@ -735,68 +736,15 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
         //Need a generic fapi target to use later
         fapi2::Target<TARGET_TYPE_ALL> l_fapiTarget( l_pTarget);
 
-        //Determine the target location info
-        uint32_t l_pos = TARGETING::AttributeTank::ATTR_POS_NA;  // chip position
-        uint8_t l_unitPos = TARGETING::AttributeTank::ATTR_UNIT_POS_NA; // chip unit position
-        uint8_t l_node = phys_path_ptr.pathElementOfType(TARGETING::TYPE_NODE).instance;
-        bool location_found = false;
-        auto l_class = l_pTarget->getAttr<TARGETING::ATTR_CLASS>();
-
-        if(l_class == TARGETING::CLASS_UNIT)
-        {
-            if(l_pTarget->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_unitPos))
-            {
-                auto l_parentChip = TARGETING::getParentChip(l_pTarget);
-                if(l_parentChip->tryGetAttr<TARGETING::ATTR_FAPI_POS>(l_pos))
-                {
-                    location_found = true;
-                }
-            }
-        }
-        else if(l_class == TARGETING::CLASS_SYS)
-        {
-            // No need to lookup any position information for the SYS target
-            location_found = true;
-        }
-        else
-        {
-            // If this is not a UNIT target then just lookup the fapi pos
-            if(l_pTarget->tryGetAttr<TARGETING::ATTR_FAPI_POS>(l_pos))
-            {
-                location_found = true;
-            }
-        }
-
-        if(!location_found)
-        {
-            FAPI_ERR("triggerAttrSync: failed to find correct position for target with HUID 0x%.8X, check that this target has the correct attributes", get_huid(l_pTarget));
-            /*@
-              * @errortype         ERRL_SEV_UNRECOVERABLE
-              * @moduleid          MOD_TRIGGER_ATTR_SYNC
-              * @reasoncode        RC_CANNOT_FIND_POSITION
-              * @userdata1[0:31]   Target HUID
-              * @userdata1[32:63]  Target Type
-              * @userdata2         Target Fapi2 Type
-              * @devdesc           Unable to dump attribute information for specificed target
-              * @custdesc          A firmware error occurred during attempting debug routine
-              */
-            errlHndl_t l_positionLookupErr = new ERRORLOG::ErrlEntry(
-                                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                  fapi2::MOD_TRIGGER_ATTR_SYNC,
-                                                  fapi2::RC_CANNOT_FIND_POSITION,
-                                                  TWO_UINT32_TO_UINT64(
-                                                    TARGETING::get_huid(l_pTarget),
-                                                    l_type),
-                                                  l_fType,
-                                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_positionLookupErr->collectTrace(FAPI2_COMP_NAME);
-            errlCommit(l_positionLookupErr, FAPI2_COMP_ID);
-            continue;
-        }
+        // Determine the target location info using the fapiname
+        // postioning attributes
+        auto l_pos = l_pTarget->getAttr<T::ATTR_FAPINAME_POS>();
+        auto l_unitPos = l_pTarget->getAttr<T::ATTR_FAPINAME_UNIT>();
+        auto l_node = l_pTarget->getAttr<T::ATTR_FAPINAME_NODE>();
 
         char * l_physString = phys_path_ptr.toString();
         FAPI_INF("triggerAttrSync: HUID 0x%X, type num[%d] fapi type[%llx] [%s], [n%d:p%d:c%d]",
-                 TARGETING::get_huid(l_pTarget), l_fTypeBitPos, l_fType,
+                 T::get_huid(l_pTarget), l_fTypeBitPos, l_fType,
                  l_physString, l_node, l_pos, l_unitPos);
         free (l_physString);
 

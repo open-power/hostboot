@@ -1012,6 +1012,7 @@ sub processNode
     $targetObj->setAttribute($target, "ORDINAL_ID",    $nodePosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $nodePosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $nodeFapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodePosPerSystem);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $nodeAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $nodePhysical);
 
@@ -1108,6 +1109,8 @@ sub processProcessorAndChildren
     $targetObj->setAttribute($target, "ORDINAL_ID",    $procPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $procPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
+    $targetObj->setAttribute($target, "FAPINAME_POS", $procPosPerNode);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $procAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $procPhysical);
 
@@ -1281,6 +1284,8 @@ sub processDdimmAndChildren
     $targetObj->setAttribute($target, "ORDINAL_ID",    $dimmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $dimmFapiPosition);
     $targetObj->setAttribute($target, "FAPI_NAME",     $dimmFapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
+    $targetObj->setAttribute($target, "FAPINAME_POS", $dimmFapiPosition);
     $targetObj->setAttribute($target, "REL_POS",       $ddimmPosPerParent);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $ddimmAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $ddimmPhysical);
@@ -1441,6 +1446,8 @@ sub processPmic
     $targetObj->setAttribute($target, "ORDINAL_ID",    $pmicPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $pmicPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $pmicFapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $pmicPosPerNode);
     $targetObj->setAttribute($target, "REL_POS",       $pmicInstancePos);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $pmicAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $pmicPhysical);
@@ -1579,6 +1586,8 @@ sub processGenericI2cDevice
     $targetObj->setAttribute($target, "ORDINAL_ID",    $posPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $posPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $posPerNode);
     $targetObj->setAttribute($target, "REL_POS",       $instancePos);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $deviceAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $devicePhysical);
@@ -1651,6 +1660,8 @@ sub processOcmbChipAndChildren
     $targetObj->setAttribute($target, "POSITION",      $ocmbId);
     $targetObj->setAttribute($target, "FAPI_POS",      $ocmbPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $ocmbFapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $ocmbPosPerNode);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $ocmbAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $ocmbPhysical);
 
@@ -1745,6 +1756,9 @@ sub processMemPort
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $memPortPosPerNode);
     $targetObj->setAttribute($target, "FAPI_POS",      $memPortPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $memPortFapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $memPortPosPerNode);
+    $targetObj->setAttribute($target, "FAPINAME_UNIT", $memPortPosPerParent);
     $targetObj->setAttribute($target, "REL_POS",       $memPortPosPerParent);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $memPortAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $memPortPhysical);
@@ -2192,11 +2206,16 @@ sub setCommonAttrForChiplet
     my $targetAffinity = "$parentAffinity/" . lc $targetType . "-$perParentNumValue";
     my $targetPhysical = "$parentPhysical/" . lc $targetType . "-$perParentNumValue";
 
+    my $chipunit = $targetObj->getAttribute($target, "CHIP_UNIT");
+
     # Now that we collected all the data we need, set some target attributes
     $targetObj->setHuid($target, $sysPos, $nodePos, $perProcNumValue);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $ordinalId);
     $targetObj->setAttribute($target, "FAPI_POS",      $ordinalId);
     $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodePos);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $procPos);
+    $targetObj->setAttribute($target, "FAPINAME_UNIT", $chipunit);
     $targetObj->setAttribute($target, "REL_POS",       $perParentNumValue);
     # Remove abus/xbus from smpgroup affinity and physical path
     if ($targetType eq "SMPGROUP")
@@ -2214,8 +2233,7 @@ sub setCommonAttrForChiplet
     if ($targetType eq "PERV")
     {
         #The chiplet_id can simply be set from the CHIP_UNIT value
-        my $chiplet_id = $targetObj->getAttribute($target, "CHIP_UNIT");
-        my $value = sprintf("0x%0.2X", $chiplet_id);
+        my $value = sprintf("0x%0.2X", $chipunit);
         $targetObj->setAttribute($target, "CHIPLET_ID", $value);
     }
 

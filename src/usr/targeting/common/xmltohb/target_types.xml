@@ -47,6 +47,15 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <id>FAPINAME_NODE</id>
+    </attribute>
+    <attribute>
+      <id>FAPINAME_POS</id>
+    </attribute>
+    <attribute>
+      <id>FAPINAME_UNIT</id>
+    </attribute>
+    <attribute>
       <id>FAPI_NAME</id>
     </attribute>
     <attribute>

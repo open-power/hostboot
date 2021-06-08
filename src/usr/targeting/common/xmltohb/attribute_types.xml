@@ -1741,6 +1741,54 @@
   </attribute>
 
   <attribute>
+    <description>
+      Node Position in the FAPI_NAME attribute for this target.
+      This attribute is set by processMrw.pl and is only expected
+      for targets known to FAPI.
+    </description>
+    <id>FAPINAME_NODE</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0xFF</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      Chip position in the FAPI_NAME attribute for this target if applicable.
+      This attribute is set by processMrw.pl and is only expected
+      for targets known to FAPI.
+    </description>
+    <id>FAPINAME_POS</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint32_t>
+        <default>0xFFFFFFFF</default>
+      </uint32_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      Unit position in the FAPI_NAME attribute for this target if applicable.
+      This attribute is set by processMrw.pl and is only expected
+      for targets known to FAPI.
+    </description>
+    <id>FAPINAME_UNIT</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0xFF</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <id>FAPI_I2C_CONTROL_INFO</id>
     <description>Information needed to address an I2C slave device</description>
     <complexType>
