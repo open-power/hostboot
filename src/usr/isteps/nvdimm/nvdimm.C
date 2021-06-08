@@ -140,10 +140,11 @@ static constexpr size_t VENDOR_LOG_UNIT_SIZE = 256;
 static constexpr size_t VENDOR_LOG_BLOCK_SIZE = 32;
 static constexpr size_t VENDOR_BLOCK_DATA_BYTES = 32;
 
-// TYPED_BLOCK_DATA
-static constexpr uint8_t VENDOR_DATA_TYPE = 0x04;
-static constexpr uint8_t VENDOR_DEFAULT = 0x00;
-static constexpr uint8_t FIRMWARE_IMAGE_DATA = 0x02;
+// TYPED_BLOCK_DATA (8.4.2.1 in JEDEC spec)
+static constexpr uint8_t VENDOR_DEFAULT      = 0x00;
+static constexpr uint8_t FIRMWARE_IMAGE_DATA = 0x01;
+static constexpr uint8_t VENDOR_LOG_PAGE     = 0x02;
+static constexpr uint8_t LABEL_DATA          = 0x03;
 
 // Commands to OPERATIONAL_UNIT_OPS_CMD
 static constexpr uint8_t GET_OPERATIONAL_UNIT = 0x01;
@@ -4483,7 +4484,7 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
     /*
        1) Read VENDOR_LOG_PAGE_SIZE. Multiply the return value with BLOCKSIZE
           to get the total page size (LOG_PAGE_SIZE)
-       2) Set TYPED_BLOCK_DATA to VENDOR_DATA_TYPE
+       2) Set TYPED_BLOCK_DATA to VENDOR_LOG_PAGE
        3) for (unit_id = 0;
                unit_id < LOG_PAGE_LENGTH/VENDOR_LOG_UNIT_SIZE;
                unit_id++)
@@ -4552,27 +4553,14 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
         size_t l_logPgeLength = l_readData * VENDOR_LOG_BLOCK_SIZE;
 
         // Step 2
-        // Some weird bug here - switching directly to VENDOR_DATA_TYPE
-        // would not work. Need to switch to something else first
         l_err = nvdimmWriteReg(i_nvdimm,
                                TYPED_BLOCK_DATA,
-                               FIRMWARE_IMAGE_DATA);
+                               VENDOR_LOG_PAGE);
         if (l_err)
         {
             TRACFCOMP(g_trac_nvdimm, ERR_MRK
-                "nvdimmAddVendorLog() nvdimm[%X] error writing 0x%X to 0x%X",
-                get_huid(i_nvdimm),TYPED_BLOCK_DATA, FIRMWARE_IMAGE_DATA );
-            break;
-        }
-
-        l_err = nvdimmWriteReg(i_nvdimm,
-                               TYPED_BLOCK_DATA,
-                               VENDOR_DATA_TYPE);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK
-                "nvdimmAddVendorLog() nvdimm[%X] error writing 0x%X to 0x%X",
-                get_huid(i_nvdimm),TYPED_BLOCK_DATA, VENDOR_DATA_TYPE );
+                "nvdimmAddVendorLog() nvdimm[%X] error writing 0x%X to address 0x%X",
+                get_huid(i_nvdimm), VENDOR_LOG_PAGE, TYPED_BLOCK_DATA );
             break;
         }
 
