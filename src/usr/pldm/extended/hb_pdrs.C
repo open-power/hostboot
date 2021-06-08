@@ -64,6 +64,7 @@ namespace
 {
 
 typedef std::map<fru_record_set_id, pldm_entity> FruRecordSetMap;
+typedef std::map<TargetHandle_t, pldm_entity> SensorEntityMap;
 
 // Allow the tree add to determine entity instance number
 constexpr uint16_t DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM = 0xFFFF;
@@ -195,13 +196,15 @@ pldm_entity_node* createEntityAssociationAndFruRecordSetPdrs(pldm_entity_associa
  * @param[in]     i_parentNodeEntity  Entity node parent for these new records
  * @param[in]     i_proc_target   Processor target to look under for cores
  * @param[in/out] io_fru_record_set_map FRU record set PDR information (used later to create these PDRs)
+ * @param[in/out] io_core_sensor_map State sensor map to add cores into
  *
  */
 void addCoreEntityAssocAndRecordSetPdrs(pldm_entity_association_tree *io_tree,
                                         PdrManager& io_pdrman,
                                         pldm_entity_node * i_parentNodeEntity,
                                         const TargetHandle_t i_proc_target,
-                                        FruRecordSetMap &io_fru_record_set_map )
+                                        FruRecordSetMap &io_fru_record_set_map,
+                                        SensorEntityMap &io_core_sensor_map )
 {
     TARGETING::TYPE l_core_type = TYPE_CORE;
     if(TARGETING::is_fused_mode())
@@ -228,13 +231,15 @@ void addCoreEntityAssocAndRecordSetPdrs(pldm_entity_association_tree *io_tree,
         PLDM_INF("Add entity association and FRU record set PDRs for %s HUID 0x%08X",
                  (l_core_type==TYPE_CORE)?"core":"fc", get_huid(l_core_target));
 
-        createEntityAssociationAndFruRecordSetPdrs(io_tree,
+        const auto entity_node
+            = createEntityAssociationAndFruRecordSetPdrs(io_tree,
                                                 io_pdrman,
                                                 i_parentNodeEntity,
                                                 PLDM_ENTITY_ASSOCIAION_PHYSICAL,
                                                 ENTITY_TYPE_LOGICAL_PROCESSOR,
                                                 l_core_target,
                                                 io_fru_record_set_map);
+        io_core_sensor_map[l_core_target] = pldm_entity_extract(entity_node);
     }
 }
 
@@ -255,6 +260,7 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman)
 
     // map so record sets can be added after associative records
     FruRecordSetMap fru_record_set_map;
+    SensorEntityMap core_sensor_entity_map;
 
     /* Add the backplane (root node) to the tree. */
     pldm_entity backplane_entity
@@ -344,7 +350,7 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman)
                                               fru_record_set_map);
                 }
                 // Add core entries under the processor
-                addCoreEntityAssocAndRecordSetPdrs(enttree.get(), io_pdrman, proc_node, targets[i], fru_record_set_map);
+                addCoreEntityAssocAndRecordSetPdrs(enttree.get(), io_pdrman, proc_node, targets[i], fru_record_set_map, core_sensor_entity_map);
             }
             else
             {
@@ -360,7 +366,7 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman)
         }
     }
 
-    // Make sure Association PDRs are added before FRU record set PDRs
+    // Make sure Association PDRs are added before FRU record set PDRs and core State Sensor PDRs
     /* Serialize the tree into the PDR repository. */
     io_pdrman.addEntityAssociationPdrs(*enttree.get(), false /* is_remote */);
 
@@ -372,6 +378,17 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman)
 
         PLDM_DBG("FRU RECORD SET PDR: fru_rsi 0x%04X, entity_type 0x%04X, entity_instance_num 0x%04X, container_id 0x%04X",
         fru_record.first, fru_record.second.entity_type, fru_record.second.entity_instance_num, fru_record.second.entity_container_id);
+    }
+
+    /* now add the State Sensor PDRs for cores */
+    for (auto const& core_sensor_entity : core_sensor_entity_map)
+    {
+        // Add the state sensor pdr for core target to PDR repo
+        io_pdrman.addStateSensorPdr(core_sensor_entity.first, core_sensor_entity.second,
+                                    PLDM_STATE_SET_HEALTH_STATE,
+                                    (enum_bit(PLDM_STATE_SET_HEALTH_STATE_NORMAL)
+                                     | enum_bit(PLDM_STATE_SET_HEALTH_STATE_CRITICAL)),
+                                    PdrManager::STATE_QUERY_HANDLER_FUNCTIONAL_STATE_SENSOR);
     }
 }
 
