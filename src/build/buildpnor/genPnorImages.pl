@@ -514,7 +514,7 @@ sub partitionDepSort
 
 sub manipulateImage
 {
-    my ($key, $i_pnorLayoutRef, $i_binFilesRef, $parallelPrefix, $preReqImages) = @_;
+    my ($key, $i_pnorLayoutRef, $i_binFilesRef, $parallelPrefix, $preReqImages, $system_target) = @_;
 
     my %sectionHash = %{$$i_pnorLayoutRef{sections}};
 
@@ -1074,7 +1074,7 @@ sub manipulateImages
             if(!defined($pid = fork())) {
                 die "fork() failed with code $!";
             } elsif ($pid == 0) {
-                manipulateImage($key, $i_pnorLayoutRef, $i_binFilesRef, $parallelPrefix, \%preReqImages);
+                manipulateImage($key, $i_pnorLayoutRef, $i_binFilesRef, $parallelPrefix, \%preReqImages, $system_target);
                 exit 0;
             } else {
                 my @info = ($pid, $key);
