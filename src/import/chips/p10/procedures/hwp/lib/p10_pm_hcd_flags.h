@@ -156,6 +156,7 @@ enum PM_QME_FLAG_DEFS
     QME_FLAGS_SRAM_SBE_MODE                 = 21,
     QME_FLAGS_SRAM_GPE_MODE                 = 22,
     QME_FLAGS_RUNTIME_MODE                  = 23,
+    QME_FLAGS_QUIESCE_MODE                  = 24,
     QME_FLAGS_RUNNING_EPM                   = 62,
     QME_FLAGS_RUNNING_SIMICS                = 63
 };
