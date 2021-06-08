@@ -2967,6 +2967,15 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 }
             }
         }
+        else
+        {
+            if ((iv_pdv_model_data & 0x01) == 0x01)
+            {
+                FAPI_INF("WOF will be disabled as model_data field indicates not a sorted part");
+                disable_wof();
+                disable_dds();
+            }
+        }
     }
     while(0);
 
