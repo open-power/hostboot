@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ class RuleChipDomain : public DomainContainer<RuleChip>
         PAUC_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 4,
         IOHS_DOMAIN_SIZE   = PAUC_DOMAIN_SIZE * 4,
         PAU_DOMAIN_SIZE    = IOHS_DOMAIN_SIZE,
-        EC_DOMAIN_SIZE     = PROC_DOMAIN_SIZE * 4,
+        CORE_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 4,
         PEC_DOMAIN_SIZE    = PROC_DOMAIN_SIZE * 3,
         PHB_DOMAIN_SIZE    = PROC_DOMAIN_SIZE * 6,
         MC_DOMAIN_SIZE     = PROC_DOMAIN_SIZE * 2,
@@ -57,7 +57,7 @@ class RuleChipDomain : public DomainContainer<RuleChip>
 
         TOTAL_CHIPS = PROC_DOMAIN_SIZE + IOHS_DOMAIN_SIZE + NMMU_DOMAIN_SIZE +
                       PAUC_DOMAIN_SIZE + PAU_DOMAIN_SIZE +
-                      EQ_DOMAIN_SIZE + EC_DOMAIN_SIZE +
+                      EQ_DOMAIN_SIZE + CORE_DOMAIN_SIZE +
                       PEC_DOMAIN_SIZE + PHB_DOMAIN_SIZE + MC_DOMAIN_SIZE +
                       MCC_DOMAIN_SIZE + OMIC_DOMAIN_SIZE +
                       OCMB_DOMAIN_SIZE,
@@ -88,6 +88,40 @@ class RuleChipDomain : public DomainContainer<RuleChip>
      *  @param ATTENTION_TYPE [MACHINE_CHECK | RECOVERABLE | SPECIAL]
      */
     virtual void Order( ATTENTION_TYPE i_attnType);
+
+    /**
+     *  @brief Returns the appropriate domain size based on input domain ID
+     *  @param i_id Domain ID to get the size from
+     *  @return The domain size for the input domain ID
+     */
+    DefaultDomainSize domainSizeFromId( DOMAIN_ID i_id )
+    {
+        DefaultDomainSize o_size = PROC_DOMAIN_SIZE;
+
+        switch ( i_id )
+        {
+            case PROC_DOMAIN: o_size = PROC_DOMAIN_SIZE; break;
+            case EQ_DOMAIN:   o_size = EQ_DOMAIN_SIZE;   break;
+            case NMMU_DOMAIN: o_size = NMMU_DOMAIN_SIZE; break;
+            case PAUC_DOMAIN: o_size = PAUC_DOMAIN_SIZE; break;
+            case IOHS_DOMAIN: o_size = IOHS_DOMAIN_SIZE; break;
+            case PAU_DOMAIN:  o_size = PAU_DOMAIN_SIZE;  break;
+            case CORE_DOMAIN: o_size = CORE_DOMAIN_SIZE; break;
+            case PEC_DOMAIN:  o_size = PEC_DOMAIN_SIZE;  break;
+            case PHB_DOMAIN:  o_size = PHB_DOMAIN_SIZE;  break;
+            case MC_DOMAIN:   o_size = MC_DOMAIN_SIZE;   break;
+            case MCC_DOMAIN:  o_size = MCC_DOMAIN_SIZE;  break;
+            case OMIC_DOMAIN: o_size = OMIC_DOMAIN_SIZE; break;
+            case OCMB_DOMAIN: o_size = OCMB_DOMAIN_SIZE; break;
+            default:
+                PRDF_ERR( "RuleChipDomain::domainSizeFromId: Invalid Domain "
+                          "ID: 0x%x", i_id );
+                PRDF_ASSERT(false);
+                break;
+        }
+
+        return o_size;
+    }
 };
 
 } // end namespace PRDF

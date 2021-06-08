@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,18 +40,8 @@
 #include <prdrLoadChipCache.H>  // To flush chip-file cache.
 
 #include <prdfP10ProcDomain.H>
-#include <prdfP10EcDomain.H>
-#include <prdfP10EqDomain.H>
-#include <prdfP10McDomain.H>
-#include <prdfP10MccDomain.H>
 #include <prdfOcmbChipDomain.H>
-#include <prdfP10OmicDomain.H>
-#include <prdfP10PecDomain.H>
-#include <prdfP10PhbDomain.H>
-#include <prdfP10IohsDomain.H>
-#include <prdfP10NmmuDomain.H>
-#include <prdfP10PaucDomain.H>
-#include <prdfP10PauDomain.H>
+#include <prdfP10GenericDomain.H>
 
 using namespace TARGETING;
 
@@ -81,17 +71,17 @@ errlHndl_t PlatConfigurator::build()
     OcmbChipDomain * ocmbChipDomain = nullptr;
 
     std::map<TARGETING::TYPE, RuleChipDomain *> unitMap;
-    unitMap[TYPE_EQ  ]  = new EqDomain(       EQ_DOMAIN   );
-    unitMap[TYPE_CORE]  = new EcDomain(       EC_DOMAIN   );
-    unitMap[TYPE_PEC ]  = new PecDomain(      PEC_DOMAIN  );
-    unitMap[TYPE_PHB ]  = new PhbDomain(      PHB_DOMAIN  );
-    unitMap[TYPE_MC ]   = new McDomain(       MC_DOMAIN   );
-    unitMap[TYPE_IOHS ] = new IohsDomain(     IOHS_DOMAIN );
-    unitMap[TYPE_NMMU ] = new NmmuDomain(     NMMU_DOMAIN );
-    unitMap[TYPE_PAUC ] = new PaucDomain(     PAUC_DOMAIN );
-    unitMap[TYPE_PAU ]  = new PauDomain(      PAU_DOMAIN  );
-    unitMap[TYPE_MCC ]  = new MccDomain(      MCC_DOMAIN  );
-    unitMap[TYPE_OMIC]  = new OmicDomain(     OMIC_DOMAIN );
+    unitMap[TYPE_EQ  ]  = new GenericDomain<EQ_DOMAIN>();
+    unitMap[TYPE_CORE]  = new GenericDomain<CORE_DOMAIN>();
+    unitMap[TYPE_PEC ]  = new GenericDomain<PEC_DOMAIN>();
+    unitMap[TYPE_PHB ]  = new GenericDomain<PHB_DOMAIN>();
+    unitMap[TYPE_MC ]   = new GenericDomain<MC_DOMAIN>();
+    unitMap[TYPE_IOHS ] = new GenericDomain<IOHS_DOMAIN>();
+    unitMap[TYPE_NMMU ] = new GenericDomain<NMMU_DOMAIN>();
+    unitMap[TYPE_PAUC ] = new GenericDomain<PAUC_DOMAIN>();
+    unitMap[TYPE_PAU ]  = new GenericDomain<PAU_DOMAIN>();
+    unitMap[TYPE_MCC ]  = new GenericDomain<MCC_DOMAIN>();
+    unitMap[TYPE_OMIC]  = new GenericDomain<OMIC_DOMAIN>();
     ocmbChipDomain      = new OcmbChipDomain( OCMB_DOMAIN );
 
     PllDomainMapList pllDmnMapLst;

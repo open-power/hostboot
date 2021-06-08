@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ enum DOMAIN_ID
 
     PROC_DOMAIN   = 0x71,
     EQ_DOMAIN     = 0x72,
-    EC_DOMAIN     = 0x73,
+    CORE_DOMAIN   = 0x73,
     PEC_DOMAIN    = 0x74,
     PHB_DOMAIN    = 0x75,
     MC_DOMAIN     = 0x76,

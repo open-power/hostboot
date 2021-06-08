@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10IohsDomain.H $       */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10GenericDomain.H $    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,25 +22,23 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __prdfP10IohsDomain_H
-#define __prdfP10IohsDomain_H
+#ifndef __prdfP10GenericDomain_H
+#define __prdfP10GenericDomain_H
 
 #include <prdfRuleChipDomain.H>
 
 namespace PRDF
 {
 
-class IohsDomain : public RuleChipDomain
+template <DOMAIN_ID ID>
+class GenericDomain : public RuleChipDomain
 {
   public:
 
     /**
      * @brief Constructor
-     * @param i_did  The domain ID
-     * @param i_size The projected size of the domain
      */
-    IohsDomain( DOMAIN_ID i_did, uint32_t i_size = IOHS_DOMAIN_SIZE ) :
-                RuleChipDomain( i_did, i_size )
+    GenericDomain() : RuleChipDomain( ID, domainSizeFromId(ID) )
     {}
 
     /**
@@ -57,4 +55,4 @@ class IohsDomain : public RuleChipDomain
 
 } // end namespace PRDF
 
-#endif /* __prdfP10IohsDomain_H */
+#endif /* __prdfP10GenericDomain_H */
