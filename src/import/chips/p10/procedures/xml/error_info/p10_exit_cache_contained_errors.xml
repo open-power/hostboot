@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,15 +31,21 @@
     <description>
       Multiple chips found with ATTR_PROC_SBE_MASTER_CHIP set
     </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_P10_EXIT_CACHE_CONTAINED_NO_MASTER_ERR</rc>
-    <ffdc>MASTER_CHIP1</ffdc>
-    <ffdc>MASTER_CHIP2</ffdc>
     <description>
       No chips were found with ATTR_PROC_SBE_MASTER_CHIP set
     </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
