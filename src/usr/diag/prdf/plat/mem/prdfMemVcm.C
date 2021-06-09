@@ -245,32 +245,13 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::rowRepair( STEP_CODE_DATA_STRUCT & io_sc,
         // get port select
         uint8_t l_ps = iv_mark.getSymbol().getPortSlct();
 
-        // get if the spares are available
-        bool l_spAvail;
-        o_rc = PlatServices::isSpareAvailable<TYPE_OCMB_CHIP>(
-            iv_chip->getTrgt(), iv_rank, l_ps, l_spAvail );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "isSpareAvailable(0x%08x,0x%02x) failed",
-                      iv_chip->getHuid(), iv_rank.getKey() );
-            break;
-        }
-
         // get dimm
         TARGETING::TargetHandle_t l_dimm =
             PlatServices::getConnectedDimm( iv_chip->getTrgt(), iv_rank,
                                             l_ps );
 
-        // If scrub stops on first MCE, and row repair
-        // not supported or both spare and chip mark used
-        if ( 1 == iv_mceCount && ( !l_spAvail ) )
-        {
-            // Record bad DQs in VPD - done when verified()
-            // No need to continue scrubbing, VCM verified, VCM done.
-            o_done = true;
-        }
-        // Else if scrub stops on first MCE and row repair supported
-        else if ( 1 == iv_mceCount )
+        // If scrub stops on first MCE and row repair supported
+        if ( 1 == iv_mceCount )
         {
             PRDF_TRAC( PRDF_FUNC "Scrub stopped on first MCE" );
             MemRowRepair l_rowRepair;
