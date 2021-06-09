@@ -55,7 +55,7 @@
 static const uint32_t PGPE_TIMEOUT_MS       = 600;
 static const uint32_t PGPE_TIMEOUT_MCYCLES  = 20;
 static const uint32_t PGPE_POLLTIME_MS      = 20;
-static const uint32_t PGPE_POLLTIME_MCYCLES = 2;
+static const uint32_t PGPE_POLLTIME_MCYCLES = 4;
 static const uint32_t TIMEOUT_COUNT = PGPE_TIMEOUT_MS / PGPE_POLLTIME_MS;
 
 #define HALT 0x2
