@@ -6594,6 +6594,64 @@ sub serializeAssociations
 }
 
 ################################################################################
+# Write the Attribute Default Values Report
+################################################################################
+sub generateAttrValuesReport {
+    my($attrhash) = @_;
+
+    open(ATTR_DEFAULT_FILE_IMAGE,">$cfgImgOutputDir"."attrDefaultsReport.txt")
+      or croak ("Attribute default file: >$cfgImgOutputDir"
+        . "attrDefaultsReport.txt could not be opened.");
+    my $attrDFile = *ATTR_DEFAULT_FILE_IMAGE;
+
+    my $delim = "----------------------------------------------------------------------------------\n";
+
+    # For each target instance, get the attribute list
+    foreach my $targetInstance (sort (keys %$attrhash))
+    {
+        # A header for each target instance will be printed followed by a list of its
+        # attributes in alphabetical order with their default values.
+        # The following shows an example with both a simple and a complex type attribute.
+        #
+        # ----------------------------------------------------------------------------------
+        # Target Instance: sys0node0tpm0
+        # ----------------------------------------------------------------------------------
+        # Attribute ID:                                          Default Value:
+        # ----------------------------------------------------------------------------------
+        # AFFINITY_PATH                                          affinity:sys-0/node-0/proc-0/tpm-0
+        # FSI_OPTION_FLAGS                                       -
+        #     Fields:
+        #         flipPort                                       0
+        #         reserved                                       0
+
+        print $attrDFile $delim, "Target Instance: ", $targetInstance, "\n", $delim;
+        printf $attrDFile "Attribute ID: %-41sDefault Value:\n%s", " ", $delim;
+
+        foreach my $targetInstanceAttribute (sort (keys %{$attrhash->{$targetInstance}}))
+        {
+            my $dValue = $attrhash->{$targetInstance}->{$targetInstanceAttribute}->{default};
+            if (ref ($dValue) eq "HASH") #If default is HASH, attr is complex type.
+            {
+                printf $attrDFile "%-55s-\n", $attrhash->{$targetInstance}->{$targetInstanceAttribute}->{id};
+                print $attrDFile "\tFields:\n";
+                foreach my $field (@{$dValue->{field}})
+                {
+                    printf $attrDFile "\t\t%-47s", $field->{id};
+                    print $attrDFile $field->{value}, "\n";
+                }
+            }
+            else
+            {
+                $dValue =~ s/^\s+|\s+$//g;
+                printf $attrDFile "%-55s", $attrhash->{$targetInstance}->{$targetInstanceAttribute}->{id};
+                print $attrDFile $dValue, "\n";
+            }
+        }
+    }
+    close $attrDFile;
+}
+
+################################################################################
 # Write the PNOR targeting image
 ################################################################################
 
@@ -6939,6 +6997,7 @@ sub generateTargetingImage {
     # For the main loop, use all attributes including virtual
     my $attributeIdEnumerationAll = getAttributeIdEnumeration($allAttributes);
 
+    my %allattrhash; #Hash used to generate attribute report
     foreach my $targetInstance (@targetsAoH)
     {
         #print STDOUT "Target=$targetInstance->{id}\n";
@@ -6951,7 +7010,6 @@ sub generateTargetingImage {
         #@TODO Attributes must eventually be ordered correctly for code update
         # Use all attributes including virtual for association processing
         getTargetAttributes($targetInstance->{type}, $allAttributes,\%attrhash);
-
 
         #Check for Targets with ZERO attributes before writing to PNOR.
         my $tempNumAttributes = keys %attrhash;
@@ -6998,7 +7056,7 @@ sub generateTargetingImage {
                 # This is a simple type, just set the data
                 {
                     $attrhash{ $targetInstanceAttribute->{id} } =
-                                                      $targetInstanceAttribute;
+                                                        $targetInstanceAttribute;
                 }
             }
             # If the attribute is not defined in the hash, then
@@ -7488,7 +7546,12 @@ sub generateTargetingImage {
 
         } # End attribute loop
 
+        #Add attribute list for current Target Instance
+        $allattrhash{$targetInstance->{id}} = \%attrhash;
+
     } # End target instance loop
+
+    generateAttrValuesReport(\%allattrhash);
 
     if($numAttributes != $attributesWritten)
     {
