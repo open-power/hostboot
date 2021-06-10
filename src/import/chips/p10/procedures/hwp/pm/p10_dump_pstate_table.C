@@ -59,14 +59,14 @@
 
 void oppb_print(FILE* stream, const OCCPstateParmBlock_t* oppb);
 void gpi_print(FILE* stream, void* gpi, uint32_t dump_flag);
-void gppb_print(FILE* stream, const GlobalPstateParmBlock_t* gppb, uint32_t dump_flag);
-void pgpe_flags_print(FILE* stream, const GlobalPstateParmBlock_t* gppb);
-void vrm_print(FILE* stream, const GlobalPstateParmBlock_t* gppb);
+void gppb_print(FILE* stream, const GlobalPstateParmBlock_v1_t* gppb, uint32_t dump_flag);
+void pgpe_flags_print(FILE* stream, const GlobalPstateParmBlock_v1_t* gppb);
+void vrm_print(FILE* stream, const GlobalPstateParmBlock_v1_t* gppb);
 void resclk_print(FILE* stream,
-                  const GlobalPstateParmBlock_t* gppb,
+                  const GlobalPstateParmBlock_v1_t* gppb,
                   const char* i_title);
-void dds_print(FILE* stream, const GlobalPstateParmBlock_t* gppb);
-void wov_wof_print(FILE* stream, const GlobalPstateParmBlock_t* gppb);
+void dds_print(FILE* stream, const GlobalPstateParmBlock_v1_t* gppb);
+void wov_wof_print(FILE* stream, const GlobalPstateParmBlock_v1_t* gppb);
 void iddq_print(const IddqTable_t* i_iddqt);
 
 //
@@ -74,9 +74,9 @@ void iddq_print(const IddqTable_t* i_iddqt);
 //
 void p10_dump_pstate_table(void* vgpi, uint32_t dump_flag)
 {
-    const GlobalPstateParmBlock_t* gppb;
+    const GlobalPstateParmBlock_v1_t* gppb;
 
-    GeneratedPstateInfo_t* g = (GeneratedPstateInfo_t*)vgpi;
+    GeneratedPstateInfo_v1_t* g = (GeneratedPstateInfo_v1_t*)vgpi;
     gppb = &g->globalppb;
 
     LCL_INF("Dump_Flag=0x%x\n", dump_flag);
@@ -148,7 +148,7 @@ void gpi_print(FILE* stream, void* vgpi, uint32_t dump_flag)
     const PstateTable_t* tbl;
     //uint64_t GenPstateInfoMagic  = revle64(*(uint64_t*)vgpi);
 
-    GeneratedPstateInfo_t* g = (GeneratedPstateInfo_t*)vgpi;
+    GeneratedPstateInfo_v1_t* g = (GeneratedPstateInfo_v1_t*)vgpi;
 
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");
@@ -204,7 +204,7 @@ void gpi_print(FILE* stream, void* vgpi, uint32_t dump_flag)
 //
 // gppb_print
 //
-void gppb_print(FILE* stream, const GlobalPstateParmBlock_t* gppb, uint32_t  dump_flag)
+void gppb_print(FILE* stream, const GlobalPstateParmBlock_v1_t* gppb, uint32_t  dump_flag)
 {
     uint32_t p, s, r;
     const char* vpdPvStr[NUM_OP_POINTS] = PV_OP_STR;
@@ -214,24 +214,24 @@ void gppb_print(FILE* stream, const GlobalPstateParmBlock_t* gppb, uint32_t  dum
     const char* vpdOpSlopesRegionStr[VPD_NUM_SLOPES_REGION] = VPD_OP_SLOPES_REGION_ORDER_STR;
 
     //Endian conversion
-    uint32_t reference_frequency_khz = revle32(gppb->reference_frequency_khz);
-    uint32_t frequency_step_khz = revle32(gppb->frequency_step_khz);
-    uint32_t occ_freq_mhz = revle32(gppb->occ_complex_frequency_mhz);
+    uint32_t reference_frequency_khz = revle32(gppb->base.reference_frequency_khz);
+    uint32_t frequency_step_khz = revle32(gppb->base.frequency_step_khz);
+    uint32_t occ_freq_mhz = revle32(gppb->base.occ_complex_frequency_mhz);
     uint32_t safe_voltage_mv[SAFE_VOLTAGE_SIZE];
 
     for (s = 0 ; s < SAFE_VOLTAGE_SIZE; s++)
     {
-        safe_voltage_mv[s] = revle32(gppb->safe_voltage_mv[s]);
+        safe_voltage_mv[s] = revle32(gppb->base.safe_voltage_mv[s]);
     }
 
-    uint32_t safe_frequency_khz = revle32(gppb->safe_frequency_khz);
+    uint32_t safe_frequency_khz = revle32(gppb->base.safe_frequency_khz);
 
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");
     fprintf(stream, "GLOBAL PSTATE PARAMETERS START@ %p\n", gppb);
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");
-    fprintf(stream, "sizeof(GlobalPstateParmBlock_t):   %lu\n", sizeof(GlobalPstateParmBlock_t));
+    fprintf(stream, "sizeof(GlobalPstateParmBlock_v1_t):   %lu\n", sizeof(GlobalPstateParmBlock_v1_t));
     fprintf(stream, "Magic_Number:                      %s\n", (char*)&gppb->magic);
     fprintf(stream, "Reference_Frequency:               %u Khz\n", reference_frequency_khz);
     fprintf(stream, "Frequency_Step_Size:               %u Khz\n", frequency_step_khz);
@@ -315,8 +315,8 @@ void gppb_print(FILE* stream, const GlobalPstateParmBlock_t* gppb, uint32_t  dum
         {
             for (s = 0; s < VPD_NUM_SLOPES_REGION; s++)
             {
-                PsVSlopes[r][p][s] = revle16(gppb->ps_voltage_slopes[r][p][s]);
-                VPsSlopes[r][p][s] = revle16(gppb->voltage_ps_slopes[r][p][s]);
+                PsVSlopes[r][p][s] = revle16(gppb->poundv_slopes.ps_voltage_slopes[r][p][s]);
+                VPsSlopes[r][p][s] = revle16(gppb->poundv_slopes.voltage_ps_slopes[r][p][s]);
                 fPsVSlopes[r][p][s] = float(PsVSlopes[r][p][s]);
                 fPsVSlopes[r][p][s] /= (1 << VID_SLOPE_FP_SHIFT_12);
                 fVPsSlopes[r][p][s] = float(VPsSlopes[r][p][s]);
@@ -409,32 +409,32 @@ void gppb_print(FILE* stream, const GlobalPstateParmBlock_t* gppb, uint32_t  dum
                 for (s = 0; s < VPD_NUM_SLOPES_REGION; s++)
                 {
                     //AC-TDP
-                    PsAcTDPSlopes[r][p][s] = revle16(gppb->ps_ac_current_tdp[r][p][s]);
-                    AcTDPPsSlopes[r][p][s] = revle16(gppb->ac_current_ps_tdp[r][p][s]);
+                    PsAcTDPSlopes[r][p][s] = revle16(gppb->poundv_slopes.ps_ac_current_tdp[r][p][s]);
+                    AcTDPPsSlopes[r][p][s] = revle16(gppb->poundv_slopes.ac_current_ps_tdp[r][p][s]);
                     fPsAcTDPSlopes[r][p][s] = float(PsAcTDPSlopes[r][p][s]);
                     fPsVSlopes[r][p][s] /= (1 << VID_SLOPE_FP_SHIFT_12);
                     fAcTDPPsSlopes[r][p][s] = float(AcTDPPsSlopes[r][p][s]);
                     fAcTDPPsSlopes[r][p][s] /= (1 << VID_SLOPE_FP_SHIFT_12);
 
                     //DC-TDP
-                    PsDcTDPSlopes[r][p][s] = revle16(gppb->ps_dc_current_tdp[r][p][s]);
-                    DcTDPPsSlopes[r][p][s] = revle16(gppb->dc_current_ps_tdp[r][p][s]);
+                    PsDcTDPSlopes[r][p][s] = revle16(gppb->poundv_slopes.ps_dc_current_tdp[r][p][s]);
+                    DcTDPPsSlopes[r][p][s] = revle16(gppb->poundv_slopes.dc_current_ps_tdp[r][p][s]);
                     fPsDcTDPSlopes[r][p][s] = float(PsDcTDPSlopes[r][p][s]);
                     fPsVSlopes[r][p][s] /= (1 << VID_SLOPE_FP_SHIFT_12);
                     fDcTDPPsSlopes[r][p][s] = float(DcTDPPsSlopes[r][p][s]);
                     fDcTDPPsSlopes[r][p][s] /= (1 << VID_SLOPE_FP_SHIFT_12);
 
                     //AC-RDP
-                    PsAcRDPSlopes[r][p][s] = revle16(gppb->ps_ac_current_rdp[r][p][s]);
-                    AcRDPPsSlopes[r][p][s] = revle16(gppb->ac_current_ps_rdp[r][p][s]);
+                    PsAcRDPSlopes[r][p][s] = revle16(gppb->poundv_slopes.ps_ac_current_rdp[r][p][s]);
+                    AcRDPPsSlopes[r][p][s] = revle16(gppb->poundv_slopes.ac_current_ps_rdp[r][p][s]);
                     fPsAcRDPSlopes[r][p][s] = float(PsAcRDPSlopes[r][p][s]);
                     fPsVSlopes[r][p][s] /= (1 << VID_SLOPE_FP_SHIFT_12);
                     fAcRDPPsSlopes[r][p][s] = float(AcRDPPsSlopes[r][p][s]);
                     fAcRDPPsSlopes[r][p][s] /= (1 << VID_SLOPE_FP_SHIFT_12);
 
                     //DC-RDP
-                    PsDcRDPSlopes[r][p][s] = revle16(gppb->ps_dc_current_rdp[r][p][s]);
-                    DcRDPPsSlopes[r][p][s] = revle16(gppb->dc_current_ps_rdp[r][p][s]);
+                    PsDcRDPSlopes[r][p][s] = revle16(gppb->poundv_slopes.ps_dc_current_rdp[r][p][s]);
+                    DcRDPPsSlopes[r][p][s] = revle16(gppb->poundv_slopes.dc_current_ps_rdp[r][p][s]);
                     fPsDcRDPSlopes[r][p][s] = float(PsDcRDPSlopes[r][p][s]);
                     fPsVSlopes[r][p][s] /= (1 << VID_SLOPE_FP_SHIFT_12);
                     fDcRDPPsSlopes[r][p][s] = float(DcRDPPsSlopes[r][p][s]);
@@ -836,7 +836,7 @@ void oppb_print(FILE* stream, OCCPstateParmBlock_t const* i_oppb)
 //pgpe_flags_print
 //
 void pgpe_flags_print(FILE* stream,
-                      const GlobalPstateParmBlock_t* gppb)
+                      const GlobalPstateParmBlock_v1_t* gppb)
 {
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");
@@ -895,7 +895,7 @@ void pgpe_flags_print(FILE* stream,
 //resclk_print
 //
 void resclk_print(FILE* stream,
-                  const GlobalPstateParmBlock_t* gppb,
+                  const GlobalPstateParmBlock_v1_t* gppb,
                   const char* i_title)
 {
     uint32_t i, c;
@@ -915,8 +915,8 @@ void resclk_print(FILE* stream,
     // Hcode use.
     for (i = 0; i < RESCLK_FREQ_REGIONS; i++)
     {
-        l_freq = ((float)(revle32(gppb->reference_frequency_khz)) -
-                  (gppb->resclk.ps[i] * (float)revle32(gppb->frequency_step_khz)));
+        l_freq = ((float)(revle32(gppb->base.reference_frequency_khz)) -
+                  (gppb->resclk.ps[i] * (float)revle32(gppb->base.frequency_step_khz)));
 
         fprintf(stream, "\t%2d %3u %5u    %5u\n",
                 i,
@@ -952,7 +952,7 @@ void resclk_print(FILE* stream,
 //dds_print
 //
 void dds_print(FILE* stream,
-               const GlobalPstateParmBlock_t* gppb)
+               const GlobalPstateParmBlock_v1_t* gppb)
 {
     uint32_t c, p;
     const char* vpdPvStr[NUM_OP_POINTS] = PV_OP_STR;
@@ -1008,7 +1008,7 @@ void dds_print(FILE* stream,
 //
 
 void wov_wof_print(FILE* stream,
-                   const GlobalPstateParmBlock_t* gppb)
+                   const GlobalPstateParmBlock_v1_t* gppb)
 {
     //WOV
     fprintf(stream,
@@ -1016,17 +1016,18 @@ void wov_wof_print(FILE* stream,
     fprintf(stream, "WOV/WOF PARAMETERS START\n");
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");
-    fprintf(stream, "WOV-Underv Performance Loss Threshold  %6.1f%%\n", (double)gppb->wov_underv_perf_loss_thresh_pct / 10);
-    fprintf(stream, "WOV-Underv Step Increment              %6.1f%%\n", (double)gppb->wov_underv_step_incr_pct);
-    fprintf(stream, "WOV-Underv Step Decrement              %6.1f%%\n", (double)gppb->wov_underv_step_decr_pct);
-    fprintf(stream, "WOV-Underv Max                         %6.1f%%\n", (double)gppb->wov_underv_max_pct);
-    fprintf(stream, "WOV-Underv Vmin                        %6u mV\n", revle16(gppb->wov_underv_vmin_mv));
+    fprintf(stream, "WOV-Underv Performance Loss Threshold  %6.1f%%\n",
+            (double)gppb->wov.wov_underv_perf_loss_thresh_pct / 10);
+    fprintf(stream, "WOV-Underv Step Increment              %6.1f%%\n", (double)gppb->wov.wov_underv_step_incr_pct);
+    fprintf(stream, "WOV-Underv Step Decrement              %6.1f%%\n", (double)gppb->wov.wov_underv_step_decr_pct);
+    fprintf(stream, "WOV-Underv Max                         %6.1f%%\n", (double)gppb->wov.wov_underv_max_pct);
+    fprintf(stream, "WOV-Underv Vmin                        %6u mV\n", revle16(gppb->wov.wov_underv_vmin_mv));
 
-    fprintf(stream, "WOV-Overv Step Increment               %6.1f%%\n", (double)gppb->wov_overv_step_incr_pct);
-    fprintf(stream, "WOV-Overv Step Decrement               %6.1f%%\n", (double)gppb->wov_overv_step_decr_pct);
-    fprintf(stream, "WOV-Overv Max                          %6.1f%%\n", (double)gppb->wov_overv_max_pct);
-    fprintf(stream, "WOV-Overv Vmax                         %6u mV\n", revle16(gppb->wov_overv_vmax_mv));
-    fprintf(stream, "WOV Sample Rate                        %6u uS\n", 125 * gppb->wov_sample_125us);
+    fprintf(stream, "WOV-Overv Step Increment               %6.1f%%\n", (double)gppb->wov.wov_overv_step_incr_pct);
+    fprintf(stream, "WOV-Overv Step Decrement               %6.1f%%\n", (double)gppb->wov.wov_overv_step_decr_pct);
+    fprintf(stream, "WOV-Overv Max                          %6.1f%%\n", (double)gppb->wov.wov_overv_max_pct);
+    fprintf(stream, "WOV-Overv Vmax                         %6u mV\n", revle16(gppb->wov.wov_overv_vmax_mv));
+    fprintf(stream, "WOV Sample Rate                        %6u uS\n", 125 * gppb->wov.wov_sample_125us);
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");
     fprintf(stream, "WOV/WOF PARAMETERS END\n");
@@ -1036,7 +1037,7 @@ void wov_wof_print(FILE* stream,
 }
 
 void vrm_print(FILE* stream,
-               const GlobalPstateParmBlock_t* gppb)
+               const GlobalPstateParmBlock_v1_t* gppb)
 {
 
     uint32_t r;

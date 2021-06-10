@@ -94,7 +94,7 @@ typedef struct
     uint64_t iv_magic;
 
     // PGPE content
-    GlobalPstateParmBlock_t iv_globalppb;
+    GlobalPstateParmBlock_v1_t iv_globalppb;
 
     //TBD
     // QME content
@@ -319,7 +319,7 @@ class PlatPmPPB
         /// @brief Initialize global pstate parameter block
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
-        fapi2::ReturnCode gppb_init( GlobalPstateParmBlock_t* i_globalppb);
+        fapi2::ReturnCode gppb_init( GlobalPstateParmBlock_v1_t* i_globalppb);
 
         /// -----------------------------------------------------------------------
         /// @brief This will set the pstate feature attrbutes(DDS,RESCLK,VRM,WOF)
@@ -338,7 +338,7 @@ class PlatPmPPB
         /// @param[out]     o_gppb  global PPB data
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
-        void compute_dds_slopes(GlobalPstateParmBlock_t* o_gppb);
+        void compute_dds_slopes(GlobalPstateParmBlock_v1_t* o_gppb);
 
         /// -----------------------------------------------------------------------
         /// @brief This fills up the PStateVSlopes and VPStatesSlopes in
@@ -346,7 +346,7 @@ class PlatPmPPB
         /// @param[out]     o_gppb  global PPB data
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
-        void compute_PStateV_I_slope(GlobalPstateParmBlock_t* o_gppb);
+        void compute_PStateV_I_slope(GlobalPstateParmBlock_v1_t* o_gppb);
 
         /// -----------------------------------------------------------------------
         /// @brief set pstate0 attribute/floor/ceil freq based on Fmax/UT/PSav value
@@ -854,7 +854,7 @@ extern "C"
     void
     gppb_print(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        GlobalPstateParmBlock_t* i_gppb);
+        GlobalPstateParmBlock_v1_t* i_gppb);
 
     /// -------------------------------------------------------------------
     /// @brief  Print a OCCPstateParameterBlock structure on a given stream
