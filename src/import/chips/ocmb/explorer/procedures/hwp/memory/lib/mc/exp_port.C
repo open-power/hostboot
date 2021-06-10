@@ -422,6 +422,7 @@ fapi_try_exit:
 fapi2::ReturnCode configure_tstab(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                   const bool i_has_rcd)
 {
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_reg_data = 0;
 
     // Clock stabilization time with an RCD on the DIMM is 5us which is converted to ns
@@ -429,7 +430,8 @@ fapi2::ReturnCode configure_tstab(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     uint64_t l_tstab_cfg_val = 0;
 
     // Convert the ns to cycles.
-    l_tstab_cfg_val = mss::ns_to_cycles(i_target, TSTAB_VAL_IN_NS);
+    l_tstab_cfg_val = mss::ns_to_cycles(i_target, TSTAB_VAL_IN_NS, l_rc);
+    FAPI_TRY(l_rc, "%s ns_to_cycles failed", mss::c_str(i_target));
 
     // Reading from the register into l_reg_data
     FAPI_TRY(mss::getScom(i_target, EXPLR_SRQ_MBAREFAQ, l_reg_data));

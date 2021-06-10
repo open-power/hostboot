@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,10 +48,11 @@ namespace mss
 /// @tparam OT the output type, derrived from the parameters
 /// @param[in] i_target target for the frequency attribute
 /// @param[in] i_ps the number of picoseconds to convert
+/// @param[out] o_rc a return code used to handle an error
 /// @return uint64_t, the number of cycles
 ///
 template< fapi2::TargetType T, typename OT >
-inline OT ps_to_cycles(const fapi2::Target<T>& i_target, const OT i_ps)
+inline OT ps_to_cycles(const fapi2::Target<T>& i_target, const OT i_ps, fapi2::ReturnCode& o_rc)
 {
     // The frequency in MT/s
     uint64_t l_freq = 0;
@@ -60,7 +61,8 @@ inline OT ps_to_cycles(const fapi2::Target<T>& i_target, const OT i_ps)
     // Each OCMB only has one MEM_PORT
     for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        FAPI_TRY(attr::get_freq(l_port, l_freq));
+        FAPI_TRY(attr::get_freq(l_port, l_freq),
+                 "%s Can't get valid MSS_FREQ - stopping", mss::c_str(i_target));
     }
 
     // No time if MT/s is 0 (well, infinite really but shut up)
@@ -70,16 +72,14 @@ inline OT ps_to_cycles(const fapi2::Target<T>& i_target, const OT i_ps)
     }
 
     // Hoping the compiler figures out how to do these together.
-    FAPI_TRY( freq_to_ps(l_freq, l_clock_period) );
+    FAPI_TRY( freq_to_ps(l_freq, l_clock_period),
+              "%s Failed to convert memory frequency (%d) to a valid clock period. Clock period returned: (%d) - stopping",
+              mss::c_str(i_target), l_freq, l_clock_period);
 
-    return ps_to_cycles( l_clock_period, i_ps );
+    return ps_to_cycles( l_clock_period, i_ps);
 
 fapi_try_exit:
-    // We simply can't work if we can't get the frequency or
-    // if we get an unsupported value that can't be converted to a valid tCK (clock period)
-    // ...so this should be ok
-    FAPI_ERR("Can't get MSS_FREQ or obtained an invalid MSS_FREQ (%d) - stopping", l_freq);
-    fapi2::Assert(false);
+    o_rc = fapi2::current_err;
 
     // Keeps compiler happy
     return 0;
@@ -90,10 +90,11 @@ fapi_try_exit:
 /// @tparam T the target type from which to get the mt/s
 /// @param[in] i_target target for the frequency attribute
 /// @param[in] i_cycles the number of cycles to convert
+/// @param[out] o_rc a return code used to handle an error
 /// @return uint64_t, the number of picoseconds
 ///
 template< fapi2::TargetType T >
-inline uint64_t cycles_to_ps(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
+inline uint64_t cycles_to_ps(const fapi2::Target<T>& i_target, const uint64_t i_cycles, fapi2::ReturnCode& o_rc)
 {
     // The frequency in MHZ
     uint64_t l_freq = 0;
@@ -102,19 +103,17 @@ inline uint64_t cycles_to_ps(const fapi2::Target<T>& i_target, const uint64_t i_
     // Each OCMB only has one MEM_PORT
     for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        FAPI_TRY(attr::get_freq(l_port, l_freq));
+        FAPI_TRY(attr::get_freq(l_port, l_freq),
+                 "%s Can't get a valid MSS_FREQ - stopping", mss::c_str(i_target));
     }
 
-    FAPI_TRY( freq_to_ps(l_freq, l_clock_period) );
+    FAPI_TRY( freq_to_ps(l_freq, l_clock_period),
+              "%s Failed to convert memory frequency to a valid clock period (%d) - stopping",
+              mss::c_str(i_target), l_freq);
     return cycles_to_ps(l_clock_period, i_cycles);
 
 fapi_try_exit:
-
-    // We simply can't work if we can't get the frequency or
-    // if we get an unsupported value that can't be converted to a valid tCK (clock period)
-    // ...so this should be ok
-    FAPI_ERR("Can't get MSS_FREQ or obtained an invalid MSS_FREQ (%d) - stopping", l_freq);
-    fapi2::Assert(false);
+    o_rc = fapi2::current_err;
 
     // Keeps compiler happy
     return 0;
@@ -125,12 +124,13 @@ fapi_try_exit:
 /// @tparam T the target type from which to get the mt/s
 /// @param[in] i_target target for the frequency attribute
 /// @param[in] i_us the number of microseconds to convert
+/// @param[out] o_rc a return code used to handle an error
 /// @return uint64_t, the number of cycles
 ///
 template< fapi2::TargetType T >
-inline uint64_t us_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_us)
+inline uint64_t us_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_us, fapi2::ReturnCode& o_rc)
 {
-    return ps_to_cycles(i_target, i_us * CONVERT_PS_IN_A_US);
+    return ps_to_cycles(i_target, i_us * CONVERT_PS_IN_A_US, o_rc);
 }
 
 ///
@@ -138,12 +138,13 @@ inline uint64_t us_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
 /// @tparam T the target type from which to get the mt/s
 /// @param[in] i_target target for the frequency attribute
 /// @param[in] i_ps the number of nanoseconds to convert
+/// @param[out] o_rc a return code used to handle an error
 /// @return uint64_t, the number of cycles
 ///
 template< fapi2::TargetType T >
-inline uint64_t ns_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_ns)
+inline uint64_t ns_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_ns, fapi2::ReturnCode& o_rc)
 {
-    return ps_to_cycles(i_target, i_ns * CONVERT_PS_IN_A_NS);
+    return ps_to_cycles(i_target, i_ns * CONVERT_PS_IN_A_NS, o_rc);
 }
 
 ///
@@ -152,13 +153,14 @@ inline uint64_t ns_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
 /// @tparam D the time conversion (NS_IN_PS, etc)
 /// @param[in] i_target target for the frequency attribute
 /// @param[in] i_cycles the number of cycles to convert
+/// @param[out] o_rc a return code used to handle an error
 /// @return uint64_t, the number of microseconds
 ///
 template< uint64_t D, fapi2::TargetType T >
-inline uint64_t cycles_to_time(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
+inline uint64_t cycles_to_time(const fapi2::Target<T>& i_target, const uint64_t i_cycles, fapi2::ReturnCode& o_rc)
 {
     // Hoping the compiler figures out how to do these together.
-    uint64_t l_dividend = cycles_to_ps(i_target, i_cycles);
+    uint64_t l_dividend = cycles_to_ps(i_target, i_cycles, o_rc);
     uint64_t l_quotient = l_dividend / ((D == 0) ? 1 : D);
     uint64_t l_remainder = l_dividend % ((D == 0) ? 1 : D);
 
@@ -171,12 +173,13 @@ inline uint64_t cycles_to_time(const fapi2::Target<T>& i_target, const uint64_t 
 /// @tparam T the target type from which to get the mt/s
 /// @param[in] i_target target for the frequency attribute
 /// @param[in] i_cycles the number of cycles to convert
+/// @param[out] o_rc a return code used to handle an error
 /// @return uint64_t, the number of nanoseconds
 ///
 template< fapi2::TargetType T >
-inline uint64_t cycles_to_ns(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
+inline uint64_t cycles_to_ns(const fapi2::Target<T>& i_target, const uint64_t i_cycles, fapi2::ReturnCode& o_rc)
 {
-    uint64_t l_ns = cycles_to_time<CONVERT_PS_IN_A_NS>(i_target, i_cycles);
+    uint64_t l_ns = cycles_to_time<CONVERT_PS_IN_A_NS>(i_target, i_cycles, o_rc);
     return l_ns;
 }
 
@@ -185,12 +188,13 @@ inline uint64_t cycles_to_ns(const fapi2::Target<T>& i_target, const uint64_t i_
 /// @tparam T the target type from which to get the mt/s
 /// @param[in] i_target target for the frequency attribute
 /// @param[in] i_cycles the number of cycles to convert
+/// @param[out] o_rc a return code used to handle an error
 /// @return uint64_t, the number of microseconds
 ///
 template< fapi2::TargetType T >
-inline uint64_t cycles_to_us(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
+inline uint64_t cycles_to_us(const fapi2::Target<T>& i_target, const uint64_t i_cycles, fapi2::ReturnCode& o_rc)
 {
-    uint64_t l_us = cycles_to_time<CONVERT_PS_IN_A_US>(i_target, i_cycles);
+    uint64_t l_us = cycles_to_time<CONVERT_PS_IN_A_US>(i_target, i_cycles, o_rc);
     return l_us;
 }
 
@@ -200,12 +204,14 @@ inline uint64_t cycles_to_us(const fapi2::Target<T>& i_target, const uint64_t i_
 /// @param[in] i_target
 /// @param[in] i_clocks a value in clocks
 /// @param[in] i_time a value in nanoseconds
+/// @param[out] o_rc a return code used to handle an error
 /// @return max( iclocks nCK, i_time ) in clocks
 ///
 template< fapi2::TargetType T >
-inline uint64_t max_ck_ns(const fapi2::Target<T>& i_target, const uint64_t i_clocks, const uint64_t i_time)
+inline uint64_t max_ck_ns(const fapi2::Target<T>& i_target, const uint64_t i_clocks, const uint64_t i_time,
+                          fapi2::ReturnCode& o_rc)
 {
-    return std::max( i_clocks, ns_to_cycles(i_target, i_time) );
+    return std::max( i_clocks, ns_to_cycles(i_target, i_time, o_rc) );
 }
 
 } // ns mss

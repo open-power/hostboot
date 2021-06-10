@@ -1185,6 +1185,7 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
 {
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("Start mss_initialize_memory for %s", mss::c_str(i_target));
 
@@ -1212,7 +1213,9 @@ fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
     uint64_t l_memory_size = 0;
 
     FAPI_TRY( mss::eff_memory_size<MC>(i_target, l_memory_size) );
-    l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay<MC>(i_target, (l_memory_size * mss::BYTES_PER_GB));
+    l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay<MC>(i_target,
+                                         (l_memory_size * mss::BYTES_PER_GB), l_rc);
+    FAPI_TRY(l_rc, "%s time to clock or clock to time conversion failed", mss::c_str(i_target));
 
     FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
 

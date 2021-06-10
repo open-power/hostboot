@@ -72,12 +72,14 @@ fapi2::ReturnCode freq(const fapi2::Target<T>& i_target, uint64_t& o_value);
 /// @tparam T the fapi2::TargetType
 /// @param[in] i_target the target from which to gather memory frequency
 /// @param[in] i_bytes number of *bytes* in the address range
+/// @param[out] o_rc a return code used to handle an error
 /// @param[in] i_64B_per mss::YES if the command is 64B, mss::NO if it's 128B. Defaults to mss::YES
 /// @return the initial polling delay for this program in ns
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline uint64_t calculate_initial_delay(const fapi2::Target<T>& i_target,
                                         const uint64_t i_bytes,
+                                        fapi2::ReturnCode& o_rc,
                                         const bool i_64B_per = mss::YES)
 {
     // TODO RTC: 164104 Update MCBIST delay calculator. As we learn more about what
@@ -86,7 +88,7 @@ inline uint64_t calculate_initial_delay(const fapi2::Target<T>& i_target,
 
     // Best case is a command takes 4 cycles. Given the number of commands and address space size
     // we can get some idea of how long to wait before we start polling.
-    return cycles_to_ns(i_target, (i_bytes / l_bytes_per_cmd) * mss::CYCLES_PER_CMD);
+    return cycles_to_ns(i_target, (i_bytes / l_bytes_per_cmd) * mss::CYCLES_PER_CMD, o_rc);
 }
 
 

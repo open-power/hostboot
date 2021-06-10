@@ -120,14 +120,15 @@ fapi_try_exit:
 /// @param[in] i_freq frequency of the DIMM
 /// @param[in] i_timing_in_ns timing parameter in ns
 /// @param[out] o_nck the number of clock cycles
+/// @param[out] o_rc a return code used to handle an error
 /// @return fapi2::ReturnCode
 /// @note Uses DDR4 SPD Contents Rounding Algorithm
 /// @note Item 2220.46
 ///
 template<typename OT>
-inline fapi2::ReturnCode ns_to_nck( const uint64_t i_freq, const OT& i_timing_in_ns, OT& o_nck)
+inline fapi2::ReturnCode ns_to_nck( const uint64_t i_freq, const OT& i_timing_in_ns, OT& o_nck, fapi2::ReturnCode& o_rc)
 {
-    return ps_to_nck(i_freq, i_timing_in_ns * CONVERT_PS_IN_A_NS, o_nck);
+    return ps_to_nck(i_freq, i_timing_in_ns * CONVERT_PS_IN_A_NS, o_nck, o_rc);
 }
 
 ///
@@ -136,12 +137,13 @@ inline fapi2::ReturnCode ns_to_nck( const uint64_t i_freq, const OT& i_timing_in
 /// @tparam OT the output type, derrived from the parameters
 /// @param[in] i_freq frequency of the DIMM
 /// @param[in] timing_in_ps timing parameter in ps
+/// @param[out] o_rc a return code used to handle an error
 /// @return the clock cycles of timing parameter (provided in ps)
 /// @note Uses DDR4 SPD Contents Rounding Algorithm
 /// @note Item 2220.46
 ///
 template<typename OT>
-inline OT ps_to_nck( const uint64_t i_freq, const OT& i_timing_in_ps)
+inline OT ps_to_nck( const uint64_t i_freq, const OT& i_timing_in_ps, fapi2::ReturnCode& o_rc)
 {
     OT l_tck_in_ps = 0;
     OT l_temp_nck = 0;
@@ -153,18 +155,15 @@ inline OT ps_to_nck( const uint64_t i_freq, const OT& i_timing_in_ps)
     }
 
     FAPI_TRY( freq_to_ps(i_freq, l_tck_in_ps),
-              "Failed freq() accessor" );
+              "Failed to convert memory frequency to a valid clock period (%d) - stopping", i_freq);
     FAPI_TRY( calc_nck(mss::generic_ffdc_codes::PS_TO_NS_ONE_CLOCK, i_timing_in_ps, l_tck_in_ps,
                        spd::INVERSE_DDR4_CORRECTION_FACTOR, l_temp_nck),
-              "Failed calc_nck()" );
+              "Failed to clock period to nck (%d) - stopping", i_freq);
 
     return l_temp_nck;
 
 fapi_try_exit:
-    // We simply can't work if we get an unsupported value that can't be converted to a valid tCK (clock period)
-    // ...so this should be ok
-    FAPI_ERR("Obtained an invalid MSS_FREQ (%d), or overflow occurred - stopping", i_freq);
-    fapi2::Assert(false);
+    o_rc = fapi2::current_err;
 
     // Keeps compiler happy
     return 0;
@@ -176,14 +175,15 @@ fapi_try_exit:
 /// @tparam OT the output type, derrived from the parameters
 /// @param[in] i_freq frequency of the DIMM
 /// @param[out] o_value_nck the end calculation in nck
+/// @param[out] o_rc a return code used to handle an error
 /// @return the clock cycles of timing parameter (provided in ps)
 /// @note Uses DDR4 SPD Contents Rounding Algorithm
 /// @note Item 2220.46
 ///
 template<typename OT>
-inline OT ns_to_nck( const uint64_t i_freq, const OT& i_timing_in_ns)
+inline OT ns_to_nck( const uint64_t i_freq, const OT& i_timing_in_ns, fapi2::ReturnCode& o_rc)
 {
-    return ps_to_nck(i_freq, i_timing_in_ns * CONVERT_PS_IN_A_NS);
+    return ps_to_nck(i_freq, i_timing_in_ns * CONVERT_PS_IN_A_NS, o_rc);
 }
 
 }// spd
@@ -432,13 +432,12 @@ fapi_try_exit:
 ///
 template< fapi2::TargetType T >
 static fapi2::ReturnCode tfaw_half_kb_page_helper(const fapi2::Target<T>& i_target,
-        const uint64_t i_freq,
-        uint64_t& o_output)
+        const uint64_t i_freq, uint64_t& o_output)
 {
     // Values derived from DDR4 Spec (79-4A)
     // 13.3 Timing Parameters by Speed Grade
     // Table 132. Pg 240
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     // It could have been more "efficient" to hand-calculate the answer and
     // use compile time constants to return the answer. To avoid magic
@@ -450,27 +449,27 @@ static fapi2::ReturnCode tfaw_half_kb_page_helper(const fapi2::Target<T>& i_targ
     {
         // static_cast is needed for template deduction of std::max API
         case 1866:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 17000) );
+            o_output = std::max( 16, spd::ps_to_nck(i_freq, 17000, l_rc) );
             break;
 
         case 2133:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 15000) );
+            o_output = std::max( 16, spd::ps_to_nck(i_freq, 15000, l_rc) );
             break;
 
         case 2400:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 13000) );
+            o_output = std::max( 16, spd::ps_to_nck(i_freq, 13000, l_rc) );
             break;
 
         case 2666:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 12000) );
+            o_output = std::max( 16, spd::ps_to_nck(i_freq, 12000, l_rc) );
             break;
 
         case 2933:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 10875) );
+            o_output = std::max( 16, spd::ps_to_nck(i_freq, 10875, l_rc) );
             break;
 
         case 3200:
-            o_output = std::max( 16, spd::ps_to_nck(i_freq, 10000) );
+            o_output = std::max( 16, spd::ps_to_nck(i_freq, 10000, l_rc) );
             break;
 
         default:
@@ -484,6 +483,7 @@ static fapi2::ReturnCode tfaw_half_kb_page_helper(const fapi2::Target<T>& i_targ
                          i_freq);
     }
 
+    FAPI_TRY(l_rc, "%s ps_to_nck failed", mss::c_str(i_target));
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -505,7 +505,7 @@ static fapi2::ReturnCode tfaw_1kb_page_helper(const fapi2::Target<T>& i_target,
     // Values derived from DDR4 Spec (79-4A)
     // 13.3 Timing Parameters by Speed Grade
     // Table 132. Pg 240
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     // It could have been more "efficient" to hand-calculate the answer and
     // use compile time constants to return the answer. To avoid magic
@@ -516,7 +516,7 @@ static fapi2::ReturnCode tfaw_1kb_page_helper(const fapi2::Target<T>& i_target,
     switch(i_freq)
     {
         case 1866:
-            o_output = std::max( 20, spd::ns_to_nck(i_freq, 23) );
+            o_output = std::max( 20, spd::ns_to_nck(i_freq, 23, l_rc) );
             break;
 
         case 2133:
@@ -524,7 +524,7 @@ static fapi2::ReturnCode tfaw_1kb_page_helper(const fapi2::Target<T>& i_target,
         case 2666:
         case 2933:
         case 3200:
-            o_output = std::max( 20, spd::ns_to_nck(i_freq, 21) );
+            o_output = std::max( 20, spd::ns_to_nck(i_freq, 21, l_rc) );
             break;
 
         default:
@@ -539,6 +539,7 @@ static fapi2::ReturnCode tfaw_1kb_page_helper(const fapi2::Target<T>& i_target,
             break;
     }
 
+    FAPI_TRY(l_rc, "%s ns_to_nck failed", mss::c_str(i_target));
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -561,7 +562,7 @@ static fapi2::ReturnCode tfaw_2kb_page_helper(const fapi2::Target<T>& i_target,
     // Values derived from DDR4 Spec (79-4A)
     // 13.3 Timing Parameters by Speed Grade
     // Table 132. Pg 240
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     // It could have been more "efficient" to hand-calculate the answer and
     // use compile time constants to return the answer. To avoid magic
@@ -577,7 +578,8 @@ static fapi2::ReturnCode tfaw_2kb_page_helper(const fapi2::Target<T>& i_target,
         case 2666:
         case 2933:
         case 3200:
-            o_output = std::max( 28, spd::ns_to_nck(i_freq, 30) );
+            o_output = std::max( 28, spd::ns_to_nck(i_freq, 30, l_rc) );
+            FAPI_TRY(l_rc, "%s ns_to_nck failed", mss::c_str(i_target));
             break;
 
         default:

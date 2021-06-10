@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -176,11 +176,14 @@ fapi2::ReturnCode update_initial_delays<fapi2::TARGET_TYPE_OCMB_CHIP, mss::mc_ty
   const uint64_t i_delay,
   ccs::program& io_program)
 {
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
     // Check our program for any delays. If there isn't a iv_initial_delay configured, then
     // we use the delay we just summed from the instructions.
     if (io_program.iv_poll.iv_initial_delay == 0)
     {
-        io_program.iv_poll.iv_initial_delay = cycles_to_ns(i_target, i_delay);
+        io_program.iv_poll.iv_initial_delay = cycles_to_ns(i_target, i_delay, l_rc);
+        FAPI_TRY(l_rc, "%s cycles_to_ns failed", mss::c_str(i_target));
     }
 
     if (io_program.iv_poll.iv_initial_sim_delay == 0)
@@ -189,6 +192,9 @@ fapi2::ReturnCode update_initial_delays<fapi2::TARGET_TYPE_OCMB_CHIP, mss::mc_ty
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
