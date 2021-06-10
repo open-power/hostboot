@@ -765,7 +765,7 @@ errlHndl_t eepromSpiWrite ( TARGETING::Target * i_target,
         // Is a read needed to fill in missing page data?
         if (pageReadSize > 0 )
         {
-            // Do the read() and use cache when possible
+            // Do the read() and always use the hardware
             l_err = DeviceFW::deviceOp( DeviceFW::READ,
                                         i_target,
                                         pageBuffer+pageBufferReadIndex,
@@ -773,7 +773,7 @@ errlHndl_t eepromSpiWrite ( TARGETING::Target * i_target,
                                         DEVICE_EEPROM_ADDRESS(
                                           io_spiInfo.eepromRole,
                                           readOffset,
-                                          EEPROM::AUTOSELECT) );
+                                          EEPROM::HARDWARE) );
             if (l_err)
             {
                 TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromSpiWrite(): read at offset "
