@@ -371,8 +371,8 @@ RUNTIME_TESTCASE_MODULES += testsbeio_rt  # ~/src/usr/sbeio/runtime/test/
 RUNTIME_TESTCASE_MODULES += testpm_rt     # ~/src/usr/isteps/pm/runtime/test/
 RUNTIME_TESTCASE_MODULES += testsyslib_rt # ~/src/usr/testcore/lib/runtime/
 RUNTIME_TESTCASE_MODULES += testexpaccess_rt # ~/src/usr/expaccess/runtime/test/
-#RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
-#RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
+RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
+RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_BMC_IPMI),testipmi_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),testmctp_rt) # ~/src/usr/mctp/runtime/
 endif
