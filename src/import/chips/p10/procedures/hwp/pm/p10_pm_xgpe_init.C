@@ -1094,14 +1094,13 @@ fapi2::ReturnCode iodlr_pgated_validation(
                         l_sub_speed_type = OC_32G;
                     }
 
-                    uint8_t index = (l_iohs_unit_pos * iohs_pos);
 
-                    g_link_data[index + OPT0_O0].io_magic = htobe32(0x4F4C4E4B);
-                    g_link_data[index + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[index + OPT0_O0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED]);
-                    g_link_data[index + 1 + OPT0_O0].io_magic = htobe32(0x4F4C4E4B);
-                    g_link_data[index + 1 + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[index + 1 + OPT0_O0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED]);
+                    g_link_data[iohs_pos + OPT0_O0].io_magic = htobe32(0x4F4C4E4B);
+                    g_link_data[iohs_pos + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
+                    g_link_data[iohs_pos + OPT0_O0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED]);
+                    g_link_data[iohs_pos + 1 + OPT0_O0].io_magic = htobe32(0x4F4C4E4B);
+                    g_link_data[iohs_pos + 1 + OPT0_O0].sub_type = htobe32(l_sub_speed_type);
+                    g_link_data[iohs_pos + 1 + OPT0_O0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED]);
                 }
 
             }

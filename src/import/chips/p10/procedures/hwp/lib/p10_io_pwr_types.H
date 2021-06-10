@@ -190,17 +190,21 @@ typedef enum
     OPT7_AX1,  //37
     OPT0_O0,   //38
     OPT0_O1,   //39
-    OPT3_O0,   //40
-    OPT3_O1,   //41
-    OPT4_O0,   //42
-    OPT4_O1,   //43
-    OPT5_O0,   //44
-    OPT5_O1,   //45
-    OPT6_O0,   //46
-    OPT6_O1,   //47
-    OPT7_O0,   //48
-    OPT7_O1,   //49
-    NUMBER_OF_IO_LINKS, //50
+    OPT1_O0,   //40
+    OPT1_O1,   //41
+    OPT2_O0,   //42
+    OPT2_O1,   //43
+    OPT3_O0,   //44
+    OPT3_O1,   //46
+    OPT4_O0,   //47
+    OPT4_O1,   //48
+    OPT5_O0,   //49
+    OPT5_O1,   //50
+    OPT6_O0,   //51
+    OPT6_O1,   //52
+    OPT7_O0,   //53
+    OPT7_O1,   //54
+    NUMBER_OF_IO_LINKS, //55
 } link_controllers;
 
 
