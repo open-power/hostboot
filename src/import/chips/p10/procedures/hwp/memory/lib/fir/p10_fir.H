@@ -811,7 +811,6 @@ inline fapi2::ReturnCode after_p10_omi_train_check(const fapi2::Target<fapi2::TA
     for (const auto& l_pauc : mss::find_targets<fapi2::TARGET_TYPE_PAUC>(i_target))
     {
         fapi2::buffer<uint64_t> l_csdr_data;
-        fapi2::buffer<uint64_t> l_mask;
         uint16_t l_ppe_error_state = 0;
         uint16_t l_ppe_error_thread = 0;
         fapi2::buffer<uint64_t> l_fir_data(0xFFFFFFFFFFFFFFFF);
@@ -840,11 +839,13 @@ inline fapi2::ReturnCode after_p10_omi_train_check(const fapi2::Target<fapi2::TA
         scomt::pauc::SET_PHY_SCOM_MAC_FIR_REG_PPE_CODE_RECAL_NOT_RUN(0, l_fir_data);
         FAPI_TRY(scomt::pauc::PUT_PHY_SCOM_MAC_FIR_REG_WO_AND(l_pauc, l_fir_data));
 
-        // Unmask the FIR
+        // Unmask the FIR (temporarily leave masked due to SW526979)
+#if 0
         FAPI_TRY(scomt::pauc::PREP_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc));
         FAPI_TRY(scomt::pauc::GET_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc, l_mask));
         scomt::pauc::SET_PHY_SCOM_MAC_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK(0, l_mask);
         FAPI_TRY(scomt::pauc::PUT_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc, l_mask));
+#endif
     }
 
 fapi_try_exit:
