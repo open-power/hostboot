@@ -366,13 +366,8 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 }
                 else
                 {
-#ifdef CONFIG_ENABLE_TOD_REDUNDANCY
                     // Report this processor as a secondary TOD master
                     this->iv_spPcrd->hdatChipTodData.hdatPcrdTodFlags=0x05;
-#else
-                    // Do not report this processor as a secondary TOD master
-                    this->iv_spPcrd->hdatChipTodData.hdatPcrdTodFlags=0x04;
-#endif
                 }
                 this->iv_spPcrd->hdatChipTodData.hdatPcrdTodControls=
                                                                 0x03F30000;

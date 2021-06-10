@@ -1310,6 +1310,30 @@ bool  TodControls::isProcBlackListed (
           break;
       }
 
+      // If the maximum number of processors on a system is more than 4, it
+      // means that we are using a half-link SMP topology to connect DCMs. In
+      // that case, due to hardware requirements, only processor 0 on any given
+      // DCM can be used as a TOD master.
+      if (TOD::TodSvcUtil::getMaxProcsOnSystem() > 4
+          && i_procTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>() % 2 != 0)
+      {
+          TARGETING::TargetHandleList procs;
+          TARGETING::getAllChips(procs, TARGETING::TYPE_PROC);
+
+          // The processors within a DCM are connected via a full IOHS link, so
+          // we don't have to blacklist the odd processor in the DCM when
+          // there's only one functional DCM (which must be DCM 0; system
+          // processor 0 must always be functional, since it is the only
+          // processor with an FSI link to the BMC).
+          if (procs.size() > 2 || i_procTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>() != 1)
+          {
+              TOD_INF("Proc 0x%.8X is blacklisted because it's the secondary processor in a DCM!",
+                      GETHUID(i_procTarget));
+              l_blackListed = true;
+              break;
+          }
+      }
+
       if(iv_BlackListedProcs.end() != std::find(
           iv_BlackListedProcs.begin(),
           iv_BlackListedProcs.end(),
