@@ -2790,7 +2790,7 @@
         OFF=0,
         ON=1
     </enum>
-    <default>ON</default>
+    <default>OFF</default>
     <overrideOnly/>
     <group>mma</group>
   </attribute>
