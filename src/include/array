@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #endif
 #include <stdint.h>
 #include <algorithm>
+#include <assert.h>
 
 namespace std
 {
@@ -212,22 +213,28 @@ namespace std
         // element access:
 
         /**
-         * Returns a reference to the element at specified location pos.
-         * No bounds checking is performed.
+         * Returns a reference to the element at specified location pos, with
+         * bounds checking. Will assert if pos is not within the range of the
+         * container
          * @param[in] position of the element to return
          * @return Reference to the requested element.
-         * @pre Unlike std::map::operator[], this operator never inserts a new
-         *      element into the container.
+         * @pre None.
          * @post None.
          */
         reference operator[](size_type n)
         {
+#ifdef BOOTLOADER
+            kassert(n < size());
+#else
+            assert(n < size());
+#endif
             return elems[n];
         }
 
         /**
-         * Returns a const_reference to the element at specified location pos.
-         * No bounds checking is performed.
+         * Returns a reference to the element at specified location pos, with
+         * bounds checking. Will assert if pos is not within the range of the
+         * container
          * @param[in] position of the element to return
          * @return const_reference to the requested element.
          * @pre None.
@@ -235,6 +242,11 @@ namespace std
          */
         const_reference operator[](size_type n) const
         {
+#ifdef BOOTLOADER
+            kassert(n < size());
+#else
+            assert(n < size());
+#endif
             return elems[n];
         }
 
@@ -249,7 +261,11 @@ namespace std
          */
         reference at(size_type n)
         {
+#ifdef BOOTLOADER
+            kassert(n < size());
+#else
             assert(n < size());
+#endif
             return elems[n];
         }
 
@@ -264,7 +280,11 @@ namespace std
          */
         const_reference at(size_type n) const
         {
+#ifdef BOOTLOADER
+            kassert(n < size());
+#else
             assert(n < size());
+#endif
             return elems[n];
         }
 
