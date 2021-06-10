@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@ enum RETURN_ACTION
     REIPL_UPD_MSEEPROM  = 6, // Reload/update of Measurement SEEPROM required or deconfig the chip
     REIPL_UPD_SPI_CLK_DIV   = 7,  // Update SP code and reipl the system/chip
     NO_RECOVERY_ACTION = 8, // No recovery action possible to correct this error
+    REIPL_BKP_BMSEEPROM  = 9, // Run IPL by selecting backup Measurement and  Boot seeproms
 };
 };
 

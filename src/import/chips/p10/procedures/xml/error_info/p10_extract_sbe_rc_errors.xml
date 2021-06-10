@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -89,7 +89,7 @@
     <rc>RC_EXTRACT_SBE_RC_PROGRAM_INTERRUPT</rc>
     <description>
     Program interrupt promoted
-    Action:Retrigger IPL or HRESET [RESTART_SBE]
+    Action:Switch both boot and measurement SEEPROMs [REIPL_BKP_BMSEEPROM]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -106,7 +106,7 @@
     <rc>RC_EXTRACT_SBE_RC_INST_STORE_INTR</rc>
     <description>
     Instruction storage interrupt
-    Action:Retrigger IPL or HRESET [RESTART_SBE]
+    Action:Switch boot and measurement SEEPROMs [REIPL_BKP_BMSEEPROM]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -157,7 +157,7 @@
     <rc>RC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED</rc>
     <description>
     Address scope out of range
-    Action:Retrigger IPL or HRESET [RESTART_SBE]
+    Action:Switch both boot and masurement SEEPROMs [REIPL_BKP_BMSEEPROM]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -508,8 +508,8 @@
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_UNKNOWN_ERROR</rc>
     <description>
-    Unknown error has occured, So debug has to be done to understand the error
-    Action: No recovery action [NO_RECOVERY_ACTION]
+    Unknown error has occured, try bkup seeproms or debug has to be done to understand the error
+    Action:  Switch sides or debug[REIPL_BKP_BMSEEPROM]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>

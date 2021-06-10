@@ -556,7 +556,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             if(l_data32_lr == MSEEPROM_MAGIC_NUMBER_CHECK_LOCATION)
             {
-                o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM;
+                o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
                 FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH()
                             .set_TARGET_CHIP(i_target_chip),
                             "ERROR:Measurement SEEPROM magic number didn't match");
@@ -625,12 +625,20 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                     l_sbe_booted = l_data32.getBit<0>();
                 }
 
-                if(l_sbe_code_state < 0x9)
+                //if(l_sbe_code_state < 0x9)
+                if((MSEEPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= MSEEPROM_MAX_RANGE))
                 {
                     o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
                     FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L1_LOADER_FAIL()
                                 .set_TARGET_CHIP(i_target_chip),
                                 "ERROR:Program Interrupt occured in Measurement SEEPROM");
+                }
+                else if((BSEEPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= BSEEPROM_MAX_RANGE))
+                {
+                    o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+                    FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL()
+                                .set_TARGET_CHIP(i_target_chip),
+                                "ERROR:Program Interrupt occured in Boot SEEPROM");
                 }
                 else if(l_sbe_code_state < 0xB)
                 {
@@ -657,7 +665,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 FAPI_ERR("ERROR: IAR %08lX is out of range when MCS reported a Program Interrupt", l_data32_iar);
             }
 
-            o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
+            o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM;
             FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_PROGRAM_INTERRUPT()
                         .set_TARGET_CHIP(i_target_chip),
                         "ERROR:Program interrupt occured for IAR=%08lX and EDR=%08lX", l_data32_iar, l_data32_edr);
@@ -684,7 +692,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 FAPI_ERR("ERROR: IAR %08lX is out of range when MCS reported a Instruction storage interrupt", l_data32_iar);
             }
 
-            o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
+            o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM;
             FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_INST_STORE_INTR()
                         .set_TARGET_CHIP(i_target_chip),
                         "ERROR:Instruction storage interrupt for IAR=%08lX and EDR=%08lX", l_data32_iar, l_data32_edr);
@@ -802,7 +810,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         }
         else
         {
-            o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
+            o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM;
             FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED()
                         .set_TARGET_CHIP(i_target_chip),
                         "ERROR:Address %08lX is out of range", l_data32_iar);
@@ -1253,7 +1261,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                 "Measurement SEEPROM configured with invalid clock divider");
                 }
 
-                o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM;
+                o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
                 FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
                             .set_TARGET_CHIP(i_target_chip),
                             "Measurement SEEPROM uncorrectable ECC error detected");
@@ -1705,7 +1713,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                 "Measurement SEEPROM configured with invalid clock divider");
                 }
 
-                o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM;
+                o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
                 FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
                             .set_TARGET_CHIP(i_target_chip),
                             "Measurement SEEPROM uncorrectable ECC error detected");
@@ -1722,39 +1730,10 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
         }
 
-        //Unknown error - recovery action based on sbe state.
+        //Unknown
         FAPI_ERR("Halted due to unknown error at IAR location %08lX", l_data32_iar);
 
-        fapi2::buffer<uint8_t> l_sbe_code_state;
-        bool l_sbe_booted = false;
-        FAPI_INF("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
-
-        if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
-        {
-            FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG, l_data64));
-            l_data64.extractToRight(l_sbe_code_state, 30, 2);
-            l_sbe_booted = l_data64.getBit<0>();
-        }
-        else
-        {
-            FAPI_TRY(getCfamRegister(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI, l_data32));
-            l_data32.extractToRight(l_sbe_code_state, 30, 2);
-            l_sbe_booted = l_data32.getBit<0>();
-        }
-
-        if(l_sbe_code_state < 0x9)
-        {
-            o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
-        }
-        else if(l_sbe_code_state < 0xB)
-        {
-            o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
-        }
-        else if((l_sbe_code_state == 0xB) && (!l_sbe_booted))
-        {
-            o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
-        }
-
+        o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM;
         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_UNKNOWN_ERROR()
                     .set_TARGET_CHIP(i_target_chip), "SBE halted due to unknown error");
     }
