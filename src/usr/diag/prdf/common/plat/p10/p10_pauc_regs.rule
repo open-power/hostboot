@@ -118,7 +118,8 @@
     {
         name        "PAU_PHY_FIR_MASK atomic OR reg";
         scomaddr    0x10012c05;
-        capture     group default;
+        capture     group never;
+        access      write_only;
     };
 
     register PHY_LOCAL_SRAM_DATA
