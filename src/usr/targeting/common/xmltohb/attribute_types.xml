@@ -565,6 +565,20 @@
   </attribute>
 
   <attribute>
+    <id>CHECK_ATTN_AFTER_ISTEP_FAIL</id>
+    <description>
+      Flag to check for IPL attentions if channel failure is detected
+    </description>
+    <persistency>volatile-zeroed</persistency>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <writeable/>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>The address offset which each Chiplet types pervasive
      address space used to represent the a chiplet.
      0x00 to 0x0F =&gt; For P9 all non-core and non-cache chiplets

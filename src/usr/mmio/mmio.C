@@ -1011,30 +1011,16 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                     // Dump some debug registers to the error log
                     addChannelFailureRegisterData(i_ocmbTarget, l_err);
 
-                    // Look for a better PRD error
-                    //
-                    // TODO RTC 92971
-                    // There is a potential deadlock if we call PRD here since
-                    // we could recursively call PRD and they are locking a
-                    // mutex.  Skip this call for now.
-                    //
-                    //errlHndl_t l_prd_err = ATTN::checkForIplAttentions();
-                    errlHndl_t l_prd_err = nullptr;
-                    if(l_prd_err)
-                    {
-                        TRACFCOMP(g_trac_mmio,
-                                  ERR_MRK"Error from checkForIplAttentions: "
-                                  "PLID=%X",
-                                  l_prd_err->plid());
+#ifndef __HOSTBOOT_RUNTIME
+                    // Set system attribute to call PRD at the end of the istep.
+                    // Calling it here will cause a potential deadlock
+                    // because we could recursively call PRD and they are locking
+                    // a mutex
+                    TARGETING::Target* sys = TARGETING::UTIL::assertGetToplevelTarget();
 
-                        //connect up the plids
-                        l_err->plid(l_prd_err->plid());
-
-                        //commit my log as info because PRD's log is better
-                        l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                        ERRORLOG::errlCommit(l_err, MMIO_COMP_ID);
-                        l_err = l_prd_err;
-                    }
+                    // 0 = false, 1 = true
+                    sys->setAttr<ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>(1);
+#endif
 
                     break;
                 }

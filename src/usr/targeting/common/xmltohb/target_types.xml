@@ -2064,6 +2064,9 @@
       <id>CHASSIS_LOCATION_CODE</id>
     </attribute>
     <attribute>
+      <id>CHECK_ATTN_AFTER_ISTEP_FAIL</id>
+    </attribute>
+    <attribute>
       <default>SYS</default>
       <id>CLASS</id>
     </attribute>

@@ -848,7 +848,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                                     uint32_t i_substep,
                                     bool & o_doReconfig)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     o_doReconfig = false;
 
     INITSERVICE::ShadowIstepData( static_cast<uint8_t>(i_istep),
@@ -1022,7 +1022,9 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             }
         }
 
-        if(err)
+        // Run check attention if system attribute is set
+        bool runCheckAttn = l_pTopLevel->getAttr<TARGETING::ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>();
+        if (err)
         {
             TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Istep failed, plid 0x%x",
                       err->plid());
@@ -1033,16 +1035,36 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         else if ((true == theStep->taskflags.check_attn) &&
                  (false == iv_mpiplMode))
         {
+            runCheckAttn = true;
+        }
+
+        // Run check attention if flag is set
+        if (runCheckAttn)
+        {
             TRACDCOMP(g_trac_initsvc,
                       INFO_MRK"Check for attentions and invoke PRD" );
 
-            err = ATTN::checkForIplAttentions();
+            errlHndl_t l_errl = ATTN::checkForIplAttentions();
 
-            if ( err )
+            if (l_errl)
             {
                 TRACFCOMP( g_trac_initsvc, ERR_MRK"doIstep: error from "
                           "checkForIplAttentions");
+
+                if (err)
+                {
+                    l_errl->plid(err->plid());
+                    errlCommit(l_errl, INITSVC_COMP_ID);
+                }
+                else
+                {
+                    err = l_errl;
+                    l_errl = nullptr;
+                }
             }
+
+            // Zero out attribute to handle reconfig loops
+            l_pTopLevel->setAttr<TARGETING::ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>(0);
         }
 
 #ifdef CONFIG_RECONFIG_LOOP_TESTS_ENABLE
