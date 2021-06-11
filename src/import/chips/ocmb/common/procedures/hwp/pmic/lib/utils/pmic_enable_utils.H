@@ -399,7 +399,7 @@ struct target_info_redundancy
                     "Given %u PMICs, %u GI2C",
                     mss::c_str(i_ocmb),
                     NUM_PRIMARY_PMICS,
-                    NUM_GENERICI2CSLAVE,
+                    mss::generic_i2c_slave::NUM_TOTAL_DEVICES,
                     NUM_PMICS,
                     NUM_GENERICI2CSLAVE);
 
