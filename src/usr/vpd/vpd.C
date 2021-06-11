@@ -891,17 +891,7 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
         TRACFCOMP(g_trac_vpd, "VPD::ensureEepromCacheIsInSync o_isInSync=%d HUID=0x%X l_matchPN=%d l_matchSN=%d",
             o_isInSync, get_huid(i_target), l_matchPN, l_matchSN);
 
-        // There are two cases where we want to refresh our copy of the VPD
-        // when the hardware didn't actually change.
-        // 1) ATTR_EECACHE_VPD_STATE is set, which indicates that someone
-        //    (either HBRT or HWSV) knowingly modified the data without
-        //    updating our EECACHE at the same time.
-        // 2) There are known cases on the service processor where the
-        //    processor module vpd specifically is modified while Hostboot
-        //    isn't running.
-        if( (i_target->getAttr<TARGETING::ATTR_EECACHE_VPD_STATE>()
-             == TARGETING::EECACHE_VPD_STATE_VPD_NEEDS_REFRESH)
-            || (i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC) )
+        if (i_target->getAttr<TARGETING::ATTR_EECACHE_VPD_STATE>() == TARGETING::EECACHE_VPD_STATE_VPD_NEEDS_REFRESH)
         {
             o_isInSync = false;
             o_isNewPart = false;
