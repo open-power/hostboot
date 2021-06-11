@@ -79,6 +79,7 @@ As referenced above, this is used to clear errors in the `RCS_SENSE_1` register.
 [xx0f001f]: https://eclipz.pok.ibm.com/sys/ras/scom/p10/ec_10.dd10_split_fure.v17/tp_pcb_slave.html#00000000010F001F
 [xx0f001e]: https://eclipz.pok.ibm.com/sys/ras/scom/p10/ec_10.dd10_split_fure.v17/tp_pcb_slave.html#00000000010F001E
 [0005001D]: https://eclipz.pok.ibm.com/sys/ras/scom/p10/ec_10.dd10_split_fure.v17/tp.html#000000000005001D
+[00050013]: https://eclipz.pok.ibm.com/sys/ras/scom/p10/ec_10.dd10_split_fure.v17/tp.html#0000000000050013
 [00050015]: https://eclipz.pok.ibm.com/sys/ras/scom/p10/ec_10.dd10_split_fure.v17/tp.html#0000000000050015
 
 ## Clock Domains
@@ -123,14 +124,15 @@ RCS OSC error attentions have the potential of generating PLL unlock attentions,
 but it is also possible the PLL unlock attentions could have asserted on their
 own. Unfortunately, there may have been one or more clock failovers due to the
 RCS OSC error attentions. Therefore, it would be impossible to tell which clock
-may have generated the PLL unlock attentions. So, if any RCS OSC error
-attentions are present, PRD must ignore all PLL unlock attentions
+was the primary at the time of the PLL unlock attention. So, if any RCS OSC
+error attentions are present on a chip, PRD must ignore any PLL unlock
+attentions on that chip.
 
 Similarly, RCS unlock detect attentions only have meaning if found on the
 non-primary clock. Again, due to potential clock failovers, it would be
-impossible to tell which clock may have been the primary at the time of the RCS
-unlock attention. Therefore, PRD must also ignore all RCS unlock detect
-attentions if there are any RCS OSC error attentions present.
+impossible to tell which clock was the primary at the time of the the RCS unlock
+detect attention. Therefore, if any RCS OSC error attentions are present on a
+chip, PRD must ignore any RCS unlock detect attentions on that chip.
 
 Certain PLL unlock attentions have the potential of causing RCS unlock detect
 attentions, but it is also possible the two error types could have asserted on
@@ -162,33 +164,39 @@ IPLing, which would be undesirable when there could be a perfectly good
 redundant clock available. Therefore, we will not guard the processor on any of
 these errors.
 
+Note that any time a clock is called out, HWSV will add the planar (priority
+LOW) and procedure FSPSP96 to the callout list.
+
 The following is a summary for clock domain analysis based on the detailed
-description above. Note that any time a clock is called out, HWSV will add the
-planar (priority LOW) and procedure FSPSP96 to the callout list.
+description above (note that service will only be requested when a threshold
+has been reached):
 
 ```
-if ( RCS OSC error on any chip in the domain )
+for ( each chip in the domain )
 {
-    call out the associated clock(s), HIGH
-    call out the processor(s), LOW, NO GUARD
-}
-else
-{
-    if ( RCS unlock detect on non-primary clock on any chip in the domain )
+    if ( RCS OSC error from either clock )
     {
         call out the associated clock(s), HIGH
-        call out the processor(s), LOW, NO GUARD
+        call out the processor, LOW, NO GUARD
     }
+    else
+    {
+        if ( RCS unlock detect on non-primary clock )
+        {
+            call out the associated clock, HIGH
+            call out the processor, LOW, NO GUARD
+        }
 
-    if ( PLL unlock on more than one chip in the domain )
-    {
-        call out the primary clock, HIGH
-        call out the processor(s), MEDIUM, NO GUARD
-    }
-    else if ( PLL unlock on only one chip in the domain )
-    {
-        call out the primary clock, MEDIUM
-        call out the processor, MEDIUM, NO GUARD
+        if ( PLL unlock from primary clock on more than one chip in domain )
+        {
+            call out the associated clock, HIGH
+            call out the processor, MEDIUM, NO GUARD
+        }
+        else if ( PLL unlock from primary clock on only one chip in the domain )
+        {
+            call out the associated clock, MEDIUM
+            call out the processor, MEDIUM, NO GUARD
+        }
     }
 }
 ```
@@ -197,68 +205,110 @@ else
 
 Some failover events could be caused by transient soft errors. When PRD detects
 an RCS OSC error, it will call the `p10_rcs_transient_check` HWP which will
-determine if the error was transient or a hard failure. On the event of a hard
-failure, PRD will enable the alternate ref clock mode by setting bit 3 (OSC 0)
-or bit 7 (OSC 0) in the `ROOT_CTRL3` register.
+initiate recovery. On the event of a hard failure (unsuccessful recovery), PRD
+will enable the alternate ref clock mode on the processor reporting the error
+by setting `ROOT_CTRL3[3]` (OSC 0) or `ROOT_CTRL3[7]` (OSC 1). In addition, PRD
+will make an immediate predictive callout, following the rules above, regardless
+of the current threshold counts.
 
-## Thresholding
+## Thresholding RCS OSC error and RCS unlock detect attentions
 
-PRD will maintain the following threshold counters per clock domain:
+PRD will maintain the following threshold counters per chip in the clock
+domain:
 - RCS OSC error and RCS unlock detect attentions on clock 0.
 - RCS OSC error and RCS unlock detect attentions on clock 1.
-- PLL unlock attentions on either clock.
 
-During analysis of a clock domain, a threshold counter is increased by 1 if at
-least one chip in the clock domain reported the associated attention type.
+Note that this is different from PLL unlock attentions were we only threshold
+per clock. This is because on threshold of RCS transient errors must switch the
+chip over to alt ref clock mode. We only want to do this on failing chips and we
+don't want to force any potentially good chips to this mode.
 
-Unlike previous chip generations, the RAS team has requested that we be more
-tolerant of transient errors. In addition, firmware will not play a role in
-clock recovery. Instead, we will allow the hardware to take its own course, even
-if one of the clocks hits a hard failure. Therefore, each threshold counters
-will have a threshold of 2 per 5 minutes.
+The threshold for each counter will be 2 per 5 minutes in the field or on first
+occurrence in manufacturing.
 
 Once a threshold has been reached, all associated attention types will be masked
 using the rules stated below. For example, if there is an RCS threshold on
-clock 0, both the RCS OSC error and RCS unlock detect attentions on clock 0 will
-be masked. This also requires the RCS unlock detect attention on clock 1 and PLL
-unlock attentions to be masked, per the rules we have for RCS OSC error
-attentions.
+clock 0, the following will be masked per the rules below:
+- RCS OSC error on clock 0 on this chip.
+- RCS unlock detect on clock 0 on this chip.
+- RCS unlock detect on clock 1 on this chip.
+- PLL unlock on all chips in the domain.
+
+## Thresholding PLL unlock attentions
+
+PRD will maintain a threshold counter, per clock, for PLL unlock attentions from
+any chip in the domain.
+
+During analysis of a clock domain, the threshold counter is increased by 1 if at
+least one chip in the clock domain reported a PLL unlock attention.
+
+The threshold for each counter will be 2 per 5 minutes in the field or on first
+occurrence in manufacturing.
+
+Once a threshold has been reached, PLL unlock attentions will be masked on **all
+processors** in the domain using the rules stated below.
 
 ## Clearing Attentions
 
-When clearing a PLL unlock attention on a chip, PRD must:
+When clearing any PLL unlock attention in the domain, PRD must clear all PLL
+attentions on **all chips in the domain**. For each chip:
+
 - Clear all chiplet PLL unlock attentions by setting `BC_OR_PCBSLV_ERROR[24:31]`
   to all 1's.
+
 - Clear `TP_LOCAL_FIR[28]`.
 
 When clearing an RCS unlock detect attention on a chip, PRD must:
-- Clear the underlying attentions in `RCS_SENSE_1` by toggling the associated
-  bits in `ROOT_CTRL5[6:7]`.
-- Clear the associated bits in `TP_LOCAL_FIR[44:45]`.
+
+- Clear the underlying attentions in `RCS_SENSE_1` by toggling `ROOT_CTRL5[6]`
+  (OSC 0) or `ROOT_CTRL5[7]` (OSC 1) on, then off. Note that this will clear
+  both RCS unlock detect and RCS OSC error attentions and there is no way in
+  hardware to separate this.
+
+- Clear `TP_LOCAL_FIR[44]` (OSC 0) or `TP_LOCAL_FIR[45]` (OSC 1).
 
 When clearing an RCS OSC error attentions on a chip, PRD must:
-- Clear PLL unlock attentions, as described above, on all chips in the domain.
-- Clear both RCS unlock detect attentions, as described above, on all chips in
-  the domain.
-- Clear the underlying attentions in `RCS_SENSE_1` by toggling the associated
-  bits in `ROOT_CTRL5[6:7]`.
-- Clear the associated bits in `TP_LOCAL_FIR[42:43]`.
+
+- Clear all PLL unlock attentions, as described above, on **all chips in the
+  domain**. This must be done to avoid reporting possible side-effect attentions
+  later on. See the Analysis Priority above for justification.
+
+- Clear all RCS unlock detect attentions (both clocks), as described above, on
+  **this chip**. This must be done to avoid reporting possible side-effect
+  attentions later on. See the Analysis Priority above for justification.
+
+- Clear the underlying attentions in `RCS_SENSE_1` by toggling `ROOT_CTRL5[6]`
+  (OSC 0) or `ROOT_CTRL5[7]` (OSC 1) on, then off. Note that this will clear
+  both RCS unlock detect and RCS OSC error attentions and there is no way in
+  hardware to separate this.
+
+- Clear `TP_LOCAL_FIR[42]` (OSC 0) or `TP_LOCAL_FIR[43]` (OSC 1).
 
 ## Masking Attentions (on threshold)
 
-When masking a PLL unlock attention on a chip, PRD must:
+When masking any PLL unlock attention in the domain, PRD must mask all PLL
+attentions on **all chips in the domain**. For each chip:
+
 - Set `xx_PCBSLV_CONFIG[12:19]` on all chiplets in the processor.
+
 - PRD will **not** mask `TP_LOCAL_FIR[28]` so that PCB slave parity error
   attentions can continue to be reported.
 
 When masking an RCS unlock detect attention on a chip, PRD must:
-- Mask the associated bits in `TP_LOCAL_FIR[44:45]`.
 
-When clearing an RCS OSC error attentions on a chip, PRD must:
-- Mask PLL unlock attentions, as described above, on all chips in the domain.
-- Mask both RCS unlock detect attentions, as described above, on all chips in
-  the domain.
-- Mask the associated bits in `TP_LOCAL_FIR[42:43]`.
+- Mask `TP_LOCAL_FIR[44]` (OSC 0) or `TP_LOCAL_FIR[45]` (OSC 1).
+
+When masking an RCS OSC error attentions on a chip, PRD must:
+
+- Mask all PLL unlock attentions, as described above, on **all chips in the
+  domain**. This must be done to avoid reporting possible side-effect attentions
+  later on. See the Analysis Priority above for justification.
+
+- Mask all RCS unlock detect attentions (both clocks), as described above, on
+  **this chip**. This must be done to avoid reporting possible side-effect
+  attentions later on. See the Analysis Priority above for justification.
+
+- Mask `TP_LOCAL_FIR[42]` (OSC 0) or `TP_LOCAL_FIR[43]` (OSC 1).
 
 ## Additional Handling in Normal PRD FIR Analysis
 
