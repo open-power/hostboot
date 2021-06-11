@@ -846,14 +846,30 @@ fapi2::ReturnCode p10_io_init::ext_req_all(const fapi2::Target<fapi2::TARGET_TYP
 
         for (auto l_iohs_target : l_iohs_targets)
         {
+            fapi2::ATTR_IOHS_CONFIG_MODE_Type l_config_mode;
             int l_thread = 0;
             FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
 
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_hw_reg_init_pg[l_thread].putData(l_pauc_target, 1));
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_dccal_pl[l_thread].putData(l_pauc_target, 1));
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_zcal_pl[l_thread].putData(l_pauc_target, 1));
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_ffe_pl[l_thread].putData(l_pauc_target, 1));
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_power_on_pl[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, l_iohs_target, l_config_mode),
+                     "Error from FAPI_ATTR_GET (ATTR_IOHS_CONFIG_MODE)");
+
+
+            if (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
+            {
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_hw_reg_init_pg[l_thread].putData(l_pauc_target, 1));
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_dccal_pl[l_thread].putData(l_pauc_target, 1));
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_zcal_pl[l_thread].putData(l_pauc_target, 1));
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_ffe_pl[l_thread].putData(l_pauc_target, 1));
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_power_on_pl[l_thread].putData(l_pauc_target, 1));
+            }
+            else if (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
+            {
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_hw_reg_init_pg[l_thread].putData(l_pauc_target, 1));
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_dccal_pl[l_thread].putData(l_pauc_target, 1));
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_zcal_pl[l_thread].putData(l_pauc_target, 1));
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_ffe_pl[l_thread].putData(l_pauc_target, 1));
+                FAPI_TRY(p10_io_ppe_ext_cmd_req_power_off_pl[l_thread].putData(l_pauc_target, 1));
+            }
 
         }
 

@@ -36,6 +36,7 @@
 //------------------------------------------------------------------------------
 #include <p10_fabric_link_layer.H>
 #include <p10_scom_iohs.H>
+#include <p10_io_power.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -186,6 +187,13 @@ fapi2::ReturnCode p10_fabric_link_layer(
         {
 
             FAPI_DBG("Training link %s", l_targetStr);
+
+            if (i_train_internode)   // Abus
+            {
+                FAPI_TRY(p10_io_iohs_power(l_iohs, true),
+                         "Error from p10_io_iohs_power");
+            }
+
             FAPI_TRY(p10_fabric_link_layer_train_link(
                          l_iohs,
                          l_link_train),

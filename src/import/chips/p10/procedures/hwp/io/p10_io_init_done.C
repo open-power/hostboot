@@ -383,12 +383,23 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             {
                 int l_thread = 0;
                 fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_num;
+                fapi2::ATTR_IOHS_CONFIG_MODE_Type l_config_mode;
                 FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_iohs_num),
                          "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, l_iohs_target, l_config_mode),
+                         "Error from FAPI_ATTR_GET (ATTR_IOHS_CONFIG_MODE)");
+
                 FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
 
-                FAPI_TRY(l_proc.p10_io_init_done_pon_check_thread_done(l_pauc_target, l_thread, l_done));
+                if (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
+                {
+                    FAPI_TRY(l_proc.p10_io_init_done_pon_check_thread_done(l_pauc_target, l_thread, l_done));
+                }
+                else if (l_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
+                {
+                    FAPI_TRY(l_proc.p10_io_init_done_poff_check_thread_done(l_pauc_target, l_thread, l_done));
+                }
             }
 
             for (auto l_omic_target : l_omic_targets)
