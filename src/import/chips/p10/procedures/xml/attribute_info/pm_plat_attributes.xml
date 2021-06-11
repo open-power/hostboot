@@ -728,30 +728,6 @@
 
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_XGPE_PM_SUSPEND_DISABLE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    Enables the XGPE Hcode to support the MPIPL function that coordinates the
-    suspension of the Power Management subsystem. If ON (DISABLED), XGPE provides
-    and immediate good response to allow for general integration testing
-
-    Consumer: p10_hcode_image_build.c -> XGPE Header field
-
-    Platform default: OFF
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <enum>
-        OFF = 0x00,
-        ON = 0x01
-    </enum>
-    <!-- TODO RTC 210233 -->
-    <default>ON</default>
-    <group>debug</group>
-  </attribute>
-
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_PM_GLOBAL_FIR_TRACE_EN</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>

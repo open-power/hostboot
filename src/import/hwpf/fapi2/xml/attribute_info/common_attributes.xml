@@ -73,6 +73,7 @@
       This data is from the MRW.
     </description>
     <valueType>uint32</valueType>
+    <default>0xFFFFFFFF</default><!-- Ensures platform explicitly puts a valid number in here -->
     <platInit/>
   </attribute>
   <!-- ******************************************************************************** -->
@@ -112,6 +113,7 @@
       This data is derived from the MRW.
     </description>
     <valueType>uint32</valueType>
+    <default>0xFFFFFFFF</default><!-- Ensures platform explicitly puts a valid number in here -->
     <platInit/>
   </attribute>
   <!-- ******************************************************************************** -->

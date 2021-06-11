@@ -24,28 +24,6 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
   <attribute>
-    <id>ATTR_MSS_MRW_SUPPORTED_FREQ</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-      List of memory frequencies supported by the current system.
-    </description>
-    <valueType>uint32</valueType>
-    <array>4</array>
-    <platInit/>
-    <!-- Note, mirrors ATTR_MSS_FREQ -->
-    <enum>
-      MT1866 = 1866,
-      MT2133 = 2133,
-      MT2400 = 2400,
-      MT2666 = 2666,
-      MT2933 = 2933,
-      MT3200 = 3200
-    </enum>
-    <default> 1866, 2133, 2400, 2666 </default>
-    <mssUnit>MT/s</mssUnit>
-  </attribute>
-
-  <attribute>
     <id>ATTR_MEM_MRW_IS_PLANAR</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
     <description>
@@ -74,35 +52,6 @@
     <default>32</default>
     <platInit/>
     <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_port</mssAccessorName>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-        Machine Readable Workbook Thermal Memory Power Limit
-        Used to calculate throttles to be at or under the power limit
-        Per DIMM basis
-        KEY (0-19): In order
-        DIMM_SIZE = bits 0-3,
-        DIMM_GEN = 4-5,
-        DIMM_TYPE = 6-7,
-        DIMM_WIDTH = 8-10,
-        DIMM_DENSITY = 11-13,
-        DIMM_STACK_TYPE = 14-15,
-        DRAM_MFGID = 16-18,
-        DIMMS_PER_PORT = 19-20,
-        Bits 21-32: Not used
-        VALUE (bits 32-63) in cW:
-        VMEM+VPP thermal power limit per DIMM = 32-63
-        Consumers: eff_config_thermal and bulk_pwr_throttles
-    </description>
-    <valueType>uint64</valueType>
-    <mssUnits>cW</mssUnits>
-    <default>0xfffff80000000794</default>
-    <array>10</array>
-    <platInit/>
-    <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -798,5 +747,58 @@
     <default> NOT_ALLOWED </default>
     <mssAccessorName>mrw_dimm_height_plug_rule</mssAccessorName>
   </attribute>
+
+<!-- DEPRECATED : Avoiding delete for now to avoid coreq CI issues -->
+  <attribute>
+    <id>ATTR_MSS_MRW_SUPPORTED_FREQ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      List of memory frequencies supported by the current system.
+    </description>
+    <valueType>uint32</valueType>
+    <array>4</array>
+    <platInit/>
+    <!-- Note, mirrors ATTR_MSS_FREQ -->
+    <enum>
+      MT1866 = 1866,
+      MT2133 = 2133,
+      MT2400 = 2400,
+      MT2666 = 2666,
+      MT2933 = 2933,
+      MT3200 = 3200
+    </enum>
+    <default> 1866, 2133, 2400, 2666 </default>
+    <mssUnit>MT/s</mssUnit>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Thermal Memory Power Limit
+        Used to calculate throttles to be at or under the power limit
+        Per DIMM basis
+        KEY (0-19): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-7,
+        DIMM_WIDTH = 8-10,
+        DIMM_DENSITY = 11-13,
+        DIMM_STACK_TYPE = 14-15,
+        DRAM_MFGID = 16-18,
+        DIMMS_PER_PORT = 19-20,
+        Bits 21-32: Not used
+        VALUE (bits 32-63) in cW:
+        VMEM+VPP thermal power limit per DIMM = 32-63
+        Consumers: eff_config_thermal and bulk_pwr_throttles
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>cW</mssUnits>
+    <default>0xfffff80000000794</default>
+    <array>10</array>
+    <platInit/>
+    <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
+  </attribute>
+<!-- END DEPRECATED -->
 
 </attributes>
