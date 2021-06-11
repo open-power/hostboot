@@ -289,6 +289,10 @@
           <id>SBE_SELECT_EX_POLICY</id>
           <default>HB_DEFAULT</default><!-- Run with minimum cache -->
     </attribute>
+    <attribute>
+          <id>MSS_INTERLEAVE_ENABLE</id>
+          <default>0xAE</default><!-- Require pairs -->
+    </attribute>
 </targetInstance>
 
 <targetInstance>

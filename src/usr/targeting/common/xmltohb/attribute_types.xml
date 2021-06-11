@@ -3675,6 +3675,7 @@
 
   <attribute>
     <id>MBA_DIMM</id>
+    <!-- deprecated -->
     <description>
        MBA port DIMM number of this DIMM
        (deprecated in favor of POS_ON_MEM_PORT)
@@ -3690,6 +3691,7 @@
 
   <attribute>
     <id>MBA_PORT</id>
+    <!-- deprecated -->
     <description>
        MBA port this DIMM is connected to
        (deprecated in favor of MEM_PORT)
@@ -7074,42 +7076,6 @@
     <simpleType>
       <uint16_t/>
       <array>4</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-  </attribute>
-
-  <attribute>
-    <id>PROC_PCIE_PCS_SYSTEM_CNTL</id>
-    <description>
-        Value of PCS system control
-        creator: platform
-        consumer: p9_pcie_scominit
-    </description>
-    <simpleType>
-      <uint16_t/>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <!-- @fixme -->
-    <readable/>
-    <writeable/>
-    <ignoreEkb/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_PCS_SYSTEM_CNTL</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-  </attribute>
-
-  <attribute>
-    <id>PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id>
-    <!-- TARGET_TYPE_PEC -->
-    <description>
-        Value of PCS tx fifo config offset
-        creator: platform
-        consumer: p9_pcie_scominit
-    </description>
-    <simpleType>
-      <uint8_t/>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
