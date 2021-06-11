@@ -738,9 +738,12 @@ errlHndl_t handleSetEventReceiverRequest(const msg_q_t i_msgQ,
         if(!UTIL::assertGetToplevelTarget()->getAttr<ATTR_ISTEP_MODE>())
         {
             g_pldmWatchdogArmed = true;
-#ifndef __HOSTBOOT_RUNTIME
-            INITSERVICE::sendProgressCode();
-#endif
+            l_errl = resetWatchdogTimer();
+            if(l_errl)
+            {
+                PLDM_ERR("handleSetEventReceiverRequest: Could not send the first watchdog to BMC");
+                break;
+            }
         }
     }
 
