@@ -342,22 +342,22 @@ group gEQ_CHIPLET_RE_FIR attntype RECOVERABLE
     /** EQ_CHIPLET_RE_FIR[5]
      *  Attention from EQ_CORE_FIR 0
      */
-    (rEQ_CHIPLET_RE_FIR, bit(5)) ? analyzeConnectedCORE0;
+    (rEQ_CHIPLET_RE_FIR, bit(5)) ? analyzeConnectedCoreFir_0;
 
     /** EQ_CHIPLET_RE_FIR[6]
      *  Attention from EQ_CORE_FIR 1
      */
-    (rEQ_CHIPLET_RE_FIR, bit(6)) ? analyzeConnectedCORE1;
+    (rEQ_CHIPLET_RE_FIR, bit(6)) ? analyzeConnectedCoreFir_1;
 
     /** EQ_CHIPLET_RE_FIR[7]
      *  Attention from EQ_CORE_FIR 2
      */
-    (rEQ_CHIPLET_RE_FIR, bit(7)) ? analyzeConnectedCORE2;
+    (rEQ_CHIPLET_RE_FIR, bit(7)) ? analyzeConnectedCoreFir_2;
 
     /** EQ_CHIPLET_RE_FIR[8]
      *  Attention from EQ_CORE_FIR 3
      */
-    (rEQ_CHIPLET_RE_FIR, bit(8)) ? analyzeConnectedCORE3;
+    (rEQ_CHIPLET_RE_FIR, bit(8)) ? analyzeConnectedCoreFir_3;
 
     /** EQ_CHIPLET_RE_FIR[9]
      *  Attention from EQ_L2_FIR 0

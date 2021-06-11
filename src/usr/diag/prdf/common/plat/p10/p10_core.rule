@@ -158,11 +158,14 @@ chip p10_core
     # P10 chip EQ_CORE_FIR
     ############################################################################
 
+    # Note that there is no 'mask' defined under the EQ_CORE_FIR register.
+    # This is because we cannot set the mask of recoverable bits that have
+    # reached threshold in the EQ_CORE_FIR. Instead, we will mask the core off
+    # at the EQ_CHIPLET_RE_FIR level.
     register EQ_CORE_FIR
     {
         name        "P10 chip EQ_CORE_FIR";
         scomaddr    0x20028440;
-        mask        (|, 0x20028445);
         capture     group default;
     };
 

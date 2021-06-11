@@ -43,3 +43,8 @@ actionclass analyzeConnectedCORE1 { analyze(connected(TYPE_CORE, 1)); };
 actionclass analyzeConnectedCORE2 { analyze(connected(TYPE_CORE, 2)); };
 actionclass analyzeConnectedCORE3 { analyze(connected(TYPE_CORE, 3)); };
 
+actionclass analyzeConnectedCoreFir_0 { funccall("analyzeCoreFir_0"); };
+actionclass analyzeConnectedCoreFir_1 { funccall("analyzeCoreFir_1"); };
+actionclass analyzeConnectedCoreFir_2 { funccall("analyzeCoreFir_2"); };
+actionclass analyzeConnectedCoreFir_3 { funccall("analyzeCoreFir_3"); };
+
