@@ -687,9 +687,9 @@
     A positive value can be provided to add additional guardband, or a
     negative value can be provided to reduce the guardband.
 
-    Note that base epsilon table values have a 20% guardband by default,
-    therefore, setting this attribute to -16 (for -16% guardband) will
-    provide epsilon values with approximately 0% guardband.
+    Note that base epsilon table values have built-in guardband, relative to the
+    modeled zero margin numbers, and this attribute simply helps add or subtract
+    cycles relative to the base table values.
   </description>
   <valueType>int8</valueType>
   <writeable/>

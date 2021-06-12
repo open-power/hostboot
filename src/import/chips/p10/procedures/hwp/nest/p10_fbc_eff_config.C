@@ -48,7 +48,7 @@ const uint8_t NUM_EPSILON_READ_TIERS = 3;
 const uint8_t NUM_EPSILON_WRITE_TIERS = 2;
 
 //
-// PAU: 2588 MHz
+// PAU: 2588 MHz (20% GB)
 //
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR disabled/half
@@ -84,7 +84,7 @@ const uint32_t EPSILON_2588_W_T0_HE[] = { 197, 202, 202, 209, 209, 219, 219, 233
 const uint32_t EPSILON_2588_W_T1_HE[] = { 401, 422, 422, 450, 450, 490, 490, 550, 550 };
 
 //
-// PAU: 2133 MHz
+// PAU: 2133 MHz (20% GB)
 //
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR disabled/half
@@ -120,16 +120,16 @@ const uint32_t EPSILON_2133_W_T0_HE[] = { 186, 190, 190, 196, 196, 204, 204, 216
 const uint32_t EPSILON_2133_W_T1_HE[] = { 365, 382, 382, 406, 406, 439, 439, 488, 488 };
 
 //
-// PAU: 2050 MHz
+// PAU: 2050 MHz (15% GB)
 //
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR disabled/half
 // Product offerings: Rainier (low-end with DCMs)
 const uint32_t EPSILON_2050_R_T0_LE[] = {   9,   9,   9,   9,  10,  10,  10,  10,  10 };
 const uint32_t EPSILON_2050_R_T1_LE[] = {   9,   9,   9,   9,  10,  10,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T2_LE[] = { 265, 272, 279, 289, 298, 312, 325, 345, 366 };
+const uint32_t EPSILON_2050_R_T2_LE[] = { 254, 261, 268, 277, 286, 299, 312, 331, 351 };
 const uint32_t EPSILON_2050_W_T0_LE[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2050_W_T1_LE[] = { 191, 193, 195, 198, 200, 204, 208, 214, 219 };
+const uint32_t EPSILON_2050_W_T1_LE[] = { 183, 185, 187, 190, 192, 196, 200, 205, 210 };
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR quarter-width
 // Product offerings: Rainier (low-end with DCMs)
@@ -141,19 +141,19 @@ const uint32_t EPSILON_2050_W_T1_LQ[] = { 251, 256, 256, 261, 261, 268, 268, 280
 
 // Mid-range Epsilons (8 chips/group, 1 group)
 // Product offerings: Everest (mid-range with DCMs), Denali Flat-8
-const uint32_t EPSILON_2050_R_T0_MR[] = {   9,   9,   9,  10,  10,  10,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T1_MR[] = {   9,   9,   9,  10,  10,  10,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T2_MR[] = { 260, 266, 272, 279, 287, 298, 308, 324, 340 };
+const uint32_t EPSILON_2050_R_T0_MR[] = {   9,   9,   9,   9,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T1_MR[] = {   9,   9,   9,   9,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T2_MR[] = { 250, 255, 261, 268, 275, 286, 296, 311, 326 };
 const uint32_t EPSILON_2050_W_T0_MR[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_2050_W_T1_MR[] = { 151, 150, 150, 148, 147, 146, 144, 142, 140 };
+const uint32_t EPSILON_2050_W_T1_MR[] = { 145, 144, 144, 143, 142, 140, 139, 137, 135 };
 
 // High-end Epsilons (4 chips/group, 4 groups)
 // Product offerings: Denali (high-end with SCMs)
-const uint32_t EPSILON_2050_R_T0_HE[] = {   9,   9,   9,  10,  10,  10,  10,  10,  10 };
-const uint32_t EPSILON_2050_R_T1_HE[] = { 269, 276, 283, 293, 303, 316, 329, 347, 370 };
-const uint32_t EPSILON_2050_R_T2_HE[] = { 460, 473, 486, 503, 521, 545, 570, 602, 643 };
-const uint32_t EPSILON_2050_W_T0_HE[] = { 184, 186, 188, 191, 194, 197, 201, 206, 212 };
-const uint32_t EPSILON_2050_W_T1_HE[] = { 358, 367, 375, 386, 398, 413, 429, 450, 476 };
+const uint32_t EPSILON_2050_R_T0_HE[] = {   9,   9,   9,   9,  10,  10,  10,  10,  10 };
+const uint32_t EPSILON_2050_R_T1_HE[] = { 258, 265, 272, 281, 290, 303, 316, 335, 355 };
+const uint32_t EPSILON_2050_R_T2_HE[] = { 441, 453, 466, 483, 499, 523, 546, 581, 617 };
+const uint32_t EPSILON_2050_W_T0_HE[] = { 177, 179, 181, 183, 186, 189, 193, 199, 204 };
+const uint32_t EPSILON_2050_W_T1_HE[] = { 344, 352, 360, 371, 381, 397, 412, 434, 457 };
 
 // LCO constants
 const uint8_t MAX_L3_TARGETS = 32;
