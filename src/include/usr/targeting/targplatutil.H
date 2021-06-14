@@ -419,7 +419,7 @@ inline void subsystemIsMasterNodeCapable(bool& o_masterNodeCapable)
  * Return the sensor ID for a given target and sensor name
  *
  * @param[in] i_pTarget - pointer to the Target which sensor is associated
- * @param[in] i_name - the name of the sensor
+ * @param[in] i_name - the name of the sensor (unused)
  *
  * @return    IPMI Sensor number when IPMI is enabled or HUID if IPMI is not
  *            enabled.
@@ -433,11 +433,19 @@ uint32_t getSensorNumber( const Target* i_pTarget,
  *
  * @param[in] i_sensorNumber - Sensor number associated with an
  *                             unknown target
+ * @param[in] i_occ          - OCC target providing the context for the sensor
+ *                             ID. This is necessary because different
+ *                             instances of some sensor types (e.g. CORE
+ *                             sensors) may have the same numerical ID and only
+ *                             be differentiable in reference to the target they
+ *                             are associated with.
  *
- * @return    Target associated with the passed in sensor number.
+ * @return    Target associated with the passed in sensor number, or nullptr
+ *            if a matching target can't be found.
  *
  */
-TARGETING::Target * getSensorTarget( uint32_t i_sensorNumber );
+TARGETING::Target * getSensorTarget( uint32_t i_sensorNumber,
+                                     TARGETING::Target* i_occ);
 
 #ifdef CONFIG_BMC_IPMI
 /**

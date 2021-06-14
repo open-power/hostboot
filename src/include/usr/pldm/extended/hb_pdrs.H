@@ -66,6 +66,14 @@ class PdrManager;
  */
 errlHndl_t addHostbootPdrs(PdrManager& io_pdrman);
 
+/* @brief Get the Entity Instance Number associated with target and entity_type
+ * @param[in] i_target      Target associated with entity
+ * @param[in] i_entity_type FRU entity type. A value of 0 means that PROC targets
+ *                          will always be treated as processors rather than DCMs.
+ * @return entity instance number
+ */
+uint16_t getEntityInstanceNumber(TARGETING::ConstTargetHandle_t i_target, uint16_t i_entity_type = 0);
+
 }
 
 #endif

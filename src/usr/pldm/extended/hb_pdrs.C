@@ -62,70 +62,11 @@ using namespace ERRORLOG;
 
 namespace
 {
-
 typedef std::map<fru_record_set_id, pldm_entity> FruRecordSetMap;
 typedef std::map<TargetHandle_t, pldm_entity> SensorEntityMap;
 
 // Allow the tree add to determine entity instance number
 constexpr uint16_t DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM = 0xFFFF;
-
-/* @brief Get the Entity Instance Number associated with target and entity_type
- * @param[in] i_target      Target associated with entity
- * @param[in] i_entity_type FRU entity type
- * @return entity instance number
- */
-uint16_t getEntityInstanceNumber(const TargetHandle_t i_target, uint16_t i_entity_type)
-{
-    uint16_t entityInstanceNum = DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM;
-
-    ///////////////////////////////////////////////////////////
-    // How to determine Entity Instance Number
-    // --------------------------------------------------------
-    // chip entity instance = chip's (ATTR_MRU_ID & 0xFFFF)
-    // core entity instance = core's ATTR_CHIP_UNIT
-    // module entity instance = group by proc chip location code and look up
-    //                          the ATTR_POSITION/2 from one of the chip's in
-    //                          each group
-    // dimm entity instance = dimm's ATTR_POSITION
-    ///////////////////////////////////////////////////////////
-    switch(i_target->getAttr<ATTR_TYPE>())
-    {
-        case TYPE_PROC:
-        {
-            if (i_entity_type == ENTITY_TYPE_PROCESSOR_MODULE)
-            {
-                // DCM
-                entityInstanceNum = (i_target->getAttr<ATTR_POSITION>())/2;
-            }
-            else
-            {
-                // Processor chip
-                entityInstanceNum = (i_target->getAttr<ATTR_MRU_ID>() & 0xFFFF);
-            }
-        }
-        break;
-
-        case TYPE_FC:
-        case TYPE_CORE:
-        {
-            entityInstanceNum = i_target->getAttr<ATTR_CHIP_UNIT>();
-        }
-        break;
-
-        case TYPE_DIMM:
-        {
-            entityInstanceNum = i_target->getAttr<ATTR_POSITION>();
-        }
-        break;
-
-        default:
-        // already defaulted
-        break;
-    }
-    return entityInstanceNum;
-}
-
-
 
 /* @brief Creates Entity Association and FRU record set PDRs
  *        for specified entity_type target
@@ -553,11 +494,61 @@ errlHndl_t addFruInventoryPdrs(PdrManager& io_pdrman)
     return errl;
 }
 
-
 }
 
 namespace PLDM
 {
+/* Get the Entity Instance Number associated with target and entity_type */
+uint16_t getEntityInstanceNumber(ConstTargetHandle_t i_target, uint16_t i_entity_type)
+{
+    uint16_t entityInstanceNum = DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM;
+
+    ///////////////////////////////////////////////////////////
+    // How to determine Entity Instance Number
+    // --------------------------------------------------------
+    // chip entity instance = chip's (ATTR_MRU_ID & 0xFFFF)
+    // core entity instance = core's ATTR_CHIP_UNIT
+    // module entity instance = group by proc chip location code and look up
+    //                          the ATTR_POSITION/2 from one of the chip's in
+    //                          each group
+    // dimm entity instance = dimm's ATTR_POSITION
+    ///////////////////////////////////////////////////////////
+    switch(i_target->getAttr<ATTR_TYPE>())
+    {
+        case TYPE_PROC:
+        {
+            if (i_entity_type == ENTITY_TYPE_PROCESSOR_MODULE)
+            {
+                // DCM
+                entityInstanceNum = (i_target->getAttr<ATTR_POSITION>())/2;
+            }
+            else
+            {
+                // Processor chip
+                entityInstanceNum = (i_target->getAttr<ATTR_MRU_ID>() & 0xFFFF);
+            }
+        }
+        break;
+
+        case TYPE_FC:
+        case TYPE_CORE:
+        {
+            entityInstanceNum = i_target->getAttr<ATTR_CHIP_UNIT>();
+        }
+        break;
+
+        case TYPE_DIMM:
+        {
+            entityInstanceNum = i_target->getAttr<ATTR_POSITION>();
+        }
+        break;
+
+        default:
+        // already defaulted
+        break;
+    }
+    return entityInstanceNum;
+}
 
 extern const std::array<fru_inventory_class, 2> fru_inventory_classes
 {{

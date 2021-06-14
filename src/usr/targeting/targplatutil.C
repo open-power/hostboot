@@ -42,6 +42,10 @@
 #include <targeting/targplatutil.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/utilFilter.H>
+#include <util/misc.H> // isTargetingLoaded
+
+// PLDM
+#include <pldm/extended/hb_pdrs.H>
 
 // ERRL
 #include <errl/errlmanager.H>
@@ -134,12 +138,6 @@ void dumpHBAttrs(const uint32_t i_huid)
         }
     }
 }
-
-#ifdef CONFIG_BMC_IPMI
-    uint32_t getIPMISensorNumber( const TARGETING::Target*& i_targ,
-        TARGETING::SENSOR_NAME i_name );
-#endif
-
 
 #define TARG_NAMESPACE "TARGETING::UTIL"
 #define TARG_CLASS ""
@@ -235,175 +233,190 @@ uint8_t getCurrentNodePhysId(void)
 }
 #endif
 
-// return the sensor number from the passed in target
-uint32_t getSensorNumber( const TARGETING::Target* i_pTarget,
-                          TARGETING::SENSOR_NAME i_name )
+/* @brief Structure of OCC sensor IDs.
+ */
+union occ_sensor_id_t
 {
+    uint32_t encoded = 0;
+    struct
+    {
+        uint8_t sensor_type;
+        uint8_t reserved;
+        uint16_t entity_id;
+    } PACKED;
 
-#ifdef CONFIG_BMC_IPMI
-    // get the IPMI sensor number from the array, these are unique for each
-    // sensor + sensor owner in an IPMI system
-    return getIPMISensorNumber( i_pTarget, i_name );
+    enum sensor_type_t : uint8_t
+    {
+        SENSOR_TYPE_CORE = 0xC0,
+        SENSOR_TYPE_DIMM = 0xD0,
+        SENSOR_TYPE_UNKNOWN = 0xFF
+    };
+} PACKED;
+
+// return the sensor number from the passed in target
+uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
+                         TARGETING::SENSOR_NAME i_name)
+{
+    const uint32_t INVALID_SENSOR_NUMBER = 0xFF;
+
+    using namespace TARGETING;
+
+    uint32_t sensor_number = INVALID_SENSOR_NUMBER;
+
+    do
+    {
+
+    if (!i_pTarget || !Util::isTargetingLoaded())
+    {
+        break;
+    }
+
+#ifdef CONFIG_PLDM
+    uint8_t sensor_type = occ_sensor_id_t::SENSOR_TYPE_UNKNOWN;
+    const TARGETING::TYPE target_type = i_pTarget->getAttr<ATTR_TYPE>();
+
+    switch (target_type)
+    {
+    case TYPE_FC:
+    case TYPE_CORE:
+        sensor_type = occ_sensor_id_t::SENSOR_TYPE_CORE;
+        break;
+    case TYPE_OCMB_CHIP:
+    case TYPE_MEM_PORT:
+    {
+        TargetHandleList dimm;
+        getChildAffinityTargetsByState(dimm,
+                                       i_pTarget,
+                                       CLASS_NA,
+                                       TYPE_DIMM,
+                                       UTIL_FILTER_PRESENT);
+
+        assert(dimm.size() <= 1, "Expected at most one DIMM target beneath OCMB/MEM_PORT");
+
+        if (dimm.empty())
+        {
+            // Print a message and use SENSOR_TYPE_DIMM (in the TYPE_DIMM case),
+            // but keep the OCMB_CHIP or MEM_PORT target in i_pTarget, which
+            // will cause getEntityInstanceNumber to return "unknown."
+            TRACFCOMP(g_trac_targeting,
+                      "getSensorNumber(0x%08x, %d): No present DIMM children for target type %s (%d)",
+                      TARGETING::get_huid(i_pTarget),
+                      i_name,
+                      TARGETING::attrToString<TARGETING::ATTR_TYPE>(target_type),
+                      target_type);
+        }
+        else
+        {
+            i_pTarget = dimm.front();
+        }
+    }
+    // fall through
+
+    case TYPE_DIMM:
+        sensor_type = occ_sensor_id_t::SENSOR_TYPE_DIMM;
+        break;
+    default:
+        TRACFCOMP(g_trac_targeting,
+                  "getSensorNumber(0x%08x, %d): Unknown target type %s (%d)",
+                  TARGETING::get_huid(i_pTarget),
+                  i_name,
+                  TARGETING::attrToString<TARGETING::ATTR_TYPE>(target_type),
+                  target_type);
+        break;
+    }
+
+    occ_sensor_id_t sensor_id { };
+    sensor_id.sensor_type = sensor_type;
+    sensor_id.reserved = 0;
+    sensor_id.entity_id = PLDM::getEntityInstanceNumber(i_pTarget);
+
+    sensor_number = sensor_id.encoded;
 #else
-    // pass back the HUID - this will be the sensor number for non ipmi based
+    // pass back the HUID - this will be the sensor number for non-PLDM-based
     // systems
-    return get_huid( i_pTarget );
-
+    sensor_number = get_huid( i_pTarget );
 #endif
 
+    } while (false);
+
+    return sensor_number;
 }
 
 // convert sensor number to a target
-TARGETING::Target * getSensorTarget(const uint32_t i_sensorNumber )
+TARGETING::Target * getSensorTarget(const uint32_t i_sensorNumber,
+                                    TARGETING::Target* const i_occ)
 {
+    TARGETING::Target* result = nullptr;
 
-#ifdef CONFIG_BMC_IPMI
-    return TARGETING::UTIL::getTargetFromIPMISensor( i_sensorNumber );
+    do
+    {
+
+    if (!i_occ || !Util::isTargetingLoaded())
+    {
+        break;
+    }
+
+#ifdef CONFIG_PLDM
+    const occ_sensor_id_t sensor { .encoded = i_sensorNumber };
+    TargetHandleList candidates;
+
+    // If this is set to a valid targeting type, we will get the sensor target's
+    // affinity parent of this type instead of the target itself.
+    TARGETING::TYPE get_parent_type = TARGETING::TYPE_INVALID;
+
+    // Figure out what targeting type the sensor is, and collect a list of
+    // candidate targets based on the type
+    switch (sensor.sensor_type)
+    {
+    case occ_sensor_id_t::SENSOR_TYPE_CORE:
+    {
+        const auto proc_parent = getParentChip(i_occ);
+        getChildChiplets(candidates, proc_parent, TYPE_CORE, false /* don't filter non-functional */);
+        TargetHandleList fcs;
+        getChildChiplets(fcs, proc_parent, TYPE_FC, false /* don't filter non-functional */);
+        candidates.insert(end(candidates), cbegin(fcs), cend(fcs));
+        break;
+    }
+    case occ_sensor_id_t::SENSOR_TYPE_DIMM:
+        get_parent_type = TARGETING::TYPE_OCMB_CHIP;
+        getClassResources(candidates, CLASS_NA, TARGETING::TYPE_DIMM, UTIL_FILTER_PRESENT);
+        break;
+    default:
+        TRACFCOMP(g_trac_targeting,
+                  "getSensorTarget(0x%08x, 0x%08x): Unknown sensor type %d",
+                  i_sensorNumber, TARGETING::get_huid(i_occ), sensor.sensor_type);
+        break;
+    }
+
+    // Search the target list for a target whose entity instance number matches
+    // the sensor ID we were given
+    for (const auto target : candidates)
+    {
+        if (sensor.entity_id == PLDM::getEntityInstanceNumber(target))
+        {
+            result = target;
+            break;
+        }
+    }
+
+    if (result && get_parent_type != TARGETING::TYPE_INVALID)
+    {
+        TargetHandleList parents;
+        getParentAffinityTargets(parents, result, CLASS_NA, get_parent_type);
+        assert(parents.size() == 1,
+               "getSensorTarget(0x%08x, 0x%08x): Expected 0x%08x to have exactly one parent of type %d",
+               i_sensorNumber, get_huid(i_occ), get_huid(result), get_parent_type);
+        result = parents[0];
+    }
 #else
-    // in non ipmi systems huid == sensor number
-    return Target::getTargetFromHuid( i_sensorNumber );
+    // in non-PLDM systems the sensor number is the target's HUID
+    result = Target::getTargetFromHuid( i_sensorNumber );
 #endif
 
+    } while (false);
+
+    return result;
 }
-
-// predicate for binary search of ipmi sensors array.
-// given an array[][2] compare the sensor name, located in the first column,
-// to the passed in key value
-static inline bool name_predicate( uint16_t (&a)[2], uint16_t key )
-{
-    return  a[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET] < key;
-};
-
-#ifdef  CONFIG_BMC_IPMI
-// given a target and sensor name, return the IPMI sensor number
-// from the IPMI_SENSORS attribute.
-uint32_t getIPMISensorNumber( const TARGETING::Target*& i_targ,
-        TARGETING::SENSOR_NAME i_name )
-{
-    // $TODO RTC:123035 investigate pre-populating some info if we end up
-    // doing this multiple times per sensor
-    //
-    // Helper function to search the sensor data for the correct sensor number
-    // based on the sensor name.
-    //
-    uint8_t l_sensor_number = INVALID_IPMI_SENSOR;
-
-    const TARGETING::Target * l_targ = i_targ;
-
-    if( i_targ == NULL )
-    {
-        TARGETING::Target * sys;
-        // use the system target
-        TARGETING::targetService().getTopLevelTarget(sys);
-
-        // die if there is no system target
-        assert(sys);
-
-        l_targ = sys;
-    }
-
-    TARGETING::AttributeTraits<TARGETING::ATTR_IPMI_SENSORS>::Type l_sensors;
-
-    // if there is no sensor attribute, we will return INVALID_IPMI_SENSOR(0xFF)
-    if(  l_targ->tryGetAttr<TARGETING::ATTR_IPMI_SENSORS>(l_sensors) )
-    {
-        // get the number of rows by dividing the total size by the size of
-        // the first row
-        uint16_t array_rows = (sizeof(l_sensors)/sizeof(l_sensors[0]));
-
-        // create an iterator pointing to the first element of the array
-        uint16_t (*begin)[2]  = &l_sensors[0];
-
-        // using the number entries as the index into the array will set the
-        // end iterator to the correct position or one entry past the last
-        // element of the array
-        uint16_t (*end)[2] = &l_sensors[array_rows];
-
-        uint16_t (*ptr)[2] =
-            std::lower_bound(begin, end, i_name, &name_predicate);
-
-        // we have not reached the end of the array and the iterator
-        // returned from lower_bound is pointing to an entry which equals
-        // the one we are searching for.
-        if( ( ptr != end ) &&
-                ( (*ptr)[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET] == i_name ) )
-        {
-            // found it
-            l_sensor_number =
-                (*ptr)[TARGETING::IPMI_SENSOR_ARRAY_NUMBER_OFFSET];
-
-        }
-    }
-    return l_sensor_number;
-}
-
-class number_predicate
-{
-    public:
-
-        number_predicate( const uint32_t number )
-            :iv_number(number)
-        {};
-
-        bool operator()( const uint16_t (&a)[2] ) const
-        {
-            return  a[TARGETING::IPMI_SENSOR_ARRAY_NUMBER_OFFSET] == iv_number;
-        }
-
-    private:
-        uint32_t iv_number;
-};
-
-//******************************************************************************
-// getTargetFromIPMISensor()
-//******************************************************************************
-Target * getTargetFromIPMISensor( uint32_t i_sensorNumber )
-{
-
-    // if the size of HUID is made larger than a uint32_t the compile will fail
-    CPPASSERT((sizeof(TARGETING::ATTR_HUID_type) > sizeof(i_sensorNumber)));
-
-    // 1. find targets with IPMI_SENSOR attribute which has sensor numbers
-    // 2. search array for the sensor number (not sorted on this column)
-    // 3. return the target
-
-    TARGETING::Target * l_target = NULL;
-
-    TARGETING::AttributeTraits<TARGETING::ATTR_IPMI_SENSORS>::Type l_sensors;
-
-    for (TargetIterator itr = TARGETING::targetService().begin();
-            itr != TARGETING::targetService().end(); ++itr)
-    {
-        // if there is a sensors attribute, see if our number is in it
-        if( (*itr)->tryGetAttr<TARGETING::ATTR_IPMI_SENSORS>(l_sensors))
-        {
-            uint16_t array_rows = (sizeof(l_sensors)/sizeof(l_sensors[0]));
-
-            // create an iterator pointing to the first sensor number of the
-            // array.
-            uint16_t (*begin)[2] =
-                &l_sensors[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET];
-
-            // using the number entries as the index into the array will set the
-            // end iterator to the correct position or one entry past the last
-            // element of the array
-            uint16_t (*end)[2] = &l_sensors[array_rows];
-
-            uint16_t (*ptr)[2] = std::find_if(begin, end,
-                                              number_predicate(i_sensorNumber));
-
-            if ( ptr != end )
-            {
-                // found it
-                l_target = *itr;
-                break;
-            }
-        }
-    }
-    return l_target;
-}
-
-#endif
 
 typedef struct procIds
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -454,7 +454,7 @@ namespace HTMGT
         {
             const uint32_t sensor = (uint32_t)i_callout.calloutValue;
             TARGETING::Target * target =
-                TARGETING::UTIL::getSensorTarget(sensor);
+                TARGETING::UTIL::getSensorTarget(sensor, iv_target);
             if (nullptr != target)
             {
                 io_errlHndl->addHwCallout(target, i_priority,
