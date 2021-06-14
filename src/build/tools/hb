@@ -275,7 +275,8 @@ hb_helptext()
         echo
         echo "  Available Commands:"
         echo "      workon, simsetup, prime, startsimics, rsync, objsizes,"
-        echo "      copyright_check, errlparser, cachesync, cacheadd, fipssetup"
+        echo "      copyright_check, errlparser, cachesync, cacheadd, fipssetup,"
+        echo "      flags"
         echo
         echo "  Additional Help Topics:"
         echo "      customrc"
@@ -813,7 +814,25 @@ hb_cacheadd()
 
 }
 
-
+hb_flags()
+{
+    echo "Environment Variables that influence how Hostboot builds and simulates"
+    echo " "
+    echo "= Compile Options ="
+    echo "BUILD_VERBOSE : Print build commands before running them"
+    echo "HOSTBOOT_DEBUG : Enable debug output, including TRACD, see src/build/mkrules/env.mk"
+    echo " "
+    echo "= Prime Options ="
+    echo "HB_FAST_PRIME : Enable all prime optimizations"
+    echo "HB_NFS_DIR : Copies FSP patch data after prime"
+    echo "HB_SKIP_GEN_HCODE : Will not attempt to rebuild the ekb submodule (included in HB_FAST_PRIME)"
+    echo "PARSE_RCDL_STRICT : Validates all obj/genfiles/HB_BCxxRcdl_* files with RcdlSniffer2Perl"
+    echo " "
+    echo "= Simics Options ="
+    echo "HB_BREAK_ON_ERROR : Halts simics if HB hits an exception"
+    echo "HB_FORCE_1PROC : Force single-processor mode"
+    echo " "
+}
 
 if [ 0 -eq $# ]; then
     hb_helptext
@@ -856,6 +875,9 @@ cachesync)
     ;;
 cacheadd)
     hb_cacheadd $*
+    ;;
+flags)
+    hb_flags $*
     ;;
 *)
     hb_helptext $*
