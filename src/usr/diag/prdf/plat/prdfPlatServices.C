@@ -845,7 +845,8 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 template<>
 uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
         const MemRank & i_rank, AddrRangeType i_rangeType,
-        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> i_stopCond)
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> i_stopCond,
+        mss::mcbist::end_boundary i_endBound)
 {
     #define PRDF_FUNC "[PlatServices::startTdScrub<TYPE_OCMB_CHIP>] "
 
@@ -886,7 +887,7 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
         // Start targeted scrub command.
         errlHndl_t errl = nullptr;
         FAPI_INVOKE_HWP( errl, exp_targeted_scrub, fapiTrgt,
-                         i_stopCond, saddr, eaddr, mss::mcbist::NONE );
+                         i_stopCond, saddr, eaddr, i_endBound );
         if ( nullptr != errl )
         {
             PRDF_ERR( PRDF_FUNC "exp_targeted_scrub(0x%08x,0x%02x) "

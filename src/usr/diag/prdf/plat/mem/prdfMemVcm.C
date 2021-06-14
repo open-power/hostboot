@@ -215,7 +215,8 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
     {
         // Start the time based scrub procedure on this master rank.
         o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, MASTER_RANK,
-                                             stopCond );
+                                             stopCond,
+                                             mss::mcbist::STOP_AFTER_ADDRESS );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%02x) failed",

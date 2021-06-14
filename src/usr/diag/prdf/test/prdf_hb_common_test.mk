@@ -65,6 +65,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/
 
