@@ -290,6 +290,9 @@ void captureError(errlHndl_t               &io_err,
         // Create IStep error log and cross reference error that occurred
         io_stepError.addErrorDetails(io_err);
 
+        // Add the istep traces for more context
+        io_err->collectTrace("ISTEPS_TRACE", 256);
+
         // Commit error. Log should be deleted and set to NULL in errlCommit.
         errlCommit( io_err, i_componentId );
     } // end if ( i_err )
@@ -311,6 +314,9 @@ void captureError(errlHndl_t                        &io_err,
 
         // Create IStep error log and cross reference error that occurred
         io_stepError.addErrorDetails(io_err);
+
+        // Add the istep traces for more context
+        io_err->collectTrace("ISTEPS_TRACE", 256);
 
         // Commit error. Log should be deleted and set to NULL in errlCommit.
         errlCommit( io_err, i_componentId );
@@ -394,6 +400,10 @@ void captureErrorOcmbUpdateCheck(errlHndl_t               &io_err,
                     ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(io_err);
                 }
                 io_err->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+
+                // Add the istep traces for more context
+                io_err->collectTrace("ISTEPS_TRACE", 256);
+
                 errlCommit( io_err, i_componentId );
             }
             // skip normal error capture
@@ -419,6 +429,10 @@ void captureErrorOcmbUpdateCheck(errlHndl_t               &io_err,
                     ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(io_err);
                 }
                 io_err->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+
+                // Add the istep traces for more context
+                io_err->collectTrace("ISTEPS_TRACE", 256);
+
                 errlCommit( io_err, i_componentId );
             }
             // skip normal error capture

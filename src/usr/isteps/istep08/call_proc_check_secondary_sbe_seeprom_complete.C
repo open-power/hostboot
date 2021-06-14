@@ -77,15 +77,15 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
     //
     //  get a list of all the procs in the system
     //
-    TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
+    TargetHandleList l_procChipList;
+    getAllChips(l_procChipList, TYPE_PROC);
 
     TRACFCOMP(g_trac_isteps_trace,
         "proc_check_secondary_sbe_seeprom_complete: %d procs in the system.",
-        l_cpuTargetList.size());
+        l_procChipList.size());
 
     // loop thru all the cpus
-    for (const auto & l_cpu_target: l_cpuTargetList)
+    for (const auto & l_cpu_target: l_procChipList)
     {
         if ( l_cpu_target  ==  l_pMasterProcTarget )
         {
@@ -124,15 +124,13 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
         l_errl = SPI::spiLockProcessor(l_cpu_target, false);
         if (l_errl)
         {
-            // This would be a firmware bug that would be hard to
-            // find later so terminate with this failure
             TRACFCOMP(g_trac_isteps_trace,
                       "ERROR : SPI unlock failed to target %.8X"
                       TRACE_ERR_FMT,
                       get_huid(l_cpu_target),
                       TRACE_ERR_ARGS(l_errl));
             captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
-            break;
+            continue;
         }
 
         // Poll for SBE boot complete
@@ -207,7 +205,6 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
             if (l_errl)
             {
                 l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                l_errl->collectTrace("ISTEPS_TRACE", 256);
                 captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
             }
         }
@@ -231,7 +228,6 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
                                             RC_FAILED_TO_BOOT_SBE,
                                             get_huid(l_cpu_target),
                                             0);
-            l_errl->collectTrace("ISTEPS_TRACE", 256);
             captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
 
 
@@ -254,80 +250,81 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
         l_errl = SPI::spiSetAccessMode(l_cpu_target, SPI::FSI_ACCESS);
         if (l_errl)
         {
-            // This would be another hard to find firmware bug so terminate
-            // with this failure
             TRACFCOMP(g_trac_isteps_trace,
                       "ERROR: SPI access mode switch to FSI_ACCESS failed for target %.8X"
                       TRACE_ERR_FMT,
                       get_huid(l_cpu_target),
                       TRACE_ERR_ARGS(l_errl));
             captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
-            break;
+            continue;
         }
 
     }   // end of going through all slave processors
 
+
     //  Once the sbes are up correctly, fetch all the proc ECIDs and
     //  store them in an attribute.
-    for (const auto & l_cpu_target: l_cpuTargetList)
+    for (const auto & l_cpu_target: l_procChipList)
     {
-      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
-                          const_cast<Target*> (l_cpu_target));
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
+                           const_cast<Target*> (l_cpu_target));
 
-      TRACFCOMP(g_trac_isteps_trace,
-                "Running p10_getecid HWP"
-                " on processor target %.8X",
-                get_huid(l_cpu_target));
+        TRACFCOMP(g_trac_isteps_trace,
+                  "Running p10_getecid HWP"
+                  " on processor target %.8X",
+                  get_huid(l_cpu_target));
 
-      //  p10_getecid should set the fuse string to proper length
-      fapi2::variable_buffer  l_fuseString(p10_getecid_fuseString_len);
+        //  p10_getecid should set the fuse string to proper length
+        fapi2::variable_buffer  l_fuseString(p10_getecid_fuseString_len);
 
-      // Invoke the HWP
-      FAPI_INVOKE_HWP(l_errl,
-                      p10_getecid,
-                      l_fapi2ProcTarget,
-                      l_fuseString);
+        // Invoke the HWP
+        FAPI_INVOKE_HWP(l_errl,
+                        p10_getecid,
+                        l_fapi2ProcTarget,
+                        l_fuseString);
 
-      if (l_errl)
-      {
-        if (l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
+        if (l_errl)
         {
-            TRACFCOMP(g_trac_isteps_trace,
-                    "ERROR : p10_getecid failed, returning errorlog target %.8X"
-                    TRACE_ERR_FMT,
-                    get_huid(l_cpu_target),
-                    TRACE_ERR_ARGS(l_errl));
+            if( !(l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
+                || !(l_cpu_target->getAttr<ATTR_SBE_IS_STARTED>()) )
+            {
+                // Not functional or not booted, don't report error
+                TRACFCOMP(g_trac_isteps_trace,
+                          "ERROR : p10_getecid failed, proc target %.8X deconfigured/failed",
+                          get_huid(l_cpu_target));
+                delete l_errl;
+                l_errl = nullptr;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          "ERROR : p10_getecid failed, returning errorlog target %.8X"
+                          TRACE_ERR_FMT,
+                          get_huid(l_cpu_target),
+                          TRACE_ERR_ARGS(l_errl));
 
-            captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+            }
         }
-        else // Not functional, proc deconfigured, don't report error
+        else
         {
             TRACFCOMP(g_trac_isteps_trace,
-                      "ERROR : p10_getecid failed, proc target %.8X deconfigured",
+                      "SUCCESS : proc_getecid completed ok target %.8X",
                       get_huid(l_cpu_target));
-            delete l_errl;
-            l_errl = nullptr;
-        }
-      }
-      else
-      {
-          TRACFCOMP(g_trac_isteps_trace,
-                    "SUCCESS : proc_getecid completed ok target %.8X",
-                    get_huid(l_cpu_target));
 
-          // Update HDAT_EC to account for anything lower than the minor EC
-          auto l_miniEC = l_cpu_target->getAttr<ATTR_MINI_EC>();
-          if( l_miniEC != 0 )
-          {
-              auto l_hdatEC = l_cpu_target->getAttr<ATTR_HDAT_EC>();
-              auto l_EC = l_cpu_target->getAttr<ATTR_EC>();
-              auto l_newHdatEC = l_EC + l_miniEC;
-              TRACFCOMP(g_trac_isteps_trace,
-                        "MINI_EC=%d, HDAT_EC changing from %d->%d",
-                        l_miniEC, l_hdatEC, l_newHdatEC);
-              l_cpu_target->setAttr<ATTR_HDAT_EC>(l_newHdatEC);
-          }
-      }
+            // Update HDAT_EC to account for anything lower than the minor EC
+            auto l_miniEC = l_cpu_target->getAttr<ATTR_MINI_EC>();
+            if( l_miniEC != 0 )
+            {
+                auto l_hdatEC = l_cpu_target->getAttr<ATTR_HDAT_EC>();
+                auto l_EC = l_cpu_target->getAttr<ATTR_EC>();
+                auto l_newHdatEC = l_EC + l_miniEC;
+                TRACFCOMP(g_trac_isteps_trace,
+                          "MINI_EC=%d, HDAT_EC changing from %d->%d",
+                          l_miniEC, l_hdatEC, l_newHdatEC);
+                l_cpu_target->setAttr<ATTR_HDAT_EC>(l_newHdatEC);
+            }
+        }
 
     }  // end of going through all processors
 
