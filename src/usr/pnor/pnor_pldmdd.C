@@ -227,46 +227,93 @@ errlHndl_t PnorPldmDD::_writeFlash( uint64_t i_addr,
                                     const void* i_data )
 {
     errlHndl_t err = nullptr;
+    do
+    {
+        // Create local copies of the input addr/size params that we can manipulate
+        uint32_t offset_into_section = 0;
+        assert(io_size <= UINT32_MAX,
+               "_writeFlash error, io_size > UINT32_MAX when UINT32_MAX is the max write size");
+        uint32_t write_size = io_size;
+        uint32_t lid_id = PLDM_PNOR::INVALID_LID;
 
-    // Create local copies of the input addr/size params that we can manipulate
-    uint32_t offset_into_section = 0;
-    assert(io_size < UINT32_MAX);
-    uint32_t write_size = io_size;
+        // Figure out which LID we want to write to and adjust the offset.
+        err = PLDM_PNOR::vaddrToLidId(i_addr, lid_id, offset_into_section);
+        if(err)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "PnorPldmDD::_writeFlash > Error looking up lid id associated with vaddr 0x%lx"
+                      TRACE_ERR_FMT,
+                      i_addr,
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
 
-    // Figure out which LID we want to read from and adjust the offset.
-    auto lid = PLDM_PNOR::vaddrToLidId(i_addr, offset_into_section);
+        err = PLDM::writeLidFileFromOffset(lid_id,
+                                  offset_into_section,
+                                  write_size,
+                                  reinterpret_cast<const uint8_t *>(i_data));
+        if(err)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "PnorPldmDD::_writeFlash > Error writing to lid 0x%x at offset 0x%x"
+                      TRACE_ERR_FMT,
+                      lid_id,
+                      offset_into_section,
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
 
-    err = PLDM::writeLidFileFromOffset(lid,
-                               offset_into_section,
-                               write_size,
-                               reinterpret_cast<const uint8_t *>(i_data));
+        io_size = write_size;
+    }while(0);
 
-    io_size = (err == nullptr) ? write_size : 0;
     return err;
 }
 
 /**
- * @brief Read data from PNOR using Mbox LPC windows
+ * @brief Read data from PNOR using PLDM File I/O Requests
  */
 errlHndl_t PnorPldmDD::_readFlash( uint64_t i_addr,
                                    size_t &io_size,
                                    void* o_data )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
+    do
+    {
+        // Create local copies of the input addr/size params that we can manipulate
+        uint32_t offset_into_section = 0;
+        assert(io_size <= UINT32_MAX,
+          "_readFlash error, io_size > UINT32_MAX when UINT32_MAX is the max read size");
+        uint32_t read_size = io_size;
+        uint32_t lid_id = PLDM_PNOR::INVALID_LID;
 
-    // Create local copies of the input addr/size params that we can manipulate
-    uint32_t offset_into_section = 0;
-    assert(io_size < UINT32_MAX);
-    uint32_t read_size = io_size;
+        // Figure out which LID we want to read from and adjust the offset.
+        err = PLDM_PNOR::vaddrToLidId(i_addr, lid_id, offset_into_section);
+        if(err)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "PnorPldmDD::_readFlash > Error looking up lid id associated with vaddr 0x%lx"
+                      TRACE_ERR_FMT,
+                      i_addr,
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
 
-    // Figure out which LID we want to read from and adjust the offset.
-    auto lid = PLDM_PNOR::vaddrToLidId(i_addr, offset_into_section);
-
-    err = PLDM::getLidFileFromOffset(lid,
-                               offset_into_section,
-                               read_size,
-                               reinterpret_cast<uint8_t *>(o_data));
-    io_size = (err == nullptr) ? read_size : 0;
+        err = PLDM::getLidFileFromOffset(lid_id,
+                                         offset_into_section,
+                                         read_size,
+                                         reinterpret_cast<uint8_t *>(o_data));
+        if(err)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "PnorPldmDD::_readFlash > Error reading from lid 0x%x at offset 0x%x"
+                      TRACE_ERR_FMT,
+                      lid_id,
+                      offset_into_section,
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
+        io_size =  read_size;
+    }while(0);
     return err;
 }
 

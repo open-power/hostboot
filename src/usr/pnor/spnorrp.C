@@ -522,7 +522,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         l_errhdl = l_conHdr.setHeader(l_tempAddr);
         if (l_errhdl)
         {
-            TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections> setheader failed");
+            TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections> setheader failed for section %d", i_id);
             break;
         }
 

@@ -88,6 +88,7 @@ namespace PLDM
         MOD_SET_BIOS_ATTR_BY_HANDLE                  = 0x2F, // setBiosAttrByHandle
         MOD_GET_BIOS_SIDE                            = 0x30, // get_pldm_bootside
         MOD_GET_MIRROR_MEMORY                        = 0x31, // getMirrorMemory
+        MOD_GET_LID_IDS                              = 0x32, // getLidIds
     };
 
     enum PLDMReasonCode
@@ -137,6 +138,7 @@ namespace PLDM
         RC_OCC_STATUS_NOT_AVAILABLE = PLDM_COMP_ID | 0x2B,
         RC_BAD_GLOBAL_ENABLE        = PLDM_COMP_ID | 0x2C,
         RC_BAD_WATCHDOG_VALUE       = PLDM_COMP_ID | 0x2D,
+        RC_INVALID_LID_ID           = PLDM_COMP_ID | 0x2E,
     };
 }
 #endif

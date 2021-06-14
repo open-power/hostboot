@@ -44,6 +44,7 @@
 #include <hwas/common/hwasCallout.H>
 #include <pldm/pldm_errl.H>
 #include <limits.h>
+#include <util/misc.H>
 #include <targeting/common/targetservice.H>
 
 namespace PLDM
@@ -410,15 +411,13 @@ errlHndl_t writeLidFileFromOffset(const uint32_t i_fileHandle,
     auto current_ptr = const_cast<uint8_t* const >(i_writeBuffer);
 
     do {
-    // There is not 'invalid' file type for this enum so pick
-    // a value that is invalid in this context for to init this var
-    pldm_fileio_file_type pldm_bootside = PLDM_FILE_TYPE_PEL;
+    pldm_fileio_file_type pldm_bootside = PLDM_BOOT_SIDE_INVALID;
     errl = get_pldm_bootside(pldm_bootside);
     if(errl)
     {
         break;
     }
-    assert(pldm_bootside != PLDM_FILE_TYPE_PEL,
+    assert(pldm_bootside != PLDM_BOOT_SIDE_INVALID,
            "pldm_bootside was not set correctly");
 
     struct pldm_read_write_file_by_type_req request

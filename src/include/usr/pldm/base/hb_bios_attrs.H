@@ -51,6 +51,7 @@
 
 #include <openbmc/pldm/libpldm/bios_table.h>
 #include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
+#include <pnor/pnor_const.H>
 #include <attributetraits.H>
 #include <attributeenums.H>
 
@@ -173,6 +174,23 @@ namespace PLDM
                                      std::vector<uint8_t>& io_attr_table,
                                      TARGETING::ATTR_FIELD_CORE_OVERRIDE_type &o_fieldCoreOverride);
 
+    /** @brief Retrieve and parse the hb_lid_ids attribute from the BMC.
+    *
+    * @details This method retrieves the mapping of traditional PNOR eyecatch
+    *          identifiers used by hostboot to the lid ids that are used by the
+    *          BMC file system.
+    *
+    * @param[in,out] io_string_table   See brief at the top of this file.
+    * @param[in,out] io_attr_table     See brief at the top of this file.
+    * @param[out] io_pnorToLidMappings An array of length PNOR::NUM_SECTIONS
+    *                                  that this function will update any lid
+    *                                  id mappings it finds in.
+    *
+    * @return Errorlog is an error occurred, otherwise nullptr on success
+    */
+    errlHndl_t getLidIds(std::vector<uint8_t>& io_string_table,
+                         std::vector<uint8_t>& io_attr_table,
+                         std::array<uint32_t, PNOR::NUM_SECTIONS>& io_pnorToLidMappings);
 
     /** @brief Retrieve the current value of the hb_mfg_flags
     *          PLDM bios attribute from the BMC and return the value

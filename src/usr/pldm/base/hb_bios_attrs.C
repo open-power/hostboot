@@ -46,6 +46,9 @@
 #include <errl/errludstring.H>
 #include <errl/errlmanager.H>
 
+// SectionId eyecatch string lookup
+#include <pnor/pnorif.H>
+
 // sys target
 #include <targeting/common/targetservice.H>
 
@@ -66,6 +69,7 @@ const char PLDM_BIOS_HB_USB_SECURITY_STRING[] = "hb_usb_security";
 const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[] = "hb_power_limit_enable_current";
 const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[] = "hb_power_limit_in_watts_current";
 const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[] = "hb_secure_ver_lockin_enabled";
+const char PLDM_BIOS_HB_LID_IDS_STRING[] = "hb_lid_ids";
 
 const char PLDM_BIOS_PVM_FW_BOOT_SIDE_STRING[] = "pvm_fw_boot_side";
 const char PLDM_BIOS_HB_MIRROR_MEMORY_STRING[] = "hb_mirror_memory_mode_current";
@@ -101,6 +105,7 @@ const std::vector<const char*> POSSIBLE_PVM_FW_BOOT_SIDE_STRINGS = {PLDM_BIOS_PE
 const std::vector<const char*> POSSIBLE_SEC_VER_LOCKIN_STRINGS {PLDM_BIOS_ENABLED_STRING,
                                                                 PLDM_BIOS_DISABLED_STRING};
 
+constexpr uint8_t PLDM_BIOS_STRING_TYPE_ASCII = 0x1;
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
 constexpr size_t MFG_FLAGS_CONVERT_STRING_SIZE = 8;
 constexpr size_t STRTOUL_BASE_VALUE_HEX = 16;
@@ -1218,6 +1223,193 @@ errlHndl_t getBootside(std::vector<uint8_t>   & io_string_table,
         // Set to an invalid value, PLDM_FILE_TYPE_PEL = 0 and is
         // invalid for hostboot's use case.
         o_bootside = PLDM_FILE_TYPE_PEL;
+    }
+
+    }while(0);
+
+    return errl;
+}
+
+
+struct pnor_lid_mapping_t
+{
+    PNOR::SectionId section_id;
+    uint32_t lid_id;
+};
+
+/** @brief Validate the contents of the parsed pnor to lid mapping
+*
+* @details This method will check that the section id and lid id found
+*          when parsing the hb_lid_ids attribute make sense.
+*
+* @param[in]  i_mapping               SectionId to Lid Id mapping to check
+* @param[in,out] io_pnorToLidMappings An array of length PNOR::NUM_SECTIONS
+*                                     that this function will update any lid
+*                                     id mappings it finds in if the mapping
+*                                     is valid.
+*
+* @return Errorlog is an error occurred, otherwise nullptr on success
+*/
+void checkPnorToLidMapping(const pnor_lid_mapping_t & i_mapping,
+                           std::array<uint32_t, PNOR::NUM_SECTIONS>& io_pnorToLidMappings)
+{
+    const uint32_t MIN_LID_ID_NUM = 0x80000000;
+    do{
+        if(i_mapping.section_id >= PNOR::INVALID_SECTION)
+        {
+            // Skip entries who we could not translate
+            PLDM_ERR("checkPnorToLidMapping: Could not find SectionId for entry with lidId %x so we will discard the map entry",
+                      i_mapping.lid_id);
+            break;
+        }
+        else if( i_mapping.lid_id < MIN_LID_ID_NUM )
+        {
+            PLDM_ERR("checkPnorToLidMapping: Invalid lid_id %lx", i_mapping.lid_id);
+            // This likely indicates a parsing problem. All valid lids ids
+            // should have first bit set. Commit a visible error but go ahead
+            // and attempt to use the lid
+            /*@
+              * @errortype
+              * @severity   ERRL_SEV_PREDICTIVE
+              * @moduleid   MOD_GET_LID_IDS
+              * @reasoncode RC_INVALID_LID_ID
+              * @userdata1  Lid Id Found
+              * @userdata2  Section Id Found
+              * @devdesc    Software problem, incorrect data from BMC
+              * @custdesc   A software error occurred during system boot
+              */
+            errlHndl_t errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                MOD_GET_LID_IDS,
+                                RC_INVALID_LID_ID,
+                                i_mapping.lid_id,
+                                i_mapping.section_id,
+                                ErrlEntry::NO_SW_CALLOUT);
+            ErrlUserDetailsString(PLDM_BIOS_HB_LID_IDS_STRING).addToLog(errl);
+            addBmcErrorCallouts(errl);
+            errlCommit(errl, PLDM_COMP_ID);
+            break;
+        }
+        // if we pass the checks above add i_mapping.lid_id to
+        // io_pnorToLidMappings which is returned as an out param
+        io_pnorToLidMappings[i_mapping.section_id] = i_mapping.lid_id;
+        PLDM_INF("checkPnorToLidMapping: %s = %lx ", PNOR::SectionIdToString(i_mapping.section_id) , i_mapping.lid_id);
+    }while(0);
+}
+
+errlHndl_t getLidIds(std::vector<uint8_t>& io_string_table,
+                      std::vector<uint8_t>& io_attr_table,
+                      std::array<uint32_t, PNOR::NUM_SECTIONS>& io_pnorToLidMappings)
+{
+    errlHndl_t errl = nullptr;
+    do {
+
+    constexpr uint32_t INVALID_LID = 0xffffffff;
+    for(auto &entry : io_pnorToLidMappings)
+    {
+        entry = INVALID_LID;
+    }
+
+    uint8_t bios_string_type = 0;
+    std::vector<char> lid_ids_string;
+    // Get the ascii string value from the BMC
+    errl = systemStringAttrLookup(io_string_table,
+                                  io_attr_table,
+                                  PLDM_BIOS_HB_LID_IDS_STRING,
+                                  bios_string_type,
+                                  lid_ids_string);
+
+    if(errl)
+    {
+        PLDM_ERR("getLidIds: Failed to lookup value for %s", PLDM_BIOS_HB_LID_IDS_STRING);
+        break;
+    }
+    // Check for string type == 0x01 ASCII
+    if (bios_string_type != PLDM_BIOS_STRING_TYPE_ASCII)
+    {
+        PLDM_ERR("getLidIds: Unexpected string type 0x%X for %s",
+                 bios_string_type, PLDM_BIOS_HB_LID_IDS_STRING);
+        /*@
+          * @errortype
+          * @severity   ERRL_SEV_PREDICTIVE
+          * @moduleid   MOD_GET_LID_IDS
+          * @reasoncode RC_UNSUPPORTED_STRING_TYPE
+          * @userdata1  Expected String Type
+          * @userdata2  Returned String Type
+          * @devdesc    Software problem, incorrect data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                             MOD_GET_LID_IDS,
+                             RC_UNSUPPORTED_STRING_TYPE,
+                             PLDM_BIOS_STRING_TYPE_ASCII,
+                             bios_string_type,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ErrlUserDetailsString(PLDM_BIOS_HB_LID_IDS_STRING).addToLog(errl);
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
+    // setup some working variables which will be used
+    // in the for-loop below
+    std::vector<char> eyecatch, lid_id;
+    pnor_lid_mapping_t mapping = {PNOR::INVALID_SECTION, 0};
+
+    // We will fill this vector with all mappings we
+    // parse from the hb_lid_ids attribute value
+    std::vector<pnor_lid_mapping_t> mappings_found;
+
+    // parse a string of the format:
+    //   <EYECATCH_a>=<lid_id_1>,<EYECATCH_b>=<lid_id_2>
+    for(size_t i = 0; i < lid_ids_string.size(); i++)
+    {
+        char c = lid_ids_string[i];
+        switch(c)
+        {
+            case '=' :
+                eyecatch.push_back('\0');
+                // lookup eyecatch string's SectionId mapping and
+                // set it in the mapping struct we are using to
+                //  fill mappings_found
+                for(uint32_t eye_index=PNOR::FIRST_SECTION;
+                    eye_index < PNOR::NUM_SECTIONS;
+                    eye_index++)
+                    {
+                        if(strcmp(PNOR::SectionIdToString(eye_index), eyecatch.data()) == 0)
+                        {
+                            mapping.section_id = static_cast<PNOR::SectionId>(eye_index);
+                            break;
+                        }
+                    }
+                break;
+            case ',' :
+                lid_id.push_back('\0');
+                mapping.lid_id = strtoul(lid_id.data(), nullptr, STRTOUL_BASE_VALUE_HEX);
+                checkPnorToLidMapping(mapping, io_pnorToLidMappings);
+                // reset working variables
+                eyecatch.clear();
+                lid_id.clear();
+                mapping = {PNOR::INVALID_SECTION, 0};
+                break;
+            default :
+                if(eyecatch.size() == 0 ||
+                   eyecatch.back() != '\0')
+                {
+                    eyecatch.push_back(c);
+                }
+                else
+                {
+                    lid_id.push_back(c);
+                }
+                break;
+        }
+    }
+
+    // catch the case where the list of entries was not terminated by ','
+    if(eyecatch.size() && lid_id.size())
+    {
+        lid_id.push_back('\0');
+        mapping.lid_id = strtoul(lid_id.data(), nullptr, STRTOUL_BASE_VALUE_HEX);
+        checkPnorToLidMapping(mapping, io_pnorToLidMappings);
     }
 
     }while(0);

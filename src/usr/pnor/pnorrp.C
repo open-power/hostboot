@@ -61,7 +61,8 @@
 
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
 #include "pnor_pldm_utils.H"
-#include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
+#include <pldm/requests/pldm_fileio_requests.H>
+#include <pldm/base/hb_bios_attrs.H>
 #include <pldm/pldm_errl.H>
 #endif
 
@@ -309,8 +310,8 @@ PnorRP::~PnorRP()
 }
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
 
-pldm_file_attr_table_entry * sectionIdFileTableLookup( const SectionId i_secId,
-                                                       const std::vector<uint8_t> & i_fileTable)
+pldm_file_attr_table_entry * PnorRP::sectionIdFileTableLookup(const SectionId i_secId,
+                                                             const std::vector<uint8_t> & i_fileTable)
 {
     /* See PLDM for File Based I/O document for details */
     // Up to 3 bytes of padding are added to the end of the table
@@ -318,7 +319,7 @@ pldm_file_attr_table_entry * sectionIdFileTableLookup( const SectionId i_secId,
     // the CRC32 checksum at the end of the entire table. Together
     // these will be up to 7 bytes.
     const size_t CHKSUM_PADDING = 7;
-    auto lid_id = PLDM_PNOR::getipl_lid_ids()[i_secId];
+    auto lid_id = iv_ipltime_lid_ids[i_secId];
 
     auto start_ptr = const_cast<uint8_t *>(i_fileTable.data());
     auto end_ptr = start_ptr + i_fileTable.size() - CHKSUM_PADDING;
@@ -364,15 +365,24 @@ pldm_file_attr_table_entry * sectionIdFileTableLookup( const SectionId i_secId,
 
 errlHndl_t PnorRP::populateTOC( void )
 {
-    using namespace PLDM_PNOR;
     std::vector<uint8_t> file_table;
     errlHndl_t l_errhdl = nullptr;
 
     do{
-        // TODO RTC: 208802 call real getFileTable when BMC has support
-        // for populating response with hostfw IPL time lids.
-        //l_errhdl= PLDM::getFileTable(file_table);
-        l_errhdl = PLDM_PNOR::getFileTableLidsMockup(file_table);
+        // declare these vectors in their own scope so we dont keep them around any
+        // longer than we need to
+        {
+            std::vector<uint8_t> bios_string_table, bios_attr_table;
+            l_errhdl = PLDM::getLidIds(bios_string_table, bios_attr_table, iv_ipltime_lid_ids);
+        }
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "An error occurred when we requested the hb_lid_ids attribute from the BMC");
+            break;
+        }
+
+        l_errhdl = PLDM::getFileTable(file_table);
+
         if(l_errhdl)
         {
             TRACFCOMP(g_trac_pnor, "An error occurred when we requested the PLDM file table from the BMC");
@@ -387,7 +397,7 @@ errlHndl_t PnorRP::populateTOC( void )
 
             iv_TOC[i].id        = static_cast<SectionId>(section_id);
 
-            if(getipl_lid_ids()[section_id] == INVALID_LID)
+            if(iv_ipltime_lid_ids[section_id] == PLDM_PNOR::INVALID_LID)
             {
                 // If there is no lid associated with this section
                 // then skip this pnor section
@@ -606,9 +616,6 @@ void PnorRP::initDaemon()
             TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> populateTOC failed");
             break;
         }
-        assert(PLDM_PNOR::getipl_lid_ids()[PNOR::NUM_SECTIONS-1] != 0,
-               "Code bug, sections were added to the sectionId enum without "
-               "updating PLDM_PNOR::getipl_lid_ids.");
 #endif
 
         // Initialize the VMM memory pnorrp will use
@@ -810,7 +817,32 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             id = PNOR::INVALID_SECTION;
             break;
         }
-
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+        if(iv_ipltime_lid_ids[i_section] == PLDM_PNOR::INVALID_LID)
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Requested a section we have no lid mapping for : i_section=%d (%s)", i_section, SectionIdToString(id));
+            /*@
+             * @errortype
+             * @moduleid         PNOR::MOD_PNORRP_GETSECTIONINFO
+             * @reasoncode       PNOR::RC_NO_LID_MAPPING
+             * @userdata1        Requested Section
+             * @userdata2        Unused
+             * @devdesc          No lid mapping found for requested section
+             * @custdesc         A problem occurred while accessing the boot
+             *                   flash.
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               PNOR::MOD_PNORRP_GETSECTIONINFO,
+                                               PNOR::RC_NO_LID_MAPPING,
+                                               i_section,
+                                               0,
+                                               ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+            PLDM::addBmcErrorCallouts(l_errhdl);
+            // set the return section to our invalid data
+            id = PNOR::INVALID_SECTION;
+            break;
+        }
+#endif
 
         if (PNOR::INVALID_SECTION != id)
         {
@@ -2079,7 +2111,7 @@ uint64_t PnorRP::getTocOffset(TOCS i_toc) const
 }
 
 void PnorRP::readAndClearCounter( uint32_t i_threshold,
-                                  bool i_clear ) 
+                                  bool i_clear )
 {
     TRACFCOMP(g_trac_pnor,"PnorRP::readAndClearCounter>  (Flash offset)=(Number of reads)");
     for( auto const& page : iv_pageCounter )

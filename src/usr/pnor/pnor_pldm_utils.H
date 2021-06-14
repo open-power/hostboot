@@ -43,55 +43,6 @@
 namespace PLDM_PNOR
 {
     constexpr uint32_t INVALID_LID = 0xffffffff;
-    constexpr auto getipl_lid_ids ()
-    {
-        std::array<uint32_t, PNOR::NUM_SECTIONS> ipltime_lid_ids = {{0}};
-        std::get<PNOR::TOC>(ipltime_lid_ids)            = INVALID_LID;
-#ifndef BOOTLOADER
-        std::get<PNOR::HB_EXT_CODE>(ipltime_lid_ids)    = 0x81E0065D;
-#endif
-        std::get<PNOR::HB_BASE_CODE>(ipltime_lid_ids)   = 0x81E0065A;
-#ifndef BOOTLOADER
-        std::get<PNOR::SBE_IPL>(ipltime_lid_ids)        = 0x81E00661;
-        std::get<PNOR::HCODE>(ipltime_lid_ids)          = 0x81E00696;
-        std::get<PNOR::PAYLOAD>(ipltime_lid_ids)        = 0x81E00660;
-        std::get<PNOR::HB_RUNTIME>(ipltime_lid_ids)     = 0x81E0068E;
-        std::get<PNOR::HB_DATA>(ipltime_lid_ids)        = 0x81E0068D;
-        std::get<PNOR::GUARD_DATA>(ipltime_lid_ids)     = 0x81E00667;
-        std::get<PNOR::HB_ERRLOGS>(ipltime_lid_ids)     = 0x81E00668;
-        std::get<PNOR::DIMM_JEDEC_VPD>(ipltime_lid_ids) = INVALID_LID;
-        std::get<PNOR::MODULE_VPD>(ipltime_lid_ids)     = INVALID_LID;
-        std::get<PNOR::NVRAM>(ipltime_lid_ids)          = 0x81E0066B;
-        std::get<PNOR::OCC>(ipltime_lid_ids)            = 0x81E00688;
-        std::get<PNOR::FIRDATA>(ipltime_lid_ids)        = INVALID_LID;
-        std::get<PNOR::ATTR_TMP>(ipltime_lid_ids)       = 0x81E00664;
-        std::get<PNOR::ATTR_PERM>(ipltime_lid_ids)      = 0x81E00663;
-        std::get<PNOR::CAPP>(ipltime_lid_ids)           = INVALID_LID;
-        std::get<PNOR::VERSION>(ipltime_lid_ids)        = 0x81E00662;
-        std::get<PNOR::HB_BOOTLOADER>(ipltime_lid_ids)  = 0x81E0065B;
-        std::get<PNOR::TEST>(ipltime_lid_ids)           = INVALID_LID;
-        std::get<PNOR::TESTRO>(ipltime_lid_ids)         = INVALID_LID;
-        std::get<PNOR::BACKUP_PART>(ipltime_lid_ids)    = INVALID_LID;
-        std::get<PNOR::RINGOVD>(ipltime_lid_ids)        = 0x81E00620;
-        std::get<PNOR::WOFDATA>(ipltime_lid_ids)        = 0x81E00692;
-        std::get<PNOR::SBKT>(ipltime_lid_ids)           = 0x81E0066C;
-        std::get<PNOR::HB_VOLATILE>(ipltime_lid_ids)    = 0x81E0066F;
-        std::get<PNOR::TESTLOAD>(ipltime_lid_ids)       = INVALID_LID;
-        std::get<PNOR::HDAT>(ipltime_lid_ids)           = 0x81E00669;
-        std::get<PNOR::EECACHE>(ipltime_lid_ids)        = 0x81E00679;
-        std::get<PNOR::OCMBFW>(ipltime_lid_ids)         = 0x81E0067A;
-#ifdef CONFIG_DEVTREE
-        std::get<PNOR::DEVTREE>(ipltime_lid_ids)        = 0x81E00672;
-#endif
-#ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
-        std::get<PNOR::BOOTKERNEL>(ipltime_lid_ids)     = 0x81E00658;
-#endif
-        std::get<PNOR::HCODE_LID>(ipltime_lid_ids)      = 0x81E00671;
-#endif
-        return ipltime_lid_ids;
-    }
-
-
     enum TraitBitMap : uint32_t
     {
         READ_ONLY  = 0x00000001,
@@ -100,34 +51,36 @@ namespace PLDM_PNOR
     };
 
     /**
+    * @brief Given SectionId enum value lookup the lid id associated
+    *        with that section. This function also validates that
+    *        the given SectionId is valid and the mapping is also
+    *        valid.
+    *
+    * @param[in]  i_sectionId SectionId we want to know the lid id of.
+    * @param[out] o_lidId A uint32 representing the lid id assigned
+    *                     to this pnor section on the service processor.
+    * @return nullptr if no error is found. Will return error if i_sectionId
+    *         maps to INVALID_LID
+    */
+  errlHndl_t sectionIdToLidId(const PNOR::SectionId i_sectionId,
+                              uint32_t & o_lidId);
+
+
+    /**
     * @brief Given virtual address in PNOR VMM space, return what
     *        IPL-time lid id the address maps to, and what offset
     *        into that lid id that virtual address would be.
     *
     * @param[in]  i_vaddr A virtual address in PNOR space
+    * @param[out] o_lidId The lid id associated with this virtual address
     * @param[out] o_offset The offset the input address would be
     *                      into the lid id that is returned
-    * @return The IPL-time lid id associated with the virtual address
-    *         that was passed in by the caller.
+    * @return nullptr on success; errorlog if unable to find valid lid id
     */
-    uint32_t vaddrToLidId(uint64_t i_vaddr,
-                          uint32_t &o_offset);
+    errlHndl_t vaddrToLidId(const uint64_t i_vaddr,
+                            uint32_t &o_lidId,
+                            uint32_t &o_offset);
 
-    // TODO RTC 208802 remove mockup when BMC has support for host
-    // access to .lid files via PLDM file i/o operations
-    /**
-    * @brief A temporary workaround which will return the expected reply to
-    *        for a getFileTable request to the BMC. In this mockup we will
-    *        return the IPL-time hostfw lids that the BMC stores. This
-    *        function should be removed when the BMC adds correct support
-    *        to populate the file table with the hostfw ipl time lids.
-    *
-    * @param[out] o_table the file table in binary format; will be cleared before
-    *             populating with output data.
-    * @return nullptr on success; non-nullptr on error. Other outputs are
-    *         invalidated on error.
-    */
-    errlHndl_t getFileTableLidsMockup(std::vector<uint8_t> & o_fileTable);
 }
 
 #endif

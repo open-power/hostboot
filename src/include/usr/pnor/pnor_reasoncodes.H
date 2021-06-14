@@ -119,6 +119,9 @@ namespace PNOR
         MOD_PNORRP_SETUP_PNOR_VMM       = 0xF1, /**< setupPnorVMM */
         MOD_PNORRP_SETUP_PNOR_VMM_PLDM  = 0xF2, /**< setupPnorVMM */
         MOD_POPULATE_TOC                = 0xF3, /**< populateTOC */
+
+        // pnor_pldm_utils.C
+        MOD_PNOR_PLDM_SEC_TO_LID        = 0xF4 /**< sectionIdToLidId */
     };
 
     enum PNORReasonCode
@@ -197,6 +200,7 @@ namespace PNOR
         RC_SECURE_PRO_SIZE_MISMATCH  = PNOR_COMP_ID | 0x3C,
         RC_READ_ONLY_PERM_FAIL       = PNOR_COMP_ID | 0x3D,
         RC_VERIFY_PAGE_FAILED        = PNOR_COMP_ID | 0x3E,
+        RC_NO_LID_MAPPING            = PNOR_COMP_ID | 0x3F,
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
         RC_PNOR_CORRUPTION           = PNOR_COMP_ID | 0x99,

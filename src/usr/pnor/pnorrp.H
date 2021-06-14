@@ -36,6 +36,10 @@
 #include "ffs.h"
 #include "pnor_utils.H"
 
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+#include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
+#endif
+
 /**
  * PNOR Resource Provider
  */
@@ -135,6 +139,16 @@ class PnorRP
      */
     void readAndClearCounter( uint32_t i_threshold,
                               bool i_clear = true );
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+    /**
+     * @brief Return a const ref to the iv_ipltime_lid std:array
+     * @return a const ref to the iv_ipltime_lid member variable.
+     */
+    const std::array<uint32_t, PNOR::NUM_SECTIONS>& get_lid_ids() const
+    {
+        return this->iv_ipltime_lid_ids;
+    }
+#endif
 
   protected:
     /**
@@ -155,6 +169,9 @@ class PnorRP
      */
     typedef std::pair<uint64_t, uint64_t> TocOffsets_t;
     TocOffsets_t iv_TocOffset [PNOR::NUM_SIDES];
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+    std::array<uint32_t, PNOR::NUM_SECTIONS> iv_ipltime_lid_ids;
+#endif
 
     enum
     {
@@ -239,16 +256,6 @@ class PnorRP
      * @return Error from device
      */
     errlHndl_t  findTOC(size_t & o_tocSize);
-
-    /**
-     * @brief Request the PLDM file table from the BMC and use it to fill
-     *        in information about the various PNOR sections in the iv_TOC
-     *        member of PnorRP.
-     *
-     * @return Contains the error, if one occurred, returned from the getFileTable
-     *         PLDM request. Otherwise it will return nullptr.
-     */
-    errlHndl_t populateTOC(void);
 
     /**
      * @brief Perform mm_alloc_block operations in order to allocate
@@ -362,6 +369,32 @@ class PnorRP
      *         PNOR::INVALID_SECTION if not mapped
      */
      PNOR::SectionId computeSectionPhys( uint64_t i_offset );
+
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+    /**
+     * @brief Request the PLDM file table from the BMC and use it to fill
+     *        in information about the various PNOR sections in the iv_TOC
+     *        member of PnorRP.
+     *
+     * @return Contains the error, if one occurred, returned from the getFileTable
+     *         PLDM request. Otherwise it will return nullptr.
+     */
+    errlHndl_t populateTOC(void);
+
+
+
+    /**
+    * @brief Given a SectionId and a PLDM File Table, lookup the file table
+    *        entry associated with that SectionId in the PLDM File Table given.
+    *
+    * @param[in]  i_secId SectionId we want to lookup
+    * @param[in]  i_fileTable Byte vector containing the PLDM file table we got from
+    *                         the BMC.
+    * @return File Table Entry associated with this PNOR::SectionId
+    */
+    pldm_file_attr_table_entry * sectionIdFileTableLookup(const PNOR::SectionId i_secId,
+                                                          const std::vector<uint8_t> & i_fileTable);
+#endif
 
     /**
      * @brief  Returns true if the initial startup failed for some reason
