@@ -60,11 +60,71 @@ using namespace TARGETING;
 using namespace PLDM;
 using namespace ERRORLOG;
 
-#define DEFAULT_ENITTY_ID 0xFFFF
-
 namespace
 {
+
 typedef std::map<fru_record_set_id, pldm_entity> FruRecordSetMap;
+
+// Allow the tree add to determine entity instance number
+constexpr uint16_t DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM = 0xFFFF;
+
+/* @brief Get the Entity Instance Number associated with target and entity_type
+ * @param[in] i_target      Target associated with entity
+ * @param[in] i_entity_type FRU entity type
+ * @return entity instance number
+ */
+uint16_t getEntityInstanceNumber(const TargetHandle_t i_target, uint16_t i_entity_type)
+{
+    uint16_t entityInstanceNum = DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM;
+
+    ///////////////////////////////////////////////////////////
+    // How to determine Entity Instance Number
+    // --------------------------------------------------------
+    // chip entity instance = chip's (ATTR_MRU_ID & 0xFFFF)
+    // core entity instance = core's ATTR_CHIP_UNIT
+    // module entity instance = group by proc chip location code and look up
+    //                          the ATTR_POSITION/2 from one of the chip's in
+    //                          each group
+    // dimm entity instance = dimm's ATTR_POSITION
+    ///////////////////////////////////////////////////////////
+    switch(i_target->getAttr<ATTR_TYPE>())
+    {
+        case TYPE_PROC:
+        {
+            if (i_entity_type == ENTITY_TYPE_PROCESSOR_MODULE)
+            {
+                // DCM
+                entityInstanceNum = (i_target->getAttr<ATTR_POSITION>())/2;
+            }
+            else
+            {
+                // Processor chip
+                entityInstanceNum = (i_target->getAttr<ATTR_MRU_ID>() & 0xFFFF);
+            }
+        }
+        break;
+
+        case TYPE_FC:
+        case TYPE_CORE:
+        {
+            entityInstanceNum = i_target->getAttr<ATTR_CHIP_UNIT>();
+        }
+        break;
+
+        case TYPE_DIMM:
+        {
+            entityInstanceNum = i_target->getAttr<ATTR_POSITION>();
+        }
+        break;
+
+        default:
+        // already defaulted
+        break;
+    }
+    return entityInstanceNum;
+}
+
+
 
 /* @brief Creates Entity Association and FRU record set PDRs
  *        for specified entity_type target
@@ -94,15 +154,17 @@ pldm_entity_node* createEntityAssociationAndFruRecordSetPdrs(pldm_entity_associa
         // pldm_entity_association_tree_add below
         .entity_type = i_entity_type
     };
+    uint16_t requested_entity_instance_num = getEntityInstanceNumber(i_target, i_entity_type);
 
-    PLDM_INF("Adding entity association and FRU record set PDRs for entity_type 0x%04X, HUID 0x%x",
-             i_entity_type, get_huid(i_target));
+    PLDM_INF("Adding entity association and FRU record set PDRs for "
+             "entity_type 0x%04X, HUID 0x%x, req instance_num 0x%x",
+             i_entity_type, get_huid(i_target), requested_entity_instance_num);
 
-    // Add the Entity Assocation record to the tree (will be converted
-    // to PDRs and stored in the repo at the end of this function)
+    // Add the Entity Association record to the tree (will be converted
+    // to PDRs and stored in the repo at the end)
     pldm_entity_node * entityNode = pldm_entity_association_tree_add(io_tree,
                                                                  &pldmEntity,
-                                                                 DEFAULT_ENITTY_ID,
+                                                                 requested_entity_instance_num,
                                                                  i_parent,
                                                                  i_association_type);
 
@@ -203,13 +265,13 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman)
     const auto backplane_node
         = pldm_entity_association_tree_add(enttree.get(),
                                            &backplane_entity,
-                                           DEFAULT_ENITTY_ID,
+                                           DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM,
                                            nullptr, // means "no parent" i.e. root
                                            PLDM_ENTITY_ASSOCIAION_PHYSICAL);
     PLDM_DBG("Backplane_entity: entity_type 0x%04X, entity_instance_num 0x%04X, container_id 0x%04X",
         backplane_entity.entity_type, backplane_entity.entity_instance_num, backplane_entity.entity_container_id);
 
-    /* Now we add all the children of the backplane to the tree. */
+    /* Now we add all the children under the backplane to the tree. */
     struct cmp_str
     {
        // note: vectors contain strings (null-terminated)
