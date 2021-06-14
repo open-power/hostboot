@@ -277,4 +277,21 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_QME_FAILED_TO_ENTER_QUIESCE_MODE</rc>
+    <description> QME(s) failed to confirm entry to quiesce mode
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>LOOP_COUNT</ffdc>
+    <ffdc>QME_FLAG</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

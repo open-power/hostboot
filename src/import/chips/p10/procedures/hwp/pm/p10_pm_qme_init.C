@@ -77,8 +77,12 @@
 #include <p10_scom_proc_1.H>
 #include <p10_scom_proc_d.H>
 #include <p10_scom_proc_b.H>
+#include <p10_scom_eq_c.H>
 #ifndef __PPE__
     #include <p10_tod_utils.H>
+#endif
+#ifdef __HOSTBOOT_MODULE
+    #include <util/misc.H>     // Util::isSimicsRunning
 #endif
 
 // ----------------------------------------------------------------------
@@ -109,8 +113,10 @@ enum
     CPMR_BASE               =   (2 * 1024 * 1024),
     MBASE_SHIFT             =   5,
     QME_PIG_REQ_INT_TYPE    =   1,
-    QME_PIG_REQ_INT_TYPE_LEN   = 4,
+    QME_PIG_REQ_INT_TYPE_LEN  = 4,
     QME_PIG_REG             =   0x200e0030,
+    QME_QUIESCE_TIMEOUT_MS  =   250,
+
 };
 
 // -----------------------------------------------------------------------------
@@ -134,7 +140,14 @@ fapi2::ReturnCode get_functional_chiplet_info(
 fapi2::ReturnCode pcb_skew_adj(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
 
+fapi2::ReturnCode invokeQmeQuiesceMode(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
 
+fapi2::ReturnCode cleanUpQuiesceMode(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
+
+fapi2::ReturnCode protectCoreIncaseQmeHaltOrQuiesce(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
 // -----------------------------------------------------------------------------
 //  Function definitions
 // -----------------------------------------------------------------------------
@@ -171,10 +184,14 @@ fapi2::ReturnCode p10_pm_qme_init(
          pm::PM_START_RUNTIME == i_mode)
     {
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE,
                                FAPI_SYSTEM,
                                fusedModeState),
                  "Error from FAPI_ATTR_GET for attribute ATTR_FUSED_CORE_MODE");
+
+        FAPI_TRY( qme_halt( i_target ), "ERROR: Failed To Reset QME");
+        FAPI_TRY( cleanUpQuiesceMode( i_target ), "Clean Up QME Flag Reg Failed" );
 
         // Boot the QME
         FAPI_TRY( qme_init( i_target, i_mode ), "ERROR: Failed To Initialize  QME" );
@@ -187,7 +204,22 @@ fapi2::ReturnCode p10_pm_qme_init(
     // so that it can reconfigured and reinitialized
     else if ( i_mode == pm::PM_HALT )
     {
-        FAPI_TRY( qme_halt( i_target ), "ERROR: Failed To Reset QME");
+
+#ifdef __HOSTBOOT_MODULE
+
+        if (Util::isSimicsRunning())
+        {
+            FAPI_TRY( qme_halt( i_target ), "ERROR: Failed To Reset QME");
+        }
+        else
+        {
+#endif
+            FAPI_TRY( invokeQmeQuiesceMode( i_target ),
+                      "Failed To Invoke QME Quiesce Mode" );
+#ifdef __HOSTBOOT_MODULE
+        }
+
+#endif
     }
 
     // -------------------------------
@@ -321,7 +353,7 @@ fapi2::ReturnCode qme_init(
             FAPI_TRY( getScom( i_target, TP_TPCHIP_OCC_OCI_OCB_OPITASV2, l_opitA2Data ) );
             FAPI_TRY( getScom( i_target, TP_TPCHIP_OCC_OCI_OCB_OPITASV3, l_opitA3Data ) );
 
-            l_opitA0Data = ( l_opitA0Data & l_opitA1Data & l_opitA2Data & l_opitA3Data );
+            l_opitA0Data = ( l_opitA0Data | l_opitA1Data | l_opitA2Data | l_opitA3Data );
 
             if( l_opitA0Data == 0 )
             {
@@ -512,81 +544,23 @@ fapi2::ReturnCode qme_halt(
     using namespace scomt;
     using namespace eq;
     using namespace c;
-    fapi2::buffer<uint64_t> l_data64;
-    uint32_t                l_timeout_in_MS = 100;
-    uint8_t CL2_START_POS = 5;
-    uint8_t L3_START_POS = 9;
-
     FAPI_IMP(">> qme_halt...");
 
+    fapi2::buffer<uint64_t> l_data64;
+    uint32_t                l_timeout_in_MS = 100;
+
     // mc_or target will be used for putscom too
-    auto l_eq_mc_or  =
-        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
+    auto l_eq_mc_or  = i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
+
     auto l_eq_mc_and =
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
-    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > core_mc_target_and =
-        i_target.getMulticast< fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
+
+    FAPI_TRY( protectCoreIncaseQmeHaltOrQuiesce( i_target ),
+              "QME Halt: Failed To Protect Cores Before Halting QME" );
 
     FAPI_INF("Send HALT command via XCR...");
     l_data64.flush<0>().insertFromRight( XCR_HALT, 1, 3 );
     FAPI_TRY( putScom( l_eq_mc_or, QME_SCOM_XIXCR, l_data64 ) );
-
-    FAPI_INF("Clear AUTO_SPECIAL_WAKEUP_DISABLE, Assert PM_EXIT if not STOP_GATED");
-    l_data64.flush<0>().setBit < QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE > ();
-    FAPI_TRY( putScom( core_mc_target_and, QME_SCSR_WO_CLEAR, l_data64 ) );
-
-    for ( auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_FUNCTIONAL ) )
-    {
-        uint8_t l_scsr_update = 0;
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_unit_pos;
-        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
-                                l_core_target,
-                                l_core_unit_pos));
-
-        l_core_unit_pos = l_core_unit_pos % 4;
-
-        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE,
-                               l_core_target,
-                               l_eco_mode));
-
-        fapi2::Target<fapi2::TARGET_TYPE_EQ> l_eq_target = l_core_target.getParent<fapi2::TARGET_TYPE_EQ>();
-
-        FAPI_TRY( fapi2::getScom( l_eq_target, CPLT_CTRL3_RW, l_data64 ) );
-
-        if (!l_data64.getBit(l_core_unit_pos + CL2_START_POS) &&
-            !l_data64.getBit(l_core_unit_pos + L3_START_POS))
-        {
-            continue;
-        }
-
-        FAPI_TRY( fapi2::getScom( l_core_target, scomt::c::QME_SSH_SRC, l_data64 ) );
-
-        if( l_data64.getBit<0>() != 1 &&
-            (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED))
-        {
-            l_scsr_update = 1;
-            l_data64.flush<0>().setBit< QME_SCSR_ASSERT_PM_EXIT >();
-        }
-
-        if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
-        {
-            l_scsr_update = 1;
-            l_data64.flush<0>().setBit< QME_SCSR_BLOCK_INTR_OUTPUTS>().
-            setBit<QME_SCSR_ASSERT_PM_BLOCK_INTR>();
-        }
-
-        if ( l_scsr_update )
-        {
-            FAPI_TRY( putScom( l_core_target, QME_SCSR_WO_OR, l_data64 ) );
-        }
-    }
-
-    //Set STOP_OVERRIDE_MODE and ACTIVE_MASK , so that QME won't be involved in
-    //stop sequencing when it is halted
-    l_data64.flush<0>().setBit<QME_QMCR_STOP_OVERRIDE_MODE>().setBit<QME_QMCR_STOP_ACTIVE_MASK>();
-    FAPI_TRY( putScom( l_eq_mc_or, QME_QMCR_SCOM2, l_data64) );
-
 
     FAPI_INF("Poll for HALT State via XSR...");
 
@@ -880,5 +854,179 @@ fapi2::ReturnCode pcb_skew_adj(
 
 fapi_try_exit:
     FAPI_INF("<< pcb_skew_adj");
+    return fapi2::current_err;
+}
+
+/// @brief     Initiates Quiesce mode for QME instead of halting the QME.
+/// @param[in] i_target   Chip target
+/// @retval    FAPI_RC_SUCCESS
+/// @retval    ERROR defined in xml
+fapi2::ReturnCode invokeQmeQuiesceMode(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+{
+    using namespace scomt;
+    using namespace proc;
+    using namespace eq;
+    FAPI_INF( ">> invokeQmeQuiesceMode" );
+
+    fapi2::buffer<uint64_t>  l_doorBellValue;
+    fapi2::buffer<uint64_t>  l_qmeFlagRegValue;
+    uint32_t l_quiesceModeTimeout = QME_QUIESCE_TIMEOUT_MS;
+
+#ifdef __HOSTBOOT_MODULE
+    fapi2::ATTR_IS_MPIPL_Type l_mpipl;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>      FAPI_SYSTEM;
+#endif
+
+    auto l_eq_mc_and  = i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
+
+    FAPI_TRY( protectCoreIncaseQmeHaltOrQuiesce( i_target ),
+              "Quiesce Mode: Failed To Protect Cores Before Halting QME" );
+
+    l_doorBellValue.flush< 0 >();
+    FAPI_TRY( fapi2::putScom( l_eq_mc_and, QME_DB0, l_doorBellValue ),
+              "Failed To Clear Door Bell0 Register" );
+
+    l_doorBellValue.insertFromRight( 0xF2, QME_DB0_NUMBER, QME_DB0_NUMBER_LEN );
+    FAPI_TRY( fapi2::putScom( l_eq_mc_and, QME_DB0, l_doorBellValue ),
+              "Failed To Send Door Bell 0 To All QMEs" );
+
+    do
+    {
+        fapi2::delay( QME_POLLTIME_MS * 1000 * 1000, QME_POLLTIME_MCYCLES * 1000 * 1000 );
+        FAPI_TRY( getScom( l_eq_mc_and, QME_FLAGS_RW, l_qmeFlagRegValue ) );
+    }
+    while( !( l_qmeFlagRegValue.getBit< p10hcd::QME_FLAGS_QUIESCE_MODE >() ) && ( --l_quiesceModeTimeout != 0 ) );
+
+    FAPI_DBG( "After loop l_qmeFlagRegValue: 0x%016llX QME Flag Register 0x%016llX",
+              l_quiesceModeTimeout, l_qmeFlagRegValue );
+
+#ifdef __HOSTBOOT_MODULE
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_mpipl ) );
+
+    if( l_mpipl && !l_quiesceModeTimeout )
+    {
+        FAPI_IMP( "MPIPL Up Path : Entry to Quiesce Mode Not A Blocker. Moving On" );
+        goto fapi_try_exit;
+    }
+
+#endif
+
+    FAPI_ASSERT( l_quiesceModeTimeout,
+                 fapi2::QME_FAILED_TO_ENTER_QUIESCE_MODE()
+                 .set_CHIP( i_target )
+                 .set_LOOP_COUNT( l_quiesceModeTimeout )
+                 .set_QME_FLAG( l_qmeFlagRegValue ),
+                 "Failed To Get Confirmation For QME Entering Quiesce Mode" );
+fapi_try_exit:
+    FAPI_INF( "<< invokeQmeQuiesceMode" );
+    return fapi2::current_err;
+}
+
+/// @brief  Cleans up quiesce mode confirmation from QME hcode.
+/// @param [in] i_target Chip target
+/// @retval FAPI_RC_SUCCESS
+/// @retval ERROR defined in xml
+fapi2::ReturnCode cleanUpQuiesceMode(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+{
+    using namespace scomt;
+    using namespace proc;
+    using namespace eq;
+    fapi2::buffer<uint64_t>  l_qmeFlagRegValue;
+    auto l_eq_mc_and  =
+        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >( fapi2::MCGROUP_GOOD_EQ );
+
+    l_qmeFlagRegValue.setBit( p10hcd::QME_FLAGS_QUIESCE_MODE );
+
+    FAPI_TRY( fapi2::putScom( l_eq_mc_and, QME_FLAGS_WO_CLEAR, l_qmeFlagRegValue ),
+              "Failed To Clear Quiesce Mode Indication" );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+/// @brief      Protects cores from accidentally entering to PM State when QME is in quiesce mode.
+/// @param[in]  i_target    Chip target
+/// @retval     FAPI_RC_SUCCESS
+/// @retval     ERROR defined in xml
+fapi2::ReturnCode protectCoreIncaseQmeHaltOrQuiesce(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+{
+    FAPI_INF(">> protectCoreIncaseQmeHaltOrQuiesce");
+    using namespace scomt;
+    using namespace eq;
+    using namespace c;
+    fapi2::buffer<uint64_t> l_data64;
+    uint8_t CL2_START_POS = 5;
+    uint8_t L3_START_POS  = 9;
+
+    // mc_or target will be used for putscom too
+    auto l_eq_mc_or  =
+        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
+    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > core_mc_target_and =
+        i_target.getMulticast< fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
+
+    FAPI_INF("Clear AUTO_SPECIAL_WAKEUP_DISABLE, Assert PM_EXIT if not STOP_GATED");
+    l_data64.flush<0>().setBit < QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE > ();
+    FAPI_TRY( putScom( core_mc_target_and, QME_SCSR_WO_CLEAR, l_data64 ) );
+
+    for ( auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_FUNCTIONAL ) )
+    {
+        uint8_t l_scsr_update = 0;
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_unit_pos;
+
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                l_core_target,
+                                l_core_unit_pos));
+
+        l_core_unit_pos = l_core_unit_pos % 4;
+
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+
+        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ECO_MODE,
+                                 l_core_target,
+                                 l_eco_mode ) );
+
+        fapi2::Target<fapi2::TARGET_TYPE_EQ> l_eq_target = l_core_target.getParent<fapi2::TARGET_TYPE_EQ>();
+
+        FAPI_TRY( fapi2::getScom( l_eq_target, CPLT_CTRL3_RW, l_data64 ) );
+
+        if ( !l_data64.getBit( l_core_unit_pos + CL2_START_POS ) &&
+             !l_data64.getBit( l_core_unit_pos + L3_START_POS ) )
+        {
+            continue;
+        }
+
+        FAPI_TRY( fapi2::getScom( l_core_target, scomt::c::QME_SSH_SRC, l_data64 ) );
+
+        if( l_data64.getBit<0>() != 1 &&
+            (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_DISABLED))
+        {
+            l_scsr_update = 1;
+            l_data64.flush<0>().setBit< QME_SCSR_ASSERT_PM_EXIT >();
+        }
+
+        if (l_eco_mode == fapi2::ENUM_ATTR_ECO_MODE_ENABLED)
+        {
+            l_scsr_update = 1;
+            l_data64.flush<0>().setBit< QME_SCSR_BLOCK_INTR_OUTPUTS>().
+            setBit<QME_SCSR_ASSERT_PM_BLOCK_INTR>();
+        }
+
+        if( l_scsr_update )
+        {
+            FAPI_TRY( putScom( l_core_target, QME_SCSR_WO_OR, l_data64 ) );
+        }
+
+    }
+
+    //Set STOP_OVERRIDE_MODE and ACTIVE_MASK, so that QME won't be involved in
+    //stop sequencing when it is quiesced
+    l_data64.flush<0>().setBit<QME_QMCR_STOP_OVERRIDE_MODE>().setBit<QME_QMCR_STOP_ACTIVE_MASK>();
+    FAPI_TRY( putScom( l_eq_mc_or, QME_QMCR_SCOM2, l_data64) );
+
+fapi_try_exit:
+    FAPI_INF("<< protectCoreIncaseQmeHaltOrQuiesce");
     return fapi2::current_err;
 }

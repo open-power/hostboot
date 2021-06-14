@@ -248,7 +248,8 @@ fapi2::ReturnCode initiateSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     FAPI_TRY( getScom( l_eq_mc_and, QME_SCOM_XIDBGPRO, l_xsr ) );
 
     FAPI_INF("Enable special wakeup for all functional  Core targets");
-    fapi2::specialWakeup (i_target, true);
+    FAPI_TRY( fapi2::specialWakeup (i_target, true),
+              "Special Wakeup Failed" );
 
 fapi_try_exit:
 
